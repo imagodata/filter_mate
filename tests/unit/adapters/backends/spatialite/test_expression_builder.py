@@ -295,25 +295,31 @@ class TestBuildExpression:
 # ===========================================================================
 
 def _long_linestring(min_chars):
-    """A valid-looking MULTILINESTRING WKT of at least ``min_chars`` characters."""
-    coords = ", ".join(f"{560000 + i * 0.5:.3f} {6280000 + (i % 7) * 0.25:.3f}" for i in range(min_chars // 20 + 1))
-    return f"MULTILINESTRING(({coords}))"
+    """A valid-looking MULTILINESTRING WKT of at least ``min_chars`` characters (and at most 30 more)."""
+    pair = 26  # len("560000.500 6280000.250, ") + 2
+    count = max(2, (min_chars - 19) // pair + 1)
+    coords = ", ".join(f"{560000 + i * 0.5:.3f} {6280000 + (i % 7) * 0.25:.3f}" for i in range(count))
+    wkt = f"MULTILINESTRING(({coords}))"
+    while len(wkt) < min_chars:
+        count += 1
+        coords += f", {560000 + count * 0.5:.3f} 6280000.000"
+        wkt = f"MULTILINESTRING(({coords}))"
+    return wkt
 
 
 class TestLargeSourceWkt:
     """The builder never generalizes the source; too large → OGR backend (exact)."""
 
     def test_thresholds_are_consistent(self):
-        assert _mod.SPATIALITE_WKT_SIMPLIFY_THRESHOLD == 1_000_000
-        assert _mod.SPATIALITE_WKT_INLINE_MAX_LENGTH >= _mod.SPATIALITE_WKT_SIMPLIFY_THRESHOLD
-        # SQLite's default SQLITE_MAX_SQL_LENGTH is 1,000,000,000 bytes.
-        assert _mod.SPATIALITE_WKT_INLINE_MAX_LENGTH < 1_000_000_000
+        # One limit: simplification exists only to fit under the inline limit.
+        assert _mod.SPATIALITE_WKT_INLINE_MAX_LENGTH == 100_000
+        assert _mod.SPATIALITE_WKT_SIMPLIFY_THRESHOLD == _mod.SPATIALITE_WKT_INLINE_MAX_LENGTH
         assert not hasattr(SpatialiteExpressionBuilder, "_simplify_wkt")
 
     @pytest.mark.parametrize("predicate", ["crosses", "touches", "intersects"])
-    def test_source_above_simplify_threshold_is_inlined_untouched(self, builder, predicate):
-        wkt = _long_linestring(_mod.SPATIALITE_WKT_SIMPLIFY_THRESHOLD + 10)
-        assert len(wkt) > _mod.SPATIALITE_WKT_SIMPLIFY_THRESHOLD
+    def test_source_up_to_the_limit_is_inlined_untouched(self, builder, predicate):
+        wkt = _long_linestring(_mod.SPATIALITE_WKT_INLINE_MAX_LENGTH - 1_000)
+        assert len(wkt) <= _mod.SPATIALITE_WKT_INLINE_MAX_LENGTH
         expr = builder.build_expression(
             layer_props={"layer_name": "test", "layer_geometry_field": "geom"},
             predicates={predicate: True},
@@ -322,16 +328,38 @@ class TestLargeSourceWkt:
         assert expr != USE_OGR_FALLBACK
         assert f"ST_GeomFromText('{wkt}'" in expr
 
-    def test_source_above_inline_limit_goes_to_ogr(self, builder):
-        wkt = "MULTILINESTRING((0 0, 1 1" + ", 2 2" * (_mod.SPATIALITE_WKT_INLINE_MAX_LENGTH // 5) + "))"
+    @pytest.mark.parametrize("predicate", ["crosses", "intersects"])
+    def test_source_above_inline_limit_goes_to_ogr(self, builder, predicate):
+        # The 236 KB Toulouse river network.
+        wkt = _long_linestring(236_398)
         assert len(wkt) > _mod.SPATIALITE_WKT_INLINE_MAX_LENGTH
         expr = builder.build_expression(
             layer_props={"layer_name": "test", "layer_geometry_field": "geom"},
-            predicates={"crosses": True},
+            predicates={predicate: True},
             source_geom=wkt,
         )
         assert expr == USE_OGR_FALLBACK
         assert any("too large to inline" in w for w in builder._warnings)
+
+    def test_source_bbox_parsed_once_per_task(self, monkeypatch):
+        # Builders are created per target layer but share the task parameters.
+        task_params = {"buffer_endcap_style": "round", "source_srid": 2154}
+        calls = []
+
+        def _compute(self, *args):
+            calls.append(args)
+            return (0.0, 0.0, 1.0, 1.0)
+
+        monkeypatch.setattr(SpatialiteExpressionBuilder, "_compute_source_bbox", _compute)
+        wkt = _long_linestring(50_000)
+        for _target in range(17):
+            bbox = SpatialiteExpressionBuilder(task_params)._source_bbox(wkt, 2154, 2154, None)
+            assert bbox == (0.0, 0.0, 1.0, 1.0)
+        assert len(calls) == 1
+        # Another source (or buffer) is computed again and replaces it.
+        SpatialiteExpressionBuilder(task_params)._source_bbox(wkt, 2154, 2154, 10.0)
+        assert len(calls) == 2
+        assert len(task_params["_spatialite_source_bbox_cache"]) == 1
 
 
 # ===========================================================================

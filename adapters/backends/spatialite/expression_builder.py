@@ -57,20 +57,26 @@ except ImportError:
 USE_OGR_FALLBACK = "__USE_OGR_FALLBACK__"
 
 # Thresholds
-# 2026-10-16: the single source-WKT threshold of the SpatiaLite chain. Above
-# it, filter_executor.process_spatialite_geometries() simplifies the source,
-# by at most 1 m and only for Intersects / Disjoint (see
-# adapters/qgis/geometry_preparation.py); smaller sources are inlined exact.
-# This builder no longer simplifies anything itself (its extent / 1000 pass
-# moved a 30 km source by 30 m).
-SPATIALITE_WKT_SIMPLIFY_THRESHOLD = 1_000_000
-# 2026-10-16: largest source WKT inlined in a subset string. SQLite accepts
-# statements up to SQLITE_MAX_SQL_LENGTH (1,000,000,000 bytes by default) and
-# GDAL's GeoPackage driver passes the filter through as is, but the string is
-# parsed again by every statement QGIS runs on the layer (count, extent, each
-# render) and kept in the project. Beyond this size the layer goes to the OGR
-# backend (QGIS processing against the source layer), which stays exact.
-SPATIALITE_WKT_INLINE_MAX_LENGTH = 10 * SPATIALITE_WKT_SIMPLIFY_THRESHOLD
+# 2026-10-16: largest source WKT inlined in a subset string. The string is
+# copied into the subset of every target layer, into the project (``subset=``)
+# and into the FilterMate subset history, and its cost is paid by every
+# statement QGIS runs on the layer (count, extent, each render). SQLite
+# evaluates ``ST_MakeValid(ST_GeomFromText('...'))`` once per statement
+# (constant factored out, ``Once`` opcode), but the predicate itself is not
+# prepared: measured with SpatiaLite 5.1 / SQLite 3.53 (QGIS 4.2), about
+# 0.75 µs per KB of WKT per candidate row, the same for Intersects, Crosses,
+# Touches and Disjoint (24 KB: 14 µs/row, 96 KB: 65, 240 KB: 180, 673 KB:
+# 600). 100 KB keeps a 50,000-row R-tree window around 3 s per statement and
+# matches PostgreSQLExpressionBuilder.MAX_WKT_LENGTH. A larger source goes to
+# the OGR backend: QGIS processing selects the targets once (spatial index,
+# prepared geometries) and the subset becomes a key list - exact as well.
+SPATIALITE_WKT_INLINE_MAX_LENGTH = 100_000
+# 2026-10-16: the executor simplifies a source only to fit under the inline
+# limit (Intersects / Disjoint only, 1 m at most, see
+# adapters/qgis/geometry_preparation.py), so both limits are one value. This
+# builder never simplifies anything itself (its old extent / 1000 pass moved a
+# 30 km source by 30 m).
+SPATIALITE_WKT_SIMPLIFY_THRESHOLD = SPATIALITE_WKT_INLINE_MAX_LENGTH
 
 # PERF 2026-09-12: GeoPackage R-tree prefilter. SQLite evaluates the spatial
 # predicate row by row over the whole table: with a 2,000-vertex source polygon
@@ -549,7 +555,28 @@ class SpatialiteExpressionBuilder(GeometricFilterPort):
         target_srid: int,
         buffer_value: Optional[float]
     ) -> Optional[Tuple[float, float, float, float]]:
-        """Bounding box of the source WKT in the target CRS, grown by the buffer."""
+        """Bounding box of the source WKT in the target CRS, grown by the buffer.
+
+        2026-10-16: computed once per task and source (the WKT used to be
+        parsed again for every target layer); the memo lives in the task
+        parameters shared by the builders of one task, like the OGR backend's
+        buffered-source cache.
+        """
+        memo = self.task_params.setdefault('_spatialite_source_bbox_cache', {}) if isinstance(self.task_params, dict) else {}
+        key = (source_wkt, source_srid, target_srid, buffer_value)
+        if key not in memo:
+            memo.clear()  # one source per task: keep a single WKT alive
+            memo[key] = self._compute_source_bbox(source_wkt, source_srid, target_srid, buffer_value)
+        return memo[key]
+
+    def _compute_source_bbox(
+        self,
+        source_wkt: str,
+        source_srid: int,
+        target_srid: int,
+        buffer_value: Optional[float]
+    ) -> Optional[Tuple[float, float, float, float]]:
+        """See _source_bbox."""
         try:
             from qgis.core import (
                 QgsGeometry, QgsCoordinateReferenceSystem, QgsCoordinateTransform, QgsProject

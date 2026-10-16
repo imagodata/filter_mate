@@ -1,12 +1,14 @@
 # -*- coding: utf-8 -*-
 """One source-WKT simplification threshold for the SpatiaLite chain (2026-10-16).
 
-The executor simplified the source above the 100 KB PostgreSQL EXISTS
-threshold (``exists_subquery_threshold``) while the expression builder used
+The executor simplified the source above the PostgreSQL option
+``exists_subquery_threshold`` while the expression builder used its own
 SPATIALITE_WKT_SIMPLIFY_THRESHOLD (1 MB) and interruptible_query defined a
 third, unused 30 KB value. A 236 KB river network was generalized by 100 m
-and Cross returned 1,181 roads instead of ~747. These checks read the source,
-so they need no QGIS.
+and Cross returned 1,181 roads instead of ~747. Now one limit (100 KB, the
+PostgreSQL MAX_WKT_LENGTH too) decides both the simplification and the
+inlining; above it the OGR backend filters exactly. These checks read the
+source, so they need no QGIS.
 """
 import ast
 from pathlib import Path
@@ -86,10 +88,48 @@ def test_source_preparation_has_no_envelope_fallback():
         if isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute)
     }
     assert not calls & {"convexHull", "orientedMinimumBoundingBox", "fromRect"}
-    constants = {
+    assert 0 < _constants(tree)["SOURCE_SIMPLIFY_MAX_TOLERANCE"] <= 1.0
+
+
+def _constants(scope):
+    return {
         node.targets[0].id: node.value.value
-        for node in tree.body
+        for node in scope.body
         if isinstance(node, ast.Assign) and isinstance(node.targets[0], ast.Name)
         and isinstance(node.value, ast.Constant)
     }
-    assert 0 < constants["SOURCE_SIMPLIFY_MAX_TOLERANCE"] <= 1.0
+
+
+def test_inline_limit_matches_postgresql():
+    """Same WKT size limit for inlining a source in SpatiaLite and PostgreSQL subsets."""
+    spatialite = _constants(_tree(SPATIALITE_DIR / "expression_builder.py"))
+    pg_tree = _tree(PLUGIN_ROOT / "adapters" / "backends" / "postgresql" / "expression_builder.py")
+    pg_class = next(
+        node for node in pg_tree.body
+        if isinstance(node, ast.ClassDef) and node.name == "PostgreSQLExpressionBuilder"
+    )
+    assert spatialite["SPATIALITE_WKT_INLINE_MAX_LENGTH"] == _constants(pg_class)["MAX_WKT_LENGTH"] == 100_000
+
+
+def test_no_envelope_repair_nor_ogr_source_simplification():
+    assert not (PLUGIN_ROOT / "adapters" / "backends" / "ogr" / "geometry_optimizer.py").exists()
+    for path, function in (
+        (PLUGIN_ROOT / "core" / "geometry" / "geometry_repair.py", "aggressive_geometry_repair"),
+        (PLUGIN_ROOT / "adapters" / "qgis" / "geometry_preparation.py", "_repair_geometry"),
+    ):
+        node = next(n for n in ast.walk(_tree(path)) if isinstance(n, ast.FunctionDef) and n.name == function)
+        calls = {
+            c.func.attr for c in ast.walk(node)
+            if isinstance(c, ast.Call) and isinstance(c.func, ast.Attribute)
+        }
+        assert not calls & {"convexHull", "fromRect", "orientedMinimumBoundingBox"}, path.name
+
+
+def test_no_post_buffer_simplification():
+    """2026-10-16: it ignored the predicate and read an expression buffer from the first feature only."""
+    for path in (
+        PLUGIN_ROOT / "core" / "geometry" / "buffer_processor.py",
+        PLUGIN_ROOT / "core" / "tasks" / "geometry_handler.py",
+    ):
+        names = {n.name for n in ast.walk(_tree(path)) if isinstance(n, ast.FunctionDef)}
+        assert "simplify_buffer_result" not in names, path.name

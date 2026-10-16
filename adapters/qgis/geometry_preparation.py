@@ -1115,17 +1115,24 @@ class GeometryPreparationAdapter:
         return base_tolerance * scale
 
     def _is_geographic_crs(self, crs_authid: Optional[str]) -> bool:
-        """Check if CRS is geographic based on auth ID."""
+        """Whether coordinates in ``crs_authid`` are degrees.
+
+        2026-10-16: asks QGIS. The former ``4000 < srid < 5000`` guess took
+        EPSG:4087, 4491-4554, 4647, 4839 (projected) for geographic and missed
+        IGNF / ESRI codes, EPSG:6318, 7844... A geographic CRS read as
+        projected got a 3-decimal WKT (about 100 m) and a tolerance in metres
+        applied to degrees. An unknown CRS gets the safe answer (geographic:
+        finest precision, smallest tolerance).
+        """
         if not crs_authid:
-            return False
+            return True
         try:
-            if ':' in crs_authid:
-                srid = int(crs_authid.split(':')[1])
-            else:
-                srid = int(crs_authid)
-            return srid == 4326 or (4000 < srid < 5000)
-        except (ValueError, IndexError):
-            return False
+            crs = QgsCoordinateReferenceSystem(str(crs_authid))
+            if crs.isValid():
+                return bool(crs.isGeographic())
+        except Exception:  # nosec B110 - unknown CRS handled below
+            pass
+        return True
 
     def _get_wkt_precision_from_authid(self, crs_authid: Optional[str]) -> int:
         """Get WKT precision from CRS auth ID string."""
@@ -1145,7 +1152,6 @@ class GeometryPreparationAdapter:
         1. makeValid()
         2. buffer(0)
         3. simplify then makeValid
-        4. convexHull as last resort
 
         Args:
             geom: Geometry to repair
@@ -1182,15 +1188,9 @@ class GeometryPreparationAdapter:
         except Exception:  # nosec B110 - repair strategy attempt only, next strategy tried below
             pass
 
-        # Strategy 4: convexHull
-        try:
-            hull = geom.convexHull()
-            if hull and hull.isGeosValid():
-                logger.warning("Using convexHull fallback - some precision lost")
-                return hull
-        except Exception:  # nosec B110 - last repair strategy, returns None below if it also fails
-            pass
-
+        # 2026-10-16: no convex hull fallback - an envelope of a source
+        # feature makes the spatial filter wrong; the caller skips it.
+        logger.warning("Geometry could not be repaired (makeValid, buffer(0), simplify): skipped")
         return None
 
     def _get_wkt_precision(

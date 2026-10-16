@@ -38,6 +38,11 @@ BackendFactory = _backend_services.get_backend_factory()
 
 logger = logging.getLogger('filter_mate')
 
+# Returned by a backend's build_expression() to hand the layer to the OGR
+# backend (adapters/backends/spatialite/expression_builder.USE_OGR_FALLBACK).
+# It must never reach apply_filter() nor a subset string.
+OGR_FALLBACK_SENTINEL = "__USE_OGR_FALLBACK__"
+
 
 class FilterOrchestrator:
     """
@@ -229,14 +234,17 @@ class FilterOrchestrator:
             logger.debug("✅ EXPRESSION BUILDING COMPLETE")
             logger.debug("=" * 80)
 
-            if not expression:
-                # Try OGR fallback if primary backend failed
+            if not expression or expression == OGR_FALLBACK_SENTINEL:
+                # Try OGR fallback if primary backend failed, or hand the
+                # layer over when the backend asks for it (2026-10-16: the
+                # sentinel used to reach apply_filter(), which "FAILED" first)
                 return self._try_fallback_backend(
                     layer=layer,
                     layer_props=layer_props,
                     backend_name=backend_name,
                     source_geometries=source_geometries,
-                    expression_builder=expression_builder
+                    expression_builder=expression_builder,
+                    requested=bool(expression)
                 )
 
             logger.debug(f"  ✓ Expression built: {len(expression)} chars")
@@ -561,7 +569,8 @@ class FilterOrchestrator:
         layer_props: Dict[str, Any],
         backend_name: str,
         source_geometries: Dict[str, Any],
-        expression_builder: Any
+        expression_builder: Any,
+        requested: bool = False
     ) -> bool:
         """
         Try OGR backend when primary backend fails to build expression.
@@ -569,6 +578,8 @@ class FilterOrchestrator:
         This handles cases like:
         - Spatialite source geometry not available
         - PostgreSQL WKT too large for embedding
+        - The backend asking for it (OGR_FALLBACK_SENTINEL): source WKT too
+          large to inline, GeometryCollection, dynamic buffer expression
 
         Args:
             layer: Layer to filter
@@ -576,6 +587,8 @@ class FilterOrchestrator:
             backend_name: Name of backend that failed
             source_geometries: Available source geometries
             expression_builder: ExpressionBuilder instance
+            requested: True when the backend returned OGR_FALLBACK_SENTINEL
+                (an expected hand-over, not a failure)
 
         Returns:
             bool: True if fallback succeeded, False otherwise
@@ -585,8 +598,11 @@ class FilterOrchestrator:
                 f"{layer.name()}: {backend_name} expression building failed (no fallback for this backend)"
             )
 
-        logger.warning(f"⚠️ {backend_name.upper()} expression building failed for {layer.name()}")
-        logger.warning("  → Attempting OGR fallback (QGIS processing)...")
+        if requested:
+            logger.info(f"{layer.name()}: {backend_name} hands the layer to the OGR backend (QGIS processing, exact)")
+        else:
+            logger.warning(f"⚠️ {backend_name.upper()} expression building failed for {layer.name()}")
+            logger.warning("  → Attempting OGR fallback (QGIS processing)...")
 
         try:
             ogr_backend = BackendFactory.get_backend('ogr', layer, self.task_parameters)

@@ -44,6 +44,25 @@ _mod.QgsWkbTypes = MagicMock()
 _mod.QgsWkbTypes.geometryType = lambda wkb_type: wkb_type
 _mod.QgsGeometry = MagicMock()
 
+
+class _FakeCrs:
+    """QgsCoordinateReferenceSystem stand-in: what QGIS answers for these codes."""
+
+    GEOGRAPHIC = {"EPSG:4326", "EPSG:4258", "EPSG:6318", "EPSG:7844", "IGNF:WGS84G", "IGNF:RGF93G"}
+    PROJECTED = {"EPSG:2154", "EPSG:3857", "EPSG:4087", "EPSG:4647", "EPSG:4491", "EPSG:4839", "ESRI:102110", "IGNF:LAMB93"}
+
+    def __init__(self, authid=""):
+        self._authid = authid
+
+    def isValid(self):
+        return self._authid in self.GEOGRAPHIC | self.PROJECTED
+
+    def isGeographic(self):
+        return self._authid in self.GEOGRAPHIC
+
+
+_mod.QgsCoordinateReferenceSystem = _FakeCrs
+
 INTERSECTS = ["ST_Intersects"]
 VERTEX_EXACT_PREDICATES = [
     "ST_Crosses", "ST_Touches", "ST_Equals", "ST_Overlaps", "ST_Within", "ST_Contains",
@@ -113,15 +132,28 @@ def adapter():
 
 class TestSimplifyGeometryAdaptive:
     def test_first_tolerance_above_maximum_no_longer_skips_the_loop(self, adapter):
-        # 200 km extent: extent-based first guess (200 m × scale) is far above the cap.
-        geometry = _FakeGeometry(base=300_000, extent=200_000.0, shrink=10.0)
+        # 200 km extent: the extent-based first guess (200 m × scale) is far
+        # above the cap. It used to skip the loop and go to the convex hull;
+        # now exactly one attempt is made, at the cap, and the best real
+        # simplification is kept although the target is not reached.
+        geometry = _FakeGeometry(base=300_000, extent=200_000.0, shrink=0.05)
         result = adapter.simplify_geometry_adaptive(
             geometry, max_wkt_length=100_000, crs_authid="EPSG:2154", predicates=INTERSECTS
         )
+        assert geometry.calls == [SOURCE_SIMPLIFY_MAX_TOLERANCE]
         assert result.success
         assert result.geometry.kind == "line"
-        assert 0 < result.geometry.tolerance <= SOURCE_SIMPLIFY_MAX_TOLERANCE
+        assert result.geometry.tolerance == SOURCE_SIMPLIFY_MAX_TOLERANCE
+        assert 100_000 < len(result.wkt) < 300_000
+
+    def test_reaches_target_below_the_cap_when_it_can(self, adapter):
+        # Small source: the first guess is under the cap and already fits.
+        geometry = _FakeGeometry(base=150_000, extent=100.0, shrink=10.0)
+        result = adapter.simplify_geometry_adaptive(
+            geometry, max_wkt_length=100_000, crs_authid="EPSG:2154", predicates=INTERSECTS
+        )
         assert len(result.wkt) <= 100_000
+        assert result.geometry.tolerance < SOURCE_SIMPLIFY_MAX_TOLERANCE
 
     def test_buffer_caps_the_tolerance_and_keeps_best_effort(self, adapter):
         # Cannot reach 100 KB with a 0.5 m tolerance (a tenth of the 5 m
@@ -263,3 +295,27 @@ class TestToleranceNeverExceedsTheCap:
         )
         assert max(geometry.calls) <= SOURCE_SIMPLIFY_MAX_TOLERANCE
         assert result.geometry.tolerance <= SOURCE_SIMPLIFY_MAX_TOLERANCE
+
+
+class TestGeographicCrsDetection:
+    """2026-10-16: QGIS decides; the 4000 < srid < 5000 guess was wrong both ways."""
+
+    @pytest.mark.parametrize("authid", ["EPSG:4326", "EPSG:6318", "EPSG:7844", "IGNF:WGS84G", "IGNF:RGF93G"])
+    def test_geographic(self, adapter, authid):
+        assert adapter._is_geographic_crs(authid) is True
+        assert adapter._get_wkt_precision_from_authid(authid) == 8
+
+    @pytest.mark.parametrize("authid", ["EPSG:2154", "EPSG:4087", "EPSG:4647", "EPSG:4491", "EPSG:4839", "ESRI:102110", "IGNF:LAMB93"])
+    def test_projected(self, adapter, authid):
+        assert adapter._is_geographic_crs(authid) is False
+        assert adapter._get_wkt_precision_from_authid(authid) == 3
+
+    @pytest.mark.parametrize("authid", [None, "", "FOO:1"])
+    def test_unknown_gets_the_safe_answer(self, adapter, authid):
+        # Finest precision, smallest tolerance.
+        assert adapter._is_geographic_crs(authid) is True
+
+    def test_ignf_geographic_source_tolerance_is_in_degrees(self, adapter):
+        geometry = _FakeGeometry(base=1_500_000, extent=0.5, shrink=0.0, floor=1_000_000)
+        adapter.simplify_geometry_adaptive(geometry, max_wkt_length=100_000, crs_authid="IGNF:WGS84G", predicates=INTERSECTS)
+        assert max(geometry.calls) <= SOURCE_SIMPLIFY_MAX_TOLERANCE / 111000.0 + 1e-15

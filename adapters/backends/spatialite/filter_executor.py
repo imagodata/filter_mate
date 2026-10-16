@@ -72,6 +72,11 @@ class SpatialiteSourceContext:
     # Centroid optimization
     param_use_centroids_source_layer: bool = False
 
+    # 2026-10-16: the task's spatial predicates. They decide whether the
+    # source may be simplified at all (vertex-level predicates keep it exact)
+    # and are part of the geometry cache key. None = unknown = exact.
+    predicates: Optional[List[str]] = None
+
     # QGIS Project reference (for transforms)
     PROJECT: Any = None
 
@@ -619,11 +624,12 @@ def process_spatialite_geometries(
 
     # Apply adaptive simplification for large geometries.
     # 2026-10-16: one threshold for the whole SpatiaLite chain, the expression
-    # builder's (this used to be the 100 KB PostgreSQL EXISTS threshold, so a
-    # 236 KB river network was generalized by 100 m). The callback leaves the
-    # geometry exact for vertex-level predicates (Crosses, Touches, ...) and
-    # caps the tolerance to 1 m otherwise; the builder hands sources still too
-    # large to inline to the OGR backend.
+    # builder's inline limit (it used to be read from the PostgreSQL EXISTS
+    # mode option of the optimization thresholds). The callback leaves the geometry
+    # exact for vertex-level predicates (Crosses, Touches, ...) and caps the
+    # tolerance to 1 m otherwise - a 236 KB river network was generalized by
+    # 100 m for a Cross filter. The builder hands sources still above the
+    # limit to the OGR backend, which is exact.
     from .expression_builder import SPATIALITE_WKT_SIMPLIFY_THRESHOLD
     if len(wkt) > SPATIALITE_WKT_SIMPLIFY_THRESHOLD and context.simplify_geometry_adaptive:
         logger.warning(f"[Spatialite]   ⚠️ WKT too long ({len(wkt)} > {SPATIALITE_WKT_SIMPLIFY_THRESHOLD})")
@@ -631,7 +637,8 @@ def process_spatialite_geometries(
         simplified = context.simplify_geometry_adaptive(
             collected_geometry,
             max_wkt_length=SPATIALITE_WKT_SIMPLIFY_THRESHOLD,
-            crs_authid=crs_authid
+            crs_authid=crs_authid,
+            predicates=context.predicates
         )
 
         if simplified is not None and simplified is not collected_geometry and not simplified.isEmpty():
@@ -648,6 +655,25 @@ def process_spatialite_geometries(
 
     # Escape single quotes for SQL
     return wkt.replace("'", "''")
+
+
+def _source_cache_variant(context: SpatialiteSourceContext) -> tuple:
+    """Inputs of the source WKT that the geometry cache key must also hold.
+
+    2026-10-16: features, buffer distance, CRS, layer and subset were the
+    whole key, so a WKT simplified for Intersects could be served to a Cross
+    filter. The simplification tolerance follows from what is here (the
+    predicates and the threshold) plus the buffer and CRS already in the key.
+    """
+    from .expression_builder import SPATIALITE_WKT_SIMPLIFY_THRESHOLD
+    return (
+        tuple(sorted(str(p) for p in (context.predicates or ()))),
+        SPATIALITE_WKT_SIMPLIFY_THRESHOLD,
+        context.param_buffer_segments,
+        str(context.param_buffer_type),
+        context.param_buffer_expression or '',
+        bool(context.param_use_centroids_source_layer),
+    )
 
 
 def _build_buffer_state(context: SpatialiteSourceContext) -> Dict:
@@ -762,13 +788,19 @@ def prepare_spatialite_source_geom(context: SpatialiteSourceContext) -> Spatiali
     logger.debug(f"[Spatialite] Target CRS: {context.source_layer_crs_authid}")
 
     # Step 4: Check cache with proper key
-    if context.geom_cache:
+    # 2026-10-16: ``is not None`` (an empty GeometryCache is falsy, so the
+    # cache was never filled) and the GeometryCache keyword API (the old
+    # positional call matched SourceGeometryCache and would have raised);
+    # the key now holds the predicates too (_source_cache_variant).
+    cache_variant = _source_cache_variant(context)
+    if context.geom_cache is not None:
         cached_geom = context.geom_cache.get(
-            features,
-            context.param_buffer_value,
-            context.source_layer_crs_authid,
             layer_id=layer_id,
-            subset_string=current_subset
+            feature_ids=features,
+            buffer_value=context.param_buffer_value,
+            target_crs_authid=context.source_layer_crs_authid,
+            subset_string=current_subset,
+            variant=cache_variant
         )
 
         if cached_geom is not None:
@@ -813,14 +845,15 @@ def prepare_spatialite_source_geom(context: SpatialiteSourceContext) -> Spatiali
     buffer_state = _build_buffer_state(context)
 
     # Step 7: Store in cache
-    if context.geom_cache:
+    if context.geom_cache is not None:
         context.geom_cache.put(
-            features,
-            context.param_buffer_value,
-            context.source_layer_crs_authid,
-            {'wkt': wkt, 'buffer_applied': context.buffer_applied_in_wkt},
             layer_id=layer_id,
-            subset_string=current_subset
+            geometry={'wkt': wkt, 'buffer_applied': context.buffer_applied_in_wkt},
+            feature_ids=features,
+            buffer_value=context.param_buffer_value,
+            target_crs_authid=context.source_layer_crs_authid,
+            subset_string=current_subset,
+            variant=cache_variant
         )
         logger.info("[Spatialite] ✓ Source geometry computed and CACHED")
 

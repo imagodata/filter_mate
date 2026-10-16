@@ -105,9 +105,22 @@ class GeometryHandler:
 
         Returns:
             int: Number of decimal places for WKT
+
+        2026-10-16: QGIS decides whether the CRS is geographic. The
+        BufferService guess (EPSG:4326 or 4000 < srid < 5000) gave IGNF / ESRI
+        / EPSG:6318 / 7844 degrees 3 decimals, about 100 m. An unknown CRS
+        gets the finest precision.
         """
-        from ..services.buffer_service import BufferService
-        return BufferService().get_wkt_precision(crs_authid)
+        try:
+            crs = QgsCoordinateReferenceSystem(str(crs_authid)) if crs_authid else None
+            if crs is not None and crs.isValid():
+                is_geographic = crs.isGeographic()
+            else:
+                is_geographic = True
+        except Exception:  # nosec B110 - unknown CRS: finest precision
+            is_geographic = True
+        # Same values as BufferService.WKT_PRECISION_GEOGRAPHIC / _PROJECTED (~1 mm)
+        return 8 if is_geographic else 3
 
     def geometry_to_wkt(
         self,
@@ -270,38 +283,11 @@ class GeometryHandler:
                 logger.error(f"Both buffer methods failed. QGIS: {str(e)}, Manual: {str(manual_error)}")
                 return None
 
-        # Apply post-buffer simplification
-        if result is not None and result.isValid() and result.featureCount() > 0:
-            result = self.simplify_buffer_result(result, buffer_distance, verify_spatial_index_fn)
-
+        # 2026-10-16: no post-buffer simplification any more. It moved the
+        # buffer by 1 % of its distance (5 m for 500 m) whatever the
+        # predicate (Crosses / Touches included) and read the distance of the
+        # first feature only for a buffer expression.
         return result
-
-    def simplify_buffer_result(
-        self,
-        layer: QgsVectorLayer,
-        buffer_distance: float,
-        verify_spatial_index_fn: Callable,
-    ) -> QgsVectorLayer:
-        """Simplify polygon(s) from buffer operations.
-
-        Args:
-            layer: Buffered layer to simplify
-            buffer_distance: Original buffer distance
-            verify_spatial_index_fn: Function to verify/create spatial index
-
-        Returns:
-            QgsVectorLayer: Simplified layer
-        """
-        from ..services.auto_optimizer import get_auto_optimization_config
-        from ..geometry import simplify_buffer_result
-        config = get_auto_optimization_config()
-        return simplify_buffer_result(
-            layer=layer,
-            buffer_distance=buffer_distance,
-            auto_simplify=config.get('auto_simplify_after_buffer', True),
-            tolerance=config.get('buffer_simplify_after_tolerance', 0.5),
-            verify_spatial_index_fn=verify_spatial_index_fn,
-        )
 
     # =========================================================================
     # Geometry Simplification
