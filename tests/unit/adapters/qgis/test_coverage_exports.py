@@ -7,8 +7,6 @@ import sys
 
 import pytest
 
-gdal = pytest.importorskip("osgeo.gdal")
-
 pytestmark = pytest.mark.unit
 
 
@@ -27,6 +25,7 @@ task_module = fk.load("cross_filter_task")
 
 
 def _write_tif(path, size=4):
+    from osgeo import gdal
     dataset = gdal.GetDriverByName('GTiff').Create(path, size, size, 1, gdal.GDT_Float32)
     dataset.SetGeoTransform((0, 1, 0, size, 0, -1))
     dataset.GetRasterBand(1).Fill(1.0)
@@ -56,6 +55,7 @@ class Writer:
 
 @pytest.fixture
 def raster_job(monkeypatch, tmp_path):
+    pytest.importorskip("osgeo.gdal")  # the raster exports finish with GDAL (COG, reprojection)
     fk.install(monkeypatch, exporters)
     monkeypatch.setattr(sys.modules['qgis.core'], 'QgsRasterFileWriter', Writer, raising=False)
     Writer.mode = 'ok'
@@ -86,6 +86,8 @@ class TestRasterExport:
         assert os.listdir(tmp_path) == []
 
     def test_failed_conversion_leaves_nothing(self, raster_job, tmp_path, monkeypatch):
+        from osgeo import gdal
+
         def translate(*args, **kwargs):
             raise RuntimeError('COG driver failed')
 

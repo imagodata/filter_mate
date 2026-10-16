@@ -18,6 +18,14 @@ def _fakes():
     return sys.modules["fm_coverage_fakes"]
 
 
+try:
+    from osgeo import osr  # noqa: F401
+    HAS_GDAL = True
+except ImportError:
+    HAS_GDAL = False
+# Two different CRS are told apart by GDAL (osr.IsSame); without it the task cannot tell and accepts.
+needs_gdal = pytest.mark.skipif(not HAS_GDAL, reason="GDAL (osgeo) not installed")
+
 fk = _fakes()
 hag_task = fk.load("hag_task")
 pdal_cli = fk.load("pdal_cli")
@@ -34,10 +42,12 @@ class TestCrsMismatch:
     def test_same_horizontal_crs(self, cloud, dem):
         assert hag_task.crs_mismatch(cloud, dem) == ''
 
+    @needs_gdal
     def test_other_crs_is_named(self):
         message = hag_task.crs_mismatch(L93, UTM31)
         assert 'EPSG:32631' in message and 'EPSG:2154' in message and 'reproject' in message
 
+    @needs_gdal
     def test_geographic_3d_cloud_with_a_2d_dtm(self):
         """EPSG:4979 (lat / lon / ellipsoidal height) and EPSG:4326 share X / Y."""
         assert hag_task.crs_mismatch(fk.FakeCrs('EPSG:4979'), fk.FakeCrs('EPSG:4326')) == ''
@@ -48,6 +58,7 @@ class TestCrsMismatch:
     def test_unknown_crs_is_not_judged(self):
         assert hag_task.crs_mismatch(L93, fk.FakeCrs(valid=False)) == ''
 
+    @needs_gdal
     def test_old_qgis_compound_crs_is_not_judged(self):
         """No horizontalCrs() before QGIS 3.38: a compound CRS cannot be told apart, PDAL is trusted."""
         class OldCrs(fk.FakeCrs):
@@ -95,6 +106,7 @@ class TestTask:
         yield ran
         cache.set_cache_root(None)
 
+    @needs_gdal
     def test_dtm_in_another_crs_is_refused(self, pipelines):
         task = hag_task.HeightAboveGroundTask(Layer('cloud', L93, '/d/c.copc.laz'), Layer('dem', UTM31, '/d/dem.tif'))
         assert task.run() is False and 'reproject' in task.message

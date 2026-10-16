@@ -7,7 +7,6 @@ import sys
 import pytest
 
 np = pytest.importorskip("numpy")
-pytest.importorskip("osgeo.gdal")
 
 pytestmark = pytest.mark.unit
 
@@ -29,7 +28,7 @@ RasterSelectionMode = fk.load("core.domain.raster_filter_criteria").RasterSelect
 
 
 def _gdal_arrays():
-    """gdal_array needs the numpy GDAL was built with (``python3 -s`` on a machine with a newer user numpy)."""
+    """GDAL, and gdal_array built for this numpy (``python3 -s`` on a machine with a newer user numpy)."""
     try:
         from osgeo import gdal_array  # noqa: F401
     except ImportError as exc:
@@ -43,7 +42,7 @@ def sieves(monkeypatch):
 
     def mask_to_geometry(mask, geotransform, crs_wkt, sieve_pixels=0, simplify_tolerance=0.0):
         calls.append(sieve_pixels)
-        return fk.FakeGeometry.fromWkt("POINT(0 0)")
+        return object()  # the polygons, not looked at here
 
     monkeypatch.setattr(geometry_tools, 'mask_to_geometry', mask_to_geometry)
     return calls

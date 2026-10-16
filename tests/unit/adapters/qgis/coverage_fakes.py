@@ -8,13 +8,17 @@
   :func:`install` puts them in the loaded modules.
 
 Load it by path (``importlib``), the test folders are not importable packages.
+Without GDAL (the CI test job) it loads too: only the OGR backed fakes need it.
 """
 import importlib
 import pathlib
 import sys
 import types
 
-from osgeo import ogr
+try:
+    from osgeo import ogr
+except ImportError:  # no GDAL: FakeGeometry is unusable, the other fakes work
+    ogr = None
 
 ROOT = pathlib.Path(__file__).resolve().parents[4]
 PACKAGE = "fm_coverage_engine_test"
@@ -309,7 +313,10 @@ class FakeSpatialIndex:
 
 def _epsg_wkt(authid):
     """WKT of an EPSG code (GDAL), a placeholder for anything else."""
-    from osgeo import osr
+    try:
+        from osgeo import osr
+    except ImportError:
+        return f'LOCAL_CS["{authid}"]'
     srs = osr.SpatialReference()
     if authid.startswith('EPSG:'):
         try:
