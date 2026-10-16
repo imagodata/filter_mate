@@ -11,7 +11,7 @@ touched together.
 
 This is a PURE PYTHON module with NO QGIS dependencies.
 """
-from dataclasses import dataclass, field, asdict
+from dataclasses import dataclass, field, asdict, replace
 from typing import Callable, Dict, List, NamedTuple, Optional, Tuple
 import itertools
 import time
@@ -146,6 +146,10 @@ class CrossOperationHistory:
         stack = self._undo.get(source_layer_id) or []
         return stack[-1] if stack else None
 
+    def peek_redo(self, source_layer_id: str) -> Optional[CrossOperation]:
+        stack = self._redo.get(source_layer_id) or []
+        return stack[-1] if stack else None
+
     def undo(self, source_layer_id: str) -> Optional[CrossOperation]:
         """Pop the last operation of the source; restore its ``before`` snapshots."""
         stack = self._undo.get(source_layer_id) or []
@@ -210,11 +214,24 @@ class CrossOperationHistory:
         return DroppedStep(operation, from_undo)
 
     def forget_layer(self, layer_id: str) -> None:
-        """Drop every operation touching a removed layer (its snapshots are stale)."""
+        """Forget a removed layer: its own history, and its changes in the operations of other sources.
+
+        The other layers of an operation keep their (before, after) pair, so
+        undoing it still restores them; the operation keeps its ``op_id`` and
+        is dropped only when the removed layer was all it changed.
+        """
         for stacks in (self._undo, self._redo):
             stacks.pop(layer_id, None)
             for key in list(stacks):
-                stacks[key] = [op for op in stacks[key] if layer_id not in op.layer_ids]
+                kept = []
+                for op in stacks[key]:
+                    if layer_id in op.layer_ids:
+                        changes = tuple(pair for pair in op.changes if pair[0].layer_id != layer_id)
+                        if not changes:
+                            continue
+                        op = replace(op, changes=changes)
+                    kept.append(op)
+                stacks[key] = kept
 
     def clear(self) -> None:
         self._undo.clear()
