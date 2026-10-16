@@ -124,7 +124,8 @@ state = api.get_filter_state()      # [{"id", "name", "kind", "subset", "derived
 Every operation returns a report: `{"ok", "done", "failed", "skipped", "error", "outputs", "details"}`;
 `details["source_filtered"]` tells whether a cross filter also changed its source. Invalid
 arguments (NaN or infinite numbers, a buffer beyond 10 000 000 units, a coverage outside 0-100) give `ok = False` with a
-message, never an exception. Two exported layers with the same name are reported as `name` and `name (layer id)`. Signals: `operation_completed(name, report)`,
+message, never an exception; so does an operation refused while FilterMate is busy (`details["busy"]`). Two exported
+layers with the same name are reported as `name` and `name (layer id)`. Signals: `operation_completed(name, report)`,
 `error_occurred(operation, message)`, plus the 4.7 ones (`filter_applied`, `filter_cleared`).
 
 `raster_selection`: `band`, `mode` (`range`, `classes`, `expression`), `minimum`, `maximum`, `classes`,
