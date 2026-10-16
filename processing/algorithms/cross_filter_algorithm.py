@@ -92,6 +92,7 @@ class CrossFilterFromRasterAlgorithm(FilterMateAlgorithm):
     MAXIMUM = "MAXIMUM"
     CLASSES = "CLASSES"
     EXPRESSION = "EXPRESSION"
+    DERIVATIVE = "DERIVATIVE"
     FILTER_SOURCE = "FILTER_SOURCE"
     MAX_PIXELS = "MAX_PIXELS"
 
@@ -105,6 +106,11 @@ class CrossFilterFromRasterAlgorithm(FilterMateAlgorithm):
         self.addParameter(QgsProcessingParameterEnum(
             self.MODE, self.tr("Pixels to keep"),
             options=[self.tr("Value range"), self.tr("Classes"), self.tr("Raster expression")], defaultValue=0))
+        self.addParameter(QgsProcessingParameterEnum(
+            self.DERIVATIVE, self.tr("Range applies to (band read as a DTM for slope, aspect...)"),
+            options=[self.tr("Pixel value"), self.tr("Slope (degrees)"), self.tr("Slope (%)"),
+                     self.tr("Aspect (degrees)"), self.tr("Hillshade (0-255)"), self.tr("Roughness (TRI)")],
+            defaultValue=0))
         self.addParameter(QgsProcessingParameterNumber(self.MINIMUM, self.tr("Minimum value (range)"),
                                                        type=number, optional=True))
         self.addParameter(QgsProcessingParameterNumber(self.MAXIMUM, self.tr("Maximum value (range)"),
@@ -137,7 +143,8 @@ class CrossFilterFromRasterAlgorithm(FilterMateAlgorithm):
                 minimum=self.optional_number(self, parameters, self.MINIMUM, context),
                 maximum=self.optional_number(self, parameters, self.MAXIMUM, context),
                 classes=self.parameterAsString(parameters, self.CLASSES, context),
-                expression=self.parameterAsString(parameters, self.EXPRESSION, context))
+                expression=self.parameterAsString(parameters, self.EXPRESSION, context),
+                derivative=self.parameterAsEnum(parameters, self.DERIVATIVE, context))
         except ValueError as exc:
             raise QgsProcessingException(str(exc))
         feedback.pushInfo(self.tr("Selection: {0}").format(selection.describe()))
@@ -166,8 +173,8 @@ class CrossFilterFromRasterAlgorithm(FilterMateAlgorithm):
             "Keeps the pixels of a raster (value range of a band, classes of a categorized raster or "
             "raster expression), vectorizes them at the pixel size and filters the target layers by this area.\n\n"
             "Examples: parcels contained in the 1200–1300 m zone with a coverage of 50%; a DEM limited "
-            "to the forest classes; LiDAR points of the areas with a slope < 15% (slope computed by \"Slope\" "
-            "just before in a model).\n\n"
+            "to the forest classes; LiDAR points of the areas with a slope < 15% (choose \"Slope (%)\" in "
+            "\"Range applies to\" with a DEM as the source: no \"Slope\" step needed before).\n\n"
             "The source raster can be a model output: it is read without being modified. With \"Also hide the "
             "source raster outside the selection\" and a project source, the source itself is filtered.\n\n") + self.targets_help()
 

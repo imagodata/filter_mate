@@ -608,6 +608,13 @@ class RunningTask:
         return self._status
 
 
+def _value_panel():
+    """Raster panel mock whose range applies to the pixel value (no terrain derivative)."""
+    panel = MagicMock()
+    panel.current_derivative.return_value = types.SimpleNamespace(is_terrain=False, value="value")
+    return panel
+
+
 @pytest.fixture
 def adapters(monkeypatch, ctrl_module):
     """Stub ``adapters.qgis.coverage_layers`` modules (raster preview, snapshots) recording their calls."""
@@ -620,6 +627,8 @@ def adapters(monkeypatch, ctrl_module):
         ("apply", layer.id(), low, high))
     raster.clear_selection_preview = lambda layer: calls.append(("clear", layer.id()))
     raster.band_histogram = lambda layer, band, bins=64: calls.append(("histogram", band)) or ([1, 1], 0.0, 10.0)
+    raster.derivative_histogram = lambda layer, band, derivative, bins=64: calls.append(
+        ("derivative_histogram", band, derivative.value)) or ([2, 1], 0.0, 90.0)
     snapshots = types.ModuleType(f"{package.__name__}.snapshots")
     snapshots.derived = {}
     snapshots.registry = lambda: types.SimpleNamespace(get=snapshots.derived.get, install=lambda *a: None)
@@ -729,7 +738,7 @@ class TestPreviewStopsBeforeHistory:
         selecting = MagicMock()
         controller = ctrl_module.CoverageModeController(_dock(pushButton_checkable_exploring_selecting=selecting))
         controller._active_layer, controller._kind = layers["r1"], _kind(ctrl_module, "RASTER")
-        controller._raster_panel = MagicMock()
+        controller._raster_panel = _value_panel()
         controller._preview_active = True
         controller._stop_preview(layers["r1"])
         assert ("clear", "r1") in adapters.calls
@@ -748,7 +757,7 @@ class TestReactivation:
         for name in ("_show_kind_badge", "_extras_call", "_populate_raster", "_sync_layer_combo",
                      "_populate_filtering_targets", "_load_coverage_min", "_save_dock_state", "update_undo_redo_buttons"):
             monkeypatch.setattr(controller, name, lambda *a, **k: None)
-        controller._raster_panel = MagicMock()
+        controller._raster_panel = _value_panel()
         return controller, selecting
 
     def test_same_layer_is_not_restored_from_an_older_input(self, ctrl_module, layers, adapters, monkeypatch):
@@ -782,7 +791,7 @@ class TestLayerLifecycle:
         controller = ctrl_module.CoverageModeController(_dock())
         monkeypatch.setattr(controller, "_schedule_cache_tidy", lambda *a: None)
         controller._active_layer, controller._kind = layers["r1"], _kind(ctrl_module, "RASTER")
-        controller._raster_panel = MagicMock()
+        controller._raster_panel = _value_panel()
         controller._raster_panel.state.return_value = {"mode": "range"}
         controller._on_layers_removed(["r1"])
         assert controller.active_layer is None
@@ -1057,7 +1066,7 @@ class TestRasterPreviewFollowsTheSelection:
     def test_empty_selection_removes_the_preview(self, ctrl_module, layers, adapters):
         controller = ctrl_module.CoverageModeController(_dock())
         controller._active_layer = layers["r1"]
-        controller._raster_panel = MagicMock()
+        controller._raster_panel = _value_panel()
         controller._raster_panel.selection.return_value = None
         controller._apply_raster_preview()
         assert adapters.calls == [("clear", "r1")]
@@ -1070,7 +1079,7 @@ class TestHistogramCache:
     def test_histogram_cached_on_the_original_source(self, ctrl_module, layers, adapters, monkeypatch):
         controller = ctrl_module.CoverageModeController(_dock())
         controller._active_layer = layers["r1"]
-        controller._raster_panel = MagicMock()
+        controller._raster_panel = _value_panel()
         controller._raster_panel.current_band.return_value = 1
         controller._raster_panel.selection.return_value = None
         monkeypatch.setattr(controller, "_base_raster", lambda layer: layer)
@@ -1083,7 +1092,7 @@ class TestHistogramCache:
 
     def test_unavailable_statistics_are_read_again(self, ctrl_module, layers, adapters, monkeypatch):
         controller = ctrl_module.CoverageModeController(_dock())
-        controller._raster_panel = MagicMock()
+        controller._raster_panel = _value_panel()
         monkeypatch.setattr(controller, "_base_raster", lambda layer: layer)
         adapters.raster.band_histogram = lambda layer, band, bins=64: adapters.calls.append(("histogram", band)) \
             or ([], 0.0, 0.0)
@@ -1094,12 +1103,12 @@ class TestHistogramCache:
 
     def test_histogram_cache_is_bounded(self, ctrl_module, adapters, monkeypatch):
         controller = ctrl_module.CoverageModeController(_dock())
-        controller._raster_panel = MagicMock()
+        controller._raster_panel = _value_panel()
         monkeypatch.setattr(controller, "_base_raster", lambda layer: layer)
         for index in range(ctrl_module.HISTOGRAM_CACHE_SIZE + 5):
             controller._refresh_histogram(FakeLayer(f"r{index}", "raster"), 1)
         assert len(controller._histogram_cache) == ctrl_module.HISTOGRAM_CACHE_SIZE
-        assert ("/data/r0", 1) not in controller._histogram_cache
+        assert ("/data/r0", 1, "value") not in controller._histogram_cache
 
 
 @pytest.mark.unit

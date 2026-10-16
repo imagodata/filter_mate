@@ -262,6 +262,9 @@ class FakePanel:
     def current_band(self):
         return 1
 
+    def current_derivative(self):
+        return types.SimpleNamespace(is_terrain=False, value="value")
+
     def set_hover_value(self, x, y, value=None):
         self.hover.append(value)
 

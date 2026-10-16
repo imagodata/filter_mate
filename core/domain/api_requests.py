@@ -22,7 +22,7 @@ from typing import Dict, Iterable, List, Optional, Sequence, Tuple, Union
 
 from .cross_filter import COMBINE_OPERATORS, PREDICATE_METHODS
 from .point_cloud_filter_criteria import AttributeRange, PointCloudFilterCriteria
-from .raster_filter_criteria import RasterSelection, RasterSelectionMode
+from .raster_filter_criteria import RasterDerivative, RasterSelection, RasterSelectionMode
 
 # Predicate labels of the FILTERING tab, in the order of the Processing enum.
 PREDICATES: Tuple[str, ...] = ("Intersect", "Contain", "Disjoint", "Equal", "Touch", "Overlap", "Are within", "Cross")
@@ -31,6 +31,7 @@ PREDICATES: Tuple[str, ...] = ("Intersect", "Contain", "Disjoint", "Equal", "Tou
 OPERATORS: Tuple[Optional[str], ...] = (None, "AND", "OR", "AND NOT")
 
 RASTER_SELECTION_MODES: Tuple[str, ...] = tuple(mode.value for mode in RasterSelectionMode)
+RASTER_DERIVATIVES: Tuple[str, ...] = tuple(item.value for item in RasterDerivative)
 
 # Export formats per layer kind: label -> (driver / writer format, file extension).
 VECTOR_EXPORT_FORMATS: Dict[str, Tuple[str, str]] = {
@@ -171,7 +172,8 @@ def normalize_predicates(values: Union[None, str, Iterable]) -> Tuple[str, ...]:
 def raster_selection_from_values(band: int = 1, mode: Union[str, int, RasterSelectionMode] = "range",
                                  minimum: Optional[float] = None, maximum: Optional[float] = None,
                                  classes: Union[None, str, Iterable] = None,
-                                 expression: str = "") -> RasterSelection:
+                                 expression: str = "",
+                                 derivative: Union[None, str, int, RasterDerivative] = "value") -> RasterSelection:
     """Build the pixels selection of a raster source.
 
     Args:
@@ -182,6 +184,9 @@ def raster_selection_from_values(band: int = 1, mode: Union[str, int, RasterSele
         maximum: Upper bound of a range (inclusive), None = unbounded.
         classes: Pixel values kept in ``classes`` mode.
         expression: Raster calculator expression (``"mnt@1" > 1200``) in ``expression`` mode.
+        derivative: Quantity the ``range`` applies to: ``"value"`` (default), ``"slope_degrees"``,
+            ``"slope_percent"``, ``"aspect"``, ``"hillshade"``, ``"roughness"`` (the band is read as a
+            DTM), a :class:`RasterDerivative` or its index in :data:`RASTER_DERIVATIVES`.
 
     Raises:
         ValueError: When the selection would keep nothing meaningful.
@@ -211,11 +216,30 @@ def raster_selection_from_values(band: int = 1, mode: Union[str, int, RasterSele
     expression = (expression or "").strip()
     if selection_mode is RasterSelectionMode.EXPRESSION and not expression:
         raise ValueError("a raster expression selection needs an expression")
-    return RasterSelection(band=int(band), mode=selection_mode,
+    chosen = _derivative_of(derivative)
+    if chosen.is_terrain and selection_mode is not RasterSelectionMode.RANGE:
+        raise ValueError(f"the {chosen.value} derivative only works with the range mode")
+    return RasterSelection(band=int(band), mode=selection_mode, derivative=chosen,
                            minimum=None if minimum is None else float(minimum),
                            maximum=None if maximum is None else float(maximum),
                            classes=codes if selection_mode is RasterSelectionMode.CLASSES else frozenset(),
                            expression=expression if selection_mode is RasterSelectionMode.EXPRESSION else "")
+
+
+def _derivative_of(value: Union[None, str, int, RasterDerivative]) -> RasterDerivative:
+    if value is None or value == "":
+        return RasterDerivative.VALUE
+    if isinstance(value, RasterDerivative):
+        return value
+    if isinstance(value, int) and not isinstance(value, bool):
+        if not 0 <= value < len(RASTER_DERIVATIVES):
+            raise ValueError(f"raster derivative index out of range: {value}")
+        return RasterDerivative(RASTER_DERIVATIVES[value])
+    try:
+        return RasterDerivative(str(value).strip().lower())
+    except ValueError:
+        raise ValueError(f"unknown raster derivative {value!r}, expected one of "
+                         f"{', '.join(RASTER_DERIVATIVES)}") from None
 
 
 def point_cloud_criteria_from_values(classes: Union[None, str, Iterable] = None,
@@ -290,7 +314,7 @@ class OperationReport:
         }
 
 
-_RASTER_KEYS = ("band", "mode", "minimum", "maximum", "classes", "expression")
+_RASTER_KEYS = ("band", "mode", "minimum", "maximum", "classes", "expression", "derivative")
 _POINT_CLOUD_KEYS = ("classes", "z_min", "z_max", "intensity_min", "intensity_max", "return_number", "expression")
 
 

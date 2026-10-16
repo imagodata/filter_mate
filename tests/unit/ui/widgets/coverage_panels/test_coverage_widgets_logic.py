@@ -224,6 +224,37 @@ class TestRasterPicking:
         assert history == [6, 5, 4, 3, 2]
 
 
+class TestDerivativeInTheState:
+    def test_range_carries_the_derivative(self):
+        selection = raster.build_raster_selection({"mode": "range", "maximum": 15.0, "derivative": "slope_degrees"})
+        assert selection.derivative.value == "slope_degrees"
+
+    def test_classes_and_expression_ignore_it(self):
+        classes = raster.build_raster_selection({"mode": "classes", "classes": [1], "derivative": "aspect"})
+        expression = raster.build_raster_selection({"mode": "expression", "expression": "1", "derivative": "aspect"})
+        assert classes.derivative.value == expression.derivative.value == "value"
+
+    def test_unknown_derivative_is_the_value(self):
+        assert raster.parse_raster_state({"derivative": "curvature"})["derivative"].value == "value"
+        assert raster.parse_raster_state(None)["derivative"].value == "value"
+
+    def test_presets_are_ordered_and_bounded(self):
+        for derivative in raster.RasterDerivative:
+            for key, low, high in raster.derivative_presets(derivative):
+                assert key and (low is None or high is None or low < high)
+        assert raster.derivative_presets(raster.RasterDerivative.VALUE) == []
+        assert raster.derivative_presets(raster.RasterDerivative.ROUGHNESS) == []
+
+    def test_aspect_has_no_north_that_would_wrap(self):
+        keys = [key for key, _low, _high in raster.derivative_presets(raster.RasterDerivative.ASPECT)]
+        assert "north" not in keys
+
+    def test_preset_text(self):
+        assert raster.format_preset("Flat", None, 5.0, " °") == "Flat (< 5 °)"
+        assert raster.format_preset("Steep", 30.0, None, " %") == "Steep (> 30 %)"
+        assert raster.format_preset("Gentle", 5.0, 15.0) == "Gentle (5–15)"
+
+
 class TestRasterSelectionFromState:
     def test_range(self):
         selection = raster.build_raster_selection({"mode": "range", "band": 2, "minimum": 200.0, "maximum": 260.0})
@@ -293,6 +324,20 @@ class TestPointCloudFormatting:
     def test_class_colours(self):
         assert cloud.class_color(2) != cloud.class_color(5)
         assert cloud.class_color(200) == cloud.DEFAULT_CLASS_COLOR
+
+
+class TestClassQuickSelection:
+    def test_invert_keeps_list_order(self):
+        assert cloud.inverted_codes([2, 3, 5, 6], [3, 6]) == (2, 5)
+        assert cloud.inverted_codes([2, 3], [2, 3]) == ()
+        assert cloud.inverted_codes([2, 3], []) == (2, 3)
+
+    def test_summary_with_counts(self):
+        assert cloud.class_selection_summary(3, 12, 9_800_000, 38_400_000) == "3 / 12 · 9.8 M / 38.4 M (25.5 %)"
+
+    def test_summary_without_counts(self):
+        assert cloud.class_selection_summary(0, 12, None, None) == "0 / 12"
+        assert cloud.class_selection_summary(2, 12, None, 100) == "2 / 12"
 
 
 class TestPresets:

@@ -118,7 +118,7 @@ class CoverageModeController(BaseController):
         self._previous_map_tool: Any = None
         self._preview_base_subset: Optional[str] = None
         self._preview_active = False
-        self._histogram_cache: Dict[Tuple[str, int], Tuple[list, float, float]] = {}
+        self._histogram_cache: Dict[Tuple[str, int, str], Tuple[list, float, float]] = {}
         self._stats_watched: set = set()  # point cloud layer ids whose statistics signal is connected
         self._button_slots: List[Tuple[Any, Any]] = []
         # Vector sources: one entry per vector filter run, with the cross operation it recorded (if any).
@@ -766,6 +766,12 @@ class CoverageModeController(BaseController):
         if state and panel is not None:
             try:
                 panel.restore_state(state)
+                if self._kind is LayerKind.RASTER:
+                    # The restored band / quantity may not be the one populated first.
+                    try:
+                        self._refresh_histogram(layer, panel.current_band())
+                    except Exception as exc:
+                        logger.debug(f"[FM5] histogram not refreshed after the restore: {exc}")
                 if self._kind is LayerKind.RASTER and state.get('preview'):
                     # The preview box comes back checked: so do the button and the mask on the map.
                     self._on_raster_preview_toggled(True)
@@ -824,17 +830,21 @@ class CoverageModeController(BaseController):
             logger.warning(f"[FM5] raster panel not populated: {exc}", exc_info=True)
 
     def _refresh_histogram(self, layer: Any, band: int) -> None:
-        from ...adapters.qgis.coverage_layers.raster_adapter import band_histogram
-        key = self._histogram_key(layer, band)
+        from ...adapters.qgis.coverage_layers.raster_adapter import band_histogram, derivative_histogram
+        derivative = self._raster_panel.current_derivative()
+        key = self._histogram_key(layer, band, derivative)
         cached = self._histogram_cache.get(key)
         if cached is None:
-            cached = band_histogram(self._base_raster(layer), band, bins=64)
+            if derivative.is_terrain:
+                cached = derivative_histogram(self._base_raster(layer), band, derivative, bins=64)
+            else:
+                cached = band_histogram(self._base_raster(layer), band, bins=64)
             if cached[0]:  # statistics unavailable (yet): read them again next time
                 self._histogram_cache[key] = cached
             while len(self._histogram_cache) > HISTOGRAM_CACHE_SIZE:
                 del self._histogram_cache[next(iter(self._histogram_cache))]  # oldest first
         counts, minimum, maximum = cached
-        self._raster_panel.set_histogram(band, counts, minimum, maximum)
+        self._raster_panel.set_histogram(band, counts, minimum, maximum, derivative)
         self._update_kept_ratio()
 
     def _base_raster(self, layer: Any):
@@ -849,7 +859,7 @@ class CoverageModeController(BaseController):
         return base if base.isValid() else layer
 
     @staticmethod
-    def _histogram_key(layer: Any, band: int) -> Tuple[str, int]:
+    def _histogram_key(layer: Any, band: int, derivative: Any = None) -> Tuple[str, int, str]:
         """Histograms are read on the original raster (see :meth:`_base_raster`): a filter keeps the key."""
         try:
             from ...adapters.qgis.coverage_layers.snapshots import registry
@@ -857,7 +867,7 @@ class CoverageModeController(BaseController):
         except Exception:
             snapshot = None
         source = snapshot.original_source if snapshot is not None and snapshot.original_source else layer.source()
-        return source, int(band)
+        return source, int(band), getattr(derivative, 'value', 'value')
 
     def _on_raster_band_changed(self, band: int) -> None:
         if self._active_layer is not None:
@@ -871,7 +881,7 @@ class CoverageModeController(BaseController):
         if panel is None or layer is None:
             return
         selection = panel.selection()
-        cached = self._histogram_cache.get(self._histogram_key(layer, panel.current_band()))
+        cached = self._histogram_cache.get(self._histogram_key(layer, panel.current_band(), panel.current_derivative()))
         if selection is None or cached is None or not cached[0]:
             panel.set_kept_ratio(None)
             return

@@ -15,7 +15,7 @@ from core.domain.api_requests import (
     raster_selection_from_values,
     relation_numbers,
 )
-from core.domain.raster_filter_criteria import RasterSelectionMode
+from core.domain.raster_filter_criteria import RasterDerivative, RasterSelectionMode
 
 
 class TestClassCodes:
@@ -91,6 +91,53 @@ class TestRasterSelection:
             raster_selection_from_dict({"minimum": 1, "colour": "red"})
         with pytest.raises(ValueError):
             raster_selection_from_dict(["range"])
+
+
+class TestRasterDerivative:
+    def test_default_is_the_pixel_value(self):
+        assert raster_selection_from_values(minimum=1).derivative is RasterDerivative.VALUE
+
+    @pytest.mark.parametrize("name, expected", [
+        ("slope_degrees", RasterDerivative.SLOPE_DEGREES), (" Slope_Percent ", RasterDerivative.SLOPE_PERCENT),
+        (3, RasterDerivative.ASPECT), (RasterDerivative.HILLSHADE, RasterDerivative.HILLSHADE),
+        (None, RasterDerivative.VALUE),
+    ])
+    def test_named_by_text_index_or_enum(self, name, expected):
+        assert raster_selection_from_values(maximum=15, derivative=name).derivative is expected
+
+    @pytest.mark.parametrize("kwargs", [
+        {"derivative": "curvature", "maximum": 1}, {"derivative": 9, "maximum": 1},
+        {"derivative": "slope_degrees", "mode": "classes", "classes": "1"},
+        {"derivative": "slope_degrees", "mode": "expression", "expression": "1"},
+    ])
+    def test_rejects(self, kwargs):
+        with pytest.raises(ValueError):
+            raster_selection_from_values(**kwargs)
+
+    def test_from_dict(self):
+        selection = raster_selection_from_dict({"derivative": "slope_percent", "maximum": 15})
+        assert selection.derivative is RasterDerivative.SLOPE_PERCENT and selection.maximum == 15.0
+
+    def test_round_trip(self):
+        selection = raster_selection_from_values(minimum=5, maximum=15, derivative="slope_degrees")
+        assert type(selection).from_dict(selection.to_dict()) == selection
+
+    def test_older_saved_states_have_none(self):
+        data = raster_selection_from_values(minimum=1).to_dict()
+        del data["derivative"]
+        assert type(raster_selection_from_values(minimum=1)).from_dict(data).derivative is RasterDerivative.VALUE
+
+    def test_text_is_accepted_by_the_dataclass(self):
+        from core.domain.raster_filter_criteria import RasterSelection
+        assert RasterSelection(maximum=3, derivative="aspect").derivative is RasterDerivative.ASPECT
+        with pytest.raises(ValueError):
+            RasterSelection(maximum=3, derivative="curvature")
+
+    def test_cannot_be_a_calculator_formula(self):
+        selection = raster_selection_from_values(maximum=15, derivative="slope_percent")
+        with pytest.raises(ValueError):
+            selection.to_calc_formula("mnt")
+        assert "slope percent" in selection.describe()
 
 
 class TestPointCloudCriteria:

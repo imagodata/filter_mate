@@ -18,6 +18,7 @@ from typing import Dict, List, Optional, Tuple
 
 from qgis.core import (
     Qgis,
+    QgsCoordinateReferenceSystem,
     QgsPointXY,
     QgsRasterBandStats,
     QgsRasterDataProvider,
@@ -25,7 +26,13 @@ from qgis.core import (
     QgsRectangle,
 )
 
-from ....core.domain.raster_filter_criteria import RasterSelection, RasterSelectionMode
+from ....core.domain.raster_filter_criteria import (
+    DERIVATIVE_BOUNDS,
+    RasterDerivative,
+    RasterSelection,
+    RasterSelectionMode,
+)
+from .terrain import derive, ground_cell_size
 
 logger = logging.getLogger(__name__)
 
@@ -215,6 +222,74 @@ def read_band_array(provider: QgsRasterDataProvider, band: int, extent: QgsRecta
     return array
 
 
+def crs_kind(crs) -> str:
+    """``"geographic"`` (degrees), ``"mercator"`` (EPSG:3857) or ``"projected"``: how a cell size reaches the ground."""
+    try:
+        if crs.isGeographic():
+            return 'geographic'
+        if crs.authid() in ('EPSG:3857', 'EPSG:900913'):
+            return 'mercator'
+    except Exception:
+        pass
+    return 'projected'
+
+
+def derived_array(array, derivative: RasterDerivative, extent: QgsRectangle, kind):
+    """``derivative`` of a band grid read over ``extent`` (the grid shape gives the cell size).
+
+    Args:
+        array: Band read by :func:`read_band_array`.
+        derivative: Quantity to compute; ``VALUE`` returns ``array``.
+        extent: Extent covered by ``array``, in the layer CRS.
+        kind: :func:`crs_kind` of the layer CRS (degrees and Web Mercator cells are converted to metres);
+            True / False are read as geographic / projected.
+    """
+    import math
+    if not derivative.is_terrain:
+        return array
+    if isinstance(kind, bool):
+        kind = 'geographic' if kind else 'projected'
+    height, width = array.shape
+    centre = (extent.yMinimum() + extent.yMaximum()) / 2.0
+    if kind == 'mercator':  # northing -> latitude
+        latitude = math.degrees(2.0 * math.atan(math.exp(centre / 6378137.0)) - math.pi / 2.0)
+    else:
+        latitude = centre if kind == 'geographic' else 0.0
+    size_x, size_y = ground_cell_size(extent.width() / width, extent.height() / height,
+                                      kind == 'geographic', latitude, mercator=kind == 'mercator')
+    return derive(array, derivative, size_x, size_y)
+
+
+def derivative_histogram(layer: QgsRasterLayer, band: int, derivative: RasterDerivative, bins: int = 64,
+                         max_pixels: int = 1000000) -> Tuple[List[int], float, float]:
+    """Histogram of a terrain derivative of ``band``: ``(counts, minimum, maximum)``.
+
+    Computed on the band read on at most ``max_pixels`` pixels. A coarser grid
+    smooths the relief, so the slopes of a large raster are underestimated
+    here; the filter itself reads up to its own (larger) pixel budget.
+    Empty counts when the band cannot be read or has no valid pixel.
+    """
+    import numpy as np
+    extent = layer.extent()
+    width, height = _grid_for(extent, layer.width(), layer.height(), max_pixels)
+    try:
+        array = read_band_array(layer.dataProvider(), band, extent, width, height)
+        values = derived_array(array, derivative, extent, crs_kind(layer.crs()))
+    except Exception as exc:
+        logger.debug(f"[FM5] derivative histogram failed: {exc}")
+        return [], 0.0, 0.0
+    values = values[np.isfinite(values)]
+    if values.size == 0:
+        return [], 0.0, 0.0
+    low, high = DERIVATIVE_BOUNDS.get(derivative, (float(values.min()), float(values.max())))
+    if derivative not in DERIVATIVE_BOUNDS:
+        high = float(values.max())
+    if not high > low:
+        high = low + 1.0
+    counts, _edges = np.histogram(values, bins=int(bins), range=(low, high))
+    return [int(c) for c in counts], float(low), float(high)
+
+
 def selection_mask(array, selection: RasterSelection):
     """Boolean numpy mask of the pixels kept by a RANGE or CLASSES selection."""
     import numpy as np
@@ -260,6 +335,9 @@ def selection_geometry(provider: QgsRasterDataProvider, selection: RasterSelecti
         mask = ~np.isnan(array) & (array != 0)
     else:
         array = read_band_array(provider, selection.band, extent, width, height)
+        if selection.derivative.is_terrain:
+            kind = crs_kind(QgsCoordinateReferenceSystem.fromWkt(crs_wkt))
+            array = derived_array(array, selection.derivative, extent, kind)
         mask = selection_mask(array, selection)
     cell_x = extent.width() / width
     cell_y = extent.height() / height
@@ -447,7 +525,9 @@ def apply_selection_preview(layer: QgsRasterLayer, selection: RasterSelection,
     """
     from qgis.core import QgsRasterTransparency
     renderer = layer.renderer()
-    if renderer is None or selection.is_empty or selection.mode is RasterSelectionMode.EXPRESSION:
+    if (renderer is None or selection.is_empty or selection.mode is RasterSelectionMode.EXPRESSION
+            or selection.derivative.is_terrain):
+        # A derivative has no transparency ranges: the renderer only knows the pixel values.
         clear_selection_preview(layer)
         return False
     saved = layer.customProperty(_PREVIEW_PROPERTY)
@@ -537,8 +617,11 @@ def selection_extent(layer: QgsRasterLayer, selection: RasterSelection, max_pixe
     if selection is None or selection.is_empty or selection.mode is RasterSelectionMode.EXPRESSION:
         return None
     extent = layer.extent()
+    if selection.derivative.is_terrain:
+        max_pixels = max(max_pixels, 1000000)  # the grid of the histogram: a slope depends on the pixel size
     width, height = _grid_for(extent, layer.width(), layer.height(), max_pixels)
     array = read_band_array(layer.dataProvider(), selection.band, extent, width, height)
+    array = derived_array(array, selection.derivative, extent, crs_kind(layer.crs()))
     bounds = mask_bounds(selection_mask(array, selection))
     if bounds is None:
         return None
