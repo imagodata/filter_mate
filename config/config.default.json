@@ -765,6 +765,20 @@
           "value": 5,
           "description": "Maximum size of the FilterMate cache of derived rasters and point clouds"
         },
+        "cache_dir": {
+          "value": "",
+          "description": "Folder of the FilterMate cache of derived rasters and point clouds (empty: in the QGIS profile)"
+        },
+        "raster_export_format": {
+          "value": "COG",
+          "choices": ["COG", "GTiff"],
+          "description": "File format of the exported rasters: Cloud Optimized GeoTIFF or plain GeoTIFF"
+        },
+        "point_cloud_export_format": {
+          "value": "LAZ",
+          "choices": ["LAZ", "LAS", "COPC", "GPKG", "CSV"],
+          "description": "File format of the exported point clouds"
+        },
         "pdal_path": {
           "value": "",
           "description": "Path to the pdal executable (empty: detected next to QGIS or on PATH)"

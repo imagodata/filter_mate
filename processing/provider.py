@@ -1,5 +1,6 @@
 """QgsProcessingProvider exposant les algorithmes FilterMate dans la Processing Toolbox."""
 
+import atexit
 import glob
 import os
 
@@ -26,12 +27,35 @@ logger = get_logger(__name__)
 MODELS_DIR = os.path.join(os.path.dirname(__file__), "models")
 
 
+def _purge_cache_at_exit():
+    """Sans interface (``qgis_process``) : supprime les fichiers dérivés du lancement à la sortie.
+
+    Le plugin n'y est jamais déchargé (le déchargement vide la session du
+    cache) et ``qgis_process`` n'enregistre pas le projet : plus rien n'y fait
+    référence. À défaut, la session suivante supprime le dossier (non verrouillé).
+    """
+    try:
+        from ..adapters.qgis.coverage_layers import cache
+        cache.purge_session()
+    except Exception:  # nosec B110 - interpreter shutting down, the next session cleans up
+        pass
+
+
 class FilterMateProcessingProvider(QgsProcessingProvider):
     """Fournisseur Processing regroupant les algorithmes et les modèles FilterMate."""
+
+    _exit_purge_registered = False
 
     def __init__(self):
         super().__init__()
         self._waiting_for_registry = False
+        try:
+            from qgis.utils import iface
+        except ImportError:
+            iface = None
+        if iface is None and not FilterMateProcessingProvider._exit_purge_registered:
+            atexit.register(_purge_cache_at_exit)
+            FilterMateProcessingProvider._exit_purge_registered = True
 
     def loadAlgorithms(self):
         """Enregistre les algorithmes FilterMate, puis les modèles livrés (``processing/models``).

@@ -52,7 +52,7 @@ class TestFavoritesUnavailableAt503:
             create_app(
                 config=APIConfig(host="127.0.0.1"),
                 accessor=_UnavailableFavoritesAccessor(),
-            )
+            ), base_url="http://127.0.0.1:8000"
         )
 
     def test_list_favorites_returns_503_with_retry_after(self):
@@ -87,7 +87,7 @@ class TestErrorBodiesNoLongerReflectInput:
             create_app(
                 config=APIConfig(host="127.0.0.1"),
                 accessor=InMemoryAccessor(),
-            )
+            ), base_url="http://127.0.0.1:8000"
         )
 
     @pytest.mark.parametrize(
@@ -154,7 +154,7 @@ class TestBodySizeCap:
         async def _echo(payload: dict) -> dict:  # noqa: ANN401 - test-only
             return payload
 
-        return TestClient(app)
+        return TestClient(app, base_url="http://127.0.0.1:8000")
 
     def test_oversized_body_returns_413(self):
         client = self._client(max_body=1024)
@@ -206,7 +206,7 @@ class TestBodySizeCap:
         # End-to-end: the app factory wires the middleware so a real
         # 2 MiB POST gets 413'd before the route runs.
         client = TestClient(
-            create_app(config=APIConfig(host="127.0.0.1"), accessor=InMemoryAccessor())
+            create_app(config=APIConfig(host="127.0.0.1"), accessor=InMemoryAccessor()), base_url="http://127.0.0.1:8000"
         )
         oversized = "x" * (2 * 1024 * 1024)  # 2 MiB > 1 MiB default cap
         response = client.post(

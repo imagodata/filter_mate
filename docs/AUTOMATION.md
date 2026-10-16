@@ -18,12 +18,16 @@ Shared rules:
   the dock's history: the dock's Undo on that layer reverts them. The others (vector source, geometry, unfilter) are
   kept in a separate history so they never interleave with the dock's vector history: revert them with
   `clear_filters` or the dock's Unfilter.
-- **One at a time.** An operation is refused while a filter started from the dock still runs in the background.
+- **One at a time.** An operation is refused while another one runs, and while a task of the dock that changes or
+  reads the filters still runs in the background (vector filter, cross filter, export, height above ground; not an
+  expression evaluation): the error says so, try again when it ends.
 - **Project layers only.** A layer loaded from a path by Processing is a temporary copy: filtering it would be lost,
   so it is skipped with a warning. A *source* can be a temporary layer (a model output such as a slope raster): it is
   only read.
 - **Main thread.** The operations run synchronously on the Qt main thread (`FlagNoThreading` in Processing; the REST
-  API marshals its calls).
+  API marshals every call that reads or changes QGIS, reads included).
+- **Cache.** After each filter, the derived files nothing refers to any more are removed and the cache is kept under
+  `CROSS_FILTER.cache_max_gb` (oldest undo steps holding a file forgotten first), as after a dock run.
 
 ## Processing algorithms
 
@@ -49,10 +53,17 @@ the next step of a model: plug the `OUTPUT` of a filter into the `LAYERS` of *Ex
 target, a raster source with `FILTER_SOURCE` (or a point cloud source with criteria) filters itself and `OUTPUT` is
 that source.
 
+`LAYERS_FILTERED` and `LAYERS_FAILED` give the names of the layers handled and failed (declared outputs from QGIS
+3.28; returned by `processing.run` on every version).
+
 Notes: the buffer of `cross_filter_from_geometry` is in the units of the first target's CRS; on a target with no
 filter yet, `AND`, `OR` and `AND NOT` keep the new selection, like the vector engine; `filter_point_cloud` and point
 cloud source criteria refuse `AND NOT` without an existing filter (they would keep only the excluded points);
-`FILTER_SOURCE` is off by default (the dock masks a raster source, automation leaves it untouched unless asked).
+`FILTER_SOURCE` is off by default (the dock masks a raster source, automation leaves it untouched unless asked);
+`MAX_PIXELS` and `RESOLUTION` left empty use the FilterMate settings (`CROSS_FILTER.raster_selection_max_pixels`,
+`point_cloud_footprint_resolution`). The progress bar follows the targets and *Cancel* stops a cross filter between
+two steps, a point cloud filter or an export before the next layer (`error`: `canceled`); the raster / point cloud
+clips of `apply_favorite` and a point cloud being written cannot be interrupted.
 
 ### Shipped models (`processing/models/`)
 
@@ -89,9 +100,10 @@ qgis_process run filtermate:extraction_par_emprise --PROJECT_PATH=C:/data/chanti
     dossier_de_sortie=C:/exports/communes
 ```
 
-`qgis_process` does not save the project: a filter only matters for the steps that follow it in the same run. To
-replay a favorite and export the result, chain `apply_favorite` → `export_filtered_layers` in a model and run the
-model. Without the dock, `apply_favorite` reads the favorites saved in the project file.
+`qgis_process` does not save the project: a filter only matters for the steps that follow it in the same run, and the
+derived files of the run are removed when it exits. To replay a favorite and export the result, chain
+`apply_favorite` → `export_filtered_layers` in a model and run the model. Without the dock, `apply_favorite` reads the
+favorites saved in the project file.
 
 ## Python API (other plugins, scripts)
 
@@ -112,7 +124,9 @@ state = api.get_filter_state()      # [{"id", "name", "kind", "subset", "derived
 
 Every operation returns a report: `{"ok", "done", "failed", "skipped", "error", "outputs", "details"}`;
 `details["source_filtered"]` tells whether a cross filter also changed its source. Invalid
-arguments give `ok = False` with a message, never an exception. Signals: `operation_completed(name, report)`,
+arguments (NaN or infinite numbers, a buffer beyond 10 000 000 units, a coverage outside 0-100) give `ok = False` with a
+message, never an exception; so does an operation refused while FilterMate is busy (`details["busy"]`). Two exported
+layers with the same name are reported as `name` and `name (layer id)`. Signals: `operation_completed(name, report)`,
 `error_occurred(operation, message)`, plus the 4.7 ones (`filter_applied`, `filter_cleared`).
 
 `raster_selection`: `band`, `mode` (`range`, `classes`, `expression`), `minimum`, `maximum`, `classes`,
@@ -139,21 +153,54 @@ communes.removeSelection()
 
 ## REST API
 
-Start the API from QGIS with a `QGISFilterMateAccessor` (see `filtermate_api/qgis_accessor.py`). FilterMate 5 routes:
+Start the API from QGIS with a `QGISFilterMateAccessor(plugin.get_public_api(), plugin)` (see
+`filtermate_api/qgis_accessor.py`; `plugin` is `qgis.utils.plugins["filter_mate"]`). FilterMate 5 routes:
 
 | Route | Body | Returns |
 |---|---|---|
-| `POST /filters/cross` | `source_layer` (any kind), `target_layers`, `predicates`, `buffer`, `coverage_min`, `operator`, `selected_only`, `raster_selection`, `point_cloud_criteria`, `filter_source` | `filtered` (targets), `failed` |
+| `POST /filters/cross` | `source_layer` (any kind, id or name), `target_layers`, `predicates`, `buffer`, `coverage_min`, `operator`, `selected_only`, `raster_selection`, `point_cloud_criteria`, `filter_source` | `filtered` (targets), `failed`, `skipped` |
 | `POST /filters/geometry` | `wkt`, `crs`, `target_layers`, predicates… | same |
 | `POST /filters/point-cloud` | `layers`, `criteria`, `operator` | `done`, `failed`, `skipped` |
 | `POST /filters/clear` | `layers` | same |
 | `GET /filters/state` | — | filtered layers: name, kind, subset, derived |
 | `POST /export` | `layers`, `subfolder`, `vector_format`, `raster_format`, `point_cloud_format`, `crs` | `done`, `outputs` (server paths) |
 | `GET /layers` | — | layers with `layer_kind` |
-| `POST /favorites/{id}/apply` | — | applies subsets and raster / point cloud clips |
+| `POST /favorites/{id}/apply` | — | replays the favorite like the dock's menu: subsets (remote layers too), raster / point cloud clips |
+
+Answers: `400` names what stopped the operation (`"Cross filter failed: <reason>"`; an unexpected error in QGIS is
+reported as such, its details stay in the FilterMate log); `503` with `Retry-After` when QGIS
+is busy (its main thread on a long task for 30 s, or a FilterMate operation or task running): nothing was changed,
+retry later. A change that is done is never reported as failed: its `active_filters` snapshot is `{}` when QGIS was too
+busy to read it back (`GET /filters/state` reads the state).
+
+`POST /filters/undo` and `/filters/redo` are the dock's Undo / Redo for vector filters: the same history, whatever
+added its last step. Nothing the API changes is recorded there: neither `POST /filters/apply` nor the FilterMate 5
+operations (cross, geometry, point cloud, clear, favorites); revert those with `POST /filters/clear`.
 
 `POST /export` only writes below the export root of the server (`FILTERMATE_API_EXPORT_ROOT`, or `API.export_root`
-in `config.json`; default: `<temp>/filtermate_exports_<user>`). Clients give a sub-folder name, never a path.
+in `config.json`; default: `FilterMate/exports` in the QGIS profile folder, `~/.filtermate/exports` when the API runs
+outside QGIS). Clients give a sub-folder name, never a path. The root is private (created or set to mode 0700); a root
+that is a symbolic link, a Windows junction, a file or (POSIX) a folder of another user is refused
+(`500 Export root unavailable`, the reason in the log), and no output file that is a symbolic link is written over.
+The API reads the `API` section of the `config.json` the plugin uses (QGIS profile); while that file has none, the
+section of `config/config.json` in the plugin folder (4.x place, or outside QGIS) is used, with a warning in the log.
+
+Web pages the user visits must not drive QGIS through the browser:
+
+- **CORS is off by default**: no origin may call the API from a browser until it is listed in `API.cors_origins`
+  (`config.json`, a list or a comma-separated string) or `FILTERMATE_API_CORS_ORIGINS` (comma-separated). `*` is
+  refused without an API key.
+- **No cross-site changes**: a request that is not a read (`POST`…) and comes from a web page — an `Origin` header,
+  or `Sec-Fetch-Site: cross-site` — is refused (`403`) unless that origin is the API's own (`/docs`) or listed in
+  `cors_origins`: a form post or a no-cors fetch needs no pre-flight, CORS alone does not stop it. A request body must
+  be JSON (`Content-Type: application/json`, else `415`). Scripts and programs send no `Origin`: nothing changes
+  for them.
+- **Loopback host names only**: bound to `127.0.0.1`, `localhost` or `::1`, the API answers only requests whose `Host`
+  is one of these names (a numeric port at most), which defeats DNS rebinding. A request with no `Host` (HTTP/1.0) is
+  served. A reverse proxy in front must forward `Host: 127.0.0.1`. Bound to another address, an API key is required.
+- **Limits**: request bodies over 1 MiB (`FILTERMATE_API_MAX_BODY_BYTES`) get 413, chunked or not; an expression is at
+  most 500 000 characters, a request at most 1 000 layers of at most 1 000 characters each; NaN and Infinity are refused, a buffer is at most 10 000 000
+  units (10 000 km in metres) in absolute value. Validation errors (422) say where and why, without echoing the value.
 
 ```bash
 curl -s -X POST localhost:8000/filters/cross -H "X-API-Key: $KEY" -H "Content-Type: application/json" -d '{

@@ -26,7 +26,7 @@ def _client(api_key: str | None) -> TestClient:
         create_app(
             config=APIConfig(api_key=api_key),
             accessor=InMemoryAccessor(layers=list(_SAMPLE_LAYERS)),
-        )
+        ), base_url="http://127.0.0.1:8000"
     )
 
 

@@ -1,18 +1,19 @@
 # ![FilterMate](https://github.com/imagodata/filter_mate/blob/main/icon.png?raw=true) FilterMate
 
-**Version 4.9.2** | QGIS Plugin | **Production-Ready** 🎉
+**Version 5.0.0** | QGIS Plugin | QGIS 3.22 → 4.x · Qt5 / Qt6
 
-> 🚀 Explore, filter & export vector data with lightning-fast performance on ANY data source.
+> 🚀 Explore, filter & export vector, raster and LiDAR point cloud data with lightning-fast performance on ANY data source.
 
 [![Tests](https://github.com/imagodata/filter_mate/actions/workflows/test.yml/badge.svg)](https://github.com/imagodata/filter_mate/actions/workflows/test.yml)
 [![Documentation](https://img.shields.io/badge/docs-website-blue)](https://imagodata.github.io/filter_mate)
 [![User Guide](https://img.shields.io/badge/guide-EN%20%7C%20FR-blueviolet)](https://imagodata.github.io/filter_mate/guide.html)
 [![QGIS Plugin](https://img.shields.io/badge/QGIS-Plugin-green)](https://plugins.qgis.org/plugins/filter_mate)
-[![QGIS 4 / Qt6](https://img.shields.io/badge/QGIS%204%20%2F%20Qt6-supported-brightgreen)](CHANGELOG.md#488---2026-09-12)
+[![QGIS 4 / Qt6](https://img.shields.io/badge/QGIS%204%20%2F%20Qt6-supported-brightgreen)](CHANGELOG.md#500---2026-10-15)
+[![QGIS headless](https://github.com/imagodata/filter_mate/actions/workflows/qgis-headless.yml/badge.svg)](https://github.com/imagodata/filter_mate/actions/workflows/qgis-headless.yml)
 [![GitHub](https://img.shields.io/badge/GitHub-repo-black)](https://github.com/imagodata/filter_mate)
 [![Issues](https://img.shields.io/badge/issues-report-red)](https://github.com/imagodata/filter_mate/issues)
 
-**QGIS 3 / Qt5 and QGIS 4 / Qt6:** v4.9.2 fixes the GeoPackage layer that came back empty when it was re-filtered as a source after being filtered as a target (a parenthesis lost while combining with the R-tree subset), and makes a new source filter replace the previous one when the combine option is off. v4.9.1 fixed two regressions of the new project switch with the panel open: a Python error when the previous layer is gone, and a QGIS crash after a plugin reload followed by a project close (the panel is now removed and deleted on unload). v4.9.0 brought the project switch itself, one FilterMate project row per project, a PostgreSQL feature list without server-side sort nor freeze, type-to-find in the layer combo, plain-language error messages and accessible names.
+**FilterMate 5** filters raster and LiDAR point cloud layers as well as vector layers. EXPLORING selects on the current layer whatever its kind, FILTERING relates that selection to the layers to filter with the usual predicates and buffer (vector, raster and point cloud, in every direction), EXPORTING writes each kind. Every release is tested in CI on QGIS 3.22, 3.28, 3.34, 3.44 and 4.2, through Processing and through the panel itself.
 
 📖 **New to FilterMate?** Follow the step-by-step tutorial: [User Guide (English)](https://imagodata.github.io/filter_mate/guide.html) · [Guide utilisateur (français)](https://imagodata.github.io/filter_mate/guide.fr.html)
 
@@ -32,9 +33,24 @@
 | 🎨 **Dark Mode** | Automatic theme detection |
 | 📦 **GPKG Project Export** | Embedded QGIS project with group hierarchy, styles & CRS |
 | 🚀 **Multi-Backend** | PostgreSQL, Spatialite, OGR |
+| 🏔️ **Rasters** | Band, pixel picker, value range with histogram and live preview, classes of paletted rasters, raster expression; raster targets are clipped (VRT) with their id and style kept |
+| ☁️ **LiDAR point clouds** | LAS / LAZ / COPC / EPT / VPC: ASPRS and LiDAR HD classes with presets, Z / intensity / return ranges, chained attribute conditions, height above a DTM (PDAL), the same criteria on every tile of a dataset |
+| 🔀 **Cross filters** | Any source kind → any target kind (9 combinations): routes near buildings, parcels in an elevation range, LiDAR points under buildings, DTM clipped to a commune; minimum coverage and Disjoint |
+| 💾 **Export of every kind** | Vector formats as before, GeoTIFF / COG for rasters, LAZ / LAS / COPC / GPKG / CSV for point clouds |
 | 🧰 **Processing Toolbox** | Cross filters from vector, raster, point cloud or extent sources, point cloud criteria, favorites and export of filtered layers — chainable in models, with four ready-made models and `qgis_process` support ([docs/AUTOMATION.md](docs/AUTOMATION.md)) |
 
-### 🆕 What's new in 4.9.2
+### 🆕 What's new in 5.0
+
+- **Raster and LiDAR point cloud layers** are first-class: choose one as the current layer and EXPLORING shows its own tools (value range and histogram, pixel picker, classes, expression for a raster; classes, ranges, attribute conditions and height above a DTM for a point cloud). The selection becomes a source geometry for FILTERING.
+- **Targets of every kind**: vector targets keep the features that satisfy the predicates (with an optional minimum coverage), raster targets keep the pixels inside or outside the source geometry, point cloud targets keep the points. Clipped layers keep their id, style and place; Unfilter, Undo / Redo and plugin unload put the original source back, and project files are always saved with the original source.
+- **Export** of filtered rasters (GeoTIFF, COG) and point clouds (LAZ, LAS, COPC, GPKG, CSV), alone or with vector layers.
+- **Automation**: seven Processing algorithms and four ready-made models, `qgis_process`, Python and REST APIs ([docs/AUTOMATION.md](docs/AUTOMATION.md)).
+- **Options**: raster and point cloud support are on by default; switch them off or on in the Configuration tab and the layer lists follow at once.
+- **Compatibility, tested**: a CI job loads FilterMate in the official QGIS Docker images (3.22 to nightly) and drives the panel with its GUI. It found and fixed a QGIS crash when the panel opened on QGIS 3.22–3.34, a possible crash when a layer was removed, the plugin not loading before QGIS 3.34.2, rasters not clipped with GDAL older than 3.9, and point clouds with PDAL older than 2.4 (the QGIS exporter is used instead).
+
+See the [5.0.0 changelog](CHANGELOG.md#500---2026-10-15) and the [user guide](https://imagodata.github.io/filter_mate/guide.html) for details.
+
+### What's new in 4.9.2
 
 - **GeoPackage layer empty after a second filter**: a layer filtered as a target (R-tree prefilter) and then used as the source with an attribute expression showed 0 features. The subset combiners dropped one closing parenthesis and the SQL was invalid without any error, since OGR accepts the subset string. Verified on the BD TOPO 31 GeoPackage.
 - **Combine option off means replace**: the new source filter replaces the previous subset instead of being ANDed to it, as the target layers already did.
@@ -186,9 +202,9 @@ pip install psycopg2-binary
 
 ## 📋 Requirements
 
-- **QGIS**: 3.22+ — including **QGIS 4.x / Qt6** (fully supported since v4.8.0)
+- **QGIS**: 3.22+ — including **QGIS 4.x / Qt6** (fully supported since v4.8.0); point cloud layers need QGIS 3.26+
 - **Python**: 3.9+ (included with QGIS)
-- **Optional**: psycopg2 for PostgreSQL backend
+- **Optional**: psycopg2 for PostgreSQL backend; PDAL 2.4+ (`pdal` command, shipped with QGIS on Windows) for the height above a DTM and direct COPC writing — without it, point clouds are clipped by the QGIS exporter
 
 ---
 

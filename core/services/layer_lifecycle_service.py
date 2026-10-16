@@ -126,10 +126,13 @@ class LayerLifecycleService:
             def is_filtermate_temp_layer(_layer):  # noqa: D103 - no-op fallback
                 return False
         try:
-            from ...adapters.qgis.point_cloud_capability import get_filterable_layer_types
+            from ...adapters.qgis.point_cloud_capability import get_filterable_layer_types, is_non_analysis_raster
             filterable_types = get_filterable_layer_types() or (QgsVectorLayer,)
         except ImportError:  # capability module absent (stubbed package or older tree)
             filterable_types = (QgsVectorLayer,)
+
+            def is_non_analysis_raster(_layer):  # noqa: D103 - vector only: no raster to exclude
+                return False
 
         try:
             input_count = len(layers or [])
@@ -150,6 +153,12 @@ class LayerLifecycleService:
                     except RuntimeError:
                         name = 'unknown'
                     filtered_reasons.append(f"{name}: not a filterable layer")
+                    continue
+
+                # A basemap (WMS, XYZ, WCS) is a raster FilterMate cannot read: adding one
+                # must not start a layer task and rebuild the panel for nothing.
+                if is_non_analysis_raster(layer_item):
+                    filtered_reasons.append(f"{layer_item.name()}: web or basemap raster")
                     continue
 
                 # PERF 2026-09-12: the plugin's own scratch layers never enter PROJECT_LAYERS

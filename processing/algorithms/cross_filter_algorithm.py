@@ -74,7 +74,7 @@ class CrossFilterAlgorithm(FilterMateAlgorithm):
         count = source.selectedFeatureCount() if selected_only and source.selectedFeatureCount() else source.featureCount()
         feedback.pushInfo(self.tr("{0} entité(s) source").format(count))
         report = operations.cross_filter(source, self.parameterAsLayerList(parameters, self.TARGETS, context),
-                                         selected_only=selected_only, project=context.project(),
+                                         selected_only=selected_only, project=context.project(), feedback=feedback,
                                          **self.target_settings(parameters, context))
         return self.finish(report, feedback)
 
@@ -126,9 +126,10 @@ class CrossFilterFromRasterAlgorithm(FilterMateAlgorithm):
             self.FILTER_SOURCE, self.tr("Masquer aussi le raster source hors sélection"), defaultValue=False))
         self.add_target_parameters(QgsProcessingParameterDistance(
             self.BUFFER, self.tr("Tampon"), defaultValue=0.0, parentParameterName=self.SOURCE))
+        # Sans valeur : réglage CROSS_FILTER.raster_selection_max_pixels (4 000 000 par défaut).
         self.addParameter(advanced(QgsProcessingParameterNumber(
             self.MAX_PIXELS, self.tr("Pixels lus au maximum (au-delà : rééchantillonnage)"),
-            type=QgsProcessingParameterNumber.Type.Integer, defaultValue=4000000, minValue=10000)))
+            type=QgsProcessingParameterNumber.Type.Integer, optional=True, minValue=10000)))
         self.add_output()
 
     def processAlgorithm(self, parameters, context, feedback):
@@ -151,8 +152,8 @@ class CrossFilterFromRasterAlgorithm(FilterMateAlgorithm):
         report = operations.cross_filter(
             source, self.parameterAsLayerList(parameters, self.TARGETS, context) or [],
             raster_selection=selection, filter_source=self.parameterAsBoolean(parameters, self.FILTER_SOURCE, context),
-            max_pixels=self.parameterAsInt(parameters, self.MAX_PIXELS, context), project=context.project(),
-            **self.target_settings(parameters, context))
+            max_pixels=self.optional_number(self, parameters, self.MAX_PIXELS, context, integer=True),
+            project=context.project(), feedback=feedback, **self.target_settings(parameters, context))
         self._log_source(report, feedback)
         return self.finish(report, feedback)
 
@@ -199,9 +200,10 @@ class CrossFilterFromPointCloudAlgorithm(FilterMateAlgorithm):
         self.add_operator_parameter(self.tr("Combinaison des critères avec le filtre existant de la source"),
                                     self.SOURCE_OPERATOR)
         self.add_target_parameters()
+        # Sans valeur : réglage CROSS_FILTER.point_cloud_footprint_resolution (2 par défaut).
         self.addParameter(advanced(QgsProcessingParameterNumber(
             self.RESOLUTION, self.tr("Résolution de l'empreinte des points (unités du nuage)"),
-            type=QgsProcessingParameterNumber.Type.Double, defaultValue=2.0, minValue=0.1)))
+            type=QgsProcessingParameterNumber.Type.Double, optional=True, minValue=0.1)))
         self.add_output()
 
     def processAlgorithm(self, parameters, context, feedback):
@@ -216,8 +218,8 @@ class CrossFilterFromPointCloudAlgorithm(FilterMateAlgorithm):
             source, self.parameterAsLayerList(parameters, self.TARGETS, context) or [],
             point_cloud_criteria=criteria,
             source_operator=OPERATORS[self.parameterAsEnum(parameters, self.SOURCE_OPERATOR, context)],
-            footprint_resolution=self.parameterAsDouble(parameters, self.RESOLUTION, context),
-            project=context.project(), **self.target_settings(parameters, context))
+            footprint_resolution=self.optional_number(self, parameters, self.RESOLUTION, context),
+            project=context.project(), feedback=feedback, **self.target_settings(parameters, context))
         details = report.details.get("source") or {}
         if details.get("truncated"):
             feedback.pushWarning(self.tr("Empreinte calculée sur un nombre de points limité : augmentez la résolution"))
@@ -267,7 +269,7 @@ class CrossFilterFromGeometryAlgorithm(FilterMateAlgorithm):
             crs = context.project().crs() if context.project() else None
         report = operations.cross_filter_by_geometry(
             geometry, crs, self.parameterAsLayerList(parameters, self.TARGETS, context),
-            project=context.project(), **self.target_settings(parameters, context))
+            project=context.project(), feedback=feedback, **self.target_settings(parameters, context))
         return self.finish(report, feedback)
 
     def name(self):
