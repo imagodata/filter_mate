@@ -109,7 +109,7 @@ filter_mate_dockwidget.py ← Main UI: tabs (Exploring, Filtering, Exporting)
 | Principle | Implementation |
 |-----------|---------------|
 | **Hexagonal Architecture** | `core/ports/` = interfaces, `adapters/` = implementations |
-| **Pure Domain** | `core/` has zero QGIS imports (testable without QGIS) |
+| **Domain first** | `core/domain/` and `core/ports/` are mostly free of QGIS imports and tested without QGIS; `core/services/` and `core/tasks/` use `qgis.core` |
 | **Dependency Injection** | `adapters/app_bridge.py` = service locator + singletons |
 | **MVC Controllers** | `ui/controllers/` with `BaseController`, `ControllerRegistry` |
 | **Optional Extensions** | `extensions/` with auto-discovery, lazy loading |

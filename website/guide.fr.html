@@ -4,10 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Guide utilisateur FilterMate — Filtrage spatial pour QGIS</title>
-    <meta name="description" content="Guide utilisateur pas à pas de FilterMate, le plugin QGIS pour explorer, filtrer et exporter des données vectorielles : installation, interface, prédicats spatiaux, tampons, favoris, export et configuration.">
+    <meta name="description" content="Guide utilisateur pas à pas de FilterMate, le plugin QGIS pour explorer, filtrer et exporter des couches vecteur, raster et nuages de points LiDAR : installation, interface, prédicats spatiaux, tampons, favoris, export, configuration et automatisation.">
     <meta name="keywords" content="QGIS, plugin, FilterMate, guide utilisateur, tutoriel, filtre spatial, PostGIS, GeoPackage, SpatiaLite">
     <meta property="og:title" content="Guide utilisateur FilterMate">
-    <meta property="og:description" content="Apprenez FilterMate en 15 minutes : explorer, filtrer et exporter des données vectorielles dans QGIS.">
+    <meta property="og:description" content="Apprenez FilterMate en 15 minutes : explorer, filtrer et exporter des couches vecteur, raster et nuages de points LiDAR dans QGIS.">
     <meta property="og:type" content="article">
     <meta property="og:url" content="https://imagodata.github.io/filter_mate/guide.fr.html">
     <link rel="alternate" hreflang="en" href="https://imagodata.github.io/filter_mate/guide.html">
@@ -65,7 +65,7 @@
 <main class="content" id="main">
 
 <header class="hero">
-    <span class="section-label">Guide utilisateur de FilterMate 4.9</span>
+    <span class="section-label">Guide utilisateur de FilterMate 5.0</span>
     <div class="band band-hero">
         <video class="sheet-video" muted loop playsinline preload="none" poster="video/hero.webp" data-src="video/hero.mp4" aria-hidden="true"></video>
         <div class="sheet-scrim"></div>
@@ -88,6 +88,8 @@
         la couche filtrée n'affiche que les entités qui correspondent, exactement comme si vous aviez saisi un filtre fournisseur
         dans les propriétés de la couche. FilterMate construit ce filtre pour vous, dans le langage natif de la source de données
         (SQL PostGIS, SQL SpatiaLite ou expression QGIS pour les fichiers).
+        Les rasters et les nuages de points se filtrent aussi : ils sont découpés dans un fichier temporaire qui remplace
+        leur source tant que le filtre est actif (voir <a href="#raster-lidar">Rasters et nuages de points LiDAR</a>).
     </p>
     <p>Chaque filtre spatial suit le même schéma en trois parties :</p>
     <div class="cards">
@@ -277,7 +279,7 @@
     <table>
         <tr><th>Bouton</th><th>Ligne</th><th>Signification</th></tr>
         <tr><td><strong>Auto current layer</strong></td><td>Couche source</td><td>Activé, la couche source suit le panneau Couches de QGIS. Désactivé, choisissez-la dans la liste. La petite icône et la case à droite activent l'option <em>centroïde</em> pour la géométrie source.</td></tr>
-        <tr><td><strong>Layers to filter</strong></td><td>Couches cibles</td><td>Liste à cocher de toutes les autres couches vectorielles du projet. Clic droit pour <em>Select All</em>, <em>Deselect All</em> ou par type de géométrie. La case à droite utilise les centroïdes pour les couches cibles.</td></tr>
+        <tr><td><strong>Layers to filter</strong></td><td>Couches cibles</td><td>Liste à cocher des autres couches du projet : vecteur et, depuis la 5.0, raster et nuages de points. Clic droit pour <em>Select All</em>, <em>Deselect All</em> ou par type de géométrie. La case à droite utilise les centroïdes pour les couches cibles.</td></tr>
         <tr><td><strong>Combine operator</strong></td><td>Deux listes</td><td>Comment un nouveau filtre se combine avec celui déjà appliqué. À gauche : pour la couche source. À droite : pour les couches cibles. Valeurs : <code>AND</code>, <code>OR</code> et <code>AND NOT</code>.</td></tr>
         <tr><td><strong>Geometric predicates</strong></td><td>Liste de prédicats</td><td>Liste à cocher des relations spatiales. Plusieurs peuvent être cochées ; elles sont combinées par OR.</td></tr>
         <tr><td><strong>Buffer value</strong></td><td>Distance en mètres</td><td>Agrandit (positif) ou rétrécit (négatif) la géométrie source avant le test du prédicat. Cliquez sur la petite flèche pour passer à une expression QGIS, p. ex. <code>"largeur" * 2</code>.</td></tr>
@@ -479,7 +481,7 @@ AND ST_Intersects("geom",
         <tr><td><strong>Layers</strong></td><td>Liste à cocher des couches à exporter.</td></tr>
         <tr><td><strong>Projection</strong></td><td>CRS de sortie. Les couches dans un autre CRS sont reprojetées pendant l'export.</td></tr>
         <tr><td><strong>Styles</strong></td><td>Enregistre les styles de couche à côté des données en <code>QML</code> (natif QGIS) ou <code>SLD</code> (interopérable). En sortie GeoPackage, le style est intégré au fichier.</td></tr>
-        <tr><td><strong>Output format</strong></td><td>Tout format vectoriel que QGIS sait écrire : GeoPackage (défaut), Shapefile, GeoJSON, KML, CSV, FlatGeobuf&hellip;</td></tr>
+        <tr><td><strong>Output format</strong></td><td>Tout format vectoriel que QGIS sait écrire : GeoPackage (défaut), Shapefile, GeoJSON, KML, CSV, FlatGeobuf&hellip; Les rasters et les nuages de points ont leurs propres formats (<a href="#raster-lidar">section 13</a>).</td></tr>
         <tr><td><strong>Output folder</strong></td><td>Où les fichiers sont écrits. Le <strong>mode batch</strong> écrit un fichier par couche au lieu d'un seul fichier multi-couches.</td></tr>
         <tr><td><strong>ZIP</strong></td><td>Regroupe le résultat dans une archive unique, en mode batch aussi si souhaité.</td></tr>
     </table>
@@ -578,7 +580,7 @@ AND ST_Intersects("geom",
         <figcaption>L'algorithme <em>Filtrer plusieurs couches (batch)</em> : choisir les couches, saisir une expression, exécuter.</figcaption>
     </figure>
     <p>
-        FilterMate enregistre un fournisseur Processing. Son premier algorithme, <code>filtermate:batch_filter</code>, applique une expression de filtre à plusieurs couches vectorielles en une seule exécution.
+        FilterMate enregistre un fournisseur Processing. Son algorithme le plus simple, <code>filtermate:batch_filter</code>, applique une expression de filtre à plusieurs couches vectorielles en une seule exécution ; les filtres croisés de FilterMate 5 sont décrits en <a href="#raster-lidar">section 13</a>.
         Comme c'est un algorithme Processing ordinaire, il s'utilise dans le modeleur graphique, en mode batch ou depuis Python :
     </p>
     <pre><code>import processing

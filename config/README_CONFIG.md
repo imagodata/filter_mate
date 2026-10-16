@@ -1,319 +1,65 @@
-# Configuration System - Quick Start
+# FilterMate configuration
 
-## 📋 Vue d'ensemble
+This folder holds the default configuration and the helpers that load, migrate, validate and read it. The user edits settings in the Configuration tab of the dock; the tab writes `config.json`.
 
-Système de configuration amélioré pour FilterMate avec :
-- ✨ **Métadonnées** pour chaque paramètre (description, type de widget, validation)
-- 🎨 **Widgets auto-générés** (checkbox, combobox, spinbox, etc.)
-- ✅ **Validation automatique** des valeurs
-- 📚 **Documentation** générée automatiquement
+## Files
 
-## 🚀 Démarrage rapide
+| File | Role |
+|---|---|
+| `config.default.json` | Reference configuration, with the description, choices and limits of every setting. Shipped in the zip. |
+| `config.json` | Copy used when the profile folder is unavailable. The active file is in the profile (see below). |
+| `config.py` | `init_env_vars()`, `reload_config()`, `reset_config_to_default()`, migration, `_get_option_value` / `_get_option_bool` / `_get_option_int`, and the `ENV_VARS` dict. |
+| `config_validator.py` | Structural validation of the loaded file (sections, `_CONFIG_VERSION`, value types, `choices`). Called by `init_env_vars()`; it only logs. |
+| `feedback_config.py` | Message verbosity (`minimal`, `normal`, `verbose`): `should_show_message(category)`, `set_feedback_level_from_string`. |
+| `theme_helpers.py` | `get_active_theme`, `get_theme_colors` and related readers of the theme settings. |
+| `config_metadata.py`, `config_metadata_handler.py` | Metadata lookups (`ConfigMetadata`, `get_config_metadata`). See "Metadata API" below. |
+| `config.v2.example.json` | Example of a proposed v2 layout (lower-case keys). Not used by the code. |
 
-### 1. Lire les métadonnées d'un paramètre
+## Where the active file is
 
-```python
-from modules.config_metadata import get_config_metadata
+`init_env_vars()` uses `<QGIS profile>/FilterMate/config.json` (`QgsApplication.qgisSettingsDirPath()`). If it does not exist, it is copied from `config.default.json`. `ENV_VARS["CONFIG_JSON_PATH"]` holds the path actually in use; `get_config_json_path()` returns it. If the profile folder cannot be used, `config/config.json` in the plugin folder is the fallback.
 
-metadata = get_config_metadata()
-info = metadata.get_metadata('app.ui.profile')
+At each start `_migrate_config` merges keys that are new in `config.default.json`, overwrites the schema-owned fields of existing keys (`description`, `choices`, `min`, `max`, `applies_to`, `_hidden`, `_display_name`), removes obsolete sections, and keeps the user's `value`s. It rewrites `config.json` only when something changed.
 
-print(info['description'])      # Description complète
-print(info['widget_type'])      # Type de widget recommandé
-print(info['default'])          # Valeur par défaut
-```
+## Format
 
-### 2. Utiliser les helpers
+Sections are `_CONFIG_VERSION`, `_CONFIG_META`, `APP`, `CURRENT_PROJECT` and `EXTENSIONS`. A setting is an object with a `value`:
 
-```python
-from modules.config_helpers import (
-    get_widget_type_for_config,
-    get_config_description,
-    validate_config_value_with_metadata
-)
-
-# Obtenir le type de widget
-widget = get_widget_type_for_config('app.auto_activate')  # 'checkbox'
-
-# Valider une valeur
-valid, error = validate_config_value_with_metadata('app.ui.profile', 'invalid')
-if not valid:
-    print(error)  # "Value must be one of: auto, compact, normal"
-```
-
-### 3. Créer une interface de configuration
-
-```python
-from modules.config_editor_widget import SimpleConfigDialog
-
-# Ouvrir le dialog de configuration
-dialog = SimpleConfigDialog(config_data)
-dialog.show()
-
-# Écouter les changements
-dialog.editor.config_changed.connect(
-    lambda path, value: print(f"{path} = {value}")
-)
-```
-
-## 📁 Fichiers créés
-
-| Fichier | Description |
-|---------|-------------|
-| **config/config_schema.json** | Schéma avec métadonnées pour tous les paramètres |
-| **modules/config_metadata.py** | Module de gestion des métadonnées |
-| **modules/config_helpers.py** | Helpers améliorés avec support métadonnées |
-| **modules/config_editor_widget.py** | Widget d'édition auto-généré |
-| **docs/CONFIG_SYSTEM.md** | Documentation complète |
-| **docs/CONFIG_INTEGRATION_EXAMPLES.py** | Exemples d'intégration |
-| **tools/demo_config_system.py** | Script de démonstration |
-
-## 🎯 Types de widgets supportés
-
-| Widget | Usage | Exemple |
-|--------|-------|---------|
-| **checkbox** | Booléens | Auto-activate plugin |
-| **combobox** | Choix multiples | Theme selection |
-| **textbox** | Texte libre | File paths |
-| **spinbox** | Nombres entiers | Icon size, limits |
-| **colorpicker** | Couleurs | Button colors |
-
-## 📖 Documentation complète
-
-- **[CONFIG_SYSTEM.md](CONFIG_SYSTEM.md)** - Guide complet du système
-- **[CONFIG_INTEGRATION_EXAMPLES.py](CONFIG_INTEGRATION_EXAMPLES.py)** - Exemples d'intégration
-- **[config_schema.json](../config/config_schema.json)** - Schéma complet
-
-## 🧪 Tester le système
-
-```bash
-# Lancer le script de démonstration
-cd /path/to/filter_mate
-python3 tools/demo_config_system.py
-```
-
-## ✨ Avantages
-
-### Pour les développeurs
-- 🔧 Auto-documentation du code
-- ✅ Validation automatique
-- 🛠️ Maintenance simplifiée
-- 🔄 Type-safety améliorée
-
-### Pour les utilisateurs
-- 🎨 Interface intuitive
-- 📝 Descriptions claires
-- ⚡ Validation immédiate
-- 💡 Aide contextuelle
-
-### Pour l'interface
-- 🤖 Génération automatique
-- 🎯 Cohérence garantie
-- 📈 Extensibilité facile
-- 🔌 Intégration simple
-
-## 🔨 Ajouter un nouveau paramètre
-
-1. **Ajouter au schéma** (`config/config_schema.json`) :
 ```json
-{
-  "app": {
-    "mon_parametre": {
-      "description": "Description claire",
-      "widget_type": "checkbox",
-      "data_type": "boolean",
-      "validation": {"required": true},
-      "default": true,
-      "user_friendly_label": "Mon Paramètre"
-    }
-  }
+"cache_max_gb": {
+  "value": 5,
+  "description": "Maximum size of the FilterMate cache of derived rasters and point clouds"
 }
 ```
 
-2. **Créer un helper** (optionnel mais recommandé) :
+Optional fields: `choices` (list of allowed values), `min`, `max`. Keys starting with `_` are not settings: `_display_name` names a group in the Configuration tab and `_hidden` hides it.
+
+## Reading a setting
+
+`ENV_VARS["CONFIG_DATA"]` holds the loaded dict. `reload_config()` updates it in place, so references stay valid. The `_get_option_*` helpers accept a wrapped option (`{"value": ...}`) or a raw value, and tolerate a hand-edited file:
+
 ```python
-def get_mon_parametre(config_data: dict) -> bool:
-    return get_config_value(config_data, "app", "mon_parametre")
+from filter_mate.config.config import ENV_VARS, _get_option_bool, _get_option_int
+
+options = ENV_VARS.get("CONFIG_DATA", {}).get("APP", {}).get("OPTIONS", {})
+raster_on = _get_option_bool(options.get("RASTER", {}).get("enabled"), False)
+cache_gb = _get_option_int(options.get("CROSS_FILTER", {}).get("cache_max_gb"), 5)
 ```
 
-3. **Utiliser dans le code** :
-```python
-if get_mon_parametre(self.config_data):
-    # Faire quelque chose
-    pass
-```
+`adapters/qgis/point_cloud_capability.py` (`is_raster_filtering_enabled`) is a real example.
 
-**C'est tout !** Le widget se génère automatiquement. ✨
+## Adding a setting
 
-## 🔗 Intégration dans l'UI
+1. Add it to `config.default.json` with `value` and `description` (and `choices`, `min`, `max` when they apply). Put it in an existing group or create one with `_display_name`.
+2. Read it with the `_get_option_*` helpers. Existing users get it at the next start through the migration.
+3. The Configuration tab shows it without further code: it displays the JSON tree (`ui/widgets/json_view/`, `ui/managers/config_model_manager.py`).
 
-### Bouton de configuration
-```python
-settings_btn = QPushButton("Settings")
-settings_btn.clicked.connect(self.open_config_dialog)
+Extensions add their own keys under `EXTENSIONS.<id>` by returning them from `config_schema()` (see `extensions/base.py`).
 
-def open_config_dialog(self):
-    from modules.config_editor_widget import SimpleConfigDialog
-    dialog = SimpleConfigDialog(self.config_data, self)
-    dialog.show()
-```
+## Metadata API
 
-### Onglet de configuration
-```python
-from modules.config_editor_widget import ConfigEditorWidget
+`ConfigMetadata` reads `config/config_schema.json`. That file was removed (commit `cf9e96f2`), so `get_metadata()` returns `None` for every path, `get_widget_type()` returns `'textbox'` and `validate_value()` accepts anything. The description, choices and limits live in `config.default.json` instead. `ConfigEditorWidget` and `SimpleConfigDialog` (`ui/dialogs/config_editor_widget.py`) build a form from that metadata; the dock does not use them.
 
-config_widget = ConfigEditorWidget(self.config_data)
-tab_widget.addTab(config_widget, "Settings")
-```
+## Tests
 
-Voir [CONFIG_INTEGRATION_EXAMPLES.py](CONFIG_INTEGRATION_EXAMPLES.py) pour plus d'exemples.
-
-## 📊 Structure du schéma
-
-```json
-{
-  "parameter_path": {
-    "description": "User-friendly description",
-    "widget_type": "combobox|checkbox|textbox|spinbox|colorpicker",
-    "data_type": "boolean|string|integer",
-    "validation": {
-      "required": true,
-      "allowed_values": ["option1", "option2"],
-      "min": 0,
-      "max": 100,
-      "pattern": "^regex$"
-    },
-    "default": "default_value",
-    "user_friendly_label": "Display Label"
-  }
-}
-```
-
-## 🎓 Exemples
-
-### Exemple 1: Checkbox
-```json
-{
-  "app": {
-    "auto_activate": {
-      "description": "Auto-open plugin on project load",
-      "widget_type": "checkbox",
-      "data_type": "boolean",
-      "default": false
-    }
-  }
-}
-```
-
-### Exemple 2: Combobox
-```json
-{
-  "app": {
-    "ui": {
-      "theme": {
-        "active": {
-          "description": "Color theme selection",
-          "widget_type": "combobox",
-          "data_type": "string",
-          "validation": {
-            "allowed_values": ["auto", "dark", "light"]
-          },
-          "default": "auto"
-        }
-      }
-    }
-  }
-}
-```
-
-### Exemple 3: Spinbox
-```json
-{
-  "app": {
-    "buttons": {
-      "icon_sizes": {
-        "action": {
-          "description": "Icon size for action buttons",
-          "widget_type": "spinbox",
-          "data_type": "integer",
-          "validation": {
-            "min": 16,
-            "max": 64
-          },
-          "default": 25
-        }
-      }
-    }
-  }
-}
-```
-
-## 🛠️ Outils disponibles
-
-### 1. Script de démonstration
-```bash
-python3 tools/demo_config_system.py
-```
-Montre toutes les fonctionnalités du système.
-
-### 2. Export documentation
-```python
-from modules.config_metadata import get_config_metadata
-
-metadata = get_config_metadata()
-markdown = metadata.export_schema_to_markdown("CONFIG_REFERENCE.md")
-```
-
-### 3. Validation
-```python
-from modules.config_helpers import validate_config_value_with_metadata
-
-valid, error = validate_config_value_with_metadata('app.ui.profile', 'compact')
-```
-
-## 🔍 Dépannage
-
-### Métadonnées non disponibles
-```python
-from modules.config_helpers import METADATA_AVAILABLE
-
-if not METADATA_AVAILABLE:
-    print("Module config_metadata not imported correctly")
-```
-
-### Paramètre non trouvé
-```python
-from modules.config_metadata import get_config_metadata
-
-metadata = get_config_metadata()
-info = metadata.get_metadata('app.mon.param')
-if info is None:
-    print("Parameter not in schema!")
-```
-
-## 📞 Support
-
-- Documentation complète : [CONFIG_SYSTEM.md](CONFIG_SYSTEM.md)
-- Exemples d'intégration : [CONFIG_INTEGRATION_EXAMPLES.py](CONFIG_INTEGRATION_EXAMPLES.py)
-- Schéma : [config_schema.json](../config/config_schema.json)
-
-## 🎉 Migration
-
-Le système est **rétro-compatible** :
-- ✅ Fonctionne avec l'ancienne structure config v1
-- ✅ Helpers supportent v1 et v2
-- ✅ Migration progressive possible
-
-## 📝 TODO
-
-- [ ] Intégrer le widget de configuration dans l'interface principale
-- [ ] Ajouter icône "Settings" dans `icons/`
-- [ ] Créer tests unitaires pour validation
-- [ ] Migrer progressivement vers structure v2
-- [ ] Ajouter import/export de configuration
-
----
-
-**Auteur** : Équipe FilterMate  
-**Date** : 17 décembre 2025  
-**Version** : 2.0
+`tests/unit/test_config_migration.py` covers the merge and the metadata overlay of `config.py`. `tests/unit/test_plugin_config.py` covers the forced language and the configuration reset in `filter_mate.py`.
