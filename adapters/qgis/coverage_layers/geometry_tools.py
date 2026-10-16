@@ -127,6 +127,8 @@ def mask_to_geometry(mask, geotransform: Tuple[float, float, float, float, float
     band.SetNoDataValue(0)
     if sieve_pixels and sieve_pixels > 1:
         gdal.SieveFilter(band, None, band, int(sieve_pixels), 8)
+        if not band.ReadAsArray().any():
+            band.WriteArray(grid)  # only small patches: the sieve never empties a selection
     driver = ogr.GetDriverByName('Memory') or ogr.GetDriverByName('MEM')
     vector = driver.CreateDataSource('fm5_mask')
     srs = osr.SpatialReference()

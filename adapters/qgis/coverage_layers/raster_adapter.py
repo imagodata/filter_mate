@@ -239,6 +239,10 @@ class SelectionGeometryResult:
     cell_size: float
 
 
+# Below this many selected pixels the selection is polygonized without sieve.
+SIEVE_MIN_KEPT_PIXELS = 10000
+
+
 def selection_geometry(provider: QgsRasterDataProvider, selection: RasterSelection, extent: QgsRectangle,
                        native_width: int, native_height: int, crs_wkt: str, max_pixels: int = 4000000,
                        sieve_pixels: int = 4) -> SelectionGeometryResult:
@@ -259,8 +263,14 @@ def selection_geometry(provider: QgsRasterDataProvider, selection: RasterSelecti
     cell_x = extent.width() / width
     cell_y = extent.height() / height
     geotransform = (extent.xMinimum(), cell_x, 0.0, extent.yMaximum(), 0.0, -cell_y)
+    kept = int(mask.sum())
+    # The sieve removes the speckle of a large selection read pixel for pixel.
+    # A small one (a rare class, a narrow range) is kept as it is, and so is a
+    # subsampled grid: each of its cells already stands for several pixels.
+    if kept < SIEVE_MIN_KEPT_PIXELS or width < native_width or height < native_height:
+        sieve_pixels = 0
     geometry = mask_to_geometry(mask, geotransform, crs_wkt, sieve_pixels=sieve_pixels, simplify_tolerance=min(cell_x, cell_y) * 0.5)
-    return SelectionGeometryResult(geometry, int(mask.sum()), int(mask.size), max(cell_x, cell_y))
+    return SelectionGeometryResult(geometry, kept, int(mask.size), max(cell_x, cell_y))
 
 
 # --- virtual rasters -------------------------------------------------------
