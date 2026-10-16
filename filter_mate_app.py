@@ -1477,11 +1477,17 @@ class FilterMateApp:
 
     def _set_filter_protection_flags(self, current_layer):
         """Set protection flags and disconnect signals during filtering."""
+        import time
         if not self.dockwidget: return
         if self._current_layer_id_before_filter: self.dockwidget._saved_layer_id_before_filter = self._current_layer_id_before_filter
         # A new task: the timers of the previous post-filter window must not unblock the combo box during it.
         self.dockwidget._combo_protection_gen = getattr(self.dockwidget, '_combo_protection_gen', 0) + 1
         self.dockwidget._end_post_filter_window = None
+        # A layer picked from now on is only shown by the combo box: applied when the task is over. Still blocked
+        # by the task this one cancels (a second click on Filter): a layer picked during that one counts too.
+        if not (self.dockwidget.comboBox_filtering_current_layer.signalsBlocked()
+                and getattr(self.dockwidget, '_combo_blocked_at', None)):
+            self.dockwidget._combo_blocked_at = time.perf_counter()
         self.dockwidget._filtering_in_progress = True
         try:
             self.dockwidget.manageSignal(["FILTERING", "CURRENT_LAYER"], 'disconnect')

@@ -3,6 +3,7 @@
 
 For 1.5 s after a filter the combo box stays blocked and its checks put the source layer back when an async
 change moved it, never over a layer the user picked (a pick not looked at yet is looked at first).
+A layer picked during the task is applied when it is over.
 """
 import importlib
 import pathlib
@@ -63,6 +64,10 @@ def _checks(window):
     return [slot for delay, slot in window.timers if delay < 1500]
 
 
+def _end(window):
+    return next(slot for delay, slot in window.timers if delay == 1500)
+
+
 def _ended(window):
     """Protection over: combo box unblocked, its handler reconnected, filtering flag reset."""
     return (not window.dock._filtering_in_progress
@@ -104,3 +109,46 @@ def test_a_check_leaves_a_pick_of_this_window_alone(window):
     for check in _checks(window):
         check()
     window.combo.setLayer.assert_not_called()
+
+
+def test_a_layer_picked_during_the_task_is_applied_when_it_is_over(window):
+    """The combo box was blocked during the task: the pick was shown, then the completion put the source layer
+    back. The window ends at once and applies it (it used to be dropped)."""
+    window.dock._user_layer_pick = (time.perf_counter(), "dem")
+    window.handler._schedule_delayed_reconnection("zones")
+    assert _ended(window)
+    assert window.timers == []
+    window.combo.setLayer.assert_called_once_with(window.layers["dem"])  # handler connected: applies it
+    assert window.dock._end_post_filter_window is None
+
+
+def test_the_source_layer_picked_back_during_the_task_keeps_the_window(window):
+    window.dock._user_layer_pick = (time.perf_counter(), "zones")
+    window.handler._schedule_delayed_reconnection("zones")
+    assert len(_checks(window)) == 5
+    assert not _ended(window)
+
+
+def test_the_completion_looks_at_a_pick_not_looked_at_yet_first(window):
+    """The completion is a queued call too: it can run before the call the detector posted for a key press made
+    during the task, and it puts the source layer back in the combo box."""
+    class _Looked(Exception):
+        pass
+
+    def record_pending_pick():
+        raise _Looked  # stops the completion here: nothing ran before
+
+    window.dock._record_pending_layer_pick = record_pending_pick
+    with pytest.raises(_Looked):
+        window.handler.handle_task_completion("filter", MagicMock(), {"infos": {}, "task": {"layers": []}}, "zones")
+    window.combo.setLayer.assert_not_called()
+
+
+def test_a_layer_picked_before_the_task_is_not_applied(window):
+    window.dock._user_layer_pick = (window.dock._combo_blocked_at - 5, "dem")
+    window.handler._schedule_delayed_reconnection("zones")
+    assert len(_checks(window)) == 5
+    _end(window)()
+    assert _ended(window)
+    window.combo.setLayer.assert_not_called()
+    window.dock.current_layer_changed.assert_not_called()
