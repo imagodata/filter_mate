@@ -108,14 +108,13 @@ class TestPointCloudCard:
 
 
 class TestTools:
-    def test_raster_tools(self):
-        assert extras.tools_for("raster") == ["pushButton_checkable_exploring_raster_hover",
-                                              "pushButton_checkable_exploring_raster_zone",
-                                              "pushButton_checkable_exploring_raster_link"]
+    def test_raster_rail_has_no_extra_tool(self):
+        # Picker, zoom, preview and reset are the shared buttons; hover, statistics and style link are off the rail.
+        assert extras.tools_for("raster") == []
 
-    def test_point_cloud_tools(self):
-        assert extras.tools_for("point_cloud") == ["pushButton_exploring_point_cloud_profile",
-                                                   "pushButton_exploring_point_cloud_3d"]
+    def test_point_cloud_rail_has_no_extra_tool(self):
+        # The elevation profile and the 3D view are the standard QGIS tools: not on the rail.
+        assert extras.tools_for("point_cloud") == []
 
     def test_vector_has_no_extra_tool(self):
         assert extras.tools_for("vector") == []
