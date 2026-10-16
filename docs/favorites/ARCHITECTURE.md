@@ -1,5 +1,7 @@
 # Favorites system — developer guide
 
+> Written for 4.7; file paths checked for 5.0. Line counts and test counts below date from 4.7 (in 5.0: `ui/controllers/favorites_controller.py` 1199 lines, `ui/dialogs/favorites_manager.py` 1306, `extensions/favorites_sharing/service.py` 152, `extensions/favorites_sharing/ui/publish_dialog.py` 770; the whole suite: 2880 passed, 11 skipped).
+
 Last refreshed: **2026-04-29** after the deep audit (24 commits, 1424/1424
 tests). Read this before editing anything under `core/services/favorites*`,
 `core/domain/favorit*`, `ui/controllers/favorites*`, `ui/dialogs/favorites*`,

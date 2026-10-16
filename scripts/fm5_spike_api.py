@@ -1,5 +1,5 @@
 # Spike FilterMate 5.0 (14/10/2026) : vérifie en QGIS réel les API raster / nuage du plan
-# docs/plans/V5_RASTER_LIDAR_PLAN.md. Lancer avec python-qgis.bat ; chemins de données Windows à adapter.
+# docs/internal/plans/V5_RASTER_LIDAR_PLAN.md. Lancer avec python-qgis.bat ; chemins de données Windows à adapter.
 import os, sys, tempfile
 from qgis.core import *
 app = QgsApplication([], False); app.initQgis()
