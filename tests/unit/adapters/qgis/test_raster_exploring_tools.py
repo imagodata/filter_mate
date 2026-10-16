@@ -214,6 +214,36 @@ class TestSelectionPreview:
         adapter.clear_selection_preview(preview_layer)
         assert preview_layer.hidden([-9999.0, 1.0]) == [-9999.0]
 
+    def test_pixels_beyond_the_sampled_statistics_are_hidden(self, preview_layer):
+        # Statistics read on a sample (0 -> 10) of a raster holding -50 and 500.
+        adapter.apply_selection_preview(preview_layer, RasterSelection(minimum=3.0, maximum=7.0), 0.0, 10.0)
+        assert preview_layer.hidden([-50.0, 5.0, 500.0, 1e30]) == [-50.0, 500.0, 1e30]
+        adapter.apply_selection_preview(preview_layer, RasterSelection(mode=RasterSelectionMode.CLASSES,
+                                                                       classes=frozenset({2})), 0.0, 0.0)
+        assert preview_layer.hidden([-3.0, 2.0, 40.0]) == [-3.0, 40.0]
+
+    @pytest.mark.parametrize("value", [0.001, 1e-5])
+    def test_small_float32_bounds(self, preview_layer, value):
+        np = pytest.importorskip("numpy")
+        bound = np.float32(value)
+        below, above = (float(np.nextafter(bound, np.float32(direction))) for direction in (-1, 1))
+        adapter.apply_selection_preview(preview_layer, RasterSelection(minimum=float(bound)))
+        assert preview_layer.hidden([below, float(bound), above]) == [below]
+        adapter.apply_selection_preview(preview_layer, RasterSelection(maximum=float(bound)))
+        assert preview_layer.hidden([below, float(bound), above]) == [above]
+
+    def test_user_transparency_still_applies_to_the_kept_pixels(self, preview_layer):
+        own = adapter._transparent_pixel(-9999.0, -9999.0, True, True)  # a NoData-like value of the user
+        half = adapter._transparent_pixel(0.0, 100.0, True, True)  # half transparent range of the user
+        if hasattr(half, "opacity"):
+            half.opacity = 0.5
+        else:
+            half.percentTransparent = 50.0
+        preview_layer.renderer().rasterTransparency().setTransparentSingleValuePixelList([own, half])
+        adapter.apply_selection_preview(preview_layer, RasterSelection(minimum=-10000.0, maximum=60.0))
+        # -9999 is selected but stays transparent; 80 is not selected: hidden, not half transparent.
+        assert preview_layer.hidden([-9999.0, 20.0, 80.0]) == [-9999.0, 80.0]
+
 
 class TestLinkedStyles:
     """Constat 4: saved styles never outlive their layer, and come back when the plugin unloads."""

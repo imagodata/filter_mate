@@ -790,7 +790,8 @@ class CoverageModeController(BaseController):
         cached = self._histogram_cache.get(key)
         if cached is None:
             cached = band_histogram(self._base_raster(layer), band, bins=64)
-            self._histogram_cache[key] = cached
+            if cached[0]:  # statistics unavailable (yet): read them again next time
+                self._histogram_cache[key] = cached
             while len(self._histogram_cache) > HISTOGRAM_CACHE_SIZE:
                 del self._histogram_cache[next(iter(self._histogram_cache))]  # oldest first
         counts, minimum, maximum = cached
@@ -888,12 +889,10 @@ class CoverageModeController(BaseController):
             return
         from ...adapters.qgis.coverage_layers.raster_adapter import apply_selection_preview, clear_selection_preview
         selection = panel.selection()
-        cached = self._histogram_cache.get(self._histogram_key(layer, panel.current_band()))
-        low, high = (cached[1], cached[2]) if cached else (None, None)
         if selection is None:
             clear_selection_preview(layer)  # nothing selected: every pixel shows again
         else:
-            apply_selection_preview(layer, selection, low, high)
+            apply_selection_preview(layer, selection)
 
     def _populate_point_cloud(self, layer: Any, keep_kept: bool = False) -> None:
         try:

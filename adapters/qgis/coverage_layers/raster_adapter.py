@@ -12,6 +12,7 @@ a source geometry.
 """
 import logging
 import math
+import sys
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Tuple
 
@@ -380,14 +381,14 @@ def pixel_is_transparent(pixel) -> bool:
 def _bound_step(value: float) -> float:
     """Gap left between a kept value and a transparent range whose bounds are inclusive.
 
-    Far above the absolute tolerance QGIS compares bounds with (4 double
-    epsilons), far below the spacing of Float32 pixel values.
+    Above the absolute tolerance QGIS compares bounds with (4 double
+    epsilons, about 8.9e-16) and below the relative spacing of Float32
+    pixel values (about 6e-8), small values (0.001, 1e-5) included.
     """
-    return max(abs(value), 1.0) * 1e-9
+    return max(abs(value) * 1e-12, 1e-14)
 
 
-def preview_ranges(selection: RasterSelection, data_min: Optional[float], data_max: Optional[float],
-                   exclusive_bounds: bool = True) -> List[Tuple[float, float, bool, bool]]:
+def preview_ranges(selection: RasterSelection, exclusive_bounds: bool = True) -> List[Tuple[float, float, bool, bool]]:
     """Value ranges a RANGE / CLASSES preview makes transparent: ``(low, high, include_low, include_high)``.
 
     No kept value may fall in one. A range bound next to a kept value is
@@ -395,10 +396,10 @@ def preview_ranges(selection: RasterSelection, data_min: Optional[float], data_m
     / ``includeMaximum``, ranges inclusive on both sides) moves it off the
     kept value instead. A class keeps the values that round to it, like the
     filter (:func:`selection_mask`): the gaps between classes start and end
-    at half values, which an integer pixel never takes.
+    at half values, which an integer pixel never takes. The outer ranges are
+    unbounded: band statistics are sampled and miss pixels.
     """
-    low = -1e300 if data_min is None else data_min - 1
-    high = 1e300 if data_max is None else data_max + 1
+    low, high = -sys.float_info.max, sys.float_info.max
     gaps = []
     if selection.mode is RasterSelectionMode.RANGE:
         if selection.minimum is not None:
@@ -425,24 +426,30 @@ def preview_ranges(selection: RasterSelection, data_min: Optional[float], data_m
 
 
 def apply_selection_preview(layer: QgsRasterLayer, selection: RasterSelection,
-                            data_min: Optional[float], data_max: Optional[float]) -> bool:
+                            data_min: Optional[float] = None, data_max: Optional[float] = None) -> bool:
     """Make the pixels outside a RANGE / CLASSES selection transparent in the renderer.
 
     The previous transparency settings are kept on the layer and restored by
-    :func:`clear_selection_preview`. A selection the preview cannot show
-    (empty, raster calculator expression) shows every pixel again.
+    :func:`clear_selection_preview`; meanwhile they still apply to the kept
+    pixels. A selection the preview cannot show (empty, raster calculator
+    expression) shows every pixel again. ``data_min`` / ``data_max`` are no
+    longer used (the outer ranges are unbounded), kept for callers.
     """
     from qgis.core import QgsRasterTransparency
     renderer = layer.renderer()
     if renderer is None or selection.is_empty or selection.mode is RasterSelectionMode.EXPRESSION:
         clear_selection_preview(layer)
         return False
-    if layer.customProperty(_PREVIEW_PROPERTY) is None:
-        layer.setCustomProperty(_PREVIEW_PROPERTY, _transparency_to_list(renderer.rasterTransparency()))
+    saved = layer.customProperty(_PREVIEW_PROPERTY)
+    if saved is None:
+        saved = _transparency_to_list(renderer.rasterTransparency())
+        layer.setCustomProperty(_PREVIEW_PROPERTY, saved)
     transparency = QgsRasterTransparency()
     exclusive = hasattr(_transparent_pixel(0.0, 0.0, True, True), 'includeMinimum')  # QGIS >= 3.30
-    pixels = [_transparent_pixel(*gap) for gap in preview_ranges(selection, data_min, data_max, exclusive)]
-    transparency.setTransparentSingleValuePixelList(pixels)
+    pixels = [_transparent_pixel(*gap) for gap in preview_ranges(selection, exclusive)]
+    # QGIS uses the first range holding a value: the preview first (hidden is hidden), then the
+    # ranges of the user, which keep applying to the kept pixels (a NoData-like value stays transparent).
+    transparency.setTransparentSingleValuePixelList(pixels + _pixels_from_list(saved))
     renderer.setRasterTransparency(transparency)
     layer.triggerRepaint()
     return True
@@ -467,6 +474,23 @@ def _transparency_to_list(transparency) -> list:
     return items
 
 
+def _pixels_from_list(saved) -> list:
+    """Pixels of a :func:`_transparency_to_list` copy (either API)."""
+    pixels = []
+    for item in saved or []:
+        try:
+            low, high, kind, level, include_min, include_max = item
+            pixel = _transparent_pixel(low, high, include_min, include_max)
+            if hasattr(pixel, 'opacity'):
+                pixel.opacity = float(level) if kind == 'opacity' else 1.0 - float(level) / 100.0
+            else:
+                pixel.percentTransparent = float(level) if kind == 'percent' else (1.0 - float(level)) * 100.0
+            pixels.append(pixel)
+        except (TypeError, ValueError):
+            continue
+    return pixels
+
+
 def clear_selection_preview(layer: QgsRasterLayer) -> bool:
     """Restore the transparency saved by :func:`apply_selection_preview`."""
     from qgis.core import QgsRasterTransparency
@@ -476,19 +500,7 @@ def clear_selection_preview(layer: QgsRasterLayer) -> bool:
     renderer = layer.renderer()
     if renderer is not None:
         transparency = QgsRasterTransparency()
-        pixels = []
-        for item in saved or []:
-            try:
-                low, high, kind, level, include_min, include_max = item
-                pixel = _transparent_pixel(low, high, include_min, include_max)
-                if hasattr(pixel, 'opacity'):
-                    pixel.opacity = float(level) if kind == 'opacity' else 1.0 - float(level) / 100.0
-                else:
-                    pixel.percentTransparent = float(level) if kind == 'percent' else (1.0 - float(level)) * 100.0
-                pixels.append(pixel)
-            except (TypeError, ValueError):
-                continue
-        transparency.setTransparentSingleValuePixelList(pixels)
+        transparency.setTransparentSingleValuePixelList(_pixels_from_list(saved))
         renderer.setRasterTransparency(transparency)
         layer.triggerRepaint()
     layer.removeCustomProperty(_PREVIEW_PROPERTY)

@@ -616,7 +616,8 @@ def adapters(monkeypatch, ctrl_module):
     monkeypatch.setitem(sys.modules, package.__name__, package)
     calls = []
     raster = types.ModuleType(f"{package.__name__}.raster_adapter")
-    raster.apply_selection_preview = lambda layer, selection, low, high: calls.append(("apply", layer.id(), low, high))
+    raster.apply_selection_preview = lambda layer, selection, low=None, high=None: calls.append(
+        ("apply", layer.id(), low, high))
     raster.clear_selection_preview = lambda layer: calls.append(("clear", layer.id()))
     raster.band_histogram = lambda layer, band, bins=64: calls.append(("histogram", band)) or ([1, 1], 0.0, 10.0)
     snapshots = types.ModuleType(f"{package.__name__}.snapshots")
@@ -627,7 +628,7 @@ def adapters(monkeypatch, ctrl_module):
     for module in (raster, snapshots):
         monkeypatch.setitem(sys.modules, module.__name__, module)
     monkeypatch.setattr(sys.modules["qgis.core"], "QgsTask", FakeQgsTask, raising=False)
-    return types.SimpleNamespace(calls=calls, package=package, snapshots=snapshots)
+    return types.SimpleNamespace(calls=calls, package=package, snapshots=snapshots, raster=raster)
 
 
 @pytest.mark.unit
@@ -962,6 +963,17 @@ class TestHistogramCache:
         adapters.snapshots.derived["r1"] = types.SimpleNamespace(original_source="/data/r1")
         controller._refresh_histogram(layers["r1"], 1)
         assert [call for call in adapters.calls if call[0] == "histogram"] == [("histogram", 1)]
+
+    def test_unavailable_statistics_are_read_again(self, ctrl_module, layers, adapters, monkeypatch):
+        controller = ctrl_module.CoverageModeController(_dock())
+        controller._raster_panel = MagicMock()
+        monkeypatch.setattr(controller, "_base_raster", lambda layer: layer)
+        adapters.raster.band_histogram = lambda layer, band, bins=64: adapters.calls.append(("histogram", band)) \
+            or ([], 0.0, 0.0)
+        controller._refresh_histogram(layers["r1"], 1)
+        controller._refresh_histogram(layers["r1"], 1)
+        assert [call for call in adapters.calls if call[0] == "histogram"] == [("histogram", 1)] * 2
+        assert controller._histogram_cache == {}
 
     def test_histogram_cache_is_bounded(self, ctrl_module, adapters, monkeypatch):
         controller = ctrl_module.CoverageModeController(_dock())
