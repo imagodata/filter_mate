@@ -157,8 +157,14 @@ class RasterSourceJob(SourceJob):
         if self._provider is None:
             self.message = 'raster provider unavailable'
             return QgsGeometry()
+        if is_canceled():
+            self.message = 'canceled'
+            return QgsGeometry()
         result = selection_geometry(self._provider, self.selection, self._extent, self._width, self._height,
                                     self._crs_wkt, max_pixels=self._max_pixels)
+        if is_canceled():  # the polygonization cannot be interrupted: its result is dropped
+            self.message = 'canceled'
+            return QgsGeometry()
         self.details.update(kept_pixels=result.kept_pixels, total_pixels=result.total_pixels, cell_size=result.cell_size)
         return result.geometry
 
@@ -194,10 +200,15 @@ class RasterSourceJob(SourceJob):
             self.raw_geometry = self._raw_geometry(lambda: False)
         if self.raw_geometry.isEmpty() or self.before.base_provider != 'gdal':
             return None
+        from . import cache
         job = RasterTargetJob(layer, None)
         request = CrossFilterRequest(self.layer_id, LayerKind.RASTER, targets=(TargetSpec(self.layer_id, LayerKind.RASTER),))
-        job.compute(self.raw_geometry, self.crs, QgsCoordinateTransformContext(), request, lambda: False)
-        return job.apply(layer) if job.outcome.success else None
+        try:
+            job.compute(self.raw_geometry, self.crs, QgsCoordinateTransformContext(), request, lambda: False)
+            return job.apply(layer) if job.outcome.success else None
+        finally:
+            # Not a target of the task: its VRT is released for the cache cleaner here.
+            cache.settle(job.outputs)
 
     def _record(self, layer, provider: str, nodata=None) -> LayerSnapshot:
         import json

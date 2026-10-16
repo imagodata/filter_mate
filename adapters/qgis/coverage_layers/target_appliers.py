@@ -62,6 +62,47 @@ logger = logging.getLogger(__name__)
 
 CanceledFn = Callable[[], bool]
 MAX_BBOX_TERMS = 50
+NO_AREA = "the source geometry has no area (lines or points only): add a buffer"
+
+
+def _checked(result: QgsGeometry, operation: str) -> QgsGeometry:
+    """Valid result of a GEOS operation; a null result is an error, never "nothing kept".
+
+    An empty result (the areas do not meet) is a valid empty geometry, kept
+    as it is; GEOS failing (invalid input) gives a null one, which must not
+    mask everything.
+    """
+    if result is None or result.isNull():
+        error = result.lastError() if result is not None and hasattr(result, 'lastError') else ''
+        raise RuntimeError(f"{operation} of the source geometry failed{': ' + error if error else ''}")
+    return result if result.isEmpty() else make_valid(result)
+
+
+def _nothing_kept(extent: QgsRectangle) -> QgsGeometry:
+    """Area kept when nothing is: a tiny polygon outside ``extent``.
+
+    Stored like any kept area, so that the state survives a project reload
+    and combines like an empty area (no pixel, no point lies there).
+    """
+    return QgsGeometry.fromRect(QgsRectangle(extent.xMinimum() - 2, extent.yMinimum() - 2,
+                                             extent.xMinimum() - 1, extent.yMinimum() - 1))
+
+
+def _has_area(geometry: QgsGeometry) -> bool:
+    """True when ``geometry`` has a polygon part (pixels and points are kept inside areas only)."""
+    return polygonal_wkt(geometry.asWkt()) is not None
+
+
+def _kept_area(geometry: QgsGeometry) -> Optional[str]:
+    """WKT of the polygon parts of a kept area; None when nothing is kept.
+
+    Two kept areas that touch meet in a line: no pixel, no point is kept
+    there, and only polygons are stored (overlays of collections with lines
+    fail on older GEOS).
+    """
+    if geometry is None or geometry.isEmpty():
+        return None
+    return polygonal_wkt(geometry.asWkt())
 
 
 def _combine_geometry(previous_wkt: str, previous_side: str, new: QgsGeometry, side: CoverageSide,
@@ -77,12 +118,16 @@ def _combine_geometry(previous_wkt: str, previous_side: str, new: QgsGeometry, s
     if previous.isEmpty():
         return new
     op = operator.upper()
+    if new is None or new.isEmpty():
+        # Nothing new kept (outside of a source covering the whole layer):
+        # AND keeps nothing, OR and AND NOT keep the previous area.
+        return previous if op in ('OR', 'AND NOT') else new
     if op == 'AND':
-        return make_valid(previous.intersection(new))
+        return _checked(previous.intersection(new), 'intersection')
     if op == 'OR':
-        return make_valid(previous.combine(new))
+        return _checked(previous.combine(new), 'union')
     if op == 'AND NOT':
-        return make_valid(previous.difference(new))
+        return _checked(previous.difference(new), 'difference')
     return new
 
 
@@ -146,7 +191,8 @@ class TargetJob:
         raise NotImplementedError
 
     def _target_geometry(self, source_geometry, source_crs, context) -> QgsGeometry:
-        return transform_geometry(source_geometry, source_crs, self.crs, context)
+        # A reprojection can make a valid polygon invalid (GEOS operations then fail).
+        return make_valid(transform_geometry(source_geometry, source_crs, self.crs, context))
 
 
 # --- vector -----------------------------------------------------------------
@@ -337,20 +383,34 @@ class RasterTargetJob(TargetJob):
         if side is CoverageSide.ALL:
             self.outcome.message = 'inside OR outside keeps every pixel: nothing to do'
             return
+        if (self.operator or '').upper() in ('AND', 'OR', 'AND NOT') and self.before.derived \
+                and self.before.selection and not self.before.geometry_wkt:
+            # Filtered as a source (virtual raster of its own pixel selection):
+            # there is no kept area to combine with, and the clip of the
+            # original raster would silently drop that selection.
+            self.outcome.message = ("the layer is filtered by its own pixel selection, which cannot be combined: "
+                                    "replace its filter or unfilter it first")
+            return
         geometry = self._target_geometry(source_geometry, source_crs, context)
+        if side is CoverageSide.INSIDE and not geometry.isEmpty() and not _has_area(geometry):
+            self.outcome.message = NO_AREA
+            return
         if side is CoverageSide.OUTSIDE:
-            geometry = make_valid(QgsGeometry.fromRect(self._extent).difference(geometry))
+            geometry = _checked(QgsGeometry.fromRect(self._extent).difference(geometry), 'difference')
         geometry = _combine_geometry(self.before.geometry_wkt if self.before.derived else '', self.before.side,
                                      geometry, side, self.operator)
         self._side = side
-        if geometry.isEmpty():
-            # Nothing kept: clip with a degenerate polygon far outside the extent.
-            ext = self._extent
-            geometry = QgsGeometry.fromRect(QgsRectangle(ext.xMinimum() - 2, ext.yMinimum() - 2, ext.xMinimum() - 1, ext.yMinimum() - 1))
+        kept = _kept_area(geometry)
+        # Nothing kept: clip with a degenerate polygon far outside the extent.
+        geometry = QgsGeometry.fromWkt(kept) if kept is not None else _nothing_kept(self._extent)
         self._geometry_wkt = geometry.asWkt()
         cutline = _simplified_for_cutline(geometry, self._pixel * 0.5)
         path = self._new_path('.vrt')
-        options = dict(format='VRT', cutlineWKT=cutline.asWkt(), cutlineSRS=self.crs.toWkt(), cropToCutline=False)
+        options = dict(format='VRT', cutlineWKT=cutline.asWkt(), cropToCutline=False)
+        if self.crs.isValid():
+            # An empty cutlineSRS is an invalid SRS for GDAL >= 3.9: without a
+            # CRS the cutline is in the raster's own coordinates.
+            options['cutlineSRS'] = self.crs.toWkt()
         if self._nodata and all(value is not None for value in self._nodata):
             options['dstNodata'] = ' '.join(repr(value) for value in self._nodata)
         elif self._float:
