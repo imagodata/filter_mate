@@ -57,6 +57,9 @@ logger = setup_logger(
     level=logging.INFO
 )
 
+# 2026-10-17: QGIS end cap codes (Round 0, Flat 1, Square 2) as the backends name them
+BUFFER_ENDCAP_STYLES = {0: 'round', 1: 'flat', 2: 'square'}
+
 # PostgreSQL availability check - EPIC-1 E13: Use BackendServices facade
 from ..ports.backend_services import get_backend_services
 
@@ -1353,6 +1356,12 @@ class FilterEngineTask(QgsTask):
         self.param_buffer_expression = result['buffer_expression']
         self.param_buffer_type = result['buffer_type']
         self.param_buffer_segments = result['buffer_segments']
+        # 2026-10-17: the backends read the end cap and the segments from
+        # these task parameters (GeometricFilterPort._get_buffer_endcap_style,
+        # the OGR buffers); nothing set them, so every SQL / OGR buffer was
+        # Round with 5 segments whatever the panel said.
+        self.task_parameters['buffer_endcap_style'] = BUFFER_ENDCAP_STYLES.get(self.param_buffer_type, 'round')
+        self.task_parameters['buffer_segments'] = self.param_buffer_segments
 
     def _prepare_geometries_by_provider(self, provider_list):
         """Prepare source geometries for each provider. Delegates to SourceGeometryPreparer."""

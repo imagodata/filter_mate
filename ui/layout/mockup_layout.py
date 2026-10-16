@@ -96,13 +96,34 @@ def merge_buffer_rows(dw: Any) -> bool:
         type_button.setVisible(False)
         _remove_spacer(keys, 'verticalSpacer_filtering_keys_field_bottom', button_index - 1)
 
+    link_buffer_type_to_value(value_button, type_button, combo, segments)
+    dw.setProperty('fm_buffer_rows_merged', True)
+    return True
+
+
+def link_buffer_type_to_value(value_button: Any, type_button: Any, combo: Any, segments: Any = None) -> None:
+    """The hidden buffer type switch follows the buffer value row (FilterMate 5 design).
+
+    It follows the value switch, and (2026-10-17) it is turned on when the
+    type or the segment count is changed while a buffer is active: the type
+    shown on the row is the type applied. ``has_buffer_type`` used to stay
+    False after a layer change (signals blocked), and Flat / Square buffers
+    came out Round. The filter task applies the type whenever a buffer is
+    active anyway (SourceSubsetBufferBuilder._extract_buffer_type); this keeps
+    the stored flag, the favorites and the history consistent with it.
+    """
     def follow(checked: bool) -> None:
         if type_button.isChecked() != checked:
             type_button.setChecked(checked)
 
+    def type_changed(*_args) -> None:
+        if value_button.isChecked() and not type_button.isChecked():
+            type_button.setChecked(True)
+
     value_button.toggled.connect(follow)
-    dw.setProperty('fm_buffer_rows_merged', True)
-    return True
+    combo.currentIndexChanged.connect(type_changed)
+    if segments is not None and hasattr(segments, 'valueChanged'):
+        segments.valueChanged.connect(type_changed)
 
 
 GAP_ITEM = None  # an expanding gap in a rail plan
