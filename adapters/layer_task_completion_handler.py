@@ -152,8 +152,11 @@ class LayerTaskCompletionHandler:
         current = dict(self._get_project_layers() or {})
         changed = set(changed_layer_ids)
         if task_name == 'add_layers':
+            # A layer this task registered and a removal unregistered meanwhile: kept only
+            # while still in the project (added then removed at once, it is gone).
+            project = self._get_project()
             merged = {key: value for key, value in result_project_layers.items()
-                      if key in current or key in changed}
+                      if key in current or (key in changed and self._in_project(project, key))}
         else:
             merged = {key: value for key, value in result_project_layers.items()
                       if key in current and key not in changed}
@@ -161,6 +164,14 @@ class LayerTaskCompletionHandler:
             if key not in result_project_layers and not (task_name == 'remove_layers' and key in changed):
                 merged[key] = value
         return merged
+
+    @staticmethod
+    def _in_project(project: Any, layer_id: str) -> bool:
+        """True unless the project no longer holds the layer (unknown: True)."""
+        try:
+            return project is None or project.mapLayer(layer_id) is not None
+        except (RuntimeError, AttributeError):
+            return True
 
     def _apply_task_result(
         self,

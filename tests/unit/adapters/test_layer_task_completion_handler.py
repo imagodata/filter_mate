@@ -87,7 +87,7 @@ class _Env:
         self.pending = 0
         self.queue = []
         self.process_queue = MagicMock()
-        project = MagicMock()
+        project = self.project = MagicMock()
         project.readPath.return_value = "/data"
         self.handler = handler_mod.LayerTaskCompletionHandler(
             get_spatialite_connection=lambda: sqlite3.connect(self.db_path),
@@ -256,6 +256,16 @@ class TestOverlappingLayerTasks:
             {"A": _layer("A"), "B": _layer("B"), "X": _layer("X")}, "add_layers", changed_layer_ids=["X"])
 
         assert set(env.project_layers) == {"A", "X"}
+
+    def test_a_layer_added_then_removed_at_once_is_not_brought_back(self, tmp_path):
+        """The addition registered X; X left the project and its removal finished first."""
+        env = _Env(tmp_path, ["A"])
+        env.project.mapLayer.side_effect = lambda layer_id: None if layer_id == "X" else MagicMock()
+
+        env.handler.handle_task_completion({"A": _layer("A"), "X": _layer("X")}, "add_layers",
+                                           changed_layer_ids=["X"])
+
+        assert set(env.project_layers) == {"A"}
 
     def test_two_removals_keep_both_removed(self, tmp_path):
         env = _Env(tmp_path, ["A", "C"])  # the first removal took B out
