@@ -2,6 +2,12 @@
 
 All notable changes to FilterMate will be documented in this file.
 
+## [Unreleased]
+
+### Changed
+
+- **Processing algorithms and shipped models are labelled in English** (names, parameters, help, messages). Their text was written in French in the source and never translated, so an English QGIS showed « Filtrer plusieurs couches (batch) »; French users keep the same labels through the French translation. Algorithm ids, model ids and parameter names are unchanged, so models, scripts and `qgis_process` calls keep working.
+
 ## [5.0.0] - 2026-10-15
 
 FilterMate 5 filters raster and LiDAR point cloud layers as well as vector layers: EXPLORING selects on the current layer whatever its kind, FILTERING relates that selection to layers of any kind, EXPORTING writes each kind. Raster and point cloud support is on by default and can be switched off in the Configuration tab (`APP.OPTIONS.RASTER.enabled`, `APP.OPTIONS.POINT_CLOUD.enabled`). Requirements unchanged: QGIS 3.22 or later (point clouds from 3.26), Qt5 or Qt6; PDAL 2.4 or later is optional (height above a DTM, direct COPC writing). Every release is now tested in CI on QGIS 3.22, 3.28, 3.34, 3.44 and 4.2, with Processing and with the dock itself.
