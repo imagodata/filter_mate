@@ -4,10 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FilterMate User Guide — Spatial Filtering for QGIS</title>
-    <meta name="description" content="Step-by-step user guide for FilterMate, the QGIS plugin for exploring, filtering and exporting vector data: installation, interface, spatial predicates, buffers, favorites, export and configuration.">
+    <meta name="description" content="Step-by-step user guide for FilterMate, the QGIS plugin for exploring, filtering and exporting vector, raster and LiDAR point cloud layers: installation, interface, spatial predicates, buffers, favorites, export, configuration and automation.">
     <meta name="keywords" content="QGIS, plugin, FilterMate, user guide, tutorial, spatial filter, PostGIS, GeoPackage, SpatiaLite">
     <meta property="og:title" content="FilterMate User Guide">
-    <meta property="og:description" content="Learn FilterMate in 15 minutes: explore, filter and export vector data in QGIS.">
+    <meta property="og:description" content="Learn FilterMate in 15 minutes: explore, filter and export vector, raster and LiDAR point cloud layers in QGIS.">
     <meta property="og:type" content="article">
     <meta property="og:url" content="https://imagodata.github.io/filter_mate/guide.html">
     <link rel="alternate" hreflang="en" href="https://imagodata.github.io/filter_mate/guide.html">
@@ -65,7 +65,7 @@
 <main class="content" id="main">
 
 <header class="hero">
-    <span class="section-label">User guide for FilterMate 4.9</span>
+    <span class="section-label">User guide for FilterMate 5.0</span>
     <div class="band band-hero">
         <video class="sheet-video" muted loop playsinline preload="none" poster="video/hero.webp" data-src="video/hero.mp4" aria-hidden="true"></video>
         <div class="sheet-scrim"></div>
@@ -88,6 +88,8 @@
         the filtered layer simply shows only the features that match, exactly as if you had typed a
         provider filter in the layer properties. FilterMate builds that filter for you, in the native
         language of the data source (PostGIS SQL, SpatiaLite SQL or a QGIS expression for files).
+        Raster and point cloud layers are filtered too: they are clipped to a temporary file that replaces
+        their source while the filter is on (see <a href="#raster-lidar">Rasters and LiDAR point clouds</a>).
     </p>
     <p>Every spatial filter follows the same three-part pattern:</p>
     <div class="cards">
@@ -278,7 +280,7 @@
     <table>
         <tr><th>Rail button</th><th>Row</th><th>Meaning</th></tr>
         <tr><td><strong>Auto current layer</strong></td><td>Source layer</td><td>When on, the source layer follows the QGIS Layers panel. When off, choose it in the drop-down. The small icon and checkbox to the right enable the <em>centroid</em> option for the source geometry.</td></tr>
-        <tr><td><strong>Layers to filter</strong></td><td>Target layers</td><td>A checkable list of every other vector layer in the project. Right-click for <em>Select All</em>, <em>Deselect All</em> or by geometry type. The checkbox on the right uses centroids for distant (target) layers.</td></tr>
+        <tr><td><strong>Layers to filter</strong></td><td>Target layers</td><td>A checkable list of the other layers of the project: vector, and since 5.0 raster and point cloud layers. Right-click for <em>Select All</em>, <em>Deselect All</em> or by geometry type. The checkbox on the right uses centroids for distant (target) layers.</td></tr>
         <tr><td><strong>Combine operator</strong></td><td>Two drop-downs</td><td>How a new filter combines with the one already applied. Left: for the source layer. Right: for the target layers. Values are <code>AND</code>, <code>OR</code> and <code>AND NOT</code>.</td></tr>
         <tr><td><strong>Geometric predicates</strong></td><td>Predicate list</td><td>Checkable list of spatial relations. Several can be ticked; they are combined with OR.</td></tr>
         <tr><td><strong>Buffer value</strong></td><td>Distance in metres</td><td>Expands (positive) or shrinks (negative) the source geometry before the predicate is tested. Click the small arrow to switch to a QGIS expression, e.g. <code>"width" * 2</code>.</td></tr>
@@ -480,7 +482,7 @@ AND ST_Intersects("geom",
         <tr><td><strong>Layers</strong></td><td>Checkable list of the layers to export.</td></tr>
         <tr><td><strong>Projection</strong></td><td>Output CRS. Layers in another CRS are reprojected during the export.</td></tr>
         <tr><td><strong>Styles</strong></td><td>Save the layer styles alongside the data as <code>QML</code> (QGIS native) or <code>SLD</code> (interoperable). With GeoPackage output the style is embedded in the file.</td></tr>
-        <tr><td><strong>Output format</strong></td><td>Any vector format QGIS can write: GeoPackage (default), Shapefile, GeoJSON, KML, CSV, FlatGeobuf&hellip;</td></tr>
+        <tr><td><strong>Output format</strong></td><td>Any vector format QGIS can write: GeoPackage (default), Shapefile, GeoJSON, KML, CSV, FlatGeobuf&hellip; Rasters and point clouds have their own formats (<a href="#raster-lidar">section 13</a>).</td></tr>
         <tr><td><strong>Output folder</strong></td><td>Where files are written. <strong>Batch mode</strong> writes one file per layer instead of one multi-layer file.</td></tr>
         <tr><td><strong>ZIP</strong></td><td>Packs the result in a single archive, optionally in batch mode as well.</td></tr>
     </table>
@@ -579,7 +581,7 @@ AND ST_Intersects("geom",
         <figcaption>The <em>Filter several layers (batch)</em> algorithm: pick layers, type an expression, run.</figcaption>
     </figure>
     <p>
-        FilterMate registers a Processing provider. Its first algorithm, <code>filtermate:batch_filter</code>, applies one filter expression to several vector layers in a single run.
+        FilterMate registers a Processing provider. Its simplest algorithm, <code>filtermate:batch_filter</code>, applies one filter expression to several vector layers in a single run; the cross filters of FilterMate 5 are described in <a href="#raster-lidar">section 13</a>.
         Because it is a regular Processing algorithm it can be used in the graphical modeler, in batch mode, or from Python:
     </p>
     <pre><code>import processing
