@@ -776,7 +776,8 @@ class TestReactivation:
         controller._active_layer, controller._kind = layers["r2"], raster
         state = {"mode": "range", "minimum": 1.0, "preview": True}
         controller._panel_states["r1"] = state
-        controller._raster_panel.selection.return_value = object()
+        controller._raster_panel.selection.return_value = types.SimpleNamespace(
+            derivative=types.SimpleNamespace(is_terrain=False))
         controller.activate(layers["r1"], raster)
         controller._raster_panel.restore_state.assert_called_once_with(state)
         selecting.setChecked.assert_called_with(True)

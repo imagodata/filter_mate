@@ -260,16 +260,17 @@ class CoverageDockExtras(QObject):
         if layout is None or not hasattr(layout, 'insertWidget'):
             logger.debug("[FM5] EXPLORING tool rail not found, kind tools not added")
             return
+        self._link_tip = self.tr("Link the range to the style: the layer colours stretch over the selected range")
         specs = (
             ('pushButton_checkable_exploring_raster_hover', True,
-             self.tr("Value under the cursor: follow the pixel value of the current band while moving over the map"),
+             self.tr("Value under the cursor: follow the pixel value (or the slope, aspect... the range applies to) "
+                     "while moving over the map"),
              self._on_hover_toggled),
             ('pushButton_checkable_exploring_raster_zone', True,
-             self.tr("Statistics of a rectangle: drag on the map to read the minimum, maximum and mean of the current band"),
+             self.tr("Statistics of a rectangle: drag on the map to read the minimum, maximum and mean of the current "
+                     "band (or of the slope, aspect... the range applies to)"),
              self._on_zone_toggled),
-            ('pushButton_checkable_exploring_raster_link', True,
-             self.tr("Link the range to the style: the layer colours stretch over the selected range"),
-             self._on_link_toggled),
+            ('pushButton_checkable_exploring_raster_link', True, self._link_tip, self._on_link_toggled),
             ('pushButton_exploring_point_cloud_profile', False,
              self.tr("Elevation profile: open the QGIS elevation profile of the map"), self._open_elevation_profile),
             ('pushButton_exploring_point_cloud_3d', False,
@@ -337,8 +338,32 @@ class CoverageDockExtras(QObject):
             button.setVisible(name in visible)
         if kind_value == 'point_cloud':
             self._tools_enabled_by_action()
+        if kind_value == 'raster':
+            self._guarded(self._watch_panel)
         self._refresh_icons()
         self._guarded(self._set_kind_icons, kind_value)
+
+    def _watch_panel(self) -> None:
+        """Keep the tools in step with the quantity the range applies to (connected once)."""
+        panel = self._controller._raster_panel
+        if panel is not None and getattr(self, '_watched_panel', None) is not panel:
+            panel.selectionChanged.connect(self._sync_derivative_tools)
+            self._watched_panel = panel  # a panel rebuilt after a teardown is watched again
+        self._sync_derivative_tools()
+
+    def _sync_derivative_tools(self, *_args) -> None:
+        """The style link cannot follow a slope or an aspect: the button is off while the range applies to one."""
+        panel = self._controller._raster_panel
+        button = self._tools.get('pushButton_checkable_exploring_raster_link')
+        if panel is None or button is None:
+            return
+        terrain = panel.current_derivative().is_terrain
+        if terrain and button.isChecked():
+            button.setChecked(False)  # runs the toggled slot: the style is given back
+        button.setEnabled(not terrain)
+        button.setToolTip(
+            self.tr("The style link follows pixel values: not available while the range applies to a slope, "
+                    "aspect, hillshade or roughness") if terrain else self._link_tip)
 
     def show_vector(self, layer: Any = None) -> None:
         """Vector layer: its card, no kind tool, vector buttons back (no card without a layer: it was removed)."""
@@ -583,10 +608,14 @@ class CoverageDockExtras(QObject):
                 # again when a filter / undo changed the source.
                 self._hover_base, self._hover_base_key = controller._base_raster(layer), key
             values = identify_values(self._hover_base, layer_point)
+            derived = None
+            if panel.current_derivative().is_terrain:
+                terrain = controller._terrain_at(self._hover_base, layer_point)
+                derived = terrain.get(panel.current_derivative())
         except Exception as exc:
             logger.debug(f"[FM5] value under the cursor unreadable: {exc}")
             return
-        panel.set_hover_value(layer_point.x(), layer_point.y(), values.get(panel.current_band()))
+        panel.set_hover_value(layer_point.x(), layer_point.y(), values.get(panel.current_band()), derived)
 
     # === Raster: range linked to the layer style ===
 
@@ -741,6 +770,14 @@ class CoverageDockExtras(QObject):
                 return
             base = controller._base_raster(layer)
             band = panel.current_band()
+            if panel.current_derivative().is_terrain:
+                from ...adapters.qgis.coverage_layers.raster_adapter import derivative_zone_statistics
+                found = derivative_zone_statistics(base, band, rect, panel.current_derivative(), ZONE_SAMPLE_SIZE)
+                if found is None:
+                    panel.set_zone_statistics(None, None)
+                else:
+                    panel.set_zone_statistics(*found)
+                return
             stats = base.dataProvider().bandStatistics(band, _all_stats(), rect, ZONE_SAMPLE_SIZE)
         except Exception as exc:
             logger.debug(f"[FM5] statistics of the rectangle unreadable: {exc}")

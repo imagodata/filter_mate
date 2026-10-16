@@ -261,6 +261,70 @@ def derived_array(array, derivative: RasterDerivative, extent: QgsRectangle, kin
     return derive(array, derivative, size_x, size_y)
 
 
+_PICKED_DERIVATIVES = (RasterDerivative.SLOPE_DEGREES, RasterDerivative.SLOPE_PERCENT, RasterDerivative.ASPECT,
+                       RasterDerivative.HILLSHADE, RasterDerivative.ROUGHNESS)
+
+
+def terrain_values_at(layer: QgsRasterLayer, point: QgsPointXY, band: int) -> Dict[RasterDerivative, Optional[float]]:
+    """Slope, aspect, hillshade and roughness of the pixel under ``point`` (layer CRS), the band read as a DTM.
+
+    Read on the 3 x 3 pixels around it at the native resolution; a pixel on the border
+    uses the window moved inside the raster. Empty when the point is outside the layer,
+    the raster is smaller than 3 x 3 pixels or the band cannot be read; a value is None
+    where it is undefined (NoData around, flat pixel has no aspect).
+    """
+    import math
+    extent = layer.extent()
+    width, height = layer.width(), layer.height()
+    if width < 3 or height < 3 or not extent.contains(point):
+        return {}
+    size_x, size_y = extent.width() / width, extent.height() / height
+    col = min(width - 1, max(0, int((point.x() - extent.xMinimum()) / size_x)))
+    row = min(height - 1, max(0, int((extent.yMaximum() - point.y()) / size_y)))
+    first_col = min(max(col - 1, 0), width - 3)
+    first_row = min(max(row - 1, 0), height - 3)
+    window = QgsRectangle(extent.xMinimum() + first_col * size_x, extent.yMaximum() - (first_row + 3) * size_y,
+                          extent.xMinimum() + (first_col + 3) * size_x, extent.yMaximum() - first_row * size_y)
+    try:
+        array = read_band_array(layer.dataProvider(), band, window, 3, 3)
+    except Exception as exc:
+        logger.debug(f"[FM5] terrain values not read: {exc}")
+        return {}
+    kind = crs_kind(layer.crs())
+    values: Dict[RasterDerivative, Optional[float]] = {}
+    for derivative in _PICKED_DERIVATIVES:
+        result = derived_array(array, derivative, window, kind)[row - first_row, col - first_col]
+        values[derivative] = float(result) if math.isfinite(result) else None
+    return values
+
+
+def derivative_zone_statistics(layer: QgsRasterLayer, band: int, rect: QgsRectangle, derivative: RasterDerivative,
+                               max_pixels: int = 250000):
+    """``(minimum, maximum, mean, count)`` of a terrain derivative over ``rect`` (layer CRS); None without a valid pixel.
+
+    The rectangle is read on its own pixels, so a pixel of its border sees an extrapolated
+    neighbourhood. ``count`` is the number of valid pixels of the grid read.
+    """
+    import numpy as np
+    extent = layer.extent()
+    rect = rect.intersect(extent)
+    if rect.isEmpty() or not layer.width() or not layer.height():
+        return None
+    native_x = max(1, int(round(rect.width() / (extent.width() / layer.width()))))
+    native_y = max(1, int(round(rect.height() / (extent.height() / layer.height()))))
+    width, height = _grid_for(rect, native_x, native_y, max_pixels)
+    try:
+        array = read_band_array(layer.dataProvider(), band, rect, width, height)
+        values = derived_array(array, derivative, rect, crs_kind(layer.crs()))
+    except Exception as exc:
+        logger.debug(f"[FM5] derivative zone statistics failed: {exc}")
+        return None
+    values = values[np.isfinite(values)]
+    if values.size == 0:
+        return None
+    return float(values.min()), float(values.max()), float(values.mean()), int(values.size)
+
+
 def derivative_histogram(layer: QgsRasterLayer, band: int, derivative: RasterDerivative, bins: int = 64,
                          max_pixels: int = 1000000) -> Tuple[List[int], float, float]:
     """Histogram of a terrain derivative of ``band``: ``(counts, minimum, maximum)``.

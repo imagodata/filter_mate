@@ -118,6 +118,8 @@ class CoverageModeController(BaseController):
         self._previous_map_tool: Any = None
         self._preview_base_subset: Optional[str] = None
         self._preview_active = False
+        self._mask_overlay = None  # veil of a terrain derivative preview (canvas item)
+        self._preview_surface = None
         self._histogram_cache: Dict[Tuple[str, int, str], Tuple[list, float, float]] = {}
         self._stats_watched: set = set()  # point cloud layer ids whose statistics signal is connected
         self._button_slots: List[Tuple[Any, Any]] = []
@@ -711,9 +713,12 @@ class CoverageModeController(BaseController):
         self._call(self._coverage_spin, 'setVisible', True)
         tips = {
             LayerKind.RASTER: {
-                'pushButton_exploring_identify': self.tr("Pixel picker: click on the map to read the value of every band (Ctrl+click extends the range)"),
-                'pushButton_exploring_zoom': self.tr("Zoom to the layer"),
-                'pushButton_checkable_exploring_selecting': self.tr("Preview: hide the pixels outside the selection"),
+                'pushButton_exploring_identify': self.tr("Pixel picker: click on the map to read the value of every band, "
+                                                         "and the slope, aspect... when the range applies to one "
+                                                         "(Ctrl+click extends the range)"),
+                'pushButton_exploring_zoom': self.tr("Zoom to the selected pixels (to the layer when nothing is selected)"),
+                'pushButton_checkable_exploring_selecting': self.tr("Preview: hide the pixels outside the selection "
+                                                                    "(a white veil for a slope, aspect...)"),
                 'pushButton_checkable_exploring_tracking': self.tr("Not used for raster layers"),
                 'pushButton_checkable_exploring_linking_widgets': self.tr("Not used for raster layers"),
                 'pushButton_exploring_reset_layer_properties': self.tr("Reset the raster selection"),
@@ -938,10 +943,43 @@ class CoverageModeController(BaseController):
             return
         from ...adapters.qgis.coverage_layers.raster_adapter import apply_selection_preview, clear_selection_preview
         selection = panel.selection()
+        if selection is not None and selection.derivative.is_terrain:
+            clear_selection_preview(layer)  # a value preview left from before the quantity changed
+            self._show_derivative_preview(layer, selection)
+            return
+        self._hide_derivative_preview()
         if selection is None:
             clear_selection_preview(layer)  # nothing selected: every pixel shows again
         else:
             apply_selection_preview(layer, selection)
+
+    def _show_derivative_preview(self, layer: Any, selection: Any) -> None:
+        """Veil the pixels a slope / aspect / ... selection drops (a canvas item, no layer is added)."""
+        iface = self._iface()
+        canvas = iface.mapCanvas() if iface is not None else None
+        if canvas is None:
+            return
+        try:
+            from ...adapters.qgis.coverage_layers.preview_overlay import DerivativeSurface, MaskOverlay
+            base = self._base_raster(layer)
+            key = (base.source(), selection.band, selection.derivative)
+            if self._preview_surface is None or self._preview_surface.key != key:
+                self._preview_surface = DerivativeSurface(base, selection.band, selection.derivative)
+            surface = self._preview_surface
+            if surface.crs_authid != canvas.mapSettings().destinationCrs().authid():
+                self._hide_derivative_preview()
+                iface.messageBar().pushInfo("FilterMate", self.tr(
+                    "The preview of a slope or aspect needs the map in the CRS of the raster ({0})").format(surface.crs_authid))
+                return
+            if self._mask_overlay is None:
+                self._mask_overlay = MaskOverlay(canvas)
+            self._mask_overlay.show(surface.veil(selection), surface.extent)
+        except Exception as exc:
+            logger.warning(f"[FM5] derivative preview failed: {exc}", exc_info=True)
+
+    def _hide_derivative_preview(self) -> None:
+        if self._mask_overlay is not None:
+            self._mask_overlay.hide()
 
     def _populate_point_cloud(self, layer: Any, keep_kept: bool = False) -> None:
         try:
@@ -1017,6 +1055,8 @@ class CoverageModeController(BaseController):
         change, on top of a filter just applied or an undo.
         """
         from ...core.domain.layer_kind import LayerKind
+        self._hide_derivative_preview()
+        self._preview_surface = None
         try:
             if self._kind is LayerKind.RASTER:
                 from ...adapters.qgis.coverage_layers.raster_adapter import clear_selection_preview
@@ -1214,11 +1254,21 @@ class CoverageModeController(BaseController):
         except Exception:
             layer_point = point
         try:
-            values = identify_values(self._base_raster(layer), layer_point)
+            base = self._base_raster(layer)
+            values = identify_values(base, layer_point)
+            terrain = self._terrain_at(base, layer_point)
         except RuntimeError as exc:
             logger.debug(f"[FM5] pixel not read, layer deleted: {exc}")
             return
-        self._raster_panel.set_pixel_values(layer_point.x(), layer_point.y(), values, extend)
+        self._raster_panel.set_pixel_values(layer_point.x(), layer_point.y(), values, extend, terrain)
+
+    def _terrain_at(self, base: Any, layer_point: Any) -> dict:
+        """Slope, aspect... under ``layer_point`` while the range applies to one; empty otherwise."""
+        panel = self._raster_panel
+        if panel is None or not panel.current_derivative().is_terrain:
+            return {}
+        from ...adapters.qgis.coverage_layers.raster_adapter import terrain_values_at
+        return terrain_values_at(base, layer_point, panel.current_band())
 
     # === FILTERING request ===
 

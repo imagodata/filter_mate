@@ -182,6 +182,13 @@ DERIVATIVE_SUFFIXES = {
 DERIVATIVE_DECIMALS = 2
 
 
+def format_derived_value(derivative: RasterDerivative, value: Optional[float], nodata_text: str = "NoData") -> str:
+    """Value of a terrain derivative with its unit (``"12.3 °"``), ``nodata_text`` for None."""
+    if value is None:
+        return nodata_text
+    return f"{float(value):.{DERIVATIVE_DECIMALS}f}{DERIVATIVE_SUFFIXES.get(derivative, '')}"
+
+
 def derivative_presets(derivative: RasterDerivative) -> List[Tuple[str, Bound, Bound]]:
     """Usual thresholds of a derivative: ``(key, low, high)``, ``None`` bound = open side.
 
@@ -330,8 +337,9 @@ class RasterExploringPanel(QWidget):
         self._decimals = FLOAT_DECIMALS
         self._coordinate_decimals = 2
         self._histograms: Dict[Tuple[int, RasterDerivative], Tuple[List[int], float, float]] = {}
-        self._last_pixel: Optional[Tuple[float, float, Dict[int, Optional[float]]]] = None
-        self._history: List[Tuple[float, float, Optional[float], int]] = []
+        self._last_pixel: Optional[Tuple[float, float, Dict[int, Optional[float]], Dict[RasterDerivative, Optional[float]]]] = None
+        # (x, y, band value, band, text of the derivative picked with it or None)
+        self._history: List[Tuple[float, float, Optional[float], int, Optional[str]]] = []
         self._switching_mode = False
         self._kept_ratio: Optional[float] = None
         self.setObjectName("widget_raster_exploring_panel")
@@ -603,8 +611,7 @@ class RasterExploringPanel(QWidget):
 
     def preview_enabled(self) -> bool:
         """Whether the map preview is asked for a mode it supports (range or classes)."""
-        return (self._preview_check.isChecked() and self._mode is not RasterSelectionMode.EXPRESSION
-                and not self.current_derivative().is_terrain)
+        return self._preview_check.isChecked() and self._mode is not RasterSelectionMode.EXPRESSION
 
     def set_preview_checked(self, checked: bool) -> None:
         """Check or uncheck the "Preview on the map" box (the dock button changed it). Does not emit."""
@@ -643,7 +650,8 @@ class RasterExploringPanel(QWidget):
         color = _STATUS_OK_COLOR if ok else _STATUS_ERROR_COLOR
         self._expression_status.setStyleSheet(f"color: {color};" if message else "")
 
-    def set_pixel_values(self, x: float, y: float, values: Dict[int, Optional[float]], extend: bool = False) -> None:
+    def set_pixel_values(self, x: float, y: float, values: Dict[int, Optional[float]], extend: bool = False,
+                         terrain: Optional[Dict[RasterDerivative, Optional[float]]] = None) -> None:
         """Show the values picked at ``(x, y)`` (one per band, None for NoData).
 
         Args:
@@ -651,32 +659,42 @@ class RasterExploringPanel(QWidget):
             y: Map ordinate of the click.
             values: Band number -> value.
             extend: Ctrl+click; in RANGE mode the range grows to contain the
-                value of the current band and ``selectionChanged`` is emitted.
+                picked value (the one of the quantity the range applies to) and
+                ``selectionChanged`` is emitted.
+            terrain: Slope, aspect... of the pixel, read when the range applies to one.
         """
         values = dict(values or {})
-        self._last_pixel = (float(x), float(y), values)
+        terrain = dict(terrain or {})
+        self._last_pixel = (float(x), float(y), values, terrain)
         band = self.current_band()
-        self._history = push_history(self._history, (float(x), float(y), values.get(band), band))
+        shown = None
+        if self._derivative.is_terrain:
+            shown = format_derived_value(self._derivative, terrain.get(self._derivative), self.tr("NoData"))
+        self._history = push_history(self._history, (float(x), float(y), values.get(band), band, shown))
         self._refresh_pixel_display()
         if hasattr(self._pixel_group, 'setCollapsed'):
             self._pixel_group.setCollapsed(False)
-        value = values.get(band)
-        if (extend and value is not None and self._mode is RasterSelectionMode.RANGE
-                and not self._derivative.is_terrain):
+        value = terrain.get(self._derivative) if self._derivative.is_terrain else values.get(band)
+        if extend and value is not None and self._mode is RasterSelectionMode.RANGE:
             self._set_range(*extend_range(self._low, self._high, value))
             self._emit_now()
 
-    def set_hover_value(self, x: Optional[float], y: Optional[float], value: Optional[float] = None) -> None:
-        """Show the current band value under the cursor; ``x`` None hides the line.
+    def set_hover_value(self, x: Optional[float], y: Optional[float], value: Optional[float] = None,
+                        derived: Optional[float] = None) -> None:
+        """Show the value under the cursor; ``x`` None hides the line.
 
-        Unlike :meth:`set_pixel_values`, nothing is added to the history.
+        The value is the one of the current band, or ``derived`` (slope, aspect...) when the range
+        applies to a terrain derivative. Unlike :meth:`set_pixel_values`, nothing is added to the history.
         """
         if x is None or y is None:
             self._hover_label.setVisible(False)
             self._hover_label.setText("")
             return
         digits = self._coordinate_decimals
-        text = format_pixel_value(value, self._decimals, self.tr("NoData"))
+        if self._derivative.is_terrain:
+            text = format_derived_value(self._derivative, derived, self.tr("NoData"))
+        else:
+            text = format_pixel_value(value, self._decimals, self.tr("NoData"))
         self._hover_label.setText(self.tr("Under the cursor: {0}  (X {1:.{3}f}  Y {2:.{3}f})").format(text, x, y, digits))
         if self._hover_label.isHidden():
             self._hover_label.setVisible(True)
@@ -686,7 +704,7 @@ class RasterExploringPanel(QWidget):
     def set_zone_statistics(self, minimum: Bound, maximum: Bound, mean: Bound = None,
                             count: Optional[int] = None) -> None:
         """Show the statistics of a drawn rectangle; ``minimum`` None says the zone holds no pixel."""
-        text = format_zone_statistics(minimum, maximum, mean, count, self._decimals)
+        text = format_zone_statistics(minimum, maximum, mean, count, self._range_decimals())
         self._zone_label.setText(self.tr("Zone: {0}").format(text or self.tr("no pixel")))
         self._zone_label.setVisible(True)
         if hasattr(self._pixel_group, 'setCollapsed'):
@@ -747,7 +765,7 @@ class RasterExploringPanel(QWidget):
                 item.setCheckState(Qt.CheckState.Checked if checked else Qt.CheckState.Unchecked)
         with _signals_blocked(self._expression_edit, self._preview_check):
             self._expression_edit.setText(parsed["expression"])
-            self._preview_check.setChecked(parsed["preview"] and not parsed["derivative"].is_terrain)
+            self._preview_check.setChecked(parsed["preview"])
         mode = parsed["mode"]
         if mode is RasterSelectionMode.CLASSES and not self._has_classes():
             mode = RasterSelectionMode.RANGE
@@ -878,6 +896,7 @@ class RasterExploringPanel(QWidget):
         self._set_derivative(derivative)
         self._apply_band()
         self._set_range(None, None)  # the old bounds were in another unit
+        self._refresh_pixel_display()
         self._zone_label.setVisible(False)
         self.bandChanged.emit(self.current_band())  # the controller then sends the histogram
         self._emit_now()
@@ -904,14 +923,8 @@ class RasterExploringPanel(QWidget):
         self._emit_now()
 
     def _update_mode_controls(self) -> None:
-        """Enable what makes sense for the quantity: a derivative has no preview, expression or classes."""
+        """Enable what makes sense for the quantity: a derivative has no raster calculator expression."""
         terrain = self._derivative.is_terrain
-        if terrain and self._preview_check.isChecked():
-            with _signals_blocked(self._preview_check):
-                self._preview_check.setChecked(False)  # nothing to show: no stale tick
-        self._preview_check.setEnabled(not terrain)
-        self._preview_check.setToolTip(
-            self.tr("The map preview is not available for slope, aspect, hillshade and roughness") if terrain else "")
         self._use_range_button.setEnabled(not terrain)
         self._derivative_combo.setEnabled(self._mode is RasterSelectionMode.RANGE)
 
@@ -997,9 +1010,14 @@ class RasterExploringPanel(QWidget):
             self._pixel_bands_label.setText("")
             self._pixel_history_label.setText("")
             return
-        x, y, values = self._last_pixel
+        x, y, values, terrain = self._last_pixel
         nodata = self.tr("NoData")
-        self._pixel_value_label.setText(format_pixel_value(values.get(self.current_band()), self._decimals, nodata))
+        if self._derivative.is_terrain:
+            # Picked while the range applied to the pixel value: no derivative read for this pixel.
+            self._pixel_value_label.setText(format_derived_value(self._derivative, terrain.get(self._derivative), nodata)
+                                            if terrain else "–")
+        else:
+            self._pixel_value_label.setText(format_pixel_value(values.get(self.current_band()), self._decimals, nodata))
         digits = self._coordinate_decimals
         self._pixel_coordinates_label.setText(f"X {x:.{digits}f} · Y {y:.{digits}f}")
         lines = []
@@ -1008,10 +1026,13 @@ class RasterExploringPanel(QWidget):
             decimals = decimals_for(info.data_type) if info is not None else FLOAT_DECIMALS
             name = f"{band} — {info.name}" if info is not None and info.name else str(band)
             lines.append(f"{name}: {format_pixel_value(values[band], decimals, nodata)}")
+        for derivative, value in terrain.items():
+            name = self._derivative_combo.itemText(max(0, self._derivative_combo.findData(derivative.value)))
+            lines.append(f"{name}: {format_derived_value(derivative, value, nodata)}")
         self._pixel_bands_label.setText("\n".join(lines))
         rows = []
-        for hx, hy, value, band in self._history:
+        for hx, hy, value, band, shown in self._history:
             info = self._band_info(band)
             decimals = decimals_for(info.data_type) if info is not None else FLOAT_DECIMALS
-            rows.append((f"{hx:.{digits}f} · {hy:.{digits}f}", format_pixel_value(value, decimals, nodata), band))
+            rows.append((f"{hx:.{digits}f} · {hy:.{digits}f}", shown or format_pixel_value(value, decimals, nodata), band))
         self._pixel_history_label.setText(history_html(rows, self.tr("LAST PICKS")))
