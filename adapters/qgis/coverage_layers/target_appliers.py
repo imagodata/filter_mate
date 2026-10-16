@@ -21,6 +21,7 @@ Target semantics (see ``core.domain.cross_filter``):
   derived COPC file written by PDAL (exact) or an X/Y expression (bbox mode).
 """
 import logging
+import math
 import os
 import time
 from typing import Callable, List, Optional
@@ -177,6 +178,9 @@ class TargetJob:
     # sources, exporters): released once the task is over, never left for the
     # interpreter shutdown (QGIS 3.44 crashed on exit when they outlived it).
     _QGIS_HANDLES = ('_source', '_unfiltered', '_base_layer', '_exporter', '_base_keepalive')
+    # QgsFeedback canceled with the task (set by CrossFilterTask), for the
+    # QGIS calls that cannot poll ``is_canceled``.
+    feedback = None
 
     def release(self) -> None:
         for name in self._QGIS_HANDLES:
@@ -448,12 +452,21 @@ class RasterTargetJob(TargetJob):
 
 # --- point cloud ------------------------------------------------------------
 
-def _bbox_expression(geometry: QgsGeometry, outside: bool) -> str:
+def _bound(value: float, decimals: int, upper: bool) -> str:
+    """``value`` written with ``decimals`` decimals, rounded outwards (a box never loses an edge point)."""
+    scale = 10 ** decimals
+    rounded = (math.ceil(value * scale) if upper else math.floor(value * scale)) / scale
+    return f"{rounded:.{decimals}f}"
+
+
+def _bbox_expression(geometry: QgsGeometry, outside: bool, geographic: bool = False) -> str:
     parts = [part for part in geometry.asGeometryCollection()] if geometry.isMultipart() else [geometry]
     boxes = [p.boundingBox() for p in parts if p is not None and not p.isEmpty()]
     if len(boxes) > MAX_BBOX_TERMS:
         boxes = [geometry.boundingBox()]
-    terms = [f"(X >= {b.xMinimum():.3f} AND X <= {b.xMaximum():.3f} AND Y >= {b.yMinimum():.3f} AND Y <= {b.yMaximum():.3f})"
+    decimals = 9 if geographic else 3  # 0.001 degree is about 111 m
+    terms = [f"(X >= {_bound(b.xMinimum(), decimals, False)} AND X <= {_bound(b.xMaximum(), decimals, True)} "
+             f"AND Y >= {_bound(b.yMinimum(), decimals, False)} AND Y <= {_bound(b.yMaximum(), decimals, True)})"
              for b in boxes]
     expression = " OR ".join(terms) if terms else "X < X"
     return f"NOT ({expression})" if outside else expression
@@ -476,16 +489,22 @@ class PointCloudTargetJob(TargetJob):
         self._geometry_wkt = ''
         self._side = CoverageSide.INSIDE
         self._extent = QgsRectangle(layer.extent())
+        self._unsupported = ''
         if self.before.derived:
             # Outside / empty areas are computed on the ORIGINAL extent: the
             # clip is applied to the original source, not to the derived one.
-            from qgis.core import QgsPointCloudLayer
-            base = QgsPointCloudLayer(self._base_source, f"{self.layer_name}_base", self._base_provider)
+            from .point_cloud_footprint import open_point_cloud
+            base = open_point_cloud(self._base_source, f"{self.layer_name}_base", self._base_provider)
             if base.isValid():
                 self._extent = QgsRectangle(base.extent())
         self._extent.grow(1.0)  # header rounding: keep the points on the edge
         self._exporter = None
         if self._mode == 'exact':
+            if self._base_provider == 'vpc':
+                # Neither PDAL (readers.las / copc / ept) nor the QGIS exporter
+                # (no index: it would crash) reads a virtual point cloud.
+                self._unsupported = "a virtual point cloud (VPC) cannot be clipped exactly (bbox clip mode only)"
+                return
             from . import pdal_cli
             self._use_pdal = pdal_cli.supports_copc() and self._pdal_readable(self._base_source)
             if not self._use_pdal:
@@ -502,9 +521,14 @@ class PointCloudTargetJob(TargetJob):
 
     def _prepare_exporter(self) -> None:
         """QgsPointCloudLayerExporter must be prepared on the main thread."""
-        from qgis.core import QgsPointCloudLayer, QgsPointCloudLayerExporter
-        base = QgsPointCloudLayer(self._base_source, f"{self.layer_name}_base", self._base_provider)
+        from qgis.core import QgsPointCloudLayerExporter
+        from .point_cloud_footprint import index_ready, open_point_cloud
+        base = open_point_cloud(self._base_source, f"{self.layer_name}_base", self._base_provider)
         if not base.isValid():
+            return
+        if not index_ready(base):
+            # The exporter reads the index without checking it (crash on a null one).
+            self._unsupported = "the point cloud has no index yet (LAS file being indexed): try again later"
             return
         self._base_layer = base  # keep alive while the task runs
         exporter = QgsPointCloudLayerExporter(base)
@@ -521,34 +545,47 @@ class PointCloudTargetJob(TargetJob):
             return
         geometry = self._target_geometry(source_geometry, source_crs, context)
         self._side = side
+        if side is CoverageSide.INSIDE and not geometry.isEmpty() and not _has_area(geometry):
+            # Same as the raster target: lines or points keep no point at all.
+            self.outcome.message = NO_AREA
+            return
         if self._mode == 'bbox':
             if geometry.isEmpty():
                 self._expression = 'X = X' if side is CoverageSide.OUTSIDE else 'X < X'
             else:
-                self._expression = _bbox_expression(geometry, side is CoverageSide.OUTSIDE)
+                self._expression = _bbox_expression(geometry, side is CoverageSide.OUTSIDE, self.crs.isGeographic())
             self.outcome.success = True
             self.outcome.elapsed = time.perf_counter() - self._started
+            return
+        if self._unsupported:
+            self.outcome.message = self._unsupported
             return
         # Like the raster target, the stored geometry is the area KEPT (outside
         # = extent minus the source geometry) and the clip always keeps the inside.
         if side is CoverageSide.OUTSIDE:
-            geometry = make_valid(QgsGeometry.fromRect(self._extent).difference(geometry))
+            geometry = _checked(QgsGeometry.fromRect(self._extent).difference(geometry), 'difference')
         geometry = _combine_geometry(self.before.geometry_wkt if self.before.derived else '', self.before.side,
                                      geometry, side, self.operator)
-        self._geometry_wkt = geometry.asWkt() if not geometry.isEmpty() else ''
+        # filters.crop takes polygons only: make_valid / an intersection can add lines and points.
+        polygon = _kept_area(geometry)
+        geometry = QgsGeometry.fromWkt(polygon) if polygon is not None else None
+        if geometry is None or not geometry.boundingBox().intersects(self._extent):
+            # Nothing kept. Stored, not left empty: an empty state would be
+            # dropped from the project and read as "no previous filter" by the next AND.
+            polygon, geometry = None, _nothing_kept(self._extent)
+        self._geometry_wkt = geometry.asWkt()
         if self._use_pdal:
-            self._compute_pdal(geometry, is_canceled)
+            self._compute_pdal(polygon, is_canceled)
         else:
             self._compute_exporter(geometry, is_canceled)
         self.outcome.elapsed = time.perf_counter() - self._started
 
-    def _compute_pdal(self, geometry: QgsGeometry, is_canceled) -> None:
+    def _compute_pdal(self, polygon: Optional[str], is_canceled) -> None:
+        """Clip with ``polygon`` (WKT), nothing kept when None."""
         from . import pdal_cli
         path = self._new_path('.copc.laz')
         reader = {"type": pdal_cli.reader_for(self._base_source), "filename": self._base_source}
         stages = [reader]
-        # filters.crop takes polygons only: make_valid / an intersection can add lines and points.
-        polygon = None if geometry.isEmpty() else polygonal_wkt(geometry.asWkt())
         if polygon is None:
             stages.append({"type": "filters.head", "count": 0})
         else:
@@ -556,7 +593,7 @@ class PointCloudTargetJob(TargetJob):
                 reader["polygon"] = polygon
             stages.append({"type": "filters.crop", "polygon": polygon})
         stages.append({"type": "writers.copc", "filename": path, "forward": "all", "extra_dims": "all",
-                       "a_srs": self.crs.authid() or self.crs.toWkt()})
+                       "a_srs": pdal_cli.srs_for(self.crs)})
         ok, message = pdal_cli.run_pipeline(stages, is_canceled=is_canceled)
         if not ok:
             self.outcome.message = f"pdal: {message}"
@@ -567,14 +604,16 @@ class PointCloudTargetJob(TargetJob):
 
     def _compute_exporter(self, geometry: QgsGeometry, is_canceled) -> None:
         if self._exporter is None:
-            self.outcome.message = 'point cloud cannot be clipped (no pdal and no exporter)'
+            self.outcome.message = self._unsupported or 'point cloud cannot be clipped (no pdal and no exporter)'
             return
-        if geometry.isEmpty():
-            # Nothing kept: a tiny polygon outside the extent (None would export everything).
-            ext = self._extent
-            geometry = QgsGeometry.fromRect(QgsRectangle(ext.xMinimum() - 2, ext.yMinimum() - 2, ext.xMinimum() - 1, ext.yMinimum() - 1))
+        # Nothing kept is a tiny polygon outside the extent here (None would export everything).
         self._exporter.setFilterGeometry(geometry.constGet().clone())
+        if self.feedback is not None:
+            self._exporter.setFeedback(self.feedback)
         self._exporter.doExport()
+        if is_canceled():
+            self.outcome.message = 'canceled'
+            return
         error = self._exporter.lastError()
         if error:
             self.outcome.message = f"export: {error}"

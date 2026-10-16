@@ -10,7 +10,7 @@ import logging
 import time
 from typing import Callable, List, Optional, Tuple
 
-from qgis.core import QgsProject, QgsTask
+from qgis.core import QgsFeedback, QgsProject, QgsTask
 
 from ....core.domain.filter_state import LayerSnapshot
 
@@ -32,6 +32,12 @@ class CrossFilterTask(QgsTask):
         self.changes: List[Tuple[LayerSnapshot, LayerSnapshot]] = []
         self.outcomes = []
         self.elapsed = 0.0
+        # Canceled with the task, for the QGIS calls that only take a feedback.
+        self.feedback = QgsFeedback()
+
+    def cancel(self) -> None:
+        self.feedback.cancel()
+        super().cancel()
 
     def run(self) -> bool:
         started = time.perf_counter()
@@ -54,6 +60,7 @@ class CrossFilterTask(QgsTask):
             for index, job in enumerate(self.target_jobs):
                 if self.isCanceled():
                     return False
+                job.feedback = self.feedback
                 if parts is not None and hasattr(job, 'source_parts'):
                     job.source_parts = parts
                 try:

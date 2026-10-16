@@ -233,24 +233,48 @@ class PointCloudSourceJob(SourceJob):
         if before is not None:
             # Snapshot taken before the controller applied the selection subset.
             self.before = before
-        # The task reads its own copy of the layer (same source, same subset):
-        # the live layer may change (preview, removal) while the task runs.
-        from qgis.core import QgsPointCloudLayer
-        copy = QgsPointCloudLayer(layer.source(), f"{layer.name()}_footprint", layer.providerType())
-        if copy.isValid():
-            copy.setSubsetString(layer.subsetString())
-            self._layer = copy
-        else:
-            self._layer = layer
         self._resolution = resolution
+        self._layer = None
+        self._error = ''
+        if layer.providerType() == 'vpc':
+            self._error = "a virtual point cloud (VPC) cannot be a source: its points are read tile by tile"
+            return
+        # The task reads its own copy of the layer (same source, same subset):
+        # the live layer may change (preview, removal) while the task runs, and
+        # it is never read from the task thread.
+        from .point_cloud_footprint import index_ready, open_point_cloud
+        copy = open_point_cloud(layer.source(), f"{layer.name()}_footprint", layer.providerType())
+        subset = layer.subsetString()
+        # Spelled in parentheses: QGIS caches the decoded blocks under the
+        # subset text, and the statistics task of the project layer may have
+        # cached unfiltered blocks under its spelling (see open_point_cloud).
+        # The line break keeps a final "--" comment out of the parenthesis.
+        self._subset = f"({subset}\n)" if subset else ''
+        if not copy.isValid() or not index_ready(copy):
+            self._error = "the point cloud could not be read (not indexed yet?)"
+        elif subset and not copy.setSubsetString(self._subset):
+            self._error = f"the selection was rejected by the point cloud: {subset[:120]}"
+        else:
+            self._layer = copy
 
     def _raw_geometry(self, is_canceled) -> QgsGeometry:
-        from .point_cloud_footprint import DEFAULT_POINTS_LIMIT, footprint_geometry
-        result = footprint_geometry(self._layer, self._resolution)
+        from .point_cloud_footprint import footprint_geometry, selection_check
+        if self._error:
+            self.message = self._error
+            return QgsGeometry()
+        try:
+            result = footprint_geometry(self._layer, self._resolution, is_canceled=is_canceled,
+                                        check=selection_check(self._subset))
+        except RuntimeError as exc:
+            self.message = str(exc)
+            return QgsGeometry()
+        if is_canceled():
+            self.message = 'canceled'
+            return QgsGeometry()
         self.details.update(points_read=result.points_read, cell_size=result.cell_size)
-        if result.points_read >= DEFAULT_POINTS_LIMIT:
+        if result.truncated:
             self.details['truncated'] = True
-            logger.warning(f"[FM5] footprint of '{self.layer_name}' read the maximum of {DEFAULT_POINTS_LIMIT} points: "
+            logger.warning(f"[FM5] footprint of '{self.layer_name}' read the maximum of {result.points_read} points: "
                            f"it may miss areas, use a coarser resolution")
         return result.geometry
 
