@@ -9,6 +9,7 @@ cannot be imported outside QGIS):
   favorites stored in the layer database (it deleted every .db / .sqlite file).
 """
 import ast
+import json
 import os
 import sqlite3
 import sys
@@ -132,6 +133,7 @@ def reset_env(tmp_path, monkeypatch):
     def init_env_vars():
         env_vars.update(PLUGIN_CONFIG_DIRECTORY=str(profile), CONFIG_JSON_PATH=str(profile / "config.json"),
                         DIR_CONFIG=str(plugin_dir / "config"))
+        env_vars["CONFIG_DATA"] = json.loads((profile / "config.json").read_text(encoding="utf-8"))
 
     def reset_config_to_default():
         Path(env_vars["CONFIG_JSON_PATH"]).write_text(
@@ -151,17 +153,33 @@ def reset_env(tmp_path, monkeypatch):
         monkeypatch.setitem(sys.modules, name, module)
     monkeypatch.setattr(sys.modules["qgis.PyQt.QtWidgets"], "QMessageBox", _MessageBox, raising=False)
 
-    namespace = _load(["reset_configuration", "tr"], {"__package__": _PKG, "os": os, "QCoreApplication": MagicMock()},
+    namespace = _load(["reset_configuration", "_adopt_reset_config", "tr"],
+                      {"__package__": _PKG, "os": os, "QCoreApplication": MagicMock()},
                       module_level=("LAYER_DATABASE_NAME", "_clear_layer_database"))
     plugin = _Plugin()
+    connection = object()
+    plugin.app = types.SimpleNamespace(dockwidget=types.SimpleNamespace(CONFIG_DATA={
+        "APP": {"user": True}, "CURRENT_PROJECT": {"OPTIONS": {"ACTIVE_POSTGRESQL": connection}}}))
     plugin.plugin_dir = str(plugin_dir)
     plugin.iface = MagicMock()
-    _bind(plugin, namespace, ["reset_configuration", "tr"])
-    return types.SimpleNamespace(plugin=plugin, profile=profile, shipped=shipped, namespace=namespace)
+    _bind(plugin, namespace, ["reset_configuration", "_adopt_reset_config", "tr"])
+    return types.SimpleNamespace(plugin=plugin, profile=profile, shipped=shipped, namespace=namespace,
+                                 connection=connection)
 
 
 @pytest.mark.unit
 class TestResetConfiguration:
+
+    def test_the_panel_config_takes_the_reset_values(self, reset_env):
+        """FilterMateApp.save_project_variables writes the panel's dict to config.json at the
+        end of every layer task: the old settings came back before the restart."""
+        live = reset_env.plugin.app.dockwidget.CONFIG_DATA
+
+        reset_env.plugin.reset_configuration()
+
+        assert live == {"APP": {"default": True},
+                        "CURRENT_PROJECT": {"OPTIONS": {"ACTIVE_POSTGRESQL": reset_env.connection}}}
+        assert reset_env.plugin.app.dockwidget.CONFIG_DATA is live
 
     def test_the_active_config_is_reset(self, reset_env):
         reset_env.plugin.reset_configuration()

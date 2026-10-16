@@ -1480,6 +1480,25 @@ class FilterMate:
 
     # --------------------------------------------------------------------------
 
+    def _adopt_reset_config(self, config_data):
+        """Give the panel's config dict the reset values, in place.
+
+        FilterMateApp.save_project_variables writes that dict to config.json at the end of
+        every layer task: without this, the old settings were written back before the
+        restart. CURRENT_PROJECT, the open project's state (live PostgreSQL connection),
+        is kept.
+        """
+        import copy
+        dockwidget = getattr(self.app, 'dockwidget', None) if self.app else None
+        live = getattr(dockwidget, 'CONFIG_DATA', None)
+        if not isinstance(live, dict) or not isinstance(config_data, dict) or live is config_data:
+            return
+        kept = {key: live[key] for key in ("CURRENT_PROJECT",) if key in live}
+        live.clear()
+        for key, value in config_data.items():
+            live[key] = kept.pop(key) if key in kept else copy.deepcopy(value)
+        live.update(kept)
+
     def reset_configuration(self):
         """Reset the configuration to default values and the layer database.
 
@@ -1532,6 +1551,7 @@ class FilterMate:
             # Re-initialize to get current paths
             try:
                 init_env_vars()
+                self._adopt_reset_config(ENV_VARS.get("CONFIG_DATA"))
                 plugin_config_dir = ENV_VARS.get("PLUGIN_CONFIG_DIRECTORY", "")
 
                 if plugin_config_dir and os.path.isdir(plugin_config_dir):
