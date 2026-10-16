@@ -25,14 +25,23 @@ from ..accessor import (
 
 router = APIRouter(prefix="/filters", tags=["filters"])
 
+# Field caps, below the 1 MiB body cap (server.BodySizeLimitMiddleware):
+# no single field may carry the whole body.
+_MAX_NAME = 1000          # layer names
+_MAX_EXPRESSION = 500_000  # subset strings (long IN lists stay possible)
+_MAX_LAYERS = 1000        # layers per request
+# Buffer bound, in layer units (metres for a geographic CRS): 10 000 km.
+_MAX_BUFFER = 1e7
+
 
 class ApplyFilterRequest(BaseModel):
-    layer_name: str = Field(..., min_length=1, description="Target QGIS layer name")
+    layer_name: str = Field(..., min_length=1, max_length=_MAX_NAME, description="Target QGIS layer name")
     expression: str = Field(
-        ..., min_length=1, description="QGIS filter expression to apply"
+        ..., min_length=1, max_length=_MAX_EXPRESSION, description="QGIS filter expression to apply"
     )
     source: str = Field(
         default="rest_api",
+        max_length=200,
         description=(
             "Free-text tag identifying the caller — surfaced in plugin "
             "logs / signals so end users can tell where a filter came from"
@@ -145,7 +154,7 @@ _OPERATORS = ("AND", "OR", "AND NOT")
 
 class RasterSelectionBody(BaseModel):
     """Pixels kept on a raster source (same rules as the EXPLORING raster panel)."""
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="forbid", allow_inf_nan=False)
 
     band: int = Field(default=1, ge=1, description="1-based band number")
     mode: Literal["range", "classes", "expression"] = Field(default="range")
@@ -171,7 +180,7 @@ class RasterSelectionBody(BaseModel):
 
 class PointCloudCriteriaBody(BaseModel):
     """Points kept on a point cloud (ASPRS classes, ranges, return number, expression)."""
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="forbid", allow_inf_nan=False)
 
     classes: List[int] = Field(default_factory=list, description="ASPRS classification codes kept")
     z_min: Optional[float] = None
@@ -196,9 +205,16 @@ class PointCloudCriteriaBody(BaseModel):
 
 
 class _RelationBody(BaseModel):
-    target_layers: List[str] = Field(..., min_length=1, description="Layers to filter: vector, raster or point cloud")
-    predicates: List[str] = Field(default_factory=lambda: ["Intersect"], description=f"Any of {', '.join(_PREDICATES)}")
-    buffer: float = Field(default=0.0, description="Buffer of the source geometry (source CRS units, metres for a geographic CRS)")
+    # NaN / Infinity (accepted by Python's JSON parser) are refused: NaN slips
+    # through every comparison and a buffer of Infinity covers everything.
+    model_config = ConfigDict(allow_inf_nan=False)
+
+    target_layers: List[str] = Field(..., min_length=1, max_length=_MAX_LAYERS,
+                                     description="Layers to filter: vector, raster or point cloud")
+    predicates: List[str] = Field(default_factory=lambda: ["Intersect"], max_length=len(_PREDICATES),
+                                  description=f"Any of {', '.join(_PREDICATES)}")
+    buffer: float = Field(default=0.0, ge=-_MAX_BUFFER, le=_MAX_BUFFER,
+                          description="Buffer of the source geometry (source CRS units, metres for a geographic CRS)")
     coverage_min: float = Field(default=0.0, ge=0.0, le=100.0, description="Minimum share of a polygon target inside the source (%)")
     operator: Optional[str] = Field(default=None, description="Combine with the targets' previous filter: AND, OR, AND NOT (null = replace)")
 
@@ -211,7 +227,8 @@ def _check_relation(payload: _RelationBody) -> None:
 
 
 class CrossFilterRequestBody(_RelationBody):
-    source_layer: str = Field(..., min_length=1, description="Source layer name: vector, raster or point cloud")
+    source_layer: str = Field(..., min_length=1, max_length=_MAX_NAME,
+                              description="Source layer: id or name, vector, raster or point cloud")
     selected_only: bool = Field(default=True, description="Vector source: use the selected features (all when none is selected)")
     raster_selection: Optional[RasterSelectionBody] = Field(
         default=None, description="Raster source (required): pixels kept")
@@ -257,7 +274,7 @@ def geometry_filter(payload: GeometryFilterRequestBody, request: Request) -> Cro
 
 
 class PointCloudFilterRequestBody(BaseModel):
-    layers: List[str] = Field(..., min_length=1, description="Point cloud layers (LiDAR tiles...)")
+    layers: List[str] = Field(..., min_length=1, max_length=_MAX_LAYERS, description="Point cloud layers (LiDAR tiles...)")
     criteria: PointCloudCriteriaBody
     operator: Optional[str] = Field(default=None, description="Combine with each layer's filter: AND, OR, AND NOT (null = replace)")
 
@@ -277,7 +294,7 @@ def point_cloud_filter(payload: PointCloudFilterRequestBody, request: Request) -
 
 
 class ClearFiltersRequestBody(BaseModel):
-    layers: List[str] = Field(..., min_length=1, description="Layers of any kind to unfilter")
+    layers: List[str] = Field(..., min_length=1, max_length=_MAX_LAYERS, description="Layers of any kind to unfilter")
 
 
 @router.post("/clear", response_model=OperationResult)

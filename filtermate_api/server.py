@@ -14,17 +14,20 @@ import logging
 import sys
 from contextlib import asynccontextmanager
 from pathlib import Path
-from typing import AsyncGenerator
+from typing import AsyncGenerator, Iterable, Optional
 
 from fastapi import FastAPI, Request, status
+from fastapi.encoders import jsonable_encoder
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.datastructures import Headers
+from starlette.types import ASGIApp, Receive, Scope, Send
 
 from . import __version__
 from .accessor import FilterMateAccessor, InMemoryAccessor
 from .auth import APIKeyMiddleware
-from .config import APIConfig
+from .config import _LOOPBACK_HOSTS, APIConfig
 from .routers import export as export_router
 from .routers import favorites as favorites_router
 from .routers import filters as filters_router
@@ -41,22 +44,15 @@ logger = logging.getLogger("filtermate_api")
 _DEFAULT_MAX_BODY_BYTES = 1 * 1024 * 1024
 
 
-class BodySizeLimitMiddleware(BaseHTTPMiddleware):
-    """Reject requests with ``Content-Length`` above the configured cap.
+class BodySizeLimitMiddleware:
+    """Reject request bodies over the configured cap with HTTP 413.
 
-    Compares against the declared ``Content-Length`` header — a hostile
-    caller can omit the header and stream chunked, but FastAPI's body
-    parsing then enforces the same ceiling implicitly via Pydantic's
-    ``max_length`` validators on the field shapes (``ApplyFilterRequest``
-    has ``min_length=1`` but no ``max_length`` today; if that becomes a
-    real attack surface we'll add it). Header-based rejection is the
-    cheap first wall — it stops well-behaved clients from accidentally
-    DoS-ing the QGIS process.
+    Pure ASGI: the declared ``Content-Length`` is checked first (cheap
+    wall for well-behaved clients), then the body is read here while the
+    bytes actually received are counted, so a chunked upload without
+    ``Content-Length`` hits the same ceiling. The body read (at most the
+    cap) is then replayed to the application.
     """
-
-    def __init__(self, app, max_body_bytes: int = _DEFAULT_MAX_BODY_BYTES) -> None:
-        super().__init__(app)
-        self._max_body_bytes = max_body_bytes
 
     # Newer Starlette renamed this constant to ``HTTP_413_CONTENT_TOO_LARGE``;
     # fall back to the legacy spelling so the middleware works against
@@ -65,22 +61,90 @@ class BodySizeLimitMiddleware(BaseHTTPMiddleware):
         status, "HTTP_413_CONTENT_TOO_LARGE", 413
     )
 
-    async def dispatch(self, request: Request, call_next):
-        content_length_raw = request.headers.get("content-length")
-        if content_length_raw:
-            try:
-                content_length = int(content_length_raw)
-            except ValueError:
-                content_length = 0
-            if content_length > self._max_body_bytes:
-                return JSONResponse(
-                    status_code=self._STATUS_413,
-                    content={
-                        "detail": "Request body too large",
-                        "max_bytes": self._max_body_bytes,
-                    },
-                )
-        return await call_next(request)
+    def __init__(self, app: ASGIApp, max_body_bytes: int = _DEFAULT_MAX_BODY_BYTES) -> None:
+        self.app = app
+        self._max_body_bytes = max_body_bytes
+
+    async def _reject(self, scope: Scope, receive: Receive, send: Send) -> None:
+        response = JSONResponse(
+            status_code=self._STATUS_413,
+            content={
+                "detail": "Request body too large",
+                "max_bytes": self._max_body_bytes,
+            },
+        )
+        await response(scope, receive, send)
+
+    async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
+        if scope["type"] != "http":
+            await self.app(scope, receive, send)
+            return
+        try:
+            declared = int(Headers(scope=scope).get("content-length") or 0)
+        except ValueError:
+            declared = 0  # not trusted: the bytes received are counted below
+        if declared > self._max_body_bytes:
+            await self._reject(scope, receive, send)
+            return
+
+        chunks = []
+        size = 0
+        while True:
+            message = await receive()
+            if message["type"] != "http.request":
+                return  # client gone before the end of the body
+            body = message.get("body", b"")
+            size += len(body)
+            if size > self._max_body_bytes:
+                await self._reject(scope, receive, send)
+                return
+            chunks.append(body)
+            if not message.get("more_body", False):
+                break
+
+        replayed = False
+
+        async def replay() -> dict:
+            nonlocal replayed
+            if not replayed:
+                replayed = True
+                return {"type": "http.request", "body": b"".join(chunks), "more_body": False}
+            return await receive()  # later calls wait for the disconnect, as usual
+
+        await self.app(scope, replay, send)
+
+
+def _host_name(value: str) -> str:
+    """Host of a ``Host`` header without its port (``[::1]:8000`` -> ``::1``)."""
+    value = (value or "").strip().lower()
+    if value.startswith("["):
+        end = value.find("]")
+        return value[1:end] if end > 0 else ""
+    if value.count(":") == 1:
+        return value.split(":", 1)[0]
+    return value  # no port, or a bare IPv6 address
+
+
+class LoopbackHostMiddleware:
+    """Refuse requests whose ``Host`` header is not a loopback name.
+
+    A loopback bind keeps other machines out, not web pages: through DNS
+    rebinding a hostile page gets its own host name resolved to 127.0.0.1
+    and talks to the API as a same-origin page, past CORS. Its requests
+    still carry that host name, so only ``127.0.0.1``, ``localhost`` and
+    ``::1`` (any port) are served.
+    """
+
+    def __init__(self, app: ASGIApp, allowed_hosts: Iterable[str] = _LOOPBACK_HOSTS) -> None:
+        self.app = app
+        self._allowed_hosts = frozenset(allowed_hosts)
+
+    async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
+        if scope["type"] == "http" and _host_name(Headers(scope=scope).get("host", "")) not in self._allowed_hosts:
+            response = JSONResponse(status_code=400, content={"detail": "Invalid host header"})
+            await response(scope, receive, send)
+            return
+        await self.app(scope, receive, send)
 
 
 def _configure_logging(level: str) -> None:
@@ -123,10 +187,10 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 
 
 def create_app(
-    config: APIConfig | None = None,
-    accessor: FilterMateAccessor | None = None,
+    config: Optional[APIConfig] = None,
+    accessor: Optional[FilterMateAccessor] = None,
     *,
-    allow_insecure: bool | None = None,
+    allow_insecure: Optional[bool] = None,
 ) -> FastAPI:
     """Factory that builds and returns a configured FastAPI application.
 
@@ -166,7 +230,33 @@ def create_app(
     app.state.config = config
     app.state.accessor = accessor
 
-    # --- CORS ---
+    # --- Middlewares ---
+    # Starlette runs the LAST added middleware first: they are added from
+    # the innermost to the outermost. Request path:
+    #   loopback Host check -> CORS -> API key -> body-size cap -> routes.
+
+    # Body-size cap (P1-API-HARDEN), innermost: unauthenticated callers are
+    # 401'd before their body is read. Override via
+    # FILTERMATE_API_MAX_BODY_BYTES.
+    import os as _os
+    try:
+        _max_body = int(
+            _os.environ.get("FILTERMATE_API_MAX_BODY_BYTES")
+            or _DEFAULT_MAX_BODY_BYTES
+        )
+    except ValueError:
+        _max_body = _DEFAULT_MAX_BODY_BYTES
+    app.add_middleware(BodySizeLimitMiddleware, max_body_bytes=_max_body)
+
+    # API key auth (#28). Always installed; no-op when api_key is None/empty
+    # so dev mode is still ergonomic.
+    app.add_middleware(APIKeyMiddleware, api_key_hash=config.api_key_hash)
+
+    # CORS, outside auth: CORSMiddleware answers browser pre-flights
+    # (OPTIONS) itself — browsers never attach X-API-Key to a pre-flight,
+    # so a 401 there would break every client — and adds its headers to
+    # the 401 responses so a browser client can read them. No origin is
+    # allowed unless configured (``cors_origins``).
     # Wildcard origin + credentials is forbidden by spec; browsers reject
     # it silently. Force-disable credentials when origin is "*" so the
     # middleware emits a coherent, browser-honoured policy instead of
@@ -186,26 +276,9 @@ def create_app(
         allow_headers=["*"],
     )
 
-    # --- API key auth (#28) ---
-    # Always installed; no-op when api_key is None/empty so dev mode is
-    # still ergonomic. Putting it AFTER CORS means CORS pre-flight (OPTIONS)
-    # responses don't carry an auth check — browsers refuse to attach the
-    # X-API-Key on the pre-flight, so a 401 there would silently break clients.
-    app.add_middleware(APIKeyMiddleware, api_key_hash=config.api_key_hash)
-
-    # --- Body-size cap (P1-API-HARDEN) ---
-    # Installed AFTER auth so unauthenticated callers are 401'd before
-    # we even read the Content-Length — keeps the cheap first wall in
-    # the right order. Override via FILTERMATE_API_MAX_BODY_BYTES.
-    import os as _os
-    try:
-        _max_body = int(
-            _os.environ.get("FILTERMATE_API_MAX_BODY_BYTES")
-            or _DEFAULT_MAX_BODY_BYTES
-        )
-    except ValueError:
-        _max_body = _DEFAULT_MAX_BODY_BYTES
-    app.add_middleware(BodySizeLimitMiddleware, max_body_bytes=_max_body)
+    # Loopback bind: refuse foreign Host headers (DNS rebinding), outermost.
+    if config.is_loopback_only:
+        app.add_middleware(LoopbackHostMiddleware)
 
     if not config.has_auth:
         logger.warning(
@@ -213,6 +286,15 @@ def create_app(
             "(allowed because host=%r is loopback-only).",
             config.host,
         )
+
+    # --- Validation errors ---
+    # FastAPI's default 422 echoes every rejected value back: a refused
+    # NaN / Infinity cannot even be encoded (500), and a refused 500 kB
+    # expression would come back whole. Keep where and why, not the value.
+    @app.exception_handler(RequestValidationError)
+    async def _validation_error(request: Request, exc: RequestValidationError) -> JSONResponse:
+        errors = [{key: error[key] for key in ("type", "loc", "msg") if key in error} for error in exc.errors()]
+        return JSONResponse(status_code=422, content={"detail": jsonable_encoder(errors)})
 
     # ------------------------------------------------------------------
     # Routes

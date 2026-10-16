@@ -6,6 +6,8 @@ Kept intentionally separate from the QGIS plugin config (config/config.py)
 which depends on QgsApplication and QgsProject.
 """
 
+from __future__ import annotations
+
 import hashlib
 import json
 import logging
@@ -58,7 +60,9 @@ class APIConfig:
     port: int = 8000
     debug: bool = False
     log_level: str = "info"
-    cors_origins: list[str] = field(default_factory=lambda: ["*"])
+    # No cross-origin access unless origins are listed: a web page the user
+    # visits must not be able to drive the QGIS session through the browser.
+    cors_origins: list[str] = field(default_factory=list)
     project_root: Path = _PROJECT_ROOT
     # Issue #28 — when set, every business request must carry an
     # ``X-API-Key`` header equal to this value. Empty/None ⇒ auth
@@ -97,9 +101,9 @@ class APIConfig:
             FILTERMATE_API_PORT     — bind port     (default 8000)
             FILTERMATE_API_DEBUG    — enable debug  (default false)
             FILTERMATE_API_LOG_LEVEL — uvicorn log level (default info)
-            FILTERMATE_API_CORS_ORIGINS — comma-separated origins (default *)
+            FILTERMATE_API_CORS_ORIGINS — comma-separated origins (default: none)
         """
-        cors_raw = os.getenv("FILTERMATE_API_CORS_ORIGINS", "*")
+        cors_raw = os.getenv("FILTERMATE_API_CORS_ORIGINS", "")
         cors_origins = [o.strip() for o in cors_raw.split(",") if o.strip()]
 
         return cls(
@@ -164,7 +168,7 @@ class APIConfig:
             port=api_section.get("port", 8000),
             debug=api_section.get("debug", False),
             log_level=api_section.get("log_level", "info"),
-            cors_origins=api_section.get("cors_origins", ["*"]),
+            cors_origins=api_section.get("cors_origins", []),
             api_key=api_key,
             api_key_hash=api_key_hash,
             **({"export_root": Path(api_section["export_root"])} if api_section.get("export_root") else {}),
@@ -217,16 +221,20 @@ class APIConfig:
     def validate(self, allow_insecure: bool | None = None) -> None:
         """Reject insecure deployments before the app boots.
 
-        Two combinations are remotely exploitable and refused:
+        Three combinations are remotely exploitable and refused:
 
         1. **Non-loopback bind without auth** — anything on the LAN can
            drive the QGIS session. CWE-306.
         2. **Non-loopback bind with wildcard CORS** — even with auth, a
            browser-driven CSRF can replay credentials when the user
            visits a hostile page. CWE-942.
+        3. **Wildcard CORS without auth, loopback included** — any web
+           page the user visits could read the project layers and apply
+           filters (raw SQL subsets on PostgreSQL) through the browser.
+           CWE-942.
 
         ``allow_insecure=True`` (or env ``FILTERMATE_API_ALLOW_INSECURE=1``)
-        bypasses both rules — for tests/CI only.
+        bypasses these rules — for tests/CI only.
         """
         if allow_insecure is None:
             allow_insecure = os.getenv(_INSECURE_OVERRIDE_ENV, "").lower() in (
@@ -249,4 +257,12 @@ class APIConfig:
                 f"Refusing to start: cors_origins={self.cors_origins!r} contains "
                 f"a wildcard on non-loopback host {self.host!r}. Specify explicit "
                 f"origins or set {_INSECURE_OVERRIDE_ENV}=1 to override (dev only)."
+            )
+
+        if self.has_wildcard_cors and not self.has_auth:
+            raise APIConfigError(
+                f"Refusing to start: cors_origins={self.cors_origins!r} contains "
+                f"a wildcard but api_key is unset — any web page could drive QGIS. "
+                f"Set FILTERMATE_API_KEY, list explicit origins, or set "
+                f"{_INSECURE_OVERRIDE_ENV}=1 to override (dev only)."
             )

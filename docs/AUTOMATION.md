@@ -155,6 +155,17 @@ Start the API from QGIS with a `QGISFilterMateAccessor` (see `filtermate_api/qgi
 `POST /export` only writes below the export root of the server (`FILTERMATE_API_EXPORT_ROOT`, or `API.export_root`
 in `config.json`; default: `<temp>/filtermate_exports_<user>`). Clients give a sub-folder name, never a path.
 
+Web pages the user visits must not drive QGIS through the browser:
+
+- **CORS is off by default**: no origin may call the API from a browser until it is listed in `API.cors_origins`
+  (`config.json`) or `FILTERMATE_API_CORS_ORIGINS` (comma-separated). `*` is refused without an API key.
+- **Loopback host names only**: bound to `127.0.0.1`, `localhost` or `::1`, the API answers only requests whose `Host`
+  is one of these names (any port), which defeats DNS rebinding. A reverse proxy in front must forward
+  `Host: 127.0.0.1`. Bound to another address, an API key is required.
+- **Limits**: request bodies over 1 MiB (`FILTERMATE_API_MAX_BODY_BYTES`) get 413, chunked or not; an expression is at
+  most 500 000 characters, a request at most 1 000 layers; NaN and Infinity are refused, a buffer is at most 10 000 000
+  units (10 000 km in metres) in absolute value. Validation errors (422) say where and why, without echoing the value.
+
 ```bash
 curl -s -X POST localhost:8000/filters/cross -H "X-API-Key: $KEY" -H "Content-Type: application/json" -d '{
   "source_layer": "lhd", "target_layers": ["batiment"], "predicates": ["Disjoint"],

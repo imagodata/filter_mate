@@ -76,7 +76,7 @@ def accessor(sample_layers, sample_favorites) -> InMemoryAccessor:
 
 @pytest.fixture
 def client(accessor) -> TestClient:
-    return TestClient(create_app(accessor=accessor))
+    return TestClient(create_app(accessor=accessor), base_url="http://127.0.0.1:8000")
 
 
 @pytest.fixture
@@ -88,6 +88,6 @@ def client_factory():
     """
     def _make(layers: list[LayerSummary] | None = None) -> TestClient:
         return TestClient(
-            create_app(accessor=InMemoryAccessor(layers=list(layers or [])))
+            create_app(accessor=InMemoryAccessor(layers=list(layers or []))), base_url="http://127.0.0.1:8000"
         )
     return _make

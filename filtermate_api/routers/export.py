@@ -22,7 +22,7 @@ _SUBFOLDER = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.-]{0,63}(/[A-Za-z0-9][A-Za-z0-
 
 
 class ExportRequestBody(BaseModel):
-    layers: List[str] = Field(..., min_length=1, description="Layers of any kind, exported as filtered now")
+    layers: List[str] = Field(..., min_length=1, max_length=1000, description="Layers of any kind, exported as filtered now")
     subfolder: str = Field(default="export", description="Sub-folder of the server export root (a/b allowed, no ..)")
     vector_format: Literal["GPKG", "GeoJSON", "ESRI Shapefile", "FlatGeobuf", "CSV"] = "GPKG"
     raster_format: Literal["COG", "GTiff"] = "COG"
@@ -32,7 +32,8 @@ class ExportRequestBody(BaseModel):
 
 def resolve_export_folder(root: Path, subfolder: str) -> Path:
     """Folder below ``root`` for ``subfolder``; ValueError when it would escape it."""
-    if not _SUBFOLDER.match(subfolder or "") or ".." in subfolder.split("/"):
+    # fullmatch: ``$`` alone would let a trailing newline through ("a\n").
+    if not _SUBFOLDER.fullmatch(subfolder or "") or ".." in subfolder.split("/"):
         raise ValueError("invalid subfolder")
     root = Path(root).resolve()
     folder = (root / subfolder).resolve()

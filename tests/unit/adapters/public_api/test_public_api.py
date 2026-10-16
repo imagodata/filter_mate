@@ -256,6 +256,23 @@ class TestFilterMatePublicAPIApplyFilter:
                 args = api.filter_applied.emit.call_args[0]
                 assert args[2] == "external"
 
+    def test_apply_filter_logs_a_clipped_expression(self, mock_plugin):
+        """A long expression (REST clients may send 500 kB) is clipped in the log."""
+        layer = _make_layer("communes", valid=True)
+        project = MagicMock()
+        project.mapLayersByName.return_value = [layer]
+        expression = "id IN (" + ",".join(str(i) for i in range(20000)) + ")"
+
+        with patch.object(_mod, "QgsProject") as mock_qgs, patch.object(_mod, "logger") as logger:
+            mock_qgs.instance.return_value = project
+            with patch.object(_mod, "QgsVectorLayer", new=type(layer)):
+                assert _make_api(mock_plugin).apply_filter("communes", expression) is True
+
+        logged = " ".join(str(call.args[0]) for call in logger.info.call_args_list)
+        assert expression not in logged
+        assert f"({len(expression)} chars)" in logged
+        assert len(logged) < 2000
+
 
 class TestFilterMatePublicAPIClearFilter:
     """Tests for clear_filter method."""
