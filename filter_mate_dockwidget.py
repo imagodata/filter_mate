@@ -6388,6 +6388,13 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
                 layer = self._determine_active_layer()
                 self._activate_layer_ui()
                 if layer: self._refresh_layer_specific_widgets(layer)
+                # FIX 2026-10-17: the "add_layers" task disconnected the widgets when it began. For a vector
+                # layer current_layer_changed reconnects the current-layer combo; for a raster / point cloud
+                # shown that chain does not run, and the combo stayed deaf to every later layer change.
+                self.manageSignal(["FILTERING", "CURRENT_LAYER"], 'connect', 'layerChanged')
+                # ...and the vector refresh above wrote a vector backend in the badge: the raster / point cloud
+                # shown gets its own back.
+                self._coverage_action('refresh')
                 # v4.0.4: Emit signal after PROJECT_LAYERS is fully populated
                 logger.info(f"Emitting projectLayersReady signal ({len(self.PROJECT_LAYERS)} layers)")
                 self.projectLayersReady.emit()

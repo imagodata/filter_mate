@@ -162,13 +162,14 @@ def card_html(name: str, kind_label: str, meta: str, color: str, square: bool) -
 
 
 # The rail keeps the shared EXPLORING buttons that matter most: pixel picker, zoom to the selection,
-# preview and reset. On top of them: the style link for a raster (no QGIS tool stretches the colours over
-# the selected range) and the class pipette for a point cloud (a click on the map checks the class of the
-# points there). The other tools (value under the cursor, statistics of a rectangle, elevation profile,
-# 3D view) are still implemented below but not put on the rail: the picker reads the value and QGIS has
-# its own statistics, profile and 3D tools. List a tool here to bring it back.
+# preview and reset. On top of them: the colour pipette (a selection tool, like the picker) and the style
+# link for a raster (no QGIS tool stretches the colours over the selected range), and the class pipette for
+# a point cloud (a click on the map checks the class of the points there). The other tools (value under the
+# cursor, statistics of a rectangle, elevation profile, 3D view) are still implemented below but not put on
+# the rail: the picker reads the value and QGIS has its own statistics, profile and 3D tools. List a tool
+# here to bring it back.
 RAIL_TOOLS = {
-    'raster': ('pushButton_checkable_exploring_raster_link',),
+    'raster': ('pushButton_checkable_exploring_raster_pipette', 'pushButton_checkable_exploring_raster_link'),
     'point_cloud': ('pushButton_checkable_exploring_point_cloud_pipette',),
 }
 _RAIL_TOOL_NAMES = frozenset(name for names in RAIL_TOOLS.values() for name in names)
@@ -274,6 +275,11 @@ class CoverageDockExtras(QObject):
             "Class pipette: click the map and the class of the points drawn there is checked. Ctrl+click adds "
             "another one")
         specs = (
+            ('pushButton_checkable_exploring_raster_pipette', True,
+             self.tr("Pipette: click the map and the pixels that look like the one you click are selected (a color "
+                     "on an image, a value on a DTM or an index, a class on a classified raster, with the tolerance "
+                     "of the panel). Ctrl+click adds another one"),
+             self._on_pipette_toggled),
             ('pushButton_checkable_exploring_raster_hover', True,
              self.tr("Value under the cursor: follow the pixel value (or the slope, aspect... the range applies to) "
                      "while moving over the map"),
@@ -321,6 +327,7 @@ class CoverageDockExtras(QObject):
         except ImportError:
             return
         bodies = {
+            'pushButton_checkable_exploring_raster_pipette': ICON_PIPETTE,
             'pushButton_checkable_exploring_raster_hover': ICON_HOVER,
             'pushButton_checkable_exploring_raster_zone': ICON_ZONE,
             'pushButton_checkable_exploring_raster_link': ICON_LINK_STYLE,
@@ -415,8 +422,9 @@ class CoverageDockExtras(QObject):
 
     def leave(self) -> None:
         """Stop the map interactions of the outgoing layer (hover, rectangle tool)."""
-        for name in ('pushButton_checkable_exploring_raster_hover', 'pushButton_checkable_exploring_raster_zone',
-                     'pushButton_checkable_exploring_raster_link', 'pushButton_checkable_exploring_point_cloud_pipette'):
+        for name in ('pushButton_checkable_exploring_raster_pipette', 'pushButton_checkable_exploring_raster_hover',
+                     'pushButton_checkable_exploring_raster_zone', 'pushButton_checkable_exploring_raster_link',
+                     'pushButton_checkable_exploring_point_cloud_pipette'):
             button = self._tools.get(name)
             if button is not None:
                 self._guarded(self._uncheck, button)
@@ -573,6 +581,19 @@ class CoverageDockExtras(QObject):
     def set_class_pipette_checked(self, checked: bool) -> None:
         """The class picker left the map: the pipette button follows without running its slot."""
         button = self._tools.get('pushButton_checkable_exploring_point_cloud_pipette')
+        if button is not None:
+            button.blockSignals(True)
+            button.setChecked(bool(checked))
+            button.blockSignals(False)
+
+    # === Raster: colour pipette ===
+
+    def _on_pipette_toggled(self, checked: bool) -> None:
+        self._controller._on_color_pick_toggled(checked)
+
+    def set_pipette_checked(self, checked: bool) -> None:
+        """The pixel picker left the map: the pipette button follows without running its slot."""
+        button = self._tools.get('pushButton_checkable_exploring_raster_pipette')
         if button is not None:
             button.blockSignals(True)
             button.setChecked(bool(checked))

@@ -108,9 +108,11 @@ class TestPointCloudCard:
 
 
 class TestTools:
-    def test_raster_rail_adds_the_style_link(self):
-        # Picker, zoom, preview and reset are the shared buttons; hover and statistics are off the rail.
-        assert extras.tools_for("raster") == ["pushButton_checkable_exploring_raster_link"]
+    def test_raster_rail_adds_the_pipette_and_the_style_link(self):
+        # Picker, zoom, preview and reset are the shared buttons; the pipette is a selection tool like the picker.
+        # Hover and statistics are off the rail.
+        assert extras.tools_for("raster") == ["pushButton_checkable_exploring_raster_pipette",
+                                              "pushButton_checkable_exploring_raster_link"]
 
     def test_point_cloud_rail_adds_the_class_pipette(self):
         # The elevation profile and the 3D view are the standard QGIS tools: not on the rail.

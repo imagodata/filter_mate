@@ -120,6 +120,7 @@ class CoverageModeController(BaseController):
         self._previous_class_map_tool: Any = None
         self._preview_base_subset: Optional[str] = None
         self._preview_active = False
+        self._color_pick = False  # the pipette: a click on the map picks a colour to select
         self._mask_overlay = None  # veil of a terrain derivative preview (canvas item)
         self._preview_surface = None
         self._histogram_cache: Dict[Tuple[str, int, str], Tuple[list, float, float]] = {}
@@ -1102,7 +1103,8 @@ class CoverageModeController(BaseController):
         """Run an EXPLORING button for the active coverage layer.
 
         Args:
-            action: ``identify``, ``zoom``, ``select``, ``deselect`` or ``reset``.
+            action: ``identify``, ``zoom``, ``select``, ``deselect``, ``reset`` or ``refresh`` (badge back
+                after a vector refresh of the dock).
 
         Returns:
             True when handled (the vector handler must stop).
@@ -1131,6 +1133,8 @@ class CoverageModeController(BaseController):
                 else:
                     self._stop_preview(layer)
                     self._refresh_canvas(layer)
+            elif action == 'refresh':
+                self._show_kind_badge(layer, self._kind)  # after a vector refresh of the dock (layers added)
             elif action == 'backend':
                 pass
             elif action == 'reset':
@@ -1223,8 +1227,25 @@ class CoverageModeController(BaseController):
         self._previous_map_tool = canvas.mapTool()
         canvas.setMapTool(self._pixel_tool)
 
+    def _on_color_pick_toggled(self, enabled: bool) -> None:
+        """The colour pipette of the panel: the pixel picker goes on the map (or leaves it) with it."""
+        self._color_pick = bool(enabled)
+        if self._raster_panel is not None:
+            self._raster_panel.show_pipette_active(self._color_pick)
+        iface = self._iface()
+        if iface is None:
+            return
+        on_map = self._pixel_tool is not None and iface.mapCanvas().mapTool() is self._pixel_tool
+        if enabled and not on_map:
+            self._toggle_pixel_tool()
+        elif not enabled and on_map:
+            self._deactivate_pixel_tool()
+
     def _show_picker_state(self, active: bool) -> None:
         """Pipette button held down and pixel group open while the picker is on the map."""
+        if not active and self._color_pick:
+            self._color_pick = False  # the picker was dropped (another tool, the rail button): the pipette goes off
+            self._extras_call('set_pipette_checked', False)
         try:
             button = getattr(self.dockwidget, 'pushButton_exploring_identify', None)
             if button is not None:
@@ -1334,7 +1355,10 @@ class CoverageModeController(BaseController):
         except RuntimeError as exc:
             logger.debug(f"[FM5] pixel not read, layer deleted: {exc}")
             return
-        self._raster_panel.set_pixel_values(layer_point.x(), layer_point.y(), values, extend, terrain)
+        # With the colour pipette Ctrl+click adds a colour: it does not extend the range.
+        self._raster_panel.set_pixel_values(layer_point.x(), layer_point.y(), values, extend and not self._color_pick, terrain)
+        if self._color_pick:
+            self._raster_panel.set_color_sample(values, extend, terrain)
 
     def _terrain_at(self, base: Any, layer_point: Any) -> dict:
         """Slope, aspect... under ``layer_point`` while the range applies to one; empty otherwise."""
