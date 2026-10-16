@@ -1,8 +1,12 @@
 # -*- coding: utf-8 -*-
 """
-BackendController: the dock state read again on a click.
+BackendController (FilterMate 5): the backend badge with raster / point cloud
+layers, and the dock state read again on a click.
 
-setup() now runs when the dock is built (the controller registry used to
+- ``_update_indicator_display`` called ``layer.featureCount()``, which raster /
+  point cloud layers lack: "delegate_update_backend_indicator failed:
+  'QgsRasterLayer' object has no attribute 'featureCount'" on every start.
+- setup() now runs when the dock is built (the controller registry used to
   stay empty): the first click on the badge no longer runs it lazily, so the
   click reads the dock's optimization settings itself.
 
@@ -44,6 +48,25 @@ class FakeVectorLayer:
 
     def featureCount(self):
         return self._features
+
+
+class FakeRasterLayer:
+    """No featureCount(), like QgsRasterLayer / QgsPointCloudLayer."""
+
+    def id(self):
+        return "dem"
+
+    def name(self):
+        return "dem"
+
+    def isValid(self):
+        return True
+
+    def providerType(self):
+        return "gdal"
+
+    def source(self):
+        return "/data/dem.tif"
 
 
 class BaseController:
@@ -94,6 +117,18 @@ def controller(backend_module):
     controller = backend_module.BackendController(dock)
     controller._indicator_label = MagicMock()
     return controller
+
+
+def test_raster_layer_badge_without_feature_count(controller):
+    controller.update_for_layer(FakeRasterLayer())
+    tooltip = controller._indicator_label.setToolTip.call_args[0][0]
+    assert "features" not in tooltip
+
+
+def test_vector_layer_badge_shows_the_feature_count(controller):
+    controller.update_for_layer(FakeVectorLayer(features=1234))
+    tooltip = controller._indicator_label.setToolTip.call_args[0][0]
+    assert "Layer: zones (1,234 features)" in tooltip
 
 
 def test_click_reads_the_optimization_settings_of_the_dock(controller):

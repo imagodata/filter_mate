@@ -9,6 +9,8 @@ Dock controllers across a close / reopen and an unload (FilterMate 5).
 - unload() removes and deletes the dock without a closeEvent: it tears the
   controllers down itself, before removeDockWidget, so the raster / point
   cloud controller disconnects from the project signals.
+- The type badge of a raster / point cloud current layer ("Raster · GDAL")
+  is not overwritten by a vector backend badge.
 
 The methods are extracted from filter_mate_dockwidget.py / filter_mate.py with
 ast (those modules cannot be imported outside QGIS).
@@ -27,6 +29,11 @@ _ROOT = Path(__file__).resolve().parents[2]
 class FakeVectorLayer:
     def id(self):
         return "zones"
+
+
+class FakeRasterLayer:
+    def id(self):
+        return "dem"
 
 
 def _extract(path, class_name, name, namespace):
@@ -58,6 +65,25 @@ def test_closing_the_dock_keeps_the_controllers():
     dock._controller_integration.on_dock_closed.assert_called_once_with()
     dock.closingPlugin.emit.assert_called_once_with()
     event.accept.assert_called_once_with()
+
+
+def test_raster_current_layer_keeps_its_kind_badge():
+    dock = _dock(FakeRasterLayer())
+    _dock_method("_update_backend_indicator")(dock, "gdal")
+    integration = dock._controller_integration
+    integration.delegate_coverage_kind_badge.assert_called_once_with()
+    integration.delegate_update_backend_indicator.assert_not_called()
+    dock.backend_indicator_label.setText.assert_not_called()
+
+
+def test_vector_current_layer_gets_the_backend_badge():
+    layer = FakeVectorLayer()
+    dock = _dock(layer)
+    dock._controller_integration.delegate_update_backend_indicator.return_value = True
+    _dock_method("_update_backend_indicator")(dock, "ogr")
+    integration = dock._controller_integration
+    integration.delegate_update_backend_indicator.assert_called_once_with(layer, None, None)
+    integration.delegate_coverage_kind_badge.assert_not_called()
 
 
 def test_unload_tears_the_controllers_down_before_removing_the_dock():

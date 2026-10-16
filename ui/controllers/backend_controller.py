@@ -620,7 +620,8 @@ class BackendController(BaseController):
 
         # Build tooltip with context
         tooltip = style['tooltip']
-        if layer:
+        # Raster / point cloud layers have no featureCount() (FilterMate 5).
+        if layer and isinstance(layer, QgsVectorLayer):
             feature_count = layer.featureCount()
             tooltip += f"\nLayer: {layer.name()} ({feature_count:,} features)"
         if is_forced:

@@ -1974,6 +1974,14 @@ class ControllerIntegration:
             logger.warning(f"delegate_coverage_exploring_action failed: {e}")
             return False
 
+    def delegate_coverage_kind_badge(self) -> bool:
+        """Show the kind badge ("Raster · GDAL") of the active raster / point cloud layer; True when shown."""
+        controller = self._point_cloud_ui_controller
+        if controller is None or controller.active_layer is None:
+            return False
+        controller._show_kind_badge(controller.active_layer, controller.active_kind)
+        return True
+
     def delegate_split_coverage_targets(self, layer_ids: list) -> tuple:
         """Split target ids into (vector ids, raster / point cloud ids)."""
         controller = self._point_cloud_ui_controller

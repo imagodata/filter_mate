@@ -6552,10 +6552,17 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         self._current_provider_type = provider_type
         self._current_postgresql_available = postgresql_connection_available
 
+        # FilterMate 5: a raster / point cloud current layer keeps its kind badge
+        # ("Raster · GDAL"); the backends shown below are vector ones.
+        layer = self.current_layer
+        if layer is not None and not isinstance(layer, QgsVectorLayer):
+            if self._controller_integration:
+                self._controller_integration.delegate_coverage_kind_badge()
+            return
+
         # Try delegation to BackendController first
         if self._controller_integration and self._controller_integration.backend_controller:
             # Use current_layer if available, otherwise create minimal layer context
-            layer = self.current_layer
             if layer and self._controller_integration.delegate_update_backend_indicator(layer, postgresql_connection_available, actual_backend):
                 return
 
