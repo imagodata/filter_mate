@@ -74,7 +74,7 @@ def apply(entries: List[Dict], service=None, project: Optional[QgsProject] = Non
     kind_of = kind_of or _kind
     from ....core.domain.cross_filter import CrossFilterRequest, TargetSpec
     from ....core.services.cross_filter_service import get_cross_filter_service
-    from .snapshots import registry, restore_snapshot, take_snapshot
+    from .snapshots import base_snapshot, registry, restore_snapshot, take_snapshot
     from .source_jobs import FixedGeometrySourceJob
     project = project or QgsProject.instance()
     service = service or get_cross_filter_service()
@@ -94,9 +94,7 @@ def apply(entries: List[Dict], service=None, project: Optional[QgsProject] = Non
         except TypeError:
             continue
         current = take_snapshot(layer, kind)
-        original = LayerSnapshot(layer.id(), kind.value, source=current.base_source, provider=current.base_provider,
-                                 subset=stored.subset if kind is LayerKind.POINT_CLOUD else '')
-        restore_snapshot(layer, original)
+        restore_snapshot(layer, base_snapshot(current, stored.subset if kind is LayerKind.POINT_CLOUD else ''))
         if stored.derived and stored.selection and not stored.geometry_wkt:
             from .source_jobs import apply_stored_selection
             apply_stored_selection(layer, stored)
