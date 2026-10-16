@@ -48,7 +48,14 @@ from ....core.domain.filter_state import LayerSnapshot
 from ....core.domain.layer_kind import LayerKind
 from . import cache
 from .gdal_warp import gdal_warp, polygonal_wkt
-from .geometry_tools import make_valid, prepared_engine, target_matches, transform_geometry
+from .geometry_tools import (
+    WHOLE_SOURCE_METHODS,
+    SourceParts,
+    make_valid,
+    prepared_engine,
+    target_matches,
+    transform_geometry,
+)
 from .snapshots import registry, take_snapshot
 
 logger = logging.getLogger(__name__)
@@ -159,6 +166,8 @@ class VectorTargetJob(TargetJob):
     """Keep the features of a vector target that satisfy the predicates."""
 
     kind = LayerKind.VECTOR
+    # The selected features of a vector source, buffered (set by CrossFilterTask).
+    source_parts: Optional[List[QgsGeometry]] = None
 
     def __init__(self, layer: QgsVectorLayer, operator: Optional[str]) -> None:
         super().__init__(layer, operator)
@@ -219,6 +228,14 @@ class VectorTargetJob(TargetJob):
             return
         geometry = self._target_geometry(source_geometry, source_crs, context)
         methods = request.methods
+        # Intersects / disjoint are tested against the union of the source,
+        # the other predicates against each selected feature (vector source).
+        whole_methods = [m for m in methods if m in WHOLE_SOURCE_METHODS]
+        part_methods = [m for m in methods if m not in WHOLE_SOURCE_METHODS]
+        parts = None
+        if self.source_parts is not None and part_methods:
+            parts = SourceParts([self._target_geometry(part, source_crs, context) for part in self.source_parts])
+            methods = whole_methods
         needs_all = 'disjoint' in methods
         feature_request = QgsFeatureRequest()
         if not needs_all and not geometry.isEmpty():
@@ -228,7 +245,7 @@ class VectorTargetJob(TargetJob):
         else:
             feature_request.setSubsetOfAttributes([self._pk], self._source_fields())
         kept: List = []
-        engine = prepared_engine(geometry) if not geometry.isEmpty() else None
+        engine = prepared_engine(geometry) if methods and not geometry.isEmpty() else None
         coverage = float(request.coverage_min or 0.0) if self._is_polygon else 0.0
         for feature in self._source.getFeatures(feature_request):
             if is_canceled():
@@ -241,7 +258,9 @@ class VectorTargetJob(TargetJob):
                 matched = methods == ['disjoint']
             else:
                 matched = target_matches(engine, target_geometry, methods)
-            if matched and coverage > 0 and 'disjoint' not in methods:
+            if not matched and parts is not None:
+                matched = parts.matches(target_geometry, part_methods)
+            if matched and coverage > 0 and 'disjoint' not in request.methods:
                 matched = coverage_ratio_ok(target_geometry.area(), target_geometry.intersection(geometry).area(), coverage)
             if matched:
                 kept.append(feature.id() if self._raw_pk else feature.attribute(self._pk))

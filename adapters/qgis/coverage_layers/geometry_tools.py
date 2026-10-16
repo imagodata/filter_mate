@@ -152,6 +152,12 @@ def mask_to_geometry(mask, geotransform: Tuple[float, float, float, float, float
     return result
 
 
+# Predicates a target can test against the union of the source features:
+# intersecting the union is intersecting one of them, being disjoint from it
+# is being disjoint from all of them. The others hold when ONE source feature
+# satisfies them (see SourceParts).
+WHOLE_SOURCE_METHODS = ('intersects', 'disjoint')
+
 # QgsGeometryEngine methods to call on the *source* engine for a predicate
 # expressed on the *target* (target.contains(source) == source.within(target)).
 _ENGINE_METHOD_FOR_TARGET_METHOD = {
@@ -184,3 +190,24 @@ def target_matches(engine, target_geometry: QgsGeometry, methods: Sequence[str])
         except Exception as exc:  # invalid target geometry
             logger.debug(f"[FM5] predicate {method} failed on a target geometry: {exc}")
     return False
+
+
+class SourceParts:
+    """Source features tested one by one: ``target.<method>(feature)`` for at least one of them."""
+
+    def __init__(self, parts: Sequence[QgsGeometry]) -> None:
+        from qgis.core import QgsSpatialIndex
+        self._engines = []
+        self._index = QgsSpatialIndex()
+        for part in parts:
+            if part is None or part.isEmpty():
+                continue
+            self._index.addFeature(len(self._engines), part.boundingBox())
+            self._engines.append(prepared_engine(part))
+
+    def matches(self, target_geometry: QgsGeometry, methods: Sequence[str]) -> bool:
+        """True when one source feature whose box meets the target's satisfies one of ``methods``."""
+        for number in self._index.intersects(target_geometry.boundingBox()):
+            if target_matches(self._engines[number], target_geometry, methods):
+                return True
+        return False

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""FilterMate 5 vector targets: the features a previous subset hides, memory layers."""
+"""FilterMate 5 vector targets: the features a previous subset hides, memory layers, per-feature predicates."""
 import importlib.util
 import pathlib
 import sys
@@ -249,3 +249,70 @@ class TestMemoryLayer:
         assert layer.provider.calls == [('blockSignals', True), ('setSubsetString', ''),
                                         ('setSubsetString', 'ids:4'), ('blockSignals', False)]
 
+
+# Buildings: one in east_a, one in west_a, one in no zone.
+BUILDINGS = [(710, 410, 720, 420), (110, 410, 120, 420), (300, 300, 310, 310)]
+
+
+class FakeSourceLayer(FakeVectorLayer):
+    def __init__(self):
+        super().__init__('/data/buildings.gpkg|layername=b', name='buildings', features={})
+
+
+def _task_kept(predicates, buffer=0.0, buildings=BUILDINGS):
+    """Vector source (three buildings) -> zones, through the task as the API runs it."""
+    source = source_jobs.VectorSourceJob(FakeSourceLayer(), [FakeFeature(i, _box(*b)) for i, b in enumerate(buildings)])
+    layer = _zones()
+    job = appliers.VectorTargetJob(layer, None)
+    request = _request(*predicates, buffer=buffer)
+    task = task_module.CrossFilterTask('t', request, source, [job])
+    task.isCanceled = lambda: False
+    assert task.run(), task.error
+    assert job.outcome.success, job.outcome.message
+    return _kept(job)
+
+
+class TestPredicatesPerSourceFeature:
+    """Like native:selectbylocation and the dock's OGR backend: at least one selected feature."""
+
+    def test_contains_one_of_the_selected_features(self, engine):
+        assert _task_kept(('Contain',)) == ['east_a', 'west_a']
+
+    def test_contains_with_a_buffer(self, engine):
+        assert _task_kept(('Contain',), buffer=1.0) == ['east_a', 'west_a']
+
+    def test_disjoint_from_every_selected_feature(self, engine):
+        assert _task_kept(('Disjoint',)) == ['east_b', 'straddle', 'west_b']
+
+    def test_intersect_and_contain_together(self, engine):
+        assert _task_kept(('Intersect', 'Contain')) == ['east_a', 'west_a']
+
+    def test_one_feature_needs_no_parts(self, engine):
+        source = source_jobs.VectorSourceJob(FakeSourceLayer(), [FakeFeature(0, _box(*BUILDINGS[0]))])
+        source.compute(_request('Contain'), lambda: False)
+        assert source.parts(_request('Contain')) is None
+
+    def test_intersect_alone_uses_the_union(self, engine):
+        source = source_jobs.VectorSourceJob(FakeSourceLayer(), [FakeFeature(i, _box(*b)) for i, b in enumerate(BUILDINGS)])
+        source.compute(_request('Intersect'), lambda: False)
+        assert source.parts(_request('Intersect')) is None
+
+    def test_parts_only_for_vector_targets(self, engine, monkeypatch):
+        """Vector source -> raster / point cloud targets (the dock): the features are not buffered one by one."""
+        source = source_jobs.VectorSourceJob(FakeSourceLayer(), [FakeFeature(i, _box(*b)) for i, b in enumerate(BUILDINGS)])
+        monkeypatch.setattr(source, 'parts', lambda request: pytest.fail("parts built without a vector target"))
+
+        class RasterJob:
+            layer_name = 'dem'
+
+            def compute(self, *args):
+                pass
+
+        task = task_module.CrossFilterTask('t', _request('Contain'), source, [RasterJob()])
+        task.isCanceled = lambda: False
+        assert task.run()
+
+    def test_every_feature_erased_by_the_buffer_matches_nothing(self, engine):
+        """A negative buffer erasing each building, not their union: Contain keeps nothing (no silent union test)."""
+        block = [(710, 410, 720, 420), (720, 410, 730, 420), (710, 420, 720, 430), (720, 420, 730, 430)]
+        assert _task_kept(('Contain',), buffer=-6.0, buildings=block) == []

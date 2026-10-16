@@ -46,10 +46,16 @@ class CrossFilterTask(QgsTask):
             if geometry.isEmpty() and self.target_jobs:
                 self.error = 'the selection is empty: nothing to relate to the target layers'
                 return False
+            # The selected features of a vector source, apart, for the vector targets only.
+            parts = None
+            if callable(getattr(self.source_job, 'parts', None)) and any(hasattr(j, 'source_parts') for j in self.target_jobs):
+                parts = self.source_job.parts(self.request)
             total = max(1, len(self.target_jobs))
             for index, job in enumerate(self.target_jobs):
                 if self.isCanceled():
                     return False
+                if parts is not None and hasattr(job, 'source_parts'):
+                    job.source_parts = parts
                 try:
                     job.compute(geometry, self.source_job.crs, self.transform_context, self.request, self.isCanceled)
                 except Exception as exc:  # one target must not stop the others

@@ -21,7 +21,7 @@ from qgis.core import QgsCoordinateReferenceSystem, QgsCoordinateTransformContex
 from ....core.domain.filter_state import LayerSnapshot
 from ....core.domain.layer_kind import LayerKind
 from ....core.domain.raster_filter_criteria import RasterSelection, RasterSelectionMode
-from .geometry_tools import buffer_geometry, transform_geometry, union_geometries
+from .geometry_tools import WHOLE_SOURCE_METHODS, buffer_geometry, make_valid, transform_geometry, union_geometries
 from .snapshots import registry, swap_source, take_snapshot
 
 logger = logging.getLogger(__name__)
@@ -51,11 +51,14 @@ class SourceJob:
         self.elapsed = time.perf_counter() - started
         return self.geometry
 
-    def _buffer(self, raw: QgsGeometry, request) -> QgsGeometry:
-        """Buffer in metres like the vector engine, even for a geographic source CRS."""
+    def _buffer(self, raw: QgsGeometry, request, around: Optional[QgsGeometry] = None) -> QgsGeometry:
+        """Buffer in metres like the vector engine, even for a geographic source CRS.
+
+        ``around``: geometry whose centroid picks the UTM zone (default ``raw``).
+        """
         if not request.buffer_value or raw.isEmpty() or not self.crs.isGeographic():
             return buffer_geometry(raw, request.buffer_value, request.buffer_segments, request.buffer_type)
-        center = raw.centroid().asPoint()
+        center = (around if around is not None and not around.isEmpty() else raw).centroid().asPoint()
         zone = min(60, max(1, int((center.x() + 180.0) / 6.0) + 1))
         metric = QgsCoordinateReferenceSystem(f"EPSG:{(32600 if center.y() >= 0 else 32700) + zone}")
         context = QgsCoordinateTransformContext()
@@ -95,6 +98,20 @@ class VectorSourceJob(SourceJob):
             if geometry is not None and not geometry.isEmpty():
                 self._geometries.append(QgsGeometry(geometry))
         self.details['features'] = len(self._geometries)
+
+    def parts(self, request) -> Optional[List[QgsGeometry]]:
+        """The buffered selected features, for the vector targets (after :meth:`compute`); None when the union does.
+
+        Intersect and Disjoint are tested against the union; the other
+        predicates hold when ONE selected feature satisfies them
+        (native:selectbylocation), not their union: a parcel containing one
+        of three selected buildings is kept. A buffer can erase every
+        feature: an empty list then matches nothing.
+        """
+        if len(self._geometries) < 2 or all(m in WHOLE_SOURCE_METHODS for m in request.methods):
+            return None
+        parts = (make_valid(self._buffer(g, request, around=self.raw_geometry)) for g in self._geometries)
+        return [part for part in parts if not part.isEmpty()]
 
     def _raw_geometry(self, is_canceled) -> QgsGeometry:
         return union_geometries(self._geometries)

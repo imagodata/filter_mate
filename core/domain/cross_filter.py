@@ -24,7 +24,10 @@ from .layer_kind import LayerKind
 # UI labels of comboBox_filtering_geometric_predicates (filtering_controller.py)
 # mapped to the QgsGeometry / QgsGeometryEngine method that tests
 # ``target.<method>(source)``, the same orientation as native:selectbylocation
-# used by the OGR backend (INPUT = target, INTERSECT = source).
+# used by the OGR backend (INPUT = target, INTERSECT = source). Like that
+# algorithm, a vector target is kept when the predicate holds with at least
+# one selected feature of a vector source (Disjoint: disjoint from all); a
+# raster or point cloud source is a single geometry, the selected area.
 PREDICATE_METHODS = {
     "Intersect": "intersects",
     "Contain": "contains",
