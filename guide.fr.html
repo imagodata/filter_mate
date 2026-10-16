@@ -592,7 +592,13 @@ processing.run("filtermate:batch_filter", {
 
 <!-- 13 ----------------------------------------------------------------- -->
 <section id="raster-lidar">
-    <h2><span class="num">13</span>Rasters et nuages de points <small>(5.0)</small></h2>
+    <div class="band">
+        <video class="sheet-video" muted loop playsinline preload="none" poster="video/slope.webp" data-src="video/slope.mp4" aria-hidden="true"></video>
+        <div class="sheet-scrim"></div>
+        <h2><span class="num">13</span>Rasters et nuages de points <small>(5.0)</small></h2>
+        <button class="watch" type="button" data-watch aria-label="Regarder la vidéo: Rasters et nuages de points"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Regarder</button>
+        <p class="credit">LiDAR HD, BD TOPO® © IGN, Estavar (Pyrénées-Orientales).</p>
+    </div>
     <div class="callout tip"><p><strong>Nouveau dans la version 5.0.</strong> Les couches raster et nuage de points LiDAR sont des sources et des cibles à part entière. Les prérequis ne changent pas : QGIS 3.22 ou plus récent (nuages de points à partir de 3.26), Qt5 ou Qt6. PDAL 2.4 ou plus récent est facultatif (hauteur au-dessus d'un MNT, écriture directe de COPC).</p></div>
     <p>
         Le principe ne change pas : <strong>EXPLORING sélectionne</strong> sur la couche courante, <strong>FILTERING relie</strong> cette sélection aux couches à filtrer
@@ -619,8 +625,13 @@ processing.run("filtermate:batch_filter", {
     <ul>
         <li><strong>Classes</strong> ASPRS et LiDAR HD avec des préréglages (sol, végétation, bâtiments, sursol, eau, sans bruit).</li>
         <li><strong>Plages</strong> Z (au millimètre), intensité, retour ; <strong>hauteur au-dessus d'un MNT</strong> calculée avec PDAL.</li>
+        <li>Conditions enchaînées par AND / OR sur tout attribut, classification comprise : <code>Classification = 6</code> avec une hauteur au-dessus du MNT d’au moins 9 m garde les toits hauts (histoire 10).</li>
         <li>Option « appliquer aux autres dalles du jeu » pour les données livrées en dalles (LiDAR HD).</li>
     </ul>
+    <figure class="video-figure">
+        <button class="example-media" type="button" data-watch data-video="video/heights.mp4" data-poster="video/heights.webp" aria-label="Regarder l’exemple de hauteur du bâti"><img src="video/heights.webp" alt="Points LiDAR de bâtiment à plus de 9 m au-dessus du terrain et les bâtiments auxquels ils appartiennent" loading="lazy" width="1280" height="720"><span class="media-play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Regarder</span></button>
+        <figcaption>Source nuage de points : les points de bâtiment à plus de 9 m au-dessus du MNT (calculé avec PDAL) gardent les bâtiments les plus hauts.</figcaption>
+    </figure>
     <h3>Ce que deviennent les cibles</h3>
     <div class="table-wrap">
     <table>
@@ -632,12 +643,16 @@ processing.run("filtermate:batch_filter", {
         </tbody>
     </table>
     </div>
+    <figure class="video-figure">
+        <button class="example-media" type="button" data-watch data-video="video/survey.mp4" data-poster="video/survey.webp" aria-label="Regarder l’exemple de lot de relevé"><img src="video/survey.webp" alt="L’église et ses abords à 50 m découpent le modèle de terrain et le nuage de points, puis les deux sont exportés" loading="lazy" width="1280" height="720"><span class="media-play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Regarder</span></button>
+        <figcaption>Source vecteur, cibles raster et nuage de points : l’église et 50 m autour découpent les deux, puis EXPORTING les écrit dans un ZIP.</figcaption>
+    </figure>
     <h3>Neuf combinaisons</h3>
     <p>
         La source (la couche courante) et les cibles peuvent être de n'importe quel type : vecteur → vecteur, vecteur → raster, vecteur → nuage de points, raster → vecteur, raster → raster,
         raster → nuage de points, nuage de points → vecteur, nuage de points → raster et nuage de points → nuage de points. FILTERING garde sa forme : couches à filtrer, opérateurs de combinaison,
-        prédicats géométriques et tampon. Deux réglages sont nouveaux : la <strong>couverture minimale</strong> (%) des polygones par la géométrie source, et <strong>Disjoint</strong>,
-        qui garde ce qui se trouve à l'extérieur.
+        prédicats géométriques et tampon. Un réglage est nouveau : la <strong>couverture minimale</strong> (%) des polygones par la géométrie source. <strong>Disjoint</strong>,
+        déjà l'un des huit prédicats, garde ce qui se trouve à l'extérieur de la géométrie source, quel que soit le type de cible.
     </p>
     <div class="fig-row">
         <figure class="narrow">
@@ -683,7 +698,7 @@ processing.run("filtermate:batch_filter", {
     <div class="callout"><p><strong>PDAL.</strong> La hauteur au-dessus d'un MNT et l'écriture directe de fichiers COPC demandent PDAL 2.4 ou plus récent. Avec un PDAL plus ancien, les cibles nuage de points sont découpées par l'exporteur de QGIS, un export COPC écrit du LAZ avec un message, et la hauteur au-dessus d'un MNT est désactivée avec un message qui nomme la version.</p></div>
     <h3>Automatisation</h3>
     <p>
-        Sept algorithmes Processing (<code>cross_filter_from_raster</code>, <code>cross_filter_from_point_cloud</code>, <code>cross_filter_from_geometry</code>, <code>filter_point_cloud</code>,
+        Neuf algorithmes Processing (<code>batch_filter</code> et <code>cross_filter</code> hérités de la 4.x, <code>cross_filter_from_raster</code>, <code>cross_filter_from_point_cloud</code>, <code>cross_filter_from_geometry</code>, <code>filter_point_cloud</code>,
         <code>clear_filters</code>, <code>apply_favorite</code>, <code>export_filtered_layers</code>) et quatre modèles prêts à l'emploi (extraction par zone, végétation haute près de lignes,
         parcelles sur pente douce, bâtiments absents du LiDAR) s'exécutent depuis la boîte à outils, <code>qgis_process</code> (le plugin démarre sans fenêtre QGIS), Python et l'API REST.
         Voir <a href="https://github.com/imagodata/filter_mate/blob/main/docs/AUTOMATION.md" target="_blank" rel="noopener">docs/AUTOMATION.md</a>.

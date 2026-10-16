@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cas d'usage FilterMate — Huit besoins métier traduits en filtres QGIS</title>
-    <meta name="description" content="Huit cas d'usage FilterMate pas à pas sur la BD TOPO complète d'un département : dossier communal, proximité routière, cours d’eau, franchissements, végétation, hameaux éloignés, favoris, Processing. Captures QGIS à chaque étape et résultats chiffrés.">
+    <title>Cas d'usage FilterMate — Douze besoins métier traduits en filtres QGIS</title>
+    <meta name="description" content="Douze cas d'usage FilterMate pas à pas : huit sur la BD TOPO complète d'un département (dossier communal, proximité routière, cours d’eau, franchissements, végétation, hameaux éloignés, favoris, Processing) et quatre sur des rasters et des nuages de points LiDAR (pente, hauteur du bâti, élagage, lot de relevé). Captures QGIS à chaque étape et résultats chiffrés.">
     <meta name="keywords" content="QGIS, plugin, FilterMate, cas d'usage, tutoriel, filtre spatial, BD TOPO, GeoPackage, tampon, prédicat, favoris, Processing">
     <meta property="og:title" content="Cas d'usage FilterMate">
-    <meta property="og:description" content="Huit besoins métier, huit filtres : FilterMate pas à pas sur 1,17 million de bâtiments.">
+    <meta property="og:description" content="Douze besoins métier, douze filtres : FilterMate 5 pas à pas sur des vecteurs, des rasters et des nuages de points LiDAR.">
     <meta property="og:type" content="article">
     <meta property="og:url" content="https://imagodata.github.io/filter_mate/stories.fr.html">
     <link rel="alternate" hreflang="en" href="https://imagodata.github.io/filter_mate/stories.html">
@@ -53,7 +53,12 @@
         <li><a href="#s6"><span class="num">6</span>Les hameaux éloignés des routes revêtues</a></li>
         <li><a href="#s7"><span class="num">7</span>La bibliothèque de requêtes de l'équipe</a></li>
         <li><a href="#s8"><span class="num">8</span>Les objets modifiés depuis une date</a></li>
-        <li><a href="#replay"><span class="num">9</span>Rejouer ces histoires chez vous</a></li>
+        <li><a href="#estavar"><span class="num">⁂</span>Second terrain : Estavar</a></li>
+        <li><a href="#s9"><span class="num">9</span>Les parcelles en forte pente</a></li>
+        <li><a href="#s10"><span class="num">10</span>La hauteur du bâti, mesurée par le LiDAR</a></li>
+        <li><a href="#s11"><span class="num">11</span>Les routes à élaguer</a></li>
+        <li><a href="#s12"><span class="num">12</span>Le lot de relevé autour de l’église</a></li>
+        <li><a href="#replay"><span class="num">13</span>Rejouer ces histoires chez vous</a></li>
     </ol>
 </aside>
 
@@ -61,12 +66,12 @@
 <main class="content" id="main">
 
 <header class="hero">
-    <span class="section-label">Cas d'usage de FilterMate 4.9</span>
+    <span class="section-label">Cas d'usage de FilterMate 5</span>
     <div class="band band-hero">
         <video class="sheet-video" muted loop playsinline preload="none" poster="video/hero.webp" data-src="video/hero.mp4" aria-hidden="true"></video>
         <div class="sheet-scrim"></div>
-        <h1>Huit besoins métier, huit filtres</h1>
-        <button class="watch" type="button" data-watch aria-label="Regarder la vidéo: Huit besoins métier, huit filtres"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Regarder</button>
+        <h1>Douze besoins métier, douze filtres</h1>
+        <button class="watch" type="button" data-watch aria-label="Regarder la vidéo: Douze besoins métier, douze filtres"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Regarder</button>
         <p class="credit">BD TOPO® 3.5 © IGN, Haute-Garonne.</p>
     </div>
     <p class="lead">
@@ -83,6 +88,10 @@
         <a class="card story-card" href="#s6"><span class="story-card-media"><img src="video/hamlets.webp" alt="Hameaux à plus de 200 mètres des routes revêtues à Aspet" loading="lazy" width="1280" height="720"><b aria-hidden="true">06</b></span><div class="story-card-copy"><span class="badge">Secours</span><h4>Les hameaux éloignés des routes revêtues</h4><p>Disjoint trouve ce qui reste au-delà d'une zone de 200 m.</p><span class="story-outcome"><strong>22 hameaux</strong> au-delà de 200 m</span></div></a>
         <a class="card story-card" href="#s7"><span class="story-card-media"><img src="video/favorites.webp" alt="Un filtre enregistré puis rejoué depuis les favoris" loading="lazy" width="1280" height="720"><b aria-hidden="true">07</b></span><div class="story-card-copy"><span class="badge">Équipe</span><h4>La bibliothèque de requêtes</h4><p>Enregistrer, décrire, rejouer et partager un filtre complet.</p><span class="story-outcome">Même résultat · <strong>un clic</strong></span></div></a>
         <a class="card story-card" href="#s8"><span class="story-card-media"><img src="video/processing.webp" alt="Filtrage par lot depuis la boîte à outils Processing de QGIS" loading="lazy" width="1280" height="720"><b aria-hidden="true">08</b></span><div class="story-card-copy"><span class="badge">Administration SIG</span><h4>Les objets modifiés depuis une date</h4><p>Appliquer une expression de date à quatre couches depuis Processing.</p><span class="story-outcome"><strong>4 couches</strong> · 1,6 million d'objets</span></div></a>
+        <a class="card story-card" href="#s9"><span class="story-card-media"><img src="video/slope.webp" alt="Les parcelles en forte pente" loading="lazy" width="1280" height="720"><b aria-hidden="true">09</b></span><div class="story-card-copy"><span class="badge">Urbanisme</span><h4>Les parcelles en forte pente</h4><p>La pente calculée depuis le MNT, une plage sur l’histogramme, une couverture minimale.</p><span class="story-outcome"><strong>58 parcelles</strong> · pente ≥ 30 %</span></div></a>
+        <a class="card story-card" href="#s10"><span class="story-card-media"><img src="video/heights.webp" alt="La hauteur du bâti" loading="lazy" width="1280" height="720"><b aria-hidden="true">10</b></span><div class="story-card-copy"><span class="badge">Instruction</span><h4>La hauteur du bâti</h4><p>Classe bâtiment et hauteur au-dessus du MNT, calculée par PDAL.</p><span class="story-outcome"><strong>57 bâtiments</strong> au-dessus de 9 m</span></div></a>
+        <a class="card story-card" href="#s11"><span class="story-card-media"><img src="video/pruning.webp" alt="Les routes à élaguer" loading="lazy" width="1280" height="720"><b aria-hidden="true">11</b></span><div class="story-card-copy"><span class="badge">Voirie</span><h4>Les routes à élaguer</h4><p>Végétation haute de plus de 8 m, à 3 m des tronçons.</p><span class="story-outcome"><strong>91 tronçons</strong> sur 172</span></div></a>
+        <a class="card story-card" href="#s12"><span class="story-card-media"><img src="video/survey.webp" alt="Le lot de relevé autour de l’église" loading="lazy" width="1280" height="720"><b aria-hidden="true">12</b></span><div class="story-card-copy"><span class="badge">Patrimoine</span><h4>Le lot de relevé autour de l’église</h4><p>Un vecteur découpe un MNT et un nuage, puis tout part dans un ZIP.</p><span class="story-outcome">GeoTIFF + LAZ · <strong>ZIP</strong></span></div></a>
     </div>
 </header>
 
@@ -90,7 +99,7 @@
 <section id="data">
     <h2><span class="num">0</span>Le terrain de jeu</h2>
     <p>
-        Toutes les histoires utilisent le même fichier : la <strong>BD TOPO 3.5 de la Haute-Garonne</strong>, telle que l'IGN la diffuse
+        Les histoires 1 à 8 utilisent le même fichier : la <strong>BD TOPO 3.5 de la Haute-Garonne</strong>, telle que l'IGN la diffuse
         gratuitement sur la Géoplateforme, en un seul GeoPackage de 2,9 Go et 53 couches. Rien n'a été découpé au préalable :
         c'est FilterMate qui cadre le territoire à chaque fois.
     </p>
@@ -471,8 +480,152 @@ processing.run("filtermate:batch_filter", {
 </section>
 
 <!-- 9 ------------------------------------------------------------------ -->
+<!-- ===== ESTAVAR ===== -->
+<section id="estavar">
+    <h2><span class="num">⁂</span>Second terrain : raster et LiDAR à Estavar</h2>
+    <p>Les histoires 9 à 12 quittent la Haute-Garonne pour un kilomètre carré du village d’<strong>Estavar</strong>, en Cerdagne (Pyrénées-Orientales), où FilterMate 5 travaille sur des couches raster et nuage de points :</p>
+    <div class="table-wrap">
+    <table>
+        <thead><tr><th>Couche</th><th>Contenu</th><th>Source</th></tr></thead>
+        <tbody>
+            <tr><td><code>lhd</code></td><td>20 422 819 points classés (COPC)</td><td>LiDAR HD, dalles 0617_6152 et 0617_6153</td></tr>
+            <tr><td><code>mnt</code> · <code>pente</code></td><td>MNT au mètre interpolé des points sol ; pente en % pour le fond de carte</td><td>PDAL, <code>gdaldem slope -p</code></td></tr>
+            <tr><td><code>batiment</code> · <code>troncon_de_route</code></td><td>668 bâtiments, 172 tronçons</td><td>BD TOPO® (service WFS de l’IGN)</td></tr>
+            <tr><td><code>parcelle</code></td><td>1 763 parcelles de la commune</td><td>cadastre Etalab</td></tr>
+        </tbody>
+    </table>
+    </div>
+    <div class="callout"><strong>Lecture du nuage.</strong> L’empreinte d’une sélection de points est calculée sur une grille de 2 m, au niveau de détail du nuage qui lui correspond. Deux exécutions peuvent différer de quelques entités : les effectifs cités sont ceux des enregistrements.</div>
+    <p>À l’ouest de la fenêtre, de l’autre côté de la frontière, commence Llívia, l’enclave espagnole de Cerdagne : la BD TOPO et le LiDAR HD la couvrent, le cadastre français non. <code>scripts/site_videos.sh data</code> refait ces fichiers.</p>
+</section>
+<!-- 9 ------------------------------------------------------------------ -->
+<section id="s9">
+    <div class="band">
+        <video class="sheet-video" muted loop playsinline preload="none" poster="video/slope.webp" data-src="video/slope.mp4" aria-hidden="true"></video>
+        <div class="sheet-scrim"></div>
+        <h2><span class="num">9</span>Les parcelles en forte pente</h2>
+        <button class="watch" type="button" data-watch aria-label="Regarder la vidéo: Les parcelles en forte pente"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Regarder</button>
+        <p class="credit">LiDAR HD et BD TOPO® © IGN, cadastre Etalab, Estavar (Pyrénées-Orientales).</p>
+    </div>
+    <div class="story-brief">
+        <div><h4>Le besoin</h4><p>À la mairie d’<strong>Estavar</strong>, en Cerdagne, on révise le document d’urbanisme : quelles parcelles du village sont pour l’essentiel sur une pente de plus de 30 %, donc peu constructibles et exposées au ravinement ?</p></div>
+        <div><h4>La traduction FilterMate</h4><p>Couche <strong>mnt</strong> courante : EXPLORING montre ses outils raster. La liste <strong>Compute on</strong> passe sur <em>Slope (%)</em> : la pente est calculée à la volée sur le MNT, sans raster intermédiaire. La <strong>plage de valeurs</strong> 30 % → maximum, lue sur l’histogramme de la pente, devient la géométrie source. FILTERING garde les <em>parcelles</em> couvertes à au moins <strong>50 %</strong> par cette géométrie.</p></div>
+    </div>
+    <dl class="recipe"><div><dt>Source</dt><dd>MNT <code>mnt</code>, pente calculée (%)</dd></div><div><dt>Sélection</dt><dd>Plage de pente ≥ 30 %</dd></div><div><dt>Cibles</dt><dd><code>parcelle</code></dd></div><div><dt>Relation</dt><dd>Intersect, couverture ≥ 50 %</dd></div><div><dt>Résultat</dt><dd><strong>58</strong> parcelles</dd></div></dl>
+    <ol class="steps">
+        <li><strong>Calculer la pente.</strong> Cliquez sur <em>mnt</em> dans le panneau Couches, puis <strong>Compute on</strong> → <em>Slope (%)</em>. L’histogramme montre désormais la pente.
+            <figure><img src="img/stories/s9-01.webp" alt="Étape 1 : Compute on réglé sur Slope (%) pour le MNT" loading="lazy" width="1600" height="900"><figcaption>Étape 1. Pente, exposition, ombrage et rugosité sont calculés depuis le MNT.</figcaption></figure>
+        </li>
+        <li><strong>Choisir la plage.</strong> Cochez <strong>Value range</strong> et tapez 30 dans Min. La part des pixels retenus s’affiche sous l’histogramme : 12,9 %.
+            <figure><img src="img/stories/s9-02.webp" alt="Étape 2 : plage de pente de 30 % au maximum sur l’histogramme" loading="lazy" width="1600" height="900"><figcaption>Étape 2. La queue de l’histogramme : les versants raides. Le fond de carte montre la même pente, calculée par gdaldem.</figcaption></figure>
+        </li>
+        <li><strong>Relier aux parcelles.</strong> Cible <em>parcelle</em>, prédicat Intersect, <strong>cov. ≥ 50 %</strong> à côté des prédicats.
+            <figure><img src="img/stories/s9-03.webp" alt="Étape 3 : cible parcelle, Intersect et couverture minimale de 50 %" loading="lazy" width="1600" height="900"><figcaption>Étape 3. Sans couverture minimale, une parcelle effleurée par un talus compterait.</figcaption></figure>
+        </li>
+        <li><strong>Filter.</strong>
+            <figure><img src="img/stories/s9-04.webp" alt="Étape 4 : les parcelles en forte pente" loading="lazy" width="1600" height="900"><figcaption>Étape 4. 58 parcelles.</figcaption></figure>
+        </li>
+    </ol>
+    <h3>Résultat</h3>
+    <p><strong>58 parcelles</strong> du kilomètre carré ont au moins la moitié de leur surface sur une pente de plus de 30 %. Le même filtre avec un raster de pente précalculé (<code>gdaldem slope -p</code>) donne le même nombre.</p>
+    <div class="callout"><strong>Pente et risque.</strong> Une pente forte n’est pas une zone d’aléa : croisez avec les documents de prévention des risques avant toute décision.</div>
+</section>
+<!-- 10 ------------------------------------------------------------------ -->
+<section id="s10">
+    <div class="band">
+        <video class="sheet-video" muted loop playsinline preload="none" poster="video/heights.webp" data-src="video/heights.mp4" aria-hidden="true"></video>
+        <div class="sheet-scrim"></div>
+        <h2><span class="num">10</span>La hauteur du bâti, mesurée par le LiDAR</h2>
+        <button class="watch" type="button" data-watch aria-label="Regarder la vidéo: La hauteur du bâti, mesurée par le LiDAR"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Regarder</button>
+        <p class="credit">LiDAR HD et BD TOPO® © IGN, cadastre Etalab, Estavar (Pyrénées-Orientales).</p>
+    </div>
+    <div class="story-brief">
+        <div><h4>Le besoin</h4><p>Le règlement d’urbanisme limite la hauteur des constructions. Le service instructeur veut repérer les bâtiments du village qui dépassent <strong>9 m</strong> au-dessus du terrain naturel, mesurés et non déclarés.</p></div>
+        <div><h4>La traduction FilterMate</h4><p>Couche <strong>nuage de points</strong> courante. Dans ATTRIBUTES, une condition <code>Classification = 6</code> (bâtiment) et la <strong>hauteur au-dessus du MNT ≥ 9 m</strong>, calculée par PDAL au premier filtre. L’empreinte des points retenus est la géométrie source ; une couverture de 50 % écarte les voisins mitoyens.</p></div>
+    </div>
+    <dl class="recipe"><div><dt>Source</dt><dd>nuage LiDAR HD (COPC)</dd></div><div><dt>Sélection</dt><dd><code>Classification = 6</code> et hauteur ≥ 9 m</dd></div><div><dt>Cibles</dt><dd><code>batiment</code></dd></div><div><dt>Relation</dt><dd>Intersect, couverture ≥ 50 %</dd></div><div><dt>Résultat</dt><dd><strong>57</strong> bâtiments</dd></div></dl>
+    <ol class="steps">
+        <li><strong>Les points de bâtiment.</strong> Cliquez sur <em>lhd</em>, cochez ATTRIBUTES, <strong>+ Condition</strong>, puis Classification = 6. Le bouton œil les isole sur la carte.
+            <figure><img src="img/stories/s10-01.webp" alt="Étape 1 : condition Classification = 6 dans ATTRIBUTES" loading="lazy" width="1600" height="900"><figcaption>Étape 1. Les classes sont aussi des conditions : elles se combinent avec la hauteur.</figcaption></figure>
+        </li>
+        <li><strong>La hauteur.</strong> Cochez <em>Height above DTM ≥</em>, tapez 9 et choisissez le MNT <em>mnt</em>.
+            <figure><img src="img/stories/s10-02.webp" alt="Étape 2 : hauteur au-dessus du MNT supérieure ou égale à 9 m" loading="lazy" width="1600" height="900"><figcaption>Étape 2. PDAL calcule la hauteur au premier filtre, une fois pour la couche.</figcaption></figure>
+        </li>
+        <li><strong>Relier au bâti.</strong> Cible <em>batiment</em>, Intersect, cov. ≥ 50 %.
+            <figure><img src="img/stories/s10-03.webp" alt="Étape 3 : cible batiment, couverture minimale de 50 %" loading="lazy" width="1600" height="900"><figcaption>Étape 3.</figcaption></figure>
+        </li>
+        <li><strong>Filter.</strong> La hauteur est calculée en 75 s sur 20,4 millions de points, puis le filtre est immédiat.
+            <figure><img src="img/stories/s10-04.webp" alt="Étape 4 : les bâtiments de plus de 9 m" loading="lazy" width="1600" height="900"><figcaption>Étape 4. 57 bâtiments.</figcaption></figure>
+        </li>
+    </ol>
+    <h3>Résultat</h3>
+    <p><strong>57 bâtiments</strong> sur 668 ont au moins la moitié de leur emprise sous des points de toit à plus de 9 m. La BD TOPO en déclare 68 de 9 m ou plus : les écarts sont à vérifier sur place.</p>
+    <div class="callout"><strong>Terrain naturel.</strong> Le MNT est interpolé des points sol ; sur un terrain en pente, la hauteur mesurée côté aval est plus forte.</div>
+</section>
+<!-- 11 ------------------------------------------------------------------ -->
+<section id="s11">
+    <div class="band">
+        <video class="sheet-video" muted loop playsinline preload="none" poster="video/pruning.webp" data-src="video/pruning.mp4" aria-hidden="true"></video>
+        <div class="sheet-scrim"></div>
+        <h2><span class="num">11</span>Les routes à élaguer</h2>
+        <button class="watch" type="button" data-watch aria-label="Regarder la vidéo: Les routes à élaguer"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Regarder</button>
+        <p class="credit">LiDAR HD et BD TOPO® © IGN, cadastre Etalab, Estavar (Pyrénées-Orientales).</p>
+    </div>
+    <div class="story-brief">
+        <div><h4>Le besoin</h4><p>L’exploitant de la voirie communale prépare la campagne d’élagage : quels tronçons sont bordés d’arbres de plus de <strong>8 m</strong> à moins de <strong>3 m</strong> de la chaussée ?</p></div>
+        <div><h4>La traduction FilterMate</h4><p>Même mouvement que l’histoire 10 : <code>Classification = 5</code> (végétation haute) et hauteur ≥ 8 m. Cette fois les cibles sont des <strong>lignes</strong> : <em>troncon_de_route</em>, avec un tampon de 3 m autour de l’empreinte des arbres.</p></div>
+    </div>
+    <dl class="recipe"><div><dt>Source</dt><dd>nuage LiDAR HD</dd></div><div><dt>Sélection</dt><dd><code>Classification = 5</code> et hauteur ≥ 8 m</dd></div><div><dt>Cibles</dt><dd><code>troncon_de_route</code></dd></div><div><dt>Relation</dt><dd>Intersect, tampon 3 m</dd></div><div><dt>Résultat</dt><dd><strong>91</strong> tronçons sur 172</dd></div></dl>
+    <ol class="steps">
+        <li><strong>La végétation haute.</strong> ATTRIBUTES, + Condition, Classification = 5, puis l’œil pour la voir.
+            <figure><img src="img/stories/s11-01.webp" alt="Étape 1 : condition Classification = 5" loading="lazy" width="1600" height="900"><figcaption>Étape 1.</figcaption></figure>
+        </li>
+        <li><strong>Plus de 8 m.</strong> Height above DTM ≥ 8 sur le MNT.
+            <figure><img src="img/stories/s11-02.webp" alt="Étape 2 : hauteur au-dessus du MNT de 8 m" loading="lazy" width="1600" height="900"><figcaption>Étape 2. Les haies basses et les buissons sortent du filtre.</figcaption></figure>
+        </li>
+        <li><strong>3 m de la chaussée.</strong> Cible <em>troncon_de_route</em>, Intersect, Buffer 3.
+            <figure><img src="img/stories/s11-03.webp" alt="Étape 3 : cible troncon_de_route avec un tampon de 3 m" loading="lazy" width="1600" height="900"><figcaption>Étape 3.</figcaption></figure>
+        </li>
+        <li><strong>Filter.</strong>
+            <figure><img src="img/stories/s11-04.webp" alt="Étape 4 : les tronçons bordés d’arbres hauts" loading="lazy" width="1600" height="900"><figcaption>Étape 4. 91 tronçons.</figcaption></figure>
+        </li>
+    </ol>
+    <h3>Résultat</h3>
+    <p><strong>91 tronçons</strong> sur 172 ont des arbres de plus de 8 m à moins de 3 m : la liste de départ de la campagne, à hiérarchiser sur le terrain.</p>
+</section>
+<!-- 12 ------------------------------------------------------------------ -->
+<section id="s12">
+    <div class="band">
+        <video class="sheet-video" muted loop playsinline preload="none" poster="video/survey.webp" data-src="video/survey.mp4" aria-hidden="true"></video>
+        <div class="sheet-scrim"></div>
+        <h2><span class="num">12</span>Le lot de relevé autour de l’église</h2>
+        <button class="watch" type="button" data-watch aria-label="Regarder la vidéo: Le lot de relevé autour de l’église"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Regarder</button>
+        <p class="credit">LiDAR HD et BD TOPO® © IGN, cadastre Etalab, Estavar (Pyrénées-Orientales).</p>
+    </div>
+    <div class="story-brief">
+        <div><h4>Le besoin</h4><p>Un architecte du patrimoine prépare la restauration de l’<strong>église d’Estavar</strong>. Il demande le nuage de points et le MNT de l’église et de ses abords, à 50 m, dans un fichier qu’il peut ouvrir sans QGIS.</p></div>
+        <div><h4>La traduction FilterMate</h4><p>Source vecteur, cibles raster et nuage : <strong>batiment</strong> avec <code>"nature" = 'Eglise'</code>, tampon de 50 m, cibles <em>mnt</em> et <em>lhd</em>. Le MNT est découpé en VRT, le nuage en COPC dérivé ; les couches gardent leur identifiant et leur style. EXPORTING écrit ensuite GeoTIFF et LAZ dans un ZIP.</p></div>
+    </div>
+    <dl class="recipe"><div><dt>Source</dt><dd><code>batiment</code></dd></div><div><dt>Sélection</dt><dd><code>"nature" = 'Eglise'</code></dd></div><div><dt>Cibles</dt><dd><code>mnt</code> (raster), <code>lhd</code> (nuage)</dd></div><div><dt>Relation</dt><dd>Intersect, tampon 50 m</dd></div><div><dt>Résultat</dt><dd>GeoTIFF 45 Ko + LAZ 1,0 Mo</dd></div></dl>
+    <ol class="steps">
+        <li><strong>L’église.</strong> Source <em>batiment</em>, Custom selection <code>"nature" = 'Eglise'</code>.
+            <figure><img src="img/stories/s12-01.webp" alt="Étape 1 : l’église sélectionnée" loading="lazy" width="1600" height="900"><figcaption>Étape 1.</figcaption></figure>
+        </li>
+        <li><strong>50 m autour, sur le MNT et le nuage.</strong> Cibles <em>mnt</em> et <em>lhd</em>, Intersect, Buffer 50.
+            <figure><img src="img/stories/s12-02.webp" alt="Étape 2 : cibles raster et nuage de points, tampon de 50 m" loading="lazy" width="1600" height="900"><figcaption>Étape 2. Un raster et un nuage dans la même liste de cibles que des vecteurs.</figcaption></figure>
+        </li>
+        <li><strong>Filter.</strong>
+            <figure><img src="img/stories/s12-03.webp" alt="Étape 3 : MNT et nuage découpés autour de l’église" loading="lazy" width="1600" height="900"><figcaption>Étape 3. Undo rendrait les couches entières.</figcaption></figure>
+        </li>
+        <li><strong>Exporter.</strong> EXPORTING : couches <em>mnt</em> et <em>lhd</em>, dossier, chemin du ZIP, Export.
+            <figure><img src="img/stories/s12-04.webp" alt="Étape 4 : l’onglet EXPORTING avec les deux couches et le ZIP" loading="lazy" width="1600" height="900"><figcaption>Étape 4.</figcaption></figure>
+        </li>
+    </ol>
+    <h3>Résultat</h3>
+    <p>Un ZIP de 1,1 Mo : le MNT (GeoTIFF, 45 Ko) et le nuage (LAZ, 1,0 Mo) de l’église et de ses abords.</p>
+</section>
 <section id="replay">
-    <h2><span class="num">9</span>Rejouer ces histoires chez vous</h2>
+    <h2><span class="num">13</span>Rejouer ces histoires chez vous</h2>
     <div class="callout demo-download"><strong>Commencez avec un petit projet.</strong><p>La démonstration de Toutens contient quatre couches, un projet QGIS, un favori et des instructions en français et en anglais. Ses effectifs diffèrent des exemples départementaux ci-dessus.</p><a class="btn btn-primary" href="downloads/filtermate-toutens.zip" download>Télécharger la démo (ZIP, 203 Ko)</a></div>
     <ol class="steps">
         <li><strong>Téléchargez la BD TOPO</strong> de votre département sur la Géoplateforme de l'IGN (thème « Tous thèmes », format GeoPackage, projection Lambert-93). Le fichier est livré avec ses index spatiaux : c'est ce qui rend les cascades rapides.</li>
