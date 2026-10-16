@@ -388,20 +388,6 @@ class BackendServices:
             logger.debug(f"OGR cleanup failed: {e}")
             return 0
 
-    def simplify_source_for_ogr_fallback(self, *args, **kwargs) -> Any:
-        """
-        Delegate to OGR geometry optimizer.
-
-        Returns:
-            Simplified geometry
-        """
-        try:
-            from ...adapters.backends.ogr.geometry_optimizer import simplify_source_for_ogr_fallback
-            return simplify_source_for_ogr_fallback(*args, **kwargs)
-        except ImportError as e:
-            logger.error(f"OGR geometry optimizer not available: {e}")
-            raise
-
     # ==================== Task Bridge Services ====================
 
     def get_task_bridge(self) -> Tuple[Optional[Callable], Optional[Any]]:

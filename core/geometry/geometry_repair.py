@@ -12,8 +12,9 @@ Repair strategies (in order):
 1. makeValid() - GEOS standard repair
 2. buffer(0) - Fixes self-intersections
 3. simplify + makeValid - For complex geometries
-4. convexHull - Preserves area, simplifies shape
-5. boundingBox - Last resort for filtering
+(2026-10-16: the convex hull and bounding box "repairs" are gone: they made
+any filter using the geometry wrong. An irreparable geometry is dropped with
+a WARNING instead.)
 
 Author: FilterMate Team
 Created: January 2026 (EPIC-1 Phase E2)
@@ -38,12 +39,13 @@ def aggressive_geometry_repair(geom: QgsGeometry) -> Optional[QgsGeometry]:
     """
     Try multiple repair strategies for a geometry.
 
-    Attempts 5 different repair strategies in order of preference:
+    Attempts 3 repair strategies in order of preference:
     1. makeValid() - Standard GEOS repair
     2. buffer(0) - Often fixes self-intersections
     3. simplify + makeValid - For complex geometries
-    4. convexHull - Preserves area but simplifies shape
-    5. boundingBox - Last resort for filtering purposes
+
+    2026-10-16: no convex hull / bounding box fallback any more (an envelope
+    is not a repair and silently changed spatial filter results).
 
     Args:
         geom: QgsGeometry to repair
@@ -99,29 +101,7 @@ def aggressive_geometry_repair(geom: QgsGeometry) -> Optional[QgsGeometry]:
     except Exception as e:
         logger.debug(f"simplify + makeValid failed: {e}")
 
-    # Strategy 4: ConvexHull as last resort (preserves area but simplifies shape)
-    try:
-        hull = geom.convexHull()
-        if hull and not hull.isNull() and not hull.isEmpty() and hull.isGeosValid():
-            logger.info("✓ Using convex hull as last resort")
-            return hull
-    except Exception as e:
-        logger.debug(f"convexHull failed: {e}")
-
-    # Strategy 5: Bounding box (very last resort for filtering purposes)
-    try:
-        bbox = geom.boundingBox()
-        if bbox and not bbox.isEmpty():
-            bbox_geom = QgsGeometry.fromRect(bbox)
-            if bbox_geom and not bbox_geom.isNull() and bbox_geom.isGeosValid():
-                logger.warning(
-                    "⚠️ Using bounding box as absolute last resort - geometry severely corrupted"
-                )
-                return bbox_geom
-    except Exception as e:
-        logger.debug(f"boundingBox failed: {e}")
-
-    logger.error("✗ All repair strategies failed - geometry is irreparably corrupted")
+    logger.warning("✗ All repair strategies failed - geometry is irreparably corrupted, dropped")
     return None
 
 

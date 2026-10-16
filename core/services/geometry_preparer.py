@@ -107,65 +107,6 @@ def get_buffer_aware_tolerance(
         return extent_size / 1000 if extent_size > 0 else 0.001
 
 
-def simplify_geometry_adaptive(
-    geometry: QgsGeometry,
-    max_wkt_length: Optional[int] = None,
-    crs_authid: Optional[str] = None,
-    buffer_value: Optional[float] = None,
-    buffer_segments: int = 5,
-    buffer_type: int = 0
-) -> QgsGeometry:
-    """
-    Simplify geometry adaptively to reduce WKT size while preserving shape.
-
-    Args:
-        geometry: Geometry to simplify
-        max_wkt_length: Maximum acceptable WKT length
-        crs_authid: CRS authority ID
-        buffer_value: Buffer distance (if applicable)
-        buffer_segments: Number of buffer segments
-        buffer_type: Buffer end cap style
-
-    Returns:
-        Simplified geometry
-    """
-    if not geometry or geometry.isEmpty():
-        return geometry
-
-    try:
-        from ..ports import get_backend_services
-        adapter = get_backend_services().get_geometry_preparation_adapter()
-        if not adapter:
-            logger.warning("GeometryPreparationAdapter not available")
-            return geometry
-
-        result = adapter.simplify_geometry_adaptive(
-            geometry=geometry,
-            max_wkt_length=max_wkt_length,
-            crs_authid=crs_authid,
-            buffer_value=buffer_value,
-            buffer_segments=buffer_segments,
-            buffer_type=buffer_type
-        )
-
-        if result.success and result.geometry:
-            return result.geometry
-
-        logger.warning(f"Adaptive simplification failed: {result.message}")
-        return geometry
-
-    except ImportError as e:
-        logger.error(f"GeometryPreparationAdapter not available: {e}")
-        return geometry
-    except Exception as e:
-        logger.error(f"Adaptive simplification error: {e}")
-        return geometry
-
-
-# ==============================================================================
-# GEOMETRY VALIDATION & REPAIR (Extracted from filter_task.py)
-# ==============================================================================
-
 def aggressive_geometry_repair(geometry: QgsGeometry) -> QgsGeometry:
     """
     Aggressively repair invalid geometry using multiple strategies.

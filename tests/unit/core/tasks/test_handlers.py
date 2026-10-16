@@ -687,6 +687,46 @@ class TestGeometryHandler:
         result = self.handler.simplify_geometry_adaptive(mock_geom)
         assert result is mock_geom
 
+    @pytest.mark.parametrize("authid, geographic", [
+        ("EPSG:4326", True), ("IGNF:WGS84G", True), ("EPSG:6318", True), ("EPSG:7844", True),
+        ("EPSG:2154", False), ("EPSG:4647", False), ("EPSG:4087", False), ("ESRI:102110", False),
+    ])
+    def test_wkt_precision_asks_qgis_whether_the_crs_is_geographic(self, authid, geographic):
+        """2026-10-16: the 4000 < srid < 5000 guess gave degrees 3 decimals (~100 m)."""
+        import core.tasks.geometry_handler as module
+
+        crs = MagicMock()
+        crs.isValid.return_value = True
+        crs.isGeographic.return_value = geographic
+        with patch.object(module, "QgsCoordinateReferenceSystem", return_value=crs):
+            assert self.handler.get_wkt_precision(authid) == (8 if geographic else 3)
+
+    def test_wkt_precision_unknown_crs_is_finest(self):
+        import core.tasks.geometry_handler as module
+
+        crs = MagicMock()
+        crs.isValid.return_value = False
+        with patch.object(module, "QgsCoordinateReferenceSystem", return_value=crs):
+            assert self.handler.get_wkt_precision("FOO:1") == 8
+        assert self.handler.get_wkt_precision(None) == 8
+
+    def test_simplify_geometry_adaptive_forwards_predicates(self):
+        """2026-10-16: the adapter needs the predicates to keep Cross/Touch sources exact."""
+        adapter_instance = MagicMock()
+        simplified = MagicMock()
+        adapter_instance.simplify_geometry_adaptive.return_value = MagicMock(success=True, geometry=simplified)
+        self.mock_bs.get_geometry_preparation_adapter.return_value = MagicMock(return_value=adapter_instance)
+        mock_geom = MagicMock()
+        mock_geom.isEmpty.return_value = False
+
+        result = self.handler.simplify_geometry_adaptive(
+            mock_geom, 1_000_000, "EPSG:2154", predicates=["ST_Crosses"]
+        )
+        assert result is simplified
+        kwargs = adapter_instance.simplify_geometry_adaptive.call_args.kwargs
+        assert kwargs["predicates"] == ["ST_Crosses"]
+        assert kwargs["max_wkt_length"] == 1_000_000
+
 
 # ===========================================================================
 # InitializationHandler Tests

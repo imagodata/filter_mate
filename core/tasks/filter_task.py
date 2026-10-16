@@ -1477,14 +1477,9 @@ class FilterEngineTask(QgsTask):
             buffer_value, buffer_segments, buffer_type, extent_size, is_geographic
         )
 
-    def _simplify_geometry_adaptive(self, geometry: Any, max_wkt_length: Optional[int] = None, crs_authid: Optional[str] = None) -> Any:
-        """Simplify geometry adaptively. Delegates to GeometryHandler."""
-        return self._geometry_handler.simplify_geometry_adaptive(
-            geometry, max_wkt_length, crs_authid,
-            buffer_value=getattr(self, 'param_buffer_value', None),
-            buffer_segments=getattr(self, 'param_buffer_segments', 5),
-            buffer_type=getattr(self, 'param_buffer_type', 0),
-        )
+    def _predicate_names(self) -> list:
+        """The task's spatial predicates (SQL names), empty when unknown."""
+        return list(getattr(self, 'current_predicates', None) or {})
 
     def prepare_spatialite_source_geom(self) -> Optional[str]:
         """Prepare Spatialite source geometry. Delegates to SourceGeometryPreparer."""
@@ -1504,8 +1499,8 @@ class FilterEngineTask(QgsTask):
             project=getattr(self, 'PROJECT', None),
             geom_cache=getattr(self, 'geom_cache', None),
             geometry_to_wkt_fn=self._geometry_to_wkt,
-            simplify_geometry_adaptive_fn=self._simplify_geometry_adaptive,
             get_optimization_thresholds_fn=self._get_optimization_thresholds,
+            predicates=self._predicate_names(),
         )
         if result['success']:
             self.spatialite_source_geom = result['wkt']
@@ -1604,12 +1599,6 @@ class FilterEngineTask(QgsTask):
         """Repair invalid geometries. Delegates to GeometryHandler."""
         return self._geometry_handler.repair_invalid_geometries(
             layer, self._verify_and_create_spatial_index
-        )
-
-    def _simplify_buffer_result(self, layer, buffer_distance):
-        """Simplify buffer result. Delegates to GeometryHandler."""
-        return self._geometry_handler.simplify_buffer_result(
-            layer, buffer_distance, self._verify_and_create_spatial_index
         )
 
     def _apply_buffer_with_fallback(self, layer, buffer_distance):
@@ -1898,20 +1887,6 @@ class FilterEngineTask(QgsTask):
     def _get_combine_operator(self):
         """Get combine operator. Delegates to ExpressionFacadeHandler."""
         return self._expr_facade.get_combine_operator()
-
-    def _simplify_source_for_ogr_fallback(self, source_layer):
-        """
-        v4.7 E6-S2: Simplify complex source geometries for OGR fallback.
-
-        Delegated to BackendServices facade.
-
-        Args:
-            source_layer: QgsVectorLayer containing source geometry
-
-        Returns:
-            QgsVectorLayer: Simplified source layer (may be new memory layer)
-        """
-        return _backend_services.simplify_source_for_ogr_fallback(source_layer, logger=logger)
 
     def _prepare_source_geometry(self, layer_provider_type):
         """Prepare source geometry expression based on provider type (PostgreSQL→SQL/WKT, Spatialite→WKT, OGR→QgsVectorLayer)."""
