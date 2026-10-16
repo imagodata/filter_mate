@@ -564,3 +564,34 @@ class TestPixelHistory:
 
     def test_escapes(self):
         assert "&lt;" in raster.history_html([("<x>", "1", 1)], "T")
+
+
+class TestDtmLayerCombo:
+    """PDAL hag_dem reads a file through GDAL: the DTM list leaves out WMS / XYZ / WCS like the layer
+    lists, and the virtual / PostGIS rasters."""
+
+    def test_rasters_pdal_cannot_read_are_excluded(self, monkeypatch):
+        for name, path in ((".adapters", _PROJECT_ROOT / "adapters"),
+                           (".adapters.qgis", _PROJECT_ROOT / "adapters" / "qgis")):
+            package = types.ModuleType(_PKG + name)
+            package.__path__ = [str(path)]  # the real modules, without running the package __init__
+            monkeypatch.setitem(sys.modules, _PKG + name, package)
+        capability = f"{_PKG}.adapters.qgis.point_cloud_capability"
+        excluded = ["ogr"]
+        combo = types.SimpleNamespace(excludedProviders=lambda: list(excluded),
+                                      setExcludedProviders=lambda providers: excluded.__init__(providers))
+        try:
+            cloud._dtm_rasters_only(combo)
+        finally:
+            sys.modules.pop(capability, None)
+        assert excluded[0] == "ogr"
+        assert {"wms", "wcs", "arcgismapserver", "virtualraster", "postgresraster"} <= set(excluded)
+        assert "gdal" not in excluded and len(excluded) == len(set(excluded))
+
+    def test_the_dtm_combo_uses_it(self):
+        import ast
+        path = _PROJECT_ROOT / "ui" / "widgets" / "coverage_panels" / "point_cloud_exploring_panel.py"
+        tree = ast.parse(path.read_text(encoding="utf-8"))
+        build = next(node for node in ast.walk(tree)
+                     if isinstance(node, ast.FunctionDef) and node.name == "_build_ranges_group")
+        assert "_dtm_rasters_only(self._hag_layer_combo)" in ast.unparse(build)

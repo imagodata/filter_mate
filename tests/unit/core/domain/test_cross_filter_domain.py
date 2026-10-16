@@ -147,6 +147,22 @@ class TestSnapshotsAndHistory:
         history.clear()
         assert not history.can_undo("src")
 
+    def test_forget_keeps_the_other_layers_of_an_operation(self):
+        history = CrossOperationHistory()
+        first = CrossOperation("v", ((self._snap("r2", "a"), self._snap("r2", "b")),))
+        second = CrossOperation("v", ((self._snap("r1", "a"), self._snap("r1", "b")),
+                                      (self._snap("r2", "b"), self._snap("r2", "c"))))
+        r1_alone = CrossOperation("v2", ((self._snap("r1", "a"), self._snap("r1", "b")),))
+        for operation in (first, second, r1_alone):
+            history.push(operation)
+        history.undo("v")  # second is on the redo stack
+        history.forget_layer("r1")
+        kept = history.peek_redo("v")
+        assert kept.op_id == second.op_id and kept.layer_ids == ("r2",)
+        assert kept.changes == second.changes[1:]
+        assert history.peek_undo("v") is first
+        assert not history.can_undo("v2")  # nothing left of an operation on the removed layer alone
+
 
 class TestRasterSelection:
     def test_range_formula_and_keeps(self):

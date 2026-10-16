@@ -12,6 +12,7 @@ a source geometry.
 """
 import logging
 import math
+import sys
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Tuple
 
@@ -387,35 +388,78 @@ def pixel_is_transparent(pixel) -> bool:
     return float(getattr(pixel, 'percentTransparent', 0.0)) >= 100.0
 
 
+def _bound_step(value: float) -> float:
+    """Gap left between a kept value and a transparent range whose bounds are inclusive.
+
+    Above the absolute tolerance QGIS compares bounds with (4 double
+    epsilons, about 8.9e-16) and below the relative spacing of Float32
+    pixel values (about 6e-8), small values (0.001, 1e-5) included.
+    """
+    return max(abs(value) * 1e-12, 1e-14)
+
+
+def preview_ranges(selection: RasterSelection, exclusive_bounds: bool = True) -> List[Tuple[float, float, bool, bool]]:
+    """Value ranges a RANGE / CLASSES preview makes transparent: ``(low, high, include_low, include_high)``.
+
+    No kept value may fall in one. A range bound next to a kept value is
+    exclusive; ``exclusive_bounds`` False (QGIS < 3.30: no ``includeMinimum``
+    / ``includeMaximum``, ranges inclusive on both sides) moves it off the
+    kept value instead. A class keeps the values that round to it, like the
+    filter (:func:`selection_mask`): the gaps between classes start and end
+    at half values, which an integer pixel never takes. The outer ranges are
+    unbounded: band statistics are sampled and miss pixels.
+    """
+    low, high = -sys.float_info.max, sys.float_info.max
+    gaps = []
+    if selection.mode is RasterSelectionMode.RANGE:
+        if selection.minimum is not None:
+            gaps.append((low, selection.minimum, True, False))
+        if selection.maximum is not None:
+            gaps.append((selection.maximum, high, False, True))
+    elif selection.mode is RasterSelectionMode.CLASSES:
+        start, include_start = low, True
+        for value in sorted(selection.classes):
+            gaps.append((start, value - 0.5, include_start, False))
+            start, include_start = value + 0.5, False
+        gaps.append((start, high, include_start, True))
+    ranges = []
+    for start, end, include_start, include_end in gaps:
+        if not exclusive_bounds:
+            if not include_start:
+                start += _bound_step(start)
+            if not include_end:
+                end -= _bound_step(end)
+            include_start = include_end = True
+        if start < end or (start == end and include_start and include_end):
+            ranges.append((start, end, include_start, include_end))
+    return ranges
+
+
 def apply_selection_preview(layer: QgsRasterLayer, selection: RasterSelection,
-                            data_min: Optional[float], data_max: Optional[float]) -> bool:
+                            data_min: Optional[float] = None, data_max: Optional[float] = None) -> bool:
     """Make the pixels outside a RANGE / CLASSES selection transparent in the renderer.
 
     The previous transparency settings are kept on the layer and restored by
-    :func:`clear_selection_preview`.
+    :func:`clear_selection_preview`; meanwhile they still apply to the kept
+    pixels. A selection the preview cannot show (empty, raster calculator
+    expression) shows every pixel again. ``data_min`` / ``data_max`` are no
+    longer used (the outer ranges are unbounded), kept for callers.
     """
     from qgis.core import QgsRasterTransparency
     renderer = layer.renderer()
     if renderer is None or selection.is_empty or selection.mode is RasterSelectionMode.EXPRESSION:
+        clear_selection_preview(layer)
         return False
-    if layer.customProperty(_PREVIEW_PROPERTY) is None:
-        layer.setCustomProperty(_PREVIEW_PROPERTY, _transparency_to_list(renderer.rasterTransparency()))
+    saved = layer.customProperty(_PREVIEW_PROPERTY)
+    if saved is None:
+        saved = _transparency_to_list(renderer.rasterTransparency())
+        layer.setCustomProperty(_PREVIEW_PROPERTY, saved)
     transparency = QgsRasterTransparency()
-    pixels = []
-    low = -1e300 if data_min is None else data_min - 1
-    high = 1e300 if data_max is None else data_max + 1
-    if selection.mode is RasterSelectionMode.RANGE:
-        if selection.minimum is not None:
-            pixels.append(_transparent_pixel(low, selection.minimum, True, False))
-        if selection.maximum is not None:
-            pixels.append(_transparent_pixel(selection.maximum, high, False, True))
-    else:
-        previous_value = low
-        for value in sorted(selection.classes):
-            pixels.append(_transparent_pixel(previous_value, value, True, False))
-            previous_value = value
-        pixels.append(_transparent_pixel(previous_value, high, False, True))
-    transparency.setTransparentSingleValuePixelList(pixels)
+    exclusive = hasattr(_transparent_pixel(0.0, 0.0, True, True), 'includeMinimum')  # QGIS >= 3.30
+    pixels = [_transparent_pixel(*gap) for gap in preview_ranges(selection, exclusive)]
+    # QGIS uses the first range holding a value: the preview first (hidden is hidden), then the
+    # ranges of the user, which keep applying to the kept pixels (a NoData-like value stays transparent).
+    transparency.setTransparentSingleValuePixelList(pixels + _pixels_from_list(saved))
     renderer.setRasterTransparency(transparency)
     layer.triggerRepaint()
     return True
@@ -440,6 +484,23 @@ def _transparency_to_list(transparency) -> list:
     return items
 
 
+def _pixels_from_list(saved) -> list:
+    """Pixels of a :func:`_transparency_to_list` copy (either API)."""
+    pixels = []
+    for item in saved or []:
+        try:
+            low, high, kind, level, include_min, include_max = item
+            pixel = _transparent_pixel(low, high, include_min, include_max)
+            if hasattr(pixel, 'opacity'):
+                pixel.opacity = float(level) if kind == 'opacity' else 1.0 - float(level) / 100.0
+            else:
+                pixel.percentTransparent = float(level) if kind == 'percent' else (1.0 - float(level)) * 100.0
+            pixels.append(pixel)
+        except (TypeError, ValueError):
+            continue
+    return pixels
+
+
 def clear_selection_preview(layer: QgsRasterLayer) -> bool:
     """Restore the transparency saved by :func:`apply_selection_preview`."""
     from qgis.core import QgsRasterTransparency
@@ -449,19 +510,7 @@ def clear_selection_preview(layer: QgsRasterLayer) -> bool:
     renderer = layer.renderer()
     if renderer is not None:
         transparency = QgsRasterTransparency()
-        pixels = []
-        for item in saved or []:
-            try:
-                low, high, kind, level, include_min, include_max = item
-                pixel = _transparent_pixel(low, high, include_min, include_max)
-                if hasattr(pixel, 'opacity'):
-                    pixel.opacity = float(level) if kind == 'opacity' else 1.0 - float(level) / 100.0
-                else:
-                    pixel.percentTransparent = float(level) if kind == 'percent' else (1.0 - float(level)) * 100.0
-                pixels.append(pixel)
-            except (TypeError, ValueError):
-                continue
-        transparency.setTransparentSingleValuePixelList(pixels)
+        transparency.setTransparentSingleValuePixelList(_pixels_from_list(saved))
         renderer.setRasterTransparency(transparency)
         layer.triggerRepaint()
     layer.removeCustomProperty(_PREVIEW_PROPERTY)
@@ -572,3 +621,31 @@ def unlink_range_from_style(layer: QgsRasterLayer) -> bool:
     layer.setRenderer(restored)
     layer.triggerRepaint()
     return True
+
+
+def forget_linked_styles(layer_ids=None) -> None:
+    """Drop the styles saved for layers removed from the project (every one when ``layer_ids`` is None).
+
+    Never restored: a layer opened again with the same id has its own style.
+    """
+    if layer_ids is None:
+        _LINKED_RENDERERS.clear()
+        return
+    for layer_id in layer_ids:
+        _LINKED_RENDERERS.pop(layer_id, None)
+
+
+def unlink_all_styles(project=None) -> int:
+    """Give every linked raster of the project its style back (plugin unloaded); returns how many."""
+    from qgis.core import QgsProject
+    project = project or QgsProject.instance()
+    restored = 0
+    for layer_id in list(_LINKED_RENDERERS):
+        layer = project.mapLayer(layer_id)
+        try:
+            if layer is not None and unlink_range_from_style(layer):
+                restored += 1
+        except RuntimeError:
+            pass
+        _LINKED_RENDERERS.pop(layer_id, None)
+    return restored
