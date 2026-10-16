@@ -51,6 +51,15 @@ except ImportError:
 logger = get_logger(__name__)
 
 
+def _panel_layer_id(dockwidget) -> Optional[str]:
+    """Id of the dock's current layer (None: no layer, or a deleted one)."""
+    try:
+        layer = getattr(dockwidget, 'current_layer', None)
+        return layer.id() if layer is not None else None
+    except RuntimeError:
+        return None
+
+
 class UndoRedoHandler:
     """
     Handles undo/redo operations for filter states.
@@ -630,6 +639,10 @@ class UndoRedoHandler:
                 if not current_combo or current_combo.id() != saved_layer.id():
                     current_name = current_combo.name() if current_combo else "(None)"
                     logger.debug(f"DELAYED CHECK - Restoring from '{current_name}' to '{saved_layer.name()}'")
+                    if _panel_layer_id(dw) not in (None, saved_layer_id):
+                        # The panel moved too (an async layer change can show a raster page): back through the
+                        # layer change, so that the coverage panel follows.
+                        dw.current_layer_changed(saved_layer, manual_change=True)
                     with SignalBlocker(dw.comboBox_filtering_current_layer):
                         dw.comboBox_filtering_current_layer.setLayer(saved_layer)
                     dw.current_layer = saved_layer

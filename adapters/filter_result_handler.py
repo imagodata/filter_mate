@@ -49,6 +49,15 @@ def _record_pending_pick(dockwidget) -> None:
         record_pending_pick()
 
 
+def _panel_layer_id(dockwidget) -> Optional[str]:
+    """Id of the dock's current layer (None: no layer, or a deleted one)."""
+    try:
+        layer = getattr(dockwidget, 'current_layer', None)
+        return layer.id() if layer is not None else None
+    except RuntimeError:
+        return None
+
+
 class FilterResultHandler:
     """
     Handles filter operation completion and result application.
@@ -939,6 +948,11 @@ class FilterResultHandler:
                             f"v3.0.19: 🔧 RESTORING combobox from '{current_name}' to '{saved_layer.name()}'",
                             "FilterMate", Qgis.MessageLevel.Warning
                         )
+                        if _panel_layer_id(dockwidget) not in (None, saved_layer_id):
+                            # The panel moved too (an undo in the window lets async layer changes through, a
+                            # raster page can show): back through the layer change, so that the coverage panel
+                            # follows. Ignored while the filtering flag is set.
+                            dockwidget.current_layer_changed(saved_layer, manual_change=True)
                         # Keep signals blocked during restore
                         dockwidget.comboBox_filtering_current_layer.setLayer(saved_layer)
                         dockwidget.current_layer = saved_layer

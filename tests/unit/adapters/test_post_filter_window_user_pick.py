@@ -5,6 +5,7 @@ For 1.5 s after a filter the combo box stays blocked and its checks put the sour
 change moved it, never over a layer the user picked (a pick not looked at yet is looked at first).
 A layer picked during the task is applied when it is over.
 A failed or canceled task ends the protection too.
+A check that finds the panel moved too puts it back through the layer change (the coverage panel follows).
 """
 import importlib
 import pathlib
@@ -153,6 +154,19 @@ def test_a_layer_picked_before_the_task_is_not_applied(window):
     assert _ended(window)
     window.combo.setLayer.assert_not_called()
     window.dock.current_layer_changed.assert_not_called()
+
+
+def test_a_check_moves_the_panel_back_through_the_layer_change(window):
+    """An undo in the window resets the filtering flag: an async change can then show a raster page. The check
+    puts the panel back through the layer change (the coverage panel follows), not only the combo box."""
+    window.dock._filtering_in_progress = False
+    window.handler._schedule_delayed_reconnection("zones")
+    window.combo.currentLayer.return_value = window.layers["dem"]
+    window.dock.current_layer = window.layers["dem"]
+    _checks(window)[0]()
+    window.dock.current_layer_changed.assert_called_once_with(window.layers["zones"], manual_change=True)
+    assert window.combo.currentLayer() is window.layers["zones"]
+    assert window.dock.current_layer is window.layers["zones"]
 
 
 def test_a_terminated_task_ends_the_protection(window):
