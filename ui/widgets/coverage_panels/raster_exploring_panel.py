@@ -532,6 +532,11 @@ class RasterExploringPanel(QWidget):
         """Whether the map preview is asked for a mode it supports (range or classes)."""
         return self._preview_check.isChecked() and self._mode is not RasterSelectionMode.EXPRESSION
 
+    def set_preview_checked(self, checked: bool) -> None:
+        """Check or uncheck the "Preview on the map" box (the dock button changed it). Does not emit."""
+        with _signals_blocked(self._preview_check):
+            self._preview_check.setChecked(bool(checked))
+
     def current_band(self) -> int:
         """1-based number of the selected band (1 when no band is listed)."""
         value = self._band_combo.currentData()
