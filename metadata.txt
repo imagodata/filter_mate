@@ -8,54 +8,29 @@ name=FilterMate
 qgisMinimumVersion=3.22
 qgisMaximumVersion=4.99
 supportsQt6=yes
-description=🚀 The ultimate spatial filtering plugin! Explore, filter & export vector, raster and LiDAR point cloud data with lightning-fast performance on ANY data source. Full QGIS 4 / Qt6 support.
+description=Explore, filter and export vector, raster and LiDAR point cloud layers from one panel, on any data source (PostgreSQL, Spatialite, GeoPackage, OGR). QGIS 3.22 to 4.x.
 version=5.0.0
 author=imagodata
 email=simon.ducournau+filter_mate@gmail.com
 
-about=🎯 FilterMate 5.0 - Your Swiss Army Knife for Spatial Data: vector, raster and LiDAR point clouds!
+about=FilterMate explores, filters and exports vector, raster and LiDAR point cloud layers from one panel.
 
-    Stop struggling with complex filters. FilterMate makes spatial queries intuitive, fast, and powerful.
+    Pick a layer, select what matters on it, and FilterMate filters the other layers of the project by their relation to that selection: buildings within 50 m of a road, parcels on a gentle slope, LiDAR points under the buildings, a DTM clipped to a commune. Filters stay on the project layers (no copies), can be undone, saved as favorites, exported and replayed from Processing.
 
-    🌟 WHY FILTERMATE?
-    ━━━━━━━━━━━━━━━━━
-    ✓ Works with EVERYTHING: PostgreSQL, Spatialite, GeoPackage, Shapefiles, WFS, rasters (GeoTIFF, COG, VRT) and LiDAR point clouds (LAS, LAZ, COPC)...
-    ✓ Lightning fast: 2-8× faster with 4 performance optimizers + smart caching
-    ✓ Intuitive: Filter by clicking, drawing, or selecting - no SQL needed!
-    ✓ Professional: Undo/Redo, Favorites, Dark Mode, 34 languages
-    ✓ Shareable: Git-backed favorites sharing + REST API for automation
+    EXPLORING selects on the current layer, whatever its kind:
+    - vector: one feature, several, or an expression;
+    - raster: band, pixel value picked on the map, value range on a live histogram, classes, raster calculator expression;
+    - point cloud (LAS, LAZ, COPC, EPT, VPC): ASPRS / LiDAR HD classes, Z, intensity and return ranges, attribute conditions, height above a DTM.
 
-    🔥 KILLER FEATURES:
-    ━━━━━━━━━━━━━━━━━━
-    🏔️ Rasters and LiDAR point clouds: select by value range, classes or point attributes, then filter layers of any kind with that selection (vector, raster and point cloud, in every direction)
-    📍 Geometric filtering with buffer, intersection, containment...
-    🔍 Smart entity search across any layer type
-    ⭐ Save & share your favorite filter configurations with spatial context
-    🤝 Publish favorites to git repos (private/team) with authcfg credentials
-    🌐 REST API to drive FilterMate from external tools (X-API-Key auth), Processing algorithms and models, qgis_process
-    📦 One-click export to GeoPackage with embedded QGIS project (preserves group structure, styles & CRS)
-    🎨 Beautiful UI that adapts to your QGIS theme
-    ⚡ Filter chaining with dynamic buffer expressions
+    FILTERING relates that selection to layers of any kind (9 source / target combinations) with geometric predicates, a buffer, AND / OR with existing filters and a minimum coverage. Filtered rasters and point clouds keep their id, style and place in the layer tree, and the project is always saved with the original sources.
 
-    💡 v5.0.0: FilterMate 5 filters raster and LiDAR point cloud layers too. EXPLORING adapts to the current layer (raster value range with histogram, pixel picker, classes and expression; point cloud classes, Z / intensity / return ranges, attribute conditions, height above a DTM with PDAL); FILTERING relates that selection to layers of any kind in every direction (minimum coverage, Disjoint); EXPORTING writes GeoTIFF / COG and LAZ / COPC. Processing algorithms and models, qgis_process, Python and REST APIs. Tested in CI with the real dock on QGIS 3.22 to 4.2.
-    💡 v4.9.2: Fix the GeoPackage layer that showed 0 features when re-filtered as a source after being filtered as a target (a closing parenthesis was lost while combining the new expression with the R-tree subset, invalid SQL accepted silently by OGR); with the combine option off, a new source filter now replaces the previous subset instead of being ANDed to it.
-    💡 v4.9.1: Fix the filter refused on the first click on PostgreSQL selections of 100 000 features or more (materialized-view path called a missing facade method), fix after a project switch with the panel open ("wrapped C/C++ object of type QgsVectorLayer has been deleted" when the previous layer is gone) and a QGIS crash after a plugin reload followed by a project close (the panel is now removed and deleted on unload, so no feature-picker gather can outlive its layer); timing lines for the validate/reset steps of a layer change.
-    💡 v4.9.0: Open another project with the panel open and it follows (four causes fixed and verified in QGIS 4.2), one stable FilterMate project row per project and no more duplicated favorites, PostgreSQL feature list without the server-side sort that fetched the whole table (13 s → 30 ms) and deferred while the canvas renders (no more 17 s freeze at project open), type-to-find in the layer combo, busy cursor and pressed button during tasks, plain-language error messages, accessible names, lighter zip, lint in CI, Qt6 enum guard.
-    💡 v4.8.10: PostgreSQL buffer filters (ST_DWithin + source envelope prefilter on the target's GiST index: a roads + 20 m buffer cascade went from never finishing to 25 s for 16 layers), source-selection materialized view repaired, panel reloads on project switch whatever APP.AUTO_ACTIVATE, GeoPackage buffers applied once in QGIS (no convex hull), OGR buffer cached per task, 48 SQL templates restored.
-    💡 v4.8.9: Measured performance release. GeoPackage spatial cascades use the R-tree of each target table (a 37-layer filter by the commune of Toulouse went from 371 s to under 3 s), PostgreSQL targets keep their GiST index with the centroid option (49.6 s to under 4 s), no double scan after a filter, canvas frozen for the whole task, no more localhost/IPv6 connection stall, fewer counts and repaints. Fix: filter with no target layer.
-    💡 v4.8.8: Performance release. Multiple-selection list bounded by feature_picker_limit (sorted, server-side text search, Select All loads the full list) and one indexed lookup per click instead of a full-layer scan. Layer variables applied per layer in one batched write at project load. GEOS cascaded union, attribute-free source loading and immediate wake-up of interruptible Spatialite queries. Stale unsaved projects purged from the FilterMate database. INFO log level by default, timing lines (project_open, layer_change, task_filter) in filtermate.log.
-    💡 v4.8.7: Consistent controls, button bars and panel backgrounds across dark, light and gray themes. Clearer Exploring titles and configuration text. Fix icon-theme synchronization errors and avoid repeated work during bulk layer removal and shutdown.
-    💡 v4.8.6: QGIS 3/4 theme synchronization for existing profiles, readable dark-mode PNG icons and aligned filtering rows. Retains Qt5/Qt6 checkbox and mouse-event fixes.
-    💡 v4.8.4: Fixed the checkbox primitive name (PE_IndicatorItemViewItemCheck) and mouse position handling across Qt5 and Qt6.
-    💡 v4.8.3: Config log cleanup — the "Schema file not found" message logged on every config reload (config_schema.json was intentionally removed in a prior release) is now Info instead of Warning. Also closed out 2 live-testing reports as confirmed non-bugs (QGIS3-named settings path is QGIS 4.2's own behavior; "Adding layers" progress is QGIS-core, not FilterMate).
-    💡 v4.8.2: 🚑 Second QGIS 4.x hotfix — v4.8.1's fix still crashed ("DockWidgetFeature has no attribute AllDockWidgetFeatures"): that convenience constant was deprecated in Qt 5.13 and fully removed in Qt6, not just rescoped. Now ORs the 3 individual flags it used to expand to.
-    💡 v4.8.1: 🚑 Critical fix for QGIS 4.x — the dockwidget failed to load entirely ("QDockWidget has no attribute AllDockWidgetFeatures") because PyQt6's UI loader can't resolve the .ui file's features flag; now set programmatically instead. Also fixed BatchFilterAlgorithm.tr() crashing the Processing Toolbox entry. Found via real-world QGIS 4.2/Windows testing right after v4.8.0 shipped.
-    💡 v4.8.0: 🎉 Full QGIS 4.2 / Qt6 support! Three sweeps across the whole codebase — QMetaType field-type migration, QtWidgets→QtGui relocations (QShortcut & co.), remaining flat-enum fixes — plus 2 AST regression guards to keep it that way. New: FilterMate algorithms now in the Processing Toolbox (batch-filter multiple layers with one expression).
-    💡 v4.7.3: Stability + Qt6-readiness release. Fix crash on QGIS 4.0.1/Windows when the standalone sip package wasn't importable (unguarded top-level import in the dockwidget). Security — resolved all Bandit findings (asserts replaced with explicit raises, corrected nosec code for ElementTree import, documented exception-suppression guards). Qt6 readiness — qualified ~165 flat PyQt/PyQGIS enum accesses to their scoped form and dropped exec_() across 50 files, no Qt5 behavior change.
-    💡 v4.7.2: Spatial filtering fixes (SpatiaLite source_srid staleness causing silent 0-feature filters, Custom Selection "all-features" mode no longer shadowed by a stale layer selection), export hardening (blocked export with no Exploring selection, SHP/batch warnings surfaced, GPKG styles embedded on reprojection + streaming, empty-layer streaming crash fixed, partial-file cleanup on failure/cancel, format registry consolidation, ~900 LOC dead export code removed), HIDPI display fix (combobox/input stuck at 20px on 4K/Retina/150%%+ scaling)
-    💡 v4.7.1: Hardening release — export pipeline (12 fixes across SHP/CSV/GPKG/SpatiaLite/ZIP), spatialite cascade (drop GeomFromGPB wrap, preserve ST_* + EXISTS/NOT predicates), Qt main-thread marshalling for QGISFilterMateAccessor, REST API hardening (503 favorites, no input echo, 1 MiB body cap, api_key hash-at-rest), portable Git SHA-256 digest enforcement, favorites deep audit follow-through (37 findings, FavoritesSpatialHandler extraction, FavoritesError exception family), auto-zoom on filtered union, +200 tests (1493 ✅)
+    EXPORTING writes the filtered layers: vector formats, GeoPackage with an embedded QGIS project, GeoTIFF / COG, LAZ / LAS / COPC.
 
-    📖 Full docs: https://imagodata.github.io/filter_mate
+    Also: PostgreSQL / PostGIS, Spatialite, GeoPackage and OGR backends with spatial indexes; undo / redo; favorites shared through git repositories; Processing algorithms and models, qgis_process, Python and REST APIs; light and dark themes; 34 languages. QGIS 3.22 to 4.x, Qt5 and Qt6.
+
+    Optional: psycopg2 for PostgreSQL, PDAL 2.4+ for the height above a DTM and COPC writing.
+
+    User guide: https://imagodata.github.io/filter_mate/guide.html
 
 tracker=https://github.com/imagodata/filter_mate/issues
 repository=https://github.com/imagodata/filter_mate
@@ -66,8 +41,7 @@ repository=https://github.com/imagodata/filter_mate
 hasProcessingProvider=yes
 
 changelog=v5.0.0 (2026-10-15): FilterMate 5 - raster and LiDAR point cloud layers are sources and targets like vector layers. EXPLORING adapts to the current layer: raster band, pixel picker, value range with histogram and live preview, classes of paletted rasters, raster expression; point cloud ASPRS / LiDAR HD classes, Z / intensity / return ranges, chained attribute conditions, height above a DTM (PDAL), tiles of the same dataset. FILTERING keeps its form and relates that selection to vector, raster and point cloud targets (9 combinations, buffer, minimum coverage, Disjoint); clipped rasters (VRT) and point clouds (COPC) keep the layer id and style, follow undo / redo, are restored on unload and never written to the project file. EXPORTING writes GeoTIFF / COG and LAZ / LAS / COPC / GPKG / CSV. Automation: 7 Processing algorithms, 4 models, qgis_process, Python and REST APIs. Raster and point cloud support on by default, switched live in Configuration. Fixes found by the new CI runs on QGIS 3.22 to 4.2 (engine and dock): QGIS crash when the panel opened on QGIS 3.22-3.34, possible crash when a layer was removed, plugin not loading before QGIS 3.34.2, rasters not clipped with GDAL older than 3.9, point clouds with PDAL older than 2.4, modal extension dialog at every start, FILTERING rows thousands of pixels apart. Breaking: Favorites Sharing refuses a plaintext auth_header, use the QGIS Authentication Manager (authcfg_id).
-    v4.9.2 (2026-09-14): GeoPackage layer empty (0 features) when re-filtered as a source after being filtered as a target fixed (the subset combiners dropped a closing parenthesis of the R-tree subset, invalid SQL accepted silently by OGR); with the combine option off the new source filter replaces the previous subset instead of being ANDed to it (targets already did).
-    v4.9.1 (2026-09-14): Filter refused on the first click and accepted on the second on PostgreSQL selections of 100 000 features or more (the materialized-view path called a facade method that does not exist) fixed; Python error after a project switch (RuntimeError on the deleted previous layer in the exploring and filtering controllers) fixed; QGIS access violation after a plugin reload followed by a project close fixed (the dock widget is removed and deleted on unload, no feature-picker gather outlives its layer); layer_change_validate / layer_change_reset timing lines.
+    Release notes of every version: https://github.com/imagodata/filter_mate/blob/main/CHANGELOG.md
 
 # Tags are comma separated with spaces allowed
 tags=python,filter,vector,raster,point cloud,lidar,las,laz,copc,dem,layers,geofilter,search,postgis,ogr,spatialite,data,exploration,subset,export
