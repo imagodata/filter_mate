@@ -667,3 +667,137 @@ class TestLayerHistoryWrapper:
         entry = h.peek_undo()
         assert entry.get_metadata_value("feature_count") == 9
         assert entry.get_metadata_value("custom") == "v"
+
+
+# ---------------------------------------------------------------------------
+# remove_history (layer removed from the project)
+# ---------------------------------------------------------------------------
+
+
+def _global_state(h, source="A", remotes=None, previous=None):
+    remotes = remotes if remotes is not None else {"B": ("b = 1", 2), "C": ("c = 1", 3)}
+    h.push_global_state(
+        source_layer_id=source,
+        source_expression="a = 1",
+        source_feature_count=1,
+        remote_layers=remotes,
+        previous_expressions=previous or {source: "a0", "B": "b0", "C": "c0"},
+    )
+    return h.peek_undo()
+
+
+class TestRemoveHistory:
+    """LayerTaskCompletionHandler called remove_history(), absent from HistoryService:
+    the first removed layer raised AttributeError and ended the completion."""
+
+    def test_entries_of_the_removed_layer_alone_leave_the_undo_stack(self):
+        h = HistoryService()
+        h.push(_make_entry("a = 1", layer_ids=("A",), previous_filters=(("A", "a0"),)))
+        h.push(_make_entry("b = 1", layer_ids=("B",), previous_filters=(("B", ""),)))
+
+        assert h.remove_history("B") == 1
+
+        # The next Undo of layer A pops A's entry: B's one gave A its empty previous filter.
+        entry = h.undo()
+        assert entry.layer_ids == ("A",)
+        assert entry.get_previous_filter("A") == "a0"
+        assert h.can_undo is False
+
+    def test_entries_of_the_removed_layer_alone_leave_the_redo_stack(self):
+        h = HistoryService()
+        h.push(_make_entry("a = 1", layer_ids=("A",)))
+        h.push(_make_entry("b = 1", layer_ids=("B",), previous_filters=(("B", ""),)))
+        h.undo()
+
+        h.remove_history("B")
+
+        assert h.can_redo is False
+        assert [e.layer_ids for e in h.get_undo_stack()] == [("A",)]
+
+    def test_a_removed_remote_layer_leaves_a_global_entry(self):
+        h = HistoryService()
+        original = _global_state(h)
+
+        assert h.remove_history("B") == 1
+
+        entry = h.peek_undo()
+        assert entry.entry_id == original.entry_id
+        assert entry.layer_ids == ("A", "C")
+        assert entry.expression == "a = 1"
+        assert dict(entry.previous_filters) == {"A": "a0", "C": "c0"}
+        assert set(entry.get_metadata_value("remote_layers")) == {"C"}
+        # The original entry and its metadata dict are left untouched (frozen dataclass).
+        assert original.layer_ids == ("A", "B", "C")
+        assert set(original.get_metadata_value("remote_layers")) == {"B", "C"}
+
+    def test_a_removed_source_hands_the_entry_to_the_first_remote_layer(self):
+        h = HistoryService()
+        _global_state(h)
+
+        h.remove_history("A")
+
+        entry = h.peek_undo()
+        assert entry.layer_ids == ("B", "C")
+        # The layout push_global_state(source="B", remotes={"C": ...}) records
+        assert entry.expression == "b = 1"
+        assert entry.get_metadata_value("source_feature_count") == 2
+        assert set(entry.get_metadata_value("remote_layers")) == {"C"}
+        assert dict(entry.previous_filters) == {"B": "b0", "C": "c0"}
+
+    def test_a_removed_source_without_per_layer_expressions_keeps_the_expression(self):
+        h = HistoryService()
+        h.push(_make_entry("x = 1", layer_ids=("A", "B"), previous_filters=(("A", ""), ("B", ""))))
+
+        h.remove_history("A")
+
+        entry = h.peek_undo()
+        assert entry.layer_ids == ("B",)
+        assert entry.expression == "x = 1"
+
+    def test_unknown_layer_changes_nothing(self):
+        callback = MagicMock()
+        h = HistoryService(on_change=callback)
+        h.push(_make_entry(layer_ids=("A",)))
+        callback.reset_mock()
+        before = h.get_undo_stack()
+
+        assert h.remove_history("Z") == 0
+        assert h.remove_history("Z") == 0
+
+        assert h.get_undo_stack() == before
+        callback.assert_not_called()
+
+    def test_idempotent_and_notifies_once(self):
+        callback = MagicMock()
+        h = HistoryService(on_change=callback)
+        h.push(_make_entry(layer_ids=("B",)))
+        h.push(_make_entry(layer_ids=("B",)))
+        _global_state(h)
+        callback.reset_mock()
+
+        assert h.remove_history("B") == 3
+        assert callback.call_count == 1
+        assert h.remove_history("B") == 0
+        assert callback.call_count == 1
+
+    def test_per_layer_wrapper_is_dropped(self):
+        h = HistoryService()
+        wrapper = h.get_or_create_history("B")
+        wrapper.push_state(expression="b = 1", feature_count=1)
+
+        h.remove_history("B")
+
+        assert h.get_or_create_history("B") is not wrapper
+        assert h.total_entries == 0
+
+    def test_max_depth_is_kept(self):
+        h = HistoryService(max_depth=3)
+        for _ in range(3):
+            h.push(_make_entry(layer_ids=("A",)))
+        h.push(_make_entry(layer_ids=("B",)))
+
+        h.remove_history("B")
+        for _ in range(5):
+            h.push(_make_entry(layer_ids=("A",)))
+
+        assert h.undo_count == 3

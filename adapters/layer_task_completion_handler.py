@@ -228,6 +228,9 @@ class LayerTaskCompletionHandler:
         """
         Handle layer removals.
 
+        A failure on one layer is logged and skipped: the other removed layers,
+        then the project variables and the panel refresh, must still happen.
+
         Args:
             result_project_layers: Updated PROJECT_LAYERS
             dockwidget: Dockwidget instance
@@ -237,30 +240,53 @@ class LayerTaskCompletionHandler:
         history_manager = self._get_history_manager()
         project_uuid = self._get_uuid()
 
-        for layer_key in dockwidget.PROJECT_LAYERS.keys():
-            if layer_key not in result_project_layers.keys():
-                # Layer removed - clean up database
+        dock_layer_keys = list(dockwidget.PROJECT_LAYERS.keys())
+        removed_layer_ids = [key for key in dock_layer_keys if key not in result_project_layers]
+
+        for layer_key in removed_layer_ids:
+            try:
+                # Layer removed - clean up its properties and filter history in the database
                 cursor.execute(
                     """DELETE FROM fm_project_layers_properties
                        WHERE fk_project = ? AND layer_id = ?""",
                     (project_uuid, layer_key)
                 )
-                connection.commit()
+                cursor.execute(
+                    """DELETE FROM fm_subset_history
+                       WHERE fk_project = ? AND layer_id = ?""",
+                    (project_uuid, layer_key)
+                )
+            except Exception as e:
+                logger.warning(f"Could not delete the stored properties of removed layer {layer_key}: {e}")
 
-                # Clean up history
-                history_manager.remove_history(layer_key)
-                logger.info(f"Removed history for deleted layer {layer_key}")
+            # Clean up undo/redo history
+            try:
+                if history_manager is not None:
+                    history_manager.remove_history(layer_key)
+                logger.info(f"Removed properties and history of deleted layer {layer_key}")
+            except Exception as e:
+                logger.warning(f"Could not remove the undo history of removed layer {layer_key}: {e}")
 
-                try:
-                    dockwidget.widgets["EXPLORING"]["MULTIPLE_SELECTION_FEATURES"]["WIDGET"].remove_list_widget(layer_key)
-                except (KeyError, AttributeError, RuntimeError):
-                    pass
-            else:
+            try:
+                dockwidget.widgets["EXPLORING"]["MULTIPLE_SELECTION_FEATURES"]["WIDGET"].remove_list_widget(layer_key)
+            except (KeyError, AttributeError, RuntimeError):
+                pass
+
+        try:
+            connection.commit()
+        except Exception as e:
+            logger.warning(f"Could not commit the clean-up of removed layers: {e}")
+
+        for layer_key in dock_layer_keys:
+            if layer_key in result_project_layers:
                 # Update datasource for remaining layers
                 if self._validate_layer_info:
                     layer_info = self._validate_layer_info(layer_key)
                     if layer_info and self._remove_layer_datasource:
-                        self._remove_layer_datasource(layer_info)
+                        try:
+                            self._remove_layer_datasource(layer_info)
+                        except Exception as e:
+                            logger.warning(f"Datasource of layer {layer_key} not updated: {e}")
 
     def _handle_add_layers_completion(
         self,
