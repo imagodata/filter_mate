@@ -160,14 +160,20 @@ def card_html(name: str, kind_label: str, meta: str, color: str, square: bool) -
     return f"{head}<br>{escape(second)}" if second else head
 
 
+# The rail keeps the shared EXPLORING buttons that matter most: pixel picker, zoom to the selection,
+# preview and reset. The extra tools (value under the cursor, statistics of a rectangle, style link,
+# elevation profile, 3D view) are still implemented below but no longer put on the rail: the picker reads
+# the value and QGIS has its own statistics, profile and 3D tools. List a tool here to bring it back.
+RAIL_TOOLS = {
+    'raster': (),
+    'point_cloud': (),
+}
+_RAIL_TOOL_NAMES = frozenset(name for names in RAIL_TOOLS.values() for name in names)
+
+
 def tools_for(kind_value: str) -> List[str]:
     """Object names of the extra tool buttons shown for a layer kind value."""
-    if kind_value == 'raster':
-        return ['pushButton_checkable_exploring_raster_hover', 'pushButton_checkable_exploring_raster_zone',
-                'pushButton_checkable_exploring_raster_link']
-    if kind_value == 'point_cloud':
-        return ['pushButton_exploring_point_cloud_profile', 'pushButton_exploring_point_cloud_3d']
-    return []
+    return list(RAIL_TOOLS.get(kind_value, ()))
 
 
 def zone_pixel_estimate(width: float, height: float, size_x: float, size_y: float) -> Optional[int]:
@@ -276,6 +282,7 @@ class CoverageDockExtras(QObject):
             ('pushButton_exploring_point_cloud_3d', False,
              self.tr("3D view: open a new QGIS 3D map view"), self._open_3d_view),
         )
+        specs = tuple(spec for spec in specs if spec[0] in _RAIL_TOOL_NAMES)
         index = layout.indexOf(anchor) + 1
         for offset, (name, checkable, tip, slot) in enumerate(specs):
             button = QPushButton(anchor.parentWidget())

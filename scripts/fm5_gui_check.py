@@ -319,18 +319,6 @@ def s_terrain_pick():
     ctrl._on_pixel_picked(QgsPointXY(centre.x() + 40, centre.y() + 40), True)  # Ctrl+click: the range grows to the slope
     check('pixel picker: Ctrl+click extends the range in degrees', (panel._low, panel._high) != before and panel._high is not None
           and panel._high <= 90, f"{before} -> {(panel._low, panel._high)}")
-    extras = ctrl._extras
-    link = extras._tools['pushButton_checkable_exploring_raster_link']
-    check('buttons: style link is off while the range applies to a slope', not link.isEnabled() and 'slope' in link.toolTip().lower(), link.toolTip()[:60])
-    from qgis.core import QgsRectangle
-    ext = layer('mnt').extent()
-    zone = QgsRectangle(ext.center().x() - 100, ext.center().y() - 100, ext.center().x() + 100, ext.center().y() + 100)
-    extras._on_zone_drawn(zone)
-    text = panel._zone_label.text()
-    import re
-    found = re.search(r'min\s+(-?[\d.]+).*?max\s+(-?[\d.]+)', text)
-    check('buttons: rectangle statistics are in degrees (0-90, not elevations)',
-          found is not None and 0 <= float(found.group(1)) <= float(found.group(2)) <= 90, text)
     check('buttons: zoom tooltip names the selected pixels', 'selected pixels' in dock().pushButton_exploring_zoom.toolTip(), dock().pushButton_exploring_zoom.toolTip()[:60])
     panel._set_range(None, 15.0)
     panel._emit_now()
@@ -360,8 +348,6 @@ def s_terrain_unfilter_check():
           and layer('mnt').source().endswith('mnt_1m.tif'), layer('mnt').source()[-40:])
     panel = controller()._raster_panel
     panel._derivative_combo.setCurrentIndex(0)  # back to the pixel value for the rest of the run
-    link = controller()._extras._tools['pushButton_checkable_exploring_raster_link']
-    check('buttons: style link is back on the pixel value', link.isEnabled(), link.toolTip()[:60])
     check('terrain: back on the pixel value', panel.current_derivative().value == 'value' and panel._data_bounds()[1] > 90.0,
           str(panel._data_bounds()))
 
