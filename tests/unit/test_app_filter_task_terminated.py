@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""A filter task that fails or is canceled ends the protection of the current-layer combo box.
+"""A filter task that fails, is canceled or ends unhandled ends the protection of the current-layer combo box.
 
 _set_filter_protection_flags blocks the combo box, disconnects its handler and sets the filtering flag when a
 filter / unfilter / reset task starts; only the completion (FilterResultHandler) undid it, so after a failed or
@@ -20,7 +20,7 @@ pytestmark = pytest.mark.unit
 _APP = Path(__file__).resolve().parents[2] / "filter_mate_app.py"
 _PKG = "fm_app_task_terminated_test"
 _METHODS = ["_execute_filter_task", "_save_current_layer_before_filter", "_set_filter_protection_flags",
-            "_filter_engine_task_terminated"]
+            "_filter_engine_task_terminated", "_release_filter_protection", "filter_engine_task_completed"]
 
 
 class _Signal:
@@ -75,7 +75,7 @@ def app():
     instance = types.SimpleNamespace(
         dockwidget=dock, PROJECT=MagicMock(), _backend_registry=None, tasks_descriptions={"filter": "Filter"},
         appTasks={}, _current_layer_id_before_filter=None, _filter_result_handler=MagicMock(),
-        _show_filter_start_message=MagicMock(), filter_engine_task_completed=MagicMock(),
+        _show_filter_start_message=MagicMock(),
         _cancel_conflicting_tasks=MagicMock(), _freeze_canvas_for_task=MagicMock(return_value=1),
         _unfreeze_canvas_after_task=MagicMock(),
     )
@@ -144,3 +144,41 @@ def test_a_task_canceled_by_the_project_closing_leaves_no_protection(app):
     app._filter_result_handler.handle_task_terminated.assert_not_called()
     assert app.dockwidget._filtering_in_progress is False
     assert app.dockwidget.comboBox_filtering_current_layer.signalsBlocked() is False
+
+
+def _connected_again(app):
+    return any(call.args == (["FILTERING", "CURRENT_LAYER"], 'connect', 'layerChanged')
+               for call in app.dockwidget.manageSignal.call_args_list)
+
+
+def test_a_filter_ending_while_the_project_closes_leaves_no_protection(app):
+    """A project change leaves a running filter alone; its completion was skipped while the project closed."""
+    _launch(app)
+    app._removing_all_layers = True
+    app.filter_engine_task_completed("filter", app.dockwidget.current_layer, {})
+    app._filter_result_handler.handle_task_completion.assert_not_called()
+    assert app.dockwidget._filtering_in_progress is False
+    assert app.dockwidget.comboBox_filtering_current_layer.signalsBlocked() is False
+    assert not _connected_again(app)  # the teardown disconnected the panel, the next project connects it
+
+
+def test_a_completion_failing_before_the_window_lifts_the_protection(app):
+    _launch(app)
+    app._filter_result_handler.handle_task_completion.side_effect = RuntimeError("source layer deleted")
+    app.filter_engine_task_completed("filter", app.dockwidget.current_layer, {})
+    assert app.dockwidget._filtering_in_progress is False
+    assert app.dockwidget.comboBox_filtering_current_layer.signalsBlocked() is False
+    assert _connected_again(app)
+
+
+def test_a_completion_failing_after_the_window_opened_leaves_it_to_the_window(app):
+    _launch(app)
+
+    def fail(**kwargs):
+        app.dockwidget._end_post_filter_window = lambda: None  # FilterResultHandler opened it
+        raise RuntimeError("late")
+
+    app._filter_result_handler.handle_task_completion.side_effect = fail
+    app.filter_engine_task_completed("filter", app.dockwidget.current_layer, {})
+    assert app.dockwidget._filtering_in_progress is True
+    assert app.dockwidget.comboBox_filtering_current_layer.signalsBlocked() is True

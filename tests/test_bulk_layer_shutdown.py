@@ -30,7 +30,7 @@ def app():
         'manage_task', '_handle_remove_all_layers', '_stop_pending_layer_additions',
         '_on_layers_added', '_process_pending_added_layers',
         '_handle_layer_task_terminated', 'layer_management_engine_task_completed', 'cleanup',
-        'filter_engine_task_completed', '_safe_layer_operation',
+        'filter_engine_task_completed', '_release_filter_protection', '_safe_layer_operation',
     ], namespace)
     instance = type('TestApp', (), methods)()
     instance.PROJECT_LAYERS = {str(i): object() for i in range(1000)}
@@ -73,6 +73,7 @@ def test_bulk_removal_skips_following_layer_tasks_and_late_callbacks(app):
     assert not app._pending_added_layers
     assert not app._add_layers_queue
     assert app._pending_add_layers_tasks == 0
+    assert app.dockwidget._filtering_in_progress is False  # a late filter completion leaves no protection
 
 
 @pytest.mark.unit
