@@ -101,14 +101,18 @@ def _constants(scope):
 
 
 def test_inline_limit_matches_postgresql():
-    """Same WKT size limit for inlining a source in SpatiaLite and PostgreSQL subsets."""
+    """Same static WKT size limit for inlining a source in SpatiaLite and PostgreSQL subsets.
+
+    2026-10-17: SpatiaLite may inline more (up to 1 MB) on a GeoPackage
+    target whose R-tree count keeps one statement under its time budget.
+    """
     spatialite = _constants(_tree(SPATIALITE_DIR / "expression_builder.py"))
     pg_tree = _tree(PLUGIN_ROOT / "adapters" / "backends" / "postgresql" / "expression_builder.py")
     pg_class = next(
         node for node in pg_tree.body
         if isinstance(node, ast.ClassDef) and node.name == "PostgreSQLExpressionBuilder"
     )
-    assert spatialite["SPATIALITE_WKT_INLINE_MAX_LENGTH"] == _constants(pg_class)["MAX_WKT_LENGTH"] == 100_000
+    assert spatialite["SPATIALITE_WKT_SIMPLIFY_THRESHOLD"] == _constants(pg_class)["MAX_WKT_LENGTH"] == 100_000
 
 
 def test_no_envelope_repair_nor_ogr_source_simplification():

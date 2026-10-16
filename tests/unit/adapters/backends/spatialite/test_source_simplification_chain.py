@@ -87,9 +87,9 @@ preparation.QgsCoordinateReferenceSystem = _FakeCrs
 def _inline_limit():
     tree = ast.parse((PLUGIN_ROOT / "adapters" / "backends" / "spatialite" / "expression_builder.py").read_text(encoding="utf-8"))
     for node in tree.body:
-        if isinstance(node, ast.Assign) and getattr(node.targets[0], "id", None) == "SPATIALITE_WKT_INLINE_MAX_LENGTH":
+        if isinstance(node, ast.Assign) and getattr(node.targets[0], "id", None) == "SPATIALITE_WKT_SIMPLIFY_THRESHOLD":
             return node.value.value
-    raise AssertionError("SPATIALITE_WKT_INLINE_MAX_LENGTH not found")
+    raise AssertionError("SPATIALITE_WKT_SIMPLIFY_THRESHOLD not found")
 
 
 INLINE_LIMIT = _inline_limit()

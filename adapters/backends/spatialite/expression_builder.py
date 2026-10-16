@@ -57,26 +57,31 @@ except ImportError:
 USE_OGR_FALLBACK = "__USE_OGR_FALLBACK__"
 
 # Thresholds
-# 2026-10-16: largest source WKT inlined in a subset string. The string is
-# copied into the subset of every target layer, into the project (``subset=``)
-# and into the FilterMate subset history, and its cost is paid by every
-# statement QGIS runs on the layer (count, extent, each render). SQLite
-# evaluates ``ST_MakeValid(ST_GeomFromText('...'))`` once per statement
-# (constant factored out, ``Once`` opcode), but the predicate itself is not
-# prepared: measured with SpatiaLite 5.1 / SQLite 3.53 (QGIS 4.2), about
-# 0.75 µs per KB of WKT per candidate row, the same for Intersects, Crosses,
-# Touches and Disjoint (24 KB: 14 µs/row, 96 KB: 65, 240 KB: 180, 673 KB:
-# 600). 100 KB keeps a 50,000-row R-tree window around 3 s per statement and
-# matches PostgreSQLExpressionBuilder.MAX_WKT_LENGTH. A larger source goes to
-# the OGR backend: QGIS processing selects the targets once (spatial index,
-# prepared geometries) and the subset becomes a key list - exact as well.
-SPATIALITE_WKT_INLINE_MAX_LENGTH = 100_000
-# 2026-10-16: the executor simplifies a source only to fit under the inline
-# limit (Intersects / Disjoint only, 1 m at most, see
-# adapters/qgis/geometry_preparation.py), so both limits are one value. This
-# builder never simplifies anything itself (its old extent / 1000 pass moved a
-# 30 km source by 30 m).
-SPATIALITE_WKT_SIMPLIFY_THRESHOLD = SPATIALITE_WKT_INLINE_MAX_LENGTH
+# 2026-10-17: inline the source WKT only when the subset string stays cheap.
+# It is evaluated by every statement QGIS runs on the target (count, extent,
+# each render, each later pan), and the predicate is not prepared: measured
+# through GDAL's GeoPackage driver with SpatiaLite 5.1 (QGIS 4.2.3), about
+# 1.1-1.4 µs per candidate row and per KB of WKT for ST_Crosses (100,000
+# candidates: 3.4 KB 0.3 s, 13 KB 1.5 s, 41 KB 4.5 s, 106 KB 12.4 s, 262 KB
+# 37 s; ``ST_MakeValid(ST_GeomFromText(...))`` itself runs once, 0.06 s for
+# 262 KB). With the target's R-tree the candidates are counted (R-tree
+# window of the source) and the source is inlined when the estimated cost of
+# one statement stays under SPATIALITE_INLINE_BUDGET_SECONDS, up to
+# SPATIALITE_WKT_INLINE_MAX_LENGTH. Otherwise - or above
+# SPATIALITE_WKT_SIMPLIFY_THRESHOLD when the candidates are unknown - the
+# layer goes to the OGR backend: the targets are read once and tested against
+# the prepared union of the source (0.9 s for Crosses on the same 100,000
+# rows in QGIS 4.2.3, plus reading them through the target's subset once)
+# and the subset becomes a key list.
+SPATIALITE_INLINE_COST_US_PER_ROW_KB = 1.4
+SPATIALITE_INLINE_BUDGET_SECONDS = 3.0
+SPATIALITE_WKT_INLINE_MAX_LENGTH = 1_000_000
+# 2026-10-16: above this the executor simplifies the source (Intersects /
+# Disjoint only, 1 m at most, see adapters/qgis/geometry_preparation.py), and
+# a source with no candidate count is not inlined. Same value as
+# PostgreSQLExpressionBuilder.MAX_WKT_LENGTH. This builder never simplifies
+# anything itself (its old extent / 1000 pass moved a 30 km source by 30 m).
+SPATIALITE_WKT_SIMPLIFY_THRESHOLD = 100_000
 
 # PERF 2026-09-12: GeoPackage R-tree prefilter. SQLite evaluates the spatial
 # predicate row by row over the whole table: with a 2,000-vertex source polygon
@@ -94,6 +99,7 @@ RTREE_PREFILTER_PREDICATES = frozenset((
 ))
 _RTREE_CACHE: Dict[tuple, tuple] = {}
 _RTREE_CACHE_LOCK = threading.Lock()
+_RTREE_COUNT_CACHE: Dict[tuple, tuple] = {}
 
 
 def gpkg_layer_location(layer) -> Tuple[Optional[str], Optional[str]]:
@@ -163,10 +169,51 @@ def gpkg_has_rtree(path: Optional[str], table: Optional[str], geom_column: Optio
     return found
 
 
+def gpkg_rtree_count(
+    path: Optional[str], table: Optional[str], geom_column: Optional[str],
+    bbox: Optional[Tuple[float, float, float, float]] = None,
+) -> Optional[int]:
+    """Entries of the GeoPackage R-tree of (table, column), within ``bbox`` when given.
+
+    2026-10-17: the number of candidate rows a subset string will test.
+    Read-only lookup through a separate connection, cached like
+    gpkg_has_rtree() for RTREE_CHECK_TTL_SECONDS (it only steers the
+    inline / OGR choice); None when unknown.
+    """
+    if not gpkg_has_rtree(path, table, geom_column):
+        return None
+    key = (os.path.abspath(path), table, geom_column, bbox)
+    now = time.monotonic()
+    with _RTREE_CACHE_LOCK:
+        cached = _RTREE_COUNT_CACHE.get(key)
+        if cached is not None and now - cached[1] < RTREE_CHECK_TTL_SECONDS:
+            return cached[0]
+    rtree_table = f"rtree_{table}_{geom_column}".replace('"', '""')
+    sql = f'SELECT count(*) FROM "{rtree_table}"'  # nosec B608 - name from the layer URI, quotes doubled
+    params: tuple = ()
+    if bbox is not None:
+        xmin, ymin, xmax, ymax = bbox
+        sql += " WHERE minx <= ? AND maxx >= ? AND miny <= ? AND maxy >= ?"
+        params = (xmax, xmin, ymax, ymin)
+    try:
+        connection = sqlite3.connect(f"file:{pathname2url(os.path.abspath(path))}?mode=ro", uri=True, timeout=1.0)
+        try:
+            count = int(connection.execute(sql, params).fetchone()[0])
+        finally:
+            connection.close()
+    except (sqlite3.Error, OSError, ValueError, TypeError) as exc:
+        logger.info(f"R-tree count skipped for {os.path.basename(str(path))} ({table}): {exc}")
+        return None
+    with _RTREE_CACHE_LOCK:
+        _RTREE_COUNT_CACHE[key] = (count, now)
+    return count
+
+
 def clear_rtree_cache() -> None:
     """Forget the R-tree lookups (tests, or after a file is rebuilt)."""
     with _RTREE_CACHE_LOCK:
         _RTREE_CACHE.clear()
+        _RTREE_COUNT_CACHE.clear()
 
 
 class SpatialiteExpressionBuilder(GeometricFilterPort):
@@ -378,6 +425,24 @@ class SpatialiteExpressionBuilder(GeometricFilterPort):
 
         self.log_debug(f"SRIDs: source={source_srid}, target={target_srid}")
 
+        # 2026-10-17: inline only when one statement stays cheap (see
+        # SPATIALITE_INLINE_BUDGET_SECONDS); else the OGR backend selects once.
+        inline_cost = self._inline_cost_seconds(
+            layer, geom_field, source_geom, source_srid, target_srid, buffer_value, predicates
+        )
+        if inline_cost is None and wkt_length > SPATIALITE_WKT_SIMPLIFY_THRESHOLD:
+            self.log_warning(
+                f"Source WKT too large to inline without a candidate count ({wkt_length:,} > "
+                f"{SPATIALITE_WKT_SIMPLIFY_THRESHOLD:,} chars) - returning OGR fallback (exact, QGIS processing)"
+            )
+            return USE_OGR_FALLBACK
+        if inline_cost is not None and inline_cost > SPATIALITE_INLINE_BUDGET_SECONDS:
+            self.log_warning(
+                f"Source WKT too large to inline for this layer ({wkt_length:,} chars, about {inline_cost:.1f} s "
+                f"per statement > {SPATIALITE_INLINE_BUDGET_SECONDS:g} s) - returning OGR fallback (exact, QGIS processing)"
+            )
+            return USE_OGR_FALLBACK
+
         # Build source geometry SQL
         # FIX v4.2.11: Pass buffer_expression for dynamic buffer support
         source_geom_sql = self._build_source_geometry_sql(
@@ -547,6 +612,47 @@ class SpatialiteExpressionBuilder(GeometricFilterPort):
             f'ROWID IN (SELECT id FROM "{rtree_table}" '  # nosec B608 - finite floats, table name from the layer URI with quotes doubled, OGR subset string not a cursor
             f'WHERE minx <= {xmax!r} AND maxx >= {xmin!r} AND miny <= {ymax!r} AND maxy >= {ymin!r})'
         )
+
+    def _inline_cost_seconds(
+        self,
+        layer,
+        geom_field: str,
+        source_wkt: str,
+        source_srid: int,
+        target_srid: int,
+        buffer_value: Optional[float],
+        predicates: Dict[str, bool]
+    ) -> Optional[float]:
+        """Estimated time of one statement on ``layer`` with the source inlined, or None if unknown.
+
+        2026-10-17: candidates (target R-tree entries in the source bounding
+        box, or the whole R-tree for Disjoint) x KB of WKT x
+        SPATIALITE_INLINE_COST_US_PER_ROW_KB. Only GeoPackage targets with an
+        R-tree have a count.
+        """
+        if not layer or not self._is_geopackage(layer):
+            return None
+        try:
+            if layer.providerType() != 'ogr':
+                return None
+        except Exception:
+            return None
+        path, table = gpkg_layer_location(layer)
+        active = [str(name).lower().replace('st_', '') for name, enabled in predicates.items() if enabled]
+        bbox = None
+        if active and all(name in RTREE_PREFILTER_PREDICATES for name in active):
+            bbox = self._source_bbox(source_wkt, source_srid, target_srid, buffer_value)
+            if bbox is None:
+                return None
+        candidates = gpkg_rtree_count(path, table, geom_field, bbox)
+        if candidates is None:
+            return None
+        cost = candidates * (len(source_wkt) / 1000.0) * SPATIALITE_INLINE_COST_US_PER_ROW_KB / 1e6
+        self.log_info(
+            f"Inline estimate for {table}: {candidates:,} candidates x {len(source_wkt) / 1000.0:.0f} KB "
+            f"≈ {cost:.1f} s per statement"
+        )
+        return cost
 
     def _source_bbox(
         self,

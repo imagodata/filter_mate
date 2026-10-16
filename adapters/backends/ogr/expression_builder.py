@@ -142,6 +142,11 @@ class OGRExpressionBuilder(GeometricFilterPort):
         'overlaps': 5,
         'within': 6,
         'crosses': 7,
+        # 2026-10-16: were missing, so Covers / CoveredBy fell back to code 0
+        # (Intersects). select-by-location has no covers predicate: the
+        # closest are Contains / Within, as FilterEngineTask maps them.
+        'covers': 1,
+        'coveredby': 6,
     }
 
     def __init__(self, task_params: Dict[str, Any]):
@@ -327,6 +332,15 @@ class OGRExpressionBuilder(GeometricFilterPort):
                     return False
                 self.log_info(f"  - Buffered source: {source_layer.featureCount()} features")
 
+            # 2026-10-17: test the union of the source, like the SpatiaLite
+            # and GeoPackage SQL (one dissolved WKT). select-by-location
+            # tests each source feature on its own: "Cross" from the 691
+            # Toulouse rivers kept 702 roads instead of ~747 (a road meeting
+            # two rivers at a junction crosses the network, not either river)
+            # and ran 691 target requests, each paying the target's subset
+            # again (98 s for troncon_de_route).
+            source_union = self._source_union(source_layer)
+
             # Map predicates to QGIS codes
             predicate_codes = []
             for pred in predicates:
@@ -337,25 +351,30 @@ class OGRExpressionBuilder(GeometricFilterPort):
             # Create feedback for cancellation
             self._feedback = CancellableFeedback()
 
-            # Run selectbylocation
-            try:
-                processing.run(
-                    'native:selectbylocation',
-                    {
-                        'INPUT': layer,
-                        'INTERSECT': source_layer,
-                        'PREDICATE': predicate_codes,
-                        'METHOD': 0  # New selection
-                    },
-                    feedback=self._feedback
-                )
-            except Exception as e:
-                self.last_error = f"native:selectbylocation processing failed: {e}"
-                self.log_error(self.last_error)
-                return False
+            if source_union is not None:
+                selected_ids = self._select_against_union(layer, source_union, source_layer.crs(), predicate_codes)
+                if selected_ids is None:
+                    return False
+            else:
+                # Run selectbylocation
+                try:
+                    processing.run(
+                        'native:selectbylocation',
+                        {
+                            'INPUT': layer,
+                            'INTERSECT': source_layer,
+                            'PREDICATE': predicate_codes,
+                            'METHOD': 0  # New selection
+                        },
+                        feedback=self._feedback
+                    )
+                except Exception as e:
+                    self.last_error = f"native:selectbylocation processing failed: {e}"
+                    self.log_error(self.last_error)
+                    return False
 
-            # Get selected feature IDs
-            selected_ids = list(layer.selectedFeatureIds())
+                # Get selected feature IDs
+                selected_ids = list(layer.selectedFeatureIds())
             self.log_info(f"  - Selected: {len(selected_ids)} features")
 
             if not selected_ids:
@@ -667,6 +686,97 @@ class OGRExpressionBuilder(GeometricFilterPort):
         if params is None:
             return {}
         return params.setdefault('_ogr_buffered_source_cache', {})
+
+    def _source_union(self, layer: 'QgsVectorLayer'):
+        """Union of the source geometries, or None to test the source features one by one.
+
+        2026-10-17: the filter tests the union of the source on every
+        backend (SpatiaLite / GeoPackage inline one dissolved WKT). Computed
+        once per task and source layer (task_params cache, like the buffered
+        source). None for a single-feature source (same answer, the
+        select-by-location path stays) and, with a WARNING, when the union
+        fails or mixes geometry types.
+        """
+        try:
+            if layer.featureCount() <= 1:
+                return None
+        except RuntimeError:
+            return None
+        from qgis.core import QgsFeatureRequest, QgsGeometry, QgsWkbTypes
+
+        params = self.task_params if isinstance(self.task_params, dict) else {}
+        cache = params.setdefault('_ogr_source_union_cache', {})
+        if layer.id() in cache:
+            return cache[layer.id()]
+        geometries = [
+            feature.geometry()
+            for feature in layer.getFeatures(QgsFeatureRequest().setNoAttributes())
+            if feature.hasGeometry() and not feature.geometry().isEmpty()
+        ]
+        union = QgsGeometry.unaryUnion(geometries) if geometries else None
+        if union is None or union.isEmpty():
+            union = QgsGeometry.unaryUnion([geometry.makeValid() for geometry in geometries]) if geometries else None
+        if (
+            union is None or union.isEmpty()
+            or QgsWkbTypes.geometryType(union.wkbType()) != QgsWkbTypes.geometryType(layer.wkbType())
+        ):
+            self.log_warning(
+                f"  ⚠️ Union of the source {layer.name()} unavailable: each source feature is tested on its own "
+                "(Crosses / Touches / Within may differ from the SQL backends)"
+            )
+            union = None
+        else:
+            self.log_info(f"  - Source dissolved: {len(geometries)} features → 1 (union semantics)")
+        cache[layer.id()] = union
+        return union
+
+    def _select_against_union(self, layer, union, union_crs, predicate_codes) -> Optional[list]:
+        """Ids of the ``layer`` features related to ``union`` by any of ``predicate_codes``.
+
+        2026-10-17: same codes and directions as native:selectbylocation
+        (INPUT = target, INTERSECT = source): Contains = the target contains
+        the source, Within = the target is within the source. One request
+        (bounding box of the source, the whole layer for Disjoint) through
+        the layer and its subset, a prepared source, and a prepared
+        Intersects before the costlier predicates. Measured on 100,000 road
+        segments and a 260 KB river network (shapely / GEOS 3.14): 3 s to
+        read the candidates through a framed subset, 0.07 s for Intersects,
+        0.4 s for Crosses on the hits; select-by-location with the union
+        took 4.6 s, one request per river 35 s through the same subset.
+        Returns None (last_error set) when cancelled.
+        """
+        from qgis.core import QgsFeatureRequest, QgsGeometry, QgsProject
+
+        engine = QgsGeometry.createGeometryEngine(union.constGet())
+        engine.prepareGeometry()
+        codes = set(predicate_codes)
+        request = QgsFeatureRequest().setNoAttributes()
+        request.setDestinationCrs(union_crs, QgsProject.instance().transformContext())
+        if 2 not in codes:  # every predicate but Disjoint needs a shared point
+            request.setFilterRect(union.boundingBox())
+        tests = {
+            1: engine.within,     # target contains source
+            3: engine.isEqual,
+            4: engine.touches,
+            5: engine.overlaps,
+            6: engine.contains,   # target within source
+            7: engine.crosses,
+        }
+        selected = []
+        for index, feature in enumerate(layer.getFeatures(request)):
+            if index % 1000 == 0 and self._feedback is not None and self._feedback.isCanceled():
+                self.last_error = "OGR selection cancelled"
+                return None
+            if not feature.hasGeometry():
+                continue
+            geometry = feature.geometry().constGet()
+            if not engine.intersects(geometry):
+                if 2 in codes:
+                    selected.append(feature.id())
+                continue
+            if 0 in codes or any(code in tests and tests[code](geometry) for code in codes):
+                selected.append(feature.id())
+        return selected
 
     def _apply_buffer_to_layer(
         self,
