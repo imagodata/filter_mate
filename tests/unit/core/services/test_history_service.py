@@ -738,11 +738,29 @@ class TestRemoveHistory:
 
         entry = h.peek_undo()
         assert entry.layer_ids == ("B", "C")
-        # The layout push_global_state(source="B", remotes={"C": ...}) records
+        # The source as push_global_state records one: layer_ids[0] and expression
         assert entry.expression == "b = 1"
         assert entry.get_metadata_value("source_feature_count") == 2
-        assert set(entry.get_metadata_value("remote_layers")) == {"C"}
         assert dict(entry.previous_filters) == {"B": "b0", "C": "c0"}
+        # B stays in remote_layers: UndoRedoHandler._perform_global_redo gives the current
+        # layer the entry expression and looks every other layer up there.
+        remote = entry.get_metadata_value("remote_layers")
+        assert {lid: info["expression"] for lid, info in remote.items()} == {"B": "b = 1", "C": "c = 1"}
+
+    def test_global_redo_after_the_source_left(self):
+        """The expressions a global redo applies (UndoRedoHandler._perform_global_redo rule)."""
+        h = HistoryService()
+        _global_state(h)
+        h.remove_history("A")
+        entry = h.peek_undo()
+
+        def redo(current):
+            remote = entry.get_metadata_value("remote_layers") or {}
+            return {lid: entry.expression if lid == current else remote.get(lid, {}).get("expression", "")
+                    for lid in entry.layer_ids}
+
+        assert redo("B") == {"B": "b = 1", "C": "c = 1"}
+        assert redo("X") == {"B": "b = 1", "C": "c = 1"}  # a layer outside the entry
 
     def test_a_removed_source_without_per_layer_expressions_keeps_the_expression(self):
         h = HistoryService()

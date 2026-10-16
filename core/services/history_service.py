@@ -582,8 +582,8 @@ class HistoryService:
         filter, and a Redo would give it this layer's expression. Entries of
         several layers lose this one (layer id, previous filter, remote_layers
         metadata) and stay for the others; when it was the source, the first
-        remaining layer becomes the source with the expression it received,
-        as push_global_state would have recorded it.
+        remaining layer becomes the source with the expression it received
+        (layer_ids[0] and expression, as push_global_state records a source).
 
         Args:
             layer_id: ID of the removed layer
@@ -632,7 +632,9 @@ class HistoryService:
         if entry.layer_ids[0] == layer_id:
             # The source left: the first remaining layer takes its place. An entry
             # without per-layer expressions keeps the one it applied to every layer.
-            source_info = remote_layers.pop(layer_ids[0], None)
+            # It stays in remote_layers too: a global redo or the previous expression
+            # of a later filter look a layer up there when it is not the current one.
+            source_info = remote_layers.get(layer_ids[0])
             if isinstance(source_info, dict):
                 expression = source_info.get('expression', '')
                 if 'feature_count' in source_info:
