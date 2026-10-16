@@ -3,14 +3,17 @@ API configuration.
 
 Reads settings from environment variables, falling back to defaults.
 Kept intentionally separate from the QGIS plugin config (config/config.py)
-which depends on QgsApplication and QgsProject.
+which depends on QgsApplication and QgsProject: only the values it already
+computed (``ENV_VARS``, when the plugin runs in this process) are read.
 """
+
+from __future__ import annotations
 
 import hashlib
 import json
 import logging
 import os
-import tempfile
+import sys
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -39,15 +42,94 @@ def _hash_api_key(plaintext: str) -> str:
     return hashlib.sha256(plaintext.encode("utf-8")).hexdigest()
 
 
-def _default_export_root() -> Path:
-    """Per-user folder in the temp directory (shared /tmp on Linux)."""
-    import getpass
+def _origins(value) -> list:
+    """``cors_origins`` as a list of origins.
+
+    A string (a hand-edited config.json) is split on commas: CORSMiddleware
+    would test substrings of it (``"http://localhost:3000"`` allowing
+    ``"http://local"``). Anything else but a list of strings is refused.
+    """
+    if value is None:
+        return []
+    if isinstance(value, str):
+        items = value.split(",")
+    elif isinstance(value, (list, tuple)) and all(isinstance(item, str) for item in value):
+        items = list(value)
+    else:
+        raise APIConfigError(f"cors_origins must be a list of origins or a comma-separated string, got {value!r}")
+    return [item.strip() for item in items if item.strip()]
+
+
+def _plugin_env_vars() -> dict:
+    """``ENV_VARS`` of the FilterMate plugin running in this process, ``{}`` otherwise.
+
+    Read from the plugin module QGIS already imported, never imported here:
+    that would initialise QGIS-bound state (standalone uvicorn, tests).
+    """
+    names = ["filter_mate.config.config"]
+    if __package__ and "." in __package__:  # filter_mate.filtermate_api, whatever the plugin folder name
+        names.insert(0, f"{__package__.rsplit('.', 1)[0]}.config.config")
+    for name in names:
+        env_vars = getattr(sys.modules.get(name), "ENV_VARS", None)
+        if isinstance(env_vars, dict) and env_vars:
+            return env_vars
+    return {}
+
+
+def _qgis_profile_dir() -> str:
+    """Folder of the running QGIS profile (``QgsApplication.qgisSettingsDirPath()``), "" outside QGIS."""
+    settings = _plugin_env_vars().get("QGIS_SETTINGS_PATH")
+    if settings:
+        return str(settings)
+    application = getattr(sys.modules.get("qgis.core"), "QgsApplication", None)
     try:
-        user = getpass.getuser()
+        path = application.qgisSettingsDirPath() if application is not None else ""
     except Exception:
-        user = "user"
-    safe = "".join(c for c in user if c.isalnum() or c in "-_") or "user"
-    return Path(tempfile.gettempdir()) / f"filtermate_exports_{safe}"
+        path = ""
+    return path if isinstance(path, str) else ""
+
+
+def _default_export_root() -> Path:
+    """``FilterMate/exports`` in the QGIS profile folder, else ``~/.filtermate/exports``.
+
+    Never in the shared temp folder: another account could create the folder
+    (or a link of that name) first and read or redirect the exports. Not in
+    the plugin data folder either: it can be set to a team share.
+    """
+    profile = _qgis_profile_dir()
+    if profile:
+        return Path(profile) / "FilterMate" / "exports"
+    return Path.home() / ".filtermate" / "exports"
+
+
+def _has_api_section(path: Path) -> bool:
+    try:
+        with open(path, encoding="utf-8") as fh:
+            return isinstance(json.load(fh).get("API"), dict)
+    except (OSError, ValueError, AttributeError):
+        return False
+
+
+def _default_config_path() -> Path:
+    """config.json holding the API settings.
+
+    The one the plugin uses (QGIS profile) when the plugin runs here; but
+    while it has no ``API`` section and ``config/config.json`` of the plugin
+    folder (where 4.x read them) has one, that one, with a warning: an API
+    key must not silently vanish on upgrade.
+    """
+    legacy = _PROJECT_ROOT / "config" / "config.json"
+    profile = _plugin_env_vars().get("CONFIG_JSON_PATH")
+    if not profile:
+        return legacy
+    profile = Path(profile)
+    if _has_api_section(profile) or not _has_api_section(legacy):
+        return profile
+    logging.getLogger("filtermate_api").warning(
+        "filtermate_api.config: API settings read from %s, their old place. Move the \"API\" "
+        "section to %s, the config.json FilterMate uses.", legacy, profile,
+    )
+    return legacy
 
 
 @dataclass
@@ -58,7 +140,9 @@ class APIConfig:
     port: int = 8000
     debug: bool = False
     log_level: str = "info"
-    cors_origins: list[str] = field(default_factory=lambda: ["*"])
+    # No cross-origin access unless origins are listed: a web page the user
+    # visits must not be able to drive the QGIS session through the browser.
+    cors_origins: list[str] = field(default_factory=list)
     project_root: Path = _PROJECT_ROOT
     # Issue #28 — when set, every business request must carry an
     # ``X-API-Key`` header equal to this value. Empty/None ⇒ auth
@@ -76,6 +160,7 @@ class APIConfig:
     export_root: Path = field(default_factory=lambda: _default_export_root())
 
     def __post_init__(self) -> None:
+        self.cors_origins = _origins(self.cors_origins)
         # Derive the hash from plaintext when only ``api_key`` was
         # provided (env path, legacy JSON path, or direct construction
         # in tests). When both are provided, trust ``api_key_hash`` as
@@ -97,9 +182,9 @@ class APIConfig:
             FILTERMATE_API_PORT     — bind port     (default 8000)
             FILTERMATE_API_DEBUG    — enable debug  (default false)
             FILTERMATE_API_LOG_LEVEL — uvicorn log level (default info)
-            FILTERMATE_API_CORS_ORIGINS — comma-separated origins (default *)
+            FILTERMATE_API_CORS_ORIGINS — comma-separated origins (default: none)
         """
-        cors_raw = os.getenv("FILTERMATE_API_CORS_ORIGINS", "*")
+        cors_raw = os.getenv("FILTERMATE_API_CORS_ORIGINS", "")
         cors_origins = [o.strip() for o in cors_raw.split(",") if o.strip()]
 
         return cls(
@@ -118,7 +203,10 @@ class APIConfig:
         """Load API config from a JSON file.
 
         Looks for an ``"API"`` key in the JSON. If absent, returns defaults.
-        Falls back to ``config/config.json`` in the project root.
+        Without ``path``: the config.json the plugin uses (QGIS profile,
+        ``ENV_VARS["CONFIG_JSON_PATH"]``), else ``config/config.json`` in the
+        project root (standalone, or the 4.x place, see
+        :func:`_default_config_path`).
 
         Auth fields (mutually exclusive — ``api_key_sha256`` wins):
 
@@ -131,7 +219,7 @@ class APIConfig:
           ``FILTERMATE_API_KEY`` env var.
         """
         if path is None:
-            path = _PROJECT_ROOT / "config" / "config.json"
+            path = _default_config_path()
         path = Path(path)
         if not path.exists():
             return cls()
@@ -164,7 +252,7 @@ class APIConfig:
             port=api_section.get("port", 8000),
             debug=api_section.get("debug", False),
             log_level=api_section.get("log_level", "info"),
-            cors_origins=api_section.get("cors_origins", ["*"]),
+            cors_origins=api_section.get("cors_origins", []),
             api_key=api_key,
             api_key_hash=api_key_hash,
             **({"export_root": Path(api_section["export_root"])} if api_section.get("export_root") else {}),
@@ -217,16 +305,20 @@ class APIConfig:
     def validate(self, allow_insecure: bool | None = None) -> None:
         """Reject insecure deployments before the app boots.
 
-        Two combinations are remotely exploitable and refused:
+        Three combinations are remotely exploitable and refused:
 
         1. **Non-loopback bind without auth** — anything on the LAN can
            drive the QGIS session. CWE-306.
         2. **Non-loopback bind with wildcard CORS** — even with auth, a
            browser-driven CSRF can replay credentials when the user
            visits a hostile page. CWE-942.
+        3. **Wildcard CORS without auth, loopback included** — any web
+           page the user visits could read the project layers and apply
+           filters (raw SQL subsets on PostgreSQL) through the browser.
+           CWE-942.
 
         ``allow_insecure=True`` (or env ``FILTERMATE_API_ALLOW_INSECURE=1``)
-        bypasses both rules — for tests/CI only.
+        bypasses these rules — for tests/CI only.
         """
         if allow_insecure is None:
             allow_insecure = os.getenv(_INSECURE_OVERRIDE_ENV, "").lower() in (
@@ -249,4 +341,12 @@ class APIConfig:
                 f"Refusing to start: cors_origins={self.cors_origins!r} contains "
                 f"a wildcard on non-loopback host {self.host!r}. Specify explicit "
                 f"origins or set {_INSECURE_OVERRIDE_ENV}=1 to override (dev only)."
+            )
+
+        if self.has_wildcard_cors and not self.has_auth:
+            raise APIConfigError(
+                f"Refusing to start: cors_origins={self.cors_origins!r} contains "
+                f"a wildcard but api_key is unset — any web page could drive QGIS. "
+                f"Set FILTERMATE_API_KEY, list explicit origins, or set "
+                f"{_INSECURE_OVERRIDE_ENV}=1 to override (dev only)."
             )

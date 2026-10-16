@@ -29,7 +29,7 @@ def layers() -> list[LayerSummary]:
 @pytest.fixture
 def client(layers, tmp_path) -> TestClient:
     config = APIConfig(export_root=tmp_path / "exports")
-    return TestClient(create_app(config=config, accessor=InMemoryAccessor(layers=layers), allow_insecure=True))
+    return TestClient(create_app(config=config, accessor=InMemoryAccessor(layers=layers), allow_insecure=True), base_url="http://127.0.0.1:8000")
 
 
 class TestGeometryFilter:

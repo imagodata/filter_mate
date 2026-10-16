@@ -63,7 +63,7 @@ class CrossFilterResult:
     filtered: List[str] = field(default_factory=list)
     failed: Dict[str, str] = field(default_factory=dict)
     error: Optional[str] = None
-    # Reserved: layers left out on purpose (the QGIS accessor reports them in ``failed``).
+    # Layers left out on purpose (not found, not filterable, the source itself), apart from ``failed``.
     skipped: Dict[str, str] = field(default_factory=dict)
 
 

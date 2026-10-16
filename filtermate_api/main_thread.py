@@ -19,6 +19,13 @@ This module exposes :func:`run_on_main_thread` which:
   :class:`threading.Event` for the result. Exceptions raised on the
   main thread re-raise on the caller's thread.
 
+The timeout bounds the wait for the main thread to *start* the call. A
+call still queued then is abandoned — it never runs, not even late and out
+of order — and :class:`QGISBusy` is raised (REST: 503, retry later). A call
+the main thread already started is waited for until it ends, so the caller
+reports what really happened rather than an error for a change that lands
+anyway.
+
 When QGIS / Qt is not importable (the headless test harness), the
 function runs the callable inline and emits a one-time warning so the
 lack of true main-thread enforcement is not invisible.
@@ -33,6 +40,16 @@ from typing import Any, Callable, Optional
 logger = logging.getLogger("filtermate_api.main_thread")
 
 _DEFAULT_TIMEOUT_SECONDS = 30.0
+
+
+class QGISBusy(TimeoutError):
+    """QGIS could not take the call now: nothing was changed, retry later.
+
+    Raised when the main thread did not start a dispatched call in time
+    (the call is dropped), and by the accessor while a FilterMate
+    operation or filter task runs.
+    """
+
 
 # One-time guard so the headless-mode warning doesn't spam the log when
 # the API is exercised in tests.
@@ -98,8 +115,9 @@ def run_on_main_thread(
 
     When already on the main thread the call runs inline (no Qt event
     queue trip). Otherwise the call is marshalled to a QObject living
-    on the main thread and the worker blocks until completion or
-    ``timeout`` seconds elapse — whichever comes first.
+    on the main thread and the worker blocks until it completes. When
+    the main thread has not started it after ``timeout`` seconds, the
+    call is dropped and :class:`QGISBusy` raised (see the module doc).
 
     Re-raises any exception raised by ``fn`` so the caller sees the
     original traceback (just on its own thread).
@@ -125,11 +143,39 @@ def run_on_main_thread(
     if QThread.currentThread() is dispatcher.thread():  # pragma: no cover
         return fn(*args, **kwargs)
 
-    result_holder: list = []  # pragma: no cover
-    error_holder: list = []  # pragma: no cover
-    done = threading.Event()  # pragma: no cover
+    def _post(wrapper: Callable[[], None]) -> None:  # pragma: no cover
+        QMetaObject.invokeMethod(
+            dispatcher, "_run", Qt.ConnectionType.QueuedConnection, Q_ARG(object, wrapper)
+        )
 
-    def _wrapper() -> None:  # pragma: no cover
+    return _dispatch(_post, fn, args, kwargs, timeout)  # pragma: no cover
+
+
+def _dispatch(
+    post: Callable[[Callable[[], None]], None],
+    fn: Callable[..., Any],
+    args: tuple,
+    kwargs: dict,
+    timeout: float,
+) -> Any:
+    """Hand ``fn(*args, **kwargs)`` to ``post`` (main thread queue) and wait for it.
+
+    ``timeout`` bounds the wait for the call to START: a call still queued
+    then is marked abandoned — its wrapper returns without calling ``fn``
+    when the main thread reaches it — and :class:`QGISBusy` is raised. A
+    call already running is waited for until it ends.
+    """
+    lock = threading.Lock()
+    state = {"started": False, "abandoned": False}
+    result_holder: list = []
+    error_holder: list = []
+    done = threading.Event()
+
+    def _wrapper() -> None:
+        with lock:
+            if state["abandoned"]:
+                return  # the caller gave up: running now would apply a change reported as failed
+            state["started"] = True
         try:
             result_holder.append(fn(*args, **kwargs))
         except Exception as exc:  # noqa: BLE001 - re-raised below
@@ -137,17 +183,19 @@ def run_on_main_thread(
         finally:
             done.set()
 
-    QMetaObject.invokeMethod(  # pragma: no cover
-        dispatcher, "_run", Qt.ConnectionType.QueuedConnection, Q_ARG(object, _wrapper)
-    )
-    if not done.wait(timeout=timeout):  # pragma: no cover
-        raise TimeoutError(
-            f"main_thread.run_on_main_thread: invocation timed out after "
-            f"{timeout:.0f}s — main thread may be blocked"
-        )
-    if error_holder:  # pragma: no cover
+    post(_wrapper)
+    if not done.wait(timeout=timeout):
+        with lock:
+            if not state["started"]:
+                state["abandoned"] = True
+                raise QGISBusy(
+                    f"the QGIS main thread did not take the call within {timeout:.0f}s "
+                    f"(busy with a long task): nothing was changed, retry later"
+                )
+        done.wait()  # running on the main thread: report its real outcome
+    if error_holder:
         raise error_holder[0]
-    return result_holder[0] if result_holder else None  # pragma: no cover
+    return result_holder[0] if result_holder else None
 
 
 def reset_for_tests() -> None:

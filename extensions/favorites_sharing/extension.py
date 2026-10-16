@@ -341,6 +341,15 @@ class FavoritesSharingExtension(BaseExtension):
 
         return actions
 
+    def purge_legacy_config(self) -> bool:
+        """Drop the refused plaintext ``auth_header`` of 4.x repos from the live config.
+
+        Called by the registry when it loads the extension configs — enabled,
+        disabled or missing its dependencies alike —, which then writes
+        config.json. Returns True when the config changed.
+        """
+        return RemoteRepoManager(extension=self).purge_plaintext_auth(persist=False)
+
     def get_remote_repos(self) -> List[Dict[str, Any]]:
         """Return the configured remote repos (never None, never malformed).
 
