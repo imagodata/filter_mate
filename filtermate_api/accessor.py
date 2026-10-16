@@ -36,6 +36,16 @@ class FavoritesUnavailable(RuntimeError):
     """
 
 
+class UndoUnavailable(RuntimeError):
+    """Undo / redo refused: the last API change is not in the history they walk.
+
+    ``/filters/undo`` and ``/filters/redo`` walk the dock's vector filter
+    history. FilterMate 5 operations (cross, geometry, point cloud, clear,
+    favorites) are not in it: right after one of them an undo would revert
+    an unrelated dock step, so the route answers 409 instead.
+    """
+
+
 @dataclass(frozen=True)
 class LayerSummary:
     """Lightweight projection of a QGIS layer for API consumers.
@@ -63,7 +73,7 @@ class CrossFilterResult:
     filtered: List[str] = field(default_factory=list)
     failed: Dict[str, str] = field(default_factory=dict)
     error: Optional[str] = None
-    # Reserved: layers left out on purpose (the QGIS accessor reports them in ``failed``).
+    # Layers left out on purpose (not found, not filterable, the source itself), apart from ``failed``.
     skipped: Dict[str, str] = field(default_factory=dict)
 
 

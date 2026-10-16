@@ -21,7 +21,9 @@ from ..accessor import (
     FilterStatus,
     HistoryStep,
     OperationResult,
+    UndoUnavailable,
 )
+from ..main_thread import QGISBusy
 
 router = APIRouter(prefix="/filters", tags=["filters"])
 
@@ -65,6 +67,27 @@ def _accessor(request: Request) -> FilterMateAccessor:
     return accessor
 
 
+def active_filters_after_change(accessor: FilterMateAccessor) -> Dict[str, str]:
+    """Snapshot sent back with a change, ``{}`` when QGIS is too busy to read it.
+
+    The change is done by then: answering 503 would make the client retry
+    it (an undo applied twice). ``GET /filters/state`` reads the state.
+    """
+    try:
+        return accessor.get_active_filters()
+    except QGISBusy:
+        return {}
+
+
+def _failed(operation: str, error: str) -> HTTPException:
+    """400 naming what stopped the operation (a busy QGIS is a 503, see server)."""
+    return HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"{operation} failed: {error}")
+
+
+_NOT_IN_HISTORY = ("The last API change was a FilterMate 5 operation ({0}), which is not in the undo history: "
+                   "revert it with POST /filters/clear")
+
+
 @router.post("/apply", response_model=ApplyFilterResponse)
 def apply_filter(
     payload: ApplyFilterRequest, request: Request
@@ -93,7 +116,7 @@ def apply_filter(
         layer_name=payload.layer_name,
         expression=payload.expression,
         source=payload.source,
-        active_filters=accessor.get_active_filters(),
+        active_filters=active_filters_after_change(accessor),
     )
 
 
@@ -116,9 +139,15 @@ def undo_filter(request: Request) -> HistoryStepResponse:
     Returns the step we just rolled back TO. 409 when there is nothing
     to undo so clients can disable the button without polling /status
     first.
+
+    The history is the dock's vector filter history (its Undo button).
+    FilterMate 5 operations are not in it: right after one, 409 too.
     """
     accessor = _accessor(request)
-    step = accessor.undo_filter()
+    try:
+        step = accessor.undo_filter()
+    except UndoUnavailable as exc:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=_NOT_IN_HISTORY.format(exc))
     if step is None:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
@@ -126,15 +155,18 @@ def undo_filter(request: Request) -> HistoryStepResponse:
         )
     return HistoryStepResponse(
         step=step,
-        active_filters=accessor.get_active_filters(),
+        active_filters=active_filters_after_change(accessor),
     )
 
 
 @router.post("/redo", response_model=HistoryStepResponse)
 def redo_filter(request: Request) -> HistoryStepResponse:
-    """Issue #33 — re-apply the most recently undone step."""
+    """Issue #33 — re-apply the most recently undone step (dock's vector history)."""
     accessor = _accessor(request)
-    step = accessor.redo_filter()
+    try:
+        step = accessor.redo_filter()
+    except UndoUnavailable as exc:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=_NOT_IN_HISTORY.format(exc))
     if step is None:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
@@ -142,7 +174,7 @@ def redo_filter(request: Request) -> HistoryStepResponse:
         )
     return HistoryStepResponse(
         step=step,
-        active_filters=accessor.get_active_filters(),
+        active_filters=active_filters_after_change(accessor),
     )
 
 
@@ -252,7 +284,7 @@ def cross_filter(payload: CrossFilterRequestBody, request: Request) -> CrossFilt
     if result is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Source layer not found")
     if result.error:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Cross filter failed")
+        raise _failed("Cross filter", result.error)
     return result
 
 
@@ -269,7 +301,7 @@ def geometry_filter(payload: GeometryFilterRequestBody, request: Request) -> Cro
         wkt=payload.wkt, crs=payload.crs, target_layers=payload.target_layers, predicates=payload.predicates,
         buffer=payload.buffer, coverage_min=payload.coverage_min, operator=payload.operator)
     if result.error:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Geometry filter failed")
+        raise _failed("Geometry filter", result.error)
     return result
 
 
@@ -289,7 +321,7 @@ def point_cloud_filter(payload: PointCloudFilterRequestBody, request: Request) -
     result = _accessor(request).filter_point_clouds(
         layers=payload.layers, criteria=payload.criteria.model_dump(), operator=payload.operator)
     if result.error:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Point cloud filter failed")
+        raise _failed("Point cloud filter", result.error)
     return result
 
 
@@ -302,7 +334,7 @@ def clear_filters(payload: ClearFiltersRequestBody, request: Request) -> Operati
     """Put layers of any kind back on their original source, with no filter (undoable in the dock)."""
     result = _accessor(request).clear_filters(layers=payload.layers)
     if result.error:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Clear failed")
+        raise _failed("Clear", result.error)
     return result
 
 

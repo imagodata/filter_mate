@@ -23,6 +23,7 @@ Operations:
 * :func:`export_layers` - filtered layers to files (vector, GeoTIFF / COG, LAZ / COPC);
 * :func:`apply_favorite` / :func:`list_favorites` - saved favorites, dock or not.
 """
+import functools
 import json
 import logging
 import os
@@ -133,14 +134,54 @@ def _api_service():
     return _API_SERVICE
 
 
-def _busy() -> str:
-    """Error message while a cross filter of the dock still runs in the background, "" otherwise."""
+# Name of the operation running now: one at a time (see busy_reason).
+_RUNNING: List[str] = []
+
+BACKGROUND_BUSY = "a FilterMate filter is still running in the background: try again when it ends"
+
+
+def _background_tasks_running() -> bool:
+    """A FilterMate task of the dock still runs: cross filter, export, or a vector filter task."""
     try:
-        from ...core.services.cross_filter_service import _finished, get_cross_filter_service
-        running = [task for task in get_cross_filter_service()._running if not _finished(task)]
+        from ...core.services.cross_filter_service import _finished, filtermate_tasks_active, get_cross_filter_service
+        if any(not _finished(task) for task in get_cross_filter_service()._running) or filtermate_tasks_active():
+            return True
+        from qgis.core import QgsApplication
+        tasks = list(QgsApplication.taskManager().activeTasks())
     except Exception:
-        return ""
-    return "a FilterMate filter is still running in the background: try again when it ends" if running else ""
+        return False
+    # The vector engine of the dock applies its subsets when its task ends:
+    # they would land over the operation's.
+    return any(type(task).__name__ == "FilterEngineTask" for task in tasks)
+
+
+def busy_reason() -> str:
+    """Why an operation cannot start now, "" when it can.
+
+    One at a time: refused while another operation runs (a REST call can
+    re-enter through processEvents while an export writes), and while a
+    FilterMate task of the dock runs in the background.
+    """
+    if _RUNNING:
+        return f"FilterMate is already running {_RUNNING[0]}: try again when it ends"
+    return BACKGROUND_BUSY if _background_tasks_running() else ""
+
+
+def _exclusive(operation):
+    """Run ``operation`` alone; refused with ``details["busy"]`` while FilterMate is busy."""
+    @functools.wraps(operation)
+    def run(*args, **kwargs) -> OperationReport:
+        reason = busy_reason()
+        if reason:
+            report = OperationReport(error=reason)
+            report.details["busy"] = True
+            return report
+        _RUNNING.append(operation.__name__)
+        try:
+            return operation(*args, **kwargs)
+        finally:
+            _RUNNING.clear()
+    return run
 
 
 def _install_registry(project) -> None:
@@ -174,6 +215,7 @@ def _collect(task, project, report: OperationReport) -> OperationReport:
 
 # --- cross filter --------------------------------------------------------------
 
+@_exclusive
 def cross_filter(source, targets: Sequence, predicates: Sequence[str] = ("Intersect",), buffer: float = 0.0,
                  coverage_min: float = 0.0, operator: Optional[str] = None, selected_only: bool = True,
                  raster_selection=None, point_cloud_criteria=None, source_operator: Optional[str] = None,
@@ -205,9 +247,7 @@ def cross_filter(source, targets: Sequence, predicates: Sequence[str] = ("Inters
     """
     from ...core.domain.cross_filter import CrossFilterRequest
     project = _project(project)
-    report = OperationReport(error=_busy())
-    if report.error:
-        return report
+    report = OperationReport()
     targets = list(targets or [])
     layer = resolve_layer(source, project) if isinstance(source, str) else source
     if layer is None:
@@ -327,6 +367,7 @@ def _source_only(layer, kind: LayerKind, source_job, report: OperationReport, se
     return report
 
 
+@_exclusive
 def cross_filter_by_geometry(geometry, crs, targets: Sequence, predicates: Sequence[str] = ("Intersect",),
                              buffer: float = 0.0, coverage_min: float = 0.0, operator: Optional[str] = None,
                              project=None, service=None) -> OperationReport:
@@ -339,9 +380,7 @@ def cross_filter_by_geometry(geometry, crs, targets: Sequence, predicates: Seque
     from ...core.domain.cross_filter import CrossFilterRequest
     from ..qgis.coverage_layers.source_jobs import FixedGeometrySourceJob
     project = _project(project)
-    report = OperationReport(error=_busy())
-    if report.error:
-        return report
+    report = OperationReport()
     if geometry is None or geometry.isNull() or geometry.isEmpty():
         report.error = "the geometry is empty"
         return report
@@ -362,6 +401,7 @@ def cross_filter_by_geometry(geometry, crs, targets: Sequence, predicates: Seque
 
 # --- point clouds ----------------------------------------------------------------
 
+@_exclusive
 def filter_point_clouds(layers: Sequence, criteria, operator: Optional[str] = None, project=None,
                         service=None) -> OperationReport:
     """Apply the same criteria (or expression) to several point clouds, as one undoable step."""
@@ -369,9 +409,7 @@ def filter_point_clouds(layers: Sequence, criteria, operator: Optional[str] = No
     from ...core.domain.filter_state import CrossOperation
     from ..qgis.coverage_layers.snapshots import take_snapshot
     project = _project(project)
-    report = OperationReport(error=_busy())
-    if report.error:
-        return report
+    report = OperationReport()
     expression = criteria if isinstance(criteria, str) else (criteria.to_subset_string() if criteria is not None else "")
     expression = (expression or "").strip()
     if not expression:
@@ -412,6 +450,7 @@ def filter_point_clouds(layers: Sequence, criteria, operator: Optional[str] = No
 
 # --- unfilter --------------------------------------------------------------------
 
+@_exclusive
 def clear_filters(layers: Sequence, project=None, service=None) -> OperationReport:
     """Put layers of any kind back on their original source with no subset.
 
@@ -419,9 +458,7 @@ def clear_filters(layers: Sequence, project=None, service=None) -> OperationRepo
     Unfilter records nothing either).
     """
     project = _project(project)
-    report = OperationReport(error=_busy())
-    if report.error:
-        return report
+    report = OperationReport()
     ids, kinds, names = [], {}, {}
     for reference in layers or []:
         layer = resolve_layer(reference, project)
@@ -467,6 +504,7 @@ def _unique_path(path: str, used: set) -> str:
     return candidate
 
 
+@_exclusive
 def export_layers(layers: Sequence, folder: str, vector_format: str = "GPKG", raster_format: str = "COG",
                   point_cloud_format: str = "LAZ", crs=None, feedback=None, project=None) -> OperationReport:
     """Write each layer as it is filtered now into ``folder``.
@@ -675,6 +713,7 @@ def _favorite_layer(project, signature: Optional[str], layer_id: Optional[str], 
     return None
 
 
+@_exclusive
 def apply_favorite(name_or_id: str, service=None, project=None) -> OperationReport:
     """Apply a favorite: its subset strings, then its raster / point cloud clips.
 
@@ -686,9 +725,7 @@ def apply_favorite(name_or_id: str, service=None, project=None) -> OperationRepo
     from ...infrastructure.database.sql_utils import safe_set_subset_string
     from ..qgis.coverage_layers import favorites_bridge
     project = _project(project)
-    report = OperationReport(error=_busy())
-    if report.error:
-        return report
+    report = OperationReport()
     service = service or find_favorites_service()
     favorite = find_favorite(name_or_id, service, project)
     if favorite is None:

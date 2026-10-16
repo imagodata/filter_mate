@@ -103,10 +103,12 @@ class TestAccessorRoutesThroughDispatcher:
         assert ok is True
         # Helper was called exactly once for apply_filter.
         assert spy.call_count == 1
-        # The first positional arg is the callable to dispatch — must
-        # be the public_api method, NOT the result of calling it.
+        # The dispatched callable is the busy guard wrapping the public_api
+        # method (NOT the result of calling it): both run on the main thread.
+        from filtermate_api.qgis_accessor import _unless_busy
         first_call_args = spy.call_args_list[0]
-        assert first_call_args.args[0] is public_api.apply_filter
+        assert first_call_args.args[0] is _unless_busy
+        assert first_call_args.args[1] is public_api.apply_filter
         # Original kwargs preserved.
         assert first_call_args.kwargs == {
             "layer_name": "Layer",
@@ -176,3 +178,51 @@ class TestAccessorRoutesThroughDispatcher:
             project, []
         )
         assert result == ("", "", True)
+
+
+# ---------------------------------------------------------------------------
+# Queued call past its timeout (audit 2026-10): dropped, never run late
+# ---------------------------------------------------------------------------
+
+
+class TestDispatchTimeout:
+    """``_dispatch`` is the Qt path minus Qt: ``post`` stands for the main thread queue."""
+
+    def test_call_not_started_in_time_is_dropped_and_reported_busy(self):
+        queued = []
+        calls = []
+        with pytest.raises(main_thread.QGISBusy):
+            main_thread._dispatch(queued.append, calls.append, ("change",), {}, 0.05)
+        # The main thread reaches the queued call later: it must not run.
+        queued[0]()
+        assert calls == []
+
+    def test_busy_is_a_timeout_error(self):
+        # Callers catching TimeoutError keep working.
+        assert issubclass(main_thread.QGISBusy, TimeoutError)
+
+    def test_call_started_before_the_timeout_is_waited_for(self):
+        import threading
+        import time
+
+        def post(wrapper):
+            threading.Thread(target=wrapper).start()
+
+        def slow():
+            time.sleep(0.3)
+            return "done"
+
+        # The main thread took the call in time and it outlives the timeout:
+        # its real outcome is returned, not an error for a landed change.
+        assert main_thread._dispatch(post, slow, (), {}, 0.05) == "done"
+
+    def test_exception_of_the_call_is_reraised(self):
+        def explode():
+            raise ValueError("bad layer")
+
+        with pytest.raises(ValueError, match="bad layer"):
+            main_thread._dispatch(lambda wrapper: wrapper(), explode, (), {}, 1.0)
+
+    def test_result_and_arguments_go_through(self):
+        result = main_thread._dispatch(lambda wrapper: wrapper(), lambda a, b=0: a + b, (2,), {"b": 3}, 1.0)
+        assert result == 5

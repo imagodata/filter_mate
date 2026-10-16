@@ -18,12 +18,13 @@ Shared rules:
   the dock's history: the dock's Undo on that layer reverts them. The others (vector source, geometry, unfilter) are
   kept in a separate history so they never interleave with the dock's vector history: revert them with
   `clear_filters` or the dock's Unfilter.
-- **One at a time.** An operation is refused while a filter started from the dock still runs in the background.
+- **One at a time.** An operation is refused while another one runs, and while a FilterMate task of the dock (vector
+  filter, cross filter, export) still runs in the background: the error says so, try again when it ends.
 - **Project layers only.** A layer loaded from a path by Processing is a temporary copy: filtering it would be lost,
   so it is skipped with a warning. A *source* can be a temporary layer (a model output such as a slope raster): it is
   only read.
 - **Main thread.** The operations run synchronously on the Qt main thread (`FlagNoThreading` in Processing; the REST
-  API marshals its calls).
+  API marshals every call that reads or changes QGIS, reads included).
 
 ## Processing algorithms
 
@@ -139,18 +140,28 @@ communes.removeSelection()
 
 ## REST API
 
-Start the API from QGIS with a `QGISFilterMateAccessor` (see `filtermate_api/qgis_accessor.py`). FilterMate 5 routes:
+Start the API from QGIS with a `QGISFilterMateAccessor(plugin.get_public_api(), plugin)` (see
+`filtermate_api/qgis_accessor.py`; `plugin` is `qgis.utils.plugins["filter_mate"]`). FilterMate 5 routes:
 
 | Route | Body | Returns |
 |---|---|---|
-| `POST /filters/cross` | `source_layer` (any kind), `target_layers`, `predicates`, `buffer`, `coverage_min`, `operator`, `selected_only`, `raster_selection`, `point_cloud_criteria`, `filter_source` | `filtered` (targets), `failed` |
+| `POST /filters/cross` | `source_layer` (any kind, id or name), `target_layers`, `predicates`, `buffer`, `coverage_min`, `operator`, `selected_only`, `raster_selection`, `point_cloud_criteria`, `filter_source` | `filtered` (targets), `failed`, `skipped` |
 | `POST /filters/geometry` | `wkt`, `crs`, `target_layers`, predicates… | same |
 | `POST /filters/point-cloud` | `layers`, `criteria`, `operator` | `done`, `failed`, `skipped` |
 | `POST /filters/clear` | `layers` | same |
 | `GET /filters/state` | — | filtered layers: name, kind, subset, derived |
 | `POST /export` | `layers`, `subfolder`, `vector_format`, `raster_format`, `point_cloud_format`, `crs` | `done`, `outputs` (server paths) |
 | `GET /layers` | — | layers with `layer_kind` |
-| `POST /favorites/{id}/apply` | — | applies subsets and raster / point cloud clips |
+| `POST /favorites/{id}/apply` | — | replays the favorite like the dock's menu: subsets (remote layers too), raster / point cloud clips |
+
+Answers: `400` names what stopped the operation (`"Cross filter failed: <reason>"`); `503` with `Retry-After` when QGIS
+is busy (its main thread on a long task for 30 s, or a FilterMate operation or task running): nothing was changed,
+retry later. A change that is done is never reported as failed: its `active_filters` snapshot is `{}` when QGIS was too
+busy to read it back (`GET /filters/state` reads the state).
+
+`POST /filters/undo` and `/filters/redo` walk the dock's vector filter history (its Undo / Redo buttons), not the
+API's own changes. Right after a FilterMate 5 operation (cross, geometry, point cloud, clear, favorite) they answer
+`409`: revert the operation with `POST /filters/clear`; the next `POST /filters/apply` lifts the refusal.
 
 `POST /export` only writes below the export root of the server (`FILTERMATE_API_EXPORT_ROOT`, or `API.export_root`
 in `config.json`; default: `<temp>/filtermate_exports_<user>`). Clients give a sub-folder name, never a path.

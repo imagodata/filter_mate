@@ -28,6 +28,7 @@ from . import __version__
 from .accessor import FilterMateAccessor, InMemoryAccessor
 from .auth import APIKeyMiddleware
 from .config import _LOOPBACK_HOSTS, APIConfig
+from .main_thread import QGISBusy
 from .routers import export as export_router
 from .routers import favorites as favorites_router
 from .routers import filters as filters_router
@@ -42,6 +43,10 @@ logger = logging.getLogger("filtermate_api")
 # filter expression — operators can override per-deployment via the
 # ``FILTERMATE_API_MAX_BODY_BYTES`` env var.
 _DEFAULT_MAX_BODY_BYTES = 1 * 1024 * 1024
+
+# QGIS busy (main thread on a long task, FilterMate operation or filter task
+# running): nothing was changed, the client retries after this many seconds.
+_BUSY_RETRY_AFTER_SECONDS = 5
 
 
 class BodySizeLimitMiddleware:
@@ -295,6 +300,14 @@ def create_app(
     async def _validation_error(request: Request, exc: RequestValidationError) -> JSONResponse:
         errors = [{key: error[key] for key in ("type", "loc", "msg") if key in error} for error in exc.errors()]
         return JSONResponse(status_code=422, content={"detail": jsonable_encoder(errors)})
+
+    @app.exception_handler(QGISBusy)
+    async def _qgis_busy(request: Request, exc: QGISBusy) -> JSONResponse:
+        return JSONResponse(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            content={"detail": f"QGIS is busy: {exc}"},
+            headers={"Retry-After": str(_BUSY_RETRY_AFTER_SECONDS)},
+        )
 
     # ------------------------------------------------------------------
     # Routes

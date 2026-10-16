@@ -54,5 +54,5 @@ def export_layers(payload: ExportRequestBody, request: Request) -> OperationResu
         layers=payload.layers, folder=str(folder), vector_format=payload.vector_format,
         raster_format=payload.raster_format, point_cloud_format=payload.point_cloud_format, crs=payload.crs)
     if result.error:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Export failed")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Export failed: {result.error}")
     return result
