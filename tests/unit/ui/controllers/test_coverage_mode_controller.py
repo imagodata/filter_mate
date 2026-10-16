@@ -191,7 +191,7 @@ class TestDispatch:
         assert controller.on_current_layer_changed(layers["r1"]) is False
 
     def test_leaving_coverage_layer_deactivates(self, ctrl_module, layers, monkeypatch):
-        controller = ctrl_module.CoverageModeController(_dock())
+        controller = ctrl_module.CoverageModeController(_dock(PROJECT_LAYERS={"v1": {}}))
         controller._active_layer = layers["r1"]
         calls = []
         monkeypatch.setattr(controller, "deactivate", lambda: calls.append("deactivate"))
@@ -414,7 +414,7 @@ class TestUndoRedoButtons:
 
     def test_buttons_follow_the_coverage_history(self, ctrl_module, layers):
         undo, redo = MagicMock(), MagicMock()
-        dock = _dock(pushButton_action_undo_filter=undo, pushButton_action_redo_filter=redo)
+        dock = _dock(pushButton_action_undo_filter=undo, pushButton_action_redo_filter=redo, tabTools_current_index=0)
         controller = ctrl_module.CoverageModeController(dock)
         controller._active_layer = layers["r1"]
         ctrl_module._test_service.undo_ok["r1"] = True
@@ -945,3 +945,70 @@ class TestRasterPreviewFollowsTheSelection:
         assert adapters.calls == [("clear", "r1")]
 
 
+@pytest.mark.unit
+class TestHistogramCache:
+    """Constat 17: histograms survive a filter of the raster, and the cache is bounded."""
+
+    def test_histogram_cached_on_the_original_source(self, ctrl_module, layers, adapters, monkeypatch):
+        controller = ctrl_module.CoverageModeController(_dock())
+        controller._active_layer = layers["r1"]
+        controller._raster_panel = MagicMock()
+        controller._raster_panel.current_band.return_value = 1
+        controller._raster_panel.selection.return_value = None
+        monkeypatch.setattr(controller, "_base_raster", lambda layer: layer)
+        controller._refresh_histogram(layers["r1"], 1)
+        # Filtered: the layer now shows a derived source of the cache.
+        layers["r1"].source = lambda: "/cache/r1_cut.vrt"
+        adapters.snapshots.derived["r1"] = types.SimpleNamespace(original_source="/data/r1")
+        controller._refresh_histogram(layers["r1"], 1)
+        assert [call for call in adapters.calls if call[0] == "histogram"] == [("histogram", 1)]
+
+    def test_histogram_cache_is_bounded(self, ctrl_module, adapters, monkeypatch):
+        controller = ctrl_module.CoverageModeController(_dock())
+        controller._raster_panel = MagicMock()
+        monkeypatch.setattr(controller, "_base_raster", lambda layer: layer)
+        for index in range(ctrl_module.HISTOGRAM_CACHE_SIZE + 5):
+            controller._refresh_histogram(FakeLayer(f"r{index}", "raster"), 1)
+        assert len(controller._histogram_cache) == ctrl_module.HISTOGRAM_CACHE_SIZE
+        assert ("/data/r0", 1) not in controller._histogram_cache
+
+
+@pytest.mark.unit
+class TestVectorLayerChange:
+    """Constat 12: a layer the vector chain refuses does not end the coverage mode."""
+
+    def _controller(self, ctrl_module, layers, monkeypatch):
+        controller = ctrl_module.CoverageModeController(_dock(PROJECT_LAYERS={"v1": {}, "r1": {}}))
+        controller._active_layer = layers["r1"]
+        calls = []
+        monkeypatch.setattr(controller, "deactivate", lambda: calls.append("deactivate"))
+        monkeypatch.setattr(controller, "_extras_call", lambda method, *a: calls.append(method))
+        return controller, calls
+
+    def test_web_raster_or_table_keeps_the_raster(self, ctrl_module, layers, monkeypatch):
+        controller, calls = self._controller(ctrl_module, layers, monkeypatch)
+        assert controller.on_current_layer_changed(layers["o1"]) is False
+        assert calls == []
+
+    def test_vector_layer_not_listed_keeps_the_raster(self, ctrl_module, layers, monkeypatch):
+        controller, calls = self._controller(ctrl_module, layers, monkeypatch)
+        assert controller.on_current_layer_changed(layers["v2"]) is False
+        assert calls == []
+
+    def test_listed_vector_layer_ends_the_mode(self, ctrl_module, layers, monkeypatch):
+        controller, calls = self._controller(ctrl_module, layers, monkeypatch)
+        assert controller.on_current_layer_changed(layers["v1"]) is False
+        assert calls == ["deactivate", "show_vector"]
+
+
+@pytest.mark.unit
+def test_undo_redo_disabled_outside_the_filtering_tab(ctrl_module, layers):
+    """Constat 15: same rule as FilterMateApp.update_undo_redo_buttons."""
+    undo, redo = MagicMock(), MagicMock()
+    controller = ctrl_module.CoverageModeController(_dock(pushButton_action_undo_filter=undo,
+                                                          pushButton_action_redo_filter=redo, tabTools_current_index=1))
+    controller._active_layer = layers["r1"]
+    ctrl_module._test_service.undo_ok["r1"] = ctrl_module._test_service.redo_ok["r1"] = True
+    controller.update_undo_redo_buttons()
+    undo.setEnabled.assert_called_with(False)
+    redo.setEnabled.assert_called_with(False)

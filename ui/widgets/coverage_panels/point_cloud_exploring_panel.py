@@ -384,6 +384,15 @@ def _raster_layer_filter() -> Any:
         return None
 
 
+def _exclude_web_rasters(combo: Any) -> None:
+    """Hide the rasters FilterMate cannot read (WMS, XYZ, WCS...) from a layer combo box, as in the layer lists."""
+    try:
+        from ....adapters.qgis.point_cloud_capability import exclude_non_analysis_rasters
+    except ImportError:
+        return
+    exclude_non_analysis_rasters(combo)
+
+
 @contextmanager
 def _signals_blocked(*widgets):
     """Block the signals of ``widgets`` for the duration of the block."""
@@ -810,6 +819,7 @@ class PointCloudExploringPanel(QWidget):
             raster_filter = _raster_layer_filter()
             if raster_filter is not None:
                 self._hag_layer_combo.setFilters(raster_filter)
+            _exclude_web_rasters(self._hag_layer_combo)  # PDAL hag_dem reads files: no WMS / XYZ basemap
             self._hag_layer_combo.setAllowEmptyLayer(True)
             self._hag_layer_combo.setLayer(None)
             self._hag_layer_combo.layerChanged.connect(self._changed)

@@ -351,3 +351,33 @@ class TestRangeLinkedToStyle:
         assert ("unlink", "r1") in dock_extras.adapter.calls and ("unlink_all",) in dock_extras.adapter.calls
 
 
+class TestVectorCardCount:
+    """Constat 13: no count(*) on the main thread for a database / web layer or a filtered one."""
+
+    def test_cheap_counts(self):
+        assert extras.feature_count_is_cheap("ogr", "")
+        assert not extras.feature_count_is_cheap("ogr", '"zone" = 3')
+        assert not extras.feature_count_is_cheap("postgres", "")
+        assert not extras.feature_count_is_cheap("wfs", "")
+
+    def test_card_counts_local_unfiltered_layers_only(self, dock_extras, monkeypatch):
+        monkeypatch.setattr(sys.modules["qgis.core"], "QgsWkbTypes",
+                            types.SimpleNamespace(geometryDisplayString=lambda geometry_type: "Polygon"), raising=False)
+        dock_extras.dock.tr = lambda text: text
+        layers = (FakeLayer("pg", "postgres"), FakeLayer("gpkg", "ogr", subset='EXISTS (SELECT 1)'), FakeLayer("shp"))
+        texts = [dock_extras.dock._vector_meta(layer) for layer in layers]
+        assert [layer.counted for layer in layers] == [0, 0, 1]
+        assert texts == ["Polygon", "Polygon", "Polygon · 12 features"]
+
+
+def test_value_under_the_cursor_reads_the_new_source_after_a_filter(dock_extras):
+    """Constat 17: the raster opened for the hover follows a source change of the layer."""
+    env = dock_extras
+    layer = env.layers["r1"]
+    env.controller.active_layer = layer
+    env.dock._hover_point = types.SimpleNamespace(x=lambda: 1.0, y=lambda: 2.0)
+    env.dock._read_hover_value()
+    env.dock._read_hover_value()
+    layer._source = "/cache/r1_cut.vrt"
+    env.dock._read_hover_value()
+    assert env.controller.based == ["/data/r1.tif", "/cache/r1_cut.vrt"]

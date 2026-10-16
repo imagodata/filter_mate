@@ -43,6 +43,9 @@ ICON_3D = '<path d="M12 2l9 5v10l-9 5-9-5V7z"/><path d="M12 12l9-5M12 12L3 7M12 
 # (the 3D action is ``mActionNew3DMapCanvas`` in QGIS 4.2, ``mActionNew3DMapView`` in older builds).
 ACTION_ELEVATION_PROFILE = ('mActionElevationProfile',)
 ACTION_NEW_3D_VIEW = ('mActionNew3DMapCanvas', 'mActionNew3DMapView')
+# Vector providers whose feature count is a server / database query: the card leaves it out
+# (it is read on the main thread at every layer change).
+UNCOUNTED_PROVIDERS = ('postgres', 'oracle', 'mssql', 'hana', 'wfs', 'oapif', 'arcgisfeatureserver', 'virtual')
 
 
 def _identity(text: str) -> str:
@@ -139,6 +142,15 @@ def vector_card_text(geometry_label: str, feature_count: Optional[int],
     return " · ".join(parts)
 
 
+def feature_count_is_cheap(provider: str, subset: str) -> bool:
+    """Whether the card may count the features: a local source without a filter.
+
+    A filtered GeoPackage / Spatialite layer counts through its subset
+    (``EXISTS``, ``ST_DWithin``...), a database or web layer runs a query.
+    """
+    return not (subset or '').strip() and (provider or '') not in UNCOUNTED_PROVIDERS
+
+
 def card_html(name: str, kind_label: str, meta: str, color: str, square: bool) -> str:
     """Rich text of the layer card: a kind bullet, the bold name, then ``kind · meta`` (mockup)."""
     from html import escape
@@ -193,7 +205,7 @@ class CoverageDockExtras(QObject):
         self._zone_previous_tool = None
         self._layer_id: Optional[str] = None
         self._hover_base = None
-        self._hover_base_id: Optional[str] = None
+        self._hover_base_key: Optional[Tuple[str, str]] = None  # (layer id, source) the base was opened for
         self._link_connected = False
         self._linked_layer_id: Optional[str] = None  # raster whose style follows the range
 
@@ -366,7 +378,7 @@ class CoverageDockExtras(QObject):
                 self._guarded(self._uncheck, button)
         self._guarded(self._stop_hover)
         self._guarded(self._stop_zone_tool)
-        self._hover_base, self._hover_base_id = None, None
+        self._hover_base, self._hover_base_key = None, None
 
     @staticmethod
     def _uncheck(button: Any) -> None:
@@ -431,7 +443,7 @@ class CoverageDockExtras(QObject):
         except Exception:
             geometry = ''
         try:
-            count = layer.featureCount()
+            count = layer.featureCount() if feature_count_is_cheap(layer.providerType(), layer.subsetString()) else None
         except Exception:
             count = None
         return vector_card_text(geometry, count, self.tr)
@@ -563,9 +575,11 @@ class CoverageDockExtras(QObject):
         from ...adapters.qgis.coverage_layers.raster_adapter import identify_values
         layer_point = self._layer_point(point)
         try:
-            if self._hover_base_id != layer.id():
-                # FilterMate derived source: the original raster is opened once, not every 60 ms.
-                self._hover_base, self._hover_base_id = controller._base_raster(layer), layer.id()
+            key = (layer.id(), layer.source())
+            if self._hover_base_key != key:
+                # FilterMate derived source: the original raster is opened once, not every 60 ms;
+                # again when a filter / undo changed the source.
+                self._hover_base, self._hover_base_key = controller._base_raster(layer), key
             values = identify_values(self._hover_base, layer_point)
         except Exception as exc:
             logger.debug(f"[FM5] value under the cursor unreadable: {exc}")

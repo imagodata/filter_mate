@@ -44,6 +44,7 @@ EXPLORING_BUTTONS = (
 )
 COVERAGE_SPIN_NAME = 'mQgsSpinBox_filtering_coverage_min'
 MAX_SOURCE_FEATURES = 100000
+HISTOGRAM_CACHE_SIZE = 32
 
 
 def _kind_of(layer: Any):
@@ -342,10 +343,24 @@ class CoverageModeController(BaseController):
                 return False
             self.activate(layer, kind)
             return True
+        if not self._vector_chain_takes(layer, kind):
+            # A web raster, a table, a layer FilterMate does not list: the vector chain
+            # refuses it and the current layer stays the same, so does this mode.
+            return False
         if self._active_layer is not None:
             self.deactivate()
         self._extras_call('show_vector', layer)
         return False
+
+    def _vector_chain_takes(self, layer: Any, kind: Any) -> bool:
+        """True when the dock's vector chain will make ``layer`` the current layer (a listed vector layer)."""
+        from ...core.domain.layer_kind import LayerKind
+        if kind is not LayerKind.VECTOR:
+            return False
+        try:
+            return layer.id() in (getattr(self.dockwidget, 'PROJECT_LAYERS', None) or {})
+        except (RuntimeError, AttributeError, TypeError):
+            return False
 
     def activate(self, layer: Any, kind: Any) -> None:
         from ...core.domain.layer_kind import LayerKind
@@ -771,11 +786,13 @@ class CoverageModeController(BaseController):
 
     def _refresh_histogram(self, layer: Any, band: int) -> None:
         from ...adapters.qgis.coverage_layers.raster_adapter import band_histogram
-        key = (layer.source(), int(band))
+        key = self._histogram_key(layer, band)
         cached = self._histogram_cache.get(key)
         if cached is None:
             cached = band_histogram(self._base_raster(layer), band, bins=64)
             self._histogram_cache[key] = cached
+            while len(self._histogram_cache) > HISTOGRAM_CACHE_SIZE:
+                del self._histogram_cache[next(iter(self._histogram_cache))]  # oldest first
         counts, minimum, maximum = cached
         self._raster_panel.set_histogram(band, counts, minimum, maximum)
         self._update_kept_ratio()
@@ -791,6 +808,17 @@ class CoverageModeController(BaseController):
         self._base_keepalive = base
         return base if base.isValid() else layer
 
+    @staticmethod
+    def _histogram_key(layer: Any, band: int) -> Tuple[str, int]:
+        """Histograms are read on the original raster (see :meth:`_base_raster`): a filter keeps the key."""
+        try:
+            from ...adapters.qgis.coverage_layers.snapshots import registry
+            snapshot = registry().get(layer.id())
+        except Exception:
+            snapshot = None
+        source = snapshot.original_source if snapshot is not None and snapshot.original_source else layer.source()
+        return source, int(band)
+
     def _on_raster_band_changed(self, band: int) -> None:
         if self._active_layer is not None:
             try:
@@ -803,7 +831,7 @@ class CoverageModeController(BaseController):
         if panel is None or layer is None:
             return
         selection = panel.selection()
-        cached = self._histogram_cache.get((layer.source(), panel.current_band()))
+        cached = self._histogram_cache.get(self._histogram_key(layer, panel.current_band()))
         if selection is None or cached is None or not cached[0]:
             panel.set_kept_ratio(None)
             return
@@ -860,7 +888,7 @@ class CoverageModeController(BaseController):
             return
         from ...adapters.qgis.coverage_layers.raster_adapter import apply_selection_preview, clear_selection_preview
         selection = panel.selection()
-        cached = self._histogram_cache.get((layer.source(), panel.current_band()))
+        cached = self._histogram_cache.get(self._histogram_key(layer, panel.current_band()))
         low, high = (cached[1], cached[2]) if cached else (None, None)
         if selection is None:
             clear_selection_preview(layer)  # nothing selected: every pixel shows again
@@ -1751,8 +1779,10 @@ class CoverageModeController(BaseController):
             self._call(self._app(), 'update_undo_redo_buttons')
             return
         dw = self.dockwidget
-        self._call(getattr(dw, 'pushButton_action_undo_filter', None), 'setEnabled', self.can_undo())
-        self._call(getattr(dw, 'pushButton_action_redo_filter', None), 'setEnabled', self.can_redo())
+        # Same rule as FilterMateApp.update_undo_redo_buttons: Undo / Redo only on the FILTERING tab.
+        on_filtering = getattr(dw, 'tabTools_current_index', 0) == 0
+        self._call(getattr(dw, 'pushButton_action_undo_filter', None), 'setEnabled', on_filtering and self.can_undo())
+        self._call(getattr(dw, 'pushButton_action_redo_filter', None), 'setEnabled', on_filtering and self.can_redo())
 
     # === Height above ground ===
 
