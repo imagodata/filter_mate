@@ -100,13 +100,21 @@ class TestSessionLock:
 
     def test_unknown_liveness_waits_a_day(self, root):
         other_host = _session(root, "session_remote", host="another-computer", age=3600)
-        legacy = _session(root, "session_recent", age=3600)
-        old = _session(root, "session_old", age=2 * 86400)
+        old = _session(root, "session_old", host="another-computer", age=2 * 86400)
         unrelated = root / "not_a_session"
         unrelated.mkdir(parents=True)
         cache.cleanup_stale_sessions()
-        assert other_host.exists() and legacy.exists() and unrelated.exists()
+        assert other_host.exists() and unrelated.exists()
         assert not old.exists()
+
+    def test_folders_without_the_filtermate_lock_file_are_never_removed(self, root):
+        # cache_dir set on a folder shared with other data: a "session_*"
+        # folder FilterMate did not create stays, whatever its age.
+        foreign = _session(root, "session_2019")
+        _files(foreign, "survey.csv")
+        _age(foreign, OLD)
+        cache.cleanup_stale_sessions()
+        assert (foreign / "survey.csv").exists()
 
     def test_lock_retried_while_another_instance_probes(self, root, monkeypatch):
         answers = iter([False, False, True])
@@ -142,10 +150,58 @@ class TestFallback:
         cache.set_cache_root(str(blocker / "cache"))
         try:
             path = cache.new_path("dtm", ".vrt")
-            assert path.startswith(str(tmp_path / "tmp" / "filtermate-"))
+            assert path.startswith(os.path.join(os.path.dirname(cache.temp_root()), ""))
             assert os.path.isdir(os.path.dirname(path))
         finally:
             cache.set_cache_root(None)
+
+    @staticmethod
+    def _fallback_path(tmp_path, monkeypatch, prepare):
+        """Cache path with an unwritable root, once ``prepare(user temp folder)`` ran."""
+        blocker = tmp_path / "file"
+        blocker.write_text("not a folder")
+        (tmp_path / "tmp").mkdir()
+        monkeypatch.setattr(cache.tempfile, "gettempdir", lambda: str(tmp_path / "tmp"))
+        prepare(os.path.dirname(cache.temp_root()))
+        cache.set_cache_root(str(blocker / "cache"))
+        try:
+            return cache.new_path("dtm", ".vrt")
+        finally:
+            cache.set_cache_root(None)
+
+    @pytest.mark.skipif(not hasattr(os, "getuid"), reason="POSIX owners")
+    def test_user_temp_folder_owned_by_someone_else_is_not_used(self, tmp_path, monkeypatch):
+        user_folder = []
+
+        def other_owner(folder):
+            os.makedirs(folder)
+            user_folder.append(folder)
+            uid = os.getuid()
+            monkeypatch.setattr(cache.os, "getuid", lambda: uid + 1)
+
+        path = self._fallback_path(tmp_path, monkeypatch, other_owner)
+        assert not path.startswith(os.path.join(user_folder[0], ""))
+        assert os.path.basename(os.path.dirname(os.path.dirname(os.path.dirname(path)))).startswith("filtermate-")
+        assert os.stat(os.path.dirname(os.path.dirname(os.path.dirname(path)))).st_mode & 0o077 == 0
+
+    @pytest.mark.skipif(os.name == "nt", reason="symbolic links need privileges")
+    def test_user_temp_folder_that_is_a_link_is_not_followed(self, tmp_path, monkeypatch):
+        target = tmp_path / "elsewhere"
+        target.mkdir()
+        path = self._fallback_path(tmp_path, monkeypatch, lambda folder: os.symlink(str(target), folder))
+        assert not os.listdir(target)
+        assert not path.startswith(os.path.join(os.path.dirname(cache.temp_root()), ""))
+
+    @pytest.mark.skipif(not hasattr(os, "getuid"), reason="POSIX modes")
+    def test_own_user_temp_folder_is_made_private(self, tmp_path, monkeypatch):
+        def loose(folder):
+            os.makedirs(folder)
+            os.chmod(folder, 0o777)
+
+        path = self._fallback_path(tmp_path, monkeypatch, loose)
+        user_folder = os.path.dirname(cache.temp_root())
+        assert path.startswith(os.path.join(user_folder, ""))
+        assert os.stat(user_folder).st_mode & 0o777 == 0o700
 
 
 class TestGarbageCollection:

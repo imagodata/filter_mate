@@ -113,6 +113,8 @@ Pour pousser sur le dépôt il faut un **Personal Access Token** (GitHub) ou éq
 
 Le token n'apparaît jamais en clair dans la config FilterMate. Le master-password QGIS ne sera demandé qu'au premier `publish`.
 
+> **Depuis FilterMate 5.0** : un `auth_header` en clair dans `config.json` (laissé par la 4.x) est refusé. Le dépôt est conservé, mais le jeton n'est pas utilisé et est retiré de `config.json` au chargement de l'extension. Enregistrez-le dans le gestionnaire d'authentification QGIS (ci-dessus), puis choisissez-le dans **Manage Repos → Edit → Authentication** (`authcfg_id`).
+
 ### B.4 · Configurer le dépôt dans FilterMate
 
 Menu favoris ★ → **🌐 Manage Resource Sharing repos…** → **➕ Add**

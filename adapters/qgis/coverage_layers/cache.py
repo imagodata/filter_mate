@@ -12,7 +12,8 @@ original source; the cache is then closed.
 A live session holds an OS lock on its ``.session.lock`` file, which also
 names its host and process, so another QGIS instance never removes it; the
 folders of crashed sessions of this computer are not locked and are removed
-by the next session. Files that no layer and no undo step refer to any more
+by the next session. A folder without that file was not made by FilterMate
+and is never removed. Files that no layer and no undo step refer to any more
 are removed by :func:`collect_garbage`, except the files a running task is
 still writing (:func:`new_path` until :func:`settle`).
 """
@@ -21,6 +22,7 @@ import logging
 import os
 import shutil
 import socket
+import stat
 import tempfile
 import threading
 import time
@@ -32,8 +34,8 @@ logger = logging.getLogger(__name__)
 LOCK_NAME = '.session.lock'
 # A folder unlocked for less than this may be a session being created.
 _UNLOCKED_GRACE_SECONDS = 60.0
-# Folders whose liveness cannot be told (older versions without lock file,
-# another computer, file systems without locks) are removed after this age.
+# Folders whose liveness cannot be told (another computer, file systems
+# without locks) are removed after this age.
 _UNKNOWN_MAX_AGE_HOURS = 24.0
 _LOCK_ATTEMPTS = 20
 # Lock errors meaning "another process holds it"; any other error means the
@@ -103,6 +105,36 @@ def temp_root() -> str:
         user = str(getattr(os, 'getuid', lambda: 'user')())
     user = "".join(c if c.isascii() and c.isalnum() else "_" for c in user) or "user"
     return os.path.join(tempfile.gettempdir(), f'filtermate-{user}', 'cache')
+
+
+def _private_temp_root() -> str:
+    """:func:`temp_root` when its folder belongs to this user alone, else a new private folder.
+
+    That folder has a predictable name in a folder every user can write to:
+    one made by another user, or a link, is never used (the derived files
+    written there could be read or replaced, a link could send them anywhere).
+    """
+    root = temp_root()
+    folder = os.path.dirname(root)
+    try:
+        os.makedirs(folder, mode=0o700, exist_ok=True)
+        if _owned_privately(folder):
+            return root
+    except OSError:
+        pass
+    return os.path.join(tempfile.mkdtemp(prefix='filtermate-'), 'cache')
+
+
+def _owned_privately(folder: str) -> bool:
+    info = os.lstat(folder)
+    if stat.S_ISLNK(info.st_mode) or not stat.S_ISDIR(info.st_mode):
+        return False
+    if hasattr(os, 'getuid'):  # POSIX: the system temp folder is shared by every user
+        if info.st_uid != os.getuid():
+            return False
+        if info.st_mode & 0o077:
+            os.chmod(folder, 0o700)
+    return True
 
 
 def is_closed() -> bool:
@@ -225,10 +257,9 @@ def session_dir() -> str:
             except OSError as exc:
                 if _fallback_root:
                     raise
-                _fallback_root = temp_root()
+                _fallback_root = _private_temp_root()
                 logger.warning(f"[FM5] the FilterMate cache cannot be written ({exc}): "
                                f"derived files go to {_fallback_root}")
-                os.makedirs(os.path.dirname(_fallback_root), mode=0o700, exist_ok=True)
                 _session_dir = _create_session(_fallback_root)
             created = True
         os.makedirs(_session_dir, exist_ok=True)
@@ -242,9 +273,11 @@ def cleanup_stale_sessions(keep: str = '', root: Optional[str] = None) -> int:
     """Remove the session folders left by crashed or closed QGIS sessions.
 
     A folder of this computer whose lock is free belongs to no live session
-    and is removed; a folder whose liveness cannot be told (older FilterMate
-    version, another computer sharing the folder, file system without locks)
-    is removed once it is older than a day. Locked folders are kept.
+    and is removed; a folder whose liveness cannot be told (another computer
+    sharing the folder, file system without locks) is removed once it is
+    older than a day. Locked folders are kept, and so are the folders without
+    the lock file of FilterMate: ``cache_dir`` may be a folder holding other
+    data, where a ``session_*`` folder is not necessarily FilterMate's.
 
     Args:
         keep: Folder never removed (the current session).
@@ -263,7 +296,7 @@ def cleanup_stale_sessions(keep: str = '', root: Optional[str] = None) -> int:
         if not name.startswith('session_') or os.path.normcase(path) == os.path.normcase(keep or ''):
             continue
         try:
-            if not os.path.isdir(path):
+            if not os.path.isdir(path) or not os.path.isfile(os.path.join(path, LOCK_NAME)):
                 continue
             locked, host = session_state(path)
             if locked is True:
@@ -335,6 +368,15 @@ def file_key(name: str) -> str:
     to ``a_1f2e.laz`` all have the key ``a_1f2e``.
     """
     return name.split('.', 1)[0]
+
+
+def in_session(source: str) -> bool:
+    """True when ``source`` refers to a file of the current session (plain path or URI).
+
+    Session folder names (``session_<hex>``) survive any URI encoding.
+    """
+    folder = _session_dir
+    return bool(folder and source and os.path.basename(folder) in source)
 
 
 def _entries(folder: str):

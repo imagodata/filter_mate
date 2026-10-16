@@ -12,19 +12,24 @@ road), opens the favorites menu and manager, the export and configuration tabs
 and the Processing batch-filter dialog, saving one PNG per state in ``OUT``.
 It removes the favorite it created and quits QGIS at the end.
 
-Adjust ``OUT`` and ``GPKG`` to your machine. The layer names, the road feature
-id and the field used for the custom-selection expression are specific to the
-demo GeoPackage (commune 31 extract) and must be adapted for another dataset.
+Set ``FM_GUIDE_OUT`` (default: a temp folder) and ``FM_GUIDE_GPKG`` for your
+machine; the PNGs carry the names used by the guide, so ``FM_GUIDE_OUT`` can be
+``website/img/guide``. Run it with a throwaway profile (``--profiles-path``):
+the modal first-run dialogs are switched off through QSettings. The layer names,
+the road feature id and the field used for the custom-selection expression are
+specific to the demo GeoPackage (commune 31 extract) and must be adapted for
+another dataset.
 """
 import os, traceback
-from qgis.PyQt.QtCore import QTimer, Qt
+from qgis.PyQt.QtCore import QSettings, QTimer, Qt
 from qgis.PyQt.QtWidgets import QApplication, QDialog
 from qgis.core import QgsApplication, QgsProject, QgsVectorLayer
 from qgis.utils import iface, plugins
 
-OUT = r'C:\Users\Simon\AppData\Local\Temp\fm_shots\out'
+OUT = os.environ.get('FM_GUIDE_OUT') or os.path.join(os.environ.get('TEMP', '/tmp'), 'fm_shots')
+os.makedirs(OUT, exist_ok=True)
 LOG = os.path.join(OUT, 'shots.log')
-GPKG = r'C:\Users\Simon\Documents\31.gpkg'
+GPKG = os.environ.get('FM_GUIDE_GPKG') or r'C:\Users\Simon\Documents\31.gpkg'
 STATE = {}
 
 def log(msg):
@@ -33,6 +38,7 @@ def log(msg):
 
 def save(widget, name, max_width=None):
     try:
+        iface.messageBar().clearWidgets()  # first-run notices of a throwaway profile
         pm = widget.grab()
         if max_width and pm.width() > max_width:
             pm = pm.scaledToWidth(max_width, Qt.TransformationMode.SmoothTransformation)
@@ -70,6 +76,9 @@ def check_combo_items(combo, texts):
 
 # ---------------------------------------------------------------- steps
 def s_setup():
+    settings = QSettings()
+    settings.setValue('FilterMate/discord_welcome_dismissed', True)  # modal dialogs would block the run
+    settings.setValue('FilterMate/whats_new_seen', 99)
     mw = iface.mainWindow()
     mw.showNormal()
     mw.resize(1760, 1040)
@@ -84,13 +93,19 @@ def s_setup():
             d.hide()
 
 def s_open_plugin():
+    import qgis.utils
+    if 'filter_mate' not in plugins:  # throwaway profile: the plugin is found but not enabled
+        qgis.utils.loadPlugin('filter_mate') and qgis.utils.startPlugin('filter_mate')
     plugins['filter_mate'].run()
 
 def s_after_open():
     d = dock()
     d.setMinimumWidth(0)
     iface.mainWindow().resizeDocks([d], [413], Qt.Orientation.Horizontal)
-    save(plugins['filter_mate'].toolbar, '00-toolbar')
+    tb = plugins['filter_mate'].toolbar
+    pm = tb.grab()
+    pm.copy(0, 0, min(pm.width(), round(100 * pm.devicePixelRatio())), pm.height()).save(
+        os.path.join(OUT, 'toolbar-button.png'), 'PNG')  # the toolbar spans the window: keep its first button
 
 def s_exploring_single():
     d = dock()
@@ -105,9 +120,9 @@ def s_exploring_single_pick():
 
 def s_grab_exploring_single():
     d = dock()
-    save(d.frame_exploring, '02-exploring-single')
-    save(d, '01-dock-overview')
-    save(iface.mainWindow(), '01-qgis-window', 1600)
+    save(d.frame_exploring, 'exploring-single')
+    save(d, 'dock-overview')
+    save(iface.mainWindow(), 'qgis-window', 1600)
 
 def s_exploring_multiple():
     d = dock()
@@ -124,7 +139,7 @@ def s_exploring_multiple_pick():
         log(traceback.format_exc())
 
 def s_grab_exploring_multiple():
-    save(dock().frame_exploring, '03-exploring-multiple')
+    save(dock().frame_exploring, 'exploring-multiple')
 
 def s_exploring_custom():
     d = dock()
@@ -132,7 +147,7 @@ def s_exploring_custom():
     d.mFieldExpressionWidget_exploring_custom_selection.setExpression('"importance" IN (\'3\', \'4\')')
 
 def s_grab_exploring_custom():
-    save(dock().frame_exploring, '04-exploring-custom')
+    save(dock().frame_exploring, 'exploring-custom')
 
 def s_back_to_single():
     d = dock()
@@ -152,17 +167,17 @@ def s_filtering_tab():
 
 def s_grab_filtering():
     d = dock()
-    save(d.toolBox_tabTools, '05-filtering-tab')
-    save(d, '05-dock-filtering')
+    save(d.toolBox_tabTools, 'filtering-tab')
+    save(d, '_dock-filtering')
 
 def s_run_filter():
     dock().pushButton_action_filter.click()
 
 def s_grab_filtered():
     d = dock()
-    save(iface.mainWindow(), '06-filter-result', 1600)
-    save(d.frame_actions, '07-action-bar')
-    save(d.frame_header, '08-header-badges')
+    save(iface.mainWindow(), '_filter-result', 1600)
+    save(d.frame_actions, 'action-bar')
+    save(d.frame_header, 'header-badges')
     for name in ['batiment', 'haie']:
         log(f'{name} subset={layer(name).subsetString()!r} count={layer(name).featureCount()}')
 
@@ -179,7 +194,7 @@ def s_favorites_menu():
         w = QApplication.activePopupWidget()
         log(f'popup {w}')
         if w:
-            screen_save(w, '09-favorites-menu')
+            screen_save(w, 'favorites-menu')
             w.close()
     QTimer.singleShot(1200, grab_popup)
     dock()._favorites_ctrl.handle_indicator_clicked()
@@ -190,7 +205,7 @@ def s_favorites_manager():
         log(f'modal {w}')
         if w:
             w.resize(900, 600)
-            QTimer.singleShot(400, lambda: (save(w, '10-favorites-manager'), w.reject()))
+            QTimer.singleShot(400, lambda: (save(w, 'favorites-manager'), w.reject()))
     QTimer.singleShot(1500, grab_modal)
     dock()._favorites_ctrl.show_manager_dialog()
 
@@ -214,8 +229,8 @@ def s_export_tab():
 
 def s_grab_export():
     d = dock()
-    save(d.toolBox_tabTools, '11-export-tab')
-    save(d, '11-dock-export')
+    save(d.toolBox_tabTools, 'export-tab')
+    save(d, '_dock-export')
 
 def s_config_tab():
     from qgis.PyQt.QtWidgets import QTreeView
@@ -228,8 +243,8 @@ def s_config_tab():
 
 def s_grab_config():
     d = dock()
-    save(d.toolBox_tabTools, '12-configuration-tab')
-    save(d, '12-dock-configuration')
+    save(d.toolBox_tabTools, 'configuration-tab')
+    save(d, '_dock-configuration')
 
 def s_processing():
     try:
@@ -244,7 +259,7 @@ def s_processing():
 def s_grab_processing():
     dlg = STATE.get('proc')
     if dlg:
-        save(dlg, '13-processing-batch-filter')
+        save(dlg, 'processing-batch-filter')
         dlg.close()
 
 def s_cleanup_favorite():

@@ -4,10 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FilterMate User Guide — Spatial Filtering for QGIS</title>
-    <meta name="description" content="Step-by-step user guide for FilterMate, the QGIS plugin for exploring, filtering and exporting vector data: installation, interface, spatial predicates, buffers, favorites, export and configuration.">
+    <meta name="description" content="Step-by-step user guide for FilterMate, the QGIS plugin for exploring, filtering and exporting vector, raster and LiDAR point cloud layers: installation, interface, spatial predicates, buffers, favorites, export, configuration and automation.">
     <meta name="keywords" content="QGIS, plugin, FilterMate, user guide, tutorial, spatial filter, PostGIS, GeoPackage, SpatiaLite">
     <meta property="og:title" content="FilterMate User Guide">
-    <meta property="og:description" content="Learn FilterMate in 15 minutes: explore, filter and export vector data in QGIS.">
+    <meta property="og:description" content="Learn FilterMate in 15 minutes: explore, filter and export vector, raster and LiDAR point cloud layers in QGIS.">
     <meta property="og:type" content="article">
     <meta property="og:url" content="https://imagodata.github.io/filter_mate/guide.html">
     <link rel="alternate" hreflang="en" href="https://imagodata.github.io/filter_mate/guide.html">
@@ -65,7 +65,7 @@
 <main class="content" id="main">
 
 <header class="hero">
-    <span class="section-label">User guide for FilterMate 4.9</span>
+    <span class="section-label">User guide for FilterMate 5.0</span>
     <div class="band band-hero">
         <video class="sheet-video" muted loop playsinline preload="none" poster="video/hero.webp" data-src="video/hero.mp4" aria-hidden="true"></video>
         <div class="sheet-scrim"></div>
@@ -88,6 +88,8 @@
         the filtered layer simply shows only the features that match, exactly as if you had typed a
         provider filter in the layer properties. FilterMate builds that filter for you, in the native
         language of the data source (PostGIS SQL, SpatiaLite SQL or a QGIS expression for files).
+        Raster and point cloud layers are filtered too: they are clipped to a temporary file that replaces
+        their source while the filter is on (see <a href="#raster-lidar">Rasters and LiDAR point clouds</a>).
     </p>
     <p>Every spatial filter follows the same three-part pattern:</p>
     <div class="cards">
@@ -153,15 +155,15 @@
     <p>FilterMate is a dock panel. By default it opens on the right side of the QGIS window and can be moved, floated or resized like any other QGIS panel.</p>
     <figure>
         <img src="img/guide/qgis-window.png" alt="QGIS 4.2 with a small BD TOPO project and the FilterMate panel docked on the right" loading="lazy" width="1600" height="945">
-        <figcaption>QGIS 4.2 (dark theme) with the FilterMate panel docked on the right. The project holds five GeoPackage layers.</figcaption>
+        <figcaption>QGIS 4.2 with the FilterMate panel docked on the right. The project holds five GeoPackage layers.</figcaption>
     </figure>
 
     <p>The panel is made of four areas, from top to bottom:</p>
     <div class="table-wrap">
     <table>
         <tr><th>Area</th><th>What it does</th></tr>
-        <tr><td><strong>Header badges</strong></td><td>The <span class="badge" style="background:#f39c12;">&#9733; n</span> badge counts saved favorites and opens the favorites menu. The colored badge shows which backend handles the current layer: <span class="badge" style="background:#58d68d;">PostgreSQL</span> <span class="badge" style="background:#bb8fce;">Spatialite</span> <span class="badge" style="background:#5dade2;">OGR</span> <span class="badge" style="background:#f0b27a;">Memory</span>.</td></tr>
-        <tr><td><strong>Exploring zone</strong></td><td>Pick the reference features on the current layer: single, multiple or expression-based selection, plus a vertical rail of navigation buttons.</td></tr>
+        <tr><td><strong>Header badges</strong></td><td>The &#9733; button opens the favorites menu; it turns amber once favorites are saved. The colored badge shows the kind of the current layer and what reads it: the backend for a vector layer (PostgreSQL, Spatialite, OGR, Memory), the provider for a raster or a point cloud. For example <span class="badge" style="background:#6cb4ee;color:#141414;">Vector · Spatialite</span> <span class="badge" style="background:#f0b35a;color:#141414;">Raster · GDAL</span> <span class="badge" style="background:#5ad6a5;color:#141414;">Point cloud · COPC</span>.</td></tr>
+        <tr><td><strong>Exploring zone</strong></td><td>Select on the current layer, described by the card at the top. For a vector layer: single, multiple or expression-based selection, plus a vertical rail of navigation buttons. Rasters and point clouds get their own tools (<a href="#raster-lidar">section 13</a>).</td></tr>
         <tr><td><strong>Tool tabs</strong></td><td>Three collapsible tabs: <strong>Filtering</strong>, <strong>Exporting</strong> and <strong>Configuration</strong>. Only one is open at a time.</td></tr>
         <tr><td><strong>Action bar</strong></td><td>The six buttons that actually do something: Filter, Undo, Redo, Unfilter, Export, About.</td></tr>
     </table>
@@ -174,8 +176,8 @@
         </figure>
         <div>
             <figure>
-                <img src="img/guide/header-badges.png" alt="Favorites and backend badges in the panel header" loading="lazy" width="614" height="42">
-                <figcaption>Header: 4 favorites saved, current layer handled by the Spatialite backend.</figcaption>
+                <img src="img/guide/header-badges.png" alt="Favorites and backend badges in the panel header" loading="lazy" width="614" height="48">
+                <figcaption>Header: the favorites button and the current layer, a vector layer read by the Spatialite backend.</figcaption>
             </figure>
             <figure>
                 <img src="img/guide/action-bar.png" alt="The action bar with Filter, Undo, Redo, Unfilter, Export and About" loading="lazy" width="614" height="119">
@@ -208,7 +210,7 @@
 
     <h3>Single selection</h3>
     <figure class="narrow">
-        <img src="img/guide/exploring-single.png" alt="Single selection mode with a road picked by name" loading="lazy" width="596" height="452">
+        <img src="img/guide/exploring-single.png" alt="Single selection mode with a road picked by name" loading="lazy" width="596" height="449">
         <figcaption>Single selection on a road layer: the feature is picked by name, the field below sets which attribute is displayed.</figcaption>
     </figure>
     <p>
@@ -219,7 +221,7 @@
 
     <h3>Multiple selection</h3>
     <figure class="narrow">
-        <img src="img/guide/exploring-multiple.png" alt="Multiple selection with four roads checked" loading="lazy" width="596" height="452">
+        <img src="img/guide/exploring-multiple.png" alt="Multiple selection with four roads checked" loading="lazy" width="596" height="449">
         <figcaption>Multiple selection: four roads are checked. The line above the list summarises the selection; the text box filters the list as you type.</figcaption>
     </figure>
     <p>
@@ -229,7 +231,7 @@
 
     <h3>Custom selection (expression)</h3>
     <figure class="narrow">
-        <img src="img/guide/exploring-custom.png" alt="Custom selection with a QGIS expression" loading="lazy" width="596" height="452">
+        <img src="img/guide/exploring-custom.png" alt="Custom selection with a QGIS expression" loading="lazy" width="596" height="449">
         <figcaption>Custom selection: any QGIS expression, here roads whose importance is 3 or 4.</figcaption>
     </figure>
     <p>
@@ -265,7 +267,7 @@
         <p class="credit">BD TOPO® 3.5 © IGN, Grenade.</p>
     </div>
     <figure class="narrow">
-        <img src="img/guide/filtering-tab.png" alt="The Filtering tab with target layers, predicate and buffer set" loading="lazy" width="590" height="620">
+        <img src="img/guide/filtering-tab.png" alt="The Filtering tab with target layers, predicate and buffer set" loading="lazy" width="590" height="617">
         <figcaption>Filtering tab: source layer, two target layers, combine operators, Intersect predicate, 50 m round buffer.</figcaption>
     </figure>
     <p>
@@ -278,7 +280,7 @@
     <table>
         <tr><th>Rail button</th><th>Row</th><th>Meaning</th></tr>
         <tr><td><strong>Auto current layer</strong></td><td>Source layer</td><td>When on, the source layer follows the QGIS Layers panel. When off, choose it in the drop-down. The small icon and checkbox to the right enable the <em>centroid</em> option for the source geometry.</td></tr>
-        <tr><td><strong>Layers to filter</strong></td><td>Target layers</td><td>A checkable list of every other vector layer in the project. Right-click for <em>Select All</em>, <em>Deselect All</em> or by geometry type. The checkbox on the right uses centroids for distant (target) layers.</td></tr>
+        <tr><td><strong>Layers to filter</strong></td><td>Target layers</td><td>A checkable list of the other layers of the project: vector, and since 5.0 raster and point cloud layers. Right-click for <em>Select All</em>, <em>Deselect All</em> or by geometry type. The checkbox on the right uses centroids for distant (target) layers.</td></tr>
         <tr><td><strong>Combine operator</strong></td><td>Two drop-downs</td><td>How a new filter combines with the one already applied. Left: for the source layer. Right: for the target layers. Values are <code>AND</code>, <code>OR</code> and <code>AND NOT</code>.</td></tr>
         <tr><td><strong>Geometric predicates</strong></td><td>Predicate list</td><td>Checkable list of spatial relations. Several can be ticked; they are combined with OR.</td></tr>
         <tr><td><strong>Buffer value</strong></td><td>Distance in metres</td><td>Expands (positive) or shrinks (negative) the source geometry before the predicate is tested. Click the small arrow to switch to a QGIS expression, e.g. <code>"width" * 2</code>.</td></tr>
@@ -467,7 +469,7 @@ AND ST_Intersects("geom",
         <p class="credit">BD TOPO® 3.5 © IGN, Saint-Gaudens.</p>
     </div>
     <figure class="narrow">
-        <img src="img/guide/export-tab.png" alt="The Exporting tab" loading="lazy" width="590" height="620">
+        <img src="img/guide/export-tab.png" alt="The Exporting tab" loading="lazy" width="590" height="617">
         <figcaption>Exporting tab: layers, CRS, style format, output format, output folder with batch mode, ZIP.</figcaption>
     </figure>
     <p>
@@ -480,7 +482,7 @@ AND ST_Intersects("geom",
         <tr><td><strong>Layers</strong></td><td>Checkable list of the layers to export.</td></tr>
         <tr><td><strong>Projection</strong></td><td>Output CRS. Layers in another CRS are reprojected during the export.</td></tr>
         <tr><td><strong>Styles</strong></td><td>Save the layer styles alongside the data as <code>QML</code> (QGIS native) or <code>SLD</code> (interoperable). With GeoPackage output the style is embedded in the file.</td></tr>
-        <tr><td><strong>Output format</strong></td><td>Any vector format QGIS can write: GeoPackage (default), Shapefile, GeoJSON, KML, CSV, FlatGeobuf&hellip;</td></tr>
+        <tr><td><strong>Output format</strong></td><td>Any vector format QGIS can write: GeoPackage (default), Shapefile, GeoJSON, KML, CSV, FlatGeobuf&hellip; Rasters and point clouds have their own formats (<a href="#raster-lidar">section 13</a>).</td></tr>
         <tr><td><strong>Output folder</strong></td><td>Where files are written. <strong>Batch mode</strong> writes one file per layer instead of one multi-layer file.</td></tr>
         <tr><td><strong>ZIP</strong></td><td>Packs the result in a single archive, optionally in batch mode as well.</td></tr>
     </table>
@@ -500,7 +502,7 @@ AND ST_Intersects("geom",
 <section id="configuration">
     <h2><span class="num">10</span>Configuration</h2>
     <figure class="narrow">
-        <img src="img/guide/configuration-tab.png" alt="The Configuration tab showing the settings tree" loading="lazy" width="590" height="620">
+        <img src="img/guide/configuration-tab.png" alt="The Configuration tab showing the settings tree" loading="lazy" width="590" height="617">
         <figcaption>Configuration tab: a tree of settings, edited in place. Changes are saved immediately.</figcaption>
     </figure>
     <p>
@@ -579,7 +581,7 @@ AND ST_Intersects("geom",
         <figcaption>The <em>Filter several layers (batch)</em> algorithm: pick layers, type an expression, run.</figcaption>
     </figure>
     <p>
-        FilterMate registers a Processing provider. Its first algorithm, <code>filtermate:batch_filter</code>, applies one filter expression to several vector layers in a single run.
+        FilterMate registers a Processing provider. Its simplest algorithm, <code>filtermate:batch_filter</code>, applies one filter expression to several vector layers in a single run; the cross filters of FilterMate 5 are described in <a href="#raster-lidar">section 13</a>.
         Because it is a regular Processing algorithm it can be used in the graphical modeler, in batch mode, or from Python:
     </p>
     <pre><code>import processing
