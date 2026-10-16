@@ -229,7 +229,9 @@ class ConfigController(BaseController):
         after = self._layer_kind_flags()
         if before is None or after is None or after == before:
             return
-        apply_options = getattr(getattr(self.dockwidget, 'app', None), 'apply_layer_kind_options', None)
+        # FilterMateApp sets dock.filter_mate_app (dock.app only in its legacy mode).
+        app = getattr(self.dockwidget, 'filter_mate_app', None) or getattr(self.dockwidget, 'app', None)
+        apply_options = getattr(app, 'apply_layer_kind_options', None)
         if callable(apply_options):
             QTimer.singleShot(0, apply_options)
             changes_summary.append(f"layer kinds (point clouds={after[0]}, rasters={after[1]})")
