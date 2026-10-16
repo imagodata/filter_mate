@@ -68,7 +68,7 @@
         </div>
     </div>
     <a class="hero-scroll" href="#workflow"><span>Discover the workflow</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></a>
-    <p class="credit">BD TOPO® 3.5 © IGN, Haute-Garonne. Recorded in QGIS 4.2 with FilterMate 4.9.2.</p>
+    <p class="credit">BD TOPO® 3.5 © IGN, Haute-Garonne. Recorded in QGIS 4.2 with FilterMate 5.0.</p>
 </header>
 
 <section class="proof-strip" aria-label="Key benefits">
@@ -99,15 +99,17 @@
 <section class="home-section fm5" id="fm5" aria-labelledby="fm5-title">
     <div class="home-container capability-layout">
         <div class="fm5-visual">
-            <div class="fm5-shots">
-                <img src="img/guide/fm5_raster_exploring.png" alt="EXPLORING panel of a raster layer: band, value range and histogram" loading="lazy" width="440" height="1086">
-                <img src="img/guide/fm5_pointcloud_exploring.png" alt="EXPLORING panel of a point cloud: LiDAR classes" loading="lazy" width="440" height="1086">
+            <div class="fm5-videos">
+                <button class="example-media" type="button" data-watch data-video="video/slope.mp4" data-poster="video/slope.webp" aria-label="Watch the slope example"><img src="video/slope.webp" alt="Slope of a terrain model above 30 % selected on the histogram, and the parcels lying mostly on it" loading="lazy" width="1280" height="720"><span class="case-number" aria-hidden="true">Raster</span><span class="media-play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Watch</span></button>
+                <button class="example-media" type="button" data-watch data-video="video/heights.mp4" data-poster="video/heights.webp" aria-label="Watch the building height example"><img src="video/heights.webp" alt="LiDAR building points more than 9 m above the terrain and the buildings they belong to" loading="lazy" width="1280" height="720"><span class="case-number" aria-hidden="true">LiDAR</span><span class="media-play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Watch</span></button>
+                <button class="example-media" type="button" data-watch data-video="video/pruning.mp4" data-poster="video/pruning.webp" aria-label="Watch the road pruning example"><img src="video/pruning.webp" alt="Trees more than 8 m tall within 3 m of a road, and the road segments to prune" loading="lazy" width="1280" height="720"><span class="case-number" aria-hidden="true">LiDAR</span><span class="media-play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Watch</span></button>
+                <button class="example-media" type="button" data-watch data-video="video/survey.mp4" data-poster="video/survey.webp" aria-label="Watch the survey delivery example"><img src="video/survey.webp" alt="The church and 50 m around it clip the terrain model and the point cloud, then both are exported" loading="lazy" width="1280" height="720"><span class="case-number" aria-hidden="true">Clip</span><span class="media-play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Watch</span></button>
             </div>
-            <p class="fm5-caption">The panel follows the current layer: a raster on the left, a point cloud on the right.</p>
+            <p class="fm5-caption">Recorded in QGIS 4.2 on one square kilometre around Estavar, in the Pyrenees: LiDAR HD (20.4 million points), the terrain model computed from it, BD TOPO® © IGN and Etalab cadastre.</p>
         </div>
         <div>
             <div class="section-heading"><p class="section-kicker">New in FilterMate 5</p><h2 id="fm5-title">Rasters and LiDAR point clouds, filtered like any layer.</h2><p>Choose a raster or a point cloud as the current layer and EXPLORING shows its own tools. FILTERING then relates the selection to layers of any kind.</p></div>
-            <ul class="capability-list"><li><strong>Raster</strong><span>Band, pixel picker, value range with histogram and live preview, classes, raster expression.</span></li><li><strong>Point clouds</strong><span>ASPRS and LiDAR HD classes, Z, intensity and return ranges, height above a DTM.</span></li><li><strong>Every direction</strong><span>Vector, raster and point cloud as source or target: nine combinations with buffer, minimum coverage and Disjoint.</span></li><li><strong>Safe to undo</strong><span>Clipped layers keep their id and style. Undo, redo and project files return to the original source.</span></li><li><strong>Export</strong><span>GeoTIFF and COG for rasters; LAZ, LAS, COPC, GPKG and CSV for point clouds.</span></li><li><strong>Automate</strong><span>Seven Processing algorithms, four models, qgis_process, Python and REST APIs.</span></li><li><strong>Tested</strong><span>CI on QGIS 3.22, 3.28, 3.34, 3.44 and 4.2, through Processing and the dock itself.</span></li></ul>
+            <ul class="capability-list"><li><strong>Raster</strong><span>Band, pixel picker, value range with histogram and live preview, classes, raster expression.</span></li><li><strong>Point clouds</strong><span>ASPRS and LiDAR HD classes, Z, intensity and return ranges, height above a DTM.</span></li><li><strong>Every direction</strong><span>Vector, raster and point cloud as source or target: nine combinations with buffer, minimum coverage and Disjoint.</span></li><li><strong>Safe to undo</strong><span>Clipped layers keep their id and style. Undo, redo and project files return to the original source.</span></li><li><strong>Export</strong><span>GeoTIFF and COG for rasters; LAZ, LAS, COPC, GPKG and CSV for point clouds.</span></li><li><strong>Automate</strong><span>Nine Processing algorithms, four models, qgis_process, Python and REST APIs.</span></li><li><strong>Tested</strong><span>CI on QGIS 3.22, 3.28, 3.34, 3.44 and 4.2, through Processing and the dock itself.</span></li></ul>
             <a class="inline-cta" href="guide.html#raster-lidar">Read the FilterMate 5 guide <span aria-hidden="true">→</span></a>
         </div>
     </div>

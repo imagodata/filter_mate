@@ -1428,8 +1428,8 @@ PROCESSING = boot(S8_LAYERS, 'commune', '"nom_officiel" = \'Toulouse\'', 1.0, de
 
 
 # ------------------------------------------------------------------ FilterMate 5: raster and LiDAR
-# Estavar (Cerdagne, Pyrénées-Orientales): one square kilometre around the village cut from the
-# IGN LiDAR HD tiles 0616_6152 and 0616_6153 (COPC, 25.8 M points), the DTM interpolated from
+# Estavar (Cerdagne, Pyrénées-Orientales): one square kilometre of the village cut from the
+# IGN LiDAR HD tiles 0617_6152 and 0617_6153 (COPC), the DTM interpolated from
 # their ground points (1 m), its slope in percent, BD TOPO (IGN WFS) and Etalab cadastre.
 # scripts/site_videos.sh documents how the files of fm_video\data are made.
 FM5_DIR = os.environ.get('FM5_DIR', os.path.join(ROOT, 'data'))
@@ -1437,8 +1437,9 @@ FM5_DTM = os.path.join(FM5_DIR, 'mnt_village.tif')
 FM5_SLOPE = os.path.join(FM5_DIR, 'pente_village.tif')
 FM5_GPKG = os.path.join(FM5_DIR, 'estavar.gpkg')
 FM5_TILE = os.path.join(FM5_DIR, 'estavar_village.copc.laz')
-FM5_EXTENT = (616000, 6151700, 617000, 6152700)
-DTM_COLORS = [(1188, '#3f7d4f'), (1215, '#8fb46a'), (1250, '#d8d39a'), (1300, '#c8a27a'), (1358, '#f3efe8')]
+FM5_EXTENT = (617000, 6152100, 618000, 6153100)
+DTM_COLORS = [(1200, '#3f7d4f'), (1225, '#8fb46a'), (1250, '#d8d39a'), (1280, '#c8a27a'), (1315, '#f3efe8')]
+FM5_STYLE = {'troncon_de_route': ('#e07b24', 1.1, 1.0)}  # readable on the hillshade, light or dark
 SLOPE_COLORS = [(0, '#f4f1e4'), (15, '#e8d48c'), (30, '#de8f3c'), (60, '#ad3a2c'), (100, '#5c1a22')]
 
 
@@ -1468,6 +1469,27 @@ def hillshade_layer(name):
     return rl
 
 
+def style_point_cloud(pc=None):
+    """Classified rendering without the ground and unclassified points: the hillshade shows through.
+
+    Built here: at load time the layer only has the provisional extent renderer.
+    """
+    try:
+        from qgis.core import QgsPointCloudClassifiedRenderer
+        pc = pc or layer('lhd')
+        renderer = QgsPointCloudClassifiedRenderer('Classification', QgsPointCloudClassifiedRenderer.defaultCategories())
+        categories = renderer.categories()
+        for category in categories:
+            if category.value() in (0, 1, 2, 7, 18, 64, 65, 66, 67):
+                category.setRenderState(False)
+        renderer.setCategories(categories)
+        renderer.setPointSize(1.6)
+        pc.setRenderer(renderer)
+        pc.triggerRepaint()
+    except Exception:
+        log(traceback.format_exc())
+
+
 def setup5(layer_names, hidden=(), margin=1.03):
     """Load the Estavar layers (bottom to top), hide `hidden` in the legend, frame the square kilometre."""
     def _s():
@@ -1485,7 +1507,7 @@ def setup5(layer_names, hidden=(), margin=1.03):
             else:
                 ml = QgsVectorLayer(f'{FM5_GPKG}|layername={name}', name, 'ogr')
                 ml.setLabelsEnabled(False)
-                style_layer(ml, STYLE.get(name))
+                style_layer(ml, FM5_STYLE.get(name, STYLE.get(name)))
             log(f'layer {name} valid={ml.isValid()}')
             QgsProject.instance().addMapLayer(ml)
             if name in hidden:
@@ -1590,46 +1612,34 @@ def coverage_spin():
     return dock().findChild(QWidget, 'mQgsSpinBox_filtering_coverage_min')
 
 
-def class_item(text):
-    def _r():
-        lw = pc_panel()._classes_list
-        items = [lw.item(i) for i in range(lw.count()) if text.lower() in lw.item(i).text().lower()]
-        if not items:
-            return rect_of(lw)
-        lw.scrollToItem(items[0])
-        r = lw.visualItemRect(items[0])
-        return to_main(lw.viewport(), QRect(r.x(), r.y(), 28, r.height()))
-    return _r
+def class_condition(code, dtm, hag, story):
+    """ATTRIBUTES group: "Classification = code" AND height above the DTM >= hag.
 
-
-def check_class(text):
-    def _s():
-        lw = pc_panel()._classes_list
-        hits = [lw.item(i) for i in range(lw.count()) if text.lower() in lw.item(i).text().lower()]
-        log(f'class items -> {[h.text() for h in hits]}')
-        for item in hits[:1]:
-            item.setCheckState(Qt.CheckState.Checked)
-    return _s
-
-
-def pick_class(text):
-    """Open the classes group and tick one class, as a user would."""
-    group = lambda: pc_panel()._classes_group  # noqa: E731
-    return (act(group_check(group), open_group(group)) + [
-        hold(600), (0, ensure_visible(lambda: pc_panel()._classes_list)), hold(300),
-    ] + act(class_item(text), check_class(text), lead=700) + [hold(1200)])
-
-
-def height_above(dtm, value):
-    """ATTRIBUTES group: height above the DTM >= value, measured from the layer `dtm`."""
+    CLASSES, ATTRIBUTES and EXPRESSION are exclusive groups of the panel; the height is ANDed
+    with the active one, so a class and a height go together through a condition.
+    """
     group = lambda: pc_panel()._ranges_group  # noqa: E731
+    row = lambda: pc_panel()._condition_rows[-1]  # noqa: E731
+
+    def set_condition():
+        from filter_mate.core.domain.point_cloud_attributes import OP_EQUAL, JOIN_AND
+        row().set_condition({'attribute': 'Classification', 'op': OP_EQUAL, 'low': float(code), 'high': None,
+                             'join': JOIN_AND})
+        pc_panel()._changed()
+        log(f'condition {row().condition()}')
+
     return (act(group_check(group), open_group(group)) + [
-        hold(500), (0, ensure_visible(lambda: pc_panel()._hag_spin)), hold(300),
-        (0, cam(lambda: pc_panel()._ranges_group, dur=1.2, pad=30)),
+        hold(500), (0, ensure_visible(lambda: pc_panel()._add_condition_button)), hold(300),
+        (0, cam(group, dur=1.2, pad=30)),
+    ] + act(lambda: pc_panel()._add_condition_button, lambda: pc_panel()._add_condition_button.click())
+        + [hold(700)] + act(lambda: row()._attribute_combo, set_condition, lead=800) + [hold(1300), still(f'{story}-01')]
+        + act('pushButton_checkable_exploring_selecting', click_selecting) + settle() + show_map(2800) + [
+        (0, cam(group, dur=1.2, pad=30)), (0, ensure_visible(lambda: pc_panel()._hag_spin)),
     ] + act(lambda: pc_panel()._hag_check, lambda: pc_panel()._hag_check.setChecked(True))
-        + typed_spin(lambda: pc_panel()._hag_spin, value)
+        + typed_spin(lambda: pc_panel()._hag_spin, hag)
         + act(lambda: pc_panel()._hag_layer_combo, lambda: pc_panel()._hag_layer_combo.setLayer(layer(dtm)))
-        + [hold(1200)])
+        + [hold(1200), (0, lambda: log(f'hag settings {pc_panel().hag_settings()} expression {pc_panel().expression()}')),
+           still(f'{story}-02')])
 
 
 def run_filter_long(fast=8.0):
@@ -1641,7 +1651,11 @@ def run_filter_long(fast=8.0):
 
 def fm5_scene():
     """Start recording on the whole square kilometre."""
-    return [(500, wait_idle()), (500, rec_start), (0, cam('full', dur=0, drift=1.03)), hold(1200),
+    def style_cloud():
+        if QgsProject.instance().mapLayersByName('lhd'):
+            style_point_cloud()
+    return [(500, wait_idle()), (0, style_cloud), (0, refocus), (800, wait_idle()), (500, rec_start),
+            (0, cam('full', dur=0, drift=1.03)), hold(1200),
             (0, cam('canvas', dur=1.4, drift=1.03)), hold(1400)]
 
 
@@ -1654,48 +1668,50 @@ SLOPE = boot5(['hillshade', 'pente', 'parcelle', 'batiment']) + fm5_scene() + to
     + act(group_check(lambda: raster_panel()._range_group), open_group(lambda: raster_panel()._range_group)) + [
     hold(600), (0, ensure_visible(lambda: raster_panel()._max_spin)), hold(300),
     (0, cam(lambda: raster_panel()._range_group, dur=1.2, pad=30)),
-] + typed_spin(lambda: raster_panel()._min_spin, 30) + [hold(1500)] \
+] + typed_spin(lambda: raster_panel()._min_spin, 30) + [hold(1300), still('s9-01')] \
     + act('pushButton_checkable_exploring_selecting', click_selecting) + settle() + show_map(3200) + [
-    (0, cam(FILTER_ZONE, dur=1.4, pad=40)),
+    still('s9-02'), (0, cam(FILTER_ZONE, dur=1.4, pad=40)),
 ] + targets(['parcelle']) + predicates(['intersect']) + typed_spin(coverage_spin, 50, per_char=250) + [
-    (400, cam(ACTION_ZONE, dur=1.2, pad=40)),
-] + run_filter() + [(0, lambda: counts(['parcelle', 'batiment']))] + show_map(4500, 1.05) + ending(['parcelle'])
+    hold(600), still('s9-03'), (400, cam(ACTION_ZONE, dur=1.2, pad=40)),
+] + run_filter() + [(0, lambda: counts(['parcelle', 'batiment']))] + show_map(4500, 1.05) + [still('s9-04')] \
+    + ending(['parcelle'])
 
-# heights (story 10): building points more than 9 m above the DTM (PDAL) -> buildings above 9 m.
+# heights (story 10): building points (class 6) more than 9 m above the DTM (PDAL) -> buildings with
+# at least half of their footprint under such points.
 HEIGHTS = boot5(['hillshade', 'mnt', 'lhd', 'batiment'], hidden=('mnt',)) + fm5_scene() + to_exploring('lhd') \
-    + pick_class('6 - building') + act('pushButton_checkable_exploring_selecting', click_selecting) + settle() \
-    + show_map(2800) + [(0, cam(coverage_host, dur=1.4, pad=24))] + height_above('mnt', 9) + [
-    (0, cam(FILTER_ZONE, dur=1.4, pad=40)),
-] + targets(['batiment']) + predicates(['intersect']) + [(200, buffer_off), (400, cam(ACTION_ZONE, dur=1.2, pad=40))] \
-    + run_filter_long() + [(0, lambda: counts(['batiment']))] + show_map(4500, 1.05) + ending(['batiment'])
+    + class_condition(6, 'mnt', 9, 's10') + [(0, cam(FILTER_ZONE, dur=1.4, pad=40))] \
+    + targets(['batiment']) + predicates(['intersect']) + typed_spin(coverage_spin, 50, per_char=250) + [
+    (200, buffer_off), hold(500), still('s10-03'), (400, cam(ACTION_ZONE, dur=1.2, pad=40)),
+] + run_filter_long() + [(0, lambda: counts(['batiment']))] + show_map(4500, 1.05) + [still('s10-04')] \
+    + ending(['batiment'])
 
-# pruning (story 11): high vegetation more than 8 m above the DTM -> road segments within 3 m of it.
+# pruning (story 11): high vegetation (class 5) more than 8 m above the DTM -> road segments within 3 m.
 PRUNING = boot5(['hillshade', 'mnt', 'lhd', 'batiment', 'troncon_de_route'], hidden=('mnt',)) + fm5_scene() \
-    + to_exploring('lhd') + pick_class('5 - high veg') \
-    + act('pushButton_checkable_exploring_selecting', click_selecting) + settle() + show_map(2800) + [
-    (0, cam(coverage_host, dur=1.4, pad=24)),
-] + height_above('mnt', 8) + [(0, cam(FILTER_ZONE, dur=1.4, pad=40))] \
+    + to_exploring('lhd') + class_condition(5, 'mnt', 8, 's11') + [(0, cam(FILTER_ZONE, dur=1.4, pad=40))] \
     + targets(['troncon_de_route']) + predicates(['intersect']) \
     + act('pushButton_checkable_filtering_buffer_value', buffer_value(0)) + typed_buffer(3) + [
-    (400, cam(ACTION_ZONE, dur=1.2, pad=40)),
-] + run_filter_long() + [(0, lambda: counts(['troncon_de_route']))] + show_map(4500, 1.05) \
+    hold(500), still('s11-03'), (400, cam(ACTION_ZONE, dur=1.2, pad=40)),
+] + run_filter_long() + [(0, lambda: counts(['troncon_de_route']))] + show_map(4500, 1.05) + [still('s11-04')] \
     + ending(['troncon_de_route'])
 
 
-def survey_export_zip():
-    os.makedirs(EXPORT_DIR, exist_ok=True)
-    dock().lineEdit_exporting_zip.setText(os.path.join(EXPORT_DIR, 'estavar_eglise.zip'))
+def zip_edit():
+    return dock().lineEdit_exporting_zip
+
+
+SURVEY_ZIP = os.path.join(EXPORT_DIR, 'estavar_eglise.zip')
 
 
 # survey (story 12): the church and 50 m around clip the DTM and the LiDAR, then both are exported.
 SURVEY = boot5(['hillshade', 'mnt', 'lhd', 'parcelle', 'batiment']) + fm5_scene() + pick_layer('batiment') + [
     (1500, cam(EXPLORE_ZONE, dur=1.4, pad=30)),
 ] + typed_custom('"nature" = \'Eglise\'', per_char=70) + settle() + show_map(2000) + [
-    (0, cam(FILTER_ZONE, dur=1.4, pad=40)),
+    still('s12-01'), (0, cam(FILTER_ZONE, dur=1.4, pad=40)),
 ] + targets(['mnt', 'lhd']) + predicates(['intersect']) \
     + act('pushButton_checkable_filtering_buffer_value', buffer_value(0)) + typed_buffer(50) + [
-    (400, cam(ACTION_ZONE, dur=1.2, pad=40)),
-] + run_filter() + [(0, zoom_rect(616030, 6152100, 616330, 6152400))] + settle() + show_map(4000, 1.05) + [
+    hold(500), still('s12-02'), (400, cam(ACTION_ZONE, dur=1.2, pad=40)),
+] + run_filter() + [(0, zoom_rect(617207, 6152391, 617507, 6152691))] + settle() + show_map(4000, 1.05) + [
+    still('s12-03'),
     (0, cam('dock', dur=1.4, pad=10)),
 ] + act(toolbox_button('export'), lambda: dock().toolBox_tabTools.setCurrentIndex(1)) + [
     (1200, cam(EXPORT_ZONE, dur=1.4, pad=40)),
@@ -1705,9 +1721,12 @@ SURVEY = boot5(['hillshade', 'mnt', 'lhd', 'parcelle', 'batiment']) + fm5_scene(
     + act('pushButton_checkable_exporting_output_folder', enable('pushButton_checkable_exporting_output_folder')) \
     + act(folder_edit, lambda: folder_edit().clear()) + type_into(folder_edit, EXPORT_DIR, per_char=25, clear=False) \
     + act('pushButton_checkable_exporting_zip', enable('pushButton_checkable_exporting_zip')) \
-    + [(300, survey_export_zip), (400, cam(['pushButton_action_export', 'pushButton_checkable_exporting_zip'], dur=1.2, pad=40))] \
-    + act('pushButton_action_export', export_with_recap) + [hold(1500)] + settle(4.0) + [(0, wait_long())] \
-    + show_map(3000) + ending()
+    + act(zip_edit, lambda: (os.makedirs(EXPORT_DIR, exist_ok=True), zip_edit().clear())) \
+    + type_into(zip_edit, SURVEY_ZIP, per_char=25, clear=False) \
+    + [(400, cam(['pushButton_action_export', 'pushButton_checkable_exporting_zip'], dur=1.2, pad=40))] \
+    + [hold(600), still('s12-04'), (0, lambda: log(f"export props {dock().project_props.get('EXPORTING')}"))] \
+    + act('pushButton_action_export', export_with_recap) + [hold(1500)] \
+    + settle(4.0) + [(0, wait_long())] + show_map(3000) + ending()
 
 CLIPS = {'hero': HERO, 'explore': EXPLORE, 'buffer': BUFFER, 'noise': NOISE, 'bridges': BRIDGES,
          'brush': BRUSH, 'hamlets': HAMLETS, 'favorites': FAVORITES, 'export': EXPORT, 'processing': PROCESSING,
