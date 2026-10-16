@@ -321,7 +321,10 @@ class CoverageModeController(BaseController):
     def activate(self, layer: Any, kind: Any) -> None:
         from ...core.domain.layer_kind import LayerKind
         dw = self.dockwidget
-        if self._active_layer is not None and not _same_layer(self._active_layer, layer):
+        # Activated again for the layer it shows (F5, a late layer change signal):
+        # the input and the live preview stay as they are.
+        again = self._active_layer is not None and _same_layer(self._active_layer, layer)
+        if self._active_layer is not None and not again:
             self._leave_layer()
         self._disconnect_previous_vector_selection(dw, layer)
         try:
@@ -333,14 +336,15 @@ class CoverageModeController(BaseController):
         self._kind = kind
         if first_activation:
             self._save_dock_state()
-        self._apply_layout(kind)
+        self._apply_layout(kind, keep_preview=again)
         self._show_kind_badge(layer, kind)
         self._extras_call('show_for', layer, kind)
         if kind is LayerKind.RASTER:
             self._populate_raster(layer)
         else:
             self._populate_point_cloud(layer)
-        self._restore_panel_state(layer)
+        if not again:
+            self._restore_panel_state(layer)
         self._sync_layer_combo(layer)
         self._populate_filtering_targets(layer)
         self._load_coverage_min(layer)
@@ -614,7 +618,7 @@ class CoverageModeController(BaseController):
         self._call(badge, 'setToolTip', self.tr("{0} layer: selection in EXPLORING, relation in FILTERING").format(label))
         self._call(badge, 'setStyleSheet', badge_stylesheet(name, color))
 
-    def _apply_layout(self, kind: Any) -> None:
+    def _apply_layout(self, kind: Any, keep_preview: bool = False) -> None:
         from ...core.domain.layer_kind import LayerKind
         dw = self.dockwidget
         for widget in self._saved_visibility:
@@ -649,13 +653,20 @@ class CoverageModeController(BaseController):
                 self._call(button, 'setEnabled', False)
             else:
                 self._call(button, 'setEnabled', True)
-        selecting = getattr(dw, 'pushButton_checkable_exploring_selecting', None)
-        if selecting is not None:
-            try:
-                selecting.blockSignals(True)
-                selecting.setChecked(False)
-            finally:
-                selecting.blockSignals(False)
+        if not keep_preview:
+            self._set_selecting_checked(False)  # no preview on a layer just shown
+
+    def _set_selecting_checked(self, checked: bool) -> None:
+        """Check the preview button of the dock without running its handler."""
+        selecting = getattr(self.dockwidget, 'pushButton_checkable_exploring_selecting', None)
+        if selecting is None:
+            return
+        try:
+            selecting.blockSignals(True)
+            selecting.setChecked(bool(checked))
+            selecting.blockSignals(False)
+        except RuntimeError:
+            pass  # deleted (plugin closing)
 
     def _current_panel(self):
         from ...core.domain.layer_kind import LayerKind
@@ -666,11 +677,15 @@ class CoverageModeController(BaseController):
         return None
 
     def _restore_panel_state(self, layer: Any) -> None:
+        from ...core.domain.layer_kind import LayerKind
         state = self._panel_states.get(layer.id())
         panel = self._current_panel()
         if state and panel is not None:
             try:
                 panel.restore_state(state)
+                if self._kind is LayerKind.RASTER and state.get('preview'):
+                    # The preview box comes back checked: so do the button and the mask on the map.
+                    self._on_raster_preview_toggled(True)
             except Exception as exc:
                 logger.debug(f"[FM5] panel state not restored: {exc}")
 
@@ -801,13 +816,9 @@ class CoverageModeController(BaseController):
             logger.debug(f"[FM5] raster expression not validated: {exc}")
 
     def _on_raster_preview_toggled(self, enabled: bool) -> None:
-        selecting = getattr(self.dockwidget, 'pushButton_checkable_exploring_selecting', None)
-        if selecting is not None and selecting.isChecked() != enabled:
-            try:
-                selecting.blockSignals(True)
-                selecting.setChecked(enabled)
-            finally:
-                selecting.blockSignals(False)
+        # The dock button and the panel box show the same state (either one can toggle it).
+        self._set_selecting_checked(enabled)
+        self._call(self._raster_panel, 'set_preview_checked', enabled)
         self._preview_active = bool(enabled)
         if enabled:
             self._apply_raster_preview()
@@ -818,11 +829,13 @@ class CoverageModeController(BaseController):
         layer, panel = self._active_layer, self._raster_panel
         if layer is None or panel is None:
             return
-        from ...adapters.qgis.coverage_layers.raster_adapter import apply_selection_preview
+        from ...adapters.qgis.coverage_layers.raster_adapter import apply_selection_preview, clear_selection_preview
         selection = panel.selection()
         cached = self._histogram_cache.get((layer.source(), panel.current_band()))
         low, high = (cached[1], cached[2]) if cached else (None, None)
-        if selection is not None:
+        if selection is None:
+            clear_selection_preview(layer)  # nothing selected: every pixel shows again
+        else:
             apply_selection_preview(layer, selection, low, high)
 
     def _populate_point_cloud(self, layer: Any, keep_kept: bool = False) -> None:
@@ -894,6 +907,11 @@ class CoverageModeController(BaseController):
         self._refresh_canvas(layer)
 
     def _stop_preview(self, layer: Any) -> None:
+        """Drop the live preview of ``layer``; the preview button (and box) follow, unchecked.
+
+        A button left checked would bring the preview back at the next input
+        change, on top of a filter just applied or an undo.
+        """
         from ...core.domain.layer_kind import LayerKind
         try:
             if self._kind is LayerKind.RASTER:
@@ -905,6 +923,9 @@ class CoverageModeController(BaseController):
             logger.debug(f"[FM5] preview not cleared: {exc}")
         self._preview_base_subset = None
         self._preview_active = False
+        self._set_selecting_checked(False)
+        if self._kind is LayerKind.RASTER:
+            self._call(self._raster_panel, 'set_preview_checked', False)
 
     def _point_cloud_expression(self, include_hag: bool = True) -> str:
         panel = self._pc_panel
@@ -1209,10 +1230,12 @@ class CoverageModeController(BaseController):
                 self._run_filter(layer)
             elif task_name in ('unfilter', 'reset'):
                 self._run_unfilter(layer, reset=task_name == 'reset')
-            elif task_name == 'undo':
-                self._finish_restore(self.service.undo(layer.id()))
-            elif task_name == 'redo':
-                self._finish_restore(self.service.redo(layer.id()))
+            elif task_name in ('undo', 'redo'):
+                # The point cloud preview subset must go first: the history only
+                # restores a layer still in the state it recorded.
+                self._stop_preview(layer)
+                step = self.service.undo if task_name == 'undo' else self.service.redo
+                self._finish_restore(step(layer.id()))
             elif task_name == 'export':
                 self._run_export([layer.id()])
         except Exception as exc:

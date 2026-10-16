@@ -46,6 +46,9 @@ class FakeLayer:
     def name(self):
         return self._id
 
+    def source(self):
+        return f"/data/{self._id}"
+
     def subsetString(self):
         return self._subset
 
@@ -55,10 +58,13 @@ class FakeLayer:
 
 
 class FakeService:
-    def __init__(self):
+    """CrossFilterService stand-in: real history (pure domain), recorded calls."""
+
+    def __init__(self, history):
         self.calls = []
         self.undo_ok = {}
         self.redo_ok = {}
+        self.history = history
 
     def unfilter(self, source_id, ids, kinds, record=True):
         self.calls.append(("unfilter", source_id, tuple(ids)))
@@ -66,10 +72,12 @@ class FakeService:
 
     def undo(self, source_id):
         self.calls.append(("undo", source_id))
+        self.history.undo(source_id)
         return [source_id]
 
     def redo(self, source_id):
         self.calls.append(("redo", source_id))
+        self.history.redo(source_id)
         return [source_id]
 
     def can_undo(self, source_id):
@@ -102,18 +110,23 @@ def ctrl_module(monkeypatch):
     monkeypatch.setitem(sys.modules, base.__name__, base)
     layer_kind = _load_real("core.domain.layer_kind", "core/domain/layer_kind.py")
     _load_real("core.domain.cross_filter", "core/domain/cross_filter.py")
-    _load_real("core.domain.filter_state", "core/domain/filter_state.py")
+    filter_state = _load_real("core.domain.filter_state", "core/domain/filter_state.py")
     capability = types.ModuleType(f"{_PKG}.adapters.qgis.point_cloud_capability")
     kinds = {"vector": layer_kind.LayerKind.VECTOR, "raster": layer_kind.LayerKind.RASTER,
              "pc": layer_kind.LayerKind.POINT_CLOUD}
     capability.get_layer_kind = lambda layer: kinds.get(getattr(layer, "kind", None), layer_kind.LayerKind.OTHER)
     monkeypatch.setitem(sys.modules, capability.__name__, capability)
-    service = FakeService()
+    service = FakeService(filter_state.CrossOperationHistory())
     service_module = types.ModuleType(f"{_PKG}.core.services.cross_filter_service")
     service_module.get_cross_filter_service = lambda: service
     service_module.calls = []
     service_module.clear_histories = lambda: service_module.calls.append(("clear_histories",))
-    service_module.forget_layer_everywhere = lambda layer_id: service_module.calls.append(("forget", layer_id))
+
+    def forget_layer_everywhere(layer_id):
+        service_module.calls.append(("forget", layer_id))
+        service.history.forget_layer(layer_id)
+
+    service_module.forget_layer_everywhere = forget_layer_everywhere
     service_module.tidy_report = None
     service_module.tidy_cache = lambda: service_module.tidy_report
     monkeypatch.setitem(sys.modules, service_module.__name__, service_module)
@@ -130,6 +143,8 @@ def ctrl_module(monkeypatch):
     module._test_service_module = service_module
     module._test_feedback = feedback
     module._test_kinds = kinds
+    module._test_filter_state = filter_state
+    module._test_layer_kind = layer_kind
     return module
 
 
@@ -556,3 +571,132 @@ class TestPointCloudStatisticsRefresh:
         ctrl._watch_point_cloud_statistics(layer)
         ctrl._watch_point_cloud_statistics(layer)
         assert len(layer.statisticsCalculationStateChanged.slots) == 1
+
+
+# ---------------------------------------------------------------------------
+# Audit fixes (FilterMate 5): layer switches, previews, lifecycle, history links
+# ---------------------------------------------------------------------------
+
+def _kind(ctrl_module, name):
+    return getattr(ctrl_module._test_layer_kind.LayerKind, name)
+
+
+def _unchecked(widget):
+    return [call for call in widget.setChecked.call_args_list if call.args == (False,)]
+
+
+class FakeQgsTask:
+    class TaskStatus:
+        Queued, OnHold, Running, Complete, Terminated = range(5)
+
+
+class RunningTask:
+    def __init__(self, status=FakeQgsTask.TaskStatus.Running):
+        self._status = status
+
+    def status(self):
+        return self._status
+
+
+@pytest.fixture
+def adapters(monkeypatch, ctrl_module):
+    """Stub ``adapters.qgis.coverage_layers`` modules (raster preview, snapshots) recording their calls."""
+    package = types.ModuleType(f"{_PKG}.adapters.qgis.coverage_layers")
+    package.__path__ = []
+    monkeypatch.setitem(sys.modules, package.__name__, package)
+    calls = []
+    raster = types.ModuleType(f"{package.__name__}.raster_adapter")
+    raster.apply_selection_preview = lambda layer, selection, low, high: calls.append(("apply", layer.id(), low, high))
+    raster.clear_selection_preview = lambda layer: calls.append(("clear", layer.id()))
+    raster.band_histogram = lambda layer, band, bins=64: calls.append(("histogram", band)) or ([1, 1], 0.0, 10.0)
+    snapshots = types.ModuleType(f"{package.__name__}.snapshots")
+    snapshots.derived = {}
+    snapshots.registry = lambda: types.SimpleNamespace(get=snapshots.derived.get, install=lambda *a: None)
+    snapshots.take_snapshot = lambda layer, kind: ctrl_module._test_filter_state.LayerSnapshot(
+        layer.id(), kind.value, source=layer.source(), subset=layer.subsetString())
+    for module in (raster, snapshots):
+        monkeypatch.setitem(sys.modules, module.__name__, module)
+    monkeypatch.setattr(sys.modules["qgis.core"], "QgsTask", FakeQgsTask, raising=False)
+    return types.SimpleNamespace(calls=calls, package=package, snapshots=snapshots)
+
+
+@pytest.mark.unit
+class TestPreviewStopsBeforeHistory:
+    """Constat 2: the live preview never makes Undo / Redo skip the point cloud."""
+
+    def test_undo_removes_the_point_cloud_preview_first(self, ctrl_module, adapters):
+        selecting = MagicMock()
+        layer = FakeLayer("p1", "pc", subset="(Classification = 2) AND (Z > 300)")
+        controller = ctrl_module.CoverageModeController(_dock(current_layer=layer,
+                                                              pushButton_checkable_exploring_selecting=selecting))
+        controller._active_layer, controller._kind = layer, _kind(ctrl_module, "POINT_CLOUD")
+        controller._preview_base_subset = "Classification = 2"
+        seen = []
+        ctrl_module._test_service.undo = lambda source_id: seen.append(layer.subsetString()) or []
+        controller.handle_task("undo")
+        assert seen == ["Classification = 2"]  # the state the history recorded
+        assert _unchecked(selecting)  # the preview does not come back at the next input change
+        assert controller._preview_base_subset is None
+
+    def test_stopped_raster_preview_unchecks_the_button_and_the_box(self, ctrl_module, layers, adapters):
+        selecting = MagicMock()
+        controller = ctrl_module.CoverageModeController(_dock(pushButton_checkable_exploring_selecting=selecting))
+        controller._active_layer, controller._kind = layers["r1"], _kind(ctrl_module, "RASTER")
+        controller._raster_panel = MagicMock()
+        controller._preview_active = True
+        controller._stop_preview(layers["r1"])
+        assert ("clear", "r1") in adapters.calls
+        assert _unchecked(selecting)
+        controller._raster_panel.set_preview_checked.assert_called_with(False)
+        assert not controller._preview_active
+
+
+@pytest.mark.unit
+class TestReactivation:
+    """Constat 5: activating the shown layer again keeps its input and its preview."""
+
+    def _controller(self, ctrl_module, monkeypatch):
+        selecting = MagicMock()
+        controller = ctrl_module.CoverageModeController(_dock(pushButton_checkable_exploring_selecting=selecting))
+        for name in ("_show_kind_badge", "_extras_call", "_populate_raster", "_sync_layer_combo",
+                     "_populate_filtering_targets", "_load_coverage_min", "_save_dock_state", "update_undo_redo_buttons"):
+            monkeypatch.setattr(controller, name, lambda *a, **k: None)
+        controller._raster_panel = MagicMock()
+        return controller, selecting
+
+    def test_same_layer_is_not_restored_from_an_older_input(self, ctrl_module, layers, adapters, monkeypatch):
+        controller, selecting = self._controller(ctrl_module, monkeypatch)
+        raster = _kind(ctrl_module, "RASTER")
+        controller._active_layer, controller._kind = layers["r1"], raster
+        controller._panel_states["r1"] = {"mode": "range", "minimum": 1.0}  # saved when r1 was left earlier
+        controller.activate(layers["r1"], raster)
+        controller._raster_panel.restore_state.assert_not_called()
+        assert _unchecked(selecting) == []  # the preview button stays as it is
+
+    def test_another_layer_gets_its_input_and_its_preview_back(self, ctrl_module, layers, adapters, monkeypatch):
+        controller, selecting = self._controller(ctrl_module, monkeypatch)
+        raster = _kind(ctrl_module, "RASTER")
+        layers["r2"] = FakeLayer("r2", "raster")
+        controller._active_layer, controller._kind = layers["r2"], raster
+        state = {"mode": "range", "minimum": 1.0, "preview": True}
+        controller._panel_states["r1"] = state
+        controller._raster_panel.selection.return_value = object()
+        controller.activate(layers["r1"], raster)
+        controller._raster_panel.restore_state.assert_called_once_with(state)
+        selecting.setChecked.assert_called_with(True)
+        assert ("apply", "r1", None, None) in adapters.calls
+
+
+@pytest.mark.unit
+class TestRasterPreviewFollowsTheSelection:
+    """Constat 7: an empty selection shows every pixel again."""
+
+    def test_empty_selection_removes_the_preview(self, ctrl_module, layers, adapters):
+        controller = ctrl_module.CoverageModeController(_dock())
+        controller._active_layer = layers["r1"]
+        controller._raster_panel = MagicMock()
+        controller._raster_panel.selection.return_value = None
+        controller._apply_raster_preview()
+        assert adapters.calls == [("clear", "r1")]
+
+
