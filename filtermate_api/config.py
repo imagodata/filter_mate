@@ -76,16 +76,60 @@ def _plugin_env_vars() -> dict:
     return {}
 
 
+def _qgis_profile_dir() -> str:
+    """Folder of the running QGIS profile (``QgsApplication.qgisSettingsDirPath()``), "" outside QGIS."""
+    settings = _plugin_env_vars().get("QGIS_SETTINGS_PATH")
+    if settings:
+        return str(settings)
+    application = getattr(sys.modules.get("qgis.core"), "QgsApplication", None)
+    try:
+        path = application.qgisSettingsDirPath() if application is not None else ""
+    except Exception:
+        path = ""
+    return path if isinstance(path, str) else ""
+
+
 def _default_export_root() -> Path:
-    """``exports`` in the FilterMate folder of the QGIS profile, else ``~/.filtermate/exports``.
+    """``FilterMate/exports`` in the QGIS profile folder, else ``~/.filtermate/exports``.
 
     Never in the shared temp folder: another account could create the folder
-    (or a link of that name) first and read or redirect the exports.
+    (or a link of that name) first and read or redirect the exports. Not in
+    the plugin data folder either: it can be set to a team share.
     """
-    profile = _plugin_env_vars().get("PLUGIN_CONFIG_DIRECTORY")
+    profile = _qgis_profile_dir()
     if profile:
-        return Path(profile) / "exports"
+        return Path(profile) / "FilterMate" / "exports"
     return Path.home() / ".filtermate" / "exports"
+
+
+def _has_api_section(path: Path) -> bool:
+    try:
+        with open(path, encoding="utf-8") as fh:
+            return isinstance(json.load(fh).get("API"), dict)
+    except (OSError, ValueError, AttributeError):
+        return False
+
+
+def _default_config_path() -> Path:
+    """config.json holding the API settings.
+
+    The one the plugin uses (QGIS profile) when the plugin runs here; but
+    while it has no ``API`` section and ``config/config.json`` of the plugin
+    folder (where 4.x read them) has one, that one, with a warning: an API
+    key must not silently vanish on upgrade.
+    """
+    legacy = _PROJECT_ROOT / "config" / "config.json"
+    profile = _plugin_env_vars().get("CONFIG_JSON_PATH")
+    if not profile:
+        return legacy
+    profile = Path(profile)
+    if _has_api_section(profile) or not _has_api_section(legacy):
+        return profile
+    logging.getLogger("filtermate_api").warning(
+        "filtermate_api.config: API settings read from %s, their old place. Move the \"API\" "
+        "section to %s, the config.json FilterMate uses.", legacy, profile,
+    )
+    return legacy
 
 
 @dataclass
@@ -161,7 +205,8 @@ class APIConfig:
         Looks for an ``"API"`` key in the JSON. If absent, returns defaults.
         Without ``path``: the config.json the plugin uses (QGIS profile,
         ``ENV_VARS["CONFIG_JSON_PATH"]``), else ``config/config.json`` in the
-        project root (standalone).
+        project root (standalone, or the 4.x place, see
+        :func:`_default_config_path`).
 
         Auth fields (mutually exclusive — ``api_key_sha256`` wins):
 
@@ -174,7 +219,7 @@ class APIConfig:
           ``FILTERMATE_API_KEY`` env var.
         """
         if path is None:
-            path = _plugin_env_vars().get("CONFIG_JSON_PATH") or _PROJECT_ROOT / "config" / "config.json"
+            path = _default_config_path()
         path = Path(path)
         if not path.exists():
             return cls()

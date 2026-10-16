@@ -46,7 +46,9 @@ class TestDefaultRoot:
         assert root == Path.home() / ".filtermate" / "exports"
 
     def test_in_the_qgis_profile_when_the_plugin_runs(self, plugin_env, tmp_path):
-        plugin_env(PLUGIN_CONFIG_DIRECTORY=str(tmp_path / "profile" / "FilterMate"))
+        # Review 2026-10: the profile folder, not the plugin data folder (it can be a team share).
+        plugin_env(QGIS_SETTINGS_PATH=str(tmp_path / "profile"),
+                   PLUGIN_CONFIG_DIRECTORY=str(tmp_path / "team_share" / "FilterMate"))
         assert APIConfig().export_root == tmp_path / "profile" / "FilterMate" / "exports"
 
     def test_configured_root_still_wins(self, plugin_env, tmp_path, monkeypatch):
@@ -62,6 +64,30 @@ class TestConfigJsonOfThePlugin:
         plugin_env(CONFIG_JSON_PATH=str(path))
         config = APIConfig.from_json()
         assert config.port == 8123 and config.cors_origins == ["https://app.example"]
+
+    def test_old_place_read_while_the_profile_has_no_api_section(self, plugin_env, monkeypatch, tmp_path, caplog):
+        # Review 2026-10: an API key configured in 4.x must not silently vanish.
+        import logging
+        monkeypatch.setattr(config_module, "_PROJECT_ROOT", tmp_path / "plugin")
+        (tmp_path / "plugin" / "config").mkdir(parents=True)
+        legacy = tmp_path / "plugin" / "config" / "config.json"
+        legacy.write_text('{"API": {"api_key_sha256": "%s"}}' % ("ab" * 32), encoding="utf-8")
+        profile = tmp_path / "profile.json"
+        profile.write_text('{"APP": {}}', encoding="utf-8")
+        plugin_env(CONFIG_JSON_PATH=str(profile))
+        with caplog.at_level(logging.WARNING, logger="filtermate_api"):
+            config = APIConfig.from_json()
+        assert config.api_key_hash == "ab" * 32
+        assert "old place" in caplog.text and str(profile) in caplog.text
+
+    def test_profile_api_section_wins(self, plugin_env, monkeypatch, tmp_path):
+        monkeypatch.setattr(config_module, "_PROJECT_ROOT", tmp_path / "plugin")
+        (tmp_path / "plugin" / "config").mkdir(parents=True)
+        (tmp_path / "plugin" / "config" / "config.json").write_text('{"API": {"port": 1}}', encoding="utf-8")
+        profile = tmp_path / "profile.json"
+        profile.write_text('{"API": {"port": 2}}', encoding="utf-8")
+        plugin_env(CONFIG_JSON_PATH=str(profile))
+        assert APIConfig.from_json().port == 2
 
     def test_standalone_reads_the_project_config(self, plugin_env, monkeypatch, tmp_path):
         monkeypatch.setattr(config_module, "_PROJECT_ROOT", tmp_path)
@@ -105,6 +131,28 @@ class TestPrepareRoot:
             self._prepare(tmp_path / "exports")
 
     @posix_only
+    def test_existing_root_readable_by_others_made_private(self, tmp_path):
+        root = tmp_path / "exports"
+        root.mkdir(mode=0o755)
+        os.chmod(root, 0o755)
+        self._prepare(root)
+        assert (root.stat().st_mode & 0o777) == 0o700
+
+    def test_windows_junction_is_refused(self, tmp_path, monkeypatch):
+        from filtermate_api.routers import export as export_module
+        from filtermate_api.routers.export import ExportRootError
+        (tmp_path / "exports").mkdir()
+        real_lstat = os.lstat
+
+        def junction_lstat(path, *args, **kwargs):
+            info = real_lstat(path, *args, **kwargs)
+            return types.SimpleNamespace(st_mode=info.st_mode, st_uid=info.st_uid, st_file_attributes=0x400)
+
+        monkeypatch.setattr(export_module.os, "lstat", junction_lstat)
+        with pytest.raises(ExportRootError, match="not a real folder"):
+            self._prepare(tmp_path / "exports")
+
+    @posix_only
     def test_folder_of_another_user_is_refused(self, tmp_path, monkeypatch):
         from filtermate_api.routers.export import ExportRootError
         (tmp_path / "exports").mkdir()
@@ -120,13 +168,16 @@ class _RecordingAccessor(InMemoryAccessor):
 
 
 @posix_only
-def test_route_refuses_a_linked_root(tmp_path):
+def test_route_refuses_a_linked_root(tmp_path, caplog):
     (tmp_path / "etc").mkdir()
     (tmp_path / "exports").symlink_to(tmp_path / "etc")
     accessor = _RecordingAccessor(layers=[LayerSummary(layer_id="L1", name="communes", provider_type="ogr")])
     client = TestClient(create_app(config=APIConfig(export_root=tmp_path / "exports"), accessor=accessor),
                         base_url="http://127.0.0.1:8000")
-    response = client.post("/export", json={"layers": ["communes"]})
+    import logging
+    with caplog.at_level(logging.ERROR, logger="filtermate_api"):
+        response = client.post("/export", json={"layers": ["communes"]})
     assert response.status_code == 500
     assert response.json()["detail"] == "Export root unavailable"
     assert not getattr(accessor, "exported", False)
+    assert "not a real folder" in caplog.text  # the operator reads why

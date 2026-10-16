@@ -8,6 +8,7 @@ running QGIS (created private, mode 0700).
 
 from __future__ import annotations
 
+import logging
 import os
 import re
 import stat
@@ -21,6 +22,7 @@ from ..accessor import FilterMateAccessor, OperationResult
 from .filters import LayerName
 
 router = APIRouter(prefix="/export", tags=["export"])
+logger = logging.getLogger("filtermate_api")
 
 _SUBFOLDER = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.-]{0,63}(/[A-Za-z0-9][A-Za-z0-9_.-]{0,63}){0,3}$")
 
@@ -42,9 +44,10 @@ class ExportRootError(RuntimeError):
 def prepare_export_root(root: Path) -> Path:
     """Create ``root`` when missing (mode 0700) and check it is safe to write below.
 
-    Refused: a symbolic link (whoever made it chose where the files go), a
-    file, or on POSIX a folder owned by another user (who could swap its
-    content between the check and the write).
+    Refused: a symbolic link or, on Windows, a junction / reparse point
+    (whoever made it chose where the files go), a file, or on POSIX a folder
+    owned by another user (who could swap its content between the check and
+    the write). A root of the user readable by others is made private.
     """
     root = Path(root).expanduser()
     try:
@@ -52,10 +55,17 @@ def prepare_export_root(root: Path) -> Path:
         info = os.lstat(root)
     except OSError as exc:
         raise ExportRootError(f"export root unavailable: {exc}") from exc
-    if stat.S_ISLNK(info.st_mode) or not stat.S_ISDIR(info.st_mode):
+    reparse = getattr(info, "st_file_attributes", 0) & getattr(stat, "FILE_ATTRIBUTE_REPARSE_POINT", 0x400)
+    if stat.S_ISLNK(info.st_mode) or reparse or not stat.S_ISDIR(info.st_mode):
         raise ExportRootError("export root is not a real folder")
-    if hasattr(os, "getuid") and info.st_uid != os.getuid():
-        raise ExportRootError("export root belongs to another user")
+    if hasattr(os, "getuid"):
+        if info.st_uid != os.getuid():
+            raise ExportRootError("export root belongs to another user")
+        if info.st_mode & 0o077:
+            try:
+                os.chmod(root, 0o700)
+            except OSError as exc:
+                raise ExportRootError(f"export root cannot be made private: {exc}") from exc
     return root
 
 
@@ -76,8 +86,9 @@ def export_layers(payload: ExportRequestBody, request: Request) -> OperationResu
     """Write each layer (vector, raster, point cloud) as filtered now, one file per layer."""
     try:
         root = prepare_export_root(request.app.state.config.export_root)
-    except ExportRootError:
-        # Server side configuration: the client can do nothing about it (details in no log of theirs).
+    except ExportRootError as exc:
+        # Server side configuration: the client can do nothing about it, the operator reads why here.
+        logger.error("POST /export refused: %s (%s)", exc, request.app.state.config.export_root)
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Export root unavailable")
     try:
         folder = resolve_export_folder(root, payload.subfolder)
