@@ -288,6 +288,25 @@ def mark(name):
     return lambda: REC.event('mark', name=name)
 
 
+def note(label, names):
+    """Log the feature counts of layers under a label (the numbers quoted by the stories)."""
+    def _s():
+        out = {}
+        for n in names:
+            req = QgsFeatureRequest().setFlags(QgsFeatureRequest.Flag.NoGeometry).setNoAttributes()
+            out[n] = sum(1 for _ in layer(n).getFeatures(req))
+        log(f'note {label} {out}')
+    return (0, _s)
+
+
+def note_expr(label, name, expr):
+    """Log how many features of a (filtered) layer match an expression."""
+    def _s():
+        n = sum(1 for _ in layer(name).getFeatures(QgsFeatureRequest(QgsExpression(expr))))
+        log(f'note {label} {{{name!r}: {n}}}')
+    return (0, _s)
+
+
 def still(name):
     """A step image of the stories, cut from the recording by site_video_render.py (img/stories/<name>.webp)."""
     return (0, mark('still:' + name))
@@ -856,6 +875,7 @@ def buffer_expr_dialog(expr, keep_menu=1500, keep_dialog=3000):
                 REC.windows.append(dialog)
             REC.event('camera', rect=box(rect_of(dialog).adjusted(-25, -25, 25, 25)),
                       dur=1.0, drift=1.0)
+            QTimer.singleShot(1500, lambda: REC.event('mark', name='still:s2-02'))  # story 2 step image
             buttons = [b for b in dialog.findChildren(QPushButton) if b.isVisible()]
             ok = next((b for b in buttons if b.isDefault()), None)
             state['ok'] = ok
@@ -1096,11 +1116,11 @@ HERO = boot(S1_LAYERS, 'commune', '"nom_officiel" = \'Saint-Gaudens\'', scale=No
     (1200, cam(EXPLORE_ZONE, dur=1.6, pad=30)),
 ] + act(picker_edit) + type_into(picker_edit, 'Saint-Gau', per_char=140) + [
     (900, pick_focus)] + settle() + show_map(2600, 1.03) + [
-    (0, cam(FILTER_ZONE, dur=1.4, pad=40)),
+    still('s1-01'), (0, cam(FILTER_ZONE, dur=1.4, pad=40)),
 ] + targets(S1_TARGETS) + predicates(['intersect']) + [
-    (200, buffer_off), (400, cam(ACTION_ZONE, dur=1.3, pad=40)),
+    (200, buffer_off), hold(500), still('s1-02'), (400, cam(ACTION_ZONE, dur=1.3, pad=40)),
 ] + run_filter() + [
-    (200, cam('canvas', dur=1.8, drift=1.05)), hold(4200),
+    (200, cam('canvas', dur=1.8, drift=1.05)), hold(2500), still('s1-03'), hold(1700),
     (0, cam('layers', dur=1.4)), hold(2600),
 ] + ending(S1_TARGETS)
 
@@ -1135,16 +1155,17 @@ BUFFER = boot(S3_LAYERS, 'commune', '"nom_officiel" = \'Grenade\'', 1.2) + scope
     (1200, cam(['mGroupBox_exploring_single_selection', 'mGroupBox_exploring_multiple_selection'], dur=1.4, pad=30)),
 ] + act(gb_check('mGroupBox_exploring_multiple_selection'), multi_mode) + [
     hold(2500),
-] + select_all_multi_menu() + [(0, cam(FILTER_ZONE, dur=1.4, pad=40))] \
+] + select_all_multi_menu() + [hold(400), still('s3-01'), (0, cam(FILTER_ZONE, dur=1.4, pad=40))] \
     + targets(S3_FLOOD_TARGETS) + predicates(['intersect']) \
     + act('pushButton_checkable_filtering_buffer_value', buffer_value(0)) + typed_buffer(300) + and_targets() + [
-    (400, cam(ACTION_ZONE, dur=1.2, pad=40)),
-] + run_filter() + show_map(3500) + [
-    (0, cam(FILTER_ZONE, dur=1.3, pad=40)),
+    hold(500), still('s3-02'), (400, cam(ACTION_ZONE, dur=1.2, pad=40)),
+] + run_filter() + [note('300 m', S3_FLOOD_TARGETS)] + show_map(3500) + [
+    still('s3-03'), (0, cam(FILTER_ZONE, dur=1.3, pad=40)),
 ] + typed_buffer(100) + [(300, cam(ACTION_ZONE, dur=1.0, pad=40))] + run_filter() + [
-    (0, lambda: counts(S3_FLOOD_TARGETS))] + show_map(3000) + [
-    (0, cam(ACTION_ZONE, dur=1.2, pad=40)),
+    note('100 m', S3_FLOOD_TARGETS)] + show_map(3000) + [
+    still('s3-04'), (0, cam(ACTION_ZONE, dur=1.2, pad=40)),
 ] + act('pushButton_action_undo_filter', click_undo) + settle(4.0) + [(0, refocus)] + settle() + show_map(3000) \
+    + [still('s3-05')] \
     + ending(S3_FLOOD_TARGETS)
 
 S2_LAYERS = ['commune', 'zone_d_habitation', 'batiment', 'troncon_de_voie_ferree', 'troncon_de_route', 'erp']
@@ -1154,14 +1175,16 @@ NOISE_EXPR = 'CASE WHEN "importance" = \'1\' THEN 300 WHEN "importance" = \'2\' 
 NOISE = boot(S2_LAYERS, 'commune', '"nom_officiel" = \'Muret\'', 1.2) + scope('commune') + recorded_scene(1.2) \
     + pick_layer('troncon_de_route') + [(1500, cam(EXPLORE_ZONE, dur=1.4, pad=30))] \
     + typed_custom('"importance" IN (\'1\', \'2\')') + settle() + show_map(2400) + [
-    (0, cam(FILTER_ZONE, dur=1.4, pad=40)),
+    note_expr('major roads', 'troncon_de_route', '"importance" IN (\'1\', \'2\')'),
+    still('s2-01'), (0, cam(FILTER_ZONE, dur=1.4, pad=40)),
 ] + targets(['batiment', 'erp']) + predicates(['intersect']) \
     + act('pushButton_checkable_filtering_buffer_value', buffer_value(0)) \
     + act('mPropertyOverrideButton_filtering_buffer_value_property', buffer_expr_dialog(NOISE_EXPR),
           lead=900, after=900) \
     + combo_choose('comboBox_filtering_buffer_type', 'Flat') \
-    + and_targets() + [(400, cam(ACTION_ZONE, dur=1.2, pad=40))] + run_filter() + show_map(3500) + [
-    (0, zoom_focus(0.5))] + settle() + show_map(3500, 1.05) + ending(['batiment', 'erp', 'troncon_de_route'])
+    + and_targets() + [hold(500), still('s2-03'), (400, cam(ACTION_ZONE, dur=1.2, pad=40))] + run_filter() \
+    + show_map(3500) + [still('s2-04'), (0, zoom_focus(0.5))] + settle() + show_map(3500, 1.05) + [still('s2-05')] \
+    + ending(['batiment', 'erp', 'troncon_de_route'])
 
 S4_LAYERS = ['epci', 'commune', 'surface_hydrographique', 'troncon_hydrographique', 'troncon_de_route',
              'construction_lineaire']
@@ -1171,14 +1194,17 @@ BRIDGES = boot(S4_LAYERS, 'epci', '"nom_officiel" = \'Toulouse Métropole\'', 1.
     + scope('epci') + recorded_scene(1.1) \
     + pick_layer('troncon_hydrographique') + [(1500, cam(EXPLORE_ZONE, dur=1.4, pad=30))] \
     + typed_custom('"persistance" = \'Permanent\'') + settle() + [
-    (0, cam('full', dur=1.0)), hold(1200),
+    note('scope', ['troncon_de_route', 'troncon_hydrographique', 'construction_lineaire', 'commune']),
+    note_expr('permanent', 'troncon_hydrographique', '"persistance" = \'Permanent\''),
+    still('s4-01'), (0, cam('full', dur=1.0)), hold(1200),
 ] + act('pushButton_exploring_identify', lambda: dock().pushButton_exploring_identify.click(),
         lead=700, after=100) + [
-    hold(2600),
+    hold(900), still('s4-02'), hold(1700),
     (0, cam(FILTER_ZONE, dur=1.4, pad=40)),
 ] + targets(['troncon_de_route', 'construction_lineaire']) + predicates(['cross']) + and_targets() + [
-    (400, cam(ACTION_ZONE, dur=1.2, pad=40)),
-] + run_filter() + show_map(3500) + [(0, zoom_focus(0.22))] + settle() + show_map(4000, 1.05) \
+    hold(500), still('s4-03'), (400, cam(ACTION_ZONE, dur=1.2, pad=40)),
+] + run_filter() + show_map(3500) + [still('s4-04'), (0, zoom_focus(0.22))] + settle() + show_map(4000, 1.05) \
+    + [still('s4-05')] \
     + ending(['troncon_de_route', 'construction_lineaire'])
 
 S5_LAYERS = ['commune', 'foret_publique', 'zone_de_vegetation', 'zone_d_habitation', 'batiment', 'haie',
@@ -1190,17 +1216,21 @@ WOOD_EXPR = ('"nature" IN (\'Bois\', \'Forêt fermée de feuillus\', \'Forêt fe
 BRUSH = boot(S5_LAYERS, 'commune', '"nom_officiel" = \'Bagnères-de-Luchon\'', 1.15) + scope('commune') \
     + recorded_scene(1.15) + pick_layer('batiment') + [(1500, cam(EXPLORE_ZONE, dur=1.4, pad=30))] \
     + typed_custom('"usage_1" = \'Résidentiel\'') + settle() + [
-    (0, cam(FILTER_ZONE, dur=1.4, pad=40)),
+    note('scope', ['batiment', 'zone_de_vegetation', 'haie']),
+    note_expr('homes', 'batiment', '"usage_1" = \'Résidentiel\''),
+    still('s5-01'), (0, cam(FILTER_ZONE, dur=1.4, pad=40)),
 ] + targets(['zone_de_vegetation', 'haie']) + predicates(['intersect']) \
     + act('pushButton_checkable_filtering_buffer_value', buffer_value(0)) + typed_buffer(50) + and_targets() + [
     (400, cam(ACTION_ZONE, dur=1.2, pad=40)),
-] + run_filter() + show_map(3000) + pick_layer('zone_de_vegetation') + [
+] + run_filter() + [note('50 m', ['zone_de_vegetation', 'haie'])] + show_map(3000) + [still('s5-02')] \
+    + pick_layer('zone_de_vegetation') + [
     (1500, cam(EXPLORE_ZONE, dur=1.4, pad=30)),
 ] + typed_custom(WOOD_EXPR, per_char=18) + [
     (400, cam(FILTER_ZONE, dur=1.3, pad=40)),
 ] + act('pushButton_checkable_filtering_current_layer_combine_operator', combine('AND', None)) + [
-    (400, cam(ACTION_ZONE, dur=1.2, pad=40)),
-] + run_filter() + [(0, zoom_focus(0.35))] + settle() + show_map(4000, 1.05) + ending(['zone_de_vegetation', 'haie'])
+    hold(500), still('s5-03'), (400, cam(ACTION_ZONE, dur=1.2, pad=40)),
+] + run_filter() + [(0, zoom_focus(0.35))] + settle() + show_map(4000, 1.05) + [still('s5-04')] \
+    + ending(['zone_de_vegetation', 'haie'])
 
 S6_LAYERS = ['commune', 'zone_de_vegetation', 'zone_d_activite_ou_d_interet', 'zone_d_habitation', 'batiment',
              'troncon_de_route']
@@ -1219,14 +1249,16 @@ def s6_processing_scope():
 # hamlets (story 6): places more than 200 m from any paved road in Aspet.
 HAMLETS = boot(S6_LAYERS, 'commune', '"nom_officiel" = \'Aspet\'', 1.15) + scope('commune', S6_SCOPE_TARGETS) + [
     (500, s6_processing_scope), (3000, wait_idle()),
-] + recorded_scene(1.15) + pick_layer('troncon_de_route') + [(1500, cam(EXPLORE_ZONE, dur=1.4, pad=30))] \
+] + recorded_scene(1.15) + [note('scope', S6_TARGETS + ['troncon_de_route']), still('s6-01')] \
+    + pick_layer('troncon_de_route') + [(1500, cam(EXPLORE_ZONE, dur=1.4, pad=30))] \
     + typed_custom(PAVED_EXPR, per_char=22) + settle() + [
+    note_expr('paved', 'troncon_de_route', PAVED_EXPR), still('s6-02'),
     (0, cam(FILTER_ZONE, dur=1.4, pad=40)),
 ] + targets(S6_TARGETS, per_item=650, close_after=1200) \
     + predicates(['disjoint'], per_item=900, close_after=1200) \
     + act('pushButton_checkable_filtering_buffer_value', buffer_value(0)) + typed_buffer(200) + and_targets() + [
-    (400, cam(ACTION_ZONE, dur=1.2, pad=40)),
-] + run_filter() + show_map(4500, 1.05) + ending(S6_TARGETS)
+    hold(500), still('s6-03'), (400, cam(ACTION_ZONE, dur=1.2, pad=40)),
+] + run_filter() + show_map(4500, 1.05) + [still('s6-04')] + ending(S6_TARGETS)
 
 FAV_NAME = 'PPRI Garonne 300 m'
 
@@ -1302,12 +1334,13 @@ FAVORITES = boot(S3_LAYERS, 'commune', '"nom_officiel" = \'Grenade\'', 1.2) + [(
     (500, click_filter), (3000, wait_idle()), hold(1500),
 ] + recorded_scene(1.2) + [
     (0, cam(['favorites_indicator_label', 'mGroupBox_exploring_single_selection'], dur=1.4, pad=30)),
-] + act(fav_indicator, fav_menu('add', fav_add)) + [hold(1200)] + show_map(2200) + [
+] + act(fav_indicator, fav_menu('add', fav_add)) + [(1000, mark('still:s7-01')), hold(200)] + show_map(2200) + [
     (0, cam(ACTION_ZONE, dur=1.2, pad=40)),
 ] + act('pushButton_action_unfilter', click_unfilter) + settle(3.0) + [(0, refocus)] + settle() + show_map(2600) + [
+    still('s7-02'),
     (0, cam(['favorites_indicator_label', 'mGroupBox_exploring_single_selection'], dur=1.4, pad=30)),
-] + act(fav_indicator, fav_menu(FAV_NAME, fav_apply)) + settle(3.0) + [(0, refocus)] + settle() + show_map(3500) + [
-    (0, fav_cleanup)] + ending()
+] + act(fav_indicator, fav_menu(FAV_NAME, fav_apply)) + [(1000, mark('still:s7-03'))] + settle(3.0) + [(0, refocus)] + settle() + show_map(3500) + [
+    still('s7-04'), (0, fav_cleanup)] + ending()
 
 EXPORT_ZONE = ['pushButton_checkable_exporting_layers', 'pushButton_checkable_exporting_zip']
 
@@ -1351,7 +1384,7 @@ def export_zip():
 
 # export (story 1): the commune dossier as one GeoPackage with styles, zipped.
 EXPORT = boot(S1_LAYERS, 'commune', '"nom_officiel" = \'Saint-Gaudens\'', 1.3) + scope('commune') \
-    + recorded_scene(1.3) + [(0, cam('dock', dur=1.4, pad=10))] \
+    + recorded_scene(1.3) + [note('scope', S1_TARGETS), (0, cam('dock', dur=1.4, pad=10))] \
     + act(toolbox_button('export'), lambda: dock().toolBox_tabTools.setCurrentIndex(1)) + [
     (1200, cam(EXPORT_ZONE, dur=1.4, pad=40)),
 ] + act('pushButton_checkable_exporting_layers', enable('pushButton_checkable_exporting_layers')) \
@@ -1364,7 +1397,9 @@ EXPORT = boot(S1_LAYERS, 'commune', '"nom_officiel" = \'Saint-Gaudens\'', 1.3) +
     + act(folder_edit, lambda: folder_edit().clear()) + type_into(folder_edit, EXPORT_DIR, per_char=25, clear=False) \
     + act('pushButton_checkable_exporting_zip', enable('pushButton_checkable_exporting_zip')) + [(300, export_zip)] + [
     (400, cam(['pushButton_action_export', 'pushButton_checkable_exporting_zip'], dur=1.2, pad=40)),
-] + act('pushButton_action_export', export_with_recap) + [hold(1500)] + settle(3.0) + show_map(3000) + ending()
+    hold(900), still('s1-04'),
+] + act('pushButton_action_export', export_with_recap) + [(2400, mark('still:s1-05'))] + settle(3.0) + show_map(3000) \
+    + ending()
 
 S8_LAYERS = ['commune', 'batiment', 'troncon_hydrographique', 'troncon_de_route', 'erp']
 S8_TARGETS = ['batiment', 'troncon_de_route', 'troncon_hydrographique', 'erp']
@@ -1423,8 +1458,10 @@ PROCESSING = boot(S8_LAYERS, 'commune', '"nom_officiel" = \'Toulouse\'', 1.0, de
     + recorded_scene(1.0) + [
     (0, show_toolbox), (600, cam(lambda: rect_of(toolbox_dock()), dur=1.4, pad=20)),
 ] + act(toolbox_search) + type_into(toolbox_search, 'filtermate', per_char=120) + [
-    hold(1200), (0, s8_dialog), (400, cam(lambda: rect_of(STATE['proc']), dur=1.4, pad=30)), hold(1500),
-] + act(run_button, s8_run) + settle(3.0) + [(0, refocus)] + settle() + show_map(4500, 1.05) + ending(S8_TARGETS)
+    hold(1200), still('s8-01'), (0, s8_dialog), (400, cam(lambda: rect_of(STATE['proc']), dur=1.4, pad=30)), hold(1500),
+    still('s8-02'),
+] + act(run_button, s8_run) + settle(3.0) + [(0, refocus)] + settle() + show_map(4500, 1.05) + [still('s8-03')] \
+    + ending(S8_TARGETS)
 
 
 # ------------------------------------------------------------------ FilterMate 5: raster and LiDAR
