@@ -31,6 +31,22 @@ except ImportError:
 
 logger = logging.getLogger('FilterMate.TaskManagementService')
 
+# Root package of the plugin ('filter_mate' once installed): every FilterMate task
+# class is defined under it, whatever the (translated) description of the task.
+_PLUGIN_PACKAGE = __name__.split('.')[0]
+
+
+def is_filtermate_task(task: Any) -> bool:
+    """True for a task started by FilterMate: a task class of the plugin, or a
+    description starting with "FilterMate" (raster / point cloud tasks)."""
+    module = type(task).__module__ or ''
+    if module == _PLUGIN_PACKAGE or module.startswith(_PLUGIN_PACKAGE + '.'):
+        return True
+    try:
+        return str(task.description()).startswith('FilterMate')
+    except (RuntimeError, AttributeError):
+        return False
+
 
 @dataclass
 class TaskManagementConfig:
@@ -68,21 +84,21 @@ class TaskManagementService:
 
     def safe_cancel_all_tasks(self) -> None:
         """
-        Safely cancel all tasks in the task manager.
+        Safely cancel all FilterMate tasks in the task manager.
 
         Cancels tasks individually instead of using cancelAll() to avoid
-        Windows access violations during project transitions.
+        Windows access violations during project transitions. Tasks of QGIS
+        (Processing in the background) and of other plugins are left alone:
+        a project change or the plugin unload is no reason to stop them.
         """
         try:
             task_manager = QgsApplication.taskManager()
             if not task_manager:
                 return
 
-            # Get all active tasks and cancel them
-            count = task_manager.count()
-            for i in range(count - 1, -1, -1):  # Iterate backwards
-                task = task_manager.task(i)
-                if task and task.canCancel():
+            # tasks(), not task(i) for i < count(): task() takes a task id, not an index
+            for task in reversed(list(task_manager.tasks())):
+                if task and is_filtermate_task(task) and task.canCancel():
                     task.cancel()
 
         except Exception as e:
