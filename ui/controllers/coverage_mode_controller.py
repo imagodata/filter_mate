@@ -1734,12 +1734,17 @@ class CoverageModeController(BaseController):
         source_id = source.id()
 
         def done(task, result):
+            self._vector_task_over(source_id, task)
             if getattr(self, '_torn_down', False):
                 return
             if task.changes and run is not None:
-                # The service recorded the operation just before calling back: it is on top.
-                operation = self.service.history.peek_undo(source_id)
-                run.op_id = operation.op_id if operation is not None else None
+                if self._map_layer(source_id) is None:
+                    # The source was removed (or the project closed) meanwhile: its history went with it.
+                    self.service.history.clear_source(source_id)
+                else:
+                    # The service recorded the operation just before calling back: it is on top.
+                    operation = self.service.history.peek_undo(source_id)
+                    run.op_id = operation.op_id if operation is not None else None
             failures = [o for o in task.outcomes if not o.success]
             if not result:
                 message = self.tr("Raster / point cloud targets not filtered: {0}").format(task.error or self.tr("canceled"))
@@ -1749,8 +1754,35 @@ class CoverageModeController(BaseController):
                     message += ' — ' + self._failure_text(failures)
             self._after_run(self._map_layer(source_id), task.outcomes, message, warning=not result or bool(failures))
 
-        self.service.run(request, job, on_done=done)
+        task = self.service.run(request, job, on_done=done)
+        if task is not None:
+            self._vector_tasks[source_id] = task
+            for signal_name in ('taskCompleted', 'taskTerminated'):
+                try:
+                    # Also over when its callback failed before reaching done().
+                    getattr(task, signal_name).connect(lambda t=task: self._vector_task_over(source_id, t))
+                except (AttributeError, TypeError, RuntimeError):
+                    pass
         return True
+
+    def _vector_task_over(self, source_id: str, task: Any) -> None:
+        if self._vector_tasks.get(source_id) is task:
+            del self._vector_tasks[source_id]
+
+    def vector_source_busy(self, source: Any) -> bool:
+        """True, and the user is told to wait, while a cross task clips the coverage targets of ``source``.
+
+        A Filter, Unfilter, Reset, Undo or Redo of the source meanwhile would
+        pair its runs with the wrong cross operation (or none).
+        """
+        try:
+            busy = source is not None and source.id() in self._vector_tasks
+        except (RuntimeError, AttributeError):
+            return False
+        if busy:
+            _, show_warning = _feedback()
+            show_warning(self.tr("A FilterMate task is still running: wait for it to finish"))
+        return busy
 
     def _vector_source_features(self, source: Any) -> list:
         """Features of the EXPLORING selection, with geometry."""

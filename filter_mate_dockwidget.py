@@ -6930,13 +6930,19 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         if integration is not None and hasattr(integration, 'delegate_split_coverage_targets'):
             _, coverage_targets = integration.delegate_split_coverage_targets(all_targets)
         source_layer = self.current_layer
-        # The app may refuse the vector filter (edit mode, no parameters) or defer it:
-        # the coverage targets (and their undo step) only follow a filter task it created.
-        app_tasks = getattr(app, 'appTasks', None) if app is not None else None
+        coverage = getattr(integration, 'coverage_controller', None) if integration is not None else None
+        if coverage is not None and hasattr(coverage, 'vector_source_busy') and coverage.vector_source_busy(source_layer):
+            return  # its raster / point cloud targets are still being clipped: the user is told to wait
+        # The app may refuse the vector task (edit mode, no parameters) or defer it: the coverage
+        # targets (and their undo step) only follow a filter / unfilter / reset task it created.
+        # AppInitializer sets dockwidget.filter_mate_app, the legacy initialization dockwidget.app.
+        owner = getattr(self, 'filter_mate_app', None) or app
+        app_tasks = getattr(owner, 'appTasks', None) if owner is not None else None
         previous_task = app_tasks.get(task_name) if isinstance(app_tasks, dict) else None
         self.launchingTask.emit(task_name)
-        if task_name == 'filter' and isinstance(app_tasks, dict) and app_tasks.get(task_name) is previous_task:
-            logger.info("launchTaskEvent: vector filter not launched, raster / point cloud targets left as they are")
+        if task_name in ('filter', 'unfilter', 'reset') and isinstance(app_tasks, dict) \
+                and app_tasks.get(task_name) is previous_task:
+            logger.info(f"launchTaskEvent: vector {task_name} not launched, raster / point cloud targets left as they are")
             return
         if integration is not None and hasattr(integration, 'delegate_vector_source_coverage_task'):
             integration.delegate_vector_source_coverage_task(task_name, source_layer, coverage_targets)

@@ -977,6 +977,55 @@ class TestLinkedRunsAfterLayerRemoval:
 
 
 @pytest.mark.unit
+class TestVectorSourceTaskRunning:
+    """While the cross task of a vector source runs, no other task of that source may start:
+    its operation would land on a run already undone or thrown away."""
+
+    def _start(self, ctrl_module, layers, adapters, monkeypatch):
+        controller = ctrl_module.CoverageModeController(_dock())
+        jobs = types.ModuleType(f"{adapters.package.__name__}.source_jobs")
+        jobs.VectorSourceJob = lambda source, features: object()
+        monkeypatch.setitem(sys.modules, jobs.__name__, jobs)
+        for name, value in (("_vector_source_features", lambda source: ["feature"]),
+                            ("_target_specs", lambda ids, exclude_id="": ids), ("_filtering_settings", lambda: {}),
+                            ("_build_request", lambda *a: object()), ("_after_run", lambda *a, **k: None)):
+            monkeypatch.setattr(controller, name, value)
+        # The CrossFilterTask: service.run returns it, and it calls on_done(itself, result).
+        task = types.SimpleNamespace(taskCompleted=FakeSignal(), taskTerminated=FakeSignal(),
+                                     changes=[], outcomes=[], error="")
+        callbacks = []
+        ctrl_module._test_service.run = lambda request, job, on_done=None: callbacks.append(on_done) or task
+        run = ctrl_module._LinkedRun()
+        controller._run_vector_source_filter(layers["v1"], ["r1"], run=run)
+        return controller, task, callbacks[0], run
+
+    def test_source_is_busy_until_its_task_is_done(self, ctrl_module, layers, adapters, monkeypatch):
+        controller, task, done, _ = self._start(ctrl_module, layers, adapters, monkeypatch)
+        assert controller.vector_source_busy(layers["v1"])
+        assert ctrl_module._test_feedback.messages[-1] == (
+            "warning", "A FilterMate task is still running: wait for it to finish")
+        assert not controller.vector_source_busy(layers["v2"])
+        done(task, True)
+        assert not controller.vector_source_busy(layers["v1"])
+
+    def test_a_failed_callback_does_not_block_the_source(self, ctrl_module, layers, adapters, monkeypatch):
+        controller, task, _, _ = self._start(ctrl_module, layers, adapters, monkeypatch)
+        task.taskCompleted.emit()  # QGIS signal, also emitted when done() was never reached
+        assert not controller.vector_source_busy(layers["v1"])
+
+    def test_operation_of_a_source_removed_meanwhile_is_forgotten(self, ctrl_module, layers, adapters, monkeypatch):
+        controller, task, done, run = self._start(ctrl_module, layers, adapters, monkeypatch)
+        filter_state = ctrl_module._test_filter_state
+        task.changes = [(filter_state.LayerSnapshot("r1", "raster", source="/a"),
+                         filter_state.LayerSnapshot("r1", "raster", source="/b"))]
+        ctrl_module._test_service.history.push(filter_state.CrossOperation("v1", tuple(task.changes)))
+        del layers["v1"]  # removed from the project while the task ran
+        done(task, True)
+        assert not controller.vector_source_busy(layers["v2"])
+        assert not ctrl_module._test_service.history.can_undo("v1") and run.op_id is None
+
+
+@pytest.mark.unit
 class TestTaskResultOfAnotherLayer:
     """Constat 8: a task ending after a layer switch leaves the panel and the Filter button alone."""
 
