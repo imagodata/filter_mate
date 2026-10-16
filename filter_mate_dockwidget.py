@@ -6745,36 +6745,6 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             except Exception as e:
                 logger.warning(f"Failed to sync HAS_LAYERS_TO_EXPORT: {e}")
 
-            # FilterMate 5: raster / point cloud layers checked in EXPORTING are
-            # written by their own exporters (GeoTIFF / COG, LAZ / COPC) as they
-            # are filtered; the vector export only receives the vector layers.
-            integration = getattr(self, '_controller_integration', None)
-            if layers_to_export and integration is not None and hasattr(integration, 'delegate_split_coverage_targets'):
-                vector_ids, coverage_ids = integration.delegate_split_coverage_targets(list(layers_to_export))
-                if coverage_ids:
-                    exporting_props = self.project_props.setdefault('EXPORTING', {})
-                    folder = exporting_props.get('OUTPUT_FOLDER_TO_EXPORT', '') if exporting_props.get('HAS_OUTPUT_FOLDER_TO_EXPORT') else ''
-                    # A single layer / GPKG export stores a FILE path: raster and
-                    # point cloud files go next to it.
-                    if folder and os.path.splitext(folder)[1] and not os.path.isdir(folder):
-                        folder = os.path.dirname(folder)
-                    crs = None
-                    if exporting_props.get('HAS_PROJECTION_TO_EXPORT') and exporting_props.get('PROJECTION_TO_EXPORT'):
-                        crs = QgsCoordinateReferenceSystem.fromWkt(exporting_props['PROJECTION_TO_EXPORT'])
-                    # Started when the vector export really starts (after the
-                    # "preserve groups" dialog, which can still be canceled).
-                    zip_path = exporting_props.get('ZIP_TO_EXPORT', '') if exporting_props.get('HAS_ZIP_TO_EXPORT') else ''
-                    # Next to a vector ZIP, in a subfolder that ZIP leaves out.
-                    from .core.export.batch_exporter import coverage_export_folder
-                    folder = coverage_export_folder(folder, zip_path, bool(vector_ids))
-                    self._pending_coverage_export = (coverage_ids, folder or None, crs, zip_path or None)
-                    # The vector export skips raster / point cloud layers itself
-                    # (TaskParameterBuilder.build_export_params).
-                    layers_to_export = vector_ids
-                    if not vector_ids:
-                        self._flush_coverage_export()
-                        return
-
             # FIX 2026-01-22 v4.3.7: Sync ALL export flags JUST-IN-TIME
             # Qt restores widget states without emitting signals - sync all flags to match UI
             try:
@@ -6804,6 +6774,18 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
                             with SignalBlocker(has_folder_widget):
                                 has_folder_widget.setChecked(True)
 
+                # Sync HAS_ZIP_TO_EXPORT (FilterMate 5: a ZIP path typed without the toggle counts too)
+                zip_widget = self.widgets.get('EXPORTING', {}).get('ZIP_TO_EXPORT', {}).get('WIDGET')
+                if zip_widget:
+                    current_zip = zip_widget.text() if hasattr(zip_widget, 'text') else ''
+                    if current_zip and current_zip.strip() and not exporting_props.get('HAS_ZIP_TO_EXPORT', False):
+                        self.project_props['EXPORTING']['HAS_ZIP_TO_EXPORT'] = True
+                        self.project_props['EXPORTING']['ZIP_TO_EXPORT'] = current_zip
+                        has_zip_widget = self.widgets.get('EXPORTING', {}).get('HAS_ZIP_TO_EXPORT', {}).get('WIDGET')
+                        if has_zip_widget and hasattr(has_zip_widget, 'setChecked'):
+                            with SignalBlocker(has_zip_widget):
+                                has_zip_widget.setChecked(True)
+
                 # Sync HAS_PROJECTION_TO_EXPORT
                 projection_widget = self.widgets.get('EXPORTING', {}).get('PROJECTION_TO_EXPORT', {}).get('WIDGET')
                 if projection_widget and hasattr(projection_widget, 'crs'):
@@ -6829,6 +6811,37 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
                                 has_styles_widget.setChecked(True)
             except Exception as e:
                 logger.warning(f"Failed to sync export flags: {e}")
+
+            # FilterMate 5 (after the flags above, so a folder typed without the toggle counts too):
+            # raster / point cloud layers checked in EXPORTING are
+            # written by their own exporters (GeoTIFF / COG, LAZ / COPC) as they
+            # are filtered; the vector export only receives the vector layers.
+            integration = getattr(self, '_controller_integration', None)
+            if layers_to_export and integration is not None and hasattr(integration, 'delegate_split_coverage_targets'):
+                vector_ids, coverage_ids = integration.delegate_split_coverage_targets(list(layers_to_export))
+                if coverage_ids:
+                    exporting_props = self.project_props.setdefault('EXPORTING', {})
+                    folder = exporting_props.get('OUTPUT_FOLDER_TO_EXPORT', '') if exporting_props.get('HAS_OUTPUT_FOLDER_TO_EXPORT') else ''
+                    # A single layer / GPKG export stores a FILE path: raster and
+                    # point cloud files go next to it.
+                    if folder and os.path.splitext(folder)[1] and not os.path.isdir(folder):
+                        folder = os.path.dirname(folder)
+                    crs = None
+                    if exporting_props.get('HAS_PROJECTION_TO_EXPORT') and exporting_props.get('PROJECTION_TO_EXPORT'):
+                        crs = QgsCoordinateReferenceSystem.fromWkt(exporting_props['PROJECTION_TO_EXPORT'])
+                    # Started when the vector export really starts (after the
+                    # "preserve groups" dialog, which can still be canceled).
+                    zip_path = exporting_props.get('ZIP_TO_EXPORT', '') if exporting_props.get('HAS_ZIP_TO_EXPORT') else ''
+                    # Next to a vector ZIP, in a subfolder that ZIP leaves out.
+                    from .core.export.batch_exporter import coverage_export_folder
+                    folder = coverage_export_folder(folder, zip_path, bool(vector_ids))
+                    self._pending_coverage_export = (coverage_ids, folder or None, crs, zip_path or None)
+                    # The vector export skips raster / point cloud layers itself
+                    # (TaskParameterBuilder.build_export_params).
+                    layers_to_export = vector_ids
+                    if not vector_ids:
+                        self._flush_coverage_export()
+                        return
 
             # Show preserve groups dialog for GPKG / KML exports
             # CRITICAL: QDialog.exec() crashes QGIS 3.44 (access violation in

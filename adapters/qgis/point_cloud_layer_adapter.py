@@ -120,8 +120,8 @@ def _read_classes(stats: Any) -> Tuple[Tuple[int, int], ...]:
 def _read_ranges(stats: Any, attributes: Tuple[str, ...]) -> Tuple[PointCloudAttributeSummary, ...]:
     """Min/max of the attributes present on the layer (the attribute conditions are built on them).
 
-    The standard ones come first; X, Y and Classification are left out (the
-    classes are counted by :func:`_read_classes`).
+    The standard ones come first; X and Y are left out. Classification stays: the classes
+    are counted by :func:`_read_classes`, but a condition on it needs its bounds.
     """
     if stats is None:
         return ()

@@ -33,6 +33,8 @@ FilterMate 5 filters raster and LiDAR point cloud layers as well as vector layer
 
 ### Fixed
 
+- **Class and height above the DTM together on a point cloud.** `Classification` is offered in the ATTRIBUTES conditions: the CLASSES, ATTRIBUTES and EXPRESSION groups are exclusive and the height above the DTM belongs to ATTRIBUTES, so "building points more than 9 m above the ground" could not be built in the panel.
+- **Export of raster / point cloud layers with a folder or a ZIP typed in EXPORTING** (without its toggle): the folder dialog opened (or the ZIP was left out) because their files were planned before the export flags were synced with the fields.
 - **QGIS 3.22 – 3.34: QGIS crashed when the panel opened.** A spacer inserted in the EXPORTING values with `QBoxLayout.insertItem` was deleted at once by PyQt5 5.15.6 (no ownership transfer) and left a dangling item in the layout. It is now handed to the layout (`sip.transferto`); `tests/test_no_layout_insert_item_temporaries.py` keeps it that way.
 - **FILTERING / EXPORTING rows thousands of pixels apart** (one row visible): the alignment of the key icons with their rows fed back into the page height whenever the section had free height (tall dock, enlarged lower zone); the key column no longer sets the page height.
 - **A layer picked in the first seconds after the panel opened could be reverted** to QGIS' active layer by a late refresh, or shown in the list without being applied; it is kept and applied.
