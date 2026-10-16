@@ -101,8 +101,8 @@ def _read_classes(stats: Any) -> Tuple[Tuple[int, int], ...]:
                     pairs[code_int] = _to_int(count, -1)
             if pairs:
                 return tuple(sorted(pairs.items()))
-        except Exception:
-            pass
+        except Exception as exc:
+            logger.debug(f"[FM5] class statistics unreadable: {exc}")
     available = getattr(stats, 'availableClasses', None)
     if callable(available):
         try:
@@ -112,8 +112,8 @@ def _read_classes(stats: Any) -> Tuple[Tuple[int, int], ...]:
                 if code_int >= 0:
                     codes.add(code_int)
             return tuple((code, -1) for code in sorted(codes))
-        except Exception:
-            pass
+        except Exception as exc:
+            logger.debug(f"[FM5] available classes unreadable: {exc}")
     return ()
 
 

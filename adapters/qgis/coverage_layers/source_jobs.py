@@ -184,8 +184,8 @@ class RasterSourceJob(SourceJob):
             provider = base.dataProvider()
             if provider.sourceHasNoDataValue(self.selection.band):
                 nodata = float(provider.sourceNoDataValue(self.selection.band))
-        except Exception:
-            pass
+        except Exception as exc:
+            logger.debug(f"[FM5] source NoData value unreadable: {exc}")
         uri, nodata = selection_virtual_uri(self.before.base_source, self.before.base_provider, base, self.selection, nodata)
         if not swap_source(layer, uri, 'virtualraster'):
             self.message = 'virtual raster of the selection could not be opened'

@@ -236,7 +236,7 @@ publishers). The defenses below are wired by default:
 | Threat | Mitigation | Implementation |
 |---|---|---|
 | Plain-text PAT in `config.json` | Prefer `authcfg_id` (encrypted at rest) | [git_client.py](git_client.py): `_resolve_authcfg_header()` |
-| Token leak in logs / GitError msgs | Scrub `Authorization:` headers + URL-embedded creds (`https://user:token@`) in commands, stdout, stderr and the clone log | [git_client.py](git_client.py): `_scrub_command/_scrub_text` |
+| Token leak in logs / GitError msgs | Scrub `Authorization:` headers + URL-embedded creds (`https://user:token@`) in commands, stdout, stderr and the clone log | [git_client.py](git_client.py): `_scrub_command/_scrub_text` | <!-- pragma: allowlist secret -->
 | Token visible in `argv` / process list | `http.extraHeader` passed in the environment (`GIT_CONFIG_COUNT` / `GIT_CONFIG_KEY_n` / `GIT_CONFIG_VALUE_n`, git ≥ 2.31); `-c` on the command line only for older git | [git_client.py](git_client.py): `_run()` |
 | Token sent in clear or to the wrong place | Header only for clone / fetch / pull / push / ls-remote to an `https://` remote | [git_client.py](git_client.py): `_run()`, `_remote_url()` |
 | Command transport (`ext::`) | `GIT_ALLOW_PROTOCOL=file:git:http:https:ssh` (git's default list without `ext`) | [git_client.py](git_client.py): `ALLOWED_PROTOCOLS` |

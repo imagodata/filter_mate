@@ -53,7 +53,7 @@ _AUTH_HEADER_RE = re.compile(
 )
 # A bare header line echoed by a server or a verbose trace (``Authorization: Basic ...``).
 _RAW_AUTH_RE = re.compile(r"(Authorization:\s*)(?!\[REDACTED\])[^\n]+", re.IGNORECASE)
-# userinfo of a URL (``https://user:token@host``), greedy up to the last "@"
+# userinfo of a URL (``https://user:token@host``), greedy up to the last "@"  # pragma: allowlist secret
 # of the authority so a password holding "@" is masked whole.
 _URL_CREDS_RE = re.compile(r"(\w+://)([^/\s]+)@")
 _REDACTED = "[REDACTED]"
@@ -211,7 +211,7 @@ class GitError(RuntimeError):
     def __init__(self, command: List[str], returncode: int,
                  stdout: str, stderr: str, cwd: Optional[str] = None):
         # M7 (2026-04-23): scrub auth headers and URL credentials
-        # (``git clone -- https://oauth2:TOKEN@host/...``) from cmd & output
+        # (``git clone -- https://oauth2:TOKEN@host/...``) from cmd & output  # pragma: allowlist secret
         # so the exception (message bar, log files, bug reports) doesn't
         # leak credentials.
         self.command = _scrub_command(command)

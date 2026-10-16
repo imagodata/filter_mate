@@ -783,8 +783,8 @@ def find_favorites_service(plugin=None):
         from qgis.utils import plugins
         loaded = plugins.get('filter_mate')
         candidates += [loaded, getattr(loaded, 'app', None)]
-    except Exception:
-        pass
+    except Exception as exc:
+        logger.debug(f"[FM5] loaded plugin instance not found: {exc}")
     for candidate in candidates:
         service = getattr(candidate, 'favorites_manager', None) if candidate is not None else None
         if service is not None and hasattr(service, 'get_favorite'):
@@ -875,8 +875,8 @@ def apply_favorite(name_or_id: str, service=None, project=None, feedback=None) -
     for layer in project.mapLayers().values():
         try:
             by_signature[LayerSignature.compute(layer)] = layer
-        except Exception:
-            pass
+        except Exception as exc:
+            logger.debug(f"[FM5] layer signature not computed: {exc}")
     spatial = favorite.spatial_config if isinstance(favorite.spatial_config, dict) else {}
     coverage = spatial.get(favorites_bridge.COVERAGE_KEY) or []
     entries = []
@@ -950,7 +950,8 @@ def filter_state(project=None) -> List[Dict[str, Any]]:
             continue
         try:
             snapshot = take_snapshot(layer, kind)
-        except Exception:
+        except Exception as exc:
+            logger.debug(f"[FM5] layer snapshot not taken: {exc}")
             continue
         if not snapshot.subset and not snapshot.derived:
             continue
