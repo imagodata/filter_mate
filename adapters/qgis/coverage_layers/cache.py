@@ -403,6 +403,21 @@ def in_session(source: str) -> bool:
     return bool(folder and source and os.path.basename(folder) in source)
 
 
+def session_relative(source: str) -> Optional[str]:
+    """What follows the current session folder in ``source`` ('/' separators); None when not in it.
+
+    Names a file of the session whatever the spelling of the folders before
+    it: QgsPathResolver resolves a cache root reached through a link, and
+    writes '/' for the '\\' of Windows paths.
+    """
+    folder = _session_dir
+    if not folder or not source:
+        return None
+    name = os.path.basename(folder)
+    index = source.find(name)
+    return None if index < 0 else source[index + len(name):].replace('\\', '/')
+
+
 def _entries(folder: str):
     with os.scandir(folder) as scan:
         return [entry for entry in scan if entry.name != LOCK_NAME]

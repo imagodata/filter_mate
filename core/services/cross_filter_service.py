@@ -354,6 +354,28 @@ def stop_filtermate_tasks(wait_seconds: float = 2.0) -> int:
     return len(tasks)
 
 
+def release_coverage_layers() -> int:
+    """Plugin unload: stop the tasks, put raster / point cloud layers back on their original source, drop the cache.
+
+    The hooks are disconnected and the cache closed whatever fails before:
+    a task finishing later then applies nothing.
+
+    Returns:
+        Number of layers put back on their original source.
+    """
+    from ...adapters.qgis.coverage_layers import cache
+    from ...adapters.qgis.coverage_layers.snapshots import registry
+    try:
+        for service in all_services():  # the dock's and the automation one
+            service.cancel_all()
+        # Exports and height-above-ground runs read / write the cache too.
+        stop_filtermate_tasks()
+        return registry().restore_all()
+    finally:
+        registry().uninstall()
+        cache.purge_session()
+
+
 def tidy_cache(project=None) -> Optional[dict]:
     """Remove the derived files nothing refers to, then keep the cache under its limit.
 
