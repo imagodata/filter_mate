@@ -92,7 +92,7 @@ wait_qgis_idle() {
 }
 
 # Pass FM_* / FM5_* variables of this shell to the Windows QGIS.
-export WSLENV="${WSLENV:-}:FM_GPKG/w:FM5_DATA/w:FM5_GPKG/w:FM5_TILE/w:FM_TAKE"
+export WSLENV="${WSLENV:-}:FM_GPKG/w:FM5_DATA/w:FM5_GPKG/w:FM5_TILE/w:FM_TAKE:FM_MEASURE"
 for v in FM_GPKG FM5_DATA FM5_GPKG FM5_TILE; do [ -n "${!v:-}" ] || unset "$v"; done
 
 cmd="${1:-}"; shift || true
