@@ -307,6 +307,9 @@ class FilterMate:
             self.iface.addPluginToVectorMenu(
                 self.menu,
                 action)
+            # retranslate_actions renames self.menu: unload removes the entries
+            # from the submenu they were added to.
+            self._vector_menu_name = self.menu
 
         self.actions.append(action)
 
@@ -386,9 +389,14 @@ class FilterMate:
             self.initProcessing()
 
             # FilterMate 5: remove the derived-file folders of crashed QGIS
-            # sessions (live sessions hold a lock), off the startup path.
+            # sessions (live sessions hold a lock), off the startup path. A timer
+            # of the plugin, stopped in unload: a QTimer.singleShot still fired
+            # after an unload and imported the removed package again.
             from qgis.PyQt.QtCore import QTimer
-            QTimer.singleShot(30000, self._cleanup_stale_cache)
+            self._stale_cache_timer = QTimer()
+            self._stale_cache_timer.setSingleShot(True)
+            self._stale_cache_timer.timeout.connect(self._cleanup_stale_cache)
+            self._stale_cache_timer.start(30000)
 
             logger.debug("FilterMate.initGui: Completed successfully")
 
@@ -1457,9 +1465,14 @@ class FilterMate:
         if self.app:
             self.app.cleanup()
 
+        stale_cache_timer = getattr(self, '_stale_cache_timer', None)
+        if stale_cache_timer is not None:
+            stale_cache_timer.stop()
+            self._stale_cache_timer = None
+
         for action in self.actions:
             self.iface.removePluginVectorMenu(
-                self.menu,
+                getattr(self, '_vector_menu_name', self.menu),
                 action)
             self.iface.removeToolBarIcon(action)
         # remove the toolbar
