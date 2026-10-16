@@ -121,6 +121,22 @@ class LayerTaskCompletionHandler:
             logger.error("Task completion received None for result_project_layers")
             return
 
+        try:
+            self._apply_task_result(result_project_layers, task_name)
+        finally:
+            # Whatever failed above, the add_layers task is over: release its pending
+            # counter, or every layer added later waits in the queue for good.
+            if task_name == 'add_layers':
+                self._handle_add_layers_completion(loading_new_project, self._get_dockwidget())
+                # PERF 2026-09-12: closes the span opened at project read / first add_layers
+                try:
+                    layer_total = len(result_project_layers) if result_project_layers else 0
+                except TypeError:
+                    layer_total = 0
+                perf_mark_end("project_open", f"{layer_total} layers registered")
+
+    def _apply_task_result(self, result_project_layers: Dict, task_name: str) -> None:
+        """Register the task result, clean up removed layers and refresh the panel."""
         # Update PROJECT_LAYERS
         self._set_project_layers(result_project_layers)
         project = self._get_project()
@@ -153,7 +169,10 @@ class LayerTaskCompletionHandler:
 
             # Update map layer store and datasources
             project.layerStore()
-            self._update_datasource()
+            try:
+                self._update_datasource()
+            except Exception as e:
+                logger.warning(f"Datasources not updated after {task_name}: {e}")
 
         finally:
             # STABILITY: Always close DB connection
@@ -165,16 +184,6 @@ class LayerTaskCompletionHandler:
                 conn.close()
             except Exception:  # nosec B110 - cleanup best-effort in finally block, safe to ignore close() errors
                 pass
-
-        # Handle add_layers post-processing
-        if task_name == 'add_layers':
-            self._handle_add_layers_completion(loading_new_project, dockwidget)
-            # PERF 2026-09-12: closes the span opened at project read / first add_layers
-            try:
-                layer_total = len(result_project_layers) if result_project_layers else 0
-            except TypeError:
-                layer_total = 0
-            perf_mark_end("project_open", f"{layer_total} layers registered")
 
     def _update_env_paths(self) -> None:
         """Update ENV_VARS with current project paths."""
@@ -216,7 +225,10 @@ class LayerTaskCompletionHandler:
             if self._validate_layer_info:
                 layer_info = self._validate_layer_info(layer_key)
                 if layer_info and self._update_layer_datasource:
-                    self._update_layer_datasource(layer_info)
+                    try:
+                        self._update_layer_datasource(layer_info)
+                    except Exception as e:
+                        logger.warning(f"Datasource of layer {layer_key} not tracked: {e}")
 
     def _handle_remove_layers(
         self,

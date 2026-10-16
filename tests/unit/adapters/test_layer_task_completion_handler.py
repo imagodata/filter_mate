@@ -6,6 +6,9 @@ LayerTaskCompletionHandler: end of the add_layers / remove_layers tasks.
   undo/redo entries; the first one used to raise AttributeError
   (``HistoryService.remove_history`` did not exist), which skipped the project
   variables, the panel refresh, the datasource update and the other removed layers.
+- A failure while tracking datasources (PostgreSQL session with a raster) no longer
+  ends the completion: the add_layers pending counter is always released, or every
+  layer added afterwards waited in the queue for good.
 
 The module is loaded from its file (no package: its optional perf_timer import
 falls back to a no-op) and runs against a real sqlite file and a real HistoryService.
@@ -168,3 +171,43 @@ class TestRemovedLayersCleanUp:
         env.handler.handle_task_completion({"A": env.project_layers["A"]}, "remove_layers")
 
         env.remove_layer_datasource.assert_called_once_with(env.project_layers["A"]["infos"])
+
+
+@pytest.mark.unit
+class TestCompletionAlwaysFinishes:
+
+    def test_datasource_failure_still_releases_the_add_layers_counter(self, tmp_path):
+        """A raster in a PostgreSQL session: update_datasource raised IndexError, the counter
+        stayed at 1 and every layer added afterwards was queued for good."""
+        env = _Env(tmp_path, ["A"])
+        env.pending = 1
+        env.queue.append(["queued layer"])
+        env.update_datasource.side_effect = IndexError("list index out of range")
+        handler_mod.QTimer.singleShot.reset_mock()
+
+        env.handler.handle_task_completion(dict(env.project_layers), "add_layers")
+
+        assert env.pending == 0
+        handler_mod.QTimer.singleShot.assert_called()  # the queued add_layers is processed
+        assert env.panel_layers() == ["A"]
+
+    def test_a_layer_datasource_failure_does_not_stop_the_completion(self, tmp_path):
+        env = _Env(tmp_path, ["A", "B"])
+        env.pending = 1
+        env.update_layer_datasource.side_effect = [AttributeError("'NoneType' object has no attribute 'uri'"), None]
+
+        env.handler.handle_task_completion(dict(env.project_layers), "add_layers")
+
+        assert env.update_layer_datasource.call_count == 2
+        env.save_project_variables.assert_called_once_with()
+        assert env.pending == 0
+
+    def test_any_failure_still_releases_the_add_layers_counter(self, tmp_path):
+        env = _Env(tmp_path, ["A"])
+        env.pending = 1
+        env.save_project_variables.side_effect = RuntimeError("project gone")
+
+        with pytest.raises(RuntimeError):
+            env.handler.handle_task_completion(dict(env.project_layers), "add_layers")
+
+        assert env.pending == 0
