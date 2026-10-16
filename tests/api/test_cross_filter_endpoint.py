@@ -58,7 +58,8 @@ class TestCrossFilter:
         response = client_factory(layers=mixed_layers).post(
             "/filters/cross", json={"source_layer": "mnt", "target_layers": ["lhd"]})
         assert response.status_code == 400
-        assert response.json()["detail"] == "Cross filter failed"
+        # The reason is given (audit 2026-10): the client can fix its request.
+        assert response.json()["detail"] == "Cross filter failed: a raster source needs a pixel selection"
 
     def test_raster_source_with_a_range(self, client_factory, mixed_layers):
         client = client_factory(layers=mixed_layers)

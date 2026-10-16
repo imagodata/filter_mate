@@ -125,12 +125,13 @@ def public_api():
 
 @pytest.fixture
 def plugin():
-    """Stub plugin singleton with history_manager + favorites_manager."""
-    plug = MagicMock()
-    plug.history_manager = MagicMock()
-    plug.favorites_manager = MagicMock()
-    plug.favorites_manager.get_all_favorites.return_value = []
-    return plug
+    """Stub FilterMate plugin, wired like the real one: history_manager and
+    favorites_manager live on its application object (``plugin.app``)."""
+    app = MagicMock()
+    app.history_manager = MagicMock()
+    app.favorites_manager = MagicMock()
+    app.favorites_manager.get_all_favorites.return_value = []
+    return types.SimpleNamespace(app=app)
 
 
 @pytest.fixture
@@ -248,7 +249,7 @@ class TestApplyAndStatus:
 
 class TestUndoRedo:
     def test_undo_returns_none_when_history_empty(self, accessor, plugin):
-        plugin.history_manager.undo.return_value = None
+        plugin.app.history_manager.undo.return_value = None
         assert accessor.undo_filter() is None
 
     def test_undo_reapplies_previous_filters_on_layers(self, accessor, plugin,
@@ -258,7 +259,7 @@ class TestUndoRedo:
         entry.previous_filters = (("L1", '"prev" = 1'),)
         entry.expression = '"x" = 1'
         entry.layer_ids = ("L1",)
-        plugin.history_manager.undo.return_value = entry
+        plugin.app.history_manager.undo.return_value = entry
 
         step = accessor.undo_filter()
 
@@ -275,21 +276,21 @@ class TestUndoRedo:
         entry.previous_filters = (("L1", ""),)
         entry.layer_ids = ("L1",)
         entry.expression = ""
-        plugin.history_manager.undo.return_value = entry
+        plugin.app.history_manager.undo.return_value = entry
 
         step = accessor.undo_filter()
         layer_a.setSubsetString.assert_called_once_with("")
         assert step.is_clear is True
 
     def test_redo_calls_history_redo(self, accessor, plugin):
-        plugin.history_manager.redo.return_value = None
+        plugin.app.history_manager.redo.return_value = None
         accessor.redo_filter()
-        plugin.history_manager.redo.assert_called_once()
+        plugin.app.history_manager.redo.assert_called_once()
 
     def test_undo_handles_missing_history_manager_gracefully(self, public_api,
                                                              plugin):
         # Plugin without history_manager — undo returns None without raising.
-        del plugin.history_manager
+        del plugin.app.history_manager
         accessor = QGISFilterMateAccessor(public_api=public_api, plugin=plugin)
         assert accessor.undo_filter() is None
 
@@ -306,7 +307,7 @@ class TestFavorites:
         return fav
 
     def test_list_favorites_maps_service_entries(self, accessor, plugin):
-        plugin.favorites_manager.get_all_favorites.return_value = [
+        plugin.app.favorites_manager.get_all_favorites.return_value = [
             self._favorite(
                 favorite_id="fav-1", name="N", description="D",
                 layer_name="communes", expression='"x" = 1',
@@ -325,14 +326,22 @@ class TestFavorites:
         # The router translates this to 503 + Retry-After.
         from filtermate_api.accessor import FavoritesUnavailable
 
-        del plugin.favorites_manager
+        del plugin.app.favorites_manager
         accessor = QGISFilterMateAccessor(public_api=public_api, plugin=plugin)
         with pytest.raises(FavoritesUnavailable):
             accessor.list_favorites()
 
-    def test_apply_favorite_delegates_through_public_api(self, accessor,
-                                                        plugin, public_api):
-        plugin.favorites_manager.get_favorite.return_value = self._favorite(
+    def test_apply_favorite_replays_it_through_operations(self, accessor, plugin, public_api, monkeypatch):
+        # Audit 2026-10: every favorite (vector ones too) is replayed by
+        # operations.apply_favorite, like the dock menu, the Python API and
+        # Processing: remote layers, signature / id / name resolution.
+        import filtermate_api.qgis_accessor as qgis_accessor
+        operations = MagicMock()
+        operations.busy_reason.return_value = ""
+        operations.apply_favorite.return_value = types.SimpleNamespace(
+            error="", done={"L1": "communes", "L2": "roads"}, done_names=["communes", "roads"], details={})
+        monkeypatch.setattr(qgis_accessor, "_plugin_module", lambda name: operations)
+        plugin.app.favorites_manager.get_favorite.return_value = self._favorite(
             favorite_id="fav-1", layer_name="communes",
             expression='"x" = 1', name="N",
         )
@@ -340,21 +349,254 @@ class TestFavorites:
         assert step is not None
         assert step.layer_name == "communes"
         assert step.expression == '"x" = 1'
-        # The bridge stamps the apply with `favorite:<id>` so the plugin
-        # can distinguish API-driven applies in its log/signal stream.
-        public_api.apply_filter.assert_called_once_with(
-            layer_name="communes",
-            filter_expr='"x" = 1',
-            source_plugin="favorite:fav-1",
-        )
+        operations.apply_favorite.assert_called_once_with("fav-1", plugin.app.favorites_manager)
+        public_api.apply_filter.assert_not_called()
+        # The bridge stamps the apply with `favorite:<id>` in /filters/status.
+        assert accessor.get_filter_status().last_applied_source == "favorite:fav-1"
 
     def test_apply_unknown_favorite_returns_none(self, accessor, plugin):
-        plugin.favorites_manager.get_favorite.return_value = None
+        plugin.app.favorites_manager.get_favorite.return_value = None
         assert accessor.apply_favorite("nope") is None
 
     def test_apply_orphan_favorite_returns_none(self, accessor, plugin):
         # Favorite with no layer_name can't be applied.
-        plugin.favorites_manager.get_favorite.return_value = self._favorite(
+        plugin.app.favorites_manager.get_favorite.return_value = self._favorite(
             favorite_id="fav-orphan", layer_name="", expression="", name="N",
         )
         assert accessor.apply_favorite("fav-orphan") is None
+
+
+# ---------------------------------------------------------------------------
+# Audit 2026-10 (FilterMate 5)
+# ---------------------------------------------------------------------------
+
+class TestServicesOnThePluginApp:
+    """The real plugin carries no favorites_manager / history_manager: its app does."""
+
+    def test_plugin_without_app_has_no_favorites_store(self, public_api):
+        from filtermate_api.accessor import FavoritesUnavailable
+        accessor = QGISFilterMateAccessor(public_api=public_api, plugin=types.SimpleNamespace(app=None))
+        with pytest.raises(FavoritesUnavailable):
+            accessor.list_favorites()
+
+    def test_services_found_on_the_plugin_itself_too(self, public_api):
+        # An embedding that passes the app (or a plugin carrying them) keeps working.
+        app = MagicMock()
+        app.history_manager.undo.return_value = None
+        app.favorites_manager.get_all_favorites.return_value = []
+        accessor = QGISFilterMateAccessor(public_api=public_api, plugin=app)
+        assert accessor.list_favorites() == []
+        assert accessor.undo_filter() is None
+        app.history_manager.undo.assert_called_once()
+
+
+class _MainThreadSpy:
+    """Stand-in for run_on_main_thread: records that QGIS is only touched inside it."""
+
+    def __init__(self):
+        self.inside = False
+        self.calls = 0
+
+    def __call__(self, fn, *args, timeout=None, **kwargs):
+        self.calls += 1
+        self.inside = True
+        try:
+            return fn(*args, **kwargs)
+        finally:
+            self.inside = False
+
+    def guard(self, value=None):
+        """side_effect asserting the call happens on the (simulated) main thread."""
+        def _check(*_args, **_kwargs):
+            assert self.inside, "QGIS touched outside run_on_main_thread"
+            return value
+        return _check
+
+
+class TestEverythingOnTheMainThread:
+    @pytest.fixture
+    def spy(self, monkeypatch):
+        import filtermate_api.qgis_accessor as qgis_accessor
+        spy = _MainThreadSpy()
+        monkeypatch.setattr(qgis_accessor, "run_on_main_thread", spy)
+        return spy
+
+    def test_list_layers(self, spy, public_api, plugin, project_with_layers):
+        project, layer_a, _ = project_with_layers
+        project.mapLayers.side_effect = spy.guard(project.mapLayers.return_value)
+        layer_a.featureCount.side_effect = spy.guard(10)
+        public_api.get_active_filters.side_effect = spy.guard({})
+        _install_qgis_stubs(project, _DefaultVectorLayer)
+        accessor = QGISFilterMateAccessor(public_api=public_api, plugin=plugin)
+        assert [layer.name for layer in accessor.list_layers()] == ["communes", "roads"]
+
+    def test_active_filters_and_status(self, spy, accessor, public_api):
+        public_api.get_active_filters.side_effect = spy.guard({"communes": "x = 1"})
+        assert accessor.get_active_filters() == {"communes": "x = 1"}
+        assert accessor.get_filter_status().active_filters_count == 1
+
+    def test_favorites(self, spy, accessor, plugin):
+        plugin.app.favorites_manager.get_all_favorites.side_effect = spy.guard([])
+        plugin.app.favorites_manager.get_favorite.side_effect = spy.guard(None)
+        assert accessor.list_favorites() == []
+        assert accessor.apply_favorite("fav-1") is None
+
+    def test_undo_and_redo_pop_the_shared_history_on_the_main_thread(self, spy, accessor, plugin):
+        # The history is shared with the dock (buttons, change callbacks).
+        plugin.app.history_manager.undo.side_effect = spy.guard(None)
+        plugin.app.history_manager.redo.side_effect = spy.guard(None)
+        assert accessor.undo_filter() is None
+        assert accessor.redo_filter() is None
+        plugin.app.history_manager.undo.assert_called_once()
+        plugin.app.history_manager.redo.assert_called_once()
+
+
+class TestBusyIsNeverAnsweredAsEmpty:
+    @pytest.fixture
+    def busy(self, monkeypatch):
+        import filtermate_api.qgis_accessor as qgis_accessor
+        from filtermate_api.main_thread import QGISBusy
+
+        def _busy(*_args, **_kwargs):
+            raise QGISBusy("main thread busy")
+        monkeypatch.setattr(qgis_accessor, "run_on_main_thread", _busy)
+        return QGISBusy
+
+    def test_filter_state(self, busy, accessor):
+        with pytest.raises(busy):
+            accessor.get_filter_state()
+
+    def test_active_filters(self, busy, accessor):
+        with pytest.raises(busy):
+            accessor.get_active_filters()
+
+    def test_layers(self, busy, accessor):
+        with pytest.raises(busy):
+            accessor.list_layers()
+
+
+def _operations(**overrides):
+    """Fake ``adapters.public_api.operations`` + ``core.domain.api_requests`` for _plugin_module."""
+    module = MagicMock()
+    module.busy_reason.return_value = ""
+    module.raster_selection_from_dict.side_effect = lambda value: value
+    module.point_cloud_criteria_from_dict.side_effect = lambda value: value
+    for name, value in overrides.items():
+        setattr(module, name, value)
+    return module
+
+
+def _report(done=None, failed=None, skipped=None, error="", details=None):
+    done = dict(done or {})
+    return types.SimpleNamespace(done=done, done_names=list(done.values()), failed=dict(failed or {}),
+                                 skipped=dict(skipped or {}), error=error, outputs={}, details=dict(details or {}))
+
+
+class TestOperationsThroughTheAccessor:
+    @pytest.fixture
+    def operations(self, monkeypatch):
+        import filtermate_api.qgis_accessor as qgis_accessor
+        module = _operations()
+        monkeypatch.setattr(qgis_accessor, "_plugin_module", lambda name: module)
+        return module
+
+    def test_source_resolved_by_id_or_name(self, accessor, operations, project_with_layers):
+        _, layer_a, _ = project_with_layers
+        operations.resolve_layer.return_value = layer_a
+        operations.cross_filter.return_value = _report(done={"L2": "roads"})
+        result = accessor.cross_filter("L1", ["roads"], ["Intersect"])
+        assert result.filtered == ["roads"]
+        assert operations.resolve_layer.call_args.args[0] == "L1"
+        assert operations.cross_filter.call_args.args[0] is layer_a
+
+    def test_unexpected_errors_never_reach_the_client(self, accessor, operations, project_with_layers):
+        # Review 2026-10: paths of the cache, SQL, module names stay in the QGIS log.
+        from filtermate_api.qgis_accessor import INTERNAL_ERROR
+        operations.resolve_layer.return_value = project_with_layers[1]
+        operations.cross_filter.return_value = _report(
+            done={"L2": "roads"}, failed={"mnt": "/home/u/cache/x.vrt: denied", "lhd": "outside the area"},
+            error="sqlite3.OperationalError: no such column secret",
+            details={"internal_error": True, "internal_failures": ["mnt"]})
+        result = accessor.cross_filter("communes", ["roads", "mnt", "lhd"], ["Intersect"])
+        assert result.error == INTERNAL_ERROR
+        assert result.failed == {"mnt": INTERNAL_ERROR, "lhd": "outside the area"}
+
+    def test_validation_errors_are_kept(self, accessor, operations, project_with_layers):
+        operations.resolve_layer.return_value = project_with_layers[1]
+        operations.cross_filter.return_value = _report(error="a raster source needs a pixel selection")
+        assert accessor.cross_filter("communes", ["roads"], ["Intersect"]).error == \
+            "a raster source needs a pixel selection"
+
+    def test_missing_module_name_stays_in_the_log(self, accessor, monkeypatch):
+        import filtermate_api.qgis_accessor as qgis_accessor
+
+        def missing(name):
+            raise ImportError("No module named 'filter_mate.adapters.public_api.operations'")
+        monkeypatch.setattr(qgis_accessor, "_plugin_module", missing)
+        result = accessor.clear_filters(["roads"])
+        assert "filter_mate.adapters" not in result.error
+
+    def test_unknown_source_is_none(self, accessor, operations):
+        operations.resolve_layer.return_value = None
+        assert accessor.cross_filter("ghost", ["roads"], ["Intersect"]) is None
+
+    def test_skipped_layers_stay_apart_from_failed(self, accessor, operations, project_with_layers):
+        operations.resolve_layer.return_value = project_with_layers[1]
+        operations.cross_filter.return_value = _report(done={"L2": "roads"}, failed={"mnt": "clip failed"},
+                                                       skipped={"ghost": "layer not found"})
+        result = accessor.cross_filter("communes", ["roads", "mnt", "ghost"], ["Intersect"])
+        assert result.failed == {"mnt": "clip failed"}
+        assert result.skipped == {"ghost": "layer not found"}
+
+    def test_busy_report_raises_qgis_busy(self, accessor, operations, project_with_layers):
+        from filtermate_api.main_thread import QGISBusy
+        operations.resolve_layer.return_value = project_with_layers[1]
+        operations.cross_filter.return_value = _report(error="a FilterMate filter is still running",
+                                                       details={"busy": True})
+        with pytest.raises(QGISBusy, match="still running"):
+            accessor.cross_filter("communes", ["roads"], ["Intersect"])
+
+    def test_apply_filter_refused_while_filtermate_is_busy(self, accessor, operations, public_api):
+        from filtermate_api.main_thread import QGISBusy
+        operations.busy_reason.return_value = "a FilterMate filter is still running"
+        with pytest.raises(QGISBusy):
+            accessor.apply_filter("communes", "x = 1", "rest_api")
+        public_api.apply_filter.assert_not_called()
+
+    def test_undo_refused_while_filtermate_is_busy(self, accessor, operations, plugin):
+        from filtermate_api.main_thread import QGISBusy
+        operations.busy_reason.return_value = "a FilterMate filter is still running"
+        with pytest.raises(QGISBusy):
+            accessor.undo_filter()
+        plugin.app.history_manager.undo.assert_not_called()
+
+    def test_undo_is_the_dock_undo_whatever_the_api_did_before(self, accessor, operations, plugin,
+                                                               project_with_layers):
+        # Review 2026-10: no guard pretending the API's changes are in this
+        # history (apply_filter records nothing there either): /filters/undo
+        # is the dock's vector Undo, documented as such.
+        operations.resolve_layer.return_value = project_with_layers[1]
+        operations.cross_filter.return_value = _report(done={"L2": "roads"})
+        accessor.cross_filter("communes", ["roads"], ["Intersect"])
+        plugin.app.history_manager.undo.return_value = None
+        assert accessor.undo_filter() is None
+        plugin.app.history_manager.undo.assert_called_once()
+
+
+class TestGeometryTypeNames:
+    """QGIS 4 / PyQt6: Qgis.GeometryType is an enum, no longer an int."""
+
+    def test_pyqt6_enum_and_pyqt5_int(self):
+        import enum
+        from filtermate_api.qgis_accessor import _geometry_type_name
+
+        class GeometryType(enum.Enum):
+            Point = 0
+            Line = 1
+            Polygon = 2
+
+        assert _geometry_type_name(GeometryType.Polygon) == "Polygon"
+        assert _geometry_type_name(GeometryType.Line) == "LineString"
+        assert _geometry_type_name(2) == "Polygon"
+        assert _geometry_type_name(None) == "Unknown"
+        assert _geometry_type_name(-1) == "Unknown"

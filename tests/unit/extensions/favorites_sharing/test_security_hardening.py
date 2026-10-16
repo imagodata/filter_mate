@@ -109,9 +109,8 @@ def test_commit_author_newline_is_stripped(tmp_path):
     assert "\n" not in args[author_idx + 1]
 
 
-def test_auth_header_newline_is_stripped(tmp_path):
-    """``_run`` injects the auth header — patch ``subprocess.run`` so we
-    can observe the final argv that would have hit git."""
+def _poisoned_commit(tmp_path, git_version):
+    """ls-remote (network, https) with a poisoned stored credential; ``(argv, env)`` git would have got."""
     captured: Dict[str, Any] = {}
 
     class _FakeProc:
@@ -120,21 +119,36 @@ def test_auth_header_newline_is_stripped(tmp_path):
         stderr = ""
 
     def _fake_run(cmd, **kwargs):
-        captured["cmd"] = list(cmd)
+        captured["cmd"], captured["env"] = list(cmd), kwargs.get("env") or {}
         return _FakeProc()
 
     # The header comes from the QGIS Auth Manager entry (authcfg_id): a poisoned stored credential.
     client = GitClient(cwd=str(tmp_path), authcfg_id="qg1xy7w")
     with patch("extensions.favorites_sharing.git_client._resolve_authcfg_header",
                lambda authcfg_id: "Bearer token\n[remote \"x\"]\nurl=evil"), \
+            patch("extensions.favorites_sharing.git_client._git_version", lambda binary: git_version), \
             patch("extensions.favorites_sharing.git_client.subprocess.run", _fake_run):
-        client.commit("msg")
+        client.ls_remote("https://git.example/team/repo.git")
+    return captured["cmd"], captured["env"]
 
-    cmd = captured["cmd"]
+
+def test_auth_header_newline_is_stripped(tmp_path):
+    """git < 2.31: the header goes through ``-c`` — no newline may reach it."""
+    cmd, _ = _poisoned_commit(tmp_path, (2, 30))
     ec_args = [a for a in cmd if a.startswith("http.extraHeader=")]
     assert ec_args, "expected http.extraHeader injection"
     assert "\n" not in ec_args[0]
     assert "[remote" in ec_args[0]  # other content survives, just no newline
+
+
+def test_auth_header_newline_is_stripped_in_the_environment(tmp_path):
+    """git >= 2.31: the header goes through GIT_CONFIG_VALUE_n, stripped the same way."""
+    cmd, env = _poisoned_commit(tmp_path, (2, 43))
+    assert not any("http.extraHeader" in a for a in cmd)
+    index = int(env["GIT_CONFIG_COUNT"]) - 1
+    assert env[f"GIT_CONFIG_KEY_{index}"] == "http.extraHeader"
+    assert "\n" not in env[f"GIT_CONFIG_VALUE_{index}"]
+    assert "[remote" in env[f"GIT_CONFIG_VALUE_{index}"]
 
 
 # ─── C3: validator runs on scanner load ──────────────────────────────────

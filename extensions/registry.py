@@ -98,6 +98,16 @@ class ExtensionRegistry:
                             "Config seeding failed for '%s': %s",
                             ext_id, seed_err,
                         )
+                    # Secrets a past release left in its config (a 4.x
+                    # plaintext token): removed now, whatever the state of the
+                    # extension, never at the cost of the start-up.
+                    purge = getattr(extension, "purge_legacy_config", None)
+                    if purge is not None:
+                        try:
+                            if purge():
+                                config_dirty = True
+                        except Exception as purge_err:
+                            logger.warning("Legacy config purge failed for '%s': %s", ext_id, purge_err)
                 else:
                     # FIX 2026-04-23: surface silent load failures. Before,
                     # _load_extension_module returned None on import error /
@@ -350,12 +360,20 @@ class ExtensionRegistry:
         else:
             live_data["EXTENSIONS"] = merged_ext
 
+        # Written next to it, then swapped in: a failure never leaves a
+        # truncated config.json.
+        tmp_path = f"{config_path}.tmp"
         try:
-            with open(config_path, 'w', encoding='utf-8') as f:
+            with open(tmp_path, 'w', encoding='utf-8') as f:
                 json.dump(live_data, f, indent=2, ensure_ascii=False)
+            os.replace(tmp_path, config_path)
             return True
-        except OSError as exc:
+        except (OSError, TypeError, ValueError) as exc:
             logger.warning("Could not persist config.json: %s", exc)
+            try:
+                os.remove(tmp_path)
+            except OSError:
+                pass
             return False
 
     def _show_missing_deps_message(self, ext: BaseExtension, iface: Any) -> None:

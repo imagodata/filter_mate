@@ -59,6 +59,22 @@ FALLBACK_CONFIG = {
             "FRESH_RELOAD_FLAG": {
                 "value": False,
                 "description": "Force fresh reload on next startup"
+            },
+            # On, as in config.default.json: without them the fallback turned
+            # raster and point cloud layers off.
+            "RASTER": {
+                "enabled": {
+                    "value": True,
+                    "choices": [True, False],
+                    "description": "Show raster layers in the layer lists"
+                }
+            },
+            "POINT_CLOUD": {
+                "enabled": {
+                    "value": True,
+                    "choices": [True, False],
+                    "description": "Show point cloud layers in the layer lists"
+                }
             }
         }
     },
@@ -95,6 +111,45 @@ def _get_option_value(option, default=""):
     if isinstance(option, dict) and 'value' in option:
         return option['value']
     return option
+
+
+_FALSE_STRINGS = frozenset({'false', '0', 'no', 'off', ''})
+_TRUE_STRINGS = frozenset({'true', '1', 'yes', 'on'})
+
+
+def _get_option_bool(option, default=False):
+    """Boolean value of a config option, tolerant of a hand-edited config.json.
+
+    ``bool("false")`` is True: "false", "0", "no", "off" and "" (any case)
+    read as False, "true", "1", "yes", "on" as True; another string, or no
+    value, gives ``default``.
+    """
+    value = _get_option_value(option, default)
+    if isinstance(value, str):
+        text = value.strip().lower()
+        if text in _FALSE_STRINGS:
+            return False
+        if text in _TRUE_STRINGS:
+            return True
+        return bool(default)
+    if value is None:
+        return bool(default)
+    return bool(value)
+
+
+def _get_option_int(option, default=0):
+    """Integer value of a config option: 4000000, "4000000" or 4e6 are read,
+    anything else (text, a boolean, no value) gives ``default``."""
+    value = _get_option_value(option, default)
+    if isinstance(value, bool) or value is None:
+        return int(default)
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        try:
+            return int(float(value))
+        except (TypeError, ValueError, OverflowError):
+            return int(default)
 
 
 def _set_option_value(options_dict, key, new_value):
@@ -345,6 +400,22 @@ def merge(a, b, path=None):
     return a
 
 
+def get_config_json_path():
+    """Path of the active config.json, without reading or writing anything.
+
+    ENV_VARS["CONFIG_JSON_PATH"] once init_env_vars() ran; before that (the
+    plugin constructor reads the forced language there), the file
+    init_env_vars() loads: config.json in the FilterMate folder of the QGIS
+    profile, where the Configuration tab saves. The copy in the plugin
+    folder is only a fallback.
+    """
+    path = ENV_VARS.get("CONFIG_JSON_PATH")
+    if path:
+        return path
+    settings_path = QgsApplication.qgisSettingsDirPath().rstrip(os.sep).rstrip('/')
+    return os.path.join(os.path.normpath(os.path.join(settings_path, 'FilterMate')), 'config.json')
+
+
 def init_env_vars():
     """
     Initialize environment variables and configuration paths.
@@ -420,7 +491,7 @@ def init_env_vars():
     using_fallback = False
 
     try:
-        with open(config_json_path) as f:
+        with open(config_json_path, 'r', encoding='utf-8') as f:
             CONFIG_DATA = json.load(f)
 
         # v4.0.7: Validate configuration after loading
@@ -463,7 +534,7 @@ def init_env_vars():
         )
         # Try to load default config as second option
         try:
-            with open(config_default_path) as f:
+            with open(config_default_path, 'r', encoding='utf-8') as f:
                 CONFIG_DATA = json.load(f)
             QgsMessageLog.logMessage(
                 "FilterMate: Loaded default configuration file",
@@ -495,7 +566,7 @@ def init_env_vars():
 
         # Try to write fallback to disk for next time
         try:
-            with open(config_json_path, 'w') as outfile:
+            with open(config_json_path, 'w', encoding='utf-8') as outfile:
                 outfile.write(json.dumps(CONFIG_DATA, indent=4))
             QgsMessageLog.logMessage(
                 f"FilterMate: Fallback configuration saved: {config_json_path}",
@@ -591,7 +662,7 @@ def init_env_vars():
 
     if config_dirty:
         try:
-            with open(config_json_path, 'w') as outfile:
+            with open(config_json_path, 'w', encoding='utf-8') as outfile:
                 outfile.write(json.dumps(CONFIG_DATA, indent=4))
         except Exception as e:
             QgsMessageLog.logMessage(
@@ -649,7 +720,7 @@ def reset_config_to_default():
         shutil.copy2(config_default_path, config_json_path)
 
         # Reload config
-        with open(config_json_path) as f:
+        with open(config_json_path, 'r', encoding='utf-8') as f:
             ENV_VARS["CONFIG_DATA"] = json.load(f)
 
         QgsMessageLog.logMessage(

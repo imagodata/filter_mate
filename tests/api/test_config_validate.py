@@ -27,10 +27,20 @@ class TestValidateAllowsLoopback:
     def test_loopback_ipv6_no_auth_passes(self):
         APIConfig(host="::1", api_key=None).validate()
 
-    def test_loopback_with_wildcard_cors_passes(self):
-        # On loopback, wildcard CORS is acceptable — create_app forces
-        # allow_credentials=False so cookies/credentials cannot ride along.
-        APIConfig(host="127.0.0.1", cors_origins=["*"], api_key=None).validate()
+    def test_loopback_with_wildcard_cors_and_key_passes(self):
+        # On loopback, wildcard CORS is acceptable with a key — create_app
+        # forces allow_credentials=False and a hostile page cannot know the key.
+        APIConfig(host="127.0.0.1", cors_origins=["*"], api_key="secret-123").validate()
+
+    def test_loopback_with_wildcard_cors_and_no_key_raises(self):
+        # Audit 2026-10 (FilterMate 5): any web page the user visits could
+        # read the layers and apply raw SQL subsets through the browser.
+        cfg = APIConfig(host="127.0.0.1", cors_origins=["*"], api_key=None)
+        with pytest.raises(APIConfigError, match="wildcard but api_key is unset"):
+            cfg.validate()
+
+    def test_loopback_with_explicit_origin_and_no_key_passes(self):
+        APIConfig(host="127.0.0.1", cors_origins=["http://localhost:3000"], api_key=None).validate()
 
 
 class TestValidateRejectsRemoteExposure:
@@ -103,7 +113,7 @@ class TestCreateAppPropagatesValidation:
             accessor=InMemoryAccessor(),
             allow_insecure=True,
         )
-        client = TestClient(app)
+        client = TestClient(app, base_url="http://127.0.0.1:8000")
         assert client.get("/").status_code == 200
 
     def test_create_app_default_loopback_still_works(self):
@@ -113,7 +123,7 @@ class TestCreateAppPropagatesValidation:
             config=APIConfig(),
             accessor=InMemoryAccessor(),
         )
-        assert TestClient(app).get("/").status_code == 200
+        assert TestClient(app, base_url="http://127.0.0.1:8000").get("/").status_code == 200
 
 
 class TestApiKeyJsonPlaintextWarning:
@@ -169,8 +179,8 @@ class TestWildcardCorsForcesNoCredentials:
         # When origins=["*"], the CORS middleware must not advertise
         # allow-credentials — even on loopback. Browsers ignore that
         # combination silently; we make the policy explicit.
-        cfg = APIConfig(host="127.0.0.1", cors_origins=["*"])
-        client = TestClient(create_app(config=cfg, accessor=InMemoryAccessor()))
+        cfg = APIConfig(host="127.0.0.1", cors_origins=["*"], api_key="secret-123")
+        client = TestClient(create_app(config=cfg, accessor=InMemoryAccessor()), base_url="http://127.0.0.1:8000")
         response = client.options(
             "/layers",
             headers={
@@ -185,7 +195,7 @@ class TestWildcardCorsForcesNoCredentials:
             host="127.0.0.1",
             cors_origins=["https://trusted.example"],
         )
-        client = TestClient(create_app(config=cfg, accessor=InMemoryAccessor()))
+        client = TestClient(create_app(config=cfg, accessor=InMemoryAccessor()), base_url="http://127.0.0.1:8000")
         response = client.options(
             "/layers",
             headers={
@@ -279,7 +289,7 @@ class TestApiKeyMiddlewareHashCompare:
 
     def _client(self) -> TestClient:
         cfg = APIConfig(api_key_hash=self._SECRET_HASH)
-        return TestClient(create_app(config=cfg, accessor=InMemoryAccessor()))
+        return TestClient(create_app(config=cfg, accessor=InMemoryAccessor()), base_url="http://127.0.0.1:8000")
 
     def test_correct_plaintext_authorises(self):
         response = self._client().get(

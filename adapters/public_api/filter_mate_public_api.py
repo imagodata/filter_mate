@@ -21,6 +21,16 @@ from ...infrastructure.logging import get_logger
 
 logger = get_logger(__name__)
 
+# Expressions are logged clipped: a REST client may send a long subset string
+# (up to the API body cap), which must not flood the log file.
+_LOG_EXPRESSION_CHARS = 200
+
+
+def _clip(text: str, limit: int = _LOG_EXPRESSION_CHARS) -> str:
+    """``text`` cut to ``limit`` characters, with the full length when cut."""
+    text = text or ""
+    return text if len(text) <= limit else f"{text[:limit]}… ({len(text)} chars)"
+
 
 def _common_metaclass(*bases):
     """Metaclass deriving from the metaclasses of every base.
@@ -95,8 +105,8 @@ class FilterMatePublicAPI(QObject, IFilterMatePublicAPI, metaclass=_common_metac
         """
         operation = f"apply_filter({layer_name!r})"
         logger.info(
-            f"PublicAPI: {operation} from {source_plugin!r}, "
-            f"expr={filter_expr!r}"
+            f"PublicAPI: {operation} from {_clip(source_plugin)!r}, "
+            f"expr={_clip(filter_expr)!r}"
         )
 
         try:

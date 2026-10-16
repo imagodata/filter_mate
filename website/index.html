@@ -64,7 +64,7 @@
                 <button class="watch" type="button" data-watch data-video="video/hero.mp4" data-poster="video/hero.webp" aria-label="Watch the selected video"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Watch the video</button>
                 <a class="home-text-link" href="guide.html">Read the guide <span aria-hidden="true">→</span></a>
             </div>
-            <p class="home-version">FilterMate 4.9.2 · QGIS 3.22–4.x · Qt5 and Qt6</p>
+            <p class="home-version">FilterMate 5.0 · QGIS 3.22–4.x · Qt5 and Qt6</p>
         </div>
     </div>
     <a class="hero-scroll" href="#workflow"><span>Discover the workflow</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></a>
@@ -93,6 +93,23 @@
         </ol>
         <a class="inline-cta" href="guide.html#tutorial">Follow the first-filter tutorial <span aria-hidden="true">→</span></a>
         <div class="callout demo-download"><strong>Try a small dataset.</strong><p>Four layers around Toutens, a styled QGIS project, an importable favorite and instructions in English and French. Extract the ZIP before opening the project.</p><a class="btn btn-primary" href="downloads/filtermate-toutens.zip" download>Download the demo (ZIP, 203 KB)</a></div>
+    </div>
+</section>
+
+<section class="home-section fm5" id="fm5" aria-labelledby="fm5-title">
+    <div class="home-container capability-layout">
+        <div class="fm5-visual">
+            <div class="fm5-shots">
+                <img src="img/guide/fm5_raster_exploring.png" alt="EXPLORING panel of a raster layer: band, value range and histogram" loading="lazy" width="440" height="1086">
+                <img src="img/guide/fm5_pointcloud_exploring.png" alt="EXPLORING panel of a point cloud: LiDAR classes" loading="lazy" width="440" height="1086">
+            </div>
+            <p class="fm5-caption">The panel follows the current layer: a raster on the left, a point cloud on the right.</p>
+        </div>
+        <div>
+            <div class="section-heading"><p class="section-kicker">New in FilterMate 5</p><h2 id="fm5-title">Rasters and LiDAR point clouds, filtered like any layer.</h2><p>Choose a raster or a point cloud as the current layer and EXPLORING shows its own tools. FILTERING then relates the selection to layers of any kind.</p></div>
+            <ul class="capability-list"><li><strong>Raster</strong><span>Band, pixel picker, value range with histogram and live preview, classes, raster expression.</span></li><li><strong>Point clouds</strong><span>ASPRS and LiDAR HD classes, Z, intensity and return ranges, height above a DTM.</span></li><li><strong>Every direction</strong><span>Vector, raster and point cloud as source or target: nine combinations with buffer, minimum coverage and Disjoint.</span></li><li><strong>Safe to undo</strong><span>Clipped layers keep their id and style. Undo, redo and project files return to the original source.</span></li><li><strong>Export</strong><span>GeoTIFF and COG for rasters; LAZ, LAS, COPC, GPKG and CSV for point clouds.</span></li><li><strong>Automate</strong><span>Seven Processing algorithms, four models, qgis_process, Python and REST APIs.</span></li><li><strong>Tested</strong><span>CI on QGIS 3.22, 3.28, 3.34, 3.44 and 4.2, through Processing and the dock itself.</span></li></ul>
+            <a class="inline-cta" href="guide.html#raster-lidar">Read the FilterMate 5 guide <span aria-hidden="true">→</span></a>
+        </div>
     </div>
 </section>
 
@@ -153,7 +170,7 @@
 
 <footer class="home-footer">
     <div class="home-container footer-grid"><div><a href="index.html" class="nav-brand"><img src="logo.png" alt="" width="32" height="32">FilterMate</a><p>Spatial filtering for QGIS, by imagodata.</p></div><ul><li><a href="guide.html">User guide</a></li><li><a href="stories.html">Use cases</a></li><li><a href="roadmap.html">Roadmap</a></li></ul><ul><li><a href="https://github.com/imagodata/filter_mate">Source code</a></li><li><a href="https://github.com/imagodata/filter_mate/issues">Report an issue</a></li><li><a href="https://discord.gg/9DNbuVYQ">Discord</a></li></ul></div>
-    <div class="home-container footer-note">FilterMate 4.9.2 · Map data in videos and screenshots: BD TOPO® © IGN, Licence Ouverte 2.0.</div>
+    <div class="home-container footer-note">FilterMate 5.0 · Map data in videos and screenshots: BD TOPO® © IGN, Licence Ouverte 2.0.</div>
 </footer>
 
 <dialog class="lightbox" id="lightbox" aria-label="Video"><video controls playsinline muted></video><form method="dialog"><button>Close</button></form></dialog>

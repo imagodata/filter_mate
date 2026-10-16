@@ -11,6 +11,7 @@ build exactly the same selection:
 * :func:`raster_selection_from_values` - band, mode and bounds -> :class:`RasterSelection`;
 * :func:`point_cloud_criteria_from_values` - classes, Z / intensity ranges,
   return number and expression -> :class:`PointCloudFilterCriteria`;
+* :func:`relation_numbers` - buffer and minimum coverage, finite and in range;
 * :class:`OperationReport` - outcome of an operation on several layers.
 
 This is a PURE PYTHON module with NO QGIS dependencies.
@@ -41,6 +42,42 @@ VECTOR_EXPORT_FORMATS: Dict[str, Tuple[str, str]] = {
 }
 RASTER_EXPORT_FORMATS: Tuple[str, ...] = ("COG", "GTiff")
 POINT_CLOUD_EXPORT_FORMATS: Tuple[str, ...] = ("LAZ", "COPC", "LAS", "GPKG", "CSV")
+
+# Largest buffer accepted, in layer units (metres for a geographic CRS): 10 000 km.
+MAX_BUFFER = 1e7
+
+
+def _finite(value, label: str) -> float:
+    """``value`` as a float; ValueError when it is not a number, NaN or infinite."""
+    try:
+        number = float(value)
+    except (TypeError, ValueError):
+        raise ValueError(f"{label} must be a number, got {value!r}") from None
+    if not math.isfinite(number):
+        raise ValueError(f"{label} must be a finite number, got {value!r}")
+    return number
+
+
+def relation_numbers(buffer, coverage_min) -> Tuple[float, float]:
+    """Buffer and minimum coverage of a cross filter, checked.
+
+    NaN slips through every comparison and an infinite buffer covers
+    everything: both are refused, like values out of range.
+
+    Returns:
+        ``(buffer, coverage_min)`` as floats (None counts as 0).
+
+    Raises:
+        ValueError: When a value is not finite, the buffer is beyond
+            :data:`MAX_BUFFER` or the coverage outside 0-100 %.
+    """
+    buffer = _finite(buffer or 0.0, "buffer")
+    coverage = _finite(coverage_min or 0.0, "coverage_min")
+    if abs(buffer) > MAX_BUFFER:
+        raise ValueError(f"buffer must be between {-MAX_BUFFER:g} and {MAX_BUFFER:g}, got {buffer:g}")
+    if not 0.0 <= coverage <= 100.0:
+        raise ValueError(f"coverage_min must be between 0 and 100, got {coverage:g}")
+    return buffer, coverage
 
 
 def parse_class_codes(value: Union[None, str, int, Iterable]) -> frozenset:
@@ -186,7 +223,15 @@ def point_cloud_criteria_from_values(classes: Union[None, str, Iterable] = None,
                                      intensity_min: Optional[float] = None, intensity_max: Optional[float] = None,
                                      return_number: Optional[int] = None,
                                      expression: str = "") -> PointCloudFilterCriteria:
-    """Build point cloud criteria (ASPRS classes, Z / intensity ranges, return, expression)."""
+    """Build point cloud criteria (ASPRS classes, Z / intensity ranges, return, expression).
+
+    Raises:
+        ValueError: When a bound is not a finite number.
+    """
+    for value, label in ((z_min, "z_min"), (z_max, "z_max"),
+                         (intensity_min, "intensity_min"), (intensity_max, "intensity_max")):
+        if value is not None:
+            _finite(value, label)  # NaN would slip through the min <= max check
     ranges = []
     if z_min is not None or z_max is not None:
         ranges.append(AttributeRange("Z", z_min, z_max))

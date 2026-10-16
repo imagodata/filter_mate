@@ -53,7 +53,8 @@ class FilterPointCloudAlgorithm(FilterMateAlgorithm):
         feedback.pushInfo(self.tr("Critères : {0}").format(criteria.to_subset_string()))
         report = operations.filter_point_clouds(
             self.parameterAsLayerList(parameters, self.LAYERS, context), criteria,
-            operator=OPERATORS[self.parameterAsEnum(parameters, self.OPERATOR, context)], project=context.project())
+            operator=OPERATORS[self.parameterAsEnum(parameters, self.OPERATOR, context)], project=context.project(),
+            feedback=feedback)
         return self.finish(report, feedback)
 
     def name(self):
@@ -112,7 +113,7 @@ class ApplyFavoriteAlgorithm(FilterMateAlgorithm):
         name = self.parameterAsString(parameters, self.FAVORITE, context).strip()
         if not name:
             raise QgsProcessingException(self.tr("Donnez le nom du favori"))
-        report = operations.apply_favorite(name, project=context.project())
+        report = operations.apply_favorite(name, project=context.project(), feedback=feedback)
         favorite = report.details.get("favorite") or {}
         if favorite:
             feedback.pushInfo(self.tr("Favori : {0}").format(favorite.get("name")))

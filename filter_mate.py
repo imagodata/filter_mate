@@ -34,10 +34,32 @@ import weakref
 import os
 import os.path
 from .filter_mate_app import FilterMateApp
-from .config.config import reload_config
+from .config.config import reload_config, get_config_json_path
 from .infrastructure.logging import get_logger
 
 logger = get_logger(__name__)
+
+# SQLite database of the layer properties, filter history and favorites
+# (FilterMateApp.db_name), in the FilterMate folder of the QGIS profile.
+LAYER_DATABASE_NAME = 'filterMate_db.sqlite'
+
+
+def _clear_layer_database(db_path):
+    """Delete the layer properties and filter history stored in ``db_path``.
+
+    The favorites (fm_favorites) and the project identities they belong to
+    (fm_projects) live in the same database and stay.
+    """
+    import sqlite3
+    conn = sqlite3.connect(db_path)
+    try:
+        tables = {row[0] for row in conn.execute("SELECT name FROM sqlite_master WHERE type = 'table'")}
+        for table in ('fm_project_layers_properties', 'fm_subset_history'):
+            if table in tables:
+                conn.execute(f"DELETE FROM {table}")  # nosec B608 - fixed table names
+        conn.commit()
+    finally:
+        conn.close()
 
 
 class FilterMate:
@@ -63,7 +85,9 @@ class FilterMate:
         config_language = None
         try:
             import json
-            config_path = os.path.join(self.plugin_dir, 'config', 'config.json')
+            # The active config (QGIS profile), where the Configuration tab saves the language:
+            # the copy in the plugin folder never held it, so a forced language was lost on restart.
+            config_path = get_config_json_path()
             if os.path.exists(config_path):
                 with open(config_path, 'r', encoding='utf-8') as f:
                     config_data = json.load(f)
@@ -283,6 +307,9 @@ class FilterMate:
             self.iface.addPluginToVectorMenu(
                 self.menu,
                 action)
+            # retranslate_actions renames self.menu: unload removes the entries
+            # from the submenu they were added to.
+            self._vector_menu_name = self.menu
 
         self.actions.append(action)
 
@@ -362,9 +389,14 @@ class FilterMate:
             self.initProcessing()
 
             # FilterMate 5: remove the derived-file folders of crashed QGIS
-            # sessions (live sessions hold a lock), off the startup path.
+            # sessions (live sessions hold a lock), off the startup path. A timer
+            # of the plugin, stopped in unload: a QTimer.singleShot still fired
+            # after an unload and imported the removed package again.
             from qgis.PyQt.QtCore import QTimer
-            QTimer.singleShot(30000, self._cleanup_stale_cache)
+            self._stale_cache_timer = QTimer()
+            self._stale_cache_timer.setSingleShot(True)
+            self._stale_cache_timer.timeout.connect(self._cleanup_stale_cache)
+            self._stale_cache_timer.start(30000)
 
             logger.debug("FilterMate.initGui: Completed successfully")
 
@@ -832,8 +864,8 @@ class FilterMate:
                 ext_enabled = True
                 try:
                     ext_cfg = dw.CONFIG_DATA.get('EXTENSIONS', {}).get('qfieldcloud', {})
-                    from .config.config import _get_option_value
-                    ext_enabled = bool(_get_option_value(ext_cfg.get('enabled'), True))
+                    from .config.config import _get_option_bool
+                    ext_enabled = _get_option_bool(ext_cfg.get('enabled'), True)
                 except Exception:  # nosec B110 - best-effort config read; defaults to enabled
                     pass
                 if ext_enabled:
@@ -1423,9 +1455,14 @@ class FilterMate:
         if self.app:
             self.app.cleanup()
 
+        stale_cache_timer = getattr(self, '_stale_cache_timer', None)
+        if stale_cache_timer is not None:
+            stale_cache_timer.stop()
+            self._stale_cache_timer = None
+
         for action in self.actions:
             self.iface.removePluginVectorMenu(
-                self.menu,
+                getattr(self, '_vector_menu_name', self.menu),
                 action)
             self.iface.removeToolBarIcon(action)
         # remove the toolbar
@@ -1433,16 +1470,35 @@ class FilterMate:
 
     # --------------------------------------------------------------------------
 
+    def _adopt_reset_config(self, config_data):
+        """Give the panel's config dict the reset values, in place.
+
+        FilterMateApp.save_project_variables writes that dict to config.json at the end of
+        every layer task: without this, the old settings were written back before the
+        restart. CURRENT_PROJECT, the open project's state (live PostgreSQL connection),
+        is kept.
+        """
+        import copy
+        dockwidget = getattr(self.app, 'dockwidget', None) if self.app else None
+        live = getattr(dockwidget, 'CONFIG_DATA', None)
+        if not isinstance(live, dict) or not isinstance(config_data, dict) or live is config_data:
+            return
+        kept = {key: live[key] for key in ("CURRENT_PROJECT",) if key in live}
+        live.clear()
+        for key, value in config_data.items():
+            live[key] = kept.pop(key) if key in kept else copy.deepcopy(value)
+        live.update(kept)
+
     def reset_configuration(self):
-        """Reset the configuration to default values and optionally delete the SQLite database.
+        """Reset the configuration to default values and the layer database.
 
         This method:
-        1. Copies config.default.json to config.json
-        2. Optionally deletes the SQLite database file
+        1. Copies config.default.json over the active config.json (QGIS profile)
+        2. Deletes the cache database and the layer data of the layer database
+           (properties, filter history), keeping the favorites stored there
         3. Prompts user to restart QGIS for changes to take effect
         """
         from qgis.PyQt.QtWidgets import QMessageBox
-        import shutil
 
         # Ask for confirmation
         reply = QMessageBox.question(
@@ -1461,13 +1517,16 @@ class FilterMate:
             return
 
         try:
-            config_dir = os.path.join(self.plugin_dir, 'config')
-            config_file = os.path.join(config_dir, 'config.json')
-            default_config_file = os.path.join(config_dir, 'config.default.json')
+            from .config.config import ENV_VARS, init_env_vars, reset_config_to_default
+            default_config_file = os.path.join(self.plugin_dir, 'config', 'config.default.json')
 
-            # Copy default config to config.json
+            # Copy the default config over the active one (QGIS profile), the file read at
+            # startup: the copy over config/config.json in the plugin folder reset nothing.
             if os.path.exists(default_config_file):
-                shutil.copy2(default_config_file, config_file)
+                if "CONFIG_JSON_PATH" not in ENV_VARS:
+                    init_env_vars()
+                if not reset_config_to_default():
+                    raise OSError(f"default configuration not copied to {ENV_VARS.get('CONFIG_JSON_PATH')}")
                 self.iface.messageBar().pushSuccess(
                     "FilterMate",
                     self.tr("Configuration reset successfully.")
@@ -1479,30 +1538,41 @@ class FilterMate:
                 )
                 return
 
-            # Try to delete SQLite database
-            from .config.config import ENV_VARS, init_env_vars
-
             # Re-initialize to get current paths
             try:
                 init_env_vars()
+                self._adopt_reset_config(ENV_VARS.get("CONFIG_DATA"))
                 plugin_config_dir = ENV_VARS.get("PLUGIN_CONFIG_DIRECTORY", "")
 
                 if plugin_config_dir and os.path.isdir(plugin_config_dir):
-                    # Look for SQLite files
-                    for filename in os.listdir(plugin_config_dir):
-                        if filename.endswith('.db') or filename.endswith('.sqlite'):
-                            db_path = os.path.join(plugin_config_dir, filename)
-                            try:
-                                os.remove(db_path)
-                                self.iface.messageBar().pushInfo(
-                                    "FilterMate",
-                                    self.tr(f"Database deleted: {filename}")
-                                )
-                            except OSError as e:
-                                self.iface.messageBar().pushWarning(
-                                    "FilterMate",
-                                    self.tr(f"Unable to delete {filename}: {e}")
-                                )
+                    # The cache database is deleted. The layer database also holds the
+                    # favorites: only its layer properties and filter history are deleted
+                    # (removing every .db / .sqlite file of the folder lost the favorites).
+                    from .infrastructure.cache.spatialite_persistent_cache import CACHE_DB_NAME
+                    filename = CACHE_DB_NAME
+                    db_path = os.path.join(plugin_config_dir, filename)
+                    if os.path.exists(db_path):
+                        try:
+                            os.remove(db_path)
+                            self.iface.messageBar().pushInfo(
+                                "FilterMate",
+                                self.tr(f"Database deleted: {filename}")
+                            )
+                        except OSError as e:
+                            self.iface.messageBar().pushWarning(
+                                "FilterMate",
+                                self.tr(f"Unable to delete {filename}: {e}")
+                            )
+                    filename = LAYER_DATABASE_NAME
+                    db_path = os.path.join(plugin_config_dir, filename)
+                    if os.path.exists(db_path):
+                        try:
+                            _clear_layer_database(db_path)
+                        except Exception as e:  # sqlite3.Error: locked or damaged database
+                            self.iface.messageBar().pushWarning(
+                                "FilterMate",
+                                self.tr(f"Unable to delete {filename}: {e}")
+                            )
             except Exception:  # nosec B110 - Non-critical error, config was already reset
                 # Non-critical error, config was already reset
                 pass

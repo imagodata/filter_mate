@@ -55,13 +55,14 @@ class ConfigMigration:
                                    Should accept (reason: str, version: str) and return True if reset is confirmed.
 
         Returns:
-            Tuple of (success: bool, warnings: List[str])
+            Tuple of (performed: bool, warnings: List[str]): performed is True only
+            when a migration ran and succeeded (the caller then tells the user).
         """
         try:
             # Check if migration is needed
             if not self._needs_migration():
                 logger.debug("Configuration is up to date, no migration needed")
-                return True, []
+                return False, []
 
             logger.debug("Configuration migration started")
 

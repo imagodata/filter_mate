@@ -9,18 +9,22 @@ by delegating each accessor method to:
 * :class:`HistoryService` (the same instance shared with the legacy plugin
   via ``adapters.app_bridge.get_history_service`` after #41 M4) for the
   undo/redo stack.
-* :class:`FavoritesService` (mounted on the plugin instance) for
-  favorite listing and apply.
+* :class:`FavoritesService` (mounted on the plugin's ``FilterMateApp``,
+  ``plugin.app``) for favorite listing and apply.
+* ``adapters.public_api.operations`` for the FilterMate 5 operations
+  (the same code as the Python API and the Processing algorithms).
 * ``QgsProject.instance().mapLayers()`` for the layer enumeration.
 
 The class is import-light: no Qt/QGIS imports at module top-level so it
 can be loaded under the headless test harness. QGIS only enters the
-picture when methods run, and any QGIS access is wrapped in a defensive
+picture when methods run, always on the Qt main thread
+(:func:`run_on_main_thread`), and any QGIS access is wrapped in a defensive
 try/except so a misconfigured plugin doesn't bring the API down.
 """
 
 from __future__ import annotations
 
+import logging
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 
@@ -34,7 +38,9 @@ from .accessor import (
     LayerSummary,
     OperationResult,
 )
-from .main_thread import run_on_main_thread
+from .main_thread import QGISBusy, run_on_main_thread
+
+logger = logging.getLogger("filtermate_api.qgis_accessor")
 
 
 def _plugin_module(name: str):
@@ -81,6 +87,22 @@ def _derived_marker(layer) -> str:
     return "filtermate:clip" if snapshot.geometry_wkt else "filtermate:selection"
 
 
+def _unless_busy(fn, *args, **kwargs):
+    """``fn(*args, **kwargs)`` (main thread), refused while FilterMate is busy.
+
+    A FilterMate operation (possibly re-entered here through processEvents)
+    or a filter task of the dock would land its own subsets over this
+    change: :class:`QGISBusy` instead, nothing changed.
+    """
+    try:
+        reason = _plugin_module("adapters.public_api.operations").busy_reason()
+    except ImportError:
+        reason = ""
+    if reason:
+        raise QGISBusy(reason)
+    return fn(*args, **kwargs)
+
+
 def _safe(callable_, default):
     """Call ``callable_()`` and return ``default`` on any exception.
 
@@ -92,6 +114,37 @@ def _safe(callable_, default):
         return callable_()
     except Exception:
         return default
+
+
+# What a REST client reads instead of an unexpected exception's text (paths of
+# the cache, SQL, module names); the operation logged it in the QGIS log.
+INTERNAL_ERROR = "unexpected error in QGIS: see the FilterMate log"
+
+
+def _unavailable(exc: ImportError) -> str:
+    logger.error("FilterMate operations not importable: %s", exc)
+    return "FilterMate operations unavailable: see the FilterMate log"
+
+
+def _client_messages(report):
+    """``(error, failed)`` of ``report`` for a client: unexpected exceptions replaced by INTERNAL_ERROR.
+
+    Validation messages (bad selection, layer not found, busy) are kept.
+    """
+    error = report.error or None
+    if error and report.details.get("internal_error"):
+        error = INTERNAL_ERROR
+    failed = dict(report.failed)
+    for label in report.details.get("internal_failures") or ():
+        if label in failed:
+            failed[label] = INTERNAL_ERROR
+    return error, failed
+
+
+def _report_busy(report) -> None:
+    """Raise :class:`QGISBusy` when ``report`` was refused because FilterMate is busy."""
+    if report.details.get("busy"):
+        raise QGISBusy(report.error)
 
 
 class QGISFilterMateAccessor:
@@ -107,9 +160,14 @@ class QGISFilterMateAccessor:
         # ... start uvicorn in a QThread, see #45 acceptance criteria.
 
     The ``plugin`` argument exposes the plugin singleton so the bridge
-    can reach :attr:`history_manager` and :attr:`favorites_manager` —
-    these aren't on the public API surface today (#13 EPIC scoped them
-    out), but the bridge is plugin-internal so reaching in is fine.
+    can reach ``history_manager`` and ``favorites_manager`` — these live
+    on its application object (``plugin.app``, a ``FilterMateApp``) and
+    aren't on the public API surface today (#13 EPIC scoped them out),
+    but the bridge is plugin-internal so reaching in is fine.
+
+    Every method that touches QGIS (project, layers, history, favorites)
+    runs its whole body on the Qt main thread: uvicorn calls the routes
+    from a pool of worker threads, concurrently.
     """
 
     def __init__(self, public_api, plugin):
@@ -124,12 +182,23 @@ class QGISFilterMateAccessor:
         self._last_applied_source: Optional[str] = None
         self._last_error: Optional[str] = None
 
+    def _app_attribute(self, name: str):
+        """``name`` of the plugin's application (``plugin.app``), or of the plugin itself."""
+        for owner in (self._plugin, getattr(self._plugin, "app", None)):
+            value = getattr(owner, name, None) if owner is not None else None
+            if value is not None:
+                return value
+        return None
+
     # ------------------------------------------------------------------
     # Layer enumeration
     # ------------------------------------------------------------------
 
     def list_layers(self) -> List[LayerSummary]:
         """Return all valid vector, raster and point cloud layers of the current QgsProject."""
+        return run_on_main_thread(self._list_layers_main_thread)
+
+    def _list_layers_main_thread(self) -> List[LayerSummary]:
         try:
             from qgis.core import QgsProject, QgsVectorLayer
         except ImportError:
@@ -137,7 +206,7 @@ class QGISFilterMateAccessor:
             return []
 
         project = QgsProject.instance()
-        active_filters = self.get_active_filters()
+        active_filters = self._active_filters_main_thread()
 
         out: List[LayerSummary] = []
         for layer in project.mapLayers().values():
@@ -153,7 +222,7 @@ class QGISFilterMateAccessor:
             crs_authid = _safe(crs_obj.authid, "") if crs_obj else ""
             if kind == "vector":
                 count = _safe(layer.featureCount, -1)
-                geometry = _GEOMETRY_TYPE_NAMES.get(_safe(layer.geometryType, -1), "Unknown")
+                geometry = _geometry_type_name(_safe(layer.geometryType, -1))
             elif kind == "point_cloud":
                 count = _safe(layer.pointCount, -1)
                 geometry = "PointCloud"
@@ -177,16 +246,19 @@ class QGISFilterMateAccessor:
             )
         return out
 
+    # ------------------------------------------------------------------
+    # FilterMate 5 operations — adapters.public_api.operations
+    # ------------------------------------------------------------------
+
     def cross_filter(self, source_layer: str, target_layers: List[str], predicates: List[str],
                      buffer: float = 0.0, coverage_min: float = 0.0, operator: Optional[str] = None,
                      selected_only: bool = True, raster_selection: Optional[Dict] = None,
                      point_cloud_criteria: Optional[Dict] = None,
                      filter_source: bool = False) -> Optional[CrossFilterResult]:
         """FilterMate 5 cross filter, run on the Qt main thread (it changes layers)."""
-        # Clipping a point cloud can take a while: wait longer than for a subset.
         return run_on_main_thread(self._cross_filter_main_thread, source_layer, list(target_layers), list(predicates),
                                   float(buffer), float(coverage_min), operator, bool(selected_only),
-                                  raster_selection, point_cloud_criteria, bool(filter_source), timeout=600.0)
+                                  raster_selection, point_cloud_criteria, bool(filter_source))
 
     def _cross_filter_main_thread(self, source_layer, target_layers, predicates, buffer, coverage_min,
                                   operator, selected_only, raster_selection=None, point_cloud_criteria=None,
@@ -196,20 +268,22 @@ class QGISFilterMateAccessor:
             operations = _plugin_module("adapters.public_api.operations")
             requests = _plugin_module("core.domain.api_requests")
         except ImportError as exc:
-            return CrossFilterResult(error=str(exc))
+            return CrossFilterResult(error=_unavailable(exc))
         project = QgsProject.instance()
-        sources = [l for l in project.mapLayersByName(source_layer) if _layer_kind(l) != "other"]
-        if not sources:
+        # Same resolution as the Python API and Processing: layer id, then name.
+        source = operations.resolve_layer(source_layer, project)
+        if source is None or _layer_kind(source) == "other":
             return None
         try:
             report = operations.cross_filter(
-                sources[0], list(target_layers), predicates=tuple(predicates) or ("Intersect",), buffer=buffer,
+                source, list(target_layers), predicates=tuple(predicates) or ("Intersect",), buffer=buffer,
                 coverage_min=coverage_min, operator=operator, selected_only=selected_only,
                 raster_selection=requests.raster_selection_from_dict(raster_selection),
                 point_cloud_criteria=requests.point_cloud_criteria_from_dict(point_cloud_criteria),
                 filter_source=filter_source, project=project)
         except ValueError as exc:
             return CrossFilterResult(error=str(exc))
+        _report_busy(report)
         result = self._cross_result(report)
         if not result.error:
             self._mark_applied(source_layer, "rest_api:cross")
@@ -217,16 +291,14 @@ class QGISFilterMateAccessor:
 
     @staticmethod
     def _cross_result(report) -> CrossFilterResult:
-        # REST contract (5.0 first cut): every target that was not filtered is in ``failed``.
-        failed = dict(report.failed)
-        for name in report.skipped:
-            failed.setdefault(name, "layer not found or not filterable")
-        return CrossFilterResult(filtered=report.done_names, failed=failed, error=report.error or None)
+        error, failed = _client_messages(report)
+        return CrossFilterResult(filtered=report.done_names, failed=failed, skipped=dict(report.skipped), error=error)
 
     @staticmethod
     def _operation_result(report) -> OperationResult:
-        return OperationResult(done=report.done_names, failed=dict(report.failed), skipped=dict(report.skipped),
-                               error=report.error or None, outputs=dict(report.outputs))
+        error, failed = _client_messages(report)
+        return OperationResult(done=report.done_names, failed=failed, skipped=dict(report.skipped),
+                               error=error, outputs=dict(report.outputs))
 
     def _mark_applied(self, layer: str, source: str) -> None:
         self._last_applied_at = datetime.now(timezone.utc).isoformat()
@@ -237,14 +309,14 @@ class QGISFilterMateAccessor:
                                  buffer: float = 0.0, coverage_min: float = 0.0,
                                  operator: Optional[str] = None) -> CrossFilterResult:
         return run_on_main_thread(self._geometry_main_thread, wkt, crs, list(target_layers), list(predicates),
-                                  float(buffer), float(coverage_min), operator, timeout=600.0)
+                                  float(buffer), float(coverage_min), operator)
 
     def _geometry_main_thread(self, wkt, crs, target_layers, predicates, buffer, coverage_min, operator):
         try:
             from qgis.core import QgsCoordinateReferenceSystem, QgsGeometry
             operations = _plugin_module("adapters.public_api.operations")
         except ImportError as exc:
-            return CrossFilterResult(error=str(exc))
+            return CrossFilterResult(error=_unavailable(exc))
         reference = QgsCoordinateReferenceSystem(crs)
         geometry = QgsGeometry.fromWkt(wkt)
         if not reference.isValid() or geometry.isNull():
@@ -252,6 +324,7 @@ class QGISFilterMateAccessor:
         report = operations.cross_filter_by_geometry(geometry, reference, target_layers,
                                                      predicates=tuple(predicates) or ("Intersect",), buffer=buffer,
                                                      coverage_min=coverage_min, operator=operator)
+        _report_busy(report)
         result = self._cross_result(report)
         if not result.error:
             self._mark_applied("geometry", "rest_api:geometry")
@@ -267,8 +340,13 @@ class QGISFilterMateAccessor:
             requests = _plugin_module("core.domain.api_requests")
             report = operations.filter_point_clouds(layers, requests.point_cloud_criteria_from_dict(criteria),
                                                     operator=operator)
-        except (ImportError, ValueError) as exc:
+        except ImportError as exc:
+            return OperationResult(error=_unavailable(exc))
+        except ValueError as exc:  # invalid criteria
             return OperationResult(error=str(exc))
+        _report_busy(report)
+        if report.done:
+            self._mark_applied(report.done_names[0], "rest_api:point_cloud")
         return self._operation_result(report)
 
     def clear_filters(self, layers: List[str]) -> OperationResult:
@@ -278,19 +356,22 @@ class QGISFilterMateAccessor:
         try:
             report = _plugin_module("adapters.public_api.operations").clear_filters(layers)
         except ImportError as exc:
-            return OperationResult(error=str(exc))
+            return OperationResult(error=_unavailable(exc))
+        _report_busy(report)
+        if report.done:
+            self._mark_applied(report.done_names[0], "rest_api:clear")
         return self._operation_result(report)
 
     def export_layers(self, layers: List[str], folder: str, vector_format: str, raster_format: str,
                       point_cloud_format: str, crs: Optional[str] = None) -> OperationResult:
         return run_on_main_thread(self._export_main_thread, list(layers), folder, vector_format, raster_format,
-                                  point_cloud_format, crs, timeout=1800.0)
+                                  point_cloud_format, crs)
 
     def _export_main_thread(self, layers, folder, vector_format, raster_format, point_cloud_format, crs):
         try:
             operations = _plugin_module("adapters.public_api.operations")
         except ImportError as exc:
-            return OperationResult(error=str(exc))
+            return OperationResult(error=_unavailable(exc))
         output_crs = None
         if crs:
             from qgis.core import QgsCoordinateReferenceSystem
@@ -299,14 +380,20 @@ class QGISFilterMateAccessor:
                 return OperationResult(error="invalid CRS")
         report = operations.export_layers(layers, folder, vector_format=vector_format, raster_format=raster_format,
                                           point_cloud_format=point_cloud_format, crs=output_crs)
+        _report_busy(report)
         return self._operation_result(report)
 
     def get_filter_state(self) -> List[FilteredLayer]:
+        # A busy main thread raises QGISBusy (503): never answered as "no filter".
+        return run_on_main_thread(self._filter_state_main_thread)
+
+    @staticmethod
+    def _filter_state_main_thread() -> List[FilteredLayer]:
         def _state():
             rows = _plugin_module("adapters.public_api.operations").filter_state()
             return [FilteredLayer(layer_id=row["id"], name=row["name"], layer_kind=row["kind"],
                                   subset=row["subset"], derived=row["derived"]) for row in rows]
-        return _safe(lambda: run_on_main_thread(_state), []) or []
+        return _safe(_state, []) or []
 
     # ------------------------------------------------------------------
     # Filter mutations — delegated to the PublicAPI
@@ -318,8 +405,10 @@ class QGISFilterMateAccessor:
         # thread-safe outside the Qt main thread. ``uvicorn`` runs us
         # on a worker, so we marshal the call through the main-thread
         # dispatcher; under the headless test harness this is a no-op
-        # inline call.
+        # inline call. Refused (QGISBusy) while a FilterMate operation or
+        # filter task runs: its own subsets would land over this one.
         ok = run_on_main_thread(
+            _unless_busy,
             self._public_api.apply_filter,
             layer_name=layer_name,
             filter_expr=expression,
@@ -335,6 +424,9 @@ class QGISFilterMateAccessor:
         return ok
 
     def get_active_filters(self) -> Dict[str, str]:
+        return run_on_main_thread(self._active_filters_main_thread)
+
+    def _active_filters_main_thread(self) -> Dict[str, str]:
         return _safe(self._public_api.get_active_filters, {}) or {}
 
     def get_filter_status(self) -> FilterStatus:
@@ -354,23 +446,30 @@ class QGISFilterMateAccessor:
     # ------------------------------------------------------------------
 
     def undo_filter(self) -> Optional[HistoryStep]:
-        return self._step_via_history(self._history_undo, direction="undo")
+        return self._step_via_history("undo")
 
     def redo_filter(self) -> Optional[HistoryStep]:
-        return self._step_via_history(self._history_redo, direction="redo")
+        return self._step_via_history("redo")
 
     # ------------------------------------------------------------------
     # Favorites — delegated to FavoritesService
     # ------------------------------------------------------------------
 
-    def list_favorites(self) -> List[Favorite]:
-        favorites_service = getattr(self._plugin, "favorites_manager", None)
+    def _favorites_service(self):
+        favorites_service = self._app_attribute("favorites_manager")
         if favorites_service is None:
             # P1-API-HARDEN: surface "not ready" distinctly from "no
             # favorites" so the router can answer 503 instead of [].
             raise FavoritesUnavailable(
-                "FavoritesService not mounted on plugin instance"
+                "FavoritesService not mounted on the plugin application"
             )
+        return favorites_service
+
+    def list_favorites(self) -> List[Favorite]:
+        return run_on_main_thread(self._list_favorites_main_thread)
+
+    def _list_favorites_main_thread(self) -> List[Favorite]:
+        favorites_service = self._favorites_service()
         try:
             entries = favorites_service.get_all_favorites() or []
         except FavoritesUnavailable:
@@ -385,11 +484,10 @@ class QGISFilterMateAccessor:
         return [self._favorite_from(entry) for entry in entries]
 
     def apply_favorite(self, favorite_id: str) -> Optional[HistoryStep]:
-        favorites_service = getattr(self._plugin, "favorites_manager", None)
-        if favorites_service is None:
-            raise FavoritesUnavailable(
-                "FavoritesService not mounted on plugin instance"
-            )
+        return run_on_main_thread(self._apply_favorite_main_thread, favorite_id)
+
+    def _apply_favorite_main_thread(self, favorite_id: str) -> Optional[HistoryStep]:
+        favorites_service = self._favorites_service()
         try:
             entry = favorites_service.get_favorite(favorite_id)
         except FavoritesUnavailable:
@@ -400,55 +498,45 @@ class QGISFilterMateAccessor:
             return None
         if entry is None:
             return None
-        layer_name = getattr(entry, "layer_name", "") or ""
-        expression = getattr(entry, "expression", "") or ""
-        spatial = getattr(entry, "spatial_config", None)
-        if isinstance(spatial, dict) and spatial.get("coverage_layers"):
-            # FilterMate 5: the favorite also clips raster / point cloud layers.
-            # Vector-only favorites keep the PublicAPI path (vector history, signals).
-            try:
-                operations = _plugin_module("adapters.public_api.operations")
-                report = run_on_main_thread(operations.apply_favorite, favorite_id, favorites_service, timeout=600.0)
-            except Exception:
-                return None
-            if report.error or not report.done:
-                return None
-            self._mark_applied(layer_name or report.done_names[0], f"favorite:{favorite_id}")
-            return HistoryStep(layer_name=layer_name or report.done_names[0], expression=expression)
-        if not layer_name or not expression:
+        try:
+            operations = _plugin_module("adapters.public_api.operations")
+        except ImportError:
             return None
-        ok = self.apply_filter(
-            layer_name=layer_name,
-            expression=expression,
-            source=f"favorite:{favorite_id}",
-        )
-        if not ok:
+        # Same replay as the dock's menu, the Python API and Processing: every
+        # subset of the favorite (remote layers too, found by signature, id
+        # then name), then its raster / point cloud clips.
+        report = operations.apply_favorite(favorite_id, favorites_service)
+        _report_busy(report)
+        if report.error or not report.done:
             return None
-        return HistoryStep(layer_name=layer_name, expression=expression)
+        layer_name = getattr(entry, "layer_name", "") or report.done_names[0]
+        self._mark_applied(layer_name, f"favorite:{favorite_id}")
+        return HistoryStep(layer_name=layer_name, expression=getattr(entry, "expression", "") or "")
 
     # ------------------------------------------------------------------
     # Internals
     # ------------------------------------------------------------------
 
-    def _history_service(self):
-        return getattr(self._plugin, "history_manager", None)
+    def _step_via_history(self, direction: str) -> Optional[HistoryStep]:
+        """Undo / redo one step of the HistoryService shared with the dock, on the main thread.
 
-    def _history_undo(self):
-        svc = self._history_service()
-        return svc.undo() if svc is not None and hasattr(svc, "undo") else None
+        The dock's vector filter history: neither ``apply_filter`` nor the
+        FilterMate 5 operations record anything in it.
+        """
+        return run_on_main_thread(_unless_busy, self._step_via_history_inline, direction)
 
-    def _history_redo(self):
-        svc = self._history_service()
-        return svc.redo() if svc is not None and hasattr(svc, "redo") else None
-
-    def _step_via_history(self, action, direction: str) -> Optional[HistoryStep]:
-        """Run ``action`` (HistoryService.undo/redo) and re-apply the resulting
+    def _step_via_history_inline(self, direction: str) -> Optional[HistoryStep]:
+        """Run HistoryService.undo/redo (main thread) and re-apply the resulting
         entry's previous filters back to QGIS layers.
 
-        Returns a :class:`HistoryStep` describing the layer most affected
-        by the operation, or ``None`` when the stack is empty.
+        The history is shared with the dock (its buttons, its change
+        callbacks): it is only ever touched on the main thread. Returns a
+        :class:`HistoryStep` describing the layer most affected by the
+        operation, or ``None`` when the stack is empty.
         """
-        entry = action()
+        svc = self._app_attribute("history_manager")
+        action = getattr(svc, direction, None) if svc is not None else None
+        entry = action() if action is not None else None
         if entry is None:
             return None
 
@@ -459,12 +547,7 @@ class QGISFilterMateAccessor:
             project = None
 
         previous_filters = getattr(entry, "previous_filters", ()) or ()
-
-        # P0-B (audit 2026-04-29): ``setSubsetString`` is not thread-safe
-        # outside the Qt main thread. Batch all subset writes into a
-        # single main-thread roundtrip rather than N round-trips.
-        target_layer_name, target_expression, target_is_clear = run_on_main_thread(
-            self._reapply_previous_filters_inline,
+        target_layer_name, target_expression, target_is_clear = self._reapply_previous_filters_inline(
             project,
             previous_filters,
         )
@@ -537,3 +620,11 @@ _GEOMETRY_TYPE_NAMES: Dict[int, str] = {
     3: "Unknown",
     4: "NoGeometry",
 }
+
+
+def _geometry_type_name(value) -> str:
+    """API name of a geometry type: an int (PyQt5 enum) or an enum with ``.value`` (Qgis.GeometryType, PyQt6)."""
+    try:
+        return _GEOMETRY_TYPE_NAMES.get(int(getattr(value, "value", value)), "Unknown")
+    except (TypeError, ValueError):
+        return "Unknown"
