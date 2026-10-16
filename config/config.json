@@ -14,6 +14,11 @@
       "description": "Auto-activate plugin when a project with vector layers is loaded: true (automatically open plugin), false (manual activation only)",
       "applies_to": "Plugin initialization behavior"
     },
+    "USER_IDENTITY": {
+      "value": "",
+      "description": "Identity used to stamp the 'owner' column on new favorites. Cascade fallback when empty: QgsSettings 'qgis/userName' → OS user. Set explicitly to stabilize identity across machines or when running as a shared OS user (e.g. a kiosk session).",
+      "applies_to": "Per-user scope on favorites (v5.1+)"
+    },
     "DOCKWIDGET": {
       "_display_name": "Interface",
       "FEEDBACK_LEVEL": {
@@ -65,19 +70,7 @@
           "sl",
           "tl",
           "am",
-          "uz",
-          "ko",
-          "ja",
-          "ar",
-          "th",
-          "uk",
-          "cs",
-          "ro",
-          "el",
-          "hu",
-          "bg",
-          "ms",
-          "ca"
+          "uz"
         ],
         "description": "Interface language: 'auto' (use QGIS locale), or force specific language",
         "available_translations": [
@@ -102,19 +95,7 @@
           "sl (Slovenščina)",
           "tl (Tagalog)",
           "am (አማርኛ)",
-          "uz (Oʻzbekcha)",
-          "ko (한국어)",
-          "ja (日本語)",
-          "ar (العربية)",
-          "th (ไทย)",
-          "uk (Українська)",
-          "cs (Čeština)",
-          "ro (Română)",
-          "el (Ελληνικά)",
-          "hu (Magyar)",
-          "bg (Български)",
-          "ms (Bahasa Melayu)",
-          "ca (Català)"
+          "uz (Oʻzbekcha)"
         ]
       },
       "UI_PROFILE": {
@@ -317,36 +298,39 @@
       "_display_name": "Performance",
       "DISCORD_INVITE": {
         "_hidden": true,
-        "value": "https://discord.gg/9DNbuVYQ"
+        "value": "https://discord.gg/9DNbuVYQ",
+        "description": "Discord community invite link"
       },
       "GITHUB_PAGE": {
         "_hidden": true,
-        "value": "https://imagodata.github.io/filter_mate/index.html"
+        "value": "https://imagodata.github.io/filter_mate/index.html",
+        "description": "Plugin documentation website URL"
       },
       "GITHUB_REPOSITORY": {
         "_hidden": true,
-        "value": "https://github.com/imagodata/filter_mate/"
+        "value": "https://github.com/imagodata/filter_mate/",
+        "description": "GitHub source code repository URL"
       },
       "QGIS_PLUGIN_REPOSITORY": {
         "_hidden": true,
-        "value": "https://plugins.qgis.org/plugins/filter_mate/"
+        "value": "https://plugins.qgis.org/plugins/filter_mate/",
+        "description": "QGIS official plugin repository page URL"
       },
       "APP_SQLITE_PATH": {
         "_hidden": true,
-        "value": ""
+        "value": "",
+        "description": "Directory path for SQLite database storage (auto-set to plugin config directory if empty)"
       },
       "FRESH_RELOAD_FLAG": {
         "_hidden": true,
-        "value": false
+        "value": false,
+        "description": "Force a fresh reload of the plugin on next startup (automatically reset to false after reload)"
       },
       "SMALL_DATASET_OPTIMIZATION": {
         "description": "For PostgreSQL layers with fewer features than threshold, use OGR memory backend for faster filtering (avoids network overhead)",
         "enabled": {
           "value": true,
-          "choices": [
-            true,
-            false
-          ],
+          "choices": [true, false],
           "description": "Enable/disable optimization"
         },
         "threshold": {
@@ -355,18 +339,12 @@
         },
         "method": {
           "value": "ogr_memory",
-          "choices": [
-            "ogr_memory",
-            "qgis_processing"
-          ],
+          "choices": ["ogr_memory", "qgis_processing"],
           "description": "Backend to use: 'ogr_memory' (fastest) or 'qgis_processing' (compatible)"
         },
         "prefer_native_for_postgresql_project": {
           "value": true,
-          "choices": [
-            true,
-            false
-          ],
+          "choices": [true, false],
           "description": "When all project layers are PostgreSQL, always use PostgreSQL backend even for small datasets (ensures consistent behavior and leverages server-side processing)"
         }
       },
@@ -374,18 +352,12 @@
         "description": "Intelligent automatic optimization based on layer characteristics (v2.7.0). Recommends and applies optimizations for distant layers, large datasets, and complex geometries.",
         "enabled": {
           "value": true,
-          "choices": [
-            true,
-            false
-          ],
+          "choices": [true, false],
           "description": "Enable/disable automatic optimization analysis"
         },
         "auto_centroid_for_distant": {
           "value": true,
-          "choices": [
-            true,
-            false
-          ],
+          "choices": [true, false],
           "description": "Automatically use ST_Centroid() for remote layers (WFS, ArcGIS) with many features. Reduces network data transfer by ~90%."
         },
         "centroid_threshold_distant": {
@@ -398,33 +370,24 @@
         },
         "auto_simplify_geometry": {
           "value": false,
-          "choices": [
-            true,
-            false
-          ],
+          "choices": [true, false],
           "description": "Automatically simplify complex geometries (LOSSY - may reduce precision). Disabled by default."
         },
         "auto_simplify_before_buffer": {
           "value": true,
-          "choices": [
-            true,
-            false
-          ],
+          "choices": [true, false],
           "description": "Automatically simplify geometries before buffer operations (positive or negative). Improves buffer performance without affecting spatial results."
         },
         "auto_simplify_after_buffer": {
           "value": true,
-          "choices": [
-            true,
-            false
-          ],
-          "description": "Automatically simplify the resulting polygon after buffer operations. Reduces vertex count without significantly affecting spatial accuracy. Particularly useful for complex polygons from negative/positive buffer sequences."
+          "choices": [true, false],
+          "description": "Automatically simplify the resulting polygon after buffer operations."
         },
         "buffer_simplify_after_tolerance": {
           "value": 0.5,
           "min": 0.1,
           "max": 50.0,
-          "description": "Simplification tolerance in meters for post-buffer simplification. Lower values preserve more detail, higher values create smoother polygons with fewer vertices."
+          "description": "Simplification tolerance in meters for post-buffer simplification."
         },
         "buffer_simplify_vertex_threshold": {
           "value": 50,
@@ -446,18 +409,12 @@
         },
         "auto_strategy_selection": {
           "value": true,
-          "choices": [
-            true,
-            false
-          ],
+          "choices": [true, false],
           "description": "Automatically select optimal filtering strategy (attribute-first, bbox-prefilter, progressive chunks)"
         },
         "show_optimization_hints": {
           "value": true,
-          "choices": [
-            true,
-            false
-          ],
+          "choices": [true, false],
           "description": "Show optimization hints in message bar when recommendations are available"
         }
       },
@@ -465,23 +422,17 @@
         "description": "Progressive/two-phase filtering for complex queries on large PostgreSQL datasets (v2.5.9 optimization)",
         "enabled": {
           "value": true,
-          "choices": [
-            true,
-            false
-          ],
+          "choices": [true, false],
           "description": "Enable/disable progressive filtering for complex expressions"
         },
         "two_phase_enabled": {
           "value": true,
-          "choices": [
-            true,
-            false
-          ],
+          "choices": [true, false],
           "description": "Enable two-phase filtering (bbox pre-filter + full predicate)"
         },
         "complexity_threshold": {
           "value": 100,
-          "description": "Minimum query complexity score to trigger two-phase filtering (higher = more selective)"
+          "description": "Minimum query complexity score to trigger two-phase filtering"
         },
         "lazy_cursor_threshold": {
           "value": 50000,
@@ -496,10 +447,7 @@
         "description": "Expression caching to avoid rebuilding identical queries (v2.5.9 enhancement)",
         "enabled": {
           "value": true,
-          "choices": [
-            true,
-            false
-          ],
+          "choices": [true, false],
           "description": "Enable/disable query expression caching"
         },
         "max_size": {
@@ -512,29 +460,20 @@
         },
         "cache_result_counts": {
           "value": true,
-          "choices": [
-            true,
-            false
-          ],
+          "choices": [true, false],
           "description": "Cache result counts to avoid expensive COUNT queries"
         },
         "cache_complexity_scores": {
           "value": true,
-          "choices": [
-            true,
-            false
-          ],
+          "choices": [true, false],
           "description": "Cache complexity scores to avoid re-analysis"
         }
       },
       "PARALLEL_FILTERING": {
-        "description": "Use parallel execution for filtering multiple layers simultaneously (Phase 4 optimization)",
+        "description": "Use parallel execution for filtering multiple layers simultaneously",
         "enabled": {
           "value": true,
-          "choices": [
-            true,
-            false
-          ],
+          "choices": [true, false],
           "description": "Enable/disable parallel layer filtering"
         },
         "min_layers": {
@@ -547,13 +486,10 @@
         }
       },
       "STREAMING_EXPORT": {
-        "description": "Use batch streaming for exporting large datasets to avoid memory issues (Phase 4 optimization)",
+        "description": "Use batch streaming for exporting large datasets to avoid memory issues",
         "enabled": {
           "value": true,
-          "choices": [
-            true,
-            false
-          ],
+          "choices": [true, false],
           "description": "Enable/disable streaming export"
         },
         "feature_threshold": {
@@ -564,6 +500,18 @@
           "value": 5000,
           "description": "Number of features per batch during streaming export"
         }
+      },
+      "GPKG_PRESERVE_GROUPS": {
+        "description": "Default behavior for preserving QGIS layer group structure in GPKG exports",
+        "value": false,
+        "choices": [true, false],
+        "applies_to": "GPKG export - embeds a QGIS project with layer tree groups into the GeoPackage file"
+      },
+      "KML_PRESERVE_GROUPS": {
+        "description": "Default behavior for merging KML exports into a single file with folder structure",
+        "value": false,
+        "choices": [true, false],
+        "applies_to": "KML export - merges all layers into a single KML file with Folder hierarchy"
       },
       "OPTIMIZATION_THRESHOLDS": {
         "description": "Thresholds for automatic optimizations (feature counts and sizes)",
@@ -601,7 +549,7 @@
           "value": 500,
           "min": 50,
           "max": 5000,
-          "description": "Maximum number of source FIDs to include inline in EXISTS query. Above this threshold, a temporary materialized view is created for better performance (v2.8.0 optimization for large source selections)"
+          "description": "Maximum number of source FIDs to include inline in EXISTS query."
         },
         "parallel_processing_threshold": {
           "value": 100000,
@@ -613,7 +561,7 @@
           "value": 100,
           "min": 10,
           "max": 1000,
-          "description": "Number of features between progress bar updates (higher = faster but less responsive)"
+          "description": "Number of features between progress bar updates"
         }
       },
       "HISTORY": {
@@ -624,10 +572,7 @@
         },
         "persist_history": {
           "value": true,
-          "choices": [
-            true,
-            false
-          ],
+          "choices": [true, false],
           "description": "Save filter history to project file"
         }
       },
@@ -635,10 +580,7 @@
         "description": "Geometry simplification settings for large WKT expressions",
         "enabled": {
           "value": true,
-          "choices": [
-            true,
-            false
-          ],
+          "choices": [true, false],
           "description": "Enable automatic geometry simplification for large WKT expressions"
         },
         "max_wkt_length": {
@@ -649,10 +591,7 @@
         },
         "preserve_topology": {
           "value": true,
-          "choices": [
-            true,
-            false
-          ],
+          "choices": [true, false],
           "description": "Preserve geometry topology during simplification (prevents self-intersections)"
         },
         "min_tolerance_meters": {
@@ -669,11 +608,180 @@
         },
         "show_simplification_warnings": {
           "value": true,
-          "choices": [
-            true,
-            false
-          ],
+          "choices": [true, false],
           "description": "Show warning messages when geometry is simplified"
+        }
+      },
+      "UI_RESPONSIVENESS": {
+        "description": "User interface responsiveness settings (debounce timers, refresh delays)",
+        "expression_debounce_ms": {
+          "value": 450,
+          "min": 100,
+          "max": 2000,
+          "description": "Delay in milliseconds before evaluating expression changes while typing"
+        },
+        "filter_debounce_ms": {
+          "value": 300,
+          "min": 50,
+          "max": 1000,
+          "description": "Delay in milliseconds before applying text search filter in list widgets"
+        },
+        "canvas_refresh_delay_simple_ms": {
+          "value": 500,
+          "min": 100,
+          "max": 5000,
+          "description": "Canvas refresh delay after simple filter operations in milliseconds"
+        },
+        "canvas_refresh_delay_complex_ms": {
+          "value": 1500,
+          "min": 500,
+          "max": 10000,
+          "description": "Canvas refresh delay after complex filter operations in milliseconds"
+        }
+      },
+      "FAVORITES": {
+        "description": "Favorites management settings",
+        "recent_favorites_limit": {
+          "value": 10,
+          "min": 3,
+          "max": 50,
+          "description": "Maximum number of recent favorites shown in the quick access menu"
+        }
+      },
+      "SPATIALITE": {
+        "description": "SpatiaLite backend processing settings",
+        "batch_size": {
+          "value": 5000,
+          "min": 500,
+          "max": 50000,
+          "description": "Number of features processed per batch in SpatiaLite queries"
+        },
+        "progress_interval": {
+          "value": 1000,
+          "min": 100,
+          "max": 10000,
+          "description": "Report progress every N features during SpatiaLite processing"
+        },
+        "query_timeout_seconds": {
+          "value": 120,
+          "min": 10,
+          "max": 600,
+          "description": "Maximum time in seconds for a single SpatiaLite query before cancellation"
+        }
+      },
+      "EXPRESSION_BUILDER": {
+        "description": "SQL expression construction limits",
+        "max_fids_per_in_clause": {
+          "value": 5000,
+          "min": 500,
+          "max": 50000,
+          "description": "Maximum number of feature IDs in a single SQL IN clause"
+        },
+        "absolute_fid_limit": {
+          "value": 50000,
+          "min": 5000,
+          "max": 500000,
+          "description": "Absolute maximum feature IDs for inline SQL expressions"
+        },
+        "max_inline_features": {
+          "value": 1000,
+          "min": 100,
+          "max": 10000,
+          "description": "Maximum features for inline IN clause before switching to subquery strategy"
+        },
+        "max_expression_length": {
+          "value": 10000,
+          "min": 1000,
+          "max": 100000,
+          "description": "Maximum expression string length in characters before switching to optimized strategy"
+        }
+      },
+      "QUERY_TIMEOUTS": {
+        "description": "Backend query timeout settings",
+        "postgresql_timeout_seconds": {
+          "value": 60.0,
+          "min": 5.0,
+          "max": 300.0,
+          "description": "Circuit breaker timeout for PostgreSQL operations in seconds"
+        },
+        "local_timeout_seconds": {
+          "value": 30.0,
+          "min": 5.0,
+          "max": 120.0,
+          "description": "Circuit breaker timeout for local (SpatiaLite/OGR) operations in seconds"
+        }
+      },
+      "EXPLORATION": {
+        "description": "Layer exploration and feature identification settings",
+        "point_buffer_distance_m": {
+          "value": 50,
+          "min": 1,
+          "max": 10000,
+          "description": "Buffer distance in meters applied to point features for zoom-to-feature"
+        },
+        "feature_picker_limit": {
+          "value": 1000,
+          "min": 100,
+          "max": 50000,
+          "description": "Maximum number of features loaded in the feature picker list widget"
+        },
+        "auto_zoom_on_filter": {
+          "value": true,
+          "description": "Auto-zoom on the union extent of filtered layers (source + cascade targets) after a filter or favorite is applied. Per-layer is_tracking still forces zoom on its own layer."
+        }
+      },
+      "POINT_CLOUD": {
+        "description": "Exploring and filtering of point cloud layers (LAS/LAZ/COPC): classification, elevation, intensity, height above a DTM. Requires QGIS 3.26 or newer",
+        "enabled": {
+          "value": true,
+          "choices": [true, false],
+          "description": "Show point cloud layers in the layer lists, as source (EXPLORING selection) and as target (clipped by the source geometry)"
+        }
+      },
+      "RASTER": {
+        "description": "Exploring and filtering of raster layers: pixel value, value range, classes, raster expression. Requires QGIS 3.22 or newer",
+        "enabled": {
+          "value": true,
+          "choices": [true, false],
+          "description": "Show raster layers in the layer lists, as source (EXPLORING selection) and as target (pixels outside the source geometry set to NoData)"
+        }
+      },
+      "CROSS_FILTER": {
+        "description": "Filtering between layers of different kinds (vector, raster, point cloud)",
+        "point_cloud_clip": {
+          "value": "exact",
+          "choices": ["exact", "bbox"],
+          "description": "How a point cloud target is clipped: exact (derived file, background task) or bbox (instant X/Y expression, approximate)"
+        },
+        "raster_selection_max_pixels": {
+          "value": 4000000,
+          "description": "Above this pixel count, a raster selection is vectorized on a coarser grid"
+        },
+        "point_cloud_footprint_resolution": {
+          "value": 2.0,
+          "description": "Cell size (map units) of the footprint of the points kept by a point cloud selection"
+        },
+        "cache_max_gb": {
+          "value": 5,
+          "description": "Maximum size of the FilterMate cache of derived rasters and point clouds"
+        },
+        "cache_dir": {
+          "value": "",
+          "description": "Folder of the FilterMate cache of derived rasters and point clouds (empty: in the QGIS profile)"
+        },
+        "raster_export_format": {
+          "value": "COG",
+          "choices": ["COG", "GTiff"],
+          "description": "File format of the exported rasters: Cloud Optimized GeoTIFF or plain GeoTIFF"
+        },
+        "point_cloud_export_format": {
+          "value": "LAZ",
+          "choices": ["LAZ", "LAS", "COPC", "GPKG", "CSV"],
+          "description": "File format of the exported point clouds"
+        },
+        "pdal_path": {
+          "value": "",
+          "description": "Path to the pdal executable (empty: detected next to QGIS or on PATH)"
         }
       }
     }
@@ -699,6 +807,10 @@
     "OPTIONS": {
       "LAYERS": {
         "LINK_LEGEND_LAYERS_AND_CURRENT_LAYER_FLAG": true,
+        "DEFAULT_IS_LINKING": {
+          "value": true,
+          "description": "Default state of the 'Link exploring widgets' button for all layers"
+        },
         "LAYER_PROPERTIES_COUNT": 35,
         "FEATURE_COUNT_LIMIT": 10000
       },
@@ -711,17 +823,6 @@
     "layers": []
   },
   "EXTENSIONS": {
-    "qfieldcloud": {
-      "enabled": {
-        "value": false,
-        "choices": [true, false],
-        "description": "Enable/disable the QFieldCloud extension. When disabled, the export button is hidden."
-      },
-      "dismiss_missing_deps_warning": {
-        "value": false,
-        "choices": [true, false],
-        "description": "Do not show the missing dependencies warning for this extension"
-      }
-    }
+    "_display_name": "Extensions"
   }
 }

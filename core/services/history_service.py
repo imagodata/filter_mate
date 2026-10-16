@@ -7,7 +7,7 @@ This is a PURE PYTHON module with NO QGIS dependencies,
 enabling true unit testing and clear separation of concerns.
 """
 from typing import Optional, List, Callable, Dict, Any
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from datetime import datetime
 from collections import deque
 import logging
@@ -572,6 +572,81 @@ class HistoryService:
         self._redo_stack.clear()
         self._notify_change()
         return count
+
+    def remove_history(self, layer_id: str) -> int:
+        """
+        Forget a layer removed from the project (idempotent).
+
+        Entries of this layer alone leave both stacks: the next Undo of another
+        layer would otherwise pop one and give that layer its empty previous
+        filter, and a Redo would give it this layer's expression. Entries of
+        several layers lose this one (layer id, previous filter, remote_layers
+        metadata) and stay for the others; when it was the source, the first
+        remaining layer becomes the source with the expression it received
+        (layer_ids[0] and expression, as push_global_state records a source).
+
+        Args:
+            layer_id: ID of the removed layer
+
+        Returns:
+            Number of entries removed or rewritten
+        """
+        self._layer_histories.pop(layer_id, None)
+
+        touched = 0
+        stacks = []
+        for stack in (self._undo_stack, self._redo_stack):
+            kept = []
+            for entry in stack:
+                if layer_id not in entry.layer_ids:
+                    kept.append(entry)
+                    continue
+                touched += 1
+                pruned = self._entry_without_layer(entry, layer_id)
+                if pruned is not None:
+                    kept.append(pruned)
+            stacks.append(deque(kept, maxlen=self._max_depth))
+
+        if touched:
+            self._undo_stack, self._redo_stack = stacks
+            self._notify_change()
+            logger.debug(f"History: removed layer {layer_id} from {touched} entries")
+        return touched
+
+    @staticmethod
+    def _entry_without_layer(entry: HistoryEntry, layer_id: str) -> Optional[HistoryEntry]:
+        """``entry`` without ``layer_id``, or None when no other layer is left."""
+        layer_ids = tuple(lid for lid in entry.layer_ids if lid != layer_id)
+        if not layer_ids:
+            return None
+
+        metadata = dict(entry.metadata)
+        remote_layers = metadata.get('remote_layers')
+        if isinstance(remote_layers, dict):
+            remote_layers = {lid: info for lid, info in remote_layers.items() if lid != layer_id}
+            metadata['remote_layers'] = remote_layers
+        else:
+            remote_layers = {}
+
+        expression = entry.expression
+        if entry.layer_ids[0] == layer_id:
+            # The source left: the first remaining layer takes its place. An entry
+            # without per-layer expressions keeps the one it applied to every layer.
+            # It stays in remote_layers too: a global redo or the previous expression
+            # of a later filter look a layer up there when it is not the current one.
+            source_info = remote_layers.get(layer_ids[0])
+            if isinstance(source_info, dict):
+                expression = source_info.get('expression', '')
+                if 'feature_count' in source_info:
+                    metadata['source_feature_count'] = source_info['feature_count']
+
+        return replace(
+            entry,
+            expression=expression,
+            layer_ids=layer_ids,
+            previous_filters=tuple(pf for pf in entry.previous_filters if pf[0] != layer_id),
+            metadata=tuple(sorted(metadata.items())),
+        )
 
     def set_on_change(
         self,

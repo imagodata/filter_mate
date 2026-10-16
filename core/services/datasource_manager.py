@@ -48,6 +48,12 @@ except ImportError:
     OGR_AVAILABLE = False
     logger.warning("GDAL/OGR not available - foreign data wrapper features disabled")
 
+# Raster and point cloud layers (FilterMate 5) are not vector datasources: their
+# files (.tif, .vrt, .jp2, .laz, .copc.laz...) match no OGR driver.
+COVERAGE_PROVIDER_TYPES = ('raster', 'pointcloud')
+# File-based vector datasources, the only ones a foreign data wrapper is made for
+FILE_DATASOURCE_TYPES = ('ogr', 'spatialite')
+
 
 class DatasourceManager(QObject):
     """
@@ -259,6 +265,8 @@ class DatasourceManager(QObject):
             return
 
         layer_source_type = layer_info["layer_provider_type"]
+        if layer_source_type in COVERAGE_PROVIDER_TYPES:
+            return
         if layer_source_type not in self.project_datasources:
             self.project_datasources[layer_source_type] = {}
 
@@ -312,6 +320,8 @@ class DatasourceManager(QObject):
             return
 
         layer_source_type = layer_info["layer_provider_type"]
+        if layer_source_type in COVERAGE_PROVIDER_TYPES:
+            return
         if layer_source_type not in self.project_datasources:
             self.project_datasources[layer_source_type] = {}
 
@@ -407,26 +417,28 @@ class DatasourceManager(QObject):
             config_data["CURRENT_PROJECT"]["OPTIONS"]["ACTIVE_POSTGRESQL"] = ""
             config_data["CURRENT_PROJECT"]["OPTIONS"]["IS_ACTIVE_POSTGRESQL"] = False
 
-        # Create foreign data wrappers for non-PostgreSQL datasources
-        for current_datasource in list(self.project_datasources.keys()):
-            if current_datasource != "postgresql":
-                for project_datasource in self.project_datasources[current_datasource].keys():
-                    datasources = self.project_datasources[current_datasource][project_datasource]
-                    for datasource in datasources:
-                        # Extract file extension safely
-                        datasource_path = datasource.split('|')[0]
-                        path_parts = datasource_path.split('.')
-                        # Check if there's an extension (at least 2 parts after split)
-                        datasource_ext = path_parts[-1] if len(path_parts) >= 2 else datasource_path
-                        datasource_type_name = [ogr_name for ogr_name in ogr_driver_list
-                                               if ogr_name.upper() == datasource_ext.upper()]
-
-                    if config_data["CURRENT_PROJECT"]["OPTIONS"]["IS_ACTIVE_POSTGRESQL"] is True:
-                        self.create_foreign_data_wrapper(
-                            project_datasource,
-                            os.path.basename(project_datasource),
-                            datasource_type_name[0]
-                        )
+        # Create foreign data wrappers for file-based vector datasources, one per file
+        if config_data["CURRENT_PROJECT"]["OPTIONS"]["IS_ACTIVE_POSTGRESQL"] is True:
+            for current_datasource in FILE_DATASOURCE_TYPES:
+                for project_datasource, datasources in self.project_datasources.get(current_datasource, {}).items():
+                    if not datasources:
+                        continue  # no layer reads this file any more
+                    # Extract file extension safely (every datasource of a file shares its path)
+                    datasource_path = datasources[-1].split('|')[0]
+                    path_parts = datasource_path.split('.')
+                    # Check if there's an extension (at least 2 parts after split)
+                    datasource_ext = path_parts[-1] if len(path_parts) >= 2 else datasource_path
+                    datasource_type_name = [ogr_name for ogr_name in ogr_driver_list
+                                            if ogr_name.upper() == datasource_ext.upper()]
+                    if not datasource_type_name:
+                        # No OGR driver named after the extension (.shp is 'ESRI Shapefile'): no
+                        # wrapper. Taking [0] raised IndexError, which ended the layer task completion.
+                        continue
+                    self.create_foreign_data_wrapper(
+                        project_datasource,
+                        os.path.basename(project_datasource),
+                        datasource_type_name[0]
+                    )
 
         # Update CONFIG_DATA
         self._set_config_data(config_data)

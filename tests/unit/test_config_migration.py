@@ -11,9 +11,11 @@ The functions are imported via a lightweight stand-alone path that does
 not require pulling in ``filter_mate.core.optimization.config_provider``
 (which transitively imports the QGIS PyQt wrappers).
 """
+import ast
 import importlib.util
 import json
 import sys
+import types
 from pathlib import Path
 
 import pytest
@@ -473,6 +475,100 @@ class TestDefaultConfigRasterAndCrossFilterSections:
     def test_sections_order(self, default_config):
         keys = list(default_config["APP"]["OPTIONS"].keys())
         assert keys[-3:] == ["POINT_CLOUD", "RASTER", "CROSS_FILTER"]
+
+    def test_options_read_by_the_code_are_declared(self, default_config):
+        """cache_dir and the export formats were read with a code default but absent from
+        the template, so missing from the Configuration tab."""
+        section = default_config["APP"]["OPTIONS"]["CROSS_FILTER"]
+        assert section["cache_dir"]["value"] == ""  # the cache module's default: the QGIS profile
+        assert section["raster_export_format"]["value"] == "COG"  # the dock's defaults
+        assert section["point_cloud_export_format"]["value"] == "LAZ"
+        exporters = ast.parse((PLUGIN_ROOT / "adapters" / "qgis" / "coverage_layers" / "exporters.py")
+                              .read_text(encoding="utf-8"))
+        formats = {node.targets[0].id: ast.literal_eval(node.value) for node in exporters.body
+                   if isinstance(node, ast.Assign) and getattr(node.targets[0], "id", "").endswith("_FORMATS")}
+        assert set(section["raster_export_format"]["choices"]) == set(formats["RASTER_FORMATS"])
+        assert set(section["point_cloud_export_format"]["choices"]) == set(formats["POINT_CLOUD_FORMATS"])
+
+
+class TestShippedConfigJson:
+    """config/config.json is read as a fallback (no copy in the QGIS profile, REST API):
+    it predated FilterMate 5 (no RASTER, POINT_CLOUD nor CROSS_FILTER section)."""
+
+    def test_it_mirrors_the_template(self, default_config):
+        with open(PLUGIN_ROOT / "config" / "config.json", "r", encoding="utf-8") as f:
+            assert json.load(f) == default_config
+
+
+class TestFallbackConfig:
+
+    def test_layer_kinds_are_on_as_in_the_template(self, config_helpers, default_config):
+        options = config_helpers.get_fallback_config()["APP"]["OPTIONS"]
+        for kind in ("RASTER", "POINT_CLOUD"):
+            assert options[kind]["enabled"]["value"] is True
+            assert options[kind]["enabled"]["value"] == default_config["APP"]["OPTIONS"][kind]["enabled"]["value"]
+
+
+class TestOptionReaders:
+
+    @pytest.mark.parametrize("value", [False, "false", "False", " FALSE ", "0", "no", "off", "", 0])
+    def test_bool_false(self, config_helpers, value):
+        assert config_helpers._get_option_bool({"value": value}, True) is False
+
+    @pytest.mark.parametrize("value", [True, "true", "True", "1", "yes", "on", 1])
+    def test_bool_true(self, config_helpers, value):
+        assert config_helpers._get_option_bool({"value": value}, False) is True
+
+    @pytest.mark.parametrize("option", [None, {"value": None}, {"value": "maybe"}])
+    def test_bool_default(self, config_helpers, option):
+        assert config_helpers._get_option_bool(option, True) is True
+        assert config_helpers._get_option_bool(option, False) is False
+
+    def test_bool_raw_value(self, config_helpers):
+        assert config_helpers._get_option_bool("false", True) is False
+
+    @pytest.mark.parametrize("value, expected", [
+        (4000000, 4000000), ("4000000", 4000000), (" 250 ", 250), (4e6, 4000000), ("4e6", 4000000),
+        ("2.5", 2), ("lots", 7), ("", 7), (None, 7), (True, 7), (float("nan"), 7), ("inf", 7), ([1], 7)])
+    def test_int(self, config_helpers, value, expected):
+        assert config_helpers._get_option_int({"value": value}, 7) == expected
+
+
+class TestActiveConfigPath:
+    """The plugin constructor read the forced language in config/config.json of the plugin
+    folder, while the Configuration tab saves it in the QGIS profile: lost on restart."""
+
+    def test_after_init_env_vars(self, config_helpers, monkeypatch):
+        monkeypatch.setitem(config_helpers.ENV_VARS, "CONFIG_JSON_PATH", "/custom/FilterMate/config.json")
+        assert config_helpers.get_config_json_path() == "/custom/FilterMate/config.json"
+
+    def test_before_init_env_vars(self, config_helpers, monkeypatch, tmp_path):
+        monkeypatch.delitem(config_helpers.ENV_VARS, "CONFIG_JSON_PATH", raising=False)
+        profile = str(tmp_path / "profiles" / "default") + "/"
+        monkeypatch.setattr(config_helpers, "QgsApplication",
+                            types.SimpleNamespace(qgisSettingsDirPath=lambda: profile))
+        expected = str(tmp_path / "profiles" / "default" / "FilterMate" / "config.json")
+        assert config_helpers.get_config_json_path() == expected
+
+
+class TestConfigFilesAreUtf8:
+    """config.default.json holds non-ASCII text (language names) and the Configuration tab
+    writes UTF-8: an open() without encoding (cp1252 on Windows) failed, the in-memory
+    fallback was used and then written over the user's config.json."""
+
+    @pytest.mark.parametrize("path", sorted(
+        str(p.relative_to(PLUGIN_ROOT)) for p in
+        list((PLUGIN_ROOT / "config").glob("*.py")) + list((PLUGIN_ROOT / "infrastructure" / "config").glob("*.py"))))
+    def test_every_open_names_its_encoding(self, path):
+        tree = ast.parse((PLUGIN_ROOT / path).read_text(encoding="utf-8"))
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Call) and getattr(node.func, "id", None) == "open":
+                mode = node.args[1].value if len(node.args) > 1 and isinstance(node.args[1], ast.Constant) else "r"
+                if "b" not in mode:
+                    assert any(k.arg == "encoding" for k in node.keywords), f"{path}:{node.lineno}"
+
+    def test_the_template_is_not_ascii(self):
+        assert any(byte > 127 for byte in CONFIG_DEFAULT_PATH.read_bytes())
 
 
 class TestMigrationOddShapes:

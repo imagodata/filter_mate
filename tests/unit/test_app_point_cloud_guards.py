@@ -95,6 +95,10 @@ class _PointCloud:
         return self._valid
 
 
+class _Basemap(_PointCloud):
+    """A raster of a filterable type whose pixels cannot be read (WMS / XYZ)."""
+
+
 @pytest.mark.unit
 class TestAppStaticGuards:
 
@@ -186,6 +190,7 @@ def _filter_usable_layers(filterable_types):
     namespace = _extract(
         ["_filter_usable_layers"],
         {"get_filterable_layer_types": lambda: filterable_types,
+         "is_non_analysis_raster": lambda layer: isinstance(layer, _Basemap),
          "is_layer_source_available": lambda layer: True,
          "POSTGRESQL_AVAILABLE": False, "logger": MagicMock()},
     )
@@ -204,6 +209,14 @@ class TestFilterUsableLayersFallback:
         kept = app._filter_usable_layers([vector, cloud, _Vector(valid=False), object()])
 
         assert kept == [vector, cloud]
+
+    def test_basemap_raster_is_dropped(self):
+        """With rasters on, a WMS / XYZ basemap is a filterable type: adding one started an
+        add_layers task and rebuilt the panel for a layer the task then skipped."""
+        app = _filter_usable_layers((_Vector, _PointCloud))
+        vector = _Vector()
+
+        assert app._filter_usable_layers([vector, _Basemap("osm")]) == [vector]
 
     def test_point_cloud_is_dropped_when_the_capability_is_vector_only(self):
         app = _filter_usable_layers((_Vector,))

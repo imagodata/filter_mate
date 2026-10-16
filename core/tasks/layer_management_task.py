@@ -229,6 +229,9 @@ class LayersManagementEngineTask(QgsTask):
 
         self.layers = None
         self.project_layers = None
+        # Ids this task registered (add_layers) or unregistered (remove_layers): the completion
+        # merges them into the current PROJECT_LAYERS, which may have changed meanwhile.
+        self.changed_layer_ids = []
         self.layer_properties = None
         self.layer_all_properties_flag = False
         self.outputs = {}
@@ -391,6 +394,8 @@ class LayersManagementEngineTask(QgsTask):
                 if isinstance(layer, filterable_types):
                     if layer.id() not in self.project_layers.keys():
                         result = self.add_project_layer(layer)
+                        if layer.id() in self.project_layers:
+                            self.changed_layer_ids.append(layer.id())
                         # FIX: Don't stop on False - just skip non-spatial layers
                         # add_project_layer returns False for non-spatial layers, which is OK
                         if self.isCanceled():
@@ -400,6 +405,10 @@ class LayersManagementEngineTask(QgsTask):
                 # kind switched off: no longer a filterable type). Until 5.0 no id ever matched the
                 # isinstance check, so removed layers stayed registered with their properties.
                 layer_id = layer if isinstance(layer, str) else (layer.id() if hasattr(layer, 'id') else None)
+                if layer_id is not None:
+                    # Even when absent from this task's copy: an add_layers running meanwhile may
+                    # register it, and the layer is leaving the project (or its kind turned off).
+                    self.changed_layer_ids.append(layer_id)
                 if layer_id in self.project_layers:
                     result = self.remove_project_layer(layer_id)
                     if self.isCanceled() or result is False:

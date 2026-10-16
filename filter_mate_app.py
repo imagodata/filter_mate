@@ -31,7 +31,8 @@ except ImportError:
     from qgis.core import QgsMapLayerProxyModel
 try:
     from .adapters.qgis.point_cloud_capability import (
-        get_filterable_layer_types, get_current_layer_combo_filters, exclude_non_analysis_rasters)
+        get_filterable_layer_types, get_current_layer_combo_filters, exclude_non_analysis_rasters,
+        is_non_analysis_raster)
 except ImportError:
     def get_filterable_layer_types():
         """Vector-only fallback when the point cloud capability module is unavailable."""
@@ -44,6 +45,10 @@ except ImportError:
     def exclude_non_analysis_rasters(_combo):
         """No provider exclusion when the point cloud capability module is unavailable."""
         return None
+
+    def is_non_analysis_raster(_layer):
+        """Vector only when the point cloud capability module is unavailable: no raster to exclude."""
+        return False
 from qgis.utils import iface
 
 import os.path
@@ -253,9 +258,10 @@ class FilterMateApp:
         """Return only valid vector layers with available sources."""
         service = self._get_layer_lifecycle_service()
         if service: return service.filter_usable_layers(layers, POSTGRESQL_AVAILABLE)
-        # Fallback: minimal validation
+        # Fallback: minimal validation (no basemap: a WMS / XYZ raster cannot be read)
         filterable_types = get_filterable_layer_types() or (QgsVectorLayer,)
-        return [layer_item for layer_item in layers if isinstance(layer_item, filterable_types) and layer_item.isValid() and is_layer_source_available(layer_item)]
+        return [layer_item for layer_item in layers if isinstance(layer_item, filterable_types)
+                and not is_non_analysis_raster(layer_item) and layer_item.isValid() and is_layer_source_available(layer_item)]
 
     def _on_layers_added(self, layers):
         """Signal handler for layersAdded: accumulate layers and process as single batch."""
@@ -1382,9 +1388,11 @@ class FilterMateApp:
             self.appTasks[task_name].begun.connect(self.on_remove_layer_task_begun)
 
         # Connect signals with Qt.ConnectionType.QueuedConnection
+        # The list itself is captured (filled by run() before resultingLayers is emitted):
+        # the task may already be deleted when the queued slot runs.
         self.appTasks[task_name].resultingLayers.connect(
-            lambda result_project_layers, tn=task_name:
-                self.layer_management_engine_task_completed(result_project_layers, tn),
+            lambda result_project_layers, tn=task_name, ids=self.appTasks[task_name].changed_layer_ids:
+                self.layer_management_engine_task_completed(result_project_layers, tn, ids),
             Qt.ConnectionType.QueuedConnection
         )
         self.appTasks[task_name].savingLayerVariable.connect(
@@ -2822,8 +2830,13 @@ class FilterMateApp:
                 self.favorites_manager.save_to_project_file(self.PROJECT)
                 logger.debug(f"Backed up {count} favorites to project file (.qgz)")
 
-    def layer_management_engine_task_completed(self, result_project_layers, task_name):
-        """Handle layer management task completion. Delegates to LayerTaskCompletionHandler."""
+    def layer_management_engine_task_completed(self, result_project_layers, task_name, changed_layer_ids=None):
+        """Handle layer management task completion. Delegates to LayerTaskCompletionHandler.
+
+        ``changed_layer_ids``: the ids the task registered or unregistered (see
+        LayersManagementEngineTask.changed_layer_ids); None replaces PROJECT_LAYERS
+        with the result, as before.
+        """
         if getattr(self, '_unloading', False) or getattr(self, '_removing_all_layers', False):
             return
         if self._layer_task_completion_handler is not None:
@@ -2837,7 +2850,8 @@ class FilterMateApp:
                 self._layer_task_completion_handler.handle_task_completion(
                     result_project_layers=result_project_layers,
                     task_name=task_name,
-                    loading_new_project=self._loading_new_project
+                    loading_new_project=self._loading_new_project,
+                    changed_layer_ids=changed_layer_ids
                 )
                 return
             except Exception as e:
