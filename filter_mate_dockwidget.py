@@ -6787,6 +6787,9 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
                     # Started when the vector export really starts (after the
                     # "preserve groups" dialog, which can still be canceled).
                     zip_path = exporting_props.get('ZIP_TO_EXPORT', '') if exporting_props.get('HAS_ZIP_TO_EXPORT') else ''
+                    # Next to a vector ZIP, in a subfolder that ZIP leaves out.
+                    from .core.export.batch_exporter import coverage_export_folder
+                    folder = coverage_export_folder(folder, zip_path, bool(vector_ids))
                     self._pending_coverage_export = (coverage_ids, folder or None, crs, zip_path or None)
                     # The vector export skips raster / point cloud layers itself
                     # (TaskParameterBuilder.build_export_params).

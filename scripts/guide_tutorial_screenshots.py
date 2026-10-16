@@ -2,17 +2,18 @@
 """Per-step screenshots of the guide tutorial (whole QGIS window at each step).
 
 Usage: qgis-bin.exe --nologo --lang en --code scripts/guide_tutorial_screenshots.py
-See scripts/guide_screenshots.py for the launch details; adjust OUT and GPKG.
+See scripts/guide_screenshots.py for the launch details; set FM_GUIDE_OUT and FM_GUIDE_GPKG.
 """
 import os, traceback
-from qgis.PyQt.QtCore import QTimer, Qt
+from qgis.PyQt.QtCore import QSettings, QTimer, Qt
 from qgis.PyQt.QtWidgets import QDockWidget
 from qgis.core import QgsApplication, QgsProject, QgsVectorLayer, QgsRectangle
 from qgis.utils import iface, plugins
 
-OUT = r'C:\Users\Simon\AppData\Local\Temp\fm_shots\tuto'
+OUT = os.environ.get('FM_GUIDE_OUT') or os.path.join(os.environ.get('TEMP', '/tmp'), 'fm_shots')
+os.makedirs(OUT, exist_ok=True)
 LOG = os.path.join(OUT, 'tuto.log')
-GPKG = r'C:\Users\Simon\Documents\31.gpkg'
+GPKG = os.environ.get('FM_GUIDE_GPKG') or r'C:\Users\Simon\Documents\31.gpkg'
 ROAD_FID = 247881
 STATE = {}
 
@@ -20,6 +21,7 @@ def log(m):
     open(LOG, 'a', encoding='utf-8').write(str(m) + '\n')
 
 def save_window(name):
+    iface.messageBar().clearWidgets()  # first-run notices of a throwaway profile
     pm = iface.mainWindow().grab().scaledToWidth(1600, Qt.TransformationMode.SmoothTransformation)
     log(f'{name} {pm.width()}x{pm.height()} ok={pm.save(os.path.join(OUT, name + ".png"), "PNG")}')
 
@@ -46,6 +48,8 @@ def set_tutorial_extent():
     iface.mapCanvas().refresh()
 
 def s_setup():
+    QSettings().setValue('FilterMate/discord_welcome_dismissed', True)  # modal dialogs would block the run
+    QSettings().setValue('FilterMate/whats_new_seen', 99)
     mw = iface.mainWindow()
     mw.showNormal(); mw.resize(1760, 1040)
     for name in ['commune', 'cours_d_eau', 'haie', 'troncon_de_route', 'batiment']:
@@ -56,6 +60,9 @@ def s_setup():
             d.hide()
 
 def s_open():
+    import qgis.utils
+    if 'filter_mate' not in plugins:  # throwaway profile: the plugin is found but not enabled
+        qgis.utils.loadPlugin('filter_mate') and qgis.utils.startPlugin('filter_mate')
     plugins['filter_mate'].run()
 
 def s_step1():
@@ -65,7 +72,7 @@ def s_step1():
     iface.setActiveLayer(layer('troncon_de_route'))
 
 def s_grab1():
-    save_window('tuto-01-source-layer')
+    save_window('tuto-01')
 
 def s_step2():
     d = dock()
@@ -76,7 +83,7 @@ def s_step2_extent():
     set_tutorial_extent()
 
 def s_grab2():
-    save_window('tuto-02-pick-road')
+    save_window('tuto-02')
 
 def s_step3():
     d = dock()
@@ -86,7 +93,7 @@ def s_step3():
     d.checkableComboBoxLayer_filtering_layers_to_filter.checkedItemsChangedEvent()
 
 def s_grab3():
-    save_window('tuto-03-target-layers')
+    save_window('tuto-03')
 
 def s_step4():
     d = dock()
@@ -94,7 +101,7 @@ def s_step4():
     check_combo_items(d.comboBox_filtering_geometric_predicates, ['intersect'])
 
 def s_grab4():
-    save_window('tuto-04-predicate')
+    save_window('tuto-04')
 
 def s_step5():
     d = dock()
@@ -102,7 +109,7 @@ def s_step5():
     d.mQgsDoubleSpinBox_filtering_buffer_value.setValue(50)
 
 def s_grab5():
-    save_window('tuto-05-buffer')
+    save_window('tuto-05')
 
 def s_step6():
     dock().pushButton_action_filter.click()
@@ -113,7 +120,7 @@ def s_step6_extent():
         log(f'{name} subset_len={len(layer(name).subsetString())}')
 
 def s_grab6():
-    save_window('tuto-06-result')
+    save_window('tuto-06')
 
 def s_quit():
     QgsProject.instance().setDirty(False)

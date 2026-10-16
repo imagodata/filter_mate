@@ -1,233 +1,122 @@
 # ![FilterMate](https://github.com/imagodata/filter_mate/blob/main/icon.png?raw=true) FilterMate
 
-**Version 5.0.0** | QGIS Plugin | QGIS 3.22 → 4.x · Qt5 / Qt6
+**Explore, filter and export vector, raster and LiDAR point cloud layers in QGIS, from one panel.**
 
-> 🚀 Explore, filter & export vector, raster and LiDAR point cloud data with lightning-fast performance on ANY data source.
-
+[![QGIS Plugin](https://img.shields.io/badge/QGIS%20plugin-5.0.0-589632?logo=qgis&logoColor=white)](https://plugins.qgis.org/plugins/filter_mate)
+[![QGIS 3.22 → 4.x](https://img.shields.io/badge/QGIS-3.22%20%E2%86%92%204.x%20%C2%B7%20Qt5%20%2F%20Qt6-589632)](https://plugins.qgis.org/plugins/filter_mate)
 [![Tests](https://github.com/imagodata/filter_mate/actions/workflows/test.yml/badge.svg)](https://github.com/imagodata/filter_mate/actions/workflows/test.yml)
-[![Documentation](https://img.shields.io/badge/docs-website-blue)](https://imagodata.github.io/filter_mate)
-[![User Guide](https://img.shields.io/badge/guide-EN%20%7C%20FR-blueviolet)](https://imagodata.github.io/filter_mate/guide.html)
-[![QGIS Plugin](https://img.shields.io/badge/QGIS-Plugin-green)](https://plugins.qgis.org/plugins/filter_mate)
-[![QGIS 4 / Qt6](https://img.shields.io/badge/QGIS%204%20%2F%20Qt6-supported-brightgreen)](CHANGELOG.md#500---2026-10-15)
 [![QGIS headless](https://github.com/imagodata/filter_mate/actions/workflows/qgis-headless.yml/badge.svg)](https://github.com/imagodata/filter_mate/actions/workflows/qgis-headless.yml)
-[![GitHub](https://img.shields.io/badge/GitHub-repo-black)](https://github.com/imagodata/filter_mate)
-[![Issues](https://img.shields.io/badge/issues-report-red)](https://github.com/imagodata/filter_mate/issues)
+[![Website](https://img.shields.io/badge/docs-website-16232b)](https://imagodata.github.io/filter_mate)
+[![License: GPL v3](https://img.shields.io/badge/license-GPLv3-blue)](LICENSE)
 
-**FilterMate 5** filters raster and LiDAR point cloud layers as well as vector layers. EXPLORING selects on the current layer whatever its kind, FILTERING relates that selection to the layers to filter with the usual predicates and buffer (vector, raster and point cloud, in every direction), EXPORTING writes each kind. Every release is tested in CI on QGIS 3.22, 3.28, 3.34, 3.44 and 4.2, through Processing and through the panel itself.
+Pick a layer, select what matters on it, and FilterMate filters every other layer of the project by its relation to
+that selection: buildings within 50 m of a road, parcels on a gentle slope, LiDAR points under the buildings, a DTM
+clipped to a commune. The filters stay on the project layers (no copies), can be undone, saved as favorites, exported,
+and replayed from Processing or a script.
 
-📖 **New to FilterMate?** Follow the step-by-step tutorial: [User Guide (English)](https://imagodata.github.io/filter_mate/guide.html) · [Guide utilisateur (français)](https://imagodata.github.io/filter_mate/guide.fr.html)
+<p align="center">
+  <img src="website/img/guide/fm5_raster_exploring.png" alt="FilterMate panel with a raster layer: band, value range and histogram, then the layers to filter" width="300">
+  &nbsp;
+  <img src="website/img/guide/fm5_pointcloud_exploring.png" alt="FilterMate panel with a LiDAR point cloud: classes and attribute ranges" width="300">
+</p>
+<p align="center"><em>The panel follows the current layer: a raster on the left, a LiDAR point cloud on the right.</em></p>
 
----
-
-## ✨ Features
-
-| Feature | Description |
-|---------|-------------|
-| 🔍 **Smart Search** | Intuitive entity search across all layer types |
-| 📐 **Geometric Filtering** | Spatial predicates with buffer support |
-| ⭐ **Filter Favorites** | Save and reuse filter configurations |
-| 🤝 **Favorites Sharing** | Publish favorites to git repos with QGIS authcfg credentials |
-| 🌐 **REST API** | Drive FilterMate from external tools (X-API-Key auth) |
-| 📝 **Undo/Redo** | Complete filter history |
-| 🌍 **34 Languages** | Full internationalization |
-| 🎨 **Dark Mode** | Automatic theme detection |
-| 📦 **GPKG Project Export** | Embedded QGIS project with group hierarchy, styles & CRS |
-| 🚀 **Multi-Backend** | PostgreSQL, Spatialite, OGR |
-| 🏔️ **Rasters** | Band, pixel picker, value range with histogram and live preview, classes of paletted rasters, raster expression; raster targets are clipped (VRT) with their id and style kept |
-| ☁️ **LiDAR point clouds** | LAS / LAZ / COPC / EPT / VPC: ASPRS and LiDAR HD classes with presets, Z / intensity / return ranges, chained attribute conditions, height above a DTM (PDAL), the same criteria on every tile of a dataset |
-| 🔀 **Cross filters** | Any source kind → any target kind (9 combinations): routes near buildings, parcels in an elevation range, LiDAR points under buildings, DTM clipped to a commune; minimum coverage and Disjoint |
-| 💾 **Export of every kind** | Vector formats as before, GeoTIFF / COG for rasters, LAZ / LAS / COPC / GPKG / CSV for point clouds |
-| 🧰 **Processing Toolbox** | Cross filters from vector, raster, point cloud or extent sources, point cloud criteria, favorites and export of filtered layers — chainable in models, with four ready-made models and `qgis_process` support ([docs/AUTOMATION.md](docs/AUTOMATION.md)) |
-
-### 🆕 What's new in 5.0
-
-- **Raster and LiDAR point cloud layers** are first-class: choose one as the current layer and EXPLORING shows its own tools (value range and histogram, pixel picker, classes, expression for a raster; classes, ranges, attribute conditions and height above a DTM for a point cloud). The selection becomes a source geometry for FILTERING.
-- **Targets of every kind**: vector targets keep the features that satisfy the predicates (with an optional minimum coverage), raster targets keep the pixels inside or outside the source geometry, point cloud targets keep the points. Clipped layers keep their id, style and place; Unfilter, Undo / Redo and plugin unload put the original source back, and project files are always saved with the original source.
-- **Export** of filtered rasters (GeoTIFF, COG) and point clouds (LAZ, LAS, COPC, GPKG, CSV), alone or with vector layers.
-- **Automation**: seven Processing algorithms and four ready-made models, `qgis_process`, Python and REST APIs ([docs/AUTOMATION.md](docs/AUTOMATION.md)).
-- **Options**: raster and point cloud support are on by default; switch them off or on in the Configuration tab and the layer lists follow at once.
-- **Compatibility, tested**: a CI job loads FilterMate in the official QGIS Docker images (3.22 to nightly) and drives the panel with its GUI. It found and fixed a QGIS crash when the panel opened on QGIS 3.22–3.34, a possible crash when a layer was removed, the plugin not loading before QGIS 3.34.2, rasters not clipped with GDAL older than 3.9, and point clouds with PDAL older than 2.4 (the QGIS exporter is used instead).
-
-See the [5.0.0 changelog](CHANGELOG.md#500---2026-10-15) and the [user guide](https://imagodata.github.io/filter_mate/guide.html) for details.
-
-### What's new in 4.9.2
-
-- **GeoPackage layer empty after a second filter**: a layer filtered as a target (R-tree prefilter) and then used as the source with an attribute expression showed 0 features. The subset combiners dropped one closing parenthesis and the SQL was invalid without any error, since OGR accepts the subset string. Verified on the BD TOPO 31 GeoPackage.
-- **Combine option off means replace**: the new source filter replaces the previous subset instead of being ANDed to it, as the target layers already did.
-
-See the [4.9.2 changelog](CHANGELOG.md#492---2026-09-14) for details.
-
-### What's new in 4.9.1
-
-- **PostgreSQL, selections of 100 000 features or more**: the filter was refused on the first click and accepted on the second (the materialized-view path called a facade method that does not exist).
-- **Project switch with the panel open**: no more `RuntimeError: wrapped C/C++ object of type QgsVectorLayer has been deleted` when the previous layer is gone (exploring and filtering controllers).
-- **Plugin reload then project close**: the panel is removed and deleted on unload, so a feature-picker gather can no longer outlive its layer (QGIS access violation in `QgsFeaturePickerModelBase::endUpdate`).
-- `⏱ layer_change_validate` / `⏱ layer_change_reset` timing lines in `filtermate.log`.
-
-See the [4.9.1 changelog](CHANGELOG.md#491---2026-09-14) for details.
-
-### What's new in 4.9.0
-
-- **Project switch with the panel open**: the panel follows the new project (a dead weak reference on the deferred `add_layers`, a never-drained orchestrator queue, `clear()` on the layer combo and bare `disconnect()` calls on QGIS signals were each hiding the next).
-- **FilterMate database**: one project row per project (the save no longer renames or empties the row with the next / closed project's name) and duplicate favorites removed.
-- **PostgreSQL feature list**: no server-side ORDER BY (QGIS fetched and sorted the whole table before the limit: 13 s → 30 ms on 370 000 rows) and population deferred while the canvas renders (no 17 s freeze at project open); one population per layer change.
-- **Panel**: type to find a layer in the current-layer combo, busy cursor and pressed button during a task, plain-language error messages, accessible names and tooltips on icon buttons, HiDPI sizes.
-- **Under the hood**: entry-module and app logging reaches `filtermate.log`, stored geometry column verified once, zip without translation sources and internal docs (5.8 → 5.0 MB), flake8 in CI, AST guards (Qt6 enums, `clear()` on map layer combos, bare `disconnect()` on QGIS signals).
-
-See the [4.9.0 changelog](CHANGELOG.md#490---2026-09-14) for details.
-
-### What's new in 4.8.10
-
-- **PostgreSQL buffer filters**: `ST_Intersects(target, ST_Buffer(source, d))` is replaced by `ST_DWithin(target, source, d)` for intersects with a positive round buffer, and every EXISTS is preceded by a bbox test of the target against the envelope of the selected source rows, served by the target's GiST index. A roads + 20 m buffer cascade that never finished now takes 25 s for 16 layers (zone_de_vegetation 322 s to 3 s). The source-selection materialized view is created with the right index columns and committed, and the corrupted-subset cleaner accepts the new expressions.
-- **Project switch**: with `APP.AUTO_ACTIVATE` off (the default) the open panel never reloaded on `projectRead`; it now reloads the new project's layers, source layer and favorites.
-- **GeoPackage / Spatialite buffers**: the static buffer is applied once in QGIS and simplified with a tolerance bounded by the buffer; no more convex hull fallback (a 20 m buffer around 7 000 road segments returned everything inside the hull). The source read in SUBSET mode is retried when the attribute-less request comes back empty.
-- **OGR**: the buffered source is computed once per task instead of once per target layer, and the primary keys of the selected features are fetched in one request.
-- **Repair**: 48 SQL templates in 16 modules had lost their `f` prefix since the 2026-02-10 clean-up (PostgreSQL materialized view, subset history, Spatialite temp tables, progressive strategies); restored, with a test that fails the build if it happens again.
-- Exploring: identical feature-list populations deduplicated, single-selection picker bounded to `feature_picker_limit`, `⏱ picker_populate` and `⏱ layer_change_*` timing lines; the per-layer expression trace is DEBUG.
-
-See the [4.8.10 changelog](CHANGELOG.md#4810---2026-09-13) for details.
-
-### What's new in 4.8.9
-
-- **GeoPackage cascades use the spatial index**: the Spatialite expression starts with the R-tree candidate clause GDAL uses for its own spatial filter. Filtering 37 BD TOPO layers by the commune of Toulouse took 371 s; it now takes 1.6 to 3 s. No second full scan after a filter (`reload()` removed on PostgreSQL/OGR).
-- **PostgreSQL with the centroid option keeps its GiST index**: `"t"."geom" && source` is tested before `ST_Intersects(ST_PointOnSurface("t"."geom"), source)`. A five-commune cascade went from 49.6 s to under 4 s, and the worker no longer counts each target twice.
-- **Connection and rendering**: psycopg2 tries an IPv4 `hostaddr` with `gssencmode=disable` first (a 21 s stall on `localhost` resolving to IPv6 first), the canvas is frozen for the whole task and redrawn once, no auto-zoom after unfilter/reset, no fixed pauses between layers of the same GeoPackage.
-- **Fix**: a filter launched with no target layer no longer fails.
-- More `⏱` timing lines in `filtermate.log` (`pg_layer_connect`, `apply_subsets`, `apply_subset_layer`, `layer_filter`, `cascade_filter`, `set_subset`).
-
-See the [4.8.9 changelog](CHANGELOG.md#489---2026-09-12) for details.
-
-### What's new in 4.8.8
-
-- **No more freezes on large layers**: the multiple-selection list loads at most `feature_picker_limit` rows (default 1000, sorted). When truncated, the text filter searches the whole layer, "Select All" loads the full list and canvas selections beyond the loaded rows are fetched by identifier. A click on a row is one indexed lookup instead of a full-layer scan.
-- **Faster project load**: layer variables are applied per layer in one batched write instead of 42 gated writes per layer; unchanged values are skipped; display-field detection is memoised.
-- **Filter engine**: GEOS cascaded union replaces the quadratic `combine()` loop, Spatialite source features load without attributes, interruptible SQLite queries wake up as soon as the worker finishes.
-- **Hygiene**: stale unsaved projects are purged from the FilterMate database, INFO log level by default (`FILTERMATE_LOG_LEVEL=DEBUG` for verbose output), and three timing lines (`⏱ project_open`, `⏱ layer_change`, `⏱ task_filter`) in `filtermate.log` to compare releases.
-
-See the [4.8.8 changelog](CHANGELOG.md#488---2026-09-12) for details.
-
-### What's new in 4.8.7
-
-- **Consistent panels**: Exploring and Filtering share input dimensions, button-bar styles and checkboxes across dark, light and gray themes. Gutters match the panel background, with more space below Exploring titles.
-- **Readable configuration**: white labels and values on dark backgrounds, including custom configuration cells.
-- **Theme-change fix**: remove the obsolete `IconManager.set_theme()` call that raised an error on QGIS palette changes.
-- **Project shutdown**: cancel pending layer additions and avoid repeated per-layer cleanup when removing all layers or unloading the plugin.
-
-See the [4.8.7 changelog](CHANGELOG.md#487---2026-09-09) for details.
-
-### What's new in 4.8.6
-
-- **QGIS themes**: follow native colors in Default, Night Mapping and Blend of Gray. Existing `default` settings now follow QGIS; choose `light` or `dark` to force an appearance.
-- **Readable icons**: invert PNG artwork in dark mode and refresh icons after startup and subsequent changes, including tabs and centroid controls.
-- **Filtering alignment**: match the upper and lower icon-rail widths and expand the second layer row like the first. All buttons and their dimensions are preserved.
-- **Compatibility**: retain the Qt5/Qt6 checkbox and mouse-event fixes. The 37 targeted theme/configuration tests pass under both bindings; see [validation details](docs/UI_UX_QGIS4.md).
-
-### What's new in 4.8.4
-
-- **Checkbox rendering**: correct the QStyle primitive name used by the custom delegate.
-- **Feature-list clicks**: support both Qt5 `pos()` and Qt6 `position()`.
-- **Tests**: 1499 passed, 1 skipped (Python 3.12).
-
-### What's new in 4.8.3
-
-- **Config log cleanup**: the "Schema file not found" message logged on every config reload (the schema was intentionally removed as unused in an earlier release) is now `Info` instead of `Warning`. Also closed out 2 live-testing reports as confirmed non-bugs: the `QGIS3`-named settings path is QGIS 4.2's own behavior, and a 33%-stuck "Adding layers" dialog turned out to be QGIS's own project loader, not FilterMate.
-- **Tests**: 1493 ✅.
-
-### What's new in 4.8.2
-
-- 🚑 **Second QGIS 4.x hotfix**: v4.8.1's dockwidget fix still crashed (`DockWidgetFeature has no attribute 'AllDockWidgetFeatures'`) — that convenience constant was deprecated in Qt 5.13 and is fully removed in Qt6, not just moved into a nested enum. Now ORs the 3 individual flags it used to stand for.
-- **Tests**: 1493 ✅.
-
-### What's new in 4.8.1
-
-- 🚑 **Critical QGIS 4.x fix**: the dockwidget could fail to load entirely on QGIS 4.x — PyQt6's UI loader can't resolve the `.ui` file's dock-widget `features` flag, so plugin startup crashed outright. Now set programmatically instead. Also fixed the new Processing Toolbox algorithm crashing on open (`BatchFilterAlgorithm.tr()` was missing — `QgsProcessingAlgorithm` never provides it). Found via real-world QGIS 4.2/Windows testing right after v4.8.0.
-- **Tests**: 1493 ✅.
-
-### What's new in 4.8.0
-
-- 🎉 **Full QGIS 4.2 / Qt6 support**: closed out every remaining PyQt5→PyQt6 gap found by three sweeps across the codebase — `QgsField.type()` field-detection migrated to `QMetaType.Type`, `QShortcut` moved back to `QtGui` (Qt6 relocated it there along with `QAction`/`QActionGroup`/`QFileSystemModel`/`QUndoCommand`/`QUndoGroup`/`QUndoStack`, which was breaking dockwidget keyboard shortcuts and the JSON config search widget at load time), and the last flat PyQt5-style enum accesses qualified to their scoped form. Two new AST-based static regression guards keep these bug classes from resurfacing.
-- **New — Processing Toolbox**: FilterMate algorithms are now registered via a `QgsProcessingProvider`. First algorithm, **"Filtrer plusieurs couches (batch)"**, applies one filter expression to multiple vector layers in a single run — usable from Processing models and batch processing.
-- **Tests**: 1486 ✅ (7 pre-existing, unrelated export-pipeline failures tracked separately).
+**Website and user guide:** [imagodata.github.io/filter_mate](https://imagodata.github.io/filter_mate) ·
+[User guide](https://imagodata.github.io/filter_mate/guide.html) ·
+[Guide utilisateur](https://imagodata.github.io/filter_mate/guide.fr.html) ·
+[Use cases](https://imagodata.github.io/filter_mate/stories.html)
 
 ---
 
-## 📦 Installation
+## How it works
 
-### From QGIS Plugin Repository (Recommended)
+The panel has four sections, used top to bottom.
 
-1. QGIS → `Plugins` → `Manage and Install Plugins`
-2. Search "FilterMate" → `Install Plugin`
-
-### Manual Installation
-
-Download from [GitHub Releases](https://github.com/imagodata/filter_mate/releases) and extract to:
-
-| OS | Path |
+| Section | What you do there |
 |---|---|
-| **Windows** | `%APPDATA%\QGIS\QGIS3\profiles\default\python\plugins\` |
-| **Linux** | `~/.local/share/QGIS/QGIS3/profiles/default/python/plugins/` |
-| **macOS** | `~/Library/Application Support/QGIS/QGIS3/profiles/default/python/plugins/` |
+| **EXPLORING** | Select on the current layer. Vector: one feature, several, or an expression. Raster: a band, a pixel value (picked on the map), a value range on a live histogram, classes of a paletted raster, a raster calculator expression. Point cloud: ASPRS / LiDAR HD classes, Z, intensity and return ranges, chained attribute conditions, height above a DTM. |
+| **FILTERING** | Choose the layers to filter and how they relate to the selection: geometric predicates (intersects, within, disjoint…), a buffer, AND / OR with existing filters, a minimum coverage for polygons. |
+| **EXPORTING** | Write the filtered layers as they are: vector formats, GeoTIFF / COG for rasters, LAZ / LAS / COPC / GPKG / CSV for point clouds, or a GeoPackage with an embedded QGIS project. |
+| **CONFIGURATION** | Backends, theme, layer kinds, cache and other options, from the panel. |
 
-### Optional: PostgreSQL Support
+Every kind of layer can be the source or a target:
 
-```bash
-pip install psycopg2-binary
+| Source ↓ / Target → | Vector | Raster | Point cloud |
+|---|---|---|---|
+| **Vector** (features) | features kept by the predicates | pixels inside / outside, clipped VRT | points inside / outside, clipped COPC |
+| **Raster** (value range, classes…) | features over the selected pixels, with a minimum coverage | raster clipped to the selected area | points over the selected area |
+| **Point cloud** (classes, ranges…) | features under the kept points | raster clipped to their footprint | the same criteria on every tile |
+
+Filtered layers keep their id, style and place in the layer tree. Unfilter, Undo / Redo and unloading the plugin put
+the original source back, and project files are always saved with the original sources.
+
+## Features
+
+- **Fast on large data.** Filters run as SQL on PostgreSQL / PostGIS, Spatialite and GeoPackage (spatial index used,
+  no reload), with an OGR path for everything else. On a full BD TOPO department, the 37 layers of a GeoPackage are
+  filtered by a commune in 2–3 s.
+- **Undo / Redo** of every filter, per layer, and a global history.
+- **Favorites**: save a filter with its layers and settings, replay it in a click, share it with a team through a git
+  repository ([docs/favorites_sharing/USER_GUIDE.md](docs/favorites_sharing/USER_GUIDE.md)).
+- **Automation**: nine Processing algorithms and four ready-made models, `qgis_process`, a Python API for scripts and
+  other plugins, an optional REST API ([docs/AUTOMATION.md](docs/AUTOMATION.md)).
+- **QGIS 3.22 to 4.x**, Qt5 and Qt6, light and dark themes, 34 languages.
+
+## Installation
+
+In QGIS: **Plugins → Manage and Install Plugins**, search for **FilterMate**, then **Install Plugin**. The FilterMate
+button appears in the plugin toolbar.
+
+Manual install: download a zip from [GitHub Releases](https://github.com/imagodata/filter_mate/releases) and use
+**Plugins → Manage and Install Plugins → Install from ZIP**.
+
+### Requirements
+
+| | |
+|---|---|
+| QGIS | 3.22 or later, QGIS 4.x included. Point cloud layers need QGIS 3.26+. |
+| PostgreSQL / PostGIS (optional) | `psycopg2`, shipped with most QGIS installs; otherwise `pip install psycopg2-binary` in the QGIS Python. |
+| PDAL (optional) | PDAL 2.4+ (`pdal` command, shipped with QGIS on Windows) for the height above a DTM and direct COPC writing. Without it, point clouds are clipped by the QGIS exporter. |
+| REST API (optional) | `pip install -r requirements-api.txt` (FastAPI, Uvicorn, Pydantic). |
+
+## Automation in two lines
+
+```python
+from qgis.utils import plugins
+
+api = plugins["filter_mate"].get_public_api()
+api.cross_filter("mnt", ["parcelle", "lhd"], coverage_min=50,
+                 raster_selection={"band": 1, "mode": "range", "minimum": 1200, "maximum": 1300})
 ```
 
----
+The same operation is available as the `filtermate:cross_filter_from_raster` Processing algorithm, from
+`qgis_process`, and as `POST /filters/cross` on the REST API. See [docs/AUTOMATION.md](docs/AUTOMATION.md).
 
-## 🎬 Video Tutorials
+## Documentation
 
-| Tutorial | Link |
-|----------|------|
-| 📺 Complete Overview | [Watch](https://www.youtube.com/watch?v=2gOEPrdl2Bo) |
-| 🔍 Dataset Exploration | [Watch](https://youtu.be/YwEalDjgEdY) |
-| 🛣️ Road Network Filtering | [Watch](https://youtu.be/svElL8cDpWE) |
-| 📦 GeoPackage Export | [Watch](https://youtu.be/gPLi2OudKcI) |
-| 📐 Negative Buffer | [Watch](https://youtu.be/9rZb-9A-tko) |
+| | |
+|---|---|
+| [User guide](https://imagodata.github.io/filter_mate/guide.html) · [Guide utilisateur](https://imagodata.github.io/filter_mate/guide.fr.html) | Step by step: first filter, exploring, predicates and buffers, rasters and point clouds, favorites, export, backends, configuration. |
+| [Use cases](https://imagodata.github.io/filter_mate/stories.html) · [Cas d'usage](https://imagodata.github.io/filter_mate/stories.fr.html) | Eight business questions answered on a full BD TOPO department. |
+| [docs/AUTOMATION.md](docs/AUTOMATION.md) | Processing algorithms and models, `qgis_process`, Python API, REST API. |
+| [docs/favorites_sharing/](docs/favorites_sharing/USER_GUIDE.md) | Sharing favorites through git repositories. |
+| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) · [CONTRIBUTING.md](CONTRIBUTING.md) | Source tree, code rules, tests and releases, for contributors. |
+| [CHANGELOG.md](CHANGELOG.md) | Release notes. |
 
----
+## Development
 
-## ⚡ Backend Performance
+```bash
+pip install -r requirements-test.txt
+python -m pytest tests/ -o "addopts="     # unit tests, no QGIS needed (qgis.* is mocked)
+```
 
-| Backend | 10k | 100k | 1M Features |
-|---------|:---:|:----:|:-----------:|
-| 🟢 PostgreSQL | <1s | <2s | ~10s |
-| 🔵 Spatialite | <2s | ~10s | ~60s |
-| 🟠 OGR | ~5s | ~30s | >120s |
+The CI also loads the plugin in the official QGIS Docker images (3.22 → nightly) and drives the dock with its GUI
+(`tests/qgis_headless/`). Start with [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for a map of the source tree and
+[CONTRIBUTING.md](CONTRIBUTING.md) for the code rules (Qt5 / Qt6 guards, translations, zip build, pull requests).
 
-**Tip**: Install `psycopg2-binary` for optimal performance with large datasets.
+Bugs and ideas: [GitHub issues](https://github.com/imagodata/filter_mate/issues).
 
----
+## License
 
-## 📋 Requirements
-
-- **QGIS**: 3.22+ — including **QGIS 4.x / Qt6** (fully supported since v4.8.0); point cloud layers need QGIS 3.26+
-- **Python**: 3.9+ (included with QGIS)
-- **Optional**: psycopg2 for PostgreSQL backend; PDAL 2.4+ (`pdal` command, shipped with QGIS on Windows) for the height above a DTM and direct COPC writing — without it, point clouds are clipped by the QGIS exporter
-
----
-
-## 📚 Documentation
-
-- **Users**: [Documentation Website](https://imagodata.github.io/filter_mate)
-- **Use cases**: [Use cases (English)](https://imagodata.github.io/filter_mate/stories.html) · [Cas d'usage (français)](https://imagodata.github.io/filter_mate/stories.fr.html) — eight business questions answered step by step on a full BD TOPO department (1.17 M buildings): commune dossier, road noise, flood setback, bridges, brush clearing, emergency access, favorites, Processing
-- **Tutorial**: [User Guide (English)](https://imagodata.github.io/filter_mate/guide.html) · [Guide utilisateur (français)](https://imagodata.github.io/filter_mate/guide.fr.html) — installation, first filter, exploring, predicates and buffers, favorites, export, backends, configuration
-- **Developers**: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
-- **Changelog**: [CHANGELOG.md](CHANGELOG.md)
-
----
-
-## 🤝 Contributing
-
-See [Contributing Guidelines](.github/copilot-instructions.md)
-
----
-
-## 📄 License
-
-GNU General Public License v3.0 - See [LICENSE](LICENSE)
-
----
-
-**Developed by**: imagodata | **Contact**: simon.ducournau+filter_mate@gmail.com
+GNU General Public License v3.0, see [LICENSE](LICENSE). Developed by [imagodata](https://github.com/imagodata) · simon.ducournau+filter_mate@gmail.com.
+Map data in the screenshots: BD TOPO® and LiDAR HD © IGN, Licence Ouverte 2.0.

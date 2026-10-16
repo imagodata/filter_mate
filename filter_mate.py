@@ -1377,15 +1377,13 @@ class FilterMate:
         try:
             from .adapters.qgis.coverage_layers.snapshots import registry as _coverage_registry
             from .adapters.qgis.coverage_layers import cache as _coverage_cache
-            from .core.services.cross_filter_service import all_services
+            from .core.services.cross_filter_service import all_services, stop_filtermate_tasks
             for _service in all_services():  # the dock's and the automation one
                 _service.cancel_all()
             # Exports and height-above-ground runs read / write the cache too:
-            # stop them before it is removed (their callbacks return early).
-            from qgis.core import QgsApplication
-            for _task in QgsApplication.taskManager().activeTasks():
-                if str(_task.description()).startswith('FilterMate: '):
-                    _task.cancel()
+            # stop them before it is removed (their callbacks return early),
+            # and let them close their files (bounded wait).
+            stop_filtermate_tasks()
             restored = _coverage_registry().restore_all()
             _coverage_registry().uninstall()
             _coverage_cache.purge_session()

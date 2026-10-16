@@ -52,7 +52,7 @@ Les Epics 2 et 4 (UI Narractive, mode narration) ne démarrent qu'en Sprint 2.
 **afin de** garantir un couplage faible et une architecture évolutive.
 
 **Criteres d'acceptance :**
-- Un ADR (Architecture Decision Record) est rédigé dans `/docs/narractive-integration/adr-001-inter-plugin-protocol.md`
+- Un ADR (Architecture Decision Record) est rédigé dans `/docs/internal/narractive-integration/adr-001-inter-plugin-protocol.md`
 - Le pattern retenu est validé par l'équipe (option hybride recommandee : appel direct + signaux Qt)
 - Les cas d'erreur sont documentés (plugin absent, version incompatible, couche introuvable)
 - Compatibilite QGIS 3.22+ et QGIS 4.x (Qt5 et Qt6) verifiee

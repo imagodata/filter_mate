@@ -21,6 +21,7 @@ Target semantics (see ``core.domain.cross_filter``):
   derived COPC file written by PDAL (exact) or an X/Y expression (bbox mode).
 """
 import logging
+import math
 import os
 import time
 from typing import Callable, List, Optional
@@ -48,13 +49,61 @@ from ....core.domain.filter_state import LayerSnapshot
 from ....core.domain.layer_kind import LayerKind
 from . import cache
 from .gdal_warp import gdal_warp, polygonal_wkt
-from .geometry_tools import make_valid, prepared_engine, target_matches, transform_geometry
+from .geometry_tools import (
+    WHOLE_SOURCE_METHODS,
+    SourceParts,
+    make_valid,
+    prepared_engine,
+    target_matches,
+    transform_geometry,
+)
 from .snapshots import registry, take_snapshot
 
 logger = logging.getLogger(__name__)
 
 CanceledFn = Callable[[], bool]
 MAX_BBOX_TERMS = 50
+NO_AREA = "the source geometry has no area (lines or points only): add a buffer"
+
+
+def _checked(result: QgsGeometry, operation: str) -> QgsGeometry:
+    """Valid result of a GEOS operation; a null result is an error, never "nothing kept".
+
+    An empty result (the areas do not meet) is a valid empty geometry, kept
+    as it is; GEOS failing (invalid input) gives a null one, which must not
+    mask everything.
+    """
+    if result is None or result.isNull():
+        error = result.lastError() if result is not None and hasattr(result, 'lastError') else ''
+        raise RuntimeError(f"{operation} of the source geometry failed{': ' + error if error else ''}")
+    return result if result.isEmpty() else make_valid(result)
+
+
+def _nothing_kept(extent: QgsRectangle) -> QgsGeometry:
+    """Area kept when nothing is: a tiny polygon outside ``extent``.
+
+    Stored like any kept area, so that the state survives a project reload
+    and combines like an empty area (no pixel, no point lies there).
+    """
+    return QgsGeometry.fromRect(QgsRectangle(extent.xMinimum() - 2, extent.yMinimum() - 2,
+                                             extent.xMinimum() - 1, extent.yMinimum() - 1))
+
+
+def _has_area(geometry: QgsGeometry) -> bool:
+    """True when ``geometry`` has a polygon part (pixels and points are kept inside areas only)."""
+    return polygonal_wkt(geometry.asWkt()) is not None
+
+
+def _kept_area(geometry: QgsGeometry) -> Optional[str]:
+    """WKT of the polygon parts of a kept area; None when nothing is kept.
+
+    Two kept areas that touch meet in a line: no pixel, no point is kept
+    there, and only polygons are stored (overlays of collections with lines
+    fail on older GEOS).
+    """
+    if geometry is None or geometry.isEmpty():
+        return None
+    return polygonal_wkt(geometry.asWkt())
 
 
 def _combine_geometry(previous_wkt: str, previous_side: str, new: QgsGeometry, side: CoverageSide,
@@ -70,12 +119,16 @@ def _combine_geometry(previous_wkt: str, previous_side: str, new: QgsGeometry, s
     if previous.isEmpty():
         return new
     op = operator.upper()
+    if new is None or new.isEmpty():
+        # Nothing new kept (outside of a source covering the whole layer):
+        # AND keeps nothing, OR and AND NOT keep the previous area.
+        return previous if op in ('OR', 'AND NOT') else new
     if op == 'AND':
-        return make_valid(previous.intersection(new))
+        return _checked(previous.intersection(new), 'intersection')
     if op == 'OR':
-        return make_valid(previous.combine(new))
+        return _checked(previous.combine(new), 'union')
     if op == 'AND NOT':
-        return make_valid(previous.difference(new))
+        return _checked(previous.difference(new), 'difference')
     return new
 
 
@@ -125,6 +178,9 @@ class TargetJob:
     # sources, exporters): released once the task is over, never left for the
     # interpreter shutdown (QGIS 3.44 crashed on exit when they outlived it).
     _QGIS_HANDLES = ('_source', '_unfiltered', '_base_layer', '_exporter', '_base_keepalive')
+    # QgsFeedback canceled with the task (set by CrossFilterTask), for the
+    # QGIS calls that cannot poll ``is_canceled``.
+    feedback = None
 
     def release(self) -> None:
         for name in self._QGIS_HANDLES:
@@ -139,7 +195,8 @@ class TargetJob:
         raise NotImplementedError
 
     def _target_geometry(self, source_geometry, source_crs, context) -> QgsGeometry:
-        return transform_geometry(source_geometry, source_crs, self.crs, context)
+        # A reprojection can make a valid polygon invalid (GEOS operations then fail).
+        return make_valid(transform_geometry(source_geometry, source_crs, self.crs, context))
 
 
 # --- vector -----------------------------------------------------------------
@@ -159,24 +216,47 @@ class VectorTargetJob(TargetJob):
     """Keep the features of a vector target that satisfy the predicates."""
 
     kind = LayerKind.VECTOR
+    # The selected features of a vector source, buffered (set by CrossFilterTask).
+    source_parts: Optional[List[QgsGeometry]] = None
 
     def __init__(self, layer: QgsVectorLayer, operator: Optional[str]) -> None:
         super().__init__(layer, operator)
-        if (operator or '').upper() == 'OR' and self.before.subset:
-            # (previous) OR (kept): the features hidden by the previous subset
-            # must be tested too, so read an unfiltered copy of the layer.
-            unfiltered = QgsVectorLayer(layer.source(), f"{layer.name()}_all", layer.providerType())
-            if unfiltered.isValid():
-                unfiltered.setSubsetString('')
-                self._unfiltered = unfiltered
-                self._source = QgsVectorLayerFeatureSource(unfiltered)
-            else:
-                self._source = QgsVectorLayerFeatureSource(layer)
+        self._error = ''
+        if self.before.subset and (operator or '').upper() not in ('AND', 'AND NOT'):
+            # Replace (no operator) and OR: the result does not depend on the
+            # features the previous subset hides, they are tested too.
+            self._source = self._unfiltered_source(layer)
         else:
             self._source = QgsVectorLayerFeatureSource(layer)
         self._is_polygon = _is_polygon_layer(layer)
         self._pk, self._raw_pk = self._primary_key(layer)
         self._expression = ''
+
+    def _unfiltered_source(self, layer: QgsVectorLayer):
+        """Feature source of every feature of ``layer``, its subset left out (main thread)."""
+        if layer.providerType() == 'memory':
+            # A memory layer opened again is a new, empty one: the source is
+            # taken while its provider shows every feature, signals blocked so
+            # that nothing sees the subset go and come back.
+            provider = layer.dataProvider()
+            subset = provider.subsetString()
+            provider.blockSignals(True)
+            try:
+                provider.setSubsetString('')
+                return QgsVectorLayerFeatureSource(layer)
+            finally:
+                provider.setSubsetString(subset)
+                provider.blockSignals(False)
+        options = QgsVectorLayer.LayerOptions(QgsProject.instance().transformContext())
+        options.loadDefaultStyle = False
+        options.skipCrsValidation = True  # never a "which CRS?" prompt for a private copy
+        unfiltered = QgsVectorLayer(layer.source(), f"{layer.name()}_all", layer.providerType(), options)
+        if not unfiltered.isValid():
+            self._error = "the layer could not be read without its current filter"
+            return None
+        unfiltered.setSubsetString('')
+        self._unfiltered = unfiltered
+        return QgsVectorLayerFeatureSource(unfiltered)
 
     @staticmethod
     def _primary_key(layer: QgsVectorLayer):
@@ -193,8 +273,19 @@ class VectorTargetJob(TargetJob):
 
     def compute(self, source_geometry, source_crs, context, request, is_canceled) -> None:
         self._started = time.perf_counter()
+        if self._error:
+            self.outcome.message = self._error
+            return
         geometry = self._target_geometry(source_geometry, source_crs, context)
         methods = request.methods
+        # Intersects / disjoint are tested against the union of the source,
+        # the other predicates against each selected feature (vector source).
+        whole_methods = [m for m in methods if m in WHOLE_SOURCE_METHODS]
+        part_methods = [m for m in methods if m not in WHOLE_SOURCE_METHODS]
+        parts = None
+        if self.source_parts is not None and part_methods:
+            parts = SourceParts([self._target_geometry(part, source_crs, context) for part in self.source_parts])
+            methods = whole_methods
         needs_all = 'disjoint' in methods
         feature_request = QgsFeatureRequest()
         if not needs_all and not geometry.isEmpty():
@@ -204,7 +295,7 @@ class VectorTargetJob(TargetJob):
         else:
             feature_request.setSubsetOfAttributes([self._pk], self._source_fields())
         kept: List = []
-        engine = prepared_engine(geometry) if not geometry.isEmpty() else None
+        engine = prepared_engine(geometry) if methods and not geometry.isEmpty() else None
         coverage = float(request.coverage_min or 0.0) if self._is_polygon else 0.0
         for feature in self._source.getFeatures(feature_request):
             if is_canceled():
@@ -217,15 +308,17 @@ class VectorTargetJob(TargetJob):
                 matched = methods == ['disjoint']
             else:
                 matched = target_matches(engine, target_geometry, methods)
-            if matched and coverage > 0 and 'disjoint' not in methods:
+            if not matched and parts is not None:
+                matched = parts.matches(target_geometry, part_methods)
+            if matched and coverage > 0 and 'disjoint' not in request.methods:
                 matched = coverage_ratio_ok(target_geometry.area(), target_geometry.intersection(geometry).area(), coverage)
             if matched:
                 kept.append(feature.id() if self._raw_pk else feature.attribute(self._pk))
         self._expression = build_in_expression(self._pk, kept, raw_field=self._raw_pk)
         # Release the provider connection held by the feature source before the
         # subset is applied (an open GeoPackage reader made the count fail).
+        # The unfiltered copy, a QObject of the main thread, goes in apply().
         self._source = None
-        self._unfiltered = None
         self.outcome.kept_count = len(kept)
         self.outcome.success = True
         self.outcome.elapsed = time.perf_counter() - self._started
@@ -237,6 +330,7 @@ class VectorTargetJob(TargetJob):
             return QgsProject.instance().mapLayer(self.layer_id).fields()
 
     def apply(self, layer) -> Optional[LayerSnapshot]:
+        self._unfiltered = None  # before the subset is applied, on the main thread
         if not self.outcome.success:
             return None
         subset = combine_subset(self.before.subset, self._expression, self.operator)
@@ -293,20 +387,34 @@ class RasterTargetJob(TargetJob):
         if side is CoverageSide.ALL:
             self.outcome.message = 'inside OR outside keeps every pixel: nothing to do'
             return
+        if (self.operator or '').upper() in ('AND', 'OR', 'AND NOT') and self.before.derived \
+                and self.before.selection and not self.before.geometry_wkt:
+            # Filtered as a source (virtual raster of its own pixel selection):
+            # there is no kept area to combine with, and the clip of the
+            # original raster would silently drop that selection.
+            self.outcome.message = ("the layer is filtered by its own pixel selection, which cannot be combined: "
+                                    "replace its filter or unfilter it first")
+            return
         geometry = self._target_geometry(source_geometry, source_crs, context)
+        if side is CoverageSide.INSIDE and not geometry.isEmpty() and not _has_area(geometry):
+            self.outcome.message = NO_AREA
+            return
         if side is CoverageSide.OUTSIDE:
-            geometry = make_valid(QgsGeometry.fromRect(self._extent).difference(geometry))
+            geometry = _checked(QgsGeometry.fromRect(self._extent).difference(geometry), 'difference')
         geometry = _combine_geometry(self.before.geometry_wkt if self.before.derived else '', self.before.side,
                                      geometry, side, self.operator)
         self._side = side
-        if geometry.isEmpty():
-            # Nothing kept: clip with a degenerate polygon far outside the extent.
-            ext = self._extent
-            geometry = QgsGeometry.fromRect(QgsRectangle(ext.xMinimum() - 2, ext.yMinimum() - 2, ext.xMinimum() - 1, ext.yMinimum() - 1))
+        kept = _kept_area(geometry)
+        # Nothing kept: clip with a degenerate polygon far outside the extent.
+        geometry = QgsGeometry.fromWkt(kept) if kept is not None else _nothing_kept(self._extent)
         self._geometry_wkt = geometry.asWkt()
         cutline = _simplified_for_cutline(geometry, self._pixel * 0.5)
         path = self._new_path('.vrt')
-        options = dict(format='VRT', cutlineWKT=cutline.asWkt(), cutlineSRS=self.crs.toWkt(), cropToCutline=False)
+        options = dict(format='VRT', cutlineWKT=cutline.asWkt(), cropToCutline=False)
+        if self.crs.isValid():
+            # An empty cutlineSRS is an invalid SRS for GDAL >= 3.9: without a
+            # CRS the cutline is in the raster's own coordinates.
+            options['cutlineSRS'] = self.crs.toWkt()
         if self._nodata and all(value is not None for value in self._nodata):
             options['dstNodata'] = ' '.join(repr(value) for value in self._nodata)
         elif self._float:
@@ -344,12 +452,21 @@ class RasterTargetJob(TargetJob):
 
 # --- point cloud ------------------------------------------------------------
 
-def _bbox_expression(geometry: QgsGeometry, outside: bool) -> str:
+def _bound(value: float, decimals: int, upper: bool) -> str:
+    """``value`` written with ``decimals`` decimals, rounded outwards (a box never loses an edge point)."""
+    scale = 10 ** decimals
+    rounded = (math.ceil(value * scale) if upper else math.floor(value * scale)) / scale
+    return f"{rounded:.{decimals}f}"
+
+
+def _bbox_expression(geometry: QgsGeometry, outside: bool, geographic: bool = False) -> str:
     parts = [part for part in geometry.asGeometryCollection()] if geometry.isMultipart() else [geometry]
     boxes = [p.boundingBox() for p in parts if p is not None and not p.isEmpty()]
     if len(boxes) > MAX_BBOX_TERMS:
         boxes = [geometry.boundingBox()]
-    terms = [f"(X >= {b.xMinimum():.3f} AND X <= {b.xMaximum():.3f} AND Y >= {b.yMinimum():.3f} AND Y <= {b.yMaximum():.3f})"
+    decimals = 9 if geographic else 3  # 0.001 degree is about 111 m
+    terms = [f"(X >= {_bound(b.xMinimum(), decimals, False)} AND X <= {_bound(b.xMaximum(), decimals, True)} "
+             f"AND Y >= {_bound(b.yMinimum(), decimals, False)} AND Y <= {_bound(b.yMaximum(), decimals, True)})"
              for b in boxes]
     expression = " OR ".join(terms) if terms else "X < X"
     return f"NOT ({expression})" if outside else expression
@@ -372,16 +489,22 @@ class PointCloudTargetJob(TargetJob):
         self._geometry_wkt = ''
         self._side = CoverageSide.INSIDE
         self._extent = QgsRectangle(layer.extent())
+        self._unsupported = ''
         if self.before.derived:
             # Outside / empty areas are computed on the ORIGINAL extent: the
             # clip is applied to the original source, not to the derived one.
-            from qgis.core import QgsPointCloudLayer
-            base = QgsPointCloudLayer(self._base_source, f"{self.layer_name}_base", self._base_provider)
+            from .point_cloud_footprint import open_point_cloud
+            base = open_point_cloud(self._base_source, f"{self.layer_name}_base", self._base_provider)
             if base.isValid():
                 self._extent = QgsRectangle(base.extent())
         self._extent.grow(1.0)  # header rounding: keep the points on the edge
         self._exporter = None
         if self._mode == 'exact':
+            if self._base_provider == 'vpc':
+                # Neither PDAL (readers.las / copc / ept) nor the QGIS exporter
+                # (no index: it would crash) reads a virtual point cloud.
+                self._unsupported = "a virtual point cloud (VPC) cannot be clipped exactly (bbox clip mode only)"
+                return
             from . import pdal_cli
             self._use_pdal = pdal_cli.supports_copc() and self._pdal_readable(self._base_source)
             if not self._use_pdal:
@@ -398,9 +521,14 @@ class PointCloudTargetJob(TargetJob):
 
     def _prepare_exporter(self) -> None:
         """QgsPointCloudLayerExporter must be prepared on the main thread."""
-        from qgis.core import QgsPointCloudLayer, QgsPointCloudLayerExporter
-        base = QgsPointCloudLayer(self._base_source, f"{self.layer_name}_base", self._base_provider)
+        from qgis.core import QgsPointCloudLayerExporter
+        from .point_cloud_footprint import index_ready, open_point_cloud
+        base = open_point_cloud(self._base_source, f"{self.layer_name}_base", self._base_provider)
         if not base.isValid():
+            return
+        if not index_ready(base):
+            # The exporter reads the index without checking it (crash on a null one).
+            self._unsupported = "the point cloud has no index yet (LAS file being indexed): try again later"
             return
         self._base_layer = base  # keep alive while the task runs
         exporter = QgsPointCloudLayerExporter(base)
@@ -417,34 +545,47 @@ class PointCloudTargetJob(TargetJob):
             return
         geometry = self._target_geometry(source_geometry, source_crs, context)
         self._side = side
+        if side is CoverageSide.INSIDE and not geometry.isEmpty() and not _has_area(geometry):
+            # Same as the raster target: lines or points keep no point at all.
+            self.outcome.message = NO_AREA
+            return
         if self._mode == 'bbox':
             if geometry.isEmpty():
                 self._expression = 'X = X' if side is CoverageSide.OUTSIDE else 'X < X'
             else:
-                self._expression = _bbox_expression(geometry, side is CoverageSide.OUTSIDE)
+                self._expression = _bbox_expression(geometry, side is CoverageSide.OUTSIDE, self.crs.isGeographic())
             self.outcome.success = True
             self.outcome.elapsed = time.perf_counter() - self._started
+            return
+        if self._unsupported:
+            self.outcome.message = self._unsupported
             return
         # Like the raster target, the stored geometry is the area KEPT (outside
         # = extent minus the source geometry) and the clip always keeps the inside.
         if side is CoverageSide.OUTSIDE:
-            geometry = make_valid(QgsGeometry.fromRect(self._extent).difference(geometry))
+            geometry = _checked(QgsGeometry.fromRect(self._extent).difference(geometry), 'difference')
         geometry = _combine_geometry(self.before.geometry_wkt if self.before.derived else '', self.before.side,
                                      geometry, side, self.operator)
-        self._geometry_wkt = geometry.asWkt() if not geometry.isEmpty() else ''
+        # filters.crop takes polygons only: make_valid / an intersection can add lines and points.
+        polygon = _kept_area(geometry)
+        geometry = QgsGeometry.fromWkt(polygon) if polygon is not None else None
+        if geometry is None or not geometry.boundingBox().intersects(self._extent):
+            # Nothing kept. Stored, not left empty: an empty state would be
+            # dropped from the project and read as "no previous filter" by the next AND.
+            polygon, geometry = None, _nothing_kept(self._extent)
+        self._geometry_wkt = geometry.asWkt()
         if self._use_pdal:
-            self._compute_pdal(geometry, is_canceled)
+            self._compute_pdal(polygon, is_canceled)
         else:
             self._compute_exporter(geometry, is_canceled)
         self.outcome.elapsed = time.perf_counter() - self._started
 
-    def _compute_pdal(self, geometry: QgsGeometry, is_canceled) -> None:
+    def _compute_pdal(self, polygon: Optional[str], is_canceled) -> None:
+        """Clip with ``polygon`` (WKT), nothing kept when None."""
         from . import pdal_cli
         path = self._new_path('.copc.laz')
         reader = {"type": pdal_cli.reader_for(self._base_source), "filename": self._base_source}
         stages = [reader]
-        # filters.crop takes polygons only: make_valid / an intersection can add lines and points.
-        polygon = None if geometry.isEmpty() else polygonal_wkt(geometry.asWkt())
         if polygon is None:
             stages.append({"type": "filters.head", "count": 0})
         else:
@@ -452,7 +593,7 @@ class PointCloudTargetJob(TargetJob):
                 reader["polygon"] = polygon
             stages.append({"type": "filters.crop", "polygon": polygon})
         stages.append({"type": "writers.copc", "filename": path, "forward": "all", "extra_dims": "all",
-                       "a_srs": self.crs.authid() or self.crs.toWkt()})
+                       "a_srs": pdal_cli.srs_for(self.crs)})
         ok, message = pdal_cli.run_pipeline(stages, is_canceled=is_canceled)
         if not ok:
             self.outcome.message = f"pdal: {message}"
@@ -463,14 +604,16 @@ class PointCloudTargetJob(TargetJob):
 
     def _compute_exporter(self, geometry: QgsGeometry, is_canceled) -> None:
         if self._exporter is None:
-            self.outcome.message = 'point cloud cannot be clipped (no pdal and no exporter)'
+            self.outcome.message = self._unsupported or 'point cloud cannot be clipped (no pdal and no exporter)'
             return
-        if geometry.isEmpty():
-            # Nothing kept: a tiny polygon outside the extent (None would export everything).
-            ext = self._extent
-            geometry = QgsGeometry.fromRect(QgsRectangle(ext.xMinimum() - 2, ext.yMinimum() - 2, ext.xMinimum() - 1, ext.yMinimum() - 1))
+        # Nothing kept is a tiny polygon outside the extent here (None would export everything).
         self._exporter.setFilterGeometry(geometry.constGet().clone())
+        if self.feedback is not None:
+            self._exporter.setFeedback(self.feedback)
         self._exporter.doExport()
+        if is_canceled():
+            self.outcome.message = 'canceled'
+            return
         error = self._exporter.lastError()
         if error:
             self.outcome.message = f"export: {error}"

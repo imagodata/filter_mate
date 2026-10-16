@@ -109,3 +109,46 @@ def test_no_pdal(monkeypatch):
     assert pdal_cli.version() is None
     assert pdal_cli.supports_copc() is False
     assert pdal_cli.copc_unavailable_reason() == 'pdal not found'
+
+
+class _Process:
+    returncode = 0
+
+    def communicate(self, timeout=None):
+        return 'Ã©tÃ©', ''
+
+
+def test_pipeline_output_read_as_utf8(monkeypatch):
+    """PDAL writes UTF-8: the Windows locale codec (cp1252) cannot decode every byte of it."""
+    seen = {}
+
+    def popen(argv, **kwargs):
+        seen.update(kwargs)
+        return _Process()
+
+    monkeypatch.setattr(pdal_cli, 'find_pdal', lambda: '/opt/pdal/bin/pdal')
+    monkeypatch.setattr(pdal_cli.subprocess, 'Popen', popen)
+    assert pdal_cli.run_pipeline([{"type": "readers.las", "filename": "été.las"}]) == (True, '')
+    assert seen.get('encoding') == 'utf-8' and seen.get('errors') == 'replace'
+
+
+class _Crs:
+    def __init__(self, authid, wkt='PROJCS["x"]'):
+        self._authid, self._wkt = authid, wkt
+
+    def authid(self):
+        return self._authid
+
+    def toWkt(self):
+        return self._wkt
+
+
+@pytest.mark.parametrize("authid, expected", [
+    ('EPSG:2154', 'EPSG:2154'),
+    ('IGNF:LAMB93', 'IGNF:LAMB93'),
+    ('ESRI:102110', 'ESRI:102110'),
+    ('USER:100000', 'PROJCS["x"]'),  # a user CRS of this QGIS profile: PROJ does not know it
+    ('', 'PROJCS["x"]'),
+])
+def test_writer_srs(authid, expected):
+    assert pdal_cli.srs_for(_Crs(authid)) == expected

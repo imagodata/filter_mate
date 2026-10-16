@@ -45,13 +45,17 @@ from qgis.core import (
 from qgis.utils import iface, plugins
 
 CLIP = os.environ.get('FM_CLIP', 'hero').lower()
+# light or dark: the QGIS theme of the recording profile (the site shows the one matching its own theme)
+THEME = os.environ.get('FM_THEME', 'light').lower()
+DARK = THEME == 'dark'
 ROOT = os.environ.get('FM_VIDEO_OUT', r'C:\Users\Simon\AppData\Local\Temp\fm_video')
 GPKG = os.environ.get('FM_GPKG', r'C:\Users\Simon\Documents\bdtopo31\BDT_3-5_GPKG_LAMB93_D031-ED2026-03-15.gpkg')
-OUT = os.path.join(ROOT, CLIP)
+OUT = os.path.join(ROOT, CLIP + ('-dark' if DARK else ''))
 EXPORT_DIR = os.path.join(ROOT, 'export_out')
 LOG = os.path.join(OUT, 'capture.log')
 FPS = 15
 WINDOW = (1760, 990)  # 16:9 client area, 2640x1485 frames at 150 % scaling
+DOCK_WIDTH = 440  # the FilterMate 5 dock as in the guide screenshots
 STATE = {}
 
 STYLE = {  # layer name: (color, line/stroke width or point size, fill opacity)
@@ -72,6 +76,7 @@ STYLE = {  # layer name: (color, line/stroke width or point size, fill opacity)
     'troncon_hydrographique': ('#2e7bd6', 1.1, 1.0),
     'construction_lineaire': ('#b03fb0', 1.8, 1.0),
     'erp': ('#f2c200', 2.6, 1.0),
+    'parcelle': ('#2b3a42', 0.45, 0.0),
 }
 
 # Dense layers are only drawn below 1:120 000, so a department-wide opening
@@ -162,6 +167,10 @@ class Recorder:
     def _tick(self):
         try:
             mw = iface.mainWindow()
+            if (mw.width(), mw.height()) != self.size:
+                # A dock minimum can resize the window (seen when a point cloud panel shows up).
+                log(f'window resized to {mw.width()}x{mw.height()}, back to {self.size}')
+                mw.resize(*self.size)
             pm = mw.grab()
             self.windows = [w for w in self.windows if w is not None and not sip.isdeleted(w)]
             extra = [w for w in self.windows if w.isVisible()]
@@ -184,7 +193,7 @@ class Recorder:
         duration = self.now()
         self.queue.put(None)
         self.thread.join()
-        meta = {'clip': CLIP, 'dpr': self.dpr, 'size': self.size, 'fps': FPS,
+        meta = {'clip': CLIP, 'theme': THEME, 'dpr': self.dpr, 'size': self.size, 'fps': FPS,
                 'frames': self.times, 'events': self.events}
         with open(self.meta_path, 'w', encoding='utf-8') as f:
             json.dump(meta, f, indent=1)
@@ -363,27 +372,34 @@ def zoom_layer(name, scale=1.02):
 
 
 # ------------------------------------------------------------------ scene steps
+def prepare_window():
+    """Recording window: fixed size, no developer docks or toolbars, plain canvas; returns the canvas."""
+    mw = iface.mainWindow()
+    # QGIS saves its window layout on exit, in the user's own profile:
+    # remember it so quit_when_idle() can put it back.
+    STATE['ui'] = (mw.saveGeometry(), mw.saveState(), mw.isMaximized())
+    mw.showNormal()
+    mw.resize(*WINDOW)
+    mw.move(0, 0)
+    for d in mw.findChildren(QDockWidget):
+        if d.objectName() in ('MessageLog', 'Browser', 'Browser2', 'ProcessingToolbox'):
+            d.hide()
+    for tb in mw.findChildren(QToolBar):
+        name = (tb.objectName() + ' ' + tb.windowTitle()).lower()
+        if any(k in name for k in HIDDEN_TOOLBARS):
+            tb.hide()
+    quiet_message_bar()
+    canvas = iface.mapCanvas()
+    canvas.setRenderFlag(False)
+    canvas.setCanvasColor(QColor('#1d2428' if DARK else '#f7f7f4'))
+    canvas.setSelectionColor(QColor(255, 225, 0, 90))
+    return canvas
+
+
 def setup(layer_names, focus_layer, focus_expr, scale=1.25, dense_scale=120000):
     """Load layers (bottom to top) and zoom on the focus feature (scale=None: whole layer)."""
     def _s():
-        mw = iface.mainWindow()
-        # QGIS saves its window layout on exit, in the user's own profile:
-        # remember it so quit_when_idle() can put it back.
-        STATE['ui'] = (mw.saveGeometry(), mw.saveState(), mw.isMaximized())
-        mw.showNormal()
-        mw.resize(*WINDOW)
-        mw.move(0, 0)
-        for d in mw.findChildren(QDockWidget):
-            if d.objectName() in ('MessageLog', 'Browser', 'Browser2', 'ProcessingToolbox'):
-                d.hide()
-        for tb in mw.findChildren(QToolBar):
-            name = (tb.objectName() + ' ' + tb.windowTitle()).lower()
-            if any(k in name for k in HIDDEN_TOOLBARS):
-                tb.hide()
-        canvas = iface.mapCanvas()
-        canvas.setRenderFlag(False)
-        canvas.setCanvasColor(QColor('#f7f7f4'))
-        canvas.setSelectionColor(QColor(255, 225, 0, 90))
+        canvas = prepare_window()
         # No feature counts in the Layers panel: counting per symbol walks the
         # whole department (1.2 M buildings) in a task holding the GeoPackage,
         # and froze the main thread for minutes in the first recordings.
@@ -417,14 +433,33 @@ def setup(layer_names, focus_layer, focus_expr, scale=1.25, dense_scale=120000):
     return _s
 
 
+def quiet_message_bar():
+    """No QGIS notices (downloaded fonts...) in the footage: cleared before recording starts.
+
+    Inspecting a message from the bar's widgetAdded signal crashed QGIS 4.2 (access violation
+    while FilterMate pushed its success message), so the bar is only cleared.
+    """
+    iface.messageBar().clearWidgets()
+
+
 def open_plugin():
+    """Start FilterMate in the recording profile (a fresh profile has it installed, not enabled)."""
+    import qgis.utils
+    from qgis.PyQt.QtCore import QSettings
+    settings = QSettings()
+    settings.setValue('FilterMate/discord_welcome_dismissed', True)  # modal dialogs would block the steps
+    settings.setValue('FilterMate/whats_new_seen', 99)
+    if 'filter_mate' not in plugins:
+        qgis.utils.updateAvailablePlugins()
+        started = qgis.utils.loadPlugin('filter_mate') and qgis.utils.startPlugin('filter_mate')
+        log(f'plugin started: {started}')
     plugins['filter_mate'].run()
 
 
 def size_dock():
     d = dock()
     d.setMinimumWidth(0)
-    iface.mainWindow().resizeDocks([d], [413], Qt.Orientation.Horizontal)
+    iface.mainWindow().resizeDocks([d], [DOCK_WIDTH], Qt.Orientation.Horizontal)
 
 
 def source(name):
@@ -533,9 +568,10 @@ def check_one_by_one(name, texts, per_item=160, uncheck_others=True):
     return [(0, uncheck)] + [(per_item, check_nth(k)) for k in range(n)]
 
 
-def combo_check(name, texts, per_item=380):
+def combo_check(name, texts, per_item=380, close_after=700):
     """Open a checkable combo, tick the wanted items one by one, close it."""
-    return act(name, open_combo(name)) + check_one_by_one(name, texts, per_item) + [(700, hide_popup)]
+    return (act(name, open_combo(name)) + check_one_by_one(name, texts, per_item)
+            + [(close_after, hide_popup)])
 
 
 def combo_choose(name, text, keep=1200):
@@ -640,6 +676,46 @@ def multi_mode():
 
 def select_all_multi():
     multi_widget()[0].select_all('Select All')
+
+
+def select_all_multi_menu(keep=1800):
+    """Open the multiple-selection context menu and activate Select All."""
+    def open_menu():
+        picker, feature_list = multi_widget()
+        menu = picker.context_menu
+        r = rect_of(feature_list)
+        menu.popup(iface.mainWindow().mapToGlobal(r.center()))
+        if menu not in REC.windows:
+            REC.windows.append(menu)
+
+        def highlight():
+            action = next(
+                (a for a in menu.actions() if a.text().replace('&', '').strip() == 'Select All'),
+                None,
+            )
+            if action is None:
+                log(f'Select All action not found: {[a.text() for a in menu.actions()]}')
+                menu.close()
+                return
+            STATE['multi_select_all_action'] = action
+            ar = to_main(menu, menu.actionGeometry(action))
+            REC.event('point', x=ar.center().x(), y=ar.center().y())
+            menu.setActiveAction(action)
+
+        def activate():
+            action = STATE.pop('multi_select_all_action', None)
+            if action is not None:
+                ar = to_main(menu, menu.actionGeometry(action))
+                REC.event('click', x=ar.center().x(), y=ar.center().y())
+                action.trigger()
+            menu.close()
+            if menu in REC.windows:
+                REC.windows.remove(menu)
+
+        QTimer.singleShot(200, highlight)
+        QTimer.singleShot(keep, activate)
+
+    return act(lambda: multi_widget()[1], open_menu) + [hold(keep + 350)]
 
 
 def custom_edit():
@@ -841,6 +917,7 @@ def wait_idle():
 
 def rec_start():
     iface.mapCanvas().waitWhileRendering()
+    quiet_message_bar()
     REC.start()
 
 
@@ -877,7 +954,9 @@ def finish():
 
 def refocus():
     """FilterMate zooms on the filtered extent; put the scene's framing back (as the stories do)."""
-    if STATE.get('scene_scale'):
+    if STATE.get('scene_rect') is not None:
+        set_extent(STATE['scene_rect'])
+    elif STATE.get('scene_scale'):
         zoom_focus(STATE['scene_scale'])()
 
 
@@ -974,16 +1053,17 @@ TARGETS = 'checkableComboBoxLayer_filtering_layers_to_filter'
 PREDICATES = 'comboBox_filtering_geometric_predicates'
 
 
-def targets(names):
+def targets(names, per_item=300, close_after=700):
     return (act('pushButton_checkable_filtering_layers_to_filter',
                 enable('pushButton_checkable_filtering_layers_to_filter'))
-            + combo_check(TARGETS, names, per_item=300) + [(200, refresh_targets)])
+            + combo_check(TARGETS, names, per_item=per_item, close_after=close_after)
+            + [(200, refresh_targets)])
 
 
-def predicates(names):
+def predicates(names, per_item=380, close_after=700):
     return (act('pushButton_checkable_filtering_geometric_predicates',
                 enable('pushButton_checkable_filtering_geometric_predicates'))
-            + combo_check(PREDICATES, names))
+            + combo_check(PREDICATES, names, per_item=per_item, close_after=close_after))
 
 
 def and_targets():
@@ -1041,8 +1121,9 @@ BUFFER = boot(S3_LAYERS, 'commune', '"nom_officiel" = \'Grenade\'', 1.2) + scope
     + pick_layer('surface_hydrographique') + [
     (1200, cam(['mGroupBox_exploring_single_selection', 'mGroupBox_exploring_multiple_selection'], dur=1.4, pad=30)),
 ] + act(gb_check('mGroupBox_exploring_multiple_selection'), multi_mode) + [
-    (2500, select_all_multi), hold(1200), (0, cam(FILTER_ZONE, dur=1.4, pad=40)),
-] + targets(S3_FLOOD_TARGETS) + predicates(['intersect']) \
+    hold(2500),
+] + select_all_multi_menu() + [(0, cam(FILTER_ZONE, dur=1.4, pad=40))] \
+    + targets(S3_FLOOD_TARGETS) + predicates(['intersect']) \
     + act('pushButton_checkable_filtering_buffer_value', buffer_value(0)) + typed_buffer(300) + and_targets() + [
     (400, cam(ACTION_ZONE, dur=1.2, pad=40)),
 ] + run_filter() + show_map(3500) + [
@@ -1065,8 +1146,6 @@ NOISE = boot(S2_LAYERS, 'commune', '"nom_officiel" = \'Muret\'', 1.2) + scope('c
     + act('pushButton_checkable_filtering_buffer_value', buffer_value(0)) \
     + act('mPropertyOverrideButton_filtering_buffer_value_property', buffer_expr_dialog(NOISE_EXPR),
           lead=900, after=900) \
-    + act('pushButton_checkable_filtering_buffer_type',
-          enable('pushButton_checkable_filtering_buffer_type')) \
     + combo_choose('comboBox_filtering_buffer_type', 'Flat') \
     + and_targets() + [(400, cam(ACTION_ZONE, dur=1.2, pad=40))] + run_filter() + show_map(3500) + [
     (0, zoom_focus(0.5))] + settle() + show_map(3500, 1.05) + ending(['batiment', 'erp', 'troncon_de_route'])
@@ -1113,7 +1192,7 @@ BRUSH = boot(S5_LAYERS, 'commune', '"nom_officiel" = \'Bagnères-de-Luchon\'', 1
 S6_LAYERS = ['commune', 'zone_de_vegetation', 'zone_d_activite_ou_d_interet', 'zone_d_habitation', 'batiment',
              'troncon_de_route']
 S6_SCOPE_TARGETS = ['zone_de_vegetation', 'batiment', 'troncon_de_route']
-S6_TARGETS = ['zone_d_habitation', 'zone_d_activite_ou_d_interet']
+S6_TARGETS = ['batiment', 'zone_d_habitation', 'zone_d_activite_ou_d_interet']
 PAVED_EXPR = '"nature" NOT IN (\'Chemin\', \'Sentier\', \'Escalier\', \'Piste cyclable\', \'Route empierrée\')'
 
 
@@ -1130,7 +1209,8 @@ HAMLETS = boot(S6_LAYERS, 'commune', '"nom_officiel" = \'Aspet\'', 1.15) + scope
 ] + recorded_scene(1.15) + pick_layer('troncon_de_route') + [(1500, cam(EXPLORE_ZONE, dur=1.4, pad=30))] \
     + typed_custom(PAVED_EXPR, per_char=22) + settle() + [
     (0, cam(FILTER_ZONE, dur=1.4, pad=40)),
-] + targets(S6_TARGETS) + predicates(['disjoint']) \
+] + targets(S6_TARGETS, per_item=650, close_after=1200) \
+    + predicates(['disjoint'], per_item=900, close_after=1200) \
     + act('pushButton_checkable_filtering_buffer_value', buffer_value(0)) + typed_buffer(200) + and_targets() + [
     (400, cam(ACTION_ZONE, dur=1.2, pad=40)),
 ] + run_filter() + show_map(4500, 1.05) + ending(S6_TARGETS)
@@ -1333,8 +1413,226 @@ PROCESSING = boot(S8_LAYERS, 'commune', '"nom_officiel" = \'Toulouse\'', 1.0, de
     hold(1200), (0, s8_dialog), (400, cam(lambda: rect_of(STATE['proc']), dur=1.4, pad=30)), hold(1500),
 ] + act(run_button, s8_run) + settle(3.0) + [(0, refocus)] + settle() + show_map(4500, 1.05) + ending(S8_TARGETS)
 
+
+# ------------------------------------------------------------------ FilterMate 5: raster and LiDAR
+# Estavar (Cerdagne): IGN LiDAR HD tile 0616_6153 (COPC), the DTM interpolated from its ground
+# points (1 m) and BD TOPO / cadastre vectors of the same square kilometre.
+FM5_DIR = os.environ.get('FM5_DIR', os.path.join(ROOT, 'data'))
+FM5_DTM = os.path.join(FM5_DIR, 'mnt_1m.tif')
+FM5_GPKG = os.path.join(FM5_DIR, 'cerdagne.gpkg')
+FM5_TILE = os.path.join(FM5_DIR, 'estavar.copc.laz')
+DTM_COLORS = [(1190, '#3f7d4f'), (1215, '#8fb46a'), (1250, '#d8d39a'), (1300, '#c8a27a'), (1358, '#f3efe8')]
+
+
+def dtm_layer(name):
+    from qgis.core import (QgsColorRampShader, QgsRasterLayer, QgsRasterShader,
+                           QgsSingleBandPseudoColorRenderer)
+    rl = QgsRasterLayer(FM5_DTM, name, 'gdal')
+    fn = QgsColorRampShader(DTM_COLORS[0][0], DTM_COLORS[-1][0])
+    fn.setColorRampItemList([QgsColorRampShader.ColorRampItem(v, QColor(c), f'{v} m') for v, c in DTM_COLORS])
+    shader = QgsRasterShader()
+    shader.setRasterShaderFunction(fn)
+    renderer = QgsSingleBandPseudoColorRenderer(rl.dataProvider(), 1, shader)
+    renderer.setOpacity(0.62)
+    rl.setRenderer(renderer)
+    return rl
+
+
+def hillshade_layer(name):
+    from qgis.core import QgsHillshadeRenderer, QgsRasterLayer
+    rl = QgsRasterLayer(FM5_DTM, name, 'gdal')
+    renderer = QgsHillshadeRenderer(rl.dataProvider(), 1, 315.0, 40.0)
+    renderer.setZFactor(1.6)
+    rl.setRenderer(renderer)
+    return rl
+
+
+def setup5(layer_names, margin=1.04):
+    """Load the Estavar layers (bottom to top) and frame the square kilometre of the tile."""
+    def _s():
+        canvas = prepare_window()
+        for name in layer_names:
+            if name == 'hillshade':
+                ml = hillshade_layer(name)
+            elif name == 'mnt':
+                ml = dtm_layer(name)
+            elif name == 'lhd':
+                from qgis.core import QgsPointCloudLayer
+                ml = QgsPointCloudLayer(FM5_TILE, name, 'copc')
+            else:
+                ml = QgsVectorLayer(f'{FM5_GPKG}|layername={name}', name, 'ogr')
+                ml.setLabelsEnabled(False)
+                style_layer(ml, STYLE.get(name))
+            log(f'layer {name} valid={ml.isValid()}')
+            QgsProject.instance().addMapLayer(ml)
+        bb = QgsRectangle(616000, 6152000, 617000, 6153000)
+        bb.scale(margin)
+        STATE['scene_rect'] = QgsRectangle(bb)
+        set_extent(bb)
+        canvas.setRenderFlag(True)
+    return _s
+
+
+def boot5(layers, margin=1.04):
+    return [(1000, setup5(layers, margin)), (3000, open_plugin), (8000, size_dock), (1500, wait_idle())]
+
+
+def coverage():
+    return dock()._controller_integration.coverage_controller
+
+
+def wait_current(name):
+    """Re-armed until FilterMate shows the EXPLORING page of the raster / point cloud `name`."""
+    since = []
+
+    def _s():
+        if not since:
+            since.append(time.time())
+        active = coverage().active_layer
+        ready = active is not None and active.name() == name and not tasks_running()
+        return not (ready and time.time() - since[0] > 2.0)
+    return _s
+
+
+def coverage_host():
+    return dock().findChild(QWidget, 'stackedWidget_exploring_coverage')
+
+
+def named(name):
+    return lambda: dock().findChild(QWidget, name)
+
+
+def group_check(get_group):
+    """The check box in the title of a panel group box."""
+    def _r():
+        r = rect_of(get_group())
+        return QRect(r.x() + 4, r.y() + 2, 26, 24)
+    return _r
+
+
+def open_group(get_group):
+    def _s():
+        g = get_group()
+        g.setChecked(True)
+        if hasattr(g, 'setCollapsed'):
+            g.setCollapsed(False)
+    return _s
+
+
+def raster_panel():
+    return coverage()._raster_panel
+
+
+def pc_panel():
+    return coverage()._pc_panel
+
+
+def spin_line(get_spin):
+    return lambda: get_spin().findChild(QLineEdit)
+
+
+def ensure_visible(get_widget, margin=40):
+    """Scroll the EXPLORING area so a widget is in view (the dock is shorter than the panels)."""
+    def _s():
+        from qgis.PyQt.QtWidgets import QScrollArea
+        w = get_widget()
+        p = w.parentWidget()
+        while p is not None and not isinstance(p, QScrollArea):
+            p = p.parentWidget()
+        if p is not None:
+            p.ensureWidgetVisible(w, margin, margin)
+    return _s
+
+
+def typed_spin(get_spin, value, per_char=160):
+    """Click a spin box, type the value, commit it."""
+    def commit():
+        get_spin().setValue(value)
+    text = f'{value:g}'
+    return (act(get_spin, lambda: (spin_line(get_spin)().setFocus(), spin_line(get_spin)().selectAll()))
+            + type_into(spin_line(get_spin), text, per_char) + [(300, commit)])
+
+
+def click_selecting():
+    dock().pushButton_checkable_exploring_selecting.click()
+
+
+def coverage_spin():
+    return dock().findChild(QWidget, 'mQgsSpinBox_filtering_coverage_min')
+
+
+def class_item(text):
+    def _r():
+        lw = pc_panel()._classes_list
+        items = [lw.item(i) for i in range(lw.count()) if text.lower() in lw.item(i).text().lower()]
+        if not items:
+            return rect_of(lw)
+        lw.scrollToItem(items[0])
+        r = lw.visualItemRect(items[0])
+        return to_main(lw.viewport(), QRect(r.x(), r.y(), 28, r.height()))
+    return _r
+
+
+def check_class(text):
+    def _s():
+        lw = pc_panel()._classes_list
+        hits = [lw.item(i) for i in range(lw.count()) if text.lower() in lw.item(i).text().lower()]
+        log(f'class items {[lw.item(i).text() for i in range(lw.count())]} -> {[h.text() for h in hits]}')
+        for item in hits[:1]:
+            item.setCheckState(Qt.CheckState.Checked)
+    return _s
+
+
+def fm5_scene():
+    """Start recording on the whole tile."""
+    return [(500, wait_idle()), (500, rec_start), (0, cam('full', dur=0, drift=1.03)), hold(1200)]
+
+
+RANGE = (1190, 1215)
+
+# raster: the valley floor of the DTM (value range, histogram, preview) -> buildings and parcels on it.
+RASTER = boot5(['hillshade', 'mnt', 'parcelle', 'troncon_de_route', 'batiment']) + fm5_scene() + [
+    (0, cam('canvas', dur=1.4, drift=1.03)), hold(1200),
+] + pick_layer('mnt') + [(300, wait_current('mnt')), (0, cam(coverage_host, dur=1.4, pad=24)), hold(1200)] \
+    + act(group_check(lambda: raster_panel()._range_group), open_group(lambda: raster_panel()._range_group)) + [
+    hold(600), (0, ensure_visible(lambda: raster_panel()._max_spin)), hold(300),
+    (0, cam(lambda: raster_panel()._range_group, dur=1.2, pad=30)),
+] + typed_spin(lambda: raster_panel()._min_spin, RANGE[0]) + typed_spin(lambda: raster_panel()._max_spin, RANGE[1]) \
+    + [hold(1500)] + act('pushButton_checkable_exploring_selecting', click_selecting) + settle() + show_map(3200) + [
+    (0, cam(FILTER_ZONE, dur=1.4, pad=40)),
+] + targets(['batiment', 'parcelle']) + predicates(['intersect']) + typed_spin(coverage_spin, 50, per_char=250) + [
+    (400, cam(ACTION_ZONE, dur=1.2, pad=40)),
+] + run_filter() + [(0, lambda: counts(['batiment', 'parcelle']))] + show_map(4500, 1.05) \
+    + ending(['batiment', 'parcelle'])
+
+# lidar: high vegetation points of the LiDAR HD tile -> buildings within 5 m of them.
+LIDAR = boot5(['hillshade', 'lhd', 'parcelle', 'batiment']) + fm5_scene() + [
+    (0, cam('canvas', dur=1.4, drift=1.03)), hold(1500),
+] + pick_layer('lhd') + [(300, wait_current('lhd')), hold(2500), (0, cam(coverage_host, dur=1.4, pad=24)), hold(1200)] \
+    + act(group_check(lambda: pc_panel()._classes_group), open_group(lambda: pc_panel()._classes_group)) + [
+    hold(800), (0, ensure_visible(lambda: pc_panel()._classes_list)), hold(300),
+] + act(class_item('high veg'), check_class('high veg'), lead=700) + [hold(1500)] \
+    + act('pushButton_checkable_exploring_selecting', click_selecting) + settle() + show_map(3500) + [
+    (0, cam(FILTER_ZONE, dur=1.4, pad=40)),
+] + targets(['batiment']) + predicates(['intersect']) \
+    + act('pushButton_checkable_filtering_buffer_value', buffer_value(0)) + typed_buffer(5) + [
+    (400, cam(ACTION_ZONE, dur=1.2, pad=40)),
+] + run_filter() + [(0, lambda: counts(['batiment']))] + show_map(4500, 1.05) + ending(['batiment'])
+
+# clip: a cadastral section clips the DTM and the point cloud (vector source, raster and LiDAR targets), then Undo.
+CLIP_DTM = boot5(['hillshade', 'mnt', 'lhd', 'parcelle', 'batiment']) + fm5_scene() + [
+    (0, cam('canvas', dur=1.4, drift=1.03)), hold(1200),
+] + pick_layer('parcelle') + [(1500, cam(EXPLORE_ZONE, dur=1.4, pad=30))] \
+    + typed_custom('"section" = \'AD\'', per_char=60) + settle() + show_map(2200) + [
+    (0, cam(FILTER_ZONE, dur=1.4, pad=40)),
+] + targets(['mnt', 'lhd']) + predicates(['intersect']) + [(200, buffer_off), (400, cam(ACTION_ZONE, dur=1.2, pad=40))] \
+    + run_filter() + show_map(5000, 1.05) + [(0, cam(ACTION_ZONE, dur=1.2, pad=40))] \
+    + act('pushButton_action_undo_filter', click_undo) + settle(3.0) + [(0, refocus)] + settle() + show_map(2800) \
+    + ending()
+
 CLIPS = {'hero': HERO, 'explore': EXPLORE, 'buffer': BUFFER, 'noise': NOISE, 'bridges': BRIDGES,
-         'brush': BRUSH, 'hamlets': HAMLETS, 'favorites': FAVORITES, 'export': EXPORT, 'processing': PROCESSING}
+         'brush': BRUSH, 'hamlets': HAMLETS, 'favorites': FAVORITES, 'export': EXPORT, 'processing': PROCESSING,
+         'raster': RASTER, 'lidar': LIDAR, 'clip': CLIP_DTM}
 STEPS = CLIPS[CLIP]
 
 

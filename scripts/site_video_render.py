@@ -265,12 +265,20 @@ def render(clip):
     enc = subprocess.Popen(cmd, stdin=subprocess.PIPE)
 
     cache = {}
+    full_px = (round(size[0] * dpr), round(size[1] * dpr))
 
     def source(ts):
         i = max(bisect.bisect_right(times, ts) - 1, 0)
         if i not in cache:
             cache.clear()
-            cache[i] = Image.open(os.path.join(base, 'frames', f'{i:06d}.jpg')).convert('RGB')
+            im = Image.open(os.path.join(base, 'frames', f'{i:06d}.jpg')).convert('RGB')
+            if im.size != full_px:
+                # The window changed size for a moment (a dock minimum): keep the
+                # top-left of the frame on a canvas of the recorded size.
+                fixed = Image.new('RGB', full_px, im.getpixel((im.width - 1, im.height - 1)))
+                fixed.paste(im, (0, 0))
+                im = fixed
+            cache[i] = im
         return cache[i]
 
     def compose(to):

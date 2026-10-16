@@ -39,6 +39,19 @@ from .layer_exporter import LayerExporter, get_extension_for_format
 
 logger = logging.getLogger('FilterMate.Export.Batch')
 
+# FilterMate 5: the raster / point cloud files of an export that also writes
+# vector layers into a ZIP go to this subfolder, which the ZIP of the vector
+# folder leaves out: both exports run at the same time, and the coverage
+# files have their own archive (``<name>_raster_lidar.zip``).
+COVERAGE_EXPORT_SUBFOLDER = 'raster_lidar'
+
+
+def coverage_export_folder(folder: Optional[str], zip_path: Optional[str], with_vector: bool) -> Optional[str]:
+    """Folder of the raster / point cloud files of an export to ``folder``."""
+    if folder and zip_path and with_vector:
+        return os.path.join(folder, COVERAGE_EXPORT_SUBFOLDER)
+    return folder
+
 
 def sanitize_filename(filename: str) -> str:
     """
@@ -449,11 +462,20 @@ class BatchExporter:
         Returns:
             True if successful, False otherwise
         """
+        # Archives written meanwhile, when the ZIP goes into the folder itself:
+        # this one, and the raster / point cloud one (coverage_mode_controller._zip_exports).
+        base = zip_path[:-4] if zip_path.lower().endswith('.zip') else zip_path
+        archives = {os.path.abspath(zip_path), os.path.abspath(f"{base}_raster_lidar.zip")}
         try:
             with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
                 for root, dirs, files in os.walk(folder_to_zip):
+                    if root == folder_to_zip:
+                        # Written by the raster / point cloud export meanwhile.
+                        dirs[:] = [name for name in dirs if name != COVERAGE_EXPORT_SUBFOLDER]
                     for file in files:
                         file_path = os.path.join(root, file)
+                        if os.path.abspath(file_path) in archives:
+                            continue
                         arcname = os.path.relpath(file_path, folder_to_zip)
                         zipf.write(file_path, arcname)
                         logger.debug(f"Added to ZIP: {arcname}")

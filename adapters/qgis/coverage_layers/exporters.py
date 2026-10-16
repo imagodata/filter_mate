@@ -34,6 +34,17 @@ def output_path(folder: str, layer_name: str, extension: str) -> str:
     return os.path.join(folder, safe + extension)
 
 
+def partial_path(path: str, extension: str) -> str:
+    """Name a file is written under before it is renamed ``path``, with the same extension.
+
+    A failed or canceled export never leaves a truncated file under the
+    requested name (nor in a ZIP archiving the folder meanwhile).
+    """
+    if path.lower().endswith(extension.lower()):
+        return path[:-len(extension)] + '.partial' + extension
+    return path + '.partial' + extension
+
+
 class RasterExportJob:
     """Write a raster layer as it is currently displayed (filtered pixels = NoData).
 
@@ -62,13 +73,14 @@ class RasterExportJob:
         if not self.pipe_ok:
             return ExportResult(False, path, 'raster pipe rejected the provider')
         os.makedirs(os.path.dirname(os.path.abspath(path)) or '.', exist_ok=True)
-        staging = path if (self.fmt == 'GTiff' and self.target_crs is None) else path + '.staging.tif'
+        staging = path + '.staging.tif'
         writer = QgsRasterFileWriter(staging)
         writer.setOutputFormat('GTiff')
         writer.setCreateOptions([f'COMPRESS={self.compress}', 'TILED=YES', 'BIGTIFF=IF_SAFER'])
         error = writer.writeRaster(self.pipe, self.columns, self.rows, self.extent, self.layer_crs, self.context, feedback)
-        if int(error) != 0:
-            canceled = feedback is not None and feedback.isCanceled()
+        canceled = feedback is not None and feedback.isCanceled()
+        if int(error) != 0 or canceled:  # canceled after the last block: still canceled
+            _remove(staging)
             return ExportResult(False, path, 'canceled' if canceled else f'raster writer error {int(error)}')
         manager = getattr(gdal, 'ExceptionMgr', None)
         scope = manager(useExceptions=True) if manager is not None else _NoScope()
@@ -76,24 +88,32 @@ class RasterExportJob:
             with scope:
                 return self._finish(gdal, staging, path)
         except Exception as exc:
+            _remove(staging)
             return ExportResult(False, path, str(exc))
 
     def _finish(self, gdal, staging: str, path: str) -> ExportResult:
+        """Reproject / convert the staging file, then rename it ``path`` (temporaries removed on failure)."""
+        written = [staging]
         try:
             current = staging
             if self.target_crs is not None:
                 warped = path + '.warped.tif'
+                written.append(warped)
                 if gdal.Warp(warped, current, dstSRS=self.target_crs.toWkt(), creationOptions=[f'COMPRESS={self.compress}', 'TILED=YES']) is None:
                     raise RuntimeError(gdal.GetLastErrorMsg() or 'gdal.Warp failed')
                 _remove(current)
                 current = warped
             if self.fmt == 'COG':
-                if gdal.Translate(path, current, format='COG', creationOptions=[f'COMPRESS={self.compress}']) is None:
+                cog = partial_path(path, '.tif')
+                written.append(cog)
+                if gdal.Translate(cog, current, format='COG', creationOptions=[f'COMPRESS={self.compress}']) is None:
                     raise RuntimeError(gdal.GetLastErrorMsg() or 'gdal.Translate failed')
                 _remove(current)
-            elif current != path:
-                shutil.move(current, path)
+                current = cog
+            os.replace(current, path)
         except Exception as exc:
+            for name in written:
+                _remove(name)
             return ExportResult(False, path, str(exc))
         return ExportResult(True, path)
 
@@ -129,6 +149,7 @@ class PointCloudExportJob:
 
     def __init__(self, layer, path: str, fmt: str = 'LAZ', crs=None) -> None:
         from qgis.core import QgsPointCloudLayerExporter
+        from .point_cloud_footprint import index_ready
         self.layer_name = layer.name()
         self.path = path
         self.fmt = fmt.upper() if fmt else 'LAZ'
@@ -137,13 +158,21 @@ class PointCloudExportJob:
         if self.fmt not in POINT_CLOUD_FORMATS:
             self.error = f'unsupported point cloud format {self.fmt}'
             return
+        # The exporter reads the layer index without checking it (crash on a null one).
+        if layer.providerType() == 'vpc':
+            self.error = 'a virtual point cloud (VPC) cannot be exported: export its tiles'
+            return
+        if not index_ready(layer):
+            self.error = 'the point cloud has no index yet (LAS file being indexed): try again later'
+            return
         os.makedirs(os.path.dirname(os.path.abspath(path)) or '.', exist_ok=True)
         exporter = QgsPointCloudLayerExporter(layer)
         exporter.setAllAttributes()
         if crs is not None and crs.isValid():
             exporter.setCrs(crs)
         formats = QgsPointCloudLayerExporter.ExportFormat
-        self.target = path
+        # Written under a partial name, renamed once complete.
+        self.target = partial_path(path, POINT_CLOUD_FORMATS[self.fmt])
         if self.fmt in ('LAZ', 'LAS', 'COPC'):
             exporter.setFormat(formats.Las)
             if self.fmt == 'COPC':
@@ -167,8 +196,12 @@ class PointCloudExportJob:
             except Exception:
                 pass
         self.exporter.doExport()
+        if feedback is not None and feedback.isCanceled():
+            _remove(self.target)
+            return ExportResult(False, path, 'canceled')
         error = self.exporter.lastError()
         if error:
+            _remove(self.target)
             return ExportResult(False, path, error)
         if self.fmt == 'COPC':
             from . import pdal_cli
@@ -177,14 +210,27 @@ class PointCloudExportJob:
                 fallback = self.target.replace('.staging.laz', '.laz')
                 shutil.move(self.target, fallback)
                 return ExportResult(True, fallback, f'{reason}: LAZ written instead of COPC')
+            copc = partial_path(path, '.copc.laz')
             ok, message = pdal_cli.run_pipeline([
                 {"type": "readers.las", "filename": self.target},
-                {"type": "writers.copc", "filename": path, "forward": "all", "extra_dims": "all"},
-            ])
+                {"type": "writers.copc", "filename": copc, "forward": "all", "extra_dims": "all"},
+            ], is_canceled=feedback.isCanceled if feedback is not None else None)
             _remove(self.target)
             if not ok:
+                _remove(copc)
                 return ExportResult(False, path, message)
-        return ExportResult(True, path)
+            return _rename(copc, path)
+        return _rename(self.target, path)
+
+
+def _rename(written: str, path: str) -> ExportResult:
+    """Give the complete file its name (the previous export there may be open, on Windows)."""
+    try:
+        os.replace(written, path)
+    except OSError as exc:
+        _remove(written)
+        return ExportResult(False, path, str(exc))
+    return ExportResult(True, path)
 
 
 def export_point_cloud(layer, path: str, fmt: str = 'LAZ', crs=None) -> ExportResult:
@@ -194,20 +240,26 @@ def export_point_cloud(layer, path: str, fmt: str = 'LAZ', crs=None) -> ExportRe
 
 def make_export_task(jobs, on_done=None):
     """QgsTask running export jobs in the background; ``on_done(results)`` on the main thread."""
-    from qgis.core import QgsTask
+    from qgis.core import QgsRasterBlockFeedback, QgsTask
 
     class CoverageExportTask(QgsTask):
         def __init__(self):
             super().__init__('FilterMate: export', QgsTask.CanCancel)
             self.jobs = list(jobs)
             self.results = []
+            # Canceled with the task; QgsRasterFileWriter takes no other feedback type.
+            self.feedback = QgsRasterBlockFeedback()
+
+        def cancel(self):
+            self.feedback.cancel()
+            super().cancel()
 
         def run(self):
             for index, job in enumerate(self.jobs):
                 if self.isCanceled():
                     return False
                 try:
-                    self.results.append(job.run())
+                    self.results.append(job.run(self.feedback))
                 except Exception as exc:
                     self.results.append(ExportResult(False, getattr(job, 'path', ''), str(exc)))
                 self.setProgress(100.0 * (index + 1) / max(1, len(self.jobs)))
