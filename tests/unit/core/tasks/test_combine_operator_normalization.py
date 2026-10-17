@@ -44,6 +44,11 @@ def facade():
     ("OU", "OR"),
     ("or", "OR"),
     (" and ", "AND"),
+    # translations of the i18n files (2026-10-17 review: they reached the SQL as is)
+    ("EN", "AND"), ("OF", "OR"), ("I", "AND"), ("LUB", "OR"), ("OG", "AND"), ("ELLER", "OR"),
+    ("UND NICHT", "AND NOT"), ("ȘI NU", "AND NOT"), ("或", "OR"), ("og  ikke", "AND NOT"),
+    # unknown values: AND, never injected
+    ("UNION", "AND"), ("1=1) OR (1", "AND"), ("XOR", "AND"),
 ])
 def test_operator_is_one_the_combiners_accept(facade, operator, expected):
     assert facade.normalize_sql_operator(operator) == expected
