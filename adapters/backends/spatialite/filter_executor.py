@@ -856,6 +856,13 @@ def qgis_expression_to_spatialite(expression: str, geom_col: str = 'geometry') -
     - No ILIKE operator (use LOWER() + LIKE instead)
     - Spatial functions: ST_Buffer (same), ST_Area (same), etc.
 
+    2026-10-17: same rules as qgis_expression_to_postgis. Every rewrite runs
+    outside string literals and identifiers (``"buffer_m"`` became
+    ``"Buffer_m"``), only calls are converted, length() only for the geometry,
+    ``CAST(... AS REAL)`` only when the other side is a number (a text
+    compared with a text became 0 compared with a text), and ILIKE keeps its
+    column whole (``"nom" ILIKE 'a%'`` gave ``"LOWER(nom" LIKE LOWER('a%'``).
+
     Args:
         expression: QGIS expression string
         geom_col: Geometry column name (default: 'geometry')
@@ -868,70 +875,74 @@ def qgis_expression_to_spatialite(expression: str, geom_col: str = 'geometry') -
     if not expression:
         return expression
 
+    from ....core.filter.sql_quotes import (
+        IDENTIFIER_PLACEHOLDER, LITERAL_PLACEHOLDER, cast_numeric_operands, map_geometry_length, mask_quoted,
+        unmask_quoted,
+    )
+
+    sql, parts = mask_quoted(expression)
+
     # 1. Convert QGIS spatial functions to Spatialite
     # FIX v4.2.12: Added spatial function conversions (missing in previous version)
+    sql = map_geometry_length(sql, parts, geom_col, 'ST_Length')
     spatial_conversions = {
-        '$area': f'ST_Area("{geom_col}")',
-        '$length': f'ST_Length("{geom_col}")',
-        '$perimeter': f'ST_Perimeter("{geom_col}")',
-        '$x': f'ST_X("{geom_col}")',
-        '$y': f'ST_Y("{geom_col}")',
-        '$geometry': f'"{geom_col}"',
-        'buffer': 'Buffer',  # Spatialite uses Buffer() not ST_Buffer()
-        'area': 'ST_Area',
-        'length': 'ST_Length',
-        'perimeter': 'ST_Perimeter',
+        r'\$area\b': f'ST_Area("{geom_col}")',
+        r'\$length\b': f'ST_Length("{geom_col}")',
+        r'\$perimeter\b': f'ST_Perimeter("{geom_col}")',
+        r'\$x\b': f'ST_X("{geom_col}")',
+        r'\$y\b': f'ST_Y("{geom_col}")',
+        r'\$geometry\b': f'"{geom_col}"',
+        r'\bbuffer\s*\(': 'Buffer(',  # Spatialite uses Buffer() not ST_Buffer()
+        r'\barea\s*\(': 'ST_Area(',
+        r'\bperimeter\s*\(': 'ST_Perimeter(',
     }
 
-    for qgis_func, spatialite_func in spatial_conversions.items():
-        expression = expression.replace(qgis_func, spatialite_func)
+    for pattern, replacement in spatial_conversions.items():
+        sql = re.sub(pattern, replacement, sql, flags=re.IGNORECASE)
 
     # 2. Convert IF statements to CASE WHEN
     # FIX v4.2.12: Added IF conversion (missing in previous version)
-    if expression.find('if') >= 0:
-        expression = re.sub(
-            r'if\s*\(\s*([^,]+),\s*([^,]+),\s*([^)]+)\)',
-            r'CASE WHEN \1 THEN \2 ELSE \3 END',
-            expression,
-            flags=re.IGNORECASE
-        )
-        logger.debug(f"[Spatialite] Expression after IF conversion: {expression}")
+    sql = re.sub(
+        r'\bif\s*\(\s*([^,]+),\s*([^,]+),\s*([^)]+)\)',
+        r'CASE WHEN \1 THEN \2 ELSE \3 END',
+        sql,
+        flags=re.IGNORECASE
+    )
 
     # 3. Add type casting for numeric operations
     # FIX v4.2.12: Spatialite uses CAST() instead of :: operator
     # Pattern: "field" > value → CAST("field" AS REAL) > value
-    expression = re.sub(r'("[^"]+")(\s*[><]=?\s*)', r'CAST(\1 AS REAL)\2', expression)
-    expression = re.sub(r'("[^"]+")(\s*[+\-*/]\s*)', r'CAST(\1 AS REAL)\2', expression)
+    sql = cast_numeric_operands(sql, ('>=', '<=', '>', '<', '+', '-', '*', '/'), r'CAST(\1 AS REAL)')
 
     # 4. Handle CASE expressions
-    expression = re.sub(r'\bcase\b', ' CASE ', expression, flags=re.IGNORECASE)
-    expression = re.sub(r'\bwhen\b', ' WHEN ', expression, flags=re.IGNORECASE)
-    expression = re.sub(r'\bis\b', ' IS ', expression, flags=re.IGNORECASE)
-    expression = re.sub(r'\bthen\b', ' THEN ', expression, flags=re.IGNORECASE)
-    expression = re.sub(r'\belse\b', ' ELSE ', expression, flags=re.IGNORECASE)
-    expression = re.sub(r'\bend\b', ' END ', expression, flags=re.IGNORECASE)
+    sql = re.sub(r'\bcase\b', ' CASE ', sql, flags=re.IGNORECASE)
+    sql = re.sub(r'\bwhen\b', ' WHEN ', sql, flags=re.IGNORECASE)
+    sql = re.sub(r'\bis\b', ' IS ', sql, flags=re.IGNORECASE)
+    sql = re.sub(r'\bthen\b', ' THEN ', sql, flags=re.IGNORECASE)
+    sql = re.sub(r'\belse\b', ' ELSE ', sql, flags=re.IGNORECASE)
+    sql = re.sub(r'\bend\b', ' END ', sql, flags=re.IGNORECASE)
 
     # 5. Handle LIKE/ILIKE - Spatialite doesn't have ILIKE, use LIKE with LOWER()
     # IMPORTANT: Process ILIKE first, before processing LIKE, to avoid double-replacement
-    expression = re.sub(
-        r'(\w+)\s+ILIKE\s+',
-        r'LOWER(\1) LIKE LOWER(',
-        expression,
+    sql = re.sub(
+        rf'({IDENTIFIER_PLACEHOLDER})\s+(NOT\s+)?ILIKE\s+({LITERAL_PLACEHOLDER})',
+        r'LOWER(\1) \2LIKE LOWER(\3)',
+        sql,
         flags=re.IGNORECASE
     )
-    expression = re.sub(r'\bNOT\b', ' NOT ', expression, flags=re.IGNORECASE)
-    expression = re.sub(r'\bLIKE\b', ' LIKE ', expression, flags=re.IGNORECASE)
+    sql = re.sub(r'\bNOT\b', ' NOT ', sql, flags=re.IGNORECASE)
+    sql = re.sub(r'\bLIKE\b', ' LIKE ', sql, flags=re.IGNORECASE)
 
     # 6. Convert PostgreSQL :: type casting to Spatialite CAST() function (if any remaining)
-    expression = re.sub(r'(["\\w]+)::numeric', r'CAST(\1 AS REAL)', expression)
-    expression = re.sub(r'(["\\w]+)::integer', r'CAST(\1 AS INTEGER)', expression)
-    expression = re.sub(r'(["\\w]+)::text', r'CAST(\1 AS TEXT)', expression)
-    expression = re.sub(r'(["\\w]+)::double', r'CAST(\1 AS REAL)', expression)
+    sql = re.sub(rf'({IDENTIFIER_PLACEHOLDER})::numeric', r'CAST(\1 AS REAL)', sql)
+    sql = re.sub(rf'({IDENTIFIER_PLACEHOLDER})::integer', r'CAST(\1 AS INTEGER)', sql)
+    sql = re.sub(rf'({IDENTIFIER_PLACEHOLDER})::text', r'CAST(\1 AS TEXT)', sql)
+    sql = re.sub(rf'({IDENTIFIER_PLACEHOLDER})::double', r'CAST(\1 AS REAL)', sql)
 
     # 7. Clean up multiple spaces
-    expression = re.sub(r'\s+', ' ', expression).strip()
+    sql = re.sub(r'\s+', ' ', sql).strip()
 
-    return expression
+    return unmask_quoted(sql, parts)
 
 
 def build_spatialite_query(
