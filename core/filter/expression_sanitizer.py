@@ -20,7 +20,7 @@ import logging
 import re
 from typing import Optional
 
-from .sql_quotes import map_outside_quotes
+from .sql_quotes import IDENTIFIER_PLACEHOLDER, map_outside_quotes, mask_quoted, unmask_quoted
 
 logger = logging.getLogger('FilterMate.Core.Filter.Sanitizer')
 
@@ -541,6 +541,96 @@ def sanitize_subset_string(subset_string: str) -> str:
     return sanitized
 
 
+_TOPLEVEL_TOKEN_RE = re.compile(r'\(|\)|\b(?:AND|OR|BETWEEN|CASE)\b', re.IGNORECASE)
+_IN_CLAUSE_RE = re.compile(
+    rf'^{IDENTIFIER_PLACEHOLDER}(?:\s*\.\s*{IDENTIFIER_PLACEHOLDER})?\s+IN\s*\(',
+    re.IGNORECASE,
+)
+
+
+def _split_toplevel_and(masked: str) -> Optional[list]:
+    """Depth-0 AND operands of masked text, or None if it is not an AND chain.
+
+    None when a depth-0 OR or a CASE appears: dropping an operand is only exact
+    inside a plain conjunction. The AND of ``BETWEEN a AND b`` is not a split.
+    """
+    pieces = []
+    depth = 0
+    start = 0
+    in_between = False
+    for match in _TOPLEVEL_TOKEN_RE.finditer(masked):
+        token = match.group().upper()
+        if token == '(':
+            depth += 1
+        elif token == ')':
+            depth -= 1
+        elif token == 'CASE':
+            return None
+        elif depth == 0:
+            if token == 'OR':
+                return None
+            if token == 'BETWEEN':
+                in_between = True
+            elif in_between:
+                in_between = False
+            else:
+                pieces.append(masked[start:match.start()].strip())
+                start = match.end()
+    pieces.append(masked[start:].strip())
+    return pieces
+
+
+def _strip_outer_parens(masked: str) -> str:
+    """``( x )`` -> ``x`` while the outer parentheses enclose the whole text."""
+    text = masked.strip()
+    while text.startswith('(') and text.endswith(')'):
+        depth = 0
+        for i, char in enumerate(text):
+            if char == '(':
+                depth += 1
+            elif char == ')':
+                depth -= 1
+                if depth == 0 and i < len(text) - 1:
+                    return text
+        text = text[1:-1].strip()
+    return text
+
+
+def _is_in_clause(masked: str) -> bool:
+    """``"field" IN (...)`` / ``"t"."field" IN (...)`` and nothing after the list."""
+    match = _IN_CLAUSE_RE.match(masked)
+    if not match:
+        return False
+    depth = 0
+    for i in range(match.end() - 1, len(masked)):
+        if masked[i] == '(':
+            depth += 1
+        elif masked[i] == ')':
+            depth -= 1
+            if depth == 0:
+                return masked[i + 1:].strip() == ''
+    return False
+
+
+def _flat_conjuncts(masked: str) -> list:
+    """Operands of nested AND chains: ``(A AND B) AND C`` -> A, B, C."""
+    term = _strip_outer_parens(masked)
+    pieces = _split_toplevel_and(term)
+    if not pieces or len(pieces) == 1:
+        return [term]
+    flat = []
+    for piece in pieces:
+        flat.extend(_flat_conjuncts(piece))
+    return flat
+
+
+def _comparison_key(masked: str, parts: list) -> str:
+    """Text of a term with spacing and keyword case normalized (quoted parts verbatim)."""
+    text = re.sub(r'\s+', ' ', masked).strip()
+    text = re.sub(r'\s*([(),])\s*', r'\1', text).upper()
+    return unmask_quoted(text, parts)
+
+
 def optimize_duplicate_in_clauses(expression: str) -> str:
     """
     Remove duplicate IN clauses from an expression.
@@ -548,7 +638,12 @@ def optimize_duplicate_in_clauses(expression: str) -> str:
     OPTIMIZATION v2.5.13: Multi-step filtering generates duplicate clauses like:
     (A AND fid IN (1,2,3)) AND (fid IN (1,2,3)) AND (fid IN (1,2,3))
 
-    This function detects and removes the duplicates, keeping only ONE IN clause per field.
+    2026-10-17: only an operand of the top-level AND chain that is the SAME
+    ``"field" IN (...)`` clause as an operand already kept (spacing and keyword
+    case aside, values compared verbatim) is removed: ``X AND X`` is ``X``.
+    It used to keep the first IN clause of each FIELD, so
+    ``("fid" IN (1,2,3)) AND ("fid" IN (2,3))`` lost its second condition, and
+    parentheses or spaces inside values were miscounted / squeezed.
 
     Args:
         expression: SQL expression potentially containing duplicate IN clauses
@@ -559,93 +654,36 @@ def optimize_duplicate_in_clauses(expression: str) -> str:
     if not expression:
         return expression
 
-    # Pattern to match "field" IN (...) or "table"."field" IN (...)
-    pattern = r'"([^"]+)"(?:\."([^"]+)")?\s+IN\s*\([^)]+\)'
-    matches = list(re.finditer(pattern, expression, re.IGNORECASE))
-
-    if len(matches) <= 1:
+    masked, parts = mask_quoted(expression)
+    pieces = _split_toplevel_and(masked)
+    if not pieces or len(pieces) <= 1:
         return expression  # No duplicates possible
 
-    # Group matches by field name
-    field_matches = {}
-    for match in matches:
-        if match.group(2):
-            field_key = f'"{match.group(1)}"."{match.group(2)}"'
-        else:
-            field_key = f'"{match.group(1)}"'
+    kept = []
+    seen = set()
+    for piece in pieces:
+        term = _strip_outer_parens(piece)
+        key = _comparison_key(term, parts)
+        if _is_in_clause(term) and key in seen:
+            logger.debug(f"FilterMate: Removed duplicate clause {unmask_quoted(term, parts)[:60]}")
+            continue
+        kept.append(piece)
+        seen.update(_comparison_key(flat, parts) for flat in _flat_conjuncts(piece))
 
-        if field_key not in field_matches:
-            field_matches[field_key] = []
-        field_matches[field_key].append(match)
-
-    # Check for duplicates (more than one IN clause for same field)
-    has_duplicates = False
-    for field_key, field_match_list in field_matches.items():
-        if len(field_match_list) > 1:
-            has_duplicates = True
-            logger.info(
-                f"FilterMate: OPTIMIZATION - Found {len(field_match_list)} "
-                f"duplicate IN clauses for {field_key}"
-            )
-
-    if not has_duplicates:
+    if len(kept) == len(pieces):
         return expression
 
-    # Remove duplicates - keep first occurrence, remove subsequent ones
-    result = expression
-    for field_key, field_match_list in field_matches.items():
-        if len(field_match_list) <= 1:
-            continue
-
-        # Process from end to start to preserve indices
-        for match in reversed(field_match_list[1:]):
-            start, end = match.span()
-
-            # Find the surrounding AND operator and parentheses
-            # Look for " AND (" before the match
-            search_start = max(0, start - 20)
-            before = result[search_start:start]
-
-            # Pattern: " AND (" or " AND " before the IN clause
-            and_pattern = r'\s+AND\s+\(\s*$'
-            and_match = re.search(and_pattern, before, re.IGNORECASE)
-
-            if and_match:
-                # Find corresponding closing paren after the IN clause
-                actual_start = search_start + and_match.start()
-                depth = 0
-                close_pos = end
-
-                for i, char in enumerate(result[actual_start:], actual_start):
-                    if char == '(':
-                        depth += 1
-                    elif char == ')':
-                        depth -= 1
-                        if depth == 0:
-                            close_pos = i + 1
-                            break
-
-                # Remove " AND ( ... IN (...) )"
-                result = result[:actual_start] + result[close_pos:]
-                logger.debug(f"FilterMate: Removed duplicate clause for {field_key}")
-
-    # Clean up any double spaces or malformed syntax
-    result = re.sub(r'\s+', ' ', result)
-    result = re.sub(r'\(\s*\)', '', result)  # Remove empty parens
-    result = re.sub(r'AND\s+AND', 'AND', result, flags=re.IGNORECASE)
-    result = re.sub(r'\(\s*AND', '(', result, flags=re.IGNORECASE)
-    result = re.sub(r'AND\s*\)', ')', result, flags=re.IGNORECASE)
+    result = unmask_quoted(' AND '.join(kept), parts)
 
     # Log optimization results
-    if len(result) < len(expression):
-        savings = len(expression) - len(result)
-        pct = 100 * savings / len(expression)
-        logger.info(
-            f"FilterMate: OPTIMIZATION - Reduced expression by {savings} bytes "
-            f"({pct:.1f}% reduction)"
-        )
+    savings = len(expression) - len(result)
+    pct = 100 * savings / len(expression)
+    logger.info(
+        f"FilterMate: OPTIMIZATION - Removed {len(pieces) - len(kept)} duplicate IN clauses, "
+        f"{savings} bytes ({pct:.1f}% reduction)"
+    )
 
-    return result.strip()
+    return result
 
 
 def extract_spatial_clauses_for_exists(filter_expr: str, source_table: Optional[str] = None) -> Optional[str]:
