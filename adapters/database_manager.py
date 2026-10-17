@@ -542,8 +542,8 @@ class DatabaseManager:
                 else:
                     config_data["APP"]["OPTIONS"]["FRESH_RELOAD_FLAG"] = False
                 if config_json_path:
-                    with open(config_json_path, 'w') as outfile:
-                        outfile.write(json.dumps(config_data, indent=4))
+                    from ..infrastructure.utils.atomic_io import atomic_json_write
+                    atomic_json_write(config_json_path, config_data, indent=4)
             except OSError as error:
                 logger.error(f"Failed to remove database file: {error}")
 
