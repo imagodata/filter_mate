@@ -249,23 +249,71 @@ def save_dock(name):
     save(dock(), name)
 
 
-def save_canvas(name):
-    """The canvas is as tall as the dock: keep a landscape crop centred on the raster extent."""
-    from qgis.PyQt.QtCore import QRect
-    canvas = iface.mapCanvas()
-    width, height = canvas.width(), canvas.height()
-    crop_h = min(height, int(width * 0.62))
-    save(canvas, name, QRect(0, (height - crop_h) // 2, width, crop_h))
+CROP_RATIO = 886 / 1431  # height / width of the map images (save_map)
+
+
+def framed(extent, scale, minimum=150.0):
+    """``extent`` grown by ``scale``, at least ``minimum`` map units wide, with the aspect of the map images."""
+    from qgis.core import QgsRectangle
+    centre = extent.center()
+    width = max(extent.width() * scale, minimum)
+    height = max(extent.height() * scale, minimum * CROP_RATIO)
+    width = max(width, height / CROP_RATIO)
+    return QgsRectangle(centre.x() - width / 2, centre.y() - width * CROP_RATIO / 2,
+                        centre.x() + width / 2, centre.y() + width * CROP_RATIO / 2)
+
+
+def kept_extent(name):
+    """Bounding box of the features a filter kept (``extent()`` of a filtered OGR layer can be the full one)."""
+    from qgis.core import QgsRectangle
+    box = QgsRectangle()
+    box.setMinimal()
+    for feature in layer(name).getFeatures():
+        if feature.hasGeometry():
+            box.combineExtentWith(feature.geometry().boundingBox())
+    return box if not box.isEmpty() else STATE['extent']
+
+
+def save_map(name, extent, names):
+    """Render ``names`` (top first) over ``extent`` into ``fm5_<name>.png``, away from the canvas.
+
+    Grabbing the canvas gave stale images (an earlier extent, no point cloud drawn yet); a sequential
+    render job with explicit settings waits for every layer, point clouds included.
+    """
+    from qgis.core import QgsMapRendererSequentialJob, QgsMapSettings
+    from qgis.PyQt.QtCore import QSize
+    from qgis.PyQt.QtGui import QColor
+    settings = QgsMapSettings(iface.mapCanvas().mapSettings())
+    settings.setLayers([layer(item) for item in names if layer(item) is not None])
+    settings.setBackgroundColor(QColor('#ffffff'))
+    settings.setOutputSize(QSize(1431, 886))  # 954 x 591 at 1.5 device pixel ratio, as the guide expects
+    settings.setOutputDpi(144)
+    settings.setExtent(extent)
+    job = QgsMapRendererSequentialJob(settings)
+    job.start()
+    job.waitForFinished()
+    path = os.path.join(OUT, f'fm5_{name}.png')
+    ok = job.renderedImage().save(path, 'PNG')
+    check(f'saved fm5_{name}.png', ok and os.path.getsize(path) > 2000, f'{settings.outputSize().width()}x'
+          f'{settings.outputSize().height()} over {extent.toString(0)}')
 
 
 def style_layers():
-    """Readable colours for the canvas: transparent polygons with a red outline, grey-scale raster."""
+    """Readable colours: transparent polygons with a slate outline (LiDAR buildings are red), grey-scale raster."""
     from qgis.PyQt.QtGui import QColor
     from qgis.core import QgsFillSymbol
     for item in project.mapLayers().values():
         if isinstance(item, QgsVectorLayer):
             item.renderer().setSymbol(QgsFillSymbol.createSimple({
-                'style': 'no', 'outline_color': '#d7191c', 'outline_width': '0.9'}))
+                'style': 'no', 'outline_color': '#16232b', 'outline_width': '0.6'}))
+            item.triggerRepaint()
+        elif type(item).__name__ == 'QgsPointCloudLayer' and item.renderer() is not None:
+            pixels = getattr(getattr(Qgis, 'RenderUnit', None), 'Pixels', None)
+            if pixels is None:  # QGIS < 3.30
+                from qgis.core import QgsUnitTypes
+                pixels = QgsUnitTypes.RenderPixels
+            item.renderer().setPointSize(2.5)  # default 1 px points vanish once the canvas is scaled down
+            item.renderer().setPointSizeUnit(pixels)
             item.triggerRepaint()
 
 
@@ -344,15 +392,20 @@ def s_vector_select():
     d.toolBox_tabTools.setCurrentIndex(0)
     d.mGroupBox_exploring_single_selection.setChecked(True)
     source = layer(DS['vector'])
-    wanted = (lambda f: f['name'] == 'east_a') if not REAL else (lambda f: True)
-    feature = next(f for f in source.getFeatures() if wanted(f))
+    if REAL:  # the largest building inside the DTM: its clip reads at site scale
+        inside = [f for f in source.getFeatures()
+                  if f.hasGeometry() and STATE['extent'].contains(f.geometry().boundingBox())]
+        feature = max(inside, key=lambda f: f.geometry().area())
+    else:
+        feature = next(f for f in source.getFeatures() if f['name'] == 'east_a')
+    STATE['selection_box'] = feature.geometry().boundingBox()
     d.mFeaturePickerWidget_exploring_single_selection.setFeature(feature.id())
     STATE['targets'] = [DS['raster']] + ([DS['cloud']] if has_point_clouds() else [])
     set_targets(STATE['targets'])
     set_predicates(['Intersect'])
     d.pushButton_checkable_filtering_buffer_value.setChecked(True)
-    # 5 m on the real data; the synthetic zones are small squares in a 1 km DEM: a wider buffer keeps more pixels
-    d.mQgsDoubleSpinBox_filtering_buffer_value.setValue(5.0 if REAL else 150.0)
+    # 30 m around one building on the real data; the synthetic zones are small squares in a 1 km DEM
+    d.mQgsDoubleSpinBox_filtering_buffer_value.setValue(30.0 if REAL else 150.0)
     ready = targets_ready(STATE['targets'])
     return lambda: bool(dock().get_current_features()[0]) and ready()
 
@@ -378,12 +431,20 @@ def s_shot_filtering():
 
 def s_shot_vector_to_raster():
     check('vector -> raster: clipped VRT', layer(DS['raster']).source().endswith('.vrt'))
-    iface.mapCanvas().setExtent(STATE['extent'])
-    return refresh_canvas()
+    STATE['frame'] = framed(STATE['selection_box'], 2.4)  # the clip, with room around it
+    raster = layer(DS['raster'])
+    STATE['raster_renderer'] = raster.renderer().clone()
+    enhancement = getattr(raster.renderer(), 'contrastEnhancement', lambda: None)()
+    if enhancement is not None:  # stretch the grey on the clipped pixels, not on the whole DTM
+        stats = raster.dataProvider().bandStatistics(1)
+        enhancement.setMinimumValue(stats.minimumValue)
+        enhancement.setMaximumValue(stats.maximumValue)
+    return None
 
 
 def s_save_vector_to_raster():
-    save_canvas('vector_to_raster')
+    save_map('vector_to_raster', STATE['frame'], [DS['vector'], DS['raster']])
+    layer(DS['raster']).setRenderer(STATE.pop('raster_renderer'))
     run_task('undo')
     return lambda: not layer(DS['raster']).source().endswith('.vrt') and tasks_idle()
 
@@ -426,11 +487,13 @@ def s_raster_filter():
 
 def s_raster_to_vector():
     check('raster -> vector: target filtered', layer(DS['vector']).subsetString() != '')
-    return refresh_canvas()
+    STATE['frame'] = framed(kept_extent(DS['vector']), 1.15)
+    return None
 
 
 def s_raster_save():
-    save_canvas('raster_to_vector')
+    targets = [DS['vector']] + ([DS['other_vector']] if DS['other_vector'] else [])
+    save_map('raster_to_vector', STATE['frame'], targets + [DS['raster']])
     dock().pushButton_checkable_exploring_selecting.setChecked(False)
     run_task('unfilter')
     return lambda: layer(DS['vector']).subsetString() == '' and tasks_idle()
@@ -476,14 +539,18 @@ def s_cloud_shot():
 def s_cloud_to_vector():
     if not has_point_clouds():
         return None
-    iface.mapCanvas().setExtent(STATE['extent'])
-    return refresh_canvas()
+    cloud = layer(DS['cloud'])
+    print(f"   [cloud] visible={project.layerTreeRoot().findLayer(cloud.id()).isVisible()} "
+          f"subset={cloud.subsetString()!r} source={cloud.source()[-60:]!r} extent={cloud.extent().toString(0)} "
+          f"renderer={cloud.renderer().type() if cloud.renderer() else None}", flush=True)
+    STATE['frame'] = framed(kept_extent(DS['vector']), 1.15)
+    return None
 
 
 def s_cloud_save():
     if not has_point_clouds():
         return None
-    save_canvas('pointcloud_to_vector')
+    save_map('pointcloud_to_vector', STATE['frame'], [DS['vector'], DS['cloud']])
     run_task('undo')
     return lambda: layer(DS['vector']).subsetString() == '' and tasks_idle()
 

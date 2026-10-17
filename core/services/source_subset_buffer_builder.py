@@ -325,14 +325,23 @@ class SourceSubsetBufferBuilder:
         self,
         filtering_params: Dict[str, Any]
     ) -> Dict[str, int]:
-        """Extract buffer type and segments."""
+        """Extract buffer type and segments.
+
+        2026-10-17: they apply as soon as a buffer is active. In FilterMate 5
+        the buffer type switch is hidden (merged into the buffer value row,
+        ui/layout/mockup_layout.merge_buffer_rows) and only follows the value
+        switch through signals that a layer change blocks: ``has_buffer_type``
+        stayed False and a Flat or Square buffer came out Round. The type and
+        segment count shown on the active buffer row are the ones applied.
+        """
         has_buffer_type = filtering_params.get("has_buffer_type", False)
+        has_buffer = filtering_params.get("has_buffer_value", False)
         buffer_type_str = filtering_params.get("buffer_type", "Round")
 
-        logger.info(f"  has_buffer_type: {has_buffer_type}")
+        logger.info(f"  has_buffer_type: {has_buffer_type} (buffer active: {has_buffer})")
         logger.info(f"  buffer_type: {buffer_type_str}")
 
-        if has_buffer_type:
+        if has_buffer_type or has_buffer:
             buffer_type = BUFFER_TYPE_MAPPING.get(buffer_type_str, DEFAULT_BUFFER_TYPE)
             buffer_segments = filtering_params.get("buffer_segments", DEFAULT_BUFFER_SEGMENTS)
 

@@ -76,7 +76,7 @@ class HeightAboveGroundTask(QgsTask):
     done = pyqtSignal(bool, str)
 
     def __init__(self, layer, dem_layer) -> None:
-        super().__init__(f"FilterMate: height above {dem_layer.name()}", QgsTask.CanCancel)
+        super().__init__(f"FilterMate: height above {dem_layer.name()}", QgsTask.Flag.CanCancel)
         self.layer_id = layer.id()
         self.layer_name = layer.name()
         self.before: LayerSnapshot = take_snapshot(layer, LayerKind.POINT_CLOUD)

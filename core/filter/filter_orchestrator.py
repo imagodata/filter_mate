@@ -19,6 +19,7 @@ Hexagonal Architecture:
 """
 
 import logging
+import re
 from typing import Optional, Dict, Any, Tuple
 from qgis.core import (
     QgsVectorLayer,
@@ -37,6 +38,21 @@ _backend_services = get_backend_services()
 BackendFactory = _backend_services.get_backend_factory()
 
 logger = logging.getLogger('filter_mate')
+
+# Returned by a backend's build_expression() to hand the layer to the OGR
+# backend (adapters/backends/spatialite/expression_builder.USE_OGR_FALLBACK).
+# It must never reach apply_filter() nor a subset string.
+OGR_FALLBACK_SENTINEL = "__USE_OGR_FALLBACK__"
+
+# 2026-10-17: a key list written by a previous spatial step: ``"fid" IN (...)``,
+# ``"<primary key>" IN (...)`` (PostgreSQL, ``cleabs``, ``ogc_fid``...), the
+# JSON form ``"fid" IN (SELECT value FROM json_each('...'))``, a Disjoint
+# complement ``NOT ("fid" IN (...))``, or an empty / full result.
+_KEY_LIST_SUBSET_RE = re.compile(
+    r"""^\s*(?:NOT\s*\(\s*)?\(?\s*(["']?)(?P<name>[A-Za-z_]\w*)\1\s+(?:IN\s*\(|=\s*-?\d+)""",
+    re.IGNORECASE,
+)
+_CONSTANT_SUBSETS = ("1 = 0", "1 = 1", "1=0", "1=1")
 
 
 class FilterOrchestrator:
@@ -229,14 +245,17 @@ class FilterOrchestrator:
             logger.debug("✅ EXPRESSION BUILDING COMPLETE")
             logger.debug("=" * 80)
 
-            if not expression:
-                # Try OGR fallback if primary backend failed
+            if not expression or expression == OGR_FALLBACK_SENTINEL:
+                # Try OGR fallback if primary backend failed, or hand the
+                # layer over when the backend asks for it (2026-10-16: the
+                # sentinel used to reach apply_filter(), which "FAILED" first)
                 return self._try_fallback_backend(
                     layer=layer,
                     layer_props=layer_props,
                     backend_name=backend_name,
                     source_geometries=source_geometries,
-                    expression_builder=expression_builder
+                    expression_builder=expression_builder,
+                    requested=bool(expression)
                 )
 
             logger.debug(f"  ✓ Expression built: {len(expression)} chars")
@@ -502,11 +521,10 @@ class FilterOrchestrator:
         )
 
         # Check for FID-only filters from previous spatial steps
-        is_fid_only_filter = bool(re.match(
-            r'^\s*\(?\s*(["\']?)fid\1\s+(IN\s*\(|=\s*-?\d+)',
-            old_subset,
-            re.IGNORECASE
-        ))
+        # 2026-10-17: any key-list form a backend writes (see
+        # _is_key_list_subset); it used to match "fid" only, so "cleabs" IN
+        # (...) or "ogc_fid" IN (...) accumulated as an attribute filter.
+        is_fid_only_filter = self._is_key_list_subset(layer, old_subset)
 
         # Check for style/display expression patterns
         is_style_expression = any(re.search(pattern, old_subset, re.IGNORECASE | re.DOTALL) for pattern in [
@@ -544,6 +562,28 @@ class FilterOrchestrator:
             logger.debug("  → Reason: Preserving user's attribute filter with geometric filter")
             return old_subset, combine_operator
 
+    @staticmethod
+    def _is_key_list_subset(layer, subset: str) -> bool:
+        """Whether ``subset`` is the key list of a previous spatial step (2026-10-17).
+
+        The key must be ``fid`` or one of the layer's primary-key fields, so a
+        user filter such as ``"nature" IN ('Route', 'Chemin')`` stays an
+        attribute filter.
+        """
+        text = (subset or '').strip()
+        if text in _CONSTANT_SUBSETS:
+            return True
+        match = _KEY_LIST_SUBSET_RE.match(text)
+        if not match:
+            return False
+        keys = {'fid'}
+        try:
+            fields = layer.fields()
+            keys |= {fields.at(index).name().lower() for index in layer.primaryKeyAttributes()}
+        except Exception:  # nosec B110 - no primary key info: "fid" only
+            pass
+        return match.group('name').lower() in keys
+
     def _get_combine_operator(self) -> Optional[str]:
         """
         Get the logical operator for combining filters.
@@ -561,7 +601,8 @@ class FilterOrchestrator:
         layer_props: Dict[str, Any],
         backend_name: str,
         source_geometries: Dict[str, Any],
-        expression_builder: Any
+        expression_builder: Any,
+        requested: bool = False
     ) -> bool:
         """
         Try OGR backend when primary backend fails to build expression.
@@ -569,6 +610,8 @@ class FilterOrchestrator:
         This handles cases like:
         - Spatialite source geometry not available
         - PostgreSQL WKT too large for embedding
+        - The backend asking for it (OGR_FALLBACK_SENTINEL): source WKT too
+          large to inline, GeometryCollection, dynamic buffer expression
 
         Args:
             layer: Layer to filter
@@ -576,6 +619,8 @@ class FilterOrchestrator:
             backend_name: Name of backend that failed
             source_geometries: Available source geometries
             expression_builder: ExpressionBuilder instance
+            requested: True when the backend returned OGR_FALLBACK_SENTINEL
+                (an expected hand-over, not a failure)
 
         Returns:
             bool: True if fallback succeeded, False otherwise
@@ -585,8 +630,11 @@ class FilterOrchestrator:
                 f"{layer.name()}: {backend_name} expression building failed (no fallback for this backend)"
             )
 
-        logger.warning(f"⚠️ {backend_name.upper()} expression building failed for {layer.name()}")
-        logger.warning("  → Attempting OGR fallback (QGIS processing)...")
+        if requested:
+            logger.info(f"{layer.name()}: {backend_name} hands the layer to the OGR backend (QGIS processing, exact)")
+        else:
+            logger.warning(f"⚠️ {backend_name.upper()} expression building failed for {layer.name()}")
+            logger.warning("  → Attempting OGR fallback (QGIS processing)...")
 
         try:
             ogr_backend = BackendFactory.get_backend('ogr', layer, self.task_parameters)
@@ -807,10 +855,18 @@ class FilterOrchestrator:
         Args:
             backend: Backend instance that may have warnings
         """
-        if hasattr(backend, 'user_warnings') and backend.user_warnings:
-            if not hasattr(self.parent_task, 'backend_warnings'):
-                self.parent_task.backend_warnings = []
-            self.parent_task.backend_warnings.extend(backend.user_warnings)
+        warnings = getattr(backend, 'user_warnings', None)
+        if not isinstance(warnings, list) or not warnings:
+            return
+        if not hasattr(self.parent_task, 'backend_warnings'):
+            self.parent_task.backend_warnings = []
+        self.parent_task.backend_warnings.extend(warnings)
+        # 2026-10-17: backend_warnings was read by nothing; warning_messages is
+        # what the finished handler shows in the message bar.
+        messages = getattr(self.parent_task, 'warning_messages', None)
+        if isinstance(messages, list):
+            messages.extend(w for w in warnings if w not in messages)
+        backend.user_warnings = []
 
     def _log_filter_success(self, layer: QgsVectorLayer, backend_name: str) -> None:
         """

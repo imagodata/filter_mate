@@ -108,14 +108,15 @@ class TestPointCloudCard:
 
 
 class TestTools:
-    def test_raster_tools(self):
-        assert extras.tools_for("raster") == ["pushButton_checkable_exploring_raster_hover",
-                                              "pushButton_checkable_exploring_raster_zone",
+    def test_raster_rail_adds_the_pipette_and_the_style_link(self):
+        # Picker, zoom, preview and reset are the shared buttons; the pipette is a selection tool like the picker.
+        # Hover and statistics are off the rail.
+        assert extras.tools_for("raster") == ["pushButton_checkable_exploring_raster_pipette",
                                               "pushButton_checkable_exploring_raster_link"]
 
-    def test_point_cloud_tools(self):
-        assert extras.tools_for("point_cloud") == ["pushButton_exploring_point_cloud_profile",
-                                                   "pushButton_exploring_point_cloud_3d"]
+    def test_point_cloud_rail_adds_the_class_pipette(self):
+        # The elevation profile and the 3D view are the standard QGIS tools: not on the rail.
+        assert extras.tools_for("point_cloud") == ["pushButton_checkable_exploring_point_cloud_pipette"]
 
     def test_vector_has_no_extra_tool(self):
         assert extras.tools_for("vector") == []
@@ -127,7 +128,7 @@ class TestTools:
 
     def test_every_tool_has_an_icon(self):
         assert all(body.strip().startswith("<") for body in (extras.ICON_HOVER, extras.ICON_ZONE, extras.ICON_LINK_STYLE,
-                                                            extras.ICON_PROFILE, extras.ICON_3D))
+                                                            extras.ICON_PIPETTE, extras.ICON_PROFILE, extras.ICON_3D))
 
 
 class TestZone:
@@ -262,7 +263,10 @@ class FakePanel:
     def current_band(self):
         return 1
 
-    def set_hover_value(self, x, y, value=None):
+    def current_derivative(self):
+        return types.SimpleNamespace(is_terrain=False, value="value")
+
+    def set_hover_value(self, x, y, value=None, derived=None):
         self.hover.append(value)
 
 
@@ -318,6 +322,22 @@ class TestRangeLinkedToStyle:
         env.dock.show_for(env.layers["r1"], "raster")
         env.link.setChecked(True)
         assert ("link", "r1") in env.adapter.calls
+
+    def test_a_colour_selection_keeps_the_stretch(self, dock_extras):
+        env = dock_extras
+        env.controller._raster_panel.selection = lambda: types.SimpleNamespace(mode=types.SimpleNamespace(value="expression"))
+        env.controller.active_layer = env.layers["r1"]
+        env.dock.show_for(env.layers["r1"], "raster")
+        env.link.setChecked(True)
+        assert not [c for c in env.adapter.calls if c[0] == "link"]
+
+    def test_an_empty_pipette_keeps_the_stretch(self, dock_extras):
+        env = dock_extras
+        env.controller._raster_panel.active_mode = lambda: types.SimpleNamespace(value="pipette")
+        env.controller.active_layer = env.layers["r1"]
+        env.dock.show_for(env.layers["r1"], "raster")
+        env.link.setChecked(True)
+        assert not [c for c in env.adapter.calls if c[0] == "link"]
 
     def test_switching_raster_unlinks_the_outgoing_one(self, dock_extras):
         self._link_r1(dock_extras)
@@ -387,3 +407,24 @@ def test_value_under_the_cursor_reads_the_new_source_after_a_filter(dock_extras)
     layer._source = "/cache/r1_cut.vrt"
     env.dock._read_hover_value()
     assert env.controller.based == ["/data/r1.tif", "/cache/r1_cut.vrt"]
+
+
+class TestClassPipette:
+    def _pipette(self, env):
+        calls = []
+        env.controller._on_class_pick_toggled = calls.append
+        pipette = FakeButton(env.dock._on_class_pipette_toggled)
+        env.dock._tools["pushButton_checkable_exploring_point_cloud_pipette"] = pipette
+        return pipette, calls
+
+    def test_button_drives_the_class_picker(self, dock_extras):
+        pipette, calls = self._pipette(dock_extras)
+        pipette.setChecked(True)
+        pipette.setChecked(False)
+        assert calls == [True, False]
+
+    def test_leaving_the_layer_takes_the_picker_off_the_map(self, dock_extras):
+        pipette, calls = self._pipette(dock_extras)
+        pipette.setChecked(True)
+        dock_extras.dock.leave()
+        assert calls == [True, False] and not pipette.isChecked()

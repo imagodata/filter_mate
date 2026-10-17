@@ -211,8 +211,8 @@ def get_layer_kind(layer: Any) -> Any:
         from qgis.core import QgsVectorLayer
         if isinstance(QgsVectorLayer, type) and isinstance(layer, QgsVectorLayer):
             return LayerKind.VECTOR
-    except Exception:
-        pass
+    except Exception as exc:
+        logger.debug(f"[FM5] vector layer test failed: {exc}")
     if is_point_cloud_layer(layer):
         return LayerKind.POINT_CLOUD
     if is_raster_layer(layer):

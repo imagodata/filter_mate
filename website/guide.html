@@ -155,15 +155,15 @@
     <p>FilterMate is a dock panel. By default it opens on the right side of the QGIS window and can be moved, floated or resized like any other QGIS panel.</p>
     <figure>
         <img src="img/guide/qgis-window.png" alt="QGIS 4.2 with a small BD TOPO project and the FilterMate panel docked on the right" loading="lazy" width="1600" height="945">
-        <figcaption>QGIS 4.2 (dark theme) with the FilterMate panel docked on the right. The project holds five GeoPackage layers.</figcaption>
+        <figcaption>QGIS 4.2 with the FilterMate panel docked on the right. The project holds five GeoPackage layers.</figcaption>
     </figure>
 
     <p>The panel is made of four areas, from top to bottom:</p>
     <div class="table-wrap">
     <table>
         <tr><th>Area</th><th>What it does</th></tr>
-        <tr><td><strong>Header badges</strong></td><td>The <span class="badge" style="background:#f39c12;">&#9733; n</span> badge counts saved favorites and opens the favorites menu. The colored badge shows which backend handles the current layer: <span class="badge" style="background:#58d68d;">PostgreSQL</span> <span class="badge" style="background:#bb8fce;">Spatialite</span> <span class="badge" style="background:#5dade2;">OGR</span> <span class="badge" style="background:#f0b27a;">Memory</span>.</td></tr>
-        <tr><td><strong>Exploring zone</strong></td><td>Pick the reference features on the current layer: single, multiple or expression-based selection, plus a vertical rail of navigation buttons.</td></tr>
+        <tr><td><strong>Header badges</strong></td><td>The &#9733; button opens the favorites menu; it turns amber once favorites are saved. The colored badge shows the kind of the current layer and what reads it: the backend for a vector layer (PostgreSQL, Spatialite, OGR, Memory), the provider for a raster or a point cloud. For example <span class="badge" style="background:#6cb4ee;color:#141414;">Vector · Spatialite</span> <span class="badge" style="background:#f0b35a;color:#141414;">Raster · GDAL</span> <span class="badge" style="background:#5ad6a5;color:#141414;">Point cloud · COPC</span>.</td></tr>
+        <tr><td><strong>Exploring zone</strong></td><td>Select on the current layer, described by the card at the top. For a vector layer: single, multiple or expression-based selection, plus a vertical rail of navigation buttons. Rasters and point clouds get their own tools (<a href="#raster-lidar">section 13</a>).</td></tr>
         <tr><td><strong>Tool tabs</strong></td><td>Three collapsible tabs: <strong>Filtering</strong>, <strong>Exporting</strong> and <strong>Configuration</strong>. Only one is open at a time.</td></tr>
         <tr><td><strong>Action bar</strong></td><td>The six buttons that actually do something: Filter, Undo, Redo, Unfilter, Export, About.</td></tr>
     </table>
@@ -176,8 +176,8 @@
         </figure>
         <div>
             <figure>
-                <img src="img/guide/header-badges.png" alt="Favorites and backend badges in the panel header" loading="lazy" width="614" height="42">
-                <figcaption>Header: 4 favorites saved, current layer handled by the Spatialite backend.</figcaption>
+                <img src="img/guide/header-badges.png" alt="Favorites and backend badges in the panel header" loading="lazy" width="614" height="48">
+                <figcaption>Header: the favorites button and the current layer, a vector layer read by the Spatialite backend.</figcaption>
             </figure>
             <figure>
                 <img src="img/guide/action-bar.png" alt="The action bar with Filter, Undo, Redo, Unfilter, Export and About" loading="lazy" width="614" height="119">
@@ -210,7 +210,7 @@
 
     <h3>Single selection</h3>
     <figure class="narrow">
-        <img src="img/guide/exploring-single.png" alt="Single selection mode with a road picked by name" loading="lazy" width="596" height="452">
+        <img src="img/guide/exploring-single.png" alt="Single selection mode with a road picked by name" loading="lazy" width="596" height="449">
         <figcaption>Single selection on a road layer: the feature is picked by name, the field below sets which attribute is displayed.</figcaption>
     </figure>
     <p>
@@ -221,7 +221,7 @@
 
     <h3>Multiple selection</h3>
     <figure class="narrow">
-        <img src="img/guide/exploring-multiple.png" alt="Multiple selection with four roads checked" loading="lazy" width="596" height="452">
+        <img src="img/guide/exploring-multiple.png" alt="Multiple selection with four roads checked" loading="lazy" width="596" height="449">
         <figcaption>Multiple selection: four roads are checked. The line above the list summarises the selection; the text box filters the list as you type.</figcaption>
     </figure>
     <p>
@@ -231,7 +231,7 @@
 
     <h3>Custom selection (expression)</h3>
     <figure class="narrow">
-        <img src="img/guide/exploring-custom.png" alt="Custom selection with a QGIS expression" loading="lazy" width="596" height="452">
+        <img src="img/guide/exploring-custom.png" alt="Custom selection with a QGIS expression" loading="lazy" width="596" height="449">
         <figcaption>Custom selection: any QGIS expression, here roads whose importance is 3 or 4.</figcaption>
     </figure>
     <p>
@@ -267,7 +267,7 @@
         <p class="credit">BD TOPO® 3.5 © IGN, Grenade.</p>
     </div>
     <figure class="narrow">
-        <img src="img/guide/filtering-tab.png" alt="The Filtering tab with target layers, predicate and buffer set" loading="lazy" width="590" height="620">
+        <img src="img/guide/filtering-tab.png" alt="The Filtering tab with target layers, predicate and buffer set" loading="lazy" width="590" height="617">
         <figcaption>Filtering tab: source layer, two target layers, combine operators, Intersect predicate, 50 m round buffer.</figcaption>
     </figure>
     <p>
@@ -469,7 +469,7 @@ AND ST_Intersects("geom",
         <p class="credit">BD TOPO® 3.5 © IGN, Saint-Gaudens.</p>
     </div>
     <figure class="narrow">
-        <img src="img/guide/export-tab.png" alt="The Exporting tab" loading="lazy" width="590" height="620">
+        <img src="img/guide/export-tab.png" alt="The Exporting tab" loading="lazy" width="590" height="617">
         <figcaption>Exporting tab: layers, CRS, style format, output format, output folder with batch mode, ZIP.</figcaption>
     </figure>
     <p>
@@ -502,7 +502,7 @@ AND ST_Intersects("geom",
 <section id="configuration">
     <h2><span class="num">10</span>Configuration</h2>
     <figure class="narrow">
-        <img src="img/guide/configuration-tab.png" alt="The Configuration tab showing the settings tree" loading="lazy" width="590" height="620">
+        <img src="img/guide/configuration-tab.png" alt="The Configuration tab showing the settings tree" loading="lazy" width="590" height="617">
         <figcaption>Configuration tab: a tree of settings, edited in place. Changes are saved immediately.</figcaption>
     </figure>
     <p>
@@ -593,7 +593,13 @@ processing.run("filtermate:batch_filter", {
 
 <!-- 13 ----------------------------------------------------------------- -->
 <section id="raster-lidar">
-    <h2><span class="num">13</span>Rasters and point clouds <small>(5.0)</small></h2>
+    <div class="band">
+        <video class="sheet-video" muted loop playsinline preload="none" poster="video/slope.webp" data-src="video/slope.mp4" aria-hidden="true"></video>
+        <div class="sheet-scrim"></div>
+        <h2><span class="num">13</span>Rasters and point clouds <small>(5.0)</small></h2>
+        <button class="watch" type="button" data-watch aria-label="Watch the video: Rasters and point clouds"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Watch</button>
+        <p class="credit">LiDAR HD, BD TOPO® © IGN, Estavar (Pyrénées-Orientales).</p>
+    </div>
     <div class="callout tip"><p><strong>New in 5.0.</strong> Raster and LiDAR point cloud layers are first-class sources and targets. Requirements are unchanged: QGIS 3.22 or later (point clouds from 3.26), Qt5 or Qt6. PDAL 2.4 or later is optional (height above a DTM, direct COPC writing).</p></div>
     <p>
         The principle stays the same: <strong>EXPLORING selects</strong> on the current layer, <strong>FILTERING relates</strong> that selection to the layers to filter
@@ -620,8 +626,13 @@ processing.run("filtermate:batch_filter", {
     <ul>
         <li>ASPRS and LiDAR HD <strong>classes</strong> with presets (ground, vegetation, buildings, above ground, water, without noise).</li>
         <li>Z (to the millimetre), intensity and return <strong>ranges</strong>; <strong>height above a DTM</strong> computed with PDAL.</li>
+        <li>Conditions chained with AND / OR on any attribute, the classification included: <code>Classification = 6</code> with a height above the DTM of at least 9 m keeps the tall roofs (story 10).</li>
         <li>"Apply to the other tiles of the dataset" for data delivered in tiles (LiDAR HD).</li>
     </ul>
+    <figure class="video-figure">
+        <button class="example-media" type="button" data-watch data-video="video/heights.mp4" data-poster="video/heights.webp" aria-label="Watch the building height example"><img src="video/heights.webp" alt="LiDAR building points more than 9 m above the terrain and the buildings they belong to" loading="lazy" width="1280" height="720"><span class="media-play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Watch</span></button>
+        <figcaption>Point cloud source: building points more than 9 m above the DTM (computed with PDAL) keep the taller buildings.</figcaption>
+    </figure>
     <h3>What happens to the targets</h3>
     <div class="table-wrap">
     <table>
@@ -633,12 +644,16 @@ processing.run("filtermate:batch_filter", {
         </tbody>
     </table>
     </div>
+    <figure class="video-figure">
+        <button class="example-media" type="button" data-watch data-video="video/survey.mp4" data-poster="video/survey.webp" aria-label="Watch the survey delivery example"><img src="video/survey.webp" alt="The church and 50 m around it clip the terrain model and the point cloud, then both are exported" loading="lazy" width="1280" height="720"><span class="media-play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Watch</span></button>
+        <figcaption>Vector source, raster and point cloud targets: the church and 50 m around it clip both, then EXPORTING writes them to a ZIP.</figcaption>
+    </figure>
     <h3>Nine combinations</h3>
     <p>
         The source (the current layer) and the targets can be of any kind: vector → vector, vector → raster, vector → point cloud, raster → vector, raster → raster,
         raster → point cloud, point cloud → vector, point cloud → raster and point cloud → point cloud. FILTERING keeps its form: layers to filter, combine operators,
-        geometric predicates and buffer. Two settings are new: the <strong>minimum coverage</strong> (%) of polygons by the source geometry, and <strong>Disjoint</strong>,
-        which keeps what lies outside it.
+        geometric predicates and buffer. One setting is new: the <strong>minimum coverage</strong> (%) of polygons by the source geometry. <strong>Disjoint</strong>,
+        already one of the eight predicates, keeps what lies outside the source geometry for every kind of target.
     </p>
     <div class="fig-row">
         <figure class="narrow">
@@ -684,7 +699,7 @@ processing.run("filtermate:batch_filter", {
     <div class="callout"><p><strong>PDAL.</strong> The height above a DTM and the direct writing of COPC files need PDAL 2.4 or later. With an older PDAL, point cloud targets are clipped by the QGIS exporter, a COPC export writes LAZ with a message, and the height above a DTM is disabled with a message naming the version.</p></div>
     <h3>Automation</h3>
     <p>
-        Seven Processing algorithms (<code>cross_filter_from_raster</code>, <code>cross_filter_from_point_cloud</code>, <code>cross_filter_from_geometry</code>, <code>filter_point_cloud</code>,
+        Nine Processing algorithms (<code>batch_filter</code> and <code>cross_filter</code> from 4.x, <code>cross_filter_from_raster</code>, <code>cross_filter_from_point_cloud</code>, <code>cross_filter_from_geometry</code>, <code>filter_point_cloud</code>,
         <code>clear_filters</code>, <code>apply_favorite</code>, <code>export_filtered_layers</code>) and four ready-made models (extraction by area, high vegetation near lines,
         parcels on gentle slopes, buildings missing from the LiDAR) run from the toolbox, <code>qgis_process</code> (the plugin starts without a QGIS window), Python and the REST API.
         See <a href="https://github.com/imagodata/filter_mate/blob/main/docs/AUTOMATION.md" target="_blank" rel="noopener">docs/AUTOMATION.md</a>.

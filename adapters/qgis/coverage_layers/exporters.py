@@ -209,8 +209,8 @@ class PointCloudExportJob:
         if feedback is not None:
             try:
                 self.exporter.setFeedback(feedback)
-            except Exception:
-                pass
+            except Exception as exc:
+                logger.debug(f"[FM5] export feedback not attached: {exc}")
         self.exporter.doExport()
         if feedback is not None and feedback.isCanceled():
             _remove(self.target)
@@ -260,7 +260,7 @@ def make_export_task(jobs, on_done=None):
 
     class CoverageExportTask(QgsTask):
         def __init__(self):
-            super().__init__('FilterMate: export', QgsTask.CanCancel)
+            super().__init__('FilterMate: export', QgsTask.Flag.CanCancel)
             self.jobs = list(jobs)
             self.results = []
             # Canceled with the task; QgsRasterFileWriter takes no other feedback type.

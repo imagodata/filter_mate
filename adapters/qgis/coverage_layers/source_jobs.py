@@ -171,8 +171,10 @@ class RasterSourceJob(SourceJob):
     def apply(self, layer) -> Optional[LayerSnapshot]:
         if not self._filter_source or (self.selection.mode is RasterSelectionMode.EXPRESSION and self._virtual is None):
             return None
-        if self._band_count > 1 or self.selection.mode is RasterSelectionMode.EXPRESSION:
-            # Multiband (RGB...) or expression: keep every band, mask outside the
+        if (self._band_count > 1 or self.selection.mode is RasterSelectionMode.EXPRESSION
+                or self.selection.derivative.is_terrain):
+            # Multiband (RGB...), expression or terrain derivative (the raster calculator
+            # has none): keep every band, mask outside the
             # selected area with a clipped VRT (a virtual raster has one band).
             return self._apply_clip(layer)
         from .raster_adapter import selection_virtual_uri, set_user_nodata
@@ -182,8 +184,8 @@ class RasterSourceJob(SourceJob):
             provider = base.dataProvider()
             if provider.sourceHasNoDataValue(self.selection.band):
                 nodata = float(provider.sourceNoDataValue(self.selection.band))
-        except Exception:
-            pass
+        except Exception as exc:
+            logger.debug(f"[FM5] source NoData value unreadable: {exc}")
         uri, nodata = selection_virtual_uri(self.before.base_source, self.before.base_provider, base, self.selection, nodata)
         if not swap_source(layer, uri, 'virtualraster'):
             self.message = 'virtual raster of the selection could not be opened'
@@ -198,7 +200,12 @@ class RasterSourceJob(SourceJob):
         if not getattr(self, '_computed', False) and self._provider is not None:
             # No target: the task never ran compute(), the selection is read here (main thread).
             self.raw_geometry = self._raw_geometry(lambda: False)
-        if self.raw_geometry.isEmpty() or self.before.base_provider != 'gdal':
+        if self.raw_geometry.isEmpty():
+            self.message = self.message or 'no pixel is selected: the source is left as it is'
+            return None
+        if self.before.base_provider != 'gdal':
+            self.message = (f"the source cannot be masked: its provider ({self.before.base_provider}) is not a GDAL file; "
+                            "its pixels are still used as the selection")
             return None
         from . import cache
         job = RasterTargetJob(layer, None)

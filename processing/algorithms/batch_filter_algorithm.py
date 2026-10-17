@@ -59,14 +59,14 @@ class BatchFilterAlgorithm(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterMultipleLayers(
                 self.INPUT_LAYERS,
-                self.tr("Couches à filtrer"),
+                self.tr("Layers to filter"),
                 layerType=QgsProcessing.SourceType.TypeVectorAnyGeometry,
             )
         )
         self.addParameter(
             QgsProcessingParameterExpression(
                 self.EXPRESSION,
-                self.tr("Expression de filtre"),
+                self.tr("Filter expression"),
             )
         )
 
@@ -85,7 +85,7 @@ class BatchFilterAlgorithm(QgsProcessingAlgorithm):
         expression = self.parameterAsExpression(parameters, self.EXPRESSION, context)
 
         if not layers:
-            raise QgsProcessingException(self.tr("Aucune couche sélectionnée."))
+            raise QgsProcessingException(self.tr("No layer selected."))
 
         filtered_count = 0
         failed_count = 0
@@ -100,7 +100,7 @@ class BatchFilterAlgorithm(QgsProcessingAlgorithm):
             else:
                 failed_count += 1
                 feedback.pushWarning(
-                    self.tr("Expression invalide pour la couche '{0}', ignorée.").format(
+                    self.tr("Invalid expression for layer '{0}', skipped.").format(
                         layer.name()
                     )
                 )
@@ -122,7 +122,7 @@ class BatchFilterAlgorithm(QgsProcessingAlgorithm):
 
     def displayName(self):
         """Retourne le nom affiché dans la Processing Toolbox."""
-        return self.tr("Filtrer plusieurs couches (batch)")
+        return self.tr("Filter several layers (batch)")
 
     def group(self):
         """Retourne le nom du groupe affiché dans la Processing Toolbox."""
@@ -135,8 +135,8 @@ class BatchFilterAlgorithm(QgsProcessingAlgorithm):
     def shortHelpString(self):
         """Retourne le texte d'aide affiché dans le panneau de l'algorithme."""
         return self.tr(
-            "Applique la même expression de filtre à plusieurs couches "
-            "vectorielles en une seule exécution."
+            "Applies the same filter expression to several vector layers "
+            "in a single run."
         )
 
     def createInstance(self):

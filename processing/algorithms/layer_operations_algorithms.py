@@ -40,17 +40,17 @@ class FilterPointCloudAlgorithm(FilterMateAlgorithm):
 
     def initAlgorithm(self, config=None):
         self.addParameter(QgsProcessingParameterMultipleLayers(
-            self.LAYERS, self.tr("Nuages de points"), layerType=point_cloud_layer_type()))
+            self.LAYERS, self.tr("Point clouds"), layerType=point_cloud_layer_type()))
         self.add_point_cloud_criteria_parameters()
-        self.add_operator_parameter(self.tr("Combinaison avec le filtre existant de chaque nuage"))
+        self.add_operator_parameter(self.tr("Combine with the existing filter of each point cloud"))
         self.add_output()
 
     def processAlgorithm(self, parameters, context, feedback):
         from ...adapters.public_api import operations
         criteria = self.point_cloud_criteria(parameters, context)
         if criteria is None:
-            raise QgsProcessingException(self.tr("Donnez des classes, une plage, un numéro de retour ou une expression"))
-        feedback.pushInfo(self.tr("Critères : {0}").format(criteria.to_subset_string()))
+            raise QgsProcessingException(self.tr("Provide classes, a range, a return number or an expression"))
+        feedback.pushInfo(self.tr("Criteria: {0}").format(criteria.to_subset_string()))
         report = operations.filter_point_clouds(
             self.parameterAsLayerList(parameters, self.LAYERS, context), criteria,
             operator=OPERATORS[self.parameterAsEnum(parameters, self.OPERATOR, context)], project=context.project(),
@@ -61,13 +61,13 @@ class FilterPointCloudAlgorithm(FilterMateAlgorithm):
         return "filter_point_cloud"
 
     def displayName(self):
-        return self.tr("Filtrer des nuages de points par critères")
+        return self.tr("Filter point clouds by criteria")
 
     def shortHelpString(self):
         return self.tr(
-            "Applique les mêmes critères (classes ASPRS, plages Z et intensité, numéro de retour, expression) "
-            "à un ou plusieurs nuages de points du projet, par exemple toutes les dalles LiDAR HD d'un chantier. "
-            "Le filtre est l'expression du nuage (sous-ensemble) : il est immédiat et annulable depuis FilterMate.")
+            "Applies the same criteria (ASPRS classes, Z and intensity ranges, return number, expression) "
+            "to one or more point clouds of the project, for example all the LiDAR HD tiles of a work site. "
+            "The filter is the point cloud expression (subset): it is immediate and can be undone from FilterMate.")
 
 
 class ClearFiltersAlgorithm(FilterMateAlgorithm):
@@ -77,26 +77,26 @@ class ClearFiltersAlgorithm(FilterMateAlgorithm):
 
     def initAlgorithm(self, config=None):
         self.addParameter(QgsProcessingParameterMultipleLayers(
-            self.LAYERS, self.tr("Couches à défiltrer"), layerType=QgsProcessing.SourceType.TypeMapLayer))
+            self.LAYERS, self.tr("Layers to clear"), layerType=QgsProcessing.SourceType.TypeMapLayer))
         self.add_output()
 
     def processAlgorithm(self, parameters, context, feedback):
         from ...adapters.public_api import operations
         report = operations.clear_filters(self.parameterAsLayerList(parameters, self.LAYERS, context),
                                           project=context.project())
-        return self.finish(report, feedback, self.tr("défiltrée"))
+        return self.finish(report, feedback, self.tr("cleared"))
 
     def name(self):
         return "clear_filters"
 
     def displayName(self):
-        return self.tr("Défiltrer des couches de tout type")
+        return self.tr("Clear the filters of layers of any type")
 
     def shortHelpString(self):
         return self.tr(
-            "Retire le filtre des couches choisies : sous-ensemble vidé pour les vecteurs et les nuages, "
-            "source d'origine rétablie pour les rasters et nuages découpés. Utile en tête d'un modèle pour "
-            "repartir des données complètes. Annulable depuis FilterMate.")
+            "Removes the filter from the chosen layers: subset cleared for vectors and point clouds, "
+            "original source restored for clipped rasters and point clouds. Useful at the start of a model to "
+            "start again from the complete data. Can be undone from FilterMate.")
 
 
 class ApplyFavoriteAlgorithm(FilterMateAlgorithm):
@@ -105,31 +105,31 @@ class ApplyFavoriteAlgorithm(FilterMateAlgorithm):
     FAVORITE = "FAVORITE"
 
     def initAlgorithm(self, config=None):
-        self.addParameter(QgsProcessingParameterString(self.FAVORITE, self.tr("Nom ou identifiant du favori")))
+        self.addParameter(QgsProcessingParameterString(self.FAVORITE, self.tr("Favorite name or identifier")))
         self.add_output()
 
     def processAlgorithm(self, parameters, context, feedback):
         from ...adapters.public_api import operations
         name = self.parameterAsString(parameters, self.FAVORITE, context).strip()
         if not name:
-            raise QgsProcessingException(self.tr("Donnez le nom du favori"))
+            raise QgsProcessingException(self.tr("Provide the name of the favorite"))
         report = operations.apply_favorite(name, project=context.project(), feedback=feedback)
         favorite = report.details.get("favorite") or {}
         if favorite:
-            feedback.pushInfo(self.tr("Favori : {0}").format(favorite.get("name")))
+            feedback.pushInfo(self.tr("Favorite: {0}").format(favorite.get("name")))
         return self.finish(report, feedback)
 
     def name(self):
         return "apply_favorite"
 
     def displayName(self):
-        return self.tr("Appliquer un favori FilterMate")
+        return self.tr("Apply a FilterMate favorite")
 
     def shortHelpString(self):
         return self.tr(
-            "Rejoue un favori enregistré dans FilterMate (par son nom ou son identifiant) : filtres des couches "
-            "vecteur et nuage, découpes des rasters et nuages. Les couches sont retrouvées par signature, "
-            "identifiant puis nom. Sans le dock (qgis_process), les favoris sauvegardés dans le projet sont utilisés.")
+            "Replays a favorite saved in FilterMate (by name or identifier): filters of the vector and point "
+            "cloud layers, clips of the rasters and point clouds. Layers are found by signature, then identifier, "
+            "then name. Without the dock (qgis_process), the favorites saved in the project are used.")
 
 
 class ExportFilteredLayersAlgorithm(FilterMateAlgorithm):
@@ -145,18 +145,18 @@ class ExportFilteredLayersAlgorithm(FilterMateAlgorithm):
 
     def initAlgorithm(self, config=None):
         self.addParameter(QgsProcessingParameterMultipleLayers(
-            self.LAYERS, self.tr("Couches à exporter"), layerType=QgsProcessing.SourceType.TypeMapLayer))
+            self.LAYERS, self.tr("Layers to export"), layerType=QgsProcessing.SourceType.TypeMapLayer))
         self.addParameter(QgsProcessingParameterEnum(
-            self.VECTOR_FORMAT, self.tr("Format vecteur"), options=list(VECTOR_EXPORT_FORMATS), defaultValue=0))
+            self.VECTOR_FORMAT, self.tr("Vector format"), options=list(VECTOR_EXPORT_FORMATS), defaultValue=0))
         self.addParameter(QgsProcessingParameterEnum(
-            self.RASTER_FORMAT, self.tr("Format raster"), options=list(RASTER_EXPORT_FORMATS), defaultValue=0))
+            self.RASTER_FORMAT, self.tr("Raster format"), options=list(RASTER_EXPORT_FORMATS), defaultValue=0))
         self.addParameter(QgsProcessingParameterEnum(
-            self.POINT_CLOUD_FORMAT, self.tr("Format nuage de points"), options=list(POINT_CLOUD_EXPORT_FORMATS),
+            self.POINT_CLOUD_FORMAT, self.tr("Point cloud format"), options=list(POINT_CLOUD_EXPORT_FORMATS),
             defaultValue=0))
-        self.addParameter(QgsProcessingParameterCrs(self.CRS, self.tr("SCR de sortie (vide = celui de la couche)"),
+        self.addParameter(QgsProcessingParameterCrs(self.CRS, self.tr("Output CRS (empty = the layer's CRS)"),
                                                     optional=True))
-        self.addParameter(QgsProcessingParameterFolderDestination(self.OUTPUT_FOLDER, self.tr("Dossier de sortie")))
-        self.addOutput(QgsProcessingOutputMultipleLayers(self.OUTPUT_FILES, self.tr("Fichiers écrits")))
+        self.addParameter(QgsProcessingParameterFolderDestination(self.OUTPUT_FOLDER, self.tr("Output folder")))
+        self.addOutput(QgsProcessingOutputMultipleLayers(self.OUTPUT_FILES, self.tr("Files written")))
         self.add_output()
 
     def processAlgorithm(self, parameters, context, feedback):
@@ -176,7 +176,7 @@ class ExportFilteredLayersAlgorithm(FilterMateAlgorithm):
             crs=crs if crs is not None and crs.isValid() else None, feedback=feedback, project=context.project())
         for name, note in (report.details.get("notes") or {}).items():
             feedback.pushWarning(f"{name} : {note}")
-        result = self.finish(report, feedback, self.tr("exportée"))
+        result = self.finish(report, feedback, self.tr("exported"))
         result[self.OUTPUT_FOLDER] = folder
         result[self.OUTPUT_FILES] = list(report.outputs.values())
         return result
@@ -185,12 +185,12 @@ class ExportFilteredLayersAlgorithm(FilterMateAlgorithm):
         return "export_filtered_layers"
 
     def displayName(self):
-        return self.tr("Exporter les couches filtrées (vecteur, raster, nuage)")
+        return self.tr("Export filtered layers (vector, raster, point cloud)")
 
     def shortHelpString(self):
         return self.tr(
-            "Écrit chaque couche telle qu'elle est filtrée, un fichier par couche nommé d'après la couche : "
-            "entités du sous-ensemble pour les vecteurs, pixels retenus (NoData ailleurs) en GeoTIFF ou COG "
-            "pour les rasters, points retenus en LAZ, COPC, LAS, GPKG ou CSV pour les nuages.\n\n"
-            "Dans un modèle, branchez « Couches traitées » d'un filtre FilterMate sur « Couches à exporter ». "
-            "COPC demande PDAL (livré avec QGIS) ; sans PDAL, un LAZ est écrit à la place.")
+            "Writes each layer as it is filtered, one file per layer named after the layer: subset features "
+            "for vectors, retained pixels (NoData elsewhere) as GeoTIFF or COG for rasters, retained points as "
+            "LAZ, COPC, LAS, GPKG or CSV for point clouds.\n\n"
+            "In a model, connect \"Processed layers\" of a FilterMate filter to \"Layers to export\". "
+            "COPC requires PDAL (shipped with QGIS); without PDAL, a LAZ is written instead.")

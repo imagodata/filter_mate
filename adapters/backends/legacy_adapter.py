@@ -28,6 +28,10 @@ from typing import Dict, Optional
 
 logger = logging.getLogger('FilterMate.Backend.LegacyAdapter')
 
+# Same value as spatialite.expression_builder.USE_OGR_FALLBACK (not imported:
+# this module must load without the SpatiaLite backend).
+_OGR_FALLBACK_SENTINEL = "__USE_OGR_FALLBACK__"
+
 
 # v4.1.0: Import GeometricFilterPort from new location
 try:
@@ -229,6 +233,12 @@ class BaseLegacyAdapter(GeometricFilterBackend):
         combine_operator: Optional[str] = None
     ) -> bool:
         """Apply filter expression to layer."""
+        # 2026-10-16: the OGR-fallback sentinel of build_expression() is not
+        # an expression; _apply_filter_new() would have written it into the
+        # layer's subset string.
+        if expression == _OGR_FALLBACK_SENTINEL:
+            logger.info(f"{self.provider_type}: OGR fallback requested, nothing applied")
+            return False
         if self._use_new_backend and self._new_backend:
             return self._apply_filter_new(layer, expression, old_subset, combine_operator)
         elif self._legacy_backend:

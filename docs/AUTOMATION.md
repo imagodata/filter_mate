@@ -34,7 +34,7 @@ Shared rules:
 | Algorithm | Does | Main parameters | Outputs |
 |---|---|---|---|
 | `filtermate:cross_filter` | filters any layers by the features of a vector layer | `SOURCE`, `SELECTED_ONLY`, `TARGETS`, `PREDICATES`, `BUFFER`, `COVERAGE`, `OPERATOR` | `OUTPUT` |
-| `filtermate:cross_filter_from_raster` | … by the pixels of a raster: value range, classes or raster calculator expression | `SOURCE`, `BAND`, `MODE`, `MINIMUM`, `MAXIMUM`, `CLASSES`, `EXPRESSION`, `FILTER_SOURCE` + targets | `OUTPUT` |
+| `filtermate:cross_filter_from_raster` | … by the pixels of a raster: value range, classes or raster calculator expression | `SOURCE`, `BAND`, `MODE`, `DERIVATIVE`, `MINIMUM`, `MAXIMUM`, `CLASSES`, `EXPRESSION`, `FILTER_SOURCE` + targets | `OUTPUT` |
 | `filtermate:cross_filter_from_point_cloud` | … by the footprint of the points kept on a point cloud | `SOURCE`, `CLASSES`, `Z_MIN`/`Z_MAX`, `INTENSITY_MIN`/`MAX`, `RETURN_NUMBER`, `EXPRESSION`, `SOURCE_OPERATOR` + targets | `OUTPUT` |
 | `filtermate:cross_filter_from_geometry` | … by an extent or a WKT geometry | `EXTENT`, `GEOMETRY` + targets | `OUTPUT` |
 | `filtermate:filter_point_cloud` | applies the same criteria to several point clouds (LiDAR HD tiles) | `LAYERS`, criteria, `OPERATOR` | `OUTPUT` |
@@ -130,7 +130,12 @@ layers with the same name are reported as `name` and `name (layer id)`. Signals:
 `error_occurred(operation, message)`, plus the 4.7 ones (`filter_applied`, `filter_cleared`).
 
 `raster_selection`: `band`, `mode` (`range`, `classes`, `expression`), `minimum`, `maximum`, `classes`,
-`expression`. `point_cloud_criteria`: an expression string, or `classes`, `z_min`, `z_max`, `intensity_min`,
+`expression`, `derivative`. `derivative` (range mode only) says what the bounds apply to when the band is a DTM:
+`value` (default), `slope_degrees`, `slope_percent`, `aspect`, `hillshade` (0-255), `roughness` (Wilson TRI, mean
+absolute difference with the 8 neighbours). In the `DERIVATIVE` parameter of the Processing algorithm they are
+indexes 0 to 5, in this order. Slope, aspect and hillshade use the Horn 3 x 3 kernel; degrees and Web Mercator
+cells are converted to ground metres; a pixel next to a NoData has no derivative, nor does a flat pixel have an
+aspect. No `north` exposure: a range cannot wrap around 0 / 360 (use two filters, `OR`ed). `point_cloud_criteria`: an expression string, or `classes`, `z_min`, `z_max`, `intensity_min`,
 `intensity_max`, `return_number`, `expression`.
 
 ### Script: one extraction per commune

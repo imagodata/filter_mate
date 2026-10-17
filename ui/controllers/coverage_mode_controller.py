@@ -116,9 +116,14 @@ class CoverageModeController(BaseController):
         self._panel_states: Dict[str, dict] = {}
         self._pixel_tool: Any = None
         self._previous_map_tool: Any = None
+        self._class_tool: Any = None  # the point cloud class pipette (a picker in the point cloud colour)
+        self._previous_class_map_tool: Any = None
         self._preview_base_subset: Optional[str] = None
         self._preview_active = False
-        self._histogram_cache: Dict[Tuple[str, int], Tuple[list, float, float]] = {}
+        self._color_pick = False  # the pipette: a click on the map picks a colour to select
+        self._mask_overlay = None  # veil of a terrain derivative preview (canvas item)
+        self._preview_surface = None
+        self._histogram_cache: Dict[Tuple[str, int, str], Tuple[list, float, float]] = {}
         self._stats_watched: set = set()  # point cloud layer ids whose statistics signal is connected
         self._button_slots: List[Tuple[Any, Any]] = []
         # Vector sources: one entry per vector filter run, with the cross operation it recorded (if any).
@@ -306,13 +311,13 @@ class CoverageModeController(BaseController):
                         getattr(project, name).disconnect(slot)
                     except (TypeError, RuntimeError):
                         pass
-            except Exception:
-                pass
+            except Exception as exc:
+                logger.debug(f"[FM5] project signals not disconnected: {exc}")
             self._project_connected.clear()
         try:
             self.service.cancel_all()
-        except Exception:
-            pass
+        except Exception as exc:
+            logger.debug(f"[FM5] running tasks not canceled: {exc}")
         for task_name in ('_export_task', '_hag_task'):
             task = getattr(self, task_name, None)
             setattr(self, task_name, None)
@@ -328,8 +333,9 @@ class CoverageModeController(BaseController):
                 try:
                     widget.setParent(None)
                     widget.deleteLater()
-                except Exception:
-                    pass
+                except Exception as exc:
+                    logger.debug(f"[FM5] panel widget not released: {exc}")
+        self._drop_map_tools()  # one QGIS could give back later would call a dead controller
         self._raster_panel = None
         self._pc_panel = None
         self._running_task = None
@@ -451,6 +457,10 @@ class CoverageModeController(BaseController):
         if layer is None:
             return
         self._deactivate_pixel_tool()
+        self._deactivate_class_tool()
+        # QGIS remembers the last tool before Pan / Zoom and gives it back: a picker of the outgoing
+        # layer must not come back on the next one (the raster picker reading a point cloud).
+        self._drop_map_tools()
         try:
             self._panel_states[layer.id()] = self._current_panel().state() if self._current_panel() is not None else {}
         except Exception as exc:
@@ -590,7 +600,7 @@ class CoverageModeController(BaseController):
         """Keep the field wide enough for "cov. ≥ 100 %": its size hint ignores the stylesheet padding
         and the steppers drawn by mockup.qss, and the text came out clipped ("cov. ≥ 50 !"). Measured
         again whenever the font or the style changes (the dock font arrives after creation)."""
-        from qgis.PyQt.QtCore import QEvent, QObject
+        from qgis.PyQt.QtCore import QEvent
         from qgis.PyQt.QtWidgets import QLineEdit
         editor = spin.findChild(QLineEdit)  # draws the text, with its own stylesheet font (monospace)
 
@@ -608,18 +618,8 @@ class CoverageModeController(BaseController):
                 pass
 
         events = (QEvent.Type.Show, QEvent.Type.FontChange, QEvent.Type.StyleChange, QEvent.Type.Polish)
-
-        class _Fit(QObject):
-            def eventFilter(self, watched, event):  # noqa: N802 - Qt override
-                try:
-                    if event.type() in events:
-                        fit()
-                except RuntimeError:
-                    pass
-                return False
-
         try:
-            spin._fm_fit = _Fit(spin)
+            spin._fm_fit = _event_callback(spin, events, fit)
             for widget in (spin, editor):
                 if widget is not None:
                     widget.installEventFilter(spin._fm_fit)
@@ -711,9 +711,12 @@ class CoverageModeController(BaseController):
         self._call(self._coverage_spin, 'setVisible', True)
         tips = {
             LayerKind.RASTER: {
-                'pushButton_exploring_identify': self.tr("Pixel picker: click on the map to read the value of every band (Ctrl+click extends the range)"),
-                'pushButton_exploring_zoom': self.tr("Zoom to the layer"),
-                'pushButton_checkable_exploring_selecting': self.tr("Preview: hide the pixels outside the selection"),
+                'pushButton_exploring_identify': self.tr("Pixel picker: click on the map to read the value of every band, "
+                                                         "and the slope, aspect... when the range applies to one "
+                                                         "(Ctrl+click extends the range)"),
+                'pushButton_exploring_zoom': self.tr("Zoom to the selected pixels (to the layer when nothing is selected)"),
+                'pushButton_checkable_exploring_selecting': self.tr("Preview: hide the pixels outside the selection "
+                                                                    "(a white veil for a slope, aspect...)"),
                 'pushButton_checkable_exploring_tracking': self.tr("Not used for raster layers"),
                 'pushButton_checkable_exploring_linking_widgets': self.tr("Not used for raster layers"),
                 'pushButton_exploring_reset_layer_properties': self.tr("Reset the raster selection"),
@@ -766,6 +769,12 @@ class CoverageModeController(BaseController):
         if state and panel is not None:
             try:
                 panel.restore_state(state)
+                if self._kind is LayerKind.RASTER:
+                    # The restored band / quantity may not be the one populated first.
+                    try:
+                        self._refresh_histogram(layer, panel.current_band())
+                    except Exception as exc:
+                        logger.debug(f"[FM5] histogram not refreshed after the restore: {exc}")
                 if self._kind is LayerKind.RASTER and state.get('preview'):
                     # The preview box comes back checked: so do the button and the mask on the map.
                     self._on_raster_preview_toggled(True)
@@ -810,7 +819,6 @@ class CoverageModeController(BaseController):
         raster, pc = self._raster_panel, self._pc_panel
         raster.bandChanged.connect(self._on_raster_band_changed)
         raster.selectionChanged.connect(self._on_raster_selection_changed)
-        raster.previewToggled.connect(self._on_raster_preview_toggled)
         pc.criteriaChanged.connect(self._on_point_cloud_criteria_changed)
 
     def _populate_raster(self, layer: Any) -> None:
@@ -819,22 +827,42 @@ class CoverageModeController(BaseController):
             summary = read_raster_summary(layer)
             self._raster_panel.set_summary(summary)
             self._raster_panel.set_reference(raster_reference(layer))
+            self._raster_panel.set_band_spans(self._band_spans(layer, len(summary.bands)))
             self._refresh_histogram(layer, self._raster_panel.current_band())
         except Exception as exc:
             logger.warning(f"[FM5] raster panel not populated: {exc}", exc_info=True)
 
+    def _band_spans(self, layer: Any, band_count: int) -> Dict[int, float]:
+        """Observed value range of the first four bands (the colour of an image), for the pipette tolerance."""
+        from ...adapters.qgis.coverage_layers.raster_adapter import band_range
+        spans = {}
+        base = self._base_raster(layer)
+        for band in range(1, min(band_count, 4) + 1):
+            try:
+                low, high, _mean = band_range(base, band)
+            except Exception as exc:
+                logger.debug(f"[FM5] band {band} range unread: {exc}")
+                continue
+            if low is not None and high is not None and high > low:
+                spans[band] = high - low
+        return spans
+
     def _refresh_histogram(self, layer: Any, band: int) -> None:
-        from ...adapters.qgis.coverage_layers.raster_adapter import band_histogram
-        key = self._histogram_key(layer, band)
+        from ...adapters.qgis.coverage_layers.raster_adapter import band_histogram, derivative_histogram
+        derivative = self._raster_panel.current_derivative()
+        key = self._histogram_key(layer, band, derivative)
         cached = self._histogram_cache.get(key)
         if cached is None:
-            cached = band_histogram(self._base_raster(layer), band, bins=64)
+            if derivative.is_terrain:
+                cached = derivative_histogram(self._base_raster(layer), band, derivative, bins=64)
+            else:
+                cached = band_histogram(self._base_raster(layer), band, bins=64)
             if cached[0]:  # statistics unavailable (yet): read them again next time
                 self._histogram_cache[key] = cached
             while len(self._histogram_cache) > HISTOGRAM_CACHE_SIZE:
                 del self._histogram_cache[next(iter(self._histogram_cache))]  # oldest first
         counts, minimum, maximum = cached
-        self._raster_panel.set_histogram(band, counts, minimum, maximum)
+        self._raster_panel.set_histogram(band, counts, minimum, maximum, derivative)
         self._update_kept_ratio()
 
     def _base_raster(self, layer: Any):
@@ -849,7 +877,7 @@ class CoverageModeController(BaseController):
         return base if base.isValid() else layer
 
     @staticmethod
-    def _histogram_key(layer: Any, band: int) -> Tuple[str, int]:
+    def _histogram_key(layer: Any, band: int, derivative: Any = None) -> Tuple[str, int, str]:
         """Histograms are read on the original raster (see :meth:`_base_raster`): a filter keeps the key."""
         try:
             from ...adapters.qgis.coverage_layers.snapshots import registry
@@ -857,7 +885,7 @@ class CoverageModeController(BaseController):
         except Exception:
             snapshot = None
         source = snapshot.original_source if snapshot is not None and snapshot.original_source else layer.source()
-        return source, int(band)
+        return source, int(band), getattr(derivative, 'value', 'value')
 
     def _on_raster_band_changed(self, band: int) -> None:
         if self._active_layer is not None:
@@ -871,7 +899,7 @@ class CoverageModeController(BaseController):
         if panel is None or layer is None:
             return
         selection = panel.selection()
-        cached = self._histogram_cache.get(self._histogram_key(layer, panel.current_band()))
+        cached = self._histogram_cache.get(self._histogram_key(layer, panel.current_band(), panel.current_derivative()))
         if selection is None or cached is None or not cached[0]:
             panel.set_kept_ratio(None)
             return
@@ -913,7 +941,7 @@ class CoverageModeController(BaseController):
             logger.debug(f"[FM5] raster expression not validated: {exc}")
 
     def _on_raster_preview_toggled(self, enabled: bool) -> None:
-        # The dock button and the panel box show the same state (either one can toggle it).
+        # The rail preview button is the only switch: the panel only keeps its state.
         self._set_selecting_checked(enabled)
         self._call(self._raster_panel, 'set_preview_checked', enabled)
         self._preview_active = bool(enabled)
@@ -928,10 +956,43 @@ class CoverageModeController(BaseController):
             return
         from ...adapters.qgis.coverage_layers.raster_adapter import apply_selection_preview, clear_selection_preview
         selection = panel.selection()
+        if selection is not None and selection.derivative.is_terrain:
+            clear_selection_preview(layer)  # a value preview left from before the quantity changed
+            self._show_derivative_preview(layer, selection)
+            return
+        self._hide_derivative_preview()
         if selection is None:
             clear_selection_preview(layer)  # nothing selected: every pixel shows again
         else:
             apply_selection_preview(layer, selection)
+
+    def _show_derivative_preview(self, layer: Any, selection: Any) -> None:
+        """Veil the pixels a slope / aspect / ... selection drops (a canvas item, no layer is added)."""
+        iface = self._iface()
+        canvas = iface.mapCanvas() if iface is not None else None
+        if canvas is None:
+            return
+        try:
+            from ...adapters.qgis.coverage_layers.preview_overlay import DerivativeSurface, MaskOverlay
+            base = self._base_raster(layer)
+            key = (base.source(), selection.band, selection.derivative)
+            if self._preview_surface is None or self._preview_surface.key != key:
+                self._preview_surface = DerivativeSurface(base, selection.band, selection.derivative)
+            surface = self._preview_surface
+            if surface.crs_authid != canvas.mapSettings().destinationCrs().authid():
+                self._hide_derivative_preview()
+                iface.messageBar().pushInfo("FilterMate", self.tr(
+                    "The preview of a slope or aspect needs the map in the CRS of the raster ({0})").format(surface.crs_authid))
+                return
+            if self._mask_overlay is None:
+                self._mask_overlay = MaskOverlay(canvas)
+            self._mask_overlay.show(surface.veil(selection), surface.extent)
+        except Exception as exc:
+            logger.warning(f"[FM5] derivative preview failed: {exc}", exc_info=True)
+
+    def _hide_derivative_preview(self) -> None:
+        if self._mask_overlay is not None:
+            self._mask_overlay.hide()
 
     def _populate_point_cloud(self, layer: Any, keep_kept: bool = False) -> None:
         try:
@@ -1007,6 +1068,8 @@ class CoverageModeController(BaseController):
         change, on top of a filter just applied or an undo.
         """
         from ...core.domain.layer_kind import LayerKind
+        self._hide_derivative_preview()
+        self._preview_surface = None
         try:
             if self._kind is LayerKind.RASTER:
                 from ...adapters.qgis.coverage_layers.raster_adapter import clear_selection_preview
@@ -1040,7 +1103,8 @@ class CoverageModeController(BaseController):
         """Run an EXPLORING button for the active coverage layer.
 
         Args:
-            action: ``identify``, ``zoom``, ``select``, ``deselect`` or ``reset``.
+            action: ``identify``, ``zoom``, ``select``, ``deselect``, ``reset`` or ``refresh`` (badge back
+                after a vector refresh of the dock).
 
         Returns:
             True when handled (the vector handler must stop).
@@ -1069,6 +1133,8 @@ class CoverageModeController(BaseController):
                 else:
                     self._stop_preview(layer)
                     self._refresh_canvas(layer)
+            elif action == 'refresh':
+                self._show_kind_badge(layer, self._kind)  # after a vector refresh of the dock (layers added)
             elif action == 'backend':
                 pass
             elif action == 'reset':
@@ -1102,8 +1168,8 @@ class CoverageModeController(BaseController):
         try:
             transform = QgsCoordinateTransform(layer.crs(), canvas.mapSettings().destinationCrs(), QgsProject.instance())
             extent = transform.transformBoundingBox(extent)
-        except Exception:
-            pass
+        except Exception as exc:
+            logger.debug(f"[FM5] extent not reprojected to the canvas CRS: {exc}")
         canvas.setExtent(extent)
         canvas.refresh()
 
@@ -1128,8 +1194,8 @@ class CoverageModeController(BaseController):
         try:
             transform = QgsCoordinateTransform(layer.crs(), canvas.mapSettings().destinationCrs(), QgsProject.instance())
             extent = transform.transformBoundingBox(extent)
-        except Exception:
-            pass
+        except Exception as exc:
+            logger.debug(f"[FM5] extent not reprojected to the canvas CRS: {exc}")
         extent.scale(1.05)  # a small margin around the selected pixels
         canvas.setExtent(extent)
         canvas.refresh()
@@ -1161,25 +1227,63 @@ class CoverageModeController(BaseController):
         self._previous_map_tool = canvas.mapTool()
         canvas.setMapTool(self._pixel_tool)
 
+    def _on_color_pick_toggled(self, enabled: bool) -> None:
+        """The colour pipette of the panel: the pixel picker goes on the map (or leaves it) with it."""
+        self._color_pick = bool(enabled)
+        if self._raster_panel is not None:
+            self._raster_panel.show_pipette_active(self._color_pick)
+        iface = self._iface()
+        if iface is None:
+            return
+        on_map = self._pixel_tool is not None and iface.mapCanvas().mapTool() is self._pixel_tool
+        if enabled and not on_map:
+            self._toggle_pixel_tool()
+        elif not enabled and on_map:
+            self._deactivate_pixel_tool()
+
     def _show_picker_state(self, active: bool) -> None:
         """Pipette button held down and pixel group open while the picker is on the map."""
+        if not active and self._color_pick:
+            self._color_pick = False  # the picker was dropped (another tool, the rail button): the pipette goes off
+            self._extras_call('set_pipette_checked', False)
+            if self._raster_panel is not None:
+                self._raster_panel.show_pipette_active(False)
         try:
             button = getattr(self.dockwidget, 'pushButton_exploring_identify', None)
             if button is not None:
-                button.setDown(bool(active))
+                button.setDown(bool(active) and not self._color_pick)  # the pipette has its own button (I2)
             if self._raster_panel is not None and hasattr(self._raster_panel, 'show_picker_active'):
                 self._raster_panel.show_picker_active(bool(active))
         except RuntimeError:
             pass  # deleted (plugin closing)
 
     def _deactivate_pixel_tool(self) -> None:
-        iface = self._iface()
-        if iface is None or self._pixel_tool is None:
+        if self._pixel_tool is None:
             return
         previous, self._previous_map_tool = self._previous_map_tool, None
+        self._release_map_tool(self._pixel_tool, previous)
+
+    def _drop_map_tools(self) -> None:
+        """Delete the pixel and class pickers (made again on demand); their destructor takes them off the
+        canvas and out of the tool QGIS gives back after Pan / Zoom."""
+        self._previous_map_tool = self._previous_class_map_tool = None
+        for tool_name in ('_pixel_tool', '_class_tool'):
+            tool = getattr(self, tool_name)
+            setattr(self, tool_name, None)
+            if tool is not None:
+                try:
+                    tool.deleteLater()
+                except RuntimeError:
+                    pass  # already deleted (QGIS closing)
+
+    def _release_map_tool(self, tool: Any, previous: Any) -> None:
+        """Take ``tool`` off the map and give the map back to the tool it replaced."""
+        iface = self._iface()
+        if iface is None:
+            return
         try:
             canvas = iface.mapCanvas()
-            if canvas.mapTool() is not self._pixel_tool:
+            if canvas.mapTool() is not tool:
                 return
             if previous is not None:
                 try:
@@ -1187,13 +1291,70 @@ class CoverageModeController(BaseController):
                     return
                 except RuntimeError:
                     pass  # the previous tool was deleted: no tool rather than the picker
-            canvas.unsetMapTool(self._pixel_tool)
+            canvas.unsetMapTool(tool)
         except RuntimeError as exc:
-            logger.debug(f"[FM5] pixel picker not released: {exc}")  # canvas deleted (QGIS closing)
+            logger.debug(f"[FM5] picker not released: {exc}")  # canvas deleted (QGIS closing)
+
+    # === Point cloud: class pipette ===
+
+    def _on_class_pick_toggled(self, enabled: bool) -> None:
+        """The class pipette of the rail: a picker in the point cloud colour goes on the map (or leaves it)."""
+        iface = self._iface()
+        if iface is None:
+            return
+        if not enabled:
+            self._deactivate_class_tool()
+            return
+        canvas = iface.mapCanvas()
+        if self._class_tool is not None and canvas.mapTool() is self._class_tool:
+            return
+        if self._class_tool is None:
+            from ..styles.mockup_design import KIND_COLORS
+            from ..tools.pixel_picker_tool import PixelPickerTool
+            self._class_tool = PixelPickerTool(canvas, KIND_COLORS['point_cloud'])
+            self._class_tool.picked.connect(self._on_class_picked)
+            # The rail button follows the map: up when another tool takes over, down when QGIS gives it back.
+            self._class_tool.activated.connect(lambda: self._extras_call('set_class_pipette_checked', True))
+            self._class_tool.deactivated.connect(lambda: self._extras_call('set_class_pipette_checked', False))
+        self._previous_class_map_tool = canvas.mapTool()
+        canvas.setMapTool(self._class_tool)
+
+    def _deactivate_class_tool(self) -> None:
+        if self._class_tool is None:
+            return
+        previous, self._previous_class_map_tool = self._previous_class_map_tool, None
+        self._release_map_tool(self._class_tool, previous)
+
+    def _on_class_picked(self, point: Any, extend: bool) -> None:
+        """Check the class of the points under the click (Ctrl+click: added to the checked classes)."""
+        from ...core.domain.layer_kind import LayerKind
+        layer, panel, iface = self._active_layer, self._pc_panel, self._iface()
+        if layer is None or panel is None or iface is None or self._kind is not LayerKind.POINT_CLOUD:
+            return
+        from ...adapters.qgis.point_cloud_layer_adapter import class_at
+        code = class_at(layer, iface.mapCanvas(), point)
+        selecting = getattr(self.dockwidget, 'pushButton_checkable_exploring_selecting', None)
+        previewed = selecting is not None and selecting.isChecked()
+        hidden = self.tr("only the points drawn on the map can be picked: turn the preview off to pick a class it hides")
+        if code is None:
+            message = self.tr("No classified point under the click")
+            if previewed:
+                message = f"{message}: {hidden}"
+        elif previewed and extend and code in panel.checked_class_codes():
+            message = self.tr("Class {0} is already checked").format(code) + f": {hidden}"
+        elif not panel.select_class(code, extend):
+            message = self.tr("Class {0} is not in the class list of the layer").format(code)
+        else:
+            return
+        try:
+            iface.messageBar().pushInfo("FilterMate", message)
+        except RuntimeError:
+            pass  # message bar deleted (QGIS closing)
 
     def _on_pixel_picked(self, point: Any, extend: bool) -> None:
+        from ...core.domain.layer_kind import LayerKind
         layer = self._active_layer
-        if layer is None or self._raster_panel is None:
+        if layer is None or self._raster_panel is None or self._kind is not LayerKind.RASTER:
             return
         from qgis.core import QgsCoordinateTransform, QgsProject
         from ...adapters.qgis.coverage_layers.raster_adapter import identify_values
@@ -1204,11 +1365,24 @@ class CoverageModeController(BaseController):
         except Exception:
             layer_point = point
         try:
-            values = identify_values(self._base_raster(layer), layer_point)
+            base = self._base_raster(layer)
+            values = identify_values(base, layer_point)
+            terrain = self._terrain_at(base, layer_point)
         except RuntimeError as exc:
             logger.debug(f"[FM5] pixel not read, layer deleted: {exc}")
             return
-        self._raster_panel.set_pixel_values(layer_point.x(), layer_point.y(), values, extend)
+        # With the colour pipette Ctrl+click adds a colour: it does not extend the range.
+        self._raster_panel.set_pixel_values(layer_point.x(), layer_point.y(), values, extend and not self._color_pick, terrain)
+        if self._color_pick:
+            self._raster_panel.set_color_sample(values, extend, terrain)
+
+    def _terrain_at(self, base: Any, layer_point: Any) -> dict:
+        """Slope, aspect... under ``layer_point`` while the range applies to one; empty otherwise."""
+        panel = self._raster_panel
+        if panel is None or not panel.current_derivative().is_terrain:
+            return {}
+        from ...adapters.qgis.coverage_layers.raster_adapter import terrain_values_at
+        return terrain_values_at(base, layer_point, panel.current_band())
 
     # === FILTERING request ===
 
@@ -1547,8 +1721,8 @@ class CoverageModeController(BaseController):
         try:
             if self._kind is LayerKind.POINT_CLOUD and self._pc_panel is not None:
                 self._pc_panel.set_current_subset(layer.subsetString())
-        except Exception:
-            pass
+        except Exception as exc:
+            logger.debug(f"[FM5] point cloud subset not shown: {exc}")
 
     def _run_unfilter(self, layer: Any, reset: bool) -> None:
         settings = self._filtering_settings()
@@ -1916,8 +2090,8 @@ class CoverageModeController(BaseController):
         try:
             if iface is not None:
                 iface.mapCanvas().refresh()
-        except Exception:
-            pass
+        except Exception as exc:
+            logger.debug(f"[FM5] canvas not refreshed: {exc}")
 
     @staticmethod
     def _call(target: Any, method: str, *args: Any) -> None:
@@ -1940,3 +2114,24 @@ class CoverageModeController(BaseController):
             return layer.name()
         except (RuntimeError, AttributeError):
             return "?"
+
+
+def _event_callback(parent: Any, events: Tuple[Any, ...], callback: Any) -> Any:
+    """Event filter (owned by ``parent``) running ``callback`` on the ``events`` of the widgets it watches.
+
+    At module level and after the controller: a class nested in a controller method made
+    pylupdate5 file the tr() strings that follow it under that class name, which the running
+    plugin (context CoverageModeController) never looks up.
+    """
+    from qgis.PyQt.QtCore import QObject
+
+    class _EventCallback(QObject):
+        def eventFilter(self, watched, event):  # noqa: N802 - Qt override
+            try:
+                if event.type() in events:
+                    callback()
+            except RuntimeError:
+                pass
+            return False
+
+    return _EventCallback(parent)
