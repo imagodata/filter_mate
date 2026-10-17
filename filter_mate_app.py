@@ -1345,14 +1345,20 @@ class FilterMateApp:
         # filter history, auto-zoom) — none of which apply to export. Export
         # completion is fully handled in FilterEngineTask.finished() →
         # FinishedHandler with the 'ExportLayers' message branch.
+        # 2026-10-17: the completion reads the task's own parameters (what its
+        # worker wrote: backends used, subset-change token), and a task a newer
+        # one replaced ends as a terminated task (see _filter_engine_task_succeeded).
         if not is_export:
-            self.appTasks[task_name].taskCompleted.connect(
-                lambda tn=task_name, cl=current_layer, tp=task_parameters:
-                    self.filter_engine_task_completed(tn, cl, tp)
+            task = self.appTasks[task_name]
+            generation = getattr(self.dockwidget, '_combo_protection_gen', None)
+            task.taskCompleted.connect(
+                lambda t=task, gen=generation, lid=self._current_layer_id_before_filter, tn=task_name,
+                cl=current_layer, tp=task.task_parameters:
+                    self._filter_engine_task_succeeded(t, gen, lid, tn, cl, tp)
             )
-            self.appTasks[task_name].taskTerminated.connect(
-                lambda gen=getattr(self.dockwidget, '_combo_protection_gen', None),
-                lid=self._current_layer_id_before_filter: self._filter_engine_task_terminated(gen, lid)
+            task.taskTerminated.connect(
+                lambda gen=generation, lid=self._current_layer_id_before_filter:
+                    self._filter_engine_task_terminated(gen, lid)
             )
 
         # Cancel conflicting tasks and add to task manager
@@ -1507,6 +1513,36 @@ class FilterMateApp:
             self.dockwidget.manageSignal(["QGIS", "LAYER_TREE_VIEW"], 'disconnect')
         except Exception:  # nosec B110 - Signal may already be disconnected - expected during filtering protection
             pass
+
+    def _filter_engine_task_succeeded(self, task, generation, current_layer_id_before_filter,
+                                      task_name, source_layer, task_parameters):
+        """taskCompleted of a filter / unfilter / reset task: its results, unless it was replaced.
+
+        2026-10-17: a task canceled by a second click on Filter (or by QGIS, a
+        layer removed) can still complete. Its completion ran as the newer
+        task's: history pushed, canvas zoomed, and the combo-box protection of
+        the running task released. Such a task now ends as a terminated one
+        (nothing done when a newer task owns the protection).
+
+        Args:
+            task: The FilterEngineTask that completed.
+            generation: ``_combo_protection_gen`` when the task was launched.
+            current_layer_id_before_filter: Current layer when the task was launched.
+            task_name: 'filter', 'unfilter' or 'reset'.
+            source_layer: The source layer of the task.
+            task_parameters: The task's own parameters.
+        """
+        try:
+            canceled = task.isCanceled()
+        except RuntimeError:  # task deleted meanwhile
+            canceled = True
+        replaced = (self.dockwidget is not None
+                    and getattr(self.dockwidget, '_combo_protection_gen', None) != generation)
+        if canceled or replaced:
+            logger.info(f"Filter task '{task_name}' {'canceled' if canceled else 'replaced'}: results ignored")
+            self._filter_engine_task_terminated(generation, current_layer_id_before_filter)
+            return
+        self.filter_engine_task_completed(task_name, source_layer, task_parameters)
 
     def _filter_engine_task_terminated(self, generation, current_layer_id_before_filter):
         """A filter / unfilter / reset task failed or was canceled: its protection ends as after a completed one.
@@ -2396,6 +2432,9 @@ class FilterMateApp:
                     return None
             else:
                 task_parameters = self.PROJECT_LAYERS[current_layer.id()]
+            # 2026-10-17: the "task" section below is this task's, not the layer's: the
+            # live PROJECT_LAYERS entry kept the last task's features, layers and options.
+            task_parameters = dict(task_parameters)
 
             # v4.7: Delegate feature extraction and validation
             logger.info("   → Calling builder.get_and_validate_features()...")

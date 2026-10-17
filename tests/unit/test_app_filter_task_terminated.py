@@ -20,7 +20,8 @@ pytestmark = pytest.mark.unit
 _APP = Path(__file__).resolve().parents[2] / "filter_mate_app.py"
 _PKG = "fm_app_task_terminated_test"
 _METHODS = ["_execute_filter_task", "_save_current_layer_before_filter", "_set_filter_protection_flags",
-            "_filter_engine_task_terminated", "_release_filter_protection", "filter_engine_task_completed"]
+            "_filter_engine_task_terminated", "_release_filter_protection", "filter_engine_task_completed",
+            "_filter_engine_task_succeeded"]
 
 
 class _Signal:
@@ -39,6 +40,14 @@ class _Task:
     def __init__(self, description, task_name, task_parameters, backend_registry=None):
         self._description = description
         self.taskCompleted, self.taskTerminated = _Signal(), _Signal()
+        self.task_parameters = dict(task_parameters, _copied_by_the_task=True)
+        self.canceled = False
+
+    def cancel(self):
+        self.canceled = True
+
+    def isCanceled(self):
+        return self.canceled
 
     def description(self):
         return self._description
@@ -182,3 +191,41 @@ def test_a_completion_failing_after_the_window_opened_leaves_it_to_the_window(ap
     app.filter_engine_task_completed("filter", app.dockwidget.current_layer, {})
     assert app.dockwidget._filtering_in_progress is True
     assert app.dockwidget.comboBox_filtering_current_layer.signalsBlocked() is True
+
+
+def test_a_completed_task_reports_with_its_own_parameters(app):
+    task = _launch(app)
+    task.taskCompleted.emit()
+    kwargs = app._filter_result_handler.handle_task_completion.call_args.kwargs
+    assert kwargs["task_parameters"] is task.task_parameters  # what its worker wrote (backends, token)
+    assert kwargs["current_layer_id_before_filter"] == "zones"
+
+
+def test_a_canceled_task_that_completes_ends_as_terminated(app):
+    """Canceled by QGIS (a layer removed) with no newer task: the protection ends, nothing is reported."""
+    task = _launch(app)
+    task.cancel()
+    task.taskCompleted.emit()
+    app._filter_result_handler.handle_task_completion.assert_not_called()
+    app._filter_result_handler.handle_task_terminated.assert_called_once_with("zones")
+
+
+def test_a_task_replaced_by_a_second_click_reports_nothing(app):
+    """The second click cancels the first task, which completes anyway: only the second one reports."""
+    first = _launch(app)
+    second = _launch(app)
+    first.cancel()
+    first.taskCompleted.emit()
+    app._filter_result_handler.handle_task_completion.assert_not_called()
+    app._filter_result_handler.handle_task_terminated.assert_not_called()  # the second task owns the protection
+    second.taskCompleted.emit()
+    app._filter_result_handler.handle_task_completion.assert_called_once()
+    assert app._filter_result_handler.handle_task_completion.call_args.kwargs["task_parameters"] is \
+        second.task_parameters
+
+
+def test_an_outdated_task_that_was_not_canceled_reports_nothing(app):
+    first = _launch(app)
+    _launch(app)
+    first.taskCompleted.emit()  # completed before the cancel reached it
+    app._filter_result_handler.handle_task_completion.assert_not_called()

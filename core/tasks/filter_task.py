@@ -183,6 +183,36 @@ else:
     ogr_cleanup_temp_layers = None
 
 
+# Task parameters shared with the app on purpose: read-only for the task.
+_SHARED_TASK_PARAMETER_KEYS = frozenset({'config_data'})
+
+
+def task_scoped_parameters(value, _key=None):
+    """Copy of task parameters owned by one task: its dicts and lists, not the objects they hold.
+
+    2026-10-17: the dict a task received was the live PROJECT_LAYERS entry of
+    the source layer. The app wrote the next task's ``task`` section into it,
+    the worker its ``_subset_queue_callback`` / ``_parent_task``, the source
+    WKT, the backends used...: after a second click on Filter, the canceled
+    task read the new task's parameters and queued its subsets in the new
+    task's queue. Layers, features, connections and other objects are shared
+    (never copied: QGIS objects); only the containers are the task's own.
+
+    Args:
+        value: The parameters (or a value inside them).
+
+    Returns:
+        The same structure with new dicts and lists.
+    """
+    if _key in _SHARED_TASK_PARAMETER_KEYS:
+        return value
+    if isinstance(value, dict):
+        return {key: task_scoped_parameters(item, key) for key, item in value.items()}
+    if isinstance(value, list):
+        return [task_scoped_parameters(item) for item in value]
+    return value
+
+
 class FilterEngineTask(QgsTask):
     """Main QgsTask for filtering and unfiltering vector data.
 
@@ -266,7 +296,8 @@ class FilterEngineTask(QgsTask):
 
         self.exception = None
         self.task_action = task_action
-        self.task_parameters = task_parameters
+        # This task's own copy: what the worker writes stays in it (2026-10-17)
+        self.task_parameters = task_scoped_parameters(task_parameters)
 
         # H1 (audit 2026-04-29): stamp the subset-change token NOW (main
         # thread, before run() is queued). FilterResultHandler reads this

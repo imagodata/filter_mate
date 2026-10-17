@@ -40,7 +40,6 @@ from ...config.config import ENV_VARS
 # E6: Task completion handler functions (reused, not duplicated)
 from .task_completion_handler import (
     display_warning_messages as tch_display_warnings,
-    should_skip_subset_application,
     apply_pending_subset_requests,
     schedule_canvas_refresh,
     cleanup_memory_layer,
@@ -146,14 +145,15 @@ class FinishedHandler:
         if warning_messages:
             tch_display_warnings(warning_messages)
 
-        # E6: Check if subset application should be skipped
-        has_pending = bool(pending_subset_requests)
-        truly_canceled = should_skip_subset_application(
-            is_canceled_fn(), has_pending, pending_subset_requests, result
-        )
-
-        if truly_canceled and not pending_subset_requests:
-            logger.info("Task was canceled - skipping pending subset requests to prevent partial filter application")
+        # 2026-10-17: a canceled task applies nothing, even when its run()
+        # completed: canceled by a newer task (a second click on Filter),
+        # whose subsets are the ones to keep, or by QGIS (a layer removed).
+        # They were applied whenever the task had queued some.
+        if is_canceled_fn():
+            if pending_subset_requests:
+                logger.info(f"Task was canceled - its {len(pending_subset_requests)} pending subset "
+                            "request(s) are dropped")
+            pending_subset_requests = []
 
         # Apply pending subset strings on main thread
         apply_failures: List[str] = []
@@ -247,6 +247,12 @@ class FinishedHandler:
             restore_selection_fn: Function to restore source layer selection.
             iface: QGIS iface instance.
         """
+        if is_canceled_fn():
+            # 2026-10-17: no message for a canceled task, whatever its run()
+            # returned: a newer task reports, and an interrupted query
+            # (PostgreSQL "canceling statement") is no error to show.
+            logger.info(f"Task was canceled - no message displayed (result={result}, exception={exception})")
+            return
         if exception is None:
             self._handle_no_exception_result(
                 result=result,
