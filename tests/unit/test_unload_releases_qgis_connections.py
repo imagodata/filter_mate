@@ -131,34 +131,10 @@ def test_cleanup_thaws_the_canvas_a_canceled_filter_froze():
     app._unfreeze_canvas_after_task.assert_called_once_with(7)
 
 
-def _feedback():
-    spec = importlib.util.spec_from_file_location("fm_test_feedback", ROOT / "infrastructure" / "feedback" / "__init__.py")
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    return module
+def test_the_dependency_check_replaces_only_its_own_message():
+    """2026-10-17 review: messages were removed by a match on the layer names; only FilterMate's go."""
+    source = (ROOT / "filter_mate.py").read_text(encoding="utf-8")
+    body = source[source.index("    def _install_message_filter(self):"):source.index("    def _check_geometry_validation_settings")]
+    assert ".clearWidgets()" not in body and "remove_message_bar_items" not in body
+    assert "bar.popWidget(previous)" in body and "self._dependency_message_item = bar.pushWidget(" in body
 
-
-def test_only_the_matching_messages_leave_the_bar():
-    feedback = _feedback()
-
-    def item(title, text):
-        return types.SimpleNamespace(title=lambda: title, text=lambda: text)
-
-    kept = item("Processing", "Algorithm finished")
-    other_plugin = item("QuickOSM", "Request failed")
-    dependency = item("Layer parcels", "Value relation: layer 'communes' not found")
-    bar = MagicMock()
-    bar.items.return_value = [kept, dependency, other_plugin]
-
-    removed = feedback.remove_message_bar_items(bar, lambda title, text: "communes" in f"{title} {text}")
-
-    assert removed == 1
-    bar.popWidget.assert_called_once_with(dependency)
-    bar.clearWidgets.assert_not_called()
-
-
-def test_a_bar_that_cannot_list_its_items_is_left_alone():
-    feedback = _feedback()
-    bar = types.SimpleNamespace(clearWidgets=MagicMock())
-    assert feedback.remove_message_bar_items(bar, lambda title, text: True) == 0
-    bar.clearWidgets.assert_not_called()

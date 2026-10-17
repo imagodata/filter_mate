@@ -622,7 +622,6 @@ class FilterMate:
         try:
             from qgis.core import QgsProject
             from qgis.PyQt.QtCore import QTimer
-            from .infrastructure.feedback import remove_message_bar_items
 
             def check_and_clear_warnings():
                 """Check all layers for missing ValueRelation dependencies and clear message bar."""
@@ -647,16 +646,17 @@ class FilterMate:
                     if self._missing_dependency_layers and not self._form_dependency_warning_shown:
                         self._form_dependency_warning_shown = True
 
-                        # The individual warnings about these layers give way to one message.
-                        # 2026-10-17: only those: clearWidgets() removed every message of
-                        # the bar, other plugins' and QGIS's included.
-                        try:
-                            missing = tuple(self._missing_dependency_layers)
-                            remove_message_bar_items(
-                                self.iface.messageBar(),
-                                lambda title, text: any(name and name in f"{title} {text}" for name in missing))
-                        except Exception:  # nosec B110 - best-effort message bar cleanup before showing consolidated warning
-                            pass
+                        # 2026-10-17: only FilterMate's own message is replaced (its item is kept).
+                        # clearWidgets() removed every message of the bar, other plugins' and
+                        # QGIS's included; a match on the layer names could too.
+                        bar = self.iface.messageBar()
+                        previous = getattr(self, '_dependency_message_item', None)
+                        if previous is not None:
+                            try:
+                                bar.popWidget(previous)
+                            except Exception:  # nosec B110 - already closed by the user
+                                pass
+                            self._dependency_message_item = None
 
                         # Show a single consolidated info message
                         count = len(self._missing_dependency_layers)
@@ -664,10 +664,13 @@ class FilterMate:
                         if count > 3:
                             layers_list += f" (+{count - 3} more)"
 
-                        self.iface.messageBar().pushInfo(
-                            "FilterMate",
-                            self.tr(f"{count} referenced layer(s) not loaded ({layers_list}). Using fallback display.")
-                        )
+                        text = self.tr(f"{count} referenced layer(s) not loaded ({layers_list}). Using fallback display.")
+                        try:
+                            from qgis.core import Qgis
+                            item = bar.createMessage("FilterMate", text)
+                            self._dependency_message_item = bar.pushWidget(item, Qgis.MessageLevel.Info)
+                        except Exception:  # nosec B110 - fall back on a plain message
+                            bar.pushInfo("FilterMate", text)
 
                         logger.info(
                             f"FilterMate: {count} referenced layer(s) not loaded. "

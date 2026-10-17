@@ -239,3 +239,15 @@ class TestProjectInitializationRegistersTheNewLayers:
         app.manage_task.assert_not_called()
         _FakeTimer.scheduled[1][1]()
         app.manage_task.assert_called_once()
+
+    def test_a_canceled_load_lowers_the_loading_flag(self):
+        """2026-10-17 review: the flag the load raised stayed up after stop_pending_project_load()."""
+        service = _service()
+        app, callback = _app_and_callback()
+        layer = MagicMock()
+        layer.id.return_value = "id-1"
+        flags = self._run(service, app, callback, [layer])
+        assert flags["loading"] is True
+        service.stop_pending_project_load()
+        assert flags["loading"] is False
+

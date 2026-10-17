@@ -748,8 +748,18 @@ class LayerLifecycleService:
         logger.info("Handle remove all layers completed")
 
     def stop_pending_project_load(self) -> None:
-        """Cancel the deferred add_layers of handle_project_initialization (unload, project change)."""
+        """Cancel the deferred add_layers of handle_project_initialization (unload, project change).
+
+        The loading flag the load raised is lowered (2026-10-17 review: it stayed up, and the
+        panel waited for a registration that would never come).
+        """
         self._project_load_generation = getattr(self, '_project_load_generation', 0) + 1
+        lower_flag = self.__dict__.pop('_project_load_flag_callback', None)
+        if lower_flag is not None:
+            try:
+                lower_flag(False)
+            except Exception as exc:  # catch-all safety net: app torn down
+                logger.debug(f"Loading flag not lowered: {exc}")
 
     def handle_project_initialization(
         self,
@@ -890,10 +900,12 @@ class LayerLifecycleService:
                     except RuntimeError:  # deleted meanwhile
                         continue
                 generation = self._project_load_generation = getattr(self, '_project_load_generation', 0) + 1
+                self._project_load_flag_callback = set_loading_flag_callback  # lowered if canceled
 
                 def safe_add_layers():
                     if getattr(self, '_project_load_generation', None) != generation:
                         return  # canceled or superseded
+                    self.__dict__.pop('_project_load_flag_callback', None)  # the load runs: its flag is its own
                     strong_callback = resolve_callback()
                     if strong_callback is None or not callable(strong_callback):
                         return
