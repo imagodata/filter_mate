@@ -21,12 +21,13 @@ from core.filter.expression_combiner import combine_with_old_subset
 
 def _load_subset_string_builder():
     # Loaded by path: importing the ``core.tasks`` package pulls in
-    # filter_task and its QGIS-only relative imports.
+    # filter_task and its QGIS-only relative imports. Named inside ``core``
+    # so its relative import of core.filter resolves.
     path = (
         Path(__file__).resolve().parents[4]
         / "core" / "tasks" / "builders" / "subset_string_builder.py"
     )
-    spec = importlib.util.spec_from_file_location("_subset_string_builder", path)
+    spec = importlib.util.spec_from_file_location("core.tasks.builders._subset_string_builder", path)
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     return module.SubsetStringBuilder
