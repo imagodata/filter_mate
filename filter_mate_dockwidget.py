@@ -5650,7 +5650,17 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         logger.debug(f"Caller stack:\n{''.join(traceback.format_stack()[-4:-1])}")
 
         if self._updating_current_layer:
-            logger.debug("current_layer_changed: Already updating, skipping")
+            # 2026-10-17: re-entered while a layer change runs (events are processed during it):
+            # the request was dropped, a layer the user picked then was shown in the combo box but
+            # never applied (dock smoke test, QGIS nightly). The latest request runs once the
+            # current change is over; a user pick is not replaced by an automatic change.
+            pending = getattr(self, '_layer_change_after_update', None)
+            if layer is not None and (manual_change or not (pending and pending[1])):
+                try:
+                    self._layer_change_after_update = (layer.id(), bool(manual_change))
+                except RuntimeError:  # layer deleted
+                    pass
+            logger.debug("current_layer_changed: Already updating, the request runs after it")
             return
 
         # FIX-5 (2026-01-16): CRITICAL - Ignore layer change signals during filtering
@@ -5757,6 +5767,33 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             except (RuntimeError, AttributeError):
                 perf_mark_end("layer_change")
             logger.debug("current_layer_changed: Lock released")
+            self._run_layer_change_after_update(layer)
+
+    def _run_layer_change_after_update(self, applied_layer):
+        """Run the layer change requested while the previous one ran (see current_layer_changed)."""
+        pending = self.__dict__.pop('_layer_change_after_update', None)
+        if pending is None:
+            return
+        layer_id, manual_change = pending
+        try:
+            if applied_layer is not None and applied_layer.id() == layer_id:
+                return  # the change that just ran was for that layer
+        except RuntimeError:
+            pass
+        weak_self = weakref.ref(self)
+
+        def replay():
+            dock = weak_self()
+            if dock is None:
+                return
+            picked_at, picked_id = getattr(dock, '_user_layer_pick', None) or (0.0, None)
+            if not manual_change and picked_id not in (None, layer_id):
+                return  # the user picked another layer since
+            fresh = QgsProject.instance().mapLayer(layer_id)
+            if fresh is not None:
+                dock.current_layer_changed(fresh, manual_change=manual_change)
+
+        QTimer.singleShot(0, replay)
 
     def _defer_layer_change(self, layer, manual_change=False):
         """v4.0 Sprint 18: Defer layer change when plugin is busy.
