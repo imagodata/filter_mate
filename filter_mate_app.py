@@ -1439,23 +1439,22 @@ class FilterMateApp:
         # Connect signals with Qt.ConnectionType.QueuedConnection
         # The list itself is captured (filled by run() before resultingLayers is emitted):
         # the task may already be deleted when the queued slot runs.
-        self.appTasks[task_name].resultingLayers.connect(
-            lambda result_project_layers, tn=task_name, ids=self.appTasks[task_name].changed_layer_ids:
-                self.layer_management_engine_task_completed(result_project_layers, tn, ids),
-            Qt.ConnectionType.QueuedConnection
-        )
-        self.appTasks[task_name].savingLayerVariable.connect(
-            lambda layer, variable_key, value_typped, type_returned:
-                self.saving_layer_variable(layer, variable_key, value_typped, type_returned),
-            Qt.ConnectionType.QueuedConnection
-        )
-        self.appTasks[task_name].removingLayerVariable.connect(
-            lambda layer, variable_key:
-                self.removing_layer_variable(layer, variable_key),
-            Qt.ConnectionType.QueuedConnection
-        )
+        # 2026-10-17: a failed (or canceled) run still emits resultingLayers, whose completion
+        # releases the add_layers counter, then taskTerminated released it a second time: with
+        # another add_layers pending the queue started a third one meanwhile.
+        delivered = {'results': False}
+
+        def on_results(result_project_layers, tn=task_name, ids=self.appTasks[task_name].changed_layer_ids):
+            delivered['results'] = True
+            self.layer_management_engine_task_completed(result_project_layers, tn, ids)
+
+        self.appTasks[task_name].resultingLayers.connect(on_results, Qt.ConnectionType.QueuedConnection)
+        # 2026-10-17: savingLayerVariable / removingLayerVariable are no longer connected: their slots
+        # called self.saving_layer_variable / self.removing_layer_variable, which do not exist
+        # (AttributeError if ever emitted). The task applies these variables itself, in finished()
+        # on the main thread (its _deferred_layer_variables).
         self.appTasks[task_name].taskTerminated.connect(
-            lambda tn=task_name: self._handle_layer_task_terminated(tn),
+            lambda tn=task_name: self._handle_layer_task_terminated(tn, results_delivered=delivered['results']),
             Qt.ConnectionType.QueuedConnection
         )
 
@@ -1924,15 +1923,21 @@ class FilterMateApp:
         else:
             logger.warning("TaskManagementService not available, cannot cancel layer tasks")
 
-    def _handle_layer_task_terminated(self, task_name):
-        """Handle layer management task termination (failure or cancellation) to prevent stuck UI."""
+    def _handle_layer_task_terminated(self, task_name, results_delivered=False):
+        """Handle layer management task termination (failure or cancellation) to prevent stuck UI.
+
+        Args:
+            task_name: 'add_layers' or 'remove_layers'.
+            results_delivered: The task emitted resultingLayers first: its completion already
+                released the add_layers counter.
+        """
         if getattr(self, '_unloading', False) or getattr(self, '_removing_all_layers', False):
             return
         logger.warning(f"Layer management task '{task_name}' was terminated")
 
         # STABILITY FIX: Reset counters and flags on task failure using tracked flags
         if task_name == 'add_layers':
-            if self._pending_add_layers_tasks > 0:
+            if self._pending_add_layers_tasks > 0 and not results_delivered:
                 self._pending_add_layers_tasks -= 1
                 logger.debug(f"Reset add_layers counter after termination (remaining: {self._pending_add_layers_tasks})")
             if self._loading_new_project:
