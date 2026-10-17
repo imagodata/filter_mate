@@ -1247,3 +1247,26 @@ class TestRemoveFavoriteCatchesNotInitialized:
         # The remove itself succeeded; save() failure is downgraded to log.
         assert result is True
         ctrl.favorite_removed.emit.assert_called_once_with("fav-1")
+
+
+# ---------------------------------------------------------------------------
+# teardown — the favorites service belongs to FilterMateApp
+# ---------------------------------------------------------------------------
+
+class TestTeardown:
+    """setup() now runs (and teardown() at unload): the controller lets go of
+    the app's favorites service it connected to."""
+
+    def test_teardown_disconnects_from_the_service(self):
+        ctrl = FavoritesController.__new__(FavoritesController)
+        service = MagicMock()
+        ctrl._favorites_service = service
+        ctrl.teardown()
+        service.favorites_changed.disconnect.assert_called_once_with(ctrl._on_favorites_loaded)
+        assert ctrl._favorites_service is None
+
+    def test_teardown_without_service(self):
+        ctrl = FavoritesController.__new__(FavoritesController)
+        ctrl._favorites_service = None
+        ctrl.teardown()
+        assert ctrl._favorites_service is None

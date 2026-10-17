@@ -11,7 +11,7 @@ Usage:
         self._controller_integration = ControllerIntegration(self)
         self._controller_integration.setup()
 
-    In closeEvent:
+    When the plugin unloads (filter_mate.py unload; closing the dock only hides it):
         self._controller_integration.teardown()
 """
 from typing import TYPE_CHECKING, Optional, Dict, Any, Tuple
@@ -95,6 +95,7 @@ class ControllerIntegration:
         # Connection tracking
         self._connections: list = []
         self._is_setup: bool = False
+        self._current_tab_index: Optional[int] = None
 
     @property
     def enabled(self) -> bool:
@@ -238,6 +239,18 @@ class ControllerIntegration:
 
             logger.info("Controller integration teardown complete")
 
+    def on_dock_closed(self) -> None:
+        """The dock was closed: it is only hidden, the controllers stay set up.
+
+        They are torn down when the plugin unloads (``teardown``); tearing them
+        down here left the reopened dock without its raster / point cloud mode.
+        Only the pixel picker stops: it would keep the map tool while the
+        panel showing the pixel values is hidden.
+        """
+        controller = self._point_cloud_ui_controller
+        if controller is not None:
+            controller._deactivate_pixel_tool()
+
     def _create_controllers(self) -> None:
         """Create all controller instances."""
         # Get cache from dockwidget if available
@@ -308,7 +321,7 @@ class ControllerIntegration:
 
     def _register_controllers(self) -> None:
         """Register all controllers with the registry."""
-        if not self._registry:
+        if self._registry is None:
             return
 
         # Register with tab indices
@@ -575,12 +588,10 @@ class ControllerIntegration:
             index: New tab index
         """
         if self._registry:
-            try:
-                tab_index = TabIndex(index)
-                self._registry.notify_tab_changed(tab_index)
-            except ValueError:
-                # Invalid tab index, ignore
-                pass
+            # notify_tab_changed takes the previous tab too; an index without
+            # a controller (or None, before the first change) is skipped there.
+            old_index, self._current_tab_index = self._current_tab_index, index
+            self._registry.notify_tab_changed(old_index, index)
 
     def _on_current_layer_changed(self) -> None:
         """Handle current layer change event.
@@ -1962,6 +1973,14 @@ class ControllerIntegration:
         except Exception as e:
             logger.warning(f"delegate_coverage_exploring_action failed: {e}")
             return False
+
+    def delegate_coverage_kind_badge(self) -> bool:
+        """Show the kind badge ("Raster · GDAL") of the active raster / point cloud layer; True when shown."""
+        controller = self._point_cloud_ui_controller
+        if controller is None or controller.active_layer is None:
+            return False
+        controller._show_kind_badge(controller.active_layer, controller.active_kind)
+        return True
 
     def delegate_split_coverage_targets(self, layer_ids: list) -> tuple:
         """Split target ids into (vector ids, raster / point cloud ids)."""

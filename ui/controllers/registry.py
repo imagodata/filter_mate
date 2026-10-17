@@ -3,12 +3,15 @@ FilterMate Controller Registry.
 
 Registry pattern for managing controller lifecycle and centralized access.
 """
+import logging
 from enum import IntEnum
 from typing import Dict, Type, Optional, TypeVar, List
 
 from .base_controller import BaseController
 
 T = TypeVar('T', bound=BaseController)
+
+logger = logging.getLogger(__name__)
 
 
 class TabIndex(IntEnum):
@@ -195,8 +198,8 @@ class ControllerRegistry:
                 try:
                     controller.setup()
                     count += 1
-                except Exception:  # nosec B110 - best-effort setup, non-fatal
-                    pass
+                except Exception as e:  # best-effort setup, non-fatal
+                    logger.warning(f"Controller '{name}' setup failed: {e}")
         return count
 
     def teardown_all(self) -> int:
@@ -204,7 +207,8 @@ class ControllerRegistry:
         Tear down all registered controllers in reverse order.
 
         Calls teardown() on each controller in reverse registration order.
-        This ensures proper cleanup of dependencies.
+        This ensures proper cleanup of dependencies. A failing teardown does
+        not stop the others (they disconnect project signals, stop tasks).
 
         Returns:
             Number of controllers torn down
@@ -213,8 +217,11 @@ class ControllerRegistry:
         for name in reversed(self._registration_order):
             controller = self._controllers.get(name)
             if controller:
-                controller.teardown()
-                count += 1
+                try:
+                    controller.teardown()
+                    count += 1
+                except Exception as e:  # best-effort teardown, non-fatal
+                    logger.warning(f"Controller '{name}' teardown failed: {e}")
         return count
 
     def notify_tab_changed(self, old_index: int, new_index: int) -> None:
@@ -239,6 +246,10 @@ class ControllerRegistry:
     def __len__(self) -> int:
         """Return number of registered controllers."""
         return len(self._controllers)
+
+    def __bool__(self) -> bool:
+        """A registry is truthy even when empty (``__len__`` alone made a new one falsy)."""
+        return True
 
     def __contains__(self, name: str) -> bool:
         """Check if controller is registered."""

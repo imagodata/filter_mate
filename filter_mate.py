@@ -1369,6 +1369,17 @@ class FilterMate:
             except Exception:  # nosec B110 - Best-effort during shutdown
                 pass  # Best-effort during shutdown
 
+        # Tear the dock controllers down: they disconnect from the project
+        # signals and stop their tasks. removeDockWidget / deleteLater below
+        # never send the dock a closeEvent (and closing it only hides it).
+        if self.app and self.app.dockwidget:
+            try:
+                integration = getattr(self.app.dockwidget, '_controller_integration', None)
+                if integration is not None:
+                    integration.teardown()
+            except Exception as e:
+                logger.debug(f"FilterMate: controllers not torn down on unload: {e}")
+
         # Disconnect project change signals using dedicated method
         self._disconnect_auto_activation_signals()
 

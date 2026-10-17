@@ -318,6 +318,23 @@ def s_dock_ready():
     return settled()
 
 
+def coverage_connected():
+    """The raster / point cloud controller receives the project signals (CoverageModeController.setup)."""
+    return getattr(coverage(), '_project_connected', set()) == {'readProject', 'cleared', 'layersWillBeRemoved'}
+
+
+def s_controllers_check():
+    """The controller registry stayed empty until 5.0 (an empty registry was falsy): no controller was set up,
+    so stored raster / point cloud filters were never replayed and the Configuration tab never saved an edit."""
+    integration = dock()._controller_integration
+    registry = integration.registry
+    check('dock controllers registered and set up', registry is not None and len(registry) == 10
+          and integration.validate_controllers()['all_valid'], repr(registry))
+    check('raster / point cloud controller connected to the project (stored filters replayed)',
+          coverage_connected())
+    check('configuration controller applies the edits', integration.config_controller._initialized)
+
+
 def press(key):
     """A real key press on the current-layer combo box (what a user does)."""
     from qgis.PyQt.QtCore import QEvent
@@ -563,6 +580,53 @@ def s_raster_settled():
     return settled()
 
 
+def badge_text():
+    return dock().backend_indicator_label.text()
+
+
+def s_badge_raster_source():
+    dock().comboBox_filtering_current_layer.setLayer(layer('dem'))
+    return switched_to('dem', coverage_page=True)
+
+
+def s_raster_badge_add_layer():
+    """The end of add_layers / remove_layers refreshes the backend badge: a vector one was written over the
+    "Raster · GDAL" badge of the current raster layer (and featureCount() failed on the raster).
+
+    Last steps with a current-layer pick: a layer removed while a raster layer is current leaves the
+    current-layer combo box empty, and the panel no longer follows it (also before 5.0's controller fixes)."""
+    STATE['raster_badge'] = badge_text()
+    # Out of the layer tree: a layer added to it becomes QGIS' active layer, which the panel follows.
+    project.addMapLayer(QgsVectorLayer(M['zones'] + '|layername=zones', 'extra', 'ogr'), False)
+    return lambda: registered('extra') and tasks_idle()
+
+
+def s_raster_badge_check():
+    active = coverage().active_layer
+    check('raster current layer keeps its badge after a layer is added',
+          STATE['raster_badge'].startswith('Raster') and badge_text() == STATE['raster_badge']
+          and active is not None and active.name() == 'dem',
+          f"badge before={STATE['raster_badge']!r} after={badge_text()!r} active={active.name() if active else None}")
+    project.removeMapLayer(layer('extra').id())
+    return lambda: layer('extra') is None and tasks_idle()
+
+
+def badge_matches_current():
+    """The badge names the kind of the panel's layer (a vector backend badge only for a vector layer)."""
+    active, text = coverage().active_layer, badge_text()
+    if active is not None:
+        return text.startswith('Raster' if isinstance(active, QgsRasterLayer) else 'Point cloud')
+    return text.startswith('Vector') or text == '...'
+
+
+def s_raster_badge_removed_check():
+    # The panel may move to another layer when one is removed: the badge then follows that layer.
+    active = coverage().active_layer
+    check('badge kept after a layer is removed (or follows the layer the panel moved to)',
+          badge_text() == STATE['raster_badge'] if layer_name(active) == 'dem' else badge_matches_current(),
+          f"badge={badge_text()!r} coverage={layer_name(active)} current={layer_name(dock().current_layer)}")
+
+
 def s_point_cloud_source():
     if not has_point_clouds():
         report('SKIP', 'point cloud source', f"QGIS {Qgis.QGIS_VERSION} < 3.26 (FilterMate gate)")
@@ -617,11 +681,112 @@ def s_back_to_vector():
     return switched_to('zones', coverage_page=False)
 
 
-def s_rasters_off():
+def s_close_dock():
     check('back to a vector layer: vector groups again', dock().mGroupBox_exploring_single_selection.isVisible())
+    STATE['coverage_before_close'] = coverage()
+    dock().close()  # the X of the dock title bar: run() shows the same dock again
+    since = time.time()
+    return lambda: not dock().isVisible() and time.time() - since > 1
+
+
+def s_reopen_dock():
+    qgis.utils.plugins[PACKAGE].run()  # the toolbar button
+    return settled()
+
+
+def s_reopen_pick_raster():
+    """closeEvent used to tear the controllers down: a raster picked in the reopened dock left the vector
+    layer current, without its EXPLORING page."""
+    integration = dock()._controller_integration
+    check('closing the dock keeps its controllers', dock().isVisible() and integration.registry is not None
+          and coverage() is STATE['coverage_before_close'] and coverage_connected(),
+          f"registry={integration.registry!r} coverage={coverage()!r}")
+    dock().comboBox_filtering_current_layer.setLayer(layer('dem'))
+    return switched_to('dem', coverage_page=True)
+
+
+def layer_name(map_layer):
+    try:
+        return map_layer.name() if map_layer is not None else None
+    except RuntimeError:
+        return '<deleted>'
+
+
+def s_reopen_raster_check():
+    d, active = dock(), coverage().active_layer
+    check('dock closed and reopened: a raster picked gets its EXPLORING page',
+          layer_name(active) == 'dem' and layer_name(d.current_layer) == 'dem' and coverage()._raster_panel.isVisible(),
+          f"coverage={layer_name(active)} current={layer_name(d.current_layer)}")
+    d.retranslate_all_ui()  # as when the dock is shown again or the language changes: it refreshes the badge
+    check('raster current layer keeps its badge when the dock is retranslated', badge_text().startswith('Raster'),
+          f"badge={badge_text()!r}")
+    # A handler connected twice runs twice: the layer change must run once for one pick.
+    STATE['layer_changes'] = 0
+    original = d.current_layer_changed
+
+    def counted(*args, **kwargs):
+        STATE['layer_changes'] += 1
+        return original(*args, **kwargs)
+    d.current_layer_changed = counted  # the combo calls it through a lambda: the instance attribute is used
+    d.comboBox_filtering_current_layer.setLayer(layer('zones'))
+    return switched_to('zones', coverage_page=False)
+
+
+def s_reopen_vector_check():
+    vars(dock()).pop('current_layer_changed', None)  # the class method again
+    check('one layer pick runs the dock layer change once', STATE.get('layer_changes') == 1
+          and dock().mGroupBox_exploring_single_selection.isVisible(),
+          f"current_layer_changed ran {STATE.get('layer_changes')} time(s)")
+
+
+def config_value_item(path):
+    """Value item of a key path (APP, OPTIONS, ...) in the Configuration tab model."""
+    parent, item = dock().config_model.invisibleRootItem(), None
+    for key in path:
+        # A key shown under its _display_name keeps the JSON key in UserRole.
+        rows = [row for row in range(parent.rowCount())
+                if key in (parent.child(row, 0).data(Qt.ItemDataRole.UserRole), parent.child(row, 0).text())]
+        if not rows:
+            return None
+        item, parent = parent.child(rows[0], 1), parent.child(rows[0], 0)
+    return item
+
+
+def edit_config_choice(path, value):
+    """The user picks ``value`` in the combo box of a Configuration tab choice (its delegate's setModelData)."""
+    from filter_mate.ui.widgets.json_view.datatypes import ChoicesType
+    item = config_value_item(path)
+    choices = item.data(Qt.ItemDataRole.UserRole)['choices']
+
+    class Editor:
+        def currentIndex(self):
+            return choices.index(value)
+    ChoicesType().setModelData(Editor(), item.model(), item.index())
+
+
+def record_layer_kind_counts():
+    """apply_layer_kind_options returns the (point clouds, rasters) counts it (un)registered: record them."""
+    a = app()
+    if not getattr(a, '_smoke_kind_counts', False):
+        original = a.apply_layer_kind_options
+
+        def recorded():
+            STATE['kind_counts'] = original()
+            return STATE['kind_counts']
+        a.apply_layer_kind_options = recorded
+        a._smoke_kind_counts = True
+    STATE['kind_counts'] = None
+
+
+def raster_option():
     from filter_mate.config.config import ENV_VARS
-    ENV_VARS['CONFIG_DATA']['APP']['OPTIONS']['RASTER']['enabled']['value'] = False
-    STATE['kind_counts'] = app().apply_layer_kind_options()
+    return ENV_VARS['CONFIG_DATA']['APP']['OPTIONS']['RASTER']['enabled']['value']
+
+
+def s_rasters_off():
+    """The raster switch of the Configuration tab, edited as a user does (it never reached the app until 5.0)."""
+    record_layer_kind_counts()
+    edit_config_choice(['APP', 'OPTIONS', 'RASTER', 'enabled'], False)
     return lambda: not registered('dem') and tasks_idle()
 
 
@@ -633,12 +798,11 @@ def current_layer_list():
 
 def s_rasters_off_check():
     in_combo = current_layer_list()
-    check('rasters switched off: unregistered and gone from the current-layer list',
-          not registered('dem') and 'dem' not in in_combo and 'zones' in in_combo and STATE['kind_counts'] == (0, 1),
-          f"counts={STATE['kind_counts']} combo={in_combo}")
-    from filter_mate.config.config import ENV_VARS
-    ENV_VARS['CONFIG_DATA']['APP']['OPTIONS']['RASTER']['enabled']['value'] = True
-    STATE['kind_counts'] = app().apply_layer_kind_options()
+    check('rasters switched off: saved, unregistered and gone from the current-layer list',
+          raster_option() is False and not registered('dem') and 'dem' not in in_combo and 'zones' in in_combo
+          and STATE['kind_counts'] == (0, 1), f"option={raster_option()} counts={STATE['kind_counts']} combo={in_combo}")
+    record_layer_kind_counts()
+    edit_config_choice(['APP', 'OPTIONS', 'RASTER', 'enabled'], True)
     return lambda: registered('dem') and tasks_idle()
 
 
@@ -652,6 +816,48 @@ def s_rasters_on_check():
     check('rasters switched on again: registered and listed once', registered('dem') and in_combo.count('dem') == 1
           and STATE['kind_counts'] == (1, 0), f"counts={STATE['kind_counts']} combo={in_combo}")
     check('layers to filter list each layer once', len(targets) == len(set(targets)), str(targets))
+
+
+def s_replay_select():
+    """A clipped raster target, saved with the project, is clipped again when the project is opened again
+    (CoverageModeController.setup connects readProject: it never ran until 5.0)."""
+    d = dock()
+    d.mGroupBox_exploring_single_selection.setChecked(True)
+    east_a = next(feature for feature in layer('zones').getFeatures() if feature['name'] == 'east_a')
+    d.mFeaturePickerWidget_exploring_single_selection.setFeature(east_a.id())
+    set_targets(['dem'])
+    set_predicates(['Intersect'])
+    ready = targets_ready(['dem'])
+    return lambda: bool(dock().get_current_features()[0]) and ready()
+
+
+def s_replay_filter():
+    run_task('filter')
+    return lambda: layer('dem').source().endswith('.vrt') and tasks_idle()
+
+
+def s_replay_save_and_clear():
+    dem = layer('dem')
+    check('raster target clipped before the project is saved', dem.source().endswith('.vrt'), f"source=...{dem.source()[-40:]}")
+    STATE['project_path'] = os.path.join(tempfile.mkdtemp(prefix='fm_project_'), 'smoke.qgs')
+    check('project saved', project.write(STATE['project_path']))
+    project.clear()
+    since = time.time()
+    return lambda: tasks_idle() and time.time() - since > 1
+
+
+def s_replay_read():
+    check('project opened again', project.read(STATE['project_path']))
+    return lambda: layer('dem') is not None and layer('dem').source().endswith('.vrt') and registered('zones', 'dem') \
+        and tasks_idle()
+
+
+def s_replay_check():
+    dem = layer('dem')
+    check('stored raster clip replayed when the project is opened again',
+          dem is not None and dem.source().endswith('.vrt') and dem.isValid(),
+          f"source=...{dem.source()[-40:] if dem else None}")
+    return settled()
 
 
 def s_remove_layer():
@@ -678,13 +884,18 @@ def s_finish():
     os._exit(1 if failed else 0)  # QGIS exit code = test result; skips the slow GUI teardown
 
 
-STEPS = [s_setup, s_open_plugin, s_dock_ready, s_layout_check, s_pick_before_late_refresh, s_late_refresh_check,
+STEPS = [s_setup, s_open_plugin, s_dock_ready, s_controllers_check, s_layout_check, s_pick_before_late_refresh,
+         s_late_refresh_check,
          s_vector_source, s_vector_select, s_vector_filter, s_vector_check, s_vector_undo_check,
          s_user_pick_after_undo_check,
          s_vector_source, s_vector_select, s_vector_filter, s_undo_pick_race, s_undo_pick_race_check,
          s_raster_source, s_raster_select, s_raster_filter, s_raster_check, s_raster_settled,
          s_point_cloud_source, s_point_cloud_select, s_point_cloud_filter, s_point_cloud_check, s_point_cloud_settled,
-         s_back_to_vector, s_rasters_off, s_rasters_off_check, s_rasters_on_check,
+         s_back_to_vector, s_close_dock, s_reopen_dock, s_reopen_pick_raster, s_reopen_raster_check,
+         s_reopen_vector_check,
+         s_rasters_off, s_rasters_off_check, s_rasters_on_check,
+         s_replay_select, s_replay_filter, s_replay_save_and_clear, s_replay_read, s_replay_check,
+         s_badge_raster_source, s_raster_badge_add_layer, s_raster_badge_check, s_raster_badge_removed_check,
          s_remove_layer, s_remove_layer_check, s_finish]
 
 

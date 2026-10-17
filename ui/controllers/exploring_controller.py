@@ -87,14 +87,15 @@ class ExploringController(BaseController, LayerSelectionMixin):
     # === BaseController Implementation ===
 
     def setup(self) -> None:
-        """Initialize exploring tab widgets and signals."""
-        logger.debug("Setting up ExploringController")
-        self._setup_layer_combo()
-        self._setup_field_combo()
-        self._setup_features_list()
-        self._setup_action_buttons()
-        self._connect_signals()
-        logger.debug("ExploringController setup complete")
+        """Initialize the controller.
+
+        The dock owns the EXPLORING widgets and their signals; the controller
+        follows its current layer (ControllerIntegration._on_current_layer_changed
+        calls set_layer). Wiring a layer combo here would run the dock's layer
+        change twice, and its vector-only filter would hide raster / point
+        cloud layers (FilterMate 5).
+        """
+        logger.debug("ExploringController setup complete (widgets and signals owned by the dock)")
 
     def teardown(self) -> None:
         """Clean up exploring controller."""

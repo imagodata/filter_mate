@@ -6455,7 +6455,10 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             from qgis.utils import plugins; from qgis.PyQt.QtCore import QTimer
             self.save_configuration_model()
             if 'filter_mate' not in plugins: show_warning("FilterMate", self.tr("Could not reload plugin automatically.")); return
-            fm = plugins['filter_mate']; self.close(); fm.pluginIsActive, fm.app = False, None; QTimer.singleShot(100, fm.run)
+            fm = plugins['filter_mate']
+            # This dock is dropped without unload(): its controllers go now (close() only hides it).
+            if self._controller_integration: self._controller_integration.teardown()
+            self.close(); fm.pluginIsActive, fm.app = False, None; QTimer.singleShot(100, fm.run)
         except Exception as e: show_error("FilterMate", self.tr("Error reloading plugin: {0}").format(str(e)))
 
     def _flush_coverage_export(self) -> None:
@@ -6580,10 +6583,17 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         self._current_provider_type = provider_type
         self._current_postgresql_available = postgresql_connection_available
 
+        # FilterMate 5: a raster / point cloud current layer keeps its kind badge
+        # ("Raster · GDAL"); the backends shown below are vector ones.
+        layer = self.current_layer
+        if layer is not None and not isinstance(layer, QgsVectorLayer):
+            if self._controller_integration:
+                self._controller_integration.delegate_coverage_kind_badge()
+            return
+
         # Try delegation to BackendController first
         if self._controller_integration and self._controller_integration.backend_controller:
             # Use current_layer if available, otherwise create minimal layer context
-            layer = self.current_layer
             if layer and self._controller_integration.delegate_update_backend_indicator(layer, postgresql_connection_available, actual_backend):
                 return
 
@@ -6656,9 +6666,10 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         try: self._theme_watcher.remove_callback(self._on_qgis_theme_changed) if self._theme_watcher else None
         except Exception:  # nosec B110 - Callback may not be registered - expected
             pass
-        try: self._controller_integration.teardown() if self._controller_integration else None
-        except Exception:  # nosec B110 - Controller may already be torn down - expected
-            pass
+        # Closing only hides the dock (run() shows it again): the controllers are
+        # torn down when the plugin unloads, not here.
+        try: self._controller_integration.on_dock_closed() if self._controller_integration else None
+        except Exception as e: logger.debug(f"closeEvent: controllers not notified: {e}")
 
         # FIX 2026-02-11: Unregister from module-level registry
         global _active_dockwidget

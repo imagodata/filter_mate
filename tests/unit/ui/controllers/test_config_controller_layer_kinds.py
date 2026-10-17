@@ -68,7 +68,7 @@ def test_switch_updates_the_layers_after_the_commit(controller_class):
     controller = _controller(controller_class, [(True, False)])
     summary = []
     controller._apply_layer_kinds_change((True, True), summary)
-    timer.singleShot.assert_called_once_with(0, controller.dockwidget.app.apply_layer_kind_options)
+    timer.singleShot.assert_called_once_with(0, controller.dockwidget.filter_mate_app.apply_layer_kind_options)
     controller.dockwidget._on_reload_layers_shortcut.assert_not_called()
     assert summary and 'rasters=False' in summary[0]
 
@@ -104,3 +104,16 @@ def test_edit_compares_flags_around_the_save(controller_class):
     controller.data_changed_configuration_model(item)
 
     assert calls == ['save', 'schedule']
+
+
+@pytest.mark.parametrize("attribute", ["filter_mate_app", "app"])
+def test_switch_reaches_the_app_of_the_dock(controller_class, attribute):
+    """FilterMateApp exposes itself as dock.filter_mate_app; dock.app exists only in its legacy mode."""
+    timer = _timer(controller_class)
+    controller = _controller(controller_class, [(True, False)])
+    app = MagicMock()
+    controller.dockwidget = types.SimpleNamespace(**{attribute: app})  # a real dock, not a MagicMock
+    summary = []
+    controller._apply_layer_kinds_change((True, True), summary)
+    timer.singleShot.assert_called_once_with(0, app.apply_layer_kind_options)
+    assert summary

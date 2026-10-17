@@ -261,6 +261,23 @@ class TestInit:
 
 
 # ===========================================================================
+# Tests -- Setup
+# ===========================================================================
+
+class TestSetup:
+    """The dock owns the EXPLORING widgets: setup() (run at startup since the
+    controller registry is filled) wires none of them, so no layer change runs
+    twice and no combo gets a vector-only filter."""
+
+    def test_setup_leaves_the_dock_widgets_alone(self, controller, mock_dockwidget):
+        controller.setup()
+        combo = mock_dockwidget.mMapLayerComboBox_for_exploring
+        combo.setFilters.assert_not_called()
+        combo.layerChanged.connect.assert_not_called()
+        mock_dockwidget.mFieldComboBox_for_exploring.fieldChanged.connect.assert_not_called()
+
+
+# ===========================================================================
 # Tests -- Teardown
 # ===========================================================================
 
