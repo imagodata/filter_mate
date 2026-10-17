@@ -340,8 +340,18 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
                 # The `original_source_table` contains the source layer's table name (e.g., "demand_points")
 
                 adapted_exists = []
+                search_from = 0
                 for clause_info in extracted:
                     clause_sql = clause_info['sql']
+                    # 2026-10-17: a disjoint filter is NOT EXISTS (...); the
+                    # extraction returns the EXISTS (...) part only, which
+                    # chained as is would keep the opposite targets.
+                    clause_start = source_filter.find(clause_sql, search_from)
+                    negated = clause_start > 0 and re.search(
+                        r'\bNOT\s*$', source_filter[:clause_start], re.IGNORECASE
+                    ) is not None
+                    if clause_start >= 0:
+                        search_from = clause_start + len(clause_sql)
 
                     # Adapt the EXISTS clause for the distant layer context
                     if original_source_table and table:
@@ -353,10 +363,10 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
                         )
                         if adapted_sql != clause_sql:
                             self.log_info(f"🔄 Adapted EXISTS for distant layer: '{original_source_table}' → '{table}'")
-                        adapted_exists.append(adapted_sql)
                     else:
                         # No adaptation needed or possible
-                        adapted_exists.append(clause_sql)
+                        adapted_sql = clause_sql
+                    adapted_exists.append(f"NOT {adapted_sql}" if negated else adapted_sql)
 
                 exists_clauses_to_combine = adapted_exists
                 self.log_info(f"🔗 Filter chaining: Found {len(exists_clauses_to_combine)} EXISTS clause(s) to chain at top level")
@@ -990,11 +1000,10 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
                 if table_exists:
                     self.log_info(f"♻️ Reusing existing buffer table: {temp_schema}.{temp_table_name}")
                     # FIX v4.2.20: Build EXISTS expression using existing table
-                    exists_expr = f'''EXISTS (
-              SELECT 1
-              FROM {q_temp_table} AS __buffer
-              WHERE {predicate_func}({geom_expr}, __buffer.buffered_geom)
-              )'''  # nosec B608 - identifiers quoted, values are numeric ids or SQL fragments FilterMate built from QGIS layer metadata
+                    exists_expr = self._predicate_against_sources(
+                        predicate_func, geom_expr, "__buffer.buffered_geom",
+                        f"{q_temp_table} AS __buffer", [], None, None,
+                    )
                     self.log_debug(f"Reuse buffer table expression: {exists_expr}")
                     return exists_expr
         except Exception as e:
@@ -1110,11 +1119,10 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
             self.log_info("   → Buffers pre-calculated, will be reused across all distant layers")
 
             # Build EXISTS using buffer table (with schema prefix for QGIS visibility)
-            exists_expr = f"""EXISTS (
-                SELECT 1
-                FROM {q_temp_table} AS __buffer
-                WHERE {predicate_func}({geom_expr}, __buffer.buffered_geom)
-            )"""  # nosec B608 - identifiers quoted, values are numeric ids or SQL fragments FilterMate built from QGIS layer metadata
+            exists_expr = self._predicate_against_sources(
+                predicate_func, geom_expr, "__buffer.buffered_geom",
+                f"{q_temp_table} AS __buffer", [], None, None,
+            )
 
             return exists_expr
 
@@ -1179,20 +1187,14 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
         # The MV contains pre-filtered source features that satisfy all spatial constraints
         # Each distant layer only needs ONE EXISTS query against this MV
 
-        # Source geometry in MV (use standard geom column)
-        source_geom_in_mv = '__chain."geom"'
-
-        # Apply buffer if specified (though usually already baked into MV)
-        if buffer_value is not None and buffer_value != 0:
-            source_geom_in_mv = self._build_st_buffer_with_style(
-                source_geom_in_mv, buffer_value
-            )
-
         # Build the optimized EXISTS
         # Format: EXISTS (SELECT 1 FROM mv AS __chain WHERE ST_Intersects(target, __chain.geom))
-        exists_expr = (
-            f"EXISTS (SELECT 1 FROM {mv_name} AS __chain "  # nosec B608
-            f"WHERE {predicate_func}({geom_expr}, {source_geom_in_mv}))"
+        # 2026-10-17: same union semantics as the other paths (disjoint →
+        # NOT EXISTS, non-distributive predicates against the union); the
+        # buffer, if any (usually already baked into the MV), applies there.
+        exists_expr = self._predicate_against_sources(
+            predicate_func, geom_expr, '__chain."geom"', f"{mv_name} AS __chain", [],
+            buffer_value, None,
         )
 
         self.log_info(f"✅ Optimized MV expression: {exists_expr[:150]}...")
@@ -1360,6 +1362,65 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
         if predicate_func.upper() == 'ST_DISJOINT' or 'ST_TRANSFORM(' in geom_expr.upper():
             return predicate
         return f"({raw_geom_expr} && {source_expr} AND {predicate})"
+
+    def _predicate_against_sources(
+        self,
+        predicate_func: str,
+        geom_expr: str,
+        source_expr: str,
+        from_sql: str,
+        filter_clauses: List[str],
+        buffer_value: Optional[float],
+        raw_geom_expr: Optional[str],
+    ) -> str:
+        """``predicate(target, union of the selected source rows)`` as SQL.
+
+        2026-10-17: Spatialite and OGR test a target against ONE geometry,
+        the union of the selected source features. ``EXISTS (SELECT 1 FROM
+        <source> WHERE ST_<pred>(target, row) AND <selection>)`` tested it
+        against each feature: ST_Disjoint kept every target disjoint from a
+        single feature (nearly the whole layer), ST_Within rejected a target
+        spanning two adjacent source polygons, ST_Contains kept a target
+        holding one of the selected features only.
+
+        - intersects: true for the union iff true for one row - EXISTS kept;
+        - disjoint: disjoint from the union iff it intersects no row -
+          ``NOT EXISTS (... ST_Intersects ...)`` (ST_DWithin with a buffer);
+        - every other predicate is not distributive over the rows and runs
+          against ``(SELECT ST_Union(rows) ...)``, an uncorrelated subquery
+          PostgreSQL evaluates once; a buffer then applies to the union.
+        - a negative buffer always goes through the union: erosion does not
+          distribute over it (the other backends erode the union).
+
+        Args:
+            predicate_func: PostGIS predicate (ST_Intersects, ...)
+            geom_expr: Target geometry expression
+            source_expr: Source geometry of one row (e.g. ``__source."geom"``)
+            from_sql: ``<relation> AS <alias>`` the rows come from
+            filter_clauses: Selection clauses ANDed in the subquery
+            buffer_value: Static buffer still to apply, None for none
+            raw_geom_expr: Raw target column (centroid bbox test)
+        """
+        predicate_upper = predicate_func.upper()
+        has_buffer = buffer_value is not None and buffer_value != 0
+        eroding = has_buffer and float(buffer_value) < 0
+        selection = " AND ".join(filter_clauses)
+
+        if predicate_upper in ('ST_INTERSECTS', 'ST_DISJOINT') and not eroding:
+            test_func = 'ST_Intersects' if predicate_upper == 'ST_DISJOINT' else predicate_func
+            if has_buffer:
+                row_test = self._buffered_predicate(test_func, geom_expr, source_expr, buffer_value, raw_geom_expr)
+            else:
+                row_test = self._index_aware_predicate(test_func, geom_expr, source_expr, raw_geom_expr)
+            where = f"{row_test} AND {selection}" if selection else row_test
+            exists_expr = f'EXISTS (SELECT 1 FROM {from_sql} WHERE {where})'  # nosec B608 - identifiers quoted, SQL fragments FilterMate built
+            return f"NOT {exists_expr}" if predicate_upper == 'ST_DISJOINT' else exists_expr
+
+        union_expr = f'(SELECT ST_Union({source_expr}) FROM {from_sql}'  # nosec B608 - identifiers quoted, SQL fragments FilterMate built
+        union_expr += f' WHERE {selection})' if selection else ')'
+        if has_buffer:
+            return self._buffered_predicate(predicate_func, geom_expr, union_expr, buffer_value, raw_geom_expr)
+        return self._index_aware_predicate(predicate_func, geom_expr, union_expr, raw_geom_expr)
 
     def _build_exists_expression(
         self,
@@ -1570,15 +1631,9 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
             # _buffered_predicate) instead of ST_Buffer() on the source.
             static_buffer = buffer_value
 
-        # Build WHERE clause
-        # CRITICAL: The spatial predicate checks intersection between target and source
-        if static_buffer is not None:
-            first_clause = self._buffered_predicate(
-                predicate_func, geom_expr, source_geom_in_subquery, static_buffer, raw_geom_expr
-            )
-        else:
-            first_clause = self._index_aware_predicate(predicate_func, geom_expr, source_geom_in_subquery, raw_geom_expr)
-        where_clauses = [first_clause]
+        # Source selection clauses (the spatial test is built by
+        # _predicate_against_sources below)
+        filter_clauses = []
         prefilter_filter = None  # 2026-09-13: aliased simple source filter for the envelope prefilter
         if whole_source_is_selection:
             prefilter_filter = "TRUE"  # the MV holds exactly the selection
@@ -1612,7 +1667,7 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
 
                 # CRITICAL: Add the combined EXISTS filters to WHERE clause
                 # This ensures the source geometry satisfies zone_pop AND buffer constraints
-                where_clauses.append(f"({source_filter})")
+                filter_clauses.append(f"({source_filter})")
 
             else:
                 # Original aliasing logic for simple filters (FID IN, field = value, etc.)
@@ -1659,16 +1714,16 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
 
                 self.log_debug(f"Aliased source_filter: {aliased_source_filter[:100]}...")
                 prefilter_filter = aliased_source_filter
-                where_clauses.append(f"({aliased_source_filter})")
+                filter_clauses.append(f"({aliased_source_filter})")
 
-        where_clause = " AND ".join(where_clauses)
-
-        # Build EXISTS subquery
-        exists_expr = (
-            'EXISTS ('
-            f'SELECT 1 FROM "{source_schema}"."{source_table}" AS __source '  # nosec B608
-            f'WHERE {where_clause}'
-            ')'
+        exists_expr = self._predicate_against_sources(
+            predicate_func,
+            geom_expr,
+            source_geom_in_subquery,
+            f'"{source_schema}"."{source_table}" AS __source',
+            filter_clauses,
+            static_buffer,
+            raw_geom_expr,
         )
         envelope_prefilter = self._source_envelope_prefilter(
             target_geom=raw_geom_expr or geom_expr,

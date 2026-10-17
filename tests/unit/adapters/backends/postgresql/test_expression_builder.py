@@ -528,8 +528,9 @@ class TestNoSilentEmptyFilter:
         result = self._build(
             builder, source_geom='"public"."rivers"."geom"', source_wkt=wkt, source_feature_count=691
         )
-        assert "EXISTS" in result
-        assert '"public"."rivers"' in result
+        # 2026-10-17: crosses runs against the union of the source table rows
+        assert 'ST_Crosses("roads"."geom", (SELECT ST_Union(__source."geom") FROM "public"."rivers" AS __source))' in result
+        assert "ST_GeomFromText" not in result
 
     def test_unbuildable_predicates_return_none_not_empty_filter(self, builder, monkeypatch):
         monkeypatch.setattr(builder, "_build_exists_expression", lambda **kwargs: None)
@@ -672,7 +673,8 @@ class TestIndexAwarePredicate:
             layer_props={},
             raw_geom_expr='"b"."geom"',
         )
-        assert 'ST_Within("b"."geom", ST_Buffer(__source."geom", 50' in expr
+        # 2026-10-17: within runs against the union of the source rows
+        assert 'ST_Within("b"."geom", ST_Buffer((SELECT ST_Union(__source."geom") FROM "s"."commune" AS __source), 50' in expr
         builder.task_params["buffer_endcap_style"] = "flat"
         expr = builder._build_exists_expression(
             geom_expr='"b"."geom"',
@@ -695,7 +697,9 @@ class TestIndexAwarePredicate:
             layer_props={},
             raw_geom_expr='"b"."geom"',
         )
-        assert 'ST_Buffer(__source."geom", -10' in expr and 'ST_DWithin' not in expr
+        # 2026-10-17: the erosion applies to the union of the source rows
+        assert 'ST_Buffer((SELECT ST_Union(__source."geom") FROM "s"."commune" AS __source), -10' in expr
+        assert 'ST_DWithin' not in expr
 
     def test_simple_wkt_path_uses_dwithin(self, builder):
         expr = builder._build_simple_wkt_expression(
@@ -741,7 +745,7 @@ class TestSourceEnvelopePrefilter:
 
     def test_no_prefilter_for_disjoint(self, builder):
         expr = self._expr(builder, predicate_func="ST_Disjoint")
-        assert expr.startswith('EXISTS (')
+        assert expr.startswith('NOT EXISTS (')
 
     def test_no_prefilter_for_combined_exists_filters(self, builder):
         expr = self._expr(builder, source_filter='EXISTS (SELECT 1 FROM "s"."zone" AS __source WHERE 1=1)')
@@ -939,3 +943,129 @@ class TestDynamicBufferTable:
         assert seen["buffer_table_name"] == b._buffer_table_name(
             "ref", "demand_points", '"homecount" * 2', '"demand_points"."fid" IN (7)'
         )
+
+
+# ===========================================================================
+# Tests -- predicates against the union of the selected source features
+# ===========================================================================
+
+class TestPredicatesAgainstSourceUnion:
+    """2026-10-17: a target is tested against the UNION of the selected source features.
+
+    Spatialite and OGR test the target against one geometry, the union of the
+    selection. ``EXISTS (... ST_<pred>(target, __source.geom) ...)`` tested it
+    against each source feature: ST_Disjoint kept every target disjoint from
+    ONE feature (almost the whole layer with two distant sources), ST_Within
+    rejected a target spanning two adjacent source polygons, ST_Contains kept
+    a target containing one of the selected features only.
+
+    Semantics checked on PostGIS 3.4 (A = [0,10]x[0,10], B = [10,20]x[0,10]):
+    - intersects: EXISTS(any feature) == ST_Intersects(t, A u B) - unchanged;
+    - disjoint: ST_Disjoint(t, A u B) == NOT EXISTS(ST_Intersects(t, feature));
+    - within / contains / touches / overlaps / crosses / equals / covers /
+      coveredby: not distributive over the features, tested against the
+      union, e.g. [5,15]x[2,8] is within A u B but within neither A nor B.
+    """
+
+    FILTER = '"commune"."fid" IN (1, 2)'
+    UNION = '(SELECT ST_Union(__source."geom") FROM "s"."commune" AS __source WHERE (__source."fid" IN (1, 2)))'
+
+    def _expr(self, builder, predicate_func, **kwargs):
+        params = dict(
+            geom_expr='"b"."geom"',
+            predicate_func=predicate_func,
+            source_geom='"s"."commune"."geom"',
+            source_filter=self.FILTER,
+            buffer_value=None,
+            layer_props={},
+            original_source_table="commune",
+            raw_geom_expr='"b"."geom"',
+        )
+        params.update(kwargs)
+        return builder._build_exists_expression(**params)
+
+    def test_intersects_keeps_the_exists_form(self, builder):
+        expr = self._expr(builder, "ST_Intersects")
+        assert ('EXISTS (SELECT 1 FROM "s"."commune" AS __source WHERE '
+                'ST_Intersects("b"."geom", __source."geom") AND (__source."fid" IN (1, 2)))') in expr
+        assert "ST_Union" not in expr
+
+    def test_disjoint_is_not_exists_intersects(self, builder):
+        expr = self._expr(builder, "ST_Disjoint")
+        assert expr == ('NOT EXISTS (SELECT 1 FROM "s"."commune" AS __source WHERE '
+                        'ST_Intersects("b"."geom", __source."geom") AND (__source."fid" IN (1, 2)))')
+
+    def test_disjoint_with_buffer_is_not_exists_dwithin(self, builder):
+        expr = self._expr(builder, "ST_Disjoint", buffer_value=20)
+        assert expr == ('NOT EXISTS (SELECT 1 FROM "s"."commune" AS __source WHERE '
+                        'ST_DWithin("b"."geom", __source."geom", 20) AND (__source."fid" IN (1, 2)))')
+
+    @pytest.mark.parametrize("predicate_func", [
+        "ST_Within", "ST_Contains", "ST_Touches", "ST_Overlaps", "ST_Crosses", "ST_Equals",
+        "ST_Covers", "ST_CoveredBy",
+    ])
+    def test_other_predicates_test_the_union(self, builder, predicate_func):
+        expr = self._expr(builder, predicate_func)
+        assert f'{predicate_func}("b"."geom", {self.UNION})' in expr
+        assert "EXISTS" not in expr
+
+    def test_union_with_buffer_buffers_the_union(self, builder):
+        expr = self._expr(builder, "ST_Within", buffer_value=20)
+        assert f'ST_Within("b"."geom", ST_Buffer({self.UNION}, 20, \'quad_segs=5\'))' in expr
+
+    def test_negative_buffer_erodes_the_union_for_intersects_too(self, builder):
+        # erosion does not distribute over the union: buffer(A u B, -d) != buffer(A, -d) u buffer(B, -d)
+        expr = self._expr(builder, "ST_Intersects", buffer_value=-5)
+        assert f"ST_Buffer({self.UNION}, -5, 'quad_segs=5')" in expr
+        assert "EXISTS" not in expr
+
+    def test_whole_source_union_without_filter(self, builder):
+        expr = self._expr(builder, "ST_Within", source_filter=None)
+        assert expr == 'ST_Within("b"."geom", (SELECT ST_Union(__source."geom") FROM "s"."commune" AS __source))'
+
+    def test_centroid_mode_keeps_the_bbox_test(self, builder):
+        expr = self._expr(builder, "ST_Within", geom_expr='ST_PointOnSurface("b"."geom")', source_filter=None)
+        union = '(SELECT ST_Union(__source."geom") FROM "s"."commune" AS __source)'
+        assert expr == f'("b"."geom" && {union} AND ST_Within(ST_PointOnSurface("b"."geom"), {union}))'
+
+    def test_buffer_table_disjoint_and_within(self, builder):
+        disjoint = builder._predicate_against_sources(
+            "ST_Disjoint", '"b"."geom"', "__buffer.buffered_geom", '"s"."fm_temp_buf_x" AS __buffer', [], None, None
+        )
+        assert disjoint == ('NOT EXISTS (SELECT 1 FROM "s"."fm_temp_buf_x" AS __buffer '
+                            'WHERE ST_Intersects("b"."geom", __buffer.buffered_geom))')
+        within = builder._predicate_against_sources(
+            "ST_Within", '"b"."geom"', "__buffer.buffered_geom", '"s"."fm_temp_buf_x" AS __buffer', [], None, None
+        )
+        assert within == ('ST_Within("b"."geom", (SELECT ST_Union(__buffer.buffered_geom) '
+                          'FROM "s"."fm_temp_buf_x" AS __buffer))')
+
+    def test_chained_disjoint_filter_stays_negated(self, builder, monkeypatch):
+        """A source already filtered with disjoint chains NOT EXISTS, not EXISTS."""
+        inner = 'EXISTS (SELECT 1 FROM "s"."zone" AS __source WHERE ST_Intersects("src"."geom", __source."geom"))'
+        combiner = sys.modules["filter_mate.core.filter.expression_combiner"]
+        monkeypatch.setattr(combiner, "extract_exists_clauses", lambda expr: [{"sql": inner}], raising=False)
+        monkeypatch.setattr(
+            combiner, "adapt_exists_for_nested_context",
+            lambda exists_sql, original_table, new_alias, original_schema=None:
+                exists_sql.replace(f'"{original_table}".', f"{new_alias}."),
+            raising=False,
+        )
+        result = builder.build_expression(
+            layer_props={"layer_name": "b", "layer_table_name": "b"},
+            predicates={"intersects": "ST_Intersects"},
+            source_geom='"s"."src"."geom"',
+            source_filter=f"NOT {inner}",
+            source_feature_count=500,
+            source_table_name="src",
+        )
+        assert result.endswith(
+            ' AND NOT EXISTS (SELECT 1 FROM "s"."zone" AS __source WHERE ST_Intersects("b"."geom", __source."geom"))'
+        )
+
+    def test_chain_mv_expression_uses_the_same_semantics(self, builder):
+        expr = builder._build_optimized_mv_expression(
+            geom_expr='"b"."geom"', predicates={"disjoint": "ST_Disjoint"}, mv_name='"filtermate_temp"."fm_temp_chain_x"'
+        )
+        assert expr.startswith('NOT EXISTS (SELECT 1 FROM "filtermate_temp"."fm_temp_chain_x" AS __chain')
+        assert 'ST_Intersects("b"."geom", __chain."geom")' in expr
