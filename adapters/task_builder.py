@@ -52,10 +52,12 @@ class FilteringConfig:
     layers_to_filter: List[str] = field(default_factory=list)
     use_centroids_source_layer: bool = False
     use_centroids_distant_layers: bool = False
+    # Targets tested by their centroids, chosen layer by layer (None: the global flag applies).
+    centroid_layers: Optional[List[str]] = None
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary for task parameters."""
-        return {
+        params = {
             "buffer_value": self.buffer_value,
             "buffer_segments": self.buffer_segments,
             "buffer_type": self.buffer_type,
@@ -66,6 +68,9 @@ class FilteringConfig:
             "use_centroids_source_layer": self.use_centroids_source_layer,
             "use_centroids_distant_layers": self.use_centroids_distant_layers,
         }
+        if self.centroid_layers is not None:
+            params["centroid_layers"] = list(self.centroid_layers)
+        return params
 
 
 @dataclass
@@ -256,6 +261,8 @@ class TaskParameterBuilder:
             config.use_centroids_distant_layers = (
                 dw.checkBox_filtering_use_centroids_distant_layers.isChecked()
             )
+        if hasattr(dw, 'get_centroid_target_ids'):
+            config.centroid_layers = dw.get_centroid_target_ids()
 
         return config
 
@@ -621,6 +628,13 @@ class TaskParameterBuilder:
                 logger.info(f"SYNC use_centroids_distant_layers: {stored_val} → {current_val}")
                 task_parameters["filtering"]["use_centroids_distant_layers"] = current_val
                 self._project_layers[layer_id]["filtering"]["use_centroids_distant_layers"] = current_val
+
+        # SYNC centroid_layers: the targets tested by their centroids, chosen layer by layer
+        if hasattr(dw, 'get_centroid_target_ids'):
+            centroid_ids = dw.get_centroid_target_ids()
+            if centroid_ids is not None:
+                task_parameters["filtering"]["centroid_layers"] = centroid_ids
+                self._project_layers[layer_id]["filtering"]["centroid_layers"] = centroid_ids
 
         # SYNC has_geometric_predicates
         if hasattr(dw, 'pushButton_checkable_filtering_geometric_predicates'):

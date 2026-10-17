@@ -2170,6 +2170,7 @@ class ExploringController(BaseController, LayerSelectionMixin):
         # This ensures the correct groupbox is shown when user selects from widgets
         feature_count = len(features)
         current_groupbox = dw.current_exploring_groupbox
+        self._note_selection_for_strip(feature_count, current_groupbox)
         is_selecting_from_button = dw.pushButton_checkable_exploring_selecting.isChecked() if hasattr(dw, 'pushButton_checkable_exploring_selecting') else False
 
         if is_selecting_from_button and not getattr(dw, '_syncing_from_qgis', False):
@@ -2249,6 +2250,17 @@ class ExploringController(BaseController, LayerSelectionMixin):
         dw._update_exploring_buttons_state()
 
         return features
+
+    def _note_selection_for_strip(self, feature_count, groupbox):
+        """FilterMate 5: tell the selection strip above FILTERING how many features EXPLORING hands over."""
+        integration = getattr(self._dockwidget, '_controller_integration', None)
+        coverage = getattr(integration, 'coverage_controller', None) if integration is not None else None
+        if coverage is None:
+            return
+        try:
+            coverage.note_exploring_selection(self._dockwidget.current_layer.id(), groupbox or '', feature_count)
+        except Exception as e:
+            logger.debug(f"selection strip not updated: {e}")
 
     def exploring_link_widgets(self, expression=None, change_source=None):
         """

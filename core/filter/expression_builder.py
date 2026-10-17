@@ -103,6 +103,23 @@ class ExpressionBuilder:
 
         logger.debug("ExpressionBuilder initialized")
 
+    def _distant_centroids(self, layer_props: Dict[str, Any]) -> bool:
+        """Whether this target is tested by its centroids: chosen layer by layer (FilterMate 5),
+        the global flag for tasks without the per-layer list.
+
+        Same rule as ``core.domain.centroid_targets.distant_centroids_for`` (not imported: this
+        module is also loaded on its own).
+        """
+        layer = layer_props.get('layer')
+        try:
+            layer_id = layer.id() if layer is not None else layer_props.get('layer_id')
+        except (RuntimeError, AttributeError):
+            layer_id = layer_props.get('layer_id')
+        chosen = (self.task_parameters.get('filtering') or {}).get('centroid_layers')
+        if chosen is None:
+            return bool(self.use_centroids_distant)
+        return bool(layer_id) and layer_id in set(chosen)
+
     def build_backend_expression(
         self,
         backend: Any,
@@ -190,6 +207,7 @@ class ExpressionBuilder:
             # FIX v4.2.7: Pass source_table_name for proper aliasing of source_filter
             # v4.2.10: Pass filter_chain_mv_name for MV optimization
             source_table_name = self.task_parameters.get('param_source_table')
+            use_centroids = self._distant_centroids(layer_props)
             expression = backend.build_expression(
                 layer_props=layer_props,
                 predicates=self.current_predicates,
@@ -200,7 +218,7 @@ class ExpressionBuilder:
                 source_wkt=self.source_wkt,
                 source_srid=self.source_srid,
                 source_feature_count=self.source_feature_count,
-                use_centroids=self.use_centroids_distant,
+                use_centroids=use_centroids,
                 source_table_name=source_table_name,
                 filter_chain_mv_name=filter_chain_mv  # v4.2.10
             )

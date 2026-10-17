@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-r"""FilterMate 5 mockup check in a real QGIS (GUI): layer card, kind tools, source geometry line,
+r"""FilterMate 5 mockup check in a real QGIS (GUI): layer card, kind tools, selection strip, target hints,
 map tool handover, FILTERING alignment. Same launch as scripts/fm5_gui_check.py; log in
 %LOCALAPPDATA%\Temp\fm5gaps\out\gaps.log."""
 import os
@@ -62,6 +62,8 @@ def save(name):
 
 
 def s_setup():
+    if os.environ.get('FM_THEME', '').lower() == 'dark':  # dark dock: the QGIS Night Mapping theme
+        QgsApplication.instance().setUITheme('Night Mapping')
     mw = iface.mainWindow()
     mw.showNormal()
     mw.resize(1700, 1100)
@@ -106,6 +108,125 @@ def s_vector_check():
           and card.mapTo(d, card.rect().topLeft()).y() < d.mGroupBox_exploring_single_selection.mapTo(d, d.mGroupBox_exploring_single_selection.rect().topLeft()).y(),
           card.text() if card else 'missing')
     save('vector')
+
+
+def strip():
+    from qgis.PyQt.QtWidgets import QFrame
+    return dock().findChild(QFrame, 'frame_selection_strip')
+
+
+def strip_text():
+    found = strip()
+    return '' if found is None else f"{found.kind()} | {found.caption()} | {found.value()}"
+
+
+def s_strip_vector():
+    d, found = dock(), strip()
+    check('strip: shown for a vector source', found is not None and found.isVisible() and found.kind() == 'vector',
+          strip_text())
+    if found is not None:
+        top = found.mapTo(d, found.rect().topLeft()).y()
+        bottom = found.mapTo(d, found.rect().bottomLeft()).y()
+        groups = d.scrollArea_frame_exploring
+        exploring = groups.mapTo(d, groups.rect().bottomLeft()).y()
+        sections = d.toolBox_tabTools.mapTo(d, d.toolBox_tabTools.rect().topLeft()).y()
+        check('strip: under the EXPLORING groups, above the FILTERING header', exploring <= top and bottom < sections,
+              f'groups end {exploring}, strip {top}-{bottom}, sections {sections}')
+    combo = d.checkableComboBoxLayer_filtering_layers_to_filter
+    hints = {}
+    for row in range(combo.count()):
+        item = combo.model().item(row)
+        hints[item.text().split(' [')[0]] = item.data(0x0101)
+    check('targets: one hint per layer kind', hints.get('parcelle') == 'features' and hints.get('mnt') == 'pixels in the zone'
+          and hints.get('lhd') == 'points in the zone', str(hints))
+    for name, beside in (('checkBox_filtering_use_centroids_distant_layers', combo),
+                         ('checkBox_filtering_use_centroids_source_layer', d.comboBox_filtering_current_layer)):
+        button = getattr(d, name)
+        check(f'centroid button {name[29:]}: square, as high as its combo',
+              button.width() == button.height() and abs(button.height() - beside.height()) <= 1
+              and abs(button.mapTo(d, button.rect().center()).y() - beside.mapTo(d, beside.rect().center()).y()) <= 1,
+              f'{button.width()}x{button.height()} vs {beside.height()}')
+    exporting = d.checkableComboBoxLayer_exporting_layers
+    check('targets: no hint in EXPORTING',
+          all(exporting.model().item(row).data(0x0101) is None for row in range(exporting.count())))
+    d._force_exploring_groupbox_exclusive('multiple_selection')
+    d._configure_multiple_selection_groupbox()
+    picker = d.widgets['EXPLORING']['MULTIPLE_SELECTION_FEATURES']['WIDGET']
+    items = picker.list_widgets.get(d.current_layer.id()) if hasattr(picker, 'list_widgets') else None
+    STATE['strip_items'] = items
+    if items is not None:
+        for row in range(min(2, items.count())):
+            items.item(row).setCheckState(Qt.CheckState.Checked)
+    d.refresh_selection_strip()
+
+
+def s_strip_vector_count():
+    items = STATE.get('strip_items')
+    expected = min(2, items.count()) if items is not None else -1
+    check('strip: counts the features checked in multiple selection', strip_text().endswith(f'{expected} feature(s)'),
+          strip_text())
+    save('strip_vector')
+    if items is not None:
+        for row in range(items.count()):
+            items.item(row).setCheckState(Qt.CheckState.Unchecked)
+    d = dock()
+    d._force_exploring_groupbox_exclusive('single_selection')  # the following checks expect the default group
+    d._configure_single_selection_groupbox()
+
+
+def s_targets_popup():
+    d = dock()
+    combo = d.checkableComboBoxLayer_filtering_layers_to_filter
+    STATE['popup_centroids'] = combo.centroid_layer_ids()
+    combo.set_centroid_layer_ids([layer('parcelle').id()])
+    combo.showPopup()
+
+
+def s_targets_popup_shot():
+    d = dock()
+    combo = d.checkableComboBoxLayer_filtering_layers_to_filter
+    try:
+        combo.view().window().grab().save(os.path.join(OUT, 'targets_popup.png'), 'PNG')
+    except Exception:
+        log('popup grab failed ' + traceback.format_exc())
+    rows = {combo.model().item(r).text().split(' [')[0]: combo.model().item(r).data(0x0102) for r in range(combo.count())}
+    check('targets: centroid toggle on the polygon target only', rows.get('parcelle') is True and rows.get('mnt') is None
+          and rows.get('lhd') is None, str(rows))
+    combo.hidePopup()
+    combo.set_centroid_layer_ids(STATE.get('popup_centroids', []))
+
+
+def s_strip_raster():
+    found = strip()
+    check('strip: raster range and share of pixels', found is not None and found.isVisible() and found.kind() == 'raster'
+          and '–' in found.value() and '%' in found.value(), strip_text())
+
+
+def s_strip_pc():
+    found = strip()
+    check('strip: point cloud kept points', found is not None and found.isVisible() and found.kind() == 'point_cloud'
+          and found.caption() == 'Kept points', strip_text())
+    panel = ctrl()._pc_panel
+    panel._classes_group.setChecked(True)
+    codes = panel._present_codes()
+    panel._check_codes(codes[:1])
+    STATE['strip_pc_code'] = codes[:1]
+
+
+def s_strip_pc_count():
+    panel = ctrl()._pc_panel
+    kept, total = panel.class_point_counts()
+    log(f'pc class summary: {panel._class_summary_label.text()} -> {kept} / {total}')
+    if kept is not None:
+        check('strip: checked classes counted', '/' in strip().value() and '%' in strip().value(), strip_text())
+    else:  # no point count per class in the layer statistics: the criteria are shown
+        check('strip: uncounted classes show the criteria', strip().value() == panel.expression().strip(), strip_text())
+    save('strip_point_cloud')
+    ctrl()._pc_panel.reset()
+
+
+def s_strip_back():
+    check('strip: back to the vector colours', strip() is not None and strip().kind() == 'vector', strip_text())
 
 
 def s_raster():
@@ -540,8 +661,19 @@ def s_spacing_scale():
           and 4 <= rights['sections'] - rights['fields'] <= 8, str(rights))
     check('scale: section headers on the dock edge', all(_rect(d, t)[0] == edge for t in tabs))
     check('scale: header -> EXPLORING one block', rail[1] - badge[3] == block, f'{rail[1] - badge[3]}')
-    check('scale: EXPLORING -> FILTERING header one block', _rect(d, tabs[0])[1] - rail[3] == block,
-          f'{_rect(d, tabs[0])[1] - rail[3]}')
+    selection = strip()
+    if selection is not None and selection.isVisible():
+        # The selection strip closes EXPLORING: one block above it, one block down to the header.
+        box = _rect(d, selection)
+        check('scale: EXPLORING -> selection strip one block', box[1] - rail[3] == block, f'{box[1] - rail[3]}')
+        check('scale: selection strip -> FILTERING header one block', _rect(d, tabs[0])[1] - box[3] == block,
+              f'{_rect(d, tabs[0])[1] - box[3]}')
+        check('scale: selection strip one band high', box[3] - box[1] == band, f'{box[3] - box[1]} vs {band}')
+        check('scale: selection strip on the section edges', box[0] == _rect(d, tabs[0])[0] and box[2] == _rect(d, tabs[0])[2],
+              f'{box} vs {_rect(d, tabs[0])}')
+    else:
+        check('scale: EXPLORING -> FILTERING header one block', _rect(d, tabs[0])[1] - rail[3] == block,
+              f'{_rect(d, tabs[0])[1] - rail[3]}')
     buffer = _rect(d, d.mQgsDoubleSpinBox_filtering_buffer_value)
     check('scale: last FILTERING row -> next header one block', _rect(d, tabs[1])[1] - buffer[3] == block,
           f'{_rect(d, tabs[1])[1] - buffer[3]}')
@@ -723,9 +855,9 @@ def s_finish():
     QgsApplication.instance().quit()
 
 
-STEPS = [(s_setup, 1500), (s_open, 6000), (s_vector, 3500), (s_vector_check, 500), (s_raster, 4000),
-         (s_raster_check, 500), (s_picker, 800), (s_picker_check, 500), (s_raster_tools, 2500), (s_raster_tools_check, 500), (s_handover, 1000), (s_alignment, 500),
-         (s_pc, 5000), (s_pc_check, 3000), (s_pc_pipette, 1500), (s_pc_pipette_check, 1500), (s_pc_groups, 800), (s_pc_conditions, 800), (s_pc_statistics, 300), (s_spacing_pc, 300), (s_probe, 500), (s_back, 4000), (s_back_check, 500), (s_alignment, 500), (s_sections_gap, 300), (s_harmony, 300), (s_spacing_scale, 300), (s_rail_minimum, 300), (s_badge_gap, 300), (s_source_row, 300),
+STEPS = [(s_setup, 1500), (s_open, 6000), (s_vector, 3500), (s_vector_check, 500), (s_strip_vector, 1000), (s_strip_vector_count, 500), (s_targets_popup, 800), (s_targets_popup_shot, 500), (s_raster, 4000),
+         (s_raster_check, 500), (s_picker, 800), (s_picker_check, 500), (s_raster_tools, 2500), (s_raster_tools_check, 500), (s_strip_raster, 300), (s_handover, 1000), (s_alignment, 500),
+         (s_pc, 5000), (s_pc_check, 3000), (s_strip_pc, 1000), (s_strip_pc_count, 500), (s_pc_pipette, 1500), (s_pc_pipette_check, 1500), (s_pc_groups, 800), (s_pc_conditions, 800), (s_pc_statistics, 300), (s_spacing_pc, 300), (s_probe, 500), (s_back, 4000), (s_back_check, 500), (s_strip_back, 300), (s_alignment, 500), (s_sections_gap, 300), (s_harmony, 300), (s_spacing_scale, 300), (s_rail_minimum, 300), (s_badge_gap, 300), (s_source_row, 300),
          (s_scrollbar_margin, 300), (s_resize_lower, 1500), (s_resize_lower_check, 500),
          (s_list_grow, 1500), (s_list_grow_check, 500), (s_font_reload, 6000), (s_font_reload_check, 500),
          (s_finish, 500)]
