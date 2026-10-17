@@ -25,6 +25,7 @@ Or from the package:
     from ...core.tasks import FilterEngineTask"""
 
 import logging
+import re
 import os
 import threading
 import uuid
@@ -183,6 +184,14 @@ else:
     ogr_apply_subset = None
     ogr_cleanup_temp_layers = None
 
+
+# 'CREATE MATERIALIZED VIEW [IF NOT EXISTS] "schema"."name"': the name (the task's own views)
+_CREATED_VIEW = re.compile(r'CREATE\s+MATERIALIZED\s+VIEW\s+(?:IF\s+NOT\s+EXISTS\s+)?(?:"?\w+"?\s*\.\s*)?"?(\w+)"?',
+                           re.IGNORECASE)
+
+# Views created by canceled tasks, waiting to be dropped (name -> ids of the layers that used
+# them): by the first finished() with no filter task running (main thread only).
+_DEFERRED_VIEW_DROPS = {}
 
 # Task parameters shared with the app on purpose: read-only for the task.
 _SHARED_TASK_PARAMETER_KEYS = frozenset({'config_data'})
@@ -2361,7 +2370,14 @@ class FilterEngineTask(QgsTask):
         return self._mv_handler.cleanup_orphaned_materialized_views(connexion, schema_name, max_age_hours)
 
     def _execute_postgresql_commands(self, connexion: Any, commands: List[str]) -> bool:
-        """Execute PostgreSQL commands. Delegates to MaterializedViewHandler."""
+        """Execute PostgreSQL commands. Delegates to MaterializedViewHandler.
+
+        2026-10-17: the views these commands create are recorded as the task's own
+        (``_created_mv_names``): a canceled task drops those nothing reads.
+        """
+        for command in commands or []:
+            for name in _CREATED_VIEW.findall(str(command)):
+                self.__dict__.setdefault('_created_mv_names', set()).add(name)
         return self._mv_handler.execute_postgresql_commands(connexion, commands)
 
     def _ensure_source_table_stats(self, connexion: Any, schema: str, table: str, geom_field: str) -> bool:
@@ -2989,13 +3005,32 @@ class FilterEngineTask(QgsTask):
         self._task_postgresql_connection = None
 
     def _cleanup_canceled_task_views(self) -> None:
-        """finished() of a canceled task: drop the views it created that nothing uses.
+        """finished() of a canceled task: its views are queued for dropping (see _drop_deferred_views).
 
-        Main thread: the layers' subset strings are read here. Left to the session
-        cleanup while another filter task runs (it may be filling views of the same name).
+        A view created by the task and read by no subset in place is dropped once no
+        filter task runs any more (one running may still be filling a view a subset
+        will read).
         """
         names = set(getattr(self, '_created_mv_names', None) or ())
         if not names:
+            return
+        layer_ids = []
+        source = getattr(self, 'source_layer', None)
+        for layer in ([source] if source is not None else []) + list(self.param_all_layers):
+            try:
+                layer_ids.append(layer.id())
+            except (RuntimeError, AttributeError):
+                continue
+        for name in names:
+            _DEFERRED_VIEW_DROPS.setdefault(name, set()).update(layer_ids)
+
+    def _drop_deferred_views(self) -> None:
+        """finished(), main thread: drop the views of canceled tasks that nothing reads.
+
+        Not while another filter task runs; kept for a later finished() when no PostgreSQL
+        connection can be opened from this task's source.
+        """
+        if not _DEFERRED_VIEW_DROPS:
             return
         try:
             from qgis.core import QgsApplication
@@ -3004,7 +3039,7 @@ class FilterEngineTask(QgsTask):
         except Exception:  # catch-all safety net: no task manager (shutdown)
             others = []
         if others:
-            logger.info(f"Canceled task: {len(names)} view(s) left to the session cleanup (another filter runs)")
+            logger.info(f"{len(_DEFERRED_VIEW_DROPS)} view(s) of canceled tasks: dropped once no filter runs")
             return
         project = QgsProject.instance()
         subsets = []
@@ -3013,21 +3048,27 @@ class FilterEngineTask(QgsTask):
                 subsets.append(layer.subsetString() if hasattr(layer, 'subsetString') else '')
             except RuntimeError:
                 continue
-        layer_ids = []
-        source = getattr(self, 'source_layer', None)
-        for layer in ([source] if source is not None else []) + list(self.param_all_layers):
+        names = dict(_DEFERRED_VIEW_DROPS)
+        layer_ids = sorted({layer_id for ids in names.values() for layer_id in ids})
+
+        def connection():
             try:
-                layer_ids.append(layer.id())
-            except (RuntimeError, AttributeError):
-                continue
+                return self._get_valid_postgresql_connection()
+            except Exception as e:  # catch-all safety net: not a PostgreSQL task: kept for a later one
+                logger.debug(f"Views of canceled tasks kept for now: {e}")
+                return None
+
+        in_use = {name for name in names if any(name in subset for subset in subsets)}
         dropped = self._cleanup_handler.drop_task_materialized_views(
-            names, layer_ids,
-            in_use_fn=lambda name: any(name in subset for subset in subsets),
-            get_connection_fn=self._get_valid_postgresql_connection,
+            set(names), layer_ids,
+            in_use_fn=lambda name: name in in_use,
+            get_connection_fn=connection,
             current_mv_schema=getattr(self, 'current_materialized_view_schema', None) or DEFAULT_TEMP_SCHEMA,
         )
+        for name in set(dropped) | in_use:  # dropped, or read by a subset: no longer this cleanup's
+            _DEFERRED_VIEW_DROPS.pop(name, None)
         if dropped:
-            logger.info(f"Canceled task: {len(dropped)} materialized view(s) it created dropped")
+            logger.info(f"{len(dropped)} materialized view(s) of canceled tasks dropped")
 
     def _restore_source_layer_selection(self):
         """Restore source layer selection after filter/unfilter. Delegates to FeatureCollector."""
@@ -3082,7 +3123,12 @@ class FilterEngineTask(QgsTask):
             cleanup_safe_intersect_fn=self._cleanup_safe_intersect_layers,
             cleanup_canceled_mv_fn=self._cleanup_canceled_task_views,
         )
-        # 2026-10-17: a view cleanup above opened a connection on the main thread: closed now
+        # 2026-10-17: the views of canceled tasks nothing reads, then the connection a view
+        # cleanup opened on the main thread: closed now
+        try:
+            self._drop_deferred_views()
+        except Exception as e:  # catch-all safety net: a cleanup must not break finished()
+            logger.debug(f"Views of canceled tasks not dropped: {e}")
         self._close_main_thread_connections()
 
         # Update state from handler return values

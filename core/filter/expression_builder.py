@@ -30,6 +30,23 @@ from qgis.core import (
 logger = logging.getLogger('filter_mate')
 
 
+def record_task_view(task_parameters, mv_ref) -> None:
+    """Record a materialized view as created by the running filter task (``_parent_task``).
+
+    2026-10-17: a canceled task drops the views it created that nothing reads
+    (FilterEngineTask._drop_deferred_views); the source selection views of the
+    PostgreSQL backend were not known to it.
+    """
+    task = (task_parameters or {}).get('_parent_task') if isinstance(task_parameters, dict) else None
+    if task is None or not mv_ref:
+        return
+    name = str(mv_ref).split('.')[-1].strip().strip('"')
+    try:
+        task.__dict__.setdefault('_created_mv_names', set()).add(name)
+    except AttributeError:  # an object without __dict__ (test doubles)
+        pass
+
+
 class ExpressionBuilder:
     """
     Builds filter expressions for different backend types.
@@ -1374,6 +1391,7 @@ class ExpressionBuilder:
 
             # Store MV reference for cleanup
             self._source_selection_mvs.append(mv_ref)
+            record_task_view(self.task_parameters, mv_ref)
             self._source_selection_mv_cache[cache_key] = source_filter
 
             logger.debug(f"   ✓ MV created: {mv_ref}")
