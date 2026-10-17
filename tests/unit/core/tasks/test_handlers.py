@@ -153,6 +153,59 @@ class TestCleanupHandler:
                     get_connection_fn=MagicMock(),
                 )
 
+    # --- drop_task_materialized_views (2026-10-17: a canceled task drops only its own unused views) ---
+
+    @staticmethod
+    def _tracker():
+        import importlib.util
+        from pathlib import Path
+        spec = importlib.util.spec_from_file_location(
+            "fm_test_tracker_for_cleanup",
+            Path(__file__).resolve().parents[4] / "adapters" / "backends" / "postgresql" / "mv_reference_tracker.py")
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        return module.MVReferenceTracker()
+
+    def _drop(self, tracker, names, layer_ids, in_use=(), connexion=None):
+        connexion = connexion or MagicMock()
+        stub = MagicMock(get_mv_reference_tracker=MagicMock(return_value=tracker))
+        with patch.dict('sys.modules', {
+            'adapters.backends.postgresql.mv_reference_tracker': stub,
+            'filter_mate.adapters.backends.postgresql.mv_reference_tracker': stub,
+        }):
+            dropped = self.handler.drop_task_materialized_views(
+                set(names), layer_ids, in_use_fn=lambda name: name in in_use,
+                get_connection_fn=lambda: connexion, current_mv_schema="filtermate_temp")
+        return dropped, connexion
+
+    def test_a_view_another_task_registered_is_kept(self):
+        tracker = self._tracker()
+        tracker.add_reference("fm_temp_mv_a", "roads")   # this task (canceled)
+        tracker.add_reference("fm_temp_mv_a", "rivers")  # another task's layer
+        dropped, connexion = self._drop(tracker, ["fm_temp_mv_a"], ["roads"])
+        assert dropped == [] and tracker.is_referenced("fm_temp_mv_a")
+        assert tracker.get_reference_count("fm_temp_mv_a") == 1  # only this task's reference removed
+
+    def test_a_view_a_subset_reads_is_kept(self):
+        tracker = self._tracker()
+        tracker.add_reference("fm_temp_mv_a", "roads")
+        dropped, connexion = self._drop(tracker, ["fm_temp_mv_a"], ["roads"], in_use={"fm_temp_mv_a"})
+        assert dropped == []
+        connexion.cursor.assert_not_called()  # no connection used at all
+
+    def test_an_unused_view_of_the_task_is_dropped_and_a_failure_rolls_back(self):
+        tracker = self._tracker()
+        for name in ("fm_temp_mv_a", "fm_temp_mv_b"):
+            tracker.add_reference(name, "roads")
+        connexion = MagicMock()
+        cursor = connexion.cursor.return_value
+        cursor.execute.side_effect = [Exception("InFailedSqlTransaction"), None]
+        dropped, _ = self._drop(tracker, ["fm_temp_mv_a", "fm_temp_mv_b"], ["roads"], connexion=connexion)
+        assert dropped == ["fm_temp_mv_b"]
+        connexion.rollback.assert_called_once_with()
+        assert 'DROP MATERIALIZED VIEW IF EXISTS "filtermate_temp"."fm_temp_mv_b" CASCADE;' in \
+            cursor.execute.call_args_list[-1].args[0]
+
     # --- create_custom_buffer_view_sql ---
 
     def test_custom_buffer_view_sql_basic(self):

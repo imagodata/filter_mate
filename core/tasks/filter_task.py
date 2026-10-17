@@ -26,6 +26,7 @@ Or from the package:
 
 import logging
 import os
+import threading
 import uuid
 from typing import Any, Dict, List, Optional
 
@@ -403,6 +404,13 @@ class FilterEngineTask(QgsTask):
 
         # Track active database connections for cleanup on cancellation
         self.active_connections = []
+        # 2026-10-17: cancel() interrupts their queries from a thread of its own; the worker closes
+        # them. The lock keeps a late interruption off a connection being rolled back / closed.
+        self._connections_lock = threading.Lock()
+        self._connections_released = False
+        # Materialized views this task created (MaterializedViewHandler): the only ones its
+        # cancellation may drop, in finished().
+        self._created_mv_names = set()
 
         # v3.0 MIG-023: TaskBridge for Strangler Fig migration
         # Allows using new v3 backends while keeping legacy code as fallback
@@ -2898,22 +2906,20 @@ class FilterEngineTask(QgsTask):
         waited for the worker's query (QGIS frozen), and closing an sqlite3
         connection the worker created raised ``sqlite3.ProgrammingError`` (not
         caught): ``super().cancel()`` was never reached, the task never
-        canceled. The worker releases its resources itself when ``run()``
-        ends (:meth:`_release_worker_resources`).
+        canceled. The worker releases its connections itself when ``run()``
+        ends (:meth:`_release_worker_resources`); the views of a canceled task
+        are handled by ``finished()``.
 
         Note:
             Uses Python logger instead of QgsMessageLog to prevent Windows
             access violation during QGIS shutdown (v2.8.7 crash fix).
         """
-        for conn in list(self.active_connections):
-            # psycopg2's cancel() is meant to be called from another thread:
-            # it asks the server to abort the statement the worker waits on.
-            # sqlite3 connections are left alone (owned by the worker thread).
-            if getattr(conn, 'closed', None) == 0 and callable(getattr(conn, 'cancel', None)):
-                try:
-                    conn.cancel()
-                except Exception as e:  # catch-all safety net: a cancel request must not stop the cancel
-                    logger.debug(f"PostgreSQL query not interrupted: {e}")
+        connections = [conn for conn in list(self.active_connections)
+                       if getattr(conn, 'closed', None) == 0 and callable(getattr(conn, 'cancel', None))]
+        if connections:
+            # psycopg2's cancel() (PQcancel) waits for the server: not on the main thread.
+            threading.Thread(target=self._interrupt_queries, args=(connections,),
+                             name='FilterMate query cancel', daemon=True).start()
 
         # Use Python logger only, NOT QgsMessageLog
         # QgsMessageLog may be destroyed during QGIS shutdown, causing access violation
@@ -2924,26 +2930,97 @@ class FilterEngineTask(QgsTask):
 
         super().cancel()
 
-    def _release_worker_resources(self) -> None:
-        """Release what the worker opened; called by ``run()`` in its own thread when it ends.
+    def _interrupt_queries(self, connections) -> None:
+        """Ask the server to abort the statements of ``connections`` (cancel()'s own thread).
 
-        A canceled task drops the materialized views it created (cancel() did it
-        before, from the main thread); every connection the task opened is
-        closed by the thread that used it.
+        Nothing is sent once the worker released them: an interruption must not land
+        on a connection being rolled back or closed.
         """
-        if self.isCanceled():
-            try:
-                self._cleanup_postgresql_materialized_views()
-            except Exception as e:  # catch-all safety net: the cleanup must not hide the task result
-                logger.debug(f"Materialized view cleanup after cancel failed: {e}")
+        with self._connections_lock:
+            if self._connections_released:
+                return
+            for conn in connections:
+                try:
+                    if getattr(conn, 'closed', None) == 0:
+                        conn.cancel()
+                except Exception as e:  # catch-all safety net: a cancel request must not stop the cancel
+                    logger.debug(f"PostgreSQL query not interrupted: {e}")
+
+    def _release_worker_resources(self) -> None:
+        """Close what the worker opened; called by ``run()`` in its own thread when it ends.
+
+        No query and no QGIS layer here: a canceled task drops nothing from the
+        worker (its views are handled by ``finished()``). A PostgreSQL connection
+        is rolled back first (an interrupted statement leaves its transaction
+        aborted), then closed; the task's own connection is forgotten.
+        """
+        with self._connections_lock:
+            self._connections_released = True
+            for conn in self.active_connections[:]:
+                try:
+                    if getattr(conn, 'closed', None) == 0 and callable(getattr(conn, 'rollback', None)):
+                        conn.rollback()
+                except Exception as e:  # catch-all safety net: the close below still runs
+                    logger.debug(f"Rollback before close failed: {e}")
+                try:
+                    conn.close()
+                except Exception as e:  # catch-all safety net: connection may already be closed
+                    logger.debug(f"Connection cleanup failed (may already be closed): {e}")
+            self.active_connections.clear()
+            self._task_postgresql_connection = None
+            # Reset prepared statements manager when connections close
+            self._ps_manager = None
+
+    def _close_main_thread_connections(self) -> None:
+        """Close the connections finished() opened on the main thread (view cleanups)."""
         for conn in self.active_connections[:]:
             try:
                 conn.close()
             except Exception as e:  # catch-all safety net: connection may already be closed
                 logger.debug(f"Connection cleanup failed (may already be closed): {e}")
         self.active_connections.clear()
-        # Reset prepared statements manager when connections close
-        self._ps_manager = None
+        self._task_postgresql_connection = None
+
+    def _cleanup_canceled_task_views(self) -> None:
+        """finished() of a canceled task: drop the views it created that nothing uses.
+
+        Main thread: the layers' subset strings are read here. Left to the session
+        cleanup while another filter task runs (it may be filling views of the same name).
+        """
+        names = set(getattr(self, '_created_mv_names', None) or ())
+        if not names:
+            return
+        try:
+            from qgis.core import QgsApplication
+            others = [task for task in QgsApplication.taskManager().activeTasks()
+                      if task is not self and type(task).__name__ == 'FilterEngineTask']
+        except Exception:  # catch-all safety net: no task manager (shutdown)
+            others = []
+        if others:
+            logger.info(f"Canceled task: {len(names)} view(s) left to the session cleanup (another filter runs)")
+            return
+        project = QgsProject.instance()
+        subsets = []
+        for layer in project.mapLayers().values():
+            try:
+                subsets.append(layer.subsetString() if hasattr(layer, 'subsetString') else '')
+            except RuntimeError:
+                continue
+        layer_ids = []
+        source = getattr(self, 'source_layer', None)
+        for layer in ([source] if source is not None else []) + list(self.param_all_layers):
+            try:
+                layer_ids.append(layer.id())
+            except (RuntimeError, AttributeError):
+                continue
+        dropped = self._cleanup_handler.drop_task_materialized_views(
+            names, layer_ids,
+            in_use_fn=lambda name: any(name in subset for subset in subsets),
+            get_connection_fn=self._get_valid_postgresql_connection,
+            current_mv_schema=getattr(self, 'current_materialized_view_schema', None) or DEFAULT_TEMP_SCHEMA,
+        )
+        if dropped:
+            logger.info(f"Canceled task: {len(dropped)} materialized view(s) it created dropped")
 
     def _restore_source_layer_selection(self):
         """Restore source layer selection after filter/unfilter. Delegates to FeatureCollector."""
@@ -2996,7 +3073,10 @@ class FilterEngineTask(QgsTask):
             restore_selection_fn=self._restore_source_layer_selection,
             task_bridge=getattr(self, '_task_bridge', None),
             cleanup_safe_intersect_fn=self._cleanup_safe_intersect_layers,
+            cleanup_canceled_mv_fn=self._cleanup_canceled_task_views,
         )
+        # 2026-10-17: a view cleanup above opened a connection on the main thread: closed now
+        self._close_main_thread_connections()
 
         # Update state from handler return values
         self.warning_messages = cleared_warnings

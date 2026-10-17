@@ -100,6 +100,7 @@ class FinishedHandler:
         restore_selection_fn: Callable[[], None],
         task_bridge: Optional[Any],
         cleanup_safe_intersect_fn: Callable[[], None],
+        cleanup_canceled_mv_fn: Optional[Callable[[], None]] = None,
     ) -> Tuple[List[str], List, Optional[Any]]:
         """Handle task completion with cleanup and user notifications.
 
@@ -134,6 +135,8 @@ class FinishedHandler:
             restore_selection_fn: Function to restore source layer selection.
             task_bridge: TaskBridge instance for metrics, if any.
             cleanup_safe_intersect_fn: Function to cleanup safe_intersect layers.
+            cleanup_canceled_mv_fn: For a canceled task: drops the materialized views it
+                created that nothing uses (instead of cleanup_mv_fn).
 
         Returns:
             Tuple of (cleared_warnings, cleared_pending_requests, cleared_ogr_source_geom)
@@ -176,7 +179,12 @@ class FinishedHandler:
         # Cleaning them up would invalidate the filter expression causing empty results.
         # 2026-10-17: nor on export, which creates no MV and leaves the
         # filters in place (it dropped the MVs the filtered layers used).
-        if task_action in ('reset', 'unfilter'):
+        # 2026-10-17: not after a canceled reset / unfilter either: its subsets were not
+        # applied, the layers still read those views.
+        if is_canceled_fn():
+            if cleanup_canceled_mv_fn is not None:
+                cleanup_canceled_mv_fn()
+        elif task_action in ('reset', 'unfilter'):
             cleanup_mv_fn()
 
         # E6: Delegate memory layer cleanup to task_completion_handler

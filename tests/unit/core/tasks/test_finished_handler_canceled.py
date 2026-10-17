@@ -78,19 +78,22 @@ def finished(monkeypatch):
     for name in ("_release_task_caches", "_log_task_bridge_metrics"):
         monkeypatch.setattr(handler, name, MagicMock())
 
+    cleanup_mv, cleanup_canceled = MagicMock(), MagicMock()
+
     def run(canceled, result=True, exception=None, task_action="filter"):
         handler.handle_finished(
             result=result, task_action=task_action, message_category="FilterLayers",
             is_canceled_fn=lambda: canceled, warning_messages=[],
             pending_subset_requests=[(MagicMock(), '"id" > 3')],
             safe_set_subset_fn=MagicMock(), is_complex_filter_fn=MagicMock(), single_canvas_refresh_fn=MagicMock(),
-            cleanup_mv_fn=MagicMock(), ogr_source_geom=None, exception=exception, task_message=None,
+            cleanup_mv_fn=cleanup_mv, ogr_source_geom=None, exception=exception, task_message=None,
             source_layer=MagicMock(), task_parameters={}, failed_layer_names=[], layers_count=1,
             task_description="Filtering data", restore_selection_fn=MagicMock(), task_bridge=None,
-            cleanup_safe_intersect_fn=MagicMock(),
+            cleanup_safe_intersect_fn=MagicMock(), cleanup_canceled_mv_fn=cleanup_canceled,
         )
 
-    return types.SimpleNamespace(run=run, apply=apply, iface=iface, handler=handler)
+    return types.SimpleNamespace(run=run, apply=apply, iface=iface, handler=handler, cleanup_mv=cleanup_mv,
+                                 cleanup_canceled=cleanup_canceled)
 
 
 def test_a_completed_task_applies_its_subsets(finished, monkeypatch):
@@ -143,3 +146,27 @@ def test_each_task_owns_its_parameters():
     assert params["task"]["features"][0] is feature  # QGIS objects are shared, never copied
     assert params["task"]["layers"][0]["layer"] is layer
     assert params["task"]["config_data"] is config  # the app's settings, read only
+
+
+@pytest.mark.parametrize("task_action", ["reset", "unfilter"])
+def test_a_canceled_reset_keeps_the_views_the_layers_read(finished, monkeypatch, task_action):
+    """2026-10-17 review: its subsets were not applied, the layers still read those views."""
+    monkeypatch.setattr(finished.handler, "_display_success_message", MagicMock())
+    finished.run(canceled=True, result=True, task_action=task_action)
+    finished.cleanup_mv.assert_not_called()
+    finished.cleanup_canceled.assert_called_once_with()  # only its own unused views
+
+
+@pytest.mark.parametrize("task_action", ["reset", "unfilter"])
+def test_a_completed_reset_drops_the_views(finished, monkeypatch, task_action):
+    monkeypatch.setattr(finished.handler, "_display_success_message", MagicMock())
+    finished.run(canceled=False, task_action=task_action)
+    finished.cleanup_mv.assert_called_once_with()
+    finished.cleanup_canceled.assert_not_called()
+
+
+def test_a_completed_filter_keeps_its_views(finished, monkeypatch):
+    monkeypatch.setattr(finished.handler, "_display_success_message", MagicMock())
+    finished.run(canceled=False, task_action="filter")
+    finished.cleanup_mv.assert_not_called()
+    finished.cleanup_canceled.assert_not_called()

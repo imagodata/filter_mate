@@ -21,7 +21,7 @@ Thread Safety:
 
 import logging
 import os
-from typing import Any, Dict, List, Optional, Set
+from typing import Any, Callable, Dict, List, Optional, Set
 
 from ...infrastructure.logging import setup_logger
 from ...infrastructure.constants import DEFAULT_TEMP_SCHEMA
@@ -36,6 +36,14 @@ logger = setup_logger(
 
 # Lazy-load backend services
 from ..ports.backend_services import get_backend_services
+
+
+def _rollback(connexion: Any) -> None:
+    """End a failed transaction (InFailedSqlTransaction otherwise on the next statement)."""
+    try:
+        connexion.rollback()
+    except Exception as e:  # catch-all safety net: connection gone
+        logger.debug(f"Rollback failed: {e}")
 
 
 class CleanupHandler:
@@ -144,15 +152,67 @@ class CleanupHandler:
                         mv_name = mv_name.split('.')[-1].strip('"')
                     drop_sql = f'DROP MATERIALIZED VIEW IF EXISTS "{schema}"."{mv_name}" CASCADE;'
                     cursor.execute(drop_sql)
+                    connexion.commit()
                     logger.debug(f"Dropped MV: {schema}.{mv_name}")
-                except (RuntimeError, OSError, AttributeError) as e:
+                except Exception as e:  # catch-all safety net: psycopg2 errors; the next views still go
                     logger.warning(f"Failed to drop MV {mv_name}: {e}")
+                    _rollback(connexion)
 
-            connexion.commit()
             logger.debug(f"PostgreSQL MV cleanup completed: dropped {len(mvs_to_drop)} MV(s)")
 
         except Exception as e:  # catch-all safety net: MV cleanup must not crash the task
             logger.debug(f"Error during PostgreSQL MV cleanup: {e}")
+
+    def drop_task_materialized_views(
+        self,
+        mv_names: Set[str],
+        layer_ids: List[str],
+        in_use_fn: Callable[[str], bool],
+        get_connection_fn: Callable[[], Any],
+        current_mv_schema: str = DEFAULT_TEMP_SCHEMA,
+    ) -> List[str]:
+        """Drop the views a canceled task created, those no subset in place uses (2026-10-17).
+
+        The cleanup of a canceled task used to remove every reference of its layers
+        from the (global) tracker and DROP ... CASCADE what was left: the views of a
+        task still running for the same layers, and those of the last successful
+        filter, still read by the layers' subsets.
+
+        Args:
+            mv_names: Views this task created (unqualified names).
+            layer_ids: Layers this task registered as their users.
+            in_use_fn: True when a subset string in place reads the view.
+            get_connection_fn: Opens the connection (called only if a view goes).
+            current_mv_schema: Schema of the temporary views.
+
+        Returns:
+            The views dropped.
+        """
+        from ...adapters.backends.postgresql.mv_reference_tracker import get_mv_reference_tracker
+        tracker = get_mv_reference_tracker()
+        droppable = []
+        for mv_name in sorted(mv_names or ()):
+            for layer_id in layer_ids:
+                tracker.remove_reference(mv_name, layer_id)  # this task's references only
+            if tracker.is_referenced(mv_name) or in_use_fn(mv_name):
+                continue
+            droppable.append(mv_name)
+        if not droppable:
+            return []
+        connexion = get_connection_fn()
+        if not connexion:
+            return []
+        dropped = []
+        cursor = connexion.cursor()
+        for mv_name in droppable:
+            try:
+                cursor.execute(f'DROP MATERIALIZED VIEW IF EXISTS "{current_mv_schema}"."{mv_name}" CASCADE;')
+                connexion.commit()
+                dropped.append(mv_name)
+            except Exception as e:  # catch-all safety net: psycopg2 errors; the next views still go
+                logger.warning(f"Materialized view {mv_name} of a canceled task not dropped: {e}")
+                _rollback(connexion)
+        return dropped
 
     def cleanup_session_materialized_views(
         self,
