@@ -860,7 +860,8 @@ class OGRExpressionBuilder(GeometricFilterPort):
         else:
             payload = json.dumps([str(v) for v in kept], ensure_ascii=False, separators=(",", ":"))
         self.log_info(f"  - {len(kept):,} keys: one JSON literal ({len(payload):,} chars) instead of an IN list")
-        return f"{field_sql} IN (SELECT value FROM json_each('{payload.replace(chr(39), chr(39) * 2)}'))"
+        literal = payload.replace("'", "''")  # json.dumps output as one SQL string literal
+        return f"{field_sql} IN (SELECT value FROM json_each('{literal}'))"  # nosec B608 - JSON of the keys, quotes doubled
 
     @staticmethod
     def _fetch_pk_values(layer, selected_ids, pk_field) -> list:
