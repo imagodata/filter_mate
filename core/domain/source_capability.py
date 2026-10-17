@@ -71,6 +71,12 @@ REMOTE_KEY_LIST_LIMIT = 500
 # ORA-01795: maximum number of expressions in a list is 1000.
 ORACLE_IN_LIST_MAX = 1000
 
+# Providers whose subset string is a QGIS expression (a backslash is an escape in its literals).
+QGIS_EXPRESSION_SUBSET_PROVIDERS = ('memory', 'delimitedtext', 'wfs', 'oapif', 'sensorthings')
+# Providers whose subset cannot list QGIS feature ids: on a virtual layer without a uid column,
+# "fid IN (1, 2)" and "$id IN (1, 2)" are accepted and keep 0 feature (QGIS 3.44 and 4.2).
+NO_FEATURE_ID_SUBSET_PROVIDERS = ('virtual',)
+
 # Vector web services (QGIS provider keys, lower case) and their filter language.
 REMOTE_VECTOR_SERVICES = {
     'wfs': ServerFilter.OGC_FILTER,
@@ -134,6 +140,20 @@ class SourceCapability:
     def has_raw_values(self) -> bool:
         """Whether raster pixels are values (False for a rendered image)."""
         return self.values is ValueKind.RAW
+
+    @property
+    def subset_is_qgis_expression(self) -> bool:
+        """Whether the subset string is a QGIS expression (memory, delimited text, WFS, OGC API Features)."""
+        return self.provider_key in QGIS_EXPRESSION_SUBSET_PROVIDERS
+
+    @property
+    def lists_feature_ids(self) -> bool:
+        """Whether a subset may list QGIS feature ids (``fid IN`` / ``$id IN``).
+
+        Not on a web service (its feature ids mean nothing to the server) nor a
+        virtual layer (the list keeps 0 feature without an error).
+        """
+        return not self.is_remote_service and self.provider_key not in NO_FEATURE_ID_SUBSET_PROVIDERS
 
 
 def _is_remote_path(text: str) -> bool:

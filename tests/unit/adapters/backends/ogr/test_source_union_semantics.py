@@ -740,15 +740,65 @@ class _ServiceLayer(_Layer):
 
 
 @pytest.mark.parametrize("provider, source, field_names, expected", [
-    ("ogr", "/data/communes.shp", ["nom", "population"], "fid"),         # was "population"
-    ("ogr", "/data/communes.shp", ["nom", "population", "ID"], "ID"),
+    ("ogr", "/data/communes.shp", ["nom", "population"], "$id"),        # was "population"
+    ("ogr", "/data/communes.shp", ["nom", "population", "ID"], "$id"),  # "ID" not proven unique here
     ("WFS", WFS_URI, ["cleabs", "nom_officiel", "code_insee", "population"], "cleabs"),
-    ("WFS", WFS_URI, ["fid", "population"], "fid"),                     # pseudo key: fid not trusted remotely
+    ("WFS", WFS_URI, ["fid", "population"], "$id"),                     # a WFS "fid" is never trusted
 ])
 def test_primary_key_never_falls_back_to_the_first_integer_field(provider, source, field_names, expected):
+    """Names only (the uniqueness probe is not loaded here; see test_stable_key.py)."""
     layer = _ServiceLayer("communes", provider=provider, source=source, field_names=field_names)
     builder = ogr_builder.OGRExpressionBuilder(task_params={})
     assert builder._get_primary_key(layer) == expected
+
+
+def test_primary_key_is_the_stable_key_of_the_probe(monkeypatch):
+    monkeypatch.setattr(ogr_builder, "stable_key", lambda layer: ogr_builder.KeyChoice("ID", "named"))
+    layer = _ServiceLayer("communes", provider="ogr", source="/data/communes.shp", field_names=["ID", "nom"])
+    assert ogr_builder.OGRExpressionBuilder(task_params={})._get_primary_key(layer) == "ID"
+
+
+def test_virtual_layer_without_key_is_refused(qgis):
+    """QGIS 3.44 / 4.2: on a virtual layer without uid, fid IN / $id IN keep 0 feature without an error."""
+    qgis.relations["near"] = {"intersects"}
+    queue = MagicMock()
+    builder = ogr_builder.OGRExpressionBuilder(task_params={"_subset_queue_callback": queue})
+    builder.source_geom = _rivers(3)
+    view = _ServiceLayer("vue", [_Feature(1, _Geom("near"))], provider="virtual", source="?query=SELECT * FROM t")
+    assert builder.apply_filter(view, '{"predicates": ["ST_Intersects"]}') is False
+    assert "virtual layer" in builder.last_error and builder.user_warnings == [builder.last_error]
+    queue.assert_not_called()
+
+
+def _with_text_key(layer):
+    field = MagicMock()
+    field.isNumeric.return_value = False
+    fields = MagicMock()
+    fields.indexOf.side_effect = lambda name: 0 if name == "name" else -1
+    fields.__getitem__ = MagicMock(return_value=field)
+    layer.fields = lambda: fields
+    return layer
+
+
+def test_memory_text_keys_are_qgis_expression_literals():
+    r"""A backslash is an escape in a QGIS expression: 'b\c' matched nothing on a memory layer."""
+    builder = ogr_builder.OGRExpressionBuilder(task_params={})
+    memory = _ServiceLayer("m", provider="memory", source="Point?crs=EPSG:4326", field_names=["name"])
+    clause = builder._build_fid_filter_with_values(_with_text_key(memory), ["b\\c", "L'Isle"], "name")
+    assert clause == '"name" IN (' + "'b" + "\\" * 2 + "c', 'L''Isle')"
+    shapefile = _ServiceLayer("s", provider="ogr", source="/data/x.shp", field_names=["name"])
+    clause = builder._build_fid_filter_with_values(_with_text_key(shapefile), ["b\\c"], "name")
+    assert clause == '"name" IN (' + "'b" + "\\" + "c')"
+
+
+def test_null_qvariant_keys_are_dropped():
+    class _Null:
+        def isNull(self):
+            return True
+
+    builder = ogr_builder.OGRExpressionBuilder(task_params={})
+    clause = builder._json_key_clause('"k"', [1, _Null(), 2], numeric=True)
+    assert clause == '"k" IN (SELECT value FROM json_each(\'[1,2]\'))'
 
 
 def test_web_service_without_key_is_refused_before_any_request(qgis):

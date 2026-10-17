@@ -566,12 +566,17 @@ class FilterOrchestrator:
     def _is_key_list_subset(layer, subset: str) -> bool:
         """Whether ``subset`` is the key list of a previous spatial step (2026-10-17).
 
-        The key must be ``fid`` or one of the layer's primary-key fields, so a
+        The key must be ``fid``, ``$id`` (the feature-id list of a memory /
+        delimited text layer), one of the layer's primary-key fields or the
+        stable key the OGR backend lists (core.domain.stable_key, e.g.
+        ``"cleabs"`` / ``"gml_id"`` on a web service, a unique ``"id"``), so a
         user filter such as ``"nature" IN ('Route', 'Chemin')`` stays an
         attribute filter.
         """
         text = (subset or '').strip()
         if text in _CONSTANT_SUBSETS:
+            return True
+        if re.match(r"^\s*(?:NOT\s*\(\s*)?\(?\s*\$id\s+IN\s*\(", text, re.IGNORECASE):
             return True
         match = _KEY_LIST_SUBSET_RE.match(text)
         if not match:
@@ -581,6 +586,13 @@ class FilterOrchestrator:
             fields = layer.fields()
             keys |= {fields.at(index).name().lower() for index in layer.primaryKeyAttributes()}
         except Exception:  # nosec B110 - no primary key info: "fid" only
+            pass
+        try:
+            from ...adapters.qgis.source_capability_probe import stable_key_for_layer
+            choice = stable_key_for_layer(layer, scan=False)  # verdicts already proven, no read here
+            if choice.is_field:
+                keys.add(choice.name.lower())
+        except Exception:  # nosec B110 - no stable key: the declared key and "fid" only
             pass
         return match.group('name').lower() in keys
 

@@ -119,18 +119,43 @@ except ImportError:
 
 # 2026-10-17: the one formatter of key literals (quotes doubled, type-driven).
 try:
-    from ....core.filter.pk_formatter import format_key_literal, is_pk_numeric
+    from ....core.filter.pk_formatter import QGIS_EXPRESSION, SQL, format_key_literal, is_null_value, is_pk_numeric
 except ImportError:
-    from core.filter.pk_formatter import format_key_literal, is_pk_numeric
+    from core.filter.pk_formatter import QGIS_EXPRESSION, SQL, format_key_literal, is_null_value, is_pk_numeric
 
 # 2026-10-17: the stable key shared with the layer registration (never "the first integer field").
 try:
-    from ....core.domain.stable_key import FEATURE_ID_KEY, choose_key
+    from ....core.domain.stable_key import FEATURE_ID, FEATURE_ID_KEY, NONE, KeyChoice, choose_key, is_feature_id_key
 except ImportError:
-    from core.domain.stable_key import FEATURE_ID_KEY, choose_key
+    from core.domain.stable_key import FEATURE_ID, FEATURE_ID_KEY, NONE, KeyChoice, choose_key, is_feature_id_key
 
-# Providers whose subset is a QGIS expression: the QGIS feature id is ``$id`` there.
-QGIS_EXPRESSION_SUBSET_PROVIDERS = ('memory', 'delimitedtext')
+# Providers whose subset is a QGIS expression AND address features by ``$id`` (no fid column).
+FEATURE_ID_EXPRESSION_PROVIDERS = ('memory', 'delimitedtext')
+
+
+def stable_key(layer):
+    """adapters.qgis.source_capability_probe.stable_key_for_layer: the key, proven unique on a local layer.
+
+    Outside the plugin package (unit tests) the names alone decide, and a
+    local layer without a declared key is keyed by its feature id.
+    """
+    try:
+        from ...qgis.source_capability_probe import stable_key_for_layer
+    except ImportError:
+        capability = source_capability(layer)
+        fields = layer.fields()
+        names = [field.name() for field in fields]
+        try:
+            declared = [fields.at(index).name() for index in layer.dataProvider().pkAttributeIndexes()]
+        except Exception:  # nosec B110 - provider PK lookup best-effort, the names decide
+            declared = []
+        choice = choose_key(names, declared, local=not capability.is_remote)
+        if choice.origin == FEATURE_ID and not capability.lists_feature_ids:
+            return KeyChoice(None, NONE)
+        if choice.origin == NONE and capability.lists_feature_ids:
+            return KeyChoice(FEATURE_ID_KEY, FEATURE_ID)
+        return choice
+    return stable_key_for_layer(layer)
 
 
 def source_capability(layer):
@@ -605,9 +630,7 @@ class OGRExpressionBuilder(GeometricFilterPort):
         if not selected_ids:
             return "1 = 0"
         pk_field = self._get_primary_key(layer)
-        use_pk_values = bool(pk_field) and (
-            pk_field.lower() != 'fid' or layer.fields().indexOf(pk_field) >= 0
-        )
+        use_pk_values = bool(pk_field) and not self._is_feature_id_key(layer, pk_field)
         if not use_pk_values:
             # No real PK field: use QGIS internal FIDs with pseudo 'fid' column
             return self._build_fid_filter(layer, selected_ids)
@@ -722,20 +745,28 @@ class OGRExpressionBuilder(GeometricFilterPort):
             capability = source_capability(layer)
         except Exception:  # nosec B110 - no classification: no refusal
             return None
-        if not capability.is_remote_service:
+        if capability.lists_feature_ids and not capability.is_remote_service:
             return None
         if layer.subsetString():
             kept = translate("OGRExpressionBuilder", "keeps its previous filter")
         else:
             kept = translate("OGRExpressionBuilder", "is left unfiltered")
         if key_count is None:
-            if self._is_feature_id_key(layer, self._get_primary_key(layer)):
+            if not self._is_feature_id_key(layer, self._get_primary_key(layer)):
+                return None
+            if capability.is_remote_service:
                 return translate(
                     "OGRExpressionBuilder",
                     "{0}: this web service has no unique key field (declared key, id, gml_id, cleabs, "
                     "objectid...), so the selected features cannot be listed for the server. The layer {1}. "
                     "An attribute filter, or a local copy of the layer, works."
                 ).format(layer.name(), kept)
+            return translate(
+                "OGRExpressionBuilder",
+                "{0}: this layer has no unique key field and its feature ids cannot be listed in its filter "
+                "(a virtual layer needs a unique id column, its uid). The layer {1}."
+            ).format(layer.name(), kept)
+        if not capability.is_remote_service:
             return None
         limit = capability.key_list_limit
         if limit and key_count > limit:
@@ -748,11 +779,23 @@ class OGRExpressionBuilder(GeometricFilterPort):
 
     @staticmethod
     def _is_feature_id_key(layer, pk_field: str) -> bool:
-        """The key is the QGIS feature id (``fid`` and no field of that name)."""
+        """The key is the QGIS feature id: ``$id``, or a legacy ``fid`` that is no field of the layer."""
+        if not pk_field:
+            return False
+        if pk_field == FEATURE_ID_KEY:
+            return True
         try:
-            return pk_field.lower() == FEATURE_ID_KEY and layer.fields().indexOf(pk_field) < 0
+            return is_feature_id_key(pk_field, [pk_field] if layer.fields().indexOf(pk_field) >= 0 else [])
         except Exception:
             return False
+
+    @staticmethod
+    def _dialect(layer) -> str:
+        """Literal dialect of the layer's subset: a QGIS expression (memory, WFS...) escapes backslashes."""
+        try:
+            return QGIS_EXPRESSION if source_capability(layer).subset_is_qgis_expression else SQL
+        except Exception:
+            return SQL
 
     def _in_list(self, layer, field_sql: str, literals: list) -> str:
         """``field IN (...)``, split into ORed lists where the source caps one list (Oracle: 1000)."""
@@ -809,21 +852,27 @@ class OGRExpressionBuilder(GeometricFilterPort):
             pass
 
         pk_field = self._get_primary_key(layer)
-        pk_field_lower = pk_field.lower()
+        feature_id_key = self._is_feature_id_key(layer, pk_field)
 
         # Numeric or text PK (quoting): the field type, else the values (core.filter.pk_formatter)
-        is_numeric_pk = is_pk_numeric(layer, pk_field, sample_values=list(fids))
-        literals = [format_key_literal(fid, is_numeric_pk) for fid in fids]
+        is_numeric_pk = True if feature_id_key else is_pk_numeric(layer, pk_field, sample_values=list(fids))
+        dialect = self._dialect(layer)
+        literals = [format_key_literal(fid, is_numeric_pk, dialect) for fid in fids]
         fid_list = ", ".join(literals)
 
         # 2026-10-17: memory / delimited text subsets are QGIS expressions: the
-        # feature id is $id there ('fid' is no field of theirs).
+        # feature id is $id there ('fid' is no field of theirs). Elsewhere the
+        # pseudo key '$id' is OGR's FID column, written fid. The FID of a
+        # Shapefile / CSV is its row number: renumbered when the file is edited.
         try:
             provider = layer.providerType()
         except Exception:
             provider = ''
-        if provider in QGIS_EXPRESSION_SUBSET_PROVIDERS and self._is_feature_id_key(layer, pk_field):
-            return f'$id IN ({fid_list})'
+        if feature_id_key:
+            if provider in FEATURE_ID_EXPRESSION_PROVIDERS:
+                return f'$id IN ({fid_list})'
+            pk_field = 'fid'
+        pk_field_lower = pk_field.lower()
 
         # Shapefile special case: QGIS 3.x requires lowercase 'fid' for setSubsetString
         if 'shapefile' in storage_type or 'esri' in storage_type:
@@ -869,7 +918,8 @@ class OGRExpressionBuilder(GeometricFilterPort):
         # values (a PostgreSQL integer read as text through OGR is numeric).
         # The literals are written by core.filter.pk_formatter (quotes doubled).
         is_numeric_pk = is_pk_numeric(layer, pk_field, sample_values=pk_values)
-        literals = [format_key_literal(v, is_numeric_pk) for v in pk_values]
+        dialect = self._dialect(layer)
+        literals = [format_key_literal(v, is_numeric_pk, dialect) for v in pk_values]
         value_list = ", ".join(literals)
         self.log_info(
             f"  - Building {'NUMERIC' if is_numeric_pk else 'STRING'} IN clause for '{pk_field}': {len(pk_values)} values"
@@ -910,7 +960,7 @@ class OGRExpressionBuilder(GeometricFilterPort):
         included), integral floats as integers, other numbers and text keys
         as JSON strings; None keys are dropped (they match nothing).
         """
-        kept = [v for v in values if v is not None]
+        kept = [v for v in values if not is_null_value(v)]
         if numeric:
             items = []
             for value in kept:
@@ -944,7 +994,7 @@ class OGRExpressionBuilder(GeometricFilterPort):
             pass
         for feature in layer.getFeatures(request):
             pk_value = feature[pk_field]
-            if pk_value is not None:
+            if not is_null_value(pk_value):
                 pk_values.append(pk_value)
         return pk_values
 
@@ -1295,10 +1345,11 @@ class OGRExpressionBuilder(GeometricFilterPort):
 
         Priority order:
         1. Provider-declared primary key
-        2. A field named like a unique key: id, gml_id, cleabs, objectid,
-           ogc_fid, gid, uuid, guid, pk, oid, rowid; fid on a local layer only
-        3. "fid": the QGIS feature id (no field of that name; refused on a
-           web service by _key_list_refusal)
+        2. A field named like a key: on a local layer only when its values are
+           proven unique and never NULL (id, *_id, uuid*, objectid, fid...); on
+           a web service the known unique names (gml_id, cleabs, id...)
+        3. "$id": the QGIS feature id (OGR SQL fid, QGIS expression $id;
+           refused on a web service / virtual layer by _key_list_refusal)
 
         The first integer field is no key: ``"population" IN (...)`` kept every
         feature sharing a population with a selected one.
@@ -1310,18 +1361,8 @@ class OGRExpressionBuilder(GeometricFilterPort):
             Primary key field name
         """
         try:
-            fields = layer.fields()
-            names = [field.name() for field in fields]
-            if not names:
-                return FEATURE_ID_KEY
-            declared = []
-            try:
-                declared = [fields.at(index).name() for index in layer.dataProvider().pkAttributeIndexes()]
-            except Exception:  # nosec B110 - provider PK lookup best-effort, the names decide below
-                pass
-            local = not source_capability(layer).is_remote
-            choice = choose_key(names, declared, local=local)
-            if choice.name:
+            choice = stable_key(layer)
+            if choice.is_field:
                 self.log_debug(f"Primary key of {layer.name()}: {choice.name} ({choice.origin})")
                 return choice.name
         except Exception as e:

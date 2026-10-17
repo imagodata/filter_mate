@@ -1290,14 +1290,22 @@ class LayersManagementEngineTask(QgsTask):
         return cleaned_layer_ids
 
     def _migrate_unreliable_primary_key(self, layer_variables, layer):
-        """Choose again a key the old fallbacks picked (2026-10-17).
+        """Choose again a stored key PROVEN not to be a key (2026-10-17).
 
         Layers registered before core.domain.stable_key may hold "the first
         integer field" ('population') or "the first field" as their key, and
         their properties are read back from the project database. A stored key
-        that the provider does not declare and whose name is no known unique key
-        is chosen again (the feature id when nothing better exists). PostgreSQL
-        layers keep theirs (declared key or ctid).
+        is replaced only when:
+
+        - its field no longer exists (the 'virtual_id' expression field, a
+          legacy pseudo 'fid');
+        - on a local layer: its values are proven NOT unique or hold NULL
+          (``key_field_is_unique`` is False). Unique values, or a layer too
+          large to prove it, keep the stored key;
+        - on a web service / remote file (never scanned): it is ``fid`` or a
+          name that is not a key name (``population``).
+
+        Declared keys and PostgreSQL layers keep theirs.
         """
         infos = layer_variables.get("infos", {})
         stored = infos.get("primary_key_name")
@@ -1307,12 +1315,24 @@ class LayersManagementEngineTask(QgsTask):
             if layer.providerType() == 'postgres':
                 return
             fields = layer.fields()
+            names = [field.name() for field in fields]
             declared = [fields[index].name() for index in layer.primaryKeyAttributes()]
         except (RuntimeError, AttributeError, IndexError):
             return
-        from ..domain.stable_key import KNOWN_KEY_NAMES, LOCAL_ONLY_KEY_NAMES
-        if stored in declared or stored.lower() in KNOWN_KEY_NAMES + LOCAL_ONLY_KEY_NAMES:
+        from ..domain.source_capability import classify_layer
+        from ..domain.stable_key import FEATURE_ID_KEY, looks_like_key_name
+        if stored in declared or stored == FEATURE_ID_KEY:
             return
+        capability = classify_layer(layer)
+        if stored not in names:
+            pass  # gone: chosen again
+        elif capability.is_remote:
+            if looks_like_key_name(stored) and stored.lower() != 'fid':
+                return
+        else:
+            unique = self._key_field_is_unique(layer, stored)
+            if unique is not False:
+                return
         result = self.search_primary_key_from_layer(layer)
         if not isinstance(result, tuple) or len(result) != 4 or result[0] == stored:
             return
@@ -1320,21 +1340,52 @@ class LayersManagementEngineTask(QgsTask):
             infos["primary_key_is_numeric"] = result
         logger.info(f"Layer '{layer.name()}': stored key '{stored}' is no unique key, now '{result[0]}'")
 
+    @staticmethod
+    def _key_field_is_unique(layer, name):
+        """adapters.qgis.source_capability_probe.key_field_is_unique (None without it)."""
+        try:
+            from ...adapters.qgis.source_capability_probe import key_field_is_unique
+        except ImportError:
+            return None
+        return key_field_is_unique(layer, name)
+
+    @staticmethod
+    def _stable_key_choice(layer):
+        """adapters.qgis.source_capability_probe.stable_key_for_layer (names only without it)."""
+        try:
+            from ...adapters.qgis.source_capability_probe import stable_key_for_layer
+            return stable_key_for_layer(layer)
+        except ImportError:
+            from ..domain.source_capability import classify_layer
+            from ..domain.stable_key import FEATURE_ID, FEATURE_ID_KEY, NONE, KeyChoice, choose_key
+            capability = classify_layer(layer)
+            fields = layer.fields()
+            declared = [fields[index].name() for index in layer.primaryKeyAttributes()]
+            choice = choose_key([field.name() for field in fields], declared, local=not capability.is_remote)
+            if choice.origin == FEATURE_ID and not capability.lists_feature_ids:
+                return KeyChoice(None, NONE)
+            if choice.origin == NONE and capability.lists_feature_ids:
+                return KeyChoice(FEATURE_ID_KEY, FEATURE_ID)
+            return choice
+
     def search_primary_key_from_layer(self, layer):
         """
         Search for a primary key field in the layer.
 
-        2026-10-17: the heuristic of core.domain.stable_key, shared with the
-        OGR backend:
         1. Layer's declared primary key attributes (always trusted)
-        2. A field named like a unique key: id, gml_id, cleabs, objectid,
-           ogc_fid, gid, uuid, guid, pk, oid, rowid; fid on a local layer only
-        3. PostgreSQL without key: 'ctid'
-        4. Otherwise the QGIS feature id, named 'fid' (no such field: OGR SQL
-           ``fid``, QGIS expression ``$id``). Never "the first integer / the
-           first field" any more: ``"population" IN (...)`` kept every feature
-           sharing a population with a selected one. On a web service the
-           OGR backend refuses a key-list filter without a real key.
+        2. PostgreSQL without a declared key: unchanged (exact names, uuid
+           patterns, numeric id patterns, then 'ctid')
+        3. Other layers (2026-10-17): core.domain.stable_key, shared with the
+           OGR backend. On a local layer a field named like a key (id, *_id,
+           id_*, uuid*, objectid, gid, ogc_fid, cleabs, gml_id, fid...) is kept
+           only when its values are proven unique and never NULL (one read of
+           the field, in this task); on a web service the known unique names
+           are trusted. Otherwise the QGIS feature id, stored as '$id' (no
+           field of that name: OGR SQL ``fid``, QGIS expression ``$id``); on a
+           web service or a virtual layer the OGR backend then refuses a
+           key-list filter. Never "the first integer / the first field":
+           ``"population" IN (...)`` kept every feature sharing a population
+           with a selected one.
 
         Args:
             layer (QgsVectorLayer): Layer to search
@@ -1385,45 +1436,69 @@ class LayersManagementEngineTask(QgsTask):
                 logger.debug(f"Trusting declared primary key '{field.name()}' (avoiding thread-unsafe uniqueValues)")
                 return (field.name(), field_id, field.typeName(), field.isNumeric())
 
-        # No declared primary key: a field named like a unique key (core.domain.stable_key)
+        if is_postgresql:
+            return self._search_postgresql_key_without_declared_key(layer)
+
+        # No declared primary key (core.domain.stable_key)
         logger.debug(f"Layer '{layer.name()}': No declared PRIMARY KEY, searching for suitable ID field")
-        logger.debug(f"Available fields: {[f.name() for f in layer.fields()]}")
         if self.isCanceled():
             return False
-        from ..domain.source_capability import classify_layer
-        from ..domain.stable_key import FEATURE_ID_KEY, NAMED, choose_key
-        capability = classify_layer(layer)
-        fields = layer.fields()
-        choice = choose_key([field.name() for field in fields], local=not capability.is_remote)
-        if choice.origin == NAMED:
+        from ..domain.stable_key import FEATURE_ID_KEY, NONE
+        choice = self._stable_key_choice(layer)
+        if choice.is_field:
+            fields = layer.fields()
             field_idx = fields.indexFromName(choice.name)
             field = fields[field_idx]
-            logger.info(f"Layer '{layer.name()}': Found key field '{field.name()}', using as primary key")
+            logger.info(f"Layer '{layer.name()}': key field '{field.name()}' ({choice.origin}), using as primary key")
             return (field.name(), field_idx, field.typeName(), field.isNumeric())
-
-        # PostgreSQL without PK: ctid
-        if is_postgresql:
-            logger.warning(
-                f"PostgreSQL layer '{layer.name()}': No primary key or ID field found.\n"
-                "   FilterMate will use 'ctid' (PostgreSQL internal identifier) with limitations:\n"
-                "   - Attribute filtering: OK\n"
-                "   - Basic geometry filtering: OK\n"
-                "   - Materialized views: disabled (reduced performance)\n"
-                "   - Filter history: limited\n"
-                "   Recommendation: Add a PRIMARY KEY for optimal performance."
-            )
-            return ('ctid', -1, 'tid', False)
-
-        # No reliable key: the QGIS feature id ('fid' is not a field of the layer)
-        if capability.is_remote_service:
+        if choice.origin == NONE:
             logger.warning(
                 f"Layer '{layer.name()}' ({layer.providerType()}): no unique key field "
                 "(declared key, id, gml_id, cleabs, objectid...). Filters by feature list "
-                "will be refused on this web service; attribute and spatial filters still work."
+                "will be refused on this layer; attribute and spatial filters still work."
             )
         else:
-            logger.info(f"Layer '{layer.name()}': no unique key field, using the QGIS feature id")
+            logger.info(f"Layer '{layer.name()}': no proven unique key field, using the QGIS feature id")
         return (FEATURE_ID_KEY, -1, 'Integer64', True)
+
+    # PostgreSQL layers without a declared key (unchanged since v4.0.7)
+    PG_PK_EXACT_NAMES = ['id', 'fid', 'pk', 'gid', 'ogc_fid', 'objectid', 'oid', 'rowid']
+    PG_UUID_PATTERNS = ['uuid', 'guid']
+    PG_ID_PATTERNS = ['_id', 'id_', 'identifier', 'feature_id', 'object_id']
+
+    def _search_postgresql_key_without_declared_key(self, layer):
+        """Key of a PostgreSQL layer without a declared key: exact names, uuid, numeric id patterns, ctid."""
+        for field in layer.fields():
+            if self.isCanceled():
+                return False
+            if field.name().lower() in self.PG_PK_EXACT_NAMES:
+                field_idx = layer.fields().indexFromName(field.name())
+                logger.info(f"Layer '{layer.name()}': Found exact PK name '{field.name()}', using as primary key")
+                return (field.name(), field_idx, field.typeName(), field.isNumeric())
+        for field in layer.fields():
+            if self.isCanceled():
+                return False
+            if any(pattern in field.name().lower() for pattern in self.PG_UUID_PATTERNS):
+                field_idx = layer.fields().indexFromName(field.name())
+                logger.info(f"Layer '{layer.name()}': Found UUID field '{field.name()}', using as primary key")
+                return (field.name(), field_idx, field.typeName(), field.isNumeric())
+        for field in layer.fields():
+            if self.isCanceled():
+                return False
+            if field.isNumeric() and any(pattern in field.name().lower() for pattern in self.PG_ID_PATTERNS):
+                field_idx = layer.fields().indexFromName(field.name())
+                logger.info(f"Layer '{layer.name()}': Found numeric ID field '{field.name()}', using as primary key")
+                return (field.name(), field_idx, field.typeName(), field.isNumeric())
+        logger.warning(
+            f"PostgreSQL layer '{layer.name()}': No primary key or ID field found.\n"
+            "   FilterMate will use 'ctid' (PostgreSQL internal identifier) with limitations:\n"
+            "   - Attribute filtering: OK\n"
+            "   - Basic geometry filtering: OK\n"
+            "   - Materialized views: disabled (reduced performance)\n"
+            "   - Filter history: limited\n"
+            "   Recommendation: Add a PRIMARY KEY for optimal performance."
+        )
+        return ('ctid', -1, 'tid', False)
 
     def create_spatial_index_for_postgresql_layer(self, layer, layer_props):
         """
