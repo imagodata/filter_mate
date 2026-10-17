@@ -18,7 +18,7 @@ v4.3: Strangler Fig Pattern - New service with fallback to FilterMateApp legacy 
 """
 
 import time
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, Tuple
 from qgis.PyQt.QtCore import QCoreApplication, QTimer
 from qgis.core import QgsVectorLayer, QgsProject, QgsMessageLog, Qgis
 from qgis.utils import iface
@@ -301,7 +301,7 @@ class FilterResultHandler:
         self,
         task_parameters: Dict[str, Any],
         provider_type: str
-    ) -> tuple[str, bool]:
+    ) -> Tuple[str, bool]:
         """
         Determine actual backend used and whether it was a fallback.
 

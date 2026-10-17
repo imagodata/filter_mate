@@ -7,7 +7,7 @@ This is a PURE PYTHON module with NO QGIS dependencies,
 enabling true unit testing and clear separation of concerns.
 """
 from abc import ABC, abstractmethod
-from typing import TypeVar, Generic, Optional, Callable, List
+from typing import TypeVar, Generic, Optional, Callable, Dict, List
 from dataclasses import dataclass
 from datetime import datetime
 
@@ -247,7 +247,7 @@ class CachePort(ABC, Generic[K, V]):
         self.set(key, value, ttl_seconds)
         return value
 
-    def get_many(self, keys: List[K]) -> dict[K, V]:
+    def get_many(self, keys: List[K]) -> Dict[K, V]:
         """
         Get multiple values from cache.
 
@@ -266,7 +266,7 @@ class CachePort(ABC, Generic[K, V]):
 
     def set_many(
         self,
-        items: dict[K, V],
+        items: Dict[K, V],
         ttl_seconds: Optional[float] = None
     ) -> None:
         """
