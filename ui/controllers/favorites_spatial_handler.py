@@ -711,7 +711,7 @@ class FavoritesSpatialHandler:
         try:
             from ...infrastructure.database.sql_utils import safe_set_subset_string
         except ImportError:
-            from filter_mate.infrastructure.database.sql_utils import (
+            from ...infrastructure.database.sql_utils import (
                 safe_set_subset_string,
             )
 

@@ -152,7 +152,7 @@ class ExtensionRegistry:
         """Push a compact snapshot of discovery results to the QGIS log."""
         try:
             from qgis.core import Qgis, QgsMessageLog  # type: ignore
-            from filter_mate.config.config import ENV_VARS
+            from ..config.config import ENV_VARS
 
             cfg = ENV_VARS.get("CONFIG_DATA", {})
             ext_keys = list((cfg.get("EXTENSIONS") or {}).keys()) if isinstance(cfg, dict) else []
@@ -296,7 +296,7 @@ class ExtensionRegistry:
         merged slice. Every holder of the old reference sees the fix.
         """
         try:
-            from filter_mate.config.config import ENV_VARS
+            from ..config.config import ENV_VARS
             import json
         except Exception:
             return False

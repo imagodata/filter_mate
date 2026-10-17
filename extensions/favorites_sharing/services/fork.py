@@ -54,9 +54,9 @@ class FavoritesForkService:
             New favorite id on success, ``None`` otherwise.
         """
         try:
-            from filter_mate.core.domain.favorite_import_handler import FavoriteImportHandler
-            from filter_mate.core.domain.favorites_manager import FilterFavorite
-            from filter_mate.core.domain.layer_signature import LayerSignatureIndex
+            from ....core.domain.favorite_import_handler import FavoriteImportHandler
+            from ....core.domain.favorites_manager import FilterFavorite
+            from ....core.domain.layer_signature import LayerSignatureIndex
         except Exception:  # pragma: no cover — plugin package import guard
             logger.exception("Cannot import FilterMate core for Fork")
             return None
@@ -136,7 +136,7 @@ class FavoritesForkService:
             return True
         try:
             try:
-                from filter_mate.core.filter import sanitize_subset_string
+                from ....core.filter import sanitize_subset_string
             except ImportError:
                 from core.filter import sanitize_subset_string  # type: ignore
             cleaned_expr = sanitize_subset_string(raw_expr)

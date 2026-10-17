@@ -33,7 +33,7 @@ logger = logging.getLogger('FilterMate.UserIdentity')
 def _from_config() -> Optional[str]:
     """Read ``APP.USER_IDENTITY`` (wrapped or raw) from ENV_VARS."""
     try:
-        from filter_mate.config.config import ENV_VARS, _get_option_value
+        from ...config.config import ENV_VARS, _get_option_value
     except Exception:
         return None
     data = ENV_VARS.get("CONFIG_DATA") or {}

@@ -82,7 +82,7 @@ def read_config_defaults(
 
     # Fallback — direct ENV_VARS lookup when no extension is available.
     try:
-        from filter_mate.config.config import ENV_VARS, _get_option_value
+        from ....config.config import ENV_VARS, _get_option_value
         cfg = (ENV_VARS.get("CONFIG_DATA", {}) or {}) \
             .get("EXTENSIONS", {}) \
             .get("favorites_sharing", {})
