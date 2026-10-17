@@ -665,26 +665,42 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             raise SignalStateChangeError(None, widget_path)
 
         is_ltv = widget_path == ["QGIS", "LAYER_TREE_VIEW"]
+        registry = self.__dict__.setdefault('_registry_connected_signals', set())
+        registry_key = (widget_path[0], widget_path[1], signal_name)
+        # 2026-10-17: the checkable buttons of _setup_conditional_widget_states carry a second
+        # slot on 'toggled' (enable / disable their widgets). isSignalConnected() then stayed
+        # True after disconnect(func), the cache said connected, and the registry handler was
+        # never connected again after the first layer change (has_layers_to_filter & co. were
+        # saved at task launch only). For these signals only, the registry's own handler is
+        # tracked; every other signal keeps the "any slot" test (several force / direct
+        # reconnections rely on it, a wider change connected their handlers twice).
+        tracked = (not is_ltv and signal_name == 'toggled'
+                   and any(widget is button for button in self.__dict__.get('_conditional_state_buttons', ())))
 
         # Get current state
         if is_ltv:
             state = self._layer_tree_view_signal_connected
         else:
-            state = widget.isSignalConnected(self.getSignal(widget, signal_name))
+            any_slot = widget.isSignalConnected(self.getSignal(widget, signal_name))
+            state = (registry_key in registry and any_slot) if tracked else any_slot
 
         signal = getattr(widget, signal_name)
         should_connect = (custom_action == 'connect' and not state) or (custom_action is None and not state)
         should_disconnect = (custom_action == 'disconnect' and state) or (custom_action is None and state)
+        if tracked and custom_action == 'disconnect' and any_slot:
+            should_disconnect = True  # disconnect(func) is harmless when only the conditional slot is left
 
         # Perform connection/disconnection
         try:
             if should_disconnect:
+                registry.discard(registry_key)
                 signal.disconnect(func)
                 # EXPLICIT: Update flag immediately after disconnect
                 if is_ltv:
                     self._layer_tree_view_signal_connected = False
             elif should_connect:
                 signal.connect(func)
+                registry.add(registry_key)
                 # EXPLICIT: Update flag immediately after connect
                 if is_ltv:
                     self._layer_tree_view_signal_connected = True
@@ -695,8 +711,8 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         # Return current state
         if is_ltv:
             return self._layer_tree_view_signal_connected
-        else:
-            return widget.isSignalConnected(self.getSignal(widget, signal_name))
+        any_slot = widget.isSignalConnected(self.getSignal(widget, signal_name))
+        return (registry_key in registry and any_slot) if tracked else any_slot
 
     def reset_multiple_checkable_combobox(self) -> None:
         """Reset and recreate the multiple selection checkable combobox widget.
@@ -3311,6 +3327,8 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             pushbutton.toggled.connect(
                 lambda checked, widgets=widgets_to_control: self._toggle_associated_widgets(checked, widgets)
             )
+            # changeSignalState tracks the registry handler of these buttons (second slot on 'toggled')
+            self.__dict__.setdefault('_conditional_state_buttons', []).append(pushbutton)
 
             # Set initial state based on current pushbutton state
             initial_state = pushbutton.isChecked()

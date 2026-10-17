@@ -90,15 +90,16 @@ def count(vector_layer):
 
 
 def set_targets(names):
+    """The user's order: the targets key first (it reloads the stored list), then the layers."""
+    button = dock().pushButton_checkable_filtering_layers_to_filter
+    if not button.isChecked():
+        button.setChecked(True)
     combo = dock().checkableComboBoxLayer_filtering_layers_to_filter
     model = combo.model()
     for row in range(model.rowCount()):
         item = model.item(row)
         text = item.text()
         item.setCheckState(Qt.CheckState.Checked if any(text.startswith(n + ' [') for n in names) else Qt.CheckState.Unchecked)
-    button = dock().pushButton_checkable_filtering_layers_to_filter
-    if not button.isChecked():
-        button.setChecked(True)
     log(f"targets: {dock().get_layers_to_filter()}")
 
 
@@ -192,8 +193,17 @@ def s_vector_undo_check():
 
 
 def s_centroid_registry():
-    """A target checked the way a click in the list does it (no checkedItemsChanged)."""
+    """The dock's own handlers survive the layer changes (toggling the targets key saves
+    has_layers_to_filter at once), then a target is checked the way a click in the list does it."""
     d = dock()
+    props = d.PROJECT_LAYERS[layer('batiment').id()]['filtering']
+    key = d.pushButton_checkable_filtering_layers_to_filter
+    key.setChecked(True)
+    key.setChecked(False)
+    off = props.get('has_layers_to_filter')
+    key.setChecked(True)
+    check('registry: the targets key saves has_layers_to_filter after layer changes',
+          off is False and props.get('has_layers_to_filter') is True, f'{off} / {props.get("has_layers_to_filter")}')
     combo = d.checkableComboBoxLayer_filtering_layers_to_filter
     for row in range(combo.count()):  # what a click in the list does: no checkedItemsChanged
         item = combo.model().item(row)
