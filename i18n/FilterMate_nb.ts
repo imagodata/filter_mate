@@ -91,9 +91,22 @@
     </message>
 </context>
 <context>
+    <name>CentroidTargetsSync</name>
+    <message>
+        <location filename="../ui/controllers/centroid_targets_sync.py" line="179"/>
+        <source>Test the checked line and polygon targets by their centroids (point on surface): faster on large geometries. Each target has its own square in the list</source>
+        <translation>Test de avmerkede linje- og polygonmålene med sentroidene (punkt på overflaten): raskere på store geometrier. Hvert mål har sin egen rute i listen</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/centroid_targets_sync.py" line="179"/>
+        <source>Centroids apply to line and polygon targets: check one in the list of layers to filter</source>
+        <translation>Sentroider gjelder linje- og polygonmål: merk av ett i listen over lag som skal filtreres</translation>
+    </message>
+</context>
+<context>
     <name>ConfigController</name>
     <message>
-        <location filename="../ui/controllers/config_controller.py" line="377"/>
+        <location filename="../ui/controllers/config_controller.py" line="379"/>
         <source>Error cancelling changes: {0}</source>
         <translation>Feil ved avbryting av endringer: {0}</translation>
     </message>
@@ -101,7 +114,7 @@
 <context>
     <name>ControllerIntegration</name>
     <message>
-        <location filename="../ui/controllers/integration.py" line="634"/>
+        <location filename="../ui/controllers/integration.py" line="645"/>
         <source>Property error: {0}</source>
         <translation>Egenskapsfeil: {0}</translation>
     </message>
@@ -109,17 +122,17 @@
 <context>
     <name>CoverageDockExtras</name>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="232"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="247"/>
         <source>1 band</source>
         <translation>1 bånd</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="233"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="248"/>
         <source>{0} bands</source>
         <translation>{0} bånd</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="234"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="249"/>
         <source>{0} points</source>
         <translation>{0} punkter</translation>
     </message>
@@ -129,9 +142,9 @@
         <translation type="obsolete">Kildegeometri: de valgte pikslene, vektorisert</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="208"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
         <source>Source geometry: the footprint of the kept points</source>
-        <translation type="obsolete">Kildegeometri: fotavtrykket til de beholdte punktene</translation>
+        <translation>Kildegeometri: fotavtrykket til de beholdte punktene</translation>
     </message>
     <message>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="209"/>
@@ -149,12 +162,12 @@
         <translation type="obsolete">Statistikk for et rektangel: dra på kartet for å lese minimum, maksimum og gjennomsnitt for gjeldende bånd</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="277"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="330"/>
         <source>Elevation profile: open the QGIS elevation profile of the map</source>
         <translation>Høydeprofil: åpne QGIS-høydeprofilen for kartet</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="277"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="330"/>
         <source>3D view: open a new QGIS 3D map view</source>
         <translation>3D-visning: åpne en ny QGIS 3D-kartvisning</translation>
     </message>
@@ -164,9 +177,9 @@
         <translation type="obsolete">ingen objekter</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="265"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="254"/>
         <source>{0} feature(s)</source>
-        <translation type="obsolete">{0} objekt(er)</translation>
+        <translation>{0} objekt(er)</translation>
     </message>
     <message>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="266"/>
@@ -174,32 +187,32 @@
         <translation type="obsolete">alle piksler</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="267"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="259"/>
         <source>{0} class(es)</source>
-        <translation type="obsolete">{0} klasse(r)</translation>
+        <translation>{0} klasse(r)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="268"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="256"/>
         <source>expression</source>
-        <translation type="obsolete">uttrykk</translation>
+        <translation>uttrykk</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="235"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="250"/>
         <source>{0} features</source>
         <translation>{0} objekter</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="484"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="650"/>
         <source>Vector</source>
         <translation>Vektor</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="484"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="650"/>
         <source>Raster</source>
         <translation>Raster</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="484"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="650"/>
         <source>Point cloud</source>
         <translation>Punktsky</translation>
     </message>
@@ -209,49 +222,74 @@
         <translation type="obsolete">Beholdte punkter</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="355"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="624"/>
         <source>Selection → source geometry</source>
-        <translation type="obsolete">Utvalg → kildegeometri</translation>
+        <translation>Utvalg → kildegeometri</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="273"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="326"/>
         <source>Link the range to the style: the layer colours stretch over the selected range</source>
         <translation>Knytt intervallet til stilen: lagets farger strekkes over det valgte intervallet</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="274"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="327"/>
         <source>Class pipette: click the map and the class of the points drawn there is checked. Ctrl+click adds another one</source>
         <translation>Klassevelger: klikk på kartet, så merkes klassen til punktene som er tegnet der. Ctrl+klikk legger til en til</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="277"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="330"/>
         <source>Value under the cursor: follow the pixel value (or the slope, aspect... the range applies to) while moving over the map</source>
         <translation>Verdi under markøren: følg pikselverdien (eller helningen, eksposisjonen ... intervallet gjelder for) mens du beveger deg over kartet</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="277"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="330"/>
         <source>Statistics of a rectangle: drag on the map to read the minimum, maximum and mean of the current band (or of the slope, aspect... the range applies to)</source>
         <translation>Statistikk for et rektangel: dra på kartet for å lese minimum, maksimum og gjennomsnitt for gjeldende bånd (eller for helningen, eksposisjonen ... intervallet gjelder for)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="388"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="445"/>
         <source>The style link follows pixel values: not available while the range applies to a slope, aspect, hillshade or roughness</source>
         <translation>Stilknytningen følger pikselverdier: ikke tilgjengelig mens intervallet gjelder for helning, eksposisjon, skyggerelieff eller ruhet</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="578"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="744"/>
         <source>Class pipette: this point cloud has no Classification attribute</source>
         <translation>Klassevelger: denne punktskyen har ikke noe Classification-attributt</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="738"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="910"/>
         <source>The style cannot follow the range: it needs a single band grey or pseudocolor style on the band of the panel</source>
         <translation>Stilen kan ikke følge intervallet: den trenger en gråtone- eller pseudofargestil med ett bånd på panelets bånd</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="277"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="330"/>
         <source>Pipette: click the map and the pixels that look like the one you click are selected (a color on an image, a value on a DTM or an index, a class on a classified raster, with the tolerance of the panel). Ctrl+click adds another one</source>
         <translation>Velger: klikk på kartet, så velges pikslene som ligner den du klikker på (en farge på et bilde, en verdi på en DTM eller en indeks, en klasse på et klassifisert raster, med toleransen i panelet). Ctrl+klikk legger til en til</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="255"/>
+        <source>no feature selected</source>
+        <translation>ingen objekter valgt</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="257"/>
+        <source>whole layer</source>
+        <translation>hele laget</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="258"/>
+        <source>no constraint</source>
+        <translation>ingen begrensning</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="260"/>
+        <source>raster expression</source>
+        <translation>rasteruttrykk</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="261"/>
+        <source>all points</source>
+        <translation>alle punkter</translation>
     </message>
 </context>
 <context>
@@ -262,27 +300,27 @@
         <translation>Gjenoppretter filteret for {0} raster-/punktskylag…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="574"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="582"/>
         <source>cov. ≥ </source>
         <translation>dekn. ≥ </translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="575"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="583"/>
         <source>Minimum share of a polygon target inside the source geometry (0 = any overlap). Used when the source is a raster or a point cloud.</source>
         <translation>Minste andel av et polygonmål innenfor kildegeometrien (0 = enhver overlapping). Brukes når kilden er et raster eller en punktsky.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="690"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="698"/>
         <source>Raster</source>
         <translation>Raster</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="690"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="698"/>
         <source>Point cloud</source>
         <translation>Punktsky</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="699"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="707"/>
         <source>{0} layer: selection in EXPLORING, relation in FILTERING</source>
         <translation>{0}-lag: utvalg i EXPLORING, relasjon i FILTERING</translation>
     </message>
@@ -292,7 +330,7 @@
         <translation type="obsolete">Pikselvelger: klikk på kartet for å lese verdien til hvert bånd (Ctrl+klikk utvider området)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="726"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="734"/>
         <source>Zoom to the layer</source>
         <translation>Zoom til laget</translation>
     </message>
@@ -302,167 +340,167 @@
         <translation type="obsolete">Forhåndsvisning: skjul pikslene utenfor utvalget</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="721"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="729"/>
         <source>Not used for raster layers</source>
         <translation>Ikke brukt for rasterlag</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="722"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="730"/>
         <source>Reset the raster selection</source>
         <translation>Tilbakestill rasterutvalget</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="725"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="733"/>
         <source>Identify points on the map</source>
         <translation>Identifiser punkter på kartet</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="727"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="735"/>
         <source>Live preview: show only the points kept by the selection</source>
         <translation>Direkteforhåndsvisning: vis bare punktene som beholdes av utvalget</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="729"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="737"/>
         <source>Not used for point cloud layers</source>
         <translation>Ikke brukt for punktskylag</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="730"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="738"/>
         <source>Reset the point cloud criteria</source>
         <translation>Tilbakestill punktskykriteriene</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="940"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="951"/>
         <source>Invalid raster calculator expression</source>
         <translation>Ugyldig uttrykk for rasterkalkulator</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1012"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1023"/>
         <source>PDAL was not found: the height above a DTM needs the pdal executable</source>
         <translation>PDAL ble ikke funnet: høyde over en DTM krever den kjørbare filen pdal</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1959"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1991"/>
         <source>A FilterMate task is still running: wait for it to finish</source>
         <translation>En FilterMate-oppgave kjører fortsatt: vent til den er ferdig</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1524"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1556"/>
         <source>FilterMate task failed: {0}</source>
         <translation>FilterMate-oppgaven mislyktes: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1561"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1593"/>
         <source>Select pixels first: a value range, classes or a raster expression</source>
         <translation>Velg piksler først: et verdiområde, klasser eller et rasteruttrykk</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1570"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1602"/>
         <source>Raster filtered: {0}</source>
         <translation>Raster filtrert: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1588"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1620"/>
         <source>The point cloud expression was rejected: {0}</source>
         <translation>Punktskyuttrykket ble avvist: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1591"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1623"/>
         <source>Select points first: classes, attribute ranges or an expression</source>
         <translation>Velg punkter først: klasser, attributtområder eller et uttrykk</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1599"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1631"/>
         <source>Point cloud filtered: {0}</source>
         <translation>Punktsky filtrert: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2062"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2094"/>
         <source>Filter not applied: {0}</source>
         <translation>Filteret ble ikke brukt: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1925"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1957"/>
         <source>canceled</source>
         <translation>avbrutt</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1667"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1699"/>
         <source>{0} target(s) filtered</source>
         <translation>{0} mål filtrert</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1669"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1701"/>
         <source>{0} failed: {1}</source>
         <translation>{0} mislyktes: {1}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1678"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1710"/>
         <source>FilterMate: filtering from '{0}'…</source>
         <translation>FilterMate: filtrerer fra '{0}'…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1745"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1777"/>
         <source>Changed since, left as is: {0}</source>
         <translation>Endret siden, latt være: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1751"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1783"/>
         <source>{0} layer(s) restored</source>
         <translation>{0} lag gjenopprettet</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1785"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1817"/>
         <source>&apos;{0}&apos; not exported: {1}</source>
         <translation>'{0}' ble ikke eksportert: {1}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1799"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1831"/>
         <source>Exported: {0}</source>
         <translation>Eksportert: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1801"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1833"/>
         <source>Export failed: {0}</source>
         <translation>Eksporten mislyktes: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1808"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1840"/>
         <source>Exporting {0} layer(s)…</source>
         <translation>Eksporterer {0} lag…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1814"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1846"/>
         <source>Export folder</source>
         <translation>Eksportmappe</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1896"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1928"/>
         <source>Raster / point cloud targets skipped: no source feature selected in EXPLORING</source>
         <translation>Raster-/punktskymål hoppet over: ingen kildeobjekt valgt i EXPLORING</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1925"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1957"/>
         <source>Raster / point cloud targets not filtered: {0}</source>
         <translation>Raster-/punktskymål ikke filtrert: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1927"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1959"/>
         <source>{0} raster / point cloud target(s) filtered</source>
         <translation>{0} raster-/punktskymål filtrert</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2041"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2073"/>
         <source>Choose the DTM raster used for the height above ground</source>
         <translation>Velg DTM-rasteret som brukes for høyde over bakken</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2052"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2084"/>
         <source>Height above ground not computed: {0}</source>
         <translation>Høyde over bakken ble ikke beregnet: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2071"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2103"/>
         <source>Computing the height above '{0}' with PDAL…</source>
         <translation>Beregner høyden over '{0}' med PDAL…</translation>
     </message>
@@ -472,52 +510,52 @@
         <translation>FilterMate-hurtigbufferen bruker {0} GB, over grensen på {1} GB: fjern filteret fra raster- / punktskylagene du ikke lenger trenger</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1014"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1025"/>
         <source>PDAL {0} is too old: the height above a DTM needs PDAL 2.4 or later</source>
         <translation>PDAL {0} er for gammel: høyde over en DTM krever PDAL 2.4 eller nyere</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1017"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1028"/>
         <source>PDAL could not be run, the height above a DTM is unavailable: {0}</source>
         <translation>PDAL kunne ikke kjøres, høyde over en DTM er ikke tilgjengelig: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="714"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="722"/>
         <source>Pixel picker: click on the map to read the value of every band, and the slope, aspect... when the range applies to one (Ctrl+click extends the range)</source>
         <translation>Pikselvelger: klikk på kartet for å lese verdien til hvert bånd, og helningen, eksposisjonen ... når intervallet gjelder for en av dem (Ctrl+klikk utvider området)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="717"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="725"/>
         <source>Zoom to the selected pixels (to the layer when nothing is selected)</source>
         <translation>Zoom til de valgte pikslene (til laget når ingenting er valgt)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="718"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="726"/>
         <source>Preview: hide the pixels outside the selection (a white veil for a slope, aspect...)</source>
         <translation>Forhåndsvisning: skjul pikslene utenfor utvalget (et hvitt slør for helning, eksposisjon ...)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="985"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="996"/>
         <source>The preview of a slope or aspect needs the map in the CRS of the raster ({0})</source>
         <translation>Forhåndsvisning av helning eller eksposisjon krever at kartet er i rasterets KRS ({0})</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1339"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1371"/>
         <source>only the points drawn on the map can be picked: turn the preview off to pick a class it hides</source>
         <translation>bare punktene som er tegnet på kartet kan velges: slå av forhåndsvisningen for å velge en klasse den skjuler</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1341"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1373"/>
         <source>No classified point under the click</source>
         <translation>Ingen klassifisert punkt under klikket</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1345"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1377"/>
         <source>Class {0} is already checked</source>
         <translation>Klasse {0} er allerede merket</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1347"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1379"/>
         <source>Class {0} is not in the class list of the layer</source>
         <translation>Klasse {0} finnes ikke i lagets klasseliste</translation>
     </message>
@@ -670,47 +708,47 @@
         <translation type="obsolete">Inget filter</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="264"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="270"/>
         <source>No active filter to save.</source>
         <translation>Ingen aktive filtre aa lagre.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="268"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="274"/>
         <source>Add Favorite</source>
         <translation>Legg til favoritt</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="268"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="274"/>
         <source>Favorite name:</source>
         <translation>Favorittnavn:</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="286"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="292"/>
         <source>Favorite &apos;{0}&apos; added successfully</source>
         <translation>Favoritt '{0}' lagt til</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="505"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="511"/>
         <source>Export Favorites</source>
         <translation>Eksporter favoritter</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="529"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="535"/>
         <source>Exported {0} favorites</source>
         <translation>{0} favoritter eksportert</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="531"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="537"/>
         <source>Failed to export favorites</source>
         <translation>Eksport av favoritter mislyktes</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="564"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="570"/>
         <source>Import Favorites</source>
         <translation>Importer favoritter</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="564"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="570"/>
         <source>Merge with existing favorites?
 
 Yes = Add to existing
@@ -721,27 +759,27 @@ Ja = Legg til eksisterende
 Nei = Erstatt alle eksisterende</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="602"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="608"/>
         <source>Imported {0} favorites</source>
         <translation>{0} favoritter importert</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="604"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="610"/>
         <source>No favorites imported</source>
         <translation>Ingen favoritter importert</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="613"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="619"/>
         <source>Favorites manager not initialized. Please restart FilterMate.</source>
         <translation>Favorittbehandler ikke initialisert. Start FilterMate paa nytt.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="658"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="664"/>
         <source>Favorites manager dialog not available</source>
         <translation>Favorittbehandler-dialog ikke tilgjengelig</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1168"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1174"/>
         <source>Error: {0}</source>
         <translation>Feil: {0}</translation>
     </message>
@@ -826,29 +864,29 @@ Nei = Erstatt alle eksisterende</translation>
         <translation type="obsolete">Ugyldig navn</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="763"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="769"/>
         <source>Favorite name cannot be empty.</source>
         <translation>Favorittnavn kan ikke vaere tomt.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="773"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="779"/>
         <source>Duplicate Name</source>
         <translation>Duplisert navn</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="773"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="779"/>
         <source>A favorite named &apos;{0}&apos; already exists.
 Do you want to replace it?</source>
         <translation>En favoritt med navnet '{0}' eksisterer allerede.
 Vil du erstatte den?</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1044"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1050"/>
         <source>Favorite copied to global favorites</source>
         <translation>Favoritt kopiert til globale favoritter</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1047"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1053"/>
         <source>Failed to copy to global favorites</source>
         <translation>Kopiering til globale favoritter mislyktes</translation>
     </message>
@@ -867,37 +905,37 @@ Global favorites are shared across all projects.</source>
 Globale favoritter deles paa tvers av alle prosjekter.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1064"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1070"/>
         <source>Saved {0} favorite(s) to project file</source>
         <translation>{0} favoritt(er) lagret i prosjektfil</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1066"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1072"/>
         <source>Save failed</source>
         <translation>Lagring mislyktes</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1077"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1083"/>
         <source>Restored {0} favorite(s) from project file</source>
         <translation>{0} favoritt(er) gjenopprettet fra prosjektfil</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1079"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1085"/>
         <source>No favorites to restore found in project</source>
         <translation>Ingen favoritter aa gjenopprette funnet i prosjekt</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1110"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1116"/>
         <source>Cleaned up {0} orphan project(s)</source>
         <translation>{0} foreldreloest/e prosjekt(er) ryddet opp</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1112"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1118"/>
         <source>No orphan projects to clean up</source>
         <translation>Ingen foreldreloese prosjekter aa rydde opp</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1172"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1178"/>
         <source>FilterMate Database Statistics
 
 Total favorites: {0}
@@ -914,12 +952,12 @@ Totalt favoritter: {0}
 </translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1188"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1194"/>
         <source>Top projects by favorites:</source>
         <translation>Toppprosjekter etter favoritter:</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1192"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1198"/>
         <source>FilterMate Statistics</source>
         <translation>FilterMate-statistikk</translation>
     </message>
@@ -953,7 +991,7 @@ Anvend et filter på et lag, klikk deretter på ★-indikatoren og velg «Legg t
         <translation type="obsolete">Publiser (ingen favoritter lagret)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1094"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1100"/>
         <source>FilterMate config directory is not initialized yet — open a QGIS project with FilterMate first.</source>
         <translation>FilterMate-konfigurasjonsmappen er ennå ikke initialisert — åpne først et QGIS-prosjekt med FilterMate.</translation>
     </message>
@@ -983,57 +1021,57 @@ Anvend et filter på et lag, klikk deretter på ★-indikatoren og velg «Legg t
         <translation type="obsolete">Åpning av publiseringsdialogen feilet: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="382"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="388"/>
         <source>Favorites are not ready yet: {0}</source>
         <translation>Favorittene er ikke klare ennå: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="387"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="393"/>
         <source>Could not remove &apos;{0}&apos;: {1}</source>
         <translation>Kunne ikke fjerne '{0}': {1}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="622"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="628"/>
         <source>No favorites saved yet — apply a filter then click the ★ indicator to save your first one.</source>
         <translation>Ingen favoritter lagret ennå — bruk et filter og klikk på ★-indikatoren for å lagre den første.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="661"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="667"/>
         <source>The favorites manager could not be opened. Details in filtermate.log.</source>
         <translation>Favorittbehandleren kunne ikke åpnes. Detaljer i filtermate.log.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="786"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="792"/>
         <source>Could not replace &apos;{0}&apos;: {1}</source>
         <translation>Kunne ikke erstatte '{0}': {1}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="897"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="903"/>
         <source>Could not save &apos;{0}&apos;: {1}</source>
         <translation>Kunne ikke lagre '{0}': {1}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1021"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1027"/>
         <source>Could not import global favorite: {0}</source>
         <translation>Kunne ikke importere global favoritt: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1039"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1045"/>
         <source>Could not copy to global: {0}</source>
         <translation>Kunne ikke kopiere til global: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1059"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1065"/>
         <source>Could not save favorites to project file: {0}</source>
         <translation>Kunne ikke lagre favorittene i prosjektfilen: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1115"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1121"/>
         <source>Orphan projects could not be cleaned up. Details in filtermate.log.</source>
         <translation>Foreldreløse prosjekter kunne ikke ryddes bort. Detaljer i filtermate.log.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1199"/>
+        <location filename="../ui/controllers/favorites_controller.py" line="1205"/>
         <source>Database statistics are unavailable. Details in filtermate.log.</source>
         <translation>Databasestatistikk er utilgjengelig. Detaljer i filtermate.log.</translation>
     </message>
@@ -1439,27 +1477,27 @@ Klikk paa ★-indikatoren og velg 'Legg til gjeldende filter i favoritter' for a
         <translation>Tilbakestill standardkonfigurasjonen og slett SQLite-databasen</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1504"/>
+        <location filename="../filter_mate.py" line="1515"/>
         <source>Reset Configuration</source>
         <translation>Tilbakestill konfigurasjon</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1530"/>
+        <location filename="../filter_mate.py" line="1541"/>
         <source>Configuration reset successfully.</source>
         <translation>Konfigurasjonen ble tilbakestilt.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1535"/>
+        <location filename="../filter_mate.py" line="1546"/>
         <source>Default configuration file not found.</source>
         <translation>Standard konfigurasjonsfil ikke funnet.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1557"/>
+        <location filename="../filter_mate.py" line="1568"/>
         <source>Database deleted: {filename}</source>
         <translation>Database slettet: {filename}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1581"/>
+        <location filename="../filter_mate.py" line="1592"/>
         <source>Restart required</source>
         <translation>Omstart nødvendig</translation>
     </message>
@@ -1610,7 +1648,7 @@ Do you want to disable this setting now?
 • No: Keep current setting</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1504"/>
+        <location filename="../filter_mate.py" line="1515"/>
         <source>Are you sure you want to reset to the default configuration?
 
 This will:
@@ -1627,7 +1665,7 @@ Dette vil:
 QGIS må startes på nytt for å bruke endringene.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1581"/>
+        <location filename="../filter_mate.py" line="1592"/>
         <source>The configuration has been reset.
 
 Please restart QGIS to apply the changes.</source>
@@ -1646,7 +1684,7 @@ Start QGIS på nytt for å bruke endringene.</translation>
         <translation>{count} refererte lag ikke lastet ({layers_list}). Bruker reservevisning.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1572"/>
+        <location filename="../filter_mate.py" line="1583"/>
         <source>Unable to delete {filename}: {e}</source>
         <translation>Kan ikke slette {filename}: {e}</translation>
     </message>
@@ -1656,86 +1694,86 @@ Start QGIS på nytt for å bruke endringene.</translation>
         <translation type="obsolete">Feil under tilbakestilling: {str(e)}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1624"/>
+        <location filename="../filter_mate.py" line="1635"/>
         <source>&lt;p style=&apos;font-size:13px;&apos;&gt;Thank you for using &lt;b&gt;FilterMate&lt;/b&gt;!&lt;br&gt;Join our Discord community to:&lt;/p&gt;&lt;ul style=&apos;margin-left:10px; font-size:12px;&apos;&gt;&lt;li&gt;Get help and support&lt;/li&gt;&lt;li&gt;Report bugs and issues&lt;/li&gt;&lt;li&gt;Suggest new features&lt;/li&gt;&lt;li&gt;Share tips with other users&lt;/li&gt;&lt;/ul&gt;</source>
         <translation>&lt;p style='font-size:13px;'&gt;Takk for at du bruker &lt;b&gt;FilterMate&lt;/b&gt;!&lt;br&gt;Bli med i vart Discord-fellesskap for aa:&lt;/p&gt;&lt;ul style='margin-left:10px; font-size:12px;'&gt;&lt;li&gt;Faa hjelp og stoette&lt;/li&gt;&lt;li&gt;Rapportere feil og problemer&lt;/li&gt;&lt;li&gt;Foreslaaa nye funksjoner&lt;/li&gt;&lt;li&gt;Dele tips med andre brukere&lt;/li&gt;&lt;/ul&gt;</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1640"/>
+        <location filename="../filter_mate.py" line="1651"/>
         <source>  Join us on Discord</source>
         <translation>  Foelg oss paa Discord</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1660"/>
+        <location filename="../filter_mate.py" line="1671"/>
         <source>Don&apos;t show this again</source>
         <translation>Ikke vis dette igjen</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1716"/>
+        <location filename="../filter_mate.py" line="1727"/>
         <source>Close</source>
         <translation>Lukk</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1783"/>
+        <location filename="../filter_mate.py" line="1794"/>
         <source>Error loading plugin: {0}. Check QGIS Python console for details.</source>
         <translation>Feil ved lasting av utvidelse: {0}. Sjekk QGIS Python-konsollen for detaljer.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7000"/>
+        <location filename="../filter_mate_dockwidget.py" line="7066"/>
         <source>Current layer: {0}</source>
         <translation>Gjeldende lag: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7002"/>
+        <location filename="../filter_mate_dockwidget.py" line="7068"/>
         <source>No layer selected</source>
         <translation>Ingen lag valgt</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7012"/>
+        <location filename="../filter_mate_dockwidget.py" line="7078"/>
         <source>Selected layers:
 {0}</source>
         <translation>Valgte lag:
 {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7012"/>
+        <location filename="../filter_mate_dockwidget.py" line="7078"/>
         <source>No layers selected</source>
         <translation>Ingen lag valgt</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7032"/>
+        <location filename="../filter_mate_dockwidget.py" line="7098"/>
         <source>No expression defined</source>
         <translation>Ingen uttrykk definert</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7044"/>
+        <location filename="../filter_mate_dockwidget.py" line="7110"/>
         <source>Display expression: {0}</source>
         <translation>Visningsuttrykk: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7059"/>
+        <location filename="../filter_mate_dockwidget.py" line="7125"/>
         <source>Feature ID: {0}
 First attribute: {1}</source>
         <translation>Objekt-ID: {0}
 Foerste attributt: {1}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1590"/>
+        <location filename="../filter_mate.py" line="1601"/>
         <source>The configuration could not be reset. Check that the plugin folder is writable, then try again. Details in filtermate.log.</source>
         <translation>Konfigurasjonen kunne ikke tilbakestilles. Kontroller at programtilleggsmappen er skrivbar, og prøv igjen. Detaljer i filtermate.log.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1690"/>
+        <location filename="../filter_mate.py" line="1701"/>
         <source>What&apos;s new in FilterMate 5</source>
         <translation>Nytt i FilterMate 5</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1696"/>
+        <location filename="../filter_mate.py" line="1707"/>
         <source>&lt;p style=&apos;font-size:13px;&apos;&gt;&lt;b&gt;FilterMate now works with raster and point cloud layers.&lt;/b&gt;&lt;/p&gt;&lt;ul style=&apos;margin-left:10px; font-size:12px;&apos;&gt;&lt;li&gt;&lt;b&gt;EXPLORING&lt;/b&gt; adapts to the current layer: value range and classes of a raster, classes, elevation and attributes of a LiDAR point cloud.&lt;/li&gt;&lt;li&gt;&lt;b&gt;FILTERING&lt;/b&gt; relates that selection to layers of any kind, with the usual predicates and buffer: parcels within an elevation range, LiDAR points under buildings, a DTM clipped to a municipality.&lt;/li&gt;&lt;li&gt;&lt;b&gt;EXPORTING&lt;/b&gt; writes filtered rasters (GeoTIFF, COG) and point clouds (LAZ, COPC).&lt;/li&gt;&lt;li&gt;Processing algorithms and models, qgis_process, Python and REST APIs.&lt;/li&gt;&lt;/ul&gt;</source>
         <translation>&lt;p style='font-size:13px;'&gt;&lt;b&gt;FilterMate fungerer nå med raster- og punktskylag.&lt;/b&gt;&lt;/p&gt;&lt;ul style='margin-left:10px; font-size:12px;'&gt;&lt;li&gt;&lt;b&gt;EXPLORING&lt;/b&gt; tilpasser seg det gjeldende laget: verdiområde og klasser for et raster, klasser, høyde og attributter for en LiDAR-punktsky.&lt;/li&gt;&lt;li&gt;&lt;b&gt;FILTERING&lt;/b&gt; knytter utvalget til lag av alle typer, med de vanlige predikatene og bufferen: eiendommer innenfor et høydeområde, LiDAR-punkter under bygninger, en terrengmodell klippet til en kommune.&lt;/li&gt;&lt;li&gt;&lt;b&gt;EXPORTING&lt;/b&gt; skriver filtrerte rastere (GeoTIFF, COG) og punktskyer (LAZ, COPC).&lt;/li&gt;&lt;li&gt;Processing-algoritmer og -modeller, qgis_process, Python- og REST-API-er.&lt;/li&gt;&lt;/ul&gt;</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1712"/>
+        <location filename="../filter_mate.py" line="1723"/>
         <source>Open the user guide</source>
         <translation>Åpne brukerveiledningen</translation>
     </message>
@@ -1763,82 +1801,82 @@ Foerste attributt: {1}</translation>
         <translation>Kunne ikke vise dockwidget: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1452"/>
+        <location filename="../filter_mate_app.py" line="1456"/>
         <source>Error executing {0}: {1}</source>
         <translation>Feil ved kjoering av {0}: {1}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1464"/>
+        <location filename="../filter_mate_app.py" line="1468"/>
         <source>Plugin running in degraded mode (hexagonal services unavailable). Performance may be reduced.</source>
         <translation>Utvidelse kjoerer i redusert modus (heksagonale tjenester utilgjengelige). Ytelsen kan vaere redusert.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1716"/>
+        <location filename="../filter_mate_app.py" line="1761"/>
         <source>FilterMate ERROR</source>
         <translation>FilterMate FEIL</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1716"/>
+        <location filename="../filter_mate_app.py" line="1761"/>
         <source>Cannot execute {0}: widget initialization failed.</source>
         <translation>Kan ikke kjoere {0}: widgetinitialisering mislyktes.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2499"/>
+        <location filename="../filter_mate_app.py" line="2544"/>
         <source>Cannot {0}: layer invalid or source not found.</source>
         <translation>Kan ikke {0}: lag ugyldig eller kilde ikke funnet.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2636"/>
+        <location filename="../filter_mate_app.py" line="2681"/>
         <source>All filters cleared - </source>
         <translation>Alle filtre fjernet - </translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2637"/>
+        <location filename="../filter_mate_app.py" line="2682"/>
         <source>{0}{1} features visible in main layer</source>
         <translation>{0}{1} objekter synlige i hovedlag</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2645"/>
+        <location filename="../filter_mate_app.py" line="2694"/>
         <source>Error: result handler missing</source>
         <translation>Feil: resultatbehandler mangler</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2658"/>
+        <location filename="../filter_mate_app.py" line="2707"/>
         <source>Error during filtering: {0}</source>
         <translation>Feil under filtrering: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2780"/>
+        <location filename="../filter_mate_app.py" line="2831"/>
         <source>Recovered {0} orphan favorite(s): {1}</source>
         <translation>{0} foreldreloese favoritt(er) gjenopprettet: {1}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2946"/>
+        <location filename="../filter_mate_app.py" line="2997"/>
         <source>Layer loading failed - click to retry</source>
         <translation>Lasting av lag mislyktes - klikk for aa proeve igjen</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2998"/>
+        <location filename="../filter_mate_app.py" line="3049"/>
         <source>{0} layer(s) loaded successfully</source>
         <translation>{0} lag lastet inn</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1938"/>
+        <location filename="../filter_mate_app.py" line="1983"/>
         <source>filter</source>
         <translation>filter</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1940"/>
+        <location filename="../filter_mate_app.py" line="1985"/>
         <source>unfilter</source>
         <translation>unfilter</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1943"/>
+        <location filename="../filter_mate_app.py" line="1988"/>
         <source>FilterMate – Edit Mode Detected</source>
         <translation>FilterMate – Edit Mode Detected</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1945"/>
+        <location filename="../filter_mate_app.py" line="1990"/>
         <source>The following layer(s) are currently in edit mode:
 {0}
 
@@ -1851,22 +1889,22 @@ QGIS cannot apply filters while a layer is being edited.
 What would you like to do?</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1955"/>
+        <location filename="../filter_mate_app.py" line="2000"/>
         <source>Save Changes &amp; {0}</source>
         <translation>Save Changes &amp; {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1962"/>
+        <location filename="../filter_mate_app.py" line="2007"/>
         <source>Discard Changes &amp; {0}</source>
         <translation>Discard Changes &amp; {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1969"/>
+        <location filename="../filter_mate_app.py" line="2014"/>
         <source>Cancel</source>
         <translation>Avbryt</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1993"/>
+        <location filename="../filter_mate_app.py" line="2038"/>
         <source>Could not save changes for layer &quot;{0}&quot;. Operation cancelled.</source>
         <translation>Could not save changes for layer &quot;{0}&quot;. Operation cancelled.</translation>
     </message>
@@ -1889,7 +1927,7 @@ What would you like to do?</translation>
         <translation>Initialiseringsfeil: {}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1003"/>
+        <location filename="../filter_mate_dockwidget.py" line="1008"/>
         <source>UI configuration incomplete - check logs</source>
         <translation>UI-konfigurasjon ufullstendig - sjekk logger</translation>
     </message>
@@ -1899,288 +1937,288 @@ What would you like to do?</translation>
         <translation type="obsolete">UI-dimensjonsfeil: {}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1463"/>
+        <location filename="../filter_mate_dockwidget.py" line="1468"/>
         <source>Favorites manager not available</source>
         <translation>Favorittbehandler ikke tilgjengelig</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1484"/>
+        <location filename="../filter_mate_dockwidget.py" line="1489"/>
         <source>★ {0} Favorites saved
 Click to apply or manage</source>
         <translation>★ {0} favoritter lagret
 Klikk for aa bruke eller behandle</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1487"/>
+        <location filename="../filter_mate_dockwidget.py" line="1492"/>
         <source>★ No favorites saved
 Click to add current filter</source>
         <translation>★ Ingen favoritter lagret
 Klikk for aa legge til gjeldende filter</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1507"/>
+        <location filename="../filter_mate_dockwidget.py" line="1512"/>
         <source>Forced {0} backend for {1} layer(s)</source>
         <translation>{0} backend tvunget for {1} lag</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1593"/>
+        <location filename="../filter_mate_dockwidget.py" line="1598"/>
         <source>Backend controller not available</source>
         <translation>Backend-kontroller ikke tilgjengelig</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1531"/>
+        <location filename="../filter_mate_dockwidget.py" line="1536"/>
         <source>PostgreSQL auto-cleanup enabled</source>
         <translation>PostgreSQL automatisk opprydding aktivert</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1532"/>
+        <location filename="../filter_mate_dockwidget.py" line="1537"/>
         <source>PostgreSQL auto-cleanup disabled</source>
         <translation>PostgreSQL automatisk opprydding deaktivert</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1538"/>
+        <location filename="../filter_mate_dockwidget.py" line="1543"/>
         <source>PostgreSQL session views cleaned up</source>
         <translation>PostgreSQL-sesjonsvisninger ryddet opp</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1538"/>
+        <location filename="../filter_mate_dockwidget.py" line="1543"/>
         <source>No views to clean or cleanup failed</source>
         <translation>Ingen visninger aa rydde opp eller opprydding mislyktes</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1549"/>
+        <location filename="../filter_mate_dockwidget.py" line="1554"/>
         <source>No PostgreSQL connection available</source>
         <translation>Ingen PostgreSQL-tilkobling tilgjengelig</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1555"/>
+        <location filename="../filter_mate_dockwidget.py" line="1560"/>
         <source>Schema has {0} view(s) from other sessions.
 Drop anyway?</source>
         <translation>Skjema har {0} visning(er) fra andre sesjoner.
 Fjerne likevel?</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1556"/>
+        <location filename="../filter_mate_dockwidget.py" line="1561"/>
         <source>Other Sessions Active</source>
         <translation>Andre sesjoner aktive</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1558"/>
+        <location filename="../filter_mate_dockwidget.py" line="1563"/>
         <source>Schema cleanup cancelled</source>
         <translation>Skjemaopprydding avbrutt</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1563"/>
+        <location filename="../filter_mate_dockwidget.py" line="1568"/>
         <source>Schema &apos;{0}&apos; dropped successfully</source>
         <translation>Skjema '{0}' fjernet</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1565"/>
+        <location filename="../filter_mate_dockwidget.py" line="1570"/>
         <source>Schema cleanup failed</source>
         <translation>Skjemaopprydding mislyktes</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1591"/>
+        <location filename="../filter_mate_dockwidget.py" line="1596"/>
         <source>PostgreSQL Session Info</source>
         <translation>PostgreSQL sesjonsinfo</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="2714"/>
+        <location filename="../filter_mate_dockwidget.py" line="2719"/>
         <source>Theme adapted: {0}</source>
         <translation>Tema tilpasset: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="2714"/>
+        <location filename="../filter_mate_dockwidget.py" line="2719"/>
         <source>Dark mode</source>
         <translation>Moerk modus</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="2714"/>
+        <location filename="../filter_mate_dockwidget.py" line="2719"/>
         <source>Light mode</source>
         <translation>Lys modus</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="4030"/>
+        <location filename="../filter_mate_dockwidget.py" line="4057"/>
         <source>Selected features have no geometry.</source>
         <translation>Valgte objekter har ingen geometri.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="4049"/>
+        <location filename="../filter_mate_dockwidget.py" line="4076"/>
         <source>No feature selected. Select a feature from the dropdown list.</source>
         <translation>Ingen objekt valgt. Velg et objekt fra nedtrekkslisten.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="5104"/>
+        <location filename="../filter_mate_dockwidget.py" line="5132"/>
         <source>The selected layer is invalid or its source cannot be found.</source>
         <translation>Det valgte laget er ugyldig eller kilden kan ikke finnes.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="5841"/>
+        <location filename="../filter_mate_dockwidget.py" line="5892"/>
         <source>Negative buffer (erosion): shrinks polygons inward</source>
         <translation>Negativ buffer (erosjon): krymper polygoner innover</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="5844"/>
+        <location filename="../filter_mate_dockwidget.py" line="5895"/>
         <source>Buffer value in meters (positive=expand, negative=shrink polygons)</source>
         <translation>Bufferverdi i meter (positiv=utvid, negativ=krymp polygoner)</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6345"/>
+        <location filename="../filter_mate_dockwidget.py" line="6396"/>
         <source>Plugin activated with {0} vector layer(s)</source>
         <translation>Utvidelse aktivert med {0} vektorlag</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6434"/>
+        <location filename="../filter_mate_dockwidget.py" line="6485"/>
         <source>Could not reload plugin automatically.</source>
         <translation>Kunne ikke laste utvidelsen paa nytt automatisk.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6436"/>
+        <location filename="../filter_mate_dockwidget.py" line="6490"/>
         <source>Error reloading plugin: {0}</source>
         <translation>Feil ved ny innlasting av utvidelse: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6508"/>
+        <location filename="../filter_mate_dockwidget.py" line="6562"/>
         <source>Layer properties reset to defaults</source>
         <translation>Lagegenskaper tilbakestilt til standardverdier</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6509"/>
+        <location filename="../filter_mate_dockwidget.py" line="6563"/>
         <source>Error resetting layer properties: {}</source>
         <translation>Feil ved tilbakestilling av lagegenskaper: {}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="870"/>
+        <location filename="../filter_mate_dockwidget.py" line="875"/>
         <source>Filter</source>
         <translation>Filtrer</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="871"/>
+        <location filename="../filter_mate_dockwidget.py" line="876"/>
         <source>Undo the last filter</source>
         <translation>Angre siste filter</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="872"/>
+        <location filename="../filter_mate_dockwidget.py" line="877"/>
         <source>Redo the last filter</source>
         <translation>Gjør om siste filter</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="873"/>
+        <location filename="../filter_mate_dockwidget.py" line="878"/>
         <source>Remove the filters</source>
         <translation>Fjern filtrene</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="874"/>
+        <location filename="../filter_mate_dockwidget.py" line="879"/>
         <source>Export the layers</source>
         <translation>Eksporter lagene</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="875"/>
+        <location filename="../filter_mate_dockwidget.py" line="880"/>
         <source>About FilterMate</source>
         <translation>Om FilterMate</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="876"/>
+        <location filename="../filter_mate_dockwidget.py" line="881"/>
         <source>QFieldCloud</source>
         <translation>QFieldCloud</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="877"/>
+        <location filename="../filter_mate_dockwidget.py" line="882"/>
         <source>Identify the selected features</source>
         <translation>Identifiser de valgte objektene</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="878"/>
+        <location filename="../filter_mate_dockwidget.py" line="883"/>
         <source>Zoom to the selected features</source>
         <translation>Zoom til de valgte objektene</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="879"/>
+        <location filename="../filter_mate_dockwidget.py" line="884"/>
         <source>Select the features on the map</source>
         <translation>Velg objektene på kartet</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="880"/>
+        <location filename="../filter_mate_dockwidget.py" line="885"/>
         <source>Follow the features on the map</source>
         <translation>Følg objektene på kartet</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="881"/>
+        <location filename="../filter_mate_dockwidget.py" line="886"/>
         <source>Link the three selection modes</source>
         <translation>Koble de tre valgmodusene</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="882"/>
+        <location filename="../filter_mate_dockwidget.py" line="887"/>
         <source>Reset the layer properties</source>
         <translation>Tilbakestill lagegenskapene</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="883"/>
+        <location filename="../filter_mate_dockwidget.py" line="888"/>
         <source>Follow the current layer</source>
         <translation>Følg gjeldende lag</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="884"/>
+        <location filename="../filter_mate_dockwidget.py" line="889"/>
         <source>Layers to filter</source>
         <translation>Lag som skal filtreres</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="885"/>
+        <location filename="../filter_mate_dockwidget.py" line="890"/>
         <source>Combine with the existing filter</source>
         <translation>Kombiner med eksisterende filter</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="886"/>
+        <location filename="../filter_mate_dockwidget.py" line="891"/>
         <source>Geometric predicates</source>
         <translation>Geometriske predikater</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="887"/>
+        <location filename="../filter_mate_dockwidget.py" line="892"/>
         <source>Buffer distance</source>
         <translation>Bufferavstand</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="888"/>
+        <location filename="../filter_mate_dockwidget.py" line="893"/>
         <source>Buffer type</source>
         <translation>Buffertype</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="889"/>
+        <location filename="../filter_mate_dockwidget.py" line="894"/>
         <source>Layers to export</source>
         <translation>Lag som skal eksporteres</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="890"/>
+        <location filename="../filter_mate_dockwidget.py" line="895"/>
         <source>Projection of the export</source>
         <translation>Projeksjon for eksporten</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="891"/>
+        <location filename="../filter_mate_dockwidget.py" line="896"/>
         <source>Export the styles</source>
         <translation>Eksporter stilene</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="892"/>
+        <location filename="../filter_mate_dockwidget.py" line="897"/>
         <source>Export format</source>
         <translation>Eksportformat</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="893"/>
+        <location filename="../filter_mate_dockwidget.py" line="898"/>
         <source>Output folder</source>
         <translation>Utdatamappe</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="894"/>
+        <location filename="../filter_mate_dockwidget.py" line="899"/>
         <source>Zip the export</source>
         <translation>Zip eksporten</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1008"/>
+        <location filename="../filter_mate_dockwidget.py" line="1013"/>
         <source>The panel layout could not be applied; default sizes are used. Details in filtermate.log.</source>
         <translation>Panelutformingen kunne ikke brukes; standardstørrelser brukes. Detaljer i filtermate.log.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6588"/>
+        <location filename="../filter_mate_dockwidget.py" line="6649"/>
         <source>Vector</source>
         <translation>Vektor</translation>
     </message>
@@ -2361,12 +2399,12 @@ Fjerne likevel?</translation>
 <context>
     <name>FilterResultHandler</name>
     <message>
-        <location filename="../adapters/filter_result_handler.py" line="318"/>
+        <location filename="../adapters/filter_result_handler.py" line="359"/>
         <source>{count} features visible in main layer</source>
         <translation>{count} objekter synlige i hovedlag</translation>
     </message>
     <message>
-        <location filename="../adapters/filter_result_handler.py" line="311"/>
+        <location filename="../adapters/filter_result_handler.py" line="352"/>
         <source>All filters cleared - {count} features visible in main layer</source>
         <translation>Alle filtre fjernet - {count} objekter synlige i hovedlag</translation>
     </message>
@@ -2697,42 +2735,42 @@ Soerg for at PostgreSQL-tabellen har en PRIMARY KEY definert.</translation>
 <context>
     <name>PointCloudExploringPanel</name>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="733"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="734"/>
         <source>Apply to the other tiles of the dataset</source>
         <translation>Bruk på de andre flisene i datasettet</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="747"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="748"/>
         <source>CLASSES</source>
         <translation>KLASSER</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="752"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="753"/>
         <source>Ground</source>
         <translation>Bakke</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="753"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="754"/>
         <source>Vegetation</source>
         <translation>Vegetasjon</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="754"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="755"/>
         <source>Buildings</source>
         <translation>Bygninger</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="755"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="756"/>
         <source>Above ground</source>
         <translation>Over bakken</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="756"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="757"/>
         <source>Water</source>
         <translation>Vann</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="757"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="758"/>
         <source>Without noise</source>
         <translation>Uten støy</translation>
     </message>
@@ -2752,7 +2790,7 @@ Soerg for at PostgreSQL-tabellen har en PRIMARY KEY definert.</translation>
         <translation type="obsolete">Ingen</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="775"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="776"/>
         <source>Point classes</source>
         <translation>Punktklasser</translation>
     </message>
@@ -2777,7 +2815,7 @@ Soerg for at PostgreSQL-tabellen har en PRIMARY KEY definert.</translation>
         <translation type="obsolete">Høyeste høyde beholdt</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="872"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="873"/>
         <source>Intensity</source>
         <translation>Intensitet</translation>
     </message>
@@ -2802,32 +2840,32 @@ Soerg for at PostgreSQL-tabellen har en PRIMARY KEY definert.</translation>
         <translation type="obsolete">Ekko av laserpulsen som beholdes</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="831"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="832"/>
         <source>Height above DTM ≥</source>
         <translation>Høyde over DTM ≥</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="851"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="852"/>
         <source>Digital terrain model the height is measured from</source>
         <translation>Digital terrengmodell som høyden måles fra</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="861"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="862"/>
         <source>Keep the points at least this high above the terrain model</source>
         <translation>Behold punktene som ligger minst så høyt over terrengmodellen</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="895"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="896"/>
         <source>EXPRESSION</source>
         <translation>UTTRYKK</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="899"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="900"/>
         <source>Point cloud expression</source>
         <translation>Punktskyuttrykk</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="900"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="901"/>
         <source>Check the group to edit the expression by hand</source>
         <translation>Kryss av for gruppen for å redigere uttrykket manuelt</translation>
     </message>
@@ -2837,22 +2875,22 @@ Soerg for at PostgreSQL-tabellen har en PRIMARY KEY definert.</translation>
         <translation type="obsolete">Ingen høydestatistikk for dette laget</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="958"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="959"/>
         <source>Height above the terrain is unavailable</source>
         <translation>Høyde over terrenget er utilgjengelig</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="973"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="974"/>
         <source>Kept points: {0}</source>
         <translation>Beholdte punkter: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="990"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="991"/>
         <source>Current filter: {0}</source>
         <translation>Gjeldende filter: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="990"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="991"/>
         <source>none</source>
         <translation>ingen</translation>
     </message>
@@ -2877,167 +2915,167 @@ Soerg for at PostgreSQL-tabellen har en PRIMARY KEY definert.</translation>
         <translation type="obsolete">Enkelt</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="785"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="786"/>
         <source>ATTRIBUTES</source>
         <translation>ATTRIBUTTER</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="803"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="804"/>
         <source>+ Condition</source>
         <translation>+ Betingelse</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="805"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="806"/>
         <source>Add a condition on an attribute of the layer</source>
         <translation>Legg til en betingelse på et attributt i laget</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="808"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="809"/>
         <source>Returns</source>
         <translation>Ekko</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="810"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="811"/>
         <source>Keep the first, last or single returns of the laser pulses</source>
         <translation>Behold første, siste eller enkelte ekko fra laserpulsene</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="813"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="814"/>
         <source>First return (ReturnNumber = 1)</source>
         <translation>Første ekko (ReturnNumber = 1)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="814"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="815"/>
         <source>Last return (ReturnNumber = NumberOfReturns)</source>
         <translation>Siste ekko (ReturnNumber = NumberOfReturns)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="815"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="816"/>
         <source>Single return (NumberOfReturns = 1)</source>
         <translation>Enkelt ekko (NumberOfReturns = 1)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="873"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="874"/>
         <source>Return number</source>
         <translation>Returnummer</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="874"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="875"/>
         <source>Number of returns</source>
         <translation>Antall ekko</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="875"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="876"/>
         <source>Classification</source>
         <translation>Klassifisering</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="876"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="877"/>
         <source>Scan angle</source>
         <translation>Skannevinkel</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="877"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="878"/>
         <source>User data</source>
         <translation>Brukerdata</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="878"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="879"/>
         <source>Point source ID</source>
         <translation>Punktkilde-ID</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="879"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="880"/>
         <source>GPS time</source>
         <translation>GPS-tid</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="880"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="881"/>
         <source>Red</source>
         <translation>Rød</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="881"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="882"/>
         <source>Green</source>
         <translation>Grønn</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="882"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="883"/>
         <source>Blue</source>
         <translation>Blå</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="883"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="884"/>
         <source>Infrared</source>
         <translation>Infrarød</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="884"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="885"/>
         <source>Scan direction</source>
         <translation>Skanneretning</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="885"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="886"/>
         <source>Edge of flight line</source>
         <translation>Kant av flystripe</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="886"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="887"/>
         <source>Synthetic</source>
         <translation>Syntetisk</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="887"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="888"/>
         <source>Key point</source>
         <translation>Nøkkelpunkt</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="888"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="889"/>
         <source>Withheld</source>
         <translation>Holdt tilbake</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="889"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="890"/>
         <source>Overlap</source>
         <translation>Overlapp</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="890"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="891"/>
         <source>Scanner channel</source>
         <translation>Skannerkanal</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="891"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="892"/>
         <source>Classification flags</source>
         <translation>Klassifiseringsflagg</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="892"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="893"/>
         <source>Height above ground</source>
         <translation>Høyde over bakken</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="761"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="762"/>
         <source>Quick class selection</source>
         <translation>Hurtigvalg av klasse</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="764"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="765"/>
         <source>Quick selection…</source>
         <translation>Hurtigvalg…</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="767"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="768"/>
         <source>All classes</source>
         <translation>Alle klasser</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="768"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="769"/>
         <source>No class</source>
         <translation>Ingen klasse</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="769"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="770"/>
         <source>Invert the selection</source>
         <translation>Inverter utvalget</translation>
     </message>
@@ -3286,6 +3324,31 @@ Fortsette?</translation>
         <translation>Geometriske predikater</translation>
     </message>
     <message>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="109"/>
+        <source>Pixel value</source>
+        <translation>Pikselverdi</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="109"/>
+        <source>Slope (degrees)</source>
+        <translation>Helning (grader)</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="109"/>
+        <source>Slope (%)</source>
+        <translation>Helning (%)</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="109"/>
+        <source>Aspect (degrees)</source>
+        <translation>Eksposisjon (grader)</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="109"/>
+        <source>Hillshade (0-255)</source>
+        <translation>Skyggerelieff (0-255)</translation>
+    </message>
+    <message>
         <location filename="../processing/algorithms/layer_operations_algorithms.py" line="108"/>
         <source>Favorite name or identifier</source>
         <translation type="unfinished"></translation>
@@ -3484,31 +3547,6 @@ Without criteria, the footprint covers the points displayed by the point cloud.
     <message>
         <location filename="../processing/algorithms/cross_filter_algorithm.py" line="109"/>
         <source>Range applies to (band read as a DTM for slope, aspect...)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="109"/>
-        <source>Pixel value</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="109"/>
-        <source>Slope (degrees)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="109"/>
-        <source>Slope (%)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="109"/>
-        <source>Aspect (degrees)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="109"/>
-        <source>Hillshade (0-255)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -4397,52 +4435,52 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
 <context>
     <name>QgsCheckableComboBoxFeaturesListPickerWidget</name>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="714"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="898"/>
         <source>Type to filter...</source>
         <translation>Skriv for aa filtrere...</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="723"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="907"/>
         <source>Select All</source>
         <translation>Velg alle</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="725"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="909"/>
         <source>Select All (non subset)</source>
         <translation>Velg alle (ikke delmengde)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="727"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="911"/>
         <source>Select All (subset)</source>
         <translation>Velg alle (delmengde)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="729"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="913"/>
         <source>De-select All</source>
         <translation>Fjern alle valg</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="731"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="915"/>
         <source>De-select All (non subset)</source>
         <translation>Fjern alle valg (ikke delmengde)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="733"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="917"/>
         <source>De-select All (subset)</source>
         <translation>Fjern alle valg (delmengde)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="1332"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="1516"/>
         <source>Showing the first {0} features sorted by display value. Type in the text filter to search the whole layer; &quot;Select All&quot; loads the full list.</source>
         <translation>Viser de første {0} objektene sortert etter visningsverdi. Skriv i tekstfilteret for å søke i hele laget; &quot;Velg alle&quot; laster hele listen.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="1340"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="1524"/>
         <source>Showing {0} features of the layer, sorted by display value. Type in the text filter to search the whole layer; &quot;Select All&quot; loads the full list.</source>
         <translation>Viser {0} objekter fra laget, sortert etter visningsverdi. Skriv i tekstfilteret for å søke i hele laget; &quot;Velg alle&quot; laster hele listen.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="1347"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="1531"/>
         <source>Search results for &quot;{0}&quot; over the whole layer.</source>
         <translation>Søkeresultater for &quot;{0}&quot; i hele laget.</translation>
     </message>
@@ -4450,44 +4488,99 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
 <context>
     <name>QgsCheckableComboBoxLayer</name>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="264"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="337"/>
         <source>Select All</source>
         <translation>Velg alle</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="266"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="339"/>
         <source>De-select All</source>
         <translation>Fjern alle valg</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="268"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="341"/>
         <source>Select all layers by geometry type (Lines)</source>
         <translation>Velg alle lag etter geometritype (Linjer)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="270"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="343"/>
         <source>De-Select all layers by geometry type (Lines)</source>
         <translation>Fjern valg av alle lag etter geometritype (Linjer)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="272"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="345"/>
         <source>Select all layers by geometry type (Points)</source>
         <translation>Velg alle lag etter geometritype (Punkter)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="274"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="347"/>
         <source>De-Select all layers by geometry type (Points)</source>
         <translation>Fjern valg av alle lag etter geometritype (Punkter)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="276"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="349"/>
         <source>Select all layers by geometry type (Polygons)</source>
         <translation>Velg alle lag etter geometritype (Polygoner)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="278"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="351"/>
         <source>De-Select all layers by geometry type (Polygons)</source>
         <translation>Fjern valg av alle lag etter geometritype (Polygoner)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="367"/>
+        <source>Select all raster layers</source>
+        <translation>Velg alle rasterlag</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="369"/>
+        <source>De-select all raster layers</source>
+        <translation>Fjern valget av alle rasterlag</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="371"/>
+        <source>Select all point cloud layers</source>
+        <translation>Velg alle punktskylag</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="373"/>
+        <source>De-select all point cloud layers</source>
+        <translation>Fjern valget av alle punktskylag</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="409"/>
+        <source>pixels in the zone</source>
+        <translation>piksler i sonen</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="409"/>
+        <source>points in the zone</source>
+        <translation>punkter i sonen</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="409"/>
+        <source>features</source>
+        <translation>objekter</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="415"/>
+        <source>Raster target: the pixels outside the source geometry become NoData (those inside with Disjoint)</source>
+        <translation>Rastermål: pikslene utenfor kildegeometrien blir NoData (de innenfor med Disjoint)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="417"/>
+        <source>Point cloud target: the points outside the source geometry are removed (those inside with Disjoint)</source>
+        <translation>Punktskymål: punktene utenfor kildegeometrien fjernes (de innenfor med Disjoint)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="419"/>
+        <source>Vector target: the features that satisfy the geometric predicate are kept</source>
+        <translation>Vektormål: objektene som oppfyller det geometriske predikatet beholdes</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="499"/>
+        <source>Click the square on the right to test this layer by its centroids</source>
+        <translation>Klikk på ruten til høyre for å teste dette laget med sentroidene</translation>
     </message>
 </context>
 <context>
@@ -4516,64 +4609,64 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
 <context>
     <name>RasterExploringPanel</name>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="494"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="497"/>
         <source>Band</source>
         <translation>Bånd</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="497"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="500"/>
         <source>Band whose values are selected</source>
         <translation>Bånd som verdiene velges fra</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="595"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="598"/>
         <source>PIXEL VALUE</source>
         <translation>PIKSELVERDI</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="603"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="606"/>
         <source>Pixel value of the current band</source>
         <translation>Pikselverdi for gjeldende bånd</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="622"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="625"/>
         <source>Last {0} values picked</source>
         <translation>Siste {0} valgte verdier</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="635"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="638"/>
         <source>Click on the map with the pixel picker. Ctrl+click extends the range to the value.</source>
         <translation>Klikk på kartet med pikselvelgeren. Ctrl+klikk utvider området til verdien.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="648"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="651"/>
         <source>VALUE RANGE</source>
         <translation>VERDIOMRÅDE</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="657"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="660"/>
         <source>Min</source>
         <translation>Min</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="657"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="660"/>
         <source>Lowest value kept</source>
         <translation>Laveste verdi beholdt</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="657"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="660"/>
         <source>Max</source>
         <translation>Maks</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="657"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="660"/>
         <source>Highest value kept</source>
         <translation>Høyeste verdi beholdt</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="681"/>
         <source>Preview on the map (hide the other pixels)</source>
-        <translation>Forhåndsvis på kartet (skjul de andre pikslene)</translation>
+        <translation type="obsolete">Forhåndsvis på kartet (skjul de andre pikslene)</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="688"/>
@@ -4621,17 +4714,17 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation>Skriv gjeldende verdiområde som et uttrykk</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="813"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="812"/>
         <source>Selected pixels: {0}</source>
         <translation>Valgte piksler: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1193"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1195"/>
         <source>Set a value range first</source>
         <translation>Angi et verdiområde først</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1379"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1381"/>
         <source>NoData</source>
         <translation>NoData</translation>
     </message>
@@ -4641,252 +4734,252 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">Siste verdier:</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="626"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="629"/>
         <source>Value of the current band under the cursor</source>
         <translation>Verdi for gjeldende bånd under markøren</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="632"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="635"/>
         <source>Statistics of the current band in the last rectangle drawn on the map</source>
         <translation>Statistikk for gjeldende bånd i det sist tegnede rektangelet på kartet</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="871"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="870"/>
         <source>Under the cursor: {0}  (X {1:.{3}f}  Y {2:.{3}f})</source>
         <translation>Under markøren: {0}  (X {1:.{3}f}  Y {2:.{3}f})</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="881"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="880"/>
         <source>Zone: {0}</source>
         <translation>Sone: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="881"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="880"/>
         <source>no pixel</source>
         <translation>ingen piksel</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1403"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1405"/>
         <source>LAST PICKS</source>
         <translation>SISTE AVLESNINGER</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="506"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="509"/>
         <source>Compute on</source>
         <translation>Beregn på</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="509"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="512"/>
         <source>Quantity the range applies to. Slope, aspect, hillshade and roughness read the band as a DTM.</source>
         <translation>Størrelsen intervallet gjelder for. Helning, eksposisjon, skyggerelieff og ruhet leser båndet som en DTM.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="513"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="516"/>
         <source>Pixel value</source>
         <translation>Pikselverdi</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="513"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="516"/>
         <source>Slope (degrees)</source>
         <translation>Helning (grader)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="513"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="516"/>
         <source>Slope (%)</source>
         <translation>Helning (%)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="513"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="516"/>
         <source>Aspect (degrees)</source>
         <translation>Eksposisjon (grader)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="513"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="516"/>
         <source>Hillshade (0-255)</source>
         <translation>Skyggerelieff (0-255)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="513"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="516"/>
         <source>Roughness (TRI, mean difference)</source>
         <translation>Ruhet (TRI, gjennomsnittsforskjell)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="673"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="676"/>
         <source>Usual thresholds of the quantity</source>
         <translation>Vanlige terskelverdier for størrelsen</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="674"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="677"/>
         <source>Usual thresholds</source>
         <translation>Vanlige terskelverdier</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1101"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1102"/>
         <source>Flat</source>
         <translation>Flat</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1101"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1102"/>
         <source>Gentle</source>
         <translation>Slak</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1101"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1102"/>
         <source>Moderate</source>
         <translation>Moderat</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1102"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1103"/>
         <source>Steep</source>
         <translation>Bratt</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1102"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1103"/>
         <source>East</source>
         <translation>Øst</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1102"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1103"/>
         <source>South</source>
         <translation>Sør</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1103"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1104"/>
         <source>West</source>
         <translation>Vest</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1103"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1104"/>
         <source>Shadow</source>
         <translation>Skygge</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1103"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1104"/>
         <source>Lit</source>
         <translation>Belyst</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1108"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1109"/>
         <source>Usual thresholds…</source>
         <translation>Vanlige terskelverdier…</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="548"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="551"/>
         <source>PIPETTE</source>
         <translation>VELGER</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="551"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="554"/>
         <source>Tolerance ±</source>
         <translation>Toleranse ±</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="558"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="561"/>
         <source>Tolerance around the picked color or value, in % of the value range</source>
         <translation>Toleranse rundt den valgte fargen eller verdien, i % av verdiområdet</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="559"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="562"/>
         <source>Pipette tolerance</source>
         <translation>Toleranse for velgeren</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="568"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="571"/>
         <source>Bands</source>
         <translation>Bånd</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1229"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1231"/>
         <source>What the bands of the image are: the presets and the pipette use them</source>
         <translation>Hva båndene i bildet er: forhåndsinnstillingene og velgeren bruker dem</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="573"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="576"/>
         <source>Band layout</source>
         <translation>Båndoppsett</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="574"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="577"/>
         <source>RGB (red, green, blue)</source>
         <translation>RGB (rød, grønn, blå)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="574"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="577"/>
         <source>IRC (infrared, red, green)</source>
         <translation>IRC (infrarød, rød, grønn)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="574"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="577"/>
         <source>RGB + infrared</source>
         <translation>RGB + infrarød</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1230"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1232"/>
         <source>Write the expression of a usual index (vegetation, water...)</source>
         <translation>Skriv uttrykket for en vanlig indeks (vegetasjon, vann ...)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="582"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="585"/>
         <source>Spectral presets</source>
         <translation>Spektrale forhåndsinnstillinger</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1226"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1228"/>
         <source>Needs an image of three bands or more (red, green, blue...)</source>
         <translation>Krever et bilde med tre bånd eller flere (rød, grønn, blå ...)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1233"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1235"/>
         <source>Vegetation (NDVI &gt; 0.3)</source>
         <translation>Vegetasjon (NDVI &gt; 0.3)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1233"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1235"/>
         <source>No vegetation (NDVI &lt; 0.1)</source>
         <translation>Ingen vegetasjon (NDVI &lt; 0.1)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1234"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1236"/>
         <source>Water (NDWI &gt; 0.1)</source>
         <translation>Vann (NDWI &gt; 0.1)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1234"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1236"/>
         <source>Vegetation (excess green)</source>
         <translation>Vegetasjon (overskudd av grønt)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1237"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1239"/>
         <source>Spectral presets…</source>
         <translation>Spektrale forhåndsinnstillinger…</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1297"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1299"/>
         <source>This pixel has no value (NoData): pick another one</source>
         <translation>Denne pikselen har ingen verdi (NoData): velg en annen</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1336"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1338"/>
         <source>The tolerance covers every value: lower it</source>
         <translation>Toleransen dekker alle verdier: reduser den</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1352"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1354"/>
         <source>Range {0} → {1}{2}</source>
         <translation>Intervall {0} → {1}{2}</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1354"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1356"/>
         <source>Class(es) {0}</source>
         <translation>Klasse {0}</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1357"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1359"/>
         <source>{0} color(s), last: {1}</source>
         <translation>{0} farge(r), siste: {1}</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1361"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1363"/>
         <source>Expression</source>
         <translation>Uttrykk</translation>
     </message>
@@ -5169,17 +5262,17 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
 <context>
     <name>TaskParameterBuilder</name>
     <message>
-        <location filename="../adapters/task_builder.py" line="912"/>
+        <location filename="../adapters/task_builder.py" line="926"/>
         <source>No entity selected! The selection widget lost the feature. Re-select an entity.</source>
         <translation>Ingen objekt valgt! Valgwidgeten mistet objektet. Velg et objekt paa nytt.</translation>
     </message>
     <message>
-        <location filename="../adapters/task_builder.py" line="1030"/>
+        <location filename="../adapters/task_builder.py" line="1044"/>
         <source>Selected layer is invalid or its source cannot be found. Operation cancelled.</source>
         <translation>Valgt lag er ugyldig eller kilden kan ikke finnes. Operasjon avbrutt.</translation>
     </message>
     <message>
-        <location filename="../adapters/task_builder.py" line="1045"/>
+        <location filename="../adapters/task_builder.py" line="1059"/>
         <source>Layer &apos;{0}&apos; is not yet initialized. Try selecting another layer then switch back to this one.</source>
         <translation>Lag '{0}' er ennaa ikke initialisert. Proev aa velge et annet lag, og bytt deretter tilbake til dette.</translation>
     </message>
@@ -5187,12 +5280,12 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
 <context>
     <name>UndoRedoHandler</name>
     <message>
-        <location filename="../adapters/undo_redo_handler.py" line="178"/>
+        <location filename="../adapters/undo_redo_handler.py" line="187"/>
         <source>Cannot undo: layer invalid or source not found.</source>
         <translation>Kan ikke angre: lag ugyldig eller kilde ikke funnet.</translation>
     </message>
     <message>
-        <location filename="../adapters/undo_redo_handler.py" line="255"/>
+        <location filename="../adapters/undo_redo_handler.py" line="264"/>
         <source>Cannot redo: layer invalid or source not found.</source>
         <translation>Kan ikke gjenta: lag ugyldig eller kilde ikke funnet.</translation>
     </message>
@@ -5211,6 +5304,24 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <location filename="../ui/controllers/config_controller.py" line="664"/>
         <source>Language changed to &apos;{0}&apos;.</source>
         <translation type="obsolete">Language changed to '{0}'.</translation>
+    </message>
+</context>
+<context>
+    <name>self.self</name>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="588"/>
+        <source>Source geometry: the features selected in EXPLORING</source>
+        <translation>Kildegeometri: objektene som er valgt i EXPLORING</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="624"/>
+        <source>Source geometry: the selected pixels, vectorized</source>
+        <translation>Kildegeometri: de valgte pikslene, vektorisert</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Kept points</source>
+        <translation>Beholdte punkter</translation>
     </message>
 </context>
 </TS>
