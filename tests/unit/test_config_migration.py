@@ -41,27 +41,31 @@ def config_helpers():
     # Stub the QGIS module surface needed by config.py top-level imports.
     from unittest.mock import MagicMock
 
-    for name in (
-        "qgis",
-        "qgis.core",
-        "filter_mate",
-        "filter_mate.core",
-        "filter_mate.core.optimization",
-        "filter_mate.core.optimization.config_provider",
-    ):
+    for name in ("qgis", "qgis.core"):
         if name not in sys.modules:
             sys.modules[name] = MagicMock()
-    # ``from … import get_optimization_thresholds`` resolves to a callable
-    # via MagicMock — fine, we never call it from these helpers.
-    sys.modules["filter_mate.core.optimization.config_provider"] \
-        .get_optimization_thresholds = MagicMock()
 
-    spec = importlib.util.spec_from_file_location(
-        "_test_filter_mate_config", str(config_path),
-    )
+    # config.py imports core.optimization.config_provider RELATIVELY (the plugin folder
+    # name is not 'filter_mate' once installed from a zip): load it as a module of a
+    # throw-away package, with a stub for that provider.
+    package = "_test_fm_pkg"
+    for name, path in ((package, plugin_root), (f"{package}.config", plugin_root / "config"),
+                       (f"{package}.core", plugin_root / "core"),
+                       (f"{package}.core.optimization", plugin_root / "core" / "optimization")):
+        stub = types.ModuleType(name)
+        stub.__path__ = [str(path)]
+        sys.modules[name] = stub
+    provider = types.ModuleType(f"{package}.core.optimization.config_provider")
+    provider.get_optimization_thresholds = MagicMock()
+    sys.modules[provider.__name__] = provider
+
+    spec = importlib.util.spec_from_file_location(f"{package}.config.config", str(config_path))
     module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module
     spec.loader.exec_module(module)
-    return module
+    yield module
+    for name in [n for n in sys.modules if n == package or n.startswith(package + ".")]:
+        del sys.modules[name]
 
 
 class TestSyncMetadata:

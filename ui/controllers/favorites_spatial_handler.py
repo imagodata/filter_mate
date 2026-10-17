@@ -708,12 +708,7 @@ class FavoritesSpatialHandler:
             resolve_remote_layer_entry,
         )
 
-        try:
-            from ...infrastructure.database.sql_utils import safe_set_subset_string
-        except ImportError:
-            from ...infrastructure.database.sql_utils import (
-                safe_set_subset_string,
-            )
+        from ...infrastructure.database.sql_utils import safe_set_subset_string
 
         ctrl = self._controller
 

@@ -537,6 +537,9 @@ class TestConfigAPI:
             sys.modules["filter_mate"] = real_fm
         sys.modules["filter_mate.config"] = real_c
         sys.modules["filter_mate.config.config"] = real_cc
+        # extensions.* import config relatively: re-root them under the fake filter_mate package
+        from tests.unit.extensions.plugin_alias import alias_package
+        alias_package(monkeypatch, "extensions.registry", "extensions.base")
 
         try:
             yield cfg_data, cfg_path

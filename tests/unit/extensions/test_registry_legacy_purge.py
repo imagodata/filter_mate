@@ -85,6 +85,8 @@ def env_vars(tmp_path, monkeypatch):
         monkeypatch.setitem(sys.modules, "filter_mate", root)
     monkeypatch.setitem(sys.modules, "filter_mate.config", package)
     monkeypatch.setitem(sys.modules, "filter_mate.config.config", module)
+    from tests.unit.extensions.plugin_alias import alias_package
+    alias_package(monkeypatch, "extensions.registry", "extensions.base")
     return path
 
 
