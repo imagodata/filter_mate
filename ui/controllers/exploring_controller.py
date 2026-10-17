@@ -125,21 +125,6 @@ class ExploringController(BaseController, LayerSelectionMixin):
 
     # === Layer Selection ===
 
-    def _setup_layer_combo(self) -> None:
-        """Configure the layer selection combo box."""
-        # Get layer combo from dockwidget
-        combo = self._get_layer_combo()
-        if combo is None:
-            logger.warning("Layer combo box not found in dockwidget")
-            return
-
-        # Configure to show only vector layers
-        try:
-            from qgis.gui import QgsMapLayerProxyModel
-            combo.setFilters(QgsMapLayerProxyModel.Filter.VectorLayer)
-        except (ImportError, AttributeError):
-            pass
-
     def _get_layer_combo(self):
         """Get the layer combo box widget from dockwidget."""
         # Try different attribute names that might exist in dockwidget
