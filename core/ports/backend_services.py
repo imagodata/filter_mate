@@ -565,23 +565,6 @@ class BackendServices:
             logger.debug(f"BackendFactory not available: {e}")
             return None
 
-    def get_optimization_plan(self, *args, **kwargs) -> Any:
-        """Get optimization plan from factory."""
-        try:
-            from ...adapters.backends.factory import get_optimization_plan
-            return get_optimization_plan(*args, **kwargs)
-        except ImportError as e:
-            logger.error(f"get_optimization_plan not available: {e}")
-            raise
-
-    def is_auto_optimizer_available(self) -> bool:
-        """Check if auto optimizer is available."""
-        try:
-            from ...adapters.backends.factory import AUTO_OPTIMIZER_AVAILABLE
-            return AUTO_OPTIMIZER_AVAILABLE
-        except ImportError:
-            return False
-
     # ==================== Backend Classes ====================
 
     def get_postgresql_geometric_filter(self) -> Optional[type]:
@@ -593,15 +576,6 @@ class BackendServices:
             logger.debug(f"PostgreSQLGeometricFilter not available: {e}")
             return None
 
-    def get_spatialite_geometric_filter(self) -> Optional[type]:
-        """Get SpatialiteGeometricFilter class."""
-        try:
-            from ...adapters.backends.spatialite import SpatialiteGeometricFilter
-            return SpatialiteGeometricFilter
-        except ImportError as e:
-            logger.debug(f"SpatialiteGeometricFilter not available: {e}")
-            return None
-
     def get_spatialite_backend(self) -> Optional[type]:
         """Get SpatialiteBackend class (alias for SpatialiteGeometricFilter)."""
         try:
@@ -609,15 +583,6 @@ class BackendServices:
             return SpatialiteBackend
         except ImportError as e:
             logger.debug(f"SpatialiteBackend not available: {e}")
-            return None
-
-    def get_ogr_geometric_filter(self) -> Optional[type]:
-        """Get OGRGeometricFilter class."""
-        try:
-            from ...adapters.backends.ogr import OGRGeometricFilter
-            return OGRGeometricFilter
-        except ImportError as e:
-            logger.debug(f"OGRGeometricFilter not available: {e}")
             return None
 
     # ==================== OGR Utilities ====================

@@ -12,7 +12,7 @@ v4.1.5: BackendType now aliases canonical ProviderType from core.domain.filter_e
 """
 
 import logging
-from typing import Dict, List, Optional, Tuple, Any, TYPE_CHECKING
+from typing import Dict, List, Optional, Tuple, TYPE_CHECKING
 from dataclasses import dataclass
 
 try:
@@ -117,7 +117,6 @@ class BackendService(QObject):
         self._postgresql_available: Optional[bool] = None
 
         # Backend instances cache
-        self._backend_instances: Dict[BackendType, Any] = {}
 
     # ─────────────────────────────────────────────────────────────────
     # Availability Checks
@@ -432,92 +431,6 @@ class BackendService(QObject):
             return True, False
 
         return False, False
-
-    # ─────────────────────────────────────────────────────────────────
-    # Backend Compatibility Testing
-    # ─────────────────────────────────────────────────────────────────
-
-    def verify_backend_supports_layer(
-        self,
-        layer: "QgsVectorLayer",
-        backend_type: BackendType
-    ) -> bool:
-        """
-        Verify that a backend can actually support a layer.
-
-        Uses the backend's supports_layer() method.
-
-        Args:
-            layer: QgsVectorLayer instance
-            backend_type: Backend type to test
-
-        Returns:
-            bool: True if backend supports this layer
-        """
-        if layer is None or not layer.isValid():
-            return False
-
-        try:
-            backend = self._get_backend_instance(backend_type)
-            if backend is None:
-                return False
-
-            return backend.supports_layer(layer)
-
-        except Exception as e:
-            logger.warning(
-                f"Error testing backend {backend_type.value} for layer {layer.name()}: {e}"
-            )
-            return False
-
-    def _get_backend_instance(self, backend_type: BackendType) -> Any:
-        """
-        Get or create a backend instance for testing.
-
-        Args:
-            backend_type: Backend type
-
-        Returns:
-            Backend instance or None
-        """
-        if backend_type in self._backend_instances:
-            return self._backend_instances[backend_type]
-
-        try:
-            task_params = {}  # Minimal params for testing
-
-            from ..ports import get_backend_services
-            _services = get_backend_services()
-
-            if backend_type == BackendType.POSTGRESQL:
-                if not self.is_postgresql_available:
-                    return None
-                PostgreSQLGeometricFilter = _services.get_postgresql_geometric_filter()
-                if not PostgreSQLGeometricFilter:
-                    return None
-                backend = PostgreSQLGeometricFilter(task_params)
-
-            elif backend_type == BackendType.SPATIALITE:
-                SpatialiteGeometricFilter = _services.get_spatialite_geometric_filter()
-                if not SpatialiteGeometricFilter:
-                    return None
-                backend = SpatialiteGeometricFilter(task_params)
-
-            elif backend_type == BackendType.OGR:
-                OGRGeometricFilter = _services.get_ogr_geometric_filter()
-                if not OGRGeometricFilter:
-                    return None
-                backend = OGRGeometricFilter(task_params)
-
-            else:
-                return None
-
-            self._backend_instances[backend_type] = backend
-            return backend
-
-        except Exception as e:
-            logger.warning(f"Could not create backend instance for {backend_type.value}: {e}")
-            return None
 
     # ─────────────────────────────────────────────────────────────────
     # Available Backends for Layer
