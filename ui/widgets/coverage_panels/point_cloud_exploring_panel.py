@@ -680,6 +680,7 @@ class PointCloudExploringPanel(QWidget):
     criteriaChanged = pyqtSignal()
     applyToTilesToggled = pyqtSignal(bool)
     summaryChanged = pyqtSignal()  # point counts updated: the selection strip under EXPLORING follows
+    groupChosen = pyqtSignal(str)  # the user made a group the active one ("classes", "ranges", "expression")
 
     def __init__(self, parent=None):
         """Build the panel.
@@ -1085,6 +1086,7 @@ class PointCloudExploringPanel(QWidget):
             return
         if checked:
             self._activate_group(group)
+            self.groupChosen.emit(self._group_key(group))
             return
         # Unchecking the active group would leave none: check it again, signals on, so its
         # own handler restores what the unchecking undid (EXPRESSION back to editable text).
@@ -1099,6 +1101,15 @@ class PointCloudExploringPanel(QWidget):
         if self._switching_group or collapsed or group.isChecked():
             return
         self._activate_group(group)
+        self.groupChosen.emit(self._group_key(group))
+
+    def _group_key(self, group: Any) -> str:
+        return {id(self._classes_group): "classes", id(self._ranges_group): "ranges"}.get(id(group), "expression")
+
+    def show_class_pipette_active(self) -> None:
+        """The class pipette went on the map: CLASSES becomes the active group, as a pick would make it."""
+        if not self._classes_group.isHidden() and not self._classes_group.isChecked():
+            self._activate_group(self._classes_group)
 
     def _enforce_single_group(self) -> None:
         """After a restore: the first checked group in visual order stays, classes when none."""

@@ -1180,3 +1180,64 @@ def test_undo_redo_disabled_outside_the_filtering_tab(ctrl_module, layers):
     controller.update_undo_redo_buttons()
     undo.setEnabled.assert_called_with(False)
     redo.setEnabled.assert_called_with(False)
+
+
+@pytest.mark.unit
+class TestToolFollowsTheChosenGroup:
+    """The rail tool of a selection type follows the group the user makes the active one."""
+
+    def _controller(self, ctrl_module, monkeypatch, map_tool=None):
+        controller = ctrl_module.CoverageModeController(_dock())
+        calls = []
+        canvas = MagicMock()
+        canvas.mapTool.return_value = map_tool
+        iface = MagicMock()
+        iface.mapCanvas.return_value = canvas
+        monkeypatch.setattr(controller, "_iface", lambda: iface)
+        monkeypatch.setattr(controller, "_extras_call", lambda name, *args: calls.append((name,) + args))
+        monkeypatch.setattr(controller, "_on_color_pick_toggled", lambda on: calls.append(("pipette", on)))
+        monkeypatch.setattr(controller, "_on_class_pick_toggled", lambda on: calls.append(("class pipette", on)))
+        monkeypatch.setattr(controller, "_deactivate_class_tool", lambda: calls.append(("class pipette", False)))
+        return controller, calls
+
+    def test_pipette_group_puts_the_pipette_on(self, ctrl_module, monkeypatch):
+        controller, calls = self._controller(ctrl_module, monkeypatch)
+        controller._color_pick = False
+        controller._on_raster_mode_chosen("pipette")
+        assert calls == [("set_pipette_checked", True), ("pipette", True)]
+
+    def test_another_group_takes_the_pipette_off(self, ctrl_module, monkeypatch):
+        controller, calls = self._controller(ctrl_module, monkeypatch)
+        controller._color_pick = True
+        controller._on_raster_mode_chosen("range")
+        assert calls == [("set_pipette_checked", False), ("pipette", False)]
+
+    def test_nothing_changes_when_the_pipette_already_follows(self, ctrl_module, monkeypatch):
+        controller, calls = self._controller(ctrl_module, monkeypatch)
+        controller._color_pick = False
+        controller._on_raster_mode_chosen("expression")
+        controller._color_pick = True
+        controller._on_raster_mode_chosen("pipette")
+        assert calls == []
+
+    def test_classes_group_puts_the_class_pipette_on(self, ctrl_module, monkeypatch):
+        controller, calls = self._controller(ctrl_module, monkeypatch)
+        controller._class_tool = None
+        controller._on_point_cloud_group_chosen("classes")
+        assert calls == [("class pipette", True)]
+
+    def test_attributes_or_expression_take_the_class_pipette_off(self, ctrl_module, monkeypatch):
+        tool = object()
+        controller, calls = self._controller(ctrl_module, monkeypatch, map_tool=tool)
+        controller._class_tool = tool
+        controller._on_point_cloud_group_chosen("ranges")
+        assert calls == [("class pipette", False)]
+
+    def test_classes_group_with_the_class_pipette_already_on(self, ctrl_module, monkeypatch):
+        tool = object()
+        controller, calls = self._controller(ctrl_module, monkeypatch, map_tool=tool)
+        controller._class_tool = tool
+        controller._on_point_cloud_group_chosen("classes")
+        controller._class_tool = None
+        controller._on_point_cloud_group_chosen("expression")
+        assert calls == []

@@ -820,6 +820,10 @@ class CoverageModeController(BaseController):
         raster.bandChanged.connect(self._on_raster_band_changed)
         raster.selectionChanged.connect(self._on_raster_selection_changed)
         pc.criteriaChanged.connect(self._on_point_cloud_criteria_changed)
+        if hasattr(raster, 'modeChosen'):
+            raster.modeChosen.connect(self._on_raster_mode_chosen)
+        if hasattr(pc, 'groupChosen'):
+            pc.groupChosen.connect(self._on_point_cloud_group_chosen)
 
     def _populate_raster(self, layer: Any) -> None:
         try:
@@ -1241,6 +1245,14 @@ class CoverageModeController(BaseController):
         elif not enabled and on_map:
             self._deactivate_pixel_tool()
 
+    def _on_raster_mode_chosen(self, mode: str) -> None:
+        """The user made a group of the raster panel the active one: the pipette follows the PIPETTE group."""
+        wanted = mode == 'pipette'
+        if wanted == self._color_pick:
+            return
+        self._extras_call('set_pipette_checked', wanted)
+        self._on_color_pick_toggled(wanted)
+
     def _show_picker_state(self, active: bool) -> None:
         """Pipette button held down and pixel group open while the picker is on the map."""
         if not active and self._color_pick:
@@ -1318,6 +1330,19 @@ class CoverageModeController(BaseController):
             self._class_tool.deactivated.connect(lambda: self._extras_call('set_class_pipette_checked', False))
         self._previous_class_map_tool = canvas.mapTool()
         canvas.setMapTool(self._class_tool)
+        if self._pc_panel is not None and hasattr(self._pc_panel, 'show_class_pipette_active'):
+            self._pc_panel.show_class_pipette_active()
+
+    def _on_point_cloud_group_chosen(self, group: str) -> None:
+        """The user made a group of the point cloud panel the active one: the class pipette follows CLASSES."""
+        iface = self._iface()
+        if iface is None:
+            return
+        on_map = self._class_tool is not None and iface.mapCanvas().mapTool() is self._class_tool
+        if group == 'classes' and not on_map:
+            self._on_class_pick_toggled(True)  # the tool's activated signal puts the rail button down
+        elif group != 'classes' and on_map:
+            self._deactivate_class_tool()
 
     def _deactivate_class_tool(self) -> None:
         if self._class_tool is None:
