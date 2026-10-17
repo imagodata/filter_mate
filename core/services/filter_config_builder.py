@@ -333,6 +333,8 @@ class FilterParameterBuilder:
         forced_backends = context.task_parameters.get('forced_backends', {})
         source_layer_id = infos.get("layer_id")
         forced = forced_backends.get(source_layer_id) if source_layer_id else None
+        if forced == 'remote':
+            forced = 'ogr'  # 2026-10-17: the badge of a remote source, its backend is OGR
 
         if forced:
             _param_logger.debug(f"🔒 Source layer: Using FORCED backend '{forced}'")

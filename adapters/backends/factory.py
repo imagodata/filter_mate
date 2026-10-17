@@ -128,6 +128,7 @@ class BackendSelector:
             'postgres': ProviderType.POSTGRESQL,
             'spatialite': ProviderType.SPATIALITE,
             'ogr': ProviderType.OGR,
+            'remote': ProviderType.OGR,  # the badge of a remote source (2026-10-17): OGR backend
             'memory': ProviderType.MEMORY,
         }
         provider = mapping.get(forced_backend.lower())

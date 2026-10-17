@@ -118,6 +118,9 @@ def detect_layer_provider_type(layer) -> str:
     elif provider_type == 'memory':
         return 'memory'
     elif provider_type == 'ogr':
+        # 2026-10-17: a remote GeoPackage / SQLite (/vsicurl/.../x.gpkg) is read over the network: OGR
+        if _source_capability(layer).is_remote:
+            return 'ogr'
         # Check if it's a GeoPackage or SQLite file - these support Spatialite SQL
         try:
             source = layer.source()

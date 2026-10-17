@@ -187,3 +187,21 @@ def test_click_reads_the_optimization_settings_of_the_dock(controller):
     controller.handle_indicator_clicked()
     assert (controller.optimization_enabled, controller.centroid_auto_enabled,
             controller._optimization_ask_before) == (False, False, False)
+
+
+def test_remote_is_a_badge_not_a_backend(controller):
+    """"Force REMOTE for All Layers" forced a backend that does not exist: the backend of a remote source is OGR."""
+    layer = FakeVectorLayer("communes", provider="WFS", source=WFS_URI)
+    assert controller.get_current_backend(layer) == "ogr"
+    controller.dockwidget.current_layer = layer
+    controller.set_forced_backend("communes", "remote")
+    assert controller.forced_backends == {"communes": "ogr"}
+    assert "Remote" in controller._indicator_label.setText.call_args[0][0]
+
+
+def test_remote_geopackage_is_remote_not_spatialite(controller):
+    layer = FakeVectorLayer("bati", source="/vsicurl/https://example.org/bdtopo.gpkg|layername=batiment")
+    assert controller._detect_backend_for_layer(layer) == "remote"
+    assert controller.get_current_backend(layer) == "ogr"
+    local = FakeVectorLayer("bati", source="/data/bdtopo.gpkg|layername=batiment")
+    assert controller._detect_backend_for_layer(local) == "spatialite"

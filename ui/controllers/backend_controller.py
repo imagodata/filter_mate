@@ -295,8 +295,10 @@ class BackendController(BaseController):
         if layer.id() in self._forced_backends:
             return self._forced_backends[layer.id()]
 
-        # Auto-detection
-        return self._detect_backend_for_layer(layer, self._current_postgresql_available)
+        # Auto-detection. 2026-10-17: 'remote' is a badge only, the backend of a
+        # remote source is OGR ("Force OGR for All Layers", forced backends).
+        backend = self._detect_backend_for_layer(layer, self._current_postgresql_available)
+        return 'ogr' if backend == 'remote' else backend
 
     def set_forced_backend(
         self,
@@ -310,6 +312,8 @@ class BackendController(BaseController):
             layer_id: Layer ID
             backend_type: Backend type to force, or None for auto
         """
+        if backend_type == 'remote':
+            backend_type = 'ogr'  # the badge of a remote source, not a backend
         if backend_type is None:
             if layer_id in self._forced_backends:
                 del self._forced_backends[layer_id]
@@ -325,9 +329,8 @@ class BackendController(BaseController):
         # Update indicator display if this is the current layer
         current_layer = self.dockwidget.current_layer
         if current_layer and current_layer.id() == layer_id:
-            display_backend = backend_type if backend_type else self._detect_backend_for_layer(
-                current_layer, self._current_postgresql_available
-            )
+            display_backend = self._remote_or(current_layer, backend_type) if backend_type else \
+                self._detect_backend_for_layer(current_layer, self._current_postgresql_available)
             self._update_indicator_display(display_backend, is_forced=(backend_type is not None), layer=current_layer)
 
         self.backend_changed.emit(layer_id, backend_type or 'auto')
@@ -614,11 +617,14 @@ class BackendController(BaseController):
         elif provider_type == 'spatialite':
             return 'spatialite'
         elif provider_type == 'ogr':
+            # 2026-10-17: a remote GeoPackage (/vsicurl/.../x.gpkg) is read over the network: Remote / OGR
+            if self._remote_or(layer, 'ogr') == 'remote':
+                return 'remote'
             # Check for GeoPackage/SQLite with Spatialite support
             source = layer.source().split('|')[0]
             if source.lower().endswith(('.gpkg', '.sqlite')):
                 return 'spatialite'
-            return self._remote_or(layer, 'ogr')
+            return 'ogr'
         else:
             # 2026-10-17: WFS, OGC API Features, ArcGIS... used to show "..." (unknown)
             return self._remote_or(layer, 'unknown')
