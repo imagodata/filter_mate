@@ -945,6 +945,32 @@ def remote_sources():
     project.removeMapLayer(memory.id())
 
 
+def ogr_target_centroids():
+    """FilterMate 5: a target chosen 'by its centroids' is tested by its point on surface on the OGR backend too."""
+    import json as _json
+    from filter_mate.adapters.backends.ogr.expression_builder import OGRExpressionBuilder
+    from qgis.core import QgsFeature, QgsGeometry
+
+    target = QgsVectorLayer('Polygon?crs=EPSG:2154', 'centroid_targets', 'memory')
+    features = []
+    for wkt in ('POLYGON((8 0, 40 0, 40 2, 8 2, 8 0))',   # touches the source, its point on surface is outside
+                'POLYGON((2 2, 4 2, 4 4, 2 4, 2 2))'):    # inside the source
+        feature = QgsFeature()
+        feature.setGeometry(QgsGeometry.fromWkt(wkt))
+        features.append(feature)
+    target.dataProvider().addFeatures(features)
+    ids = [feature.id() for feature in target.getFeatures()]
+    union = QgsGeometry.fromWkt('POLYGON((0 0, 10 0, 10 10, 0 10, 0 0))')
+    builder = OGRExpressionBuilder({})
+    full = builder._select_against_union(target, union, target.crs(), ['intersects'])
+    centroids = builder._select_against_union(target, union, target.crs(), ['intersects'], True)
+    check('OGR target by its full geometry: both polygons intersect', sorted(full) == sorted(ids), str(full))
+    check('OGR target by its centroids: only the polygon whose point on surface is inside', centroids == [ids[1]],
+          str(centroids))
+    params = _json.loads(builder.build_expression({'layer_name': 't'}, {'intersects': True}, None, use_centroids=True))
+    check('OGR expression carries the per-target centroid choice', params.get('use_centroids') is True, str(params))
+
+
 def environment():
     from filter_mate.adapters.qgis.coverage_layers import pdal_cli
     exe = pdal_cli.find_pdal()
@@ -982,7 +1008,8 @@ def main():
     for step in (plugin_starts_without_iface, provider_lists_algorithms, load_layers, raster_to_vector,
                  vector_to_raster, raster_alpha_band, point_clouds, remote_sources, subset_literals,
                  user_data_safety, user_data_safety_postgresql, user_data_safety_native_spatialite,
-                 user_data_safety_two_databases, environment):
+                 user_data_safety_two_databases, ogr_target_centroids,
+                 environment):
         if (step is not plugin_starts_without_iface
                 and QgsApplication.processingRegistry().providerById('filtermate') is None):
             report('SKIP', step.__name__, 'no FilterMate Processing provider')

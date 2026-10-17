@@ -697,11 +697,19 @@ class PropertyController(BaseController):
 
         try:
             dw.manageSignal(["FILTERING", "LAYERS_TO_FILTER"], 'disconnect')
+            # 2026-10-17: the layers checked on screen stay checked. A click in the list
+            # does not save them; once the registry handler of the targets key survived
+            # the layer changes, switching the key off and on dropped them.
+            combo = getattr(dw, 'checkableComboBoxLayer_filtering_layers_to_filter', None)
+            kept = _checked_target_ids(combo)
 
             if hasattr(dw, 'filtering_populate_layers_chekableCombobox'):
                 # Pass current_layer to ensure it's excluded from the list
                 layer = getattr(dw, 'current_layer', None)
                 dw.filtering_populate_layers_chekableCombobox(layer)
+
+            if kept:
+                self._restore_checked_targets(combo, kept)
 
             dw.manageSignal(
                 ["FILTERING", "LAYERS_TO_FILTER"],
@@ -710,6 +718,21 @@ class PropertyController(BaseController):
             )
         except Exception as e:
             logger.warning(f"Could not refresh layers_to_filter: {e}")
+
+    def _restore_checked_targets(self, combo, kept) -> None:
+        """Check the ``kept`` targets again after the list was refilled, and save the result."""
+        from qgis.PyQt.QtCore import Qt
+        model = combo.model()
+        for row in range(model.rowCount()):
+            item = model.item(row)
+            data = item.data(Qt.ItemDataRole.UserRole) if item is not None else None
+            if isinstance(data, dict) and data.get("layer_id") in kept:
+                item.setCheckState(Qt.CheckState.Checked)
+        dw = self.dockwidget
+        layer = getattr(dw, 'current_layer', None)
+        props = (getattr(dw, 'PROJECT_LAYERS', None) or {}).get(layer.id() if layer is not None else None)
+        if isinstance(props, dict):
+            props.setdefault("filtering", {})["layers_to_filter"] = _checked_target_ids(combo)
 
     # ─────────────────────────────────────────────────────────────────
     # Buffer Styling
@@ -1267,3 +1290,20 @@ class PropertyController(BaseController):
                 dw.setProjectVariablesEvent()
 
         return flag_value_changed
+
+
+def _checked_target_ids(combo) -> list:
+    """Ids of the layers checked in the FILTERING targets list (UserRole data ``layer_id``)."""
+    if combo is None or not hasattr(combo, 'model'):
+        return []
+    from qgis.PyQt.QtCore import Qt
+    model = combo.model()
+    ids = []
+    for row in range(model.rowCount()):
+        item = model.item(row)
+        if item is None or item.checkState() != Qt.CheckState.Checked:
+            continue
+        data = item.data(Qt.ItemDataRole.UserRole)
+        if isinstance(data, dict) and data.get("layer_id"):
+            ids.append(data["layer_id"])
+    return ids
