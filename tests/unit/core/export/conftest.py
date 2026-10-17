@@ -63,7 +63,7 @@ def _setup():
     sys.modules['core.tasks'] = sys.modules[f'{ROOT}.core.tasks']
 
     # Mock leaf modules the handler imports indirectly
-    infra = _ensure_package(f'{ROOT}.infrastructure', parent=ROOT)
+    _ensure_package(f'{ROOT}.infrastructure', parent=ROOT)
     _ensure_package(f'{ROOT}.infrastructure.streaming', parent=f'{ROOT}.infrastructure')
     sys.modules[f'{ROOT}.infrastructure.logging'] = MagicMock(setup_logger=MagicMock(return_value=MagicMock()))
     # The streaming package's __init__ re-exports from result_streaming. We
