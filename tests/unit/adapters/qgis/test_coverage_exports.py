@@ -78,6 +78,16 @@ class TestRasterExport:
         assert result.success, result.message
         assert sorted(os.listdir(tmp_path)) == ['dem.tif']
 
+    @pytest.mark.parametrize("fmt", ['GTiff', 'COG'])
+    def test_side_files_of_a_previous_export_go(self, raster_job, tmp_path, fmt):
+        """GDAL's Create removed them: statistics / overviews of the old file must not describe the new one."""
+        for name in ('dem.tif', 'dem.tif.aux.xml', 'dem.tif.ovr', 'dem.tif.msk'):
+            (tmp_path / name).write_bytes(b"previous export")
+        result = raster_job('dem.tif', fmt).run(fk.FakeFeedback())
+        assert result.success, result.message
+        assert sorted(os.listdir(tmp_path)) == ['dem.tif']
+        assert (tmp_path / 'dem.tif').read_bytes() != b"previous export"
+
     @pytest.mark.parametrize("mode, message", [('error', 'raster writer error 3'), ('cancel', 'canceled')])
     def test_failed_write_leaves_nothing(self, raster_job, tmp_path, mode, message):
         Writer.mode = mode

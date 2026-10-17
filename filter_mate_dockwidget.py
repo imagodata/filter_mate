@@ -6926,6 +6926,10 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
 
                     def _on_rejected():
                         logger.info(f"{current_datatype} export cancelled by user")
+                        pending = getattr(self, '_pending_coverage_export', None)
+                        if pending:
+                            from .core.export.batch_exporter import release_coverage_folder
+                            release_coverage_folder(pending[1])
                         self._pending_coverage_export = None
                         dialog.deleteLater()
                         self._export_recap_dialog = None

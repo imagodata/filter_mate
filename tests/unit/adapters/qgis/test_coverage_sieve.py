@@ -72,10 +72,16 @@ class TestSieveChoice:
         _select(monkeypatch, data, (200, 200))
         assert sieves == [4]
 
-    def test_subsampled_grid_is_not_sieved(self, monkeypatch, sieves):
-        """Over max_pixels each cell stands for several pixels: 4 cells are not speckle."""
+    def test_subsampled_grid_loses_lone_cells_only(self, monkeypatch, sieves):
+        """Over max_pixels each cell stands for several pixels: 4 cells are not speckle, a lone cell is."""
+        data = np.ones((200, 200))
+        data[:100, :] = 7
+        _select(monkeypatch, data, (800, 800), max_pixels=40000)
+        assert sieves == [2]
+
+    def test_small_subsampled_selection_is_not_sieved(self, monkeypatch, sieves):
         data = np.ones((100, 100))
-        data[:50, :] = 7
+        data[:50, :] = 7  # 5 000 cells
         _select(monkeypatch, data, (400, 400), max_pixels=10000)
         assert sieves == [0]
 
