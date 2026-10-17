@@ -608,6 +608,27 @@ def test_other_formats_keep_the_plain_list():
     assert clause.startswith('"fid" IN (0, 1, 2')
 
 
+def _text_key_layer(storage="ESRI Shapefile"):
+    """Layer whose key field is a text field (QgsField.isNumeric() False)."""
+    layer = _gpkg_layer(storage)
+    layer.fields.return_value.__getitem__.return_value.isNumeric.return_value = False
+    return layer
+
+
+def test_text_key_values_are_escaped_literals():
+    """2026-10-17: f"'{v}'" let the quote of L'Isle-Jourdain end the literal."""
+    builder = ogr_builder.OGRExpressionBuilder(task_params={})
+    clause = builder._build_fid_filter_with_values(_text_key_layer(), ["L'Isle-Jourdain", "Auch"], "nom")
+    assert clause == "\"nom\" IN ('L''Isle-Jourdain', 'Auch')"
+
+
+def test_text_key_made_of_digits_stays_quoted():
+    """'01001' (INSEE code, text field) was read as the number 1001: the first values decided first."""
+    builder = ogr_builder.OGRExpressionBuilder(task_params={})
+    clause = builder._build_fid_filter_with_values(_text_key_layer(), ["01001", "31555"], "insee")
+    assert clause == "\"insee\" IN ('01001', '31555')"
+
+
 def _many_roads(count):
     return _Layer("troncon_de_route", [_Feature(fid, _Geom("near")) for fid in range(count)])
 

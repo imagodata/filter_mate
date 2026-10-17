@@ -463,11 +463,9 @@ class FeatureCollector:
         if not ids:
             return ""
 
-        if is_numeric:
-            return ", ".join(str(id_val) for id_val in ids)
-        else:
-            # Quote non-numeric values
-            return ", ".join(f"'{id_val}'" for id_val in ids)
+        # 2026-10-17: the one formatter of key literals (quotes doubled).
+        from ...filter.pk_formatter import format_key_literal
+        return ", ".join(format_key_literal(id_val, is_numeric) for id_val in ids)
 
     @staticmethod
     def restore_layer_selection(

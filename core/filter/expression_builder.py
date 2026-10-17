@@ -1490,36 +1490,22 @@ def build_feature_id_expression(
     if not features_ids:
         return ""
 
+    # 2026-10-17: one literal formatter for every provider (repr() wrote
+    # "L'Isle-Jourdain", an identifier in SQL; a numeric key list joined the
+    # values as they came).
+    from .pk_formatter import format_key_literal
+    values = ", ".join(format_key_literal(fid, is_numeric) for fid in features_ids)
+
     # CRITICAL FIX v2.8.10: Use unquoted 'fid' for OGR/GeoPackage compatibility
     # OGR driver does NOT support quoted "fid" in setSubsetString()
-    if provider_type == 'ogr':
+    if provider_type in ('ogr', 'spatialite'):
         pk_ref = 'fid' if primary_key_name == 'fid' else f'"{primary_key_name}"'
-        if is_numeric:
-            return f'{pk_ref} IN ({", ".join(features_ids)})'
-        else:
-            return f'{pk_ref} IN ({", ".join(repr(fid) for fid in features_ids)})'
+        return f'{pk_ref} IN ({values})'
 
-    elif provider_type == 'spatialite':
-        pk_ref = 'fid' if primary_key_name == 'fid' else f'"{primary_key_name}"'
-        if is_numeric:
-            return f'{pk_ref} IN ({", ".join(features_ids)})'
-        else:
-            return f'{pk_ref} IN ({", ".join(repr(fid) for fid in features_ids)})'
-
-    else:  # PostgreSQL
-        if is_numeric:
-            if table_name:
-                return f'"{table_name}"."{primary_key_name}" IN ({", ".join(features_ids)})'
-            else:
-                return f'"{primary_key_name}" IN ({", ".join(features_ids)})'
-        else:
-            if table_name:
-                return (
-                    f'"{table_name}"."{primary_key_name}" IN '
-                    f"({', '.join(repr(fid) for fid in features_ids)})"
-                )
-            else:
-                return f'"{primary_key_name}" IN ({", ".join(repr(fid) for fid in features_ids)})'
+    # PostgreSQL
+    if table_name:
+        return f'"{table_name}"."{primary_key_name}" IN ({values})'
+    return f'"{primary_key_name}" IN ({values})'
 
 
 def build_combined_filter_expression(

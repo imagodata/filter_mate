@@ -9,13 +9,23 @@ Handles both numeric and text-based primary keys (UUID, varchar, etc.).
 Critical fixes:
 - v2.8.5: UUID fields must be quoted with single quotes in SQL
 - Supports fid, ctid, and custom primary keys
+- 2026-10-17: the ONE formatter of key literals. Every key list (OGR,
+  SpatiaLite, PostgreSQL materialized views, feature collectors) goes
+  through :func:`format_key_literal`: a value is written unquoted only
+  when it is a number, anything else is an SQL string literal with its
+  quotes doubled (``repr(fid)`` wrote ``"L'Isle-Jourdain"``, an
+  identifier, and ``f"'{v}'"`` let a quote end the literal). The field
+  type decides before the values: a text key made of digits (``'01001'``)
+  stays quoted.
 
 Author: FilterMate Team
 Created: January 2026 (EPIC-1 Phase E3)
 """
 
 import logging
-from typing import List, Optional
+import math
+import re
+from typing import Any, Iterable, List, Optional
 
 try:
     from qgis.core import QgsVectorLayer
@@ -23,6 +33,79 @@ except ImportError:
     QgsVectorLayer = None
 
 logger = logging.getLogger('FilterMate.Core.Filter.PKFormatter')
+
+# Names a key field is assumed numeric by when neither its type nor its values are known.
+COMMON_NUMERIC_PK_NAMES = ('id', 'fid', 'gid', 'pk', 'ogc_fid', 'objectid', 'oid', 'rowid')
+
+# An integer as SQL writes it: no leading zero ('01001' is a text code), optional minus sign.
+_CANONICAL_INT_RE = re.compile(r'-?(?:0|[1-9][0-9]*)\Z')
+# A number as SQL writes it (a numeric key read as text, '1.0'); a leading zero stays text.
+_SQL_NUMBER_RE = re.compile(r'-?(?:0|[1-9][0-9]*)(?:\.[0-9]+)?(?:[eE][-+]?[0-9]+)?\Z')
+
+
+def sql_string_literal(value: Any) -> str:
+    """``value`` as an SQL string literal: ``L'Isle`` -> ``'L''Isle'``."""
+    return "'" + str(value).replace("'", "''") + "'"
+
+
+def _is_number(value: Any) -> bool:
+    return isinstance(value, (int, float)) and not isinstance(value, bool)
+
+
+def _is_canonical_int_text(value: Any) -> bool:
+    return isinstance(value, str) and bool(_CANONICAL_INT_RE.match(value))
+
+
+def key_values_look_numeric(values: Iterable[Any]) -> bool:
+    """Whether EVERY value (None aside) is a number or an integer written as text.
+
+    ``'01001'`` is not: written unquoted it would become 1001. Booleans
+    count as numbers (written ``True`` / ``False``, as before).
+    """
+    seen = False
+    for value in values:
+        if value is None:
+            continue
+        if not (isinstance(value, (int, float)) or _is_canonical_int_text(value)):
+            return False
+        seen = True
+    return seen
+
+
+def key_field(layer: Any, pk_field: Optional[str]) -> Any:
+    """The ``QgsField`` named ``pk_field`` in ``layer``, None when unknown."""
+    if layer is None or not pk_field:
+        return None
+    try:
+        fields = layer.fields()
+        index = fields.indexOf(pk_field)
+        if isinstance(index, int) and index >= 0:
+            return fields[index]
+    except Exception as e:  # nosec B110 - schema unavailable (deleted layer, mock): decided by the values
+        logger.debug(f"Could not read the field of '{pk_field}': {e}")
+    return None
+
+
+def format_key_literal(value: Any, numeric: bool) -> str:
+    """One key value as an SQL literal.
+
+    Numeric keys are written unquoted only when the value is a number (an
+    integral float as an integer) or a number written as text (``'12'``,
+    ``'1.5'``); any other value - text, a code with a
+    leading zero, a value that would inject SQL - is a quoted literal, which
+    SQL compares with a numeric column as well. None is ``NULL`` (matches
+    nothing in an IN list).
+    """
+    if value is None:
+        return 'NULL'
+    if numeric:
+        if isinstance(value, (bool, int)):
+            return str(value)
+        if isinstance(value, float) and math.isfinite(value):
+            return str(int(value)) if value.is_integer() else repr(value)
+        if isinstance(value, str) and _SQL_NUMBER_RE.match(value):
+            return value
+    return sql_string_literal(value)
 
 
 def is_pk_numeric(
@@ -34,62 +117,36 @@ def is_pk_numeric(
     Check if the primary key field is numeric.
 
     CRITICAL FIX v2.8.5: UUID fields and other text-based PKs must be quoted in SQL.
-    CRITICAL FIX v4.0.9: Value-based detection for PostgreSQL via OGR layers.
+    2026-10-17: the field TYPE decides first; the values only decide without a
+    schema, all of them (the first ten used to, before the schema: ``'01001'``
+    was read as a number). A text field whose values are real numbers (a
+    PostgreSQL integer read through OGR as text, v4.0.9) is still numeric.
 
     Args:
         layer: QgsVectorLayer to check
         pk_field: Primary key field name
-        sample_values: Optional sample PK values for value-based detection
+        sample_values: Optional PK values for value-based detection
 
     Returns:
         bool: True if PK is numeric (int, bigint, etc.), False if text (UUID, varchar, etc.)
     """
-    if not layer or not pk_field:
-        # Default to numeric for safety (most common case)
-        return True
-
-    # FIX v4.0.9: VALUE-BASED detection first (most reliable for OGR layers)
-    if sample_values:
+    field = key_field(layer, pk_field)
+    if field is not None:
         try:
-            # Check if all sample values are numeric types
-            all_numeric = all(
-                isinstance(v, (int, float)) and not isinstance(v, bool)
-                for v in sample_values[:10]
-            )
-            if all_numeric:
-                logger.debug(f"PK '{pk_field}' detected as numeric from VALUES")
+            if field.isNumeric():
+                logger.debug(f"PK '{pk_field}' detected as numeric from schema")
                 return True
+            values = [v for v in (sample_values or []) if v is not None]
+            numeric = bool(values) and all(_is_number(v) for v in values)
+            logger.debug(f"PK '{pk_field}' detected as {'numeric' if numeric else 'text'} (text field)")
+            return numeric
+        except Exception as e:  # nosec B110 - falls back to the values below
+            logger.debug(f"Could not determine PK type from schema: {e}")
 
-            # Check if string values look like integers
-            all_look_numeric = all(
-                isinstance(v, (int, float)) or
-                (isinstance(v, str) and v.lstrip('-').isdigit())
-                for v in sample_values[:10]
-            )
-            if all_look_numeric:
-                logger.debug(f"PK '{pk_field}' detected as numeric from string VALUES")
-                return True
-        except Exception as e:
-            logger.debug(f"Value-based PK detection failed: {e}")
+    if sample_values:
+        return key_values_look_numeric(sample_values)
 
-    # SCHEMA-BASED detection
-    try:
-        field_idx = layer.fields().indexOf(pk_field)
-        if field_idx >= 0:
-            field = layer.fields().field(field_idx)
-            is_numeric = field.isNumeric()
-            logger.debug(f"PK '{pk_field}' detected as {'numeric' if is_numeric else 'text'} from schema")
-            return is_numeric
-    except Exception as e:
-        logger.debug(f"Could not determine PK type from schema: {e}")
-
-    # FALLBACK: Check common numeric PK names
-    pk_lower = pk_field.lower()
-    common_numeric_names = ('id', 'fid', 'gid', 'pk', 'ogc_fid', 'objectid', 'oid', 'rowid')
-    if pk_lower in common_numeric_names:
-        logger.debug(f"PK '{pk_field}' assumed numeric based on common name")
-        return True
-
+    # Nothing known: numeric, the most common case (common names: id, fid, gid...)
     return True
 
 
@@ -103,7 +160,7 @@ def format_pk_values_for_sql(
     Format primary key values for SQL IN clause.
 
     CRITICAL FIX v2.8.5: UUID fields must be quoted with single quotes in SQL.
-    CRITICAL FIX v4.0.9: Improved value-based detection for PostgreSQL via OGR.
+    2026-10-17: every value goes through :func:`format_key_literal`.
 
     Examples:
         - Numeric: IN (1, 2, 3)
@@ -121,40 +178,11 @@ def format_pk_values_for_sql(
     if not values:
         return ''
 
-    # Auto-detect if not specified
     if is_numeric is None:
         if layer and pk_field:
-            # FIX v4.0.9: Pass sample values for better detection
             is_numeric = is_pk_numeric(layer, pk_field, sample_values=values)
         else:
-            # FIX v4.0.9: Detect from values directly
-            try:
-                all_look_numeric = all(
-                    isinstance(v, (int, float)) and not isinstance(v, bool) or
-                    (isinstance(v, str) and v.lstrip('-').isdigit())
-                    for v in values[:10]
-                )
-                is_numeric = all_look_numeric
-                logger.debug(f"PK type detected from values: {'numeric' if is_numeric else 'text'}")
-            except Exception:
-                is_numeric = True  # Default to numeric
+            is_numeric = key_values_look_numeric(values)
+            logger.debug(f"PK type detected from values: {'numeric' if is_numeric else 'text'}")
 
-    if is_numeric:
-        # Numeric: convert to int if possible to strip any decimal or quote issues
-        formatted = []
-        for v in values:
-            if isinstance(v, (int, float)) and not isinstance(v, bool):
-                formatted.append(str(int(v)))
-            elif isinstance(v, str) and v.lstrip('-').isdigit():
-                formatted.append(v)  # Already a clean numeric string
-            else:
-                formatted.append(str(v))
-        return ', '.join(formatted)
-    else:
-        # Text/UUID: quote with single quotes, escape existing quotes
-        formatted = []
-        for v in values:
-            # Convert to string and escape single quotes
-            str_val = str(v).replace("'", "''")
-            formatted.append(f"'{str_val}'")
-        return ', '.join(formatted)
+    return ', '.join(format_key_literal(v, is_numeric) for v in values)

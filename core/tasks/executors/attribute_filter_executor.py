@@ -288,10 +288,11 @@ class AttributeFilterExecutor:
 
         # Extract feature IDs
         # CRITICAL FIX: Handle ctid (PostgreSQL internal identifier)
+        # 2026-10-17: the values keep their type (the formatter quotes text, a NULL key is NULL).
         if self.primary_key == 'ctid':
-            features_ids = [str(feature.id()) for feature in features_list]
+            features_ids = [feature.id() for feature in features_list]
         else:
-            features_ids = [str(feature[self.primary_key]) for feature in features_list]
+            features_ids = [feature[self.primary_key] for feature in features_list]
 
         if not features_ids:
             return None

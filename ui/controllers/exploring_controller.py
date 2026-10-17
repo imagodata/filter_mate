@@ -1519,11 +1519,9 @@ class ExploringController(BaseController, LayerSelectionMixin):
                         # Try to get primary key value from feature
                         try:
                             pk_value = reloaded.attribute(pk_name)
-                            # Quote string values
-                            if isinstance(pk_value, str):
-                                expression = f'"{pk_name}" = \'{pk_value}\''
-                            else:
-                                expression = f'"{pk_name}" = {pk_value}'
+                            # Quote string values (2026-10-17: quotes doubled by the key formatter)
+                            from ...core.filter.pk_formatter import format_key_literal
+                            expression = f'"{pk_name}" = {format_key_literal(pk_value, not isinstance(pk_value, str))}'
                             logger.info(f"SINGLE_SELECTION: Using PK expression: {expression}")  # nosec B608
                             return [reloaded], expression
                         except Exception as e:
@@ -1884,12 +1882,9 @@ class ExploringController(BaseController, LayerSelectionMixin):
                             else:
                                 continue
 
-                            # Format value based on numeric type
-                            if pk_is_numeric:
-                                pk_values_list.append(str(pk_value))
-                            else:
-                                pk_value_str = str(pk_value).replace("'", "''")
-                                pk_values_list.append(f"'{pk_value_str}'")
+                            # Format value based on numeric type (2026-10-17: the shared key formatter)
+                            from ...core.filter.pk_formatter import format_key_literal
+                            pk_values_list.append(format_key_literal(pk_value, bool(pk_is_numeric)))
                         except (KeyError, IndexError, AttributeError) as e:
                             logger.debug(f"Could not extract pk_value from feature: {e}")
                             continue

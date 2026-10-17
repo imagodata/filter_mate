@@ -117,6 +117,12 @@ try:
 except ImportError:
     from core.ports.geometric_filter_port import GeometricFilterPort
 
+# 2026-10-17: the one formatter of key literals (quotes doubled, type-driven).
+try:
+    from ....core.filter.pk_formatter import format_key_literal, is_pk_numeric
+except ImportError:
+    from core.filter.pk_formatter import format_key_literal, is_pk_numeric
+
 # Import safe_set_subset_string from infrastructure
 try:
     from ....infrastructure.database.sql_utils import safe_set_subset_string
@@ -676,24 +682,9 @@ class OGRExpressionBuilder(GeometricFilterPort):
         pk_field = self._get_primary_key(layer)
         pk_field_lower = pk_field.lower()
 
-        # Check if PK field is numeric or text (for quoting values)
-        is_numeric_pk = True
-        try:
-            fields = layer.fields()
-            pk_idx = fields.indexOf(pk_field)
-            if pk_idx >= 0:
-                from qgis.PyQt.QtCore import QMetaType
-                field_type = fields.at(pk_idx).type()
-                is_numeric_pk = field_type in (QMetaType.Type.Int, QMetaType.Type.LongLong, QMetaType.Type.UInt, QMetaType.Type.ULongLong, QMetaType.Type.Double)
-        except Exception:  # nosec B110 - field type detection best-effort, defaults to numeric assumption
-            pass
-
-        # Build value list based on PK type
-        if is_numeric_pk:
-            fid_list = ", ".join(str(fid) for fid in fids)
-        else:
-            # Quote string values (UUID, etc.)
-            fid_list = ", ".join(f"'{fid}'" for fid in fids)
+        # Numeric or text PK (quoting): the field type, else the values (core.filter.pk_formatter)
+        is_numeric_pk = is_pk_numeric(layer, pk_field, sample_values=list(fids))
+        fid_list = ", ".join(format_key_literal(fid, is_numeric_pk) for fid in fids)
 
         # Shapefile special case: QGIS 3.x requires lowercase 'fid' for setSubsetString
         if 'shapefile' in storage_type or 'esri' in storage_type:
@@ -734,79 +725,16 @@ class OGRExpressionBuilder(GeometricFilterPort):
         if not pk_values:
             return "1 = 0"
 
-        # FIX v4.0.9: IMPROVED numeric detection for PostgreSQL via OGR
-        # QGIS OGR provider may return incorrect field types for PostgreSQL.
-        # Use multiple detection strategies with VALUE-BASED priority.
-        is_numeric_pk = None
-
-        # Strategy 1: Check ACTUAL VALUES first (most reliable)
-        # If all values are Python int/float, they're numeric
-        try:
-            all_numeric_values = all(
-                isinstance(v, (int, float)) and not isinstance(v, bool)
-                for v in pk_values[:10]  # Check first 10 values
-            )
-            if all_numeric_values:
-                is_numeric_pk = True
-                self.log_info("  - PK type detected from VALUES: numeric (all values are int/float)")
-        except Exception as val_e:
-            self.log_debug(f"  - Value-based detection failed: {val_e}")
-
-        # Strategy 2: Check if string values look like integers
-        if is_numeric_pk is None:
-            try:
-                sample_values = pk_values[:10]
-                all_look_numeric = all(
-                    isinstance(v, (int, float)) or
-                    (isinstance(v, str) and v.lstrip('-').isdigit())
-                    for v in sample_values
-                )
-                if all_look_numeric:
-                    is_numeric_pk = True
-                    self.log_info("  - PK type detected from string VALUES: numeric (all values look like integers)")
-            except Exception:  # nosec B110 - value-based detection best-effort, falls through to next strategy
-                pass
-
-        # Strategy 3: Check field type from layer fields (may be unreliable for OGR)
-        if is_numeric_pk is None:
-            try:
-                fields = layer.fields()
-                pk_idx = fields.indexOf(pk_field)
-                if pk_idx >= 0:
-                    from qgis.PyQt.QtCore import QMetaType
-                    field_type = fields.at(pk_idx).type()
-                    numeric_types = (QMetaType.Type.Int, QMetaType.Type.LongLong, QMetaType.Type.UInt, QMetaType.Type.ULongLong, QMetaType.Type.Double)
-                    is_numeric_pk = field_type in numeric_types
-                    self.log_info(f"  - PK type detected from field schema: {'numeric' if is_numeric_pk else 'text'} (QMetaType type={field_type})")
-            except Exception as field_e:
-                self.log_debug(f"  - Field type detection failed: {field_e}")
-
-        # Default: assume numeric for common PK field names
-        if is_numeric_pk is None:
-            pk_lower = pk_field.lower()
-            common_numeric_names = ('id', 'fid', 'gid', 'pk', 'ogc_fid', 'objectid', 'oid', 'rowid')
-            is_numeric_pk = pk_lower in common_numeric_names
-            self.log_info(f"  - PK type FALLBACK: {'numeric' if is_numeric_pk else 'text'} (based on field name '{pk_field}')")
-
-        # Build value list based on PK type
-        if is_numeric_pk:
-            # Numeric: no quotes - convert all values to int if possible
-            formatted_values = []
-            for v in pk_values:
-                if isinstance(v, (int, float)) and not isinstance(v, bool):
-                    formatted_values.append(str(int(v)))
-                elif isinstance(v, str) and v.lstrip('-').isdigit():
-                    formatted_values.append(v)  # Already a numeric string
-                else:
-                    formatted_values.append(str(v))  # Best effort
-            value_list = ", ".join(formatted_values)
-            self.log_info(f"  - Building NUMERIC IN clause for '{pk_field}': {len(pk_values)} values")
-            self.log_debug(f"    Sample: {value_list[:100]}...")
-        else:
-            # String/UUID: single quotes
-            value_list = ", ".join(f"'{v}'" for v in pk_values)
-            self.log_info(f"  - Building STRING IN clause for '{pk_field}': {len(pk_values)} values")
-            self.log_debug(f"    Sample: {value_list[:100]}...")
+        # FIX v4.0.9 / 2026-10-17: numeric or text key from the field type first
+        # (a text code made of digits, '01001', stays quoted), then from ALL the
+        # values (a PostgreSQL integer read as text through OGR is numeric).
+        # The literals are written by core.filter.pk_formatter (quotes doubled).
+        is_numeric_pk = is_pk_numeric(layer, pk_field, sample_values=pk_values)
+        value_list = ", ".join(format_key_literal(v, is_numeric_pk) for v in pk_values)
+        self.log_info(
+            f"  - Building {'NUMERIC' if is_numeric_pk else 'STRING'} IN clause for '{pk_field}': {len(pk_values)} values"
+        )
+        self.log_debug(f"    Sample: {value_list[:100]}...")
 
         if len(pk_values) > KEY_LIST_JSON_THRESHOLD and self._is_sqlite_storage(layer):
             return self._json_key_clause(f'"{pk_field}"', pk_values, is_numeric_pk)
