@@ -807,3 +807,25 @@ class TestMissingDependenciesNotice:
         iface.messageBar.return_value.pushMessage.side_effect = RuntimeError("no message bar yet")
         registry._show_missing_deps_message(ext, iface)
         assert state['dismissed'] is False  # shown at the next start instead
+
+
+class TestPluginFolderName:
+    """The extension subpackages are imported relative to the plugin's real folder name."""
+
+    def test_discovery_uses_the_root_package_not_a_literal(self, monkeypatch):
+        import sys
+        import types
+
+        from tests.unit.extensions.plugin_alias import alias_package, register_plugin_package_helper
+
+        register_plugin_package_helper(monkeypatch, root="fm_main")
+        alias_package(monkeypatch, "extensions.registry", root="fm_main")
+        calls = []
+        module = types.ModuleType("fm_main.extensions.demo")
+        module.Extension = None
+        monkeypatch.setattr(sys.modules["extensions.registry"].importlib, "import_module",
+                            lambda path, package=None: calls.append((path, package)) or module)
+
+        ExtensionRegistry()._load_extension_module("demo")
+
+        assert calls == [(".extensions.demo", "fm_main")]

@@ -6485,9 +6485,11 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         """v4.0 S18: Reload FilterMate plugin."""
         try:
             from qgis.utils import plugins; from qgis.PyQt.QtCore import QTimer
+            from .core.domain.plugin_package import PLUGIN_PACKAGE
             self.save_configuration_model()
-            if 'filter_mate' not in plugins: show_warning("FilterMate", self.tr("Could not reload plugin automatically.")); return
-            fm = plugins['filter_mate']
+            package = PLUGIN_PACKAGE
+            if package not in plugins: show_warning("FilterMate", self.tr("Could not reload plugin automatically.")); return
+            fm = plugins[package]
             # This dock is dropped without unload(): its controllers go now (close() only hides it).
             if self._controller_integration: self._controller_integration.teardown()
             self.close(); fm.pluginIsActive, fm.app = False, None; QTimer.singleShot(100, fm.run)

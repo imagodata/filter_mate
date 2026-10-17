@@ -182,13 +182,14 @@ class ExtensionRegistry:
             user via the QGIS log so discovery failures are never silent.
         """
         module_path = f".extensions.{package_name}"
-        # Import relative to filter_mate package. Let import errors bubble
+        # Import relative to the plugin's root package (its folder name, whatever it is). Let import errors bubble
         # up to the caller so _log_discovery_failure can attach the full
         # traceback to the QGIS log panel — historically this was a
         # silent debug log, which made "extension vanished from the
         # Configuration panel" impossible to diagnose.
+        from ..core.domain.plugin_package import PLUGIN_PACKAGE
         module = importlib.import_module(
-            module_path, package="filter_mate"
+            module_path, package=PLUGIN_PACKAGE
         )
 
         extension_cls = getattr(module, 'Extension', None)

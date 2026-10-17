@@ -211,6 +211,41 @@ def find_broken_imports():
     return broken
 
 
+# (file, literal) pairs that are DATA, not the package name: the favorites file schema id, the
+# folder of a Resource Sharing collection, the default of the helper and of the logger root name.
+KNOWN_PACKAGE_LITERALS = {
+    ("core/services/favorites_service.py", "filter_mate.favorites"),
+    ("extensions/favorites_sharing/validator.py", "filter_mate.favorites"),
+    ("extensions/favorites_sharing/scanner.py", "filter_mate"),
+    ("extensions/favorites_sharing/services/bundle_publisher.py", "filter_mate"),
+    ("core/domain/plugin_package.py", "filter_mate"),
+    ("infrastructure/logging/__init__.py", "filter_mate"),
+}
+
+
+def find_hardcoded_package_literals():
+    """String literals naming the plugin package (``plugins.get('filter_mate')``, ``package="filter_mate"``...).
+
+    Docstrings are ignored. The package is read from ``core/domain/plugin_package.PLUGIN_PACKAGE``.
+    """
+    found = []
+    for path in _plugin_python_files():
+        rel = path.relative_to(PLUGIN_ROOT).as_posix()
+        tree = _tree(path)
+        docstrings = {id(node.value) for node in ast.walk(tree)
+                      if isinstance(node, ast.Expr) and isinstance(node.value, ast.Constant)}
+        # logging.getLogger('filter_mate') names a logger, not the package
+        docstrings |= {id(arg) for node in ast.walk(tree) if isinstance(node, ast.Call)
+                       and getattr(node.func, "attr", getattr(node.func, "id", None)) == "getLogger" for arg in node.args}
+        for node in ast.walk(tree):
+            if not (isinstance(node, ast.Constant) and isinstance(node.value, str)) or id(node) in docstrings:
+                continue
+            value = node.value
+            if (value == PACKAGE_NAME or value.startswith(PACKAGE_NAME + ".")) and (rel, value) not in KNOWN_PACKAGE_LITERALS:
+                found.append((rel, node.lineno, repr(value)))
+    return found
+
+
 def find_absolute_plugin_imports():
     found = []
     for path in _plugin_python_files():
@@ -238,6 +273,15 @@ def test_no_absolute_import_of_the_plugin_package():
     assert found == [], (
         "The plugin folder name is not 'filter_mate' once installed from a GitHub zip (filter_mate-main): "
         "use relative imports.\n" + "\n".join(f"{rel}:{lineno} {what}" for rel, lineno, what in found))
+
+
+@pytest.mark.unit
+def test_no_hardcoded_plugin_package_name():
+    found = find_hardcoded_package_literals()
+    assert found == [], (
+        "The plugin folder name is not always 'filter_mate' (filter_mate-main, a renamed folder): "
+        "use core.domain.plugin_package.PLUGIN_PACKAGE (or the root of __package__).\n"
+        + "\n".join(f"{rel}:{lineno} {what}" for rel, lineno, what in found))
 
 
 @pytest.mark.unit
@@ -272,6 +316,12 @@ class TestResolver:
         broken = self._broken(tree, "from .impl import gone\nfrom .nowhere import x\nfrom ... import y\n")
         assert len(broken) == 3
         assert "name not defined" in broken[0] and "no such module" in broken[1] and "leaves the plugin" in broken[2]
+
+    def test_package_literals_are_reported_except_docstrings(self, tree):
+        (tree / "pkg" / "user.py").write_text(
+            '"""plugins.get(\'filter_mate\') in a docstring"""\nx = plugins.get("filter_mate")\n'
+            'y = importlib.import_module(".a", package="filter_mate")\nz = f"filter_mate.{name}"\n')
+        assert sorted(lineno for _, lineno, _ in find_hardcoded_package_literals()) == [2, 3, 4]
 
     def test_absolute_plugin_import_is_reported(self, tree):
         (tree / "pkg" / "user.py").write_text("from filter_mate.pkg.impl import exported\nimport filter_mate.pkg\n")

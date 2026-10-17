@@ -66,10 +66,9 @@ def _plugin_env_vars() -> dict:
     Read from the plugin module QGIS already imported, never imported here:
     that would initialise QGIS-bound state (standalone uvicorn, tests).
     """
-    names = ["filter_mate.config.config"]
-    if __package__ and "." in __package__:  # filter_mate.filtermate_api, whatever the plugin folder name
-        names.insert(0, f"{__package__.rsplit('.', 1)[0]}.config.config")
-    for name in names:
+    from .plugin_package import plugin_package_names
+    for package in plugin_package_names():  # whatever the plugin folder name
+        name = f"{package}.config.config"
         env_vars = getattr(sys.modules.get(name), "ENV_VARS", None)
         if isinstance(env_vars, dict) and env_vars:
             return env_vars

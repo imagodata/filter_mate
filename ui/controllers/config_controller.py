@@ -356,7 +356,8 @@ class ConfigController(BaseController):
                                     .get('LANGUAGE', {})
                                     .get('value', 'auto'))
                     from qgis.utils import plugins
-                    plugin = plugins.get('filter_mate')
+                    from ...core.domain.plugin_package import PLUGIN_PACKAGE
+                    plugin = plugins.get(PLUGIN_PACKAGE)
                     if plugin and hasattr(plugin, 'reload_translator'):
                         plugin.reload_translator(saved_locale)
                         if hasattr(plugin, 'retranslate_actions'):
@@ -714,7 +715,8 @@ class ConfigController(BaseController):
             logger.info(f"LANGUAGE changed to: {new_locale}")
 
             from qgis.utils import plugins
-            plugin = plugins.get('filter_mate')
+            from ...core.domain.plugin_package import PLUGIN_PACKAGE
+            plugin = plugins.get(PLUGIN_PACKAGE)
             if not plugin or not hasattr(plugin, 'reload_translator'):
                 logger.error("_apply_language_change: plugin not found or missing reload_translator")
                 return
