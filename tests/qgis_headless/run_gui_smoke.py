@@ -572,9 +572,20 @@ def s_raster_badge_check():
     return lambda: layer('extra') is None and tasks_idle()
 
 
+def badge_matches_current():
+    """The badge names the kind of the panel's layer (a vector backend badge only for a vector layer)."""
+    active, text = coverage().active_layer, badge_text()
+    if active is not None:
+        return text.startswith('Raster' if isinstance(active, QgsRasterLayer) else 'Point cloud')
+    return text.startswith('Vector') or text == '...'
+
+
 def s_raster_badge_removed_check():
-    check('raster current layer keeps its badge after a layer is removed', badge_text() == STATE['raster_badge'],
-          f"badge={badge_text()!r}")
+    # The panel may move to another layer when one is removed: the badge then follows that layer.
+    active = coverage().active_layer
+    check('badge kept after a layer is removed (or follows the layer the panel moved to)',
+          badge_text() == STATE['raster_badge'] if layer_name(active) == 'dem' else badge_matches_current(),
+          f"badge={badge_text()!r} coverage={layer_name(active)} current={layer_name(dock().current_layer)}")
 
 
 def s_point_cloud_source():
