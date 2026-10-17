@@ -155,7 +155,10 @@ class LayerTaskCompletionHandler:
             # A layer this task registered and a removal unregistered meanwhile: kept only
             # while still in the project (added then removed at once, it is gone).
             project = self._get_project()
-            merged = {key: value for key, value in result_project_layers.items()
+            # 2026-10-17: the task works on a copy; the entries it did not register are taken
+            # from the current dict (the main thread may have replaced one meanwhile).
+            merged = {key: (value if key in changed else current[key])
+                      for key, value in result_project_layers.items()
                       if key in current or (key in changed and self._in_project(project, key))}
         else:
             merged = {key: value for key, value in result_project_layers.items()
