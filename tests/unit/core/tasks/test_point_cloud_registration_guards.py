@@ -705,3 +705,16 @@ class TestSharedStateStaysOnTheMainThread:
         assert task._layer_properties_count > 0
         assert config["CURRENT_PROJECT"]["OPTIONS"]["LAYERS"]["LAYER_PROPERTIES_COUNT"] == \
             task._layer_properties_count
+
+    def test_a_failed_task_reports_without_raising(self, point_cloud_enabled, monkeypatch):
+        """2026-10-17: ``raise self.exception`` in finished() reached QGIS's Python error handler."""
+        monkeypatch.setattr(task_mod, "MESSAGE_TASKS_CATEGORIES", {"add_layers": "ManageLayers"})
+        iface = MagicMock()
+        monkeypatch.setattr(task_mod, "iface", iface, raising=False)
+        task = _task()
+        task.exception = RuntimeError("unable to open database file")
+        task.tr = lambda text: text
+        task._perf_run_started = None
+        task.resultingLayers = MagicMock()
+        task.finished(False)  # no exception
+        iface.messageBar.return_value.pushMessage.assert_called_once()

@@ -2188,11 +2188,13 @@ class LayersManagementEngineTask(QgsTask):
                         # Message bar notification removed - internal operation, too verbose for UX
                         logger.info(f'Layers properties updated: {result_action}')
         else:
-            # Error case - log and raise
-
+            # Error case: shown, and logged with its traceback. 2026-10-17: no longer raised:
+            # an exception out of finished() reached QGIS's Python error handler (error
+            # dialog), after the message above already told the user.
             iface.messageBar().pushMessage(
                 message_category,
                 self.tr("Exception: {0}").format(self.exception),
                 Qgis.MessageLevel.Critical
             )
-            raise self.exception
+            logger.error(f"LayersManagementEngineTask {self.task_action} failed: {self.exception}",
+                         exc_info=(type(self.exception), self.exception, self.exception.__traceback__))
