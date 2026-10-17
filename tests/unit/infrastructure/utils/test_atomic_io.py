@@ -8,6 +8,7 @@ the default settings. ``atomic_json_write`` swaps a finished temp file in, and
 import importlib.util
 import json
 import os
+import stat
 import sys
 from pathlib import Path
 
@@ -81,6 +82,88 @@ class TestAtomicJsonWrite:
         assert [p.name for p in tmp_path.iterdir()] == ["config.json"]
 
 
+class TestWindowsAndFilesystemDetails:
+    def test_a_swap_refused_for_a_moment_is_retried(self, tmp_path, monkeypatch):
+        target = tmp_path / "config.json"
+        target.write_text('{"old": 1}', encoding="utf-8")
+        real_replace = os.replace
+        calls = []
+
+        def flaky(src, dst):
+            calls.append(src)
+            if len(calls) <= 3:
+                raise PermissionError("file in use")
+            real_replace(src, dst)
+
+        sleeps = []
+        monkeypatch.setattr(atomic_io.os, "replace", flaky)
+        monkeypatch.setattr(atomic_io.time, "sleep", sleeps.append)
+
+        atomic_json_write(str(target), {"new": 1})
+
+        assert len(calls) == 4 and sleeps == [0.05, 0.05, 0.05]
+        monkeypatch.undo()
+        assert json.loads(target.read_text(encoding="utf-8")) == {"new": 1}
+        assert [p.name for p in tmp_path.iterdir()] == ["config.json"]
+
+    def test_a_swap_refused_for_good_raises_after_five_attempts_and_cleans_up(self, tmp_path, monkeypatch):
+        target = tmp_path / "config.json"
+        target.write_text('{"old": 1}', encoding="utf-8")
+        calls = []
+
+        def locked(src, dst):
+            calls.append(src)
+            raise PermissionError("file in use")
+
+        monkeypatch.setattr(atomic_io.os, "replace", locked)
+        monkeypatch.setattr(atomic_io.time, "sleep", lambda seconds: None)
+
+        with pytest.raises(PermissionError):
+            atomic_json_write(str(target), {"new": 1})
+
+        monkeypatch.undo()
+        assert len(calls) == 5
+        assert json.loads(target.read_text(encoding="utf-8")) == {"old": 1}
+        assert [p.name for p in tmp_path.iterdir()] == ["config.json"]
+
+    @pytest.mark.skipif(os.name == "nt", reason="POSIX permission bits")
+    def test_the_mode_of_the_replaced_file_is_kept(self, tmp_path):
+        target = tmp_path / "config.json"
+        target.write_text("{}", encoding="utf-8")
+        os.chmod(target, 0o640)
+
+        atomic_json_write(str(target), {"a": 1})
+
+        assert stat.S_IMODE(os.stat(target).st_mode) == 0o640
+
+    @pytest.mark.skipif(os.name == "nt", reason="POSIX permission bits")
+    def test_a_new_file_is_readable_not_owner_only(self, tmp_path):
+        target = tmp_path / "fresh.json"
+
+        atomic_json_write(str(target), {"a": 1})
+
+        assert stat.S_IMODE(os.stat(target).st_mode) == 0o644
+
+    @pytest.mark.skipif(not hasattr(os, "symlink"), reason="no symlinks")
+    def test_a_symbolic_link_is_followed_and_kept(self, tmp_path):
+        real_dir = tmp_path / "dotfiles"
+        real_dir.mkdir()
+        real = real_dir / "config.json"
+        real.write_text('{"old": 1}', encoding="utf-8")
+        link = tmp_path / "config.json"
+        try:
+            os.symlink(real, link)
+        except OSError:
+            pytest.skip("symlinks not permitted")
+
+        atomic_json_write(str(link), {"new": 1})
+
+        assert os.path.islink(link)
+        assert json.loads(real.read_text(encoding="utf-8")) == {"new": 1}
+        assert sorted(p.name for p in tmp_path.iterdir()) == ["config.json", "dotfiles"]
+        assert [p.name for p in real_dir.iterdir()] == ["config.json"]
+
+
 class TestBackupCorruptFile:
     def test_copies_the_file_with_a_timestamp(self, tmp_path):
         target = tmp_path / "config.json"
@@ -105,3 +188,14 @@ class TestBackupCorruptFile:
 
     def test_missing_file(self, tmp_path):
         assert backup_corrupt_file(str(tmp_path / "nope.json")) is None
+
+    def test_the_same_broken_content_is_kept_once(self, tmp_path):
+        target = tmp_path / "config.json"
+        target.write_text("{ not json", encoding="utf-8")
+
+        first = backup_corrupt_file(str(target))
+        second = backup_corrupt_file(str(target))
+        third = backup_corrupt_file(str(target))
+
+        assert first == second == third
+        assert len([p for p in tmp_path.iterdir() if ".corrupt-" in p.name]) == 1

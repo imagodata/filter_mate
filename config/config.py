@@ -449,8 +449,18 @@ def _write_config_json(path, data):
     A crash or a full disk in the middle of ``open(path, 'w')`` left a
     truncated file that the next start replaced with the defaults.
     """
-    # Imported here: infrastructure.utils imports this module at load time
-    from filter_mate.infrastructure.utils.atomic_io import atomic_json_write
+    try:
+        # Imported here: infrastructure.utils imports this module at load time
+        from filter_mate.infrastructure.utils.atomic_io import atomic_json_write
+    except ImportError as error:
+        QgsMessageLog.logMessage(
+            f"FilterMate: atomic write unavailable ({error}); config.json written directly",
+            "FilterMate",
+            Qgis.MessageLevel.Warning
+        )
+        with open(path, 'w', encoding='utf-8') as outfile:
+            json.dump(data, outfile, indent=4, ensure_ascii=False)
+        return
     atomic_json_write(path, data, indent=4)
 
 
@@ -461,7 +471,16 @@ def _keep_unreadable_config(path, reason):
         path: The config.json that failed to load.
         reason: Why (shown in the QGIS message log).
     """
-    from filter_mate.infrastructure.utils.atomic_io import backup_corrupt_file
+    try:
+        from filter_mate.infrastructure.utils.atomic_io import backup_corrupt_file
+    except ImportError as error:
+        QgsMessageLog.logMessage(
+            f"FilterMate: {path} cannot be used ({reason}) and could not be kept ({error}); "
+            "default settings are used.",
+            "FilterMate",
+            Qgis.MessageLevel.Warning
+        )
+        return
     backup = backup_corrupt_file(path)
     if backup:
         QgsMessageLog.logMessage(
@@ -699,6 +718,20 @@ def init_env_vars():
     # Auto-migrate sducournau → imagodata URLs (v4.5.1 org migration)
     options = CONFIG_DATA.get(app_key, {}).get("OPTIONS", {})
     config_dirty = False
+
+    # Passwords an older version saved here (the URI of a PostgreSQL layer): mask them once
+    try:
+        from filter_mate.infrastructure.logging.redaction import scrub_secrets_in_place
+        scrubbed = scrub_secrets_in_place(CONFIG_DATA)
+    except ImportError:
+        scrubbed = 0
+    if scrubbed:
+        config_dirty = True
+        QgsMessageLog.logMessage(
+            f"FilterMate: masked {scrubbed} saved connection password(s) in {config_json_path}",
+            "FilterMate",
+            Qgis.MessageLevel.Info
+        )
     for key in ("GITHUB_PAGE", "GITHUB_REPOSITORY", "DISCORD_INVITE", "QGIS_PLUGIN_REPOSITORY"):
         val = _get_option_value(options.get(key), "")
         if "sducournau" in val:

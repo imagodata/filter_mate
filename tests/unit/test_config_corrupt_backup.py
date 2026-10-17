@@ -38,9 +38,11 @@ def config_module(monkeypatch, tmp_path):
         if name not in sys.modules:
             monkeypatch.setitem(sys.modules, name, MagicMock())
     atomic_io = _load_by_path("fmtest_cfg_atomic_io", _ROOT / "infrastructure" / "utils" / "atomic_io.py")
-    for name in ("filter_mate.infrastructure", "filter_mate.infrastructure.utils"):
+    redaction = _load_by_path("fmtest_cfg_redaction", _ROOT / "infrastructure" / "logging" / "redaction.py")
+    for name in ("filter_mate.infrastructure", "filter_mate.infrastructure.utils", "filter_mate.infrastructure.logging"):
         monkeypatch.setitem(sys.modules, name, types.ModuleType(name))
     monkeypatch.setitem(sys.modules, "filter_mate.infrastructure.utils.atomic_io", atomic_io)
+    monkeypatch.setitem(sys.modules, "filter_mate.infrastructure.logging.redaction", redaction)
 
     module = _load_by_path("fmtest_cfg_config", _ROOT / "config" / "config.py")
     profile = tmp_path / "profile"
@@ -89,3 +91,44 @@ def test_a_missing_config_is_created_without_backup(config_module):
     names = sorted(p.name for p in config_module.profile_config.parent.iterdir())
     assert "config.json" in names
     assert not [n for n in names if ".corrupt-" in n]
+
+
+def test_the_same_broken_file_is_kept_once_across_starts(config_module):
+    broken = '{"APP": {"truncated'
+    _run(config_module, broken)
+    _run(config_module, broken)
+    names = _run(config_module, broken)
+    assert len([n for n in names if ".corrupt-" in n]) == 1
+
+
+def test_a_missing_atomic_writer_does_not_stop_the_start(config_module, monkeypatch):
+    """The import is protected: the file is then written directly and nothing is kept."""
+    monkeypatch.setitem(sys.modules, "filter_mate.infrastructure.utils.atomic_io", None)
+
+    names = _run(config_module, '{"APP": {"truncated')
+
+    assert not [n for n in names if ".corrupt-" in n]
+    assert isinstance(json.loads(config_module.profile_config.read_text(encoding="utf-8")), dict)
+
+
+def test_a_password_saved_by_an_older_version_is_masked_once(config_module):
+    default = json.loads((_ROOT / "config" / "config.default.json").read_text(encoding="utf-8"))
+    leaked = "dbname='gis' host=h user='bob' password='s3cret' table=\"public\".\"roads\" (geom)"
+    default.setdefault("CURRENT_PROJECT", {}).setdefault("OPTIONS", {})["ACTIVE_POSTGRESQL"] = [leaked]
+    default["CURRENT_PROJECT"]["OPTIONS"]["note"] = leaked
+    config_module.QgsMessageLog.logMessage.reset_mock()
+
+    _run(config_module, json.dumps(default))
+
+    saved = config_module.profile_config.read_text(encoding="utf-8")
+    assert "s3cret" not in saved
+    options = json.loads(saved)["CURRENT_PROJECT"]["OPTIONS"]
+    assert options["ACTIVE_POSTGRESQL"] == "" and "dbname='gis'" in options["note"]
+    messages = [call.args[0] for call in config_module.QgsMessageLog.logMessage.call_args_list]
+    assert any("2" in m and "password" in m.lower() and "masked" in m for m in messages)
+    assert not any("s3cret" in m for m in messages)
+    config_module.QgsMessageLog.logMessage.reset_mock()
+
+    _run(config_module, saved)  # next start: nothing left to correct, nothing announced
+
+    assert not any("masked" in call.args[0] for call in config_module.QgsMessageLog.logMessage.call_args_list)

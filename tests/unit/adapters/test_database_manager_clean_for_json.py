@@ -15,7 +15,7 @@ from typing import Any
 
 import pytest
 
-from infrastructure.logging.redaction import mask_sensitive_text
+from infrastructure.logging.redaction import mask_uri_secrets
 
 pytestmark = pytest.mark.unit
 
@@ -28,7 +28,7 @@ def _cleaner():
     for cls in (n for n in tree.body if isinstance(n, ast.ClassDef)):
         for node in cls.body:
             if isinstance(node, ast.FunctionDef) and node.name == "_clean_for_json":
-                ns = {"json": json, "Any": Any, "mask_sensitive_text": mask_sensitive_text}
+                ns = {"json": json, "Any": Any, "mask_uri_secrets": mask_uri_secrets}
                 exec(compile(ast.Module(body=[node], type_ignores=[]), str(_MODULE), "exec"), ns)
                 holder = types.SimpleNamespace()
                 holder._clean_for_json = types.MethodType(ns["_clean_for_json"], holder)
@@ -69,3 +69,15 @@ def test_plain_settings_are_untouched():
     clean = _cleaner()
     data = {"a": 1, "b": [1, 2, {"c": "text"}], "d": None, "e": 1.5}
     assert clean(data) == data
+
+
+def test_an_expression_that_mentions_a_passwd_column_is_not_altered():
+    clean = _cleaner()
+    expression = '"passwd" = \'abc\' AND passwd = \'abc\' AND "pwd"=1'
+    assert clean({"filter": expression, "list": [expression]}) == {"filter": expression, "list": [expression]}
+
+
+def test_a_url_with_credentials_is_masked():
+    clean = _cleaner()
+    cleaned = clean({"remote": "https://user:hunter2@github.com/org/repo.git"})
+    assert "hunter2" not in json.dumps(cleaned) and "github.com" in cleaned["remote"]

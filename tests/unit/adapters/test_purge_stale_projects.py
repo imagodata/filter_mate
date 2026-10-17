@@ -44,9 +44,11 @@ def _load_database_manager():
     feedback.show_error = MagicMock()
     sys.modules[f"{_PKG}.infrastructure.feedback"] = feedback
     _register(f"{_PKG}.infrastructure.logging")
-    redaction = MagicMock()
-    redaction.mask_sensitive_text = lambda text: text
-    sys.modules[f"{_PKG}.infrastructure.logging.redaction"] = redaction
+    redaction_spec = importlib.util.spec_from_file_location(
+        f"{_PKG}.infrastructure.logging.redaction", _REPO / "infrastructure" / "logging" / "redaction.py")
+    redaction = importlib.util.module_from_spec(redaction_spec)
+    sys.modules[redaction_spec.name] = redaction
+    redaction_spec.loader.exec_module(redaction)  # standard library only
 
     spec = importlib.util.spec_from_file_location(full, _REPO / "adapters" / "database_manager.py")
     module = importlib.util.module_from_spec(spec)
@@ -196,3 +198,41 @@ class TestPurgeStaleProjects:
     def test_default_threshold_constant(self):
         dbm = _load_database_manager()
         assert dbm.STALE_PROJECT_MAX_AGE_DAYS == 30
+
+
+@pytest.mark.unit
+class TestScrubSavedProjectSecrets:
+    """project_settings written by an older version could hold a layer URI with its password."""
+
+    LEAKED = "dbname='gis' host=h user='bob' password='s3cret' table=\"public\".\"roads\" (geom)"
+
+    def _settings(self, db, pid, settings):
+        import json
+        db.execute("INSERT INTO fm_projects VALUES (?, datetime('now'), datetime('now'), 'p.qgz', '/tmp/p', ?)",  # nosec B108
+                   (pid, json.dumps(settings)))
+        db.commit()
+
+    def _read(self, db, pid):
+        import json
+        return json.loads(db.execute("SELECT project_settings FROM fm_projects WHERE project_id = ?", (pid,)).fetchone()[0])
+
+    def test_leaked_uri_is_masked_once_and_counted(self, db):
+        dbm = _load_database_manager()
+        self._settings(db, "leaky", {"OPTIONS": {"ACTIVE_POSTGRESQL": [self.LEAKED], "other": 1}})
+        self._settings(db, "clean", {"OPTIONS": {"ACTIVE_POSTGRESQL": None, "expr": '"passwd" = \'abc\''}})
+        before_clean = db.execute("SELECT project_settings FROM fm_projects WHERE project_id = 'clean'").fetchone()[0]
+
+        assert dbm.scrub_saved_project_secrets(db.cursor()) == 1
+        db.commit()
+
+        assert "s3cret" not in db.execute("SELECT group_concat(project_settings) FROM fm_projects").fetchone()[0]
+        assert self._read(db, "leaky")["OPTIONS"] == {"ACTIVE_POSTGRESQL": "", "other": 1}
+        assert db.execute("SELECT project_settings FROM fm_projects WHERE project_id = 'clean'").fetchone()[0] == before_clean
+        assert dbm.scrub_saved_project_secrets(db.cursor()) == 0
+
+    def test_unreadable_settings_are_skipped(self, db):
+        dbm = _load_database_manager()
+        db.execute("INSERT INTO fm_projects VALUES ('broken', datetime('now'), datetime('now'), 'p', '/p', 'not json password=x')")
+        db.commit()
+
+        assert dbm.scrub_saved_project_secrets(db.cursor()) == 0

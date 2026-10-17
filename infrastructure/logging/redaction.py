@@ -15,11 +15,27 @@ from typing import Any
 
 _MASK = '***'
 
-# password=..., PASSWORD = '...', "password": "...", sslpassword=..., passwd=...
-# The value is a quoted string (backslash escapes allowed) or a bare token.
-_KEY_VALUE = re.compile(
-    r"""(\b(?:ssl)?(?:password|passwd)["']?\s*[=:]\s*)"""
-    r"""('(?:[^'\\]|\\.)*'|"(?:[^"\\]|\\.)*"|[^\s,;&'")}\]]+)""",
+_QUOTED = r"'(?:[^'\\]|\\.)*'" + "|" + r'"(?:[^"\\]|\\.)*"'
+_BARE = r"""[^\s,;&'")}\]]+"""
+
+# Logs: key=value with any key that ends in password / passwd / pwd (password,
+# sslpassword, PGPASSWORD, user_password, pwd...). The value is a quoted string
+# (backslash escapes allowed) or a bare token.
+_KEY_EQUALS = re.compile(
+    r"(?P<key>\b[\w.\-]*(?:password|passwd|pwd))(?P<sep>\s*=\s*)(?P<val>" + _QUOTED + "|" + _BARE + ")",
+    re.IGNORECASE,
+)
+# Logs: "password": "x" / 'password': 'x' (JSON, dict rendering). The key has to be quoted,
+# so that prose such as "Missing password: please configure" is left alone.
+_QUOTED_KEY_COLON = re.compile(
+    r"""(?P<key>(["'])[\w.\-]*(?:password|passwd|pwd)\2)(?P<sep>\s*:\s*)(?P<val>""" + _QUOTED + ")",
+    re.IGNORECASE,
+)
+# Saved data: only the libpq / QGIS URI form password='x', sslpassword='x', written with no
+# space around "=" and not part of a longer name or quoted identifier. An expression such as
+# "passwd" = 'abc' or passwd = 'abc' is data, not a connection string.
+_URI_PASSWORD = re.compile(
+    r"""(?<![\w"'.\-])(?P<key>(?:ssl)?password=)(?P<val>""" + _QUOTED + "|" + _BARE + ")",
     re.IGNORECASE,
 )
 
@@ -27,23 +43,30 @@ _KEY_VALUE = re.compile(
 _URL_CREDENTIALS = re.compile(r'(\b[a-z][a-z0-9+.\-]*://[^\s:/@]+:)([^\s@/]+)(@)', re.IGNORECASE)
 
 # Cheap pre-check: most messages have nothing to mask
-_HINT = re.compile(r'passw|passwd|://', re.IGNORECASE)
+_HINT = re.compile(r'passw|pwd|://', re.IGNORECASE)
 
 
 def _mask_value(match: 're.Match') -> str:
-    value = match.group(2)
+    value = match.group('val')
+    head = match.group('key') + match.group('sep') if 'sep' in match.groupdict() else match.group('key')
     if value[:1] in ('"', "'"):
-        return f"{match.group(1)}{value[0]}{_MASK}{value[0]}"
-    return f"{match.group(1)}{_MASK}"
+        return f"{head}{value[0]}{_MASK}{value[0]}"
+    return f"{head}{_MASK}"
+
+
+def _mask_urls(text: str) -> str:
+    return _URL_CREDENTIALS.sub(rf'\1{_MASK}\3', text)
 
 
 def mask_sensitive_text(text: Any) -> Any:
-    """Replace passwords found in a text by ``***``.
+    """Replace passwords found in a log text by ``***``.
 
-    Handles the PostgreSQL / QGIS ``password='x'`` form (quoted or not, with
-    escapes), dict / JSON renderings (``'password': 'x'``) and
-    ``scheme://user:x@host`` URLs. The rest of the text is untouched, so a
-    connection string stays useful for diagnostics.
+    Handles ``key=value`` where the key ends in password / passwd / pwd (the
+    PostgreSQL / QGIS ``password='x'`` form, ``PGPASSWORD=x``, ``user_password=x``,
+    quoted or not, with escapes), dict / JSON renderings (``'password': 'x'``)
+    and ``scheme://user:x@host`` URLs. The rest of the text is untouched, so a
+    connection string stays useful for diagnostics. This one is meant for log
+    lines; use :func:`mask_uri_secrets` for data that is saved.
 
     Args:
         text: Any value; non-strings are returned as is.
@@ -53,8 +76,63 @@ def mask_sensitive_text(text: Any) -> Any:
     """
     if not isinstance(text, str) or not _HINT.search(text):
         return text
-    masked = _KEY_VALUE.sub(_mask_value, text)
-    return _URL_CREDENTIALS.sub(rf'\1{_MASK}\3', masked)
+    masked = _KEY_EQUALS.sub(_mask_value, text)
+    masked = _QUOTED_KEY_COLON.sub(_mask_value, masked)
+    return _mask_urls(masked)
+
+
+def mask_uri_secrets(text: Any) -> Any:
+    """Replace the password of a connection string / URI found in a text by ``***``.
+
+    Narrower than :func:`mask_sensitive_text`, for data that is saved
+    (config.json, project settings): only ``password=`` / ``sslpassword=`` in
+    the URI form and ``scheme://user:x@host`` URLs. An expression that merely
+    mentions a column called ``passwd`` is not altered.
+
+    Args:
+        text: Any value; non-strings are returned as is.
+
+    Returns:
+        The text without the password (the same object when there was none).
+    """
+    if not isinstance(text, str) or not _HINT.search(text):
+        return text
+    return _mask_urls(_URI_PASSWORD.sub(_mask_value, text))
+
+
+def scrub_secrets_in_place(data: Any) -> int:
+    """Mask the connection passwords saved by an older version, in a JSON-like structure.
+
+    Walks dicts and lists and applies :func:`mask_uri_secrets` to every string;
+    an ``ACTIVE_POSTGRESQL`` entry (a connection at run time, never to be saved)
+    that holds anything is emptied. Never logs a value.
+
+    Args:
+        data: Parsed config.json / project settings, modified in place.
+
+    Returns:
+        int: Number of values corrected (0 when there was nothing to mask).
+    """
+    corrections = 0
+
+    def walk(node):
+        nonlocal corrections
+        items = node.items() if isinstance(node, dict) else enumerate(node)
+        for key, value in list(items):
+            if isinstance(node, dict) and key == 'ACTIVE_POSTGRESQL' and value not in (None, '', [], {}):
+                node[key] = ''
+                corrections += 1
+            elif isinstance(value, str):
+                masked = mask_uri_secrets(value)
+                if masked != value:
+                    node[key] = masked
+                    corrections += 1
+            elif isinstance(value, (dict, list)):
+                walk(value)
+
+    if isinstance(data, (dict, list)):
+        walk(data)
+    return corrections
 
 
 class SecretMaskingFilter(logging.Filter):

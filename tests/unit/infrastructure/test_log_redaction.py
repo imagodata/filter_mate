@@ -16,7 +16,8 @@ import types
 import pytest
 
 from infrastructure import logging as fm_logging
-from infrastructure.logging.redaction import SecretMaskingFilter, mask_sensitive_text
+from infrastructure.logging.redaction import (
+    SecretMaskingFilter, mask_sensitive_text, mask_uri_secrets, scrub_secrets_in_place)
 
 pytestmark = pytest.mark.unit
 
@@ -43,11 +44,27 @@ class TestMaskSensitiveText:
         "passwd=hunter2",
         "postgresql://bob:hunter2@db.example/gis",
         "sslpassword=hunter2",
+        "pwd=hunter2",
+        "PGPASSWORD=hunter2",
+        "user_password=hunter2",
+        "DB_PASSWORD = 'hunter2'",
+        "https://user:hunter2@github.com/org/repo.git",
+        "url='https://u:hunter2@h/wfs'",
     ])
     def test_forms(self, text):
         masked = mask_sensitive_text(text)
         assert "hunter2" not in masked
         assert "hunter2"[1:] not in masked
+
+    @pytest.mark.parametrize("text", [
+        "Missing password: please configure",
+        "password policy ok",
+        'WHERE "passwd" = \'abc\' AND "x" = 1',
+        "C:\\Users\\passwords\\file.gpkg",
+        "pwd is /home/user",
+    ])
+    def test_prose_and_column_names_are_left_alone(self, text):
+        assert mask_sensitive_text(text) == text
 
     def test_text_without_secret_is_returned_unchanged(self):
         text = "Layer 'roads' filtered: 120 features, password policy ok"
@@ -264,3 +281,67 @@ class TestSafeSetSubsetStringDiagnostics:
         sql_utils.safe_set_subset_string(_FailingPgLayer(), "")
 
         assert fake_probe.closed_calls == 1
+
+
+class TestMaskUriSecrets:
+    """The narrow variant for saved data: connection-string passwords only."""
+
+    @pytest.mark.parametrize("text", [
+        SOURCE,
+        "host=h password=hunter2 port=5432",
+        "sslpassword='hunter2' sslmode=require",
+        "postgresql://bob:hunter2@db.example/gis",
+        "note: password='hunter2' was typed",
+    ])
+    def test_connection_strings(self, text):
+        assert "hunter2" not in mask_uri_secrets(text) and "s3cret" not in mask_uri_secrets(text)
+
+    @pytest.mark.parametrize("text", [
+        'WHERE "passwd" = \'abc\' AND "x" = 1',
+        "passwd = 'abc'",
+        "pwd=abc",
+        "PGPASSWORD=abc",
+        "user_password=abc",
+        '"password": "abc"',
+        "password: abc",
+        "Missing password: please configure",
+        "the_password='abc'",
+    ])
+    def test_everything_else_is_left_alone(self, text):
+        assert mask_uri_secrets(text) == text
+
+    def test_idempotent_and_non_strings(self):
+        once = mask_uri_secrets(SOURCE)
+        assert mask_uri_secrets(once) == once
+        assert mask_uri_secrets(None) is None and mask_uri_secrets(3) == 3
+
+
+class TestScrubSecretsInPlace:
+    """What an older version saved: URIs with their password, in config.json and the project settings."""
+
+    def test_nested_structures_are_cleaned_and_counted(self):
+        data = {
+            "CURRENT_PROJECT": {"OPTIONS": {"ACTIVE_POSTGRESQL": [SOURCE], "IS_ACTIVE_POSTGRESQL": True,
+                                            "note": f"was {SOURCE}"}},
+            "APP": {"remotes": ["https://user:hunter2@github.com/x.git", "clean"]},
+        }
+
+        corrections = scrub_secrets_in_place(data)
+
+        assert corrections == 3
+        assert "s3cret" not in repr(data) and "hunter2" not in repr(data)
+        assert data["CURRENT_PROJECT"]["OPTIONS"]["ACTIVE_POSTGRESQL"] == ""
+        assert data["CURRENT_PROJECT"]["OPTIONS"]["IS_ACTIVE_POSTGRESQL"] is True
+        assert data["APP"]["remotes"][1] == "clean"
+
+    def test_clean_data_is_untouched_and_counts_zero(self):
+        data = {"a": 1, "b": ["x", {"c": 'WHERE "passwd" = \'abc\''}], "ACTIVE_POSTGRESQL": None, "d": ""}
+        before = repr(data)
+
+        assert scrub_secrets_in_place(data) == 0
+        assert repr(data) == before
+
+    def test_second_pass_finds_nothing(self):
+        data = {"x": SOURCE}
+        assert scrub_secrets_in_place(data) == 1
+        assert scrub_secrets_in_place(data) == 0

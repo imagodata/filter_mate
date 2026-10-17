@@ -74,6 +74,11 @@ logs/*
 
 # Config backups
 config/backups/*.backup
+config/*.corrupt-*
+*.json.corrupt-*
+
+# Temp files of atomic writes (infrastructure/utils/atomic_io.py)
+.fm_*.tmp
 
 # Type checking and linting cache
 .mypy_cache/

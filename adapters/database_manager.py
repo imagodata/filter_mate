@@ -29,12 +29,43 @@ from qgis.core import (
 
 from ..infrastructure.utils.task_utils import sqlite_connect
 from ..infrastructure.feedback import show_error
-from ..infrastructure.logging.redaction import mask_sensitive_text
+from ..infrastructure.logging.redaction import mask_uri_secrets, scrub_secrets_in_place
 
 logger = logging.getLogger('FilterMate.DatabaseManager')
 
 
 STALE_PROJECT_MAX_AGE_DAYS = 30
+
+
+def scrub_saved_project_secrets(cursor) -> int:
+    """Mask the connection passwords an older version saved in ``fm_projects.project_settings``.
+
+    A PostgreSQL layer without authcfg was once saved, URI and password included, as
+    ``ACTIVE_POSTGRESQL``. Each affected row is rewritten once, masked; nothing is
+    logged but the count.
+
+    Args:
+        cursor: Open sqlite3 cursor on the FilterMate database
+
+    Returns:
+        int: Number of values corrected
+    """
+    cursor.execute(
+        "SELECT project_id, project_settings FROM fm_projects "
+        "WHERE project_settings LIKE '%password%' OR project_settings LIKE '%://%' "
+        "OR project_settings LIKE '%ACTIVE_POSTGRESQL%'")
+    corrected = 0
+    for project_id, raw in cursor.fetchall():
+        try:
+            settings = json.loads(raw)
+        except (TypeError, ValueError):
+            continue
+        count = scrub_secrets_in_place(settings)
+        if count:
+            cursor.execute("UPDATE fm_projects SET project_settings = ? WHERE project_id = ?",
+                           (json.dumps(settings), project_id))
+            corrected += count
+    return corrected
 
 
 def purge_stale_projects(cursor, keep_project_uuid: Optional[str] = None,
@@ -153,7 +184,7 @@ class DatabaseManager:
         is written to config.json and to the project database, so
         ``ACTIVE_POSTGRESQL`` (a live connection at run time) is never kept
         whatever it holds - a URI there would carry the layer's password - and
-        a password in any other string is masked.
+        a password in the URI form (password=, scheme://user:x@host) in any other string is masked.
 
         Args:
             obj: Object to clean
@@ -164,7 +195,7 @@ class DatabaseManager:
         if obj is None:
             return None
         elif isinstance(obj, str):
-            return mask_sensitive_text(obj)
+            return mask_uri_secrets(obj)
         elif isinstance(obj, (int, float, bool)):
             return obj
         elif isinstance(obj, dict):
@@ -604,6 +635,15 @@ class DatabaseManager:
                             logger.info(f"Purged {purged} stale unsaved project(s) from FilterMate database")
                     except Exception as purge_err:
                         logger.debug(f"Stale project purge skipped: {purge_err}")
+
+                    # Passwords an older version saved with the project settings: mask them once
+                    try:
+                        scrubbed = scrub_saved_project_secrets(cur)
+                        if scrubbed:
+                            conn.commit()
+                            logger.info(f"Masked {scrubbed} saved connection password(s) in the FilterMate database")
+                    except Exception as scrub_err:
+                        logger.debug(f"Saved password masking skipped: {scrub_err}")
 
             return True, config_data
 
