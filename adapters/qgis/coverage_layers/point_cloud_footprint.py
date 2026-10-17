@@ -45,6 +45,7 @@ class FootprintResult:
     points_read: int
     cell_size: float
     truncated: bool = False
+    coarse: bool = False  # cells larger than the resolution (grid limit)
 
 
 def open_point_cloud(source: str, name: str, provider: str):
@@ -82,6 +83,10 @@ def selection_check(subset: str) -> Optional[CheckFn]:
     The points returned by ``identify`` all pass the subset string, unless
     QGIS served a block cached without the filter: the footprint would then
     cover the whole cloud, so the run stops instead.
+
+    ``identify`` turns GpsTime into a date text for COPC (QGIS >= 3.42), the
+    number staying under ``GpsTime (raw)``: the number is used. A value the
+    expression reads that is still not a number turns the check off.
     """
     if not (subset or '').strip():
         return None
@@ -102,12 +107,18 @@ def selection_check(subset: str) -> Optional[CheckFn]:
             context = QgsExpressionContext()
             context.setFields(fields)
             expression.prepare(context)
-            state.update(names=names, fields=fields, context=context)
+            referenced = {str(column).lower() for column in expression.referencedColumns()}
+            read = [i for i, name in enumerate(names) if name.lower() in referenced]
+            state.update(names=names, fields=fields, context=context, read=read or list(range(len(names))))
         names, context = state['names'], state['context']
         feature = QgsFeature(state['fields'])
         step = max(1, len(points) // CHECK_SAMPLE)
         for point in points[::step][:CHECK_SAMPLE]:
-            feature.setAttributes([point.get(name) for name in names])
+            values = [_number(point, name) for name in names]
+            if any(isinstance(values[i], bool) or not isinstance(values[i], (int, float)) for i in state['read']):
+                state['off'] = True  # a text or NULL the expression reads: no reliable check
+                return
+            feature.setAttributes(values)
             context.setFeature(feature)
             value = expression.evaluate(context)
             if expression.hasEvalError():
@@ -120,11 +131,29 @@ def selection_check(subset: str) -> Optional[CheckFn]:
     return check
 
 
-def _quarters(tile: QgsRectangle, overlap: float) -> List[QgsRectangle]:
-    """Four parts of ``tile``, overlapping by ``overlap``: identify() leaves out the points on an edge."""
+def _number(point: dict, name: str):
+    """Value of ``name`` in an identify() result, the raw number behind a GpsTime turned into text."""
+    value = point.get(name)
+    if isinstance(value, str) and f"{name} (raw)" in point:
+        return point[f"{name} (raw)"]
+    return value
+
+
+def _split(tile: QgsRectangle, overlap: float, min_side: float) -> List[QgsRectangle]:
+    """Parts of a saturated tile, overlapping by ``overlap`` (identify() leaves out the points on an edge).
+
+    Four parts, or two across the long side when the short one is under
+    ``min_side`` (a corridor is cut along its length).
+    """
+    x0, y0, x1, y1 = tile.xMinimum(), tile.yMinimum(), tile.xMaximum(), tile.yMaximum()
     xm, ym = tile.center().x(), tile.center().y()
-    parts = [QgsRectangle(tile.xMinimum(), tile.yMinimum(), xm, ym), QgsRectangle(xm, tile.yMinimum(), tile.xMaximum(), ym),
-             QgsRectangle(tile.xMinimum(), ym, xm, tile.yMaximum()), QgsRectangle(xm, ym, tile.xMaximum(), tile.yMaximum())]
+    if min(tile.width(), tile.height()) > min_side:
+        parts = [QgsRectangle(x0, y0, xm, ym), QgsRectangle(xm, y0, x1, ym),
+                 QgsRectangle(x0, ym, xm, y1), QgsRectangle(xm, ym, x1, y1)]
+    elif tile.width() >= tile.height():
+        parts = [QgsRectangle(x0, y0, xm, y1), QgsRectangle(xm, y0, x1, y1)]
+    else:
+        parts = [QgsRectangle(x0, y0, x1, ym), QgsRectangle(x0, ym, x1, y1)]
     for part in parts:
         part.grow(overlap)
     return parts
@@ -147,9 +176,10 @@ def _read_xy(provider, resolution: float, area: QgsRectangle, points_limit: int,
             break
         points = provider.identify(resolution, QgsGeometry.fromRect(tile), QgsDoubleRange(), budget)
         if len(points) >= budget:
-            if budget == POINTS_PER_CALL and min(tile.width(), tile.height()) > 2 * MIN_TILE_CELLS * resolution:
+            min_side = 2 * MIN_TILE_CELLS * resolution
+            if budget == POINTS_PER_CALL and max(tile.width(), tile.height()) > min_side:
                 points = None  # noqa: F841 - not kept while the parts are read
-                tiles.extend(_quarters(tile, resolution * 1e-3))  # saturated: the cached blocks are read again
+                tiles.extend(_split(tile, resolution * 1e-3, min_side))  # saturated: the cached blocks are read again
                 continue
             truncated = True
         if check is not None:
@@ -222,4 +252,4 @@ def footprint_geometry(layer, resolution: float = DEFAULT_RESOLUTION, extent: Op
         grid = grown
     geotransform = (left, cell, 0.0, top, 0.0, -cell)
     geometry = mask_to_geometry(grid, geotransform, layer.crs().toWkt(), sieve_pixels=0, simplify_tolerance=cell * 0.5)
-    return FootprintResult(geometry, int(len(xs)), cell, truncated)
+    return FootprintResult(geometry, int(len(xs)), cell, truncated, coarse=cell > resolution)
