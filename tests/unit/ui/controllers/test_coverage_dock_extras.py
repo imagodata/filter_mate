@@ -323,6 +323,22 @@ class TestRangeLinkedToStyle:
         env.link.setChecked(True)
         assert ("link", "r1") in env.adapter.calls
 
+    def test_a_colour_selection_keeps_the_stretch(self, dock_extras):
+        env = dock_extras
+        env.controller._raster_panel.selection = lambda: types.SimpleNamespace(mode=types.SimpleNamespace(value="expression"))
+        env.controller.active_layer = env.layers["r1"]
+        env.dock.show_for(env.layers["r1"], "raster")
+        env.link.setChecked(True)
+        assert not [c for c in env.adapter.calls if c[0] == "link"]
+
+    def test_an_empty_pipette_keeps_the_stretch(self, dock_extras):
+        env = dock_extras
+        env.controller._raster_panel.active_mode = lambda: types.SimpleNamespace(value="pipette")
+        env.controller.active_layer = env.layers["r1"]
+        env.dock.show_for(env.layers["r1"], "raster")
+        env.link.setChecked(True)
+        assert not [c for c in env.adapter.calls if c[0] == "link"]
+
     def test_switching_raster_unlinks_the_outgoing_one(self, dock_extras):
         self._link_r1(dock_extras)
         dock_extras.controller.active_layer = dock_extras.layers["r2"]  # the controller moves first

@@ -717,6 +717,12 @@ class CoverageDockExtras(QObject):
         if panel.current_derivative().is_terrain:
             self._unlink_style()  # the range is in slope / aspect units, not in those of the style
             return
+        selection = panel.selection()
+        mode = getattr(getattr(panel, 'active_mode', lambda: None)(), 'value', '')
+        if (selection is not None and getattr(selection.mode, 'value', '') != 'range') or (selection is None and mode == 'pipette'):
+            # A colour, a class or an expression has no range: the current stretch stays as it is
+            # (stretching over the whole data would undo the user's contrast for nothing).
+            return
         low, high = self._link_range()
         try:
             if self._linked_layer_id not in (None, layer.id()):

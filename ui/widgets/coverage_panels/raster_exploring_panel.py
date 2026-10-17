@@ -1114,6 +1114,7 @@ class RasterExploringPanel(QWidget):
             return
         self._set_range(*bounds)
         self._presets_combo.setCurrentIndex(0)
+        self._activate_mode(RasterSelectionMode.RANGE, emit=False)  # a usual threshold is a range selection
         self._emit_now()
 
     def _update_mode_controls(self) -> None:
