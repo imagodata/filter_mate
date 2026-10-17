@@ -59,6 +59,7 @@ _OPERATOR_DOC = (
     "either keeps), AND NOT (remove the new selection from the previous filter). Omit to replace the previous filter."
 )
 
+
 def _write(title: str, idempotent: bool, destructive: bool = False) -> ToolAnnotations:
     return ToolAnnotations(title=title, readOnlyHint=False, destructiveHint=destructive,
                            idempotentHint=idempotent, openWorldHint=False)
@@ -182,6 +183,10 @@ def build_server(client: FilterMateClient) -> Any:
 
         Returns success and active_filters ({layer name: subset string} after the call). For spatial filtering
         between layers use cross_filter or geometry_filter. Revert with clear_filters.
+
+        Caution: some providers (GeoPackage, Shapefile through OGR) accept an invalid SQL expression without any
+        error and the layer then shows no feature. Check list_layers afterwards (feature_count -1, or 0 when you
+        expected matches) and use clear_filters to recover.
         """
         return await call("POST", "/filters/apply",
                           _body(layer_name=layer_name, expression=expression, source=source))

@@ -328,6 +328,25 @@ API in QGIS; a timeout, or a connection that breaks after a change was sent, tel
 retrying (the change may have been applied). `undo_filter` and `redo_filter` are not idempotent: the server's
 instructions ask the assistant to read `filter_state` after one, rather than repeat it blindly.
 
+### Tested
+
+`tests/unit/api/` (a fake REST API on a socket, the MCP server over stdio) and `tests/api/test_mcp_against_real_api.py`
+(the real FastAPI app) run without QGIS. `tests/qgis_headless/check_mcp_e2e.py` drives the whole chain in a real QGIS:
+a real MCP client starts `filtermate_api/mcp/__main__.py` against the REST API served on the loaded plugin, and every
+step is checked on the real layers (subset strings, clipped sources, exported files). Run it in the QGIS image:
+
+```bash
+docker run --rm -v "$PWD:/src:ro" qgis/qgis:ltr bash -ec '
+  pip install -q --break-system-packages --ignore-installed typing_extensions fastapi uvicorn mcp
+  python3 /src/tests/qgis_headless/make_fixtures.py /tmp/fm > /dev/null
+  FM_FIXTURES=/tmp/fm xvfb-run -a qgis --nologo --noversioncheck --profiles-path /tmp/profiles \
+    --code /src/tests/qgis_headless/check_mcp_e2e.py'
+```
+
+It passed on QGIS 3.44 and 4.2 with `mcp` 1.30 and 2.3. Known limit it records: with OGR (GeoPackage, Shapefile),
+`apply_filter` with invalid SQL is accepted by the provider and the layer shows nothing; `list_layers` then reports
+`feature_count` -1 and `clear_filters` recovers.
+
 ### Security
 
 - **An assistant that can call these tools changes what your layers show**, and can write files below the export root.
