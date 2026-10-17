@@ -542,6 +542,194 @@ def user_data_safety_postgresql():
     setup.close()
 
 
+def user_data_safety_native_spatialite():
+    """A native Spatialite database (the only kind where fm_temp_* is made in practice).
+
+    Layers use the 'spatialite' provider: the cleanup must scan their database, drop the
+    undeclared temp table of the all-sessions cleanup, spare the table a layer is filtered
+    through, and (session cleanup) drop a declared table with its own R-tree index and
+    metadata rows only.
+    """
+    import sqlite3
+    from filter_mate.adapters.backends.spatialite import filter_executor
+    from filter_mate.infrastructure.database.sql_utils import create_temp_spatialite_table
+    from filter_mate.ui.controllers.backend_controller import BackendController
+
+    session = 'cd34ab12'
+    work = os.path.join(info['work'], 'native')
+    os.makedirs(work, exist_ok=True)
+    db = os.path.join(work, 'native.sqlite')
+    conn = sqlite3.connect(db)
+    conn.enable_load_extension(True)
+    try:
+        conn.load_extension('mod_spatialite')
+    except sqlite3.Error:
+        try:
+            conn.load_extension('mod_spatialite.so')
+        except sqlite3.Error:
+            conn.close()
+            report('SKIP', 'safety: native Spatialite', 'mod_spatialite is not available')
+            return
+    conn.execute('SELECT InitSpatialMetadata(1)')
+    conn.execute('CREATE TABLE roads (pk INTEGER PRIMARY KEY)')
+    conn.execute("SELECT AddGeometryColumn('roads', 'geom', 2154, 'LINESTRING', 'XY')")
+    conn.execute("INSERT INTO roads (pk, geom) VALUES (1, GeomFromText('LINESTRING(0 0, 1 1)', 2154))")
+    conn.execute("INSERT INTO roads (pk, geom) VALUES (2, GeomFromText('LINESTRING(5 5, 6 6)', 2154))")
+    conn.execute('CREATE TABLE mv_20231231_bati (pk INTEGER)')
+    conn.commit()
+    conn.close()
+
+    roads = QgsVectorLayer(f"dbname='{db}' table=\"roads\" (geom)", 'roads', 'spatialite')
+    project.addMapLayer(roads)
+    check('safety: the native Spatialite layer is valid', roads.isValid(), roads.source()[:80])
+
+    queued = []
+    ok = filter_executor.manage_spatialite_subset(
+        layer=roads, sql_subset_string='SELECT pk, geom FROM roads WHERE pk = 1', primary_key_name='pk',
+        geom_key_name='geom', name='roads_1', session_id=session, project_uuid=None,
+        queue_subset_func=lambda layer, subset: queued.append(subset),
+        get_spatialite_datasource_func=lambda layer: (db, 'roads', 2154, True))
+    in_use = f'fm_temp_{session}_roads_1'
+    check('safety: native: the temp table is made and its subset filters the layer',
+          ok and queued == [f'"pk" IN (SELECT "pk" FROM {in_use})'] and roads.setSubsetString(queued[0])
+          and [f['pk'] for f in roads.getFeatures()] == [1], f"ok={ok} subset={queued}")
+    # a second table, declared in geometry_columns (R-tree + metadata) like a registered one, plus a sibling
+    # whose name extends it: dropping one must leave the other's index alone
+    for name in (f'fm_temp_{session}_declared', f'fm_temp_{session}_declared_more'):
+        create_temp_spatialite_table(db, name, 'SELECT pk, geom FROM roads', 'geom', 2154, register_geometry=True)
+
+    dock = _fake_dock(session)
+    controller = BackendController(dock)
+    controller.get_pg_session_context = lambda: (None, session, 'filter_mate_temp', None)
+    check('safety: native: the database of a spatialite-provider layer is scanned',
+          db in controller._spatialite_project_databases(), str(controller._spatialite_project_databases()))
+    candidates = controller.collect_global_cleanup_candidates()['spatialite']
+    check('safety: native: the table in use and the declared ones are not candidates, mv_20231231_bati neither',
+          candidates == {}, f"candidates={candidates}")
+
+    # session cleanup: declared tables go, the one a layer is filtered through stays
+    count = controller._cleanup_spatialite_project_tables()
+    conn = sqlite3.connect(db)
+    tables = {row[0] for row in conn.execute("SELECT name FROM sqlite_master WHERE type='table'")}
+    conn.enable_load_extension(True)
+    conn.load_extension('mod_spatialite')
+    declared = {row[0] for row in conn.execute('SELECT f_table_name FROM geometry_columns')}
+    stats = {row[0] for row in conn.execute('SELECT f_table_name FROM geometry_columns_statistics')}
+    integrity = conn.execute('PRAGMA integrity_check').fetchone()[0]
+    conn.close()
+    check('safety: native: the session cleanup drops the declared tables with index and metadata, keeps the table in use',
+          count == 2 and in_use in tables and {'roads', 'mv_20231231_bati'} <= tables
+          and not [t for t in tables if 'declared' in t] and declared == {'roads'}
+          and not [s for s in stats if 'declared' in s] and integrity == 'ok'
+          and [f['pk'] for f in roads.getFeatures()] == [1],
+          f"count={count} tables={sorted(t for t in tables if 'fm_temp' in t or 'idx_' in t)} "
+          f"declared={sorted(declared)} stats={sorted(stats)}")
+
+    roads.setSubsetString('')
+    candidates = controller.collect_global_cleanup_candidates()['spatialite']
+    check('safety: native: once the filter is cleared the table is a candidate of the global cleanup',
+          candidates == {db: [in_use]}, f"candidates={candidates}")
+    dropped = controller.cleanup_temp_tables_global()
+    conn = sqlite3.connect(db)
+    left = {row[0] for row in conn.execute("SELECT name FROM sqlite_master WHERE type='table'")}
+    conn.close()
+    check('safety: native: the global cleanup then drops it and nothing else',
+          dropped == 1 and in_use not in left and {'roads', 'mv_20231231_bati'} <= left, f"dropped={dropped}")
+    project.removeMapLayer(roads.id())
+
+
+def user_data_safety_two_databases():
+    """Two PostGIS databases in one project: each task connects to the database of its own layer.
+
+    ACTIVE_POSTGRESQL used to be one shared connection (the first PostgreSQL layer's): every
+    task filtered through it. Now DatasourceManager opens nothing, and a task opens its own
+    connection from its source layer.
+    """
+    dsn = os.environ.get('FM_PG_DSN')
+    if not dsn:
+        report('SKIP', 'safety: two PostgreSQL databases', 'FM_PG_DSN not set')
+        return
+    from unittest.mock import MagicMock
+    import psycopg2
+    from qgis.PyQt.QtCore import QObject
+    from filter_mate.core.services.datasource_manager import DatasourceManager
+    from filter_mate.core.tasks.filter_task import FilterEngineTask
+
+    params = dict(item.split('=', 1) for item in dsn.split())
+    first_db, second_db = params['dbname'], 'fm_second_db'
+    admin = psycopg2.connect(dsn)
+    admin.autocommit = True
+    admin.cursor().execute(f'DROP DATABASE IF EXISTS {second_db}')
+    admin.cursor().execute(f'CREATE DATABASE {second_db}')
+    rows = {first_db: 3, second_db: 5}
+    for dbname, count in rows.items():
+        connection = psycopg2.connect(dsn.replace(f"dbname={first_db}", f"dbname={dbname}"))
+        connection.autocommit = True
+        cursor = connection.cursor()
+        cursor.execute('CREATE EXTENSION IF NOT EXISTS postgis')
+        cursor.execute('DROP TABLE IF EXISTS public.fm_two_roads')
+        cursor.execute('CREATE TABLE public.fm_two_roads (id serial PRIMARY KEY, geom geometry(Point, 4326))')
+        cursor.execute(f"INSERT INTO public.fm_two_roads (geom) SELECT ST_SetSRID(ST_MakePoint(g, g), 4326) "
+                       f"FROM generate_series(1, {count}) g")
+        connection.close()
+
+    def layer_on(dbname):
+        uri = (f"dbname='{dbname}' host={params['host']} port={params['port']} user='{params['user']}' "
+               f"password='{params['password']}' sslmode=disable key='id' srid=4326 type=Point "
+               f"table=\"public\".\"fm_two_roads\" (geom)")
+        layer = QgsVectorLayer(uri, f'roads_{dbname}', 'postgres')
+        project.addMapLayer(layer)
+        return layer
+
+    layers = {dbname: layer_on(dbname) for dbname in rows}
+    check('safety: two databases: both PostGIS layers are valid', all(l.isValid() for l in layers.values()),
+          str({k: l.isValid() for k, l in layers.items()}))
+
+    # the datasource manager tracks both databases and opens no connection
+    config = {"CURRENT_PROJECT": {"OPTIONS": {"ACTIVE_POSTGRESQL": "", "IS_ACTIVE_POSTGRESQL": False}}}
+    manager = DatasourceManager(
+        get_project_callback=lambda: project, get_iface_callback=MagicMock(),
+        get_config_data_callback=lambda: config, set_config_data_callback=MagicMock(),
+        get_db_file_path_callback=lambda: '', get_temp_schema_callback=lambda: 'filter_mate_temp',
+        show_error_callback=MagicMock(), show_warning_callback=MagicMock())
+    for layer in layers.values():
+        manager.update_datasource_for_layer({'layer_provider_type': 'postgresql', 'layer_name': layer.name(),
+                                             'layer_id': layer.id()})
+    manager.update_datasource()
+    tracked = manager.project_datasources['postgresql']
+    options = config["CURRENT_PROJECT"]["OPTIONS"]
+    check('safety: two databases: one entry per database, no connection, nothing secret, ACTIVE_POSTGRESQL empty',
+          len(tracked) == 2 and set(tracked.values()) == {None} and 'password' not in repr(tracked)
+          and options["ACTIVE_POSTGRESQL"] == ""
+          and options["IS_ACTIVE_POSTGRESQL"] is True, f"tracked={list(tracked)} options={options}")
+
+    # each task connects to the database of its own source layer
+    seen = {}
+    for dbname, layer in layers.items():
+        task = QObject()  # attribute holder; the method only needs these attributes
+        task.task_parameters = {"task": {"options": {"ACTIVE_POSTGRESQL": MagicMock(closed=False)}}}
+        task.source_layer, task.active_connections, task.PROJECT = layer, [], project
+        connection = FilterEngineTask._get_valid_postgresql_connection(task)
+        cursor = connection.cursor()
+        cursor.execute('SELECT current_database(), (SELECT count(*) FROM public.fm_two_roads)')
+        seen[dbname] = cursor.fetchone()
+        again = FilterEngineTask._get_valid_postgresql_connection(task)
+        seen[dbname] += (again is connection,)
+        for opened in task.active_connections:
+            opened.close()
+    check('safety: two databases: each task uses a connection to its own layer\'s database (not a shared one)',
+          seen == {first_db: (first_db, 3, True), second_db: (second_db, 5, True)}, str(seen))
+
+    for layer in layers.values():
+        project.removeMapLayer(layer.id())
+    admin.cursor().execute(f'DROP DATABASE IF EXISTS {second_db} WITH (FORCE)')
+    connection = psycopg2.connect(dsn)
+    connection.autocommit = True
+    connection.cursor().execute('DROP TABLE IF EXISTS public.fm_two_roads')
+    connection.close()
+    admin.close()
+
+
 def environment():
     from filter_mate.adapters.qgis.coverage_layers import pdal_cli
     exe = pdal_cli.find_pdal()
@@ -578,7 +766,8 @@ def main():
 
     for step in (plugin_starts_without_iface, provider_lists_algorithms, load_layers, raster_to_vector,
                  vector_to_raster, point_clouds, user_data_safety,
-                 user_data_safety_postgresql, environment):
+                 user_data_safety_postgresql,
+                 user_data_safety_native_spatialite, user_data_safety_two_databases, environment):
         if (step is not plugin_starts_without_iface
                 and QgsApplication.processingRegistry().providerById('filtermate') is None):
             report('SKIP', step.__name__, 'no FilterMate Processing provider')
