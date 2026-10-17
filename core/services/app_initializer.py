@@ -86,6 +86,7 @@ class AppInitializer:
         save_variables_from_layer_callback=None,
         remove_variables_from_layer_callback=None,
         save_project_variables_callback=None,
+        connect_layer_store_signals_callback=None,
     ):
         """
         Initialize AppInitializer with dependency injection.
@@ -118,6 +119,8 @@ class AppInitializer:
             save_variables_from_layer_callback: Callback to save layer variables
             remove_variables_from_layer_callback: Callback to remove layer variables
             save_project_variables_callback: Callback to save project variables
+            connect_layer_store_signals_callback: The app's connection of its layer-store
+                slots (remembered, disconnected on a project switch and at unload)
         """
         self._init_filtermate_db = init_filtermate_db_callback
         self._get_spatialite_connection = get_spatialite_connection_callback
@@ -146,6 +149,7 @@ class AppInitializer:
         self._save_variables_from_layer = save_variables_from_layer_callback
         self._remove_variables_from_layer = remove_variables_from_layer_callback
         self._save_project_variables = save_project_variables_callback
+        self._connect_layer_store_signals_callback = connect_layer_store_signals_callback
 
     def initialize_application(self, is_first_run: bool = True) -> bool:
         """
@@ -649,7 +653,16 @@ class AppInitializer:
             self._manage_task('add_layers', still_valid)
 
     def _connect_layer_store_signals(self):
-        """Connect layer store signals for layer management."""
+        """Connect layer store signals for layer management.
+
+        2026-10-17: through the app when it gives its connection: the anonymous
+        slots connected below were never remembered, so a project switch could
+        not disconnect them and connected the app's next to them (every layer
+        addition / removal handled twice).
+        """
+        if self._connect_layer_store_signals_callback is not None:
+            self._connect_layer_store_signals_callback()
+            return
         signals_connected = self._get_signals_connected() if self._get_signals_connected else False
 
         if signals_connected:

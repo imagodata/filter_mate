@@ -332,6 +332,9 @@ class FilterMateApp:
         if getattr(self, '_unloading', False):
             return
         self._unloading = True
+        # 2026-10-17: _disconnect_all_signals had no caller: the project kept calling the slots
+        # of an unloaded instance (layer additions / removals, saves on fileNameChanged).
+        self._disconnect_all_signals()
         self._stop_pending_layer_additions()
         self._safe_cancel_all_tasks()
         service = self._get_layer_lifecycle_service()
@@ -584,7 +587,8 @@ class FilterMateApp:
                                                 lambda: self._signals_connected, lambda val: setattr(self, '_signals_connected', val), lambda: self._dockwidget_signals_connected,
                                                 lambda val: setattr(self, '_dockwidget_signals_connected', val), lambda: self.MapLayerStore, lambda mls: setattr(self, 'MapLayerStore', mls),
                                                 self._on_widgets_initialized, self._on_layers_added, self.update_undo_redo_buttons, self.save_variables_from_layer,
-                                                self.remove_variables_from_layer, self.save_project_variables) if HEXAGONAL_AVAILABLE and AppInitializer else None
+                                                self.remove_variables_from_layer, self.save_project_variables,
+                                                connect_layer_store_signals_callback=self._connect_layer_store_signals) if HEXAGONAL_AVAILABLE and AppInitializer else None
         if self._app_initializer:
             logger.debug("FilterMate: AppInitializer initialized (v4.4 migration)")
 
@@ -970,16 +974,24 @@ class FilterMateApp:
     # ========================================
 
     def _connect_layer_store_slots(self, store):
-        """Connect the plugin's three layer-store slots to ``store`` and remember them."""
+        """Connect the plugin's three layer-store slots to ``store`` and remember them.
+
+        Idempotent (2026-10-17): the slots connected before, to this store or
+        another, are disconnected first. The AppInitializer connected its own
+        anonymous slots (never remembered): the first project switch added
+        these ones next to them, and every layer addition / removal ran twice.
+        """
+        self._disconnect_layer_store_slots(store)
         self._layer_store_slots = {
             'layersAdded': self._on_layers_added,
             'layersWillBeRemoved': lambda layers: self.manage_task('remove_layers', layers),
             'allLayersRemoved': lambda: self.manage_task('remove_all_layers'),
         }
+        self._layer_store_slots_owner = store
         for signal_name, slot in self._layer_store_slots.items():
             getattr(store, signal_name).connect(slot)
 
-    def _disconnect_layer_store_slots(self, store):
+    def _disconnect_layer_store_slots(self, store=None):
         """Disconnect only the slots connected by _connect_layer_store_slots.
 
         2026-09-14: ``store.layersAdded.disconnect()`` (no argument) removed
@@ -988,13 +1000,18 @@ class FilterMateApp:
         switch on, the QgsMapLayerComboBox of the filtering tab (and anything
         else listening to the project) never learnt about new layers again:
         the combo stayed at the previous project's entries.
+
+        Args:
+            store: The store to disconnect from when the slots' own store is unknown.
         """
+        owner = getattr(self, '_layer_store_slots_owner', None) or store
         for signal_name, slot in (getattr(self, '_layer_store_slots', None) or {}).items():
             try:
-                getattr(store, signal_name).disconnect(slot)
-            except (TypeError, RuntimeError) as e:  # not connected / store deleted
+                getattr(owner, signal_name).disconnect(slot)
+            except (TypeError, RuntimeError, AttributeError) as e:  # not connected / store deleted
                 logger.debug(f"Layer store slot {signal_name} not disconnected: {e}")
         self._layer_store_slots = {}
+        self._layer_store_slots_owner = None
 
     def _connect_layer_store_signals(self):
         """
@@ -1092,29 +1109,27 @@ class FilterMateApp:
         Called before plugin unload or project change to prevent
         access violations from stale signal connections.
         """
-        # Disconnect layer store signals
-        if self._signals_connected and self.MapLayerStore:
-            try:
-                self._disconnect_layer_store_slots(self.MapLayerStore)
-                self._signals_connected = False
-                logger.debug("Layer store signals disconnected")
-            except (TypeError, RuntimeError) as e:
-                logger.debug(f"Could not disconnect layer store signals: {e}")
+        # Disconnect layer store signals (the remembered slots, whatever the flag says)
+        try:
+            self._disconnect_layer_store_slots(self.MapLayerStore)
+            self._signals_connected = False
+            logger.debug("Layer store signals disconnected")
+        except (TypeError, RuntimeError) as e:
+            logger.debug(f"Could not disconnect layer store signals: {e}")
 
         # Disconnect dockwidget signals
         if self._dockwidget_signals_connected and self.dockwidget:
-            try:
-                self.dockwidget.launchingTask.disconnect()
-                self.dockwidget.currentLayerChanged.disconnect()
-                self.dockwidget.settingLayerVariable.disconnect()
-                self.dockwidget.resettingLayerVariable.disconnect()
-                self.dockwidget.resettingLayerVariableOnError.disconnect()
-                self.dockwidget.settingProjectVariables.disconnect()
-                self.dockwidget.widgetsInitialized.disconnect()
-                self._dockwidget_signals_connected = False
-                logger.debug("Dockwidget signals disconnected")
-            except (TypeError, RuntimeError) as e:
-                logger.debug(f"Could not disconnect dockwidget signals: {e}")
+            # The dock's own signals; one without receivers raises TypeError and must not
+            # leave the next ones connected.
+            for signal_name in ('launchingTask', 'currentLayerChanged', 'settingLayerVariable',
+                                'resettingLayerVariable', 'resettingLayerVariableOnError',
+                                'settingProjectVariables', 'widgetsInitialized'):
+                try:
+                    getattr(self.dockwidget, signal_name).disconnect()
+                except (TypeError, RuntimeError, AttributeError) as e:
+                    logger.debug(f"Could not disconnect dockwidget signal {signal_name}: {e}")
+            self._dockwidget_signals_connected = False
+            logger.debug("Dockwidget signals disconnected")
 
     def _safe_layer_operation(self, layer, properties, operation):
         """Safely execute a layer operation by deferring to Qt event loop and re-fetching layer."""

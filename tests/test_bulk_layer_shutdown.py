@@ -41,6 +41,7 @@ def app():
     instance._pending_add_layers_tasks = 1
     instance._get_layer_lifecycle_service = MagicMock(return_value=MagicMock())
     instance._safe_cancel_all_tasks = MagicMock()
+    instance._disconnect_all_signals = MagicMock()
     instance.dockwidget = SimpleNamespace(widgets_initialized=True, PROJECT_LAYERS={}, CONFIG_DATA={})
     instance._check_and_reset_stale_flags = MagicMock()
     instance._task_orchestrator = MagicMock()
@@ -109,6 +110,7 @@ def test_unload_stops_pending_work_and_is_idempotent(app):
     app._safe_layer_operation(object(), {}, MagicMock())
     app._get_layer_lifecycle_service.return_value.cleanup.assert_called_once()
     app._safe_cancel_all_tasks.assert_called_once()
+    app._disconnect_all_signals.assert_called_once()  # the project no longer calls this instance
     app._task_orchestrator.dispatch_task.assert_not_called()
     assert not app._pending_added_layers
 
