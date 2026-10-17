@@ -121,3 +121,20 @@ class TestIsFilterMateTask:
     def test_other_tasks(self):
         assert tms.is_filtermate_task(OtherPluginTask(1, "Filtering")) is False
         assert tms.is_filtermate_task(ProcessingTask(1, "Clip")) is False
+
+
+@pytest.mark.unit
+def test_f5_leaves_a_running_export_alone(task_manager):
+    """2026-10-17 review: force_reload_layers (F5) cancels the tasks, not an export in progress."""
+    export = FilterEngineTask(60, "Exporting layers")
+    export.task_action = "export"
+    filtering = FilterEngineTask(61, "Filtering data")
+    filtering.task_action = "filter"
+    task_manager([export, filtering])
+
+    tms.TaskManagementService().safe_cancel_all_tasks(keep_exports=True)
+
+    assert not export.canceled and filtering.canceled
+
+    tms.TaskManagementService().safe_cancel_all_tasks()  # unload / project change: everything
+    assert export.canceled

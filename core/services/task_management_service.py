@@ -88,7 +88,7 @@ class TaskManagementService:
         self._processing_queue = False
         self._pending_add_layers_tasks = 0
 
-    def safe_cancel_all_tasks(self) -> None:
+    def safe_cancel_all_tasks(self, keep_exports: bool = False) -> None:
         """
         Safely cancel all FilterMate tasks in the task manager.
 
@@ -96,6 +96,9 @@ class TaskManagementService:
         Windows access violations during project transitions. Tasks of QGIS
         (Processing in the background) and of other plugins are left alone:
         a project change or the plugin unload is no reason to stop them.
+
+        Args:
+            keep_exports: Leave a running export alone (F5, force_reload_layers).
         """
         try:
             task_manager = QgsApplication.taskManager()
@@ -105,6 +108,8 @@ class TaskManagementService:
             # tasks(), not task(i) for i < count(): task() takes a task id, not an index
             for task in reversed(list(task_manager.tasks())):
                 try:
+                    if keep_exports and getattr(task, 'task_action', None) == 'export':
+                        continue  # 2026-10-17: F5 reloads the layers; a running export goes on
                     if task and is_filtermate_task(task) and task.canCancel():
                         task.cancel()
                 except RuntimeError as e:  # task deleted meanwhile: the others are still canceled

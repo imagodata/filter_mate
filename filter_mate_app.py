@@ -767,7 +767,7 @@ class FilterMateApp:
         self.MapLayerStore = self.PROJECT.layerStore()
 
         service.force_reload_layers(
-            cancel_tasks_callback=self._safe_cancel_all_tasks,
+            cancel_tasks_callback=lambda: self._safe_cancel_all_tasks(keep_exports=True),
             reset_flags_callback=lambda: (
                 self._check_and_reset_stale_flags(),
                 self._set_loading_flag(False),
@@ -1344,10 +1344,12 @@ class FilterMateApp:
             backend_registry=self._backend_registry  # v4.0.1: Hexagonal DI
         )
         logger.info(f"✓ FilterEngineTask created: {self.appTasks[task_name].description()}")
-        # 2026-10-17: QGIS cancels a task whose layers are being removed - only add_layers declared them,
-        # a filter went on with deleted layers (crash risk, an error message at its completion).
+        # 2026-10-17: QGIS cancels a task whose layers are being removed (only add_layers declared
+        # them). A filter / unfilter / reset depends on its source layer only: a target removed
+        # meanwhile is left out with a warning, the other targets are filtered (FinishedHandler).
+        # An export depends on the layers it exports, not on the panel's current layer.
         self.appTasks[task_name].setDependentLayers(
-            ([current_layer] if current_layer is not None else []) + layers
+            layers if is_export else ([current_layer] if current_layer is not None else [])
         )
 
         # Filter/unfilter/reset bookkeeping uses current_layer; skip for export
@@ -1885,11 +1887,11 @@ class FilterMateApp:
         logger.debug(f"Using legacy dispatch for {task_name}")
         self._legacy_dispatch_task(task_name, data)
 
-    def _safe_cancel_all_tasks(self):
-        """Safely cancel all tasks via TaskManagementService."""
+    def _safe_cancel_all_tasks(self, keep_exports=False):
+        """Safely cancel all tasks via TaskManagementService (``keep_exports``: F5 leaves a running export)."""
         service = self._get_task_management_service()
         if service:
-            service.safe_cancel_all_tasks()
+            service.safe_cancel_all_tasks(keep_exports=keep_exports)
         else:
             logger.warning("TaskManagementService unavailable - cannot cancel tasks safely")
 

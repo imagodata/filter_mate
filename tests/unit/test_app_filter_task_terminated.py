@@ -254,13 +254,23 @@ def test_an_outdated_task_that_was_not_canceled_reports_nothing(app):
     app._filter_result_handler.handle_task_completion.assert_not_called()
 
 
-def test_a_task_depends_on_its_layers(app):
-    """QGIS cancels a task whose layers are being removed."""
+def test_a_filter_depends_on_its_source_layer_only(app):
+    """QGIS cancels a task whose layers are being removed: a removed target must not cancel the filter
+    (2026-10-17 review: it is left out at the completion, the other targets are filtered)."""
     roads = MagicMock()
     roads.id.return_value = "roads"
     app.PROJECT.mapLayersByName.return_value = [roads]
     app._execute_filter_task("filter", {"task": {"layers": [{"layer_id": "roads", "layer_name": "roads"}]}})
-    assert app.appTasks["filter"].dependent_layers == [app.dockwidget.current_layer, roads]
+    assert app.appTasks["filter"].dependent_layers == [app.dockwidget.current_layer]
+
+
+def test_an_export_depends_on_the_exported_layers(app):
+    roads = MagicMock()
+    roads.id.return_value = "roads"
+    app.PROJECT.mapLayersByName.return_value = [roads]
+    app.tasks_descriptions["export"] = "Export"
+    app._execute_filter_task("export", {"task": {"layers": [{"layer_id": "roads", "layer_name": "roads"}]}})
+    assert app.appTasks["export"].dependent_layers == [roads]  # not the panel's current layer
 
 
 def test_a_source_layer_removed_before_the_completion_is_no_error(app):

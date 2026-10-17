@@ -76,6 +76,17 @@ def _log_cascade_timing(layer_count: int, cascade_ms: float,
     perf_logger.info(f"⏱ cascade_filter: {cascade_ms:.0f} ms ({layer_count} layer(s) in the worker{slowest})")
 
 
+def _layer_deleted(layer) -> bool:
+    """True once the layer's C++ object is gone (removed from the project during the task)."""
+    try:
+        layer.id()
+        return False
+    except RuntimeError:
+        return True
+    except AttributeError:
+        return False
+
+
 class FilteringOrchestrator:
     """Orchestrates filtering, unfiltering, and resetting workflows.
 
@@ -666,8 +677,11 @@ class FilteringOrchestrator:
             layer_list = layers[provider_type]
             logger.debug(f"  Provider: {provider_type} -> {len(layer_list)} layer(s)")
             for idx, (layer, layer_props) in enumerate(layer_list, 1):
-                logger.info(f"    {idx}. {layer.name()} (id={layer.id()[:8]}...)")
-                layer_names_list.append(layer.name())
+                try:
+                    logger.info(f"    {idx}. {layer.name()} (id={layer.id()[:8]}...)")
+                    layer_names_list.append(layer.name())
+                except RuntimeError:  # removed from the project meanwhile: skipped below
+                    logger.info(f"    {idx}. {layer_props.get('layer_name', '?')} (removed meanwhile)")
             total_layers += len(layer_list)
         logger.info(f"  TOTAL: {total_layers} layers to filter")
         logger.info("=" * 70)
@@ -805,8 +819,14 @@ class FilteringOrchestrator:
         for idx, res in enumerate(results):
             logger.debug(f"  Result[{idx}]: {res.layer_name} -> success={res.success}, error={res.error_message}")
 
+        removed = result.setdefault('removed_layer_names', [])
         for i, (layer_tuple, filter_result) in enumerate(zip(all_layers, results), 1):
             layer, layer_props = layer_tuple
+            if _layer_deleted(layer):
+                # 2026-10-17: removed from the project during the task: skipped, not a failure
+                removed.append(layer_props.get('layer_name') or getattr(filter_result, 'layer_name', None)
+                               or f"Layer_{i}")
+                continue
             set_description_callback(f"Filtering layer {i}/{layers_count}: {layer.name()}")
 
             # Results come back in completion order when the executor really
@@ -901,8 +921,15 @@ class FilteringOrchestrator:
         for provider_type in layers:
             logger.debug(f"Provider '{provider_type}' has {len(layers[provider_type])} layers")
 
+        removed = result.setdefault('removed_layer_names', [])
         for layer_provider_type in layers:
             for layer, layer_props in layers[layer_provider_type]:
+                # 2026-10-17: a target removed from the project during the task is skipped, not
+                # a failure: the other targets are filtered (finished() says which was left out)
+                if _layer_deleted(layer):
+                    removed.append(layer_props.get('layer_name') or f"Layer_{i}")
+                    i += 1
+                    continue
                 # Validate layer before any operations
                 # This prevents crashes when layer becomes invalid during sequential filtering
                 try:
@@ -947,7 +974,9 @@ class FilteringOrchestrator:
                 # Log result VISIBLY for debugging
                 logger.info(f"   -> execute_geometric_filtering RESULT: {filter_result}")
 
-                if filter_result:
+                if not filter_result and _layer_deleted(layer):
+                    removed.append(layer_props.get('layer_name') or layer_name)  # removed during its filter
+                elif filter_result:
                     successful_filters += 1
                     logger.info(f"  {layer_name} filtered in {layer_ms:.0f} ms")
                 else:

@@ -80,20 +80,26 @@ def finished(monkeypatch):
 
     cleanup_mv, cleanup_canceled = MagicMock(), MagicMock()
 
-    def run(canceled, result=True, exception=None, task_action="filter"):
+    project = MagicMock()
+    project.mapLayer.side_effect = lambda layer_id: MagicMock()  # every target still in the project
+    monkeypatch.setattr(module, "QgsProject", MagicMock(instance=MagicMock(return_value=project)))
+    monkeypatch.setattr(module, "QCoreApplication",
+                        types.SimpleNamespace(translate=lambda context, text: text), raising=False)
+
+    def run(canceled, result=True, exception=None, task_action="filter", pending=None, task_parameters=None):
         handler.handle_finished(
             result=result, task_action=task_action, message_category="FilterLayers",
             is_canceled_fn=lambda: canceled, warning_messages=[],
-            pending_subset_requests=[(MagicMock(), '"id" > 3')],
+            pending_subset_requests=pending if pending is not None else [(MagicMock(), '"id" > 3')],
             safe_set_subset_fn=MagicMock(), is_complex_filter_fn=MagicMock(), single_canvas_refresh_fn=MagicMock(),
             cleanup_mv_fn=cleanup_mv, ogr_source_geom=None, exception=exception, task_message=None,
-            source_layer=MagicMock(), task_parameters={}, failed_layer_names=[], layers_count=1,
+            source_layer=MagicMock(), task_parameters=task_parameters or {}, failed_layer_names=[], layers_count=1,
             task_description="Filtering data", restore_selection_fn=MagicMock(), task_bridge=None,
             cleanup_safe_intersect_fn=MagicMock(), cleanup_canceled_mv_fn=cleanup_canceled,
         )
 
     return types.SimpleNamespace(run=run, apply=apply, iface=iface, handler=handler, cleanup_mv=cleanup_mv,
-                                 cleanup_canceled=cleanup_canceled)
+                                 cleanup_canceled=cleanup_canceled, project=project)
 
 
 def test_a_completed_task_applies_its_subsets(finished, monkeypatch):
@@ -170,3 +176,18 @@ def test_a_completed_filter_keeps_its_views(finished, monkeypatch):
     finished.run(canceled=False, task_action="filter")
     finished.cleanup_mv.assert_not_called()
     finished.cleanup_canceled.assert_not_called()
+
+
+def test_a_target_removed_during_the_filter_is_left_out_with_a_warning(finished, monkeypatch):
+    """2026-10-17 review: the filter depends on its source only; the other targets get their subsets."""
+    monkeypatch.setattr(finished.handler, "_display_success_message", MagicMock())
+    kept, removed = MagicMock(), MagicMock()
+    removed.id.side_effect = RuntimeError("wrapped C/C++ object of type QgsVectorLayer has been deleted")
+    finished.project.mapLayer.side_effect = lambda layer_id: None if layer_id == "rivers" else MagicMock()
+    finished.run(canceled=False, pending=[(kept, '"id" > 3'), (removed, '"id" < 2')],
+                 task_parameters={"task": {"layers": [{"layer_id": "roads", "layer_name": "roads"},
+                                                      {"layer_id": "rivers", "layer_name": "rivers"}]}})
+    applied = finished.apply.call_args.args[0]
+    assert applied == [(kept, '"id" > 3')]
+    warning = finished.iface.messageBar.return_value.pushWarning.call_args.args[1]
+    assert "rivers" in warning and "roads" not in warning

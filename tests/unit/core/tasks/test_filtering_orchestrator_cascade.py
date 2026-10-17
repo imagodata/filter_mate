@@ -293,3 +293,31 @@ class TestParallelFilteringSetting:
         self._run(mod, {"task": {"config_data": self._config(True)}}, MagicMock(return_value=True))
 
         parallel.assert_called_once()
+
+
+def _removed(name):
+    layer = MagicMock()
+    layer.id.side_effect = RuntimeError(f"wrapped C/C++ object of type QgsVectorLayer has been deleted ({name})")
+    layer.name.side_effect = RuntimeError("deleted")
+    return layer
+
+
+@pytest.mark.unit
+class TestTargetRemovedDuringTheTask:
+    """2026-10-17 review: the filter task depends on its source only; a removed target is left out."""
+
+    def test_sequential_skips_it_and_filters_the_others(self, monkeypatch):
+        mod = _load()
+        monkeypatch.setattr(mod, "is_layer_valid", lambda layer: True)
+        route = _layer("route")
+        callback = MagicMock(return_value=True)
+        res = _run_sequential(mod, {"ogr": [(_removed("rivers"), {"layer_name": "rivers"}), (route, {})]}, callback)
+        assert res["success"] is True and res["removed_layer_names"] == ["rivers"]
+        callback.assert_called_once_with("ogr", route, {})
+
+    def test_parallel_skips_it_and_filters_the_others(self):
+        mod = _load()
+        route = _layer("route")
+        _FakeExecutor.results = [_result("rivers", 1.0, success=False), _result("route", 2.0)]
+        res = _run_parallel(mod, {"ogr": [(_removed("rivers"), {"layer_name": "rivers"}), (route, {})]})
+        assert res["success"] is True and res["removed_layer_names"] == ["rivers"]

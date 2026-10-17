@@ -53,6 +53,17 @@ logger = setup_logger(
 )
 
 
+def _deleted(layer: Any) -> bool:
+    """True once the layer's C++ object is gone."""
+    if layer is None:
+        return True
+    try:
+        layer.id()
+        return False
+    except RuntimeError:
+        return True
+
+
 class FinishedHandler:
     """Handles task completion logic for FilterEngineTask.
 
@@ -157,6 +168,15 @@ class FinishedHandler:
                 logger.info(f"Task was canceled - its {len(pending_subset_requests)} pending subset "
                             "request(s) are dropped")
             pending_subset_requests = []
+
+        # 2026-10-17: a target removed from the project during the task is left out (the
+        # task depends on its source layer only); the other targets get their subsets.
+        removed_targets = self._removed_target_names(task_parameters)
+        if pending_subset_requests:
+            pending_subset_requests = [(layer, expression) for layer, expression in pending_subset_requests
+                                       if not _deleted(layer)]
+        if removed_targets and not is_canceled_fn():
+            self._display_removed_targets(removed_targets, iface)
 
         # Apply pending subset strings on main thread
         apply_failures: List[str] = []
@@ -524,6 +544,32 @@ class FinishedHandler:
         store = getattr(task, '__dict__', None)
         if isinstance(store, dict):
             store.pop('_filtermate_task_caches', None)
+
+    @staticmethod
+    def _removed_target_names(task_parameters: Dict[str, Any]) -> List[str]:
+        """Names of the task's target layers no longer in the project."""
+        names = []
+        project = QgsProject.instance()
+        for props in ((task_parameters or {}).get('task') or {}).get('layers') or []:
+            if not isinstance(props, dict) or not props.get('layer_id'):
+                continue
+            try:
+                if project.mapLayer(props['layer_id']) is None:
+                    names.append(props.get('layer_name') or props['layer_id'])
+            except RuntimeError:
+                continue
+        return names
+
+    @staticmethod
+    def _display_removed_targets(names: List[str], iface: Any) -> None:
+        """One warning for the target layers removed while the task ran."""
+        text = QCoreApplication.translate(
+            "FinishedHandler", "Layer(s) removed during the filter, left out: {0}").format(', '.join(names))
+        logger.warning(text)
+        try:
+            iface.messageBar().pushWarning("FilterMate", text)
+        except Exception as e:  # catch-all safety net: no message bar (shutdown)
+            logger.debug(f"Removed targets not shown: {e}")
 
     def _log_task_bridge_metrics(self, task_bridge: Optional[Any]) -> None:
         """Log TaskBridge metrics for migration validation (MIG-023).
