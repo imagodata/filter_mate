@@ -44,6 +44,27 @@ pg_executor = _backend_services.get_postgresql_executor()
 PG_EXECUTOR_AVAILABLE = pg_executor is not None
 
 
+# Combine operators as stored by translated FilterMate versions (the values
+# of <source>AND / OR / AND NOT</source> in i18n/*.ts), plus a bare negation
+# (NON, NICHT, NO, NÃO, NOT), mapped to the SQL operators of the combiners.
+_TRANSLATED_COMBINE_OPERATORS = {
+    'A': 'AND', 'AND': 'AND', 'AT': 'AND', 'DAN': 'AND', 'E': 'AND', 'EN': 'AND', 'ET': 'AND', 'I': 'AND',
+    'IN': 'AND', 'JA': 'AND', 'OCH': 'AND', 'OG': 'AND', 'UND': 'AND', 'VA': 'AND', 'VE': 'AND', 'VÀ': 'AND',
+    'Y': 'AND', 'ÉS': 'AND', 'ȘI': 'AND', 'ΚΑΙ': 'AND', 'І': 'AND', 'И': 'AND', 'और': 'AND', 'እና': 'AND',
+    '与': 'AND',
+    'ALI': 'OR', 'ATAU': 'OR', 'ELLER': 'OR', 'HOẶC': 'OR', 'LUB': 'OR', 'NEBO': 'OR', 'O': 'OR',
+    'ODER': 'OR', 'OF': 'OR', 'OR': 'OR', 'OU': 'OR', 'SAU': 'OR', 'TAI': 'OR', 'VAGY': 'OR', 'VEYA': 'OR',
+    'YOKI': 'OR', 'Ή': 'OR', 'АБО': 'OR', 'ИЛИ': 'OR', 'या': 'OR', 'ወይም': 'OR', '或': 'OR',
+    'A NE': 'AND NOT', 'AND NOT': 'AND NOT', 'AT HINDI': 'AND NOT', 'DAN BUKAN': 'AND NOT',
+    'E NON': 'AND NOT', 'E NÃO': 'AND NOT', 'EN NIET': 'AND NOT', 'ET NON': 'AND NOT', 'I NIE': 'AND NOT',
+    'I NO': 'AND NOT', 'IN NE': 'AND NOT', 'JA EI': 'AND NOT', 'NICHT': 'AND NOT', 'NO': 'AND NOT',
+    'NON': 'AND NOT', 'NOT': 'AND NOT', 'NÃO': 'AND NOT', 'OCH INTE': 'AND NOT', 'OG IKKE': 'AND NOT',
+    'UND NICHT': 'AND NOT', 'VA EMAS': 'AND NOT', 'VE DEĞİL': 'AND NOT', 'VÀ KHÔNG': 'AND NOT',
+    'Y NO': 'AND NOT', 'ÉS NEM': 'AND NOT', 'ȘI NU': 'AND NOT', 'ΚΑΙ ΟΧΙ': 'AND NOT', 'І НЕ': 'AND NOT',
+    'И НЕ': 'AND NOT', 'और नहीं': 'AND NOT', 'እና አይደለም': 'AND NOT', '与非': 'AND NOT',
+}
+
+
 class ExpressionFacadeHandler:
     """Centralizes expression building and manipulation facades.
 
@@ -461,44 +482,25 @@ class ExpressionFacadeHandler:
             operator: The operator string (possibly translated: ET, OU, UND, Y, etc.)
 
         Returns:
-            str: Normalized SQL operator ('AND', 'OR', 'AND NOT', 'NOT') or None.
+            str: Normalized SQL operator ('AND', 'OR', 'AND NOT') or None.
+
+        2026-10-17: a bare negation (NON, NICHT, NO, NÃO, NOT) maps to
+        'AND NOT'. The combiners write ``( old ) <operator> ( new )``; 'NOT'
+        gave ``( old ) NOT ( new )``, a syntax error on every backend. Every
+        translation of the i18n files is known; any other value gives 'AND'
+        (with a warning) instead of reaching the SQL.
         """
         if not operator:
             return None
 
-        op_upper = operator.upper().strip()
-
-        # Mapping of translated operators to SQL keywords
-        translations = {
-            # French
-            'ET': 'AND',
-            'OU': 'OR',
-            'ET NON': 'AND NOT',
-            'NON': 'NOT',
-            # German
-            'UND': 'AND',
-            'ODER': 'OR',
-            'UND NICHT': 'AND NOT',
-            'NICHT': 'NOT',
-            # Spanish
-            'Y': 'AND',
-            'O': 'OR',
-            'Y NO': 'AND NOT',
-            'NO': 'NOT',
-            # Italian
-            'E': 'AND',
-            'E NON': 'AND NOT',
-            # Portuguese
-            'E NÃO': 'AND NOT',
-            'NÃO': 'NOT',
-            # Already English - just return as-is
-            'AND': 'AND',
-            'OR': 'OR',
-            'AND NOT': 'AND NOT',
-            'NOT': 'NOT',
-        }
-
-        normalized = translations.get(op_upper, operator)
+        op_upper = ' '.join(operator.upper().split())
+        normalized = _TRANSLATED_COMBINE_OPERATORS.get(op_upper)
+        if normalized is None:
+            # 2026-10-17: an unknown value (a translation added later, a
+            # hand-edited project) used to be written as is between the old
+            # and the new subset: ( old ) LUB ( new ) is a syntax error.
+            logger.warning(f"Unknown combine operator '{operator}': AND is used")
+            return 'AND'
 
         if normalized != operator:
             logger.debug(f"Normalized operator '{operator}' to '{normalized}'")

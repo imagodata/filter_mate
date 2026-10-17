@@ -113,6 +113,24 @@ def _layer_count_label(layer) -> str:
     return "n/a"
 
 
+def _text_field_names(layer) -> set:
+    """Lower-case names of the layer's text columns (the sanitizer drops ``( "text column" )`` operands).
+
+    2026-10-17: a text column is never a boolean condition; a boolean one
+    (``AND ( "actif" )``) is, and must be kept. Empty when unknown.
+    """
+    names = set()
+    try:
+        for field in layer.fields():
+            field_type = field.type()
+            # QVariant.String (Qt5) / QMetaType.Type.QString (Qt6)
+            if field_type == 10 or getattr(field_type, 'name', None) == 'QString':
+                names.add(field.name().lower())
+    except Exception:  # nosec B110 - no field information: nothing is dropped
+        return set()
+    return names
+
+
 def safe_set_subset_string(layer, subset_expression: str) -> bool:
     """
     Safely set subset string (filter) on a QGIS layer.
@@ -178,7 +196,7 @@ def safe_set_subset_string(layer, subset_expression: str) -> bool:
                         logger.debug("[SQL]   sanitize_subset_string unavailable; skipping")
 
                 if sanitize_subset_string is not None:
-                    sanitized = sanitize_subset_string(subset_expression)
+                    sanitized = sanitize_subset_string(subset_expression, text_fields=_text_field_names(layer))
                     if sanitized != subset_expression:
                         logger.info(
                             f"[SQL]   Sanitized subset string for layer '{layer.name()}': "

@@ -153,7 +153,8 @@ class ExpressionService:
         'equals': 'ST_Equals',
         'buffer': 'ST_Buffer',
         'area': 'ST_Area',
-        'length': 'ST_Length',
+        # 'length' is not mapped: length(string) is a string function in QGIS
+        # (2026-10-17); length($geometry) is handled in _to_postgis.
         'distance': 'ST_Distance',
         'centroid': 'ST_Centroid',
         'convexhull': 'ST_ConvexHull',
@@ -189,7 +190,7 @@ class ExpressionService:
         'equals': 'Equals',
         'buffer': 'Buffer',
         'area': 'Area',
-        'length': 'GLength',  # Note: Different name in Spatialite
+        # 'length': see POSTGIS_FUNCTIONS (GLength for a geometry, in _to_spatialite)
         'distance': 'Distance',
         'centroid': 'Centroid',
         'convexhull': 'ConvexHull',
@@ -423,20 +424,34 @@ class ExpressionService:
         - SQL keyword normalization
 
         Consolidated from legacy filter_task.py qgis_expression_to_postgis()
-        """
-        sql = expression
 
-        if not sql:
-            return sql
+        2026-10-17: every rewrite runs outside string literals and identifiers
+        (``'Case-Pilote'`` became ``' CASE -Pilote'``); ``::numeric`` is added
+        only when the other side is a number (``"nature" <> 'Route'`` became
+        ``"nature"::numeric <> 'Route'``); length() is ST_Length only for the
+        geometry, length(string) stays a string function.
+        """
+        if not expression:
+            return expression
+
+        from ..filter.sql_quotes import (
+            IDENTIFIER_PLACEHOLDER as _IDENTIFIER, cast_numeric_operands, map_geometry_length, mask_quoted,
+            qgis_literals_to_sql, unmask_quoted,
+        )
+
+        sql, parts = mask_quoted(expression)
+
+        # 0. length() of the geometry only (before $geometry is replaced)
+        sql = map_geometry_length(sql, parts, geometry_column, 'ST_Length')
 
         # 1. Replace $geometry with column reference (including $area, $length, etc.)
         spatial_conversions = {
-            r'\$area': f'ST_Area("{geometry_column}")',
-            r'\$length': f'ST_Length("{geometry_column}")',
-            r'\$perimeter': f'ST_Perimeter("{geometry_column}")',
-            r'\$x': f'ST_X("{geometry_column}")',
-            r'\$y': f'ST_Y("{geometry_column}")',
-            r'\$geometry|\$geom': f'"{geometry_column}"',
+            r'\$area\b': f'ST_Area("{geometry_column}")',
+            r'\$length\b': f'ST_Length("{geometry_column}")',
+            r'\$perimeter\b': f'ST_Perimeter("{geometry_column}")',
+            r'\$x\b': f'ST_X("{geometry_column}")',
+            r'\$y\b': f'ST_Y("{geometry_column}")',
+            r'\$geometry\b|\$geom\b': f'"{geometry_column}"',
         }
         for pattern, replacement in spatial_conversions.items():
             sql = re.sub(pattern, replacement, sql, flags=re.IGNORECASE)
@@ -467,15 +482,12 @@ class ExpressionService:
         sql = re.sub(r'\bis\b', ' IS ', sql, flags=re.IGNORECASE)
 
         # 5. Add type casting for numeric operations (comparison operators)
-        # "field" > value -> "field"::numeric > value
-        sql = re.sub(r'"(\w+)"\s*>', r'"\1"::numeric >', sql)
-        sql = re.sub(r'"(\w+)"\s*<', r'"\1"::numeric <', sql)
-        sql = re.sub(r'"(\w+)"\s*\+', r'"\1"::numeric +', sql)
-        sql = re.sub(r'"(\w+)"\s*-', r'"\1"::numeric -', sql)
+        # "field" > 10 -> "field"::numeric > 10, the other side a number only
+        sql = cast_numeric_operands(sql, r'\1::numeric')
 
         # 6. Add type casting for text operations (LIKE/ILIKE)
-        sql = re.sub(r'"(\w+)"\s+(NOT\s+)?ILIKE', r'"\1"::text \2ILIKE', sql)
-        sql = re.sub(r'"(\w+)"\s+(NOT\s+)?LIKE', r'"\1"::text \2LIKE', sql)
+        sql = re.sub(rf'({_IDENTIFIER})\s+(NOT\s+)?ILIKE', r'\1::text \2ILIKE', sql)
+        sql = re.sub(rf'({_IDENTIFIER})\s+(NOT\s+)?LIKE', r'\1::text \2LIKE', sql)
 
         # 7. Handle NULL comparisons
         sql = re.sub(r'\bIS\s+NULL\b', 'IS NULL', sql, flags=re.IGNORECASE)
@@ -488,7 +500,7 @@ class ExpressionService:
         # 9. Clean up extra spaces
         sql = re.sub(r'\s+', ' ', sql).strip()
 
-        return sql
+        return unmask_quoted(sql, qgis_literals_to_sql(parts))
 
     def _to_spatialite(self, expression: str, geometry_column: str) -> str:
         """
@@ -503,22 +515,39 @@ class ExpressionService:
 
         Consolidated from legacy filter_task.py qgis_expression_to_spatialite()
 
+        2026-10-17: every rewrite runs outside string literals and identifiers
+        (``'TRUE'`` became ``'1'``, ``ILIKE '%l''ariège%'`` was cut at the
+        doubled quote); length() is GLength only for the geometry.
+
         Note:
             Spatialite spatial functions are ~90% compatible with PostGIS.
             Main differences: type casting syntax, no ILIKE, some function names.
         """
-        sql = expression
+        if not expression:
+            return expression
 
-        if not sql:
-            return sql
-
-        # 1. Replace $geometry with column reference
-        sql = re.sub(
-            r'\$geometry|\$geom',
-            f'"{geometry_column}"',
-            sql,
-            flags=re.IGNORECASE
+        from ..filter.sql_quotes import (
+            IDENTIFIER_PLACEHOLDER as _IDENTIFIER, LITERAL_PLACEHOLDER as _LITERAL, map_geometry_length, mask_quoted,
+            qgis_literals_to_sql, unmask_quoted,
         )
+
+        sql, parts = mask_quoted(expression)
+
+        # 0. length() of the geometry only (before $geometry is replaced)
+        sql = map_geometry_length(sql, parts, geometry_column, 'GLength')
+
+        # 1. Replace $geometry with column reference ($area, $length... too,
+        # 2026-10-17: they reached SQLite as is, a syntax error)
+        spatial_conversions = {
+            r'\$area\b': f'ST_Area("{geometry_column}")',
+            r'\$length\b': f'GLength("{geometry_column}")',
+            r'\$perimeter\b': f'ST_Perimeter("{geometry_column}")',
+            r'\$x\b': f'ST_X("{geometry_column}")',
+            r'\$y\b': f'ST_Y("{geometry_column}")',
+            r'\$geometry\b|\$geom\b': f'"{geometry_column}"',
+        }
+        for pattern, replacement in spatial_conversions.items():
+            sql = re.sub(pattern, replacement, sql, flags=re.IGNORECASE)
 
         # 2. Replace QGIS functions with Spatialite equivalents
         for qgis_func, sl_func in self.SPATIALITE_FUNCTIONS.items():
@@ -536,14 +565,14 @@ class ExpressionService:
         # IMPORTANT: Process ILIKE before LIKE to avoid double-replacement
         # "field" ILIKE 'pattern' -> LOWER("field") LIKE LOWER('pattern')
         sql = re.sub(
-            r'"(\w+)"\s+ILIKE\s+\'([^\']+)\'',
-            r'LOWER("\1") LIKE LOWER(\'\2\')',
+            rf'({_IDENTIFIER})\s+ILIKE\s+({_LITERAL})',
+            r'LOWER(\1) LIKE LOWER(\2)',
             sql,
             flags=re.IGNORECASE
         )
         sql = re.sub(
-            r'"(\w+)"\s+NOT\s+ILIKE\s+\'([^\']+)\'',
-            r'LOWER("\1") NOT LIKE LOWER(\'\2\')',
+            rf'({_IDENTIFIER})\s+NOT\s+ILIKE\s+({_LITERAL})',
+            r'LOWER(\1) NOT LIKE LOWER(\2)',
             sql,
             flags=re.IGNORECASE
         )
@@ -556,11 +585,11 @@ class ExpressionService:
         # "field"::numeric -> CAST("field" AS REAL)
         # "field"::integer -> CAST("field" AS INTEGER)
         # "field"::text -> CAST("field" AS TEXT)
-        sql = re.sub(r'"(\w+)"::numeric', r'CAST("\1" AS REAL)', sql)
-        sql = re.sub(r'"(\w+)"::integer', r'CAST("\1" AS INTEGER)', sql)
-        sql = re.sub(r'"(\w+)"::text', r'CAST("\1" AS TEXT)', sql)
-        sql = re.sub(r'"(\w+)"::double', r'CAST("\1" AS REAL)', sql)
-        sql = re.sub(r'"(\w+)"::float', r'CAST("\1" AS REAL)', sql)
+        sql = re.sub(rf'({_IDENTIFIER})::numeric', r'CAST(\1 AS REAL)', sql)
+        sql = re.sub(rf'({_IDENTIFIER})::integer', r'CAST(\1 AS INTEGER)', sql)
+        sql = re.sub(rf'({_IDENTIFIER})::text', r'CAST(\1 AS TEXT)', sql)
+        sql = re.sub(rf'({_IDENTIFIER})::double', r'CAST(\1 AS REAL)', sql)
+        sql = re.sub(rf'({_IDENTIFIER})::float', r'CAST(\1 AS REAL)', sql)
 
         # 7. Handle NULL comparisons
         sql = re.sub(r'\bIS\s+NULL\b', 'IS NULL', sql, flags=re.IGNORECASE)
@@ -573,7 +602,7 @@ class ExpressionService:
         # 9. Clean up extra spaces
         sql = re.sub(r'\s+', ' ', sql).strip()
 
-        return sql
+        return unmask_quoted(sql, qgis_literals_to_sql(parts))
 
     def extract_fields(self, expression: str) -> Set[str]:
         """

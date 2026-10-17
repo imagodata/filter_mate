@@ -600,12 +600,16 @@ class FilterOrchestrator:
         """
         Get the logical operator for combining filters.
 
+        2026-10-17: the task's operator for the target layers
+        (ExpressionFacadeHandler.get_combine_operator: translated values
+        normalized, None when the combine option is off = replace). This was a
+        placeholder reading task_parameters['combine_operator'], a key nothing
+        sets: every target was combined with AND whatever the user chose.
+
         Returns:
             str: 'AND', 'OR', 'AND NOT', or None
         """
-        # This would come from task_parameters or parent_task
-        # Placeholder implementation
-        return self.task_parameters.get('combine_operator', 'AND')
+        return self.parent_task._get_combine_operator()
 
     def _try_fallback_backend(
         self,

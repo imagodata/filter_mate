@@ -1585,36 +1585,10 @@ def build_combined_filter_expression(
         if not old_subset:
             return new_expression
 
-    # Extract WHERE clause from old subset if present
-    param_old_subset_where_clause = ''
-    param_source_old_subset = old_subset
-
-    index_where_clause = old_subset.find('WHERE')
-    if index_where_clause > -1:
-        param_old_subset_where_clause = old_subset[index_where_clause:]
-        # 2026-09-14: drop a trailing ')' only when the old subset really has
-        # an excess closing parenthesis (balanced R-tree prefilters end in ")))").
-        if (
-            param_old_subset_where_clause.endswith('))')
-            and old_subset.count(')') > old_subset.count('(')
-        ):
-            param_old_subset_where_clause = param_old_subset_where_clause[:-1]
-        param_source_old_subset = old_subset[:index_where_clause]
-
-    # Combine expressions
-    if index_where_clause > -1:
-        # Has WHERE clause - combine with existing structure
-        # FIX 2026-01-16: Strip leading "WHERE " from new_expression to prevent "WHERE WHERE" syntax error
-        clean_new_expression = new_expression.lstrip()
-        if clean_new_expression.upper().startswith('WHERE '):
-            clean_new_expression = clean_new_expression[6:].lstrip()
-        return (
-            f'{param_source_old_subset} {param_old_subset_where_clause} '
-            f'{combine_operator} ( {clean_new_expression} )'
-        )
-    else:
-        # No WHERE clause - wrap both in parentheses for safety
-        return f'( {old_subset} ) {combine_operator} ( {new_expression} )'
+    # 2026-10-17: always ( old ) OP ( new ). An old subset containing WHERE
+    # (subquery, value) used to be re-joined unparenthesized.
+    from .expression_combiner import wrap_combination
+    return wrap_combination(old_subset, combine_operator, new_expression)
 
 
 # Module exports

@@ -274,6 +274,14 @@ def qgis_expression_to_postgis(expression: str, geom_col: str = 'geometry') -> s
     - IF statements → CASE WHEN
     - Type casting for numeric/text operations
 
+    2026-10-17: every rewrite runs outside string literals and identifiers.
+    The function names were replaced with str.replace anywhere (``"buffer_m"``
+    became ``"ST_Buffer_m"``, ``"area_ha"`` ``"ST_Area_ha"``): only calls
+    (``name(``) are converted now, and length() only for the geometry
+    (length(string) is a string function in QGIS). ``::numeric`` is added
+    only when the other side is a number (``"nature" <> 'Route'`` became
+    ``"nature"::numeric <> 'Route'``).
+
     Args:
         expression: QGIS expression string
         geom_col: Geometry column name (default: 'geometry')
@@ -286,61 +294,60 @@ def qgis_expression_to_postgis(expression: str, geom_col: str = 'geometry') -> s
     if not expression:
         return expression
 
+    from ....core.filter.sql_quotes import (
+        IDENTIFIER_PLACEHOLDER, cast_numeric_operands, map_geometry_length, mask_quoted,
+        qgis_literals_to_sql, unmask_quoted,
+    )
+
+    sql, parts = mask_quoted(expression)
+
     # 1. Convert QGIS spatial functions to PostGIS
+    sql = map_geometry_length(sql, parts, geom_col, 'ST_Length')
     spatial_conversions = {
-        '$area': f'ST_Area("{geom_col}")',
-        '$length': f'ST_Length("{geom_col}")',
-        '$perimeter': f'ST_Perimeter("{geom_col}")',
-        '$x': f'ST_X("{geom_col}")',
-        '$y': f'ST_Y("{geom_col}")',
-        '$geometry': f'"{geom_col}"',
-        'buffer': 'ST_Buffer',
-        'area': 'ST_Area',
-        'length': 'ST_Length',
-        'perimeter': 'ST_Perimeter',
+        r'\$area\b': f'ST_Area("{geom_col}")',
+        r'\$length\b': f'ST_Length("{geom_col}")',
+        r'\$perimeter\b': f'ST_Perimeter("{geom_col}")',
+        r'\$x\b': f'ST_X("{geom_col}")',
+        r'\$y\b': f'ST_Y("{geom_col}")',
+        r'\$geometry\b': f'"{geom_col}"',
+        r'\bbuffer\s*\(': 'ST_Buffer(',
+        r'\barea\s*\(': 'ST_Area(',
+        r'\bperimeter\s*\(': 'ST_Perimeter(',
     }
 
-    for qgis_func, postgis_func in spatial_conversions.items():
-        expression = expression.replace(qgis_func, postgis_func)
+    for pattern, replacement in spatial_conversions.items():
+        sql = re.sub(pattern, replacement, sql, flags=re.IGNORECASE)
 
     # 2. Convert IF statements to CASE WHEN
-    if expression.find('if') >= 0:
-        expression = re.sub(
-            r'if\s*\(\s*([^,]+),\s*([^,]+),\s*([^)]+)\)',
-            r'CASE WHEN \1 THEN \2 ELSE \3 END',
-            expression,
-            flags=re.IGNORECASE
-        )
-        logger.debug(f"[PostgreSQL] Expression after IF conversion: {expression}")
+    sql = re.sub(
+        r'\bif\s*\(\s*([^,]+),\s*([^,]+),\s*([^)]+)\)',
+        r'CASE WHEN \1 THEN \2 ELSE \3 END',
+        sql,
+        flags=re.IGNORECASE
+    )
 
     # 3. Add type casting for numeric operations
     # FIX v4.2.12: Added * and / operators
-    expression = expression.replace('" >', '"::numeric >').replace('">', '"::numeric >')
-    expression = expression.replace('" <', '"::numeric <').replace('"<', '"::numeric <')
-    expression = expression.replace('" +', '"::numeric +').replace('"+', '"::numeric +')
-    expression = expression.replace('" -', '"::numeric -').replace('"-', '"::numeric -')
-    expression = expression.replace('" *', '"::numeric *').replace('"*', '"::numeric *')
-    expression = expression.replace('" /', '"::numeric /').replace('"/', '"::numeric /')
+    sql = cast_numeric_operands(sql, r'\1::numeric', arithmetic=True)
 
     # 4. Normalize SQL keywords (case-insensitive replacements)
-    expression = re.sub(r'\bcase\b', ' CASE ', expression, flags=re.IGNORECASE)
-    expression = re.sub(r'\bwhen\b', ' WHEN ', expression, flags=re.IGNORECASE)
-    expression = re.sub(r'\bis\b', ' IS ', expression, flags=re.IGNORECASE)
-    expression = re.sub(r'\bthen\b', ' THEN ', expression, flags=re.IGNORECASE)
-    expression = re.sub(r'\belse\b', ' ELSE ', expression, flags=re.IGNORECASE)
-    expression = re.sub(r'\bend\b', ' END ', expression, flags=re.IGNORECASE)  # FIX v4.2.12: Added END
-    expression = re.sub(r'\bilike\b', ' ILIKE ', expression, flags=re.IGNORECASE)
-    expression = re.sub(r'\blike\b', ' LIKE ', expression, flags=re.IGNORECASE)
-    expression = re.sub(r'\bnot\b', ' NOT ', expression, flags=re.IGNORECASE)
+    sql = re.sub(r'\bcase\b', ' CASE ', sql, flags=re.IGNORECASE)
+    sql = re.sub(r'\bwhen\b', ' WHEN ', sql, flags=re.IGNORECASE)
+    sql = re.sub(r'\bis\b', ' IS ', sql, flags=re.IGNORECASE)
+    sql = re.sub(r'\bthen\b', ' THEN ', sql, flags=re.IGNORECASE)
+    sql = re.sub(r'\belse\b', ' ELSE ', sql, flags=re.IGNORECASE)
+    sql = re.sub(r'\bend\b', ' END ', sql, flags=re.IGNORECASE)  # FIX v4.2.12: Added END
+    sql = re.sub(r'\bilike\b', ' ILIKE ', sql, flags=re.IGNORECASE)
+    sql = re.sub(r'\blike\b', ' LIKE ', sql, flags=re.IGNORECASE)
+    sql = re.sub(r'\bnot\b', ' NOT ', sql, flags=re.IGNORECASE)
 
     # 5. Add type casting for text operations
-    expression = expression.replace('" NOT ILIKE', '"::text NOT ILIKE').replace('" ILIKE', '"::text ILIKE')
-    expression = expression.replace('" NOT LIKE', '"::text NOT LIKE').replace('" LIKE', '"::text LIKE')
+    sql = re.sub(rf'({IDENTIFIER_PLACEHOLDER})\s+(NOT\s+)?(I?LIKE)\b', r'\1::text \2\3', sql)
 
     # 6. Clean up multiple spaces (FIX v4.2.12)
-    expression = re.sub(r'\s+', ' ', expression).strip()
+    sql = re.sub(r'\s+', ' ', sql).strip()
 
-    return expression
+    return unmask_quoted(sql, qgis_literals_to_sql(parts))
 
 
 def build_postgis_predicates(
@@ -498,28 +505,30 @@ def apply_postgresql_type_casting(expression: str, layer=None) -> str:
     # match fields that are NOT already casted. This allows the regex to apply
     # casting individually to each comparison in a combined expression.
     #
-    # Before: "field"::numeric < 5 AND "field" < 5  → no change (global check failed)
-    # After:  "field"::numeric < 5 AND "field" < 5  → "field"::numeric < 5 AND "field"::numeric < 5
+    # 2026-10-17: on the text with its literals masked (a value such as
+    # '"x" = 1' is not rewritten), and ``=`` is no longer cast for a column
+    # the layer declares non-numeric: ``"insee_dep"::numeric = 75`` failed on
+    # the whole table as soon as one value was not a number ('2A').
+    from ....core.filter.sql_quotes import mask_quoted, unmask_quoted
 
-    # Pattern explanation:
-    # - "([^"]+)" : quoted field name
-    # - (?!::) : negative lookahead - NOT followed by :: (skip already casted fields)
-    # - (\s*) : optional whitespace
-    # - (<|>|<=|>=|=) : comparison operator (including = for "field" = 5)
-    # - (\s*) : optional whitespace
-    # - (\d+(?:\.\d+)?) : integer or decimal number
-    numeric_comparison_pattern = r'"([^"]+)"(?!::)(\s*)(<|>|<=|>=|=)(\s*)(\d+(?:\.\d+)?)'
+    non_numeric = set()
+    if layer is not None:
+        try:
+            non_numeric = {field.name().lower() for field in layer.fields() if not field.isNumeric()}
+        except Exception:  # nosec B110 - types unknown: every comparison is cast as before
+            non_numeric = set()
+
+    masked, parts = mask_quoted(expression)
+    numeric_comparison_pattern = r'(\x04(\d+)\x05)(?!\s*::)(\s*)(<=|>=|<|>|=)(\s*)(\d+(?:\.\d+)?)(?![\w.])'
 
     def add_numeric_cast(match):
-        field = match.group(1)
-        space1 = match.group(2)
-        operator = match.group(3)
-        space2 = match.group(4)
-        number = match.group(5)
-        return f'"{field}"::numeric{space1}{operator}{space2}{number}'
+        column, index, space1, operator, space2, number = match.groups()
+        if operator == '=' and parts[int(index)][1:-1].replace('""', '"').lower() in non_numeric:
+            return match.group(0)
+        return f'{column}::numeric{space1}{operator}{space2}{number}'
 
     # Apply to ALL numeric comparisons that don't have ::
-    expression = re.sub(numeric_comparison_pattern, add_numeric_cast, expression)
+    expression = unmask_quoted(re.sub(numeric_comparison_pattern, add_numeric_cast, masked), parts)
 
     return expression
 

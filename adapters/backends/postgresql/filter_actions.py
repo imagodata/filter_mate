@@ -552,11 +552,13 @@ def execute_filter_action_postgresql_direct(
             if clean_where_clause.upper().startswith('WHERE '):
                 clean_where_clause = clean_where_clause[6:].lstrip()
 
-            # Get existing subset to preserve filter chain
-            old_subset = layer.subsetString()
-
-            # Build final expression (combine or replace)
-            final_expression = build_combined_expression(old_subset, clean_where_clause)
+            # 2026-10-17: the WHERE is the final expression. The caller
+            # (ExpressionFacadeHandler.apply_filter_and_update_subset) has
+            # already combined it with the old subset by the user's operator
+            # and queued it; combining it again here with the current subset
+            # (AND hard-coded) made OR return the old filter alone and the
+            # replace mode keep the old filter.
+            final_expression = clean_where_clause
 
             logger.debug(f"[PostgreSQL] Direct filter expression: {final_expression[:200]}...")
 

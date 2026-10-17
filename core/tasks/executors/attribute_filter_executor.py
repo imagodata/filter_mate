@@ -30,6 +30,7 @@ from ....infrastructure.constants import (
 
 # Import utilities
 from ....infrastructure.utils import safe_set_subset_string
+from ...filter.sql_quotes import has_comparison_operator
 
 logger = logging.getLogger('FilterMate.Tasks.AttributeFilterExecutor')
 
@@ -77,7 +78,8 @@ class AttributeFilterExecutor:
         table_name: Optional[str] = None,
         old_subset: Optional[str] = None,
         combine_operator: str = 'AND',
-        task_bridge: Optional[Any] = None
+        task_bridge: Optional[Any] = None,
+        geometry_field: Optional[str] = None
     ):
         """
         Initialize AttributeFilterExecutor.
@@ -90,6 +92,9 @@ class AttributeFilterExecutor:
             old_subset: Existing subset string (for combination)
             combine_operator: Operator to combine expressions (AND/OR)
             task_bridge: Optional TaskBridge for v3 delegation
+            geometry_field: Geometry column of the layer (read from its URI
+                when omitted); $geometry and length() of the geometry are
+                written against it
         """
         self.layer = layer
         self.provider_type = provider_type
@@ -98,6 +103,7 @@ class AttributeFilterExecutor:
         self.old_subset = old_subset
         self.combine_operator = combine_operator
         self.task_bridge = task_bridge
+        self.geometry_field = geometry_field
 
         # Get layer field names
         self.field_names = [field.name() for field in layer.fields()]
@@ -134,11 +140,10 @@ class AttributeFilterExecutor:
             return None
 
         # Check if expression is just a field name (no operators)
+        # 2026-10-17: isField() alone (the root node is a column reference).
+        # The extra "'IN' in expression.upper()" test let "importance" pass.
         qgs_expr = QgsExpression(expression)
-        expr_upper = expression.upper()
-        is_simple_field = qgs_expr.isField() and not any(
-            op in expr_upper for op in ['=', '>', '<', '!', 'IN', 'LIKE', 'AND', 'OR']
-        )
+        is_simple_field = qgs_expr.isField()
 
         if is_simple_field:
             logger.debug("TaskBridge: field-only expression - using legacy code")
@@ -219,12 +224,12 @@ class AttributeFilterExecutor:
         """
         # FIXED: Only reject if expression is JUST a field name (no operators)
         # Allow expressions like "HOMECOUNT = 10" or "field > 5"
+        # 2026-10-17: isField() alone (the root node is a column reference).
+        # The extra "'IN' in expression.upper()" test let "importance",
+        # "origine" or "ordre" through, and ( old ) AND ( "importance" )
+        # reached the provider (PostgreSQL: argument of AND must be boolean).
         qgs_expr = QgsExpression(expression)
-        # Use case-insensitive check for operators
-        expr_upper = expression.upper()
-        if qgs_expr.isField() and not any(
-            op in expr_upper for op in ['=', '>', '<', '!', 'IN', 'LIKE', 'AND', 'OR']
-        ):
+        if qgs_expr.isField():
             logger.debug(
                 f"Rejecting expression '{expression}' - "
                 "it's just a field name without comparison"
@@ -238,12 +243,9 @@ class AttributeFilterExecutor:
         # CRITICAL FIX: Reject "display expressions" that don't return boolean values
         # Display expressions like coalesce("field",'<NULL>') are valid QGIS expressions
         # but they return string/value types, not boolean
-        comparison_operators = [
-            '=', '>', '<', '!=', '<>', 'IN', 'LIKE', 'ILIKE',
-            'IS NULL', 'IS NOT NULL', 'BETWEEN', 'NOT', 'AND', 'OR',
-            '~', 'SIMILAR TO', '@', '&&'
-        ]
-        has_comparison = any(op in expression.upper() for op in comparison_operators)
+        # 2026-10-17: operators searched as words, outside quotes
+        # (coalesce("origine", '') held "IN" and "OR").
+        has_comparison = has_comparison_operator(expression)
 
         if not has_comparison:
             # Expression doesn't contain comparison operators - likely a display expression
@@ -462,6 +464,19 @@ class AttributeFilterExecutor:
             logger.warning(f"qualify_field_names failed: {e}")
             return expression
 
+    def _geometry_column(self) -> str:
+        """The layer's geometry column (2026-10-17: it was 'geometry' for every layer)."""
+        if self.geometry_field:
+            return self.geometry_field
+        try:
+            from qgis.core import QgsDataSourceUri
+            column = QgsDataSourceUri(self.layer.dataProvider().dataSourceUri()).geometryColumn()
+            if isinstance(column, str) and column:
+                return column
+        except Exception:  # nosec B110 - no readable URI: the former default below
+            pass
+        return 'geometry'
+
     def _convert_to_postgis(self, expression: str) -> str:
         """
         Convert QGIS expression to PostGIS SQL.
@@ -477,8 +492,7 @@ class AttributeFilterExecutor:
             from ....core.services.expression_service import ExpressionService
             from ....core.domain.filter_expression import ProviderType
 
-            geom_col = 'geometry'  # Default geometry column
-            return ExpressionService().to_sql(expression, ProviderType.POSTGRESQL, geom_col)
+            return ExpressionService().to_sql(expression, ProviderType.POSTGRESQL, self._geometry_column())
         except ImportError:
             logger.debug("ExpressionService not available, returning expression unchanged")
             return expression
@@ -501,8 +515,7 @@ class AttributeFilterExecutor:
             from ....core.services.expression_service import ExpressionService
             from ....core.domain.filter_expression import ProviderType
 
-            geom_col = 'geometry'  # Default geometry column
-            return ExpressionService().to_sql(expression, ProviderType.SPATIALITE, geom_col)
+            return ExpressionService().to_sql(expression, ProviderType.SPATIALITE, self._geometry_column())
         except ImportError:
             logger.debug("ExpressionService not available, returning expression unchanged")
             return expression
