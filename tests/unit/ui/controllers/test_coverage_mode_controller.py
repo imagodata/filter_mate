@@ -848,6 +848,25 @@ class TestLayerLifecycle:
         canvas.unsetMapTool.assert_called_once_with(tool)
         assert controller._previous_map_tool is None
 
+    def test_leaving_a_layer_deletes_its_pickers(self, ctrl_module, layers, adapters, monkeypatch):
+        # QGIS gives the last tool back after Pan: the raster picker must not come back on a point cloud.
+        controller = ctrl_module.CoverageModeController(_dock())
+        controller._active_layer, controller._kind = layers["r1"], _kind(ctrl_module, "RASTER")
+        controller._raster_panel = _value_panel()
+        pixel, cls = MagicMock(), MagicMock()
+        controller._pixel_tool, controller._class_tool = pixel, cls
+        controller._leave_layer()
+        pixel.deleteLater.assert_called_once_with()
+        cls.deleteLater.assert_called_once_with()
+        assert controller._pixel_tool is None and controller._class_tool is None
+
+    def test_pixel_pick_ignored_on_a_point_cloud(self, ctrl_module, layers):
+        controller = ctrl_module.CoverageModeController(_dock())
+        controller._active_layer, controller._kind = layers["p1"], _kind(ctrl_module, "POINT_CLOUD")
+        controller._raster_panel = _value_panel()
+        controller._on_pixel_picked(object(), False)
+        controller._raster_panel.set_pixel_values.assert_not_called()
+
     def test_setup_connects_the_project_signals_once(self, ctrl_module, monkeypatch):
         project = types.SimpleNamespace(readProject=FakeSignal(), cleared=FakeSignal(), layersWillBeRemoved=FakeSignal())
         monkeypatch.setattr(sys.modules["qgis.core"], "QgsProject",
