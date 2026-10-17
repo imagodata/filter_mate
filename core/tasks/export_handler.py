@@ -601,6 +601,7 @@ class ExportHandler:
             )
             ext = get_extension_for_format(datatype)
             used_basenames = set()
+            guard = LayerExporter(project=project)  # one exporter: the project sources are read once
 
             for layer_info in layers:
                 layer_name = layer_info['layer_name'] if isinstance(layer_info, dict) else layer_info
@@ -618,7 +619,7 @@ class ExportHandler:
                 output_path = os.path.join(output_folder, f"{safe}{ext}")
 
                 # Never overwrite the file another layer of the project is read from
-                source_of = LayerExporter(project=project).find_layer_using_file(output_path)
+                source_of = guard.find_layer_using_file(output_path)
                 if source_of is not None:
                     logger.error(f"Streaming export refused: {output_path} is the source of '{source_of}'")
                     failed_layers.append(f"{layer_name} ({output_path} is the data source of layer '{source_of}')")

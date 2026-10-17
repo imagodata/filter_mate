@@ -62,45 +62,13 @@ def _tr(message: str) -> str:
     return message
 
 
-_SPATIALITE_DBNAME = re.compile(r"dbname='((?:[^'\\]|\\.)*)'")
-
-
-def layer_source_file_path(source: str) -> Optional[str]:
-    """File a layer reads from, or None when its source is not a plain file.
-
-    Handles the OGR form (``/data/a.gpkg|layername=roads``) and the Spatialite
-    form (``dbname='/data/b.sqlite' table=...``). PostgreSQL, memory and remote
-    sources give None.
-
-    Args:
-        source: ``layer.source()``.
-
-    Returns:
-        str: The file path, or None.
-    """
-    if not source or not isinstance(source, str):
-        return None
-    match = _SPATIALITE_DBNAME.search(source)
-    if match:
-        if 'host=' in source or 'service=' in source:
-            return None  # PostgreSQL: dbname is a database, not a file
-        path = match.group(1)
-    else:
-        path = source.split('|')[0].strip()
-    if not path or '://' in path or not os.path.splitext(path)[1]:
-        return None
-    return path
-
-
-def same_file(first: str, second: str) -> bool:
-    """Whether two paths name one file (symlinks, ``..`` and case rules resolved)."""
-    try:
-        if os.path.exists(first) and os.path.exists(second):
-            return os.path.samefile(first, second)
-    except OSError:
-        pass
-    return (os.path.normcase(os.path.realpath(os.path.abspath(first)))
-            == os.path.normcase(os.path.realpath(os.path.abspath(second))))
+# File behind a layer source and "which project layer reads this file": see target_guard.py
+from .target_guard import (  # noqa: E402,F401
+    ProjectSources,
+    layer_source_file_path,
+    layer_source_file_paths,
+    same_file,
+)
 
 # =============================================================================
 # Format registry — single source of truth for OGR driver ↔ extension lookup.
@@ -460,6 +428,11 @@ class LayerExporter:
             project: QgsProject instance or None to use current project
         """
         self.project = project or (QgsProject.instance() if QGIS_AVAILABLE else None)
+        self._project_sources: Optional[ProjectSources] = None
+
+    def refresh_project_sources(self) -> None:
+        """Forget the files the project layers read from (worked out again at the next check)."""
+        self._project_sources = None
 
     def export(self, config: ExportConfig) -> ExportResult:
         """
@@ -476,6 +449,8 @@ class LayerExporter:
                 success=False,
                 error_message="QGIS not available"
             )
+
+        self.refresh_project_sources()  # a new export looks at the project as it is now
 
         if not self.project:
             return ExportResult(
@@ -516,14 +491,10 @@ class LayerExporter:
         """
         if not output_path or not self.project:
             return None
-        try:
-            for layer in self.project.mapLayers().values():
-                path = layer_source_file_path(layer.source())
-                if path and same_file(path, output_path):
-                    return layer.name()
-        except Exception as e:  # a project we cannot inspect must not block the export
-            logger.debug(f"Could not check the export target against the project layers: {e}")
-        return None
+        if self._project_sources is None:
+            # Once per export, not once per layer: a batch asks for every target
+            self._project_sources = ProjectSources(self.project)
+        return self._project_sources.layer_using(output_path)
 
     def _refuse_project_source(self, output_path: str) -> Optional[ExportResult]:
         """A failed ExportResult when ``output_path`` is the file of a project layer.
