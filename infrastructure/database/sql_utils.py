@@ -404,11 +404,14 @@ def create_temp_spatialite_table(
 
         cursor = conn.cursor()
 
+        # Quoted: the name is data (session id + layer id), never a bare identifier
+        quoted_table = '"' + sanitize_sql_identifier(table_name).replace('"', '""') + '"'
+
         # Drop existing table if exists
-        cursor.execute(f"DROP TABLE IF EXISTS {sanitize_sql_identifier(table_name)}")  # nosec B608
+        cursor.execute(f"DROP TABLE IF EXISTS {quoted_table}")  # nosec B608
 
         # Create table from query
-        create_sql = f"CREATE TABLE {sanitize_sql_identifier(table_name)} AS {sql_query}"  # nosec B608
+        create_sql = f"CREATE TABLE {quoted_table} AS {sql_query}"  # nosec B608
         cursor.execute(create_sql)
 
         # Create spatial index
@@ -425,7 +428,7 @@ def create_temp_spatialite_table(
             """)
 
             # Create R-tree spatial index
-            cursor.execute("""
+            cursor.execute(f"""
                 SELECT CreateSpatialIndex(
                     '{sanitize_sql_identifier(table_name)}',
                     '{sanitize_sql_identifier(geom_field)}'

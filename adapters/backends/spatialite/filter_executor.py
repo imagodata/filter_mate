@@ -1156,16 +1156,22 @@ def manage_spatialite_subset(
         task_parameters=task_parameters
     )
 
-    # Create temporary table with session-prefixed name (v4.4.4: fm_temp_ prefix)
+    # Create the temporary table with the session-prefixed name apply_spatialite_subset()
+    # reads (fm_temp_<session>_<name>): the table that is created, the subset that is set
+    # and the cleanup (cleanup_session_temp_tables, "Clear Temp Tables") must agree on it.
+    # It is created in the layer's own database, not in FilterMate's: the subset string
+    # is evaluated by the layer's provider on its own connection to that file, which
+    # cannot see a table that lives in another database.
     session_name = f"{session_id}_{name}" if session_id else name
+    temp_table_name = f"fm_temp_{session_name}"
     logger.info(
-        f"Creating Spatialite temp table 'fm_temp_{session_name}' "
+        f"Creating Spatialite temp table '{temp_table_name}' "
         f"(session: {session_id})"
     )
 
     success = create_temp_spatialite_table(
         db_path=db_path,
-        table_name=session_name,
+        table_name=temp_table_name,
         sql_query=spatialite_query,
         geom_field=geom_key_name,
         srid=layer_srid
@@ -1249,64 +1255,38 @@ def get_last_subset_info(cur, layer, project_uuid: str, conn=None) -> tuple:
 
 def cleanup_session_temp_tables(
     db_path: str,
-    session_id: str
+    session_id: Optional[str] = None
 ) -> int:
     """
     Clean up all temporary tables for a specific session.
 
     EPIC-1 Phase E4-S4: New function for session cleanup
 
-    Drops all temporary tables and indexes prefixed with the session_id.
-    Should be called when closing the plugin or resetting.
+    Drops the temporary tables (and their R-tree indexes) named
+    ``fm_temp_<session_id>_*`` (legacy ``mv_<session_id>_*``). The match is exact
+    and case-sensitive, and a table registered as a GeoPackage layer is never
+    dropped. Should be called when closing the plugin or resetting.
 
     Args:
         db_path: Path to Spatialite database
-        session_id: Session identifier prefix
+        session_id: Session identifier prefix. Without one nothing is dropped
+            (callers that only know the database get 0, not an error).
 
     Returns:
         int: Number of tables cleaned up
     """
-    import sqlite3
+    from ....infrastructure.database.temp_objects import drop_filtermate_temp_tables
 
     if not session_id or not db_path:
         return 0
 
-    try:
-        conn = sqlite3.connect(db_path)
-        cur = conn.cursor()
-
-        # Find all temp tables for this session (both new and legacy prefixes v4.4.4)
-        cur.execute(
-            """SELECT name FROM sqlite_master
-               WHERE type='table' AND (name LIKE ? OR name LIKE ?)""",
-            (f"fm_temp_{session_id}_%", f"mv_{session_id}_%")
+    count = len(drop_filtermate_temp_tables(db_path, session_id=session_id))
+    if count > 0:
+        logger.info(
+            f"Cleaned up {count} Spatialite temp table(s) "
+            f"for session {session_id}"
         )
-        tables = cur.fetchall()
-
-        count = 0
-        for (table_name,) in tables:
-            try:
-                # Drop the table
-                cur.execute(f'DROP TABLE IF EXISTS "{table_name}";')  # nosec B608
-                # Drop associated R-tree index
-                cur.execute(f'DROP TABLE IF EXISTS "idx_{table_name}_geometry";')  # nosec B608
-                count += 1
-            except Exception as e:
-                logger.warning(f"[Spatialite] Error dropping temp table {table_name}: {e}")
-
-        conn.commit()
-        conn.close()
-
-        if count > 0:
-            logger.info(
-                f"Cleaned up {count} Spatialite temp table(s) "
-                f"for session {session_id}"
-            )
-        return count
-
-    except Exception as e:
-        logger.error(f"[Spatialite] Error cleaning up session tables: {e}")
-        return 0
+    return count
 
 
 def normalize_column_names_for_spatialite(
