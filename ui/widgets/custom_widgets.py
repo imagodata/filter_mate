@@ -1114,11 +1114,23 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
         layer. The rows are sorted by display value client-side anyway, and the
         text filter searches the whole layer server-side. GeoPackage keeps the
         server order (batiment, 1.17 M rows: 0.6 s).
+
+        2026-10-17: same for web services and remote files (WFS, OGC API
+        Features, /vsicurl/...): QGIS sorts them client-side, so the limited
+        request downloaded the whole layer before keeping 1001 rows.
         """
         try:
-            return self.layer.providerType() != 'postgres'
+            provider = self.layer.providerType()
+            source = self.layer.source()
         except (RuntimeError, AttributeError):
             return True
+        if provider == 'postgres':
+            return False
+        try:
+            from ...core.domain.source_capability import classify
+        except ImportError:
+            from core.domain.source_capability import classify
+        return not classify(provider, source).is_remote
 
     CANVAS_DEFER_FALLBACK_MS = 15000
     CANVAS_DEFER_MAX_ROUNDS = 3
@@ -1185,7 +1197,7 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
         QTimer.singleShot(self.CANVAS_DEFER_FALLBACK_MS, lambda: run_deferred(True))
         logger.info(
             f"_populate_features_sync: {self._cached_layer_name} population deferred until the canvas "
-            f"finishes rendering (PostgreSQL, fallback {self.CANVAS_DEFER_FALLBACK_MS} ms "
+            f"finishes rendering (PostgreSQL / remote source, fallback {self.CANVAS_DEFER_FALLBACK_MS} ms "
             f"x{self.CANVAS_DEFER_MAX_ROUNDS + 1})"
         )
         return True
@@ -1267,9 +1279,7 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
         search_text = (search_text or '').strip()
         display_sql = self._display_expression_sql(expression, list_widget)
         if search_text:
-            request.setFilterExpression(
-                f"lower(to_string({display_sql})) LIKE {QgsExpression.quotedValue('%' + search_text.lower() + '%')}"
-            )
+            request.setFilterExpression(self._search_expression(display_sql, search_text))
         server_sorted = False
         if fetch_limit > 0:
             # Sorted by display value so "the first N" is predictable, and one
@@ -1404,6 +1414,37 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
         context = QgsExpressionContext()
         context.appendScopes(QgsExpressionContextUtils.globalProjectLayerScopes(self.layer))
         return expr, context
+
+    def _search_expression(self, display_sql, search_text):
+        """Case-insensitive "contains" filter of the text search.
+
+        2026-10-17: on a web service (or remote file) whose display is a text
+        field, ``"field" ILIKE '%x%'``: QGIS translates it to the server's
+        filter (OGC PropertyIsLike matchCase=false, CQL2...), where
+        ``lower(to_string(...)) LIKE`` is evaluated client-side after
+        downloading every feature.
+        """
+        pattern = QgsExpression.quotedValue('%' + search_text + '%')
+        if not display_sql.startswith('(') and self._displays_remote_text_field(display_sql):
+            return f"{display_sql} ILIKE {pattern}"
+        return f"lower(to_string({display_sql})) LIKE {QgsExpression.quotedValue('%' + search_text.lower() + '%')}"
+
+    def _displays_remote_text_field(self, display_sql):
+        """Whether ``display_sql`` (a quoted field name) is a text field of a remote layer."""
+        if self._orders_server_side():
+            return False
+        try:
+            if self.layer.providerType() == 'postgres':
+                return False
+            fields = self.layer.fields()
+            index = fields.indexOf(display_sql.strip('"').replace('""', '"'))
+            if index < 0:
+                return False
+            field = fields.at(index)
+            is_date = getattr(field, 'isDateOrTime', lambda: False)()
+            return not field.isNumeric() and not is_date
+        except (RuntimeError, AttributeError):
+            return False
 
     @staticmethod
     def _display_expression_sql(expression, list_widget):

@@ -158,8 +158,8 @@ def classify(provider_key: str, source: str, is_raster: bool = False) -> SourceC
         SourceCapability: never None; an unknown provider is a local source
         filtered by QGIS.
     """
-    key = (provider_key or '').strip().lower()
-    text = source or ''
+    key = provider_key.strip().lower() if isinstance(provider_key, str) else ''
+    text = source if isinstance(source, str) else ''
     stripped = text.lstrip().strip('"').strip("'")
     upper = stripped.upper()
 

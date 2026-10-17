@@ -21,7 +21,7 @@ _NAMES = ("_canvas_is_drawing", "_defer_populate_while_canvas_draws", "_orders_s
 
 def _methods(timer):
     tree = ast.parse(_MODULE.read_text(encoding="utf-8"))
-    ns = {"logger": MagicMock(), "weakref": weakref, "QTimer": timer}
+    ns = {"__name__": "fm_test_feature_list_canvas_defer", "logger": MagicMock(), "weakref": weakref, "QTimer": timer}
     for cls in (n for n in tree.body if isinstance(n, ast.ClassDef)):
         for node in cls.body:
             if isinstance(node, ast.FunctionDef) and node.name in _NAMES:
