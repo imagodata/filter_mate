@@ -126,4 +126,4 @@ def test_filtered_extent_of_a_web_service_is_not_scanned():
 def test_layer_refresh_uses_the_real_gdal_error_handler():
     """The import named a module that does not exist: the no-op test double was silently used."""
     module = _load("layer_refresh_manager")
-    assert module.GdalErrorHandler.__module__.endswith("infrastructure.utils")
+    assert module.GdalErrorHandler.__module__.endswith("infrastructure.utils.gdal_error_handler")
