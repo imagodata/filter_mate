@@ -1241,6 +1241,9 @@ class FilterEngineTask(QgsTask):
             logger.error(f"   traceback:\n{traceback.format_exc()}")
             logger.error(f"{'=' * 60}")
             return False
+        finally:
+            # In the worker thread that opened them (2026-10-17: cancel() did it on the main thread)
+            self._release_worker_resources()
 
     # ========================================================================
     # V3 TaskBridge Delegation Methods (Strangler Fig Pattern)
@@ -2873,32 +2876,29 @@ class FilterEngineTask(QgsTask):
         self._mv_handler.cleanup_postgresql_materialized_views()
 
     def cancel(self) -> None:
-        """Cancel the task and cleanup all resources.
+        """Cancel the task: raise the flag and interrupt its running PostgreSQL query.
 
-        Performs cleanup in the following order:
-        1. Cleanup PostgreSQL materialized views created during filtering
-        2. Close all active database connections
-        3. Reset prepared statements manager
-        4. Log cancellation (Python logger only, not QgsMessageLog)
-        5. Call parent cancel()
+        2026-10-17: the cleanup ran here, on the main thread, with the
+        connections the worker was using: the DROP of the materialized views
+        waited for the worker's query (QGIS frozen), and closing an sqlite3
+        connection the worker created raised ``sqlite3.ProgrammingError`` (not
+        caught): ``super().cancel()`` was never reached, the task never
+        canceled. The worker releases its resources itself when ``run()``
+        ends (:meth:`_release_worker_resources`).
 
         Note:
             Uses Python logger instead of QgsMessageLog to prevent Windows
             access violation during QGIS shutdown (v2.8.7 crash fix).
         """
-        # Cleanup PostgreSQL materialized views before closing connections
-        self._cleanup_postgresql_materialized_views()
-
-        # Cleanup all active database connections
-        for conn in self.active_connections[:]:
-            try:
-                conn.close()
-            except (RuntimeError, OSError, AttributeError) as e:
-                # Log but don't fail - connection may already be closed
-                logger.debug(f"Connection cleanup failed (may already be closed): {e}")
-        self.active_connections.clear()
-        # Reset prepared statements manager when connections close
-        self._ps_manager = None
+        for conn in list(self.active_connections):
+            # psycopg2's cancel() is meant to be called from another thread:
+            # it asks the server to abort the statement the worker waits on.
+            # sqlite3 connections are left alone (owned by the worker thread).
+            if getattr(conn, 'closed', None) == 0 and callable(getattr(conn, 'cancel', None)):
+                try:
+                    conn.cancel()
+                except Exception as e:  # catch-all safety net: a cancel request must not stop the cancel
+                    logger.debug(f"PostgreSQL query not interrupted: {e}")
 
         # Use Python logger only, NOT QgsMessageLog
         # QgsMessageLog may be destroyed during QGIS shutdown, causing access violation
@@ -2908,6 +2908,27 @@ class FilterEngineTask(QgsTask):
             pass  # Intentional silent catch
 
         super().cancel()
+
+    def _release_worker_resources(self) -> None:
+        """Release what the worker opened; called by ``run()`` in its own thread when it ends.
+
+        A canceled task drops the materialized views it created (cancel() did it
+        before, from the main thread); every connection the task opened is
+        closed by the thread that used it.
+        """
+        if self.isCanceled():
+            try:
+                self._cleanup_postgresql_materialized_views()
+            except Exception as e:  # catch-all safety net: the cleanup must not hide the task result
+                logger.debug(f"Materialized view cleanup after cancel failed: {e}")
+        for conn in self.active_connections[:]:
+            try:
+                conn.close()
+            except Exception as e:  # catch-all safety net: connection may already be closed
+                logger.debug(f"Connection cleanup failed (may already be closed): {e}")
+        self.active_connections.clear()
+        # Reset prepared statements manager when connections close
+        self._ps_manager = None
 
     def _restore_source_layer_selection(self):
         """Restore source layer selection after filter/unfilter. Delegates to FeatureCollector."""
