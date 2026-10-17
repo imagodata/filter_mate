@@ -15,11 +15,14 @@ Docker network:
 Checks (2026-10-17 review of the thread / lifecycle fixes): a PostgreSQL filter whose source selection
 is large enough for a materialized view; an unfilter canceled by a filter launched at once; a second
 click on Filter. After each: no target left empty or unreadable, no materialized view that no subset
-reads, no connection "idle in transaction (aborted)", no Python error or critical message.
+reads, no connection "idle in transaction (aborted)" or left open by a task, no subset set from a
+worker thread, no Python error or critical message. ``FM_PG_DEBUG=1`` prints the views of the canceled
+task and the stack of every subset change of the target.
 """
 import faulthandler
 import logging
 import os
+import re
 import shutil
 import sys
 import tempfile
@@ -27,7 +30,7 @@ import time
 import traceback
 
 from qgis.core import Qgis, QgsApplication, QgsDataSourceUri, QgsProject, QgsVectorLayer
-from qgis.PyQt.QtCore import QSettings, Qt, QTimer
+from qgis.PyQt.QtCore import QSettings, Qt, QThread, QTimer
 from qgis.utils import iface
 import qgis.utils
 
@@ -192,6 +195,12 @@ def state_check(label, expect_filtered):
           f"views={sorted(views)} new and unread={orphans}")
     aborted = aborted_connections()
     check(f"{label}: no connection idle in an aborted transaction", not aborted, str(aborted))
+    # psycopg2 connections (no application_name, unlike QGIS's own) left open by the tasks
+    left = sql("SELECT count(*) FROM pg_stat_activity WHERE backend_type = 'client backend' "
+               "AND application_name = '' AND pid <> pg_backend_pid()")[0][0]
+    check(f"{label}: no task connection left open", left == 0, f"{left} open")
+    from_worker, STATE['subsets_from_worker'] = STATE.get('subsets_from_worker', []), []
+    check(f"{label}: every subset set on the main thread", not from_worker, '; '.join(from_worker[:2]))
 
 
 # --- steps ---------------------------------------------------------------------------------------
@@ -265,6 +274,7 @@ def mark_views():
 
 
 def s_filter():
+    watch_subset_threads()
     mark_views()
     run_task('filter')
     return settled()
@@ -285,6 +295,22 @@ def s_unfilter_canceled_by_a_filter():
 
 def s_unfilter_canceled_check():
     state_check('unfilter canceled by a filter', expect_filtered=True)
+
+
+def watch_subset_threads():
+    """Record the target's subset changes made outside the main thread (direct connection: the slot
+    runs in the thread that called setSubsetString; queued, it would always run on the main thread)."""
+    def changed():
+        on_main = QThread.currentThread() == QgsApplication.instance().thread()
+        if not on_main:
+            stack = traceback.format_stack()[:-1]
+            STATE.setdefault('subsets_from_worker', []).append(
+                ' <- '.join(frame.strip().splitlines()[0] for frame in reversed(stack[-2:])) or '?')
+        if os.environ.get('FM_PG_DEBUG'):
+            found = re.findall(r'fm_temp_mv_[0-9a-z_]+', layer('pts').subsetString())
+            print(f"   debug: pts subset changed (main thread={on_main}) -> {found[:1]}\n"
+                  + ''.join(traceback.format_stack()[:-1]), flush=True)
+    layer('pts').subsetStringChanged.connect(changed, Qt.ConnectionType.DirectConnection)
 
 
 def s_double_click():
@@ -311,6 +337,9 @@ def s_double_click_check():
         task_module = sys.modules[f'{PACKAGE}.core.tasks.filter_task']
         print(f"   debug: first created={STATE['first'].__dict__.get('_created_mv_names')} "
               f"deferred={task_module._DEFERRED_VIEW_DROPS}", flush=True)
+        for name in ('zones', 'pts'):
+            print(f"   debug: subset {name}: {re.findall(r'fm_temp_mv_[0-9a-z_]+', layer(name).subsetString())}",
+                  flush=True)
     if STATE['first_canceled'] is False:
         # it completed before the second click: its view is in the undo history, not a leak
         STATE['views_before'] = STATE['views_before'] | (matviews() - set(
