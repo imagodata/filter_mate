@@ -156,11 +156,41 @@ def _replace_raster(written: str, path: str) -> None:
             os.replace(written + suffix, path + suffix)
 
 
+def private_point_cloud(layer):
+    """A point cloud layer of its own on ``layer``'s source and filter, or ``layer`` itself.
+
+    The exporter reads the index of the layer it is given, shared (QGIS >= 3.42)
+    with the canvas and with any subset string set on the main thread meanwhile:
+    in QGIS 4.2 a filter changed on the displayed cloud during a background
+    export reached the file (34 MB written instead of 0 point), and QGIS crashed
+    in ``doExport``. A layer nothing else touches keeps the task on its own
+    index. Built on the main thread, released in ``finished``.
+    """
+    from qgis.core import QgsPointCloudLayer
+    from .point_cloud_footprint import index_ready
+    try:
+        options = QgsPointCloudLayer.LayerOptions()
+        options.loadDefaultStyle = False
+        if hasattr(options, 'skipIndexGeneration'):
+            options.skipIndexGeneration = True  # an unindexed LAS is refused, never indexed twice
+        own = QgsPointCloudLayer(layer.source(), layer.name(), layer.providerType(), options)
+        if not own.isValid() or not index_ready(own):
+            return layer
+        subset = layer.subsetString()
+        if subset and not own.setSubsetString(subset):
+            return layer
+        return own
+    except Exception as exc:  # pragma: no cover - depends on the QGIS build
+        logger.debug(f"[FM5] point cloud export reads the displayed layer: {exc}")
+        return layer
+
+
 class PointCloudExportJob:
     """Write the points of a point cloud layer that pass its current filter.
 
     ``QgsPointCloudLayerExporter.prepareExport`` must run on the main thread
-    (constructor); :meth:`run` may be called from a task thread.
+    (constructor); :meth:`run` may be called from a task thread. The exporter
+    reads a private copy of the layer (:func:`private_point_cloud`).
     """
 
     def __init__(self, layer, path: str, fmt: str = 'LAZ', crs=None) -> None:
@@ -169,6 +199,7 @@ class PointCloudExportJob:
         self.path = path
         self.fmt = fmt.upper() if fmt else 'LAZ'
         self.exporter = None
+        self.source = None
         self.error = ''
         exporter_class = point_cloud_exporter_class()
         if exporter_class is None:
@@ -185,7 +216,8 @@ class PointCloudExportJob:
             self.error = 'the point cloud has no index yet (LAS file being indexed): try again later'
             return
         os.makedirs(os.path.dirname(os.path.abspath(path)) or '.', exist_ok=True)
-        exporter = exporter_class(layer)
+        self.source = private_point_cloud(layer)
+        exporter = exporter_class(self.source)
         exporter.setAllAttributes()
         if crs is not None and crs.isValid():
             exporter.setCrs(crs)
@@ -286,7 +318,7 @@ def make_export_task(jobs, on_done=None):
 
         def finished(self, result):
             for job in self.jobs:
-                for name in ('exporter', 'pipe'):
+                for name in ('exporter', 'pipe', 'source'):
                     if hasattr(job, name):
                         setattr(job, name, None)
             self.jobs = []
