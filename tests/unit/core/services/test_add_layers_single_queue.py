@@ -40,6 +40,7 @@ def test_queued_layers_reach_manage_task():
     app = SimpleNamespace(
         _add_layers_queue=[first, second],
         _get_task_management_service=lambda: service,
+        _filter_usable_layers=lambda layers: list(layers),
         manage_task=MagicMock(),
     )
 
@@ -47,6 +48,21 @@ def test_queued_layers_reach_manage_task():
 
     app.manage_task.assert_called_once_with("add_layers", first)
     assert app._add_layers_queue == [second]
+
+
+def test_layers_removed_while_queued_are_left_out():
+    service = tms.TaskManagementService()
+    app = SimpleNamespace(
+        _add_layers_queue=[[MagicMock(name="removed")]],
+        _get_task_management_service=lambda: service,
+        _filter_usable_layers=lambda layers: [],
+        manage_task=MagicMock(),
+    )
+
+    _app_method("_process_add_layers_queue")(app)
+
+    app.manage_task.assert_not_called()
+    assert app._add_layers_queue == []
 
 
 def test_service_processes_the_queue_it_is_given():

@@ -1905,7 +1905,13 @@ class FilterMateApp:
         """
         service = self._get_task_management_service()
         if service:
-            service.process_add_layers_queue(self.manage_task, queue=self._add_layers_queue)
+            def run_queued(task_name, layers):
+                # layers removed from the project while they waited are left out
+                usable = self._filter_usable_layers(layers or [])
+                if usable:
+                    self.manage_task(task_name, usable)
+
+            service.process_add_layers_queue(run_queued, queue=self._add_layers_queue)
         else:
             logger.warning("TaskManagementService not available, cannot process queue")
 
