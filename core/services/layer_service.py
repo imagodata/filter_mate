@@ -735,7 +735,16 @@ class LayerService(QObject):
             'wfs': ('WFS', '🌐'),
         }
 
-        return providers.get((provider_type or '').lower(), (provider_type, '📄'))
+        key = (provider_type or '').lower()
+        if key in providers:
+            return providers[key]
+        try:
+            from ..domain.source_capability import classify
+        except ImportError:
+            from core.domain.source_capability import classify
+        if classify(key, '').is_remote_service:
+            return (provider_type, '🌐')  # OGC API Features, ArcGIS... (2026-10-17)
+        return (provider_type, '📄')
 
     def cleanup_for_removed_layers(
         self,

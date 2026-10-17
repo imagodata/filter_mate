@@ -11,7 +11,7 @@ Phase: 6 - God Class DockWidget Migration
 from typing import TYPE_CHECKING, Optional, List, Tuple, Dict
 import logging
 
-from qgis.PyQt.QtCore import pyqtSignal
+from qgis.PyQt.QtCore import QCoreApplication, pyqtSignal
 from qgis.PyQt.QtWidgets import QMenu, QLabel
 from qgis.PyQt.QtGui import QCursor
 from qgis.core import QgsVectorLayer
@@ -69,6 +69,15 @@ BACKEND_STYLES = {
         'icon': '🐘',
         'tooltip': 'Backend: PostgreSQL → OGR fallback'
     },
+    # 2026-10-17: a web service or a remote file (OGR path, filters sent to the
+    # server). Text and tooltip are translated at display (_remote_badge_texts).
+    'remote': {
+        'text': 'Remote',
+        'color': 'white',
+        'background': '#48c9b0',
+        'icon': '🌐',
+        'tooltip': 'Backend: remote source'
+    },
     'unknown': {
         'text': '...',
         'color': '#7f8c8d',
@@ -77,6 +86,38 @@ BACKEND_STYLES = {
         'tooltip': 'Backend: Unknown'
     }
 }
+
+
+def _source_capability(layer):
+    """core.domain.source_capability of ``layer`` (cached by the QGIS probe in the plugin)."""
+    try:
+        from ...adapters.qgis.source_capability_probe import capability_for_layer
+    except ImportError:  # loaded outside the plugin package (unit tests)
+        try:
+            from core.domain.source_capability import classify_layer as capability_for_layer
+        except ImportError:
+            return None
+    try:
+        return capability_for_layer(layer)
+    except Exception as exc:  # nosec B110 - a badge must not fail on an odd layer
+        logger.debug(f"Source capability unavailable: {exc}")
+        return None
+
+
+def _remote_badge_texts(capability) -> Tuple[str, str]:
+    """Translated badge text and tooltip of a remote source."""
+    def tr(text):
+        return QCoreApplication.translate("BackendController", text)
+
+    if capability is not None and capability.locality.value == 'remote_file':
+        tooltip = tr("Remote file: every read goes over the network. "
+                     "FilterMate does not count its features on the main thread.")
+    else:
+        tooltip = tr("Remote service: the filter is sent to the server when it can translate it. "
+                     "FilterMate does not count its features on the main thread.")
+    if capability is not None and capability.key_list_limit:
+        tooltip += "\n" + tr("A filter by feature list is limited to {0} features.").format(capability.key_list_limit)
+    return tr("Remote"), tooltip
 
 
 class BackendController(BaseController):
@@ -404,8 +445,16 @@ class BackendController(BaseController):
             return None
 
         provider_type = detect_layer_provider_type(layer)
-        feature_count = layer.featureCount()
         source = layer.source().lower()
+        capability = _source_capability(layer)
+        if capability is not None and not capability.counts_cheaply:
+            # 2026-10-17: a web service / network database is counted by a request:
+            # never on the main thread. Its only backend is OGR.
+            logger.debug(f"  Provider: {provider_type} ({capability.locality.value}) - OGR, not counted")
+            return 'ogr' if provider_type == 'ogr' else None
+        if provider_type == 'postgresql':
+            return 'postgresql'
+        feature_count = layer.featureCount()
 
         logger.debug(f"  Provider: {provider_type}, Features: {feature_count:,}")
         logger.debug(f"  PostgreSQL available: {POSTGRESQL_AVAILABLE}")
@@ -417,7 +466,7 @@ class BackendController(BaseController):
             if not POSTGRESQL_AVAILABLE:
                 logger.debug("  → PostgreSQL (QGIS native API) - psycopg2 not available for advanced features")
             else:
-                logger.debug(f"  → PostgreSQL ({feature_count:,} features) - Full backend")
+                logger.debug("  → PostgreSQL - Full backend")
             return 'postgresql'
 
         # SQLite/Spatialite layers
@@ -546,10 +595,10 @@ class BackendController(BaseController):
         """
         # Check forced backend
         if forced_backend:
-            return forced_backend.lower()
+            return self._remote_or(layer, forced_backend.lower())
 
         if layer.id() in self._forced_backends:
-            return self._forced_backends[layer.id()].lower()
+            return self._remote_or(layer, self._forced_backends[layer.id()].lower())
 
         # Auto-detection
         # FIX v4.1.4 (2026-01-21): PostgreSQL layers ALWAYS use PostgreSQL backend.
@@ -566,9 +615,18 @@ class BackendController(BaseController):
             source = layer.source().split('|')[0]
             if source.lower().endswith(('.gpkg', '.sqlite')):
                 return 'spatialite'
-            return 'ogr'
+            return self._remote_or(layer, 'ogr')
         else:
-            return 'unknown'
+            # 2026-10-17: WFS, OGC API Features, ArcGIS... used to show "..." (unknown)
+            return self._remote_or(layer, 'unknown')
+
+    @staticmethod
+    def _remote_or(layer: QgsVectorLayer, backend_type: str) -> str:
+        """``'remote'`` for a web service / remote file read through OGR, else ``backend_type``."""
+        if backend_type not in ('ogr', 'unknown'):
+            return backend_type
+        capability = _source_capability(layer)
+        return 'remote' if capability is not None and capability.is_remote else backend_type
 
     def _update_indicator_display(
         self,
@@ -601,6 +659,10 @@ class BackendController(BaseController):
 
         # Build text with forced indicator
         text = style['text']
+        capability = _source_capability(layer) if layer is not None else None
+        remote_tooltip = ''
+        if backend_type == 'remote':
+            text, remote_tooltip = _remote_badge_texts(capability)
         if is_forced:
             text = f"{text}⚡"
 
@@ -619,11 +681,15 @@ class BackendController(BaseController):
         self._indicator_label.setStyleSheet(badge_stylesheet('label_backend_indicator', badge_color))
 
         # Build tooltip with context
-        tooltip = style['tooltip']
+        tooltip = remote_tooltip or style['tooltip']
         # Raster / point cloud layers have no featureCount() (FilterMate 5).
+        # 2026-10-17: nor is a web service / network database counted here (a request on the main thread).
         if layer and isinstance(layer, QgsVectorLayer):
-            feature_count = layer.featureCount()
-            tooltip += f"\nLayer: {layer.name()} ({feature_count:,} features)"
+            if capability is None or capability.counts_cheaply:
+                feature_count = layer.featureCount()
+                tooltip += f"\nLayer: {layer.name()} ({feature_count:,} features)"
+            else:
+                tooltip += f"\nLayer: {layer.name()} (? features)"
         if is_forced:
             tooltip += "\n⚡ Manually forced"
 

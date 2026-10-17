@@ -204,9 +204,12 @@ def is_layer_source_available(
     if provider == 'memory':
         return True
 
-    # For remote providers, trust QGIS validity
-    remote_providers = {'wfs', 'arcgisfeatureserver', 'oapif'}
-    if (provider or '').lower() in remote_providers:
+    # For remote providers (web services, remote files), trust QGIS validity
+    try:
+        from ...core.domain.source_capability import classify_layer
+    except ImportError:
+        from core.domain.source_capability import classify_layer
+    if classify_layer(layer).is_remote:
         return True
 
     # For PostgreSQL, always available via QGIS API

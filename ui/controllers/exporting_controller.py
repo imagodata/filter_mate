@@ -271,7 +271,7 @@ class ExportingController(BaseController):
             # Import required modules
             from qgis.core import QgsVectorLayer, QgsProject
             from qgis.PyQt.QtCore import Qt
-            from ...infrastructure.constants import REMOTE_PROVIDERS
+            from ...adapters.qgis.source_capability_probe import is_remote_layer
             from ...infrastructure.utils import geometry_type_to_string
             from ...infrastructure.utils.validation_utils import is_layer_source_available
 
@@ -288,7 +288,7 @@ class ExportingController(BaseController):
             # Collect diagnostic info
             qgis_layers = [layer_item for layer_item in project.mapLayers().values() if isinstance(layer_item, QgsVectorLayer)]
             postgres_layers = [layer_item for layer_item in qgis_layers if layer_item.providerType() == 'postgres']
-            remote_layers = [layer_item for layer_item in qgis_layers if layer_item.providerType().lower() in REMOTE_PROVIDERS]
+            remote_layers = [layer_item for layer_item in qgis_layers if is_remote_layer(layer_item)]
 
             # Find layers missing from PROJECT_LAYERS
             # Exclude non-spatial layers: add_project_layer intentionally skips them (isSpatial() = False)

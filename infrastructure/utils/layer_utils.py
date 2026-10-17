@@ -62,8 +62,14 @@ PROVIDER_SPATIALITE = 'spatialite'
 PROVIDER_OGR = 'ogr'
 PROVIDER_MEMORY = 'memory'
 
-# Lower case, compared with ``providerType().lower()`` (QGIS: 'WFS', 'OAPIF').
-REMOTE_PROVIDERS = {'wfs', 'arcgisfeatureserver', 'oapif'}
+
+def _source_capability(layer):
+    """core.domain.source_capability of ``layer`` (web services, remote files, databases)."""
+    try:
+        from ...core.domain.source_capability import classify_layer
+    except ImportError:
+        from core.domain.source_capability import classify_layer
+    return classify_layer(layer)
 
 
 # =============================================================================
@@ -100,8 +106,8 @@ def detect_layer_provider_type(layer) -> str:
     except (RuntimeError, AttributeError):
         return 'unknown'
 
-    # Remote providers use OGR-style filtering
-    if (provider_type or '').lower() in REMOTE_PROVIDERS:
+    # Remote providers (WFS, OGC API Features, ArcGIS...) use OGR-style filtering
+    if _source_capability(layer).is_remote_service:
         return 'ogr'
 
     # Direct matches

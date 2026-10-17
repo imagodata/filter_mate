@@ -66,6 +66,8 @@ class LayerSelectionMixin:
         'delimitedtext': 'csv',
         'gpx': 'gpx',
         'wfs': 'wfs',
+        'oapif': 'oapif',
+        'arcgisfeatureserver': 'arcgisfeatureserver',
     }
 
     def get_current_layer(self) -> Optional[QgsVectorLayer]:
