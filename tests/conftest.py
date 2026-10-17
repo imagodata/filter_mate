@@ -11,12 +11,26 @@ Usage:
     pytest -m integration        # Run only integration tests (requires QGIS)
     pytest tests/unit/core/      # Run only core unit tests
 """
+import logging
+import os
 import pkgutil
 import sys
+import tempfile
 import unittest.mock
 from unittest.mock import MagicMock
 
 import pytest
+
+# ---------------------------------------------------------------------------
+# Log files -- never write in the repository's logs/
+# ---------------------------------------------------------------------------
+# infrastructure/logging opens logs/filtermate.log (rotating, 10 MB x 5) on the
+# first record the plugin code emits, which happens while the tests import it:
+# every pytest run grew the repository's log (and a local zip would embed it).
+# The folder is read from FILTERMATE_LOG_DIR when the logging module is
+# imported, so it is set here, before any plugin module is.
+_TEST_LOG_DIR = tempfile.mkdtemp(prefix="filtermate_test_logs_")
+os.environ["FILTERMATE_LOG_DIR"] = _TEST_LOG_DIR
 
 
 # ---------------------------------------------------------------------------
@@ -106,6 +120,38 @@ for _mod_name, _mock_obj in _qgis_mocks.items():
 # ---------------------------------------------------------------------------
 # Fixtures
 # ---------------------------------------------------------------------------
+
+_REPO_LOG_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "logs")
+
+
+def _redirect_repo_log_handlers():
+    """Point every file handler that writes in the repository's logs/ to the temp folder.
+
+    Covers handlers made before the environment variable was read (a logging
+    module imported under another name) and the per-module task logs, whose
+    path is relative to the working directory.
+    """
+    repo_logs = os.path.normcase(_REPO_LOG_DIR)
+    loggers = [logging.getLogger()] + [
+        candidate for candidate in logging.root.manager.loggerDict.values()
+        if isinstance(candidate, logging.Logger)
+    ]
+    for candidate in loggers:
+        for handler in candidate.handlers:
+            target = getattr(handler, "baseFilename", None)
+            if isinstance(handler, logging.FileHandler) and target \
+                    and os.path.normcase(os.path.dirname(target)) == repo_logs:
+                handler.close()  # reopened lazily on the next record, at the new path
+                handler.baseFilename = os.path.join(_TEST_LOG_DIR, os.path.basename(target))
+
+
+@pytest.fixture(scope="session", autouse=True)
+def _isolate_plugin_logs():
+    """Keep the plugin's log files out of the repository for the whole run."""
+    _redirect_repo_log_handlers()
+    yield
+    _redirect_repo_log_handlers()
+
 
 @pytest.fixture
 def mock_iface():

@@ -196,6 +196,29 @@ class TestAvailabilityGating:
         )
         assert result.status is BridgeStatus.NOT_AVAILABLE
 
+    def test_execute_export_uses_the_streaming_exporter_of_infrastructure(self, monkeypatch) -> None:
+        """Audit 2026-10: the import pointed at adapters/qgis/tasks (no such name): always a FALLBACK."""
+        calls = []
+
+        class FakeExporter:
+            def export_layer_streaming(self, **kwargs):
+                calls.append(kwargs)
+                return {"success": True, "features_exported": 7, "bytes_written": 1}
+
+        stub_name = f"{ROOT}.infrastructure.streaming"
+        stub = types.ModuleType(stub_name)
+        stub.StreamingExporter = FakeExporter
+        monkeypatch.setitem(sys.modules, f"{ROOT}.infrastructure", types.ModuleType(f"{ROOT}.infrastructure"))
+        monkeypatch.setitem(sys.modules, stub_name, stub)
+        sys.modules[f"{ROOT}.infrastructure"].streaming = stub
+        self.bridge._initialized, self.bridge._backend_factory = True, object()
+        layer = MagicMock()
+
+        result = self.bridge.execute_export(source_layer=layer, output_path="/tmp/out.gpkg", format="gpkg")
+
+        assert result.status is BridgeStatus.SUCCESS and result.feature_count == 7
+        assert calls[0]["source_layer"] is layer and calls[0]["output_path"] == "/tmp/out.gpkg"
+
     def test_convert_expression_returns_input_unchanged(self) -> None:
         sql, backend = self.bridge.convert_expression_to_backend(
             expression='"x" > 0', layer=MagicMock()

@@ -50,7 +50,7 @@ def _profile_repos_root() -> str:
     yet (tests, standalone imports). Callers must handle the empty case.
     """
     try:
-        from filter_mate.config.config import ENV_VARS
+        from ...config.config import ENV_VARS
     except Exception:
         return ""
     base = ENV_VARS.get("PLUGIN_CONFIG_DIRECTORY") or ""

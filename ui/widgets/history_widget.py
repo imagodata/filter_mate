@@ -189,7 +189,7 @@ import logging
 from typing import Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from ...core.services.history_service import FilterHistory
+    from ...core.services.history_service import LayerHistory
 logger = logging.getLogger('FilterMate.UI.HistoryWidget')
 
 
@@ -372,12 +372,12 @@ class HistoryWidget(QWidget):
 
         logger.debug(f"History buttons updated: undo={can_undo}, redo={can_redo}, pos={position_text}")
 
-    def _get_current_history(self) -> Optional['FilterHistory']:
-        """Get the FilterHistory for the current layer."""
+    def _get_current_history(self) -> Optional['LayerHistory']:
+        """Get the LayerHistory of the current layer."""
         if not self._history_manager or not self._current_layer_id:
             return None
 
-        # HistoryManager.get_history(layer_id) returns FilterHistory
+        # HistoryManager.get_history(layer_id) returns LayerHistory
         return self._history_manager.get_history(self._current_layer_id)
 
     def _on_undo_clicked(self):

@@ -21,6 +21,7 @@ import os
 from typing import Any, Dict, List, Optional
 
 from .base import BaseExtension, ExtensionState
+from .config_io import write_config_json
 
 logger = logging.getLogger('FilterMate.Extensions.Registry')
 
@@ -152,7 +153,7 @@ class ExtensionRegistry:
         """Push a compact snapshot of discovery results to the QGIS log."""
         try:
             from qgis.core import Qgis, QgsMessageLog  # type: ignore
-            from filter_mate.config.config import ENV_VARS
+            from ..config.config import ENV_VARS
 
             cfg = ENV_VARS.get("CONFIG_DATA", {})
             ext_keys = list((cfg.get("EXTENSIONS") or {}).keys()) if isinstance(cfg, dict) else []
@@ -182,13 +183,14 @@ class ExtensionRegistry:
             user via the QGIS log so discovery failures are never silent.
         """
         module_path = f".extensions.{package_name}"
-        # Import relative to filter_mate package. Let import errors bubble
+        # Import relative to the plugin's root package (its folder name, whatever it is). Let import errors bubble
         # up to the caller so _log_discovery_failure can attach the full
         # traceback to the QGIS log panel — historically this was a
         # silent debug log, which made "extension vanished from the
         # Configuration panel" impossible to diagnose.
+        from ..core.domain.plugin_package import PLUGIN_PACKAGE
         module = importlib.import_module(
-            module_path, package="filter_mate"
+            module_path, package=PLUGIN_PACKAGE
         )
 
         extension_cls = getattr(module, 'Extension', None)
@@ -296,7 +298,7 @@ class ExtensionRegistry:
         merged slice. Every holder of the old reference sees the fix.
         """
         try:
-            from filter_mate.config.config import ENV_VARS
+            from ..config.config import ENV_VARS
             import json
         except Exception:
             return False
@@ -360,21 +362,9 @@ class ExtensionRegistry:
         else:
             live_data["EXTENSIONS"] = merged_ext
 
-        # Written next to it, then swapped in: a failure never leaves a
-        # truncated config.json.
-        tmp_path = f"{config_path}.tmp"
-        try:
-            with open(tmp_path, 'w', encoding='utf-8') as f:
-                json.dump(live_data, f, indent=2, ensure_ascii=False)
-            os.replace(tmp_path, config_path)
-            return True
-        except (OSError, TypeError, ValueError) as exc:
-            logger.warning("Could not persist config.json: %s", exc)
-            try:
-                os.remove(tmp_path)
-            except OSError:
-                pass
-            return False
+        # JSON-safe copy (the live data may hold a connection), written next to the
+        # file then swapped in: a failure is a warning and leaves the previous file.
+        return write_config_json(config_path, live_data)
 
     def _show_missing_deps_message(self, ext: BaseExtension, iface: Any) -> None:
         """Say once, in the message bar, that an extension waits for its dependencies.

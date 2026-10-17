@@ -259,9 +259,6 @@ class AttributeFilterExecutor:
         expression = " " + expression
         is_field_expression = QgsExpression().isFieldEqualityExpression(expression)
 
-        # Qualify field names (delegate to helper method)
-        expression = self._qualify_field_names(expression)
-
         # Convert to provider-specific SQL
         if self.provider_type == PROVIDER_POSTGRES:
             expression = self._convert_to_postgis(expression)
@@ -427,42 +424,6 @@ class AttributeFilterExecutor:
     # ========================================================================
     # Private Helper Methods
     # ========================================================================
-
-    def _qualify_field_names(self, expression: str) -> str:
-        """
-        Qualify field names in expression with table prefix.
-
-        Delegates to core.filter.expression_builder module.
-
-        v4.0: Extracted from FilterEngineTask._qualify_field_names_in_expression
-        """
-        if not expression or not self.layer:
-            return expression
-
-        try:
-            from ....core.filter.expression_builder import qualify_field_names_in_expression
-
-            # Get field names from layer
-            field_names = [field.name() for field in self.layer.fields()]
-
-            # Determine if PostgreSQL
-            is_postgresql = self.provider_type == PROVIDER_POSTGRES
-
-            return qualify_field_names_in_expression(
-                expression=expression,
-                field_names=field_names,
-                primary_key_name=None,  # Will be auto-detected
-                table_name=self.layer.name(),
-                is_postgresql=is_postgresql,
-                provider_type=self.provider_type,
-                normalize_columns_fn=None
-            )
-        except ImportError:
-            logger.debug("expression_builder not available, returning expression unchanged")
-            return expression
-        except (RuntimeError, AttributeError, ValueError) as e:
-            logger.warning(f"qualify_field_names failed: {e}")
-            return expression
 
     def _geometry_column(self) -> str:
         """The layer's geometry column (2026-10-17: it was 'geometry' for every layer)."""

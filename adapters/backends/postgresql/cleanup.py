@@ -27,6 +27,13 @@ from datetime import datetime
 
 from ....infrastructure.database.sql_utils import sanitize_sql_identifier
 from ....infrastructure.constants import DEFAULT_TEMP_SCHEMA, LEGACY_TEMP_SCHEMAS
+from ....infrastructure.database.temp_objects import (
+    is_filtermate_pg_temp_object,
+    pg_drop_filtermate_schema,
+    pg_drop_temp_objects,
+    pg_find_temp_objects,
+    pg_quote_ident,
+)
 
 logger = logging.getLogger('FilterMate.Cleanup.PostgreSQL')
 
@@ -57,7 +64,11 @@ def drop_session_buffer_tables(cursor, session_id) -> List[str]:
     2026-10-17: the buffer tables are created in the schema of the source
     table (QGIS cannot see the temp schema from the layer connection), and
     the session cleanup only looked in the temp schema and ``public``.
-    The caller commits.
+
+    Only names FilterMate generates are dropped (``fm_temp_buf_<session>_<hash>``,
+    checked again with ``is_filtermate_pg_temp_object``), quoted as they are, never with
+    CASCADE; a table that cannot be dropped is left (each drop runs in a savepoint, so a
+    refusal does not abort the caller's transaction). The caller commits.
     """
     cursor.execute(
         "SELECT schemaname, tablename FROM pg_tables WHERE tablename LIKE %s ESCAPE '!'",
@@ -65,9 +76,16 @@ def drop_session_buffer_tables(cursor, session_id) -> List[str]:
     )
     dropped = []
     for schema, table in cursor.fetchall():
-        quoted = '"{}"."{}"'.format(schema.replace('"', '""'), table.replace('"', '""'))
-        cursor.execute(f'DROP TABLE IF EXISTS {quoted} CASCADE')  # nosec B608 - quoted identifiers read from pg_tables
-        dropped.append(f"{schema}.{table}")
+        if not is_filtermate_pg_temp_object('table', schema, table):
+            continue
+        cursor.execute("SAVEPOINT fm_drop_buffer_table")
+        try:
+            cursor.execute(f'DROP TABLE {pg_quote_ident(schema)}.{pg_quote_ident(table)}')  # nosec B608 - quoted
+            cursor.execute("RELEASE SAVEPOINT fm_drop_buffer_table")
+            dropped.append(f"{schema}.{table}")
+        except Exception as e:
+            logger.warning(f"Buffer table {schema}.{table} left in place: {e}")
+            cursor.execute("ROLLBACK TO SAVEPOINT fm_drop_buffer_table")
     return dropped
 
 
@@ -220,11 +238,11 @@ class PostgreSQLCleanupService:
             cursor = connexion.cursor()
 
             # Find all materialized views for this session
-            pattern = f"{self.MV_PREFIX}{target_session}_%"
+            pattern = _like_prefix(f"{self.MV_PREFIX}{target_session}_")
             cursor.execute("""
                 SELECT matviewname
                 FROM pg_matviews
-                WHERE schemaname = %s AND matviewname LIKE %s
+                WHERE schemaname = %s AND matviewname LIKE %s ESCAPE '!'
             """, (self._schema, pattern))
 
             views = [row[0] for row in cursor.fetchall()]
@@ -310,8 +328,8 @@ class PostgreSQLCleanupService:
             cursor.execute("""
                 SELECT matviewname
                 FROM pg_matviews
-                WHERE schemaname = %s AND matviewname LIKE %s
-            """, (self._schema, f"{self.MV_PREFIX}%"))
+                WHERE schemaname = %s AND matviewname LIKE %s ESCAPE '!'
+            """, (self._schema, _like_prefix(self.MV_PREFIX)))
 
             all_views = [row[0] for row in cursor.fetchall()]
 
@@ -421,14 +439,21 @@ class PostgreSQLCleanupService:
                     )
                     return False
 
-            # Drop the schema
-            safe_schema = sanitize_sql_identifier(self._schema)
-            cursor.execute(f'DROP SCHEMA IF EXISTS "{safe_schema}" CASCADE;')
-            connexion.commit()
-
-            logger.info(f"[PostgreSQL] Dropped schema '{self._schema}'")
-            self._record_success()
-            return True
+            # Drop the schema: FilterMate's own schemas only, and only when everything in
+            # them is FilterMate's (emptied object by object, no CASCADE)
+            result = pg_drop_filtermate_schema(connexion, self._schema)
+            if result['status'] in ('dropped', 'absent'):
+                logger.info(f"[PostgreSQL] Dropped schema '{self._schema}'")
+                self._record_success()
+                return True
+            if result['status'] == 'error':
+                self._record_failure()
+            else:
+                logger.info(
+                    f"[PostgreSQL] Schema '{self._schema}' not dropped ({result['status']}"
+                    f"{': ' + ', '.join(result['foreign'][:5]) if result['foreign'] else ''})"
+                )
+            return False
 
         except Exception as e:
             logger.error(f"[PostgreSQL] Error dropping schema: {e}")
@@ -478,12 +503,12 @@ class PostgreSQLCleanupService:
 
         try:
             cursor = connexion.cursor()
-            pattern = f"{self.MV_PREFIX}{self._session_id}_%"
+            pattern = _like_prefix(f"{self.MV_PREFIX}{self._session_id}_")
 
             cursor.execute("""
                 SELECT COUNT(*)
                 FROM pg_matviews
-                WHERE schemaname = %s AND matviewname LIKE %s
+                WHERE schemaname = %s AND matviewname LIKE %s ESCAPE '!'
             """, (self._schema, pattern))
 
             return cursor.fetchone()[0]
@@ -510,8 +535,8 @@ class PostgreSQLCleanupService:
             cursor.execute("""
                 SELECT matviewname
                 FROM pg_matviews
-                WHERE schemaname = %s AND matviewname LIKE %s
-            """, (self._schema, f"{self.MV_PREFIX}%"))
+                WHERE schemaname = %s AND matviewname LIKE %s ESCAPE '!'
+            """, (self._schema, _like_prefix(self.MV_PREFIX)))
 
             for (view_name,) in cursor.fetchall():
                 # Extract session ID from view name
@@ -563,115 +588,39 @@ class PostgreSQLCleanupService:
         if include_public_schema:
             schemas_to_check.append('public')
 
-        # Patterns to match FilterMate objects
-        patterns = [
-            'filtermate_mv_%',      # Main MV pattern
-            'fm_temp_mv_%',         # New temp MV pattern
-            'fm_temp_buf_%',        # Buffer tables
-            'filtermate_temp_%',    # Legacy temp objects
-        ]
-
         try:
             cursor = connexion.cursor()
 
-            for schema in schemas_to_check:
-                # Check if schema exists
-                cursor.execute("""
-                    SELECT COUNT(*) FROM information_schema.schemata
-                    WHERE schema_name = %s
-                """, (schema,))
+            # FilterMate's objects only: exact prefixes (see temp_objects), in the schemas
+            # asked for. No CASCADE; the legacy prefixes count in FilterMate's schemas only.
+            # 2026-10-17: buffer tables live in the schema of their source table, whichever it is.
+            found = [o for o in pg_find_temp_objects(cursor)
+                     if o[1] in schemas_to_check or (o[0] == 'table' and o[2].startswith(BUFFER_TABLE_PREFIX))]
 
-                if cursor.fetchone()[0] == 0:
-                    continue
+            if dry_run:
+                for kind, schema, name in found:
+                    full_name = f'"{schema}"."{name}"'
+                    cleaned_objects.append(
+                        f"[DRY RUN] Would drop {'MV' if kind == 'matview' else 'TABLE'}: {full_name}")
+                    logger.info(f"[DRY RUN] Would drop: {full_name}")
+            else:
+                for kind, schema, name in pg_drop_temp_objects(connexion, cursor, found):
+                    full_name = f'"{schema}"."{name}"'
+                    if kind == 'matview':
+                        cleaned_objects.append(f"MV: {full_name}")
+                        self._metrics['views_cleaned'] += 1
+                    else:
+                        cleaned_objects.append(f"TABLE: {full_name}")
+                    logger.debug(f"Dropped {kind}: {full_name}")
+                if len(cleaned_objects) < len(found):
+                    self._metrics['errors'] += len(found) - len(cleaned_objects)
 
-                # Find all matching materialized views
-                for pattern in patterns:
-                    cursor.execute("""
-                        SELECT matviewname
-                        FROM pg_matviews
-                        WHERE schemaname = %s AND matviewname LIKE %s
-                    """, (schema, pattern))
-
-                    views = [row[0] for row in cursor.fetchall()]
-
-                    for view_name in views:
-                        safe_s = sanitize_sql_identifier(schema)
-                        safe_v = sanitize_sql_identifier(view_name)
-                        full_name = f'"{safe_s}"."{safe_v}"'
-
-                        if dry_run:
-                            cleaned_objects.append(f"[DRY RUN] Would drop MV: {full_name}")
-                            logger.info(f"[DRY RUN] Would drop: {full_name}")
-                        else:
-                            try:
-                                # Use CASCADE to handle dependencies
-                                cursor.execute(
-                                    f'DROP MATERIALIZED VIEW IF EXISTS {full_name} CASCADE;'
-                                )
-                                cleaned_objects.append(f"MV: {full_name}")
-                                self._metrics['views_cleaned'] += 1
-                                logger.debug(f"Dropped MV: {full_name}")
-                            except Exception as e:
-                                logger.warning(f"Error dropping {full_name}: {e}")
-                                self._metrics['errors'] += 1
-
-                # Also clean regular tables matching patterns
-                for pattern in patterns:
-                    cursor.execute("""
-                        SELECT tablename
-                        FROM pg_tables
-                        WHERE schemaname = %s AND tablename LIKE %s
-                    """, (schema, pattern))
-
-                    tables = [row[0] for row in cursor.fetchall()]
-
-                    for table_name in tables:
-                        safe_s = sanitize_sql_identifier(schema)
-                        safe_t = sanitize_sql_identifier(table_name)
-                        full_name = f'"{safe_s}"."{safe_t}"'
-
-                        if dry_run:
-                            cleaned_objects.append(f"[DRY RUN] Would drop TABLE: {full_name}")
-                        else:
-                            try:
-                                cursor.execute(
-                                    f'DROP TABLE IF EXISTS {full_name} CASCADE;'  # nosec B608
-                                )
-                                cleaned_objects.append(f"TABLE: {full_name}")
-                                logger.debug(f"Dropped TABLE: {full_name}")
-                            except Exception as e:
-                                logger.warning(f"Error dropping table {full_name}: {e}")
-
-            # 2026-10-17: buffer tables live in the schema of their source
-            # table, whichever it is.
-            cursor.execute(
-                "SELECT schemaname, tablename FROM pg_tables "
-                "WHERE tablename LIKE %s ESCAPE '!' AND NOT (schemaname = ANY(%s))",
-                (_like_prefix(BUFFER_TABLE_PREFIX), schemas_to_check),
-            )
-            for schema, table_name in cursor.fetchall():
-                full_name = '"{}"."{}"'.format(schema.replace('"', '""'), table_name.replace('"', '""'))
-                if dry_run:
-                    cleaned_objects.append(f"[DRY RUN] Would drop TABLE: {full_name}")
-                    continue
-                try:
-                    cursor.execute(f'DROP TABLE IF EXISTS {full_name} CASCADE;')  # nosec B608
-                    cleaned_objects.append(f"TABLE: {full_name}")
-                except Exception as e:
-                    logger.warning(f"Error dropping table {full_name}: {e}")
-
-            # Drop the temp schema(s) if empty or force
-            if not dry_run:
+                # Drop the temp schema(s) (current and earlier versions') when nothing but
+                # FilterMate objects was in them: no CASCADE
                 for temp_schema in temp_schemas:
-                    try:
-                        safe_schema = sanitize_sql_identifier(temp_schema)
-                        cursor.execute(f'DROP SCHEMA IF EXISTS "{safe_schema}" CASCADE;')
+                    if pg_drop_filtermate_schema(connexion, temp_schema)['status'] == 'dropped':
                         cleaned_objects.append(f"SCHEMA: {temp_schema}")
                         logger.info(f"Dropped schema: {temp_schema}")
-                    except Exception as e:
-                        logger.warning(f"Could not drop schema {temp_schema}: {e}")
-
-            connexion.commit()
 
             action = "Would clean" if dry_run else "Cleaned"
             logger.info(f"[PostgreSQL] {action} {len(cleaned_objects)} FilterMate objects")
@@ -702,7 +651,7 @@ class PostgreSQLCleanupService:
             Tuple of (count cleaned, list of view names)
         """
         cleaned = []
-        pattern = 'filtermate_mv_src_sel_%'
+        pattern = _like_prefix('filtermate_mv_src_sel_')
 
         try:
             cursor = connexion.cursor()
@@ -711,7 +660,7 @@ class PostgreSQLCleanupService:
             cursor.execute("""
                 SELECT matviewname
                 FROM pg_matviews
-                WHERE schemaname = %s AND matviewname LIKE %s
+                WHERE schemaname = %s AND matviewname LIKE %s ESCAPE '!'
                 ORDER BY matviewname
             """, (self._schema, pattern))
 

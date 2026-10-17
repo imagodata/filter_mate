@@ -462,8 +462,8 @@ class ProjectSettingsSaver:
 
         # Save to config.json
         try:
-            with open(self._config_json_path, 'w') as outfile:
-                outfile.write(json.dumps(config_data, indent=4))
+            from ..infrastructure.utils.atomic_io import atomic_json_write
+            atomic_json_write(self._config_json_path, config_data, indent=4)
         except Exception as e:
             logger.error(f"save_project_variables: config file error: {e}")
             return False

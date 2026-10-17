@@ -48,6 +48,31 @@ class FootprintResult:
     coarse: bool = False  # cells larger than the resolution (grid limit)
 
 
+def point_cloud_exporter_class():
+    """``QgsPointCloudLayerExporter``, or None before QGIS 3.28.
+
+    Point cloud filtering by subset string starts at 3.26, the exporter (file
+    export, exact clip without PDAL) is 3.28 only: importing it unguarded made
+    those actions fail with a bare ``ImportError``.
+    """
+    try:
+        from qgis.core import QgsPointCloudLayerExporter
+    except ImportError:
+        return None
+    return QgsPointCloudLayerExporter
+
+
+def exporter_unavailable_message() -> str:
+    """User-facing reason why the exporter is missing (translated)."""
+    text = "QGIS 3.28 or newer is required to export or exactly clip a point cloud"
+    try:
+        from qgis.PyQt.QtCore import QCoreApplication
+        translated = QCoreApplication.translate("PointCloudExporter", text)
+    except Exception:  # nosec B110 - untranslated without Qt
+        return text
+    return translated if isinstance(translated, str) else text
+
+
 def open_point_cloud(source: str, name: str, provider: str):
     """A private point cloud layer for a task: no statistics, no index generation (main thread).
 

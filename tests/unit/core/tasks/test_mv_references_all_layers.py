@@ -141,7 +141,7 @@ def _load_finished_handler():
 ])
 def test_mv_cleanup_only_when_filters_are_removed(task_action, cleans, monkeypatch):
     handler = _load_finished_handler()()
-    for name in ("_handle_result_messages", "_cleanup_ogr_temp_layers", "_release_task_caches",
+    for name in ("_handle_result_messages", "_release_task_caches",
                  "_log_task_bridge_metrics"):
         monkeypatch.setattr(handler, name, MagicMock())
     monkeypatch.setitem(sys.modules, "qgis.utils", MagicMock())

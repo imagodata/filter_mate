@@ -76,6 +76,7 @@ from .layer_utils import (  # noqa: F401
     truncate,
     escape_json_string,
 )
+from .gdal_error_handler import GdalErrorHandler  # noqa: F401
 from .task_utils import (  # noqa: F401
     spatialite_connect,
     sqlite_connect,
@@ -194,39 +195,6 @@ def is_qgis_alive():
         from qgis.core import QgsApplication  # noqa: F401
         return QgsApplication.instance() is not None
     except Exception:
-        return False
-
-
-class GdalErrorHandler:
-    """
-    Context manager to suppress GDAL errors during operations.
-
-    Use this when performing operations that may trigger non-critical
-    GDAL errors that would otherwise pollute the console.
-
-    Example:
-        with GdalErrorHandler():
-            layer.reload()
-    """
-
-    def __init__(self):
-        self.previous_handler = None
-
-    def __enter__(self):
-        try:
-            from osgeo import gdal  # noqa: F401
-            self.previous_handler = gdal.GetErrorHandler()
-            gdal.PushErrorHandler('CPLQuietErrorHandler')
-        except Exception:  # nosec B110 - GDAL error handler push is best-effort; GDAL may be unavailable
-            pass
-        return self
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        try:
-            from osgeo import gdal  # noqa: F401
-            gdal.PopErrorHandler()
-        except Exception:  # nosec B110 - GDAL error handler pop is best-effort; GDAL may be unavailable
-            pass
         return False
 
 

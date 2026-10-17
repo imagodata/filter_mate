@@ -57,11 +57,16 @@ def execute_reset_action_spatialite(
         # The FilterEngineTask.finished() method handles canvas refresh safely.
         logger.debug(f"[Spatialite] Subset applied - Layer: {layer.name()} (refresh handled by main thread)")
 
-        # Cleanup temporary session tables
+        # Cleanup temporary session tables: the real session id is needed (without it nothing
+        # is dropped); the tables other layers are still filtered through are kept
         db_path = datasource_info.get('dbname')
-        if db_path:
-            cleaned_count = cleanup_session_temp_tables(db_path)
+        session_id = layer_props.get('session_id') or datasource_info.get('session_id')
+        if db_path and session_id:
+            cleaned_count = cleanup_session_temp_tables(
+                db_path, session_id, exclude_referenced_by=layer_props.get('subsets_in_use', ()))
             logger.info(f"[Spatialite] Cleanup Complete - Layer: {layer.name()} - Removed {cleaned_count} temporary tables")
+        elif db_path:
+            logger.debug(f"[Spatialite] No session id: temporary tables of {layer.name()} left for the session cleanup")
 
         message = f"Filter reset successfully for layer '{layer.name()}'"
         return True, message
@@ -123,7 +128,8 @@ def execute_unfilter_action_spatialite(
         return False, error_msg
 
 
-def cleanup_spatialite_session_tables(db_path: str) -> int:
+def cleanup_spatialite_session_tables(db_path: str, session_id: Optional[str] = None,
+                                      exclude_referenced_by=()) -> int:
     """
     Clean up temporary session tables in Spatialite database.
 
@@ -132,6 +138,8 @@ def cleanup_spatialite_session_tables(db_path: str) -> int:
 
     Args:
         db_path: Path to Spatialite database file
+        session_id: Session whose tables go (nothing is dropped without it)
+        exclude_referenced_by: Subset strings of layers in use: the tables they name are kept
 
     Returns:
         int: Number of tables cleaned up
@@ -139,7 +147,8 @@ def cleanup_spatialite_session_tables(db_path: str) -> int:
     logger.debug(f"[Spatialite] Cleanup Session Tables - Database: {db_path}")
 
     try:
-        cleaned_count = cleanup_session_temp_tables(db_path)
+        cleaned_count = cleanup_session_temp_tables(
+            db_path, session_id, exclude_referenced_by=exclude_referenced_by)
         logger.info(f"[Spatialite] Cleanup Complete - Database: {db_path} - Removed {cleaned_count} temporary tables")
         return cleaned_count
 

@@ -623,7 +623,7 @@ class TaskBridge:
 
         try:
             # Import streaming exporter
-            from .qgis.tasks import StreamingExporter
+            from ..infrastructure.streaming import StreamingExporter
 
             logger.info("=" * 60)
             logger.info("🚀 V3 TASKBRIDGE: Executing streaming export")

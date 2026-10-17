@@ -23,6 +23,8 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any, Dict, List, Optional
 
+from .config_io import write_config_json
+
 logger = logging.getLogger('FilterMate.Extensions')
 
 # Base config keys every extension gets for free (merged with extension schema).
@@ -282,7 +284,7 @@ class BaseExtension(ABC):
         safely mutate the returned dict and persist via ``_persist_config()``.
         """
         try:
-            from filter_mate.config.config import ENV_VARS
+            from ..config.config import ENV_VARS
         except Exception:
             return {}
         config_data = ENV_VARS.get("CONFIG_DATA")
@@ -309,7 +311,7 @@ class BaseExtension(ABC):
         cfg = self._get_extension_config_dict()
         if key in cfg:
             try:
-                from filter_mate.config.config import _get_option_value
+                from ..config.config import _get_option_value
             except Exception:
                 raw = cfg[key]
                 if isinstance(raw, dict) and "value" in raw:
@@ -374,7 +376,7 @@ class BaseExtension(ABC):
         stale EXTENSIONS section that no longer has our schema.
         """
         try:
-            from filter_mate.config.config import ENV_VARS
+            from ..config.config import ENV_VARS
         except Exception:
             return False
         config_path = ENV_VARS.get("CONFIG_JSON_PATH")
@@ -425,16 +427,12 @@ class BaseExtension(ABC):
                     existing_ext[ext_id] = slice_data
         existing_ext[self.metadata.id] = our_slice
 
-        try:
-            with open(config_path, "w", encoding="utf-8") as fh:
-                json.dump(live_data, fh, indent=2, ensure_ascii=False)
-            return True
-        except OSError as exc:
-            logger.warning(
-                "Failed to persist config for extension '%s': %s",
-                self.metadata.id, exc,
-            )
+        # JSON-safe copy (the live data may hold a connection), swapped in atomically;
+        # a failure is logged as a warning and leaves the previous file
+        if not write_config_json(config_path, live_data):
+            logger.warning("Failed to persist config for extension '%s'", self.metadata.id)
             return False
+        return True
 
     # --- Convenience shortcuts for the common keys ---------------------
 
@@ -473,7 +471,7 @@ class BaseExtension(ABC):
             return False
 
         try:
-            from filter_mate.config.config import _sync_metadata
+            from ..config.config import _sync_metadata
         except Exception:
             _sync_metadata = None
 

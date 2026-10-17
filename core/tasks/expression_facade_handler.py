@@ -292,37 +292,6 @@ class ExpressionFacadeHandler:
         return optimize_duplicate_in_clauses(expression)
 
     # =========================================================================
-    # Field name qualification
-    # =========================================================================
-
-    def qualify_field_names_in_expression(self, expression, field_names, primary_key_name, table_name, is_postgresql):
-        """Qualify field names with table prefix for PostgreSQL/Spatialite expressions.
-
-        EPIC-1 Phase E7.5: Delegates to core.filter.expression_builder.
-
-        Args:
-            expression: Raw QGIS expression string.
-            field_names: List of field names to qualify.
-            primary_key_name: Primary key field name.
-            table_name: Source table name.
-            is_postgresql: Whether target is PostgreSQL.
-
-        Returns:
-            str: Expression with qualified field names.
-        """
-        from ..filter.expression_builder import qualify_field_names_in_expression
-
-        return qualify_field_names_in_expression(
-            expression=expression,
-            field_names=field_names,
-            primary_key_name=primary_key_name,
-            table_name=table_name,
-            is_postgresql=is_postgresql,
-            provider_type=self.task.param_source_provider_type,
-            normalize_columns_fn=self.normalize_column_names_for_postgresql if is_postgresql else None
-        )
-
-    # =========================================================================
     # Combined filter expression building
     # =========================================================================
 

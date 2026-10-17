@@ -21,6 +21,8 @@ import json
 import logging
 from typing import TYPE_CHECKING
 
+from ...infrastructure.utils.atomic_io import atomic_json_write
+
 if TYPE_CHECKING:
     from filter_mate_dockwidget import FilterMateDockWidget
 
@@ -100,7 +102,8 @@ class ConfigModelManager:
             # Ignore if this matches the currently active translator locale
             # (spurious itemChanged when editor opens / setEditorData runs)
             from qgis.utils import plugins
-            plugin = plugins.get('filter_mate')
+            from ...core.domain.plugin_package import PLUGIN_PACKAGE
+            plugin = plugins.get(PLUGIN_PACKAGE)
             active_locale = getattr(plugin, '_current_locale', None) if plugin else None
             if new_locale == active_locale:
                 return
@@ -133,7 +136,8 @@ class ConfigModelManager:
 
             # 1) Reload translator + retranslate UI
             from qgis.utils import plugins
-            plugin = plugins.get('filter_mate')
+            from ...core.domain.plugin_package import PLUGIN_PACKAGE
+            plugin = plugins.get(PLUGIN_PACKAGE)
             if plugin and hasattr(plugin, 'reload_translator'):
                 try:
                     plugin.reload_translator(new_locale)
@@ -167,8 +171,7 @@ class ConfigModelManager:
             config_path = ENV_VARS.get(
                 'CONFIG_JSON_PATH', dw.plugin_dir + '/config/config.json')
             clean = self._sanitize_for_json(dw.CONFIG_DATA)
-            with open(config_path, 'w', encoding='utf-8') as f:
-                json.dump(clean, f, indent=4, ensure_ascii=False)
+            atomic_json_write(config_path, clean, indent=4)
             logger.info(f"Language saved to disk: {new_locale}")
 
         except Exception as e:
@@ -268,8 +271,7 @@ class ConfigModelManager:
             config_path = ENV_VARS.get(
                 'CONFIG_JSON_PATH', dw.plugin_dir + '/config/config.json'
             )
-            with open(config_path, 'w') as f:
-                f.write(json.dumps(dw.CONFIG_DATA, indent=4))
+            atomic_json_write(config_path, self._sanitize_for_json(dw.CONFIG_DATA), indent=4)
         except Exception as e:
             logger.error(f"Error reloading configuration model: {e}")
 
@@ -339,8 +341,7 @@ class ConfigModelManager:
         )
         # Sanitize again before writing (CONFIG_DATA may have runtime objects)
         clean = self._sanitize_for_json(dw.CONFIG_DATA)
-        with open(config_path, 'w', encoding='utf-8') as f:
-            json.dump(clean, f, indent=4, ensure_ascii=False)
+        atomic_json_write(config_path, clean, indent=4)
 
     # ========================================
     # SIGNAL MANAGEMENT

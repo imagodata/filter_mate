@@ -10,7 +10,7 @@ Version: 4.1.0 (January 2026)
 License: GNU GPL v2+
 """
 
-from typing import Optional, List, Dict, Any
+from typing import Optional, List, Dict, Any, Tuple
 from qgis.core import QgsExpression, QgsExpressionContext, QgsExpressionContextUtils, QgsVectorLayer
 
 from ...core.ports.qgis_port import IExpression
@@ -173,7 +173,7 @@ def create_expression(expression_str: str, layer: Optional[QgsVectorLayer] = Non
     return QGISExpressionAdapter(qgs_expr, context)
 
 
-def validate_expression(expression_str: str) -> tuple[bool, Optional[str]]:
+def validate_expression(expression_str: str) -> Tuple[bool, Optional[str]]:
     """
     Validate expression syntax.
 

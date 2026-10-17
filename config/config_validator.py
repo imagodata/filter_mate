@@ -1,8 +1,9 @@
 """
 Configuration Validator for FilterMate.
 
-Validates config.json against config_schema.json to ensure data integrity.
-Uses a lightweight validation approach that doesn't require external dependencies.
+Structural validation of config.json (sections, version, value types), without
+external dependencies. The former config_schema.json was removed in cf9e96f2: the
+description, choices and limits live in config.default.json.
 
 v4.0.7: Initial implementation based on audit recommendations.
 
@@ -10,9 +11,8 @@ Author: FilterMate Team
 """
 
 import json
-import os
 import re
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Tuple
 from qgis.core import QgsMessageLog, Qgis
 
 
@@ -41,7 +41,7 @@ class ConfigValidationError:
 
 class ConfigValidator:
     """
-    Validates FilterMate configuration against schema.
+    Validates the structure of the FilterMate configuration.
 
     Supports the v2.0 config format with {value, choices, description} structures.
     Performs structural validation without requiring jsonschema library.
@@ -59,56 +59,14 @@ class ConfigValidator:
         Initialize validator with config directory path.
 
         Args:
-            config_dir: Path to the config directory containing config_schema.json
+            config_dir: Path to the config directory
         """
         self.config_dir = config_dir
-        self.schema_path = os.path.join(config_dir, 'config_schema.json')
-        self._schema: Optional[Dict] = None
         self._errors: List[ConfigValidationError] = []
-
-    def _load_schema(self) -> bool:
-        """
-        Load the schema file.
-
-        Returns:
-            True if schema loaded successfully, False otherwise
-        """
-        if self._schema is not None:
-            return True
-
-        if not os.path.exists(self.schema_path):
-            # config_schema.json was intentionally removed as unused (see
-            # commit cf9e96f2) -- schema-based validation is a permanent
-            # no-op now, not an actionable warning on every config reload.
-            QgsMessageLog.logMessage(
-                f"Schema file not found, skipping schema validation: {self.schema_path}",
-                "FilterMate",
-                Qgis.MessageLevel.Info
-            )
-            return False
-
-        try:
-            with open(self.schema_path, 'r', encoding='utf-8') as f:
-                self._schema = json.load(f)
-            return True
-        except json.JSONDecodeError as e:
-            QgsMessageLog.logMessage(
-                f"Invalid JSON in schema file: {e}",
-                "FilterMate",
-                Qgis.MessageLevel.Critical
-            )
-            return False
-        except Exception as e:
-            QgsMessageLog.logMessage(
-                f"Error loading schema: {e}",
-                "FilterMate",
-                Qgis.MessageLevel.Critical
-            )
-            return False
 
     def validate_config(self, config_data: Dict) -> Tuple[bool, List[ConfigValidationError]]:
         """
-        Validate configuration data against schema.
+        Validate the structure of the configuration data.
 
         Args:
             config_data: The configuration dictionary to validate
@@ -128,7 +86,6 @@ class ConfigValidator:
         self._validate_required_sections(config_data)
         self._validate_config_version(config_data)
         self._validate_value_types(config_data)
-        self._validate_choices_values(config_data)
 
         is_valid = not any(e.severity == "error" for e in self._errors)
         return is_valid, self._errors
@@ -243,18 +200,6 @@ class ConfigValidator:
                 path, f"'description' must be a string, got {type(description).__name__}", "warning"
             ))
 
-    def _validate_choices_values(self, config_data: Dict, path: str = "") -> None:
-        """
-        Validate that all choice values are within allowed ranges.
-
-        Uses schema if available for additional validation rules.
-        """
-        if not self._load_schema():
-            return  # Schema not available, skip enhanced validation
-
-        # Schema-based validation would go here
-        # For now, basic validation is sufficient
-
     def get_validation_summary(self) -> str:
         """
         Get a summary of validation results.
@@ -281,7 +226,7 @@ def validate_config_file(config_path: str, config_dir: str) -> Tuple[bool, List[
 
     Args:
         config_path: Path to the config.json file
-        config_dir: Path to the config directory (for schema)
+        config_dir: Path to the config directory
 
     Returns:
         Tuple of (is_valid, list of errors)

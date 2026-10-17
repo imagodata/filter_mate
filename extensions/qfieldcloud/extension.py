@@ -77,7 +77,7 @@ class QFieldCloudExtension(BaseExtension):
             min_qgis_version="3.28",
             dependencies=["qfieldsync"],
             optional_dependencies=["keyring"],
-            icon_name="qfieldcloud.png",
+            icon_name="qfield.png",
         )
 
     def config_schema(self) -> Dict[str, Dict[str, Any]]:

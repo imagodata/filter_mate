@@ -4,6 +4,7 @@ import importlib.util
 import os
 import pathlib
 import sys
+import types
 
 import pytest
 
@@ -22,6 +23,7 @@ def _fakes():
 fk = _fakes()
 exporters = fk.load("exporters")
 task_module = fk.load("cross_filter_task")
+footprint = fk.load("point_cloud_footprint")
 
 
 def _write_tif(path, size=4):
@@ -220,6 +222,121 @@ class TestPointCloudExport:
         result = exporters.PointCloudExportJob(cloud, str(tmp_path / 'cloud.laz')).run()
         assert not result.success and message in result.message
         assert cloud_export.made == []
+
+
+class TestPointCloudExporterMissing:
+    """QGIS 3.26 / 3.27 filter point clouds but have no QgsPointCloudLayerExporter (3.28)."""
+
+    @pytest.fixture
+    def no_exporter(self, monkeypatch):
+        # A qgis.core without the class: 'from qgis.core import QgsPointCloudLayerExporter' raises ImportError.
+        monkeypatch.setitem(sys.modules, 'qgis.core', types.ModuleType('qgis.core'))
+
+    def test_export_reports_the_version_instead_of_raising(self, no_exporter, tmp_path):
+        result = exporters.PointCloudExportJob(FakeCloud(), str(tmp_path / 'cloud.laz')).run()
+        assert not result.success and 'QGIS 3.28' in result.message
+        assert os.listdir(tmp_path) == []
+
+    def test_exact_clip_reports_the_version(self, no_exporter):
+        assert footprint.point_cloud_exporter_class() is None
+        assert 'QGIS 3.28' in footprint.exporter_unavailable_message()
+
+
+class TestRasterCreationOptions:
+    def test_creation_options_setter_of_qgis_3_44(self):
+        """setCreateOptions is deprecated since QGIS 3.44 (a warning at each raster export)."""
+        calls = []
+
+        class NewWriter:
+            def setCreationOptions(self, options):
+                calls.append(('new', options))
+
+            def setCreateOptions(self, options):
+                calls.append(('old', options))
+
+        exporters.set_creation_options(NewWriter(), ('TILED=YES',))
+        assert calls == [('new', ['TILED=YES'])]
+
+    def test_older_qgis_keeps_set_create_options(self):
+        calls = []
+
+        class OldWriter:
+            def setCreateOptions(self, options):
+                calls.append(options)
+
+        exporters.set_creation_options(OldWriter(), ['TILED=YES'])
+        assert calls == [['TILED=YES']]
+
+
+class PrivateCloud(FakeCloud):
+    """A ``QgsPointCloudLayer`` opened by the export job."""
+    made = []
+    valid = True
+    accepts_subset = True
+
+    class LayerOptions:
+        def __init__(self):
+            self.loadDefaultStyle = True
+
+    def __init__(self, source, name, provider, options=None):
+        super().__init__(provider)
+        self.source_uri, self.options, self.subset = source, options, ''
+        PrivateCloud.made.append(self)
+
+    def isValid(self):
+        return PrivateCloud.valid
+
+    def setSubsetString(self, subset):
+        if not PrivateCloud.accepts_subset:
+            return False
+        self.subset = subset
+        return True
+
+
+class DisplayedCloud(FakeCloud):
+    def source(self):
+        return '/data/tile.copc.laz'
+
+    def subsetString(self):
+        return 'Classification = 9'
+
+
+@pytest.fixture
+def private_cloud(monkeypatch, cloud_export):
+    monkeypatch.setattr(sys.modules['qgis.core'], 'QgsPointCloudLayer', PrivateCloud, raising=False)
+    PrivateCloud.made, PrivateCloud.valid, PrivateCloud.accepts_subset = [], True, True
+    return PrivateCloud
+
+
+class TestPointCloudPrivateLayer:
+    """Since QGIS 3.42 the exporter reads the index of the layer it is given, shared with the
+    canvas: a filter changed on the displayed cloud during the export reached the file (34 MB
+    instead of 0 point in QGIS 4.2) and QGIS crashed in doExport."""
+
+    def test_exporter_reads_its_own_layer_with_the_same_filter(self, private_cloud, tmp_path):
+        displayed = DisplayedCloud()
+        job = exporters.PointCloudExportJob(displayed, str(tmp_path / 'cloud.laz'))
+        own = private_cloud.made[0]
+        assert job.source is own and job.source is not displayed
+        assert (own.source_uri, own.providerType(), own.subset) == ('/data/tile.copc.laz', 'copc', 'Classification = 9')
+        assert own.options.loadDefaultStyle is False
+        assert job.run().success
+
+    @pytest.mark.parametrize("valid, accepts_subset", [(False, True), (True, False)])
+    def test_displayed_layer_when_the_copy_is_unusable(self, private_cloud, tmp_path, valid, accepts_subset):
+        private_cloud.valid, private_cloud.accepts_subset = valid, accepts_subset
+        displayed = DisplayedCloud()
+        job = exporters.PointCloudExportJob(displayed, str(tmp_path / 'cloud.laz'))
+        assert job.source is displayed
+        assert job.run().success
+
+    def test_task_releases_the_private_layer(self, private_cloud, tmp_path, monkeypatch):
+        fk.install(monkeypatch, exporters)
+        job = exporters.PointCloudExportJob(DisplayedCloud(), str(tmp_path / 'cloud.laz'))
+        task = exporters.make_export_task([job])
+        assert task.run()
+        task.finished(True)
+        assert job.source is None and job.exporter is None
 
 
 class TestTasksCancel:

@@ -119,14 +119,6 @@ try:
 except ImportError:
     ASYNC_EXPRESSION_AVAILABLE = False; get_expression_manager = None
 
-# Icon utilities for dark mode (migrated to ui/)
-try: from .ui.icons import IconThemeManager, get_themed_icon; ICON_THEME_AVAILABLE = True
-except ImportError: ICON_THEME_AVAILABLE = False
-
-# UI configuration system
-try: from .ui import widget_utils as ui_utils; UI_CONFIG_AVAILABLE = True
-except ImportError: UI_CONFIG_AVAILABLE = False
-
 # MVC Controllers
 try:
     from .ui.controllers.integration import ControllerIntegration
@@ -594,9 +586,6 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             '"batch_output_folder":false,"batch_zip":false }'
         )
         self.pending_config_changes, self.config_changes_pending = [], False
-        if ICON_THEME_AVAILABLE:
-            try: IconThemeManager.set_theme(StyleLoader.detect_qgis_theme())
-            except Exception as e: logger.debug(f"IconThemeManager init (non-critical): {e}")
         self.setupUi(self)
 
         # PyQt6's dynamic `uic` loader can't resolve the `features` <set>
@@ -679,26 +668,42 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             raise SignalStateChangeError(None, widget_path)
 
         is_ltv = widget_path == ["QGIS", "LAYER_TREE_VIEW"]
+        registry = self.__dict__.setdefault('_registry_connected_signals', set())
+        registry_key = (widget_path[0], widget_path[1], signal_name)
+        # 2026-10-17: the checkable buttons of _setup_conditional_widget_states carry a second
+        # slot on 'toggled' (enable / disable their widgets). isSignalConnected() then stayed
+        # True after disconnect(func), the cache said connected, and the registry handler was
+        # never connected again after the first layer change (has_layers_to_filter & co. were
+        # saved at task launch only). For these signals only, the registry's own handler is
+        # tracked; every other signal keeps the "any slot" test (several force / direct
+        # reconnections rely on it, a wider change connected their handlers twice).
+        tracked = (not is_ltv and signal_name == 'toggled'
+                   and any(widget is button for button in self.__dict__.get('_conditional_state_buttons', ())))
 
         # Get current state
         if is_ltv:
             state = self._layer_tree_view_signal_connected
         else:
-            state = widget.isSignalConnected(self.getSignal(widget, signal_name))
+            any_slot = widget.isSignalConnected(self.getSignal(widget, signal_name))
+            state = (registry_key in registry and any_slot) if tracked else any_slot
 
         signal = getattr(widget, signal_name)
         should_connect = (custom_action == 'connect' and not state) or (custom_action is None and not state)
         should_disconnect = (custom_action == 'disconnect' and state) or (custom_action is None and state)
+        if tracked and custom_action == 'disconnect' and any_slot:
+            should_disconnect = True  # disconnect(func) is harmless when only the conditional slot is left
 
         # Perform connection/disconnection
         try:
             if should_disconnect:
+                registry.discard(registry_key)
                 signal.disconnect(func)
                 # EXPLICIT: Update flag immediately after disconnect
                 if is_ltv:
                     self._layer_tree_view_signal_connected = False
             elif should_connect:
                 signal.connect(func)
+                registry.add(registry_key)
                 # EXPLICIT: Update flag immediately after connect
                 if is_ltv:
                     self._layer_tree_view_signal_connected = True
@@ -709,8 +714,8 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         # Return current state
         if is_ltv:
             return self._layer_tree_view_signal_connected
-        else:
-            return widget.isSignalConnected(self.getSignal(widget, signal_name))
+        any_slot = widget.isSignalConnected(self.getSignal(widget, signal_name))
+        return (registry_key in registry and any_slot) if tracked else any_slot
 
     def reset_multiple_checkable_combobox(self) -> None:
         """Reset and recreate the multiple selection checkable combobox widget.
@@ -754,7 +759,7 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         """v4.0 S18: Fix toolBox_tabTools icons with absolute paths."""
         for idx, icon_file in {0: "filter_multi.png", 1: "save.png", 2: "parameters.png"}.items():
             p = os.path.join(self.plugin_dir, "icons", icon_file)
-            if os.path.exists(p): self.toolBox_tabTools.setItemIcon(idx, get_themed_icon(p) if ICON_THEME_AVAILABLE else QtGui.QIcon(p))
+            if os.path.exists(p): self.toolBox_tabTools.setItemIcon(idx, QtGui.QIcon(p))
 
     def setupUiCustom(self) -> None:
         """Initialize custom UI components and configuration.
@@ -870,8 +875,7 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
                     if self._icon_manager:
                         self._icon_manager.set_button_icon(w, p)
                     else:
-                        icon = get_themed_icon(p) if ICON_THEME_AVAILABLE else QtGui.QIcon(p)
-                        w.setIcon(icon)
+                        w.setIcon(QtGui.QIcon(p))
                     w.setIconSize(QtCore.QSize(sz, sz))
                     self._name_icon_button(w, grp, name)
                     loaded_count += 1
@@ -986,13 +990,13 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         """v4.0 S16: Apply frame size policies and minimum heights."""
         from .ui.config import UIConfig
         from qgis.PyQt.QtWidgets import QSizePolicy as SP
-        pm = {'Fixed': SP.Fixed, 'Minimum': SP.Minimum, 'Maximum': SP.Maximum, 'Preferred': SP.Preferred, 'Expanding': SP.Expanding, 'MinimumExpanding': SP.MinimumExpanding, 'Ignored': SP.Ignored}
+        pm = {name: getattr(SP.Policy, name) for name in ('Fixed', 'Minimum', 'Maximum', 'Preferred', 'Expanding', 'MinimumExpanding', 'Ignored')}
         splitter_cfg = UIConfig.get_config('splitter') or {}
         for fn, defs in [('frame_exploring', ('Preferred', 'Minimum')), ('frame_toolset', ('Preferred', 'Expanding'))]:
             if hasattr(self, fn):
                 cfg = UIConfig.get_config(fn) or {}
                 frame = getattr(self, fn)
-                frame.setSizePolicy(pm.get(cfg.get('size_policy_h', defs[0]), SP.Preferred), pm.get(cfg.get('size_policy_v', defs[1]), SP.Preferred))
+                frame.setSizePolicy(pm.get(cfg.get('size_policy_h', defs[0]), SP.Policy.Preferred), pm.get(cfg.get('size_policy_v', defs[1]), SP.Policy.Preferred))
                 # Apply minimum heights from splitter config to prevent truncation
                 min_key = 'min_exploring_height' if fn == 'frame_exploring' else 'min_toolset_height'
                 min_height = splitter_cfg.get(min_key, cfg.get('min_height', 120 if fn == 'frame_exploring' else 200))
@@ -1566,6 +1570,26 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
 
             if not info.get('connection_available'):
                 show_warning("FilterMate", self.tr("No PostgreSQL connection available"))
+                return
+
+            # Dropping the schema removes these objects (FilterMate's only): say which,
+            # or say why the schema is left alone
+            listing = self._backend_ctrl.list_postgresql_schema_objects()
+            proceed, level, reason = self._backend_ctrl.describe_schema_listing(listing)
+            if not proceed:
+                (show_warning if level == 'warning' else show_info)("FilterMate", reason)
+                return
+            lines = [f"{schema}.{name} ({kind})" for kind, schema, name in listing['objects']]
+            if lines:
+                msg = self.tr("Schema '{0}' and the following {1} temporary object(s) will be dropped:").format(
+                    listing['schema'], len(lines)) + "\n\n" + "\n".join(lines[:12])
+                if len(lines) > 12:
+                    msg += "\n" + self.tr("... and {0} more").format(len(lines) - 12)
+            else:
+                msg = self.tr("Schema '{0}' is empty and will be dropped.").format(listing['schema'])
+            if QMessageBox.question(self, self.tr("Drop FilterMate schema"), msg,
+                                    QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No, QMessageBox.StandardButton.No) != QMessageBox.StandardButton.Yes:
+                show_info("FilterMate", self.tr("Schema cleanup cancelled"))
                 return
 
             # Check for other sessions' views
@@ -2433,8 +2457,7 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         if file_path and self._icon_manager:
             self._icon_manager.set_button_icon(wgt["WIDGET"], file_path)
         elif file_path:
-            icon = get_themed_icon(file_path) if ICON_THEME_AVAILABLE else QtGui.QIcon(file_path)
-            wgt["WIDGET"].setIcon(icon)
+            wgt["WIDGET"].setIcon(QtGui.QIcon(file_path))
 
     def switch_widget_icon(self, widget_path, state):
         """v4.0 Sprint 17: Switch widget icon based on state."""
@@ -2444,8 +2467,7 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         if self._icon_manager:
             self._icon_manager.set_button_icon(widget, icon_path)
         else:
-            icon = get_themed_icon(icon_path) if ICON_THEME_AVAILABLE else QtGui.QIcon(icon_path)
-            widget.setIcon(icon)
+            widget.setIcon(QtGui.QIcon(icon_path))
 
     def icon_per_geometry_type(self, geometry_type):
         """v4.0 Sprint 17: Get cached icon for geometry type.
@@ -2633,8 +2655,8 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         return self._combobox_population_manager.populate_filtering_layers_direct(layer)
 
     def _apply_auto_configuration(self):
-        """Apply auto-configuration from environment."""
-        return ui_utils.auto_configure_from_environment(self.CONFIG_DATA) if UI_CONFIG_AVAILABLE else {}
+        """Apply auto-configuration from environment (ui.widget_utils is gone: nothing to apply)."""
+        return {}
 
     def _apply_stylesheet(self):
         """
@@ -2680,8 +2702,6 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
 
         if self._icon_manager:
             self._icon_manager.setup()
-        elif ICON_THEME_AVAILABLE:
-            IconThemeManager.set_theme(StyleLoader.detect_qgis_theme())
 
         if self._button_styler:
             self._button_styler.setup()
@@ -2709,7 +2729,6 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         """Setup QGIS theme watcher for dark/light mode switching."""
         try:
             self._theme_watcher = QGISThemeWatcher.get_instance(); current_theme = StyleLoader.detect_qgis_theme()
-            if ICON_THEME_AVAILABLE: IconThemeManager.set_theme(current_theme)
             self._theme_watcher.add_callback(self._on_qgis_theme_changed)
             if not self._theme_watcher.is_watching: self._theme_watcher.start_watching()
             if current_theme == 'dark': self._refresh_icons_for_theme()
@@ -2721,7 +2740,6 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             from .config.theme_helpers import get_active_theme
             if get_active_theme(self.CONFIG_DATA) != 'auto':
                 return
-            if ICON_THEME_AVAILABLE: IconThemeManager.set_theme(new_theme)
             if self._theme_manager:
                 self._theme_manager.on_theme_changed(new_theme)
             else:
@@ -2736,17 +2754,6 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         if self._icon_manager:
             self._icon_manager.apply()
             return
-        if not ICON_THEME_AVAILABLE or not self.widgets_initialized: return
-        try:
-            for idx, icon in enumerate(["filter_multi.png", "save.png", "parameters.png"]):
-                p = os.path.join(self.plugin_dir, "icons", icon)
-                if os.path.exists(p): self.toolBox_tabTools.setItemIcon(idx, get_themed_icon(p))
-            for wg in self.widgets:
-                for wn in self.widgets[wg]:
-                    wi = self.widgets[wg][wn]
-                    if wi.get("TYPE") != "PushButton": continue
-                    if (ip := wi.get("ICON") or wi.get("ICON_ON_FALSE")) and os.path.exists(ip): wi.get("WIDGET").setIcon(get_themed_icon(ip)); wi.get("WIDGET").setProperty('icon_path', ip)
-        except Exception as e: logger.debug(f"refresh_button_icons cosmetic update: {e}")
 
     def set_widgets_enabled_state(self, state):
         """
@@ -3323,6 +3330,8 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             pushbutton.toggled.connect(
                 lambda checked, widgets=widgets_to_control: self._toggle_associated_widgets(checked, widgets)
             )
+            # changeSignalState tracks the registry handler of these buttons (second slot on 'toggled')
+            self.__dict__.setdefault('_conditional_state_buttons', []).append(pushbutton)
 
             # Set initial state based on current pushbutton state
             initial_state = pushbutton.isChecked()
@@ -6534,9 +6543,11 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         """v4.0 S18: Reload FilterMate plugin."""
         try:
             from qgis.utils import plugins; from qgis.PyQt.QtCore import QTimer
+            from .core.domain.plugin_package import PLUGIN_PACKAGE
             self.save_configuration_model()
-            if 'filter_mate' not in plugins: show_warning("FilterMate", self.tr("Could not reload plugin automatically.")); return
-            fm = plugins['filter_mate']
+            package = PLUGIN_PACKAGE
+            if package not in plugins: show_warning("FilterMate", self.tr("Could not reload plugin automatically.")); return
+            fm = plugins[package]
             # This dock is dropped without unload(): its controllers go now (close() only hides it).
             if self._controller_integration: self._controller_integration.teardown()
             self.close(); fm.pluginIsActive, fm.app = False, None; QTimer.singleShot(100, fm.run)

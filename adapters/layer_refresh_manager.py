@@ -33,7 +33,7 @@ except ImportError:
         return logging.getLogger(name)
 
 try:
-    from ..infrastructure.utils.gdal_error_handler import GdalErrorHandler
+    from ..infrastructure.utils import GdalErrorHandler
 except ImportError:
     # Mock for testing
     class GdalErrorHandler:

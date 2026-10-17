@@ -356,7 +356,8 @@ class ConfigController(BaseController):
                                     .get('LANGUAGE', {})
                                     .get('value', 'auto'))
                     from qgis.utils import plugins
-                    plugin = plugins.get('filter_mate')
+                    from ...core.domain.plugin_package import PLUGIN_PACKAGE
+                    plugin = plugins.get(PLUGIN_PACKAGE)
                     if plugin and hasattr(plugin, 'reload_translator'):
                         plugin.reload_translator(saved_locale)
                         if hasattr(plugin, 'retranslate_actions'):
@@ -714,7 +715,8 @@ class ConfigController(BaseController):
             logger.info(f"LANGUAGE changed to: {new_locale}")
 
             from qgis.utils import plugins
-            plugin = plugins.get('filter_mate')
+            from ...core.domain.plugin_package import PLUGIN_PACKAGE
+            plugin = plugins.get(PLUGIN_PACKAGE)
             if not plugin or not hasattr(plugin, 'reload_translator'):
                 logger.error("_apply_language_change: plugin not found or missing reload_translator")
                 return
@@ -800,7 +802,7 @@ class ConfigController(BaseController):
                 self.dockwidget.plugin_dir + '/config/config.json'
             )
 
-            with open(config_json_path, 'r') as infile:
+            with open(config_json_path, 'r', encoding='utf-8') as infile:
                 self.dockwidget.CONFIG_DATA = json.load(infile)
             # Sync ENV_VARS so all code reading from it sees reverted values
             ENV_VARS["CONFIG_DATA"] = self.dockwidget.CONFIG_DATA
@@ -887,11 +889,12 @@ class ConfigController(BaseController):
         Args:
             message: Error message to display
         """
+        logger.error(f"UI Error: {message}")
         try:
-            from ...config.feedback_config import show_error
-            show_error("FilterMate", message)
+            from ...infrastructure.feedback import show_error
+            show_error(message, "FilterMate")
         except ImportError:
-            logger.error(f"UI Error: {message}")
+            pass
 
     def __repr__(self) -> str:
         """String representation for debugging."""

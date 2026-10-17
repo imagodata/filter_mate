@@ -9,7 +9,12 @@ sync state.
 
 from __future__ import annotations
 
-from typing import Annotated, Dict, List, Literal, Optional
+from typing import Dict, List, Literal, Optional
+
+try:
+    from typing import Annotated
+except ImportError:  # Python 3.8 (QGIS 3.22): pydantic 2 depends on typing_extensions
+    from typing_extensions import Annotated
 
 from fastapi import APIRouter, HTTPException, Request, status
 from pydantic import BaseModel, ConfigDict, Field, model_validator

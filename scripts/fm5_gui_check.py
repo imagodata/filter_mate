@@ -90,15 +90,16 @@ def count(vector_layer):
 
 
 def set_targets(names):
+    """The user's order: the targets key first (it reloads the stored list), then the layers."""
+    button = dock().pushButton_checkable_filtering_layers_to_filter
+    if not button.isChecked():
+        button.setChecked(True)
     combo = dock().checkableComboBoxLayer_filtering_layers_to_filter
     model = combo.model()
     for row in range(model.rowCount()):
         item = model.item(row)
         text = item.text()
         item.setCheckState(Qt.CheckState.Checked if any(text.startswith(n + ' [') for n in names) else Qt.CheckState.Unchecked)
-    button = dock().pushButton_checkable_filtering_layers_to_filter
-    if not button.isChecked():
-        button.setChecked(True)
     log(f"targets: {dock().get_layers_to_filter()}")
 
 
@@ -192,8 +193,17 @@ def s_vector_undo_check():
 
 
 def s_centroid_registry():
-    """A target checked the way a click in the list does it (no checkedItemsChanged)."""
+    """The dock's own handlers survive the layer changes (toggling the targets key saves
+    has_layers_to_filter at once), then a target is checked the way a click in the list does it."""
     d = dock()
+    props = d.PROJECT_LAYERS[layer('batiment').id()]['filtering']
+    key = d.pushButton_checkable_filtering_layers_to_filter
+    key.setChecked(True)
+    key.setChecked(False)
+    off = props.get('has_layers_to_filter')
+    key.setChecked(True)
+    check('registry: the targets key saves has_layers_to_filter after layer changes',
+          off is False and props.get('has_layers_to_filter') is True, f'{off} / {props.get("has_layers_to_filter")}')
     combo = d.checkableComboBoxLayer_filtering_layers_to_filter
     for row in range(combo.count()):  # what a click in the list does: no checkedItemsChanged
         item = combo.model().item(row)
@@ -233,6 +243,26 @@ def s_centroid_setup():
     check('centroids: and clears them', combo.centroid_layer_ids() == [] and button.checkState() == Qt.CheckState.Unchecked)
     combo.set_centroid_layer_ids([parcels], emit=True)
     save(d, '02b-centroid-targets')
+
+
+def s_centroid_popup():
+    """The list of targets opened and painted, then a real click on the centroid square of the roads."""
+    from qgis.PyQt.QtTest import QTest
+    from filter_mate.ui.widgets.custom_widgets import ItemDelegate
+    combo = dock().checkableComboBoxLayer_filtering_layers_to_filter
+    combo.showPopup()
+    view = combo.view()
+    view.window().grab().save(os.path.join(OUT, '02c-centroid-list.png'), 'PNG')  # raised under PyQt6 before 5.0.1
+    roads = layer('troncon_de_route').id()
+    row = next(r for r in range(combo.count()) if combo.model().item(r).text().startswith('troncon_de_route ['))
+    index = combo.model().index(row, 0)
+    toggle, _x, _w = ItemDelegate.trailing_layout(view.visualRect(index), view.viewport().fontMetrics(), index)
+    QTest.mouseClick(view.viewport(), Qt.MouseButton.LeftButton, Qt.KeyboardModifier.NoModifier, toggle.center())
+    check('centroids: a click on the square of a target turns its centroids on, the list stays open',
+          roads in combo.centroid_layer_ids() and view.isVisible(), str(combo.centroid_layer_ids()))
+    QTest.mouseClick(view.viewport(), Qt.MouseButton.LeftButton, Qt.KeyboardModifier.NoModifier, toggle.center())
+    check('centroids: a second click turns them off', roads not in combo.centroid_layer_ids(), str(combo.centroid_layer_ids()))
+    combo.hidePopup()
 
 
 def s_centroid_filter():
@@ -690,7 +720,7 @@ def s_finish():
 STEPS = [
     (s_setup, 1500), (s_open_plugin, 6000), (s_vector_source, 3000), (s_vector_select, 2000),
     (s_vector_filter, 9000), (s_vector_check, 1000), (s_vector_undo, 3000), (s_vector_undo_check, 1000),
-    (s_centroid_registry, 800), (s_centroid_registry_check, 500), (s_centroid_setup, 1500), (s_centroid_filter, 9000), (s_centroid_check, 1000), (s_centroid_unfilter, 4000), (s_centroid_unfilter_check, 1000),
+    (s_centroid_registry, 800), (s_centroid_registry_check, 500), (s_centroid_setup, 1500), (s_centroid_popup, 1500), (s_centroid_filter, 9000), (s_centroid_check, 1000), (s_centroid_unfilter, 4000), (s_centroid_unfilter_check, 1000),
     (s_raster_source, 3000), (s_raster_mode, 2500), (s_raster_preview, 1500), (s_raster_preview_check, 1000),
     (s_raster_filter, 8000), (s_raster_check, 1000), (s_raster_unfilter, 3000), (s_raster_unfilter_check, 1000),
     (s_pipette_ortho, 3500), (s_pipette_ortho_check, 1500), (s_pipette_ortho_shot, 1500), (s_pipette_dem, 3000), (s_pipette_dem_check, 1000),

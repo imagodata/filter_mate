@@ -190,9 +190,9 @@ class ColorType(DataType):
             color = editor.color()
             # Format color as hex string with alpha if present
             if color.alpha() < 255:
-                hex_color = color.name(QtGui.QColor.HexArgb)
+                hex_color = color.name(QtGui.QColor.NameFormat.HexArgb)
             else:
-                hex_color = color.name(QtGui.QColor.HexRgb)
+                hex_color = color.name(QtGui.QColor.NameFormat.HexRgb)
 
             model.setData(index, hex_color, QtCore.Qt.ItemDataRole.EditRole)
 

@@ -31,8 +31,6 @@ except ImportError:
     QgsVectorLayer = Any
     QgsProject = Any
 
-from ...infrastructure.database.sql_utils import sanitize_sql_identifier
-
 try:
     from ...infrastructure.perf_timer import perf_mark_start
 except ImportError:  # test harnesses that stub the infrastructure package
@@ -399,46 +397,16 @@ class LayerLifecycleService:
 
             try:
                 with connexion.cursor() as cursor:
-                    # Find all materialized views for this session (unified fm_temp_* prefix v4.4.4)
-                    # Also check legacy mv_ prefix for backward compatibility
-                    # 2026-10-17: and the temp schema of earlier versions
-                    # (filtermate_temp), see infrastructure.constants.
-                    from ...infrastructure.constants import (
-                        LEGACY_PREFIX_MATERIALIZED, LEGACY_TEMP_SCHEMAS, TABLE_PREFIX_MATERIALIZED,
-                    )
+                    # This session's materialized views (fm_temp_mv_<session>_*, legacy mv_<session>_*)
+                    # in the temp schema and the one of earlier versions (infrastructure.constants).
+                    # Names are checked and dropped by the shared guards: exact prefixes, quoted
+                    # identifiers, no CASCADE (the indexes go with their view).
+                    from ...infrastructure.constants import LEGACY_TEMP_SCHEMAS
+                    from ...infrastructure.database.temp_objects import pg_drop_session_views
                     schemas = [temp_schema] + [s for s in LEGACY_TEMP_SCHEMAS if s != temp_schema]
-                    cursor.execute("""
-                        SELECT schemaname, matviewname FROM pg_matviews
-                        WHERE schemaname = ANY(%s)
-                        AND (matviewname LIKE %s OR matviewname LIKE %s)
-                    """, (
-                        schemas,
-                        f"{TABLE_PREFIX_MATERIALIZED}{session_id}_%",
-                        f"{LEGACY_PREFIX_MATERIALIZED}{session_id}_%",
-                    ))
-                    views = cursor.fetchall()
-
-                    if views:
-                        count = 0
-                        for (view_schema, view_name) in views:
-                            safe_schema = sanitize_sql_identifier(view_schema)
-                            try:
-                                # Drop associated index first (handle both new and legacy prefixes)
-                                if view_name.startswith(TABLE_PREFIX_MATERIALIZED):
-                                    index_name = sanitize_sql_identifier(f"{view_schema}_{view_name[11:]}_cluster")  # Remove 'fm_temp_mv_' prefix
-                                else:
-                                    index_name = sanitize_sql_identifier(f"{view_schema}_{view_name[3:]}_cluster")  # Remove 'mv_' prefix (legacy)
-                                cursor.execute(f'DROP INDEX IF EXISTS "{index_name}" CASCADE;')
-                                # Drop the view
-                                safe_view = sanitize_sql_identifier(view_name)
-                                cursor.execute(f'DROP MATERIALIZED VIEW IF EXISTS "{safe_schema}"."{safe_view}" CASCADE;')
-                                count += 1
-                            except Exception as e:
-                                logger.debug(f"Error dropping view {view_name}: {e}")
-
-                        connexion.commit()
-                        if count > 0:
-                            logger.info(f"Cleaned up {count} materialized view(s) for session {session_id}")
+                    dropped_views = pg_drop_session_views(connexion, cursor, schemas, session_id)
+                    if dropped_views:
+                        logger.info(f"Cleaned up {len(dropped_views)} materialized view(s) for session {session_id}")
 
                     # 2026-10-17: the buffer tables of the dynamic buffers sit
                     # in the schema of their source table, not in temp_schema.

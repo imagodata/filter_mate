@@ -581,7 +581,8 @@ class BackendExpressionBuilder:
 
     def _check_auto_optimizations(self, layer, source_wkt: Optional[str]) -> bool:
         """
-        Check and apply auto-optimizations for the layer.
+        Whether the target layer is tested by its centroids (global flag, per-layer
+        choice or user-approved optimization).
 
         Args:
             layer: Target layer
@@ -599,46 +600,6 @@ class BackendExpressionBuilder:
             if layer_opts.get('use_centroid_distant', False):
                 use_centroids = True
                 logger.info(f"🎯 USER-APPROVED OPTIMIZATION: Centroid mode for {layer.name()}")
-
-        # Auto-detection fallback
-        if not use_centroids and self.auto_apply_optimizations:
-            try:
-                from ..ports import get_backend_services
-                _services = get_backend_services()
-                AUTO_OPTIMIZER_AVAILABLE = _services.is_auto_optimizer_available()
-                if AUTO_OPTIMIZER_AVAILABLE and layer:
-                    source_wkt_len = len(source_wkt) if source_wkt else 0
-                    has_buffer = self.param_buffer_value is not None and self.param_buffer_value != 0
-
-                    optimization_plan = _services.get_optimization_plan(
-                        target_layer=layer,
-                        source_layer=self.source_layer,
-                        source_wkt_length=source_wkt_len,
-                        predicates=self.current_predicates,
-                        user_requested_centroids=None,
-                        has_buffer=has_buffer,
-                        buffer_value=self.param_buffer_value if self.param_buffer_value else 0.0
-                    )
-
-                    if optimization_plan:
-                        if optimization_plan.final_use_centroids:
-                            use_centroids = True
-                            logger.info(f"🎯 AUTO-OPTIMIZATION: Centroid mode enabled for {layer.name()}")
-                            if optimization_plan.recommendations:
-                                logger.info(f"   Reason: {optimization_plan.recommendations[0].reason}")
-                            logger.info(f"   Expected speedup: ~{optimization_plan.estimated_total_speedup:.1f}x")
-
-                        # Apply buffer simplification if recommended
-                        if optimization_plan.final_simplify_tolerance and optimization_plan.final_simplify_tolerance > 0:
-                            filtering_params = self.task_parameters.get("filtering", {})
-                            if not filtering_params.get("has_simplify_tolerance", False):
-                                filtering_params["has_simplify_tolerance"] = True
-                                filtering_params["simplify_tolerance"] = optimization_plan.final_simplify_tolerance
-                                self.task_parameters["filtering"] = filtering_params
-                                logger.info("🎯 AUTO-OPTIMIZATION: Buffer simplification enabled")
-                                logger.info(f"   Tolerance: {optimization_plan.final_simplify_tolerance:.2f}m")
-            except Exception as e:
-                logger.debug(f"Auto-optimization check failed: {e}")
 
         return use_centroids
 

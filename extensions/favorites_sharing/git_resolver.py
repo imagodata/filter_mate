@@ -172,7 +172,7 @@ def resolve_for_extension(extension) -> GitResolution:
 
     tools_dir = ""
     try:
-        from filter_mate.config.config import ENV_VARS  # type: ignore
+        from ...config.config import ENV_VARS  # type: ignore
         base = ENV_VARS.get("PLUGIN_CONFIG_DIRECTORY") or ""
         if base:
             tools_dir = os.path.join(base, "tools")

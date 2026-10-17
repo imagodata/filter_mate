@@ -18,6 +18,8 @@ try:
 except ImportError:
     QCoreApplication = None
 
+from ..logging.redaction import mask_sensitive_text
+
 logger = logging.getLogger('FilterMate.Infrastructure.Database.SQLUtils')
 
 # Root package of the plugin ('filter_mate' once installed), for its dock module
@@ -264,7 +266,7 @@ def safe_set_subset_string(layer, subset_expression: str) -> bool:
             if subset_expression and layer.providerType() == 'postgres':
                 try:
                     # Import from adapters (infrastructure/database -> adapters/backends)
-                    from filter_mate.adapters.backends.postgresql.filter_executor import apply_postgresql_type_casting
+                    from ...adapters.backends.postgresql.filter_executor import apply_postgresql_type_casting
                     subset_expression = apply_postgresql_type_casting(subset_expression, layer)
                     logger.debug("[SQL]   PostgreSQL type casting applied")
                 except ImportError:
@@ -322,7 +324,8 @@ def safe_set_subset_string(layer, subset_expression: str) -> bool:
                 logger.warning(f"setSubsetString returned False for layer {layer.name()}")
                 # Additional diagnostics for failure
                 logger.warning("[SQL] ❌ FAILED - Diagnostics:")
-                logger.warning(f"[SQL]   Layer source: {layer.source()[:200]}...")
+                # The source of a PostgreSQL layer without authcfg carries its password
+                logger.warning(f"[SQL]   Layer source: {mask_sensitive_text(layer.source())[:200]}...")
                 logger.warning(f"[SQL]   Count before: {_layer_count_label(layer)}")
                 logger.warning(f"[SQL]   Current subset: {layer.subsetString()[:200] if layer.subsetString() else 'None'}...")
 
@@ -342,22 +345,29 @@ def safe_set_subset_string(layer, subset_expression: str) -> bool:
                         # For PostgreSQL, try executing a simple query to check connection state
                         if layer.providerType() == 'postgres':
                             try:
-                                from filter_mate.infrastructure.utils import get_datasource_connexion_from_layer
+                                from ...infrastructure.utils import get_datasource_connexion_from_layer
                                 conn, _ = get_datasource_connexion_from_layer(layer)
                                 if conn:
                                     # Check if connection is in a broken/aborted transaction state
                                     try:
-                                        with conn.cursor() as cur:
-                                            cur.execute("SELECT 1")
-                                        conn.rollback()  # Keep the connection clean after the probe
-                                        logger.info("[SQL]   PostgreSQL connection (psycopg2 probe): OK")
-                                    except Exception as probe_inner:
                                         try:
-                                            conn.rollback()
-                                        except Exception:  # nosec B110 - best-effort rollback after connection probe failure
+                                            with conn.cursor() as cur:
+                                                cur.execute("SELECT 1")
+                                            conn.rollback()  # Keep the connection clean after the probe
+                                            logger.info("[SQL]   PostgreSQL connection (psycopg2 probe): OK")
+                                        except Exception as probe_inner:
+                                            try:
+                                                conn.rollback()
+                                            except Exception:  # nosec B110 - best-effort rollback after connection probe failure
+                                                pass
+                                            logger.warning(f"[SQL]   PostgreSQL connection BROKEN: {mask_sensitive_text(str(probe_inner))}")
+                                            logger.warning("[SQL]   → Root cause: prior query may have aborted the transaction")
+                                    finally:
+                                        # The probe opened its own connection: do not leak it
+                                        try:
+                                            conn.close()
+                                        except Exception:  # nosec B110 - best-effort close of the probe connection
                                             pass
-                                        logger.warning(f"[SQL]   PostgreSQL connection BROKEN: {probe_inner}")
-                                        logger.warning("[SQL]   → Root cause: prior query may have aborted the transaction")
                             except Exception as pg_probe_e:
                                 logger.debug(f"[SQL]   psycopg2 probe unavailable: {pg_probe_e}")
                 except Exception as diag_e:
@@ -383,13 +393,18 @@ def create_temp_spatialite_table(
     table_name: str,
     sql_query: str,
     geom_field: str = 'geometry',
-    srid: int = 4326
+    srid: int = 4326,
+    register_geometry: bool = False
 ) -> bool:
     """
     Create temporary table in Spatialite database.
 
     Alternative to PostgreSQL materialized views for Spatialite backend.
-    Creates a temp table populated from a SELECT query with spatial index.
+    Creates a temp table populated from a SELECT query. The layer's subset
+    only reads its primary key, so by default the geometry column is neither
+    registered in ``geometry_columns`` nor spatially indexed: the table stays
+    an anonymous scratch table that cannot be mistaken for a user layer (and
+    adds no trigger, R-tree or metadata row to the user's database).
 
     Args:
         db_path: Path to Spatialite database file
@@ -397,6 +412,8 @@ def create_temp_spatialite_table(
         sql_query: SELECT query to populate table
         geom_field: Name of geometry column (default: 'geometry')
         srid: SRID for geometry column (default: 4326)
+        register_geometry: Register the geometry column and create its R-tree
+            index (native Spatialite databases only)
 
     Returns:
         bool: True if table created successfully
@@ -413,6 +430,7 @@ def create_temp_spatialite_table(
     """
     import sqlite3
 
+    conn = None
     try:
         conn = sqlite3.connect(db_path)
         conn.enable_load_extension(True)
@@ -425,44 +443,46 @@ def create_temp_spatialite_table(
                 conn.load_extension('mod_spatialite.dll')  # Windows fallback
             except Exception as e:
                 logger.error(f"Failed to load Spatialite extension: {e}")
-                conn.close()
                 return False
 
         cursor = conn.cursor()
 
+        # Quoted: the name is data (session id + layer id), never a bare identifier
+        quoted_table = '"' + sanitize_sql_identifier(table_name).replace('"', '""') + '"'
+
         # Drop existing table if exists
-        cursor.execute(f"DROP TABLE IF EXISTS {sanitize_sql_identifier(table_name)}")  # nosec B608
+        cursor.execute(f"DROP TABLE IF EXISTS {quoted_table}")  # nosec B608
 
         # Create table from query
-        create_sql = f"CREATE TABLE {sanitize_sql_identifier(table_name)} AS {sql_query}"  # nosec B608
+        create_sql = f"CREATE TABLE {quoted_table} AS {sql_query}"  # nosec B608
         cursor.execute(create_sql)
 
-        # Create spatial index
-        try:
-            # Register geometry column
-            cursor.execute(f"""
-                SELECT RecoverGeometryColumn(
-                    '{sanitize_sql_identifier(table_name)}',
-                    '{sanitize_sql_identifier(geom_field)}',
-                    {srid},
-                    'GEOMETRY',
-                    'XY'
-                )
-            """)
+        # Register the geometry and index it (opt-in, see the docstring)
+        if register_geometry:
+            try:
+                # Register geometry column
+                cursor.execute(f"""
+                    SELECT RecoverGeometryColumn(
+                        '{sanitize_sql_identifier(table_name)}',
+                        '{sanitize_sql_identifier(geom_field)}',
+                        {srid},
+                        'GEOMETRY',
+                        'XY'
+                    )
+                """)
 
-            # Create R-tree spatial index
-            cursor.execute("""
-                SELECT CreateSpatialIndex(
-                    '{sanitize_sql_identifier(table_name)}',
-                    '{sanitize_sql_identifier(geom_field)}'
-                )
-            """)
-        except Exception as e:
-            logger.warning(f"Could not create spatial index: {e}")
-            # Continue anyway - table is still usable without index
+                # Create R-tree spatial index
+                cursor.execute(f"""
+                    SELECT CreateSpatialIndex(
+                        '{sanitize_sql_identifier(table_name)}',
+                        '{sanitize_sql_identifier(geom_field)}'
+                    )
+                """)
+            except Exception as e:
+                logger.warning(f"Could not create spatial index: {e}")
+                # Continue anyway - table is still usable without index
 
         conn.commit()
-        conn.close()
 
         logger.info(f"Created temporary Spatialite table: {table_name}")
         return True
@@ -470,6 +490,12 @@ def create_temp_spatialite_table(
     except Exception as e:
         logger.error(f"Error creating Spatialite temp table {table_name}: {e}")
         return False
+    finally:
+        if conn is not None:
+            try:
+                conn.close()
+            except Exception:  # nosec B110 - best-effort close
+                pass
 
 
 def format_pk_values_for_sql(

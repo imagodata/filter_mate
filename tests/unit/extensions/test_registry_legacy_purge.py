@@ -85,6 +85,8 @@ def env_vars(tmp_path, monkeypatch):
         monkeypatch.setitem(sys.modules, "filter_mate", root)
     monkeypatch.setitem(sys.modules, "filter_mate.config", package)
     monkeypatch.setitem(sys.modules, "filter_mate.config.config", module)
+    from tests.unit.extensions.plugin_alias import alias_package
+    alias_package(monkeypatch, "extensions.registry", "extensions.base")
     return path
 
 
@@ -97,10 +99,10 @@ class TestAtomicWrite:
     def test_failed_write_keeps_the_previous_file(self, env_vars, monkeypatch):
         before = env_vars.read_text()
 
-        def broken_dump(*args, **kwargs):
+        def broken_dump(*args, **kwargs):  # the writer serialises with json.dumps before touching the file
             raise TypeError("Object of type MagicMock is not JSON serializable")
 
-        monkeypatch.setattr(json, "dump", broken_dump)
+        monkeypatch.setattr(json, "dumps", broken_dump)
         assert ExtensionRegistry()._persist_config() is False
         assert env_vars.read_text() == before
         assert not (env_vars.parent / "config.json.tmp").exists()

@@ -53,7 +53,7 @@ def _tr(message: str) -> str:
 def _profile_tools_dir() -> str:
     """Resolve ``[QGIS profile]/FilterMate/tools`` from FilterMate env."""
     try:
-        from filter_mate.config.config import ENV_VARS  # type: ignore
+        from ....config.config import ENV_VARS  # type: ignore
         base = ENV_VARS.get("PLUGIN_CONFIG_DIRECTORY") or ""
         if not base:
             return ""

@@ -15,6 +15,7 @@ code (1 when a check fails):
 Prints one ``PASS`` / ``FAIL`` / ``SKIP`` / ``XFAIL`` line per check, like ``run_smoke.py``.
 """
 import faulthandler
+import importlib
 import json
 import logging
 import os
@@ -54,7 +55,7 @@ QTimer.singleShot(12 * 60 * 1000, _watchdog)  # before the outer `timeout 900` o
 # QGIS < 3.28 runs --code with exec() and no __file__: FM_REPO (default /src, the CI mount) then.
 REPO = os.environ.get('FM_REPO') or (os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
                                      if '__file__' in globals() else '/src')
-PACKAGE = 'filter_mate'
+PACKAGE = os.environ.get('FM_PACKAGE') or 'filter_mate'  # FM_PACKAGE=fm_main: the plugin folder is not always filter_mate
 EXCLUDED = ('.git', '.github', '.claude', '.serena', '_bmad', '_bmad-output', 'dist', 'build', 'scripts',
             'knowledge', 'website', 'tests', 'docs', 'logs', '__pycache__', '*.pyc', 'test_*.py')
 POINT_CLOUD_MIN_VERSION = 32600  # core/domain/point_cloud_support.py
@@ -129,7 +130,7 @@ def dump_recent(count=40, keywords=('FM5', 'overage', 'ross', 'BLOCKED', 'DEFERR
 def watch_plugin_loggers():
     """Hook every FilterMate logger created so far (each one has its own handlers, no propagation)."""
     for name, logger in list(logging.root.manager.loggerDict.items()):
-        if isinstance(logger, logging.Logger) and name.split('.')[0] in ('FilterMate', 'filter_mate') \
+        if isinstance(logger, logging.Logger) and name.split('.')[0] in ('FilterMate', 'filter_mate', PACKAGE) \
                 and _ERRORS not in logger.handlers:
             logger.addHandler(_ERRORS)
             logger.addHandler(_RECENT)
@@ -296,7 +297,7 @@ def s_open_plugin():
     qgis.utils.updateAvailablePlugins()
     started = qgis.utils.loadPlugin(PACKAGE) and qgis.utils.startPlugin(PACKAGE)
     check('plugin starts with iface', started and PACKAGE in qgis.utils.plugins)
-    from filter_mate.adapters.qgis.coverage_layers import cache
+    cache = importlib.import_module(f'{PACKAGE}.adapters.qgis.coverage_layers.cache')
     cache.set_cache_root(os.path.join(os.path.dirname(plugins), 'cache'))
     qgis.utils.plugins[PACKAGE].run()
     expected = ['zones', 'dem'] + (['cloud'] if has_point_clouds() else [])
@@ -381,6 +382,41 @@ def s_layout_check():
     # The key column aligner used to grow the page at every pass: rows 4000 px apart, one row visible.
     span = filtering_rows_span()
     check('FILTERING rows laid out together (key column aligner)', 0 < span < 600, f"first to last row: {span} px")
+
+
+def s_qt6_enums_check():
+    """Scoped-enum spellings that raised AttributeError in QGIS 4 (October 2026 audit)."""
+    from qgis.PyQt.QtGui import QColor, QStandardItem, QStandardItemModel
+    from qgis.PyQt.QtWidgets import QSizePolicy
+    UIConfig = importlib.import_module(f'{PACKAGE}.ui.config').UIConfig
+    ColorType = importlib.import_module(f'{PACKAGE}.ui.widgets.json_view.datatypes').ColorType
+
+    # QSizePolicy.Policy.*: the splitter set-up swallowed the error and left main_splitter at None.
+    d = dock()
+    d._apply_splitter_frame_policies()
+    expected = {}
+    for frame, defaults in (('frame_exploring', ('Preferred', 'Minimum')), ('frame_toolset', ('Preferred', 'Expanding'))):
+        cfg = UIConfig.get_config(frame) or {}
+        expected[frame] = (getattr(QSizePolicy.Policy, cfg.get('size_policy_h', defaults[0])),
+                           getattr(QSizePolicy.Policy, cfg.get('size_policy_v', defaults[1])))
+    actual = {frame: (getattr(d, frame).sizePolicy().horizontalPolicy(), getattr(d, frame).sizePolicy().verticalPolicy())
+              for frame in expected}
+    check('dock splitter: main_splitter set up and frame size policies applied (QSizePolicy.Policy)',
+          d.main_splitter is not None and actual == expected, f"main_splitter={d.main_splitter!r} {actual} vs {expected}")
+
+    # QColor.NameFormat.*: editing a colour in the JSON view (ColorType delegate, QgsColorButton).
+    model = QStandardItemModel()
+    item = QStandardItem('#ff0000')
+    model.appendRow(item)
+    delegate = ColorType()
+    editor = delegate.createEditor(None, None, item.index())
+    editor.setColor(QColor(0x12, 0x34, 0x56, 0x80))  # colorChanged -> setModelData, as for a user's pick
+    translucent = model.data(item.index(), Qt.ItemDataRole.EditRole)
+    editor.setColor(QColor(0x12, 0x34, 0x56))
+    delegate.setModelData(editor, model, item.index())
+    opaque = model.data(item.index(), Qt.ItemDataRole.EditRole)
+    check('JSON view colour delegate writes #AARRGGBB / #RRGGBB (QColor.NameFormat)',
+          str(translucent).lower() == '#80123456' and str(opaque).lower() == '#123456', f"{translucent!r} {opaque!r}")
 
 
 def s_vector_source():
@@ -552,7 +588,7 @@ def s_raster_select():
           f"{getattr(d, 'current_layer', None) and d.current_layer.name()}", flush=True)
     check('raster layer: EXPLORING shows the raster panel, not the vector groups',
           ctrl._raster_panel.isVisible() and not d.mGroupBox_exploring_single_selection.isVisible())
-    from filter_mate.core.domain.raster_filter_criteria import RasterSelection
+    RasterSelection = importlib.import_module(f'{PACKAGE}.core.domain.raster_filter_criteria').RasterSelection
     low, high = M['east_range']
     ctrl._raster_panel.set_selection(RasterSelection(band=1, minimum=float(low), maximum=float(high)))
     set_targets(['zones'])
@@ -754,7 +790,7 @@ def config_value_item(path):
 
 def edit_config_choice(path, value):
     """The user picks ``value`` in the combo box of a Configuration tab choice (its delegate's setModelData)."""
-    from filter_mate.ui.widgets.json_view.datatypes import ChoicesType
+    ChoicesType = importlib.import_module(f'{PACKAGE}.ui.widgets.json_view.datatypes').ChoicesType
     item = config_value_item(path)
     choices = item.data(Qt.ItemDataRole.UserRole)['choices']
 
@@ -779,7 +815,7 @@ def record_layer_kind_counts():
 
 
 def raster_option():
-    from filter_mate.config.config import ENV_VARS
+    ENV_VARS = importlib.import_module(f'{PACKAGE}.config.config').ENV_VARS
     return ENV_VARS['CONFIG_DATA']['APP']['OPTIONS']['RASTER']['enabled']['value']
 
 
@@ -873,6 +909,9 @@ def s_remove_layer_check():
 
 
 def s_finish():
+    failed_extensions = [line for line in _RECENT.lines if 'Failed to load extension' in line]
+    check(f"extensions discovered under the plugin folder name '{PACKAGE}'", not failed_extensions,
+          '; '.join(failed_extensions[:3]))
     check('no Python error and no FilterMate critical message in the log', not STATE['python_errors'],
           '; '.join(STATE['python_errors'][:3]))
     counts = {status: sum(1 for s, _ in STATE['results'] if s == status) for status in ('PASS', 'FAIL', 'SKIP', 'XFAIL')}
@@ -884,7 +923,7 @@ def s_finish():
     os._exit(1 if failed else 0)  # QGIS exit code = test result; skips the slow GUI teardown
 
 
-STEPS = [s_setup, s_open_plugin, s_dock_ready, s_controllers_check, s_layout_check, s_pick_before_late_refresh,
+STEPS = [s_setup, s_open_plugin, s_dock_ready, s_controllers_check, s_layout_check, s_qt6_enums_check, s_pick_before_late_refresh,
          s_late_refresh_check,
          s_vector_source, s_vector_select, s_vector_filter, s_vector_check, s_vector_undo_check,
          s_user_pick_after_undo_check,

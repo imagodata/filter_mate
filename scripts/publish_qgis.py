@@ -11,24 +11,97 @@ import xmlrpc.client
 import zipfile
 
 
+# What plugins.qgis.org refuses or flags (and what has no business in a release archive).
+FORBIDDEN_EXTENSIONS = ('.pyc', '.pyo', '.pyd', '.log', '.so', '.dll', '.dylib', '.exe')
+MAX_ARCHIVE_BYTES = 20 * 1024 * 1024          # the repository accepts 25 MB; keep a margin
+MAX_UNPACKED_BYTES = 100 * 1024 * 1024
+MAX_ENTRY_BYTES = 25 * 1024 * 1024            # one file (a stray database or video)
+REQUIRED_METADATA = ('name', 'qgisMinimumVersion', 'description', 'about', 'version', 'author', 'email',
+                     'repository', 'tracker', 'icon')
+PLUGIN_FOLDER = 'filter_mate'
+
+
+def _load_qt_enum_scan():
+    """scripts/qt_enum_scan.py: the detector the unit tests use, run here on the archive content."""
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    import qt_enum_scan
+    return qt_enum_scan
+
+
+def check_archive_content(archive):
+    """Refuse forbidden file types, oversized archives and entries. Returns the list of problems."""
+    problems = []
+    infos = [info for info in archive.infolist() if not info.is_dir()]
+    for info in infos:
+        if info.filename.lower().endswith(FORBIDDEN_EXTENSIONS):
+            problems.append(f'forbidden file type: {info.filename}')
+        if info.file_size > MAX_ENTRY_BYTES:
+            problems.append(f'file larger than {MAX_ENTRY_BYTES // 2**20} MB: {info.filename}')
+    unpacked = sum(info.file_size for info in infos)
+    if unpacked > MAX_UNPACKED_BYTES:
+        problems.append(f'unpacked size {unpacked // 2**20} MB exceeds {MAX_UNPACKED_BYTES // 2**20} MB')
+    return problems
+
+
+def check_metadata(metadata, archive):
+    """Mandatory plugins.qgis.org keys, present and not empty; the icon file must be shipped."""
+    problems = []
+    if not metadata.has_section('general'):
+        return ['metadata.txt has no [general] section']
+    general = metadata['general']
+    for key in REQUIRED_METADATA:
+        if not general.get(key, '').strip():
+            problems.append(f'metadata.txt: missing or empty "{key}"')
+    icon = general.get('icon', '').strip()
+    if icon and f'{PLUGIN_FOLDER}/{icon}' not in archive.namelist():
+        problems.append(f'metadata.txt: icon "{icon}" is not in the archive')
+    return problems
+
+
+def check_python_sources(archive):
+    """Python 3.8 grammar (QGIS 3.22) and no unscoped Qt enum (Qt6 check of the repository)."""
+    scan = _load_qt_enum_scan()
+    problems = []
+    for name in archive.namelist():
+        if not name.endswith('.py'):
+            continue
+        try:
+            source = archive.read(name).decode('utf-8')
+            ast.parse(source, filename=name, feature_version=(3, 8))
+            offences = scan.scan_source(source, name)
+        except (SyntaxError, UnicodeDecodeError, ValueError) as exc:
+            problems.append(f'{name}: {exc}')
+            continue
+        problems.extend(f'{name}:{lineno} unscoped Qt enum {spelling}' for lineno, spelling in offences)
+    return problems
+
+
 def validate(path):
+    path = Path(path)
+    if path.stat().st_size > MAX_ARCHIVE_BYTES:
+        raise ValueError(f'Archive larger than {MAX_ARCHIVE_BYTES // 2**20} MB')
     with zipfile.ZipFile(path) as archive:
         if archive.testzip() is not None:
             raise ValueError('Corrupt ZIP archive')
         for name in archive.namelist():
             parts = Path(name).parts
-            if not parts or parts[0] != 'filter_mate' or '..' in parts:
+            if not parts or parts[0] != PLUGIN_FOLDER or '..' in parts:
                 raise ValueError('Unexpected archive path')
         metadata = configparser.ConfigParser()
-        metadata.read_string(archive.read('filter_mate/metadata.txt').decode('utf-8'))
+        metadata.read_string(archive.read(f'{PLUGIN_FOLDER}/metadata.txt').decode('utf-8'))
         for section in metadata.sections():
             for key in metadata[section]:
                 metadata.get(section, key)
-        entry = ast.parse(archive.read('filter_mate/__init__.py'))
+        entry = ast.parse(archive.read(f'{PLUGIN_FOLDER}/__init__.py'))
         if not any(isinstance(node, ast.FunctionDef) and node.name == 'classFactory'
                    for node in entry.body):
             raise ValueError('Missing classFactory entry point')
-        archive.getinfo('filter_mate/filter_mate.py')
+        archive.getinfo(f'{PLUGIN_FOLDER}/filter_mate.py')
+        problems = check_archive_content(archive) + check_metadata(metadata, archive) + check_python_sources(archive)
+        if problems:
+            shown = '\n  '.join(problems[:50])
+            more = f'\n  ... and {len(problems) - 50} more' if len(problems) > 50 else ''
+            raise ValueError(f'Archive rejected ({len(problems)} problem(s)):\n  {shown}{more}')
         return metadata.get('general', 'version')
 
 
@@ -38,7 +111,8 @@ def main():
     parser.add_argument('--validate-only', action='store_true')
     args = parser.parse_args()
     version = validate(args.archive)
-    print(f'Validated FilterMate {version}: metadata, ZIP structure and entry point')
+    print(f'Validated FilterMate {version}: ZIP structure, entry point, metadata keys, file types, size, '
+          'Python 3.8 syntax and Qt enums')
     if args.validate_only:
         return
     username = os.environ.get('OSGEO_USERNAME', '')

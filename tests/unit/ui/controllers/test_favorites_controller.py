@@ -894,25 +894,22 @@ class TestDirectSubsetApply:
         """Patch the safe_set_subset_string used by the controller so we can
         assert each (layer_name, subset) pair the apply pushed.
 
-        The controller resolves the import relative to ``filter_mate.*``
-        in the test shim (``from ...infrastructure.database.sql_utils``
-        fails at the shim depth, so the fallback ``filter_mate.infrastructure.
-        database.sql_utils`` path actually wins). We patch both paths so
-        the test stays robust whichever one resolves first.
+        The handler imports ``...infrastructure.database.sql_utils`` relatively, which in this
+        test shim is ``_fm_test_ui_shim.infrastructure.database.sql_utils``: register a stub there
+        (the real module would pull the whole infrastructure layer).
         """
-        import importlib
-
         def _record(layer, subset):
             sink.append((layer.name(), subset))
             return True
 
-        for mod_name in ("infrastructure.database.sql_utils",
-                         "filter_mate.infrastructure.database.sql_utils"):
-            try:
-                mod = importlib.import_module(mod_name)
-            except ImportError:
-                continue
-            monkeypatch.setattr(mod, "safe_set_subset_string", _record)
+        shim = "_fm_test_ui_shim.infrastructure"
+        stub = types.ModuleType(f"{shim}.database.sql_utils")
+        stub.safe_set_subset_string = _record
+        for name in (shim, f"{shim}.database"):
+            package = types.ModuleType(name)
+            package.__path__ = []
+            monkeypatch.setitem(sys.modules, name, package)
+        monkeypatch.setitem(sys.modules, stub.__name__, stub)
         return _record
 
     def test_pushes_source_and_target_subsets(self, monkeypatch):

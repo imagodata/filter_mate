@@ -912,15 +912,10 @@ class ConfigurationManager(QObject):
         self._enable_layer_search(d.comboBox_filtering_current_layer)
         self._stamp_user_layer_picks(d)
 
-        # Apply themed icon to centroids checkbox
-        try:
-            from ..icons import get_themed_icon, ICON_THEME_AVAILABLE
-        except ImportError:
-            ICON_THEME_AVAILABLE = False
-
+        # Apply icon to centroids checkbox
         icon_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "icons", "centroid.png")
         if os.path.exists(icon_path) and hasattr(d, 'checkBox_filtering_use_centroids_source_layer'):
-            icon = get_themed_icon(icon_path) if ICON_THEME_AVAILABLE else QtGui.QIcon(icon_path)
+            icon = QtGui.QIcon(icon_path)
             d.checkBox_filtering_use_centroids_source_layer.setIcon(icon)
             d.checkBox_filtering_use_centroids_source_layer.setText("")
             d.checkBox_filtering_use_centroids_source_layer.setLayoutDirection(QtCore.Qt.LayoutDirection.RightToLeft)
@@ -932,7 +927,7 @@ class ConfigurationManager(QObject):
             d.checkBox_filtering_use_centroids_distant_layers.setToolTip(d.tr("Use centroids instead of full geometries for distant layers"))
             d.checkBox_filtering_use_centroids_distant_layers.setCursor(QtGui.QCursor(QtCore.Qt.CursorShape.PointingHandCursor))
             if os.path.exists(icon_path):
-                icon = get_themed_icon(icon_path) if ICON_THEME_AVAILABLE else QtGui.QIcon(icon_path)
+                icon = QtGui.QIcon(icon_path)
                 d.checkBox_filtering_use_centroids_distant_layers.setIcon(icon)
             d.checkBox_filtering_use_centroids_distant_layers.setLayoutDirection(QtCore.Qt.LayoutDirection.RightToLeft)
             d.checkBox_filtering_use_centroids_distant_layers.setSizePolicy(QtWidgets.QSizePolicy.Policy.Fixed, QtWidgets.QSizePolicy.Policy.Fixed)

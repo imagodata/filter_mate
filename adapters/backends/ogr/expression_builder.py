@@ -384,7 +384,8 @@ class OGRExpressionBuilder(GeometricFilterPort):
             buffer_value: Buffer distance
             buffer_expression: Dynamic buffer expression
             source_filter: Not used
-            use_centroids: Already applied in source preparation
+            use_centroids: Test the target by its centroids (point on surface), like
+                ``ST_PointOnSurface`` on the SQL backends (FilterMate 5: chosen per target)
             **kwargs: Additional parameters
 
         Returns:
@@ -416,7 +417,8 @@ class OGRExpressionBuilder(GeometricFilterPort):
         params = {
             'predicates': list(predicates.keys()),
             'buffer_value': buffer_value,
-            'buffer_expression': buffer_expression
+            'buffer_expression': buffer_expression,
+            'use_centroids': bool(use_centroids),
         }
         return json.dumps(params)
 
@@ -478,6 +480,7 @@ class OGRExpressionBuilder(GeometricFilterPort):
             predicates = params.get('predicates', ['intersects'])
             buffer_value = params.get('buffer_value')
             buffer_expression = params.get('buffer_expression')
+            use_centroids = bool(params.get('use_centroids'))
             names = [str(pred).lower().replace('st_', '') for pred in predicates] or ['intersects']
 
             # Get source layer
@@ -514,13 +517,20 @@ class OGRExpressionBuilder(GeometricFilterPort):
             if source_union is not None:
                 if names == ['disjoint']:
                     complement = True
-                    selected_ids = self._select_against_union(target, source_union, source_layer.crs(), ['intersects'])
+                    selected_ids = self._select_against_union(target, source_union, source_layer.crs(), ['intersects'],
+                                                              use_centroids)
                 else:
-                    selected_ids = self._select_against_union(target, source_union, source_layer.crs(), names)
+                    selected_ids = self._select_against_union(target, source_union, source_layer.crs(), names,
+                                                              use_centroids)
                 if selected_ids is None:
                     return False
             else:
                 # Per-feature fallback (no union available): buffer each feature
+                if use_centroids and source_layer.featureCount() > 0:
+                    note = (f"{layer.name()}: tested by its full geometry, not its centroids "
+                            "(the source could not be merged into one geometry)")
+                    self.log_warning(f"  - {note}")
+                    self.user_warnings.append(note)
                 if buffer_expression and buffer_expression.strip():
                     source_layer = self._apply_buffer_expression_to_layer(source_layer, buffer_expression)
                     if source_layer is None:
@@ -1166,8 +1176,11 @@ class OGRExpressionBuilder(GeometricFilterPort):
             buffered = buffered.makeValid()
         return buffered
 
-    def _select_against_union(self, layer, union, union_crs, predicates) -> Optional[list]:
+    def _select_against_union(self, layer, union, union_crs, predicates, use_centroids: bool = False) -> Optional[list]:
         """Ids of the ``layer`` features related to ``union`` by any of ``predicates``.
+
+        With ``use_centroids`` each target is tested by its point on surface (inside the
+        feature, like ``ST_PointOnSurface`` on the SQL backends).
 
         2026-10-17: same directions as native:selectbylocation (INPUT =
         target, INTERSECT = source): Contains = the target contains the
@@ -1210,7 +1223,12 @@ class OGRExpressionBuilder(GeometricFilterPort):
                 return None
             if not feature.hasGeometry():
                 continue
-            geometry = feature.geometry().constGet()
+            target_geometry = feature.geometry()
+            if use_centroids:
+                target_geometry = target_geometry.pointOnSurface()
+                if target_geometry.isNull():
+                    continue
+            geometry = target_geometry.constGet()
             if not engine.intersects(geometry):
                 if 'disjoint' in names:
                     selected.append(feature.id())
