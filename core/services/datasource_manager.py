@@ -292,13 +292,14 @@ class DatasourceManager(QObject):
             return
 
         if authcfg_id is not None or layer_source_type == 'postgresql':
-            # PostgreSQL connection: keyed by the authentication config, or by the
+            # PostgreSQL database: keyed by the authentication config, or by the
             # host / database / user of a layer without one. Never by the URI itself,
-            # which carries the password.
+            # which carries the password. No connection is opened (nor kept) here: a
+            # shared connection would make every task use the database of the first
+            # layer; each task opens its own from its source layer.
             key = authcfg_id if authcfg_id is not None else self._postgresql_datasource_key(source_uri)
             if key and key not in self.project_datasources[layer_source_type].keys():
-                connexion, source_uri = get_datasource_connexion_from_layer(layer)
-                self.project_datasources[layer_source_type][key] = connexion
+                self.project_datasources[layer_source_type][key] = None
         else:
             # File-based datasource (GeoPackage, Shapefile, etc.)
             uri = source_uri.uri().strip()
@@ -372,15 +373,16 @@ class DatasourceManager(QObject):
 
     def update_datasource(self):
         """
-        Update CONFIG_DATA with active datasource connections.
+        Update CONFIG_DATA with the active datasource.
 
         Determines which datasource should be active for operations:
-        - PostgreSQL: If available and connections exist
+        - PostgreSQL: If available and the project has PostgreSQL layers
         - Spatialite: Fallback for local operations
 
         Notes:
-            - Updates CONFIG_DATA["CURRENT_PROJECT"]["OPTIONS"]["ACTIVE_POSTGRESQL"]
-              with a live connection object only, never with a URI or a path
+            - CONFIG_DATA["CURRENT_PROJECT"]["OPTIONS"]["ACTIVE_POSTGRESQL"] is always
+              empty: neither a connection nor an URI is stored (each task opens its
+              own connection from its source layer)
             - Updates CONFIG_DATA["CURRENT_PROJECT"]["OPTIONS"]["IS_ACTIVE_POSTGRESQL"]
             - Shows warning if PostgreSQL layers detected but psycopg2 unavailable
             - Runs no SQL: the foreign data wrappers once created here were removed
@@ -388,36 +390,13 @@ class DatasourceManager(QObject):
         """
         config_data = self._get_config_data()
 
-        # Check if PostgreSQL is available and if there are PostgreSQL connections
+        # ACTIVE_POSTGRESQL never holds a connection (nor an URI): it is saved with the
+        # project settings, and one connection shared by all tasks would be the wrong
+        # database for every layer but the first. Each task opens its own.
         if 'postgresql' in self.project_datasources and POSTGRESQL_AVAILABLE:
-            postgresql_connexions = list(self.project_datasources['postgresql'].keys())
-            if len(postgresql_connexions) >= 1:
-                # FIXED: Check if ACTIVE_POSTGRESQL is a valid connection object
-                current_connection = config_data["CURRENT_PROJECT"]["OPTIONS"]["ACTIVE_POSTGRESQL"]
-                is_valid_connection = (
-                    current_connection is not None
-                    and not isinstance(current_connection, str)
-                    and hasattr(current_connection, 'cursor')
-                    and callable(getattr(current_connection, 'cursor', None))
-                    and not getattr(current_connection, 'closed', True)
-                )
-                if not is_valid_connection:
-                    # Assign a fresh connection object from project_datasources. Only a
-                    # connection qualifies: a failed connection (None) or a leftover
-                    # URI / path must not become ACTIVE_POSTGRESQL, which is saved.
-                    fresh = next((c for c in self.project_datasources['postgresql'].values()
-                                  if hasattr(c, 'cursor') and callable(getattr(c, 'cursor', None))
-                                  and not isinstance(c, str)), None)
-                    if fresh is not None:
-                        config_data["CURRENT_PROJECT"]["OPTIONS"]["ACTIVE_POSTGRESQL"] = fresh
-                        config_data["CURRENT_PROJECT"]["OPTIONS"]["IS_ACTIVE_POSTGRESQL"] = True
-                        logger.debug("Assigned fresh PostgreSQL connection object to ACTIVE_POSTGRESQL")
-                    else:
-                        config_data["CURRENT_PROJECT"]["OPTIONS"]["ACTIVE_POSTGRESQL"] = ""
-                        config_data["CURRENT_PROJECT"]["OPTIONS"]["IS_ACTIVE_POSTGRESQL"] = False
-            else:
-                config_data["CURRENT_PROJECT"]["OPTIONS"]["ACTIVE_POSTGRESQL"] = ""
-                config_data["CURRENT_PROJECT"]["OPTIONS"]["IS_ACTIVE_POSTGRESQL"] = False
+            config_data["CURRENT_PROJECT"]["OPTIONS"]["ACTIVE_POSTGRESQL"] = ""
+            config_data["CURRENT_PROJECT"]["OPTIONS"]["IS_ACTIVE_POSTGRESQL"] = \
+                len(self.project_datasources['postgresql']) >= 1
 
         elif 'postgresql' in self.project_datasources and not POSTGRESQL_AVAILABLE:
             # PostgreSQL layers detected but psycopg2 not available

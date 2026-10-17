@@ -824,9 +824,11 @@ class FilterEngineTask(QgsTask):
         """
         Get a valid PostgreSQL connection for the current task.
 
-        Checks if ACTIVE_POSTGRESQL in task_parameters contains a valid psycopg2
-        connection object. If not (e.g., it's a string, dict, or None), attempts to
-        obtain a fresh connection from the source layer.
+        The task opens its own connection from its source layer, once, and closes it
+        with the task (``active_connections``). ``ACTIVE_POSTGRESQL`` in the task
+        parameters is not used: it never holds a connection (one connection shared
+        by every task was the database of the first PostgreSQL layer of the project,
+        whatever layer the task was filtering).
 
         Returns:
             psycopg2.connection: Valid PostgreSQL connection object
@@ -834,30 +836,17 @@ class FilterEngineTask(QgsTask):
         Raises:
             Exception: If no valid connection can be established
         """
-        # Try to get connection from task parameters
-        connexion = self.task_parameters.get("task", {}).get("options", {}).get("ACTIVE_POSTGRESQL")
-
-        # Explicitly reject dict objects - they are NOT valid connections
-        # This fixes "'dict' object has no attribute 'cursor'" errors
-        if isinstance(connexion, dict):
-            logger.warning("ACTIVE_POSTGRESQL is a dict (connection params), not a connection object - obtaining fresh connection")
-            connexion = None
-
-        # Validate that it's actually a connection object, not a string or None
-        if connexion is not None and not isinstance(connexion, str):
+        own = getattr(self, '_task_postgresql_connection', None)
+        if own is not None:
             try:
-                # Check if connection has cursor method (duck typing for psycopg2 connection)
-                if hasattr(connexion, 'cursor') and callable(getattr(connexion, 'cursor')):
-                    # Also check if connection is not closed
-                    if not getattr(connexion, 'closed', True):
-                        return connexion
-                    else:
-                        logger.warning("ACTIVE_POSTGRESQL connection is closed, will obtain new connection")
+                if not getattr(own, 'closed', True):
+                    return own
+                logger.warning("The task's PostgreSQL connection is closed, will obtain a new one")
             except (AttributeError, TypeError, RuntimeError) as e:
-                logger.warning(f"Error checking ACTIVE_POSTGRESQL connection: {e}")
+                logger.warning(f"Error checking the task's PostgreSQL connection: {e}")
+            self._task_postgresql_connection = None
 
-        # Connection is invalid (string, None, or closed) - try to get fresh connection from source layer
-        logger.info("ACTIVE_POSTGRESQL is not a valid connection object, obtaining fresh connection from source layer")
+        logger.debug("Opening the task's PostgreSQL connection from its source layer")
 
         if hasattr(self, 'source_layer') and self.source_layer is not None:
             try:
@@ -865,6 +854,7 @@ class FilterEngineTask(QgsTask):
                 if connexion is not None:
                     # Track this connection for cleanup
                     self.active_connections.append(connexion)
+                    self._task_postgresql_connection = connexion
                     return connexion
             except (RuntimeError, OSError, AttributeError) as e:
                 logger.error(f"Failed to get connection from source layer: {e}")
@@ -878,13 +868,13 @@ class FilterEngineTask(QgsTask):
                     connexion, source_uri = get_datasource_connexion_from_layer(layer)
                     if connexion is not None:
                         self.active_connections.append(connexion)
+                        self._task_postgresql_connection = connexion
                         return connexion
         except (RuntimeError, OSError, AttributeError, KeyError) as e:
             logger.error(f"Failed to get connection from layer by ID: {e}")
 
         raise Exception(
-            "No valid PostgreSQL connection available. "
-            "ACTIVE_POSTGRESQL was not a valid connection object and could not obtain fresh connection from layer."
+            "No valid PostgreSQL connection available: could not obtain a connection from the layer."
         )
 
     def _initialize_source_layer(self):
