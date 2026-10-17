@@ -42,6 +42,8 @@ logger = get_logger(__name__)
 # SQLite database of the layer properties, filter history and favorites
 # (FilterMateApp.db_name), in the FilterMate folder of the QGIS profile.
 LAYER_DATABASE_NAME = 'filterMate_db.sqlite'
+# Persistent FID cache of FilterMate 4.x (removed in 5.0, never filled): deleted by a configuration reset
+LEGACY_CACHE_DB_NAME = 'filtermate_cache.db'
 
 
 def _clear_layer_database(db_path):
@@ -1559,8 +1561,7 @@ class FilterMate:
                     # The cache database is deleted. The layer database also holds the
                     # favorites: only its layer properties and filter history are deleted
                     # (removing every .db / .sqlite file of the folder lost the favorites).
-                    from .infrastructure.cache.spatialite_persistent_cache import CACHE_DB_NAME
-                    filename = CACHE_DB_NAME
+                    filename = LEGACY_CACHE_DB_NAME
                     db_path = os.path.join(plugin_config_dir, filename)
                     if os.path.exists(db_path):
                         try:

@@ -499,23 +499,6 @@ class FilterMateApp:
         self._favorites_migration_service = FavoritesMigrationService()
         logger.debug("FilterMate: FavoritesMigrationService initialized")
 
-        # Spatialite cache
-        try:
-            from .infrastructure.cache import get_cache, cleanup_cache
-            self._spatialite_cache = get_cache()
-            expired_count = cleanup_cache()
-            if expired_count > 0:
-                logger.info(f"FilterMate: Cleaned up {expired_count} expired cache entries")
-            cache_stats = self._spatialite_cache.get_cache_stats()
-            logger.info(f"FilterMate: Spatialite cache initialized ({cache_stats['total_entries']} entries, {cache_stats['db_size_mb']} MB)")
-        except Exception as e:
-            logger.warning(
-                "FilterMate: Spatialite persistent cache disabled (init failed): %s. "
-                "Multi-step filter caching unavailable; operations will run uncached.",
-                e,
-            )
-            self._spatialite_cache = None
-
         # v4.0.1: Initialize BackendRegistry for hexagonal architecture compliance
         self._backend_registry = None
         try:

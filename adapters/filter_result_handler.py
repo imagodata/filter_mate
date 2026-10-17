@@ -160,11 +160,6 @@ class FilterResultHandler:
         # (applied when the post-filter window opens).
         _record_pending_pick(self._get_dockwidget() if self._get_dockwidget else None)
 
-        # v2.9.19: Clear Spatialite cache for all affected layers when unfiltering/resetting
-        # This ensures the multi-step cache doesn't interfere with subsequent filter operations
-        if task_name in ('unfilter', 'reset'):
-            self._clear_spatialite_cache(source_layer, task_parameters)
-
         # Refresh layers and map canvas
         # PERF 2026-09-12: each post-filter phase is timed (⏱ post_filter_*) so a
         # slow step shows up in filtermate.log instead of an unexplained gap.
@@ -269,33 +264,6 @@ class FilterResultHandler:
         _record_pending_pick(dockwidget)
         self._reconnect_layer_tree_view_signal()
         self._schedule_delayed_reconnection(current_layer_id_before_filter)
-
-    def _clear_spatialite_cache(self, source_layer: QgsVectorLayer, task_parameters: Dict[str, Any]) -> None:
-        """
-        Clear Spatialite cache for all affected layers.
-
-        Args:
-            source_layer: Source layer being unfiltered/reset
-            task_parameters: Task parameters containing affected layers list
-        """
-        try:
-            from ..infrastructure.cache import get_cache
-            cache = get_cache()
-            # Clear cache for source layer
-            cache.clear_layer_cache(source_layer.id())
-            logger.info(f"FilterMate: Cleared Spatialite cache for source layer {source_layer.name()}")
-
-            # Clear cache for all associated layers
-            # FIX v2.9.24: layers_list contains dicts with 'layer_id', not layer objects
-            layers_list = task_parameters.get("task", {}).get("layers", [])
-            for lyr_info in layers_list:
-                if isinstance(lyr_info, dict) and 'layer_id' in lyr_info:
-                    layer_id = lyr_info['layer_id']
-                    layer_name = lyr_info.get('layer_name', layer_id[:8])
-                    cache.clear_layer_cache(layer_id)
-                    logger.info(f"FilterMate: Cleared Spatialite cache for layer {layer_name}")
-        except Exception as e:
-            logger.debug(f"Could not clear Spatialite cache: {e}")
 
     def _determine_backend(
         self,

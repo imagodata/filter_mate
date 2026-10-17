@@ -144,8 +144,7 @@ def reset_env(tmp_path, monkeypatch):
         (_PKG, {}), (f"{_PKG}.config", {}),
         (f"{_PKG}.config.config", dict(ENV_VARS=env_vars, init_env_vars=init_env_vars,
                                        reset_config_to_default=reset_config_to_default)),
-        (f"{_PKG}.infrastructure", {}), (f"{_PKG}.infrastructure.cache", {}),
-        (f"{_PKG}.infrastructure.cache.spatialite_persistent_cache", dict(CACHE_DB_NAME="filtermate_cache.db")),
+        (f"{_PKG}.infrastructure", {}),
     ):
         module = types.ModuleType(name)
         module.__path__ = []
@@ -155,7 +154,7 @@ def reset_env(tmp_path, monkeypatch):
 
     namespace = _load(["reset_configuration", "_adopt_reset_config", "tr"],
                       {"__package__": _PKG, "os": os, "QCoreApplication": MagicMock()},
-                      module_level=("LAYER_DATABASE_NAME", "_clear_layer_database"))
+                      module_level=("LAYER_DATABASE_NAME", "LEGACY_CACHE_DB_NAME", "_clear_layer_database"))
     plugin = _Plugin()
     connection = object()
     plugin.app = types.SimpleNamespace(dockwidget=types.SimpleNamespace(CONFIG_DATA={
