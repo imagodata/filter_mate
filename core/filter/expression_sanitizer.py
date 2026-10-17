@@ -20,7 +20,7 @@ import logging
 import re
 from typing import Optional
 
-from .sql_quotes import IDENTIFIER_PLACEHOLDER, map_outside_quotes, mask_quoted, unmask_quoted
+from .sql_quotes import IDENTIFIER_PLACEHOLDER, LITERAL_PLACEHOLDER, mask_quoted, unmask_quoted
 
 logger = logging.getLogger('FilterMate.Core.Filter.Sanitizer')
 
@@ -315,119 +315,12 @@ def _normalize_french_operators(masked: str) -> str:
     return masked
 
 
-def _fix_structure(masked: str) -> str:
-    """Phases 2 and 3 of :func:`sanitize_subset_string`, on masked text."""
-    # ========================================================================
-    # PHASE 2: Fix unbalanced parentheses
-    # ========================================================================
-
-    # Count parentheses and fix if unbalanced
-    open_count = masked.count('(')
-    close_count = masked.count(')')
-
-    if close_count > open_count:
-        # Remove excess closing parentheses from the end
-        excess = close_count - open_count
-        # Remove trailing )))) patterns
-        trailing_parens = re.search(r'\)+\s*$', masked)
-        if trailing_parens:
-            parens_at_end = len(trailing_parens.group().strip())
-            if parens_at_end >= excess:
-                masked = re.sub(r'\){' + str(excess) + r'}\s*$', '', masked)
-                logger.info(f"FilterMate: Removed {excess} excess closing parentheses")
-
-    # PHASE 2.5 (v4.8.0) dropped every ``AND ( "field" )`` / ``OR ( "field" )``
-    # as a display expression glued to a filter (PostgreSQL: "argument of AND
-    # must be type boolean"). 2026-10-17: removed, it also dropped real
-    # conditions on boolean columns (``AND ( "actif" )``) and the layer showed
-    # more (AND) or fewer (OR) features without a word. Field-only display
-    # expressions are refused upstream (process_qgis_expression) and a
-    # standalone one by PHASE -1; a text column used as a condition now fails
-    # visibly instead of silently changing the result.
-
-    # ========================================================================
-    # PHASE 3: Clean up whitespace and orphaned operators
-    # ========================================================================
-
-    masked = re.sub(r'\s+', ' ', masked).strip()
-    masked = re.sub(r'\s+(AND|OR)\s*$', '', masked, flags=re.IGNORECASE)
-    masked = re.sub(r'^\s*(AND|OR)\s+', '', masked, flags=re.IGNORECASE)
-
-    # Remove duplicate AND/OR operators
-    masked = re.sub(r'\s+AND\s+AND\s+', ' AND ', masked, flags=re.IGNORECASE)
-    masked = re.sub(r'\s+OR\s+OR\s+', ' OR ', masked, flags=re.IGNORECASE)
-    return masked
+_IDENT = IDENTIFIER_PLACEHOLDER
+_LITERAL = LITERAL_PLACEHOLDER
 
 
-def sanitize_subset_string(subset_string: str) -> str:
-    """
-    Remove non-boolean display expressions and fix type casting issues in subset string.
-
-    Display expressions like 'coalesce("field",'<NULL>')' or CASE expressions that
-    return true/false are valid QGIS expressions but cause issues in SQL WHERE clauses.
-    This function removes such expressions and fixes common type casting issues.
-
-    Process:
-    1. Normalize French SQL operators (ET/OU/NON → AND/OR/NOT)
-    2. Remove non-boolean display expressions (coalesce, CASE)
-    3. Fix unbalanced parentheses
-    4. Clean up whitespace and orphaned operators
-
-    Args:
-        subset_string: The original subset string
-
-    Returns:
-        str: Sanitized subset string with non-boolean expressions removed
-    """
-    if not subset_string:
-        return subset_string
-
-    sanitized = subset_string
-
-    # ========================================================================
-    # PHASE -1: Reject standalone display expressions
-    # ========================================================================
-    # FIX 2026-04-23: the AND/OR-prefixed coalesce/CASE patterns below only
-    # strip display expressions that are *glued onto* a boolean filter. When
-    # the WHOLE subset is a display expression (e.g. the favorite stored the
-    # layer's displayExpression by mistake, or QGIS left a sticky invalid
-    # subset after a prior rejected setSubsetString call), it reaches
-    # PostgreSQL as `WHERE COALESCE(...)` → "argument of WHERE must be type
-    # boolean, not type character varying".
-    #
-    # We detect this by checking whether the expression starts with a known
-    # display function and *does not* contain a top-level boolean operator
-    # after the outer function call. A direct prefix check avoids the
-    # is_filter_expression() false positive where '<' inside a '<NULL>'
-    # placeholder is mistaken for a comparison operator.
-    if _is_standalone_display_expression(sanitized):
-        logger.info(
-            "FilterMate: Dropping non-boolean subset string "
-            f"(display expression, not a filter): '{sanitized[:80]}...'"
-        )
-        return ''
-
-    # ========================================================================
-    # PHASE 0: Normalize French SQL operators to English
-    # ========================================================================
-    # QGIS expressions support French operators (ET, OU, NON) but PostgreSQL
-    # only understands English operators (AND, OR, NOT). This normalization
-    # ensures compatibility with all SQL backends.
-    #
-    # FIX v2.5.12: Handle French operators that cause SQL syntax errors like:
-    # "syntax error at or near 'ET'"
-    #
-    # 2026-10-17: outside string literals and identifiers only, and upper case
-    # only. Case-insensitive on the whole string, it turned the value
-    # 'Plages, dunes et sable' into 'Plages, dunes AND sable' (0 features),
-    # and an unquoted lower-case column named "ou" into OR. The translated
-    # operators FilterMate stored were upper case (normalize_sql_operator).
-    sanitized = map_outside_quotes(sanitized, _normalize_french_operators)
-
-    # ========================================================================
-    # PHASE 1: Remove non-boolean display expressions
-    # ========================================================================
-
+def _remove_display_expressions(masked: str) -> str:
+    """PHASE 1 of :func:`sanitize_subset_string`, on masked text."""
     # Pattern to match AND/OR followed by coalesce display expressions
     # CRITICAL: These patterns must match display expressions that return values, not booleans
     # Example: AND ( COALESCE( "LABEL", '<NULL>' ) ) - returns text, not boolean
@@ -435,15 +328,14 @@ def sanitize_subset_string(subset_string: str) -> str:
     #
     # FIX v2.5.13: Handle spaces INSIDE COALESCE( ... ) and around parentheses
     # Real-world example that FAILED: AND ( COALESCE( "LABEL", '<NULL>' ) )
+    #
+    # 2026-10-17: the text is masked, "field" and '<NULL>' are placeholders
+    # (a ')' or 'AND (coalesce(' inside a value no longer matches).
     coalesce_patterns = [
         # Match coalesce with spaces everywhere: AND ( COALESCE( "field", '<NULL>' ) )
         # This handles the PostgreSQL-generated format with spaces
-        r'(?:^|\s+)AND\s+\(\s*COALESCE\s*\(\s*"[^"]+"\s*,\s*\'[^\']*\'\s*\)\s*\)',
-        r'(?:^|\s+)OR\s+\(\s*COALESCE\s*\(\s*"[^"]+"\s*,\s*\'[^\']*\'\s*\)\s*\)',
-        # Match coalesce with quoted string containing special chars like '<NULL>'
-        # Pattern: AND (coalesce("field",'<NULL>'))  - compact format
-        r'(?:^|\s+)AND\s+\(\s*coalesce\s*\(\s*"[^"]+"\s*,\s*\'[^\']*\'\s*\)\s*\)',
-        r'(?:^|\s+)OR\s+\(\s*coalesce\s*\(\s*"[^"]+"\s*,\s*\'[^\']*\'\s*\)\s*\)',
+        rf'(?:^|\s+)AND\s+\(\s*COALESCE\s*\(\s*{_IDENT}\s*,\s*{_LITERAL}\s*\)\s*\)',
+        rf'(?:^|\s+)OR\s+\(\s*COALESCE\s*\(\s*{_IDENT}\s*,\s*{_LITERAL}\s*\)\s*\)',
         # Match AND/OR followed by coalesce expression with nested content
         r'(?:^|\s+)AND\s+\(\s*coalesce\s*\([^)]*(?:\([^)]*\)[^)]*)*\)\s*\)',
         r'(?:^|\s+)OR\s+\(\s*coalesce\s*\([^)]*(?:\([^)]*\)[^)]*)*\)\s*\)',
@@ -451,18 +343,15 @@ def sanitize_subset_string(subset_string: str) -> str:
         r'(?:^|\s+)AND\s+\(\s*coalesce\s*\([^)]+\)\s*\)',
         r'(?:^|\s+)OR\s+\(\s*coalesce\s*\([^)]+\)\s*\)',
         # Match table.field syntax
-        r'(?:^|\s+)AND\s+\(\s*coalesce\s*\(\s*"[^"]+"\s*\.\s*"[^"]+"\s*,\s*\'[^\']*\'\s*\)\s*\)',
-        r'(?:^|\s+)OR\s+\(\s*coalesce\s*\(\s*"[^"]+"\s*\.\s*"[^"]+"\s*,\s*\'[^\']*\'\s*\)\s*\)',
+        rf'(?:^|\s+)AND\s+\(\s*coalesce\s*\(\s*{_IDENT}\s*\.\s*{_IDENT}\s*,\s*{_LITERAL}\s*\)\s*\)',
+        rf'(?:^|\s+)OR\s+\(\s*coalesce\s*\(\s*{_IDENT}\s*\.\s*{_IDENT}\s*,\s*{_LITERAL}\s*\)\s*\)',
     ]
 
     for pattern in coalesce_patterns:
-        match = re.search(pattern, sanitized, re.IGNORECASE)
+        match = re.search(pattern, masked, re.IGNORECASE)
         if match:
-            logger.info(
-                "FilterMate: Removing invalid coalesce expression: "
-                f"'{match.group()[:60]}...'"
-            )
-            sanitized = re.sub(pattern, '', sanitized, flags=re.IGNORECASE)
+            logger.info("FilterMate: Removing invalid coalesce expression")
+            masked = re.sub(pattern, '', masked, flags=re.IGNORECASE)
 
     # Pattern to match AND/OR followed by CASE expressions that just return true/false
     # These are style/display expressions, not filter conditions
@@ -485,14 +374,9 @@ def sanitize_subset_string(subset_string: str) -> str:
         r'\s*(?:ELSE\s+.+?)?\s*end\s*\)'
     )
 
-    match = re.search(select_case_pattern, sanitized, re.IGNORECASE | re.DOTALL)
-    if match:
-        logger.info(
-            f"FilterMate: Removing SELECT CASE style expression: '{match.group()[:80]}...'"  # nosec B608
-        )
-        sanitized = re.sub(
-            select_case_pattern, '', sanitized, flags=re.IGNORECASE | re.DOTALL
-        )
+    if re.search(select_case_pattern, masked, re.IGNORECASE | re.DOTALL):
+        logger.info("FilterMate: Removing SELECT CASE style expression")
+        masked = re.sub(select_case_pattern, '', masked, flags=re.IGNORECASE | re.DOTALL)
 
     # Also check for simpler CASE patterns without SELECT
     case_patterns = [
@@ -507,31 +391,171 @@ def sanitize_subset_string(subset_string: str) -> str:
     ]
 
     for pattern in case_patterns:
-        match = re.search(pattern, sanitized, re.IGNORECASE | re.DOTALL)
-        if match:
-            # Verify this is a display/style expression (returns true/false, not a comparison)
-            matched_text = match.group()
-            # Check if it's just "then true/false" without external comparison
-            if re.search(r'\bTHEN\s+(true|false)\b', matched_text, re.IGNORECASE):
-                logger.info(
-                    "FilterMate: Removing invalid CASE/style expression: "
-                    f"'{matched_text[:60]}...'"
-                )
-                sanitized = re.sub(pattern, '', sanitized, flags=re.IGNORECASE | re.DOTALL)
+        match = re.search(pattern, masked, re.IGNORECASE | re.DOTALL)
+        # Verify this is a display/style expression (returns true/false, not a comparison)
+        if match and re.search(r'\bTHEN\s+(true|false)\b', match.group(), re.IGNORECASE):
+            logger.info("FilterMate: Removing invalid CASE/style expression")
+            masked = re.sub(pattern, '', masked, flags=re.IGNORECASE | re.DOTALL)
 
     # Remove standalone coalesce expressions at start
     # FIX v2.5.13: Handle spaces inside coalesce expressions
     standalone_coalesce = r'^\s*\(\s*coalesce\s*\([^)]*(?:\([^)]*\)[^)]*)*\)\s*\)\s*(?:AND|OR)?'
-    if re.match(standalone_coalesce, sanitized, re.IGNORECASE):
-        match = re.match(standalone_coalesce, sanitized, re.IGNORECASE)
-        logger.info(f"FilterMate: Removing standalone coalesce: '{match.group()[:60]}...'")
-        sanitized = re.sub(standalone_coalesce, '', sanitized, flags=re.IGNORECASE)
+    if re.match(standalone_coalesce, masked, re.IGNORECASE):
+        logger.info("FilterMate: Removing standalone coalesce")
+        masked = re.sub(standalone_coalesce, '', masked, flags=re.IGNORECASE)
+    return masked
 
-    # Phases 2 and 3 run on the text with its literals and identifiers masked
-    # (2026-10-17): a ")" or a run of spaces inside 'b)' or 'Saint  Jean'
-    # belongs to the value, so it is neither counted nor squeezed.
-    sanitized = map_outside_quotes(sanitized, _fix_structure)
 
+def _fix_parentheses(masked: str) -> str:
+    """PHASE 2: drop trailing ')' that close nothing (counted outside quotes)."""
+    open_count = masked.count('(')
+    close_count = masked.count(')')
+
+    if close_count > open_count:
+        # Remove excess closing parentheses from the end
+        excess = close_count - open_count
+        # Remove trailing )))) patterns
+        trailing_parens = re.search(r'\)+\s*$', masked)
+        if trailing_parens:
+            parens_at_end = len(trailing_parens.group().strip())
+            if parens_at_end >= excess:
+                masked = re.sub(r'\){' + str(excess) + r'}\s*$', '', masked)
+                logger.info(f"FilterMate: Removed {excess} excess closing parentheses")
+    return masked
+
+
+# ``( "field" )`` / ``( "t"."field" )`` / ``( "field"::type )``, group 1 = the
+# placeholder index of the field.
+_FIELD_TERM = rf'\(\s*(?:{_IDENT}\s*\.\s*)?\x04(\d+)\x05(?:\s*::\s*\w+)?\s*\)'
+_FIELD_TERM_AFTER_OPERATOR_RE = re.compile(
+    rf'\s+(?:AND|OR)\s+{_FIELD_TERM}(?=\s*(?:\)|$|(?:AND|OR)\b))', re.IGNORECASE)
+_FIELD_TERM_BEFORE_OPERATOR_RE = re.compile(
+    rf'(?:(?<=\()|^)\s*{_FIELD_TERM}\s+(?:AND|OR)\s+', re.IGNORECASE)
+
+
+def _drop_text_field_terms(masked: str, parts: list, text_fields) -> str:
+    """PHASE 2.5: drop an operand ``( "field" )`` of an AND / OR chain when field is a TEXT column.
+
+    FIX v4.8.0 (2026-01-25): a display expression (the layer's display field)
+    glued to a filter: PostgreSQL refuses it ("argument of AND must be type
+    boolean, not type character varying"). 2026-10-17: only an operand that is
+    exactly a parenthesized column, outside quotes, and only a column the
+    caller knows to be text (``text_fields``, lower-case names): v4.8.0
+    dropped every one, so a real condition on a boolean column
+    (``AND ( "actif" )``) disappeared and the layer silently showed more (AND)
+    or fewer (OR) features. Without ``text_fields`` nothing is dropped.
+    """
+    if not text_fields or '\x04' not in masked:
+        return masked
+
+    def _drop(match):
+        name = parts[int(match.group(1))][1:-1].replace('""', '"').lower()
+        if name not in text_fields:
+            return match.group(0)
+        logger.info(f"FilterMate: Removing non-boolean field expression ( \"{name}\" ) (text column)")
+        return ''
+
+    masked = _FIELD_TERM_AFTER_OPERATOR_RE.sub(_drop, masked)
+    return _FIELD_TERM_BEFORE_OPERATOR_RE.sub(_drop, masked)
+
+
+def _clean_operators(masked: str) -> str:
+    """PHASE 3: whitespace and orphaned operators (outside quotes)."""
+    masked = re.sub(r'\s+', ' ', masked).strip()
+    masked = re.sub(r'\s+(AND|OR)\s*$', '', masked, flags=re.IGNORECASE)
+    masked = re.sub(r'^\s*(AND|OR)\s+', '', masked, flags=re.IGNORECASE)
+
+    # Remove duplicate AND/OR operators
+    masked = re.sub(r'\s+AND\s+AND\s+', ' AND ', masked, flags=re.IGNORECASE)
+    masked = re.sub(r'\s+OR\s+OR\s+', ' OR ', masked, flags=re.IGNORECASE)
+    return masked
+
+
+def sanitize_subset_string(subset_string: str, text_fields=None) -> str:
+    """
+    Remove non-boolean display expressions and fix type casting issues in subset string.
+
+    Display expressions like 'coalesce("field",'<NULL>')' or CASE expressions that
+    return true/false are valid QGIS expressions but cause issues in SQL WHERE clauses.
+    This function removes such expressions and fixes common type casting issues.
+
+    Process:
+    1. Normalize French SQL operators (ET/OU/NON → AND/OR/NOT)
+    2. Remove non-boolean display expressions (coalesce, CASE)
+    3. Fix unbalanced parentheses
+    4. Drop ``( "text column" )`` operands (when ``text_fields`` is given)
+    5. Clean up whitespace and orphaned operators
+
+    2026-10-17: every phase after -1 runs on the text with its string
+    literals, identifiers and comments masked (sql_quotes): a value such as
+    'Plages, dunes et sable', 'b)' or 'Saint  Jean' is never rewritten.
+
+    Args:
+        subset_string: The original subset string
+        text_fields: Lower-case names of the layer's text columns, if known
+            (safe_set_subset_string passes them)
+
+    Returns:
+        str: Sanitized subset string with non-boolean expressions removed
+    """
+    if not subset_string:
+        return subset_string
+
+    # ========================================================================
+    # PHASE -1: Reject standalone display expressions
+    # ========================================================================
+    # FIX 2026-04-23: the AND/OR-prefixed coalesce/CASE patterns below only
+    # strip display expressions that are *glued onto* a boolean filter. When
+    # the WHOLE subset is a display expression (e.g. the favorite stored the
+    # layer's displayExpression by mistake, or QGIS left a sticky invalid
+    # subset after a prior rejected setSubsetString call), it reaches
+    # PostgreSQL as `WHERE COALESCE(...)` → "argument of WHERE must be type
+    # boolean, not type character varying".
+    #
+    # We detect this by checking whether the expression starts with a known
+    # display function and *does not* contain a top-level boolean operator
+    # after the outer function call. A direct prefix check avoids the
+    # is_filter_expression() false positive where '<' inside a '<NULL>'
+    # placeholder is mistaken for a comparison operator.
+    if _is_standalone_display_expression(subset_string):
+        logger.info(
+            "FilterMate: Dropping non-boolean subset string "
+            f"(display expression, not a filter): '{subset_string[:80]}...'"
+        )
+        return ''
+
+    masked, parts = mask_quoted(subset_string)
+
+    # ========================================================================
+    # PHASE 0: Normalize French SQL operators to English
+    # ========================================================================
+    # QGIS expressions support French operators (ET, OU, NON) but PostgreSQL
+    # only understands English operators (AND, OR, NOT). This normalization
+    # ensures compatibility with all SQL backends.
+    #
+    # FIX v2.5.12: Handle French operators that cause SQL syntax errors like:
+    # "syntax error at or near 'ET'"
+    #
+    # 2026-10-17: outside string literals and identifiers only, and upper case
+    # only. Case-insensitive on the whole string, it turned the value
+    # 'Plages, dunes et sable' into 'Plages, dunes AND sable' (0 features),
+    # and an unquoted lower-case column named "ou" into OR. The translated
+    # operators FilterMate stored were upper case (normalize_sql_operator).
+    masked = _normalize_french_operators(masked)
+
+    # PHASE 1: Remove non-boolean display expressions
+    masked = _remove_display_expressions(masked)
+
+    # PHASE 2: Fix unbalanced parentheses
+    masked = _fix_parentheses(masked)
+
+    # PHASE 2.5: Remove ( "text column" ) operands
+    masked = _drop_text_field_terms(masked, parts, text_fields)
+
+    # PHASE 3: Clean up whitespace and orphaned operators
+    masked = _clean_operators(masked)
+
+    sanitized = unmask_quoted(masked, parts)
     if sanitized != subset_string:
         logger.info(
             f"FilterMate: Subset sanitized from '{subset_string[:80]}...' "

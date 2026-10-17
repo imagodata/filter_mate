@@ -8,77 +8,68 @@ column name was rewritten too: ``"libelle" = 'Plages, dunes et sable'`` became
 ``"buffer_m"`` became ``"ST_Buffer_m"``. The helpers below hide the quoted
 parts behind placeholders while a rewrite runs, then put them back verbatim.
 
-- ``'...'`` is a string literal, ``''`` inside it is an escaped quote.
+- ``'...'`` is a string literal; ``''`` and ``\\'`` (QGIS) inside it are
+  escaped quotes. ``$$...$$`` / ``$tag$...$tag$`` (PostgreSQL) is a literal too.
 - ``"..."`` is an identifier, ``""`` inside it is an escaped quote.
-- An unterminated quote runs to the end of the text (kept verbatim).
+- ``-- ...`` (to the end of the line, newline included) and ``/* ... */`` are
+  comments: hidden like the rest, so nothing inside them is rewritten.
+- An unterminated quote or comment runs to the end of the text (kept verbatim).
 
 Placeholders are made of control characters and digits only: no regular
 expression of the callers matches them as a word, a keyword, a quote, a
-parenthesis or whitespace.
+parenthesis or whitespace. Those control characters, when the text itself
+contains them, are hidden too (restored verbatim, never read as placeholders).
 """
 
 import re
 from typing import Callable, List, Tuple
 
-_LITERAL_OPEN, _LITERAL_CLOSE = '\x02', '\x03'
-_IDENT_OPEN, _IDENT_CLOSE = '\x04', '\x05'
-
 # A masked string literal / identifier, as it appears in masked text.
 LITERAL_PLACEHOLDER = '\x02\\d+\x03'
 IDENTIFIER_PLACEHOLDER = '\x04\\d+\x05'
 
-_PLACEHOLDER_RE = re.compile('[\x02\x04](\\d+)[\x03\x05]')
+_PLACEHOLDER_RE = re.compile('[\x02\x04\x06](\\d+)[\x03\x05\x07]')
+
+# One quoted run per match, scanned by the regex engine (a Python loop per
+# character cost ~0.1 s per MB of subset).
+_QUOTED_RE = re.compile(
+    r"""'(?:[^'\\]+|\\(?:.|\Z)|'')*(?:'|\Z)"""          # 'literal', '' and \' escapes
+    r'''|"(?:[^"]+|"")*(?:"|\Z)'''                      # "identifier"
+    r"""|\$(?P<tag>(?:[A-Za-z_]\w*)?)\$(?:.*?\$(?P=tag)\$|.*\Z)"""  # $$dollar quoted$$
+    r"""|--[^\n]*\n?"""                                  # -- comment
+    r"""|/\*(?:.*?\*/|.*\Z)"""                           # /* comment */
+    r"""|[\x02-\x07]+""",                                # the placeholders' own characters
+    re.DOTALL,
+)
+_MASKED_CHARS = ("'", '"', '$', '-', '/', '\x02', '\x03', '\x04', '\x05', '\x06', '\x07')
 
 
-def _quoted_end(text: str, start: int) -> int:
-    """Index just past the quoted run opened at ``text[start]``."""
-    quote = text[start]
-    i = start + 1
-    n = len(text)
-    while i < n:
-        if text[i] == quote:
-            if i + 1 < n and text[i + 1] == quote:
-                i += 2
-                continue
-            return i + 1
-        i += 1
-    return n
-
-
-def mask_quoted(text: str, identifiers: bool = True) -> Tuple[str, List[str]]:
-    """Replace string literals (and identifiers) by placeholders.
+def mask_quoted(text: str) -> Tuple[str, List[str]]:
+    """Replace string literals, identifiers and comments by placeholders.
 
     Args:
         text: SQL or QGIS expression text.
-        identifiers: Also mask ``"..."`` identifiers. When False they stay in
-            the masked text, but a ``'`` inside one still does not open a
-            literal.
 
     Returns:
         Tuple of (masked text, quoted parts); :func:`unmask_quoted` restores.
     """
-    if not text or ("'" not in text and '"' not in text):
+    if not text or not any(char in text for char in _MASKED_CHARS):
         return text, []
-    out = []
     parts: List[str] = []
-    i = 0
-    n = len(text)
-    while i < n:
-        c = text[i]
-        if c == "'" or c == '"':
-            end = _quoted_end(text, i)
-            quoted = text[i:end]
-            if c == '"' and not identifiers:
-                out.append(quoted)
-            else:
-                opening, closing = (_LITERAL_OPEN, _LITERAL_CLOSE) if c == "'" else (_IDENT_OPEN, _IDENT_CLOSE)
-                out.append(f'{opening}{len(parts)}{closing}')
-                parts.append(quoted)
-            i = end
-            continue
-        out.append(c)
-        i += 1
-    return ''.join(out), parts
+
+    def _hide(match):
+        quoted = match.group()
+        first = quoted[0]
+        if first in ("'", '$'):
+            opening, closing = '\x02', '\x03'
+        elif first == '"':
+            opening, closing = '\x04', '\x05'
+        else:  # comment, stray control characters
+            opening, closing = '\x06', '\x07'
+        parts.append(quoted)
+        return f'{opening}{len(parts) - 1}{closing}'
+
+    return _QUOTED_RE.sub(_hide, text), parts
 
 
 def unmask_quoted(masked: str, parts: List[str]) -> str:
@@ -88,7 +79,7 @@ def unmask_quoted(masked: str, parts: List[str]) -> str:
     return _PLACEHOLDER_RE.sub(lambda m: parts[int(m.group(1))], masked)
 
 
-def map_outside_quotes(text: str, transform: Callable[[str], str], identifiers: bool = True) -> str:
+def map_outside_quotes(text: str, transform: Callable[[str], str]) -> str:
     """Apply ``transform`` to ``text`` with its quoted parts hidden.
 
     ``transform`` must keep the placeholders it is given (it may move or
@@ -96,8 +87,36 @@ def map_outside_quotes(text: str, transform: Callable[[str], str], identifiers: 
     """
     if not text:
         return text
-    masked, parts = mask_quoted(text, identifiers)
+    masked, parts = mask_quoted(text)
     return unmask_quoted(transform(masked), parts)
+
+
+_COMPARISON_RE = re.compile(r'[=<>~@]|&&|\b(?:IN|LIKE|ILIKE|IS|BETWEEN|NOT|AND|OR|SIMILAR)\b', re.IGNORECASE)
+
+
+def has_comparison_operator(expression: str) -> bool:
+    """Whether ``expression`` holds a comparison / boolean operator outside quotes.
+
+    2026-10-17: the callers tested ``'IN' in expression.upper()``, so
+    ``"importance"``, ``"origine"`` or ``"ordre"`` (IN, OR in the name) passed
+    for filters and ``( old ) AND ( "importance" )`` reached the provider.
+    """
+    masked, _ = mask_quoted(expression or '')
+    return bool(_COMPARISON_RE.search(masked))
+
+
+def qgis_literals_to_sql(parts: List[str]) -> List[str]:
+    """QGIS string literals of ``parts`` written as SQL ones: ``\\'`` -> ``''``, ``\\\\`` -> ``\\``.
+
+    For the QGIS -> SQL converters only (a QGIS expression may escape a quote
+    with a backslash; SQL standard strings cannot).
+    """
+    def _convert(part):
+        if not part.startswith("'") or '\\' not in part:
+            return part
+        return re.sub(r"\\(['\\])", lambda m: "''" if m.group(1) == "'" else '\\', part)
+
+    return [_convert(part) for part in parts]
 
 
 # QGIS -> SQL rewrites shared by ExpressionService and the backends'
