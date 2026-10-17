@@ -177,7 +177,7 @@ class TestDispatch:
         assert controller.on_current_layer_changed(layers["v1"]) is False
 
     def test_coverage_layer_change_activates(self, ctrl_module, layers, monkeypatch):
-        controller = ctrl_module.CoverageModeController(_dock())
+        controller = ctrl_module.CoverageModeController(_dock(PROJECT_LAYERS={"r1": {}, "p1": {}}))
         activated = []
         monkeypatch.setattr(controller, "_ensure_host", lambda: True)
         monkeypatch.setattr(controller, "activate", lambda layer, kind: activated.append((layer.id(), kind.value)))
@@ -186,9 +186,43 @@ class TestDispatch:
         assert activated == [("r1", "raster"), ("p1", "point_cloud")]
 
     def test_missing_panels_fall_back_to_vector_chain(self, ctrl_module, layers, monkeypatch):
-        controller = ctrl_module.CoverageModeController(_dock())
+        controller = ctrl_module.CoverageModeController(_dock(PROJECT_LAYERS={"r1": {}}))
         monkeypatch.setattr(controller, "_ensure_host", lambda: False)
         assert controller.on_current_layer_changed(layers["r1"]) is False
+
+    def _awaiting(self, ctrl_module, layers, monkeypatch):
+        """2026-10-17: a raster picked before add_layers registered it."""
+        dock = _dock(PROJECT_LAYERS={})
+        controller = ctrl_module.CoverageModeController(dock)
+        activated = []
+        monkeypatch.setattr(controller, "_ensure_host", lambda: True)
+        monkeypatch.setattr(controller, "activate", lambda layer, kind: activated.append(layer.id()))
+        project = MagicMock()
+        project.mapLayer.side_effect = lambda layer_id: layers.get(layer_id)
+        monkeypatch.setattr(sys.modules["qgis.core"], "QgsProject",
+                            MagicMock(instance=MagicMock(return_value=project)), raising=False)
+        return dock, controller, activated
+
+    def test_an_unregistered_raster_waits_for_its_registration(self, ctrl_module, layers, monkeypatch):
+        dock, controller, activated = self._awaiting(ctrl_module, layers, monkeypatch)
+        assert controller.on_current_layer_changed(layers["r1"]) is True  # handled: the vector chain stops
+        assert activated == []
+        controller.handle_exploring_action("refresh")  # a refresh before the registration: still waiting
+        assert activated == []
+        dock.PROJECT_LAYERS["r1"] = {}  # add_layers registered it, then the dock refreshes
+        controller.handle_exploring_action("refresh")
+        assert activated == ["r1"]
+        controller.handle_exploring_action("refresh")
+        assert activated == ["r1"]  # once
+
+    def test_another_pick_cancels_the_wait(self, ctrl_module, layers, monkeypatch):
+        dock, controller, activated = self._awaiting(ctrl_module, layers, monkeypatch)
+        controller.on_current_layer_changed(layers["r1"])
+        dock.PROJECT_LAYERS["v1"] = {}
+        controller.on_current_layer_changed(layers["v1"])  # the user picked a vector layer meanwhile
+        dock.PROJECT_LAYERS["r1"] = {}
+        controller.handle_exploring_action("refresh")
+        assert activated == []
 
     def test_leaving_coverage_layer_deactivates(self, ctrl_module, layers, monkeypatch):
         controller = ctrl_module.CoverageModeController(_dock(PROJECT_LAYERS={"v1": {}}))

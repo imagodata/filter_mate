@@ -132,6 +132,9 @@ class CoverageModeController(BaseController):
         self._running_task: Any = None
         self._export_task: Any = None
         self._hag_task: Any = None
+        # A raster / point cloud picked before add_layers registered it: activated once it is
+        # (the 'refresh' after the registration), unless another layer was picked meanwhile.
+        self._awaiting_registration: Optional[str] = None
         self._tidy_pending = False
         self._cache_warned = False
         self._project_connected: set = set()  # names of the QgsProject signals connected by setup()
@@ -379,7 +382,15 @@ class CoverageModeController(BaseController):
             one is shown.
         """
         kind = _kind_of(layer)
+        self._awaiting_registration = None  # a newer pick replaces a layer waiting for its registration
         if getattr(kind, 'is_coverage', False):
+            if not self._is_registered(layer):
+                # 2026-10-17: picked before add_layers registered it (just added to the project):
+                # the panel read properties the layer did not have yet. It is activated by the
+                # 'refresh' that follows its registration; the current layer stays as it is.
+                self._awaiting_registration = self._layer_id(layer)
+                logger.info(f"[FM5] {self._layer_name(layer)} not registered yet: shown once it is")
+                return True
             if not self._ensure_host():
                 logger.warning("[FM5] coverage layer selected but the panels are unavailable")
                 return False
@@ -394,6 +405,33 @@ class CoverageModeController(BaseController):
             self.deactivate()
         self._extras_call('show_vector', layer)
         return False
+
+    @staticmethod
+    def _layer_id(layer: Any) -> Optional[str]:
+        try:
+            return layer.id()
+        except (RuntimeError, AttributeError):
+            return None
+
+    def _is_registered(self, layer: Any) -> bool:
+        """True when ``layer`` is in the dock's PROJECT_LAYERS (add_layers registered it)."""
+        layer_id = self._layer_id(layer)
+        return layer_id is not None and layer_id in (getattr(self.dockwidget, 'PROJECT_LAYERS', None) or {})
+
+    def _activate_awaited_layer(self) -> None:
+        """The layer picked before its registration, now registered: the layer change runs again."""
+        layer_id = self._awaiting_registration
+        if layer_id is None or layer_id not in (getattr(self.dockwidget, 'PROJECT_LAYERS', None) or {}):
+            return
+        self._awaiting_registration = None
+        try:
+            from qgis.core import QgsProject
+            layer = QgsProject.instance().mapLayer(layer_id)
+        except Exception as exc:  # catch-all safety net: project unavailable
+            logger.debug(f"[FM5] awaited layer not found: {exc}")
+            return
+        if layer is not None:
+            self.on_current_layer_changed(layer)
 
     def _vector_chain_takes(self, layer: Any, kind: Any) -> bool:
         """True when the dock's vector chain will make ``layer`` the current layer (a listed vector layer)."""
@@ -1125,6 +1163,8 @@ class CoverageModeController(BaseController):
             True when handled (the vector handler must stop).
         """
         from ...core.domain.layer_kind import LayerKind
+        if action == 'refresh' and self._awaiting_registration is not None:
+            self._activate_awaited_layer()  # registered by the add_layers this refresh follows
         layer = self._active_layer
         if layer is None:
             return False
