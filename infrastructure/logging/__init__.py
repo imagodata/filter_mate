@@ -7,7 +7,7 @@ This module provides centralized logging for FilterMate with:
 - File rotation (10 MB max, 5 backups)
 - Safe stream handling for QGIS shutdown
 - Pre-configured loggers for common modules
-- Automatic file logging to logs/filtermate.log
+- Automatic file logging to logs/filtermate.log (folder overridable with FILTERMATE_LOG_DIR)
 
 Usage:
     from ...infrastructure.logging import get_logger, setup_logger, get_app_logger  # noqa: F401
@@ -23,7 +23,9 @@ from datetime import datetime  # noqa: F401
 
 # Determine log file path (relative to plugin directory)
 _PLUGIN_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-_LOG_DIR = os.path.join(_PLUGIN_DIR, 'logs')
+# FILTERMATE_LOG_DIR moves the log folder (the test suite points it to a temporary
+# folder so that running pytest never writes in the repository's logs/)
+_LOG_DIR = os.environ.get('FILTERMATE_LOG_DIR') or os.path.join(_PLUGIN_DIR, 'logs')
 _LOG_FILE = os.path.join(_LOG_DIR, 'filtermate.log')
 
 # Ensure logs directory exists
@@ -57,7 +59,9 @@ def setup_logger(name: str, log_file: str = None, level=logging.INFO):
 
     Args:
         name: Logger name (e.g., 'FilterMate.Utils')
-        log_file: Path to log file (optional)
+        log_file: Log file (optional). Only its file name counts: it is always written in
+            the plugin's log folder (``FILTERMATE_LOG_DIR``, next to ``filtermate.log``),
+            never in the folder of the user's project that callers used to pass.
         level: Logging level (default: logging.INFO)
 
     Returns:
@@ -77,14 +81,9 @@ def setup_logger(name: str, log_file: str = None, level=logging.INFO):
 
     # File handler if log_file provided
     if log_file:
-        log_dir = os.path.dirname(log_file)
-        if log_dir and not os.path.exists(log_dir):
-            try:
-                os.makedirs(log_dir, exist_ok=True)
-            except OSError:
-                log_file = os.path.basename(log_file)
-
         try:
+            os.makedirs(_LOG_DIR, exist_ok=True)
+            log_file = os.path.join(_LOG_DIR, os.path.basename(log_file))
             file_handler = RotatingFileHandler(
                 log_file,
                 maxBytes=10 * 1024 * 1024,  # 10 MB
