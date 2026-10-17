@@ -102,7 +102,10 @@ class ExploringController(BaseController, LayerSelectionMixin):
         logger.debug("Tearing down ExploringController")
         self._disconnect_all_signals()
         if self._features_cache:
-            self._features_cache.clear()
+            # ExploringFeaturesCache has invalidate_all(), no clear(): the AttributeError
+            # stopped the teardown here (2026-10-17, "Controller 'exploring' teardown failed")
+            clear = getattr(self._features_cache, 'invalidate_all', None) or getattr(self._features_cache, 'clear')
+            clear()
         self._current_layer = None
         self._current_field = None
         self._selected_features.clear()

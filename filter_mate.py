@@ -1438,7 +1438,11 @@ class FilterMate:
         if self.app and self.app.dockwidget:
             try:
                 if hasattr(self.app.dockwidget, 'comboBox_filtering_current_layer'):
-                    self.app.dockwidget.comboBox_filtering_current_layer.setLayer(None)
+                    # 2026-10-17: signals blocked: layerChanged ran a whole layer change of the
+                    # dock being unloaded (current_layer_changed(None))
+                    combo = self.app.dockwidget.comboBox_filtering_current_layer
+                    combo.blockSignals(True)
+                    combo.setLayer(None)
                     logger.debug("FilterMate: Layer combo box reset during unload")
             except Exception as e:
                 logger.debug(f"FilterMate: Error clearing layer combo during unload: {e}")
