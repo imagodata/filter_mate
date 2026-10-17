@@ -240,6 +240,9 @@ def s_handover():
     check('handover: pixel picker on', canvas.mapTool() is c._pixel_tool)
     d.pushButton_exploring_identify.click()
     check('handover: picker off restores pan', canvas.mapTool() is pan, type(canvas.mapTool()).__name__)
+    d.pushButton_exploring_identify.click()
+    iface.actionPan().trigger()  # QGIS now remembers the picker as the tool to give back
+    STATE['old_picker'] = c._pixel_tool
 
 
 def s_alignment():
@@ -306,6 +309,10 @@ def s_pc_pipette_check():
 
 def s_pc_check():
     d = dock()
+    from qgis.PyQt import sip
+    old = STATE.get('old_picker')
+    check('pc: the raster picker left behind Pan is deleted with its layer',
+          old is not None and sip.isdeleted(old) and ctrl()._pixel_tool is None)
     from qgis.PyQt.QtWidgets import QLabel
     card = d.findChild(QLabel, 'label_exploring_coverage_layer')
     check('pc: layer card', card is not None and 'points' in card.text(), card.text() if card else '')

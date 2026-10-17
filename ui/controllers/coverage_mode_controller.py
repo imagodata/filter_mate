@@ -334,15 +334,7 @@ class CoverageModeController(BaseController):
                     widget.deleteLater()
                 except Exception as exc:
                     logger.debug(f"[FM5] panel widget not released: {exc}")
-        for tool_name in ('_pixel_tool', '_class_tool'):
-            # A map tool QGIS could give back later (right click after Pan) would call a dead controller.
-            tool = getattr(self, tool_name)
-            setattr(self, tool_name, None)
-            if tool is not None:
-                try:
-                    tool.deleteLater()  # its destructor takes it off the canvas
-                except RuntimeError:
-                    pass
+        self._drop_map_tools()  # one QGIS could give back later would call a dead controller
         self._raster_panel = None
         self._pc_panel = None
         self._running_task = None
@@ -465,6 +457,9 @@ class CoverageModeController(BaseController):
             return
         self._deactivate_pixel_tool()
         self._deactivate_class_tool()
+        # QGIS remembers the last tool before Pan / Zoom and gives it back: a picker of the outgoing
+        # layer must not come back on the next one (the raster picker reading a point cloud).
+        self._drop_map_tools()
         try:
             self._panel_states[layer.id()] = self._current_panel().state() if self._current_panel() is not None else {}
         except Exception as exc:
@@ -604,7 +599,7 @@ class CoverageModeController(BaseController):
         """Keep the field wide enough for "cov. ≥ 100 %": its size hint ignores the stylesheet padding
         and the steppers drawn by mockup.qss, and the text came out clipped ("cov. ≥ 50 !"). Measured
         again whenever the font or the style changes (the dock font arrives after creation)."""
-        from qgis.PyQt.QtCore import QEvent, QObject
+        from qgis.PyQt.QtCore import QEvent
         from qgis.PyQt.QtWidgets import QLineEdit
         editor = spin.findChild(QLineEdit)  # draws the text, with its own stylesheet font (monospace)
 
@@ -622,18 +617,8 @@ class CoverageModeController(BaseController):
                 pass
 
         events = (QEvent.Type.Show, QEvent.Type.FontChange, QEvent.Type.StyleChange, QEvent.Type.Polish)
-
-        class _Fit(QObject):
-            def eventFilter(self, watched, event):  # noqa: N802 - Qt override
-                try:
-                    if event.type() in events:
-                        fit()
-                except RuntimeError:
-                    pass
-                return False
-
         try:
-            spin._fm_fit = _Fit(spin)
+            spin._fm_fit = _event_callback(spin, events, fit)
             for widget in (spin, editor):
                 if widget is not None:
                     widget.installEventFilter(spin._fm_fit)
@@ -1240,6 +1225,19 @@ class CoverageModeController(BaseController):
         previous, self._previous_map_tool = self._previous_map_tool, None
         self._release_map_tool(self._pixel_tool, previous)
 
+    def _drop_map_tools(self) -> None:
+        """Delete the pixel and class pickers (made again on demand); their destructor takes them off the
+        canvas and out of the tool QGIS gives back after Pan / Zoom."""
+        self._previous_map_tool = self._previous_class_map_tool = None
+        for tool_name in ('_pixel_tool', '_class_tool'):
+            tool = getattr(self, tool_name)
+            setattr(self, tool_name, None)
+            if tool is not None:
+                try:
+                    tool.deleteLater()
+                except RuntimeError:
+                    pass  # already deleted (QGIS closing)
+
     def _release_map_tool(self, tool: Any, previous: Any) -> None:
         """Take ``tool`` off the map and give the map back to the tool it replaced."""
         iface = self._iface()
@@ -1316,8 +1314,9 @@ class CoverageModeController(BaseController):
             pass  # message bar deleted (QGIS closing)
 
     def _on_pixel_picked(self, point: Any, extend: bool) -> None:
+        from ...core.domain.layer_kind import LayerKind
         layer = self._active_layer
-        if layer is None or self._raster_panel is None:
+        if layer is None or self._raster_panel is None or self._kind is not LayerKind.RASTER:
             return
         from qgis.core import QgsCoordinateTransform, QgsProject
         from ...adapters.qgis.coverage_layers.raster_adapter import identify_values
@@ -2074,3 +2073,24 @@ class CoverageModeController(BaseController):
             return layer.name()
         except (RuntimeError, AttributeError):
             return "?"
+
+
+def _event_callback(parent: Any, events: Tuple[Any, ...], callback: Any) -> Any:
+    """Event filter (owned by ``parent``) running ``callback`` on the ``events`` of the widgets it watches.
+
+    At module level and after the controller: a class nested in a controller method made
+    pylupdate5 file the tr() strings that follow it under that class name, which the running
+    plugin (context CoverageModeController) never looks up.
+    """
+    from qgis.PyQt.QtCore import QObject
+
+    class _EventCallback(QObject):
+        def eventFilter(self, watched, event):  # noqa: N802 - Qt override
+            try:
+                if event.type() in events:
+                    callback()
+            except RuntimeError:
+                pass
+            return False
+
+    return _EventCallback(parent)
