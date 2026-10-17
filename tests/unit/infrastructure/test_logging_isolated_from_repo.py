@@ -46,7 +46,10 @@ def test_records_do_not_reach_the_repository_logs():
 def test_a_handler_made_for_the_repository_logs_is_redirected(tmp_path):
     from logging.handlers import RotatingFileHandler
 
-    conftest = sys.modules["tests.conftest"]
+    # The root conftest is "tests.conftest" or "<checkout folder>.tests.conftest":
+    # the plugin root has an __init__.py, so pytest names it after the folder.
+    conftest = next(module for name, module in sys.modules.items()
+                    if name.endswith("tests.conftest") and hasattr(module, "_redirect_repo_log_handlers"))
 
     handler = RotatingFileHandler(str(_REPO_LOGS / "filtermate_probe.log"), delay=True)
     probe = logging.getLogger("fm.isolation.redirect")
