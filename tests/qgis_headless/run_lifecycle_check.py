@@ -673,6 +673,48 @@ def s_late_refresh_report():
           f"(picked, delay ms, panel before, panel after) wrong={wrong}")
 
 
+def raster_picked_before_registration(round_index):
+    """A raster added to the project and picked in the combo box at once, before add_layers registered it:
+    once registered it must be the panel's layer, with the raster page (2026-10-17 review: it never was)."""
+    def step():
+        dock().comboBox_filtering_current_layer.setLayer(layer('zones'))
+        name = f"dem_new_{round_index}"
+        STATE['await_name'] = name
+
+        def add_and_pick():
+            raster = QgsRasterLayer(M['dem'], name, 'gdal')
+            project.addMapLayer(raster)
+            combo = dock().comboBox_filtering_current_layer
+            combo.setLayer(raster)  # the user's pick, right away
+            STATE['await_registered_at_pick'] = registered(name)
+            controller = dock()._controller_integration.coverage_controller
+            STATE['await_after_pick'] = (combo.currentLayer().name() if combo.currentLayer() else None,
+                                         getattr(controller, '_awaiting_registration', None))
+
+        QTimer.singleShot(2600, add_and_pick)  # once the change to zones is over
+        since = time.time()
+        return settled_after(lambda: time.time() - since > 2.8 and registered(name), 2.5)
+    step.__name__ = f"s_raster_picked_before_registration_{round_index}"
+    return step
+
+
+def raster_picked_before_registration_check(round_index):
+    def step():
+        name = STATE['await_name']
+        controller = dock()._controller_integration.coverage_controller
+        active = controller.active_layer
+        current = getattr(dock(), 'current_layer', None)
+        check(f"a raster picked before its registration is shown once registered ({round_index})",
+              active is not None and active.name() == name and current is not None and current.name() == name,
+              f"registered at the pick={STATE['await_registered_at_pick']} (combo, awaited) after the pick="
+              f"{STATE['await_after_pick']} awaited now={getattr(controller, '_awaiting_registration', None)} "
+              f"coverage page="
+              f"{active.name() if active else None} panel={current.name() if current else None}")
+        return settled(1.0)
+    step.__name__ = f"s_raster_picked_before_registration_{round_index}_check"
+    return step
+
+
 def s_finish():
     check('no Python error and no FilterMate critical message in the log', not STATE['python_errors'],
           '; '.join(STATE['python_errors'][:3]))
@@ -697,7 +739,15 @@ STEPS = ([s_setup, s_open_plugin, s_zones_current, s_select_source,
          + [pick_then_refresh(index) for index in range(REPEATS)]
          + [s_late_refresh_report]
          + [pick_after_safety_refresh(index) for index in range(2 * 6)]
-         + [s_safety_refresh_report, s_finish])
+         + [s_safety_refresh_report]
+         + [step for index in range(3)
+            for step in (raster_picked_before_registration(index), raster_picked_before_registration_check(index))]
+         + [s_finish])
+if os.environ.get('FM_LIFECYCLE_ONLY') == 'await':  # the raster picked before its registration alone
+    STEPS = ([s_setup, s_open_plugin, s_zones_current]
+             + [step for index in range(3)
+                for step in (raster_picked_before_registration(index), raster_picked_before_registration_check(index))]
+             + [s_finish])
 if os.environ.get('FM_LIFECYCLE_ONLY') == 'pick':  # the layer pick rounds alone (faster to iterate)
     STEPS = ([s_setup, s_open_plugin, s_zones_current] + [pick_then_refresh(index) for index in range(REPEATS)]
              + [s_late_refresh_report] + [pick_after_safety_refresh(index) for index in range(2 * 6)]

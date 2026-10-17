@@ -206,23 +206,33 @@ class TestDispatch:
 
     def test_an_unregistered_raster_waits_for_its_registration(self, ctrl_module, layers, monkeypatch):
         dock, controller, activated = self._awaiting(ctrl_module, layers, monkeypatch)
-        assert controller.on_current_layer_changed(layers["r1"]) is True  # handled: the vector chain stops
+        assert controller.on_current_layer_changed(layers["r1"], manual_change=True) is True  # vector chain stops
         assert activated == []
-        controller.handle_exploring_action("refresh")  # a refresh before the registration: still waiting
-        assert activated == []
-        dock.PROJECT_LAYERS["r1"] = {}  # add_layers registered it, then the dock refreshes
-        controller.handle_exploring_action("refresh")
+        assert controller.activate_awaited_layer() is False  # not registered yet: still waiting
+        dock.PROJECT_LAYERS["v1"] = {}
+        # the dock's refresh after add_layers shows the previous (vector) layer: no user pick, the wait stays
+        controller.on_current_layer_changed(layers["v1"], manual_change=False)
+        dock.PROJECT_LAYERS["r1"] = {}  # add_layers registered it
+        assert controller.activate_awaited_layer() is True
         assert activated == ["r1"]
-        controller.handle_exploring_action("refresh")
-        assert activated == ["r1"]  # once
+        assert controller.activate_awaited_layer() is False  # once
+        assert activated == ["r1"]
 
     def test_another_pick_cancels_the_wait(self, ctrl_module, layers, monkeypatch):
         dock, controller, activated = self._awaiting(ctrl_module, layers, monkeypatch)
-        controller.on_current_layer_changed(layers["r1"])
+        controller.on_current_layer_changed(layers["r1"], manual_change=True)
         dock.PROJECT_LAYERS["v1"] = {}
-        controller.on_current_layer_changed(layers["v1"])  # the user picked a vector layer meanwhile
+        controller.on_current_layer_changed(layers["v1"], manual_change=True)  # the user picked a vector layer
         dock.PROJECT_LAYERS["r1"] = {}
-        controller.handle_exploring_action("refresh")
+        assert controller.activate_awaited_layer() is False
+        assert activated == []
+
+    def test_the_refresh_button_action_no_longer_activates(self, ctrl_module, layers, monkeypatch):
+        """The dock's delegate skipped the action without an active layer: the wait never ended there."""
+        dock, controller, activated = self._awaiting(ctrl_module, layers, monkeypatch)
+        controller.on_current_layer_changed(layers["r1"], manual_change=True)
+        dock.PROJECT_LAYERS["r1"] = {}
+        assert controller.handle_exploring_action("refresh") is False
         assert activated == []
 
     def test_leaving_coverage_layer_deactivates(self, ctrl_module, layers, monkeypatch):

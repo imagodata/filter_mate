@@ -378,8 +378,14 @@ class CoverageModeController(BaseController):
         kind = _kind_of(layer)
         return getattr(kind, 'is_coverage', False)
 
-    def on_current_layer_changed(self, layer: Any) -> bool:
+    def on_current_layer_changed(self, layer: Any, manual_change: bool = False) -> bool:
         """Take over the layer change for a raster or point cloud layer.
+
+        Args:
+            layer: The new current layer.
+            manual_change: The user picked it (combo box): it replaces a layer waiting for
+                its registration. An automatic change (the dock's refresh after add_layers)
+                does not.
 
         Returns:
             True when handled here (the vector chain must stop): a raster /
@@ -387,12 +393,13 @@ class CoverageModeController(BaseController):
             one is shown.
         """
         kind = _kind_of(layer)
-        self._awaiting_registration = None  # a newer pick replaces a layer waiting for its registration
+        if manual_change and self._layer_id(layer) != self._awaiting_registration:
+            self._awaiting_registration = None  # the user picked another layer
         if getattr(kind, 'is_coverage', False):
             if not self._is_registered(layer):
                 # 2026-10-17: picked before add_layers registered it (just added to the project):
-                # the panel read properties the layer did not have yet. It is activated by the
-                # 'refresh' that follows its registration; the current layer stays as it is.
+                # the panel read properties the layer did not have yet. It is activated once the
+                # dock has the registration (activate_awaited_layer); the current layer stays.
                 self._awaiting_registration = self._layer_id(layer)
                 logger.info(f"[FM5] {self._layer_name(layer)} not registered yet: shown once it is")
                 return True
@@ -423,20 +430,35 @@ class CoverageModeController(BaseController):
         layer_id = self._layer_id(layer)
         return layer_id is not None and layer_id in (getattr(self.dockwidget, 'PROJECT_LAYERS', None) or {})
 
-    def _activate_awaited_layer(self) -> None:
-        """The layer picked before its registration, now registered: the layer change runs again."""
+    def activate_awaited_layer(self) -> bool:
+        """The layer picked before its registration, now in the dock's PROJECT_LAYERS: shown.
+
+        Called by the dock once it has the layers of an add_layers (get_project_layers_from_app),
+        whatever layer the dock shows meanwhile.
+
+        Returns:
+            True when the awaited layer was activated.
+        """
         layer_id = self._awaiting_registration
         if layer_id is None or layer_id not in (getattr(self.dockwidget, 'PROJECT_LAYERS', None) or {}):
-            return
+            return False
         self._awaiting_registration = None
         try:
             from qgis.core import QgsProject
             layer = QgsProject.instance().mapLayer(layer_id)
         except Exception as exc:  # catch-all safety net: project unavailable
             logger.debug(f"[FM5] awaited layer not found: {exc}")
-            return
-        if layer is not None:
-            self.on_current_layer_changed(layer)
+            return False
+        if layer is None:
+            return False
+        # The user's pick, applied now: the automatic layer changes the dock deferred during the
+        # registration (its refresh re-applied the vector layer) give way to it, as to any pick.
+        import time
+        try:
+            self.dockwidget._user_layer_pick = (time.perf_counter(), layer_id)
+        except AttributeError:
+            pass
+        return bool(self.on_current_layer_changed(layer, manual_change=True))
 
     def _vector_chain_takes(self, layer: Any, kind: Any) -> bool:
         """True when the dock's vector chain will make ``layer`` the current layer (a listed vector layer)."""
@@ -1180,8 +1202,6 @@ class CoverageModeController(BaseController):
             True when handled (the vector handler must stop).
         """
         from ...core.domain.layer_kind import LayerKind
-        if action == 'refresh' and self._awaiting_registration is not None:
-            self._activate_awaited_layer()  # registered by the add_layers this refresh follows
         layer = self._active_layer
         if layer is None:
             return False

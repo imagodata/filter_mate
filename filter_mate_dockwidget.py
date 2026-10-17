@@ -5703,7 +5703,8 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         except (RuntimeError, AttributeError):
             logger.warning("current_layer_changed: Layer C++ object deleted")
             return
-        if self._controller_integration and self._controller_integration.delegate_point_cloud_layer_change(layer):
+        if self._controller_integration and self._controller_integration.delegate_point_cloud_layer_change(
+                layer, manual_change=manual_change):
             return
         self._updating_current_layer = True
         # PERF 2026-09-12: "layer change → all widgets reloaded" latency; closed
@@ -6488,6 +6489,7 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         if project_layers is None: project_layers = {}
 
         self._updating_layers, self._plugin_busy = True, True
+        activate_awaited = False
 
         try:
             self._update_project_layers_data(project_layers, project)
@@ -6512,6 +6514,7 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
                 # v4.0.4: Emit signal after PROJECT_LAYERS is fully populated
                 logger.info(f"Emitting projectLayersReady signal ({len(self.PROJECT_LAYERS)} layers)")
                 self.projectLayersReady.emit()
+                activate_awaited = True
                 return
             if self.current_layer and self.current_layer.isValid():
                 if not self._signals_connected: self.connect_widgets_signals(); self._signals_connected = True
@@ -6531,6 +6534,12 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
                 )
         finally:
             self._updating_layers, self._plugin_busy = False, False
+            # 2026-10-17: a raster / point cloud picked before this registration is shown now (the
+            # vector refresh above showed the previous layer; the panel is no longer busy). In the
+            # finally: the branch that registers layers returns.
+            integration = getattr(self, '_controller_integration', None)
+            if activate_awaited and integration is not None and hasattr(integration, 'delegate_coverage_activate_awaited'):
+                integration.delegate_coverage_activate_awaited()
 
     def open_project_page(self):
         """v4.0 S18: Open project website page."""

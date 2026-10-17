@@ -1921,19 +1921,20 @@ class ControllerIntegration:
                 return False
         return False
 
-    def delegate_point_cloud_layer_change(self, layer) -> bool:
+    def delegate_point_cloud_layer_change(self, layer, manual_change=False) -> bool:
         """
         Let the point cloud controller take over a layer change.
 
         Args:
             layer: The new current layer (or None)
+            manual_change: True when the user picked the layer
 
         Returns:
             True if the layer is a point cloud and the panel handled it, False otherwise
         """
         if self._point_cloud_ui_controller:
             try:
-                return self._point_cloud_ui_controller.on_current_layer_changed(layer)
+                return self._point_cloud_ui_controller.on_current_layer_changed(layer, manual_change=manual_change)
             except Exception as e:
                 logger.warning(f"delegate_point_cloud_layer_change failed: {e}")
                 return False
@@ -1962,6 +1963,17 @@ class ControllerIntegration:
     @property
     def coverage_controller(self) -> Optional[CoverageModeController]:
         return self._point_cloud_ui_controller
+
+    def delegate_coverage_activate_awaited(self) -> bool:
+        """Show the raster / point cloud layer picked before add_layers registered it; True when shown."""
+        controller = self._point_cloud_ui_controller
+        if controller is None or not hasattr(controller, 'activate_awaited_layer'):
+            return False
+        try:
+            return controller.activate_awaited_layer()
+        except Exception as e:
+            logger.warning(f"delegate_coverage_activate_awaited failed: {e}")
+            return False
 
     def delegate_coverage_exploring_action(self, action: str) -> bool:
         """Let the coverage controller run an EXPLORING button; True when handled."""
