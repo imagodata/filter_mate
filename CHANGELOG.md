@@ -4,6 +4,10 @@ All notable changes to FilterMate will be documented in this file.
 
 ## [Unreleased]
 
+### Added
+
+- **MCP server for AI assistants** (`filtermate_api/mcp/`, `python -m filtermate_api.mcp`, Python 3.10+, `pip install mcp`): a Model Context Protocol server over stdio, started by the client outside QGIS, with one tool per REST API endpoint (`list_layers`, `apply_filter`, `cross_filter`, `geometry_filter`, `point_cloud_filter`, `clear_filters`, `export_layers`, ...). The API key comes from `FILTERMATE_API_KEY` (never from the command line), the server refuses to start without it and refuses a non-loopback URL unless `--allow-remote`; QGIS busy (503), a rejected key and invalid requests (422) come back as readable tool errors. See `docs/AUTOMATION.md`, section *MCP server*. The plugin itself never imports it.
+
 ### Changed
 
 - **Processing algorithms and shipped models are labelled in English** (names, parameters, help, messages). Their text was written in French in the source and never translated, so an English QGIS showed « Filtrer plusieurs couches (batch) »; French users keep the same labels through the French translation. Algorithm ids, model ids and parameter names are unchanged, so models, scripts and `qgis_process` calls keep working.

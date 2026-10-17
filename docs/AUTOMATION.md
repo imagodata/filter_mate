@@ -1,7 +1,8 @@
-# Automating FilterMate 5 — Processing, Python API, REST API
+# Automating FilterMate 5 — Processing, Python API, REST API, MCP server
 
 FilterMate 5 filters vector, raster and point cloud layers in any direction. The same operations run without the dock
-through three surfaces, which share one implementation (`adapters/public_api/operations.py`):
+through three surfaces, which share one implementation (`adapters/public_api/operations.py`); an
+[MCP server](#mcp-server) then lets an AI assistant drive the REST API:
 
 | Surface | For | Entry point |
 |---|---|---|
@@ -214,3 +215,121 @@ curl -s -X POST localhost:8000/filters/cross -H "X-API-Key: $KEY" -H "Content-Ty
 curl -s -X POST localhost:8000/export -H "X-API-Key: $KEY" -H "Content-Type: application/json" -d '{
   "layers": ["batiment"], "subfolder": "controle/2026-10"}'
 ```
+
+## MCP server
+
+`filtermate_api/mcp/` is a [Model Context Protocol](https://modelcontextprotocol.io) server that lets an AI assistant
+(Claude Code, Claude Desktop, any MCP client) list, filter, undo and export layers of the open QGIS project. It does
+not talk to QGIS itself: it speaks MCP over **stdio**, started by the client *outside* QGIS, and relays each tool call
+to the [REST API](#rest-api) running inside QGIS (one tool per endpoint, the same validation, the same
+main-thread safety, the same API key). It imports neither `qgis` nor `fastapi`, and the plugin never imports it:
+without `mcp` installed, FilterMate is unchanged.
+
+### Prerequisites
+
+1. **The REST API is running in QGIS with an API key.** The plugin does not start it by itself. Install `fastapi` and
+   `uvicorn` in the Python of QGIS (`requirements-api.txt`), set the key and serve the app from the Python console
+   (in a thread, so QGIS stays usable):
+
+   ```python
+   import os, threading, uvicorn
+   from qgis.utils import plugins
+   from filter_mate.filtermate_api.config import APIConfig
+   from filter_mate.filtermate_api.qgis_accessor import QGISFilterMateAccessor
+   from filter_mate.filtermate_api.server import create_app
+
+   os.environ["FILTERMATE_API_KEY"] = "<a long random key>"   # or API.api_key_sha256 in config.json
+   plugin = plugins["filter_mate"]
+   config = APIConfig.load()
+   app = create_app(config=config, accessor=QGISFilterMateAccessor(plugin.get_public_api(), plugin))
+   server = uvicorn.Server(uvicorn.Config(app, host=config.host, port=config.port, log_level="warning"))
+   threading.Thread(target=server.run, daemon=True).start()      # server.should_exit = True stops it
+   ```
+
+   The API listens on `http://127.0.0.1:8000` by default. On a loopback bind it accepts any request when no key is
+   configured on the QGIS side: the MCP server refuses to start without a key, but only a key set in QGIS makes the API
+   check it.
+2. **Python 3.10 or later** on the machine of the MCP client, with the SDK: `pip install mcp`
+   (`pip install -r requirements-mcp.txt` from the plugin folder; `mcp` 1.x and 2.x both work).
+   This is the client's Python, not the one of QGIS.
+
+### Configuration
+
+| Setting | Default | Meaning |
+|---|---|---|
+| `FILTERMATE_API_KEY` (environment) | none, required | the API key, sent as `X-API-Key`. `--api-key-env NAME` reads another variable. There is no option to give the key itself: it would show in the process list. |
+| `--url` | `http://127.0.0.1:8000` | base URL of the REST API. A URL that is not on this machine is refused unless `--allow-remote` is given (the key then travels over the network: use `https`). |
+| `--timeout` | 45 s | HTTP timeout per call, above the 30 s the API waits for the QGIS main thread. |
+
+The server is the module `filtermate_api.mcp` of the plugin folder, `python -m filtermate_api.mcp`. Python must find
+it: either set `PYTHONPATH` to the plugin folder (the one that contains `filtermate_api/`), or run the file directly,
+`python <plugin folder>/filtermate_api/mcp/__main__.py`, which works from any directory. The plugin folder is
+`%APPDATA%/QGIS/QGIS3/profiles/default/python/plugins/filter_mate` on Windows,
+`~/.local/share/QGIS/QGIS3/profiles/default/python/plugins/filter_mate` on Linux (from a clone of the repository, the
+clone itself).
+
+**Claude Code**
+
+```bash
+claude mcp add filtermate --env FILTERMATE_API_KEY=<key> -- python /path/to/filter_mate/filtermate_api/mcp/__main__.py
+# or, equivalently
+claude mcp add filtermate --env FILTERMATE_API_KEY=<key> --env PYTHONPATH=/path/to/filter_mate -- python -m filtermate_api.mcp
+```
+
+Put the name first, as above: `--env` takes several values. Use the Python that has `mcp` installed (a virtual
+environment's `python`), and `--scope user` to have it in every project.
+
+**Claude Desktop** (`claude_desktop_config.json`)
+
+```json
+{
+  "mcpServers": {
+    "filtermate": {
+      "command": "python",
+      "args": ["/path/to/filter_mate/filtermate_api/mcp/__main__.py", "--url", "http://127.0.0.1:8000"],
+      "env": { "FILTERMATE_API_KEY": "<key>" }
+    }
+  }
+}
+```
+
+### Tools
+
+One tool per REST endpoint. Layers are designated by id or name (list them with `list_layers`), except
+`apply_filter`, which takes the name of a vector layer.
+
+| Tool | Endpoint | Does |
+|---|---|---|
+| `list_layers` | `GET /layers` | layers with id, name, kind (vector / raster / point cloud), CRS, active filter |
+| `filter_status` | `GET /filters/status` | vector filters active, last change, last error |
+| `filter_state` | `GET /filters/state` | every layer filtered now, of any kind (subset, clipped source) |
+| `apply_filter` | `POST /filters/apply` | sets the subset string (provider SQL `WHERE` clause) of one vector layer |
+| `undo_filter`, `redo_filter` | `POST /filters/undo`, `/redo` | the dock's vector history (not what the other tools record, see above) |
+| `cross_filter` | `POST /filters/cross` | filters layers of any kind by the selection of a source layer of any kind (selected features, raster pixels, point cloud points) with spatial predicates, buffer, minimum coverage, combine operator |
+| `geometry_filter` | `POST /filters/geometry` | same, by a WKT geometry in a given CRS |
+| `point_cloud_filter` | `POST /filters/point-cloud` | keeps points by class, Z, intensity, return number or expression on several point clouds |
+| `clear_filters` | `POST /filters/clear` | back to the original source, no filter (reverts all of the above except undo / redo) |
+| `list_favorites`, `apply_favorite` | `GET /favorites`, `POST /favorites/{id}/apply` | saved filters |
+| `export_layers` | `POST /export` | writes the layers as filtered now below the export root of the QGIS machine |
+
+The tools carry MCP annotations: the four readers are `readOnlyHint`; no filter tool is destructive (a filter changes
+what a layer shows, never its data, and `clear_filters` reverts it); `export_layers` is the only one flagged
+destructive, because it writes files and overwrites a file of the same name in its sub-folder. The server also exposes
+two read-only resources, `filtermate://layers` and `filtermate://state`. The list tools answer an object
+(`{"layers": [...]}`, `{"favorites": [...]}`).
+
+Errors reach the assistant as readable tool errors: `503` becomes "QGIS is busy, nothing was changed, retry"; `401` /
+`403` "the API key was rejected"; `422` says which field is invalid and why; an unreachable API says to start the REST
+API in QGIS; a timeout on a change tells the assistant to read `filter_state` before retrying.
+
+### Security
+
+- **An assistant that can call these tools changes what your layers show**, and can write files below the export root.
+  Give the key only to a client you trust, and prefer the client's per-tool approval for the tools that change things.
+- The key travels in an environment variable of the server process, never on its command line, and is not written in
+  any answer. `claude mcp add --env` and `claude_desktop_config.json` store it in the client's configuration file in
+  clear text: protect that file.
+- The server only talks to a loopback URL (`--allow-remote` to override), uses no proxy for it and follows no redirect,
+  so the key goes nowhere else. The REST API's own protections apply to every call (loopback `Host`, size limits,
+  export root, validation).
+- Filters are not recorded in the dock's undo history: `clear_filters` is the way back.
