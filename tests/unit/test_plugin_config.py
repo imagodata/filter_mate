@@ -198,6 +198,21 @@ class TestResetConfiguration:
         assert _count(db, "fm_subset_history") == 0
         assert not (reset_env.profile / "filtermate_cache.db").exists()
 
+    def test_the_cache_of_4x_in_the_home_folder_is_deleted_too(self, reset_env, tmp_path, monkeypatch):
+        home = tmp_path / "home"
+        (home / ".filtermate").mkdir(parents=True)
+        legacy = home / ".filtermate" / "filtermate_cache.db"
+        legacy.write_bytes(b"cache")
+        other = home / ".filtermate" / "keep.txt"
+        other.write_text("not ours to delete")
+        monkeypatch.setenv("HOME", str(home))
+        monkeypatch.setenv("USERPROFILE", str(home))
+
+        reset_env.plugin.reset_configuration()
+
+        assert not legacy.exists()
+        assert other.exists()
+
     def test_clear_layer_database_on_a_database_without_the_tables(self, reset_env, tmp_path):
         db = str(tmp_path / "empty.sqlite")
         sqlite3.connect(db).close()

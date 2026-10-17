@@ -1561,20 +1561,22 @@ class FilterMate:
                     # The cache database is deleted. The layer database also holds the
                     # favorites: only its layer properties and filter history are deleted
                     # (removing every .db / .sqlite file of the folder lost the favorites).
-                    filename = LEGACY_CACHE_DB_NAME
-                    db_path = os.path.join(plugin_config_dir, filename)
-                    if os.path.exists(db_path):
-                        try:
-                            os.remove(db_path)
-                            self.iface.messageBar().pushInfo(
-                                "FilterMate",
-                                self.tr(f"Database deleted: {filename}")
-                            )
-                        except OSError as e:
-                            self.iface.messageBar().pushWarning(
-                                "FilterMate",
-                                self.tr(f"Unable to delete {filename}: {e}")
-                            )
+                    # FilterMate 4.x also kept it in ~/.filtermate
+                    for cache_dir in (plugin_config_dir, os.path.join(os.path.expanduser("~"), ".filtermate")):
+                        filename = LEGACY_CACHE_DB_NAME
+                        db_path = os.path.join(cache_dir, filename)
+                        if os.path.exists(db_path):
+                            try:
+                                os.remove(db_path)
+                                self.iface.messageBar().pushInfo(
+                                    "FilterMate",
+                                    self.tr(f"Database deleted: {filename}")
+                                )
+                            except OSError as e:
+                                self.iface.messageBar().pushWarning(
+                                    "FilterMate",
+                                    self.tr(f"Unable to delete {filename}: {e}")
+                                )
                     filename = LAYER_DATABASE_NAME
                     db_path = os.path.join(plugin_config_dir, filename)
                     if os.path.exists(db_path):
