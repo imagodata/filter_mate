@@ -261,6 +261,24 @@ class ExpressionBuilder:
     # PRIVATE HELPER METHODS
     # =====================================================================
 
+    @staticmethod
+    def _with_negations(subset: str, clause_sqls: List[str]) -> List[str]:
+        """``clause_sqls`` (EXISTS clauses found in ``subset``) with the ``NOT`` that precedes them in ``subset``.
+
+        2026-10-17: the extraction returns ``EXISTS (...)`` for
+        ``NOT EXISTS (...)`` (a disjoint filter) and ``AND NOT (EXISTS (...))``.
+        """
+        import re
+        result, search_from = [], 0
+        for clause_sql in clause_sqls:
+            start = subset.find(clause_sql, search_from) if subset else -1
+            if start >= 0:
+                search_from = start + len(clause_sql)
+                if re.search(r'\bNOT\s*(?:\(\s*)*$', subset[:start], re.IGNORECASE):
+                    clause_sql = f"NOT {clause_sql}"
+            result.append(clause_sql)
+        return result
+
     def _prepare_source_filter(self, backend_name: str) -> Optional[str]:
         """
         Prepare source geometry filter from task_features or layer subset.
@@ -496,10 +514,14 @@ class ExpressionBuilder:
             if context['spatial_exists_clauses']:
                 # Extract all EXISTS clauses from source_subset (zone_pop, etc.)
                 exists_parts = []
+                # 2026-10-17: a disjoint filter is NOT EXISTS (...) and the
+                # extraction keeps the EXISTS (...) part only: chained as is,
+                # it kept the opposite features.
+                chained_sqls = self._with_negations(source_subset, [c['sql'] for c in context['spatial_exists_clauses']])
 
                 logger.debug(f"   → Found {len(context['spatial_exists_clauses'])} EXISTS clause(s) to chain:")
                 for i, clause in enumerate(context['spatial_exists_clauses']):
-                    clause_sql = clause['sql']
+                    clause_sql = chained_sqls[i]
                     logger.debug(f"      #{i + 1}: table={clause.get('table', 'unknown')}")
 
                     # FIX v4.3.1 (2026-01-22): DO NOT adapt EXISTS here!

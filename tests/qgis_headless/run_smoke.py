@@ -237,6 +237,33 @@ def vector_to_raster():
           and dem.isValid(), f"source={dem.source()}")
 
 
+def raster_alpha_band():
+    """An RGBA orthophoto is RGB: its alpha band is told by the colour interpretation, not the name (2026-10-17)."""
+    from osgeo import gdal
+    from filter_mate.adapters.qgis.coverage_layers.raster_adapter import read_raster_summary
+    from filter_mate.ui.widgets.coverage_panels.raster_exploring_panel import (
+        default_band_layout, layouts_for, spectral_presets_for,
+    )
+    path = os.path.join(info['work'], 'ortho_rgba.tif')
+    dataset = gdal.GetDriverByName('GTiff').Create(path, 8, 8, 4, gdal.GDT_Byte, ['PHOTOMETRIC=RGB', 'ALPHA=YES'])
+    dataset.SetGeoTransform((600000, 0.25, 0, 6200002, 0, -0.25))
+    for band, colour in enumerate((gdal.GCI_RedBand, gdal.GCI_GreenBand, gdal.GCI_BlueBand, gdal.GCI_AlphaBand), 1):
+        dataset.GetRasterBand(band).SetColorInterpretation(colour)
+        dataset.GetRasterBand(band).Fill(255 if band == 4 else 40 * band)
+    dataset = None
+    layer = QgsRasterLayer(path, 'ortho_rgba', 'gdal')
+    summary = read_raster_summary(layer)
+    band_names = [band.name for band in summary.bands]
+    alpha = {band.number for band in summary.bands if band.is_alpha}
+    check('RGBA orthophoto: the alpha band is flagged by its colour interpretation',
+          layer.isValid() and alpha == {4}, f"bands={band_names} alpha={sorted(alpha)}")
+    layout = default_band_layout(band_names, alpha)
+    check('RGBA orthophoto: RGB layout, no infrared preset',
+          layout == 'rgb' and 'rgbn' not in layouts_for(band_names, alpha)
+          and not any(key.startswith('ndvi') for key in spectral_presets_for(layout)),
+          f"layout={layout} (by name only: {default_band_layout(band_names)})")
+
+
 def point_clouds():
     m = info['m']
     if Qgis.QGIS_VERSION_INT < POINT_CLOUD_MIN_VERSION:
@@ -533,7 +560,7 @@ def main():
           f"in {time.perf_counter() - started:.1f}s", flush=True)
 
     for step in (plugin_starts_without_iface, provider_lists_algorithms, load_layers, raster_to_vector,
-                 vector_to_raster, point_clouds, remote_sources, environment):
+                 vector_to_raster, raster_alpha_band, point_clouds, remote_sources, environment):
         if (step is not plugin_starts_without_iface
                 and QgsApplication.processingRegistry().providerById('filtermate') is None):
             report('SKIP', step.__name__, 'no FilterMate Processing provider')

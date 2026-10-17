@@ -289,10 +289,13 @@ class ExportHandler:
         # STREAMING MODE: For large datasets (non-GPKG, directory output only).
         # Streaming writes one file per layer into a directory, so skip it when
         # the user selected a single target file.
-        streaming_config = task_parameters.get('config', {}).get('APP', {}).get('OPTIONS', {}).get('STREAMING_EXPORT', {})
-        streaming_enabled = streaming_config.get('enabled', {}).get('value', True)
-        feature_threshold = streaming_config.get('feature_threshold', {}).get('value', 10000)
-        chunk_size = streaming_config.get('chunk_size', {}).get('value', 5000)
+        # 2026-10-17: read from the configuration the task really carries
+        # (task_parameters['task']['config_data']); task_parameters['config']
+        # was never set, so the setting had no effect.
+        from ..optimization.config_provider import get_app_option_value
+        streaming_enabled = get_app_option_value(task_parameters, 'STREAMING_EXPORT', 'enabled', True)
+        feature_threshold = get_app_option_value(task_parameters, 'STREAMING_EXPORT', 'feature_threshold', 10000)
+        chunk_size = get_app_option_value(task_parameters, 'STREAMING_EXPORT', 'chunk_size', 5000)
 
         if streaming_enabled and not output_is_file:
             total_features = self.calculate_total_features(layers, project)

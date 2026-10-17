@@ -694,10 +694,13 @@ class FilteringOrchestrator:
         # =================================================================
 
         # Check if parallel filtering is enabled
-        parallel_config = task_parameters.get('config', {}).get('APP', {}).get('OPTIONS', {}).get('PARALLEL_FILTERING', {})
-        parallel_enabled = parallel_config.get('enabled', {}).get('value', True)
-        min_layers_for_parallel = parallel_config.get('min_layers', {}).get('value', 2)
-        max_workers = parallel_config.get('max_workers', {}).get('value', 0)
+        # 2026-10-17: read from the configuration the task really carries
+        # (task_parameters['task']['config_data']); task_parameters['config']
+        # was never set, so the setting had no effect.
+        from ..optimization.config_provider import get_app_option_value
+        parallel_enabled = get_app_option_value(task_parameters, 'PARALLEL_FILTERING', 'enabled', True)
+        min_layers_for_parallel = get_app_option_value(task_parameters, 'PARALLEL_FILTERING', 'min_layers', 2)
+        max_workers = get_app_option_value(task_parameters, 'PARALLEL_FILTERING', 'max_workers', 0)
 
         # Use parallel execution if enabled and enough layers
         if parallel_enabled and total_layers >= min_layers_for_parallel:

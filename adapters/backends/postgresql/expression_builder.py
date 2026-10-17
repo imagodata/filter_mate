@@ -20,14 +20,20 @@ Date: January 2026
 
 from __future__ import annotations
 
+import hashlib
 import logging
 import re
+import uuid
 from typing import TYPE_CHECKING, Dict, List, Optional, Tuple, Any
 
 if TYPE_CHECKING:
     from qgis.core import QgsVectorLayer
 
 logger = logging.getLogger('FilterMate.Backend.PostgreSQL.ExpressionBuilder')
+
+# Lon/lat SRIDs recognised when the QGIS CRS database is not available
+# (WGS 84, ETRS89, NAD83, RGF93 geographic, ED50, NTF).
+_GEOGRAPHIC_SRIDS = frozenset({4326, 4258, 4269, 4171, 4230, 4275})
 
 # Import the port interface
 try:
@@ -231,6 +237,8 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
         # Format: "table"."geom" - NOT "schema"."table"."geom"
         geom_expr = f'"{table}"."{geom_field}"'
         raw_geom_expr = geom_expr
+        # 2026-10-17: the source is brought to this SRID (None: unknown, kept as is)
+        target_srid = self._layer_srid(layer)
 
         # Apply centroid optimization if enabled
         if use_centroids:
@@ -338,8 +346,18 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
                 # The `original_source_table` contains the source layer's table name (e.g., "demand_points")
 
                 adapted_exists = []
+                search_from = 0
                 for clause_info in extracted:
                     clause_sql = clause_info['sql']
+                    # 2026-10-17: a disjoint filter is NOT EXISTS (...); the
+                    # extraction returns the EXISTS (...) part only, which
+                    # chained as is would keep the opposite targets.
+                    clause_start = source_filter.find(clause_sql, search_from)
+                    negated = clause_start > 0 and re.search(
+                        r'\bNOT\s*(?:\(\s*)*$', source_filter[:clause_start], re.IGNORECASE
+                    ) is not None
+                    if clause_start >= 0:
+                        search_from = clause_start + len(clause_sql)
 
                     # Adapt the EXISTS clause for the distant layer context
                     if original_source_table and table:
@@ -351,10 +369,10 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
                         )
                         if adapted_sql != clause_sql:
                             self.log_info(f"🔄 Adapted EXISTS for distant layer: '{original_source_table}' → '{table}'")
-                        adapted_exists.append(adapted_sql)
                     else:
                         # No adaptation needed or possible
-                        adapted_exists.append(clause_sql)
+                        adapted_sql = clause_sql
+                    adapted_exists.append(f"NOT {adapted_sql}" if negated else adapted_sql)
 
                 exists_clauses_to_combine = adapted_exists
                 self.log_info(f"🔗 Filter chaining: Found {len(exists_clauses_to_combine)} EXISTS clause(s) to chain at top level")
@@ -375,7 +393,8 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
                     source_wkt=source_wkt,
                     source_srid=source_srid,
                     buffer_value=buffer_value,
-                    raw_geom_expr=raw_geom_expr
+                    raw_geom_expr=raw_geom_expr,
+                    target_srid=target_srid
                 )
             else:
                 # CRITICAL: Use unqualified geom_expr for EXISTS subquery
@@ -392,7 +411,8 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
                     original_source_table=original_source_table,
                     buffer_expression=buffer_expression,  # FIX v4.2.11: Pass dynamic buffer expression
                     is_filter_chaining=is_filter_chaining,  # FIX v4.3.1: Use local variable instead of recalculating
-                    raw_geom_expr=raw_geom_expr
+                    raw_geom_expr=raw_geom_expr,
+                    target_srid=target_srid
                 )
 
             if expr:
@@ -452,7 +472,7 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
             AND EXISTS (SELECT 1 FROM zone_pop WHERE ST_Intersects(...))
 
         Creates a single MV with pre-filtered source features and uses:
-            EXISTS (SELECT 1 FROM filtermate_temp.fm_chain_xxx AS __source
+            EXISTS (SELECT 1 FROM filter_mate_temp.fm_chain_xxx AS __source
                     WHERE ST_Intersects("distant"."geom", __source."geom"))
 
         Args:
@@ -820,6 +840,176 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
             self.log_warning(f"Could not set query timeout: {e}")
             # Non-critical - continue anyway
 
+    @staticmethod
+    def _quote_ident(name) -> str:
+        """``name`` as a quoted PostgreSQL identifier (embedded double quotes doubled)."""
+        return '"' + str(name).replace('"', '""') + '"'
+
+    # =========================================================================
+    # SRIDs (2026-10-17): the source is brought to the SRID of the target.
+    # A GeoJSON source in EPSG:4326 against a BD TOPO table in EPSG:2154 gave
+    # "Operation on mixed SRID geometries", and a 100 m buffer around a source
+    # in degrees was 100 degrees.
+    # =========================================================================
+
+    @staticmethod
+    def _positive_srid(value) -> Optional[int]:
+        """``value`` when it is a usable SRID (a positive int), else None."""
+        if isinstance(value, bool) or not isinstance(value, int) or value <= 0:
+            return None
+        return value
+
+    @classmethod
+    def _authid_to_srid(cls, authid) -> Optional[int]:
+        """PostGIS SRID of a CRS authid (``EPSG:2154`` → 2154), None when unknown."""
+        if not authid or not isinstance(authid, str):
+            return None
+        try:
+            from qgis.core import QgsCoordinateReferenceSystem
+            srid = cls._positive_srid(QgsCoordinateReferenceSystem(authid).postgisSrid())
+            if srid:
+                return srid
+        except Exception:  # nosec B110 - no QGIS CRS database: parse the EPSG code below
+            pass
+        match = re.fullmatch(r'\s*EPSG:(\d+)\s*', authid, re.IGNORECASE)
+        return cls._positive_srid(int(match.group(1))) if match else None
+
+    @classmethod
+    def _layer_srid(cls, layer) -> Optional[int]:
+        """SRID of the geometry column of a PostgreSQL layer, None when unknown.
+
+        The provider CRS is the column SRID; the layer CRS can be overridden
+        in QGIS.
+        """
+        if layer is None:
+            return None
+        for crs_of in (lambda: layer.dataProvider().crs(), layer.crs):
+            try:
+                srid = cls._positive_srid(crs_of().postgisSrid())
+            except Exception:  # nosec B112 - try the next CRS source
+                continue
+            if srid:
+                return srid
+        return None
+
+    def _source_table_srid(self) -> Optional[int]:
+        """SRID of the source table (the source layer's own CRS, before any metric reprojection)."""
+        infos = (self.task_params or {}).get('infos') or {}
+        return self._authid_to_srid(infos.get('layer_crs_authid'))
+
+    @staticmethod
+    def _srid_is_geographic(srid: Optional[int]) -> bool:
+        """Whether ``srid`` is a lon/lat CRS (degrees)."""
+        if not srid:
+            return False
+        try:
+            from qgis.core import QgsCoordinateReferenceSystem
+            crs = QgsCoordinateReferenceSystem(f"EPSG:{int(srid)}")
+            if crs.isValid() is True:
+                return crs.isGeographic() is True
+        except Exception:  # nosec B110 - no QGIS CRS database: known lon/lat SRIDs below
+            pass
+        return int(srid) in _GEOGRAPHIC_SRIDS
+
+    @staticmethod
+    def _transform_sql(expr: str, source_srid: Optional[int], target_srid: Optional[int]) -> str:
+        """``ST_Transform(expr, target)`` when both SRIDs are known and differ."""
+        if source_srid and target_srid and source_srid != target_srid:
+            return f"ST_Transform({expr}, {target_srid})"
+        return expr
+
+    def _source_in_target_srid(
+        self,
+        source_expr: str,
+        source_srid: Optional[int],
+        target_srid: Optional[int],
+        buffer_value: Optional[float],
+    ) -> Tuple[str, Optional[float]]:
+        """The source geometry in the target SRID, and the buffer still to apply there.
+
+        The buffer distance is in metres:
+        - same SRID, metric: nothing changes (the buffer is applied by the
+          predicate, ST_DWithin for intersects);
+        - metric target: the source is transformed, the buffer applies in
+          the target metres (the GiST index of the target stays usable);
+        - geographic target: the buffer is applied before the transform, on
+          the geography for a geographic source, in the source metres else.
+
+        Returns ``(expression, remaining_buffer)``; ``remaining_buffer`` is
+        None when there is no buffer left to apply.
+        """
+        has_buffer = buffer_value is not None and buffer_value != 0
+        source_geographic = self._srid_is_geographic(source_srid)
+        reproject = bool(source_srid and target_srid and source_srid != target_srid)
+        if not reproject and not (has_buffer and source_geographic):
+            return source_expr, (buffer_value if has_buffer else None)
+        target_geographic = self._srid_is_geographic(target_srid or source_srid)
+        if has_buffer and target_geographic:
+            if source_geographic:
+                buffered = self._build_geography_buffer(source_expr, buffer_value)
+            else:
+                buffered = self._build_st_buffer_with_style(source_expr, buffer_value)
+            return self._transform_sql(buffered, source_srid, target_srid), None
+        return (
+            self._transform_sql(source_expr, source_srid, target_srid),
+            buffer_value if has_buffer else None,
+        )
+
+    def _buffer_table_name(
+        self,
+        source_schema: str,
+        source_table: str,
+        buffer_expression: str,
+        source_filter: Optional[str],
+    ) -> str:
+        """Name of the pre-computed buffer table of a dynamic buffer.
+
+        2026-10-17: it was ``fm_temp_buf_<table>_<md5(expression)[:8]>`` and an
+        existing table was reused, so a second filter on another selection
+        (or by another user, or after an edit of the source) got the buffers
+        of the first one. The name is now
+        ``fm_temp_buf_<session>_<md5(task, schema, table, expression, filter)>``:
+
+        - the selection (source filter), schema, table and expression decide
+          what the table holds;
+        - the task token makes the reuse of v4.2.19 (the distant layers of
+          one task share the table) stop at the end of the task, while the
+          tables of earlier tasks stay in place for the layers that still
+          reference them;
+        - the session prefix lets the session cleanup find the table in
+          whatever schema it was created (the source schema).
+
+        At most 12 + 12 + 1 + 20 = 45 characters: the 63-character identifier
+        limit is never reached, also with the ``idx_..._geom`` index name.
+        """
+        from ....infrastructure.constants import TABLE_PREFIX_BUFFER
+        params = self.task_params if self.task_params is not None else {}
+        # The token lives in the "task" section: the app rebuilds it for each
+        # task, while the top-level dict is the layer's PROJECT_LAYERS entry,
+        # which outlives the task.
+        holder = params.get('task') if isinstance(params.get('task'), dict) else params
+        task_token = holder.get('_fm_buffer_table_task_token')
+        if not task_token:
+            task_token = uuid.uuid4().hex
+            holder['_fm_buffer_table_task_token'] = task_token
+        session = self._session_token()
+        digest = hashlib.md5(
+            "\x1f".join([
+                task_token, str(source_schema), str(source_table),
+                buffer_expression or "", source_filter or "",
+            ]).encode("utf-8"),
+            usedforsecurity=False,
+        ).hexdigest()[:20]
+        return f"{TABLE_PREFIX_BUFFER}{session}_{digest}"
+
+    def _session_token(self) -> str:
+        """The session id reduced to ``[0-9a-z]{1,12}`` (``nosession`` without one)."""
+        params = self.task_params or {}
+        task_section = params.get('task') if isinstance(params.get('task'), dict) else {}
+        session_id = params.get('session_id') or task_section.get('session_id') or ''
+        from .cleanup import session_token
+        return session_token(session_id)
+
     def _build_exists_with_buffer_table(
         self,
         geom_expr: str,
@@ -830,7 +1020,8 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
         buffer_expression: Optional[str],
         source_filter: Optional[str],
         layer_props: Dict,
-        buffer_table_name: Optional[str] = None  # FIX v4.2.20: Pre-calculated table name
+        buffer_table_name: Optional[str] = None,  # FIX v4.2.20: Pre-calculated table name
+        target_srid: Optional[int] = None
     ) -> str:
         """
         Build EXISTS expression using pre-calculated buffer temporary table.
@@ -883,15 +1074,9 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
             temp_table_name = buffer_table_name
             self.log_debug(f"Using provided buffer table name: {temp_table_name}")
         elif buffer_expression:
-            # FIX v4.2.19 (2026-01-21): Use stable table name based on buffer content, not session
-            # Generate unique temp table name using hash of buffer expression
-            # This ensures the same source + same buffer = same table name
-            # Fixes filter chaining: table created once and reused across all chained filters
-            # FIX v4.3.7 (2026-01-23): Use standard naming convention fm_buf_*
-            from ....infrastructure.constants import TABLE_PREFIX_BUFFER
-            import hashlib
-            buffer_hash = hashlib.md5(buffer_expression.encode(), usedforsecurity=False).hexdigest()[:8]
-            temp_table_name = f"{TABLE_PREFIX_BUFFER}{source_table}_{buffer_hash}"
+            # 2026-10-17: named after the selection, the session and the task
+            # (see _buffer_table_name), no longer after the expression alone.
+            temp_table_name = self._buffer_table_name(source_schema, source_table, buffer_expression, source_filter)
         else:
             self.log_error("No buffer_table_name or buffer_expression provided")
             return None
@@ -916,25 +1101,34 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
         # No need to create schema - we're using the same schema as the source table
         self.log_debug(f"Using existing schema {temp_schema} (source table schema)")
 
+        q_temp_table = f"{self._quote_ident(temp_schema)}.{self._quote_ident(temp_table_name)}"
+        # 2026-10-17: the buffers are in the source SRID
+        buffered_in_target = self._transform_sql("__buffer.buffered_geom", self._source_table_srid(), target_srid)
+        q_source_table = f"{self._quote_ident(source_schema)}.{self._quote_ident(source_table)}"
+
         # FIX v4.2.19: Check if table already exists (for filter chaining)
+        # 2026-10-17: the name carries the task token (_buffer_table_name), so
+        # an existing table was built by this very task for this selection.
         try:
             with connexion.cursor() as cursor:
-                cursor.execute(f"""
+                cursor.execute(
+                    """
                     SELECT EXISTS (
                         SELECT 1 FROM information_schema.tables
-                        WHERE table_schema = '{temp_schema}'
-                        AND table_name = '{temp_table_name}'
+                        WHERE table_schema = %s
+                        AND table_name = %s
                     )
-                """)  # nosec B608 - identifiers quoted, values are numeric ids or SQL fragments FilterMate built from QGIS layer metadata
+                    """,
+                    (temp_schema, temp_table_name),
+                )
                 table_exists = cursor.fetchone()[0]
                 if table_exists:
                     self.log_info(f"♻️ Reusing existing buffer table: {temp_schema}.{temp_table_name}")
                     # FIX v4.2.20: Build EXISTS expression using existing table
-                    exists_expr = f'''EXISTS (
-              SELECT 1
-              FROM "{temp_schema}"."{temp_table_name}" AS __buffer
-              WHERE {predicate_func}({geom_expr}, __buffer.buffered_geom)
-              )'''  # nosec B608 - identifiers quoted, values are numeric ids or SQL fragments FilterMate built from QGIS layer metadata
+                    exists_expr = self._predicate_against_sources(
+                        predicate_func, geom_expr, buffered_in_target,
+                        f"{q_temp_table} AS __buffer", [], None, None,
+                    )
                     self.log_debug(f"Reuse buffer table expression: {exists_expr}")
                     return exists_expr
         except Exception as e:
@@ -952,14 +1146,17 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
         primary_key_column = None
         try:
             with connexion.cursor() as cursor:
-                cursor.execute(f"""
+                cursor.execute(
+                    """
                     SELECT a.attname
                     FROM pg_index i
                     JOIN pg_attribute a ON a.attrelid = i.indrelid AND a.attnum = ANY(i.indkey)
-                    WHERE i.indrelid = '"{source_schema}"."{source_table}"'::regclass
+                    WHERE i.indrelid = %s::regclass
                     AND i.indisprimary
                     LIMIT 1
-                """)  # nosec B608 - identifiers quoted, values are numeric ids or SQL fragments FilterMate built from QGIS layer metadata
+                    """,
+                    (q_source_table,),
+                )
                 result = cursor.fetchone()
                 if result:
                     primary_key_column = result[0]
@@ -988,7 +1185,7 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
                 self.log_warning(f"PK fallback detection failed: {fallback_err}")
 
         # If still no PK, skip source_id column entirely (buffer table still works for filtering)
-        pk_select = f'"{primary_key_column}" as source_id,' if primary_key_column else ''
+        pk_select = f'{self._quote_ident(primary_key_column)} as source_id,' if primary_key_column else ''
         if not primary_key_column:
             self.log_warning("No primary key found - creating buffer table without source_id column")
 
@@ -999,24 +1196,27 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
         # In single-table SELECT, field references should be unqualified (implicit scope)
         # buffer_expr_sql already contains unqualified field names (e.g., "homecount", not "table"."homecount")
         # DDL: identifiers come from QGIS layer metadata (trusted), can't be parameterized
+        # 2026-10-17: a lon/lat source is buffered in metres on the geography
+        # (the distances of the expression are metres, not degrees)
+        source_geom_sql = self._quote_ident(source_geom_field)
+        if self._srid_is_geographic(self._source_table_srid()):
+            buffered_sql = f"ST_Buffer(({source_geom_sql})::geography, {buffer_expr_sql}, 'quad_segs=5')::geometry"
+        else:
+            buffered_sql = f"ST_Buffer({source_geom_sql}, {buffer_expr_sql}, 'quad_segs=5')"
         sql_create = f"""
-            CREATE TABLE IF NOT EXISTS "{temp_schema}"."{temp_table_name}" AS
+            CREATE TABLE IF NOT EXISTS {q_temp_table} AS
             SELECT
                 {pk_select}
-                ST_Buffer(
-                    "{source_geom_field}",
-                    {buffer_expr_sql},
-                    'quad_segs=5'
-                ) as buffered_geom
-            FROM "{source_schema}"."{source_table}"
+                {buffered_sql} as buffered_geom
+            FROM {q_source_table}
             {f"WHERE {source_filter}" if source_filter else ""}
         """  # nosec B608
 
         # Create spatial index
-        sql_index = f'CREATE INDEX IF NOT EXISTS "idx_{temp_table_name}_geom" ON "{temp_schema}"."{temp_table_name}" USING GIST (buffered_geom)'  # nosec B608
+        sql_index = f'CREATE INDEX IF NOT EXISTS "idx_{temp_table_name}_geom" ON {q_temp_table} USING GIST (buffered_geom)'  # nosec B608
 
         # Analyze for query planner
-        sql_analyze = f'ANALYZE "{temp_schema}"."{temp_table_name}"'
+        sql_analyze = f'ANALYZE {q_temp_table}'
 
         try:
             with connexion.cursor() as cursor:
@@ -1032,7 +1232,7 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
                 self.log_debug("✓ Statistics updated")
 
                 # Get row count for logging
-                cursor.execute(f'SELECT COUNT(*) FROM "{temp_schema}"."{temp_table_name}"')  # nosec B608
+                cursor.execute(f'SELECT COUNT(*) FROM {q_temp_table}')  # nosec B608
                 row_count = cursor.fetchone()[0]
 
             # FIX v4.3.6 (2026-01-22): COMMIT the transaction!
@@ -1047,11 +1247,10 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
             self.log_info("   → Buffers pre-calculated, will be reused across all distant layers")
 
             # Build EXISTS using buffer table (with schema prefix for QGIS visibility)
-            exists_expr = f"""EXISTS (
-                SELECT 1
-                FROM "{temp_schema}"."{temp_table_name}" AS __buffer
-                WHERE {predicate_func}({geom_expr}, __buffer.buffered_geom)
-            )"""  # nosec B608 - identifiers quoted, values are numeric ids or SQL fragments FilterMate built from QGIS layer metadata
+            exists_expr = self._predicate_against_sources(
+                predicate_func, geom_expr, buffered_in_target,
+                f"{q_temp_table} AS __buffer", [], None, None,
+            )
 
             return exists_expr
 
@@ -1087,7 +1286,7 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
             EXISTS(source + zone_pop) AND EXISTS(source + demand_points)
 
         We generate a single EXISTS against the pre-computed MV:
-            EXISTS (SELECT 1 FROM filtermate_temp.mv_chain_xxx AS __chain
+            EXISTS (SELECT 1 FROM filter_mate_temp.fm_temp_chain_xxx AS __chain
                     WHERE ST_Intersects("distant"."geom", __chain."geom"))
 
         Performance: O(N×M) → O(1) EXISTS per distant layer
@@ -1095,7 +1294,7 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
         Args:
             geom_expr: Target geometry expression (e.g., '"table"."geom"')
             predicates: Spatial predicates to apply (intersects, contains, etc.)
-            mv_name: Fully qualified MV name (e.g., "filtermate_temp"."fm_chain_xxx")
+            mv_name: Fully qualified MV name (e.g., "filter_mate_temp"."fm_temp_chain_xxx")
             buffer_value: Optional buffer distance (already baked into MV typically)
 
         Returns:
@@ -1116,20 +1315,14 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
         # The MV contains pre-filtered source features that satisfy all spatial constraints
         # Each distant layer only needs ONE EXISTS query against this MV
 
-        # Source geometry in MV (use standard geom column)
-        source_geom_in_mv = '__chain."geom"'
-
-        # Apply buffer if specified (though usually already baked into MV)
-        if buffer_value is not None and buffer_value != 0:
-            source_geom_in_mv = self._build_st_buffer_with_style(
-                source_geom_in_mv, buffer_value
-            )
-
         # Build the optimized EXISTS
         # Format: EXISTS (SELECT 1 FROM mv AS __chain WHERE ST_Intersects(target, __chain.geom))
-        exists_expr = (
-            f"EXISTS (SELECT 1 FROM {mv_name} AS __chain "  # nosec B608
-            f"WHERE {predicate_func}({geom_expr}, {source_geom_in_mv}))"
+        # 2026-10-17: same union semantics as the other paths (disjoint →
+        # NOT EXISTS, non-distributive predicates against the union); the
+        # buffer, if any (usually already baked into the MV), applies there.
+        exists_expr = self._predicate_against_sources(
+            predicate_func, geom_expr, '__chain."geom"', f"{mv_name} AS __chain", [],
+            buffer_value, None,
         )
 
         self.log_info(f"✅ Optimized MV expression: {exists_expr[:150]}...")
@@ -1142,7 +1335,8 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
         source_wkt: str,
         source_srid: int,
         buffer_value: Optional[float] = None,
-        raw_geom_expr: Optional[str] = None
+        raw_geom_expr: Optional[str] = None,
+        target_srid: Optional[int] = None
     ) -> str:
         """
         Build simple PostGIS expression using direct WKT.
@@ -1153,6 +1347,8 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
             source_wkt: Source geometry WKT
             source_srid: Source SRID
             buffer_value: Optional buffer distance
+            raw_geom_expr: Raw target column (centroid bbox test)
+            target_srid: SRID of the target geometry column (None: unknown)
 
         Returns:
             PostGIS SQL expression
@@ -1160,20 +1356,16 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
         # Build source geometry with ST_MakeValid
         source_geom_sql = f"ST_MakeValid(ST_GeomFromText('{source_wkt}', {source_srid}))"
 
-        # Apply buffer if specified
-        if buffer_value is not None and buffer_value != 0:
-            is_geographic = source_srid == 4326
-
-            if is_geographic:
-                # Transform to EPSG:3857 for metric buffer
-                source_geom_sql = self._build_geographic_buffer(
-                    source_geom_sql, buffer_value, source_srid
-                )
-            else:
-                # 2026-09-13: ST_DWithin for intersects + positive round buffer
-                return self._buffered_predicate(
-                    predicate_func, geom_expr, source_geom_sql, buffer_value, raw_geom_expr
-                )
+        # 2026-10-17: in the SRID of the target, the buffer in metres
+        # (see _source_in_target_srid).
+        source_geom_sql, remaining_buffer = self._source_in_target_srid(
+            source_geom_sql, self._positive_srid(source_srid), target_srid, buffer_value
+        )
+        if remaining_buffer is not None:
+            # 2026-09-13: ST_DWithin for intersects + positive round buffer
+            return self._buffered_predicate(
+                predicate_func, geom_expr, source_geom_sql, remaining_buffer, raw_geom_expr
+            )
 
         return self._index_aware_predicate(predicate_func, geom_expr, source_geom_sql, raw_geom_expr)
 
@@ -1182,7 +1374,7 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
         """``(schema, name)`` of the source-selection MV referenced by ``source_filter``, or None.
 
         Matches the filter built by the core ExpressionBuilder:
-        ``"table"."pk" IN (SELECT pk FROM "filtermate_temp"."fm_temp_mv_...")``.
+        ``"table"."pk" IN (SELECT pk FROM "filter_mate_temp"."fm_temp_mv_...")``.
         """
         if not source_filter:
             return None
@@ -1202,7 +1394,7 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
         predicate_func: str,
         source_schema: str,
         source_table: str,
-        source_geom_field: str,
+        source_expr: str,
         aliased_source_filter: Optional[str],
         buffer_value: Optional[float],
     ) -> Optional[str]:
@@ -1227,14 +1419,23 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
         margin = float(buffer_value) if buffer_value else 0.0
         if margin < 0:
             margin = 0.0
-        source_col = f'__source."{source_geom_field}"'
+        # 2026-10-17: source_expr is the row geometry in the target SRID
+        # (ST_Transform(...) when the SRIDs differ), buffer_value the buffer
+        # left to apply in that SRID.
+        source_col = source_expr
         envelope = (
             f'SELECT ST_SetSRID(ST_Expand(ST_Extent({source_col})::geometry, {margin}), '
             f'MAX(ST_SRID({source_col}))) '
             f'FROM "{source_schema}"."{source_table}" AS __source '  # nosec B608
             f'WHERE ({aliased_source_filter})'
         )
-        return f'{target_geom} && ({envelope})'
+        # 2026-10-17: a target containing / covering / equal to the union
+        # (not eroded) holds its bbox: "~" lets PostgreSQL skip the union,
+        # computed once per query, when no target can hold it.
+        holds_union = predicate_func.upper() in ('ST_CONTAINS', 'ST_COVERS', 'ST_EQUALS') and not (
+            buffer_value is not None and float(buffer_value) < 0
+        )
+        return f'{target_geom} {"~" if holds_union else "&&"} ({envelope})'
 
     def _buffered_predicate(
         self,
@@ -1298,6 +1499,136 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
             return predicate
         return f"({raw_geom_expr} && {source_expr} AND {predicate})"
 
+    # Predicates whose truth against the union only depends on the source
+    # rows near the target (see _predicate_against_sources).
+    _LOCAL_UNION_PREDICATES = frozenset({'ST_WITHIN', 'ST_COVEREDBY', 'ST_TOUCHES'})
+    # Upper bound of the degrees per metre ratio below 85° of latitude (one
+    # degree of longitude is ~9.7 km there): a reach in metres as degrees.
+    _METRES_PER_DEGREE_MIN = 9000.0
+
+    def _predicate_against_sources(
+        self,
+        predicate_func: str,
+        geom_expr: str,
+        source_expr: str,
+        from_sql: str,
+        filter_clauses: List[str],
+        buffer_value: Optional[float],
+        raw_geom_expr: Optional[str],
+        geography_buffer: bool = False,
+    ) -> str:
+        """``predicate(target, union of the selected source rows)`` as SQL.
+
+        2026-10-17: Spatialite and OGR test a target against ONE geometry,
+        the union of the selected source features. ``EXISTS (SELECT 1 FROM
+        <source> WHERE ST_<pred>(target, row) AND <selection>)`` tested it
+        against each feature: ST_Disjoint kept every target disjoint from a
+        single feature (nearly the whole layer), ST_Within rejected a target
+        spanning two adjacent source polygons, ST_Contains kept a target
+        holding one of the selected features only.
+
+        - intersects: true for the union iff true for one row - EXISTS kept;
+        - disjoint: disjoint from the union iff it intersects no row -
+          ``NOT EXISTS (... ST_Intersects ...)`` (ST_DWithin with a buffer),
+          a target without geometry is not kept (as ST_Disjoint(NULL, x));
+        - within, coveredby, touches, and intersects / disjoint with a
+          negative buffer (erosion does not distribute over the union) only
+          depend on the rows near the target: ``EXISTS (SELECT 1 FROM
+          <source> WHERE row && <target grown by the buffer> AND <selection>
+          HAVING <pred>(target, ST_Union(rows)))``, a small union per target
+          the source GiST index finds;
+        - contains, covers, equals, overlaps, crosses depend on every
+          selected row (a far one breaks "contains"): against ``(SELECT
+          ST_Union(rows) ...)``, an uncorrelated subquery PostgreSQL computes
+          once per query, aliased ``__fm_union`` (a ``__source`` outside
+          EXISTS reads as a corrupted FilterMate subset).
+
+        The unions take ST_MakeValid rows: GEOS raises a TopologyException
+        on an invalid polygon, which would reject the whole subset.
+
+        Args:
+            predicate_func: PostGIS predicate (ST_Intersects, ...)
+            geom_expr: Target geometry expression
+            source_expr: Source geometry of one row (e.g. ``__source."geom"``)
+            from_sql: ``<relation> AS <alias>`` the rows come from
+            filter_clauses: Selection clauses ANDed in the subquery
+            buffer_value: Static buffer still to apply, None for none
+            raw_geom_expr: Raw target column (centroid bbox test)
+            geography_buffer: Apply the buffer on the geography (lon/lat target)
+        """
+        predicate_upper = predicate_func.upper()
+        has_buffer = buffer_value is not None and buffer_value != 0
+        eroding = has_buffer and float(buffer_value) < 0
+        selection = " AND ".join(filter_clauses)
+        not_null = f"{raw_geom_expr or geom_expr} IS NOT NULL"
+
+        if predicate_upper in ('ST_INTERSECTS', 'ST_DISJOINT') and not eroding:
+            test_func = 'ST_Intersects' if predicate_upper == 'ST_DISJOINT' else predicate_func
+            if has_buffer:
+                row_test = self._buffered_predicate(test_func, geom_expr, source_expr, buffer_value, raw_geom_expr)
+            else:
+                row_test = self._index_aware_predicate(test_func, geom_expr, source_expr, raw_geom_expr)
+            where = f"{row_test} AND {selection}" if selection else row_test
+            exists_expr = f'EXISTS (SELECT 1 FROM {from_sql} WHERE {where})'  # nosec B608 - identifiers quoted, SQL fragments FilterMate built
+            if predicate_upper == 'ST_DISJOINT':
+                return f"({not_null} AND NOT {exists_expr})"
+            return exists_expr
+
+        union_of_rows = f"ST_Union(ST_MakeValid({source_expr}))"
+        if predicate_upper in self._LOCAL_UNION_PREDICATES or predicate_upper in ('ST_INTERSECTS', 'ST_DISJOINT'):
+            margin = abs(float(buffer_value)) if has_buffer else 0.0
+            if geography_buffer:
+                margin = margin / self._METRES_PER_DEGREE_MIN
+            reach = f"ST_Expand({geom_expr}, {margin})" if margin else geom_expr
+            where = " AND ".join([f"{source_expr} && {reach}"] + list(filter_clauses))
+            operand = self._buffer_sql(union_of_rows, buffer_value, geography_buffer) if has_buffer else union_of_rows
+            test_func = 'ST_Intersects' if predicate_upper in ('ST_INTERSECTS', 'ST_DISJOINT') else predicate_func
+            exists_expr = (
+                f'EXISTS (SELECT 1 FROM {from_sql} WHERE {where} '  # nosec B608 - identifiers quoted, SQL fragments FilterMate built
+                f'HAVING {test_func}({geom_expr}, {operand}))'
+            )
+            if predicate_upper == 'ST_DISJOINT':
+                return f"({not_null} AND NOT {exists_expr})"
+            return exists_expr
+
+        def global_alias(sql: str) -> str:
+            return re.sub(r'\b__source\b', '__fm_union', sql)
+
+        where = f' WHERE {global_alias(selection)}' if selection else ''
+        union_expr = f'(SELECT {global_alias(union_of_rows)} FROM {global_alias(from_sql)}{where})'  # nosec B608 - identifiers quoted, SQL fragments FilterMate built
+        operand = self._buffer_sql(union_expr, buffer_value, geography_buffer) if has_buffer else union_expr
+        # The union is only computed for a target whose bbox can hold the
+        # result: inside CASE, PostgreSQL evaluates the subquery on first use
+        # (a bare predicate turns it into an index condition, computed
+        # upfront: 8.9 s instead of 44 ms for 30 000 sources none of the
+        # targets contains). Contains / covers / equals need the target bbox
+        # to hold the union bbox ("~", the buffer only grows it), the others
+        # a bbox overlap with it, grown by a positive buffer.
+        row = global_alias(source_expr)
+        holds_union = predicate_upper in ('ST_CONTAINS', 'ST_COVERS', 'ST_EQUALS') and not eroding
+        margin = float(buffer_value) if has_buffer and not eroding and not holds_union and not geography_buffer else 0.0
+        envelope = (
+            f'(SELECT ST_SetSRID(ST_Expand(ST_Extent({row})::geometry, {margin}), MAX(ST_SRID({row}))) '
+            f'FROM {global_alias(from_sql)}{where})'  # nosec B608 - identifiers quoted, SQL fragments FilterMate built
+        )
+        bbox_test = f"{raw_geom_expr or geom_expr} {'~' if holds_union else '&&'} {envelope}"
+        return f"CASE WHEN {bbox_test} THEN {predicate_func}({geom_expr}, {operand}) ELSE FALSE END"
+
+    def _buffer_sql(self, geom_expr: str, buffer_value: float, geography: bool = False) -> str:
+        """``ST_Buffer(geom, d, style)``, on the geography for a lon/lat geometry.
+
+        No empty-geometry guard: an eroded-away union is an empty geometry no
+        predicate matches (disjoint is NOT intersects).
+        """
+        endcap_style = self._get_buffer_endcap_style()
+        quad_segs = self.task_params.get('buffer_segments', 5)
+        style_params = f"quad_segs={quad_segs}"
+        if endcap_style != 'round':
+            style_params += f" endcap={endcap_style}"
+        if geography:
+            return f"ST_Buffer(({geom_expr})::geography, {buffer_value}, '{style_params}')::geometry"
+        return f"ST_Buffer({geom_expr}, {buffer_value}, '{style_params}')"
+
     def _build_exists_expression(
         self,
         geom_expr: str,
@@ -1309,7 +1640,8 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
         original_source_table: Optional[str] = None,
         buffer_expression: Optional[str] = None,
         is_filter_chaining: bool = False,  # FIX v4.3.1: Explicit flag
-        raw_geom_expr: Optional[str] = None
+        raw_geom_expr: Optional[str] = None,
+        target_srid: Optional[int] = None
     ) -> str:
         """
         Build EXISTS subquery expression.
@@ -1369,10 +1701,6 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
         # So compute the table name first, then decide whether to create it or reuse it
         buffer_table_name = None
         if buffer_expression and buffer_expression.strip():
-            # FIX v4.3.7 (2026-01-23): Use standard naming convention fm_buf_*
-            from ....infrastructure.constants import TABLE_PREFIX_BUFFER
-            import hashlib
-            buffer_hash = hashlib.md5(buffer_expression.encode(), usedforsecurity=False).hexdigest()[:8]
             # CRITICAL FIX v4.2.20: For buffer table name, use CURRENT source_table (where buffer is defined)
             # NOT original_source_table (which is the first layer in the filter chain)
             # Example: zone_pop → demand_points (WITH buffer) → ducts → sheaths
@@ -1382,7 +1710,9 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
             #     → Reuse table: fm_buf_demand_points_xxx (same name!)
             #   - At sheaths: source_table="demand_points", buffer_expression still set
             #     → Reuse table: fm_buf_demand_points_xxx (same name!)
-            buffer_table_name = f"{TABLE_PREFIX_BUFFER}{source_table}_{buffer_hash}"
+            # 2026-10-17: the name also covers the selection, the session and
+            # the task (_buffer_table_name): the reuse above stays within one task.
+            buffer_table_name = self._buffer_table_name(source_schema, source_table, buffer_expression, source_filter)
             self.log_debug(f"Calculated buffer table name: {buffer_table_name} (from {source_table})")
 
         # FIX v4.2.17 (2026-01-21): Don't apply buffer_expression in filter chaining context
@@ -1451,7 +1781,8 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
                 buffer_expression=buffer_expression,
                 source_filter=source_filter,
                 layer_props=layer_props,
-                buffer_table_name=buffer_table_name  # FIX v4.2.20: Pass pre-calculated name
+                buffer_table_name=buffer_table_name,  # FIX v4.2.20: Pass pre-calculated name
+                target_srid=target_srid,
             )
 
             # If temp table creation succeeded, return it
@@ -1509,15 +1840,27 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
             # _buffered_predicate) instead of ST_Buffer() on the source.
             static_buffer = buffer_value
 
-        # Build WHERE clause
-        # CRITICAL: The spatial predicate checks intersection between target and source
-        if static_buffer is not None:
-            first_clause = self._buffered_predicate(
-                predicate_func, geom_expr, source_geom_in_subquery, static_buffer, raw_geom_expr
-            )
+        # 2026-10-17: source rows in the SRID of the target, the buffer in
+        # metres (see _source_in_target_srid). static_buffer becomes the
+        # buffer left to apply in the target SRID.
+        source_srid = self._source_table_srid()
+        # An erosion goes through the union of the rows (see
+        # _predicate_against_sources): on a lon/lat target it is applied to
+        # that union on the geography, never row by row before the transform.
+        erosion_on_geography = (
+            static_buffer is not None and float(static_buffer) < 0
+            and self._srid_is_geographic(target_srid or source_srid)
+        )
+        if erosion_on_geography:
+            source_geom_in_subquery = self._transform_sql(source_geom_in_subquery, source_srid, target_srid)
         else:
-            first_clause = self._index_aware_predicate(predicate_func, geom_expr, source_geom_in_subquery, raw_geom_expr)
-        where_clauses = [first_clause]
+            source_geom_in_subquery, static_buffer = self._source_in_target_srid(
+                source_geom_in_subquery, source_srid, target_srid, static_buffer
+            )
+
+        # Source selection clauses (the spatial test is built by
+        # _predicate_against_sources below)
+        filter_clauses = []
         prefilter_filter = None  # 2026-09-13: aliased simple source filter for the envelope prefilter
         if whole_source_is_selection:
             prefilter_filter = "TRUE"  # the MV holds exactly the selection
@@ -1551,7 +1894,7 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
 
                 # CRITICAL: Add the combined EXISTS filters to WHERE clause
                 # This ensures the source geometry satisfies zone_pop AND buffer constraints
-                where_clauses.append(f"({source_filter})")
+                filter_clauses.append(f"({source_filter})")
 
             else:
                 # Original aliasing logic for simple filters (FID IN, field = value, etc.)
@@ -1598,16 +1941,17 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
 
                 self.log_debug(f"Aliased source_filter: {aliased_source_filter[:100]}...")
                 prefilter_filter = aliased_source_filter
-                where_clauses.append(f"({aliased_source_filter})")
+                filter_clauses.append(f"({aliased_source_filter})")
 
-        where_clause = " AND ".join(where_clauses)
-
-        # Build EXISTS subquery
-        exists_expr = (
-            'EXISTS ('
-            f'SELECT 1 FROM "{source_schema}"."{source_table}" AS __source '  # nosec B608
-            f'WHERE {where_clause}'
-            ')'
+        exists_expr = self._predicate_against_sources(
+            predicate_func,
+            geom_expr,
+            source_geom_in_subquery,
+            f'"{source_schema}"."{source_table}" AS __source',
+            filter_clauses,
+            static_buffer,
+            raw_geom_expr,
+            geography_buffer=erosion_on_geography,
         )
         envelope_prefilter = self._source_envelope_prefilter(
             target_geom=raw_geom_expr or geom_expr,
@@ -1615,11 +1959,15 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
             predicate_func=predicate_func,
             source_schema=source_schema,
             source_table=source_table,
-            source_geom_field=source_geom_field,
+            source_expr=source_geom_in_subquery,
             aliased_source_filter=prefilter_filter,
             buffer_value=static_buffer,
         )
         if envelope_prefilter:
+            if 'EXISTS' not in exists_expr.upper():
+                # union computed once (no EXISTS): no "__source" outside EXISTS
+                # either, a corrupted FilterMate subset for the cleaners
+                envelope_prefilter = re.sub(r'\b__source\b', '__fm_union', envelope_prefilter)
             exists_expr = f"({envelope_prefilter} AND {exists_expr})"
             self.log_info("📦 Source envelope prefilter added (GiST index on the target)")
 
@@ -1724,23 +2072,21 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
         # PostgreSQL will handle empty geometries gracefully with ST_IsEmpty check
         return f"ST_Buffer({geom_expr}, {buffer_expr_sql}, '{style_params}')"
 
-    def _build_geographic_buffer(
-        self,
-        geom_expr: str,
-        buffer_value: float,
-        source_srid: int
-    ) -> str:
-        """Build buffer for geographic CRS via EPSG:3857."""
-        endcap_style = self._get_buffer_endcap_style()
-        style_param = "" if endcap_style == 'round' else f", 'endcap={endcap_style}'"
+    def _build_geography_buffer(self, geom_expr: str, buffer_value: float) -> str:
+        """Buffer in metres of a lon/lat geometry, computed on the geography.
 
-        buffer_expr = (
-            "ST_Transform("
-            "ST_Buffer("
-            f"ST_Transform({geom_expr}, 3857), "
-            f"{buffer_value}{style_param}), "
-            f"{source_srid})"
-        )
+        2026-10-17: replaces the buffer via EPSG:3857, whose metres are
+        1/cos(latitude) too short (a 100 m buffer was 72 m at 44° N).
+        PostGIS buffers a geography in a suited planar projection and
+        returns it in the SRID of the input.
+        """
+        endcap_style = self._get_buffer_endcap_style()
+        quad_segs = self.task_params.get('buffer_segments', 5)
+        style_params = f"quad_segs={quad_segs}"
+        if endcap_style != 'round':
+            style_params += f" endcap={endcap_style}"
+
+        buffer_expr = f"ST_Buffer(({geom_expr})::geography, {buffer_value}, '{style_params}')::geometry"
 
         if buffer_value < 0:
             validated = f"ST_MakeValid({buffer_expr})"
@@ -1812,6 +2158,7 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
 
         geometric_patterns = [
             '__source',
+            '__fm_union',  # 2026-10-17: union of the source rows (_predicate_against_sources)
             'EXISTS (',
             'EXISTS(',
             'ST_INTERSECTS',

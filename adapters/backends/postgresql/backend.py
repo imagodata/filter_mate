@@ -287,7 +287,7 @@ class PostgreSQLBackend(BackendPort):
                 geom_field='geom'
             )
             # Returns: "fm_temp_src_abc123"
-            # Use in query: pk IN (SELECT pk FROM filtermate_temp.fm_temp_src_abc123)
+            # Use in query: pk IN (SELECT pk FROM filter_mate_temp.fm_temp_src_abc123)
         """
         if not fids:
             logger.warning("[PostgreSQL] create_source_selection_mv: No FIDs provided")
@@ -380,7 +380,8 @@ class PostgreSQLBackend(BackendPort):
                 if created_name and self._mv_manager.mv_exists(created_name, connection=conn):
                     # Get row count for logging
                     cursor = conn.cursor()
-                    cursor.execute(f'SELECT COUNT(*) FROM "filtermate_temp"."{created_name}"')  # nosec B608
+                    mv_schema = self._mv_manager.MV_SCHEMA
+                    cursor.execute(f'SELECT COUNT(*) FROM "{mv_schema}"."{created_name}"')  # nosec B608
                     row_count = cursor.fetchone()[0]
                     # 2026-09-13: the subset strings run on QGIS's own connection,
                     # the MV must be committed to be visible there.
@@ -392,7 +393,7 @@ class PostgreSQLBackend(BackendPort):
                     )
 
                     # Return full reference for use in queries
-                    return f'"filtermate_temp"."{created_name}"'  # nosec B608
+                    return f'"{mv_schema}"."{created_name}"'  # nosec B608
                 else:
                     logger.error("[PostgreSQL] MV creation reported success but MV not found")
                     self._rollback_quietly(conn)
@@ -498,7 +499,7 @@ class PostgreSQLBackend(BackendPort):
 
         This is used when MV creation fails (e.g., due to permissions).
 
-        FIX v4.3.2 (2026-01-25): Use persistent table in filtermate_temp schema
+        FIX v4.3.2 (2026-01-25): Use persistent table in the temp schema
         instead of TEMPORARY table. TEMPORARY tables are session-scoped and
         not visible to QGIS's PostgreSQL connection (different session).
 
@@ -532,10 +533,10 @@ class PostgreSQLBackend(BackendPort):
 
             cursor = conn.cursor()
 
-            # FIX v4.3.2: Ensure filtermate_temp schema exists
+            # FIX v4.3.2: Ensure the temp schema exists
             cursor.execute(f'CREATE SCHEMA IF NOT EXISTS "{DEFAULT_TEMP_SCHEMA}"')  # nosec B608
 
-            # FIX v4.3.2: Create persistent table in filtermate_temp schema
+            # FIX v4.3.2: Create persistent table in the temp schema
             # (NOT TEMPORARY - QGIS uses a different PostgreSQL session)
             # Drop existing table first to avoid conflicts
             cursor.execute(f'DROP TABLE IF EXISTS "{DEFAULT_TEMP_SCHEMA}"."{temp_name}"')  # nosec B608

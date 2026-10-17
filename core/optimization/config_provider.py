@@ -41,6 +41,49 @@ DEFAULT_SIMPLIFICATION_CONFIG = {
 }
 
 
+def get_app_options(params: Optional[Dict[str, Any]]) -> Dict[str, Any]:
+    """``APP.OPTIONS`` of the FilterMate configuration carried by ``params``.
+
+    2026-10-17: the readers looked for ``params['config']``, a key nothing
+    sets. The configuration travels as:
+
+    - ``params['task']['config_data']``: filter and export tasks (set by
+      FilterMateApp.get_task_parameters), layer management tasks;
+    - ``params['config_data']``: TaskParameters.to_legacy_format;
+    - ``params['CONFIG_DATA']``: ``ENV_VARS`` itself.
+
+    Returns an empty dict when none is there (the callers use defaults).
+    """
+    if not isinstance(params, dict):
+        return {}
+    task_section = params.get('task')
+    candidates = (
+        task_section.get('config_data') if isinstance(task_section, dict) else None,
+        params.get('config_data'),
+        params.get('CONFIG_DATA'),
+    )
+    for config in candidates:
+        if isinstance(config, dict) and isinstance(config.get('APP'), dict):
+            options = config['APP'].get('OPTIONS')
+            return options if isinstance(options, dict) else {}
+    return {}
+
+
+def _option_value(entry: Any, default: Any) -> Any:
+    """Value of a configuration entry: ``{"value": x, ...}`` or a plain ``x``."""
+    if isinstance(entry, dict):
+        return entry.get('value', default)
+    return default if entry is None else entry
+
+
+def get_app_option_value(params: Optional[Dict[str, Any]], section: str, key: str, default: Any) -> Any:
+    """``APP.OPTIONS.<section>.<key>`` value from ``params``, ``default`` when absent."""
+    section_config = get_app_options(params).get(section)
+    if not isinstance(section_config, dict):
+        return default
+    return _option_value(section_config.get(key), default)
+
+
 def get_optimization_thresholds(task_parameters: Optional[Dict[str, Any]] = None) -> Dict[str, int]:
     """
     Get optimization thresholds configuration from task parameters or defaults.
@@ -56,31 +99,18 @@ def get_optimization_thresholds(task_parameters: Optional[Dict[str, Any]] = None
     - source_mv_fid_threshold: Max FIDs for inline IN clause (above creates MV)
 
     Args:
-        task_parameters: Task parameters dict containing config section
+        task_parameters: Task parameters or ENV_VARS (see get_app_options)
 
     Returns:
         dict: Optimization thresholds
     """
-    if not task_parameters:
-        return DEFAULT_OPTIMIZATION_THRESHOLDS.copy()
-
-    config = task_parameters.get('config', {})
-    app_config = config.get('APP', {})
-    settings = app_config.get('SETTINGS', {})
-    opt_config = settings.get('OPTIMIZATION_THRESHOLDS', {})
-
-    if not opt_config:
+    opt_config = get_app_options(task_parameters).get('OPTIMIZATION_THRESHOLDS')
+    if not isinstance(opt_config, dict) or not opt_config:
         return DEFAULT_OPTIMIZATION_THRESHOLDS.copy()
 
     return {
-        'large_dataset_warning': opt_config.get('large_dataset_warning', {}).get('value', DEFAULT_OPTIMIZATION_THRESHOLDS['large_dataset_warning']),
-        'async_expression_threshold': opt_config.get('async_expression_threshold', {}).get('value', DEFAULT_OPTIMIZATION_THRESHOLDS['async_expression_threshold']),
-        'update_extents_threshold': opt_config.get('update_extents_threshold', {}).get('value', DEFAULT_OPTIMIZATION_THRESHOLDS['update_extents_threshold']),
-        'centroid_optimization_threshold': opt_config.get('centroid_optimization_threshold', {}).get('value', DEFAULT_OPTIMIZATION_THRESHOLDS['centroid_optimization_threshold']),
-        'exists_subquery_threshold': opt_config.get('exists_subquery_threshold', {}).get('value', DEFAULT_OPTIMIZATION_THRESHOLDS['exists_subquery_threshold']),
-        'parallel_processing_threshold': opt_config.get('parallel_processing_threshold', {}).get('value', DEFAULT_OPTIMIZATION_THRESHOLDS['parallel_processing_threshold']),
-        'progress_update_batch_size': opt_config.get('progress_update_batch_size', {}).get('value', DEFAULT_OPTIMIZATION_THRESHOLDS['progress_update_batch_size']),
-        'source_mv_fid_threshold': opt_config.get('source_mv_fid_threshold', {}).get('value', DEFAULT_OPTIMIZATION_THRESHOLDS['source_mv_fid_threshold'])
+        key: _option_value(opt_config.get(key), default)
+        for key, default in DEFAULT_OPTIMIZATION_THRESHOLDS.items()
     }
 
 
@@ -97,27 +127,18 @@ def get_simplification_config(task_parameters: Optional[Dict[str, Any]] = None) 
     - show_warnings: Whether to show simplification warnings
 
     Args:
-        task_parameters: Task parameters dict containing config section
+        task_parameters: Task parameters or ENV_VARS (see get_app_options)
 
     Returns:
         dict: Simplification configuration
     """
-    if not task_parameters:
+    simp_config = get_app_options(task_parameters).get('GEOMETRY_SIMPLIFICATION')
+    if not isinstance(simp_config, dict) or not simp_config:
         return DEFAULT_SIMPLIFICATION_CONFIG.copy()
 
-    config = task_parameters.get('config', {})
-    app_config = config.get('APP', {})
-    settings = app_config.get('SETTINGS', {})
-    simp_config = settings.get('GEOMETRY_SIMPLIFICATION', {})
-
-    if not simp_config:
-        return DEFAULT_SIMPLIFICATION_CONFIG.copy()
-
+    # 'show_warnings' is stored as 'show_simplification_warnings'
+    config_keys = {'show_warnings': 'show_simplification_warnings'}
     return {
-        'enabled': simp_config.get('enabled', {}).get('value', DEFAULT_SIMPLIFICATION_CONFIG['enabled']),
-        'max_wkt_length': simp_config.get('max_wkt_length', {}).get('value', DEFAULT_SIMPLIFICATION_CONFIG['max_wkt_length']),
-        'preserve_topology': simp_config.get('preserve_topology', {}).get('value', DEFAULT_SIMPLIFICATION_CONFIG['preserve_topology']),
-        'min_tolerance_meters': simp_config.get('min_tolerance_meters', {}).get('value', DEFAULT_SIMPLIFICATION_CONFIG['min_tolerance_meters']),
-        'max_tolerance_meters': simp_config.get('max_tolerance_meters', {}).get('value', DEFAULT_SIMPLIFICATION_CONFIG['max_tolerance_meters']),
-        'show_warnings': simp_config.get('show_simplification_warnings', {}).get('value', DEFAULT_SIMPLIFICATION_CONFIG['show_warnings'])
+        key: _option_value(simp_config.get(config_keys.get(key, key)), default)
+        for key, default in DEFAULT_SIMPLIFICATION_CONFIG.items()
     }
