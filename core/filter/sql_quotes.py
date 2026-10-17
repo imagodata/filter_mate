@@ -100,7 +100,50 @@ def map_outside_quotes(text: str, transform: Callable[[str], str], identifiers: 
     return unmask_quoted(transform(masked), parts)
 
 
-def count_outside_quotes(text: str, char: str) -> int:
-    """Occurrences of ``char`` outside string literals and identifiers."""
-    masked, _ = mask_quoted(text or '')
-    return masked.count(char)
+# QGIS -> SQL rewrites shared by ExpressionService and the backends'
+# converters. Both work on text masked by mask_quoted().
+
+# A number literal: the only other side that gets a numeric cast.
+_NUMBER_OPERAND = r'[-+]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][-+]?\d+)?(?![\w.])'
+
+
+def map_geometry_length(masked: str, parts: List[str], geometry_column: str, function: str) -> str:
+    """``length($geometry)`` / ``length("<geometry column>")`` -> ``<function>(...)``.
+
+    2026-10-17: any other length() stays: in QGIS length(string) is its
+    number of characters, ST_Length / GLength of a text is an error.
+    ``parts`` are the quoted parts returned with ``masked``.
+    """
+    column = f'"{geometry_column}"'
+
+    def _replace(match):
+        argument = match.group(1)
+        if argument.startswith('$') or parts[int(argument[1:-1])] == column:
+            return f'{function}({argument})'
+        return match.group(0)
+
+    return re.sub(
+        rf'\blength\s*\(\s*(\$geometry\b|\$geom\b|{IDENTIFIER_PLACEHOLDER})\s*\)',
+        _replace, masked, flags=re.IGNORECASE,
+    )
+
+
+def cast_numeric_operands(masked: str, operators: tuple, cast: str) -> str:
+    """Cast a column compared / combined with a NUMBER: ``"x" > 10`` -> ``"x"::numeric > 10``.
+
+    2026-10-17: the cast was added whatever the other side, so
+    ``"nature" <> 'Route'``, dates and now() comparisons failed in PostgreSQL
+    (invalid input syntax for type numeric). ``<>`` / ``!=`` are never cast.
+    ``cast`` is a replacement template on the column (group 1).
+    """
+    alternatives = '|'.join(re.escape(op) for op in ('<>', '!=') + tuple(operators))
+
+    def _replace(match):
+        if match.group(3) in ('<>', '!='):
+            return match.group(0)
+        return match.expand(cast) + match.group(2) + match.group(3) + match.group(4)
+
+    return re.sub(
+        rf'({IDENTIFIER_PLACEHOLDER})(\s*)({alternatives})(\s*)(?={_NUMBER_OPERAND})',
+        _replace, masked,
+    )

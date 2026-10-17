@@ -434,12 +434,15 @@ class ExpressionService:
         if not expression:
             return expression
 
-        from ..filter.sql_quotes import IDENTIFIER_PLACEHOLDER as _IDENTIFIER, mask_quoted, unmask_quoted
+        from ..filter.sql_quotes import (
+            IDENTIFIER_PLACEHOLDER as _IDENTIFIER, cast_numeric_operands, map_geometry_length, mask_quoted,
+            unmask_quoted,
+        )
 
         sql, parts = mask_quoted(expression)
 
         # 0. length() of the geometry only (before $geometry is replaced)
-        sql = _geometry_length(sql, parts, geometry_column, 'ST_Length')
+        sql = map_geometry_length(sql, parts, geometry_column, 'ST_Length')
 
         # 1. Replace $geometry with column reference (including $area, $length, etc.)
         spatial_conversions = {
@@ -480,7 +483,7 @@ class ExpressionService:
 
         # 5. Add type casting for numeric operations (comparison operators)
         # "field" > 10 -> "field"::numeric > 10, the other side a number only
-        sql = _cast_numeric_operand(sql, ('>=', '<=', '>', '<', '+', '-'), r'\1::numeric')
+        sql = cast_numeric_operands(sql, ('>=', '<=', '>', '<', '+', '-'), r'\1::numeric')
 
         # 6. Add type casting for text operations (LIKE/ILIKE)
         sql = re.sub(rf'({_IDENTIFIER})\s+(NOT\s+)?ILIKE', r'\1::text \2ILIKE', sql)
@@ -524,13 +527,14 @@ class ExpressionService:
             return expression
 
         from ..filter.sql_quotes import (
-            IDENTIFIER_PLACEHOLDER as _IDENTIFIER, LITERAL_PLACEHOLDER as _LITERAL, mask_quoted, unmask_quoted,
+            IDENTIFIER_PLACEHOLDER as _IDENTIFIER, LITERAL_PLACEHOLDER as _LITERAL, map_geometry_length, mask_quoted,
+            unmask_quoted,
         )
 
         sql, parts = mask_quoted(expression)
 
         # 0. length() of the geometry only (before $geometry is replaced)
-        sql = _geometry_length(sql, parts, geometry_column, 'GLength')
+        sql = map_geometry_length(sql, parts, geometry_column, 'GLength')
 
         # 1. Replace $geometry with column reference
         sql = re.sub(
@@ -831,54 +835,6 @@ class ExpressionService:
                     )
 
         return warnings
-
-
-# A number literal: the only right-hand side that gets a numeric cast.
-_NUMBER_OPERAND = r'[-+]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][-+]?\d+)?(?![\w.])'
-
-
-def _geometry_length(masked: str, parts: List[str], geometry_column: str, function: str) -> str:
-    """``length($geometry)`` / ``length("<geometry column>")`` -> ``<function>(...)``.
-
-    2026-10-17: any other length() stays: in QGIS length(string) is its
-    number of characters, ST_Length / GLength of a text is an error.
-    ``masked`` comes from sql_quotes.mask_quoted, ``parts`` its quoted parts.
-    """
-    from ..filter.sql_quotes import IDENTIFIER_PLACEHOLDER
-    column = f'"{geometry_column}"'
-
-    def _replace(match):
-        argument = match.group(1)
-        if argument.startswith('$') or parts[int(argument[1:-1])] == column:
-            return f'{function}({argument})'
-        return match.group(0)
-
-    return re.sub(
-        rf'\blength\s*\(\s*(\$geometry\b|\$geom\b|{IDENTIFIER_PLACEHOLDER})\s*\)',
-        _replace, masked, flags=re.IGNORECASE,
-    )
-
-
-def _cast_numeric_operand(masked: str, operators: tuple, cast: str) -> str:
-    """Cast a column compared / added to a NUMBER: ``"x" > 10`` -> ``"x"::numeric > 10``.
-
-    2026-10-17: the cast was added whatever the other side, so
-    ``"nature" <> 'Route'``, dates and now() comparisons failed in PostgreSQL
-    (invalid input syntax for type numeric). ``<>`` / ``!=`` are never cast.
-    ``cast`` is a replacement template on the column (group 1).
-    """
-    from ..filter.sql_quotes import IDENTIFIER_PLACEHOLDER
-    alternatives = '|'.join(re.escape(op) for op in ('<>', '!=') + tuple(operators))
-
-    def _replace(match):
-        if match.group(3) in ('<>', '!='):
-            return match.group(0)
-        return match.expand(cast) + match.group(2) + match.group(3) + match.group(4)
-
-    return re.sub(
-        rf'({IDENTIFIER_PLACEHOLDER})(\s*)({alternatives})(\s*)(?={_NUMBER_OPERAND})',
-        _replace, masked,
-    )
 
 
 def sanitize_subset_string(subset_string: str, logger=None) -> str:
