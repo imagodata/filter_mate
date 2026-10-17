@@ -1,6 +1,28 @@
 # Project Memory
 _Auto-maintained by project agent_
 
+## [2026-10-16] Audit profond de la v5 → PR #114 – #118, #122, #148 – #150, CHANGELOG #154
+Décisions à connaître :
+- `ControllerRegistry` était « falsy » (`__len__` = 0) : `if not self._registry` empêchait tout enregistrement, donc aucun
+  `setup()` / `teardown()` en production de janvier à octobre 2026. Corrigé (#150) contrôleur par contrôleur :
+  `ExploringController.setup()` est NEUTRALISÉ (il câblait des combos que le dock n'a pas) ; ne pas le réactiver sans
+  compter les appels des handlers vecteur (scripts du lot : comptes identiques à main exigés).
+- Fermer le dock = masquage : `closeEvent` ne démonte plus les contrôleurs (`on_dock_closed()` retire seulement la
+  pipette) ; le démontage se fait dans `unload()`, avant `removeDockWidget`.
+- Le dock reçoit l'app sous `dockwidget.filter_mate_app` (AppInitializer) ; `dockwidget.app` n'existe qu'en legacy et
+  ne doit PAS être posé (il réveille des chemins vecteur). Toujours `getattr(dw, 'filter_mate_app', None) or getattr(dw, 'app', None)`.
+- Fichiers dérivés raster / nuage : le hook `writeMapLayer` réécrit datasource, provider, `alphaBand`,
+  `layer-tree-layer@source` et retire la propriété `filtermate/derived` du XML quand la couche n'est plus dérivée ;
+  comparaison des sources par chemin relatif à la session (`cache.session_relative`). Limites documentées : mises en
+  page à couches verrouillées, terrain, profils, `.qlr`.
+- QGIS ≥ 3.42 : `identify` d'un nuage rend `GpsTime` en texte (valeur numérique sous `GpsTime (raw)`).
+- QGIS 3.44 / 4.2 : une copie de nuage ouverte sans `skipStatisticsCalculation` empoisonne le cache de blocs EPT
+  (points hors sélection) ; ouvrir les copies avec `LayerOptions` (skipStatisticsCalculation, skipIndexGeneration).
+- Le test GUI « a layer picked right after undo » échouait par intermittence : course entre un `singleShot(0)` et un
+  contrôle de restauration échu dans la même passe de boucle (#148, étape smoke déterministe `s_undo_pick_race`).
+- API REST : pas de CORS par défaut, Host contrôlé sur loopback, écritures cross-site refusées (403), corps JSON
+  exigé (415), tout appel QGIS via `run_on_main_thread` (503 si occupé), exports dans `<profil>/FilterMate/exports`.
+
 ## [2026-09-13 soir] PostgreSQL buffer, MV, rechargement projet, OGR → branche `claude/pg-buffer-project-reload`
 - MV de sélection : mémoïsée par tâche (`_source_selection_mv_cache`, clé = fids triés) et lue directement par
   l'EXISTS PostgreSQL (`_source_selection_mv_ref` → FROM la MV, préfiltre d'emprise `WHERE (TRUE)`).
