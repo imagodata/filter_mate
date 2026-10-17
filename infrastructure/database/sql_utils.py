@@ -23,7 +23,6 @@ from ..logging.redaction import mask_sensitive_text
 logger = logging.getLogger('FilterMate.Infrastructure.Database.SQLUtils')
 
 
-
 def _on_main_thread() -> bool:
     """True on the Qt main thread (a widget is never touched from a task's worker)."""
     try:
