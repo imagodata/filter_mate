@@ -222,6 +222,29 @@ class TestPointCloudExport:
         assert cloud_export.made == []
 
 
+class TestPointCloudExporterMissing:
+    """QGIS 3.26 / 3.27 filter point clouds but have no QgsPointCloudLayerExporter (3.28)."""
+
+    @pytest.fixture
+    def no_exporter(self, monkeypatch):
+        monkeypatch.delattr(sys.modules['qgis.core'], 'QgsPointCloudLayerExporter', raising=False)
+        monkeypatch.setattr(type(sys.modules['qgis.core']), '__getattr__', _missing_exporter, raising=False)
+
+    def test_export_reports_the_version_instead_of_raising(self, no_exporter, tmp_path):
+        result = exporters.PointCloudExportJob(FakeCloud(), str(tmp_path / 'cloud.laz')).run()
+        assert not result.success and 'QGIS 3.28' in result.message
+        assert os.listdir(tmp_path) == []
+
+    def test_exact_clip_reports_the_version(self, no_exporter):
+        footprint = fk.load("point_cloud_footprint")
+        assert footprint.point_cloud_exporter_class() is None
+        assert 'QGIS 3.28' in footprint.exporter_unavailable_message()
+
+
+def _missing_exporter(self, name):
+    raise ImportError(f"cannot import name {name}")
+
+
 class TestTasksCancel:
     def test_export_task_passes_its_feedback(self, monkeypatch):
         fk.install(monkeypatch, exporters)

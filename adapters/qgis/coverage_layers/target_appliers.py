@@ -575,8 +575,13 @@ class PointCloudTargetJob(TargetJob):
 
     def _prepare_exporter(self) -> None:
         """QgsPointCloudLayerExporter must be prepared on the main thread."""
-        from qgis.core import QgsPointCloudLayerExporter
-        from .point_cloud_footprint import index_ready, open_point_cloud
+        from .point_cloud_footprint import (
+            exporter_unavailable_message, index_ready, open_point_cloud, point_cloud_exporter_class,
+        )
+        exporter_class = point_cloud_exporter_class()
+        if exporter_class is None:
+            self._unsupported = exporter_unavailable_message()
+            return
         base = open_point_cloud(self._base_source, f"{self.layer_name}_base", self._base_provider)
         if not base.isValid():
             return
@@ -585,8 +590,8 @@ class PointCloudTargetJob(TargetJob):
             self._unsupported = "the point cloud has no index yet (LAS file being indexed): try again later"
             return
         self._base_layer = base  # keep alive while the task runs
-        exporter = QgsPointCloudLayerExporter(base)
-        exporter.setFormat(QgsPointCloudLayerExporter.ExportFormat.Las)
+        exporter = exporter_class(base)
+        exporter.setFormat(exporter_class.ExportFormat.Las)
         exporter.setFileName(self._new_path('.laz'))
         exporter.setAllAttributes()
         self._exporter = exporter

@@ -164,13 +164,16 @@ class PointCloudExportJob:
     """
 
     def __init__(self, layer, path: str, fmt: str = 'LAZ', crs=None) -> None:
-        from qgis.core import QgsPointCloudLayerExporter
-        from .point_cloud_footprint import index_ready
+        from .point_cloud_footprint import exporter_unavailable_message, index_ready, point_cloud_exporter_class
         self.layer_name = layer.name()
         self.path = path
         self.fmt = fmt.upper() if fmt else 'LAZ'
         self.exporter = None
         self.error = ''
+        exporter_class = point_cloud_exporter_class()
+        if exporter_class is None:
+            self.error = exporter_unavailable_message()
+            return
         if self.fmt not in POINT_CLOUD_FORMATS:
             self.error = f'unsupported point cloud format {self.fmt}'
             return
@@ -182,11 +185,11 @@ class PointCloudExportJob:
             self.error = 'the point cloud has no index yet (LAS file being indexed): try again later'
             return
         os.makedirs(os.path.dirname(os.path.abspath(path)) or '.', exist_ok=True)
-        exporter = QgsPointCloudLayerExporter(layer)
+        exporter = exporter_class(layer)
         exporter.setAllAttributes()
         if crs is not None and crs.isValid():
             exporter.setCrs(crs)
-        formats = QgsPointCloudLayerExporter.ExportFormat
+        formats = exporter_class.ExportFormat
         # Written under a partial name, renamed once complete.
         self.target = partial_path(path, POINT_CLOUD_FORMATS[self.fmt])
         if self.fmt in ('LAZ', 'LAS', 'COPC'):
