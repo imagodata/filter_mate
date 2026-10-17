@@ -1485,11 +1485,16 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
         return (display_value, fid_value)
 
     def _fetch_rows_by_identifier(self, identifier_field, values, expression, identifier_numeric=False, chunk_size=500):
-        """Fetch ``(display_value, fid)`` rows for the given identifiers, in chunks."""
+        """Fetch ``(display_value, fid)`` rows for the given identifiers, in chunks.
+
+        2026-10-17: an identifier that is no field of the layer (the feature-id
+        key '$id' / a legacy 'fid') looks the rows up by feature id.
+        """
         rows = []
         values = list(values)
         if not values:
             return rows
+        identifier_field = self._identifier_field_of_layer(identifier_field)
         try:
             expr, context = self._make_display_evaluator(expression)
             for start in range(0, len(values), chunk_size):

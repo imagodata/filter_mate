@@ -142,3 +142,48 @@ def test_identifier_that_is_no_field_keys_rows_by_feature_id(helpers):
     assert helpers['_is_feature_in_layer'](picker, 'fid', 7) is True
     request = helpers['_iterated'][-1]
     assert request.expression is None and request.fids == [7]
+
+
+@pytest.mark.unit
+def test_rows_beyond_the_list_are_fetched_by_feature_id_without_a_key_field():
+    """2026-10-17: setCheckedFeatureIds fetched '"fid" IN (...)' on a Shapefile: [] (and KeyError on 'fid')."""
+    path = Path(__file__).resolve().parents[1] / 'ui/widgets/custom_widgets.py'
+    tree = ast.parse(path.read_text(encoding='utf-8'))
+    widget = next(node for node in tree.body if isinstance(node, ast.ClassDef)
+                  and node.name == 'QgsCheckableComboBoxFeaturesListPickerWidget')
+    wanted = {'_fetch_rows_by_identifier', '_row_from_feature', '_identifier_field_of_layer',
+              '_build_identifier_lookup_request', '_to_number'}
+    nodes = [node for node in widget.body if isinstance(node, ast.FunctionDef) and node.name in wanted]
+    for node in nodes:
+        node.decorator_list = []
+    requests = []
+
+    class Feature:
+        def __init__(self, fid, nom):
+            self._fid, self._nom = fid, nom
+
+        def id(self):
+            return self._fid
+
+        def __getitem__(self, name):
+            if name != 'nom':
+                raise KeyError(name)
+            return self._nom
+
+    def iterate(layer, request=None):
+        requests.append(request)
+        return [Feature(fid, f"commune {fid}") for fid in (request.fids or [])]
+
+    namespace = {'QgsFeatureRequest': FakeRequest, 'QgsExpression': FakeExpression,
+                 'safe_iterate_features': iterate, 'logger': MagicMock()}
+    exec(compile(ast.Module(body=nodes, type_ignores=[]), str(path), 'exec'), namespace)
+    namespace['QgsCheckableComboBoxFeaturesListPickerWidget'] = SimpleNamespace(_to_number=namespace['_to_number'])
+    picker = SimpleNamespace(layer=SimpleNamespace(fields=lambda: SimpleNamespace(indexOf=lambda name: -1)))
+    for name in ('_identifier_field_of_layer', '_fetch_rows_by_identifier'):
+        setattr(picker, name, namespace[name].__get__(picker))
+    picker._build_identifier_lookup_request = namespace['_build_identifier_lookup_request']
+    picker._row_from_feature = namespace['_row_from_feature']
+    picker._make_display_evaluator = lambda expression: (None, None)
+    rows = picker._fetch_rows_by_identifier('$id', [4, 9], 'nom')
+    assert rows == [('commune 4', 4), ('commune 9', 9)]
+    assert requests[-1].expression is None and requests[-1].fids == [4, 9]
