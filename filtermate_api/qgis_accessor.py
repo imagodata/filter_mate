@@ -50,7 +50,8 @@ def _plugin_module(name: str):
     import); launched by uvicorn it is the top-level ``filtermate_api``.
     """
     import importlib
-    for candidate in (f"..{name}", f"filter_mate.{name}", name):
+    from .plugin_package import plugin_package_names
+    for candidate in (f"..{name}", *[f"{package}.{name}" for package in plugin_package_names()], name):
         try:
             if candidate.startswith(".."):
                 if not __package__ or "." not in __package__:

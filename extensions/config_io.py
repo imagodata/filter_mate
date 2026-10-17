@@ -72,7 +72,7 @@ def write_config_json(path: str, data: Any, indent: int = 2) -> bool:
     """
     try:
         try:
-            from filter_mate.infrastructure.utils.atomic_io import atomic_json_write
+            from ..infrastructure.utils.atomic_io import atomic_json_write
         except Exception:  # not running inside the plugin
             atomic_json_write = None
         safe = json_safe(data)

@@ -6,7 +6,8 @@ import json
 
 # Re-export get_optimization_thresholds for backward compatibility
 # Function was moved to core.optimization.config_provider in EPIC-1 Phase E7.5
-from filter_mate.core.optimization.config_provider import get_optimization_thresholds  # noqa: F401
+from ..core.optimization.config_provider import get_optimization_thresholds  # noqa: F401
+from ..core.domain.project_folder import project_folder
 
 ENV_VARS = {}
 
@@ -342,6 +343,14 @@ def _migrate_config(config_data, default_data):
             extensions["_display_name"] = "Extensions"
             dirty = True
 
+    # 7) AUTO_OPTIMIZATION.enabled / auto_centroid_for_distant: nothing reads them since the
+    # auto-optimization confirmation flow was removed (the dock keeps its own per-project switches).
+    auto_optimization = _section(options, "AUTO_OPTIMIZATION")
+    for dead_key in ("enabled", "auto_centroid_for_distant"):
+        if dead_key in auto_optimization:
+            del auto_optimization[dead_key]
+            dirty = True
+
     return dirty
 
 
@@ -451,7 +460,7 @@ def _write_config_json(path, data):
     """
     try:
         # Imported here: infrastructure.utils imports this module at load time
-        from filter_mate.infrastructure.utils.atomic_io import atomic_json_write
+        from ..infrastructure.utils.atomic_io import atomic_json_write
     except ImportError as error:
         QgsMessageLog.logMessage(
             f"FilterMate: atomic helper unavailable ({error}); config.json written with a local temp file",
@@ -483,7 +492,7 @@ def _keep_unreadable_config(path, reason):
         reason: Why (shown in the QGIS message log).
     """
     try:
-        from filter_mate.infrastructure.utils.atomic_io import backup_corrupt_file
+        from ..infrastructure.utils.atomic_io import backup_corrupt_file
     except ImportError as error:
         QgsMessageLog.logMessage(
             f"FilterMate: {path} cannot be used ({reason}) and could not be kept ({error}); "
@@ -519,12 +528,8 @@ def init_env_vars():
 
     # Plugin directory (where config.default.json is located)
     DIR_CONFIG = os.path.normpath(os.path.dirname(__file__))
-    PATH_ABSOLUTE_PROJECT = os.path.normpath(PROJECT.readPath("./"))
-    if PATH_ABSOLUTE_PROJECT == './':
-        if PLATFORM.startswith('win'):
-            PATH_ABSOLUTE_PROJECT = os.path.normpath(os.path.join(os.path.join(os.environ['USERPROFILE']), 'Desktop'))
-        else:
-            PATH_ABSOLUTE_PROJECT = os.path.normpath(os.environ['HOME'])
+    # An unsaved project has no folder: Desktop (Windows) / home (core.domain.project_folder)
+    PATH_ABSOLUTE_PROJECT = project_folder(PROJECT.readPath("./"), windows=PLATFORM.startswith('win'))
 
     QGIS_SETTINGS_PATH = QgsApplication.qgisSettingsDirPath()
     # Remove trailing separator if present
@@ -732,7 +737,7 @@ def init_env_vars():
 
     # Passwords an older version saved here (the URI of a PostgreSQL layer): mask them once
     try:
-        from filter_mate.infrastructure.logging.redaction import scrub_secrets_in_place
+        from ..infrastructure.logging.redaction import scrub_secrets_in_place
         scrubbed = scrub_secrets_in_place(CONFIG_DATA)
     except ImportError:
         scrubbed = 0

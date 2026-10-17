@@ -225,7 +225,7 @@ class ResourceSharingScanner:
             except Exception:  # nosec B110 - best-effort delegate lookup; falls back to direct ENV_VARS read below
                 pass
         try:
-            from filter_mate.config.config import ENV_VARS, _get_option_value
+            from ...config.config import ENV_VARS, _get_option_value
             cfg = (ENV_VARS.get("CONFIG_DATA", {}) or {}) \
                 .get("EXTENSIONS", {}) \
                 .get("favorites_sharing", {})
@@ -245,7 +245,7 @@ class ResourceSharingScanner:
             except Exception:  # nosec B110 - best-effort delegate lookup; falls back to direct ENV_VARS read below
                 pass
         try:
-            from filter_mate.config.config import ENV_VARS, _get_option_value
+            from ...config.config import ENV_VARS, _get_option_value
             cfg = (ENV_VARS.get("CONFIG_DATA", {}) or {}) \
                 .get("EXTENSIONS", {}) \
                 .get("favorites_sharing", {})

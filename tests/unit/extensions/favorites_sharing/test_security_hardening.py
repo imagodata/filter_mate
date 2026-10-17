@@ -362,6 +362,9 @@ def _fake_filter_mate_modules(monkeypatch):
     monkeypatch.setitem(
         sys.modules, "filter_mate.core.domain.layer_signature", layer_sig_mod
     )
+    # fork.py imports core.* relatively: re-root it under the fake filter_mate package
+    from tests.unit.extensions.plugin_alias import alias_package
+    alias_package(monkeypatch, "extensions.favorites_sharing.services.fork")
     return _FilterFavorite, captured
 
 

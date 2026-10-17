@@ -248,7 +248,7 @@ def safe_set_subset_string(layer, subset_expression: str) -> bool:
             if subset_expression and layer.providerType() == 'postgres':
                 try:
                     # Import from adapters (infrastructure/database -> adapters/backends)
-                    from filter_mate.adapters.backends.postgresql.filter_executor import apply_postgresql_type_casting
+                    from ...adapters.backends.postgresql.filter_executor import apply_postgresql_type_casting
                     subset_expression = apply_postgresql_type_casting(subset_expression, layer)
                     logger.debug("[SQL]   PostgreSQL type casting applied")
                 except ImportError:
@@ -327,7 +327,7 @@ def safe_set_subset_string(layer, subset_expression: str) -> bool:
                         # For PostgreSQL, try executing a simple query to check connection state
                         if layer.providerType() == 'postgres':
                             try:
-                                from filter_mate.infrastructure.utils import get_datasource_connexion_from_layer
+                                from ...infrastructure.utils import get_datasource_connexion_from_layer
                                 conn, _ = get_datasource_connexion_from_layer(layer)
                                 if conn:
                                     # Check if connection is in a broken/aborted transaction state

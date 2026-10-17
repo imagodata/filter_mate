@@ -202,8 +202,6 @@ class FinishedHandler:
         if apply_failures:
             self._display_apply_failures(apply_failures, iface)
 
-        # Clean up OGR backend temporary GEOS-safe layers
-        self._cleanup_ogr_temp_layers(task_parameters)
         self._release_task_caches(task_parameters)
 
         # MIG-023: Log TaskBridge metrics for migration validation
@@ -512,35 +510,6 @@ class FinishedHandler:
         store = getattr(task, '__dict__', None)
         if isinstance(store, dict):
             store.pop('_filtermate_task_caches', None)
-
-    def _cleanup_ogr_temp_layers(self, task_parameters: Dict[str, Any]) -> None:
-        """Clean up OGR backend temporary GEOS-safe layers.
-
-        These accumulate during multi-layer filtering and must be released
-        after task completes.
-
-        Args:
-            task_parameters: Task parameters dict that may contain backend instances.
-        """
-        try:
-            # Import cleanup function from OGR backend
-            from ..backends.ogr_backend import cleanup_ogr_temp_layers
-
-            # Get OGR backend instances from task_parameters if they exist
-            if task_parameters:
-                ogr_backends = []
-
-                # Look for backend instances in different places
-                if '_backend_instances' in task_parameters:
-                    ogr_backends.extend(task_parameters['_backend_instances'])
-
-                # Clean up each backend instance
-                for backend in ogr_backends:
-                    if backend and hasattr(backend, '_temp_layers_keep_alive'):
-                        cleanup_ogr_temp_layers(backend)
-                        logger.debug(f"Cleaned up temp layers for backend: {type(backend).__name__}")
-        except (ImportError, RuntimeError, AttributeError) as cleanup_err:
-            logger.debug(f"OGR temp layer cleanup failed (non-critical): {cleanup_err}")
 
     def _log_task_bridge_metrics(self, task_bridge: Optional[Any]) -> None:
         """Log TaskBridge metrics for migration validation (MIG-023).

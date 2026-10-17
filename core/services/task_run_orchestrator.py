@@ -111,10 +111,6 @@ class TaskRunOrchestrator:
         logger.info(f"🎬 TaskRunOrchestrator.run() STARTED: action={context.task_action}, layers={context.layers_count}")
 
         try:
-            # Step 1: Clear Spatialite support cache for fresh detection
-            logger.info("  Step 1: Clearing Spatialite cache...")
-            self._clear_spatialite_cache(context)
-
             # Step 2: Initialize source layer
             logger.info("  Step 2: Initializing source layer...")
             if not self._initialize_source_layer(context):
@@ -206,19 +202,6 @@ class TaskRunOrchestrator:
                 exception=e,
                 context=context  # v4.0.1 FIX: Pass context back even on exception
             )
-
-    def _clear_spatialite_cache(self, context: TaskRunContext):
-        """Clear Spatialite support cache for fresh detection."""
-        if context.task_action == 'filter':
-            try:
-                # Import is done here to avoid circular dependencies
-                from ..ports import get_backend_services
-                SpatialiteGeometricFilter = get_backend_services().get_spatialite_geometric_filter()
-                if SpatialiteGeometricFilter and hasattr(SpatialiteGeometricFilter, 'clear_support_cache'):
-                    SpatialiteGeometricFilter.clear_support_cache()
-                    logger.debug("Spatialite support cache cleared for fresh detection")
-            except Exception as e:
-                logger.debug(f"Could not clear Spatialite cache: {e}")
 
     def _initialize_source_layer(self, context: TaskRunContext) -> bool:
         """Initialize source layer."""

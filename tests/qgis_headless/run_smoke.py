@@ -945,6 +945,43 @@ def remote_sources():
     project.removeMapLayer(memory.id())
 
 
+def compat_checks():
+    """Version-dependent API the plugin relies on (audit October 2026): QMetaType, QColor, point cloud exporter."""
+    from qgis.core import QgsField
+    from qgis.PyQt.QtCore import QMetaType
+    from qgis.PyQt.QtGui import QColor
+    from filter_mate.adapters.qgis.coverage_layers.point_cloud_footprint import (
+        exporter_unavailable_message, point_cloud_exporter_class)
+
+    # Every QMetaType.Type member the plugin compares field types with (layer_adapter, layer_utils, ...).
+    used = ('Int', 'UInt', 'LongLong', 'ULongLong', 'Double', 'QString', 'QChar', 'QDate', 'QTime', 'QDateTime',
+            'Bool', 'QByteArray')
+    missing = [name for name in used if not hasattr(QMetaType.Type, name)]
+    check('QMetaType.Type has every member the plugin uses', not missing, f"missing={missing}")
+    field = QgsField('population')  # the only QgsField the plugin builds (point_cloud_footprint): no type argument
+    check('QgsField(name) builds without a type argument', field.name() == 'population', f"type={field.type()}")
+
+    check('QColor.NameFormat.HexArgb / HexRgb exist (scoped spelling)',
+          QColor('#80ff0000').name(QColor.NameFormat.HexArgb).lower() == '#80ff0000'
+          and QColor('#ff0000').name(QColor.NameFormat.HexRgb).lower() == '#ff0000')
+
+    exporter = point_cloud_exporter_class()
+    has_exporter = hasattr(__import__('qgis.core', fromlist=['x']), 'QgsPointCloudLayerExporter')
+    check('point cloud exporter class matches the QGIS build (3.28+)', (exporter is not None) == has_exporter,
+          f"QGIS {Qgis.QGIS_VERSION}, exporter={exporter is not None}")
+    if exporter is None:
+        from filter_mate.adapters.qgis.coverage_layers.exporters import PointCloudExportJob
+
+        class NoLayer:  # never touched: the missing exporter is reported first
+            def name(self):
+                return 'cloud'
+
+        result = PointCloudExportJob(NoLayer(), os.path.join(info['work'], 'out.laz')).run()
+        check('point cloud export without the exporter reports "QGIS 3.28" instead of raising',
+              not result.success and 'QGIS 3.28' in result.message and result.message == exporter_unavailable_message(),
+              result.message)
+
+
 def ogr_target_centroids():
     """FilterMate 5: a target chosen 'by its centroids' is tested by its point on surface on the OGR backend too."""
     import json as _json
@@ -1008,7 +1045,7 @@ def main():
     for step in (plugin_starts_without_iface, provider_lists_algorithms, load_layers, raster_to_vector,
                  vector_to_raster, raster_alpha_band, point_clouds, remote_sources, subset_literals,
                  user_data_safety, user_data_safety_postgresql, user_data_safety_native_spatialite,
-                 user_data_safety_two_databases, ogr_target_centroids,
+                 user_data_safety_two_databases, compat_checks, ogr_target_centroids,
                  environment):
         if (step is not plugin_starts_without_iface
                 and QgsApplication.processingRegistry().providerById('filtermate') is None):

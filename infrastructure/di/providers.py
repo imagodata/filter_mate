@@ -227,21 +227,6 @@ class ServiceProvider:
         )
         logger.debug("Registered ExpressionService")
 
-        # Register cache (infrastructure)
-        try:
-            from ..cache.filter_cache import FilterCache
-            cache_config = config.get('cache', {})
-            container.register_singleton(
-                CachePort,
-                lambda c: FilterCache(
-                    max_size=cache_config.get('max_size', 1000),
-                    ttl_seconds=cache_config.get('ttl_seconds', 3600)
-                )
-            )
-            logger.debug("Registered FilterCache as CachePort")
-        except ImportError:
-            logger.warning("FilterCache not available, cache disabled")
-
         # Register layer repository
         try:
             from ...adapters.repositories.layer_repository import QGISLayerRepository

@@ -124,15 +124,6 @@ class FilterApplicationService:
         """Handle unfilter operation using history undo."""
         layer_id = layer.id()
 
-        # Clear Spatialite cache for this layer when unfiltering
-        try:
-            from ...infrastructure.cache import get_cache
-            cache = get_cache()
-            cache.clear_layer_cache(layer_id)
-            logger.debug(f"FilterMate: Cleared Spatialite cache for {layer.name()}")
-        except Exception as e:
-            logger.debug(f"Could not clear Spatialite cache: {e}")
-
         # Use history manager for proper undo
         history = self._history_manager.get_history(layer_id)
 

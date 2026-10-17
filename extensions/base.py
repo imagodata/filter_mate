@@ -284,7 +284,7 @@ class BaseExtension(ABC):
         safely mutate the returned dict and persist via ``_persist_config()``.
         """
         try:
-            from filter_mate.config.config import ENV_VARS
+            from ..config.config import ENV_VARS
         except Exception:
             return {}
         config_data = ENV_VARS.get("CONFIG_DATA")
@@ -311,7 +311,7 @@ class BaseExtension(ABC):
         cfg = self._get_extension_config_dict()
         if key in cfg:
             try:
-                from filter_mate.config.config import _get_option_value
+                from ..config.config import _get_option_value
             except Exception:
                 raw = cfg[key]
                 if isinstance(raw, dict) and "value" in raw:
@@ -376,7 +376,7 @@ class BaseExtension(ABC):
         stale EXTENSIONS section that no longer has our schema.
         """
         try:
-            from filter_mate.config.config import ENV_VARS
+            from ..config.config import ENV_VARS
         except Exception:
             return False
         config_path = ENV_VARS.get("CONFIG_JSON_PATH")
@@ -471,7 +471,7 @@ class BaseExtension(ABC):
             return False
 
         try:
-            from filter_mate.config.config import _sync_metadata
+            from ..config.config import _sync_metadata
         except Exception:
             _sync_metadata = None
 

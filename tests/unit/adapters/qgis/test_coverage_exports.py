@@ -4,6 +4,7 @@ import importlib.util
 import os
 import pathlib
 import sys
+import types
 
 import pytest
 
@@ -22,6 +23,7 @@ def _fakes():
 fk = _fakes()
 exporters = fk.load("exporters")
 task_module = fk.load("cross_filter_task")
+footprint = fk.load("point_cloud_footprint")
 
 
 def _write_tif(path, size=4):
@@ -220,6 +222,24 @@ class TestPointCloudExport:
         result = exporters.PointCloudExportJob(cloud, str(tmp_path / 'cloud.laz')).run()
         assert not result.success and message in result.message
         assert cloud_export.made == []
+
+
+class TestPointCloudExporterMissing:
+    """QGIS 3.26 / 3.27 filter point clouds but have no QgsPointCloudLayerExporter (3.28)."""
+
+    @pytest.fixture
+    def no_exporter(self, monkeypatch):
+        # A qgis.core without the class: 'from qgis.core import QgsPointCloudLayerExporter' raises ImportError.
+        monkeypatch.setitem(sys.modules, 'qgis.core', types.ModuleType('qgis.core'))
+
+    def test_export_reports_the_version_instead_of_raising(self, no_exporter, tmp_path):
+        result = exporters.PointCloudExportJob(FakeCloud(), str(tmp_path / 'cloud.laz')).run()
+        assert not result.success and 'QGIS 3.28' in result.message
+        assert os.listdir(tmp_path) == []
+
+    def test_exact_clip_reports_the_version(self, no_exporter):
+        assert footprint.point_cloud_exporter_class() is None
+        assert 'QGIS 3.28' in footprint.exporter_unavailable_message()
 
 
 class PrivateCloud(FakeCloud):

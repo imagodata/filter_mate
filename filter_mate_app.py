@@ -122,8 +122,6 @@ try:
     logger.debug("✓ variables_manager")
     from .core.services.task_orchestrator import TaskOrchestrator  # v4.1: Task orchestration extraction
     logger.debug("✓ task_orchestrator")
-    from .core.services.optimization_manager import OptimizationManager  # v4.2: Optimization management extraction
-    logger.debug("✓ optimization_manager")
     from .adapters.filter_result_handler import FilterResultHandler  # v4.3: Filter result handling extraction
     logger.debug("✓ filter_result_handler")
     from .core.services.app_initializer import AppInitializer  # v4.4: App initialization extraction
@@ -150,7 +148,7 @@ except ImportError as e:
     TaskParameterBuilder = LayerRefreshManager = LayerTaskCompletionHandler = None
     LayerLifecycleService = LayerLifecycleConfig = TaskManagementService = TaskManagementConfig = None
     UndoRedoHandler = DatabaseManager = VariablesPersistenceManager = TaskOrchestrator = None
-    OptimizationManager = FilterResultHandler = AppInitializer = DatasourceManager = LayerFilterBuilder = None
+    FilterResultHandler = AppInitializer = DatasourceManager = LayerFilterBuilder = None
     LayerValidator = FilterApplicationService = None
     def _init_hexagonal_services(config=None): pass
     def _cleanup_hexagonal_services(): pass
@@ -499,23 +497,6 @@ class FilterMateApp:
         self._favorites_migration_service = FavoritesMigrationService()
         logger.debug("FilterMate: FavoritesMigrationService initialized")
 
-        # Spatialite cache
-        try:
-            from .infrastructure.cache import get_cache, cleanup_cache
-            self._spatialite_cache = get_cache()
-            expired_count = cleanup_cache()
-            if expired_count > 0:
-                logger.info(f"FilterMate: Cleaned up {expired_count} expired cache entries")
-            cache_stats = self._spatialite_cache.get_cache_stats()
-            logger.info(f"FilterMate: Spatialite cache initialized ({cache_stats['total_entries']} entries, {cache_stats['db_size_mb']} MB)")
-        except Exception as e:
-            logger.warning(
-                "FilterMate: Spatialite persistent cache disabled (init failed): %s. "
-                "Multi-step filter caching unavailable; operations will run uncached.",
-                e,
-            )
-            self._spatialite_cache = None
-
         # v4.0.1: Initialize BackendRegistry for hexagonal architecture compliance
         self._backend_registry = None
         try:
@@ -571,9 +552,6 @@ class FilterMateApp:
                                                     self._handle_remove_all_layers, self._handle_project_initialization) if HEXAGONAL_AVAILABLE and TaskOrchestrator else None
         if self._task_orchestrator:
             logger.debug("FilterMate: TaskOrchestrator initialized (v4.1 migration)")
-        self._optimization_manager = OptimizationManager(lambda: self.dockwidget, lambda: self.PROJECT, lambda: self.PROJECT_LAYERS) if HEXAGONAL_AVAILABLE and OptimizationManager else None
-        if self._optimization_manager:
-            logger.debug("FilterMate: OptimizationManager initialized (v4.2 migration)")
         self._filter_result_handler = FilterResultHandler(self._refresh_layers_and_canvas, self._push_filter_to_history, self._clear_filter_history, self.update_undo_redo_buttons,
                                                            lambda: self.PROJECT_LAYERS, lambda: self.dockwidget, lambda: self.iface) if HEXAGONAL_AVAILABLE and FilterResultHandler else None
         if self._filter_result_handler:
@@ -2231,37 +2209,6 @@ class FilterMateApp:
             logger.warning(f"Controller delegation failed for '{task_name}': {e}", exc_info=True)
             logger.info("Falling back to legacy code path")
             return False
-
-    # ========================================
-    # AUTO-OPTIMIZATION METHODS
-    # ========================================
-
-    def _check_and_confirm_optimizations(self, current_layer, task_parameters):
-        """Check for optimization opportunities and ask user for confirmation. Delegates to OptimizationManager."""
-        if self._optimization_manager is not None:
-            try:
-                return self._optimization_manager.check_and_confirm_optimizations(
-                    current_layer, task_parameters
-                )
-            except Exception as e:
-                logger.warning(f"v4.2: OptimizationManager failed: {e}")
-
-        # v4.7: Minimal fallback - return safe defaults (no optimizations)
-        # Full logic is now in OptimizationManager
-        logger.debug("Optimization check skipped (manager unavailable)")
-        return {}, False
-
-    def _apply_optimization_to_ui_widgets(self, selected_optimizations: dict):
-        """Apply accepted optimization choices to UI widgets. Delegates to OptimizationManager."""
-        if self._optimization_manager is not None:
-            try:
-                self._optimization_manager.apply_optimization_to_ui_widgets(selected_optimizations)
-                return
-            except Exception as e:
-                logger.warning(f"v4.2: OptimizationManager UI update failed: {e}")
-
-        # v4.7: Minimal fallback - full logic is in OptimizationManager
-        logger.debug("UI widget optimization skipped (manager unavailable)")
 
     def _build_layers_to_filter(self, current_layer):
         """Build list of layers to filter with validation. Delegates to LayerFilterBuilder."""

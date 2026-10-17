@@ -793,7 +793,8 @@ def find_favorites_service(plugin=None):
     candidates = [plugin, getattr(plugin, 'app', None)]
     try:
         from qgis.utils import plugins
-        loaded = plugins.get('filter_mate')
+        from ...core.domain.plugin_package import PLUGIN_PACKAGE
+        loaded = plugins.get(PLUGIN_PACKAGE)
         candidates += [loaded, getattr(loaded, 'app', None)]
     except Exception as exc:
         logger.debug(f"[FM5] loaded plugin instance not found: {exc}")

@@ -187,26 +187,6 @@ def get_provider_display_name(provider: ProviderType) -> str:
     return names.get(provider, "Unknown")
 
 
-def get_provider_icon_name(provider: ProviderType) -> str:
-    """
-    Get icon filename for provider.
-
-    Args:
-        provider: ProviderType enum value
-
-    Returns:
-        Icon filename (without path)
-    """
-    icons = {
-        ProviderType.POSTGRESQL: "postgresql.svg",
-        ProviderType.SPATIALITE: "spatialite.svg",
-        ProviderType.OGR: "ogr.svg",
-        ProviderType.MEMORY: "memory.svg",
-        ProviderType.UNKNOWN: "unknown.svg",
-    }
-    return icons.get(provider, "unknown.svg")
-
-
 def is_backend_available(provider: ProviderType) -> bool:
     """
     Check if a backend is available for use.

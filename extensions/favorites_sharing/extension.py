@@ -119,7 +119,7 @@ class FavoritesSharingExtension(BaseExtension):
             # installs the companion plugin — same UX as qfieldcloud.
             dependencies=["resource_sharing"],
             optional_dependencies=[],
-            icon_name="favorites_shared.png",
+            icon_name="link.png",
         )
 
     def config_schema(self) -> Dict[str, Dict[str, Any]]:

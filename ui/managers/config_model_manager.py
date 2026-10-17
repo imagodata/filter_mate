@@ -102,7 +102,8 @@ class ConfigModelManager:
             # Ignore if this matches the currently active translator locale
             # (spurious itemChanged when editor opens / setEditorData runs)
             from qgis.utils import plugins
-            plugin = plugins.get('filter_mate')
+            from ...core.domain.plugin_package import PLUGIN_PACKAGE
+            plugin = plugins.get(PLUGIN_PACKAGE)
             active_locale = getattr(plugin, '_current_locale', None) if plugin else None
             if new_locale == active_locale:
                 return
@@ -135,7 +136,8 @@ class ConfigModelManager:
 
             # 1) Reload translator + retranslate UI
             from qgis.utils import plugins
-            plugin = plugins.get('filter_mate')
+            from ...core.domain.plugin_package import PLUGIN_PACKAGE
+            plugin = plugins.get(PLUGIN_PACKAGE)
             if plugin and hasattr(plugin, 'reload_translator'):
                 try:
                     plugin.reload_translator(new_locale)
