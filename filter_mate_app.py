@@ -1898,10 +1898,14 @@ class FilterMateApp:
 
         Processes the first queued add_layers operation from self._add_layers_queue.
         Called after a previous add_layers task completes or from safety timer.
+
+        2026-10-17: the service is handed this queue - the one manage_task
+        fills. It processed its own, always empty: layers added during an
+        add_layers task were never registered.
         """
         service = self._get_task_management_service()
         if service:
-            service.process_add_layers_queue(self.manage_task)
+            service.process_add_layers_queue(self.manage_task, queue=self._add_layers_queue)
         else:
             logger.warning("TaskManagementService not available, cannot process queue")
 
