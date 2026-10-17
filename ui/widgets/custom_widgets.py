@@ -33,6 +33,7 @@ from qgis.PyQt import QtGui
 from qgis.PyQt.QtCore import (
     QCoreApplication,
     QEvent,
+    QPointF,
     QRect,
     QSize,
     Qt,
@@ -187,7 +188,8 @@ class ItemDelegate(QStyledItemDelegate):
         inner = rect.adjusted(3, 3, -3, -3)
         painter.drawRect(inner)
         painter.setBrush(QBrush(glyph))
-        painter.drawEllipse(inner.center(), 1.6, 1.6)
+        # PyQt6 has no drawEllipse(QPoint, float, float): the centre must be a QPointF.
+        painter.drawEllipse(QPointF(inner.center()), 1.6, 1.6)
         painter.restore()
 
     def getItemRect(self, item):

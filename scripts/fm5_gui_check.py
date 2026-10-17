@@ -245,6 +245,26 @@ def s_centroid_setup():
     save(d, '02b-centroid-targets')
 
 
+def s_centroid_popup():
+    """The list of targets opened and painted, then a real click on the centroid square of the roads."""
+    from qgis.PyQt.QtTest import QTest
+    from filter_mate.ui.widgets.custom_widgets import ItemDelegate
+    combo = dock().checkableComboBoxLayer_filtering_layers_to_filter
+    combo.showPopup()
+    view = combo.view()
+    view.window().grab().save(os.path.join(OUT, '02c-centroid-list.png'), 'PNG')  # raised under PyQt6 before 5.0.1
+    roads = layer('troncon_de_route').id()
+    row = next(r for r in range(combo.count()) if combo.model().item(r).text().startswith('troncon_de_route ['))
+    index = combo.model().index(row, 0)
+    toggle, _x, _w = ItemDelegate.trailing_layout(view.visualRect(index), view.viewport().fontMetrics(), index)
+    QTest.mouseClick(view.viewport(), Qt.MouseButton.LeftButton, Qt.KeyboardModifier.NoModifier, toggle.center())
+    check('centroids: a click on the square of a target turns its centroids on, the list stays open',
+          roads in combo.centroid_layer_ids() and view.isVisible(), str(combo.centroid_layer_ids()))
+    QTest.mouseClick(view.viewport(), Qt.MouseButton.LeftButton, Qt.KeyboardModifier.NoModifier, toggle.center())
+    check('centroids: a second click turns them off', roads not in combo.centroid_layer_ids(), str(combo.centroid_layer_ids()))
+    combo.hidePopup()
+
+
 def s_centroid_filter():
     run_task('filter')
 
@@ -700,7 +720,7 @@ def s_finish():
 STEPS = [
     (s_setup, 1500), (s_open_plugin, 6000), (s_vector_source, 3000), (s_vector_select, 2000),
     (s_vector_filter, 9000), (s_vector_check, 1000), (s_vector_undo, 3000), (s_vector_undo_check, 1000),
-    (s_centroid_registry, 800), (s_centroid_registry_check, 500), (s_centroid_setup, 1500), (s_centroid_filter, 9000), (s_centroid_check, 1000), (s_centroid_unfilter, 4000), (s_centroid_unfilter_check, 1000),
+    (s_centroid_registry, 800), (s_centroid_registry_check, 500), (s_centroid_setup, 1500), (s_centroid_popup, 1500), (s_centroid_filter, 9000), (s_centroid_check, 1000), (s_centroid_unfilter, 4000), (s_centroid_unfilter_check, 1000),
     (s_raster_source, 3000), (s_raster_mode, 2500), (s_raster_preview, 1500), (s_raster_preview_check, 1000),
     (s_raster_filter, 8000), (s_raster_check, 1000), (s_raster_unfilter, 3000), (s_raster_unfilter_check, 1000),
     (s_pipette_ortho, 3500), (s_pipette_ortho_check, 1500), (s_pipette_ortho_shot, 1500), (s_pipette_dem, 3000), (s_pipette_dem_check, 1000),
