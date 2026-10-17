@@ -67,7 +67,7 @@ def test_a_pick_during_a_layer_change_runs_after_it():
     layers = {"dem": _Layer("dem"), "pts": _Layer("pts")}
     dock = _dock(layers)
     dock.current_layer_changed(layers["dem"], manual_change=True)  # dropped before
-    assert dock._layer_change_after_update == ("dem", True)
+    assert dock._layer_change_after_update[:2] == ("dem", True)
 
     applied = []
     dock._updating_current_layer = False
@@ -83,7 +83,7 @@ def test_an_automatic_change_does_not_replace_a_pick():
     dock = _dock(layers)
     dock.current_layer_changed(layers["dem"], manual_change=True)
     dock.current_layer_changed(layers["pts"], manual_change=False)
-    assert dock._layer_change_after_update == ("dem", True)
+    assert dock._layer_change_after_update[:2] == ("dem", True)
 
 
 def test_nothing_runs_again_for_the_layer_just_applied():
@@ -102,7 +102,24 @@ def test_an_automatic_change_gives_way_to_a_later_pick():
     dock._updating_current_layer = False
     dock.current_layer_changed = lambda layer, manual_change=False: applied.append(layer.id())
     dock._run_layer_change_after_update(layers["pts"])
-    dock._user_layer_pick = (1.0, "dem")  # the user picked dem before the replay ran
+    import time
+    dock._user_layer_pick = (time.perf_counter(), "dem")  # the user picked dem after the request
     for callback in _Timer.calls:
         callback()
     assert applied == []
+
+
+def test_an_older_pick_does_not_cancel_the_request():
+    """2026-10-17 review: _user_layer_pick is never reset; a pick made before the request must not win."""
+    import time
+    layers = {"pts": _Layer("pts"), "zones": _Layer("zones")}
+    dock = _dock(layers)
+    dock._user_layer_pick = (time.perf_counter(), "dem")  # long before
+    dock.current_layer_changed(layers["zones"], manual_change=False)
+    applied = []
+    dock._updating_current_layer = False
+    dock.current_layer_changed = lambda layer, manual_change=False: applied.append(layer.id())
+    dock._run_layer_change_after_update(layers["pts"])
+    for callback in _Timer.calls:
+        callback()
+    assert applied == ["zones"]

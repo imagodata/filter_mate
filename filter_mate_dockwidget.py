@@ -5666,7 +5666,8 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             pending = getattr(self, '_layer_change_after_update', None)
             if layer is not None and (manual_change or not (pending and pending[1])):
                 try:
-                    self._layer_change_after_update = (layer.id(), bool(manual_change))
+                    import time
+                    self._layer_change_after_update = (layer.id(), bool(manual_change), time.perf_counter())
                 except RuntimeError:  # layer deleted
                     pass
             logger.debug("current_layer_changed: Already updating, the request runs after it")
@@ -5784,7 +5785,7 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         pending = self.__dict__.pop('_layer_change_after_update', None)
         if pending is None:
             return
-        layer_id, manual_change = pending
+        layer_id, manual_change, requested_at = pending
         try:
             if applied_layer is not None and applied_layer.id() == layer_id:
                 return  # the change that just ran was for that layer
@@ -5796,9 +5797,11 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             dock = weak_self()
             if dock is None:
                 return
+            # as _defer_layer_change: a pick made since this request, of another layer, wins
+            # (the recorded pick is never reset: an older one must not cancel the request)
             picked_at, picked_id = getattr(dock, '_user_layer_pick', None) or (0.0, None)
-            if not manual_change and picked_id not in (None, layer_id):
-                return  # the user picked another layer since
+            if not manual_change and picked_at >= requested_at and picked_id not in (None, layer_id):
+                return
             fresh = QgsProject.instance().mapLayer(layer_id)
             if fresh is not None:
                 dock.current_layer_changed(fresh, manual_change=manual_change)
