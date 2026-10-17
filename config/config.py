@@ -454,12 +454,23 @@ def _write_config_json(path, data):
         from filter_mate.infrastructure.utils.atomic_io import atomic_json_write
     except ImportError as error:
         QgsMessageLog.logMessage(
-            f"FilterMate: atomic write unavailable ({error}); config.json written directly",
+            f"FilterMate: atomic helper unavailable ({error}); config.json written with a local temp file",
             "FilterMate",
             Qgis.MessageLevel.Warning
         )
-        with open(path, 'w', encoding='utf-8') as outfile:
-            json.dump(data, outfile, indent=4, ensure_ascii=False)
+        import tempfile
+        text = json.dumps(data, indent=4, ensure_ascii=False)
+        fd, tmp_path = tempfile.mkstemp(prefix=".fm_", suffix=".tmp", dir=os.path.dirname(os.path.abspath(path)))
+        try:
+            with os.fdopen(fd, 'w', encoding='utf-8') as outfile:
+                outfile.write(text)
+            os.replace(tmp_path, path)
+        except BaseException:
+            try:
+                os.unlink(tmp_path)
+            except OSError:
+                pass
+            raise
         return
     atomic_json_write(path, data, indent=4)
 
