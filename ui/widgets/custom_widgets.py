@@ -1257,7 +1257,7 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
 
         list_widget.clear()
 
-        identifier_field = list_widget.getIdentifierFieldName()
+        identifier_field = self._identifier_field_of_layer(list_widget.getIdentifierFieldName())
         identifier_numeric = bool(getattr(list_widget, 'identifier_field_type_numeric', False))
         expr, context = self._make_display_evaluator(expression)
 
@@ -1453,6 +1453,22 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
             return QgsExpression.quotedColumnRef(expression.replace('"', ''))
         return f"({expression})"
 
+    def _identifier_field_of_layer(self, identifier_field):
+        """``identifier_field`` when it is a field of the layer, else None (rows keyed by feature id).
+
+        2026-10-17: a layer without a unique key field is keyed by its QGIS
+        feature id, recorded as 'fid' (core.domain.stable_key); a Shapefile or a
+        web layer has no field of that name.
+        """
+        if not identifier_field:
+            return None
+        try:
+            if self.layer.fields().indexOf(identifier_field) < 0:
+                return None
+        except (RuntimeError, AttributeError):
+            pass
+        return identifier_field
+
     @staticmethod
     def _row_from_feature(feature, identifier_field, expression, expr, context):
         """Build the ``(display_value, fid)`` row for a feature."""
@@ -1613,7 +1629,7 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
         """
         try:
             request = self._build_identifier_lookup_request(
-                identifier_field_name, [id_value], self._identifier_is_numeric())
+                self._identifier_field_of_layer(identifier_field_name), [id_value], self._identifier_is_numeric())
             request.setLimit(1)
             try:
                 filter_expression = request.filterExpression()

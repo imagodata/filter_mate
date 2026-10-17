@@ -289,7 +289,9 @@ class AttributeFilterExecutor:
         # Extract feature IDs
         # CRITICAL FIX: Handle ctid (PostgreSQL internal identifier)
         # 2026-10-17: the values keep their type (the formatter quotes text, a NULL key is NULL).
-        if self.primary_key == 'ctid':
+        # A key that is no field of the layer is the QGIS feature id (core.domain.stable_key).
+        feature_id_key = self.primary_key != 'ctid' and self.primary_key not in self.field_names
+        if self.primary_key == 'ctid' or feature_id_key:
             features_ids = [feature.id() for feature in features_list]
         else:
             features_ids = [feature[self.primary_key] for feature in features_list]
@@ -297,14 +299,28 @@ class AttributeFilterExecutor:
         if not features_ids:
             return None
 
+        expression = None
+        if feature_id_key:
+            from ...domain.source_capability import classify_layer
+            if classify_layer(self.layer).is_remote_service:
+                logger.warning(
+                    f"{self.layer.name()}: no unique key field on this web service, "
+                    "the selected features cannot be listed for the server (no filter by feature list)"
+                )
+                return None
+            if self.layer.providerType() in ('memory', 'delimitedtext'):
+                # The subset of these providers is a QGIS expression: the feature id is $id
+                expression = f'$id IN ({", ".join(str(int(fid)) for fid in features_ids)})'
+
         # Build base IN expression
-        expression = build_feature_id_expression(
-            features_ids=features_ids,
-            primary_key_name=self.primary_key,
-            table_name=self.table_name if self.provider_type == PROVIDER_POSTGRES else None,
-            provider_type=self.provider_type,
-            is_numeric=is_numeric
-        )
+        if expression is None:
+            expression = build_feature_id_expression(
+                features_ids=features_ids,
+                primary_key_name=self.primary_key,
+                table_name=self.table_name if self.provider_type == PROVIDER_POSTGRES else None,
+                provider_type=self.provider_type,
+                is_numeric=True if feature_id_key else is_numeric
+            )
 
         # Combine with old subset if needed
         if self.old_subset:

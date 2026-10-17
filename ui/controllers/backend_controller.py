@@ -106,18 +106,21 @@ def _source_capability(layer):
 
 def _remote_badge_texts(capability) -> Tuple[str, str]:
     """Translated badge text and tooltip of a remote source."""
-    def tr(text):
-        return QCoreApplication.translate("BackendController", text)
-
     if capability is not None and capability.locality.value == 'remote_file':
-        tooltip = tr("Remote file: every read goes over the network. "
-                     "FilterMate does not count its features on the main thread.")
+        tooltip = QCoreApplication.translate(
+            "BackendController",
+            "Remote file: every read goes over the network. "
+            "FilterMate does not count its features on the main thread.")
     else:
-        tooltip = tr("Remote service: the filter is sent to the server when it can translate it. "
-                     "FilterMate does not count its features on the main thread.")
+        tooltip = QCoreApplication.translate(
+            "BackendController",
+            "Remote service: the filter is sent to the server when it can translate it. "
+            "FilterMate does not count its features on the main thread.")
     if capability is not None and capability.key_list_limit:
-        tooltip += "\n" + tr("A filter by feature list is limited to {0} features.").format(capability.key_list_limit)
-    return tr("Remote"), tooltip
+        tooltip += "\n" + QCoreApplication.translate(
+            "BackendController", "A filter by feature list is limited to {0} features."
+        ).format(capability.key_list_limit)
+    return QCoreApplication.translate("BackendController", "Remote"), tooltip
 
 
 class BackendController(BaseController):

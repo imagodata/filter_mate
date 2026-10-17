@@ -53,7 +53,7 @@ def helpers():
     tree = ast.parse(path.read_text(encoding='utf-8'))
     widget = next(node for node in tree.body if isinstance(node, ast.ClassDef)
                   and node.name == 'QgsCheckableComboBoxFeaturesListPickerWidget')
-    wanted = {'_build_identifier_lookup_request', '_is_feature_in_layer', '_to_number'}
+    wanted = {'_build_identifier_lookup_request', '_is_feature_in_layer', '_to_number', '_identifier_field_of_layer'}
     nodes = [node for node in widget.body if isinstance(node, ast.FunctionDef) and node.name in wanted]
     for node in nodes:
         node.decorator_list = []  # drop @staticmethod: exec as plain functions
@@ -103,6 +103,7 @@ def test_membership_is_a_single_limited_lookup(helpers):
         layer=SimpleNamespace(rows=[object()]),
         _build_identifier_lookup_request=helpers['_build_identifier_lookup_request'],
         _identifier_is_numeric=lambda: False,
+        _identifier_field_of_layer=lambda name: name,
     )
     assert helpers['_is_feature_in_layer'](picker, 'code', 'A1') is True
     request = helpers['_iterated'][-1]
@@ -121,3 +122,23 @@ def test_membership_assumes_present_on_error(helpers):
     picker = SimpleNamespace(layer=SimpleNamespace(rows=[]), _build_identifier_lookup_request=boom,
                              _identifier_is_numeric=lambda: False)
     assert helpers['_is_feature_in_layer'](picker, 'code', 'A1') is True
+
+
+@pytest.mark.unit
+def test_identifier_that_is_no_field_keys_rows_by_feature_id(helpers):
+    """2026-10-17: a layer without a unique key field is registered with the pseudo key 'fid'.
+
+    A Shapefile or a web layer has no field of that name: the rows are keyed by
+    feature id (setFilterFids) instead of an expression on a missing field.
+    """
+    fields = SimpleNamespace(indexOf=lambda name: 0 if name == 'code' else -1)
+    picker = SimpleNamespace(layer=SimpleNamespace(rows=[object()], fields=lambda: fields))
+    assert helpers['_identifier_field_of_layer'](picker, 'fid') is None
+    assert helpers['_identifier_field_of_layer'](picker, 'code') == 'code'
+    assert helpers['_identifier_field_of_layer'](picker, '') is None
+    picker._build_identifier_lookup_request = helpers['_build_identifier_lookup_request']
+    picker._identifier_is_numeric = lambda: True
+    picker._identifier_field_of_layer = lambda name: helpers['_identifier_field_of_layer'](picker, name)
+    assert helpers['_is_feature_in_layer'](picker, 'fid', 7) is True
+    request = helpers['_iterated'][-1]
+    assert request.expression is None and request.fids == [7]

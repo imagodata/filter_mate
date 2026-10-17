@@ -1771,12 +1771,9 @@ class ExploringController(BaseController, LayerSelectionMixin):
                     # This applies to ALL providers (PostgreSQL, OGR, Spatialite)
                     # UUID FIX v4.0: Convert pk_value to string explicitly for non-numeric types
                     # Note: filter_task.py handles qualified names for PostgreSQL subsetString separately
-                    if pk_is_numeric is True:
-                        expression = f'"{pk_name}" = {pk_value}'
-                    else:
-                        # Convert to string and escape single quotes for UUID, text, etc.
-                        pk_value_str = str(pk_value).replace("'", "''")
-                        expression = f'"{pk_name}" = \'{pk_value_str}\''
+                    # 2026-10-17: the shared key formatter (quotes doubled, never a raw text value)
+                    from ...core.filter.pk_formatter import format_key_literal
+                    expression = f'"{pk_name}" = {format_key_literal(pk_value, pk_is_numeric is True)}'
                     logger.debug(f"Generated expression for {provider_type}: {expression}")
 
                     # CRITICAL: Also reload feature to ensure geometry is available for zoom
@@ -1842,6 +1839,13 @@ class ExploringController(BaseController, LayerSelectionMixin):
                 pk_name = layer_props["infos"].get("primary_key_name")
                 pk_is_numeric = layer_props["infos"].get("primary_key_is_numeric", True)
                 provider_type = layer_props["infos"].get("layer_provider_type", "")
+                # 2026-10-17: a key that is no field of the layer is the QGIS feature id
+                # (core.domain.stable_key: 'fid' of a Shapefile / web layer without a unique key)
+                try:
+                    if pk_name and self._dockwidget.current_layer.fields().indexOf(pk_name) < 0:
+                        pk_name = None
+                except (RuntimeError, AttributeError):
+                    pass
 
                 if pk_name is None:
                     # FALLBACK: Use feature IDs directly when no primary key is available
