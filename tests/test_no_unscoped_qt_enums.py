@@ -57,6 +57,8 @@ UNSCOPED_MEMBERS = {
     "QTabWidget": {"North", "South", "Rounded", "Triangular"},
     "QComboBox": {"NoInsert", "InsertAtBottom", "AdjustToContents"},
     "QLayout": {"SetFixedSize", "SetMinimumSize", "SetDefaultConstraint"},
+    # QColor.name(QColor.HexArgb) raised AttributeError in QGIS 4 (json view delegate, October 2026)
+    "QColor": {"HexRgb", "HexArgb", "Rgb", "Hsv", "Hsl", "Cmyk", "ExtendedRgb"},
 }
 REMOVED_METHODS = {"exec_"}
 
@@ -68,16 +70,60 @@ def _plugin_python_files():
         yield path
 
 
+def _import_aliases(tree):
+    """Map local names to the Qt / QGIS class they were imported as.
+
+    ``from qgis.PyQt.QtWidgets import QSizePolicy as SP`` makes ``SP.Fixed`` an
+    offence even though ``SP`` is not in ``UNSCOPED_MEMBERS``. Plain module
+    aliases (``QtWidgets``) need no entry: the class name is then the attribute
+    that precedes the member (``QtWidgets.QSizePolicy.Fixed``).
+    """
+    aliases = {}
+    for node in ast.walk(tree):
+        if isinstance(node, ast.ImportFrom):
+            for alias in node.names:
+                if alias.asname and alias.name in UNSCOPED_MEMBERS:
+                    aliases[alias.asname] = alias.name
+        elif isinstance(node, ast.Assign) and len(node.targets) == 1 and isinstance(node.targets[0], ast.Name):
+            value = node.value
+            target = value.id if isinstance(value, ast.Name) else (value.attr if isinstance(value, ast.Attribute) else None)
+            if target in UNSCOPED_MEMBERS:
+                aliases[node.targets[0].id] = target  # SP = QSizePolicy
+    return aliases
+
+
+def _owner_name(owner, aliases):
+    if isinstance(owner, ast.Name):
+        return aliases.get(owner.id, owner.id)
+    if isinstance(owner, ast.Attribute):
+        return owner.attr
+    return None
+
+
 def _offences(tree):
+    aliases = _import_aliases(tree)
     for node in ast.walk(tree):
         if isinstance(node, ast.Attribute):
-            owner = node.value
-            owner_name = owner.id if isinstance(owner, ast.Name) else (
-                owner.attr if isinstance(owner, ast.Attribute) else None)
+            owner_name = _owner_name(node.value, aliases)
             if owner_name in UNSCOPED_MEMBERS and node.attr in UNSCOPED_MEMBERS[owner_name]:
                 yield node.lineno, f"{owner_name}.{node.attr}"
         if isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute) and node.func.attr in REMOVED_METHODS:
             yield node.lineno, f".{node.func.attr}()"
+
+
+def _tmp_offences(source):
+    return [what for _, what in _offences(ast.parse(source))]
+
+
+@pytest.mark.unit
+def test_detector_resolves_import_aliases_and_qcolor():
+    assert _tmp_offences(
+        "from qgis.PyQt.QtWidgets import QSizePolicy as SP\nx = SP.Fixed\n") == ["QSizePolicy.Fixed"]
+    assert _tmp_offences("SP = QtWidgets.QSizePolicy\nx = SP.Expanding") == ["QSizePolicy.Expanding"]
+    assert _tmp_offences("x = QtWidgets.QSizePolicy.Preferred") == ["QSizePolicy.Preferred"]
+    assert _tmp_offences("c.name(QtGui.QColor.HexArgb)") == ["QColor.HexArgb"]
+    assert _tmp_offences("c.name(QColor.NameFormat.HexArgb)") == []
+    assert _tmp_offences("x = SP.Policy.Fixed") == []
 
 
 @pytest.mark.unit
