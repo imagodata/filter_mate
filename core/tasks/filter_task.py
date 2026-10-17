@@ -930,6 +930,24 @@ class FilterEngineTask(QgsTask):
         self.layers_count = result.layers_count
         self.provider_list = result.provider_list
 
+    @property
+    def param_all_layers(self):
+        """Target layers of the task, every provider (``self.layers`` flattened).
+
+        2026-10-17: the materialized view handler registers these layers as
+        users of the MVs it creates, and the cleanup frees their references;
+        both read ``param_all_layers``, which nothing defined. Only the
+        source layer was registered, and unfiltering it dropped (CASCADE)
+        MVs the distant layers' subsets still referenced.
+        """
+        targets = []
+        for entries in (getattr(self, 'layers', None) or {}).values():
+            for entry in entries or []:
+                layer = entry[0] if isinstance(entry, (list, tuple)) else entry
+                if layer is not None:
+                    targets.append(layer)
+        return targets
+
     def _queue_subset_string(self, layer, expression):
         """
         Queue a subset string request for thread-safe application in finished().
