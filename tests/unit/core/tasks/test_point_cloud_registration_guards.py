@@ -711,6 +711,7 @@ class TestSharedStateStaysOnTheMainThread:
         monkeypatch.setattr(task_mod, "MESSAGE_TASKS_CATEGORIES", {"add_layers": "ManageLayers"})
         iface = MagicMock()
         monkeypatch.setattr(task_mod, "iface", iface, raising=False)
+        monkeypatch.setattr(task_mod, "Qgis", MagicMock(), raising=False)
         task = _task()
         task.exception = RuntimeError("unable to open database file")
         task.tr = lambda text: text
