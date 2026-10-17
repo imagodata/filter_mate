@@ -242,6 +242,32 @@ class TestPointCloudExporterMissing:
         assert 'QGIS 3.28' in footprint.exporter_unavailable_message()
 
 
+class TestRasterCreationOptions:
+    def test_creation_options_setter_of_qgis_3_44(self):
+        """setCreateOptions is deprecated since QGIS 3.44 (a warning at each raster export)."""
+        calls = []
+
+        class NewWriter:
+            def setCreationOptions(self, options):
+                calls.append(('new', options))
+
+            def setCreateOptions(self, options):
+                calls.append(('old', options))
+
+        exporters.set_creation_options(NewWriter(), ('TILED=YES',))
+        assert calls == [('new', ['TILED=YES'])]
+
+    def test_older_qgis_keeps_set_create_options(self):
+        calls = []
+
+        class OldWriter:
+            def setCreateOptions(self, options):
+                calls.append(options)
+
+        exporters.set_creation_options(OldWriter(), ['TILED=YES'])
+        assert calls == [['TILED=YES']]
+
+
 class PrivateCloud(FakeCloud):
     """A ``QgsPointCloudLayer`` opened by the export job."""
     made = []
