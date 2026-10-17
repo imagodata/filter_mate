@@ -161,7 +161,6 @@ class SpatialFilterExecutor:
                 target_layers=[layer],
                 predicates=predicates,
                 buffer_value=0.0,
-                combine_operator='AND'
             )
 
             if bridge_result.status == 'SUCCESS' and bridge_result.success:

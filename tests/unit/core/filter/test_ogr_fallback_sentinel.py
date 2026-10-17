@@ -277,6 +277,71 @@ def test_backend_refusal_reaches_the_message_bar():
     assert backend.user_warnings == []
 
 
+# ---------------------------------------------------------------------------
+# 2026-10-17: the targets' combine operator
+# ---------------------------------------------------------------------------
+# _get_combine_operator was a placeholder reading task_parameters
+# ['combine_operator'], a key nothing sets: every target was combined with
+# AND, whatever the user chose (OR, AND NOT, or combination unchecked =
+# replace). It now asks the task (ExpressionFacadeHandler.get_combine_operator:
+# normalized, None when the option is off).
+
+def _orchestrator_with_operator(operator):
+    task = types.SimpleNamespace(_get_combine_operator=lambda: operator)
+    return orchestrator_module.FilterOrchestrator(
+        task_parameters={}, subset_queue_callback=MagicMock(), parent_task=task,
+        get_predicates_callback=lambda: {},
+    )
+
+
+@pytest.mark.parametrize("operator", ["AND", "OR", "AND NOT", None])
+def test_target_operator_is_the_tasks(operator):
+    orchestrator = _orchestrator_with_operator(operator)
+    assert orchestrator._get_combine_operator() == operator
+    assert orchestrator._determine_subset_strategy(_layer('"nature" = \'Route\'')) == ('"nature" = \'Route\'', operator)
+    assert orchestrator.task_parameters['_current_combine_operator'] == operator
+
+
+@pytest.mark.parametrize("subset", ['"fid" IN (1, 2)', 'ST_Intersects("geom", X)'])
+def test_previous_spatial_filter_is_still_replaced_whatever_the_operator(subset):
+    orchestrator = _orchestrator_with_operator("OR")
+    old_subset, operator = orchestrator._determine_subset_strategy(_layer(subset))
+    assert operator is None
+
+
+@pytest.fixture
+def pg_adapter(monkeypatch):
+    applied = []
+    sql_utils = types.ModuleType(f"{ROOT}.infrastructure.database.sql_utils")
+    sql_utils.safe_set_subset_string = lambda layer, expression: applied.append(expression) or True
+    for name, module in (
+        (ROOT, _package(ROOT)),
+        (f"{ROOT}.infrastructure", _package(f"{ROOT}.infrastructure")),
+        (f"{ROOT}.infrastructure.database", _package(f"{ROOT}.infrastructure.database")),
+        (f"{ROOT}.infrastructure.database.sql_utils", sql_utils),
+    ):
+        monkeypatch.setitem(sys.modules, name, module)
+    adapter = legacy_module.LegacyPostgreSQLAdapter.__new__(legacy_module.LegacyPostgreSQLAdapter)
+    adapter.task_params = {}
+    adapter._use_new_backend = True
+    adapter._new_backend = MagicMock()
+    adapter._legacy_backend = MagicMock()
+    return adapter, applied
+
+
+@pytest.mark.parametrize("operator, expected", [
+    ("AND", '("nature" = \'Route\') AND (EXISTS (x))'),
+    ("OR", '("nature" = \'Route\') OR (EXISTS (x))'),
+    ("AND NOT", '("nature" = \'Route\') AND NOT (EXISTS (x))'),
+    (None, 'EXISTS (x)'),   # combination unchecked: replace (it was AND)
+])
+def test_postgresql_adapter_follows_the_operator(pg_adapter, operator, expected):
+    adapter, applied = pg_adapter
+    assert adapter.apply_filter(MagicMock(), 'EXISTS (x)', '"nature" = \'Route\'', operator) is True
+    assert applied == [expected]
+    adapter._legacy_backend.apply_filter.assert_not_called()
+
+
 @pytest.mark.parametrize("subset", ["$id IN (3, 7)", "NOT ($id IN (3, 7))", "($id IN (1))"])
 def test_feature_id_lists_of_memory_layers_are_key_lists(subset):
     """2026-10-17: the OGR backend writes $id IN (...) on memory / delimited text layers."""

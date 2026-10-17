@@ -360,6 +360,29 @@ def dock_timing(cloud, zones, attempts=5):
           f"{attempts - len(wrong)}/{attempts} right; wrong: {wrong[:1]}", expected_failure=subset_issue(344))
 
 
+def subset_literals():
+    """check_combine_literals.py (subset strings with trap values, combinations, conversions) in its own QGIS.
+
+    GeoPackage and Shapefile only here (no PostGIS in the CI job); each of its
+    PASS / FAIL lines becomes a check of this run.
+    """
+    script = os.path.join(HERE, 'check_combine_literals.py')
+    environment = {key: value for key, value in os.environ.items() if key != 'FM_PG_DSN'}
+    try:
+        run = subprocess.run([sys.executable, script], capture_output=True, text=True, timeout=600, env=environment)
+    except subprocess.TimeoutExpired as exc:
+        output = exc.stdout.decode(errors='replace') if isinstance(exc.stdout, bytes) else (exc.stdout or '')
+        check('literals: scenario script ran to the end', False, f"timeout after 600 s: {output.strip()[-300:]}")
+        return
+    lines = [line for line in run.stdout.splitlines() if line.startswith(('PASS', 'FAIL'))]
+    for line in lines:
+        status, _, rest = line.partition(' ')
+        name, _, detail = rest.strip().partition(': ')
+        check(f"literals: {name}", status == 'PASS', detail)
+    check('literals: scenario script ran to the end', run.returncode in (0, 1) and lines,
+          f"exit={run.returncode} {run.stderr.strip()[-300:]}")
+
+
 # --- remote sources, stable keys, key literals (2026-10-17) ----------------------
 
 COMMUNES = (  # name, code (text), population (int): two communes share population 800
@@ -560,7 +583,8 @@ def main():
           f"in {time.perf_counter() - started:.1f}s", flush=True)
 
     for step in (plugin_starts_without_iface, provider_lists_algorithms, load_layers, raster_to_vector,
-                 vector_to_raster, raster_alpha_band, point_clouds, remote_sources, environment):
+                 vector_to_raster, raster_alpha_band, point_clouds, remote_sources, subset_literals,
+                 environment):
         if (step is not plugin_starts_without_iface
                 and QgsApplication.processingRegistry().providerById('filtermate') is None):
             report('SKIP', step.__name__, 'no FilterMate Processing provider')

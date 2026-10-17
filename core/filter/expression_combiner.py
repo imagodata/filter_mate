@@ -22,6 +22,8 @@ import re
 from enum import Enum
 from typing import Optional, List, Dict, Tuple
 
+from .sql_quotes import mask_quoted, strip_outer_parens, unmask_quoted
+
 logger = logging.getLogger('FilterMate.Core.Filter.Combiner')
 
 
@@ -37,6 +39,10 @@ def normalize_expression(expr: str) -> str:
     """
     Normalize expression for comparison (strip whitespace and outer parentheses).
 
+    2026-10-17: outside string literals and identifiers only; ``'a  b'`` and
+    ``'a b'`` are different values, and a ``)`` inside a value is not one of
+    the outer parentheses.
+
     Args:
         expr: Expression to normalize
 
@@ -45,29 +51,88 @@ def normalize_expression(expr: str) -> str:
     """
     if not expr:
         return ""
-    expr = expr.strip()
-    # Normalize whitespace: replace multiple spaces with single space
-    expr = re.sub(r'\s+', ' ', expr)
-    # Remove outer parentheses if present
-    while expr.startswith('(') and expr.endswith(')'):
-        # Check if these are matching outer parentheses
-        depth = 0
-        is_outer = True
-        for i, char in enumerate(expr):
-            if char == '(':
-                depth += 1
-            elif char == ')':
-                depth -= 1
-                if depth == 0 and i < len(expr) - 1:
-                    is_outer = False
-                    break
-        if is_outer and depth == 0:
-            expr = expr[1:-1].strip()
-            # Normalize whitespace again after stripping parentheses
-            expr = re.sub(r'\s+', ' ', expr)
-        else:
-            break
-    return expr
+    masked, parts = mask_quoted(expr)
+    # Normalize whitespace (replace runs with one space), remove outer parentheses
+    masked = strip_outer_parens(re.sub(r'\s+', ' ', masked))
+    return unmask_quoted(masked, parts)
+
+
+def _same_expression(first: str, second: str) -> bool:
+    """normalize_expression(first) == normalize_expression(second), without unmasking.
+
+    Two texts normalize alike iff their normalized masked forms and their
+    quoted parts are equal (stripping spaces and outer parentheses never
+    drops a quoted part); unmasking a 100,000-value list costs 30 ms.
+    """
+    if ''.join(first.split()).strip('()') != ''.join(second.split()).strip('()'):
+        return False  # necessary condition, cheap
+    first_masked, first_parts = mask_quoted(first)
+    second_masked, second_parts = mask_quoted(second)
+    return (tuple(first_parts) == tuple(second_parts)
+            and strip_outer_parens(' '.join(first_masked.split())) == strip_outer_parens(' '.join(second_masked.split())))
+
+
+def _strip_where_prefix(expression: str) -> str:
+    """``WHERE x`` -> ``x`` (FIX 2026-01-16: no "WHERE WHERE" syntax error)."""
+    clean = expression.lstrip()
+    if clean.upper().startswith('WHERE '):
+        clean = clean[6:].lstrip()
+        logger.debug(f"Stripped WHERE prefix from new_expression: '{clean[:50]}...'")
+    return clean
+
+
+def _drop_excess_closing_parens(subset: str) -> str:
+    """Legacy malformed subsets: drop trailing ``)`` that close nothing.
+
+    2026-09-14: only when the subset really has an excess closing
+    parenthesis (a GeoPackage R-tree prefilter is balanced and ends in
+    ``)))``). 2026-10-17: counted outside string literals and identifiers.
+    """
+    masked, parts = mask_quoted(subset)
+    excess = masked.count(')') - masked.count('(')
+    if excess <= 0:
+        return subset
+    trailing = re.search(r'\)+\s*$', masked)
+    if not trailing or trailing.group().strip().count(')') < excess:
+        return subset
+    return unmask_quoted(masked[:trailing.start()] + ')' * (trailing.group().count(')') - excess), parts)
+
+
+def wrap_combination(old_subset: str, combine_operator: str, new_expression: str) -> str:
+    """``( old ) <operator> ( new )``, the only shape every operator is exact in.
+
+    2026-10-17: the combiners split an old subset containing ``WHERE`` (a
+    subquery, or a value) and re-joined it unparenthesized, so
+    ``a IN (SELECT .. WHERE ..) OR b`` AND ``c`` was evaluated
+    ``a OR (b AND c)``, and a space was inserted into values such as
+    ``'WHERE x'``.
+    """
+    return (
+        f'( {_drop_excess_closing_parens(old_subset)} ) {combine_operator} '
+        f'( {_strip_where_prefix(new_expression)} )'
+    )
+
+
+def _ogr_statement_where(subset: str) -> Optional[str]:
+    """WHERE body of an OGR subset written as a full ``SELECT`` statement.
+
+    None when the subset is not a statement (the usual WHERE body, R-tree
+    subqueries included); ``1 = 1`` for a statement without WHERE (the whole
+    layer). Keywords are searched outside quotes and at parenthesis depth 0.
+    """
+    masked, parts = mask_quoted(subset)
+    if not re.match(r'\s*SELECT\b', masked, re.IGNORECASE):
+        return None
+    depth = 0
+    for match in re.finditer(r'\(|\)|\bWHERE\b', masked, re.IGNORECASE):
+        token = match.group()
+        if token == '(':
+            depth += 1
+        elif token == ')':
+            depth -= 1
+        elif depth == 0:
+            return unmask_quoted(masked[match.end():], parts).strip() or '1 = 1'
+    return '1 = 1'
 
 
 def apply_combine_operator(
@@ -486,12 +551,18 @@ def combine_with_old_subset(
     Uses logical operators (AND, AND NOT, OR) for source layer filtering.
 
     Process:
-    1. Check if expressions are identical (skip duplication)
-    2. Check if new expression is contained in old (return old)
-    3. Check if old expression is contained in new (return new)
-    4. Handle OGR fallback for PostgreSQL syntax
-    5. Combine expressions with specified operator
-    6. Optimize duplicate IN clauses
+    1. REPLACE (operator None): new expression only
+    2. Identical expressions under AND / OR: new expression only (X AND X = X)
+    3. OGR subset written as a full SELECT statement: combine its WHERE body
+    4. Combine ``( old ) <operator> ( new )``
+    5. Optimize duplicate IN clauses
+
+    2026-10-17: the shortcuts on textual inclusion are gone. ``"id" = 1`` is
+    a substring of ``"id" = 12``, so AND returned ``"id" = 12`` alone; an
+    inclusion returned one side whatever the operator; identical expressions
+    under AND NOT returned X instead of nothing. The OGR branch no longer
+    drops an old subset with FROM in a value nor cuts an R-tree subset after
+    its first WHERE.
 
     Args:
         new_expression: New filter expression
@@ -513,28 +584,6 @@ def combine_with_old_subset(
         logger.info("FilterMate: REPLACE operator - using new expression only")
         return new_expression
 
-    normalized_new = normalize_expression(new_expression)
-    normalized_old = normalize_expression(old_subset)
-
-    logger.debug("FilterMate: Comparing expressions:")
-    logger.debug(f"  → normalized_new: '{normalized_new[:60]}...'")
-    logger.debug(f"  → normalized_old: '{normalized_old[:60]}...'")
-
-    # If expressions are identical, don't duplicate
-    if normalized_new == normalized_old:
-        logger.info("FilterMate: New expression identical to old subset - skipping duplication")
-        return new_expression
-
-    # If new expression is already contained in old subset, don't duplicate
-    if normalized_new in normalized_old:
-        logger.info("FilterMate: New expression already in old subset - skipping duplication")
-        return old_subset
-
-    # If old subset is contained in new expression, use new only
-    if normalized_old in normalized_new:
-        logger.info("FilterMate: Old subset already in new expression - returning new expression")
-        return new_expression
-
     # Default to AND if no operator specified (preserve existing filters)
     if not combine_operator:
         combine_operator = 'AND'
@@ -543,97 +592,23 @@ def combine_with_old_subset(
             "to preserve existing filter"
         )
 
-    # Handle OGR fallback for PostgreSQL syntax
+    # If expressions are identical, don't duplicate (exact for AND and OR only)
+    if combine_operator in ('AND', 'OR') and _same_expression(new_expression, old_subset):
+        logger.info("FilterMate: New expression identical to old subset - skipping duplication")
+        return new_expression
+
+    # OGR subset written as a full statement (``SELECT * FROM t WHERE ...``):
+    # only its WHERE body can be combined.
     if provider_type == 'ogr':
-        old_subset_upper = old_subset.upper()
-        if 'SELECT' in old_subset_upper or 'FROM' in old_subset_upper:
-            logger.warning("FilterMate: Old subset contains PostgreSQL syntax but using OGR fallback")
-            # Try to extract just the WHERE clause
-            index_where = old_subset.upper().find('WHERE')
-            if index_where != -1:
-                where_clause = old_subset[index_where + 5:].strip()  # Skip 'WHERE'
-                if where_clause:
-                    logger.info(f"FilterMate: Extracted WHERE clause for OGR: {where_clause[:80]}...")
-                    combined = f'( {where_clause} ) {combine_operator} ( {new_expression} )'
-                    if optimize_duplicates_fn:
-                        return optimize_duplicates_fn(combined)
-                    return combined
-            # Can't extract WHERE clause - use new expression only
-            logger.warning(
-                "FilterMate: Cannot combine with PostgreSQL subset in OGR mode - "
-                "using new expression only"
-            )
-            return new_expression
+        where_body = _ogr_statement_where(old_subset)
+        if where_body is not None:
+            logger.info(f"FilterMate: Extracted WHERE clause for OGR: {where_body[:80]}...")
+            old_subset = where_body
 
-    # SPECIAL CASE: EXISTS subquery pattern (re-filtering already filtered layer)
-    # When old_subset contains EXISTS, we MUST combine carefully to ensure sequential filtering
-    old_subset_upper = old_subset.upper()
-    has_exists = 'EXISTS (' in old_subset_upper or 'EXISTS(' in old_subset_upper
+    if 'EXISTS' in old_subset.upper():
+        logger.debug(f"FilterMate: Combining an EXISTS subset with {combine_operator}: {old_subset[:150]}...")
 
-    if has_exists:
-        logger.info("FilterMate: Detected EXISTS pattern in old_subset")
-        logger.info(f"  → Old subset (truncated): {old_subset[:150]}...")
-        logger.info(f"  → New expression: {new_expression}")
-        logger.info(f"  → Combine operator: {combine_operator}")
-
-        # Strip leading "WHERE " from new_expression if present
-        clean_new_expression = new_expression.lstrip()
-        if clean_new_expression.upper().startswith('WHERE '):
-            clean_new_expression = clean_new_expression[6:].lstrip()
-            logger.debug(f"Stripped WHERE prefix from new_expression: '{clean_new_expression[:50]}...'")
-
-        if combine_operator == 'AND':
-            # Combine EXISTS with new filter - both conditions must be true
-            # PostgreSQL will evaluate: rows where EXISTS(...) is true AND (new_filter) is true
-            # This correctly filters the already-filtered data
-            combined = f'( {old_subset} ) AND ( {clean_new_expression} )'
-            logger.info(
-                "FilterMate: Combined EXISTS with attribute filter using AND"
-            )
-            logger.info(f"  → Result (truncated): {combined[:200]}...")
-        elif combine_operator in ('OR', 'AND NOT'):
-            # For OR/AND NOT with EXISTS: Simple combination
-            combined = f'( {old_subset} ) {combine_operator} ( {clean_new_expression} )'
-            logger.info(
-                f"FilterMate: Combined EXISTS with new filter using {combine_operator} operator"
-            )
-        else:
-            # REPLACE mode (combine_operator is None)
-            logger.warning(
-                "FilterMate: REPLACE mode with EXISTS pattern - old EXISTS filter will be LOST"
-            )
-            combined = clean_new_expression
-
-    # Extract WHERE clause from old subset if present
-    elif old_subset.find('WHERE') != -1:
-        index_where = old_subset.find('WHERE')
-        param_old_subset_where = old_subset[index_where:]
-        param_source_old_subset = old_subset[:index_where]
-
-        # Legacy handling for malformed expressions: drop one trailing ')'.
-        # 2026-09-14: only when the old subset really has an excess closing
-        # parenthesis. A GeoPackage R-tree prefilter puts a WHERE inside a
-        # balanced expression that ends in ")))"; losing one made the combined
-        # subset invalid SQL and the source layer showed 0 features.
-        if (
-            param_old_subset_where.endswith('))')
-            and old_subset.count(')') > old_subset.count('(')
-        ):
-            param_old_subset_where = param_old_subset_where[:-1]
-
-        # FIX 2026-01-16: Strip leading "WHERE " from new_expression to prevent "WHERE WHERE" syntax error
-        clean_new_expression = new_expression.lstrip()
-        if clean_new_expression.upper().startswith('WHERE '):
-            clean_new_expression = clean_new_expression[6:].lstrip()
-            logger.debug(f"Stripped WHERE prefix from new_expression: '{clean_new_expression[:50]}...'")
-
-        combined = (
-            f'{param_source_old_subset} {param_old_subset_where} '
-            f'{combine_operator} ( {clean_new_expression} )'
-        )
-    else:
-        # No WHERE clause - simple combination
-        combined = f'( {old_subset} ) {combine_operator} ( {new_expression} )'
+    combined = wrap_combination(old_subset, combine_operator, new_expression)
 
     # Optimize duplicate IN clauses if callback provided
     if optimize_duplicates_fn:
@@ -758,7 +733,7 @@ def combine_with_old_filter(
     Args:
         new_expression: New filter expression
         old_subset: Existing subset string from layer
-        combine_operator: Logical operator ('AND', 'OR', 'AND NOT')
+        combine_operator: Logical operator ('AND', 'OR', 'AND NOT'), None to replace
         sanitize_fn: Optional callback to sanitize old_subset
 
     Returns:
@@ -780,9 +755,10 @@ def combine_with_old_filter(
         logger.info(f"Old subset contains {', '.join(reasons)} - replacing instead of combining")
         return new_expression
 
-    # Default to AND if no operator specified
+    # No operator: REPLACE, as combine_with_old_subset and the backends
+    # (2026-10-17: it defaulted to AND, keeping a filter the user replaced)
     if not combine_operator:
-        combine_operator = 'AND'
-        logger.info("No combine operator specified, using AND by default to preserve existing filter")
+        logger.info("No combine operator (combination off) - replacing the old subset")
+        return new_expression
 
     return f"({old_subset}) {combine_operator} ({new_expression})"
