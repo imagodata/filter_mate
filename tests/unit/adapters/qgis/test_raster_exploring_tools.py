@@ -264,3 +264,55 @@ class TestLinkedStyles:
         project = types.SimpleNamespace(mapLayer={"mnt": layer}.get)
         assert adapter.unlink_all_styles(project) == 1
         assert layer.renderer().type() == "singlebandpseudocolor" and adapter._LINKED_RENDERERS == {}
+
+
+# ---------------------------------------------------------------------------
+# Virtual raster URI of a source whose CRS has no authority id
+# ---------------------------------------------------------------------------
+
+class _Crs:
+    def __init__(self, authid, wkt='PROJCS["EPSG:2154",GEOGCS["unknown"]]', valid=True):
+        self._authid, self._wkt, self._valid = authid, wkt, valid
+
+    def authid(self):
+        return self._authid
+
+    def toWkt(self):
+        return self._wkt
+
+    def isValid(self):
+        return self._valid
+
+
+class _Params:
+    def __init__(self, crs):
+        self.crs = crs
+
+
+class TestVirtualUriCrs:
+    _TAIL = "extent%3D0%2C0%2C1%2C1%26formula%3D1"
+
+    def _encode(self, monkeypatch, crs, encoded):
+        provider = types.SimpleNamespace(encodeVirtualRasterProviderUri=lambda params: encoded)
+        monkeypatch.setattr(adapter, "QgsRasterDataProvider", provider)
+        return adapter._encode_virtual_uri(_Params(crs))
+
+    def test_custom_crs_is_written_as_wkt(self, monkeypatch):
+        uri = self._encode(monkeypatch, _Crs(""), "%3Fcrs%26" + self._TAIL)
+        assert uri == ("%3Fcrs%3DPROJCS%5B%22EPSG%3A2154%22%2CGEOGCS%5B%22unknown%22%5D%5D%26" + self._TAIL)
+
+    def test_authority_id_is_left_as_encoded(self, monkeypatch):
+        encoded = "%3Fcrs%3DEPSG%3A2154%26" + self._TAIL
+        assert self._encode(monkeypatch, _Crs("EPSG:2154"), encoded) == encoded
+
+    def test_invalid_crs_is_left_as_encoded(self, monkeypatch):
+        encoded = "%3Fcrs%26" + self._TAIL
+        assert self._encode(monkeypatch, _Crs("", valid=False), encoded) == encoded
+
+
+class TestBandStatistics:
+    def test_statistics_are_requested_on_the_extent_and_sample(self):
+        calls = []
+        provider = types.SimpleNamespace(bandStatistics=lambda *args: calls.append(args) or "stats")
+        assert adapter.band_statistics(provider, 2, "extent", 1000) == "stats"
+        assert calls == [(2, adapter._all_stats(), "extent", 1000)]
