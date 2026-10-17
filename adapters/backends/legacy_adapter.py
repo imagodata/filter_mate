@@ -255,12 +255,13 @@ class BaseLegacyAdapter(GeometricFilterBackend):
     ) -> bool:
         """Apply filter using new backend."""
         try:
-            # Combine with old subset if needed
+            # Combine with old subset if needed. combine_operator None means
+            # REPLACE (combination unchecked, or a previous spatial filter: see
+            # FilterOrchestrator._determine_subset_strategy), as in the
+            # SpatiaLite and OGR builders; 2026-10-17: it was combined with AND.
             final_expr = expression
             if old_subset and combine_operator:
                 final_expr = f"({old_subset}) {combine_operator} ({expression})"
-            elif old_subset:
-                final_expr = f"({old_subset}) AND ({expression})"
 
             # v4.1.0: Use safe_set_subset_string from new location
             from ...infrastructure.database.sql_utils import safe_set_subset_string
