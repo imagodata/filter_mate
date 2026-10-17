@@ -7,6 +7,7 @@ import json
 # Re-export get_optimization_thresholds for backward compatibility
 # Function was moved to core.optimization.config_provider in EPIC-1 Phase E7.5
 from ..core.optimization.config_provider import get_optimization_thresholds  # noqa: F401
+from ..core.domain.project_folder import project_folder
 
 ENV_VARS = {}
 
@@ -460,12 +461,8 @@ def init_env_vars():
 
     # Plugin directory (where config.default.json is located)
     DIR_CONFIG = os.path.normpath(os.path.dirname(__file__))
-    PATH_ABSOLUTE_PROJECT = os.path.normpath(PROJECT.readPath("./"))
-    if PATH_ABSOLUTE_PROJECT == './':
-        if PLATFORM.startswith('win'):
-            PATH_ABSOLUTE_PROJECT = os.path.normpath(os.path.join(os.path.join(os.environ['USERPROFILE']), 'Desktop'))
-        else:
-            PATH_ABSOLUTE_PROJECT = os.path.normpath(os.environ['HOME'])
+    # An unsaved project has no folder: Desktop (Windows) / home (core.domain.project_folder)
+    PATH_ABSOLUTE_PROJECT = project_folder(PROJECT.readPath("./"), windows=PLATFORM.startswith('win'))
 
     QGIS_SETTINGS_PATH = QgsApplication.qgisSettingsDirPath()
     # Remove trailing separator if present

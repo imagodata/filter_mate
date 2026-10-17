@@ -8,11 +8,11 @@ Extracted from FilterMateApp.layer_management_engine_task_completed() for God Cl
 Author: FilterMate Team
 Date: January 2026
 """
-import os
 import logging
 import weakref
 from typing import Dict, Callable, List, Optional, Any
 from qgis.PyQt.QtCore import QTimer
+from ..core.domain.project_folder import project_folder
 
 try:
     from ..infrastructure.perf_timer import perf_mark_end
@@ -243,17 +243,8 @@ class LayerTaskCompletionHandler:
         project = self._get_project()
         env_vars = self._get_env_vars()
 
-        path_absolute_project = os.path.normpath(project.readPath("./"))
-        if path_absolute_project == './':
-            # Fallback to home/desktop
-            if os.name == 'nt':  # Windows
-                path_absolute_project = os.path.normpath(
-                    os.path.join(os.environ.get('USERPROFILE', ''), 'Desktop')
-                )
-            else:
-                path_absolute_project = os.path.normpath(os.environ.get('HOME', ''))
-
-        env_vars["PATH_ABSOLUTE_PROJECT"] = path_absolute_project
+        # An unsaved project has no folder: Desktop (Windows) / home
+        env_vars["PATH_ABSOLUTE_PROJECT"] = project_folder(project.readPath("./"))
 
     def _handle_add_layers(
         self,
