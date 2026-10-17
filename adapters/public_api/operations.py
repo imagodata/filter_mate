@@ -681,14 +681,14 @@ def export_layers(layers: Sequence, folder: str, vector_format: str = "GPKG", ra
         try:
             if kind is LayerKind.VECTOR:
                 driver, extension = VECTOR_EXPORT_FORMATS[vector_format]
-                path = _output_file(_unique_path(output_path(folder, name, extension), used))
+                path = _output_file(_unique_path(output_path(folder, name, extension), used), project)
                 block, release = _child_feedback(feedback, index, total, QgsFeedback)
                 try:
                     ok, path, message = _export_vector(layer, path, driver, crs, project, feedback=block)
                 finally:
                     release()
             elif kind is LayerKind.RASTER:
-                path = _output_file(_unique_path(output_path(folder, name, '.tif'), used))
+                path = _output_file(_unique_path(output_path(folder, name, '.tif'), used), project)
                 block, release = _child_feedback(feedback, index, total, QgsRasterBlockFeedback)
                 try:
                     result = export_raster(layer, path, raster_format, crs, feedback=block)
@@ -697,7 +697,7 @@ def export_layers(layers: Sequence, folder: str, vector_format: str = "GPKG", ra
                 ok, path, message = result.success, result.path, result.message
             elif kind is LayerKind.POINT_CLOUD:
                 path = _output_file(_unique_path(output_path(folder, name, POINT_CLOUD_FORMATS[point_cloud_format]),
-                                                 used))
+                                                 used), project)
                 result = export_point_cloud(layer, path, point_cloud_format, crs)
                 ok, path, message = result.success, result.path, result.message
             else:
@@ -720,10 +720,26 @@ def export_layers(layers: Sequence, folder: str, vector_format: str = "GPKG", ra
     return report
 
 
-def _output_file(path: str) -> str:
-    """``path``, unless it is a symbolic link: writing would follow it anywhere (ValueError)."""
+def _output_file(path: str, project=None) -> str:
+    """``path``, unless writing it would be unsafe (ValueError).
+
+    Refused: a symbolic link (the writer would follow it anywhere) and, when a
+    ``project`` is given, the file another layer of the project is read from
+    (the writer overwrites its target: every layer stored in it would be lost).
+    """
     if os.path.islink(path):
         raise ValueError(f"not written: {path} is a symbolic link")
+    if project is not None:
+        from ...core.export.layer_exporter import layer_source_file_path, same_file
+        try:
+            sources = [(other.name(), layer_source_file_path(other.source()))
+                       for other in project.mapLayers().values()]
+        except Exception as exc:  # a project we cannot inspect must not block the export
+            logger.debug(f"[FM5] output file not compared with the project layers: {exc}")
+            sources = []
+        for name, source in sources:
+            if source and same_file(source, path):
+                raise ValueError(f"not written: {path} is the data source of the layer '{name}'")
     return path
 
 

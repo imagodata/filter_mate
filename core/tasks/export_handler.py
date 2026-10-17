@@ -617,6 +617,13 @@ class ExportHandler:
                 )
                 output_path = os.path.join(output_folder, f"{safe}{ext}")
 
+                # Never overwrite the file another layer of the project is read from
+                source_of = LayerExporter(project=project).find_layer_using_file(output_path)
+                if source_of is not None:
+                    logger.error(f"Streaming export refused: {output_path} is the source of '{source_of}'")
+                    failed_layers.append(f"{layer_name} ({output_path} is the data source of layer '{source_of}')")
+                    continue
+
                 logger.info(f"Streaming export: {layer_name} -> {output_path}")
 
                 result = exporter.export_layer_streaming(

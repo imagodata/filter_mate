@@ -485,6 +485,25 @@ class TestExportReport:
         assert written == [str(tmp_path / "out" / "route.gpkg")]
         assert victim.read_text() == "keep"
 
+    def test_output_file_that_is_the_source_of_a_layer_is_not_written(self, vector_world, tmp_path, monkeypatch):
+        # A layer stored in out/parcelle.gpkg: the writer would overwrite the file and lose it.
+        written = []
+        monkeypatch.setattr(operations, "_export_vector",
+                            lambda layer, path, driver, crs, project, feedback=None: (written.append(path) or
+                                                                                      (True, path, "")))
+        (tmp_path / "out").mkdir()
+        source = tmp_path / "out" / "parcelle.gpkg"
+        source.write_bytes(b"precious")
+        exported, other = _Layer("A", "parcelle"), _Layer("B", "route")
+        exported.source = lambda: f"{source}|layername=parcelle"
+        other.source = lambda: "/data/route.shp"
+        project = _Project(exported, other)
+        project.mapLayers = lambda: project.layers
+        report = operations.export_layers([exported, other], str(tmp_path / "out"), project=project)
+        assert "data source of the layer 'parcelle'" in report.failed["parcelle"]
+        assert written == [str(tmp_path / "out" / "route.gpkg")]
+        assert source.read_bytes() == b"precious"
+
     def test_vector_writer_gets_a_child_feedback(self, vector_world, tmp_path, monkeypatch):
         captured = {}
 

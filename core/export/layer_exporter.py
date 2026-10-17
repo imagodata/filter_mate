@@ -26,6 +26,11 @@ from dataclasses import dataclass
 from typing import Optional, List, Any
 
 try:
+    from qgis.PyQt.QtCore import QCoreApplication
+except ImportError:
+    QCoreApplication = None
+
+try:
     from qgis.core import (
         QgsVectorLayer,
         QgsVectorFileWriter,
@@ -46,6 +51,56 @@ except ImportError:
     QgsProject = Any
 
 logger = logging.getLogger('FilterMate.Export')
+
+
+def _tr(message: str) -> str:
+    """Translate a user-facing message (plain text without a running QGIS)."""
+    if QCoreApplication is not None:
+        translated = QCoreApplication.translate("LayerExporter", message)
+        if isinstance(translated, str):
+            return translated
+    return message
+
+
+_SPATIALITE_DBNAME = re.compile(r"dbname='((?:[^'\\]|\\.)*)'")
+
+
+def layer_source_file_path(source: str) -> Optional[str]:
+    """File a layer reads from, or None when its source is not a plain file.
+
+    Handles the OGR form (``/data/a.gpkg|layername=roads``) and the Spatialite
+    form (``dbname='/data/b.sqlite' table=...``). PostgreSQL, memory and remote
+    sources give None.
+
+    Args:
+        source: ``layer.source()``.
+
+    Returns:
+        str: The file path, or None.
+    """
+    if not source or not isinstance(source, str):
+        return None
+    match = _SPATIALITE_DBNAME.search(source)
+    if match:
+        if 'host=' in source or 'service=' in source:
+            return None  # PostgreSQL: dbname is a database, not a file
+        path = match.group(1)
+    else:
+        path = source.split('|')[0].strip()
+    if not path or '://' in path or not os.path.splitext(path)[1]:
+        return None
+    return path
+
+
+def same_file(first: str, second: str) -> bool:
+    """Whether two paths name one file (symlinks, ``..`` and case rules resolved)."""
+    try:
+        if os.path.exists(first) and os.path.exists(second):
+            return os.path.samefile(first, second)
+    except OSError:
+        pass
+    return (os.path.normcase(os.path.realpath(os.path.abspath(first)))
+            == os.path.normcase(os.path.realpath(os.path.abspath(second))))
 
 # =============================================================================
 # Format registry — single source of truth for OGR driver ↔ extension lookup.
@@ -450,6 +505,52 @@ class LayerExporter:
         # Multiple layers to directory
         return self.export_multiple_to_directory(config)
 
+    def find_layer_using_file(self, output_path: str) -> Optional[str]:
+        """Name of the project layer that reads from ``output_path``, if any.
+
+        Args:
+            output_path: Intended export target.
+
+        Returns:
+            str: The layer name, or None when no layer of the project is stored there.
+        """
+        if not output_path or not self.project:
+            return None
+        try:
+            for layer in self.project.mapLayers().values():
+                path = layer_source_file_path(layer.source())
+                if path and same_file(path, output_path):
+                    return layer.name()
+        except Exception as e:  # a project we cannot inspect must not block the export
+            logger.debug(f"Could not check the export target against the project layers: {e}")
+        return None
+
+    def _refuse_project_source(self, output_path: str) -> Optional[ExportResult]:
+        """A failed ExportResult when ``output_path`` is the file of a project layer.
+
+        Writers overwrite their target (``CreateOrOverwriteFile``,
+        ``qgis:package`` OVERWRITE, ``os.remove``) and the failure cleanup
+        deletes it: exporting onto the GeoPackage a layer is read from would
+        destroy every layer stored in it.
+
+        Args:
+            output_path: Intended export target.
+
+        Returns:
+            ExportResult: The refusal, or None when the target is free to write.
+        """
+        layer_name = self.find_layer_using_file(output_path)
+        if layer_name is None:
+            return None
+        logger.error(f"Export refused: {output_path} is the source of layer '{layer_name}'")
+        return ExportResult(
+            success=False,
+            error_message=_tr(
+                "Cannot export to '{path}': this file is the data source of the layer '{layer}' "
+                "of the project and would be overwritten. Choose another file."
+            ).format(path=output_path, layer=layer_name),
+        )
+
     def export_single_layer(
         self,
         layer_name: str,
@@ -480,6 +581,10 @@ class LayerExporter:
                 success=False,
                 error_message=f"Layer '{layer_name}' not found in project"
             )
+
+        refusal = self._refuse_project_source(output_path)
+        if refusal is not None:
+            return refusal
 
         # Determine CRS
         current_projection = projection if projection else layer.sourceCrs()
@@ -613,6 +718,10 @@ class LayerExporter:
                 error_message="No valid layers found for GPKG export"
             )
 
+        refusal = self._refuse_project_source(output_path)
+        if refusal is not None:
+            return refusal
+
         # If user picked a target CRS that differs from any layer's source
         # CRS, ``qgis:package`` would silently keep the source CRS. Fall back
         # to a manual writer loop so reprojection actually happens.
@@ -695,6 +804,10 @@ class LayerExporter:
             if QgsProject.instance() is not None
             else QgsCoordinateTransformContext()
         )
+
+        refusal = self._refuse_project_source(output_path)
+        if refusal is not None:
+            return refusal
 
         # Remove any existing output so the first writer call doesn't append
         # to stale data from a previous run.
@@ -862,6 +975,9 @@ class LayerExporter:
                     zip_path = config.output_path
                     if not zip_path.endswith('.zip'):
                         zip_path = zip_path + '.zip'
+                    refusal = self._refuse_project_source(zip_path)
+                    if refusal is not None:
+                        return refusal
 
                     with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
                         for root, dirs, files in os.walk(temp_dir):
