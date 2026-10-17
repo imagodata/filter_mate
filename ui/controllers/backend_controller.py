@@ -1547,7 +1547,8 @@ class BackendController(BaseController):
         for layer in QgsProject.instance().mapLayers().values():
             try:
                 subset = layer.subsetString() if hasattr(layer, 'subsetString') else ''
-            except Exception:  # a layer being removed
+            except Exception as exc:  # a layer being removed
+                logger.debug("Subset of a layer being removed skipped: %s", exc)
                 continue
             if subset:
                 subsets.append(subset)

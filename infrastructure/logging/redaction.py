@@ -39,7 +39,7 @@ _URI_PASSWORD = re.compile(
     re.IGNORECASE,
 )
 
-# scheme://user:password@host
+# credentials in a URL: scheme://user:***@host (the *** part is masked)
 _URL_CREDENTIALS = re.compile(r'(\b[a-z][a-z0-9+.\-]*://[^\s:/@]+:)([^\s@/]+)(@)', re.IGNORECASE)
 
 # Cheap pre-check: most messages have nothing to mask

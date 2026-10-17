@@ -15,7 +15,7 @@ import urllib.request
 from typing import Any, Dict, Optional
 from urllib.parse import quote
 
-API_KEY_HEADER = "X-API-Key"
+API_KEY_HEADER = "X-API-Key"  # pragma: allowlist secret
 # A layer list of a big project stays far below this; it only bounds a rogue answer.
 _MAX_RESPONSE_BYTES = 16 * 1024 * 1024
 

@@ -13,10 +13,12 @@ All notable changes to FilterMate will be documented in this file.
 
 ### Changed
 
+- **`supportsQt6` removed from `metadata.txt`.** plugins.qgis.org no longer reads it: QGIS 4 compatibility comes from `qgisMaximumVersion` alone (4.99, unchanged).
 - **Processing algorithms and shipped models are labelled in English** (names, parameters, help, messages). Their text was written in French in the source and never translated, so an English QGIS showed « Filtrer plusieurs couches (batch) »; French users keep the same labels through the French translation. Algorithm ids, model ids and parameter names are unchanged, so models, scripts and `qgis_process` calls keep working.
 
 ### Fixed
 
+- **plugins.qgis.org security scan passes again.** Its Bandit and secrets checks blocked the upload on false positives: a loop variable named `token` compared with `'('` or `'OR'` ("hardcoded password"), two SQLite statements built from fixed table names, a bare `except: continue`, the `X-API-Key` header name and a `user:password@host` comment. The code is unchanged in behaviour; the zip now has no Bandit or detect-secrets finding.
 - **QGIS 4 (Qt6) enums.** Editing a colour in the Configuration tab (`QColor.HexArgb`) and the fallback splitter set-up of the dock (`_setup_main_splitter`, used when `SplitterManager` cannot be imported; `QSizePolicy.Fixed`, swallowed by a `try`) raised `AttributeError`. `tests/test_no_unscoped_qt_enums.py` now resolves import aliases (`QSizePolicy as SP`) and covers `QColor`.
 - **QGIS 3.22 / Python 3.8.** `tuple[str, bool]` / `dict[K, V]` annotations in `filter_result_handler`, `expression_adapter` and `cache_port` were evaluated at import (`TypeError`); `tests/test_python38_compat.py` replaces a Python 3.9 CI job. Point cloud export and exact clip say "QGIS 3.28 or newer is required" instead of raising an `ImportError` on 3.26 / 3.27 (filtering by subset string still starts at 3.26).
 - **The plugin loads from any folder name.** About twenty absolute `filter_mate.` imports (`config/config.py` at module level, extensions, `sql_utils`...) made a plugin installed from a GitHub zip (`filter_mate-main`) unloadable; they are relative now, and `tests/test_internal_imports_resolve.py` forbids new ones.

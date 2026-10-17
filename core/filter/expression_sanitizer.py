@@ -583,19 +583,19 @@ def _split_toplevel_and(masked: str) -> Optional[list]:
     start = 0
     in_between = False
     for match in _TOPLEVEL_TOKEN_RE.finditer(masked):
-        token = match.group().upper()
-        if token == '(':
+        word = match.group().upper()
+        if word == '(':
             depth += 1
-        elif token == ')':
+        elif word == ')':
             depth -= 1
-        elif token not in _CHAIN_WORDS:
+        elif word not in _CHAIN_WORDS:
             continue
-        elif token == 'CASE':
+        elif word == 'CASE':
             return None
         elif depth == 0:
-            if token == 'OR':
+            if word == 'OR':
                 return None
-            if token == 'BETWEEN':
+            if word == 'BETWEEN':
                 in_between = True
             elif in_between:
                 in_between = False

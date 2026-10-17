@@ -24,7 +24,7 @@ import hashlib
 import logging
 import os
 import shutil
-import subprocess
+import subprocess  # nosec B404 - argument lists, never a shell
 import tempfile
 from dataclasses import dataclass
 from typing import Callable, Optional
