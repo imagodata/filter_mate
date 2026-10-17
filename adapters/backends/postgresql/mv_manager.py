@@ -27,6 +27,7 @@ from dataclasses import dataclass
 from datetime import datetime
 
 from ....infrastructure.database.sql_utils import sanitize_sql_identifier
+from ....infrastructure.constants import DEFAULT_TEMP_SCHEMA, TABLE_PREFIX_MATERIALIZED
 
 # Import port interface
 from ....core.ports.materialized_view_port import (
@@ -101,8 +102,8 @@ class MVConfig:
             auto_refresh=self.auto_refresh,
             refresh_on_change=self.refresh_on_change,
             concurrent_refresh=self.concurrent_refresh,
-            prefix="fm_temp_mv_",
-            schema="filtermate_temp"
+            prefix=TABLE_PREFIX_MATERIALIZED,
+            schema=DEFAULT_TEMP_SCHEMA
         )
 
 
@@ -136,8 +137,8 @@ class MaterializedViewManager(MaterializedViewPort):
     """
 
     # Naming conventions (unified fm_temp_* prefix for easy cleanup)
-    MV_PREFIX = "fm_temp_mv_"
-    MV_SCHEMA = "filtermate_temp"
+    MV_PREFIX = TABLE_PREFIX_MATERIALIZED
+    MV_SCHEMA = DEFAULT_TEMP_SCHEMA  # 2026-10-17: was 'filtermate_temp' (see constants)
     SESSION_PREFIX = "session_"
 
     def __init__(

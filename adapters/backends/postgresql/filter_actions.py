@@ -201,7 +201,7 @@ def should_combine_filters(old_subset: str) -> Tuple[bool, str]:
 
     # Pattern 4: FilterMate materialized view reference
     if re.search(
-        r'IN\s*\(\s*SELECT.*FROM\s+["\']?filter_mate_temp["\']?\s*\.\s*["\']?mv_',
+        r'IN\s*\(\s*SELECT.*FROM\s+["\']?filter_mate_temp["\']?\s*\.\s*["\']?(?:fm_temp_)?mv_',
         old_subset,
         re.IGNORECASE | re.DOTALL
     ):
@@ -749,7 +749,7 @@ def execute_filter_action_postgresql_materialized(
     # THREAD SAFETY: Queue for application in finished()
     layer_subset_string = (
         f'"{primary_key_name}" IN '
-        f'(SELECT "mv_{session_name}"."{primary_key_name}" FROM "{schema}"."mv_{session_name}")'  # nosec B608
+        f'(SELECT "fm_temp_mv_{session_name}"."{primary_key_name}" FROM "{schema}"."fm_temp_mv_{session_name}")'  # nosec B608
     )
     logger.debug(f"[PostgreSQL] Layer subset string: {layer_subset_string}")
     queue_subset_fn(layer, layer_subset_string)
@@ -829,8 +829,8 @@ def execute_reset_action_postgresql(
     schema = current_mv_schema
     session_name = get_session_name_fn(name)
 
-    sql_drop = f'DROP MATERIALIZED VIEW IF EXISTS "{schema}"."mv_{session_name}" CASCADE;'
-    sql_drop += f' DROP MATERIALIZED VIEW IF EXISTS "{schema}"."mv_{session_name}_dump" CASCADE;'
+    sql_drop = f'DROP MATERIALIZED VIEW IF EXISTS "{schema}"."fm_temp_mv_{session_name}" CASCADE;'
+    sql_drop += f' DROP MATERIALIZED VIEW IF EXISTS "{schema}"."fm_temp_mv_{session_name}_dump" CASCADE;'
     sql_drop += f' DROP INDEX IF EXISTS {schema}_{session_name}_cluster CASCADE;'
 
     connexion = get_connection_fn()
@@ -916,18 +916,18 @@ def execute_unfilter_action_postgresql(
 
         sql_drop = (
             f'DROP INDEX IF EXISTS {schema}_{session_name}_cluster CASCADE; '
-            f'DROP MATERIALIZED VIEW IF EXISTS "{schema}"."mv_{session_name}" CASCADE;'
+            f'DROP MATERIALIZED VIEW IF EXISTS "{schema}"."fm_temp_mv_{session_name}" CASCADE;'
         )
         sql_create = create_simple_mv_fn(schema, session_name, sql_subset_string)
         sql_create_index = (
             f'CREATE INDEX IF NOT EXISTS {schema}_{session_name}_cluster '
-            f'ON "{schema}"."mv_{session_name}" USING GIST ({geom_key_name});'
+            f'ON "{schema}"."fm_temp_mv_{session_name}" USING GIST ({geom_key_name});'
         )
         sql_cluster = (
-            f'ALTER MATERIALIZED VIEW IF EXISTS "{schema}"."mv_{session_name}" '
+            f'ALTER MATERIALIZED VIEW IF EXISTS "{schema}"."fm_temp_mv_{session_name}" '
             f'CLUSTER ON {schema}_{session_name}_cluster;'
         )
-        sql_analyze = f'ANALYZE VERBOSE "{schema}"."mv_{session_name}";'
+        sql_analyze = f'ANALYZE VERBOSE "{schema}"."fm_temp_mv_{session_name}";'
 
         sql_create = sql_create.replace('\n', '').replace('\t', '').replace('  ', ' ').strip()
 
@@ -937,7 +937,7 @@ def execute_unfilter_action_postgresql(
 
         layer_subset_string = (
             f'"{primary_key_name}" IN '
-            f'(SELECT "mv_{session_name}"."{primary_key_name}" FROM "{schema}"."mv_{session_name}")'  # nosec B608
+            f'(SELECT "fm_temp_mv_{session_name}"."{primary_key_name}" FROM "{schema}"."fm_temp_mv_{session_name}")'  # nosec B608
         )
         queue_subset_fn(layer, layer_subset_string)
         logger.info(f"[PostgreSQL] Unfilter Complete - Layer: {layer.name()} - Previous state restored")

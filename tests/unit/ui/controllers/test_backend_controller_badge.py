@@ -28,8 +28,10 @@ _PKG = "fm_backend_badge_test"
 
 
 class FakeVectorLayer:
-    def __init__(self, layer_id="zones", features=3):
+    def __init__(self, layer_id="zones", features=3, provider="ogr", source="/data/zones.shp"):
         self._id, self._features = layer_id, features
+        self._provider, self._source = provider, source
+        self.counted = 0
 
     def id(self):
         return self._id
@@ -41,12 +43,13 @@ class FakeVectorLayer:
         return True
 
     def providerType(self):
-        return "ogr"
+        return self._provider
 
     def source(self):
-        return "/data/zones.shp"
+        return self._source
 
     def featureCount(self):
+        self.counted += 1
         return self._features
 
 
@@ -85,6 +88,7 @@ class BaseController:
 def backend_module(monkeypatch):
     qtcore = types.ModuleType("qgis.PyQt.QtCore")
     qtcore.pyqtSignal = lambda *args: MagicMock()
+    qtcore.QCoreApplication = types.SimpleNamespace(translate=lambda context, text: text)
     qgis_core = types.ModuleType("qgis.core")
     qgis_core.QgsVectorLayer = FakeVectorLayer
     monkeypatch.setitem(sys.modules, "qgis.PyQt.QtCore", qtcore)
@@ -131,6 +135,46 @@ def test_vector_layer_badge_shows_the_feature_count(controller):
     assert "Layer: zones (1,234 features)" in tooltip
 
 
+WFS_URI = "typename='ADMINEXPRESS-COG.LATEST:commune' url='https://data.geopf.fr/wfs/ows' version='auto'"
+
+
+@pytest.mark.parametrize("provider, source", [
+    ("WFS", WFS_URI),
+    ("OAPIF", "url='https://example.org/ogcapi' typename='communes'"),
+    ("arcgisfeatureserver", "url='https://example.org/arcgis/rest/services/x/FeatureServer/0'"),
+    ("ogr", "/vsicurl/https://example.org/communes.fgb"),
+])
+def test_remote_source_badge_is_remote_and_not_counted(controller, provider, source):
+    """2026-10-17: a web layer showed "..." and was counted (a network request) on the main thread."""
+    layer = FakeVectorLayer("communes", provider=provider, source=source)
+    controller.update_for_layer(layer)
+    assert controller._indicator_label.setText.call_args[0][0].endswith("Remote")
+    tooltip = controller._indicator_label.setToolTip.call_args[0][0]
+    assert "Remote" in tooltip and "(? features)" in tooltip
+    assert layer.counted == 0
+
+
+def test_remote_source_after_a_filter_stays_remote(controller):
+    """The result handler passes the backend used ('ogr'): the badge keeps saying remote."""
+    layer = FakeVectorLayer("communes", provider="WFS", source=WFS_URI)
+    controller.update_for_layer(layer, actual_backend="ogr")
+    assert "Remote" in controller._indicator_label.setText.call_args[0][0]
+
+
+def test_auto_selection_does_not_count_a_remote_layer(controller, backend_module, monkeypatch):
+    layer = FakeVectorLayer("communes", provider="WFS", source=WFS_URI)
+    backends = types.ModuleType(f"{_PKG}.adapters.backends")
+    backends.POSTGRESQL_AVAILABLE = False
+    utils = types.ModuleType(f"{_PKG}.infrastructure.utils")
+    utils.detect_layer_provider_type = lambda _layer: "ogr"
+    for name, module in ((".adapters", types.ModuleType(_PKG + ".adapters")), (".adapters.backends", backends),
+                         (".infrastructure.utils", utils)):
+        module.__path__ = []
+        monkeypatch.setitem(sys.modules, _PKG + name, module)
+    assert controller._get_optimal_backend_for_layer(layer) == "ogr"
+    assert layer.counted == 0
+
+
 def test_click_reads_the_optimization_settings_of_the_dock(controller):
     dock = controller.dockwidget
     dock.forced_backends = {}
@@ -143,3 +187,21 @@ def test_click_reads_the_optimization_settings_of_the_dock(controller):
     controller.handle_indicator_clicked()
     assert (controller.optimization_enabled, controller.centroid_auto_enabled,
             controller._optimization_ask_before) == (False, False, False)
+
+
+def test_remote_is_a_badge_not_a_backend(controller):
+    """"Force REMOTE for All Layers" forced a backend that does not exist: the backend of a remote source is OGR."""
+    layer = FakeVectorLayer("communes", provider="WFS", source=WFS_URI)
+    assert controller.get_current_backend(layer) == "ogr"
+    controller.dockwidget.current_layer = layer
+    controller.set_forced_backend("communes", "remote")
+    assert controller.forced_backends == {"communes": "ogr"}
+    assert "Remote" in controller._indicator_label.setText.call_args[0][0]
+
+
+def test_remote_geopackage_is_remote_not_spatialite(controller):
+    layer = FakeVectorLayer("bati", source="/vsicurl/https://example.org/bdtopo.gpkg|layername=batiment")
+    assert controller._detect_backend_for_layer(layer) == "remote"
+    assert controller.get_current_backend(layer) == "ogr"
+    local = FakeVectorLayer("bati", source="/data/bdtopo.gpkg|layername=batiment")
+    assert controller._detect_backend_for_layer(local) == "spatialite"

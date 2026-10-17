@@ -103,6 +103,23 @@ class ExpressionBuilder:
 
         logger.debug("ExpressionBuilder initialized")
 
+    def _distant_centroids(self, layer_props: Dict[str, Any]) -> bool:
+        """Whether this target is tested by its centroids: chosen layer by layer (FilterMate 5),
+        the global flag for tasks without the per-layer list.
+
+        Same rule as ``core.domain.centroid_targets.distant_centroids_for`` (not imported: this
+        module is also loaded on its own).
+        """
+        layer = layer_props.get('layer')
+        try:
+            layer_id = layer.id() if layer is not None else layer_props.get('layer_id')
+        except (RuntimeError, AttributeError):
+            layer_id = layer_props.get('layer_id')
+        chosen = (self.task_parameters.get('filtering') or {}).get('centroid_layers')
+        if chosen is None:
+            return bool(self.use_centroids_distant)
+        return bool(layer_id) and layer_id in set(chosen)
+
     def build_backend_expression(
         self,
         backend: Any,
@@ -190,6 +207,7 @@ class ExpressionBuilder:
             # FIX v4.2.7: Pass source_table_name for proper aliasing of source_filter
             # v4.2.10: Pass filter_chain_mv_name for MV optimization
             source_table_name = self.task_parameters.get('param_source_table')
+            use_centroids = self._distant_centroids(layer_props)
             expression = backend.build_expression(
                 layer_props=layer_props,
                 predicates=self.current_predicates,
@@ -200,7 +218,7 @@ class ExpressionBuilder:
                 source_wkt=self.source_wkt,
                 source_srid=self.source_srid,
                 source_feature_count=self.source_feature_count,
-                use_centroids=self.use_centroids_distant,
+                use_centroids=use_centroids,
                 source_table_name=source_table_name,
                 filter_chain_mv_name=filter_chain_mv  # v4.2.10
             )
@@ -242,6 +260,24 @@ class ExpressionBuilder:
     # =====================================================================
     # PRIVATE HELPER METHODS
     # =====================================================================
+
+    @staticmethod
+    def _with_negations(subset: str, clause_sqls: List[str]) -> List[str]:
+        """``clause_sqls`` (EXISTS clauses found in ``subset``) with the ``NOT`` that precedes them in ``subset``.
+
+        2026-10-17: the extraction returns ``EXISTS (...)`` for
+        ``NOT EXISTS (...)`` (a disjoint filter) and ``AND NOT (EXISTS (...))``.
+        """
+        import re
+        result, search_from = [], 0
+        for clause_sql in clause_sqls:
+            start = subset.find(clause_sql, search_from) if subset else -1
+            if start >= 0:
+                search_from = start + len(clause_sql)
+                if re.search(r'\bNOT\s*(?:\(\s*)*$', subset[:start], re.IGNORECASE):
+                    clause_sql = f"NOT {clause_sql}"
+            result.append(clause_sql)
+        return result
 
     def _prepare_source_filter(self, backend_name: str) -> Optional[str]:
         """
@@ -478,10 +514,14 @@ class ExpressionBuilder:
             if context['spatial_exists_clauses']:
                 # Extract all EXISTS clauses from source_subset (zone_pop, etc.)
                 exists_parts = []
+                # 2026-10-17: a disjoint filter is NOT EXISTS (...) and the
+                # extraction keeps the EXISTS (...) part only: chained as is,
+                # it kept the opposite features.
+                chained_sqls = self._with_negations(source_subset, [c['sql'] for c in context['spatial_exists_clauses']])
 
                 logger.debug(f"   → Found {len(context['spatial_exists_clauses'])} EXISTS clause(s) to chain:")
                 for i, clause in enumerate(context['spatial_exists_clauses']):
-                    clause_sql = clause['sql']
+                    clause_sql = chained_sqls[i]
                     logger.debug(f"      #{i + 1}: table={clause.get('table', 'unknown')}")
 
                     # FIX v4.3.1 (2026-01-22): DO NOT adapt EXISTS here!
@@ -1468,7 +1508,9 @@ def build_feature_id_expression(
     primary_key_name: str,
     table_name: Optional[str],
     provider_type: str,
-    is_numeric: bool = True
+    is_numeric: bool = True,
+    dialect: str = 'sql',
+    in_list_max: Optional[int] = None
 ) -> str:
     """
     Build SQL IN expression from list of feature IDs.
@@ -1483,6 +1525,8 @@ def build_feature_id_expression(
         table_name: Table name (optional, used for PostgreSQL qualified syntax)
         provider_type: Provider type ('postgresql', 'spatialite', 'ogr')
         is_numeric: Whether PK is numeric (affects quoting)
+        dialect: 'sql' or 'qgis' (a QGIS expression subset: backslashes escaped)
+        in_list_max: Most literals in one IN list (Oracle: 1000), longer lists are ORed
 
     Returns:
         str: SQL IN expression
@@ -1490,36 +1534,25 @@ def build_feature_id_expression(
     if not features_ids:
         return ""
 
+    # 2026-10-17: one literal formatter for every provider (repr() wrote
+    # "L'Isle-Jourdain", an identifier in SQL; a numeric key list joined the
+    # values as they came).
+    from .pk_formatter import format_key_literal
+    literals = [format_key_literal(fid, is_numeric, dialect) for fid in features_ids]
+
     # CRITICAL FIX v2.8.10: Use unquoted 'fid' for OGR/GeoPackage compatibility
     # OGR driver does NOT support quoted "fid" in setSubsetString()
-    if provider_type == 'ogr':
-        pk_ref = 'fid' if primary_key_name == 'fid' else f'"{primary_key_name}"'
-        if is_numeric:
-            return f'{pk_ref} IN ({", ".join(features_ids)})'
-        else:
-            return f'{pk_ref} IN ({", ".join(repr(fid) for fid in features_ids)})'
-
-    elif provider_type == 'spatialite':
-        pk_ref = 'fid' if primary_key_name == 'fid' else f'"{primary_key_name}"'
-        if is_numeric:
-            return f'{pk_ref} IN ({", ".join(features_ids)})'
-        else:
-            return f'{pk_ref} IN ({", ".join(repr(fid) for fid in features_ids)})'
-
-    else:  # PostgreSQL
-        if is_numeric:
-            if table_name:
-                return f'"{table_name}"."{primary_key_name}" IN ({", ".join(features_ids)})'
-            else:
-                return f'"{primary_key_name}" IN ({", ".join(features_ids)})'
-        else:
-            if table_name:
-                return (
-                    f'"{table_name}"."{primary_key_name}" IN '
-                    f"({', '.join(repr(fid) for fid in features_ids)})"
-                )
-            else:
-                return f'"{primary_key_name}" IN ({", ".join(repr(fid) for fid in features_ids)})'
+    if provider_type in ('ogr', 'spatialite'):
+        field_ref = 'fid' if primary_key_name == 'fid' else f'"{primary_key_name}"'
+    elif table_name:  # PostgreSQL
+        field_ref = f'"{table_name}"."{primary_key_name}"'
+    else:
+        field_ref = f'"{primary_key_name}"'
+    if in_list_max and len(literals) > in_list_max:
+        lists = [f'{field_ref} IN ({", ".join(literals[i:i + in_list_max])})'
+                 for i in range(0, len(literals), in_list_max)]
+        return "(" + " OR ".join(lists) + ")"
+    return f'{field_ref} IN ({", ".join(literals)})'
 
 
 def build_combined_filter_expression(

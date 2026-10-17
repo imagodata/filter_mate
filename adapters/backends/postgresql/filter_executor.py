@@ -171,7 +171,9 @@ def prepare_postgresql_source_geom(
                 logger.warning(f"[PostgreSQL] No session_id provided, using base MV name: {materialized_view_name}")
 
             # FIX v4.2.0: Include schema in MV reference to avoid PostgreSQL using default 'public' schema
-            postgresql_source_geom = '"{mv_schema}"."mv_{materialized_view_name}_dump"."{source_geom}"'.format(
+            # 2026-10-17: the MV is created as fm_temp_mv_<name>_dump
+            # (MaterializedViewHandler); "mv_<name>_dump" named nothing.
+            postgresql_source_geom = '"{mv_schema}"."fm_temp_mv_{materialized_view_name}_dump"."{source_geom}"'.format(
                 mv_schema=mv_schema,
                 source_geom=source_geom,
                 materialized_view_name=materialized_view_name
@@ -572,7 +574,8 @@ def build_spatial_join_query(
 
     # Determine source reference (materialized view or direct table)
     if current_materialized_view_name:
-        source_ref = f'"{current_materialized_view_schema}"."mv_{current_materialized_view_name}_dump"'
+        # 2026-10-17: created as fm_temp_mv_<name>_dump (MaterializedViewHandler)
+        source_ref = f'"{current_materialized_view_schema}"."fm_temp_mv_{current_materialized_view_name}_dump"'
     else:
         source_ref = sub_expression
 

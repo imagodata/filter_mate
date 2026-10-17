@@ -35,6 +35,16 @@ from ...filter.sql_quotes import has_comparison_operator
 logger = logging.getLogger('FilterMate.Tasks.AttributeFilterExecutor')
 
 
+def translate(context: str, text: str) -> str:
+    """``QCoreApplication.translate``; the source text without Qt (or a mocked one)."""
+    try:
+        from qgis.PyQt.QtCore import QCoreApplication
+        translated = QCoreApplication.translate(context, text)
+    except Exception:  # nosec B110 - untranslated message without Qt (unit tests)
+        return text
+    return translated if isinstance(translated, str) else text
+
+
 class AttributeFilterExecutor:
     """
     Handles attribute-based filtering operations.
@@ -288,24 +298,49 @@ class AttributeFilterExecutor:
         from ...filter.expression_combiner import combine_with_old_subset
         from ...filter.expression_sanitizer import optimize_duplicate_in_clauses
 
+        from ...domain.source_capability import classify_layer
+        from ...filter.pk_formatter import QGIS_EXPRESSION, SQL
+
         # Extract feature IDs
         # CRITICAL FIX: Handle ctid (PostgreSQL internal identifier)
-        if self.primary_key == 'ctid':
-            features_ids = [str(feature.id()) for feature in features_list]
+        # 2026-10-17: the values keep their type (the formatter quotes text, a
+        # NULL key - None or a null QVariant - is NULL). A key that is no field of
+        # the layer ('$id', a legacy 'fid') is the QGIS feature id
+        # (core.domain.stable_key); the FID of a Shapefile / CSV is its row
+        # number, renumbered when the file is edited.
+        self.last_refusal = None
+        feature_id_key = self.primary_key != 'ctid' and self.primary_key not in self.field_names
+        if self.primary_key == 'ctid' or feature_id_key:
+            features_ids = [feature.id() for feature in features_list]
         else:
-            features_ids = [str(feature[self.primary_key]) for feature in features_list]
+            features_ids = [feature[self.primary_key] for feature in features_list]
 
         if not features_ids:
             return None
 
+        capability = classify_layer(self.layer)
+        refusal = self._key_list_refusal(capability, feature_id_key, len(features_ids))
+        if refusal:
+            self.last_refusal = refusal
+            logger.warning(refusal)
+            return None
+
+        expression = None
+        if feature_id_key and self.layer.providerType() in ('memory', 'delimitedtext'):
+            # The subset of these providers is a QGIS expression: the feature id is $id
+            expression = f'$id IN ({", ".join(str(int(fid)) for fid in features_ids)})'
+
         # Build base IN expression
-        expression = build_feature_id_expression(
-            features_ids=features_ids,
-            primary_key_name=self.primary_key,
-            table_name=self.table_name if self.provider_type == PROVIDER_POSTGRES else None,
-            provider_type=self.provider_type,
-            is_numeric=is_numeric
-        )
+        if expression is None:
+            expression = build_feature_id_expression(
+                features_ids=features_ids,
+                primary_key_name='fid' if feature_id_key else self.primary_key,
+                table_name=self.table_name if self.provider_type == PROVIDER_POSTGRES else None,
+                provider_type=self.provider_type,
+                is_numeric=True if feature_id_key else is_numeric,
+                dialect=QGIS_EXPRESSION if capability.subset_is_qgis_expression else SQL,
+                in_list_max=capability.in_list_max,
+            )
 
         # Combine with old subset if needed
         if self.old_subset:
@@ -319,6 +354,35 @@ class AttributeFilterExecutor:
             return combined
 
         return expression
+
+    def _key_list_refusal(self, capability, feature_id_key: bool, key_count: int) -> Optional[str]:
+        """Why the selected features cannot be listed in the layer's subset (None when they can), 2026-10-17.
+
+        A web service / virtual layer keyed by the QGIS feature id (its ids mean
+        nothing to the server, a virtual layer keeps 0 feature), or more keys
+        than a web service accepts (SourceCapability.key_list_limit).
+        """
+        name = self.layer.name()
+        if feature_id_key and not capability.lists_feature_ids:
+            if capability.is_remote_service:
+                return translate(
+                    "AttributeFilterExecutor",
+                    "{0}: this web service has no unique key field (declared key, id, gml_id, cleabs, "
+                    "objectid...), so the selected features cannot be listed for the server."
+                ).format(name)
+            return translate(
+                "AttributeFilterExecutor",
+                "{0}: this layer has no unique key field and its feature ids cannot be listed in its filter "
+                "(a virtual layer needs a unique id column, its uid)."
+            ).format(name)
+        limit = capability.key_list_limit if capability.is_remote_service else None
+        if limit and key_count > limit:
+            return translate(
+                "AttributeFilterExecutor",
+                "{0}: {1} selected features, more than the {2} sent to a web service. "
+                "Narrow the selection or use an attribute filter."
+            ).format(name, f"{key_count:,}", f"{limit:,}")
+        return None
 
     def combine_with_old_subset(self, expression: str) -> str:
         """

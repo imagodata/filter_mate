@@ -464,17 +464,20 @@ def format_pk_values_for_sql(
     Format primary key values for SQL IN clause.
 
     CENTRALIZED v4.3.8: Single implementation for all backends.
+    2026-10-17: the literals are written by core.filter.pk_formatter (one
+    formatter for every path); this wrapper only adds the PostgreSQL
+    ``::uuid`` cast of a uuid-typed key.
 
     Handles different data types:
     - UUID: Quoted strings with ::uuid cast ('uuid-value'::uuid)
-    - Text: Quoted strings ('text-value')
+    - Text: Quoted strings ('text-value'), quotes doubled
     - Numeric: Unquoted (123, 456)
 
-    Detection priority:
+    Detection priority (2026-10-17: the schema before the values, so a text
+    key made of digits such as '01001' stays quoted):
     1. Explicit is_numeric parameter
-    2. Value-based detection (most reliable for OGR layers)
-    3. Field schema detection from layer
-    4. Fallback based on common PK names
+    2. Field schema from the layer (a text field holding real numbers is numeric)
+    3. Every value: numbers or integers written as text without a leading zero
 
     Args:
         values: List of feature ID values
@@ -496,74 +499,25 @@ def format_pk_values_for_sql(
     if not values:
         return ""
 
-    pk_is_uuid = False
-    pk_is_text = False
-    pk_is_numeric = is_numeric
+    try:
+        from ...core.filter.pk_formatter import format_key_literal, is_pk_numeric, key_field, key_values_look_numeric
+    except ImportError:
+        from core.filter.pk_formatter import format_key_literal, is_pk_numeric, key_field, key_values_look_numeric
 
-    # Strategy 1: Check if ALL values are Python numeric types
-    if pk_is_numeric is None:
-        try:
-            all_numeric_values = all(
-                isinstance(v, (int, float)) and not isinstance(v, bool)
-                for v in values[:10]  # Check first 10 values
-            )
-            if all_numeric_values:
-                pk_is_numeric = True
-                logger.debug(f"PK '{pk_field}' detected as numeric from VALUES (all int/float)")
-        except Exception:  # nosec B110 - numeric type detection heuristic; ignore and fall through on error
-            pass
+    if is_numeric is None:
+        field = key_field(layer, pk_field)
+        if field is not None:
+            try:
+                if 'uuid' in str(field.typeName()).lower():
+                    return ", ".join(format_key_literal(fid, False) + "::uuid" for fid in values)
+            except Exception as e:  # nosec B110 - type name unavailable, the numeric test below decides
+                logger.debug(f"Could not get field schema: {e}")
+            is_numeric = is_pk_numeric(layer, pk_field, sample_values=values)
+        else:
+            is_numeric = key_values_look_numeric(values)
+        logger.debug(f"PK '{pk_field}' formatted as {'numeric' if is_numeric else 'text'}")
 
-    # Strategy 2: Check if string values look like integers
-    if pk_is_numeric is None:
-        try:
-            all_look_numeric = all(
-                isinstance(v, (int, float)) or
-                (isinstance(v, str) and v.lstrip('-').isdigit())
-                for v in values[:10]
-            )
-            if all_look_numeric:
-                pk_is_numeric = True
-                logger.debug(f"PK '{pk_field}' detected as numeric from string VALUES")
-        except Exception:  # nosec B110 - numeric type detection heuristic; ignore and fall through on error
-            pass
-
-    # Strategy 3: Check field schema (may be unreliable for OGR)
-    if pk_is_numeric is None and layer and pk_field:
-        try:
-            pk_idx = layer.fields().indexOf(pk_field)
-            if pk_idx >= 0:
-                field = layer.fields()[pk_idx]
-                field_type = field.typeName().lower()
-                pk_is_uuid = 'uuid' in field_type
-                pk_is_text = 'char' in field_type or 'text' in field_type or 'string' in field_type
-                pk_is_numeric = field.isNumeric()
-                logger.debug(f"PK '{pk_field}' from schema: uuid={pk_is_uuid}, text={pk_is_text}, numeric={pk_is_numeric}")
-        except Exception as e:
-            logger.debug(f"Could not get field schema: {e}")
-
-    # Strategy 4: Fallback based on common PK names
-    if pk_is_numeric is None and pk_field:
-        pk_lower = pk_field.lower()
-        common_numeric_names = ('id', 'fid', 'gid', 'pk', 'ogc_fid', 'objectid', 'oid', 'rowid')
-        pk_is_numeric = pk_lower in common_numeric_names
-        logger.debug(f"PK '{pk_field}' fallback based on name: numeric={pk_is_numeric}")
-
-    # Default to non-numeric if still undetermined
-    if pk_is_numeric is None:
-        pk_is_numeric = False
-
-    # Format values based on type
-    if pk_is_uuid:
-        # UUID - cast to uuid type (PostgreSQL specific)
-        formatted = ["'" + str(fid).replace("'", "''") + "'::uuid" for fid in values]
-    elif pk_is_text or not pk_is_numeric:
-        # Text/UUID/other non-numeric - quote strings and escape quotes
-        formatted = ["'" + str(fid).replace("'", "''") + "'" for fid in values]
-    else:
-        # Numeric - no quotes
-        formatted = [str(fid) for fid in values]
-
-    return ", ".join(formatted)
+    return ", ".join(format_key_literal(fid, is_numeric) for fid in values)
 
 
 __all__ = [

@@ -34,15 +34,15 @@ QGIS_PROVIDER_SPATIALITE = 'spatialite'   # layer.providerType() for SpatiaLite 
 QGIS_PROVIDER_OGR = 'ogr'                # layer.providerType() for OGR/file layers
 QGIS_PROVIDER_MEMORY = 'memory'           # layer.providerType() for memory layers
 
-# Remote/distant providers that should be treated as available if layer is valid
+# Remote/distant providers that should be treated as available if layer is valid.
+# Lower case: compare with ``providerType().lower()`` (QGIS names them 'WFS', 'OAPIF').
+# 2026-10-17: a copy of core.domain.source_capability.REMOTE_SERVICE_PROVIDERS
+# (not imported: this module is loaded before core; a unit test keeps them equal).
+# Prefer classify(), which also knows GDAL services and remote files by their source.
 REMOTE_PROVIDERS = {
-    'WFS',                    # OGC Web Feature Service
-    'wfs',                    # Lowercase variant
-    'arcgisfeatureserver',    # ArcGIS Feature Service
-    'arcgismapserver',        # ArcGIS Map Service
-    'oapif',                  # OGC API Features
-    'wcs',                    # Web Coverage Service (raster, but listed for completeness)
-    'vectortile',             # Vector tiles
+    'wfs', 'oapif', 'arcgisfeatureserver', 'sensorthings',             # vector services
+    'vectortile', 'arcgisvectortileservice', 'xyzvectortiles',         # vector tiles
+    'wms', 'wcs', 'arcgismapserver',                                   # raster services
 }
 
 # Provider type mapping from QGIS internal names (v4.0 Regression Fix)
@@ -269,12 +269,19 @@ MAX_PENDING_TASKS = 10                  # Maximum pending async tasks
 # Database Defaults
 # =============================================================================
 DEFAULT_POSTGRES_SCHEMA = 'public'
-DEFAULT_TEMP_SCHEMA = 'filtermate_temp'
+# 2026-10-17: ONE temp schema. The task path (filter_task, filter_actions,
+# the app's session cleanup, datasource_manager) used 'filter_mate_temp',
+# the v4 backend (mv_manager, backend.py, cleanup service, chain optimizer)
+# 'filtermate_temp': the MVs of one were never found nor cleaned by the
+# other. The old spelling is only read, to clean what earlier versions left.
+DEFAULT_TEMP_SCHEMA = 'filter_mate_temp'
+LEGACY_TEMP_SCHEMAS = ('filtermate_temp',)
 
 # Unified naming: all FilterMate objects use fm_temp_* prefix for easy cleanup
 TABLE_PREFIX = 'fm_temp_'               # Base prefix for all FilterMate temp objects
 TABLE_PREFIX_TEMP = 'fm_temp_tbl_'      # Temporary tables
 TABLE_PREFIX_MATERIALIZED = 'fm_temp_mv_'  # Materialized views
+LEGACY_PREFIX_MATERIALIZED = 'mv_'      # Read for cleanup only (before v4.4.4)
 TABLE_PREFIX_BUFFER = 'fm_temp_buf_'    # Buffer geometry tables
 TABLE_PREFIX_SOURCE = 'fm_temp_src_'    # Source selection tables/MVs
 
@@ -378,7 +385,10 @@ def get_provider_name(qgis_provider_type: str) -> str:
         >>> get_provider_name('postgres')
         'postgresql'
     """
-    return PROVIDER_TYPE_MAPPING.get(qgis_provider_type, qgis_provider_type)
+    if qgis_provider_type in PROVIDER_TYPE_MAPPING:
+        return PROVIDER_TYPE_MAPPING[qgis_provider_type]
+    # QGIS keys are case-sensitive ('WFS', 'OAPIF'): the mapping is matched case-insensitively.
+    return PROVIDER_TYPE_MAPPING.get((qgis_provider_type or '').lower(), qgis_provider_type)
 
 
 def get_provider_display_name(provider_type: str) -> str:
@@ -588,8 +598,10 @@ __all__ = [
     # Database defaults
     'DEFAULT_POSTGRES_SCHEMA',
     'DEFAULT_TEMP_SCHEMA',
+    'LEGACY_TEMP_SCHEMAS',
     'TABLE_PREFIX_TEMP',
     'TABLE_PREFIX_MATERIALIZED',
+    'LEGACY_PREFIX_MATERIALIZED',
     # UI constants
     'TAB_EXPLORING',
     'TAB_FILTERING',

@@ -52,6 +52,16 @@ TOKENS: Dict[str, Dict[str, str]] = {
         'fm_danger': '#e57373',
         'fm_scroll': '#4a4a4a',
         'fm_icon': '#e6e6e6',
+        # Selection strip between EXPLORING and FILTERING, tinted with the source layer kind.
+        'fm_strip_vector_bg': '#1d2630',
+        'fm_strip_vector_border': '#2f4258',
+        'fm_strip_vector_text': '#6fb1f0',
+        'fm_strip_raster_bg': '#2b251b',
+        'fm_strip_raster_border': '#4d3f26',
+        'fm_strip_raster_text': '#f0b35a',
+        'fm_strip_point_cloud_bg': '#1f2b28',
+        'fm_strip_point_cloud_border': '#2f4a43',
+        'fm_strip_point_cloud_text': '#4fd1b0',
     },
     'light': {
         'fm_bg': '#f3f3f3',
@@ -79,6 +89,16 @@ TOKENS: Dict[str, Dict[str, str]] = {
         'fm_danger': '#c62828',
         'fm_scroll': '#b5b5b5',
         'fm_icon': '#2e2e2e',
+        # Same tints on a light background; darker texts keep a 4.5:1 contrast.
+        'fm_strip_vector_bg': '#e7f0fa',
+        'fm_strip_vector_border': '#a9c8ea',
+        'fm_strip_vector_text': '#1d5b99',
+        'fm_strip_raster_bg': '#fbf1e1',
+        'fm_strip_raster_border': '#e3c38f',
+        'fm_strip_raster_text': '#7f5210',
+        'fm_strip_point_cloud_bg': '#e2f5ef',
+        'fm_strip_point_cloud_border': '#96d4c1',
+        'fm_strip_point_cloud_text': '#146a55',
     },
 }
 

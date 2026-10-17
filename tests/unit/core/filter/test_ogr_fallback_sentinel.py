@@ -340,3 +340,29 @@ def test_postgresql_adapter_follows_the_operator(pg_adapter, operator, expected)
     assert adapter.apply_filter(MagicMock(), 'EXISTS (x)', '"nature" = \'Route\'', operator) is True
     assert applied == [expected]
     adapter._legacy_backend.apply_filter.assert_not_called()
+
+
+@pytest.mark.parametrize("subset", ["$id IN (3, 7)", "NOT ($id IN (3, 7))", "($id IN (1))"])
+def test_feature_id_lists_of_memory_layers_are_key_lists(subset):
+    """2026-10-17: the OGR backend writes $id IN (...) on memory / delimited text layers."""
+    assert orchestrator_module.FilterOrchestrator._is_key_list_subset(_layer(subset), subset) is True
+
+
+@pytest.mark.parametrize("stable, subset, key_list", [
+    ("cleabs", '"cleabs" IN (\'COMMUNE_1\')', True),     # web service key, not declared
+    ("id", '"id" IN (4, 5)', True),                       # a proven unique id of a Shapefile
+    (None, '"cleabs" IN (\'COMMUNE_1\')', False),        # not the layer's key: an attribute filter
+])
+def test_the_stable_key_list_is_a_key_list(monkeypatch, stable, subset, key_list):
+    probe = types.ModuleType(f"{ROOT}.adapters.qgis.source_capability_probe")
+    calls = []
+
+    def stable_key_for_layer(layer, scan=True):
+        calls.append(scan)
+        return types.SimpleNamespace(name=stable, is_field=stable is not None)
+
+    probe.stable_key_for_layer = stable_key_for_layer
+    monkeypatch.setitem(sys.modules, probe.__name__, probe)
+    layer = _layer(subset, pk="fid")
+    assert orchestrator_module.FilterOrchestrator._is_key_list_subset(layer, subset) is key_list
+    assert calls == [False], "cached verdicts only: no read of the layer here"

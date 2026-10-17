@@ -21,12 +21,54 @@ Date: January 2025
 """
 
 import logging
+import re
 from typing import Optional, List, Tuple
 from datetime import datetime
 
 from ....infrastructure.database.sql_utils import sanitize_sql_identifier
+from ....infrastructure.constants import DEFAULT_TEMP_SCHEMA, LEGACY_TEMP_SCHEMAS
 
 logger = logging.getLogger('FilterMate.Cleanup.PostgreSQL')
+
+# Pre-computed buffer tables of the dynamic buffers (infrastructure.constants.
+# TABLE_PREFIX_BUFFER). They live in the schema of their source table, not in
+# the temp schema: see PostgreSQLExpressionBuilder._buffer_table_name.
+BUFFER_TABLE_PREFIX = "fm_temp_buf_"
+
+
+def session_token(session_id) -> str:
+    """``session_id`` reduced to ``[0-9a-z]{1,12}``, as buffer table names carry it."""
+    token = re.sub(r'[^0-9a-z]', '', str(session_id or '').lower())[:12]
+    return token or 'nosession'
+
+
+def _like_prefix(prefix: str) -> str:
+    """LIKE pattern (``ESCAPE '!'``) matching names that start with ``prefix`` (``_`` and ``%`` literal).
+
+    '!' rather than a backslash: no dependency on standard_conforming_strings.
+    """
+    escaped = prefix.replace('!', '!!').replace('_', '!_').replace('%', '!%')
+    return escaped + '%'
+
+
+def drop_session_buffer_tables(cursor, session_id) -> List[str]:
+    """Drop the buffer tables of ``session_id`` in every schema; returns ``schema.table`` names.
+
+    2026-10-17: the buffer tables are created in the schema of the source
+    table (QGIS cannot see the temp schema from the layer connection), and
+    the session cleanup only looked in the temp schema and ``public``.
+    The caller commits.
+    """
+    cursor.execute(
+        "SELECT schemaname, tablename FROM pg_tables WHERE tablename LIKE %s ESCAPE '!'",
+        (_like_prefix(f"{BUFFER_TABLE_PREFIX}{session_token(session_id)}_"),),
+    )
+    dropped = []
+    for schema, table in cursor.fetchall():
+        quoted = '"{}"."{}"'.format(schema.replace('"', '""'), table.replace('"', '""'))
+        cursor.execute(f'DROP TABLE IF EXISTS {quoted} CASCADE')  # nosec B608 - quoted identifiers read from pg_tables
+        dropped.append(f"{schema}.{table}")
+    return dropped
 
 
 class PostgreSQLCleanupService:
@@ -39,14 +81,14 @@ class PostgreSQLCleanupService:
     Features:
     - Session view cleanup with proper error handling
     - Orphaned view detection and cleanup
-    - Schema management (create/drop filtermate_temp)
+    - Schema management (create/drop the temp schema)
     - Circuit breaker integration for stability
     - Comprehensive logging and metrics
 
     Usage:
         service = PostgreSQLCleanupService(
             session_id="abc123",
-            schema="filtermate_temp"
+            schema="filter_mate_temp"
         )
 
         # Clean current session views
@@ -59,8 +101,9 @@ class PostgreSQLCleanupService:
         dropped = service.cleanup_schema_if_empty(connexion)
     """
 
-    # Default schema name for FilterMate temp objects
-    DEFAULT_SCHEMA = "filtermate_temp"
+    # Default schema name for FilterMate temp objects (2026-10-17: the one
+    # schema of infrastructure.constants, was 'filtermate_temp')
+    DEFAULT_SCHEMA = DEFAULT_TEMP_SCHEMA
 
     # Materialized view prefix patterns (unified fm_temp_* prefix)
     MV_PREFIX = "fm_temp_mv_"
@@ -497,10 +540,10 @@ class PostgreSQLCleanupService:
         Clean ALL FilterMate objects across all schemas (nuclear option).
 
         This method cleans up:
-        - All filtermate_mv_* views in filtermate_temp schema
+        - All filtermate_mv_* views in the temp schema (and the legacy filtermate_temp)
         - All filtermate_mv_* views in public schema (if include_public_schema=True)
         - All fm_temp_* objects
-        - The filtermate_temp schema itself
+        - The temp schema(s) themselves
 
         Use this for complete cleanup after crashes or before uninstall.
 
@@ -513,7 +556,9 @@ class PostgreSQLCleanupService:
             Tuple of (count of objects cleaned, list of object names)
         """
         cleaned_objects = []
-        schemas_to_check = [self._schema]
+        # 2026-10-17: also the temp schema of earlier versions (leftovers)
+        schemas_to_check = [self._schema] + [s for s in LEGACY_TEMP_SCHEMAS if s != self._schema]
+        temp_schemas = list(schemas_to_check)
 
         if include_public_schema:
             schemas_to_check.append('public')
@@ -597,15 +642,34 @@ class PostgreSQLCleanupService:
                             except Exception as e:
                                 logger.warning(f"Error dropping table {full_name}: {e}")
 
-            # Drop filtermate_temp schema if empty or force
-            if not dry_run:
+            # 2026-10-17: buffer tables live in the schema of their source
+            # table, whichever it is.
+            cursor.execute(
+                "SELECT schemaname, tablename FROM pg_tables "
+                "WHERE tablename LIKE %s ESCAPE '!' AND NOT (schemaname = ANY(%s))",
+                (_like_prefix(BUFFER_TABLE_PREFIX), schemas_to_check),
+            )
+            for schema, table_name in cursor.fetchall():
+                full_name = '"{}"."{}"'.format(schema.replace('"', '""'), table_name.replace('"', '""'))
+                if dry_run:
+                    cleaned_objects.append(f"[DRY RUN] Would drop TABLE: {full_name}")
+                    continue
                 try:
-                    safe_schema = sanitize_sql_identifier(self._schema)
-                    cursor.execute(f'DROP SCHEMA IF EXISTS "{safe_schema}" CASCADE;')
-                    cleaned_objects.append(f"SCHEMA: {self._schema}")
-                    logger.info(f"Dropped schema: {self._schema}")
+                    cursor.execute(f'DROP TABLE IF EXISTS {full_name} CASCADE;')  # nosec B608
+                    cleaned_objects.append(f"TABLE: {full_name}")
                 except Exception as e:
-                    logger.warning(f"Could not drop schema {self._schema}: {e}")
+                    logger.warning(f"Error dropping table {full_name}: {e}")
+
+            # Drop the temp schema(s) if empty or force
+            if not dry_run:
+                for temp_schema in temp_schemas:
+                    try:
+                        safe_schema = sanitize_sql_identifier(temp_schema)
+                        cursor.execute(f'DROP SCHEMA IF EXISTS "{safe_schema}" CASCADE;')
+                        cleaned_objects.append(f"SCHEMA: {temp_schema}")
+                        logger.info(f"Dropped schema: {temp_schema}")
+                    except Exception as e:
+                        logger.warning(f"Could not drop schema {temp_schema}: {e}")
 
             connexion.commit()
 
@@ -628,7 +692,7 @@ class PostgreSQLCleanupService:
         Clean filtermate_mv_src_sel_* views specifically.
 
         These are source selection views that can accumulate in the
-        filtermate_temp schema and cause dependency issues.
+        temp schema and cause dependency issues.
 
         Args:
             connexion: Active PostgreSQL connection
@@ -643,7 +707,7 @@ class PostgreSQLCleanupService:
         try:
             cursor = connexion.cursor()
 
-            # Find in filtermate_temp schema
+            # Find in the temp schema
             cursor.execute("""
                 SELECT matviewname
                 FROM pg_matviews

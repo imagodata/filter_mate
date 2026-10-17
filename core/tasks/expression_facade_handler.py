@@ -228,6 +228,12 @@ class ExpressionFacadeHandler:
             features_list=features_list,
             is_numeric=self.task.task_parameters["infos"]["primary_key_is_numeric"]
         )
+        # 2026-10-17: a refused key list (web service / virtual layer without key,
+        # too many keys) reaches the message bar, not only the log.
+        refusal = getattr(executor, 'last_refusal', None)
+        messages = getattr(self.task, 'warning_messages', None)
+        if isinstance(refusal, str) and refusal and isinstance(messages, list) and refusal not in messages:
+            messages.append(refusal)
 
         # FIX 2026-01-16: Log expression to diagnose WHERE prefix
         logger.info(f"_build_feature_id_expression result: '{result[:100] if result else None}...'")

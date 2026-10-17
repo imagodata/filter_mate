@@ -66,6 +66,8 @@ class LayerSelectionMixin:
         'delimitedtext': 'csv',
         'gpx': 'gpx',
         'wfs': 'wfs',
+        'oapif': 'oapif',
+        'arcgisfeatureserver': 'arcgisfeatureserver',
     }
 
     def get_current_layer(self) -> Optional[QgsVectorLayer]:
@@ -150,7 +152,7 @@ class LayerSelectionMixin:
         except (AttributeError, RuntimeError):
             return 'unknown'
 
-        return self.PROVIDER_TYPE_MAP.get(provider, 'unknown')
+        return self.PROVIDER_TYPE_MAP.get((provider or '').lower(), 'unknown')
 
     def get_all_vector_layers(self) -> List[QgsVectorLayer]:
         """
@@ -227,6 +229,16 @@ class LayerSelectionMixin:
         except (RuntimeError, AttributeError):
             return None
 
+    @staticmethod
+    def _cheap_feature_count(layer) -> int:
+        """``featureCount()``; -1 for a web service / network database (2026-10-17: a server request)."""
+        try:
+            from ....adapters.qgis.source_capability_probe import feature_count_or_none
+        except ImportError:
+            return layer.featureCount()
+        count = feature_count_or_none(layer)
+        return -1 if count is None else count
+
     def get_layer_info(self, layer: QgsVectorLayer) -> Dict[str, Any]:
         """
         Get layer information dictionary.
@@ -265,7 +277,7 @@ class LayerSelectionMixin:
                 'id': layer.id(),
                 'name': layer.name(),
                 'provider': self.get_layer_provider_type(layer),
-                'feature_count': layer.featureCount(),
+                'feature_count': self._cheap_feature_count(layer),
                 'geometry_type': geometry_type,
                 'crs': layer.crs().authid() if layer.crs().isValid() else None,
                 'is_valid': layer.isValid(),
