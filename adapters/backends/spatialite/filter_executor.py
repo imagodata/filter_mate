@@ -15,14 +15,45 @@ Created: January 2026 (EPIC-1 Phase E4)
 Updated: EPIC-1 Phase E4-S8 - Extracted prepare_spatialite_source_geom()
 """
 
+import hashlib
 import logging
+import os
+import time
 from dataclasses import dataclass, field
-from typing import Optional, List, Any, Callable, Dict, Tuple
+from typing import Optional, List, Any, Callable, Dict, Iterable, Tuple
 
 # EPIC-1 E4-S9: Import centralized HistoryRepository
 from ...repositories.history_repository import HistoryRepository
 
 logger = logging.getLogger('FilterMate.Adapters.Backends.Spatialite.FilterExecutor')
+
+_fallback_session: Optional[str] = None
+
+
+def resolve_session_id(session_id: Optional[str] = None, task_parameters: Optional[dict] = None) -> str:
+    """A real session id for the names of the temp tables (``fm_temp_<session>_<name>``).
+
+    The id given, else the one in the task parameters, else a process-wide one of the
+    same shape as the app's (8 hexadecimal digits): a table without a session id
+    (``fm_temp_<name>``) could not be told from a user's table by the cleanups.
+
+    Args:
+        session_id: Session id of the caller (may be None or empty).
+        task_parameters: Task parameters, which carry the app's ``session_id``.
+
+    Returns:
+        str: Never empty.
+    """
+    global _fallback_session
+    if session_id:
+        return str(session_id)
+    from_task = (task_parameters or {}).get('session_id')
+    if from_task:
+        return str(from_task)
+    if _fallback_session is None:
+        seed = f"{time.time()}_{os.getpid()}_{id(logger)}"
+        _fallback_session = hashlib.md5(seed.encode(), usedforsecurity=False).hexdigest()[:8]  # nosec B324
+    return _fallback_session
 
 
 # =============================================================================
@@ -1045,7 +1076,7 @@ def apply_spatialite_subset(
         bool: True if successful
     """
     # Build session-prefixed name for multi-client isolation
-    session_name = f"{session_id}_{name}" if session_id else name
+    session_name = f"{resolve_session_id(session_id)}_{name}"
 
     # Apply subset string to layer (reference temp table)
     # v4.4.4: Use fm_temp_ prefix for new tables
@@ -1162,7 +1193,8 @@ def manage_spatialite_subset(
     # It is created in the layer's own database, not in FilterMate's: the subset string
     # is evaluated by the layer's provider on its own connection to that file, which
     # cannot see a table that lives in another database.
-    session_name = f"{session_id}_{name}" if session_id else name
+    session_id = resolve_session_id(session_id, task_parameters)
+    session_name = f"{session_id}_{name}"
     temp_table_name = f"fm_temp_{session_name}"
     logger.info(
         f"Creating Spatialite temp table '{temp_table_name}' "
@@ -1255,7 +1287,8 @@ def get_last_subset_info(cur, layer, project_uuid: str, conn=None) -> tuple:
 
 def cleanup_session_temp_tables(
     db_path: str,
-    session_id: Optional[str] = None
+    session_id: Optional[str] = None,
+    exclude_referenced_by: Iterable[str] = ()
 ) -> int:
     """
     Clean up all temporary tables for a specific session.
@@ -1271,6 +1304,8 @@ def cleanup_session_temp_tables(
         db_path: Path to Spatialite database
         session_id: Session identifier prefix. Without one nothing is dropped
             (callers that only know the database get 0, not an error).
+        exclude_referenced_by: Subset strings of the layers that are filtered right now:
+            a table they name is kept (its layer would lose its filter).
 
     Returns:
         int: Number of tables cleaned up
@@ -1280,7 +1315,8 @@ def cleanup_session_temp_tables(
     if not session_id or not db_path:
         return 0
 
-    count = len(drop_filtermate_temp_tables(db_path, session_id=session_id))
+    count = len(drop_filtermate_temp_tables(
+        db_path, session_id=session_id, exclude_referenced_by=exclude_referenced_by))
     if count > 0:
         logger.info(
             f"Cleaned up {count} Spatialite temp table(s) "

@@ -91,12 +91,32 @@ class TestTableAndSubsetAgree:
         assert created_name == f"fm_temp_{SID}_routes_1234"
         assert queued == [f'"fid" IN (SELECT "fid" FROM {created_name})']
 
-    def test_without_a_session_the_prefix_is_still_there(self, executor):
+    def test_without_a_session_a_real_one_is_used(self, executor):
+        """fm_temp_<name> with no session id is a name the cleanups (and a user) cannot tell from theirs."""
+        temp_objects = __import__(f"{_PKG}.infrastructure.database.temp_objects", fromlist=["x"])
         ok, queued = _manage(executor, None)
 
         created_name = executor.created.call_args.kwargs["table_name"]
-        assert created_name == "fm_temp_routes_1234"
+        assert temp_objects.is_filtermate_spatialite_temp_table(created_name)
+        assert created_name.endswith("_routes_1234") and created_name != "fm_temp_routes_1234"
         assert queued == [f'"fid" IN (SELECT "fid" FROM {created_name})']
+        _manage(executor, None)
+        assert executor.created.call_args.kwargs["table_name"] == created_name  # stable for the process
+
+    def test_the_session_of_the_task_parameters_is_used_when_none_is_given(self, executor):
+        executor.created.reset_mock()
+        executor.build_spatialite_query = lambda **kwargs: "SELECT fid, geom FROM routes"
+        queued = []
+
+        executor.manage_spatialite_subset(
+            layer=_Layer(), sql_subset_string="1=1", primary_key_name="fid", geom_key_name="geom",
+            name="routes_1234", session_id="", project_uuid=None,
+            queue_subset_func=lambda layer, subset: queued.append(subset),
+            get_spatialite_datasource_func=lambda layer: ("/data/reseau.gpkg", "routes", 4326, True),
+            task_parameters={"session_id": SID})
+
+        assert executor.created.call_args.kwargs["table_name"] == f"fm_temp_{SID}_routes_1234"
+        assert queued == [f'"fid" IN (SELECT "fid" FROM fm_temp_{SID}_routes_1234)']
 
     def test_the_created_name_is_one_the_cleanup_recognises(self, executor):
         from importlib import import_module
@@ -146,6 +166,13 @@ class TestSessionCleanup:
         path = self._db(tmp_path)
 
         assert executor.cleanup_session_temp_tables(str(path)) == 0
+        assert f"fm_temp_{SID}_routes" in self._names(path)
+
+    def test_a_table_a_layer_is_still_filtered_through_is_kept(self, executor, tmp_path):
+        path = self._db(tmp_path)
+        in_use = [f'"fid" IN (SELECT "fid" FROM fm_temp_{SID}_routes)']
+
+        assert executor.cleanup_session_temp_tables(str(path), SID, exclude_referenced_by=in_use) == 0
         assert f"fm_temp_{SID}_routes" in self._names(path)
 
 
