@@ -1549,6 +1549,22 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
                 show_warning("FilterMate", self.tr("No PostgreSQL connection available"))
                 return
 
+            # Dropping the schema removes these objects (FilterMate's only): say which
+            objects = self._backend_ctrl.list_postgresql_schema_objects()
+            if objects is None:
+                show_warning("FilterMate", self.tr("Schema cleanup failed"))
+                return
+            if objects:
+                lines = [f"{schema}.{name} ({kind})" for kind, schema, name in objects]
+                msg = self.tr("Schema '{0}' and the following {1} temporary object(s) will be dropped:").format(
+                    info.get('schema'), len(lines)) + "\n\n" + "\n".join(lines[:12])
+                if len(lines) > 12:
+                    msg += "\n" + self.tr("... and {0} more").format(len(lines) - 12)
+                if QMessageBox.question(self, self.tr("Drop FilterMate schema"), msg,
+                                        QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No, QMessageBox.StandardButton.No) != QMessageBox.StandardButton.Yes:
+                    show_info("FilterMate", self.tr("Schema cleanup cancelled"))
+                    return
+
             # Check for other sessions' views
             other_count = info.get('total_views_count', 0) - info.get('our_views_count', 0)
             if other_count > 0:
