@@ -2418,6 +2418,10 @@ class FilterMateApp:
                 task_parameters["task"] = self._build_common_task_params(
                     features, expression, layers_to_filter, include_history
                 )
+                # 2026-10-17: the user's settings (APP.OPTIONS: parallel
+                # filtering, thresholds, simplification...) for the task;
+                # nothing passed them, every reader used its defaults.
+                task_parameters["task"]["config_data"] = self.CONFIG_DATA
 
                 # v4.7: Delegate skip_source_filter logic
                 skip_source_filter = builder.determine_skip_source_filter(
@@ -2443,6 +2447,8 @@ class FilterMateApp:
                     export_params = builder.build_export_params(self.PROJECT_LAYERS, self.PROJECT)
                     if export_params:
                         export_params["task"]["session_id"] = self.session_id
+                        # 2026-10-17: the user's settings (STREAMING_EXPORT...)
+                        export_params["task"]["config_data"] = self.CONFIG_DATA
                         return {**task_parameters, **export_params}
 
                 # Fallback if TaskParameterBuilder unavailable

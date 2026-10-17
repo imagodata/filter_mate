@@ -82,10 +82,10 @@ class TestExecuteExportingFilePathOutput:
                     "HAS_STYLES_TO_EXPORT": False,
                 },
                 "layers": [{"layer_name": "my_layer"}],
+                "config_data": {"APP": {"OPTIONS": {"STREAMING_EXPORT": {
+                    "enabled": {"value": False},
+                }}}},
             },
-            "config": {"APP": {"OPTIONS": {"STREAMING_EXPORT": {
-                "enabled": {"value": False},
-            }}}},
         }
 
     def _run_with_stubbed_exporter(self, datatype, output_path, layer_name="x"):
@@ -429,12 +429,12 @@ class TestStreamingTargetCrsPropagation:
                     "HAS_STYLES_TO_EXPORT": False,
                 },
                 "layers": [{"layer_name": "roads"}],
+                "config_data": {"APP": {"OPTIONS": {"STREAMING_EXPORT": {
+                    "enabled": {"value": True},
+                    "feature_threshold": {"value": 10000},
+                    "chunk_size": {"value": 5000},
+                }}}},
             },
-            "config": {"APP": {"OPTIONS": {"STREAMING_EXPORT": {
-                "enabled": {"value": True},
-                "feature_threshold": {"value": 10000},
-                "chunk_size": {"value": 5000},
-            }}}},
         }
 
         target_crs = MagicMock(name="target_crs")
@@ -1004,7 +1004,7 @@ class TestGpkgPathDetection:
                     "HAS_OUTPUT_FOLDER_TO_EXPORT": True,
                     "OUTPUT_FOLDER_TO_EXPORT": output_folder,
                     "HAS_STYLES_TO_EXPORT": False,
-                }, "layers": [{"layer_name": "x"}]}, "config": {}},
+                }, "layers": [{"layer_name": "x"}], "config_data": {}}},
                 project=project,
                 set_progress=MagicMock(), set_description=MagicMock(),
                 is_canceled=MagicMock(return_value=False),
@@ -1167,10 +1167,10 @@ class TestExportHandlerWarningCollection:
                     "HAS_STYLES_TO_EXPORT": False,
                 },
                 "layers": [{"layer_name": "x"}],
+                "config_data": {"APP": {"OPTIONS": {"STREAMING_EXPORT": {
+                    "enabled": {"value": False},
+                }}}},
             },
-            "config": {"APP": {"OPTIONS": {"STREAMING_EXPORT": {
-                "enabled": {"value": False},
-            }}}},
         }
         with patch.object(le.LayerExporter, 'export_single_layer',
                           return_value=fake_result), \
@@ -1404,12 +1404,12 @@ class TestStreamingGpkgStyles:
                     "STYLES_TO_EXPORT": "QML",
                 },
                 "layers": layers,
+                "config_data": {"APP": {"OPTIONS": {"STREAMING_EXPORT": {
+                    "enabled": {"value": True},
+                    "feature_threshold": {"value": 0},  # always streaming
+                    "chunk_size": {"value": 100},
+                }}}},
             },
-            "config": {"APP": {"OPTIONS": {"STREAMING_EXPORT": {
-                "enabled": {"value": True},
-                "feature_threshold": {"value": 0},  # always streaming
-                "chunk_size": {"value": 100},
-            }}}},
         }
 
     def _make_layer(self):
@@ -1683,10 +1683,10 @@ class TestPostWriteCancelNoLongerMisleading:
                     "HAS_STYLES_TO_EXPORT": False,
                 },
                 "layers": [{"layer_name": "roads"}],
+                "config_data": {"APP": {"OPTIONS": {"STREAMING_EXPORT": {
+                    "enabled": {"value": False},
+                }}}},
             },
-            "config": {"APP": {"OPTIONS": {"STREAMING_EXPORT": {
-                "enabled": {"value": False},
-            }}}},
         }
 
     def test_successful_write_with_late_cancel_reports_success(self, tmp_path):
