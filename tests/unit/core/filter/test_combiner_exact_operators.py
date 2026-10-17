@@ -24,7 +24,7 @@ from pathlib import Path
 import pytest
 
 from core.filter.expression_builder import build_combined_filter_expression
-from core.filter.expression_combiner import combine_with_old_subset
+from core.filter.expression_combiner import combine_with_old_filter, combine_with_old_subset
 
 
 def _load_subset_string_builder():
@@ -128,3 +128,19 @@ class TestOgrOldSubset:
 
     def test_select_statement_without_where_is_the_whole_layer(self):
         assert combine_with_old_subset('"c" = 3', 'SELECT * FROM "troncon"', 'OR', 'ogr') == '( 1 = 1 ) OR ( "c" = 3 )'
+
+
+@pytest.mark.parametrize("operator, expected", [
+    (None, '"c" = 3'),        # combination off: replace (it defaulted to AND)
+    ('', '"c" = 3'),
+    ('OR', '("nature" = \'Route\') OR ("c" = 3)'),
+])
+def test_combine_with_old_filter_none_replaces(operator, expected):
+    assert combine_with_old_filter('"c" = 3', '"nature" = \'Route\'', operator) == expected
+
+
+def test_no_combine_operator_forced_to_and_in_the_v3_paths():
+    root = Path(__file__).resolve().parents[4]
+    for relative in ("core/tasks/v3_bridge_handler.py", "core/tasks/executors/spatial_filter_executor.py"):
+        source = (root / relative).read_text(encoding="utf-8")
+        assert "or 'AND'" not in source and "combine_operator='AND'" not in source, relative

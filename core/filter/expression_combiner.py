@@ -733,7 +733,7 @@ def combine_with_old_filter(
     Args:
         new_expression: New filter expression
         old_subset: Existing subset string from layer
-        combine_operator: Logical operator ('AND', 'OR', 'AND NOT')
+        combine_operator: Logical operator ('AND', 'OR', 'AND NOT'), None to replace
         sanitize_fn: Optional callback to sanitize old_subset
 
     Returns:
@@ -755,9 +755,10 @@ def combine_with_old_filter(
         logger.info(f"Old subset contains {', '.join(reasons)} - replacing instead of combining")
         return new_expression
 
-    # Default to AND if no operator specified
+    # No operator: REPLACE, as combine_with_old_subset and the backends
+    # (2026-10-17: it defaulted to AND, keeping a filter the user replaced)
     if not combine_operator:
-        combine_operator = 'AND'
-        logger.info("No combine operator specified, using AND by default to preserve existing filter")
+        logger.info("No combine operator (combination off) - replacing the old subset")
+        return new_expression
 
     return f"({old_subset}) {combine_operator} ({new_expression})"

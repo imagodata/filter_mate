@@ -109,14 +109,14 @@ class V3BridgeHandler:
         """
         executor = self.task._get_spatial_executor()
 
+        # 2026-10-17: the arguments SpatialFilterExecutor.try_v3_spatial_filter
+        # takes (it got task_bridge / source_layer / task_parameters / a
+        # combine operator forced to AND, and raised TypeError). The v3 bridge
+        # does not combine with the existing subset.
         result = executor.try_v3_spatial_filter(
             layer=layer,
             layer_props=layer_props,
             predicates=predicates,
-            task_bridge=self.task._task_bridge,
-            source_layer=self.task.source_layer,
-            task_parameters=self.task.task_parameters,
-            combine_operator=self.task._get_combine_operator() or 'AND'
         )
 
         return result
