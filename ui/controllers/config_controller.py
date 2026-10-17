@@ -889,11 +889,12 @@ class ConfigController(BaseController):
         Args:
             message: Error message to display
         """
+        logger.error(f"UI Error: {message}")
         try:
             from ...infrastructure.feedback import show_error
             show_error(message, "FilterMate")
         except ImportError:
-            logger.error(f"UI Error: {message}")
+            pass
 
     def __repr__(self) -> str:
         """String representation for debugging."""

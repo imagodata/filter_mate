@@ -133,6 +133,10 @@ def test_show_error_reaches_the_message_bar_with_the_message_first(controller_cl
     monkeypatch.setitem(sys.modules, feedback.__name__, feedback)
     controller = controller_class.__new__(controller_class)
 
+    logged = []
+    monkeypatch.setattr(sys.modules[controller_class.__module__].logger, "error", logged.append)
+
     controller._show_error("something broke")
 
     assert shown == [("something broke", "FilterMate")]
+    assert logged and "something broke" in logged[0]  # also in the log, whatever the message bar shows
