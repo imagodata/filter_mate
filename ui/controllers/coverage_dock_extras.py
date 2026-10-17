@@ -550,8 +550,8 @@ class CoverageDockExtras(QObject):
 
     def schedule_strip(self) -> None:
         """Refresh the selection strip a moment later (selection signals come in bursts)."""
-        if self._strip_timer is not None:
-            self._strip_timer.start()
+        if self._strip_timer is not None and not self._strip_timer.isActive():
+            self._strip_timer.start()  # not pushed back by the next signals: refreshed within the delay
 
     def note_vector_selection(self, layer_id: str, groupbox: str, count: int) -> None:
         """Features of the EXPLORING selection, from the exploring controller (custom selection count)."""
