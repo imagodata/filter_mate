@@ -343,6 +343,14 @@ def _migrate_config(config_data, default_data):
             extensions["_display_name"] = "Extensions"
             dirty = True
 
+    # 7) AUTO_OPTIMIZATION.enabled / auto_centroid_for_distant: nothing reads them since the
+    # auto-optimization confirmation flow was removed (the dock keeps its own per-project switches).
+    auto_optimization = _section(options, "AUTO_OPTIMIZATION")
+    for dead_key in ("enabled", "auto_centroid_for_distant"):
+        if dead_key in auto_optimization:
+            del auto_optimization[dead_key]
+            dirty = True
+
     return dirty
 
 

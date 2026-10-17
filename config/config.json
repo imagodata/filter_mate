@@ -350,16 +350,6 @@
       },
       "AUTO_OPTIMIZATION": {
         "description": "Intelligent automatic optimization based on layer characteristics (v2.7.0). Recommends and applies optimizations for distant layers, large datasets, and complex geometries.",
-        "enabled": {
-          "value": true,
-          "choices": [true, false],
-          "description": "Enable/disable automatic optimization analysis"
-        },
-        "auto_centroid_for_distant": {
-          "value": true,
-          "choices": [true, false],
-          "description": "Automatically use ST_Centroid() for remote layers (WFS, ArcGIS) with many features. Reduces network data transfer by ~90%."
-        },
         "centroid_threshold_distant": {
           "value": 5000,
           "description": "Feature count threshold for auto-enabling centroid on distant layers"

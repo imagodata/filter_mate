@@ -613,3 +613,31 @@ class TestMigrationOddShapes:
         user = {"APP": app}
         default = {"APP": {"OPTIONS": {"RASTER": {"enabled": {"value": True}}}}}
         config_helpers._migrate_config(user, default)  # no AttributeError from step 0
+
+
+class TestDeadAutoOptimizationSwitches:
+    """AUTO_OPTIMIZATION.enabled / auto_centroid_for_distant: nothing reads them since the confirmation flow went."""
+
+    DEAD = ("enabled", "auto_centroid_for_distant")
+
+    def test_the_defaults_no_longer_ship_them(self):
+        defaults = json.loads(CONFIG_DEFAULT_PATH.read_text(encoding="utf-8"))
+        section = defaults["APP"]["OPTIONS"]["AUTO_OPTIMIZATION"]
+        assert not [key for key in self.DEAD if key in section]
+        shipped = json.loads((PLUGIN_ROOT / "config" / "config.json").read_text(encoding="utf-8"))
+        assert not [key for key in self.DEAD if key in shipped["APP"]["OPTIONS"]["AUTO_OPTIMIZATION"]]
+
+    def test_an_old_config_json_loses_them_and_keeps_the_rest(self, config_helpers):
+        defaults = json.loads(CONFIG_DEFAULT_PATH.read_text(encoding="utf-8"))
+        user = json.loads(CONFIG_DEFAULT_PATH.read_text(encoding="utf-8"))
+        section = user["APP"]["OPTIONS"]["AUTO_OPTIMIZATION"]
+        section["enabled"] = {"value": False, "description": "old"}
+        section["auto_centroid_for_distant"] = {"value": False, "description": "old"}
+        section["centroid_threshold_distant"]["value"] = 123
+
+        assert config_helpers._migrate_config(user, defaults) is True
+
+        migrated = user["APP"]["OPTIONS"]["AUTO_OPTIMIZATION"]
+        assert not [key for key in self.DEAD if key in migrated]
+        assert migrated["centroid_threshold_distant"]["value"] == 123
+        assert config_helpers._migrate_config(user, defaults) is False  # idempotent

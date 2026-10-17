@@ -813,8 +813,6 @@ def get_auto_optimization_config() -> Dict[str, Any]:
         Dictionary with configuration values
     """
     defaults = {
-        'enabled': True,
-        'auto_centroid_for_distant': True,
         'centroid_threshold_distant': 5000,
         'centroid_threshold_local': 50000,
         'auto_simplify_geometry': False,
