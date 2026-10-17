@@ -38,7 +38,7 @@ from __future__ import annotations
 import logging
 import os
 import re
-import subprocess
+import subprocess  # nosec B404 - argument lists, never a shell
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Tuple
 

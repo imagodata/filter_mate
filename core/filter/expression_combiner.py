@@ -125,10 +125,10 @@ def _ogr_statement_where(subset: str) -> Optional[str]:
         return None
     depth = 0
     for match in re.finditer(r'\(|\)|\bWHERE\b', masked, re.IGNORECASE):
-        token = match.group()
-        if token == '(':
+        symbol = match.group()
+        if symbol == '(':
             depth += 1
-        elif token == ')':
+        elif symbol == ')':
             depth -= 1
         elif depth == 0:
             return unmask_quoted(masked[match.end():], parts).strip() or '1 = 1'

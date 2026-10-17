@@ -41,15 +41,19 @@ _SPATIALITE_TEMP_RE = re.compile(r'^fm_temp_' + _SESSION_ID_PATTERN + r'_\w+$')
 
 # GeoPackage registries of user layers: a table listed there is never touched,
 # whatever its name.
-_GPKG_REGISTRY_TABLES = (
-    ('gpkg_contents', 'table_name'),
-    ('gpkg_geometry_columns', 'table_name'),
+# Complete statements (no identifier is formatted into SQL)
+_GPKG_REGISTRY_QUERIES = (
+    'SELECT table_name FROM gpkg_contents',
+    'SELECT table_name FROM gpkg_geometry_columns',
 )
 
 # Spatialite metadata that keeps a row per geometry column
-_SPATIALITE_METADATA_TABLES = (
-    'geometry_columns', 'geometry_columns_statistics', 'geometry_columns_field_infos',
-    'geometry_columns_time', 'geometry_columns_auth',
+_SPATIALITE_METADATA_DELETES = (
+    'DELETE FROM geometry_columns WHERE lower(f_table_name) = lower(?)',
+    'DELETE FROM geometry_columns_statistics WHERE lower(f_table_name) = lower(?)',
+    'DELETE FROM geometry_columns_field_infos WHERE lower(f_table_name) = lower(?)',
+    'DELETE FROM geometry_columns_time WHERE lower(f_table_name) = lower(?)',
+    'DELETE FROM geometry_columns_auth WHERE lower(f_table_name) = lower(?)',
 )
 
 
@@ -116,10 +120,9 @@ def _open_readonly(db_path: str) -> sqlite3.Connection:
 def _registered_layer_tables(cur) -> set:
     """Tables registered as layers by the GeoPackage registries, if any."""
     registered = set()
-    for registry, column in _GPKG_REGISTRY_TABLES:
+    for query in _GPKG_REGISTRY_QUERIES:
         try:
-            registered.update(
-                row[0] for row in cur.execute(f'SELECT {column} FROM {registry}'))
+            registered.update(row[0] for row in cur.execute(query))
         except sqlite3.Error:
             continue  # not a GeoPackage, or no such registry
     return registered
@@ -230,9 +233,9 @@ def _drop_one(cur, table: str, native: bool, spatialite_loaded: bool) -> None:
         cur.execute(f'DROP TABLE IF EXISTS {_quote(f"idx_{table}_{geom}")}')
     cur.execute(f'DROP TABLE IF EXISTS {_quote(table)}')
     if native:
-        for metadata in _SPATIALITE_METADATA_TABLES:
+        for statement in _SPATIALITE_METADATA_DELETES:
             try:
-                cur.execute(f'DELETE FROM {metadata} WHERE lower(f_table_name) = lower(?)', (table,))
+                cur.execute(statement, (table,))
             except sqlite3.Error:  # nosec B110 - table absent in this Spatialite version
                 pass
 

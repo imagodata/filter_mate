@@ -11,7 +11,7 @@ import logging
 import os
 import re
 import shutil
-import subprocess
+import subprocess  # nosec B404 - argument lists, never a shell
 import sys
 import tempfile
 import threading

@@ -141,7 +141,7 @@ An extension declares its configuration keys in `config_schema()`; they appear u
 - At start, `config/config.py` (`init_env_vars`) loads `config.json` from the `FilterMate` folder of the QGIS profile, creating it from the default when missing. It merges new keys, refreshes the metadata of existing keys and keeps user values (`_migrate_config`). `ENV_VARS` holds paths and the loaded data.
 - Other modules: `feedback_config.py` (message verbosity), `theme_helpers.py`, `config_metadata.py`. See [../config/README_CONFIG.md](../config/README_CONFIG.md).
 - The Configuration tab is a JSON tree (`ui/widgets/json_view/`) managed by `ui/managers/config_model_manager.py`.
-- Plugin metadata is in `metadata.txt` (version, QGIS 3.22 to 4.99, `supportsQt6=yes`).
+- Plugin metadata is in `metadata.txt` (version, QGIS 3.22 to 4.99: QGIS 4 compatibility comes from `qgisMaximumVersion`).
 
 ## Internationalization
 
