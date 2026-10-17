@@ -944,109 +944,75 @@ class BackendController(BaseController):
             except Exception:  # nosec B110 - best-effort connection close, safe to ignore
                 pass
 
-    def list_postgresql_schema_objects(self) -> Optional[List[Tuple[str, str, str]]]:
+    def list_postgresql_schema_objects(self) -> Dict[str, object]:
         """
-        List the objects that dropping FilterMate's PostgreSQL schema would remove.
+        Describe what dropping FilterMate's PostgreSQL schema would remove.
 
         Nothing is modified. Used to ask the user before the schema is dropped.
 
         Returns:
-            list: ``(kind, schema, name)`` tuples, or None when there is no
-            connection, the schema does not exist or it is not a FilterMate
-            schema.
+            dict: ``status`` is ``'ok'`` (``objects`` lists what goes; an empty
+            list is an empty schema), ``'absent'`` (no such schema), ``'foreign'``
+            (the schema holds objects FilterMate did not create, named in
+            ``foreign``: it will not be dropped), ``'not_filtermate_schema'``,
+            ``'no_connection'`` or ``'error'``; ``schema`` is the schema name.
         """
-        from ...infrastructure.database.temp_objects import PG_TEMP_SCHEMAS
+        from ...infrastructure.database.temp_objects import PG_TEMP_SCHEMAS, pg_schema_content
 
+        result = {'status': 'no_connection', 'schema': None, 'objects': [], 'foreign': []}
         app, session_id, schema, connexion = self.get_pg_session_context()
-        if not connexion or schema not in PG_TEMP_SCHEMAS:
-            return None
+        result['schema'] = schema
+        if not connexion:
+            return result
         try:
+            if schema not in PG_TEMP_SCHEMAS:
+                result['status'] = 'not_filtermate_schema'
+                return result
             with connexion.cursor() as cursor:
-                objects, foreign = self._pg_schema_content(cursor, schema)
-                return [] if foreign else objects
+                cursor.execute(
+                    "SELECT COUNT(*) FROM information_schema.schemata WHERE schema_name = %s", (schema,))
+                if cursor.fetchone()[0] == 0:
+                    result['status'] = 'absent'
+                    return result
+                objects, foreign = pg_schema_content(cursor, schema)
+                result.update(status='foreign' if foreign else 'ok', objects=objects, foreign=sorted(foreign))
+                return result
         except Exception as e:
             logger.error(f"Error listing PostgreSQL schema objects: {e}")
-            return None
+            result['status'] = 'error'
+            return result
         finally:
             try:
                 connexion.close()
             except Exception:  # nosec B110 - best-effort connection close, safe to ignore
                 pass
 
-    @staticmethod
-    def _pg_schema_content(cursor, schema: str):
-        """Split the relations of a schema into FilterMate's and foreign ones.
-
-        Returns:
-            tuple: ``(filtermate_objects, foreign_names)`` where the first list
-            holds ``(kind, schema, name)`` and the second the names of anything
-            FilterMate did not create (user tables, plain views, ...).
-        """
-        from ...infrastructure.database.temp_objects import is_filtermate_pg_temp_object
-
-        cursor.execute(
-            """SELECT c.relname, c.relkind
-               FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-               WHERE n.nspname = %s AND c.relkind IN ('r', 'p', 'v', 'm', 'f')""",
-            (schema,)
-        )
-        objects, foreign = [], []
-        for name, relkind in cursor.fetchall():
-            kind = {'m': 'matview', 'r': 'table'}.get(relkind)
-            if kind and is_filtermate_pg_temp_object(kind, schema, name):
-                objects.append((kind, schema, name))
-            else:
-                foreign.append(name)
-        return objects, foreign
-
-    @staticmethod
-    def _drop_pg_temp_objects(connexion, cursor, objects) -> int:
-        """Drop FilterMate temporary PostgreSQL objects, never with CASCADE.
-
-        Every object is validated again. A materialized view may depend on
-        another one (``..._dump``): a refused drop is retried after the others
-        (a few passes). What still cannot be dropped is left in place and
-        logged, instead of being cascaded onto objects FilterMate did not
-        create.
+    def describe_schema_listing(self, listing: Dict[str, object]):
+        """Decide from :meth:`list_postgresql_schema_objects` whether to go on, or say why not.
 
         Args:
-            connexion: psycopg2 connection (commit / rollback per object).
-            cursor: Cursor of that connection.
-            objects: ``(kind, schema, name)`` tuples.
+            listing: Result of :meth:`list_postgresql_schema_objects`.
 
         Returns:
-            int: Number of objects dropped.
+            tuple: ``(proceed, level, text)``: when ``proceed`` is False, show
+            ``text`` as a ``'warning'`` or an ``'info'`` message.
         """
-        from ...infrastructure.database.temp_objects import is_filtermate_pg_temp_object
-
-        pending = [o for o in objects if is_filtermate_pg_temp_object(*o)]
-        dropped = 0
-        for _pass in range(4):
-            if not pending:
-                break
-            still_pending = []
-            for kind, obj_schema, name in pending:
-                statement = 'DROP MATERIALIZED VIEW' if kind == 'matview' else 'DROP TABLE'
-                try:
-                    cursor.execute(
-                        f'{statement} IF EXISTS "{sanitize_sql_identifier(obj_schema)}"."{sanitize_sql_identifier(name)}";'  # nosec B608
-                    )
-                    connexion.commit()
-                    dropped += 1
-                    logger.debug(f"Dropped {kind}: {obj_schema}.{name}")
-                except Exception as e:
-                    try:
-                        connexion.rollback()
-                    except Exception:  # nosec B110 - best-effort rollback
-                        pass
-                    still_pending.append((kind, obj_schema, name))
-                    logger.debug(f"Could not drop {kind} {obj_schema}.{name} yet: {e}")
-            if len(still_pending) == len(pending):
-                break  # no progress: remaining ones have outside dependents
-            pending = still_pending
-        for kind, obj_schema, name in pending:
-            logger.warning(f"Left in place (dependent objects): {kind} {obj_schema}.{name}")
-        return dropped
+        status = listing.get('status')
+        schema = listing.get('schema')
+        if status == 'ok':
+            return True, None, ''
+        if status == 'absent':
+            return False, 'info', self._tr("Schema '{0}' does not exist: nothing to drop").format(schema)
+        if status == 'foreign':
+            names = ', '.join(listing.get('foreign', [])[:5])
+            return False, 'warning', self._tr(
+                "Schema '{0}' holds objects FilterMate did not create ({1}): it is not dropped"
+            ).format(schema, names)
+        if status == 'not_filtermate_schema':
+            return False, 'warning', self._tr("'{0}' is not a FilterMate temporary schema: it is not dropped").format(schema)
+        if status == 'no_connection':
+            return False, 'warning', self._tr("No PostgreSQL connection available")
+        return False, 'warning', self._tr("Schema cleanup failed")
 
     def cleanup_postgresql_schema_if_empty(self, force: bool = False) -> bool:
         """
@@ -1065,7 +1031,8 @@ class BackendController(BaseController):
         Returns:
             bool: True if cleanup successful or schema doesn't exist
         """
-        from ...infrastructure.database.temp_objects import PG_TEMP_SCHEMAS
+        from ...infrastructure.database.temp_objects import (
+            PG_TEMP_SCHEMAS, pg_drop_filtermate_schema, pg_schema_content)
 
         app, session_id, schema, connexion = self.get_pg_session_context()
 
@@ -1073,15 +1040,11 @@ class BackendController(BaseController):
             logger.warning("cleanup_postgresql_schema_if_empty: No PostgreSQL connection available")
             return False
 
-        if schema not in PG_TEMP_SCHEMAS:
-            logger.warning(f"Refusing to drop schema '{schema}': it is not a FilterMate temporary schema")
-            try:
-                connexion.close()
-            except Exception:  # nosec B110 - best-effort connection close, safe to ignore
-                pass
-            return False
-
         try:
+            if schema not in PG_TEMP_SCHEMAS:
+                logger.warning(f"Refusing to drop schema '{schema}': it is not a FilterMate temporary schema")
+                return False
+
             with connexion.cursor() as cursor:
                 # Check if schema exists
                 cursor.execute(
@@ -1092,7 +1055,7 @@ class BackendController(BaseController):
                     logger.info(f"Schema '{schema}' does not exist")
                     return True
 
-                objects, foreign = self._pg_schema_content(cursor, schema)
+                objects, foreign = pg_schema_content(cursor, schema)
                 if foreign:
                     logger.warning(
                         f"Schema '{schema}' holds {len(foreign)} object(s) FilterMate did not create "
@@ -1113,13 +1076,8 @@ class BackendController(BaseController):
                     logger.warning(f"Schema '{schema}' has {len(other_views)} view(s) from other sessions")
                     return False
 
-                # Empty the schema (FilterMate objects only), then drop it: no CASCADE
-                self._drop_pg_temp_objects(connexion, cursor, objects)
-                safe_schema = sanitize_sql_identifier(schema)
-                cursor.execute(f'DROP SCHEMA IF EXISTS "{safe_schema}";')
-                connexion.commit()
-                logger.info(f"Schema '{schema}' dropped successfully")
-                return True
+            # Empty the schema (FilterMate objects only), then drop it: no CASCADE
+            return pg_drop_filtermate_schema(connexion, schema)['status'] in ('dropped', 'absent')
 
         except Exception as e:
             logger.error(f"Error cleaning PostgreSQL schema: {e}")
@@ -1227,7 +1185,8 @@ class BackendController(BaseController):
         List what the global cleanup would remove, without removing anything.
 
         Only names FilterMate generates are listed (exact, case-sensitive
-        match, tables registered as GeoPackage layers excluded).
+        match, tables registered as GeoPackage layers excluded, tables a
+        layer of the project is filtered through right now excluded).
 
         Returns:
             dict: ``{'spatialite': {db_path: [table, ...]}, 'postgresql':
@@ -1235,9 +1194,10 @@ class BackendController(BaseController):
         """
         from ...infrastructure.database.temp_objects import list_filtermate_temp_tables
 
+        in_use = self._project_subset_strings()
         spatialite = {}
         for db_path in self._spatialite_project_databases():
-            tables = list_filtermate_temp_tables(db_path)
+            tables = list_filtermate_temp_tables(db_path, exclude_referenced_by=in_use)
             if tables:
                 spatialite[db_path] = tables
         return {
@@ -1395,44 +1355,16 @@ class BackendController(BaseController):
             except Exception:  # nosec B110 - best-effort connection close, safe to ignore
                 pass
 
-    @staticmethod
-    def _find_postgresql_temp_objects(cursor) -> List[Tuple[str, str, str]]:
-        """Materialized views and tables FilterMate generated, in any schema.
-
-        The SQL only pre-selects with exact prefixes (underscores escaped,
-        PostgreSQL LIKE is case-sensitive); each row is then checked again by
-        :func:`is_filtermate_pg_temp_object`.
-
-        Returns:
-            list: ``(kind, schema, name)``, dependents (``..._dump``) first.
-        """
-        from ...infrastructure.database.temp_objects import (
-            is_filtermate_pg_temp_object, pg_temp_object_like_patterns)
-
-        found = []
-        for kind, sql in (
-            ('matview', """SELECT schemaname, matviewname FROM pg_matviews
-                           WHERE schemaname NOT IN ('pg_catalog', 'information_schema')
-                           AND matviewname LIKE ANY (%s)"""),
-            ('table', """SELECT schemaname, tablename FROM pg_tables
-                         WHERE schemaname NOT IN ('pg_catalog', 'information_schema')
-                         AND tablename LIKE ANY (%s)"""),
-        ):
-            cursor.execute(sql, (pg_temp_object_like_patterns(kind),))
-            for schema, name in cursor.fetchall():
-                if is_filtermate_pg_temp_object(kind, schema, name):
-                    found.append((kind, schema, name))
-        found.sort(key=lambda o: (o[1], -len(o[2]), o[2]))
-        return found
-
     def _list_postgresql_temp_objects(self) -> List[Tuple[str, str, str]]:
         """Read-only list of the PostgreSQL objects the global cleanup would drop."""
+        from ...infrastructure.database.temp_objects import pg_find_temp_objects
+
         app, session_id, schema, connexion = self.get_pg_session_context()
         if not connexion:
             return []
         try:
             with connexion.cursor() as cursor:
-                return self._find_postgresql_temp_objects(cursor)
+                return pg_find_temp_objects(cursor)
         except Exception as e:
             logger.error(f"Error listing PostgreSQL temporary objects: {e}")
             return []
@@ -1450,7 +1382,7 @@ class BackendController(BaseController):
         FilterMate's names (see ``infrastructure/database/temp_objects.py``):
         - fm_temp_mv_*, fm_temp_src_*, fm_temp_chain_* (materialized views)
         - fm_temp_buf_*, fm_temp_tbl_*, fm_temp_src_* (tables)
-        - legacy fm_mv_*, filtermate_mv_*, fm_buf_* inside FilterMate's schemas
+        - legacy fm_mv_*, filtermate_mv_*, mv_<session>_*, fm_buf_* inside FilterMate's schemas
 
         Nothing is dropped with CASCADE, and nothing outside those names
         (a user table called ``filtermate_catalog``, say) is ever touched.
@@ -1460,9 +1392,10 @@ class BackendController(BaseController):
                 looked up now).
 
         Returns:
-            int: Total number of objects dropped
+            int: Total number of objects dropped (gone from the catalog)
         """
-        from ...infrastructure.database.temp_objects import PG_TEMP_SCHEMAS
+        from ...infrastructure.database.temp_objects import (
+            PG_TEMP_SCHEMAS, pg_drop_temp_objects, pg_find_temp_objects, pg_quote_ident)
 
         app, session_id, schema, connexion = self.get_pg_session_context()
 
@@ -1473,18 +1406,17 @@ class BackendController(BaseController):
         try:
             with connexion.cursor() as cursor:
                 if objects is None:
-                    objects = self._find_postgresql_temp_objects(cursor)
+                    objects = pg_find_temp_objects(cursor)
                 if not objects:
                     return 0
                 logger.info(f"Found {len(objects)} FilterMate PostgreSQL object(s) to clean")
-                total_count = self._drop_pg_temp_objects(connexion, cursor, objects)
+                total_count = len(pg_drop_temp_objects(connexion, cursor, objects))
 
                 # Remove FilterMate's own schemas when they are now empty. No
                 # CASCADE: a schema that still holds something is kept.
                 for temp_schema in PG_TEMP_SCHEMAS:
                     try:
-                        safe_schema = sanitize_sql_identifier(temp_schema)
-                        cursor.execute(f'DROP SCHEMA IF EXISTS "{safe_schema}";')
+                        cursor.execute(f'DROP SCHEMA IF EXISTS {pg_quote_ident(temp_schema)}')
                         connexion.commit()
                         logger.debug(f"Dropped empty schema: {temp_schema}")
                     except Exception as e:
@@ -1505,19 +1437,52 @@ class BackendController(BaseController):
 
     @staticmethod
     def _spatialite_project_databases() -> List[str]:
-        """Source databases (.gpkg / .sqlite / .db) of the project's vector layers."""
-        from qgis.core import QgsProject
+        """Source databases (.gpkg / .sqlite / .db) of the project's vector layers.
+
+        OGR layers give the file before the ``|``; Spatialite layers
+        (``dbname='path' table=...``) give the database of their data source URI,
+        which is where the native Spatialite temp tables are made.
+        """
+        import os
+        from qgis.core import QgsDataSourceUri, QgsProject
 
         db_paths = set()
         for layer in QgsProject.instance().mapLayers().values():
-            if hasattr(layer, 'providerType') and layer.providerType() in ('spatialite', 'ogr'):
+            provider = layer.providerType() if hasattr(layer, 'providerType') else None
+            if provider == 'spatialite':
+                try:
+                    path = QgsDataSourceUri(layer.source()).database()
+                except Exception as e:
+                    logger.debug(f"Could not read the database of a Spatialite layer: {e}")
+                    continue
+                if path and os.path.isfile(path):
+                    db_paths.add(path)
+            elif provider == 'ogr':
                 source = layer.source().split('|')[0]
                 if source.lower().endswith(('.gpkg', '.sqlite', '.db')):
                     db_paths.add(source)
         return sorted(db_paths)
 
+    @staticmethod
+    def _project_subset_strings() -> List[str]:
+        """Subset strings of the project's layers: the tables they name are in use."""
+        from qgis.core import QgsProject
+
+        subsets = []
+        for layer in QgsProject.instance().mapLayers().values():
+            try:
+                subset = layer.subsetString() if hasattr(layer, 'subsetString') else ''
+            except Exception:  # a layer being removed
+                continue
+            if subset:
+                subsets.append(subset)
+        return subsets
+
     def _cleanup_spatialite_project_tables(self) -> int:
-        """Clean Spatialite temp tables for current project databases."""
+        """Clean Spatialite temp tables of this session in the project's databases.
+
+        A table a layer is still filtered through is kept.
+        """
         # Get session_id from app
         app = getattr(self.dockwidget, '_app_ref', None)
         session_id = getattr(app, 'session_id', None) if app else None
@@ -1526,9 +1491,10 @@ class BackendController(BaseController):
             logger.debug("No session_id available for Spatialite project cleanup")
             return 0
 
+        in_use = self._project_subset_strings()
         total_count = 0
         for db_path in self._spatialite_project_databases():
-            total_count += self._cleanup_spatialite_db(db_path, session_id)
+            total_count += self._cleanup_spatialite_db(db_path, session_id, exclude_referenced_by=in_use)
         return total_count
 
     def _cleanup_spatialite_all_tables(self, candidates: Optional[Dict[str, List[str]]] = None) -> int:
@@ -1537,7 +1503,8 @@ class BackendController(BaseController):
         Args:
             candidates: ``{db_path: [table, ...]}`` the user confirmed (default:
                 everything FilterMate generated in the project's databases).
-                Names are validated again by the drop.
+                Names are validated again by the drop, and a table a layer is
+                filtered through right now is kept.
 
         Returns:
             int: Number of tables dropped
@@ -1545,24 +1512,29 @@ class BackendController(BaseController):
         if candidates is None:
             candidates = {db: None for db in self._spatialite_project_databases()}
 
+        in_use = self._project_subset_strings()
         total_count = 0
         for db_path, tables in candidates.items():
-            total_count += self._cleanup_spatialite_db(db_path, session_id=None, tables=tables)
+            total_count += self._cleanup_spatialite_db(
+                db_path, session_id=None, tables=tables, exclude_referenced_by=in_use)
         return total_count
 
-    def _cleanup_spatialite_db(self, db_path: str, session_id: str = None, tables=None) -> int:
+    def _cleanup_spatialite_db(self, db_path: str, session_id: str = None, tables=None,
+                               exclude_referenced_by=()) -> int:
         """
         Clean FilterMate temp tables from a specific Spatialite database.
 
-        Only ``fm_temp_<session>_*`` and legacy ``mv_<session>_*`` tables go
-        (exact, case-sensitive match; a table registered in ``gpkg_contents``
-        is never dropped). ``mvt_reseau`` or ``MVoies`` are user tables.
+        Only ``fm_temp_<session>_*`` tables go (exact, case-sensitive match; a
+        table registered in ``gpkg_contents`` is never dropped, a table named by
+        a layer subset is kept). ``mvt_reseau``, ``MVoies`` or
+        ``mv_20231231_bati`` are user tables.
 
         Args:
             db_path: Path to the SQLite/GeoPackage database
             session_id: If provided, only clean tables for this session.
                        If None, clean the tables of every session.
             tables: Optional explicit list of candidates (re-validated).
+            exclude_referenced_by: Subset strings of layers in use.
 
         Returns:
             int: Number of tables cleaned up
@@ -1573,7 +1545,8 @@ class BackendController(BaseController):
         if not db_path or not os.path.exists(db_path):
             return 0
 
-        count = len(drop_filtermate_temp_tables(db_path, session_id=session_id, tables=tables))
+        count = len(drop_filtermate_temp_tables(
+            db_path, session_id=session_id, tables=tables, exclude_referenced_by=exclude_referenced_by))
         if count > 0:
             db_name = os.path.basename(db_path)
             scope = f"session {session_id[:8]}" if session_id else "all sessions"

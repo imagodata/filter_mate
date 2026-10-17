@@ -133,11 +133,13 @@ class TestSessionCleanup:
     def test_only_the_session_tables_go(self, executor, tmp_path):
         path = self._db(tmp_path)
 
-        assert executor.cleanup_session_temp_tables(str(path), SID) == 2
+        assert executor.cleanup_session_temp_tables(str(path), SID) == 1
 
         left = self._names(path)
-        assert {"routes", "fm_temp_11111111_other", f"fmXtempX{SID}Xlookalike", f"MV_{SID}_lookalike"} <= left
-        assert f"fm_temp_{SID}_routes" not in left and f"mv_{SID}_old" not in left
+        # mv_<session>_* is no longer ours in a user's file (mv_20231231_bati is a user table)
+        assert {"routes", "fm_temp_11111111_other", f"fmXtempX{SID}Xlookalike", f"MV_{SID}_lookalike",
+                f"mv_{SID}_old"} <= left
+        assert f"fm_temp_{SID}_routes" not in left
 
     def test_no_session_id_is_a_noop_not_a_type_error(self, executor, tmp_path):
         """The reset action calls it with the database only."""
@@ -201,10 +203,19 @@ class TestCreateTempTableSql:
         assert drop.startswith('DROP TABLE IF EXISTS "') and drop.endswith('"')
         assert ";" not in drop
 
-    def test_spatial_index_call_is_formatted(self, recorded):
+    def test_by_default_the_table_is_not_declared_as_a_layer(self, recorded):
+        """The subset reads the primary key only: no geometry_columns row, trigger or R-tree in the user's file."""
         module, statements = recorded
 
         module.create_temp_spatialite_table("/data/x.sqlite", f"fm_temp_{SID}_routes", "SELECT 1", "geom", 2154)
+
+        assert not [s for s in statements if "RecoverGeometryColumn" in s or "CreateSpatialIndex" in s]
+
+    def test_spatial_index_call_is_formatted_when_asked_for(self, recorded):
+        module, statements = recorded
+
+        module.create_temp_spatialite_table("/data/x.sqlite", f"fm_temp_{SID}_routes", "SELECT 1", "geom", 2154,
+                                            register_geometry=True)
 
         index = [s for s in statements if "CreateSpatialIndex" in s]
         assert index and "{" not in index[0]

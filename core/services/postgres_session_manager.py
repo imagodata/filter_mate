@@ -30,6 +30,7 @@ if TYPE_CHECKING:
     pass  # No QGIS type hints needed
 
 from ...infrastructure.database.sql_utils import sanitize_sql_identifier
+from ...infrastructure.database.temp_objects import pg_drop_filtermate_schema
 
 logger = logging.getLogger(__name__)
 
@@ -510,17 +511,21 @@ class PostgresSessionManager(QObject):
                     error_message=f"Schema has {len(other_session_views)} views from other sessions"
                 )
 
-            # Drop schema
-            safe_schema = sanitize_sql_identifier(self._schema)
-            cursor.execute(f'DROP SCHEMA IF EXISTS "{safe_schema}" CASCADE;')
-            connection.commit()
-
-            logger.info(f"Dropped schema: {self._schema}")
-
-            return CleanupResult(
-                success=True,
-                schema_dropped=True
-            )
+            # Drop schema: FilterMate's own schemas only, and only when everything in them
+            # is FilterMate's (emptied object by object, no CASCADE)
+            result = pg_drop_filtermate_schema(connection, self._schema)
+            if result['status'] == 'dropped':
+                logger.info(f"Dropped schema: {self._schema}")
+                return CleanupResult(success=True, schema_dropped=True)
+            if result['status'] == 'absent':
+                return CleanupResult(success=True, error_message=f"Schema '{self._schema}' does not exist")
+            reason = {
+                'foreign': f"Schema '{self._schema}' holds objects FilterMate did not create "
+                           f"({', '.join(result['foreign'][:5])}): not dropped",
+                'not_filtermate_schema': f"'{self._schema}' is not a FilterMate temporary schema: not dropped",
+            }.get(result['status'], f"Schema '{self._schema}' could not be dropped")
+            logger.warning(reason)
+            return CleanupResult(success=False, error_message=reason)
 
         except Exception as e:
             error_msg = str(e)

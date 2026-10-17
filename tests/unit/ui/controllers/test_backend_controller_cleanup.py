@@ -13,12 +13,15 @@ controller are stubs, the name rules (``temp_objects``) are the real module.
 """
 import importlib.util
 import pathlib
+import re
 import sqlite3
 import sys
 import types
 from unittest.mock import MagicMock
 
 import pytest
+
+from tests.unit.pg_fakes import FakeConnection, FakePgCatalog
 
 pytestmark = pytest.mark.unit
 
@@ -28,14 +31,28 @@ SID = "ab12cd34"
 
 
 class FakeLayer:
-    def __init__(self, source, provider="ogr"):
-        self._source, self._provider = source, provider
+    def __init__(self, source, provider="ogr", subset=""):
+        self._source, self._provider, self._subset = source, provider, subset
 
     def providerType(self):
         return self._provider
 
     def source(self):
         return self._source
+
+    def subsetString(self):
+        return self._subset
+
+
+class FakeDataSourceUri:
+    """The one accessor the controller reads: database() of ``dbname='path' ...``."""
+
+    def __init__(self, source):
+        match = re.search(r"dbname='([^']*)'", source)
+        self._database = match.group(1) if match else ""
+
+    def database(self):
+        return self._database
 
 
 class FakeProject:
@@ -116,6 +133,7 @@ def backend_module(monkeypatch, feedback):
     qgis_core = types.ModuleType("qgis.core")
     qgis_core.QgsVectorLayer = FakeLayer
     qgis_core.QgsProject = FakeProject
+    qgis_core.QgsDataSourceUri = FakeDataSourceUri
     monkeypatch.setitem(sys.modules, "qgis.PyQt.QtCore", qtcore)
     monkeypatch.setitem(sys.modules, "qgis.PyQt.QtWidgets", qtwidgets)
     monkeypatch.setitem(sys.modules, "qgis.core", qgis_core)
@@ -260,160 +278,238 @@ class TestConfirmation:
         feedback.show_info.assert_called_once()
 
 
-class FakeCursor:
-    """psycopg2-like cursor over a small catalog: [(kind, schema, name), ...]."""
+class TestSpatialiteProvider:
+    """Native Spatialite databases (the only ones where fm_temp_* is made) are scanned too."""
 
-    def __init__(self, catalog, fail_on=()):
-        self.catalog = list(catalog)
-        self.fail_on = fail_on
-        self.executed = []
-        self._rows = []
+    def _native(self, tmp_path):
+        db = tmp_path / "native.sqlite"
+        conn = sqlite3.connect(str(db))
+        conn.executescript(f"""
+            CREATE TABLE geometry_columns (f_table_name TEXT, f_geometry_column TEXT);
+            CREATE TABLE roads (pk INTEGER PRIMARY KEY, geom BLOB);
+            CREATE TABLE "fm_temp_{SID}_roads" (pk INTEGER);
+            CREATE TABLE mvt_reseau (pk INTEGER);
+        """)
+        conn.execute("INSERT INTO geometry_columns VALUES ('roads', 'geom')")
+        conn.commit()
+        conn.close()
+        FakeProject.layers = [
+            FakeLayer(f"dbname='{db}' table=\"roads\" (geom) sql=", provider="spatialite"),
+            FakeLayer("dbname='gis' host=h port=5432 table=\"public\".\"x\" (geom)", provider="postgres")]
+        return db
 
-    def __enter__(self):
-        return self
+    def test_the_database_of_a_spatialite_layer_is_scanned(self, controller, tmp_path):
+        db = self._native(tmp_path)
 
-    def __exit__(self, *exc):
-        return False
+        assert controller._spatialite_project_databases() == [str(db)]
+        # an undeclared fm_temp table of the native database is a candidate, the user ones are not
+        assert controller.collect_global_cleanup_candidates()["spatialite"] == {str(db): [f"fm_temp_{SID}_roads"]}
 
-    def execute(self, sql, params=None):
-        self.executed.append((sql, params))
-        flat = " ".join(sql.split())
-        for needle in self.fail_on:
-            if needle in flat:
-                raise RuntimeError(f"cannot drop: {needle}")
-        if "FROM pg_matviews" in flat:
-            self._rows = [(s, n) for k, s, n in self.catalog if k == "matview"]
-        elif "FROM pg_tables" in flat:
-            self._rows = [(s, n) for k, s, n in self.catalog if k == "table"]
-        elif "FROM pg_class" in flat:
-            schema = params[0]
-            self._rows = [(n, {"matview": "m", "table": "r", "view": "v"}[k])
-                          for k, s, n in self.catalog if s == schema]
-        elif "information_schema.schemata" in flat:
-            self._rows = [(1,)]
-        else:
-            self._rows = []
+    def test_session_cleanup_drops_its_table_in_a_native_database(self, controller, tmp_path):
+        db = self._native(tmp_path)
 
-    def fetchall(self):
-        return self._rows
+        assert controller._cleanup_spatialite_project_tables() == 1
 
-    def fetchone(self):
-        return self._rows[0]
+        assert f"fm_temp_{SID}_roads" not in _tables(db) and {"roads", "mvt_reseau"} <= _tables(db)
 
+    def test_a_missing_database_is_ignored(self, controller):
+        FakeProject.layers = [FakeLayer("dbname='/no/such/file.sqlite' table=\"t\" (g)", provider="spatialite")]
 
-class FakeConnection:
-    def __init__(self, cursor):
-        self._cursor = cursor
-        self.commits = self.rollbacks = 0
-        self.closed = False
-
-    def cursor(self):
-        return self._cursor
-
-    def commit(self):
-        self.commits += 1
-
-    def rollback(self):
-        self.rollbacks += 1
-
-    def close(self):
-        self.closed = True
+        assert controller._spatialite_project_databases() == []
 
 
-def _pg_controller(controller, catalog, schema="filter_mate_temp", fail_on=()):
-    cursor = FakeCursor(catalog, fail_on)
-    connection = FakeConnection(cursor)
+class TestTablesInUse:
+    def test_a_table_a_layer_is_filtered_through_is_not_a_candidate_nor_dropped(self, controller, gpkg):
+        FakeProject.layers.append(FakeLayer(
+            f"{gpkg}|layername=mvt_reseau", subset=f'"fid" IN (SELECT "fid" FROM fm_temp_{SID}_routes)'))
+
+        candidates = controller.collect_global_cleanup_candidates()
+        assert candidates["spatialite"] == {str(gpkg): ["fm_temp_11111111_old"]}
+
+        assert controller.cleanup_temp_tables_global() == 1
+        assert f"fm_temp_{SID}_routes" in _tables(gpkg)
+
+    def test_the_session_cleanup_keeps_it_too(self, controller, gpkg):
+        FakeProject.layers.append(FakeLayer(
+            f"{gpkg}|layername=mvt_reseau", subset=f'"fid" IN (SELECT "fid" FROM fm_temp_{SID}_routes)'))
+
+        assert controller._cleanup_spatialite_project_tables() == 0
+        assert f"fm_temp_{SID}_routes" in _tables(gpkg)
+
+
+def _pg_controller(controller, catalog, schema="filter_mate_temp"):
+    connection = FakeConnection(catalog)
     controller.get_pg_session_context = lambda: (None, SID, schema, connection)
-    return cursor, connection
-
-
-def _statements(cursor):
-    return [" ".join(sql.split()) for sql, _p in cursor.executed
-            if sql.lstrip().upper().startswith(("DROP", "CREATE"))]
+    return connection
 
 
 class TestPostgresGlobalCleanup:
-    CATALOG = [
+    OBJECTS = [
         ("matview", "filtermate_temp", f"fm_temp_mv_{SID}_abc"),
         ("matview", "filtermate_temp", f"fm_temp_mv_{SID}_abc_dump"),
         ("table", "ref", "fm_temp_buf_communes_0123abcd"),
-        # rows an over-broad pre-selection could return: user objects
+        ("table", "ref", "fm_temp_buf_routes-2024_ab12cd34"),
+        # user objects the old patterns (or an over-broad listing) could return
         ("table", "public", "filtermate_catalog"),
         ("table", "public", "fm_buf_users"),
         ("matview", "public", "fm_mv_report"),
+        ("matview", "public", "mv_20231231_bati"),
     ]
 
-    def test_only_filtermate_objects_are_dropped_without_cascade(self, controller):
-        cursor, connection = _pg_controller(controller, self.CATALOG, schema="filtermate_temp")
-        assert controller._cleanup_postgresql_all_sessions() == 3
-        drops = _statements(cursor)
-        assert all("CASCADE" not in d for d in drops)
-        joined = "\n".join(drops)
-        assert "filtermate_catalog" not in joined
-        assert "fm_buf_users" not in joined
-        assert "fm_mv_report" not in joined
-        assert f'"filtermate_temp"."fm_temp_mv_{SID}_abc_dump"' in joined
+    def _catalog(self, **kwargs):
+        return FakePgCatalog(self.OBJECTS, dependents={
+            f"fm_temp_mv_{SID}_abc": [f"fm_temp_mv_{SID}_abc_dump"]}, **kwargs)
+
+    @pytest.mark.parametrize("overbroad", [False, True])
+    def test_only_filtermate_objects_are_dropped_without_cascade(self, controller, overbroad):
+        catalog = self._catalog(overbroad=overbroad)
+        connection = _pg_controller(controller, catalog, schema="filtermate_temp")
+
+        assert controller._cleanup_postgresql_all_sessions() == 4
+
+        assert sorted(n for _k, _s, n in catalog.objects) == sorted([
+            "filtermate_catalog", "fm_buf_users", "fm_mv_report", "mv_20231231_bati"])
+        statements = catalog.statements()
+        assert all("CASCADE" not in s for s in statements)
+        assert 'DROP TABLE "ref"."fm_temp_buf_routes-2024_ab12cd34"' in statements
         assert connection.closed
 
     def test_dependent_view_is_dropped_before_its_parent(self, controller):
-        cursor, _c = _pg_controller(controller, self.CATALOG)
+        catalog = self._catalog()
+        _pg_controller(controller, catalog)
+
         controller._cleanup_postgresql_all_sessions()
-        drops = [d for d in _statements(cursor) if "MATERIALIZED VIEW" in d]
-        assert drops.index(next(d for d in drops if d.endswith(f'fm_temp_mv_{SID}_abc_dump";'))) \
-            < drops.index(next(d for d in drops if d.endswith(f'fm_temp_mv_{SID}_abc";')))
+
+        views = [s for s in catalog.statements() if "MATERIALIZED VIEW" in s]
+        assert views.index(next(s for s in views if s.endswith(f'fm_temp_mv_{SID}_abc_dump"'))) \
+            < views.index(next(s for s in views if s.endswith(f'fm_temp_mv_{SID}_abc"')))
 
     def test_preselection_patterns_are_exact(self, controller):
-        cursor, _c = _pg_controller(controller, self.CATALOG)
+        catalog = self._catalog()
+        _pg_controller(controller, catalog)
         controller._cleanup_postgresql_all_sessions()
-        patterns = [p for sql, params in cursor.executed if params for p in params[0]]
-        assert patterns
-        assert all("\\_" in p for p in patterns)
+        patterns = [p for sql, params in catalog.executed if params and isinstance(params[0], list)
+                    for p in params[0]]
+        assert patterns and all("\\_" in p for p in patterns)
         assert "filtermate\\_%" not in patterns
 
     def test_listing_does_not_drop(self, controller):
-        cursor, _c = _pg_controller(controller, self.CATALOG)
-        assert len(controller._list_postgresql_temp_objects()) == 3
-        assert _statements(cursor) == []
+        catalog = self._catalog()
+        _pg_controller(controller, catalog)
 
-    def test_an_undroppable_object_is_left_in_place(self, controller):
-        cursor, connection = _pg_controller(
-            controller, self.CATALOG, fail_on=(f'"fm_temp_mv_{SID}_abc"',))
+        assert len(controller._list_postgresql_temp_objects()) == 4
+        assert catalog.statements() == []
+
+    def test_an_undroppable_object_is_left_in_place_and_not_counted(self, controller):
+        catalog = self._catalog(undroppable=[f"fm_temp_mv_{SID}_abc_dump"])
+        connection = _pg_controller(controller, catalog)
+
         assert controller._cleanup_postgresql_all_sessions() == 2
-        assert connection.rollbacks >= 1  # the aborted transaction is cleaned
+        assert connection.rollbacks >= 1 and catalog.has(f"fm_temp_mv_{SID}_abc_dump")
+
+    def test_what_does_not_disappear_is_not_counted(self, controller):
+        catalog = self._catalog(ghosts=["fm_temp_buf_communes_0123abcd"])
+        _pg_controller(controller, catalog)
+
+        assert controller._cleanup_postgresql_all_sessions() == 3
+
+    def test_an_emptied_filtermate_schema_is_dropped_without_cascade(self, controller):
+        catalog = FakePgCatalog([("table", "filtermate_temp", "fm_temp_tbl_x")], schemas=["filtermate_temp"])
+        _pg_controller(controller, catalog)
+
+        controller._cleanup_postgresql_all_sessions()
+
+        assert "filtermate_temp" not in catalog.schemas
+        assert 'DROP SCHEMA IF EXISTS "filtermate_temp"' in catalog.statements()
 
 
 class TestPostgresSchemaCleanup:
     def test_user_schema_is_never_dropped(self, controller):
-        cursor, connection = _pg_controller(controller, [], schema="public")
+        catalog = FakePgCatalog(schemas=["public"])
+        connection = _pg_controller(controller, catalog, schema="public")
+
         assert controller.cleanup_postgresql_schema_if_empty(force=True) is False
-        assert _statements(cursor) == []
-        assert connection.closed
+        assert catalog.statements() == [] and connection.closed
 
     def test_schema_with_a_user_table_is_kept(self, controller):
-        catalog = [("matview", "filter_mate_temp", f"fm_temp_mv_{SID}_abc"),
-                   ("table", "filter_mate_temp", "my_precious_table")]
-        cursor, _c = _pg_controller(controller, catalog)
+        catalog = FakePgCatalog([("matview", "filter_mate_temp", f"fm_temp_mv_{SID}_abc"),
+                                 ("table", "filter_mate_temp", "my_precious_table")])
+        _pg_controller(controller, catalog)
+
         assert controller.cleanup_postgresql_schema_if_empty(force=True) is False
-        assert _statements(cursor) == []
+        assert catalog.statements() == []
 
     def test_filtermate_schema_is_emptied_then_dropped_without_cascade(self, controller):
-        catalog = [("matview", "filter_mate_temp", f"fm_temp_mv_{SID}_abc"),
-                   ("table", "filter_mate_temp", "fm_temp_src_sel_0123abcd")]
-        cursor, _c = _pg_controller(controller, catalog)
+        catalog = FakePgCatalog([("matview", "filter_mate_temp", f"fm_temp_mv_{SID}_abc"),
+                                 ("table", "filter_mate_temp", "fm_temp_src_sel_0123abcd")])
+        _pg_controller(controller, catalog)
+
         assert controller.cleanup_postgresql_schema_if_empty(force=True) is True
-        drops = _statements(cursor)
-        assert drops[-1] == 'DROP SCHEMA IF EXISTS "filter_mate_temp";'
-        assert len(drops) == 3
+
+        drops = catalog.statements()
+        assert drops[-1] == 'DROP SCHEMA "filter_mate_temp"' and len(drops) == 3
         assert all("CASCADE" not in d for d in drops)
 
-    def test_other_sessions_views_block_without_force(self, controller):
-        catalog = [("matview", "filter_mate_temp", "fm_temp_mv_99999999_abc")]
-        cursor, _c = _pg_controller(controller, catalog)
-        assert controller.cleanup_postgresql_schema_if_empty(force=False) is False
-        assert _statements(cursor) == []
-
-    def test_schema_preview_lists_objects(self, controller):
-        catalog = [("matview", "filter_mate_temp", f"fm_temp_mv_{SID}_abc")]
+    def test_a_legacy_session_view_does_not_block_the_drop(self, controller):
+        catalog = FakePgCatalog([("matview", "filter_mate_temp", f"mv_{SID}_legacy")])
         _pg_controller(controller, catalog)
-        assert controller.list_postgresql_schema_objects() == [
-            ("matview", "filter_mate_temp", f"fm_temp_mv_{SID}_abc")]
+
+        assert controller.cleanup_postgresql_schema_if_empty(force=False) is True
+
+    def test_other_sessions_views_block_without_force(self, controller):
+        catalog = FakePgCatalog([("matview", "filter_mate_temp", "fm_temp_mv_99999999_abc")])
+        _pg_controller(controller, catalog)
+
+        assert controller.cleanup_postgresql_schema_if_empty(force=False) is False
+        assert catalog.statements() == []
+
+
+class TestSchemaListing:
+    def test_ok_lists_the_objects(self, controller):
+        catalog = FakePgCatalog([("matview", "filter_mate_temp", f"fm_temp_mv_{SID}_abc")])
+        _pg_controller(controller, catalog)
+
+        listing = controller.list_postgresql_schema_objects()
+
+        assert listing["status"] == "ok" and listing["schema"] == "filter_mate_temp"
+        assert listing["objects"] == [("matview", "filter_mate_temp", f"fm_temp_mv_{SID}_abc")]
+
+    def test_empty_is_ok_with_no_object(self, controller):
+        _pg_controller(controller, FakePgCatalog(schemas=["filter_mate_temp"]))
+
+        listing = controller.list_postgresql_schema_objects()
+
+        assert listing["status"] == "ok" and listing["objects"] == []
+
+    def test_absent(self, controller):
+        _pg_controller(controller, FakePgCatalog())
+
+        assert controller.list_postgresql_schema_objects()["status"] == "absent"
+
+    def test_foreign_objects_are_named(self, controller):
+        catalog = FakePgCatalog([("table", "filter_mate_temp", "mine")])
+        _pg_controller(controller, catalog)
+
+        listing = controller.list_postgresql_schema_objects()
+
+        assert listing["status"] == "foreign" and listing["foreign"] == ["mine"]
+
+    def test_not_a_filtermate_schema_and_no_connection(self, controller):
+        _pg_controller(controller, FakePgCatalog(schemas=["public"]), schema="public")
+        assert controller.list_postgresql_schema_objects()["status"] == "not_filtermate_schema"
+        controller.get_pg_session_context = lambda: (None, SID, "filter_mate_temp", None)
+        assert controller.list_postgresql_schema_objects()["status"] == "no_connection"
+
+    @pytest.mark.parametrize("listing, proceed, level, fragment", [
+        ({"status": "ok", "schema": "s", "objects": []}, True, None, ""),
+        ({"status": "absent", "schema": "s"}, False, "info", "does not exist"),
+        ({"status": "foreign", "schema": "s", "foreign": ["mine", "yours"]}, False, "warning", "mine, yours"),
+        ({"status": "not_filtermate_schema", "schema": "public"}, False, "warning", "not a FilterMate"),
+        ({"status": "no_connection", "schema": None}, False, "warning", "No PostgreSQL connection"),
+        ({"status": "error", "schema": "s"}, False, "warning", "failed"),
+    ])
+    def test_the_reason_is_shown(self, controller, listing, proceed, level, fragment):
+        got_proceed, got_level, text = controller.describe_schema_listing(listing)
+
+        assert (got_proceed, got_level) == (proceed, level)
+        assert fragment in text

@@ -44,6 +44,19 @@ def _ensure_cleanup_mocks():
         if name not in sys.modules:
             sys.modules[name] = mock_obj
 
+    # the real name rules / helpers (standard library only)
+    temp_objects_name = f"{ROOT}.infrastructure.database.temp_objects"
+    if not hasattr(sys.modules.get(temp_objects_name), "pg_drop_filtermate_schema"):
+        import importlib.util as _importlib_util
+        import os as _os
+        path = _os.path.normpath(_os.path.join(
+            _os.path.dirname(__file__), "..", "..", "..", "..", "..",
+            "infrastructure", "database", "temp_objects.py"))
+        temp_spec = _importlib_util.spec_from_file_location(temp_objects_name, path)
+        temp_module = _importlib_util.module_from_spec(temp_spec)
+        sys.modules[temp_objects_name] = temp_module
+        temp_spec.loader.exec_module(temp_module)
+
 
 _ensure_cleanup_mocks()
 
@@ -231,32 +244,122 @@ class TestEnsureSchemaExists:
 # Tests -- cleanup_schema_if_empty
 # ===========================================================================
 
+SID = "abc12345"
+
+
 class TestCleanupSchemaIfEmpty:
-    def test_returns_false_if_schema_does_not_exist(self, service, mock_connexion, mock_cursor):
-        mock_cursor.fetchone.return_value = (0,)
-        result = service.cleanup_schema_if_empty(mock_connexion)
-        assert result is False
+    """The schema goes only if it is FilterMate's own and holds nothing but FilterMate objects; no CASCADE."""
 
-    def test_drops_empty_schema(self, service, mock_connexion, mock_cursor):
-        # Schema exists
-        mock_cursor.fetchone.return_value = (1,)
-        # No views
-        mock_cursor.fetchall.return_value = []
-        result = service.cleanup_schema_if_empty(mock_connexion)
-        assert result is True
+    @staticmethod
+    def _service(catalog, schema="filtermate_temp"):
+        from tests.unit.pg_fakes import FakeConnection
+        return PostgreSQLCleanupService(session_id=SID, schema=schema), FakeConnection(catalog)
 
-    def test_preserves_schema_with_other_sessions_views(self, service, mock_connexion, mock_cursor):
-        mock_cursor.fetchone.return_value = (1,)
-        # Views from another session
-        mock_cursor.fetchall.return_value = [("fm_temp_mv_othersess_layer1",)]
-        result = service.cleanup_schema_if_empty(mock_connexion)
-        assert result is False
+    def test_returns_false_if_schema_does_not_exist(self):
+        from tests.unit.pg_fakes import FakePgCatalog
+        service, connexion = self._service(FakePgCatalog())
+        assert service.cleanup_schema_if_empty(connexion) is False
 
-    def test_force_drops_even_with_views(self, service, mock_connexion, mock_cursor):
-        mock_cursor.fetchone.return_value = (1,)
-        mock_cursor.fetchall.return_value = [("fm_temp_mv_othersess_layer1",)]
-        result = service.cleanup_schema_if_empty(mock_connexion, force=True)
-        assert result is True
+    def test_drops_empty_schema(self):
+        from tests.unit.pg_fakes import FakePgCatalog
+        catalog = FakePgCatalog(schemas=["filtermate_temp"])
+        service, connexion = self._service(catalog)
+
+        assert service.cleanup_schema_if_empty(connexion) is True
+        assert "filtermate_temp" not in catalog.schemas
+        assert catalog.statements() == ['DROP SCHEMA "filtermate_temp"']
+
+    def test_preserves_schema_with_other_sessions_views(self):
+        from tests.unit.pg_fakes import FakePgCatalog
+        catalog = FakePgCatalog([("matview", "filtermate_temp", "fm_temp_mv_othersess_layer1")])
+        service, connexion = self._service(catalog)
+
+        assert service.cleanup_schema_if_empty(connexion) is False
+        assert catalog.statements() == []
+
+    def test_force_empties_then_drops_without_cascade(self):
+        from tests.unit.pg_fakes import FakePgCatalog
+        catalog = FakePgCatalog([("matview", "filtermate_temp", "fm_temp_mv_othersess_layer1")])
+        service, connexion = self._service(catalog)
+
+        assert service.cleanup_schema_if_empty(connexion, force=True) is True
+        assert all("CASCADE" not in s for s in catalog.statements())
+        assert "filtermate_temp" not in catalog.schemas
+
+    def test_force_does_not_take_a_user_table_with_it(self):
+        from tests.unit.pg_fakes import FakePgCatalog
+        catalog = FakePgCatalog([("matview", "filtermate_temp", "fm_temp_mv_othersess_layer1"),
+                                 ("table", "filtermate_temp", "mine")])
+        service, connexion = self._service(catalog)
+
+        assert service.cleanup_schema_if_empty(connexion, force=True) is False
+        assert catalog.has("mine") and catalog.has("fm_temp_mv_othersess_layer1")
+
+    def test_other_schemas_are_never_dropped(self):
+        from tests.unit.pg_fakes import FakePgCatalog
+        catalog = FakePgCatalog(schemas=["public"])
+        service, connexion = self._service(catalog, schema="public")
+
+        assert service.cleanup_schema_if_empty(connexion, force=True) is False
+        assert catalog.statements() == [] and "public" in catalog.schemas
+
+
+class TestCleanupAllFilterMateObjects:
+    @staticmethod
+    def _run(objects, **kwargs):
+        from tests.unit.pg_fakes import FakeConnection, FakePgCatalog
+        catalog = FakePgCatalog(objects, schemas=["filtermate_temp", "public"], **kwargs)
+        service = PostgreSQLCleanupService(session_id=SID, schema="filtermate_temp")
+        return catalog, service, service.cleanup_all_filtermate_objects(FakeConnection(catalog))
+
+    OBJECTS = [
+        ("matview", "filtermate_temp", f"fm_temp_mv_{SID}_a"),
+        ("matview", "filtermate_temp", "filtermate_mv_src_sel_x"),
+        ("matview", "public", f"fm_temp_mv_{SID}_in_public"),
+        ("table", "public", "fm_temp_buf_routes-2024_ab12cd34"),
+        # not FilterMate's: the old patterns ('filtermate_mv_%', 'filtermate_temp_%') took some of them
+        ("table", "public", "filtermate_temp_notes"),
+        ("matview", "public", "filtermate_mv_report"),
+        ("table", "public", "FILTERMATE_MV_X"),
+        ("table", "other", "fm_temp_buf_x_ab12cd34"),
+    ]
+
+    def test_only_filtermate_objects_of_the_asked_schemas_go_without_cascade(self):
+        catalog, service, (count, cleaned) = self._run(self.OBJECTS)
+
+        assert sorted(n for _k, _s, n in catalog.objects) == sorted([
+            "filtermate_temp_notes", "filtermate_mv_report", "FILTERMATE_MV_X", "fm_temp_buf_x_ab12cd34"])
+        assert all("CASCADE" not in s for s in catalog.statements())
+        assert "filtermate_temp" not in catalog.schemas and "public" in catalog.schemas
+        assert count == len(cleaned) == 5  # 4 objects + the schema
+        assert any(c.startswith("SCHEMA:") for c in cleaned)
+
+    def test_dry_run_changes_nothing(self):
+        from tests.unit.pg_fakes import FakeConnection, FakePgCatalog
+        catalog = FakePgCatalog(self.OBJECTS, schemas=["filtermate_temp", "public"])
+        service = PostgreSQLCleanupService(session_id=SID, schema="filtermate_temp")
+
+        count, cleaned = service.cleanup_all_filtermate_objects(FakeConnection(catalog), dry_run=True)
+
+        assert count == 4 and all(c.startswith("[DRY RUN]") for c in cleaned)
+        assert catalog.statements() == [] and len(catalog.objects) == len(self.OBJECTS)
+
+    def test_the_schema_stays_when_a_user_table_is_in_it(self):
+        catalog, service, (count, cleaned) = self._run(self.OBJECTS + [("table", "filtermate_temp", "mine")])
+
+        assert catalog.has("mine") and "filtermate_temp" in catalog.schemas
+        assert not any(c.startswith("SCHEMA:") for c in cleaned)
+
+    def test_view_patterns_are_escaped(self):
+        from tests.unit.pg_fakes import FakeConnection, FakePgCatalog
+        catalog = FakePgCatalog([("matview", "filtermate_temp", "filtermate_mv_src_sel_1"),
+                                 ("matview", "filtermate_temp", "filtermateXmvXsrcXselX1")])
+        service = PostgreSQLCleanupService(session_id=SID, schema="filtermate_temp")
+
+        count, views = service.cleanup_src_sel_views(FakeConnection(catalog), dry_run=True)
+
+        patterns = [p for _sql, params in catalog.executed if params for p in params if isinstance(p, str)]
+        assert "filtermate\\_mv\\_src\\_sel\\_%" in patterns
 
 
 # ===========================================================================

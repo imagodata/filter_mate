@@ -357,13 +357,18 @@ def create_temp_spatialite_table(
     table_name: str,
     sql_query: str,
     geom_field: str = 'geometry',
-    srid: int = 4326
+    srid: int = 4326,
+    register_geometry: bool = False
 ) -> bool:
     """
     Create temporary table in Spatialite database.
 
     Alternative to PostgreSQL materialized views for Spatialite backend.
-    Creates a temp table populated from a SELECT query with spatial index.
+    Creates a temp table populated from a SELECT query. The layer's subset
+    only reads its primary key, so by default the geometry column is neither
+    registered in ``geometry_columns`` nor spatially indexed: the table stays
+    an anonymous scratch table that cannot be mistaken for a user layer (and
+    adds no trigger, R-tree or metadata row to the user's database).
 
     Args:
         db_path: Path to Spatialite database file
@@ -371,6 +376,8 @@ def create_temp_spatialite_table(
         sql_query: SELECT query to populate table
         geom_field: Name of geometry column (default: 'geometry')
         srid: SRID for geometry column (default: 4326)
+        register_geometry: Register the geometry column and create its R-tree
+            index (native Spatialite databases only)
 
     Returns:
         bool: True if table created successfully
@@ -387,6 +394,7 @@ def create_temp_spatialite_table(
     """
     import sqlite3
 
+    conn = None
     try:
         conn = sqlite3.connect(db_path)
         conn.enable_load_extension(True)
@@ -399,7 +407,6 @@ def create_temp_spatialite_table(
                 conn.load_extension('mod_spatialite.dll')  # Windows fallback
             except Exception as e:
                 logger.error(f"Failed to load Spatialite extension: {e}")
-                conn.close()
                 return False
 
         cursor = conn.cursor()
@@ -414,32 +421,32 @@ def create_temp_spatialite_table(
         create_sql = f"CREATE TABLE {quoted_table} AS {sql_query}"  # nosec B608
         cursor.execute(create_sql)
 
-        # Create spatial index
-        try:
-            # Register geometry column
-            cursor.execute(f"""
-                SELECT RecoverGeometryColumn(
-                    '{sanitize_sql_identifier(table_name)}',
-                    '{sanitize_sql_identifier(geom_field)}',
-                    {srid},
-                    'GEOMETRY',
-                    'XY'
-                )
-            """)
+        # Register the geometry and index it (opt-in, see the docstring)
+        if register_geometry:
+            try:
+                # Register geometry column
+                cursor.execute(f"""
+                    SELECT RecoverGeometryColumn(
+                        '{sanitize_sql_identifier(table_name)}',
+                        '{sanitize_sql_identifier(geom_field)}',
+                        {srid},
+                        'GEOMETRY',
+                        'XY'
+                    )
+                """)
 
-            # Create R-tree spatial index
-            cursor.execute(f"""
-                SELECT CreateSpatialIndex(
-                    '{sanitize_sql_identifier(table_name)}',
-                    '{sanitize_sql_identifier(geom_field)}'
-                )
-            """)
-        except Exception as e:
-            logger.warning(f"Could not create spatial index: {e}")
-            # Continue anyway - table is still usable without index
+                # Create R-tree spatial index
+                cursor.execute(f"""
+                    SELECT CreateSpatialIndex(
+                        '{sanitize_sql_identifier(table_name)}',
+                        '{sanitize_sql_identifier(geom_field)}'
+                    )
+                """)
+            except Exception as e:
+                logger.warning(f"Could not create spatial index: {e}")
+                # Continue anyway - table is still usable without index
 
         conn.commit()
-        conn.close()
 
         logger.info(f"Created temporary Spatialite table: {table_name}")
         return True
@@ -447,6 +454,12 @@ def create_temp_spatialite_table(
     except Exception as e:
         logger.error(f"Error creating Spatialite temp table {table_name}: {e}")
         return False
+    finally:
+        if conn is not None:
+            try:
+                conn.close()
+            except Exception:  # nosec B110 - best-effort close
+                pass
 
 
 def format_pk_values_for_sql(
