@@ -340,3 +340,43 @@ class TestParseCacheRegression:
         # Fallback path: a new QgsExpression is constructed once
         mock_expr_cls.assert_called_once_with('"population" > 10000')
         mock_req_cls.assert_called_once_with(fresh)
+
+
+# ---------------------------------------------------------------------------
+# 2026-10-17: the worker never reads the layer; a canceled task keeps its successor
+# ---------------------------------------------------------------------------
+
+class TestThreadSafety:
+
+    def test_the_end_of_a_replaced_task_keeps_its_successor(self, manager, valid_layer, patched_task):
+        first = manager.evaluate(layer=valid_layer, expression='"a" > 0')
+        second = manager.evaluate(layer=valid_layer, expression='"b" > 0')
+        first_done = first.signals.cancelled.connect.call_args.args[0]
+        first_done()  # the canceled first task ends after the second one started
+        assert manager._active_tasks["layer_42"] is second
+        second.signals.finished.connect.call_args.args[0]()
+        assert "layer_42" not in manager._active_tasks
+
+    def test_the_fields_are_read_on_the_main_thread(self):
+        fake = TestParseCacheRegression()._make_fake_self()
+        fake.request_fields = ["population"]
+        fields = fake._fields = MagicMock()
+        with patch.object(_EET_MODULE, 'QgsExpression'), \
+             patch.object(_EET_MODULE, 'QgsFeatureRequest') as mock_req_cls:
+            ExpressionEvaluationTask._build_feature_request(fake)
+        mock_req_cls.return_value.setSubsetOfAttributes.assert_called_once_with(["population"], fields)
+        fake.layer.fields.assert_not_called()
+
+    def test_prepare_reads_source_count_and_fields(self):
+        fake = TestParseCacheRegression()._make_fake_self()
+        fake.layer.isValid.return_value = True
+        ExpressionEvaluationTask._prepare_feature_source(fake)
+        assert fake._feature_source is fake.layer.dataProvider.return_value.featureSource.return_value
+        assert fake._fields is fake.layer.fields.return_value
+
+    def test_run_does_not_refresh_the_source_from_the_worker(self):
+        fake = TestParseCacheRegression()._make_fake_self()
+        fake._validate_inputs = MagicMock(return_value=False)
+        ExpressionEvaluationTask.run(fake)
+        fake.layer.dataProvider.assert_not_called()
+        fake.layer.isValid.assert_not_called()
