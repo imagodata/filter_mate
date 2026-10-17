@@ -191,6 +191,21 @@ def s_vector_undo_check():
     check('V undo restores point cloud', layer('lhd').source() == TILE)
 
 
+def s_centroid_registry():
+    """A target checked the way a click in the list does it (no checkedItemsChanged)."""
+    d = dock()
+    combo = d.checkableComboBoxLayer_filtering_layers_to_filter
+    for row in range(combo.count()):  # what a click in the list does: no checkedItemsChanged
+        item = combo.model().item(row)
+        item.setCheckState(Qt.CheckState.Checked if item.text().startswith('parcelle [') else Qt.CheckState.Unchecked)
+
+
+def s_centroid_registry_check():
+    button = dock().checkBox_filtering_use_centroids_distant_layers
+    check('centroids: a polygon target checked in the list enables the button', button.isEnabled()
+          and button.checkState() == Qt.CheckState.Unchecked, f'{button.isEnabled()} {button.checkState()}')
+
+
 def s_centroid_setup():
     """Centroids chosen target by target: parcels by their centroids, roads by their full geometry."""
     d = dock()
@@ -675,7 +690,7 @@ def s_finish():
 STEPS = [
     (s_setup, 1500), (s_open_plugin, 6000), (s_vector_source, 3000), (s_vector_select, 2000),
     (s_vector_filter, 9000), (s_vector_check, 1000), (s_vector_undo, 3000), (s_vector_undo_check, 1000),
-    (s_centroid_setup, 1500), (s_centroid_filter, 9000), (s_centroid_check, 1000), (s_centroid_unfilter, 4000), (s_centroid_unfilter_check, 1000),
+    (s_centroid_registry, 800), (s_centroid_registry_check, 500), (s_centroid_setup, 1500), (s_centroid_filter, 9000), (s_centroid_check, 1000), (s_centroid_unfilter, 4000), (s_centroid_unfilter_check, 1000),
     (s_raster_source, 3000), (s_raster_mode, 2500), (s_raster_preview, 1500), (s_raster_preview_check, 1000),
     (s_raster_filter, 8000), (s_raster_check, 1000), (s_raster_unfilter, 3000), (s_raster_unfilter_check, 1000),
     (s_pipette_ortho, 3500), (s_pipette_ortho_check, 1500), (s_pipette_ortho_shot, 1500), (s_pipette_dem, 3000), (s_pipette_dem_check, 1000),

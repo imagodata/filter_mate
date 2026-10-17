@@ -449,12 +449,19 @@ class QgsCheckableComboBoxLayer(QComboBox):
         if emit:
             self.centroidsChanged.emit(self.centroid_layer_ids())
 
+    def clear_centroid_toggles(self):
+        """No centroid toggle at all (the source is a raster or a point cloud: its targets are clipped)."""
+        for item in self._items():
+            if item.data(CENTROID_ROLE) is not None:
+                item.setData(None, CENTROID_ROLE)
+        self.view().viewport().update()
+
     def _centroid_toggle_at(self, pos):
         """Item whose centroid toggle is under ``pos`` (viewport coordinates), else None."""
         index = self.view().indexAt(pos)
         if not index.isValid() or index.data(CENTROID_ROLE) is None:
             return None
-        toggle, _x, _w = ItemDelegate.trailing_layout(self.view().visualRect(index), self.view().fontMetrics(), index)
+        toggle, _x, _w = ItemDelegate.trailing_layout(self.view().visualRect(index), self.view().viewport().fontMetrics(), index)
         return self.model().itemFromIndex(index) if toggle is not None and toggle.adjusted(-3, -2, 3, 2).contains(pos) else None
 
     def addItem(self, icon, text, data=None):

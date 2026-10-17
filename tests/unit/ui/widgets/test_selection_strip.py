@@ -52,6 +52,9 @@ class TestVectorValue:
         assert strip.vector_strip_value("multiple_selection", 0) == "whole layer"
         assert strip.vector_strip_value("custom_selection", None) == "whole layer"
 
+    def test_custom_expression_matching_nothing(self):
+        assert strip.vector_strip_value("custom_selection", 0, has_expression=True) == "0 feature(s)"
+
     def test_custom_expression_not_evaluated_yet(self):
         assert strip.vector_strip_value("custom_selection", None, has_expression=True) == "expression"
 

@@ -230,7 +230,7 @@ class CoverageDockExtras(QObject):
         self._strip_host = None
         self._strip_kind = 'vector'
         self._strip_timer = None
-        self._strip_panels: set = set()  # ids of the panels whose signals refresh the strip
+        self._strip_panels: List[Any] = []  # panels whose signals refresh the strip (by object, not id())
         # (layer id, EXPLORING group) -> features of the last EXPLORING selection (custom selection count)
         self._vector_counts: Dict[Tuple[str, str], int] = {}
 
@@ -312,7 +312,7 @@ class CoverageDockExtras(QObject):
         timer = _QTimer(self)
         timer.setSingleShot(True)
         timer.setInterval(STRIP_DELAY_MS)
-        timer.timeout.connect(lambda: self._guarded(self._update_strip))
+        timer.timeout.connect(self._safe_update_strip)
         self._strip_timer = timer
 
     def _build_tools(self) -> None:
@@ -515,6 +515,8 @@ class CoverageDockExtras(QObject):
         if gone(self._layer_id):
             self.leave()
             self._layer_id = None
+            self._strip_kind = 'vector'  # no raster / point cloud figures for a removed layer
+            self.schedule_strip()
 
     def teardown(self) -> None:
         self.leave()
@@ -526,7 +528,7 @@ class CoverageDockExtras(QObject):
         widgets = [self._card, self._strip_host, *self._tools.values()]
         self._card, self._tools = None, {}
         self._strip, self._strip_host, self._strip_timer = None, None, None
-        self._strip_panels = set()
+        self._strip_panels = []
         for widget in widgets:
             if widget is None:
                 continue
@@ -555,13 +557,20 @@ class CoverageDockExtras(QObject):
         raster, pc = getattr(controller, '_raster_panel', None), getattr(controller, '_pc_panel', None)
         for panel, signals in ((raster, ('summaryChanged', 'selectionChanged')),
                                (pc, ('summaryChanged', 'criteriaChanged'))):
-            if panel is None or id(panel) in self._strip_panels:
+            if panel is None or any(panel is watched for watched in self._strip_panels):
                 continue
             for name in signals:
                 getattr(panel, name).connect(self.schedule_strip)
-            self._strip_panels.add(id(panel))
-        if pc is not None and hasattr(pc, 'set_counts_inline'):
+            self._strip_panels.append(panel)
+        if pc is not None and hasattr(pc, 'set_counts_inline') and self._strip is not None:
             pc.set_counts_inline(False)  # the strip shows the kept points
+
+    def _safe_update_strip(self) -> None:
+        """Timer slot: the strip never raises into the Qt event loop."""
+        try:
+            self._update_strip()
+        except Exception as exc:  # display only: a failure leaves the previous text
+            logger.debug(f"[FM5] selection strip not updated: {exc}")
 
     def _update_strip(self) -> None:
         strip, host = self._strip, self._strip_host

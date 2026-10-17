@@ -73,6 +73,18 @@ class FilteringConfig:
         return params
 
 
+def _fully_checked(checkbox) -> bool:
+    """True for a checked box only: the partial centroid button (some targets) means "not all".
+
+    ``QCheckBox.isChecked()`` is also True in the partial state.
+    """
+    state = getattr(checkbox, 'checkState', None)
+    if state is None:
+        return bool(checkbox.isChecked())
+    from qgis.PyQt.QtCore import Qt
+    return state() == Qt.CheckState.Checked
+
+
 @dataclass
 class LayerInfo:
     """
@@ -258,9 +270,7 @@ class TaskParameterBuilder:
             )
 
         if hasattr(dw, 'checkBox_filtering_use_centroids_distant_layers'):
-            config.use_centroids_distant_layers = (
-                dw.checkBox_filtering_use_centroids_distant_layers.isChecked()
-            )
+            config.use_centroids_distant_layers = _fully_checked(dw.checkBox_filtering_use_centroids_distant_layers)
         if hasattr(dw, 'get_centroid_target_ids'):
             config.centroid_layers = dw.get_centroid_target_ids()
 
@@ -622,7 +632,7 @@ class TaskParameterBuilder:
 
         # SYNC use_centroids_distant_layers
         if hasattr(dw, 'checkBox_filtering_use_centroids_distant_layers'):
-            current_val = dw.checkBox_filtering_use_centroids_distant_layers.isChecked()
+            current_val = _fully_checked(dw.checkBox_filtering_use_centroids_distant_layers)
             stored_val = task_parameters["filtering"].get("use_centroids_distant_layers", False)
             if current_val != stored_val:
                 logger.info(f"SYNC use_centroids_distant_layers: {stored_val} → {current_val}")

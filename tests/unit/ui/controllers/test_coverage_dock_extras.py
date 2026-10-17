@@ -535,3 +535,10 @@ class TestSelectionStrip:
         strip_env.dock._strip_kind = "point_cloud"
         strip_env.dock._update_strip()
         assert strip_env.dock._strip.content[2] == "Z >= 200"
+
+
+def test_removed_raster_gives_the_strip_back_to_the_vector_colours(strip_env):
+    dock = strip_env.dock
+    dock._layer_id, dock._strip_kind = "r1", "raster"
+    dock.forget_layers(["r1"])
+    assert dock._strip_kind == "vector"

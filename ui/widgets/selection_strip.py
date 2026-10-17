@@ -60,7 +60,8 @@ def vector_strip_value(groupbox: str, count: Optional[int], has_expression: bool
     Without a selection the filter uses every feature of the source layer, except in
     single selection where it stops (see TaskParameterBuilder.get_and_validate_features).
     """
-    if count:
+    if count or (count == 0 and groupbox == 'custom_selection' and has_expression):
+        # A custom expression matching nothing filters the source down to nothing: "0 feature(s)".
         return translate("{0} feature(s)").format(f"{int(count):,}".replace(",", " "))
     if groupbox == 'single_selection':
         return translate("no feature selected")

@@ -69,14 +69,19 @@ class CentroidTargetsSync(QObject):
         self._timer = timer
         combo.populated.connect(self.apply_stored)
         combo.centroidsChanged.connect(self._on_toggles_changed)
-        combo.checkedItemsChanged.connect(self.schedule)
+        # A target checked in the list (its click does not emit checkedItemsChanged), the list
+        # emptied or refilled: the button is computed again. The model signals are not managed
+        # by the dock's signal registry, which connects a widget signal only while no slot is
+        # connected to it (checkedItemsChanged and the targets key 'toggled' must stay free: the
+        # dock calls schedule() from filtering_layers_to_filter_state_changed instead).
+        model = combo.model()
+        for signal in (model.itemChanged, model.rowsRemoved, model.modelReset):
+            signal.connect(self.schedule)
         button.clicked.connect(self._on_button_clicked)
         # A programmatic change (the properties of the layer loaded into the widgets) is
-        # corrected on the next pass: the button always shows the per-target toggles.
+        # corrected on the next pass: the button always shows the per-target toggles. The
+        # registry uses stateChanged for this button.
         button.toggled.connect(self.schedule)
-        targets = self._widget(TARGETS_KEY)
-        if targets is not None:
-            targets.toggled.connect(self.schedule)
         self._connected = True
         return True
 
@@ -118,9 +123,11 @@ class CentroidTargetsSync(QObject):
         combo = self._widget(COMBO)
         if combo is None:
             return
-        filtering = self._source_filtering()
-        ids = initial_centroid_layers(filtering, combo.centroid_eligible_ids()) if self._source_is_vector() else []
-        combo.set_centroid_layer_ids(ids)
+        if not self._source_is_vector():
+            combo.clear_centroid_toggles()  # a raster / point cloud source clips its targets, no centroid
+        else:
+            combo.set_centroid_layer_ids(initial_centroid_layers(self._source_filtering(),
+                                                                 combo.centroid_eligible_ids()))
         self.refresh()
 
     def set_all(self, enabled: bool) -> None:
@@ -169,12 +176,12 @@ class CentroidTargetsSync(QObject):
         checked = combo.centroid_eligible_ids(checked_only=True) if listing and self._source_is_vector() else []
         state = global_centroid_state(checked, combo.centroid_layer_ids())
         self._refreshing = True
+        blocked = button.blockSignals(True)
         try:
-            button.blockSignals(True)
             button.setTristate(state is None)  # a click on a partial button checks every target
             button.setCheckState(Qt.CheckState.PartiallyChecked if state is None
                                  else Qt.CheckState.Checked if state else Qt.CheckState.Unchecked)
-            button.blockSignals(False)
+            button.blockSignals(blocked)
             button.setEnabled(bool(checked))
             button.setToolTip(self.tr(
                 "Test the checked line and polygon targets by their centroids (point on surface): faster on "
@@ -182,4 +189,5 @@ class CentroidTargetsSync(QObject):
                 "Centroids apply to line and polygon targets: check one in the list of layers to filter"))
             button.update()
         finally:
+            button.blockSignals(blocked)
             self._refreshing = False

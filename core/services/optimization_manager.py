@@ -337,7 +337,10 @@ class OptimizationManager:
             return False
 
         if hasattr(dockwidget, 'checkBox_filtering_use_centroids_distant_layers'):
-            return dockwidget.checkBox_filtering_use_centroids_distant_layers.isChecked()
+            # Partial (only some targets use their centroids) is not "already enabled".
+            from qgis.PyQt.QtCore import Qt
+            checkbox = dockwidget.checkBox_filtering_use_centroids_distant_layers
+            return checkbox.checkState() == Qt.CheckState.Checked
         elif hasattr(dockwidget, 'checkBox_filtering_use_centroids_source_layer'):
             return dockwidget.checkBox_filtering_use_centroids_source_layer.isChecked()
 
