@@ -222,6 +222,77 @@ class TestPointCloudExport:
         assert cloud_export.made == []
 
 
+class PrivateCloud(FakeCloud):
+    """A ``QgsPointCloudLayer`` opened by the export job."""
+    made = []
+    valid = True
+    accepts_subset = True
+
+    class LayerOptions:
+        def __init__(self):
+            self.loadDefaultStyle = True
+
+    def __init__(self, source, name, provider, options=None):
+        super().__init__(provider)
+        self.source_uri, self.options, self.subset = source, options, ''
+        PrivateCloud.made.append(self)
+
+    def isValid(self):
+        return PrivateCloud.valid
+
+    def setSubsetString(self, subset):
+        if not PrivateCloud.accepts_subset:
+            return False
+        self.subset = subset
+        return True
+
+
+class DisplayedCloud(FakeCloud):
+    def source(self):
+        return '/data/tile.copc.laz'
+
+    def subsetString(self):
+        return 'Classification = 9'
+
+
+@pytest.fixture
+def private_cloud(monkeypatch, cloud_export):
+    monkeypatch.setattr(sys.modules['qgis.core'], 'QgsPointCloudLayer', PrivateCloud, raising=False)
+    PrivateCloud.made, PrivateCloud.valid, PrivateCloud.accepts_subset = [], True, True
+    return PrivateCloud
+
+
+class TestPointCloudPrivateLayer:
+    """Since QGIS 3.42 the exporter reads the index of the layer it is given, shared with the
+    canvas: a filter changed on the displayed cloud during the export reached the file (34 MB
+    instead of 0 point in QGIS 4.2) and QGIS crashed in doExport."""
+
+    def test_exporter_reads_its_own_layer_with_the_same_filter(self, private_cloud, tmp_path):
+        displayed = DisplayedCloud()
+        job = exporters.PointCloudExportJob(displayed, str(tmp_path / 'cloud.laz'))
+        own = private_cloud.made[0]
+        assert job.source is own and job.source is not displayed
+        assert (own.source_uri, own.providerType(), own.subset) == ('/data/tile.copc.laz', 'copc', 'Classification = 9')
+        assert own.options.loadDefaultStyle is False
+        assert job.run().success
+
+    @pytest.mark.parametrize("valid, accepts_subset", [(False, True), (True, False)])
+    def test_displayed_layer_when_the_copy_is_unusable(self, private_cloud, tmp_path, valid, accepts_subset):
+        private_cloud.valid, private_cloud.accepts_subset = valid, accepts_subset
+        displayed = DisplayedCloud()
+        job = exporters.PointCloudExportJob(displayed, str(tmp_path / 'cloud.laz'))
+        assert job.source is displayed
+        assert job.run().success
+
+    def test_task_releases_the_private_layer(self, private_cloud, tmp_path, monkeypatch):
+        fk.install(monkeypatch, exporters)
+        job = exporters.PointCloudExportJob(DisplayedCloud(), str(tmp_path / 'cloud.laz'))
+        task = exporters.make_export_task([job])
+        assert task.run()
+        task.finished(True)
+        assert job.source is None and job.exporter is None
+
+
 class TestTasksCancel:
     def test_export_task_passes_its_feedback(self, monkeypatch):
         fk.install(monkeypatch, exporters)
