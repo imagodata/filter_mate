@@ -1223,6 +1223,10 @@ class FilterMateApp:
         timer = getattr(self, '_layers_added_timer', None)
         if timer is not None:
             timer.stop()
+        # 2026-10-17: the deferred add_layers of a project load too
+        service = self._get_layer_lifecycle_service() if hasattr(self, '_get_layer_lifecycle_service') else None
+        if service is not None and hasattr(service, 'stop_pending_project_load'):
+            service.stop_pending_project_load()
         self._pending_added_layers = []
         self._add_layers_queue.clear()
         self._pending_add_layers_tasks = 0

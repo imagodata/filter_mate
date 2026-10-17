@@ -779,6 +779,10 @@ class LayerLifecycleService:
 
         logger.info("Handle remove all layers completed")
 
+    def stop_pending_project_load(self) -> None:
+        """Cancel the deferred add_layers of handle_project_initialization (unload, project change)."""
+        self._project_load_generation = getattr(self, '_project_load_generation', 0) + 1
+
     def handle_project_initialization(
         self,
         task_name: str,
@@ -908,16 +912,32 @@ class LayerLifecycleService:
 
                 # The callback must survive until the timer fires (see _hold_callback)
                 resolve_callback = _hold_callback(manage_task_callback)
+                # 2026-10-17: ids, looked up again when the timer fires. The layer objects
+                # captured here could be removed (deleted) during the delay; and a newer
+                # project load or stop_pending_project_load() cancels this one.
+                usable_ids = []
+                for layer in usable_layers:
+                    try:
+                        usable_ids.append(layer.id())
+                    except RuntimeError:  # deleted meanwhile
+                        continue
+                generation = self._project_load_generation = getattr(self, '_project_load_generation', 0) + 1
 
                 def safe_add_layers():
+                    if getattr(self, '_project_load_generation', None) != generation:
+                        return  # canceled or superseded
                     strong_callback = resolve_callback()
                     if strong_callback is None or not callable(strong_callback):
+                        return
+                    try:
+                        live_layers = [current_project.mapLayer(layer_id) for layer_id in usable_ids]
+                    except RuntimeError:  # project deleted (QGIS closing)
                         return
                     # 2026-09-14: the layersAdded debounce of the project read
                     # usually registers the layers before this timer fires;
                     # registering them a second time cost a second
                     # LayersManagementEngineTask and UI rebuild per switch.
-                    pending = usable_layers
+                    pending = [layer for layer in live_layers if layer is not None]
                     if registered_layer_ids_callback is not None:
                         try:
                             registered = set(registered_layer_ids_callback() or ())
@@ -925,9 +945,10 @@ class LayerLifecycleService:
                             logger.debug(f"registered layers unavailable: {exc}")
                             registered = set()
                         if registered:
-                            pending = [layer for layer in usable_layers if layer.id() not in registered]
+                            pending = [layer for layer in pending if layer.id() not in registered]
                     if not pending:
-                        logger.info(f"FilterMate: {task_name} - all {len(usable_layers)} layers already registered")
+                        logger.info(f"FilterMate: {task_name} - all {len(usable_layers)} layers already registered "
+                                    "or removed meanwhile")
                         set_loading_flag_callback(False)
                         return
                     strong_callback(pending)

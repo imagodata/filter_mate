@@ -131,6 +131,10 @@ class TestProjectInitializationRegistersTheNewLayers:
     def _run(self, service, app, callback, layers, registered=None):
         project = MagicMock()
         project.mapLayers.return_value = {f"id{i}": layer for i, layer in enumerate(layers)}
+        # the deferred add_layers looks the layers up again by id (2026-10-17)
+        in_project = {layer.id(): layer for layer in layers}
+        project.mapLayer.side_effect = in_project.get
+        self.in_project = in_project
         flags = {"loading": None, "initializing": []}
         dockwidget = MagicMock()
         dockwidget.widgets_initialized = True
@@ -201,3 +205,37 @@ class TestProjectInitializationRegistersTheNewLayers:
         _FakeTimer.scheduled[-1][1]()
         app.manage_task.assert_not_called()
         assert flags["loading"] is False
+
+    def test_a_layer_removed_during_the_delay_is_left_out(self):
+        """2026-10-17: the layer objects were captured; a removed one reached add_layers deleted."""
+        service = _service()
+        app, callback = _app_and_callback()
+        l1, l2 = MagicMock(), MagicMock()
+        l1.id.return_value = "id-1"
+        l2.id.return_value = "id-2"
+        self._run(service, app, callback, [l1, l2])
+        del self.in_project["id-1"]  # removed from the project during the 2.5 s
+        _FakeTimer.scheduled[0][1]()
+        assert list(app.manage_task.call_args.args[1]) == [l2]
+
+    def test_a_canceled_load_registers_nothing(self):
+        service = _service()
+        app, callback = _app_and_callback()
+        layer = MagicMock()
+        layer.id.return_value = "id-1"
+        self._run(service, app, callback, [layer])
+        service.stop_pending_project_load()  # unload / project change
+        _FakeTimer.scheduled[0][1]()
+        app.manage_task.assert_not_called()
+
+    def test_a_newer_load_supersedes_the_previous_one(self):
+        service = _service()
+        app, callback = _app_and_callback()
+        layer = MagicMock()
+        layer.id.return_value = "id-1"
+        self._run(service, app, callback, [layer])
+        self._run(service, app, callback, [layer])
+        _FakeTimer.scheduled[0][1]()  # the first timer
+        app.manage_task.assert_not_called()
+        _FakeTimer.scheduled[1][1]()
+        app.manage_task.assert_called_once()
