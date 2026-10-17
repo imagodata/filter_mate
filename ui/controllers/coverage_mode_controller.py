@@ -557,6 +557,14 @@ class CoverageModeController(BaseController):
         except Exception as exc:
             logger.debug(f"[FM5] dock additions '{method}' failed: {exc}")
 
+    def refresh_selection_strip(self) -> None:
+        """The EXPLORING selection may have changed: the strip above FILTERING follows."""
+        self._extras_call('schedule_strip')
+
+    def note_exploring_selection(self, layer_id: str, groupbox: str, count: int) -> None:
+        """Features of the vector EXPLORING selection, for the strip above FILTERING."""
+        self._extras_call('note_vector_selection', layer_id, groupbox, count)
+
     def _ensure_coverage_spin(self) -> None:
         """Add the "minimum coverage" box next to the geometric predicates combo."""
         dw = self.dockwidget

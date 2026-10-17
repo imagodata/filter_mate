@@ -9,6 +9,9 @@ Dock additions of the raster / point cloud mode (FilterMate 5 mockup).
   a rectangle. Point cloud: elevation profile, 3D map view. The tracking and
   linking buttons only make sense for vector layers: they are hidden meanwhile.
 * The layer card shows vector layers too (geometry type, feature count).
+* The selection strip between EXPLORING and FILTERING, for the three kinds:
+  what the EXPLORING selection hands over as source geometry (features,
+  range of pixels, kept points), see :mod:`ui.widgets.selection_strip`.
 
 Kept apart from :class:`CoverageModeController`, which calls :meth:`show_for`,
 :meth:`show_vector`, :meth:`leave` and :meth:`teardown`. The text builders are
@@ -27,6 +30,11 @@ except ImportError:  # pragma: no cover - unit tests without Qt
 logger = logging.getLogger(__name__)
 
 HOVER_DELAY_MS = 60
+STRIP_DELAY_MS = 80  # bursts of selection signals refresh the strip once
+STRIP_HOST_NAME = 'widget_selection_strip_host'
+# Bottom of frame_exploring, under the scrolled groups: the strip takes its height from EXPLORING
+# (which scrolls), FILTERING keeps all of its own (its two columns are aligned row by row).
+STRIP_LAYOUT = 'verticalLayout_main_content'
 ZONE_SAMPLE_SIZE = 250000
 TOOL_RAIL_ANCHOR = 'pushButton_checkable_exploring_linking_widgets'
 VECTOR_ONLY_BUTTONS = ('pushButton_checkable_exploring_tracking', 'pushButton_checkable_exploring_linking_widgets')
@@ -226,6 +234,13 @@ class CoverageDockExtras(QObject):
         self._hover_base_key: Optional[Tuple[str, str]] = None  # (layer id, source) the base was opened for
         self._link_connected = False
         self._linked_layer_id: Optional[str] = None  # raster whose style follows the range
+        self._strip = None
+        self._strip_host = None
+        self._strip_kind = 'vector'
+        self._strip_timer = None
+        self._strip_panels: List[Any] = []  # panels whose signals refresh the strip (by object, not id())
+        # (layer id, EXPLORING group) -> features of the last EXPLORING selection (custom selection count)
+        self._vector_counts: Dict[Tuple[str, str], int] = {}
 
     @property
     def dockwidget(self) -> Any:
@@ -244,12 +259,21 @@ class CoverageDockExtras(QObject):
         self.tr("Vector")
         self.tr("Raster")
         self.tr("Point cloud")
+        self.tr("{0} feature(s)")
+        self.tr("no feature selected")
+        self.tr("expression")
+        self.tr("whole layer")
+        self.tr("no constraint")
+        self.tr("{0} class(es)")
+        self.tr("raster expression")
+        self.tr("all points")
 
     # === Building ===
 
     def ensure(self, host: Any) -> None:
         """Build the layer card and the tool buttons, once."""
         self.ensure_card()
+        self.ensure_strip()
         if not self._tools:
             self._build_tools()
 
@@ -269,6 +293,35 @@ class CoverageDockExtras(QObject):
         card.setVisible(False)
         layout.insertWidget(0, card)
         self._card = card
+
+    def ensure_strip(self) -> None:
+        """Selection strip at the bottom of EXPLORING, right above the FILTERING header, once (mockup)."""
+        if self._strip is not None:
+            return
+        layout = getattr(self.dockwidget, STRIP_LAYOUT, None)
+        if layout is None:
+            return
+        from qgis.PyQt.QtCore import QTimer as _QTimer
+        from qgis.PyQt.QtWidgets import QVBoxLayout, QWidget
+        from ..styles.mockup_design import SPACING
+        from ..widgets.selection_strip import SelectionStrip
+        host = QWidget()
+        host.setObjectName(STRIP_HOST_NAME)
+        host_layout = QVBoxLayout(host)
+        # One block above the strip (the layout already puts one gap); the splitter handle
+        # below it is the block before the FILTERING header.
+        host_layout.setContentsMargins(0, max(0, SPACING['fm_block'] - SPACING['fm_gap']), 0, 0)
+        host_layout.setSpacing(0)
+        strip = SelectionStrip(host)
+        host_layout.addWidget(strip)
+        host.setVisible(False)
+        layout.addWidget(host, 0)
+        self._strip, self._strip_host = strip, host
+        timer = _QTimer(self)
+        timer.setSingleShot(True)
+        timer.setInterval(STRIP_DELAY_MS)
+        timer.timeout.connect(self._safe_update_strip)
+        self._strip_timer = timer
 
     def _build_tools(self) -> None:
         from qgis.PyQt.QtWidgets import QPushButton
@@ -374,6 +427,10 @@ class CoverageDockExtras(QObject):
             self._guarded(self._watch_panel)
         self._refresh_icons()
         self._guarded(self._set_kind_icons, kind_value)
+        self._guarded(self.ensure_strip)
+        self._guarded(self._watch_strip_panels)
+        self._strip_kind = kind_value
+        self.schedule_strip()
 
     def _watch_panel(self) -> None:
         """Keep the tools in step with the quantity the range applies to (connected once)."""
@@ -408,6 +465,9 @@ class CoverageDockExtras(QObject):
             self._guarded(self._update_card, layer, 'vector')
         elif self._card is not None:
             self._guarded(self._card.setVisible, False)
+        self._strip_kind = 'vector'
+        self._guarded(self.ensure_strip)
+        self.schedule_strip()  # deferred: the dock makes the layer current after this call
 
     @staticmethod
     def _safe_id(layer: Any) -> Optional[str]:
@@ -459,17 +519,24 @@ class CoverageDockExtras(QObject):
 
         if gone(self._linked_layer_id):
             self._linked_layer_id = None
+        self._vector_counts = {key: count for key, count in self._vector_counts.items() if not gone(key[0])}
         if gone(self._layer_id):
             self.leave()
             self._layer_id = None
+            self._strip_kind = 'vector'  # no raster / point cloud figures for a removed layer
+            self.schedule_strip()
 
     def teardown(self) -> None:
         self.leave()
         self._guarded(self._unlink_all_styles)  # plugin unloaded: every layer gets its own style back
         self._guarded(self._restore_vector_buttons)
         self._guarded(self._release_zone_tool)
-        widgets = [self._card, *self._tools.values()]
+        if self._strip_timer is not None:
+            self._guarded(self._strip_timer.stop)
+        widgets = [self._card, self._strip_host, *self._tools.values()]
         self._card, self._tools = None, {}
+        self._strip, self._strip_host, self._strip_timer = None, None, None
+        self._strip_panels = []
         for widget in widgets:
             if widget is None:
                 continue
@@ -478,6 +545,114 @@ class CoverageDockExtras(QObject):
                 widget.deleteLater()
             except RuntimeError:
                 pass
+
+    # === Selection strip ===
+
+    def schedule_strip(self) -> None:
+        """Refresh the selection strip a moment later (selection signals come in bursts)."""
+        if self._strip_timer is not None:
+            self._strip_timer.start()
+
+    def note_vector_selection(self, layer_id: str, groupbox: str, count: int) -> None:
+        """Features of the EXPLORING selection, from the exploring controller (custom selection count)."""
+        if layer_id and groupbox:
+            self._vector_counts[(layer_id, groupbox)] = max(0, int(count))
+        self.schedule_strip()
+
+    def _watch_strip_panels(self) -> None:
+        """Raster / point cloud panel signals refresh the strip (connected once per panel)."""
+        controller = self._controller
+        raster, pc = getattr(controller, '_raster_panel', None), getattr(controller, '_pc_panel', None)
+        for panel, signals in ((raster, ('summaryChanged', 'selectionChanged')),
+                               (pc, ('summaryChanged', 'criteriaChanged'))):
+            if panel is None or any(panel is watched for watched in self._strip_panels):
+                continue
+            for name in signals:
+                getattr(panel, name).connect(self.schedule_strip)
+            self._strip_panels.append(panel)
+        if pc is not None and hasattr(pc, 'set_counts_inline') and self._strip is not None:
+            pc.set_counts_inline(False)  # the strip shows the kept points
+
+    def _safe_update_strip(self) -> None:
+        """Timer slot: the strip never raises into the Qt event loop."""
+        try:
+            self._update_strip()
+        except Exception as exc:  # display only: a failure leaves the previous text
+            logger.debug(f"[FM5] selection strip not updated: {exc}")
+
+    def _update_strip(self) -> None:
+        strip, host = self._strip, self._strip_host
+        if strip is None or host is None:
+            return
+        builders = {'raster': self._raster_strip, 'point_cloud': self._point_cloud_strip}
+        content = builders.get(self._strip_kind, self._vector_strip)()
+        if content is None:
+            host.setVisible(False)
+            return
+        caption, value, tooltip = content
+        strip.set_content(self._strip_kind if self._strip_kind in builders else 'vector', caption, value, tooltip)
+        host.setVisible(True)
+
+    def _vector_strip(self) -> Optional[Tuple[str, str, str]]:
+        from ..widgets.selection_strip import vector_strip_value
+        dw = self.dockwidget
+        layer = getattr(dw, 'current_layer', None)
+        layer_id = self._safe_id(layer)
+        if layer_id is None:
+            return None
+        groupbox = getattr(dw, 'current_exploring_groupbox', '') or ''
+        count, has_expression = self._vector_selection_count(layer_id, groupbox)
+        return (self.tr("Selection → source geometry"),
+                vector_strip_value(groupbox, count, has_expression, self.tr),
+                self.tr("Source geometry: the features selected in EXPLORING"))
+
+    def _vector_selection_count(self, layer_id: str, groupbox: str) -> Tuple[Optional[int], bool]:
+        """``(features, custom expression set)`` of the EXPLORING selection, without querying the layer.
+
+        Single and multiple selection read their widget (true even after a selection made on
+        the map); the custom selection uses the count of its last evaluation, or the cache.
+        """
+        dw = self.dockwidget
+        exploring = (getattr(dw, 'widgets', None) or {}).get('EXPLORING', {})
+
+        def widget(key: str) -> Any:
+            return (exploring.get(key) or {}).get('WIDGET')
+
+        if groupbox == 'single_selection' and widget('SINGLE_SELECTION_FEATURES') is not None:
+            feature = widget('SINGLE_SELECTION_FEATURES').feature()
+            return (1 if feature is not None and feature.isValid() else 0), False
+        if groupbox == 'multiple_selection' and widget('MULTIPLE_SELECTION_FEATURES') is not None:
+            return len(widget('MULTIPLE_SELECTION_FEATURES').checkedItems() or []), False
+        expression_widget = widget('CUSTOM_SELECTION_EXPRESSION')
+        has_expression = bool(expression_widget is not None and (expression_widget.expression() or '').strip())
+        if (layer_id, groupbox) in self._vector_counts:
+            return self._vector_counts[(layer_id, groupbox)], has_expression
+        cache = getattr(dw, '_exploring_cache', None)
+        cached = cache.get(layer_id, groupbox) if cache is not None and groupbox else None
+        if cached:
+            return len(cached.get('features') or []), has_expression
+        return None, has_expression
+
+    def _raster_strip(self) -> Optional[Tuple[str, str, str]]:
+        from ..widgets.selection_strip import raster_strip_value
+        panel = getattr(self._controller, '_raster_panel', None)
+        if panel is None:
+            return None
+        return (self.tr("Selection → source geometry"),
+                raster_strip_value(panel.selection(), panel.kept_ratio(), self.tr),
+                self.tr("Source geometry: the selected pixels, vectorized"))
+
+    def _point_cloud_strip(self) -> Optional[Tuple[str, str, str]]:
+        from ..widgets.selection_strip import point_cloud_strip_value
+        panel = getattr(self._controller, '_pc_panel', None)
+        if panel is None:
+            return None
+        kept, total = panel.class_point_counts()
+        if total is None:
+            total = panel.point_counts()[1]
+        value = point_cloud_strip_value(kept, total, panel.expression(), panel.hag_settings() is not None,
+                                        self.tr)
+        return (self.tr("Kept points"), value, self.tr("Source geometry: the footprint of the kept points"))
 
     def _update_card(self, layer: Any, kind_value: str) -> None:
         if self._card is None:

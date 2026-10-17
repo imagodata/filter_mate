@@ -321,11 +321,16 @@ class OptimizationManager:
             and dw._layer_centroid_overrides.get(lid, False)
         ):
             return True
+        # FilterMate 5: the distant centroids are chosen target by target (a partial button is
+        # checked for Qt but only covers some targets).
+        chosen = dw.get_centroid_target_ids() if hasattr(dw, 'get_centroid_target_ids') else None
+        if chosen is not None:
+            distant = bool(lid) and lid in chosen
+        else:
+            distant = (hasattr(dw, 'checkBox_filtering_use_centroids_distant_layers')
+                       and dw.checkBox_filtering_use_centroids_distant_layers.isChecked())
         return (
-            (
-                hasattr(dw, 'checkBox_filtering_use_centroids_distant_layers')
-                and dw.checkBox_filtering_use_centroids_distant_layers.isChecked()
-            )
+            distant
             or (
                 hasattr(dw, 'checkBox_filtering_use_centroids_source_layer')
                 and dw.checkBox_filtering_use_centroids_source_layer.isChecked()

@@ -433,3 +433,117 @@ class TestClassPipette:
         pipette.setChecked(True)
         dock_extras.dock.leave()
         assert calls == [True, False] and not pipette.isChecked()
+
+
+# ---------------------------------------------------------------------------
+# Selection strip between EXPLORING and FILTERING
+# ---------------------------------------------------------------------------
+
+class FakeStrip:
+    def __init__(self):
+        self.content = None
+
+    def set_content(self, kind, caption, value, tooltip=""):
+        self.content = (kind, caption, value)
+
+
+class FakeHost:
+    def __init__(self):
+        self.visible = None
+
+    def setVisible(self, visible):
+        self.visible = visible
+
+
+class FakeFeature:
+    def __init__(self, valid):
+        self.valid = valid
+
+    def isValid(self):
+        return self.valid
+
+
+def _widget(**methods):
+    return types.SimpleNamespace(**{name: (lambda value=value: value) for name, value in methods.items()})
+
+
+@pytest.fixture
+def strip_env(dock_extras, monkeypatch):
+    env = dock_extras
+    monkeypatch.setattr(extras.CoverageDockExtras, "tr", lambda self, text: text, raising=False)
+    env.dock._strip, env.dock._strip_host = FakeStrip(), FakeHost()
+    env.controller.dockwidget = types.SimpleNamespace(
+        current_layer=FakeLayer("v1"), current_exploring_groupbox="multiple_selection",
+        widgets={"EXPLORING": {
+            "SINGLE_SELECTION_FEATURES": {"WIDGET": _widget(feature=FakeFeature(True))},
+            "MULTIPLE_SELECTION_FEATURES": {"WIDGET": _widget(checkedItems=[["a"], ["b"], ["c"]])},
+            "CUSTOM_SELECTION_EXPRESSION": {"WIDGET": _widget(expression='"type" = 2')},
+        }})
+    return env
+
+
+class TestSelectionStrip:
+    def test_multiple_selection_counts_the_checked_features(self, strip_env):
+        strip_env.dock._update_strip()
+        assert strip_env.dock._strip.content == ("vector", "Selection → source geometry", "3 feature(s)")
+        assert strip_env.dock._strip_host.visible is True
+
+    def test_single_selection_reads_its_picker(self, strip_env):
+        dw = strip_env.controller.dockwidget
+        dw.current_exploring_groupbox = "single_selection"
+        strip_env.dock._update_strip()
+        assert strip_env.dock._strip.content[2] == "1 feature(s)"
+        dw.widgets["EXPLORING"]["SINGLE_SELECTION_FEATURES"]["WIDGET"] = _widget(feature=FakeFeature(False))
+        strip_env.dock._update_strip()
+        assert strip_env.dock._strip.content[2] == "no feature selected"
+
+    def test_custom_selection_uses_the_last_evaluation(self, strip_env):
+        dw = strip_env.controller.dockwidget
+        dw.current_exploring_groupbox = "custom_selection"
+        strip_env.dock._update_strip()
+        assert strip_env.dock._strip.content[2] == "expression"
+        strip_env.dock.note_vector_selection("v1", "custom_selection", 42)
+        strip_env.dock._update_strip()
+        assert strip_env.dock._strip.content[2] == "42 feature(s)"
+
+    def test_removed_layer_forgets_its_counts(self, strip_env, monkeypatch):
+        strip_env.dock.note_vector_selection("v1", "custom_selection", 42)
+        strip_env.dock.forget_layers(["v1"])
+        assert strip_env.dock._vector_counts == {}
+
+    def test_no_current_layer_hides_the_strip(self, strip_env):
+        strip_env.controller.dockwidget.current_layer = None
+        strip_env.dock._update_strip()
+        assert strip_env.dock._strip_host.visible is False
+
+    def test_raster_strip_follows_the_panel(self, strip_env):
+        panel = strip_env.controller._raster_panel
+        panel.selection = lambda: types.SimpleNamespace(mode=types.SimpleNamespace(value="range"), minimum=200.0,
+                                                        maximum=260.0, derivative=None)
+        panel.kept_ratio = lambda: 0.389
+        strip_env.dock._strip_kind = "raster"
+        strip_env.dock._update_strip()
+        assert strip_env.dock._strip.content == ("raster", "Selection → source geometry", "200 – 260 · 38.9 %")
+
+    def test_point_cloud_strip_counts_the_checked_classes(self, strip_env):
+        strip_env.controller._pc_panel = types.SimpleNamespace(
+            class_point_counts=lambda: (18_900_000, 38_400_000), point_counts=lambda: (None, 38_400_000),
+            expression=lambda: "Classification IN (2, 6)", hag_settings=lambda: None)
+        strip_env.dock._strip_kind = "point_cloud"
+        strip_env.dock._update_strip()
+        assert strip_env.dock._strip.content == ("point_cloud", "Kept points", "18.9 M / 38.4 M (49.2 %)")
+
+    def test_point_cloud_strip_shows_uncounted_criteria(self, strip_env):
+        strip_env.controller._pc_panel = types.SimpleNamespace(
+            class_point_counts=lambda: (None, None), point_counts=lambda: (None, 38_400_000),
+            expression=lambda: "Z >= 200", hag_settings=lambda: None)
+        strip_env.dock._strip_kind = "point_cloud"
+        strip_env.dock._update_strip()
+        assert strip_env.dock._strip.content[2] == "Z >= 200"
+
+
+def test_removed_raster_gives_the_strip_back_to_the_vector_colours(strip_env):
+    dock = strip_env.dock
+    dock._layer_id, dock._strip_kind = "r1", "raster"
+    dock.forget_layers(["r1"])
+    assert dock._strip_kind == "vector"

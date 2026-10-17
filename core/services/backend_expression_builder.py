@@ -561,12 +561,23 @@ class BackendExpressionBuilder:
             source_geometry_hash=source_hash,
             provider_type=provider_type,
             source_filter_hash=source_filter_hash,
-            use_centroids=self.param_use_centroids_distant_layers,
+            use_centroids=self._distant_centroids(layer),
             use_centroids_source=self.param_use_centroids_source_layer,
             target_schema_signature=target_schema_signature,
         )
 
         return cache_key
+
+    def _distant_centroids(self, layer) -> bool:
+        """Whether the target ``layer`` is tested by its centroids: chosen layer by layer
+        (FilterMate 5), the global flag for tasks without the per-layer list."""
+        from ..domain.centroid_targets import distant_centroids_for
+        try:
+            layer_id = layer.id() if layer is not None else None
+        except (RuntimeError, AttributeError):
+            layer_id = None
+        filtering = (self.task_parameters or {}).get('filtering')
+        return distant_centroids_for(layer_id, filtering, self.param_use_centroids_distant_layers)
 
     def _check_auto_optimizations(self, layer, source_wkt: Optional[str]) -> bool:
         """
@@ -579,7 +590,7 @@ class BackendExpressionBuilder:
         Returns:
             bool: Updated value for use_centroids_distant
         """
-        use_centroids = self.param_use_centroids_distant_layers
+        use_centroids = self._distant_centroids(layer)
 
         # Check pre-approved optimizations
         layer_id = layer.id() if layer else None

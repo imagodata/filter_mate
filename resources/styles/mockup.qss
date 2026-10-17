@@ -165,6 +165,82 @@
     color: {fm_text_muted};
 }
 
+/* Selection strip between EXPLORING and FILTERING, tinted with the source layer kind. */
+#dockWidgetContents QFrame#frame_selection_strip {
+    background-color: {fm_strip_vector_bg};
+    border: 1px solid {fm_strip_vector_border};
+    border-radius: 6px;
+}
+#dockWidgetContents QFrame#frame_selection_strip[fm_kind="raster"] {
+    background-color: {fm_strip_raster_bg};
+    border: 1px solid {fm_strip_raster_border};
+}
+#dockWidgetContents QFrame#frame_selection_strip[fm_kind="point_cloud"] {
+    background-color: {fm_strip_point_cloud_bg};
+    border: 1px solid {fm_strip_point_cloud_border};
+}
+#dockWidgetContents QFrame#frame_selection_strip QLabel {
+    background: transparent;
+    border: none;
+    color: {fm_text};
+    font-weight: normal;
+}
+#dockWidgetContents QFrame#frame_selection_strip QLabel#label_selection_strip_value {
+    font-family: "IBM Plex Mono", "Consolas", "DejaVu Sans Mono", monospace;
+    color: {fm_strip_vector_text};
+}
+#dockWidgetContents QFrame#frame_selection_strip QLabel#label_selection_strip_value[fm_kind="raster"] {
+    color: {fm_strip_raster_text};
+}
+#dockWidgetContents QFrame#frame_selection_strip QLabel#label_selection_strip_value[fm_kind="point_cloud"] {
+    color: {fm_strip_point_cloud_text};
+}
+
+/* Centroid buttons beside the FILTERING source and target layers: one square icon button,
+   a field high (no check box). Checked: every checked line / polygon target uses its centroids;
+   partial (dashed): only some do, each target has its own square in the list. */
+#dockWidgetContents QCheckBox#checkBox_filtering_use_centroids_source_layer,
+#dockWidgetContents QCheckBox#checkBox_filtering_use_centroids_distant_layers {
+    background-color: {fm_field};
+    border: 1px solid {fm_field_border};
+    border-radius: 6px;
+    /* 38 px square: 28 + 8 px left padding (the 20 px icon centred) + 2 px border. */
+    min-width: 28px;
+    max-width: 28px;
+    min-height: 36px;
+    max-height: 36px;
+    padding: 0px 0px 0px 8px;
+    spacing: 0px;
+    qproperty-iconSize: 20px 20px;
+}
+#dockWidgetContents QCheckBox#checkBox_filtering_use_centroids_source_layer::indicator,
+#dockWidgetContents QCheckBox#checkBox_filtering_use_centroids_distant_layers::indicator {
+    width: 0px;
+    height: 0px;
+    border: none;
+    background: transparent;
+    image: none;
+}
+#dockWidgetContents QCheckBox#checkBox_filtering_use_centroids_source_layer:hover,
+#dockWidgetContents QCheckBox#checkBox_filtering_use_centroids_distant_layers:hover {
+    border-color: {fm_field_hover};
+}
+#dockWidgetContents QCheckBox#checkBox_filtering_use_centroids_source_layer:checked,
+#dockWidgetContents QCheckBox#checkBox_filtering_use_centroids_distant_layers:checked {
+    background-color: {fm_active};
+    border-color: {fm_active_border};
+}
+#dockWidgetContents QCheckBox#checkBox_filtering_use_centroids_source_layer:indeterminate,
+#dockWidgetContents QCheckBox#checkBox_filtering_use_centroids_distant_layers:indeterminate {
+    background-color: {fm_group};
+    border: 1px dashed {fm_active_border};
+}
+#dockWidgetContents QCheckBox#checkBox_filtering_use_centroids_source_layer:disabled,
+#dockWidgetContents QCheckBox#checkBox_filtering_use_centroids_distant_layers:disabled {
+    background-color: transparent;
+    border-color: {fm_group_border};
+}
+
 /* "Source geometry: ..." caption under the FILTERING source layer. */
 #dockWidgetContents QLabel#label_filtering_source_geometry {
     color: {fm_text_muted};

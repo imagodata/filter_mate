@@ -767,6 +767,7 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         # Create custom combobox widgets early so configure_widgets() can reference them
         from .ui.widgets.custom_widgets import QgsCheckableComboBoxLayer
         self.checkableComboBoxLayer_filtering_layers_to_filter = QgsCheckableComboBoxLayer(self.dockWidgetContents)
+        self.checkableComboBoxLayer_filtering_layers_to_filter.set_target_hints(True)  # vector / raster / point cloud
         # Height managed by QSS (20px standard)
         self.checkableComboBoxLayer_filtering_layers_to_filter.show()
         logger.debug(f"Created filtering layers widget: {self.checkableComboBoxLayer_filtering_layers_to_filter}")
@@ -781,6 +782,10 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         self.checkBox_filtering_use_centroids_distant_layers = QtWidgets.QCheckBox(self.dockWidgetContents)
         self.checkBox_filtering_use_centroids_distant_layers.setObjectName("checkBox_filtering_use_centroids_distant_layers")
         logger.debug(f"Created centroids distant layers checkbox: {self.checkBox_filtering_use_centroids_distant_layers}")
+        # FilterMate 5: centroids chosen target by target, the checkbox sums them up
+        from .ui.controllers.centroid_targets_sync import CentroidTargetsSync
+        self._centroid_targets = CentroidTargetsSync(self)
+        self._centroid_targets.connect()
 
         # Initialize ConfigurationManager BEFORE tab widget setup (needed for custom widget creation)
         from .ui.managers.configuration_manager import ConfigurationManager
@@ -2765,6 +2770,7 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
 
                     # v4.0.5: Apply state or force enabled
                     w.setEnabled(True if is_always_enabled else state)
+        self._schedule_centroid_targets()  # re-enabled without signal: the centroid button is computed again
 
     def connect_widgets_signals(self):
         """Connect all widget signals to their handlers.
@@ -3642,6 +3648,33 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         )
         self.exploring_groupbox_changed(groupbox)
 
+    def get_centroid_target_ids(self):
+        """FilterMate 5: ids of the targets tested by their centroids (None: the global flag applies)."""
+        sync = getattr(self, '_centroid_targets', None)
+        return sync.centroid_ids() if sync is not None else None
+
+    def _schedule_centroid_targets(self):
+        """FilterMate 5: refresh the centroid button from the per-target toggles (next event loop pass)."""
+        sync = getattr(self, '_centroid_targets', None)
+        if sync is not None:
+            sync.schedule()
+
+    def set_all_centroid_targets(self, enabled):
+        """FilterMate 5: every checked line / polygon target uses its centroids (or none does)."""
+        sync = getattr(self, '_centroid_targets', None)
+        if sync is not None:
+            sync.set_all(bool(enabled))
+
+    def refresh_selection_strip(self):
+        """FilterMate 5: refresh the selection strip above FILTERING (deferred, cheap)."""
+        integration = getattr(self, '_controller_integration', None)
+        coverage = getattr(integration, 'coverage_controller', None) if integration is not None else None
+        if coverage is not None:
+            try:
+                coverage.refresh_selection_strip()
+            except Exception as e:
+                logger.debug(f"refresh_selection_strip: {e}")
+
     def _update_exploring_buttons_state(self):
         """
         v4.0 S18: Update identify/zoom buttons based on layer validity.
@@ -3661,6 +3694,7 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
     def _configure_groupbox_common(self, groupbox_name):
         """v4.0 Sprint 17: Common groupbox configuration logic."""
         self.current_exploring_groupbox = groupbox_name
+        self.refresh_selection_strip()
         self.manageSignal(["EXPLORING", "SINGLE_SELECTION_FEATURES"], 'disconnect')
         self.manageSignal(["EXPLORING", "MULTIPLE_SELECTION_FEATURES"], 'disconnect')
 
@@ -4530,6 +4564,7 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         """
         # FIX v10: DEBUG - Confirm signal is triggered
         logger.info(f"🔔 on_layer_selection_changed TRIGGERED: selected={len(selected)}, deselected={len(deselected)}, clearAndSelect={clearAndSelect}")
+        self.refresh_selection_strip()  # the EXPLORING widgets follow the map selection
 
         # FIX v5: Ensure signal stays connected (self-healing)
         if self.current_layer and not self.current_layer_selection_connection:
@@ -6038,6 +6073,7 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         # Optional controller delegation for additional logic
         if self._controller_integration and hasattr(self._controller_integration, 'delegate_filtering_layers_to_filter_state_changed'):
             self._controller_integration.delegate_filtering_layers_to_filter_state_changed(is_checked)
+        self._schedule_centroid_targets()  # the centroid button follows the targets key
 
         logger.debug(f"filtering_layers_to_filter_state_changed: is_checked={is_checked}")
 
@@ -6530,13 +6566,16 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
                     "has_geometric_predicates": False, "geometric_predicates": [],
                     "has_buffer_value": False, "buffer_value": 0.0,
                     "buffer_value_property": False, "buffer_value_expression": "",
-                    "has_buffer_type": False, "buffer_type": "Round"
+                    "has_buffer_type": False, "buffer_type": "Round",
+                    "centroid_layers": [], "use_centroids_distant_layers": False
                 }
             }
             props_to_save = []
             for cat, props in defaults.items(): layer_props[cat].update(props); props_to_save.extend((cat, k) for k in props)
             self.settingLayerVariable.emit(layer, props_to_save); self._synchronize_layer_widgets(layer, layer_props)
             self._update_buffer_spinbox_style(0.0); self._reset_exploring_button_states(layer_props); self._reset_filtering_button_states(layer_props)
+            if getattr(self, '_centroid_targets', None) is not None:
+                self._centroid_targets.apply_stored()  # no target uses its centroids any more
             if should_show_message('layer_reset'):
                 self.iface.messageBar().pushSuccess("FilterMate", self.tr("Layer properties reset to defaults"))
         except Exception as e: self.iface.messageBar().pushCritical("FilterMate", self.tr("Error resetting layer properties: {}").format(str(e)))

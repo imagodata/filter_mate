@@ -1211,8 +1211,8 @@ class PointCloudExploringPanel(QWidget):
         else:
             self._check_codes(inverted_codes(self._present_codes(), self._checked_codes()))
 
-    def _update_class_summary(self, *_args) -> None:
-        """Checked classes and the points they hold, under the list."""
+    def _class_counts(self) -> Tuple[int, int, Optional[int], Optional[int]]:
+        """``(checked, shown, kept points, total points)``; the points are None when a class has no count."""
         items = self._class_items()
         checked = [item for item in items if item.checkState() == Qt.CheckState.Checked]
         counts = [int(item.data(CLASS_COUNT_ROLE)) for item in items]
@@ -1220,8 +1220,22 @@ class PointCloudExploringPanel(QWidget):
         if items and all(count >= 0 for count in counts):
             kept = sum(int(item.data(CLASS_COUNT_ROLE)) for item in checked)
         total = sum(counts) if kept is not None else None
-        self._class_summary_label.setText(
-            class_selection_summary(len(checked), len(items), kept if checked else None, total))
+        return len(checked), len(items), kept, total
+
+    def _update_class_summary(self, *_args) -> None:
+        """Checked classes and the points they hold, under the list."""
+        checked, shown, kept, total = self._class_counts()
+        self._class_summary_label.setText(class_selection_summary(checked, shown, kept if checked else None, total))
+
+    def class_point_counts(self) -> Tuple[Optional[int], Optional[int]]:
+        """``(kept, total)`` points of the checked classes while CLASSES is the active group, else ``(None, None)``.
+
+        Exact from the layer statistics; no class checked keeps no constraint (None).
+        """
+        if not self._classes_group.isChecked():
+            return None, None
+        checked, _shown, kept, total = self._class_counts()
+        return (kept, total) if checked and kept is not None else (None, None)
 
     # === Conditions ===
 

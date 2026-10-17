@@ -34,6 +34,7 @@ SOURCES = \
     ../ui/controllers/integration.py \
     ../ui/controllers/coverage_mode_controller.py \
     ../ui/controllers/coverage_dock_extras.py \
+    ../ui/controllers/centroid_targets_sync.py \
     ../ui/dialogs/config_editor_widget.py \
     ../ui/dialogs/export_group_recap_dialog.py \
     ../ui/dialogs/favorites_manager.py \
