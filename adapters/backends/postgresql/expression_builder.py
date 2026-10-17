@@ -31,6 +31,10 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger('FilterMate.Backend.PostgreSQL.ExpressionBuilder')
 
+# Lon/lat SRIDs recognised when the QGIS CRS database is not available
+# (WGS 84, ETRS89, NAD83, RGF93 geographic, ED50, NTF).
+_GEOGRAPHIC_SRIDS = frozenset({4326, 4258, 4269, 4171, 4230, 4275})
+
 # Import the port interface
 try:
     from ....core.ports.geometric_filter_port import GeometricFilterPort
@@ -233,6 +237,8 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
         # Format: "table"."geom" - NOT "schema"."table"."geom"
         geom_expr = f'"{table}"."{geom_field}"'
         raw_geom_expr = geom_expr
+        # 2026-10-17: the source is brought to this SRID (None: unknown, kept as is)
+        target_srid = self._layer_srid(layer)
 
         # Apply centroid optimization if enabled
         if use_centroids:
@@ -387,7 +393,8 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
                     source_wkt=source_wkt,
                     source_srid=source_srid,
                     buffer_value=buffer_value,
-                    raw_geom_expr=raw_geom_expr
+                    raw_geom_expr=raw_geom_expr,
+                    target_srid=target_srid
                 )
             else:
                 # CRITICAL: Use unqualified geom_expr for EXISTS subquery
@@ -404,7 +411,8 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
                     original_source_table=original_source_table,
                     buffer_expression=buffer_expression,  # FIX v4.2.11: Pass dynamic buffer expression
                     is_filter_chaining=is_filter_chaining,  # FIX v4.3.1: Use local variable instead of recalculating
-                    raw_geom_expr=raw_geom_expr
+                    raw_geom_expr=raw_geom_expr,
+                    target_srid=target_srid
                 )
 
             if expr:
@@ -837,6 +845,116 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
         """``name`` as a quoted PostgreSQL identifier (embedded double quotes doubled)."""
         return '"' + str(name).replace('"', '""') + '"'
 
+    # =========================================================================
+    # SRIDs (2026-10-17): the source is brought to the SRID of the target.
+    # A GeoJSON source in EPSG:4326 against a BD TOPO table in EPSG:2154 gave
+    # "Operation on mixed SRID geometries", and a 100 m buffer around a source
+    # in degrees was 100 degrees.
+    # =========================================================================
+
+    @staticmethod
+    def _positive_srid(value) -> Optional[int]:
+        """``value`` when it is a usable SRID (a positive int), else None."""
+        if isinstance(value, bool) or not isinstance(value, int) or value <= 0:
+            return None
+        return value
+
+    @classmethod
+    def _authid_to_srid(cls, authid) -> Optional[int]:
+        """PostGIS SRID of a CRS authid (``EPSG:2154`` → 2154), None when unknown."""
+        if not authid or not isinstance(authid, str):
+            return None
+        try:
+            from qgis.core import QgsCoordinateReferenceSystem
+            srid = cls._positive_srid(QgsCoordinateReferenceSystem(authid).postgisSrid())
+            if srid:
+                return srid
+        except Exception:  # nosec B110 - no QGIS CRS database: parse the EPSG code below
+            pass
+        match = re.fullmatch(r'\s*EPSG:(\d+)\s*', authid, re.IGNORECASE)
+        return cls._positive_srid(int(match.group(1))) if match else None
+
+    @classmethod
+    def _layer_srid(cls, layer) -> Optional[int]:
+        """SRID of the geometry column of a PostgreSQL layer, None when unknown.
+
+        The provider CRS is the column SRID; the layer CRS can be overridden
+        in QGIS.
+        """
+        if layer is None:
+            return None
+        for crs_of in (lambda: layer.dataProvider().crs(), layer.crs):
+            try:
+                srid = cls._positive_srid(crs_of().postgisSrid())
+            except Exception:  # nosec B112 - try the next CRS source
+                continue
+            if srid:
+                return srid
+        return None
+
+    def _source_table_srid(self) -> Optional[int]:
+        """SRID of the source table (the source layer's own CRS, before any metric reprojection)."""
+        infos = (self.task_params or {}).get('infos') or {}
+        return self._authid_to_srid(infos.get('layer_crs_authid'))
+
+    @staticmethod
+    def _srid_is_geographic(srid: Optional[int]) -> bool:
+        """Whether ``srid`` is a lon/lat CRS (degrees)."""
+        if not srid:
+            return False
+        try:
+            from qgis.core import QgsCoordinateReferenceSystem
+            crs = QgsCoordinateReferenceSystem(f"EPSG:{int(srid)}")
+            if crs.isValid() is True:
+                return crs.isGeographic() is True
+        except Exception:  # nosec B110 - no QGIS CRS database: known lon/lat SRIDs below
+            pass
+        return int(srid) in _GEOGRAPHIC_SRIDS
+
+    @staticmethod
+    def _transform_sql(expr: str, source_srid: Optional[int], target_srid: Optional[int]) -> str:
+        """``ST_Transform(expr, target)`` when both SRIDs are known and differ."""
+        if source_srid and target_srid and source_srid != target_srid:
+            return f"ST_Transform({expr}, {target_srid})"
+        return expr
+
+    def _source_in_target_srid(
+        self,
+        source_expr: str,
+        source_srid: Optional[int],
+        target_srid: Optional[int],
+        buffer_value: Optional[float],
+    ) -> Tuple[str, Optional[float]]:
+        """The source geometry in the target SRID, and the buffer still to apply there.
+
+        The buffer distance is in metres:
+        - same SRID, metric: nothing changes (the buffer is applied by the
+          predicate, ST_DWithin for intersects);
+        - metric target: the source is transformed, the buffer applies in
+          the target metres (the GiST index of the target stays usable);
+        - geographic target: the buffer is applied before the transform, on
+          the geography for a geographic source, in the source metres else.
+
+        Returns ``(expression, remaining_buffer)``; ``remaining_buffer`` is
+        None when there is no buffer left to apply.
+        """
+        has_buffer = buffer_value is not None and buffer_value != 0
+        source_geographic = self._srid_is_geographic(source_srid)
+        reproject = bool(source_srid and target_srid and source_srid != target_srid)
+        if not reproject and not (has_buffer and source_geographic):
+            return source_expr, (buffer_value if has_buffer else None)
+        target_geographic = self._srid_is_geographic(target_srid or source_srid)
+        if has_buffer and target_geographic:
+            if source_geographic:
+                buffered = self._build_geography_buffer(source_expr, buffer_value)
+            else:
+                buffered = self._build_st_buffer_with_style(source_expr, buffer_value)
+            return self._transform_sql(buffered, source_srid, target_srid), None
+        return (
+            self._transform_sql(source_expr, source_srid, target_srid),
+            buffer_value if has_buffer else None,
+        )
+
     def _buffer_table_name(
         self,
         source_schema: str,
@@ -898,7 +1016,8 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
         buffer_expression: Optional[str],
         source_filter: Optional[str],
         layer_props: Dict,
-        buffer_table_name: Optional[str] = None  # FIX v4.2.20: Pre-calculated table name
+        buffer_table_name: Optional[str] = None,  # FIX v4.2.20: Pre-calculated table name
+        target_srid: Optional[int] = None
     ) -> str:
         """
         Build EXISTS expression using pre-calculated buffer temporary table.
@@ -979,6 +1098,8 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
         self.log_debug(f"Using existing schema {temp_schema} (source table schema)")
 
         q_temp_table = f"{self._quote_ident(temp_schema)}.{self._quote_ident(temp_table_name)}"
+        # 2026-10-17: the buffers are in the source SRID
+        buffered_in_target = self._transform_sql("__buffer.buffered_geom", self._source_table_srid(), target_srid)
         q_source_table = f"{self._quote_ident(source_schema)}.{self._quote_ident(source_table)}"
 
         # FIX v4.2.19: Check if table already exists (for filter chaining)
@@ -1001,7 +1122,7 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
                     self.log_info(f"♻️ Reusing existing buffer table: {temp_schema}.{temp_table_name}")
                     # FIX v4.2.20: Build EXISTS expression using existing table
                     exists_expr = self._predicate_against_sources(
-                        predicate_func, geom_expr, "__buffer.buffered_geom",
+                        predicate_func, geom_expr, buffered_in_target,
                         f"{q_temp_table} AS __buffer", [], None, None,
                     )
                     self.log_debug(f"Reuse buffer table expression: {exists_expr}")
@@ -1120,7 +1241,7 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
 
             # Build EXISTS using buffer table (with schema prefix for QGIS visibility)
             exists_expr = self._predicate_against_sources(
-                predicate_func, geom_expr, "__buffer.buffered_geom",
+                predicate_func, geom_expr, buffered_in_target,
                 f"{q_temp_table} AS __buffer", [], None, None,
             )
 
@@ -1207,7 +1328,8 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
         source_wkt: str,
         source_srid: int,
         buffer_value: Optional[float] = None,
-        raw_geom_expr: Optional[str] = None
+        raw_geom_expr: Optional[str] = None,
+        target_srid: Optional[int] = None
     ) -> str:
         """
         Build simple PostGIS expression using direct WKT.
@@ -1218,6 +1340,8 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
             source_wkt: Source geometry WKT
             source_srid: Source SRID
             buffer_value: Optional buffer distance
+            raw_geom_expr: Raw target column (centroid bbox test)
+            target_srid: SRID of the target geometry column (None: unknown)
 
         Returns:
             PostGIS SQL expression
@@ -1225,20 +1349,16 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
         # Build source geometry with ST_MakeValid
         source_geom_sql = f"ST_MakeValid(ST_GeomFromText('{source_wkt}', {source_srid}))"
 
-        # Apply buffer if specified
-        if buffer_value is not None and buffer_value != 0:
-            is_geographic = source_srid == 4326
-
-            if is_geographic:
-                # Transform to EPSG:3857 for metric buffer
-                source_geom_sql = self._build_geographic_buffer(
-                    source_geom_sql, buffer_value, source_srid
-                )
-            else:
-                # 2026-09-13: ST_DWithin for intersects + positive round buffer
-                return self._buffered_predicate(
-                    predicate_func, geom_expr, source_geom_sql, buffer_value, raw_geom_expr
-                )
+        # 2026-10-17: in the SRID of the target, the buffer in metres
+        # (see _source_in_target_srid).
+        source_geom_sql, remaining_buffer = self._source_in_target_srid(
+            source_geom_sql, self._positive_srid(source_srid), target_srid, buffer_value
+        )
+        if remaining_buffer is not None:
+            # 2026-09-13: ST_DWithin for intersects + positive round buffer
+            return self._buffered_predicate(
+                predicate_func, geom_expr, source_geom_sql, remaining_buffer, raw_geom_expr
+            )
 
         return self._index_aware_predicate(predicate_func, geom_expr, source_geom_sql, raw_geom_expr)
 
@@ -1267,7 +1387,7 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
         predicate_func: str,
         source_schema: str,
         source_table: str,
-        source_geom_field: str,
+        source_expr: str,
         aliased_source_filter: Optional[str],
         buffer_value: Optional[float],
     ) -> Optional[str]:
@@ -1292,7 +1412,10 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
         margin = float(buffer_value) if buffer_value else 0.0
         if margin < 0:
             margin = 0.0
-        source_col = f'__source."{source_geom_field}"'
+        # 2026-10-17: source_expr is the row geometry in the target SRID
+        # (ST_Transform(...) when the SRIDs differ), buffer_value the buffer
+        # left to apply in that SRID.
+        source_col = source_expr
         envelope = (
             f'SELECT ST_SetSRID(ST_Expand(ST_Extent({source_col})::geometry, {margin}), '
             f'MAX(ST_SRID({source_col}))) '
@@ -1433,7 +1556,8 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
         original_source_table: Optional[str] = None,
         buffer_expression: Optional[str] = None,
         is_filter_chaining: bool = False,  # FIX v4.3.1: Explicit flag
-        raw_geom_expr: Optional[str] = None
+        raw_geom_expr: Optional[str] = None,
+        target_srid: Optional[int] = None
     ) -> str:
         """
         Build EXISTS subquery expression.
@@ -1573,7 +1697,8 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
                 buffer_expression=buffer_expression,
                 source_filter=source_filter,
                 layer_props=layer_props,
-                buffer_table_name=buffer_table_name  # FIX v4.2.20: Pass pre-calculated name
+                buffer_table_name=buffer_table_name,  # FIX v4.2.20: Pass pre-calculated name
+                target_srid=target_srid,
             )
 
             # If temp table creation succeeded, return it
@@ -1630,6 +1755,13 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
             # (ST_DWithin for intersects + positive round buffer, see
             # _buffered_predicate) instead of ST_Buffer() on the source.
             static_buffer = buffer_value
+
+        # 2026-10-17: source rows in the SRID of the target, the buffer in
+        # metres (see _source_in_target_srid). static_buffer becomes the
+        # buffer left to apply in the target SRID.
+        source_geom_in_subquery, static_buffer = self._source_in_target_srid(
+            source_geom_in_subquery, self._source_table_srid(), target_srid, static_buffer
+        )
 
         # Source selection clauses (the spatial test is built by
         # _predicate_against_sources below)
@@ -1731,7 +1863,7 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
             predicate_func=predicate_func,
             source_schema=source_schema,
             source_table=source_table,
-            source_geom_field=source_geom_field,
+            source_expr=source_geom_in_subquery,
             aliased_source_filter=prefilter_filter,
             buffer_value=static_buffer,
         )
@@ -1840,23 +1972,21 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
         # PostgreSQL will handle empty geometries gracefully with ST_IsEmpty check
         return f"ST_Buffer({geom_expr}, {buffer_expr_sql}, '{style_params}')"
 
-    def _build_geographic_buffer(
-        self,
-        geom_expr: str,
-        buffer_value: float,
-        source_srid: int
-    ) -> str:
-        """Build buffer for geographic CRS via EPSG:3857."""
-        endcap_style = self._get_buffer_endcap_style()
-        style_param = "" if endcap_style == 'round' else f", 'endcap={endcap_style}'"
+    def _build_geography_buffer(self, geom_expr: str, buffer_value: float) -> str:
+        """Buffer in metres of a lon/lat geometry, computed on the geography.
 
-        buffer_expr = (
-            "ST_Transform("
-            "ST_Buffer("
-            f"ST_Transform({geom_expr}, 3857), "
-            f"{buffer_value}{style_param}), "
-            f"{source_srid})"
-        )
+        2026-10-17: replaces the buffer via EPSG:3857, whose metres are
+        1/cos(latitude) too short (a 100 m buffer was 72 m at 44° N).
+        PostGIS buffers a geography in a suited planar projection and
+        returns it in the SRID of the input.
+        """
+        endcap_style = self._get_buffer_endcap_style()
+        quad_segs = self.task_params.get('buffer_segments', 5)
+        style_params = f"quad_segs={quad_segs}"
+        if endcap_style != 'round':
+            style_params += f" endcap={endcap_style}"
+
+        buffer_expr = f"ST_Buffer(({geom_expr})::geography, {buffer_value}, '{style_params}')::geometry"
 
         if buffer_value < 0:
             validated = f"ST_MakeValid({buffer_expr})"

@@ -284,10 +284,10 @@ class TestBuildSimpleWktExpression:
             source_srid=4326,
             buffer_value=500,
         )
-        # Should use ST_Transform to 3857 for metric buffer
-        assert "ST_Transform" in expr
-        assert "3857" in expr
-        assert "500" in expr
+        # 2026-10-17: metric buffer on the geography (EPSG:3857 metres are
+        # 1/cos(latitude) too short)
+        assert "::geography, 500" in expr
+        assert "3857" not in expr
 
     def test_zero_buffer_ignored(self, builder):
         expr = builder._build_simple_wkt_expression(
@@ -1069,3 +1069,139 @@ class TestPredicatesAgainstSourceUnion:
         )
         assert expr.startswith('NOT EXISTS (SELECT 1 FROM "filtermate_temp"."fm_temp_chain_x" AS __chain')
         assert 'ST_Intersects("b"."geom", __chain."geom")' in expr
+
+
+# ===========================================================================
+# Tests -- source and target SRIDs (2026-10-17)
+# ===========================================================================
+
+class TestSourceTargetSrid:
+    """The source geometry is brought to the SRID of the target, the buffer stays metric.
+
+    A GeoJSON source in EPSG:4326 against a BD TOPO table in EPSG:2154 gave
+    "Operation on mixed SRID geometries"; a 100 m buffer around a source in
+    degrees was 100 degrees.
+    """
+
+    WKT_4326 = "ST_MakeValid(ST_GeomFromText('POINT(1.44 43.6)', 4326))"
+    WKT_2154 = "ST_MakeValid(ST_GeomFromText('POINT(574000 6280000)', 2154))"
+
+    @staticmethod
+    def _builder(source_authid=None):
+        params = {"buffer_endcap_style": "round", "buffer_segments": 5}
+        if source_authid:
+            params["infos"] = {"layer_crs_authid": source_authid}
+        return PostgreSQLExpressionBuilder(task_params=params)
+
+    def _wkt(self, builder, wkt, source_srid, target_srid, buffer_value=None, predicate_func="ST_Intersects"):
+        return builder._build_simple_wkt_expression(
+            geom_expr='"t"."geom"',
+            predicate_func=predicate_func,
+            source_wkt=wkt,
+            source_srid=source_srid,
+            buffer_value=buffer_value,
+            raw_geom_expr='"t"."geom"',
+            target_srid=target_srid,
+        )
+
+    def test_layer_srid(self):
+        layer = MagicMock()
+        layer.dataProvider.return_value.crs.return_value.postgisSrid.return_value = 2154
+        assert PostgreSQLExpressionBuilder._layer_srid(layer) == 2154
+        assert PostgreSQLExpressionBuilder._layer_srid(MagicMock()) is None  # no integer SRID
+        assert PostgreSQLExpressionBuilder._layer_srid(None) is None
+
+    def test_authid_to_srid(self):
+        assert PostgreSQLExpressionBuilder._authid_to_srid("EPSG:4326") == 4326
+        assert PostgreSQLExpressionBuilder._authid_to_srid("USER:100000") is None
+        assert PostgreSQLExpressionBuilder._authid_to_srid(None) is None
+
+    def test_wkt_is_reprojected_to_the_target(self, builder):
+        expr = self._wkt(builder, "POINT(1.44 43.6)", 4326, 2154)
+        assert expr == f'ST_Intersects("t"."geom", ST_Transform({self.WKT_4326}, 2154))'
+
+    def test_wkt_same_srid_is_left_alone(self, builder):
+        expr = self._wkt(builder, "POINT(574000 6280000)", 2154, 2154)
+        assert expr == f'ST_Intersects("t"."geom", {self.WKT_2154})'
+
+    def test_wkt_geographic_source_metric_target_buffers_in_target_metres(self, builder):
+        expr = self._wkt(builder, "POINT(1.44 43.6)", 4326, 2154, buffer_value=100)
+        assert expr == f'ST_DWithin("t"."geom", ST_Transform({self.WKT_4326}, 2154), 100)'
+
+    def test_wkt_metric_source_geographic_target_buffers_before_the_transform(self, builder):
+        expr = self._wkt(builder, "POINT(574000 6280000)", 2154, 4326, buffer_value=100)
+        assert expr == (
+            f"ST_Intersects(\"t\".\"geom\", ST_Transform(ST_Buffer({self.WKT_2154}, 100, 'quad_segs=5'), 4326))"
+        )
+
+    def test_wkt_geographic_source_and_target_buffer_on_the_geography(self, builder):
+        expr = self._wkt(builder, "POINT(1.44 43.6)", 4326, 4326, buffer_value=500)
+        assert expr == (
+            f"ST_Intersects(\"t\".\"geom\", ST_Buffer(({self.WKT_4326})::geography, 500, 'quad_segs=5')::geometry)"
+        )
+
+    def test_wkt_negative_geography_buffer_is_validated(self, builder):
+        expr = self._wkt(builder, "POINT(1.44 43.6)", 4326, 4326, buffer_value=-5)
+        assert "ST_IsEmpty(ST_MakeValid(ST_Buffer((" in expr and "::geography, -5" in expr
+
+    def _exists(self, builder, target_srid, buffer_value=None, source_filter=None, predicate_func="ST_Intersects"):
+        return builder._build_exists_expression(
+            geom_expr='"b"."geom"',
+            predicate_func=predicate_func,
+            source_geom='"s"."commune"."geom"',
+            source_filter=source_filter,
+            buffer_value=buffer_value,
+            layer_props={},
+            original_source_table="commune",
+            raw_geom_expr='"b"."geom"',
+            target_srid=target_srid,
+        )
+
+    def test_exists_reprojects_the_source_rows(self):
+        expr = self._exists(self._builder("EPSG:4326"), 2154)
+        assert expr == ('EXISTS (SELECT 1 FROM "s"."commune" AS __source WHERE '
+                        'ST_Intersects("b"."geom", ST_Transform(__source."geom", 2154)))')
+
+    def test_exists_same_srid_is_left_alone(self):
+        expr = self._exists(self._builder("EPSG:2154"), 2154, buffer_value=50)
+        assert expr == ('EXISTS (SELECT 1 FROM "s"."commune" AS __source WHERE '
+                        'ST_DWithin("b"."geom", __source."geom", 50))')
+
+    def test_exists_geographic_source_buffers_in_target_metres(self):
+        expr = self._exists(self._builder("EPSG:4326"), 2154, buffer_value=50)
+        assert 'ST_DWithin("b"."geom", ST_Transform(__source."geom", 2154), 50)' in expr
+
+    def test_exists_geographic_source_and_target_buffer_on_the_geography(self):
+        expr = self._exists(self._builder("EPSG:4326"), 4326, buffer_value=50)
+        assert "ST_DWithin" not in expr
+        assert "ST_Intersects(\"b\".\"geom\", ST_Buffer((__source.\"geom\")::geography, 50, 'quad_segs=5')::geometry)" in expr
+
+    def test_exists_envelope_prefilter_is_in_the_target_srid(self):
+        expr = self._exists(self._builder("EPSG:4326"), 2154, buffer_value=20, source_filter='"commune"."fid" IN (1)')
+        assert expr.startswith(
+            '("b"."geom" && (SELECT ST_SetSRID(ST_Expand(ST_Extent(ST_Transform(__source."geom", 2154))::geometry, 20.0), '
+            'MAX(ST_SRID(ST_Transform(__source."geom", 2154))))'
+        )
+
+    def test_union_predicates_reproject_the_rows(self):
+        expr = self._exists(self._builder("EPSG:4326"), 2154, predicate_func="ST_Within")
+        assert expr == ('ST_Within("b"."geom", (SELECT ST_Union(ST_Transform(__source."geom", 2154)) '
+                        'FROM "s"."commune" AS __source))')
+
+    def test_buffer_table_rows_are_reprojected(self, monkeypatch):
+        b = TestDynamicBufferTable._builder()
+        b.task_params["infos"] = {"layer_crs_authid": "EPSG:4326"}
+        constants = sys.modules["filter_mate.infrastructure.constants"]
+        monkeypatch.setattr(constants, "TABLE_PREFIX_BUFFER", "fm_temp_buf_", raising=False)
+        executor = sys.modules["filter_mate.adapters.backends.postgresql.filter_executor"]
+        monkeypatch.setattr(executor, "qgis_expression_to_postgis", lambda expr: expr, raising=False)
+        cursor = _RecordingCursor()
+        utils = sys.modules["filter_mate.infrastructure.utils"]
+        monkeypatch.setattr(utils, "get_datasource_connexion_from_layer",
+                            lambda layer: (_RecordingConnexion(cursor), None), raising=False)
+        expr = b._build_exists_with_buffer_table(
+            geom_expr='"ducts"."geom"', predicate_func="ST_Intersects", source_schema="ref",
+            source_table="demand_points", source_geom_field="geom", buffer_expression='"homecount" * 2',
+            source_filter=None, layer_props={"layer": MagicMock()}, target_srid=2154,
+        )
+        assert 'ST_Intersects("ducts"."geom", ST_Transform(__buffer.buffered_geom, 2154))' in expr
