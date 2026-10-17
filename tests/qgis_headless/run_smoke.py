@@ -342,7 +342,9 @@ COMMUNES = (  # name, code (text), population (int): two communes share populati
     ("L'Abergement-Clémenciat", '01001', 800),
     ('Ambérieu-en-Bugey', '01004', 800),
     ('Code sans zéro', '1001', 50),
+    ('Saint\\Backslash', '99001', None),  # a backslash in a text key, a NULL population
 )
+BACKSLASH_NAME = 'Saint\\Backslash'
 # Unreachable on purpose (connection refused at once): only the provider key is read.
 OFFLINE_SERVICES = (
     ('WFS', "typename='communes' url='http://127.0.0.1:9/wfs' version='2.0.0'"),
@@ -399,7 +401,9 @@ def remote_sources():
     from filter_mate.adapters.backends.ogr.expression_builder import OGRExpressionBuilder
     from filter_mate.adapters.qgis.source_capability_probe import capability_for_layer
     from filter_mate.core.domain.source_capability import Locality, classify
-    from filter_mate.core.filter.pk_formatter import format_key_literal
+    from qgis.core import QgsFeature
+    from filter_mate.core.domain.stable_key import FEATURE_ID_KEY
+    from filter_mate.core.filter.pk_formatter import format_key_literal, is_null_value
     from filter_mate.core.tasks.layer_management_task import LayersManagementEngineTask
 
     for key, uri in OFFLINE_SERVICES:
@@ -413,17 +417,19 @@ def remote_sources():
         'gdal', '<GDAL_WMS><Service name="TMS"><ServerUrl>https://t/${z}/${x}/${y}.png</ServerUrl></Service></GDAL_WMS>',
         True).has_raw_values)
 
-    task = type('KeyTask', (), {'isCanceled': lambda self: False})()
+    task = type('KeyTask', (LayersManagementEngineTask,),
+                {'__init__': lambda self: None, 'isCanceled': lambda self: False})()
     builder = OGRExpressionBuilder({})
     for kind, layer in _communes_layers().items():
         if not layer.isValid():
             report('FAIL', f'communes {kind} valid')
             continue
         old = _old_heuristic_key(layer) if not list(layer.primaryKeyAttributes()) else 'declared'
-        key = LayersManagementEngineTask.search_primary_key_from_layer(task, layer)
+        key = task.search_primary_key_from_layer(layer)
         backend_key = builder._get_primary_key(layer)
-        check(f'{kind}: key without a declared key is the feature id, never "population"',
-              key[0] == 'fid' and backend_key == 'fid',
+        expected = 'fid' if kind == 'gpkg' else FEATURE_ID_KEY  # the GeoPackage declares its fid
+        check(f'{kind}: key without a unique key field is the feature id, never "population"',
+              key[0] == expected and backend_key == expected,
               f"before: {old}; now: registration {key}, OGR backend {backend_key!r}")
 
         def count(subset):
@@ -437,10 +443,19 @@ def remote_sources():
         before = '"nom" IN (' + repr("L'Isle-Jourdain") + ')'  # repr() of core/filter/expression_builder
         check(f"{kind}: L'Isle-Jourdain key literal applied by setSubsetString", count(clause) == 2,
               f"{clause} -> {count(clause)} feature(s); before {before} -> {count(before)}")
+        clause = builder._build_fid_filter_with_values(layer, [BACKSLASH_NAME], 'nom')
+        before = '"nom" IN (' + "'" + BACKSLASH_NAME + "')"
+        check(f"{kind}: a backslash in a key literal (QGIS expression escape on memory)", count(clause) == 1,
+              f"{clause} -> {count(clause)}; before {before} -> {count(before)}")
         clause = builder._build_fid_filter_with_values(layer, ['01001'], 'code')
         before = '"code" IN (01001)'
         check(f"{kind}: text code '01001' stays a text literal", count(clause) == 1,
               f"{clause} -> {count(clause)}; before {before} -> {count(before)}")
+        populations = [feature['population'] for feature in layer.getFeatures()]
+        nulls = [value for value in populations if is_null_value(value)]
+        check(f"{kind}: a NULL attribute is NULL, never 'NULL'", nulls and all(
+            format_key_literal(value, True) == 'NULL' for value in nulls),
+            f"{[repr(value) for value in nulls]} -> {[format_key_literal(value, True) for value in nulls]}")
         ids = [feature.id() for feature in layer.getFeatures() if feature['code'] in ('01001', '32013')]
         if layer.fields().indexOf(key[0]) < 0:
             clause = builder._build_fid_filter(layer, ids)
@@ -449,7 +464,38 @@ def remote_sources():
         before = '"population" IN (800, 22000)'
         check(f'{kind}: feature-id key list keeps exactly the selected features', count(clause) == 2,
               f"{clause} -> {count(clause)}; before {before} -> {count(before)}")
-        check(f'{kind}: shared formatter literal', format_key_literal("L'Isle", False) == "'L''Isle'")
+
+    from qgis.core import QgsExpression
+    from filter_mate.core.filter.pk_formatter import qgis_string_literal
+    samples = ["L'Isle", 'b\\c', 'd\\', 'tab\there', 'line\nbreak', "''"]
+    check('QGIS expression literals are QgsExpression.quotedString', all(
+        qgis_string_literal(text) == QgsExpression.quotedString(text) for text in samples),
+        f"{[(qgis_string_literal(t), QgsExpression.quotedString(t)) for t in samples]}")
+
+    # A unique "id" is the key, a duplicated one is not (proven by reading it, in the task)
+    for label, values, expected in (('unique id', [1, 2, 3], 'id'), ('duplicated id', [1, 1, 3], FEATURE_ID_KEY),
+                                    ('id with a NULL', [1, None, 3], FEATURE_ID_KEY)):
+        layer = QgsVectorLayer('Point?crs=EPSG:2154&field=id:integer&field=population:integer', label, 'memory')
+        features = []
+        for value in values:
+            feature = QgsFeature(layer.fields())
+            feature.setAttributes([value, 10])
+            feature.setGeometry(QgsGeometry.fromPointXY(QgsPointXY(0, 0)))
+            features.append(feature)
+        layer.dataProvider().addFeatures(features)
+        key = task.search_primary_key_from_layer(layer)
+        check(f'memory layer with a {label}: key {expected}', key[0] == expected, f"{key}")
+
+    # Virtual layer without a uid column: fid / $id lists keep 0 feature, the key list is refused
+    memory = _communes_layers()['memory']
+    project.addMapLayer(memory)
+    virtual = QgsVectorLayer(f'?query=SELECT * FROM "{memory.name()}"', 'communes_virtual', 'virtual')
+    key = task.search_primary_key_from_layer(virtual)
+    refusal = builder._key_list_refusal(virtual)
+    check('virtual layer without uid: no key list (refused with a message)',
+          virtual.isValid() and key[0] == FEATURE_ID_KEY and bool(refusal) and 'virtual layer' in refusal,
+          f"valid={virtual.isValid()} key={key} refusal={refusal!r}")
+    project.removeMapLayer(memory.id())
 
 
 def environment():
