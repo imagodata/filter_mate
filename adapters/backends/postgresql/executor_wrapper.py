@@ -33,7 +33,7 @@ class PostgreSQLFilterExecutor(FilterExecutorPort):
     def _check_availability(self):
         """Check if PostgreSQL is available."""
         try:
-            from .postgresql_availability import POSTGRESQL_AVAILABLE
+            from ..postgresql_availability import POSTGRESQL_AVAILABLE
             self._available = POSTGRESQL_AVAILABLE
         except ImportError:
             self._available = False
@@ -162,13 +162,15 @@ class PostgreSQLFilterExecutor(FilterExecutorPort):
             return False
 
     def cleanup_resources(self) -> None:
-        """Clean up materialized views."""
-        try:
-            from .cleanup import cleanup_materialized_views
-            cleanup_materialized_views()
-            logger.debug("[PostgreSQL] PostgreSQL MVs cleaned up")
-        except Exception as e:
-            logger.warning(f"[PostgreSQL] PostgreSQL cleanup failed: {e}")
+        """Nothing to clean without a connection.
+
+        The PostgreSQL objects FilterMate creates (materialized views, buffer
+        tables) are dropped by ``PostgreSQLCleanupService`` with a live
+        connection (``LayerLifecycleService``, plugin unload); this executor
+        holds none, and the old ``cleanup.cleanup_materialized_views`` it
+        imported no longer exists.
+        """
+        logger.debug("[PostgreSQL] No executor-held resources to clean up")
 
     @property
     def backend_name(self) -> str:
