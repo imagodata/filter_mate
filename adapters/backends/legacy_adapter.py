@@ -263,6 +263,15 @@ class BaseLegacyAdapter(GeometricFilterBackend):
             if old_subset and combine_operator:
                 final_expr = f"({old_subset}) {combine_operator} ({expression})"
 
+            # 2026-10-17: a filter task's subset is queued for the main thread, as in the
+            # PostgreSQL, SpatiaLite and OGR builders. Set here, from the worker, the subset
+            # of a canceled task still running could overwrite the next task's (found on
+            # PostGIS: a second click on Filter), and setSubsetString is not thread-safe.
+            queue_callback = self.task_params.get('_subset_queue_callback') if self.task_params else None
+            if queue_callback is not None:
+                queue_callback(layer, final_expr)
+                return True
+
             # v4.1.0: Use safe_set_subset_string from new location
             from ...infrastructure.database.sql_utils import safe_set_subset_string
             return safe_set_subset_string(layer, final_expr)
