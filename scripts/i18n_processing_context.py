@@ -55,13 +55,13 @@ def fix(path: str) -> int:
             source = message.findtext('source')
             previous = kept.get(source)
             if previous is not None:
-                if previous.find('location') is not None and previous.find('translation').get('type') != 'vanished':
+                if previous.find('translation').get('type') not in ('vanished', 'obsolete'):
                     # Already moved from another class: one message, every location.
                     for location in message.findall('location'):
                         previous.insert(list(previous).index(previous.find('source')), location)
                     continue
                 old = previous.find('translation')
-                if old is not None and (old.text or '').strip() and old.get('type') in ('vanished', None, 'obsolete'):
+                if old is not None and (old.text or '').strip():
                     translation = message.find('translation')
                     translation.text = old.text
                     translation.attrib.pop('type', None)
