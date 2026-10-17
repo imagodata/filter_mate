@@ -283,6 +283,32 @@ class TestSpectralPresets:
         assert raster.default_band_layout(["Band 1"]) == "rgb"
 
 
+class TestPipetteReviewFixes:
+    def test_alpha_is_not_an_infrared_band(self):
+        assert raster.default_band_layout(["Red", "Green", "Blue", "Alpha"]) == "rgb"
+        assert raster.layouts_for(["Red", "Green", "Blue", "Alpha"]) == ["rgb", "irc"]
+        assert raster.layouts_for(["R", "G", "B", "N"]) == ["rgb", "irc", "rgbn"]
+
+    def test_one_tolerance_per_band(self):
+        text = raster.color_similarity_expression("o", [1, 2], [(10, 20)], [5, 500])
+        assert text == '(abs("o@1" - 10) <= 5 AND abs("o@2" - 20) <= 500)'
+
+    def test_numbers_are_not_rounded_to_six_digits(self):
+        text = raster.color_similarity_expression("o", [1], [(123456789,)], 0)
+        assert '"o@1" - 123456789)' in text
+        assert '0.123456789' in raster.color_similarity_expression("o", [1], [(0.123456789,)], 0)
+
+    def test_picks_survive_the_state(self):
+        parsed = raster.parse_raster_state({"pipette_kind": "color", "pipette_picks": [[20, 120, 200], [200, 40, 40], "x"]})
+        assert parsed["pipette_kind"] == "color" and parsed["pipette_picks"] == [[20.0, 120.0, 200.0], [200.0, 40.0, 40.0]]
+        assert raster.parse_raster_state({"pipette_kind": "weird", "pipette_picks": "1"})["pipette_kind"] == ""
+        assert raster.parse_raster_state({"pipette_picks": [1300.5, 2]})["pipette_picks"] == [1300.5, 2]
+
+    def test_odd_values_in_a_state_do_not_raise(self):
+        parsed = raster.parse_raster_state({"expression": 42, "layout": ["rgb"]})
+        assert parsed["expression"] == "" and parsed["layout"] == ""
+
+
 class TestPipetteGroupState:
     def test_pipette_mode_round_trip(self):
         parsed = raster.parse_raster_state({"mode": "pipette", "pipette_selection": {"mode": "classes", "classes": [3]}})

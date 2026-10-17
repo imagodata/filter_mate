@@ -303,7 +303,7 @@ def s_pipette_ortho_check():
     check('pipette: the pool is selected, nothing else', _kept(selection) == 400, str(_kept(selection)))
     ctrl._on_pixel_picked(_cell_point(ext, 70, 70), True)  # Ctrl+click: the roof is added
     check('pipette: Ctrl+click adds the roof (pool + roof)', _kept(panel.selection()) == 800, str(_kept(panel.selection())))
-    panel._tolerance_spin.setValue(70.0)  # wide enough to take the green field too
+    panel._tolerance_spin.setValue(100.0)  # the whole observed range of each band: the green field too
     check('pipette: the tolerance widens the selection', _kept(panel.selection()) > 800, str(_kept(panel.selection())))
     panel._tolerance_spin.setValue(12.0)
     panel._layout_combo.setCurrentIndex(panel._layout_combo.findData('irc'))

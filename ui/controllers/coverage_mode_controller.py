@@ -843,9 +843,25 @@ class CoverageModeController(BaseController):
             summary = read_raster_summary(layer)
             self._raster_panel.set_summary(summary)
             self._raster_panel.set_reference(raster_reference(layer))
+            self._raster_panel.set_band_spans(self._band_spans(layer, len(summary.bands)))
             self._refresh_histogram(layer, self._raster_panel.current_band())
         except Exception as exc:
             logger.warning(f"[FM5] raster panel not populated: {exc}", exc_info=True)
+
+    def _band_spans(self, layer: Any, band_count: int) -> Dict[int, float]:
+        """Observed value range of the first four bands (the colour of an image), for the pipette tolerance."""
+        from ...adapters.qgis.coverage_layers.raster_adapter import band_range
+        spans = {}
+        base = self._base_raster(layer)
+        for band in range(1, min(band_count, 4) + 1):
+            try:
+                low, high, _mean = band_range(base, band)
+            except Exception as exc:
+                logger.debug(f"[FM5] band {band} range unread: {exc}")
+                continue
+            if low is not None and high is not None and high > low:
+                spans[band] = high - low
+        return spans
 
     def _refresh_histogram(self, layer: Any, band: int) -> None:
         from ...adapters.qgis.coverage_layers.raster_adapter import band_histogram, derivative_histogram
@@ -1246,10 +1262,12 @@ class CoverageModeController(BaseController):
         if not active and self._color_pick:
             self._color_pick = False  # the picker was dropped (another tool, the rail button): the pipette goes off
             self._extras_call('set_pipette_checked', False)
+            if self._raster_panel is not None:
+                self._raster_panel.show_pipette_active(False)
         try:
             button = getattr(self.dockwidget, 'pushButton_exploring_identify', None)
             if button is not None:
-                button.setDown(bool(active))
+                button.setDown(bool(active) and not self._color_pick)  # the pipette has its own button (I2)
             if self._raster_panel is not None and hasattr(self._raster_panel, 'show_picker_active'):
                 self._raster_panel.show_picker_active(bool(active))
         except RuntimeError:
