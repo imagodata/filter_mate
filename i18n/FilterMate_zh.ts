@@ -109,17 +109,17 @@
 <context>
     <name>CoverageDockExtras</name>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="231"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="232"/>
         <source>1 band</source>
         <translation>1 个波段</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="232"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="233"/>
         <source>{0} bands</source>
         <translation>{0} 个波段</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="233"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="234"/>
         <source>{0} points</source>
         <translation>{0} 个点</translation>
     </message>
@@ -149,12 +149,12 @@
         <translation type="obsolete">矩形统计: 在地图上拖动以读取当前波段的最小值、最大值和平均值</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="276"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="277"/>
         <source>Elevation profile: open the QGIS elevation profile of the map</source>
         <translation>高程剖面: 打开 QGIS 高程剖面</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="276"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="277"/>
         <source>3D view: open a new QGIS 3D map view</source>
         <translation>3D 视图: 打开新的 QGIS 3D 地图视图</translation>
     </message>
@@ -184,22 +184,22 @@
         <translation type="obsolete">表达式</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="234"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="235"/>
         <source>{0} features</source>
         <translation>{0} 个要素</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="476"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="484"/>
         <source>Vector</source>
         <translation>矢量</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="476"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="484"/>
         <source>Raster</source>
         <translation>栅格</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="476"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="484"/>
         <source>Point cloud</source>
         <translation>点云</translation>
     </message>
@@ -214,70 +214,75 @@
         <translation type="obsolete">选择 → 源几何</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="272"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="273"/>
         <source>Link the range to the style: the layer colours stretch over the selected range</source>
         <translation>将范围关联到样式：图层颜色拉伸到所选范围</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="273"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="274"/>
         <source>Class pipette: click the map and the class of the points drawn there is checked. Ctrl+click adds another one</source>
         <translation>类别拾取器：点击地图，即勾选此处所绘制点的类别。Ctrl+点击可再添加一个类别</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="276"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="277"/>
         <source>Value under the cursor: follow the pixel value (or the slope, aspect... the range applies to) while moving over the map</source>
         <translation>光标处的值：在地图上移动时跟踪像元值（或范围所应用的坡度、坡向等）</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="276"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="277"/>
         <source>Statistics of a rectangle: drag on the map to read the minimum, maximum and mean of the current band (or of the slope, aspect... the range applies to)</source>
         <translation>矩形统计：在地图上拖动以读取当前波段（或范围所应用的坡度、坡向等）的最小值、最大值和平均值</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="381"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="388"/>
         <source>The style link follows pixel values: not available while the range applies to a slope, aspect, hillshade or roughness</source>
         <translation>样式关联跟随像元值：当范围应用于坡度、坡向、山体阴影或粗糙度时不可用</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="570"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="578"/>
         <source>Class pipette: this point cloud has no Classification attribute</source>
         <translation>类别拾取器：此点云没有 Classification 属性</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="717"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="738"/>
         <source>The style cannot follow the range: it needs a single band grey or pseudocolor style on the band of the panel</source>
         <translation>样式无法跟随范围：需要面板所用波段的单波段灰度或伪彩色样式</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="277"/>
+        <source>Pipette: click the map and the pixels that look like the one you click are selected (a color on an image, a value on a DTM or an index, a class on a classified raster, with the tolerance of the panel). Ctrl+click adds another one</source>
+        <translation>拾取器：点击地图，即选中与所点击像元相似的像元（图像上为颜色，DTM 或指数上为值，分类栅格上为类别，使用面板的容差）。Ctrl+点击可再添加一个</translation>
     </message>
 </context>
 <context>
     <name>CoverageModeController</name>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="293"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="294"/>
         <source>Restoring the filter of {0} raster / point cloud layer(s)…</source>
         <translation>正在恢复 {0} 个栅格/点云图层的过滤器…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="573"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="574"/>
         <source>cov. ≥ </source>
         <translation>覆盖率 ≥</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="574"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="575"/>
         <source>Minimum share of a polygon target inside the source geometry (0 = any overlap). Used when the source is a raster or a point cloud.</source>
         <translation>多边形目标位于源几何内部的最小占比（0 = 任意重叠）。当源为栅格或点云时使用。</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="689"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="690"/>
         <source>Raster</source>
         <translation>栅格</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="689"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="690"/>
         <source>Point cloud</source>
         <translation>点云</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="698"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="699"/>
         <source>{0} layer: selection in EXPLORING, relation in FILTERING</source>
         <translation>{0} 图层：在 EXPLORING 中选择，在 FILTERING 中设置关系</translation>
     </message>
@@ -287,7 +292,7 @@
         <translation type="obsolete">像元拾取器：点击地图读取每个波段的值（Ctrl+点击可扩展范围）</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="725"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="726"/>
         <source>Zoom to the layer</source>
         <translation>缩放到图层</translation>
     </message>
@@ -297,222 +302,222 @@
         <translation type="obsolete">预览：隐藏所选范围之外的像元</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="720"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="721"/>
         <source>Not used for raster layers</source>
         <translation>不用于栅格图层</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="721"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="722"/>
         <source>Reset the raster selection</source>
         <translation>重置栅格选择</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="724"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="725"/>
         <source>Identify points on the map</source>
         <translation>在地图上识别点</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="726"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="727"/>
         <source>Live preview: show only the points kept by the selection</source>
         <translation>实时预览：仅显示所选内容保留的点</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="728"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="729"/>
         <source>Not used for point cloud layers</source>
         <translation>不用于点云图层</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="729"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="730"/>
         <source>Reset the point cloud criteria</source>
         <translation>重置点云条件</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="923"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="940"/>
         <source>Invalid raster calculator expression</source>
         <translation>栅格计算器表达式无效</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="995"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1012"/>
         <source>PDAL was not found: the height above a DTM needs the pdal executable</source>
         <translation>未找到 PDAL：计算相对于 DTM 的高度需要 pdal 可执行文件</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1917"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1959"/>
         <source>A FilterMate task is still running: wait for it to finish</source>
         <translation>FilterMate 任务仍在运行：请等待其完成</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1482"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1524"/>
         <source>FilterMate task failed: {0}</source>
         <translation>FilterMate 任务失败：{0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1519"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1561"/>
         <source>Select pixels first: a value range, classes or a raster expression</source>
         <translation>请先选择像元：值范围、类别或栅格表达式</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1528"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1570"/>
         <source>Raster filtered: {0}</source>
         <translation>栅格已过滤：{0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1546"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1588"/>
         <source>The point cloud expression was rejected: {0}</source>
         <translation>点云表达式被拒绝：{0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1549"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1591"/>
         <source>Select points first: classes, attribute ranges or an expression</source>
         <translation>请先选择点：类别、属性范围或表达式</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1557"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1599"/>
         <source>Point cloud filtered: {0}</source>
         <translation>点云已过滤：{0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2020"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2062"/>
         <source>Filter not applied: {0}</source>
         <translation>未应用过滤器：{0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1883"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1925"/>
         <source>canceled</source>
         <translation>已取消</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1625"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1667"/>
         <source>{0} target(s) filtered</source>
         <translation>已过滤 {0} 个目标</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1627"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1669"/>
         <source>{0} failed: {1}</source>
         <translation>{0} 失败：{1}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1636"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1678"/>
         <source>FilterMate: filtering from '{0}'…</source>
         <translation>FilterMate：正在从“{0}”过滤…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1703"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1745"/>
         <source>Changed since, left as is: {0}</source>
         <translation>此后已更改，保持原样：{0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1709"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1751"/>
         <source>{0} layer(s) restored</source>
         <translation>已恢复 {0} 个图层</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1743"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1785"/>
         <source>&apos;{0}&apos; not exported: {1}</source>
         <translation>未导出“{0}”：{1}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1757"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1799"/>
         <source>Exported: {0}</source>
         <translation>已导出：{0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1759"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1801"/>
         <source>Export failed: {0}</source>
         <translation>导出失败：{0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1766"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1808"/>
         <source>Exporting {0} layer(s)…</source>
         <translation>正在导出 {0} 个图层…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1772"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1814"/>
         <source>Export folder</source>
         <translation>导出文件夹</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1854"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1896"/>
         <source>Raster / point cloud targets skipped: no source feature selected in EXPLORING</source>
         <translation>已跳过栅格/点云目标：EXPLORING 中未选择源要素</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1883"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1925"/>
         <source>Raster / point cloud targets not filtered: {0}</source>
         <translation>栅格/点云目标未过滤：{0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1885"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1927"/>
         <source>{0} raster / point cloud target(s) filtered</source>
         <translation>已过滤 {0} 个栅格/点云目标</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1999"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2041"/>
         <source>Choose the DTM raster used for the height above ground</source>
         <translation>选择用于计算离地高度的 DTM 栅格</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2010"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2052"/>
         <source>Height above ground not computed: {0}</source>
         <translation>未计算离地高度：{0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2029"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2071"/>
         <source>Computing the height above '{0}' with PDAL…</source>
         <translation>正在使用 PDAL 计算相对于“{0}”的高度…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="270"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="271"/>
         <source>The FilterMate cache holds {0} GB, over its {1} GB limit: unfilter the raster / point cloud layers you no longer need</source>
         <translation>FilterMate 缓存占用 {0} GB，超过了 {1} GB 的上限：请取消不再需要的栅格 / 点云图层的过滤</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="997"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1014"/>
         <source>PDAL {0} is too old: the height above a DTM needs PDAL 2.4 or later</source>
         <translation>PDAL {0} 版本过旧：计算相对于 DTM 的高度需要 PDAL 2.4 或更高版本</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1000"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1017"/>
         <source>PDAL could not be run, the height above a DTM is unavailable: {0}</source>
         <translation>无法运行 PDAL，相对于 DTM 的高度不可用：{0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="713"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="714"/>
         <source>Pixel picker: click on the map to read the value of every band, and the slope, aspect... when the range applies to one (Ctrl+click extends the range)</source>
         <translation>像元拾取器：点击地图读取每个波段的值，当范围应用于坡度、坡向等时也读取其值（Ctrl+点击可扩展范围）</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="716"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="717"/>
         <source>Zoom to the selected pixels (to the layer when nothing is selected)</source>
         <translation>缩放到所选像元（未选择时缩放到图层）</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="717"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="718"/>
         <source>Preview: hide the pixels outside the selection (a white veil for a slope, aspect...)</source>
         <translation>预览：隐藏所选范围之外的像元（坡度、坡向等以白色遮罩显示）</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="968"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="985"/>
         <source>The preview of a slope or aspect needs the map in the CRS of the raster ({0})</source>
         <translation>坡度或坡向的预览需要地图使用栅格的 CRS（{0}）</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1300"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1339"/>
         <source>only the points drawn on the map can be picked: turn the preview off to pick a class it hides</source>
         <translation>只能拾取地图上所绘制的点：要拾取被预览隐藏的类别，请关闭预览</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1302"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1341"/>
         <source>No classified point under the click</source>
         <translation>点击处没有已分类的点</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1306"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1345"/>
         <source>Class {0} is already checked</source>
         <translation>类别 {0} 已被勾选</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1308"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1347"/>
         <source>Class {0} is not in the class list of the layer</source>
         <translation>类别 {0} 不在图层的类别列表中</translation>
     </message>
@@ -1676,39 +1681,39 @@ Please restart QGIS to apply the changes.</source>
         <translation>加载插件出错：{0}。查看 QGIS Python 控制台了解详情。</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6992"/>
+        <location filename="../filter_mate_dockwidget.py" line="7000"/>
         <source>Current layer: {0}</source>
         <translation>当前图层：{0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6994"/>
+        <location filename="../filter_mate_dockwidget.py" line="7002"/>
         <source>No layer selected</source>
         <translation>未选择图层</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7004"/>
+        <location filename="../filter_mate_dockwidget.py" line="7012"/>
         <source>Selected layers:
 {0}</source>
         <translation>选定的图层：
 {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7004"/>
+        <location filename="../filter_mate_dockwidget.py" line="7012"/>
         <source>No layers selected</source>
         <translation>未选择图层</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7024"/>
+        <location filename="../filter_mate_dockwidget.py" line="7032"/>
         <source>No expression defined</source>
         <translation>未定义表达式</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7036"/>
+        <location filename="../filter_mate_dockwidget.py" line="7044"/>
         <source>Display expression: {0}</source>
         <translation>显示表达式：{0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7051"/>
+        <location filename="../filter_mate_dockwidget.py" line="7059"/>
         <source>Feature ID: {0}
 First attribute: {1}</source>
         <translation>要素 ID：{0}
@@ -2025,22 +2030,22 @@ Drop anyway?</source>
         <translation>插件已激活，包含 {0} 个矢量图层</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6426"/>
+        <location filename="../filter_mate_dockwidget.py" line="6434"/>
         <source>Could not reload plugin automatically.</source>
         <translation>无法自动重新加载插件。</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6428"/>
+        <location filename="../filter_mate_dockwidget.py" line="6436"/>
         <source>Error reloading plugin: {0}</source>
         <translation>重新加载插件时出错：{0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6500"/>
+        <location filename="../filter_mate_dockwidget.py" line="6508"/>
         <source>Layer properties reset to defaults</source>
         <translation>图层属性已重置为默认值</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6501"/>
+        <location filename="../filter_mate_dockwidget.py" line="6509"/>
         <source>Error resetting layer properties: {}</source>
         <translation>重置图层属性时出错：{}</translation>
     </message>
@@ -2175,7 +2180,7 @@ Drop anyway?</source>
         <translation>无法应用面板布局；将使用默认尺寸。详情见 filtermate.log。</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6580"/>
+        <location filename="../filter_mate_dockwidget.py" line="6588"/>
         <source>Vector</source>
         <translation>矢量</translation>
     </message>
@@ -3242,6 +3247,507 @@ Continue?</source>
     </message>
 </context>
 <context>
+    <name>Processing</name>
+    <message>
+        <location filename="../processing/algorithms/batch_filter_algorithm.py" line="59"/>
+        <source>Layers to filter</source>
+        <translation>要过滤的图层</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/batch_filter_algorithm.py" line="129"/>
+        <location filename="../processing/algorithms/common.py" line="78"/>
+        <source>FilterMate</source>
+        <translation>FilterMate</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="56"/>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="125"/>
+        <source>Buffer</source>
+        <translation>缓冲区</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="105"/>
+        <source>Band</source>
+        <translation>波段</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="106"/>
+        <source>Raster expression</source>
+        <translation>栅格表达式</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/layer_operations_algorithms.py" line="147"/>
+        <source>Layers to export</source>
+        <translation>要导出的图层</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/layer_operations_algorithms.py" line="158"/>
+        <source>Output folder</source>
+        <translation>输出文件夹</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/common.py" line="93"/>
+        <source>Geometric predicates</source>
+        <translation>几何谓词</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/layer_operations_algorithms.py" line="108"/>
+        <source>Favorite name or identifier</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/layer_operations_algorithms.py" line="115"/>
+        <source>Provide the name of the favorite</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/layer_operations_algorithms.py" line="119"/>
+        <source>Favorite: {0}</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/layer_operations_algorithms.py" line="126"/>
+        <source>Apply a FilterMate favorite</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/layer_operations_algorithms.py" line="129"/>
+        <source>Replays a favorite saved in FilterMate (by name or identifier): filters of the vector and point cloud layers, clips of the rasters and point clouds. Layers are found by signature, then identifier, then name. Without the dock (qgis_process), the favorites saved in the project are used.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/batch_filter_algorithm.py" line="66"/>
+        <source>Filter expression</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/batch_filter_algorithm.py" line="88"/>
+        <source>No layer selected.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/batch_filter_algorithm.py" line="102"/>
+        <source>Invalid expression for layer &apos;{0}&apos;, skipped.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/batch_filter_algorithm.py" line="125"/>
+        <source>Filter several layers (batch)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/batch_filter_algorithm.py" line="137"/>
+        <source>Applies the same filter expression to several vector layers in a single run.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/layer_operations_algorithms.py" line="79"/>
+        <source>Layers to clear</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/layer_operations_algorithms.py" line="87"/>
+        <source>cleared</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/layer_operations_algorithms.py" line="93"/>
+        <source>Clear the filters of layers of any type</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/layer_operations_algorithms.py" line="96"/>
+        <source>Removes the filter from the chosen layers: subset cleared for vectors and point clouds, original source restored for clipped rasters and point clouds. Useful at the start of a model to start again from the complete data. Can be undone from FilterMate.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="52"/>
+        <source>Source layer</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="54"/>
+        <source>Selected features only</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="64"/>
+        <source>Invalid source layer</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="67"/>
+        <source>{0} source feature(s)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="77"/>
+        <source>Filter layers of any type by a vector layer</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="80"/>
+        <source>Filters vector, raster and point cloud layers in place by the features of a vector layer, with the geometric predicates, a buffer and a minimum coverage.
+
+</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="250"/>
+        <source>Extent</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="251"/>
+        <source>Geometry (WKT, takes precedence over the extent)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="267"/>
+        <source>Provide an extent or a geometry</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="279"/>
+        <source>Filter layers of any type by an extent or a geometry</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="282"/>
+        <source>Filters the target layers by an extent (layer, canvas, typed in) or a WKT geometry, with the same predicates, buffer and coverage as the FILTERING tab. The operation is recorded in the history of the first target layer.
+
+</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="197"/>
+        <source>Source point cloud</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="199"/>
+        <source>Combine the criteria with the existing filter of the source</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="203"/>
+        <source>Point footprint resolution (point cloud units)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="212"/>
+        <source>Invalid source point cloud</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="215"/>
+        <location filename="../processing/algorithms/layer_operations_algorithms.py" line="53"/>
+        <source>Criteria: {0}</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="224"/>
+        <source>Footprint computed from a limited number of points: increase the resolution</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="231"/>
+        <source>Filter layers of any type by the points of a point cloud</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="234"/>
+        <source>Applies criteria to the source point cloud (ASPRS classes, Z and intensity ranges, return number, expression), computes the footprint of the retained points and filters the target layers by this area.
+
+Examples: buildings intersecting class 6 points (coverage ≥ 10%); Disjoint = buildings absent from the point cloud; a DEM limited to the extent of the water points (class 9).
+
+Without criteria, the footprint covers the points displayed by the point cloud.
+
+</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="104"/>
+        <source>Source raster</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="106"/>
+        <source>Pixels to keep</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="106"/>
+        <source>Value range</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="106"/>
+        <source>Classes</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="109"/>
+        <source>Range applies to (band read as a DTM for slope, aspect...)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="109"/>
+        <source>Pixel value</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="109"/>
+        <source>Slope (degrees)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="109"/>
+        <source>Slope (%)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="109"/>
+        <source>Aspect (degrees)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="109"/>
+        <source>Hillshade (0-255)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="109"/>
+        <source>Roughness (TRI)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="114"/>
+        <source>Minimum value (range)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="116"/>
+        <source>Maximum value (range)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="118"/>
+        <source>Class values (e.g. 6,7)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="120"/>
+        <source>Raster expression, pixel kept if non-zero (e.g. &quot;dem@1&quot; &gt; 1200)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="123"/>
+        <source>Also hide the source raster outside the selection</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="128"/>
+        <source>Maximum pixels read (beyond: resampling)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="138"/>
+        <source>Invalid source raster</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="150"/>
+        <source>Selection: {0}</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="162"/>
+        <source>{0} of {1} pixel(s) kept</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="169"/>
+        <source>Filter layers of any type by the pixels of a raster</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="172"/>
+        <source>Keeps the pixels of a raster (value range of a band, classes of a categorized raster or raster expression), vectorizes them at the pixel size and filters the target layers by this area.
+
+Examples: parcels contained in the 1200–1300 m zone with a coverage of 50%; a DEM limited to the forest classes; LiDAR points of the areas with a slope &lt; 15% (choose &quot;Slope (%)&quot; in &quot;Range applies to&quot; with a DEM as the source: no &quot;Slope&quot; step needed before).
+
+The source raster can be a model output: it is read without being modified. With &quot;Also hide the source raster outside the selection&quot; and a project source, the source itself is filtered.
+
+</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/layer_operations_algorithms.py" line="149"/>
+        <source>Vector format</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/layer_operations_algorithms.py" line="151"/>
+        <source>Raster format</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/layer_operations_algorithms.py" line="153"/>
+        <source>Point cloud format</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/layer_operations_algorithms.py" line="156"/>
+        <source>Output CRS (empty = the layer&apos;s CRS)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/layer_operations_algorithms.py" line="159"/>
+        <source>Files written</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/layer_operations_algorithms.py" line="179"/>
+        <source>exported</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/layer_operations_algorithms.py" line="188"/>
+        <source>Export filtered layers (vector, raster, point cloud)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/layer_operations_algorithms.py" line="191"/>
+        <source>Writes each layer as it is filtered, one file per layer named after the layer: subset features for vectors, retained pixels (NoData elsewhere) as GeoTIFF or COG for rasters, retained points as LAZ, COPC, LAS, GPKG or CSV for point clouds.
+
+In a model, connect &quot;Processed layers&quot; of a FilterMate filter to &quot;Layers to export&quot;. COPC requires PDAL (shipped with QGIS); without PDAL, a LAZ is written instead.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/common.py" line="90"/>
+        <source>Layers to filter (vector, raster, point cloud)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/common.py" line="96"/>
+        <source>Buffer (source units)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/common.py" line="99"/>
+        <source>Minimum coverage of the target polygons (%)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/common.py" line="102"/>
+        <source>Combine with the existing filter of the targets</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/common.py" line="109"/>
+        <source>Vector: subset of the features. Raster: pixels outside the area set to NoData (clipped VRT). Point cloud: points outside the area removed (derived COPC file, PDAL). Disjoint keeps the outside.
+
+Only project layers are filtered. The filter can be undone from FilterMate and the original sources are always recorded in the project. The &quot;Processed layers&quot; output can be chained in a model, for example into &quot;Export filtered layers&quot;.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/common.py" line="117"/>
+        <source>Replace</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/common.py" line="123"/>
+        <source>ASPRS classes to keep (e.g. 3,4,5; empty = all)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/common.py" line="125"/>
+        <source>Minimum Z</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/common.py" line="125"/>
+        <source>Maximum Z</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/common.py" line="125"/>
+        <source>Minimum intensity</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/common.py" line="125"/>
+        <source>Maximum intensity</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/common.py" line="129"/>
+        <source>Return number (empty = all)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/common.py" line="132"/>
+        <source>Point cloud expression (e.g. ReturnNumber = NumberOfReturns)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/common.py" line="137"/>
+        <source>Processed layers</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/common.py" line="185"/>
+        <source>Layer skipped: {0} ({1})</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/common.py" line="188"/>
+        <source>filtered</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/common.py" line="194"/>
+        <source> ({0:.1f} s)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/common.py" line="197"/>
+        <source>{0}: {1}{2}</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/common.py" line="199"/>
+        <source>{0}: failed — {1}</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/layer_operations_algorithms.py" line="42"/>
+        <source>Point clouds</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/layer_operations_algorithms.py" line="45"/>
+        <source>Combine with the existing filter of each point cloud</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/layer_operations_algorithms.py" line="52"/>
+        <source>Provide classes, a range, a return number or an expression</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/layer_operations_algorithms.py" line="64"/>
+        <source>Filter point clouds by criteria</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/layer_operations_algorithms.py" line="67"/>
+        <source>Applies the same criteria (ASPRS classes, Z and intensity ranges, return number, expression) to one or more point clouds of the project, for example all the LiDAR HD tiles of a work site. The filter is the point cloud expression (subset): it is immediate and can be undone from FilterMate.</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>PublishFavoritesDialog</name>
     <message>
         <location filename="../extensions/favorites_sharing/ui/publish_dialog.py" line="119"/>
@@ -4010,122 +4516,122 @@ Continue?</source>
 <context>
     <name>RasterExploringPanel</name>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="376"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="494"/>
         <source>Band</source>
         <translation>波段</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="379"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="497"/>
         <source>Band whose values are selected</source>
         <translation>选择其值的波段</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="427"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="595"/>
         <source>PIXEL VALUE</source>
         <translation>像元值</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="435"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="603"/>
         <source>Pixel value of the current band</source>
         <translation>当前波段的像元值</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="454"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="622"/>
         <source>Last {0} values picked</source>
         <translation>最近选取的 {0} 个值</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="467"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="635"/>
         <source>Click on the map with the pixel picker. Ctrl+click extends the range to the value.</source>
         <translation>使用像元拾取器点击地图。Ctrl+点击可将范围扩展到该值。</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="480"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="648"/>
         <source>VALUE RANGE</source>
         <translation>值范围</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="489"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="657"/>
         <source>Min</source>
         <translation>最小</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="489"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="657"/>
         <source>Lowest value kept</source>
         <translation>保留的最低值</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="489"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="657"/>
         <source>Max</source>
         <translation>最大</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="489"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="657"/>
         <source>Highest value kept</source>
         <translation>保留的最高值</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="513"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="681"/>
         <source>Preview on the map (hide the other pixels)</source>
         <translation>在地图上预览（隐藏其他像元）</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="520"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="688"/>
         <source>CLASSES</source>
         <translation>类别</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="524"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="692"/>
         <source>Raster classes</source>
         <translation>栅格类别</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="528"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="696"/>
         <source>All</source>
         <translation>全部</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="529"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="697"/>
         <source>None</source>
         <translation>无</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="539"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="707"/>
         <source>RASTER EXPRESSION</source>
         <translation>栅格表达式</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="543"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="711"/>
         <source>Raster calculator expression; a pixel is kept where it is not 0</source>
         <translation>栅格计算器表达式；像元值不为 0 处保留该像元</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="544"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="712"/>
         <source>Raster expression</source>
         <translation>栅格表达式</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="552"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="721"/>
         <source>Use the range</source>
         <translation>使用该范围</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="553"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="722"/>
         <source>Write the current value range as an expression</source>
         <translation>将当前值范围写为表达式</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="640"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="813"/>
         <source>Selected pixels: {0}</source>
         <translation>已选像元：{0}</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="997"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1193"/>
         <source>Set a value range first</source>
         <translation>请先设置值范围</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1014"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1379"/>
         <source>NoData</source>
         <translation>NoData</translation>
     </message>
@@ -4135,134 +4641,254 @@ Continue?</source>
         <translation type="obsolete">最近的值：</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="458"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="626"/>
         <source>Value of the current band under the cursor</source>
         <translation>光标处当前波段的值</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="464"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="632"/>
         <source>Statistics of the current band in the last rectangle drawn on the map</source>
         <translation>地图上最后绘制的矩形内当前波段的统计</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="698"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="871"/>
         <source>Under the cursor: {0}  (X {1:.{3}f}  Y {2:.{3}f})</source>
         <translation>光标处: {0}  (X {1:.{3}f}  Y {2:.{3}f})</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="708"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="881"/>
         <source>Zone: {0}</source>
         <translation>区域: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="708"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="881"/>
         <source>no pixel</source>
         <translation>无像元</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1038"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1403"/>
         <source>LAST PICKS</source>
         <translation>最近读数</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="388"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="506"/>
         <source>Compute on</source>
         <translation>计算对象</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="391"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="509"/>
         <source>Quantity the range applies to. Slope, aspect, hillshade and roughness read the band as a DTM.</source>
         <translation>范围所应用的量。坡度、坡向、山体阴影和粗糙度将该波段视为 DTM 读取。</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="395"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="513"/>
         <source>Pixel value</source>
         <translation>像元值</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="395"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="513"/>
         <source>Slope (degrees)</source>
         <translation>坡度（度）</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="395"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="513"/>
         <source>Slope (%)</source>
         <translation>坡度（%）</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="395"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="513"/>
         <source>Aspect (degrees)</source>
         <translation>坡向（度）</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="395"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="513"/>
         <source>Hillshade (0-255)</source>
         <translation>山体阴影（0-255）</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="395"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="513"/>
         <source>Roughness (TRI, mean difference)</source>
         <translation>粗糙度（TRI，平均差）</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="505"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="673"/>
         <source>Usual thresholds of the quantity</source>
         <translation>该量的常用阈值</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="506"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="674"/>
         <source>Usual thresholds</source>
         <translation>常用阈值</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="905"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1101"/>
         <source>Flat</source>
         <translation>平坦</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="905"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1101"/>
         <source>Gentle</source>
         <translation>平缓</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="905"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1101"/>
         <source>Moderate</source>
         <translation>中等</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="906"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1102"/>
         <source>Steep</source>
         <translation>陡</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="906"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1102"/>
         <source>East</source>
         <translation>东</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="906"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1102"/>
         <source>South</source>
         <translation>南</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="907"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1103"/>
         <source>West</source>
         <translation>西</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="907"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1103"/>
         <source>Shadow</source>
         <translation>阴影</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="907"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1103"/>
         <source>Lit</source>
         <translation>受光</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="912"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1108"/>
         <source>Usual thresholds…</source>
         <translation>常用阈值…</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="548"/>
+        <source>PIPETTE</source>
+        <translation>拾取器</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="551"/>
+        <source>Tolerance ±</source>
+        <translation>容差 ±</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="558"/>
+        <source>Tolerance around the picked color or value, in % of the value range</source>
+        <translation>所拾取颜色或值周围的容差，占值范围的百分比</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="559"/>
+        <source>Pipette tolerance</source>
+        <translation>拾取器容差</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="568"/>
+        <source>Bands</source>
+        <translation>波段</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1229"/>
+        <source>What the bands of the image are: the presets and the pipette use them</source>
+        <translation>图像的各波段含义：预设和拾取器会使用它们</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="573"/>
+        <source>Band layout</source>
+        <translation>波段组合</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="574"/>
+        <source>RGB (red, green, blue)</source>
+        <translation>RGB（红、绿、蓝）</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="574"/>
+        <source>IRC (infrared, red, green)</source>
+        <translation>IRC（红外、红、绿）</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="574"/>
+        <source>RGB + infrared</source>
+        <translation>RGB + 红外</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1230"/>
+        <source>Write the expression of a usual index (vegetation, water...)</source>
+        <translation>写入常用指数（植被、水体...）的表达式</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="582"/>
+        <source>Spectral presets</source>
+        <translation>光谱预设</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1226"/>
+        <source>Needs an image of three bands or more (red, green, blue...)</source>
+        <translation>需要三个或更多波段的图像（红、绿、蓝...）</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1233"/>
+        <source>Vegetation (NDVI &gt; 0.3)</source>
+        <translation>植被（NDVI &gt; 0.3）</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1233"/>
+        <source>No vegetation (NDVI &lt; 0.1)</source>
+        <translation>无植被（NDVI &lt; 0.1）</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1234"/>
+        <source>Water (NDWI &gt; 0.1)</source>
+        <translation>水体（NDWI &gt; 0.1）</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1234"/>
+        <source>Vegetation (excess green)</source>
+        <translation>植被（超绿）</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1237"/>
+        <source>Spectral presets…</source>
+        <translation>光谱预设…</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1297"/>
+        <source>This pixel has no value (NoData): pick another one</source>
+        <translation>此像元没有值（NoData）：请选择另一个</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1336"/>
+        <source>The tolerance covers every value: lower it</source>
+        <translation>容差涵盖了所有值：请调小</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1352"/>
+        <source>Range {0} → {1}{2}</source>
+        <translation>范围 {0} → {1}{2}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1354"/>
+        <source>Class(es) {0}</source>
+        <translation>类别 {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1357"/>
+        <source>{0} color(s), last: {1}</source>
+        <translation>{0} 种颜色，最后一种：{1}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1361"/>
+        <source>Expression</source>
+        <translation>表达式</translation>
     </message>
 </context>
 <context>
@@ -4585,507 +5211,6 @@ Continue?</source>
         <location filename="../ui/controllers/config_controller.py" line="664"/>
         <source>Language changed to &apos;{0}&apos;.</source>
         <translation type="obsolete">Language changed to '{0}'.</translation>
-    </message>
-</context>
-<context>
-    <name>Processing</name>
-    <message>
-        <location filename="../processing/algorithms/layer_operations_algorithms.py" line="108"/>
-        <source>Favorite name or identifier</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../processing/algorithms/layer_operations_algorithms.py" line="115"/>
-        <source>Provide the name of the favorite</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../processing/algorithms/layer_operations_algorithms.py" line="119"/>
-        <source>Favorite: {0}</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../processing/algorithms/layer_operations_algorithms.py" line="126"/>
-        <source>Apply a FilterMate favorite</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../processing/algorithms/layer_operations_algorithms.py" line="129"/>
-        <source>Replays a favorite saved in FilterMate (by name or identifier): filters of the vector and point cloud layers, clips of the rasters and point clouds. Layers are found by signature, then identifier, then name. Without the dock (qgis_process), the favorites saved in the project are used.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../processing/algorithms/batch_filter_algorithm.py" line="59"/>
-        <source>Layers to filter</source>
-        <translation type="unfinished">要过滤的图层</translation>
-    </message>
-    <message>
-        <location filename="../processing/algorithms/batch_filter_algorithm.py" line="66"/>
-        <source>Filter expression</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../processing/algorithms/batch_filter_algorithm.py" line="88"/>
-        <source>No layer selected.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../processing/algorithms/batch_filter_algorithm.py" line="102"/>
-        <source>Invalid expression for layer &apos;{0}&apos;, skipped.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../processing/algorithms/batch_filter_algorithm.py" line="125"/>
-        <source>Filter several layers (batch)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../processing/algorithms/batch_filter_algorithm.py" line="129"/>
-        <location filename="../processing/algorithms/common.py" line="78"/>
-        <source>FilterMate</source>
-        <translation type="unfinished">FilterMate</translation>
-    </message>
-    <message>
-        <location filename="../processing/algorithms/batch_filter_algorithm.py" line="137"/>
-        <source>Applies the same filter expression to several vector layers in a single run.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../processing/algorithms/layer_operations_algorithms.py" line="79"/>
-        <source>Layers to clear</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../processing/algorithms/layer_operations_algorithms.py" line="87"/>
-        <source>cleared</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../processing/algorithms/layer_operations_algorithms.py" line="93"/>
-        <source>Clear the filters of layers of any type</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../processing/algorithms/layer_operations_algorithms.py" line="96"/>
-        <source>Removes the filter from the chosen layers: subset cleared for vectors and point clouds, original source restored for clipped rasters and point clouds. Useful at the start of a model to start again from the complete data. Can be undone from FilterMate.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="52"/>
-        <source>Source layer</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="54"/>
-        <source>Selected features only</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="56"/>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="125"/>
-        <source>Buffer</source>
-        <translation type="unfinished">缓冲区</translation>
-    </message>
-    <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="64"/>
-        <source>Invalid source layer</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="67"/>
-        <source>{0} source feature(s)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="77"/>
-        <source>Filter layers of any type by a vector layer</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="80"/>
-        <source>Filters vector, raster and point cloud layers in place by the features of a vector layer, with the geometric predicates, a buffer and a minimum coverage.
-
-</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="250"/>
-        <source>Extent</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="251"/>
-        <source>Geometry (WKT, takes precedence over the extent)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="267"/>
-        <source>Provide an extent or a geometry</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="279"/>
-        <source>Filter layers of any type by an extent or a geometry</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="282"/>
-        <source>Filters the target layers by an extent (layer, canvas, typed in) or a WKT geometry, with the same predicates, buffer and coverage as the FILTERING tab. The operation is recorded in the history of the first target layer.
-
-</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="197"/>
-        <source>Source point cloud</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="199"/>
-        <source>Combine the criteria with the existing filter of the source</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="203"/>
-        <source>Point footprint resolution (point cloud units)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="212"/>
-        <source>Invalid source point cloud</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="215"/>
-        <location filename="../processing/algorithms/layer_operations_algorithms.py" line="53"/>
-        <source>Criteria: {0}</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="224"/>
-        <source>Footprint computed from a limited number of points: increase the resolution</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="231"/>
-        <source>Filter layers of any type by the points of a point cloud</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="234"/>
-        <source>Applies criteria to the source point cloud (ASPRS classes, Z and intensity ranges, return number, expression), computes the footprint of the retained points and filters the target layers by this area.
-
-Examples: buildings intersecting class 6 points (coverage ≥ 10%); Disjoint = buildings absent from the point cloud; a DEM limited to the extent of the water points (class 9).
-
-Without criteria, the footprint covers the points displayed by the point cloud.
-
-</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="104"/>
-        <source>Source raster</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="105"/>
-        <source>Band</source>
-        <translation type="unfinished">波段</translation>
-    </message>
-    <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="106"/>
-        <source>Pixels to keep</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="106"/>
-        <source>Value range</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="106"/>
-        <source>Classes</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="106"/>
-        <source>Raster expression</source>
-        <translation type="unfinished">栅格表达式</translation>
-    </message>
-    <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="109"/>
-        <source>Range applies to (band read as a DTM for slope, aspect...)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="109"/>
-        <source>Pixel value</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="109"/>
-        <source>Slope (degrees)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="109"/>
-        <source>Slope (%)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="109"/>
-        <source>Aspect (degrees)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="109"/>
-        <source>Hillshade (0-255)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="109"/>
-        <source>Roughness (TRI)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="114"/>
-        <source>Minimum value (range)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="116"/>
-        <source>Maximum value (range)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="118"/>
-        <source>Class values (e.g. 6,7)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="120"/>
-        <source>Raster expression, pixel kept if non-zero (e.g. &quot;dem@1&quot; &gt; 1200)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="123"/>
-        <source>Also hide the source raster outside the selection</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="128"/>
-        <source>Maximum pixels read (beyond: resampling)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="138"/>
-        <source>Invalid source raster</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="150"/>
-        <source>Selection: {0}</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="162"/>
-        <source>{0} of {1} pixel(s) kept</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="169"/>
-        <source>Filter layers of any type by the pixels of a raster</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../processing/algorithms/cross_filter_algorithm.py" line="172"/>
-        <source>Keeps the pixels of a raster (value range of a band, classes of a categorized raster or raster expression), vectorizes them at the pixel size and filters the target layers by this area.
-
-Examples: parcels contained in the 1200–1300 m zone with a coverage of 50%; a DEM limited to the forest classes; LiDAR points of the areas with a slope &lt; 15% (choose &quot;Slope (%)&quot; in &quot;Range applies to&quot; with a DEM as the source: no &quot;Slope&quot; step needed before).
-
-The source raster can be a model output: it is read without being modified. With &quot;Also hide the source raster outside the selection&quot; and a project source, the source itself is filtered.
-
-</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../processing/algorithms/layer_operations_algorithms.py" line="147"/>
-        <source>Layers to export</source>
-        <translation type="unfinished">要导出的图层</translation>
-    </message>
-    <message>
-        <location filename="../processing/algorithms/layer_operations_algorithms.py" line="149"/>
-        <source>Vector format</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../processing/algorithms/layer_operations_algorithms.py" line="151"/>
-        <source>Raster format</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../processing/algorithms/layer_operations_algorithms.py" line="153"/>
-        <source>Point cloud format</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../processing/algorithms/layer_operations_algorithms.py" line="156"/>
-        <source>Output CRS (empty = the layer&apos;s CRS)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../processing/algorithms/layer_operations_algorithms.py" line="158"/>
-        <source>Output folder</source>
-        <translation type="unfinished">输出文件夹</translation>
-    </message>
-    <message>
-        <location filename="../processing/algorithms/layer_operations_algorithms.py" line="159"/>
-        <source>Files written</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../processing/algorithms/layer_operations_algorithms.py" line="179"/>
-        <source>exported</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../processing/algorithms/layer_operations_algorithms.py" line="188"/>
-        <source>Export filtered layers (vector, raster, point cloud)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../processing/algorithms/layer_operations_algorithms.py" line="191"/>
-        <source>Writes each layer as it is filtered, one file per layer named after the layer: subset features for vectors, retained pixels (NoData elsewhere) as GeoTIFF or COG for rasters, retained points as LAZ, COPC, LAS, GPKG or CSV for point clouds.
-
-In a model, connect &quot;Processed layers&quot; of a FilterMate filter to &quot;Layers to export&quot;. COPC requires PDAL (shipped with QGIS); without PDAL, a LAZ is written instead.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../processing/algorithms/common.py" line="90"/>
-        <source>Layers to filter (vector, raster, point cloud)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../processing/algorithms/common.py" line="93"/>
-        <source>Geometric predicates</source>
-        <translation type="unfinished">几何谓词</translation>
-    </message>
-    <message>
-        <location filename="../processing/algorithms/common.py" line="96"/>
-        <source>Buffer (source units)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../processing/algorithms/common.py" line="99"/>
-        <source>Minimum coverage of the target polygons (%)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../processing/algorithms/common.py" line="102"/>
-        <source>Combine with the existing filter of the targets</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../processing/algorithms/common.py" line="109"/>
-        <source>Vector: subset of the features. Raster: pixels outside the area set to NoData (clipped VRT). Point cloud: points outside the area removed (derived COPC file, PDAL). Disjoint keeps the outside.
-
-Only project layers are filtered. The filter can be undone from FilterMate and the original sources are always recorded in the project. The &quot;Processed layers&quot; output can be chained in a model, for example into &quot;Export filtered layers&quot;.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../processing/algorithms/common.py" line="117"/>
-        <source>Replace</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../processing/algorithms/common.py" line="123"/>
-        <source>ASPRS classes to keep (e.g. 3,4,5; empty = all)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../processing/algorithms/common.py" line="125"/>
-        <source>Minimum Z</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../processing/algorithms/common.py" line="125"/>
-        <source>Maximum Z</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../processing/algorithms/common.py" line="125"/>
-        <source>Minimum intensity</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../processing/algorithms/common.py" line="125"/>
-        <source>Maximum intensity</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../processing/algorithms/common.py" line="129"/>
-        <source>Return number (empty = all)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../processing/algorithms/common.py" line="132"/>
-        <source>Point cloud expression (e.g. ReturnNumber = NumberOfReturns)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../processing/algorithms/common.py" line="137"/>
-        <source>Processed layers</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../processing/algorithms/common.py" line="185"/>
-        <source>Layer skipped: {0} ({1})</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../processing/algorithms/common.py" line="188"/>
-        <source>filtered</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../processing/algorithms/common.py" line="194"/>
-        <source> ({0:.1f} s)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../processing/algorithms/common.py" line="197"/>
-        <source>{0}: {1}{2}</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../processing/algorithms/common.py" line="199"/>
-        <source>{0}: failed — {1}</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../processing/algorithms/layer_operations_algorithms.py" line="42"/>
-        <source>Point clouds</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../processing/algorithms/layer_operations_algorithms.py" line="45"/>
-        <source>Combine with the existing filter of each point cloud</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../processing/algorithms/layer_operations_algorithms.py" line="52"/>
-        <source>Provide classes, a range, a return number or an expression</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../processing/algorithms/layer_operations_algorithms.py" line="64"/>
-        <source>Filter point clouds by criteria</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../processing/algorithms/layer_operations_algorithms.py" line="67"/>
-        <source>Applies the same criteria (ASPRS classes, Z and intensity ranges, return number, expression) to one or more point clouds of the project, for example all the LiDAR HD tiles of a work site. The filter is the point cloud expression (subset): it is immediate and can be undone from FilterMate.</source>
-        <translation type="unfinished"></translation>
     </message>
 </context>
 </TS>
