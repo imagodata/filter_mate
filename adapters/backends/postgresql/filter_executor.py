@@ -293,7 +293,8 @@ def qgis_expression_to_postgis(expression: str, geom_col: str = 'geometry') -> s
         return expression
 
     from ....core.filter.sql_quotes import (
-        IDENTIFIER_PLACEHOLDER, cast_numeric_operands, map_geometry_length, mask_quoted, unmask_quoted,
+        IDENTIFIER_PLACEHOLDER, cast_numeric_operands, map_geometry_length, mask_quoted,
+        qgis_literals_to_sql, unmask_quoted,
     )
 
     sql, parts = mask_quoted(expression)
@@ -325,7 +326,7 @@ def qgis_expression_to_postgis(expression: str, geom_col: str = 'geometry') -> s
 
     # 3. Add type casting for numeric operations
     # FIX v4.2.12: Added * and / operators
-    sql = cast_numeric_operands(sql, ('>=', '<=', '>', '<', '+', '-', '*', '/'), r'\1::numeric')
+    sql = cast_numeric_operands(sql, r'\1::numeric', arithmetic=True)
 
     # 4. Normalize SQL keywords (case-insensitive replacements)
     sql = re.sub(r'\bcase\b', ' CASE ', sql, flags=re.IGNORECASE)
@@ -344,7 +345,7 @@ def qgis_expression_to_postgis(expression: str, geom_col: str = 'geometry') -> s
     # 6. Clean up multiple spaces (FIX v4.2.12)
     sql = re.sub(r'\s+', ' ', sql).strip()
 
-    return unmask_quoted(sql, parts)
+    return unmask_quoted(sql, qgis_literals_to_sql(parts))
 
 
 def build_postgis_predicates(
@@ -502,28 +503,30 @@ def apply_postgresql_type_casting(expression: str, layer=None) -> str:
     # match fields that are NOT already casted. This allows the regex to apply
     # casting individually to each comparison in a combined expression.
     #
-    # Before: "field"::numeric < 5 AND "field" < 5  → no change (global check failed)
-    # After:  "field"::numeric < 5 AND "field" < 5  → "field"::numeric < 5 AND "field"::numeric < 5
+    # 2026-10-17: on the text with its literals masked (a value such as
+    # '"x" = 1' is not rewritten), and ``=`` is no longer cast for a column
+    # the layer declares non-numeric: ``"insee_dep"::numeric = 75`` failed on
+    # the whole table as soon as one value was not a number ('2A').
+    from ....core.filter.sql_quotes import mask_quoted, unmask_quoted
 
-    # Pattern explanation:
-    # - "([^"]+)" : quoted field name
-    # - (?!::) : negative lookahead - NOT followed by :: (skip already casted fields)
-    # - (\s*) : optional whitespace
-    # - (<|>|<=|>=|=) : comparison operator (including = for "field" = 5)
-    # - (\s*) : optional whitespace
-    # - (\d+(?:\.\d+)?) : integer or decimal number
-    numeric_comparison_pattern = r'"([^"]+)"(?!::)(\s*)(<|>|<=|>=|=)(\s*)(\d+(?:\.\d+)?)'
+    non_numeric = set()
+    if layer is not None:
+        try:
+            non_numeric = {field.name().lower() for field in layer.fields() if not field.isNumeric()}
+        except Exception:  # nosec B110 - types unknown: every comparison is cast as before
+            non_numeric = set()
+
+    masked, parts = mask_quoted(expression)
+    numeric_comparison_pattern = r'(\x04(\d+)\x05)(?!\s*::)(\s*)(<=|>=|<|>|=)(\s*)(\d+(?:\.\d+)?)(?![\w.])'
 
     def add_numeric_cast(match):
-        field = match.group(1)
-        space1 = match.group(2)
-        operator = match.group(3)
-        space2 = match.group(4)
-        number = match.group(5)
-        return f'"{field}"::numeric{space1}{operator}{space2}{number}'
+        column, index, space1, operator, space2, number = match.groups()
+        if operator == '=' and parts[int(index)][1:-1].replace('""', '"').lower() in non_numeric:
+            return match.group(0)
+        return f'{column}::numeric{space1}{operator}{space2}{number}'
 
     # Apply to ALL numeric comparisons that don't have ::
-    expression = re.sub(numeric_comparison_pattern, add_numeric_cast, expression)
+    expression = unmask_quoted(re.sub(numeric_comparison_pattern, add_numeric_cast, masked), parts)
 
     return expression
 

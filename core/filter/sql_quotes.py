@@ -122,47 +122,86 @@ def qgis_literals_to_sql(parts: List[str]) -> List[str]:
 # QGIS -> SQL rewrites shared by ExpressionService and the backends'
 # converters. Both work on text masked by mask_quoted().
 
-# A number literal: the only other side that gets a numeric cast.
-_NUMBER_OPERAND = r'[-+]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][-+]?\d+)?(?![\w.])'
+# QGIS functions returning a geometry: length() of one is a geometric length.
+GEOMETRY_FUNCTIONS = frozenset((
+    'buffer', 'single_sided_buffer', 'offset_curve', 'centroid', 'point_on_surface', 'pointonsurface',
+    'convex_hull', 'convexhull', 'envelope', 'bounds', 'boundary', 'simplify', 'simplify_vw', 'smooth',
+    'union', 'intersection', 'difference', 'sym_difference', 'symdifference', 'combine', 'collect',
+    'transform', 'make_valid', 'makevalid', 'geometry', 'geometry_n', 'geometryn', 'start_point', 'startpoint',
+    'end_point', 'endpoint', 'point_n', 'pointn', 'exterior_ring', 'exteriorring', 'interior_ring_n',
+    'geom_from_wkt', 'geomfromtext', 'geom_from_gml', 'make_line', 'makeline', 'make_polygon', 'reverse',
+    'translate', 'rotate', 'scale', 'segmentize', 'line_merge', 'shortest_line', 'line_substring',
+    'densify_by_count', 'densify_by_distance', 'extend', 'force_rhr', 'force_2d', 'tapered_buffer',
+))
+
+_NUMBER = r'(?<![\w.\x02-\x07])(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][-+]?\d+)?(?![\w.])'
+_COLUMN = rf'(?:{IDENTIFIER_PLACEHOLDER}\s*\.\s*)?{IDENTIFIER_PLACEHOLDER}'
+_OPERAND = rf'(?:{_COLUMN}(?:\s*::\s*\w+)?|{_NUMBER})'
+_CHAIN_RE = re.compile(rf'{_OPERAND}(?:\s*[-+*/]\s*{_OPERAND})*')
+_OPERAND_RE = re.compile(_OPERAND)
+_COMPARED_AFTER_RE = re.compile(rf'\s*(?:<=|>=|<(?!>)|>)\s*[-+]?{_NUMBER}')
+_COMPARED_BEFORE_RE = re.compile(rf'{_NUMBER}\s*(?:<=|>=|(?<!<)>|<(?!>))\s*$')
+_CASTABLE_COLUMN_RE = re.compile(rf'({_COLUMN})(?!\s*(?:::|\.))')
+_LENGTH_RE = re.compile(
+    r'\blength(\s*\()(?=\s*(\$geometry\b|\$geom\b|\x04(\d+)\x05(?!\s*\.)|([A-Za-z_]\w*)\s*\())',
+    re.IGNORECASE,
+)
+
+
+def _unquote(identifier: str) -> str:
+    return identifier[1:-1].replace('""', '"')
 
 
 def map_geometry_length(masked: str, parts: List[str], geometry_column: str, function: str) -> str:
-    """``length($geometry)`` / ``length("<geometry column>")`` -> ``<function>(...)``.
+    """``length(<geometry>)`` -> ``<function>(<geometry>)``, any other length() kept.
 
-    2026-10-17: any other length() stays: in QGIS length(string) is its
-    number of characters, ST_Length / GLength of a text is an error.
-    ``parts`` are the quoted parts returned with ``masked``.
+    A geometry is ``$geometry``, the layer's geometry column (case-insensitive)
+    or a call of a function returning one (:data:`GEOMETRY_FUNCTIONS`, ``ST_``
+    prefix allowed). 2026-10-17: in QGIS length(string) is its number of
+    characters, ST_Length / GLength of a text is an error. ``parts`` are the
+    quoted parts returned with ``masked``.
     """
-    column = f'"{geometry_column}"'
+    column = (geometry_column or '').lower()
 
     def _replace(match):
-        argument = match.group(1)
-        if argument.startswith('$') or parts[int(argument[1:-1])] == column:
-            return f'{function}({argument})'
-        return match.group(0)
+        argument, index, call = match.group(2), match.group(3), match.group(4)
+        if index is not None:
+            geometric = _unquote(parts[int(index)]).lower() == column
+        elif call is not None:
+            name = call.lower()
+            geometric = name in GEOMETRY_FUNCTIONS or (name.startswith('st_') and name[3:] in GEOMETRY_FUNCTIONS)
+        else:
+            geometric = argument.startswith('$')
+        return f'{function}{match.group(1)}' if geometric else match.group(0)
 
-    return re.sub(
-        rf'\blength\s*\(\s*(\$geometry\b|\$geom\b|{IDENTIFIER_PLACEHOLDER})\s*\)',
-        _replace, masked, flags=re.IGNORECASE,
-    )
+    return _LENGTH_RE.sub(_replace, masked)
 
 
-def cast_numeric_operands(masked: str, operators: tuple, cast: str) -> str:
-    """Cast a column compared / combined with a NUMBER: ``"x" > 10`` -> ``"x"::numeric > 10``.
+def cast_numeric_operands(masked: str, cast: str, arithmetic: bool = False) -> str:
+    """Cast the columns of a numeric term: ``"x" > 10`` -> ``"x"::numeric > 10``.
 
-    2026-10-17: the cast was added whatever the other side, so
-    ``"nature" <> 'Route'``, dates and now() comparisons failed in PostgreSQL
-    (invalid input syntax for type numeric). ``<>`` / ``!=`` are never cast.
-    ``cast`` is a replacement template on the column (group 1).
+    A term is a chain of columns and numbers joined by + - * /. Its columns
+    are cast when the term is compared (< > <= >=) with a number, or when it
+    adds / multiplies... a number. With ``arithmetic`` (buffer expressions,
+    numeric by definition) every column of a term with an operator is cast:
+    ``"a" * "b"`` too. 2026-10-17: the cast was added whatever the other side,
+    so ``"nature" <> 'Route'``, dates and now() comparisons failed in
+    PostgreSQL (invalid input syntax for type numeric); ``"x" - "y" > 0`` now
+    casts both columns. ``=``, ``<>`` and ``!=`` never cast. ``cast`` is a
+    replacement template on the column (group 1).
     """
-    alternatives = '|'.join(re.escape(op) for op in ('<>', '!=') + tuple(operators))
+    if '\x04' not in masked:
+        return masked
 
-    def _replace(match):
-        if match.group(3) in ('<>', '!='):
-            return match.group(0)
-        return match.expand(cast) + match.group(2) + match.group(3) + match.group(4)
+    def _cast(match):
+        term = match.group()
+        if '\x04' not in term:
+            return term
+        operated = not _OPERAND_RE.fullmatch(term)
+        compared = bool(_COMPARED_AFTER_RE.match(masked, match.end())
+                        or _COMPARED_BEFORE_RE.search(masked[max(0, match.start() - 64):match.start()]))
+        if compared or (operated and (arithmetic or re.search(_NUMBER, term))):
+            return _CASTABLE_COLUMN_RE.sub(lambda column: column.expand(cast), term)
+        return term
 
-    return re.sub(
-        rf'({IDENTIFIER_PLACEHOLDER})(\s*)({alternatives})(\s*)(?={_NUMBER_OPERAND})',
-        _replace, masked,
-    )
+    return _CHAIN_RE.sub(_cast, masked)

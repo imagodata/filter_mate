@@ -436,7 +436,7 @@ class ExpressionService:
 
         from ..filter.sql_quotes import (
             IDENTIFIER_PLACEHOLDER as _IDENTIFIER, cast_numeric_operands, map_geometry_length, mask_quoted,
-            unmask_quoted,
+            qgis_literals_to_sql, unmask_quoted,
         )
 
         sql, parts = mask_quoted(expression)
@@ -483,7 +483,7 @@ class ExpressionService:
 
         # 5. Add type casting for numeric operations (comparison operators)
         # "field" > 10 -> "field"::numeric > 10, the other side a number only
-        sql = cast_numeric_operands(sql, ('>=', '<=', '>', '<', '+', '-'), r'\1::numeric')
+        sql = cast_numeric_operands(sql, r'\1::numeric')
 
         # 6. Add type casting for text operations (LIKE/ILIKE)
         sql = re.sub(rf'({_IDENTIFIER})\s+(NOT\s+)?ILIKE', r'\1::text \2ILIKE', sql)
@@ -500,7 +500,7 @@ class ExpressionService:
         # 9. Clean up extra spaces
         sql = re.sub(r'\s+', ' ', sql).strip()
 
-        return unmask_quoted(sql, parts)
+        return unmask_quoted(sql, qgis_literals_to_sql(parts))
 
     def _to_spatialite(self, expression: str, geometry_column: str) -> str:
         """
@@ -528,7 +528,7 @@ class ExpressionService:
 
         from ..filter.sql_quotes import (
             IDENTIFIER_PLACEHOLDER as _IDENTIFIER, LITERAL_PLACEHOLDER as _LITERAL, map_geometry_length, mask_quoted,
-            unmask_quoted,
+            qgis_literals_to_sql, unmask_quoted,
         )
 
         sql, parts = mask_quoted(expression)
@@ -536,13 +536,18 @@ class ExpressionService:
         # 0. length() of the geometry only (before $geometry is replaced)
         sql = map_geometry_length(sql, parts, geometry_column, 'GLength')
 
-        # 1. Replace $geometry with column reference
-        sql = re.sub(
-            r'\$geometry\b|\$geom\b',
-            f'"{geometry_column}"',
-            sql,
-            flags=re.IGNORECASE
-        )
+        # 1. Replace $geometry with column reference ($area, $length... too,
+        # 2026-10-17: they reached SQLite as is, a syntax error)
+        spatial_conversions = {
+            r'\$area\b': f'ST_Area("{geometry_column}")',
+            r'\$length\b': f'GLength("{geometry_column}")',
+            r'\$perimeter\b': f'ST_Perimeter("{geometry_column}")',
+            r'\$x\b': f'ST_X("{geometry_column}")',
+            r'\$y\b': f'ST_Y("{geometry_column}")',
+            r'\$geometry\b|\$geom\b': f'"{geometry_column}"',
+        }
+        for pattern, replacement in spatial_conversions.items():
+            sql = re.sub(pattern, replacement, sql, flags=re.IGNORECASE)
 
         # 2. Replace QGIS functions with Spatialite equivalents
         for qgis_func, sl_func in self.SPATIALITE_FUNCTIONS.items():
@@ -597,7 +602,7 @@ class ExpressionService:
         # 9. Clean up extra spaces
         sql = re.sub(r'\s+', ' ', sql).strip()
 
-        return unmask_quoted(sql, parts)
+        return unmask_quoted(sql, qgis_literals_to_sql(parts))
 
     def extract_fields(self, expression: str) -> Set[str]:
         """

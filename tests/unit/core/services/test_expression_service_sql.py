@@ -84,3 +84,35 @@ def test_spatialite_keeps_the_expression(expression):
 ])
 def test_spatialite_conversion(expression, expected):
     assert _sl(expression) == expected
+
+
+# --- review follow-up (2026-10-17) -------------------------------------------
+
+@pytest.mark.parametrize("expression, expected", [
+    # length() of a geometry: $geometry, the geometry column (any case), a geometry function
+    ('length(buffer($geometry, 10)) > 5', 'ST_Length(ST_Buffer("geom", 10)) > 5'),
+    ('length("GEOM") > 5', 'ST_Length("GEOM") > 5'),
+    ('length(st_centroid("geom")) > 0', 'ST_Length(st_centroid("geom")) > 0'),
+    ('length(upper("nom")) > 5', 'length(upper("nom")) > 5'),
+    # arithmetic compared with a number: every column of the term
+    ('"x" - "y" > 0', '"x"::numeric - "y"::numeric > 0'),
+    ('"x" * "y" + 1 <= 10', '"x"::numeric * "y"::numeric + 1 <= 10'),
+    ('0 < "x"', '0 < "x"::numeric'),
+    ('"x" > 10 AND "y" < 5', '"x"::numeric > 10 AND "y"::numeric < 5'),
+    ('"x" - "y" = 0', '"x" - "y" = 0'),
+    ('"x" <> 5', '"x" <> 5'),
+    # QGIS backslash escape -> SQL doubled quote; comments untouched
+    ("\"nom\" = 'l\\'eau'", "\"nom\" = 'l''eau'"),
+    ("\"a\" = 1 -- c'est case\n AND $area > 3", "\"a\" = 1 -- c'est case\n AND ST_Area(\"geom\") > 3"),
+])
+def test_postgis_conversion_review(expression, expected):
+    assert _pg(expression) == expected
+
+
+@pytest.mark.parametrize("expression, expected", [
+    ('length(buffer($geometry, 10)) > 5', 'GLength(Buffer("geom", 10)) > 5'),
+    ('$area > 10', 'ST_Area("geom") > 10'),
+    ("\"nom\" = 'l\\'eau'", "\"nom\" = 'l''eau'"),
+])
+def test_spatialite_conversion_review(expression, expected):
+    assert _sl(expression) == expected

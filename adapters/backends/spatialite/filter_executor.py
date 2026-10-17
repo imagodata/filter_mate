@@ -877,7 +877,7 @@ def qgis_expression_to_spatialite(expression: str, geom_col: str = 'geometry') -
 
     from ....core.filter.sql_quotes import (
         IDENTIFIER_PLACEHOLDER, LITERAL_PLACEHOLDER, cast_numeric_operands, map_geometry_length, mask_quoted,
-        unmask_quoted,
+        qgis_literals_to_sql, unmask_quoted,
     )
 
     sql, parts = mask_quoted(expression)
@@ -912,7 +912,7 @@ def qgis_expression_to_spatialite(expression: str, geom_col: str = 'geometry') -
     # 3. Add type casting for numeric operations
     # FIX v4.2.12: Spatialite uses CAST() instead of :: operator
     # Pattern: "field" > value → CAST("field" AS REAL) > value
-    sql = cast_numeric_operands(sql, ('>=', '<=', '>', '<', '+', '-', '*', '/'), r'CAST(\1 AS REAL)')
+    sql = cast_numeric_operands(sql, r'CAST(\1 AS REAL)', arithmetic=True)
 
     # 4. Handle CASE expressions
     sql = re.sub(r'\bcase\b', ' CASE ', sql, flags=re.IGNORECASE)
@@ -942,7 +942,7 @@ def qgis_expression_to_spatialite(expression: str, geom_col: str = 'geometry') -
     # 7. Clean up multiple spaces
     sql = re.sub(r'\s+', ' ', sql).strip()
 
-    return unmask_quoted(sql, parts)
+    return unmask_quoted(sql, qgis_literals_to_sql(parts))
 
 
 def build_spatialite_query(

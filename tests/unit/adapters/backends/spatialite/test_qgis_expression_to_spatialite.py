@@ -71,3 +71,12 @@ def test_names_and_values_are_kept(to_spatialite, expression):
 ])
 def test_conversions(to_spatialite, expression, expected):
     assert to_spatialite(expression) == expected
+
+
+@pytest.mark.parametrize("expression, expected", [
+    ('"x" - "y"', 'CAST("x" AS REAL) - CAST("y" AS REAL)'),
+    ('length(buffer($geometry, 1))', 'ST_Length(Buffer("geometry", 1))'),
+    ("if(\"nom\" = 'l\\'eau', 10, 5)", "CASE WHEN \"nom\" = 'l''eau' THEN 10 ELSE 5 END"),
+])
+def test_conversions_review(to_spatialite, expression, expected):
+    assert to_spatialite(expression) == expected
