@@ -77,3 +77,56 @@ def test_only_the_filtering_list_shows_hints():
     dock = (_MODULE.parents[2] / "filter_mate_dockwidget.py").read_text(encoding="utf-8")
     assert "checkableComboBoxLayer_filtering_layers_to_filter.set_target_hints(True)" in dock
     assert "checkableComboBoxLayer_exporting_layers.set_target_hints" not in dock
+
+
+def _paint_centroid_toggle():
+    """``ItemDelegate.paint_centroid_toggle`` with stand-ins for its Qt names."""
+    delegate = next(n for n in _TREE.body if isinstance(n, ast.ClassDef) and n.name == "ItemDelegate")
+    node = next(n for n in delegate.body if isinstance(n, ast.FunctionDef) and n.name == "paint_centroid_toggle")
+    node.decorator_list = []
+
+    class QPointF:
+        def __init__(self, point):
+            self.point = point
+
+    class Anything:
+        def __init__(self, *args, **kwargs):
+            pass
+
+        def __getattr__(self, name):
+            return Anything()
+
+        def __call__(self, *args, **kwargs):
+            return Anything()
+
+    namespace = {"QPointF": QPointF, "QColor": Anything, "QBrush": Anything, "QtGui": Anything(), "Qt": Anything()}
+    exec(compile(ast.Module(body=[node], type_ignores=[]), str(_MODULE), "exec"), namespace)
+    return namespace["paint_centroid_toggle"], QPointF
+
+
+class _Rect:
+    def adjusted(self, *_margins):
+        return self
+
+    def center(self):
+        return "QPoint"
+
+
+@pytest.mark.parametrize("on", [True, False])
+def test_centroid_toggle_paints_with_a_float_centre(on):
+    """PyQt6 has no drawEllipse(QPoint, float, float): the glyph raised and the list items were not painted."""
+    paint, point_f = _paint_centroid_toggle()
+    calls = []
+
+    class Painter:
+        def __getattr__(self, name):
+            return lambda *args: calls.append((name, args))
+
+        def drawEllipse(self, centre, rx, ry):
+            if not isinstance(centre, point_f):
+                raise TypeError("drawEllipse(center: QPoint, rx: int, ry: int): argument 2 has unexpected type 'float'")
+            calls.append(("drawEllipse", (centre, rx, ry)))
+
+    paint(Painter(), _Rect(), on, "color")
+    assert [name for name, _args in calls].count("drawEllipse") == 1
+    assert calls[-1][0] == "restore"
