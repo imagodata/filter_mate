@@ -75,7 +75,7 @@ def finished(monkeypatch):
     qgis_utils.iface = iface
     monkeypatch.setitem(sys.modules, "qgis.utils", qgis_utils)
     handler = module.FinishedHandler()
-    for name in ("_cleanup_ogr_temp_layers", "_release_task_caches", "_log_task_bridge_metrics"):
+    for name in ("_release_task_caches", "_log_task_bridge_metrics"):
         monkeypatch.setattr(handler, name, MagicMock())
 
     def run(canceled, result=True, exception=None, task_action="filter"):

@@ -22,8 +22,6 @@ from ..logging.redaction import mask_sensitive_text
 
 logger = logging.getLogger('FilterMate.Infrastructure.Database.SQLUtils')
 
-# Root package of the plugin ('filter_mate' once installed), for its dock module
-_PLUGIN_PACKAGE = __name__.rsplit('.', 3)[0]
 
 
 def _on_main_thread() -> bool:
@@ -54,7 +52,8 @@ def feature_picker_guard(layer):
         # 2026-10-17: the plugin's dock module, by its package. ``from filter_mate_dockwidget
         # import`` (absolute) never found it (ImportError swallowed): the guard never ran.
         # Read from sys.modules: no import of the dock where it was never loaded (Processing).
-        dock_module = sys.modules.get(f"{_PLUGIN_PACKAGE}.filter_mate_dockwidget")
+        from ...core.domain.plugin_package import PLUGIN_PACKAGE
+        dock_module = sys.modules.get(f"{PLUGIN_PACKAGE}.filter_mate_dockwidget")
         active_dock = getattr(dock_module, '_active_dockwidget', None)
         if active_dock is not None and _on_main_thread():
             widget = getattr(active_dock, 'mFeaturePickerWidget_exploring_single_selection', None)
