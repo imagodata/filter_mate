@@ -56,13 +56,13 @@ from dataclasses import dataclass
 from enum import Enum, auto
 
 from ...infrastructure.logging import get_logger
-# DEFAULT_TEMP_SCHEMA is hardcoded - no longer imported from constants
+from ...infrastructure.constants import DEFAULT_TEMP_SCHEMA
 
 logger = get_logger(__name__)
 
 # v2.8.8: Use dedicated FilterMate temp schema for all MVs
-# Constant defined locally after removal of modules.constants dependency
-DEFAULT_TEMP_SCHEMA = 'filtermate_temp'
+# 2026-10-17: the one temp schema of infrastructure.constants (was a local
+# 'filtermate_temp', not the schema the task path uses)
 FILTERMATE_MV_SCHEMA = DEFAULT_TEMP_SCHEMA
 
 

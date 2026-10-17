@@ -50,6 +50,23 @@ _ensure_cleanup_mocks()
 import importlib.util
 import os
 
+
+def _load_real_constants():
+    """cleanup.py reads its schema names from infrastructure.constants (2026-10-17)."""
+    name = "filter_mate.infrastructure.constants"
+    if isinstance(sys.modules.get(name), types.ModuleType):
+        return
+    path = os.path.normpath(os.path.join(
+        os.path.dirname(__file__), "..", "..", "..", "..", "..", "infrastructure", "constants.py"
+    ))
+    spec = importlib.util.spec_from_file_location(name, path)
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[name] = module
+    spec.loader.exec_module(module)
+
+
+_load_real_constants()
+
 _cleanup_path = os.path.normpath(os.path.join(
     os.path.dirname(__file__),
     "..", "..", "..", "..", "..",
@@ -112,7 +129,7 @@ class TestInit:
 
     def test_default_schema(self):
         s = PostgreSQLCleanupService()
-        assert s.schema == "filtermate_temp"
+        assert s.schema == "filter_mate_temp"  # 2026-10-17: the one temp schema
 
     def test_metrics_returns_copy(self, service):
         m1 = service.metrics

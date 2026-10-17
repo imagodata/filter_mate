@@ -73,7 +73,7 @@ POSTGRESQL_AVAILABLE = _pg_availability.postgresql_available
 # Import constants (migrated to infrastructure)
 from ...infrastructure.constants import (
     PROVIDER_POSTGRES, PROVIDER_SPATIALITE, PROVIDER_OGR,
-    QGIS_PROVIDER_POSTGRES,
+    QGIS_PROVIDER_POSTGRES, DEFAULT_TEMP_SCHEMA,
 )
 
 # Backend architecture (migrated to adapters.backends)
@@ -364,7 +364,7 @@ class FilterEngineTask(QgsTask):
         }
         # Use QgsProject.instance() directly - always available in QGIS
         self.PROJECT = QgsProject.instance()
-        self.current_materialized_view_schema = 'filter_mate_temp'
+        self.current_materialized_view_schema = DEFAULT_TEMP_SCHEMA
 
         # Session ID for multi-client materialized view isolation
         # Retrieved from task_parameters, defaults to 'default' for backward compatibility
@@ -1471,7 +1471,7 @@ class FilterEngineTask(QgsTask):
             buffer_type=self.task_parameters.get("filtering", {}).get("buffer_type", "Round"),
             primary_key_name=getattr(self, 'primary_key_name', None),
             session_id=getattr(self, 'session_id', None),
-            mv_schema=getattr(self, 'current_materialized_view_schema', 'filter_mate_temp'),
+            mv_schema=getattr(self, 'current_materialized_view_schema', None) or DEFAULT_TEMP_SCHEMA,
             source_feature_count=source_fc,
             source_layer=self.source_layer,
         )

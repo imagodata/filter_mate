@@ -24,6 +24,7 @@ import os
 from typing import Any, Dict, List, Optional, Set
 
 from ...infrastructure.logging import setup_logger
+from ...infrastructure.constants import DEFAULT_TEMP_SCHEMA
 from ...config.config import ENV_VARS
 
 # Setup logger
@@ -49,7 +50,7 @@ class CleanupHandler:
 
     Example:
         >>> handler = CleanupHandler()
-        >>> handler.cleanup_session_mvs(connexion, 'filtermate_temp', session_id)
+        >>> handler.cleanup_session_mvs(connexion, 'filter_mate_temp', session_id)
     """
 
     def __init__(self):
@@ -64,7 +65,7 @@ class CleanupHandler:
         task_parameters: Dict[str, Any],
         param_all_layers: Optional[List[Any]],
         get_connection_fn,
-        current_mv_schema: str = 'filtermate_temp',
+        current_mv_schema: str = DEFAULT_TEMP_SCHEMA,
     ) -> None:
         """Cleanup PostgreSQL materialized views created during filtering.
 

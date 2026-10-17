@@ -104,6 +104,15 @@ def _load_real_cleanup():
     name = "filter_mate.adapters.backends.postgresql.cleanup"
     if isinstance(sys.modules.get(name), types.ModuleType):
         return
+    constants_name = "filter_mate.infrastructure.constants"
+    if not isinstance(sys.modules.get(constants_name), types.ModuleType):
+        constants_path = os.path.normpath(os.path.join(
+            os.path.dirname(__file__), "..", "..", "..", "..", "..", "infrastructure", "constants.py"
+        ))
+        constants_spec = importlib.util.spec_from_file_location(constants_name, constants_path)
+        constants_module = importlib.util.module_from_spec(constants_spec)
+        sys.modules[constants_name] = constants_module
+        constants_spec.loader.exec_module(constants_module)
     path = os.path.normpath(os.path.join(
         os.path.dirname(__file__), "..", "..", "..", "..", "..",
         "adapters", "backends", "postgresql", "cleanup.py"

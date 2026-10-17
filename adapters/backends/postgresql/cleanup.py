@@ -26,6 +26,7 @@ from typing import Optional, List, Tuple
 from datetime import datetime
 
 from ....infrastructure.database.sql_utils import sanitize_sql_identifier
+from ....infrastructure.constants import DEFAULT_TEMP_SCHEMA, LEGACY_TEMP_SCHEMAS
 
 logger = logging.getLogger('FilterMate.Cleanup.PostgreSQL')
 
@@ -77,14 +78,14 @@ class PostgreSQLCleanupService:
     Features:
     - Session view cleanup with proper error handling
     - Orphaned view detection and cleanup
-    - Schema management (create/drop filtermate_temp)
+    - Schema management (create/drop the temp schema)
     - Circuit breaker integration for stability
     - Comprehensive logging and metrics
 
     Usage:
         service = PostgreSQLCleanupService(
             session_id="abc123",
-            schema="filtermate_temp"
+            schema="filter_mate_temp"
         )
 
         # Clean current session views
@@ -97,8 +98,9 @@ class PostgreSQLCleanupService:
         dropped = service.cleanup_schema_if_empty(connexion)
     """
 
-    # Default schema name for FilterMate temp objects
-    DEFAULT_SCHEMA = "filtermate_temp"
+    # Default schema name for FilterMate temp objects (2026-10-17: the one
+    # schema of infrastructure.constants, was 'filtermate_temp')
+    DEFAULT_SCHEMA = DEFAULT_TEMP_SCHEMA
 
     # Materialized view prefix patterns (unified fm_temp_* prefix)
     MV_PREFIX = "fm_temp_mv_"
@@ -535,10 +537,10 @@ class PostgreSQLCleanupService:
         Clean ALL FilterMate objects across all schemas (nuclear option).
 
         This method cleans up:
-        - All filtermate_mv_* views in filtermate_temp schema
+        - All filtermate_mv_* views in the temp schema (and the legacy filtermate_temp)
         - All filtermate_mv_* views in public schema (if include_public_schema=True)
         - All fm_temp_* objects
-        - The filtermate_temp schema itself
+        - The temp schema(s) themselves
 
         Use this for complete cleanup after crashes or before uninstall.
 
@@ -551,7 +553,9 @@ class PostgreSQLCleanupService:
             Tuple of (count of objects cleaned, list of object names)
         """
         cleaned_objects = []
-        schemas_to_check = [self._schema]
+        # 2026-10-17: also the temp schema of earlier versions (leftovers)
+        schemas_to_check = [self._schema] + [s for s in LEGACY_TEMP_SCHEMAS if s != self._schema]
+        temp_schemas = list(schemas_to_check)
 
         if include_public_schema:
             schemas_to_check.append('public')
@@ -653,15 +657,16 @@ class PostgreSQLCleanupService:
                 except Exception as e:
                     logger.warning(f"Error dropping table {full_name}: {e}")
 
-            # Drop filtermate_temp schema if empty or force
+            # Drop the temp schema(s) if empty or force
             if not dry_run:
-                try:
-                    safe_schema = sanitize_sql_identifier(self._schema)
-                    cursor.execute(f'DROP SCHEMA IF EXISTS "{safe_schema}" CASCADE;')
-                    cleaned_objects.append(f"SCHEMA: {self._schema}")
-                    logger.info(f"Dropped schema: {self._schema}")
-                except Exception as e:
-                    logger.warning(f"Could not drop schema {self._schema}: {e}")
+                for temp_schema in temp_schemas:
+                    try:
+                        safe_schema = sanitize_sql_identifier(temp_schema)
+                        cursor.execute(f'DROP SCHEMA IF EXISTS "{safe_schema}" CASCADE;')
+                        cleaned_objects.append(f"SCHEMA: {temp_schema}")
+                        logger.info(f"Dropped schema: {temp_schema}")
+                    except Exception as e:
+                        logger.warning(f"Could not drop schema {temp_schema}: {e}")
 
             connexion.commit()
 
@@ -684,7 +689,7 @@ class PostgreSQLCleanupService:
         Clean filtermate_mv_src_sel_* views specifically.
 
         These are source selection views that can accumulate in the
-        filtermate_temp schema and cause dependency issues.
+        temp schema and cause dependency issues.
 
         Args:
             connexion: Active PostgreSQL connection
@@ -699,7 +704,7 @@ class PostgreSQLCleanupService:
         try:
             cursor = connexion.cursor()
 
-            # Find in filtermate_temp schema
+            # Find in the temp schema
             cursor.execute("""
                 SELECT matviewname
                 FROM pg_matviews

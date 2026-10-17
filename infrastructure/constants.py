@@ -269,12 +269,19 @@ MAX_PENDING_TASKS = 10                  # Maximum pending async tasks
 # Database Defaults
 # =============================================================================
 DEFAULT_POSTGRES_SCHEMA = 'public'
-DEFAULT_TEMP_SCHEMA = 'filtermate_temp'
+# 2026-10-17: ONE temp schema. The task path (filter_task, filter_actions,
+# the app's session cleanup, datasource_manager) used 'filter_mate_temp',
+# the v4 backend (mv_manager, backend.py, cleanup service, chain optimizer)
+# 'filtermate_temp': the MVs of one were never found nor cleaned by the
+# other. The old spelling is only read, to clean what earlier versions left.
+DEFAULT_TEMP_SCHEMA = 'filter_mate_temp'
+LEGACY_TEMP_SCHEMAS = ('filtermate_temp',)
 
 # Unified naming: all FilterMate objects use fm_temp_* prefix for easy cleanup
 TABLE_PREFIX = 'fm_temp_'               # Base prefix for all FilterMate temp objects
 TABLE_PREFIX_TEMP = 'fm_temp_tbl_'      # Temporary tables
 TABLE_PREFIX_MATERIALIZED = 'fm_temp_mv_'  # Materialized views
+LEGACY_PREFIX_MATERIALIZED = 'mv_'      # Read for cleanup only (before v4.4.4)
 TABLE_PREFIX_BUFFER = 'fm_temp_buf_'    # Buffer geometry tables
 TABLE_PREFIX_SOURCE = 'fm_temp_src_'    # Source selection tables/MVs
 
@@ -588,8 +595,10 @@ __all__ = [
     # Database defaults
     'DEFAULT_POSTGRES_SCHEMA',
     'DEFAULT_TEMP_SCHEMA',
+    'LEGACY_TEMP_SCHEMAS',
     'TABLE_PREFIX_TEMP',
     'TABLE_PREFIX_MATERIALIZED',
+    'LEGACY_PREFIX_MATERIALIZED',
     # UI constants
     'TAB_EXPLORING',
     'TAB_FILTERING',

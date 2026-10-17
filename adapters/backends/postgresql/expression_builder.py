@@ -472,7 +472,7 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
             AND EXISTS (SELECT 1 FROM zone_pop WHERE ST_Intersects(...))
 
         Creates a single MV with pre-filtered source features and uses:
-            EXISTS (SELECT 1 FROM filtermate_temp.fm_chain_xxx AS __source
+            EXISTS (SELECT 1 FROM filter_mate_temp.fm_chain_xxx AS __source
                     WHERE ST_Intersects("distant"."geom", __source."geom"))
 
         Args:
@@ -1283,7 +1283,7 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
             EXISTS(source + zone_pop) AND EXISTS(source + demand_points)
 
         We generate a single EXISTS against the pre-computed MV:
-            EXISTS (SELECT 1 FROM filtermate_temp.mv_chain_xxx AS __chain
+            EXISTS (SELECT 1 FROM filter_mate_temp.fm_temp_chain_xxx AS __chain
                     WHERE ST_Intersects("distant"."geom", __chain."geom"))
 
         Performance: O(N×M) → O(1) EXISTS per distant layer
@@ -1291,7 +1291,7 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
         Args:
             geom_expr: Target geometry expression (e.g., '"table"."geom"')
             predicates: Spatial predicates to apply (intersects, contains, etc.)
-            mv_name: Fully qualified MV name (e.g., "filtermate_temp"."fm_chain_xxx")
+            mv_name: Fully qualified MV name (e.g., "filter_mate_temp"."fm_temp_chain_xxx")
             buffer_value: Optional buffer distance (already baked into MV typically)
 
         Returns:
@@ -1371,7 +1371,7 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
         """``(schema, name)`` of the source-selection MV referenced by ``source_filter``, or None.
 
         Matches the filter built by the core ExpressionBuilder:
-        ``"table"."pk" IN (SELECT pk FROM "filtermate_temp"."fm_temp_mv_...")``.
+        ``"table"."pk" IN (SELECT pk FROM "filter_mate_temp"."fm_temp_mv_...")``.
         """
         if not source_filter:
             return None
