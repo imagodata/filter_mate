@@ -83,7 +83,9 @@ class TestDockwidgetHooks:
         assert first is hook, "the point cloud delegation must be the first statement of launchTaskEvent"
 
     def test_validate_and_prepare_layer_tolerates_a_layer_without_selection_signal(self):
-        func = _method(_DOCKWIDGET, "FilterMateDockWidget", "_validate_and_prepare_layer")
+        prepare = _method(_DOCKWIDGET, "FilterMateDockWidget", "_validate_and_prepare_layer")
+        assert "_disconnect_layer_selection_signal" in ast.unparse(prepare)  # 2026-10-17: one helper
+        func = _method(_DOCKWIDGET, "FilterMateDockWidget", "_disconnect_layer_selection_signal")
         handlers = [node for node in ast.walk(func) if isinstance(node, ast.Try)
                     and _calls(node, "disconnect") and "selectionChanged" in ast.unparse(node)]
         assert handlers, "selectionChanged.disconnect try block not found"

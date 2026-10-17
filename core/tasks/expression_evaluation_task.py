@@ -134,6 +134,8 @@ class ExpressionEvaluationTask(QgsTask):
         # Thread-safe feature source (must be created before run())
         self._feature_source = None
         self._total_count = 0
+        # The layer's fields, read on the main thread with the feature source (2026-10-17)
+        self._fields = None
 
         # Parsed expression cached between _validate_inputs and _build_feature_request
         self._qgs_expr: Optional[QgsExpression] = None
@@ -166,6 +168,7 @@ class ExpressionEvaluationTask(QgsTask):
                 if provider:
                     self._feature_source = provider.featureSource()
                     self._total_count = provider.featureCount()
+                    self._fields = self.layer.fields()
             except (RuntimeError, AttributeError) as e:
                 logger.warning(f"Could not prepare feature source for {self.layer_name}: {e}")
                 self._feature_source = None
@@ -180,9 +183,10 @@ class ExpressionEvaluationTask(QgsTask):
         self._start_time = time.time()
 
         try:
-            # v2.6.7: Refresh feature source at run() time to get current layer state
-            # This fixes stale data when filter was applied between task creation and execution
-            self._refresh_feature_source()
+            # 2026-10-17: the feature source prepared on the main thread is used as is. The
+            # v2.6.7 refresh here read the layer and its provider from the worker thread
+            # (QgsVectorLayer is not thread-safe). The task is created right before it is
+            # queued, and a newer evaluation of the layer cancels it (ExpressionEvaluationManager).
 
             # Validate inputs
             if not self._validate_inputs():
@@ -209,24 +213,6 @@ class ExpressionEvaluationTask(QgsTask):
             self.exception = e
             logger.error(f"Expression evaluation failed for '{self.layer_name}': {e}")
             return False
-
-    def _refresh_feature_source(self):
-        """
-        Refresh the feature source from the layer's data provider.
-
-        v2.6.7: Called at the start of run() to ensure we have the current layer state,
-        not a stale snapshot from when the task was created.
-        """
-        if self.layer and self.layer.isValid():
-            try:
-                provider = self.layer.dataProvider()
-                if provider:
-                    self._feature_source = provider.featureSource()
-                    self._total_count = provider.featureCount()
-                    logger.debug(f"Refreshed feature source for {self.layer_name}: {self._total_count} features")
-            except (RuntimeError, AttributeError) as e:
-                logger.warning(f"Could not refresh feature source for {self.layer_name}: {e}")
-                # Keep the existing feature source if refresh fails
 
     def _validate_inputs(self) -> bool:
         """Validate task inputs before execution."""
@@ -265,7 +251,7 @@ class ExpressionEvaluationTask(QgsTask):
             if self.request_fields:
                 request.setSubsetOfAttributes(
                     self.request_fields,
-                    self.layer.fields()
+                    self._fields  # read on the main thread: never self.layer from the worker
                 )
 
             # Geometry flag (can save memory/time if not needed)
@@ -470,9 +456,40 @@ class ExpressionEvaluationManager:
         if on_cancelled:
             task.signals.cancelled.connect(on_cancelled)
 
+        # 2026-10-17 (review): the feature source is a snapshot taken here, on the main
+        # thread. An evaluation queued behind a filter task ran on the source of before the
+        # filter: when the layer's subset changes before the evaluation ends, it starts again
+        # on the new one (the new task cancels this one).
+        subset_changed = getattr(layer, 'subsetStringChanged', None)
+
+        def _on_subset_changed(*_args):
+            _disconnect_subset_watch()
+            if self._active_tasks.get(layer_id) is task:
+                logger.debug(f"Subset of '{layer.name()}' changed: expression evaluation started again")
+                self.evaluate(layer, expression, on_complete=on_complete, on_error=on_error,
+                              on_progress=on_progress, on_cancelled=on_cancelled, limit=limit,
+                              description=description, cancel_existing=True)
+
+        def _disconnect_subset_watch():
+            if subset_changed is None:
+                return
+            try:
+                subset_changed.disconnect(_on_subset_changed)
+            except (TypeError, RuntimeError):  # already disconnected / layer deleted
+                pass
+
+        if subset_changed is not None:
+            try:
+                subset_changed.connect(_on_subset_changed)
+            except (TypeError, RuntimeError, AttributeError):
+                subset_changed = None
+
         # Track and cleanup
         def _on_task_done(*args):
-            if layer_id in self._active_tasks:
+            _disconnect_subset_watch()
+            # 2026-10-17: only this task's entry. The previous task, canceled by this
+            # call, ends later and removed the entry that already held its successor.
+            if self._active_tasks.get(layer_id) is task:
                 del self._active_tasks[layer_id]
 
         task.signals.finished.connect(_on_task_done)

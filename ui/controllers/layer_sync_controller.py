@@ -1134,6 +1134,11 @@ class LayerSyncController(BaseController):
         if current_layer is None:
             return
 
+        # 2026-10-17: once. Connected here unconditionally, then again by the exploring
+        # reload: each layer change could add a connection.
+        if hasattr(dw, '_ensure_layer_signals_connected'):
+            dw._ensure_layer_signals_connected(current_layer)
+            return
         try:
             if hasattr(dw, 'on_layer_selection_changed'):
                 current_layer.selectionChanged.connect(dw.on_layer_selection_changed)

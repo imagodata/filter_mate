@@ -646,11 +646,17 @@ class FilterMate:
                     if self._missing_dependency_layers and not self._form_dependency_warning_shown:
                         self._form_dependency_warning_shown = True
 
-                        # Clear the message bar to remove QGIS's individual warnings
-                        try:
-                            self.iface.messageBar().clearWidgets()
-                        except Exception:  # nosec B110 - best-effort message bar cleanup before showing consolidated warning
-                            pass
+                        # 2026-10-17: only FilterMate's own message is replaced (its item is kept).
+                        # clearWidgets() removed every message of the bar, other plugins' and
+                        # QGIS's included; a match on the layer names could too.
+                        bar = self.iface.messageBar()
+                        previous = getattr(self, '_dependency_message_item', None)
+                        if previous is not None:
+                            try:
+                                bar.popWidget(previous)
+                            except Exception:  # nosec B110 - already closed by the user
+                                pass
+                            self._dependency_message_item = None
 
                         # Show a single consolidated info message
                         count = len(self._missing_dependency_layers)
@@ -658,10 +664,13 @@ class FilterMate:
                         if count > 3:
                             layers_list += f" (+{count - 3} more)"
 
-                        self.iface.messageBar().pushInfo(
-                            "FilterMate",
-                            self.tr(f"{count} referenced layer(s) not loaded ({layers_list}). Using fallback display.")
-                        )
+                        text = self.tr(f"{count} referenced layer(s) not loaded ({layers_list}). Using fallback display.")
+                        try:
+                            from qgis.core import Qgis
+                            item = bar.createMessage("FilterMate", text)
+                            self._dependency_message_item = bar.pushWidget(item, Qgis.MessageLevel.Info)
+                        except Exception:  # nosec B110 - fall back on a plain message
+                            bar.pushInfo("FilterMate", text)
 
                         logger.info(
                             f"FilterMate: {count} referenced layer(s) not loaded. "
@@ -677,7 +686,13 @@ class FilterMate:
                 self._form_dependency_warning_shown = False
                 self._missing_dependency_layers = set()
                 # Schedule check after QGIS warnings have appeared (project load is async)
-                QTimer.singleShot(2000, check_and_clear_warnings)
+                self._dependency_check_timer.start(2000)
+
+            # 2026-10-17: a timer of the plugin, stopped in unload (QTimer.singleShot
+            # could not be canceled: it ran on an unloaded plugin).
+            self._dependency_check_timer = QTimer()
+            self._dependency_check_timer.setSingleShot(True)
+            self._dependency_check_timer.timeout.connect(check_and_clear_warnings)
 
             # Connect to project read signal for future project loads
             # Store reference to avoid garbage collection and allow disconnection
@@ -685,7 +700,7 @@ class FilterMate:
             QgsProject.instance().readProject.connect(on_project_read)
 
             # Also check now for already loaded project (e.g., plugin activated after project load)
-            QTimer.singleShot(1500, check_and_clear_warnings)
+            self._dependency_check_timer.start(1500)
 
         except Exception as e:
             logger.debug(f"FilterMate: Message filter setup note: {e}")
@@ -1382,6 +1397,13 @@ class FilterMate:
             except Exception as e:
                 logger.debug(f"FilterMate: controllers not torn down on unload: {e}")
 
+            # 2026-10-17: what ties the dock to QGIS objects outliving it (layer tree view,
+            # current layer, theme watcher, timers): its closeEvent is never sent here.
+            try:
+                self.app.dockwidget.release_qgis_connections()
+            except Exception as e:
+                logger.debug(f"FilterMate: dock connections not released on unload: {e}")
+
         # Disconnect project change signals using dedicated method
         self._disconnect_auto_activation_signals()
 
@@ -1421,7 +1443,11 @@ class FilterMate:
         if self.app and self.app.dockwidget:
             try:
                 if hasattr(self.app.dockwidget, 'comboBox_filtering_current_layer'):
-                    self.app.dockwidget.comboBox_filtering_current_layer.setLayer(None)
+                    # 2026-10-17: signals blocked: layerChanged ran a whole layer change of the
+                    # dock being unloaded (current_layer_changed(None))
+                    combo = self.app.dockwidget.comboBox_filtering_current_layer
+                    combo.blockSignals(True)
+                    combo.setLayer(None)
                     logger.debug("FilterMate: Layer combo box reset during unload")
             except Exception as e:
                 logger.debug(f"FilterMate: Error clearing layer combo during unload: {e}")
@@ -1468,18 +1494,38 @@ class FilterMate:
         if self.app:
             self.app.cleanup()
 
-        stale_cache_timer = getattr(self, '_stale_cache_timer', None)
-        if stale_cache_timer is not None:
-            stale_cache_timer.stop()
-            self._stale_cache_timer = None
+        for timer_name in ('_stale_cache_timer', '_dependency_check_timer'):
+            timer = getattr(self, timer_name, None)
+            if timer is not None:
+                timer.stop()
+                setattr(self, timer_name, None)
 
         for action in self.actions:
             self.iface.removePluginVectorMenu(
                 getattr(self, '_vector_menu_name', self.menu),
                 action)
             self.iface.removeToolBarIcon(action)
-        # remove the toolbar
-        del self.toolbar
+        # remove the toolbar: 2026-10-17, addToolBar() put it in the main window and
+        # removeToolBarIcon() only acts on the Plugins toolbar: an empty "FilterMate"
+        # toolbar stayed after each reload.
+        toolbar = getattr(self, 'toolbar', None)
+        if toolbar is not None:
+            try:
+                self.iface.mainWindow().removeToolBar(toolbar)
+                toolbar.deleteLater()
+            except RuntimeError as e:  # already deleted with the main window
+                logger.debug(f"FilterMate: toolbar not removed: {e}")
+        self.toolbar = None
+
+        # the translator installed by __init__ / reload_translator
+        translator = getattr(self, 'translator', None)
+        if translator is not None:
+            QCoreApplication.removeTranslator(translator)
+            self.translator = None
+
+        # The deferred callbacks (perform_reinitialization...) test it: an unloaded plugin has no app.
+        self.app = None
+        self.pluginIsActive = False
 
     # --------------------------------------------------------------------------
 

@@ -228,6 +228,10 @@ class LayersManagementEngineTask(QgsTask):
 
         self.layers = None
         self.project_layers = None
+        # CONFIG_DATA["CURRENT_PROJECT"]["OPTIONS"]["LAYERS"]["LAYER_PROPERTIES_COUNT"] as this
+        # task sees it (_properties_count): the worker wrote the app's configuration, finished()
+        # now writes it back on the main thread (2026-10-17).
+        self._layer_properties_count = None
         # Ids this task registered (add_layers) or unregistered (remove_layers): the completion
         # merges them into the current PROJECT_LAYERS, which may have changed meanwhile.
         self.changed_layer_ids = []
@@ -278,6 +282,12 @@ class LayersManagementEngineTask(QgsTask):
 
         global ENV_VARS
         self.PROJECT = ENV_VARS["PROJECT"]
+        # The Processing settings for the worker's contexts, read here on the main thread (2026-10-17)
+        try:
+            from ...infrastructure.utils.processing_context import capture_processing_settings
+            capture_processing_settings()
+        except ImportError:  # test doubles of the plugin packages
+            pass
 
     def _ensure_db_directory_exists(self):
         """
@@ -326,7 +336,10 @@ class LayersManagementEngineTask(QgsTask):
 
             if self.task_action == 'add_layers':
                 self.layers = self.task_parameters["task"]["layers"]
-                self.project_layers = self.task_parameters["task"]["project_layers"]
+                # A copy (2026-10-17), as for remove_layers: this worker added the new layers to the
+                # app's PROJECT_LAYERS while the main thread read it. The completion merges the
+                # registered ids into the current dict (LayerTaskCompletionHandler._merge_task_result).
+                self.project_layers = dict(self.task_parameters["task"]["project_layers"])
                 self.reset_all = self.task_parameters["task"]["reset_all_layers_variables_flag"]
 
                 logger.info(f"add_layers task: processing {len(self.layers)} layers, current project_layers count: {len(self.project_layers)}")
@@ -369,6 +382,19 @@ class LayersManagementEngineTask(QgsTask):
                     error_msg += f'\nDirectory exists: {os.path.exists(db_dir) if db_dir else "N/A"}'
             safe_log(logger, logging.ERROR, error_msg, exc_info=True)
             return False
+
+    def _config_layers_options(self):
+        """CONFIG_DATA["CURRENT_PROJECT"]["OPTIONS"]["LAYERS"], {} when absent."""
+        try:
+            return self.CONFIG_DATA["CURRENT_PROJECT"]["OPTIONS"]["LAYERS"]
+        except (KeyError, TypeError):
+            return {}
+
+    def _properties_count(self):
+        """LAYER_PROPERTIES_COUNT for this task: read once from CONFIG_DATA, then the task's own."""
+        if getattr(self, '_layer_properties_count', None) is None:
+            self._layer_properties_count = self._config_layers_options().get("LAYER_PROPERTIES_COUNT", 0)
+        return self._layer_properties_count
 
     def manage_project_layers(self):
         """
@@ -436,7 +462,7 @@ class LayersManagementEngineTask(QgsTask):
             dict: Dictionary with 'infos', 'exploring', 'filtering' keys, or empty dict if not found
         """
         spatialite_results = self.select_properties_from_spatialite(layer.id())
-        expected_count = self.CONFIG_DATA["CURRENT_PROJECT"]["OPTIONS"]["LAYERS"]["LAYER_PROPERTIES_COUNT"]
+        expected_count = self._properties_count()
 
         if not spatialite_results:
             return {}
@@ -467,7 +493,7 @@ class LayersManagementEngineTask(QgsTask):
         )
         if actual_count > 0 and actual_count != expected_count:
             logger.debug(f"Property count changed from {expected_count} to {actual_count} for layer {layer.id()}")
-            self.CONFIG_DATA["CURRENT_PROJECT"]["OPTIONS"]["LAYERS"]["LAYER_PROPERTIES_COUNT"] = actual_count
+            self._layer_properties_count = actual_count
 
         return existing_layer_variables
 
@@ -1084,13 +1110,13 @@ class LayersManagementEngineTask(QgsTask):
             self._set_layer_variables(layer, layer_variables)
 
         # Update properties count if first layer
-        if self.CONFIG_DATA["CURRENT_PROJECT"]["OPTIONS"]["LAYERS"]["LAYER_PROPERTIES_COUNT"] == 0:
+        if self._properties_count() == 0:
             properties_count = (
                 len(layer_variables["infos"]) +
                 len(layer_variables["exploring"]) +
                 len(layer_variables["filtering"])
             )
-            self.CONFIG_DATA["CURRENT_PROJECT"]["OPTIONS"]["LAYERS"]["LAYER_PROPERTIES_COUNT"] = properties_count
+            self._layer_properties_count = properties_count
 
         # Prepare layer properties dict
         layer_props = {
@@ -1169,13 +1195,13 @@ class LayersManagementEngineTask(QgsTask):
         else:
             ensure_template(layer_variables, template)
 
-        if self.CONFIG_DATA["CURRENT_PROJECT"]["OPTIONS"]["LAYERS"]["LAYER_PROPERTIES_COUNT"] == 0:
+        if self._properties_count() == 0:
             properties_count = (
                 len(layer_variables["infos"]) +
                 len(layer_variables["exploring"]) +
                 len(layer_variables["filtering"])
             )
-            self.CONFIG_DATA["CURRENT_PROJECT"]["OPTIONS"]["LAYERS"]["LAYER_PROPERTIES_COUNT"] = properties_count
+            self._layer_properties_count = properties_count
 
         layer_props = {
             "infos": layer_variables["infos"],
@@ -1699,7 +1725,10 @@ class LayersManagementEngineTask(QgsTask):
 
             # Create spatial index
             alg_params_createspatialindex = {"INPUT": layer}
-            processing.run('qgis:createspatialindex', alg_params_createspatialindex)
+            from ...infrastructure.utils.processing_context import worker_processing_context
+            # 2026-10-17: an explicit context: never built from the project / canvas in the worker
+            processing.run('qgis:createspatialindex', alg_params_createspatialindex,
+                           context=worker_processing_context())
 
             if self.isCanceled():
                 return False
@@ -2126,6 +2155,12 @@ class LayersManagementEngineTask(QgsTask):
                 )
             self._deferred_warnings.clear()
 
+        # The properties count this task found, into the app's configuration (main thread)
+        layers_options = self._config_layers_options()
+        if (getattr(self, '_layer_properties_count', None) is not None
+                and layers_options.get("LAYER_PROPERTIES_COUNT") != self._layer_properties_count):
+            layers_options["LAYER_PROPERTIES_COUNT"] = self._layer_properties_count
+
         result_action = None
         message_category = MESSAGE_TASKS_CATEGORIES[self.task_action]
 
@@ -2162,11 +2197,13 @@ class LayersManagementEngineTask(QgsTask):
                         # Message bar notification removed - internal operation, too verbose for UX
                         logger.info(f'Layers properties updated: {result_action}')
         else:
-            # Error case - log and raise
-
+            # Error case: shown, and logged with its traceback. 2026-10-17: no longer raised:
+            # an exception out of finished() reached QGIS's Python error handler (error
+            # dialog), after the message above already told the user.
             iface.messageBar().pushMessage(
                 message_category,
                 self.tr("Exception: {0}").format(self.exception),
                 Qgis.MessageLevel.Critical
             )
-            raise self.exception
+            logger.error(f"LayersManagementEngineTask {self.task_action} failed: {self.exception}",
+                         exc_info=(type(self.exception), self.exception, self.exception.__traceback__))

@@ -105,6 +105,9 @@ class MaterializedViewHandler:
             from ...adapters.backends.postgresql.mv_reference_tracker import get_mv_reference_tracker
             tracker = get_mv_reference_tracker()
 
+            # The task's own views (2026-10-17): the only ones a canceled task may drop
+            self.task.__dict__.setdefault('_created_mv_names', set()).add(view_name)
+
             # Register references for source layer and all distant layers
             if hasattr(self.task, 'source_layer') and self.task.source_layer:
                 tracker.add_reference(view_name, self.task.source_layer.id())
@@ -256,6 +259,10 @@ class MaterializedViewHandler:
             # Register MV references to prevent premature cleanup
             from ...adapters.backends.postgresql.mv_reference_tracker import get_mv_reference_tracker
             tracker = get_mv_reference_tracker()
+
+            # The task's own views (2026-10-17): the only ones a canceled task may drop
+            self.task.__dict__.setdefault('_created_mv_names', set()).update(
+                {f"fm_temp_mv_{mv_name}", f"fm_temp_mv_{mv_name}_dump"})
 
             # Register references for source layer and all distant layers (fm_temp_mv_ prefix)
             if self.task.source_layer:

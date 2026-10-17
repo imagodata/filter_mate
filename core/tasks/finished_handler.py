@@ -40,7 +40,6 @@ from ...config.config import ENV_VARS
 # E6: Task completion handler functions (reused, not duplicated)
 from .task_completion_handler import (
     display_warning_messages as tch_display_warnings,
-    should_skip_subset_application,
     apply_pending_subset_requests,
     schedule_canvas_refresh,
     cleanup_memory_layer,
@@ -52,6 +51,17 @@ logger = setup_logger(
     os.path.join(ENV_VARS.get("PATH_ABSOLUTE_PROJECT", "."), 'logs', 'filtermate_tasks.log'),
     level=logging.INFO
 )
+
+
+def _deleted(layer: Any) -> bool:
+    """True once the layer's C++ object is gone."""
+    if layer is None:
+        return True
+    try:
+        layer.id()
+        return False
+    except RuntimeError:
+        return True
 
 
 class FinishedHandler:
@@ -101,6 +111,7 @@ class FinishedHandler:
         restore_selection_fn: Callable[[], None],
         task_bridge: Optional[Any],
         cleanup_safe_intersect_fn: Callable[[], None],
+        cleanup_canceled_mv_fn: Optional[Callable[[], None]] = None,
     ) -> Tuple[List[str], List, Optional[Any]]:
         """Handle task completion with cleanup and user notifications.
 
@@ -135,6 +146,8 @@ class FinishedHandler:
             restore_selection_fn: Function to restore source layer selection.
             task_bridge: TaskBridge instance for metrics, if any.
             cleanup_safe_intersect_fn: Function to cleanup safe_intersect layers.
+            cleanup_canceled_mv_fn: For a canceled task: drops the materialized views it
+                created that nothing uses (instead of cleanup_mv_fn).
 
         Returns:
             Tuple of (cleared_warnings, cleared_pending_requests, cleared_ogr_source_geom)
@@ -146,14 +159,24 @@ class FinishedHandler:
         if warning_messages:
             tch_display_warnings(warning_messages)
 
-        # E6: Check if subset application should be skipped
-        has_pending = bool(pending_subset_requests)
-        truly_canceled = should_skip_subset_application(
-            is_canceled_fn(), has_pending, pending_subset_requests, result
-        )
+        # 2026-10-17: a canceled task applies nothing, even when its run()
+        # completed: canceled by a newer task (a second click on Filter),
+        # whose subsets are the ones to keep, or by QGIS (a layer removed).
+        # They were applied whenever the task had queued some.
+        if is_canceled_fn():
+            if pending_subset_requests:
+                logger.info(f"Task was canceled - its {len(pending_subset_requests)} pending subset "
+                            "request(s) are dropped")
+            pending_subset_requests = []
 
-        if truly_canceled and not pending_subset_requests:
-            logger.info("Task was canceled - skipping pending subset requests to prevent partial filter application")
+        # 2026-10-17: a target removed from the project during the task is left out (the
+        # task depends on its source layer only); the other targets get their subsets.
+        removed_targets = self._removed_target_names(task_parameters)
+        if pending_subset_requests:
+            pending_subset_requests = [(layer, expression) for layer, expression in pending_subset_requests
+                                       if not _deleted(layer)]
+        if removed_targets and not is_canceled_fn():
+            self._display_removed_targets(removed_targets, iface)
 
         # Apply pending subset strings on main thread
         apply_failures: List[str] = []
@@ -176,7 +199,12 @@ class FinishedHandler:
         # Cleaning them up would invalidate the filter expression causing empty results.
         # 2026-10-17: nor on export, which creates no MV and leaves the
         # filters in place (it dropped the MVs the filtered layers used).
-        if task_action in ('reset', 'unfilter'):
+        # 2026-10-17: not after a canceled reset / unfilter either: its subsets were not
+        # applied, the layers still read those views.
+        if is_canceled_fn():
+            if cleanup_canceled_mv_fn is not None:
+                cleanup_canceled_mv_fn()
+        elif task_action in ('reset', 'unfilter'):
             cleanup_mv_fn()
 
         # E6: Delegate memory layer cleanup to task_completion_handler
@@ -245,6 +273,12 @@ class FinishedHandler:
             restore_selection_fn: Function to restore source layer selection.
             iface: QGIS iface instance.
         """
+        if is_canceled_fn():
+            # 2026-10-17: no message for a canceled task, whatever its run()
+            # returned: a newer task reports, and an interrupted query
+            # (PostgreSQL "canceling statement") is no error to show.
+            logger.info(f"Task was canceled - no message displayed (result={result}, exception={exception})")
+            return
         if exception is None:
             self._handle_no_exception_result(
                 result=result,
@@ -510,6 +544,32 @@ class FinishedHandler:
         store = getattr(task, '__dict__', None)
         if isinstance(store, dict):
             store.pop('_filtermate_task_caches', None)
+
+    @staticmethod
+    def _removed_target_names(task_parameters: Dict[str, Any]) -> List[str]:
+        """Names of the task's target layers no longer in the project."""
+        names = []
+        project = QgsProject.instance()
+        for props in ((task_parameters or {}).get('task') or {}).get('layers') or []:
+            if not isinstance(props, dict) or not props.get('layer_id'):
+                continue
+            try:
+                if project.mapLayer(props['layer_id']) is None:
+                    names.append(props.get('layer_name') or props['layer_id'])
+            except RuntimeError:
+                continue
+        return names
+
+    @staticmethod
+    def _display_removed_targets(names: List[str], iface: Any) -> None:
+        """One warning for the target layers removed while the task ran."""
+        text = QCoreApplication.translate(
+            "FinishedHandler", "Layer(s) removed during the filter, left out: {0}").format(', '.join(names))
+        logger.warning(text)
+        try:
+            iface.messageBar().pushWarning("FilterMate", text)
+        except Exception as e:  # catch-all safety net: no message bar (shutdown)
+            logger.debug(f"Removed targets not shown: {e}")
 
     def _log_task_bridge_metrics(self, task_bridge: Optional[Any]) -> None:
         """Log TaskBridge metrics for migration validation (MIG-023).

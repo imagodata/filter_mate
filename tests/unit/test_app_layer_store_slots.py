@@ -95,3 +95,76 @@ class TestLayerStoreSlots:
         assert new_store.layersAdded.slots == [app._on_layers_added]
         new_store.allLayersRemoved.slots[0]()
         app.manage_task.assert_called_once_with('remove_all_layers')
+
+
+def _full_app():
+    """The app's connection, project switch and teardown of its layer-store slots."""
+    names = ["_connect_layer_store_slots", "_disconnect_layer_store_slots", "_connect_layer_store_signals",
+             "_handle_project_initialization", "_disconnect_all_signals"]
+    ns = _extract(names, {"logger": MagicMock(), "ENV_VARS": {}, "STABILITY_CONSTANTS": {}})
+    store = _Store()
+    service = MagicMock()
+    app = types.SimpleNamespace(
+        _on_layers_added=MagicMock(), manage_task=MagicMock(), MapLayerStore=store, _signals_connected=False,
+        _dockwidget_signals_connected=False, dockwidget=None,
+        PROJECT=types.SimpleNamespace(layerStore=lambda: store),
+        _get_layer_lifecycle_service=lambda: service, _datasource_manager=None,
+        _initializing_project=False, _loading_new_project=False, app_postgresql_temp_schema="filtermate_temp",
+        _check_and_reset_stale_flags=MagicMock(), _set_initializing_flag=MagicMock(), _set_loading_flag=MagicMock(),
+        _safe_cancel_all_tasks=MagicMock(), init_filterMate_db=MagicMock(),
+    )
+    app.service = service
+    for name in names:
+        setattr(app, name, types.MethodType(ns[name], app))
+    return app, store
+
+
+def _app_initializer_connect():
+    path = Path(__file__).resolve().parents[2] / "core" / "services" / "app_initializer.py"
+    tree = ast.parse(path.read_text(encoding="utf-8"))
+    cls = next(node for node in tree.body if isinstance(node, ast.ClassDef) and node.name == "AppInitializer")
+    method = next(node for node in cls.body if isinstance(node, ast.FunctionDef)
+                  and node.name == "_connect_layer_store_signals")
+    namespace = {"logger": MagicMock()}
+    exec(compile(ast.Module(body=[method], type_ignores=[]), str(path), "exec"), namespace)
+    return namespace["_connect_layer_store_signals"]
+
+
+@pytest.mark.unit
+class TestOneSetOfLayerStoreSlots:
+    """2026-10-17: the AppInitializer connected its own anonymous slots (never remembered), the first
+    project switch connected the app's next to them: every layer addition / removal ran twice."""
+
+    def test_connecting_twice_keeps_one_set(self):
+        app = _app()
+        store = _Store()
+        app._connect_layer_store_slots(store)
+        app._connect_layer_store_slots(store)
+        assert len(store.layersAdded.slots) == 1 and len(store.allLayersRemoved.slots) == 1
+
+    def test_the_app_initializer_connects_through_the_app(self):
+        app, store = _full_app()
+        initializer = types.SimpleNamespace(_connect_layer_store_signals_callback=app._connect_layer_store_signals,
+                                            _get_signals_connected=lambda: app._signals_connected)
+        _app_initializer_connect()(initializer)
+        app._connect_layer_store_signals()  # FilterMateApp.run() connects again after the initializer
+        assert store.layersAdded.slots == [app._on_layers_added]
+
+    @pytest.mark.parametrize("switches", [1, 3])
+    def test_project_switches_keep_one_set(self, switches):
+        app, store = _full_app()
+        app._connect_layer_store_signals()
+        for _ in range(switches):
+            app._handle_project_initialization("project_read")
+        assert app.service.handle_project_initialization.call_count == switches  # the switch went through
+        assert len(store.layersAdded.slots) == 1
+        assert len(store.layersWillBeRemoved.slots) == 1 and len(store.allLayersRemoved.slots) == 1
+
+    def test_cleanup_disconnects_them(self):
+        app, store = _full_app()
+        qgis_receiver = object()
+        store.layersAdded.connect(qgis_receiver)
+        app._connect_layer_store_signals()
+        app._disconnect_all_signals()
+        assert store.layersAdded.slots == [qgis_receiver] and store.allLayersRemoved.slots == []
+        assert app._signals_connected is False

@@ -25,7 +25,7 @@ class TaskManagementPort(Protocol):
     """
 
     @abstractmethod
-    def safe_cancel_all_tasks(self) -> None:
+    def safe_cancel_all_tasks(self, keep_exports: bool = False) -> None:
         """Cancel all tasks safely to avoid access violations."""
         ...
 

@@ -1075,6 +1075,7 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
                 if is_layer_valid(self.layer) and self.layer.id() != layer.id():
                     old_layer_id = self.layer.id()
                     self._filter_debounce_timer.stop()
+                    self._cancel_deferred_populate()
                     for task_type in self.tasks:
                         if old_layer_id in self.tasks[task_type]:
                             try:
@@ -1328,6 +1329,17 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
     CANVAS_DEFER_FALLBACK_MS = 15000
     CANVAS_DEFER_MAX_ROUNDS = 3
 
+    def _layer_id_or_none(self):
+        try:
+            return self.layer.id() if self.layer is not None else None
+        except (RuntimeError, AttributeError):  # layer deleted
+            return None
+
+    def _cancel_deferred_populate(self):
+        """Drop the population waiting for the canvas (the layer changes)."""
+        self._deferred_populate_armed = False
+        self._deferred_populate_request = None
+
     def _canvas_is_drawing(self) -> bool:
         try:
             from qgis.utils import iface
@@ -1350,9 +1362,15 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
             return False
         if not self._canvas_is_drawing():
             return False
+        # 2026-10-17: the latest request runs, for the layer it was made for. The closure ran
+        # the first request's expression, and the requests made while it waited were lost;
+        # after a layer change it populated the new layer with the old layer's expression.
+        self._deferred_populate_request = (
+            self._layer_id_or_none(), expression, preserve_checked, force_full, search_text)
         if getattr(self, '_deferred_populate_armed', False):
             return True
         self._deferred_populate_armed = True
+        generation = self._deferred_populate_gen = getattr(self, '_deferred_populate_gen', 0) + 1
         weak_self = weakref.ref(self)
         from qgis.utils import iface
         canvas = iface.mapCanvas()
@@ -1360,7 +1378,12 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
 
         def run_deferred(from_timer=False):
             widget = weak_self()
-            if widget is None or not getattr(widget, '_deferred_populate_armed', False):
+            if (widget is None or not getattr(widget, '_deferred_populate_armed', False)
+                    or getattr(widget, '_deferred_populate_gen', None) != generation):
+                try:  # canceled (layer change) or superseded: no longer waits for the canvas
+                    canvas.mapCanvasRefreshed.disconnect(run_deferred)
+                except (TypeError, RuntimeError):
+                    pass
                 return
             if from_timer and widget._canvas_is_drawing() and rounds['timer'] < widget.CANVAS_DEFER_MAX_ROUNDS:
                 # 2026-09-14: an 8 s fallback fired while the canvas was still
@@ -1374,11 +1397,17 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
                 canvas.mapCanvasRefreshed.disconnect(run_deferred)
             except (TypeError, RuntimeError):
                 pass
+            request = widget._deferred_populate_request
+            widget._deferred_populate_request = None
+            if request is None or request[0] is None or request[0] != widget._layer_id_or_none():
+                logger.debug("_populate_features_sync: deferred population dropped (the layer changed)")
+                return
+            _, expression_now, preserve_now, force_now, search_now = request
             widget._skip_canvas_defer = True
             try:
                 widget._populate_features_sync(
-                    expression, preserve_checked=preserve_checked,
-                    force_full=force_full, search_text=search_text,
+                    expression_now, preserve_checked=preserve_now,
+                    force_full=force_now, search_text=search_now,
                 )
             finally:
                 widget._skip_canvas_defer = False

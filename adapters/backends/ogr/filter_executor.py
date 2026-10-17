@@ -746,7 +746,7 @@ def prepare_ogr_source_geom(
     Returns:
         QgsVectorLayer or None: Prepared source geometry layer
     """
-    from qgis.core import QgsMessageLog, Qgis, QgsProject, QgsExpressionContext
+    from qgis.core import QgsMessageLog, Qgis, QgsExpressionContext
     try:
         from qgis.core import QgsProperty
     except ImportError:
@@ -896,15 +896,15 @@ def prepare_ogr_source_geom(
                 "FilterMate", Qgis.MessageLevel.Warning
             )
 
-    # Step 5: Prevent garbage collection for memory layers
-    # FIX v4.1.1: Register layer for cleanup after filtering completes
+    # Step 5: the memory layer is NOT added to the project (2026-10-17). It was,
+    # "to prevent its garbage collection", from the worker thread (the project's
+    # layersAdded / willBeRemoved signals fired there). A layer created in Python
+    # lives as long as a reference to it: the task keeps the one returned here
+    # (ogr_source_geom), and Processing takes layer objects, in a project or not.
     if layer and layer.isValid() and layer.providerType() == 'memory':
-        logger.debug("[OGR]   Adding memory layer to project (prevent GC)")
         # PERF 2026-09-12: marker read by FilterMate's layersAdded/WillBeRemoved
         # handlers so this scratch layer never triggers a layer-management task
         layer.setCustomProperty('filterMate/internal_temp', True)
-        QgsProject.instance().addMapLayer(layer, addToLegend=False)
-        register_temp_layer(layer.id())  # Register for cleanup
 
     return layer
 

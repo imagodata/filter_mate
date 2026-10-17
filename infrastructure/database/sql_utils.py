@@ -9,6 +9,7 @@ Migrated from modules/appUtils.py to infrastructure/database/sql_utils.py
 
 import re
 import logging
+import sys
 import time as _perf
 from contextlib import contextmanager
 
@@ -20,6 +21,16 @@ except ImportError:
 from ..logging.redaction import mask_sensitive_text
 
 logger = logging.getLogger('FilterMate.Infrastructure.Database.SQLUtils')
+
+
+def _on_main_thread() -> bool:
+    """True on the Qt main thread (a widget is never touched from a task's worker)."""
+    try:
+        from qgis.PyQt.QtCore import QThread
+        app = QCoreApplication.instance() if QCoreApplication is not None else None
+        return app is not None and QThread.currentThread() == app.thread()
+    except Exception:  # catch-all safety net: unknown means no
+        return False
 
 
 @contextmanager
@@ -37,9 +48,14 @@ def feature_picker_guard(layer):
     """
     picker = None
     try:
-        from filter_mate_dockwidget import _active_dockwidget
-        if _active_dockwidget is not None:
-            widget = getattr(_active_dockwidget, 'mFeaturePickerWidget_exploring_single_selection', None)
+        # 2026-10-17: the plugin's dock module, by its package. ``from filter_mate_dockwidget
+        # import`` (absolute) never found it (ImportError swallowed): the guard never ran.
+        # Read from sys.modules: no import of the dock where it was never loaded (Processing).
+        from ...core.domain.plugin_package import PLUGIN_PACKAGE
+        dock_module = sys.modules.get(f"{PLUGIN_PACKAGE}.filter_mate_dockwidget")
+        active_dock = getattr(dock_module, '_active_dockwidget', None)
+        if active_dock is not None and _on_main_thread():
+            widget = getattr(active_dock, 'mFeaturePickerWidget_exploring_single_selection', None)
             if widget is not None and hasattr(widget, 'layer') and widget.layer() == layer:
                 widget.setLayer(None)
                 picker = widget

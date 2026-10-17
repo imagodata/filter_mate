@@ -269,6 +269,9 @@ class CreateSpatialIndexTask(BaseFilterMateTask):
         )
 
         self._layer_ids = layer_ids
+        # The Processing settings for the worker's contexts, read here on the main thread (2026-10-17)
+        from ....infrastructure.utils.processing_context import capture_processing_settings
+        capture_processing_settings()
         self._created = 0
         self._skipped = 0
         self._failed = 0
@@ -298,9 +301,11 @@ class CreateSpatialIndexTask(BaseFilterMateTask):
 
                 try:
                     # Create spatial index using processing
+                    from ....infrastructure.utils.processing_context import worker_processing_context
+                    # 2026-10-17: an explicit context: never built from the project / canvas in the worker
                     processing.run("native:createspatialindex", {
                         'INPUT': layer
-                    })
+                    }, context=worker_processing_context())
                     self._created += 1
                 except Exception as e:
                     logger.warning(f"Failed to create index for {layer.name()}: {e}")

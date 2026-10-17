@@ -79,15 +79,16 @@ class TestSafeCancelAllTasks:
         assert not processing.canceled and not other.canceled
         assert layers.canceled and export.canceled
 
-    def test_a_running_filter_is_left_alone(self, task_manager):
-        """Canceled, a filter left the panel in "filtering" state with the current-layer combo box
-        blocked (lifted on taskCompleted only); the former loop practically never reached it."""
+    def test_a_running_filter_is_canceled(self, task_manager):
+        """2026-10-17: left running before (its protections were lifted on taskCompleted only, its
+        cancel() dropped PostgreSQL views on the main thread): a project change or an unload left
+        it running over layers being removed."""
         filtering = FilterEngineTask(58, "Filtering data")
         task_manager([filtering])
 
         tms.TaskManagementService().safe_cancel_all_tasks()
 
-        assert not filtering.canceled
+        assert filtering.canceled
 
     def test_tasks_that_cannot_be_canceled_are_left(self, task_manager):
         task = LayersManagementEngineTask(3, "Adding layers", can_cancel=False)
@@ -120,3 +121,20 @@ class TestIsFilterMateTask:
     def test_other_tasks(self):
         assert tms.is_filtermate_task(OtherPluginTask(1, "Filtering")) is False
         assert tms.is_filtermate_task(ProcessingTask(1, "Clip")) is False
+
+
+@pytest.mark.unit
+def test_f5_leaves_a_running_export_alone(task_manager):
+    """2026-10-17 review: force_reload_layers (F5) cancels the tasks, not an export in progress."""
+    export = FilterEngineTask(60, "Exporting layers")
+    export.task_action = "export"
+    filtering = FilterEngineTask(61, "Filtering data")
+    filtering.task_action = "filter"
+    task_manager([export, filtering])
+
+    tms.TaskManagementService().safe_cancel_all_tasks(keep_exports=True)
+
+    assert not export.canceled and filtering.canceled
+
+    tms.TaskManagementService().safe_cancel_all_tasks()  # unload / project change: everything
+    assert export.canceled

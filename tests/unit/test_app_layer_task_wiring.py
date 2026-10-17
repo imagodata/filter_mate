@@ -34,6 +34,10 @@ class _Signal:
     def connect(self, slot, *args):
         self.slots.append(slot)
 
+    def emit(self, *args):
+        for slot in list(self.slots):
+            slot(*args)
+
 
 class _FakeTask:
     def __init__(self, description, task_action, task_parameters):
@@ -92,3 +96,62 @@ def test_the_ids_reach_the_handler():
     first, second = handler.handle_task_completion.call_args_list
     assert first.kwargs["changed_layer_ids"] == ["B"]
     assert second.kwargs["changed_layer_ids"] is None
+
+
+def test_no_slot_calls_a_missing_method(tasks_package):
+    """2026-10-17: savingLayerVariable / removingLayerVariable reached self.saving_layer_variable /
+    self.removing_layer_variable, which FilterMateApp does not define."""
+    namespace = _extract(["_execute_layer_task"], {
+        "__package__": _PKG, "Qt": MagicMock(), "QgsApplication": MagicMock(),
+    })
+    app = types.SimpleNamespace(appTasks={}, tasks_descriptions={"remove_layers": "Removing layers"},
+                                dockwidget=None, on_remove_layer_task_begun=MagicMock(),
+                                layer_management_engine_task_completed=MagicMock())
+    namespace["_execute_layer_task"](app, "remove_layers", {"task": {"layers": ["B"]}})
+    task = app.appTasks["remove_layers"]
+    assert task.savingLayerVariable.slots == [] and task.removingLayerVariable.slots == []
+    source = _APP.read_text(encoding="utf-8")
+    for name in ("saving_layer_variable", "removing_layer_variable"):
+        assert f"self.{name}(" not in source or f"def {name}(" in source
+
+
+def _terminated_app(pending):
+    namespace = _extract(["_handle_layer_task_terminated"], {"logger": MagicMock()})
+    app = types.SimpleNamespace(_pending_add_layers_tasks=pending, _loading_new_project=False,
+                                _initializing_project=False, dockwidget=None)
+    app._handle_layer_task_terminated = types.MethodType(namespace["_handle_layer_task_terminated"], app)
+    return app
+
+
+def test_a_failed_add_layers_releases_its_counter_once(tasks_package):
+    """2026-10-17: a failed run emits resultingLayers (the completion releases the counter) then
+    taskTerminated released it again: 2 pending add_layers -> 0, the queue started a third one."""
+    namespace = _extract(["_execute_layer_task"], {
+        "__package__": _PKG, "Qt": MagicMock(), "QgsApplication": MagicMock(),
+    })
+    app = types.SimpleNamespace(appTasks={}, tasks_descriptions={"add_layers": "Adding layers"},
+                                dockwidget=None, layer_management_engine_task_completed=MagicMock(),
+                                _handle_layer_task_terminated=MagicMock())
+    namespace["_execute_layer_task"](app, "add_layers", {"task": {"layers": []}})
+    task = app.appTasks["add_layers"]
+    task.resultingLayers.emit({"A": {}})
+    task.taskTerminated.emit()
+    app._handle_layer_task_terminated.assert_called_once_with("add_layers", results_delivered=True)
+
+    terminated = _terminated_app(pending=2)
+    terminated._handle_layer_task_terminated("add_layers", results_delivered=True)
+    assert terminated._pending_add_layers_tasks == 2  # already released by the completion
+    terminated._handle_layer_task_terminated("add_layers")
+    assert terminated._pending_add_layers_tasks == 1  # no results: released here
+
+
+def test_an_add_layers_terminated_without_results_still_releases(tasks_package):
+    namespace = _extract(["_execute_layer_task"], {
+        "__package__": _PKG, "Qt": MagicMock(), "QgsApplication": MagicMock(),
+    })
+    app = types.SimpleNamespace(appTasks={}, tasks_descriptions={"add_layers": "Adding layers"},
+                                dockwidget=None, layer_management_engine_task_completed=MagicMock(),
+                                _handle_layer_task_terminated=MagicMock())
+    namespace["_execute_layer_task"](app, "add_layers", {"task": {"layers": []}})
+    app.appTasks["add_layers"].taskTerminated.emit()
+    app._handle_layer_task_terminated.assert_called_once_with("add_layers", results_delivered=False)

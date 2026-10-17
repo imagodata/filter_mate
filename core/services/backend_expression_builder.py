@@ -328,6 +328,8 @@ class BackendExpressionBuilder:
                     fids, pk_field, source_table_name, mv_ref
                 )
                 self._source_selection_mvs.append(mv_ref)
+                from ..filter.expression_builder import record_task_view
+                record_task_view(self.task_parameters, mv_ref)
                 logger.debug(f"   ✓ MV created: {mv_ref}")
                 logger.debug(f"   → v2.8.0: Using source selection MV ({len(fids)} features) for EXISTS optimization")
                 return source_filter

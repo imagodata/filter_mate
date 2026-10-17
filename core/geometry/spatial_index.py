@@ -57,9 +57,13 @@ def verify_and_create_spatial_index(layer, layer_name: Optional[str] = None) -> 
     # Create spatial index
     try:
         import processing
+        from ...infrastructure.utils.processing_context import worker_processing_context
+        # 2026-10-17: an explicit context. Without one, processing.run() builds its own from the
+        # project and iface.mapCanvas(), read from this worker thread: QGIS crashed
+        # (segfault in createExpressionContext) while the main thread removed a layer.
         processing.run('qgis:createspatialindex', {
             'INPUT': layer
-        })
+        }, context=worker_processing_context())
         logger.info(f"Successfully created spatial index for: {display_name}")
         return True
 

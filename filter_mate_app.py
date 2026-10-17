@@ -330,8 +330,16 @@ class FilterMateApp:
         if getattr(self, '_unloading', False):
             return
         self._unloading = True
+        # 2026-10-17: _disconnect_all_signals had no caller: the project kept calling the slots
+        # of an unloaded instance (layer additions / removals, saves on fileNameChanged).
+        self._disconnect_all_signals()
         self._stop_pending_layer_additions()
         self._safe_cancel_all_tasks()
+        # A filter task just canceled ends later (its run() returns at the next check): its
+        # completion does nothing once unloading, the canvas it froze is thawed now.
+        frozen_token = getattr(self, '_canvas_frozen_token', None)
+        if frozen_token is not None:
+            self._unfreeze_canvas_after_task(frozen_token)
         service = self._get_layer_lifecycle_service()
         if service:
             auto_cleanup_enabled = getattr(self.dockwidget, '_pg_auto_cleanup_enabled', True) if self.dockwidget else True
@@ -562,7 +570,8 @@ class FilterMateApp:
                                                 lambda: self._signals_connected, lambda val: setattr(self, '_signals_connected', val), lambda: self._dockwidget_signals_connected,
                                                 lambda val: setattr(self, '_dockwidget_signals_connected', val), lambda: self.MapLayerStore, lambda mls: setattr(self, 'MapLayerStore', mls),
                                                 self._on_widgets_initialized, self._on_layers_added, self.update_undo_redo_buttons, self.save_variables_from_layer,
-                                                self.remove_variables_from_layer, self.save_project_variables) if HEXAGONAL_AVAILABLE and AppInitializer else None
+                                                self.remove_variables_from_layer, self.save_project_variables,
+                                                connect_layer_store_signals_callback=self._connect_layer_store_signals) if HEXAGONAL_AVAILABLE and AppInitializer else None
         if self._app_initializer:
             logger.debug("FilterMate: AppInitializer initialized (v4.4 migration)")
 
@@ -758,7 +767,7 @@ class FilterMateApp:
         self.MapLayerStore = self.PROJECT.layerStore()
 
         service.force_reload_layers(
-            cancel_tasks_callback=self._safe_cancel_all_tasks,
+            cancel_tasks_callback=lambda: self._safe_cancel_all_tasks(keep_exports=True),
             reset_flags_callback=lambda: (
                 self._check_and_reset_stale_flags(),
                 self._set_loading_flag(False),
@@ -948,16 +957,24 @@ class FilterMateApp:
     # ========================================
 
     def _connect_layer_store_slots(self, store):
-        """Connect the plugin's three layer-store slots to ``store`` and remember them."""
+        """Connect the plugin's three layer-store slots to ``store`` and remember them.
+
+        Idempotent (2026-10-17): the slots connected before, to this store or
+        another, are disconnected first. The AppInitializer connected its own
+        anonymous slots (never remembered): the first project switch added
+        these ones next to them, and every layer addition / removal ran twice.
+        """
+        self._disconnect_layer_store_slots(store)
         self._layer_store_slots = {
             'layersAdded': self._on_layers_added,
             'layersWillBeRemoved': lambda layers: self.manage_task('remove_layers', layers),
             'allLayersRemoved': lambda: self.manage_task('remove_all_layers'),
         }
+        self._layer_store_slots_owner = store
         for signal_name, slot in self._layer_store_slots.items():
             getattr(store, signal_name).connect(slot)
 
-    def _disconnect_layer_store_slots(self, store):
+    def _disconnect_layer_store_slots(self, store=None):
         """Disconnect only the slots connected by _connect_layer_store_slots.
 
         2026-09-14: ``store.layersAdded.disconnect()`` (no argument) removed
@@ -966,13 +983,18 @@ class FilterMateApp:
         switch on, the QgsMapLayerComboBox of the filtering tab (and anything
         else listening to the project) never learnt about new layers again:
         the combo stayed at the previous project's entries.
+
+        Args:
+            store: The store to disconnect from when the slots' own store is unknown.
         """
+        owner = getattr(self, '_layer_store_slots_owner', None) or store
         for signal_name, slot in (getattr(self, '_layer_store_slots', None) or {}).items():
             try:
-                getattr(store, signal_name).disconnect(slot)
-            except (TypeError, RuntimeError) as e:  # not connected / store deleted
+                getattr(owner, signal_name).disconnect(slot)
+            except (TypeError, RuntimeError, AttributeError) as e:  # not connected / store deleted
                 logger.debug(f"Layer store slot {signal_name} not disconnected: {e}")
         self._layer_store_slots = {}
+        self._layer_store_slots_owner = None
 
     def _connect_layer_store_signals(self):
         """
@@ -1070,29 +1092,37 @@ class FilterMateApp:
         Called before plugin unload or project change to prevent
         access violations from stale signal connections.
         """
-        # Disconnect layer store signals
-        if self._signals_connected and self.MapLayerStore:
+        # Disconnect layer store signals (the remembered slots, whatever the flag says)
+        try:
+            self._disconnect_layer_store_slots(self.MapLayerStore)
+            self._signals_connected = False
+            logger.debug("Layer store signals disconnected")
+        except (TypeError, RuntimeError) as e:
+            logger.debug(f"Could not disconnect layer store signals: {e}")
+
+        # The project's fileNameChanged (2026-10-17: an unloaded instance saved its variables
+        # into the next session's project)
+        previous_slot = getattr(self, '_project_filename_slot', None)
+        if previous_slot is not None and getattr(self, 'PROJECT', None) is not None:
             try:
-                self._disconnect_layer_store_slots(self.MapLayerStore)
-                self._signals_connected = False
-                logger.debug("Layer store signals disconnected")
-            except (TypeError, RuntimeError) as e:
-                logger.debug(f"Could not disconnect layer store signals: {e}")
+                self.PROJECT.fileNameChanged.disconnect(previous_slot)
+            except (TypeError, RuntimeError) as e:  # not connected / project deleted
+                logger.debug(f"fileNameChanged slot not disconnected: {e}")
+            self._project_filename_slot = None
 
         # Disconnect dockwidget signals
         if self._dockwidget_signals_connected and self.dockwidget:
-            try:
-                self.dockwidget.launchingTask.disconnect()
-                self.dockwidget.currentLayerChanged.disconnect()
-                self.dockwidget.settingLayerVariable.disconnect()
-                self.dockwidget.resettingLayerVariable.disconnect()
-                self.dockwidget.resettingLayerVariableOnError.disconnect()
-                self.dockwidget.settingProjectVariables.disconnect()
-                self.dockwidget.widgetsInitialized.disconnect()
-                self._dockwidget_signals_connected = False
-                logger.debug("Dockwidget signals disconnected")
-            except (TypeError, RuntimeError) as e:
-                logger.debug(f"Could not disconnect dockwidget signals: {e}")
+            # The dock's own signals; one without receivers raises TypeError and must not
+            # leave the next ones connected.
+            for signal_name in ('launchingTask', 'currentLayerChanged', 'settingLayerVariable',
+                                'resettingLayerVariable', 'resettingLayerVariableOnError',
+                                'settingProjectVariables', 'widgetsInitialized'):
+                try:
+                    getattr(self.dockwidget, signal_name).disconnect()
+                except (TypeError, RuntimeError, AttributeError) as e:
+                    logger.debug(f"Could not disconnect dockwidget signal {signal_name}: {e}")
+            self._dockwidget_signals_connected = False
+            logger.debug("Dockwidget signals disconnected")
 
     def _safe_layer_operation(self, layer, properties, operation):
         """Safely execute a layer operation by deferring to Qt event loop and re-fetching layer."""
@@ -1171,6 +1201,10 @@ class FilterMateApp:
         timer = getattr(self, '_layers_added_timer', None)
         if timer is not None:
             timer.stop()
+        # 2026-10-17: the deferred add_layers of a project load too
+        service = self._get_layer_lifecycle_service() if hasattr(self, '_get_layer_lifecycle_service') else None
+        if service is not None and hasattr(service, 'stop_pending_project_load'):
+            service.stop_pending_project_load()
         self._pending_added_layers = []
         self._add_layers_queue.clear()
         self._pending_add_layers_tasks = 0
@@ -1310,6 +1344,13 @@ class FilterMateApp:
             backend_registry=self._backend_registry  # v4.0.1: Hexagonal DI
         )
         logger.info(f"✓ FilterEngineTask created: {self.appTasks[task_name].description()}")
+        # 2026-10-17: QGIS cancels a task whose layers are being removed (only add_layers declared
+        # them). A filter / unfilter / reset depends on its source layer only: a target removed
+        # meanwhile is left out with a warning, the other targets are filtered (FinishedHandler).
+        # An export depends on the layers it exports, not on the panel's current layer.
+        self.appTasks[task_name].setDependentLayers(
+            layers if is_export else ([current_layer] if current_layer is not None else [])
+        )
 
         # Filter/unfilter/reset bookkeeping uses current_layer; skip for export
         # which has its own independent flow.
@@ -1323,14 +1364,20 @@ class FilterMateApp:
         # filter history, auto-zoom) — none of which apply to export. Export
         # completion is fully handled in FilterEngineTask.finished() →
         # FinishedHandler with the 'ExportLayers' message branch.
+        # 2026-10-17: the completion reads the task's own parameters (what its
+        # worker wrote: backends used, subset-change token), and a task a newer
+        # one replaced ends as a terminated task (see _filter_engine_task_succeeded).
         if not is_export:
-            self.appTasks[task_name].taskCompleted.connect(
-                lambda tn=task_name, cl=current_layer, tp=task_parameters:
-                    self.filter_engine_task_completed(tn, cl, tp)
+            task = self.appTasks[task_name]
+            generation = getattr(self.dockwidget, '_combo_protection_gen', None)
+            task.taskCompleted.connect(
+                lambda t=task, gen=generation, lid=self._current_layer_id_before_filter, tn=task_name,
+                cl=current_layer, tp=task.task_parameters:
+                    self._filter_engine_task_succeeded(t, gen, lid, tn, cl, tp)
             )
-            self.appTasks[task_name].taskTerminated.connect(
-                lambda gen=getattr(self.dockwidget, '_combo_protection_gen', None),
-                lid=self._current_layer_id_before_filter: self._filter_engine_task_terminated(gen, lid)
+            task.taskTerminated.connect(
+                lambda gen=generation, lid=self._current_layer_id_before_filter:
+                    self._filter_engine_task_terminated(gen, lid)
             )
 
         # Cancel conflicting tasks and add to task manager
@@ -1372,23 +1419,22 @@ class FilterMateApp:
         # Connect signals with Qt.ConnectionType.QueuedConnection
         # The list itself is captured (filled by run() before resultingLayers is emitted):
         # the task may already be deleted when the queued slot runs.
-        self.appTasks[task_name].resultingLayers.connect(
-            lambda result_project_layers, tn=task_name, ids=self.appTasks[task_name].changed_layer_ids:
-                self.layer_management_engine_task_completed(result_project_layers, tn, ids),
-            Qt.ConnectionType.QueuedConnection
-        )
-        self.appTasks[task_name].savingLayerVariable.connect(
-            lambda layer, variable_key, value_typped, type_returned:
-                self.saving_layer_variable(layer, variable_key, value_typped, type_returned),
-            Qt.ConnectionType.QueuedConnection
-        )
-        self.appTasks[task_name].removingLayerVariable.connect(
-            lambda layer, variable_key:
-                self.removing_layer_variable(layer, variable_key),
-            Qt.ConnectionType.QueuedConnection
-        )
+        # 2026-10-17: a failed (or canceled) run still emits resultingLayers, whose completion
+        # releases the add_layers counter, then taskTerminated released it a second time: with
+        # another add_layers pending the queue started a third one meanwhile.
+        delivered = {'results': False}
+
+        def on_results(result_project_layers, tn=task_name, ids=self.appTasks[task_name].changed_layer_ids):
+            delivered['results'] = True
+            self.layer_management_engine_task_completed(result_project_layers, tn, ids)
+
+        self.appTasks[task_name].resultingLayers.connect(on_results, Qt.ConnectionType.QueuedConnection)
+        # 2026-10-17: savingLayerVariable / removingLayerVariable are no longer connected: their slots
+        # called self.saving_layer_variable / self.removing_layer_variable, which do not exist
+        # (AttributeError if ever emitted). The task applies these variables itself, in finished()
+        # on the main thread (its _deferred_layer_variables).
         self.appTasks[task_name].taskTerminated.connect(
-            lambda tn=task_name: self._handle_layer_task_terminated(tn),
+            lambda tn=task_name: self._handle_layer_task_terminated(tn, results_delivered=delivered['results']),
             Qt.ConnectionType.QueuedConnection
         )
 
@@ -1485,6 +1531,52 @@ class FilterMateApp:
             self.dockwidget.manageSignal(["QGIS", "LAYER_TREE_VIEW"], 'disconnect')
         except Exception:  # nosec B110 - Signal may already be disconnected - expected during filtering protection
             pass
+
+    def _filter_engine_task_succeeded(self, task, generation, current_layer_id_before_filter,
+                                      task_name, source_layer, task_parameters):
+        """taskCompleted of a filter / unfilter / reset task: its results, unless it was replaced.
+
+        2026-10-17: a task canceled by a second click on Filter (or by QGIS, a
+        layer removed) can still complete. Its completion ran as the newer
+        task's: history pushed, canvas zoomed, and the combo-box protection of
+        the running task released. Such a task now ends as a terminated one
+        (nothing done when a newer task owns the protection).
+
+        Args:
+            task: The FilterEngineTask that completed.
+            generation: ``_combo_protection_gen`` when the task was launched.
+            current_layer_id_before_filter: Current layer when the task was launched.
+            task_name: 'filter', 'unfilter' or 'reset'.
+            source_layer: The source layer of the task.
+            task_parameters: The task's own parameters.
+        """
+        try:
+            canceled = task.isCanceled()
+        except RuntimeError:  # task deleted meanwhile
+            canceled = True
+        replaced = (self.dockwidget is not None
+                    and getattr(self.dockwidget, '_combo_protection_gen', None) != generation)
+        if canceled or replaced:
+            logger.info(f"Filter task '{task_name}' {'canceled' if canceled else 'replaced'}: results ignored")
+            self._filter_engine_task_terminated(generation, current_layer_id_before_filter)
+            return
+        source_layer = self._layer_in_project(source_layer)
+        if source_layer is None:
+            # removed meanwhile: nothing to report on, no error either
+            logger.info(f"Filter task '{task_name}': source layer removed meanwhile, results ignored")
+            self._filter_engine_task_terminated(generation, current_layer_id_before_filter)
+            return
+        self.filter_engine_task_completed(task_name, source_layer, task_parameters)
+
+    @staticmethod
+    def _layer_in_project(layer):
+        """The layer if it is still in the project (its C++ object alive), else None."""
+        try:
+            if layer is None or sip.isdeleted(layer):
+                return None
+            return QgsProject.instance().mapLayer(layer.id())
+        except RuntimeError:  # deleted between the checks
+            return None
 
     def _filter_engine_task_terminated(self, generation, current_layer_id_before_filter):
         """A filter / unfilter / reset task failed or was canceled: its protection ends as after a completed one.
@@ -1795,11 +1887,11 @@ class FilterMateApp:
         logger.debug(f"Using legacy dispatch for {task_name}")
         self._legacy_dispatch_task(task_name, data)
 
-    def _safe_cancel_all_tasks(self):
-        """Safely cancel all tasks via TaskManagementService."""
+    def _safe_cancel_all_tasks(self, keep_exports=False):
+        """Safely cancel all tasks via TaskManagementService (``keep_exports``: F5 leaves a running export)."""
         service = self._get_task_management_service()
         if service:
-            service.safe_cancel_all_tasks()
+            service.safe_cancel_all_tasks(keep_exports=keep_exports)
         else:
             logger.warning("TaskManagementService unavailable - cannot cancel tasks safely")
 
@@ -1811,15 +1903,21 @@ class FilterMateApp:
         else:
             logger.warning("TaskManagementService not available, cannot cancel layer tasks")
 
-    def _handle_layer_task_terminated(self, task_name):
-        """Handle layer management task termination (failure or cancellation) to prevent stuck UI."""
+    def _handle_layer_task_terminated(self, task_name, results_delivered=False):
+        """Handle layer management task termination (failure or cancellation) to prevent stuck UI.
+
+        Args:
+            task_name: 'add_layers' or 'remove_layers'.
+            results_delivered: The task emitted resultingLayers first: its completion already
+                released the add_layers counter.
+        """
         if getattr(self, '_unloading', False) or getattr(self, '_removing_all_layers', False):
             return
         logger.warning(f"Layer management task '{task_name}' was terminated")
 
         # STABILITY FIX: Reset counters and flags on task failure using tracked flags
         if task_name == 'add_layers':
-            if self._pending_add_layers_tasks > 0:
+            if self._pending_add_layers_tasks > 0 and not results_delivered:
                 self._pending_add_layers_tasks -= 1
                 logger.debug(f"Reset add_layers counter after termination (remaining: {self._pending_add_layers_tasks})")
             if self._loading_new_project:
@@ -2343,6 +2441,9 @@ class FilterMateApp:
                     return None
             else:
                 task_parameters = self.PROJECT_LAYERS[current_layer.id()]
+            # 2026-10-17: the "task" section below is this task's, not the layer's: the
+            # live PROJECT_LAYERS entry kept the last task's features, layers and options.
+            task_parameters = dict(task_parameters)
 
             # v4.7: Delegate feature extraction and validation
             logger.info("   → Calling builder.get_and_validate_features()...")
@@ -2669,8 +2770,12 @@ class FilterMateApp:
                 current_layer_id_before_filter=current_layer_id
             )
         except Exception as e:
-            logger.error(f"FilterResultHandler failed: {e}")
-            iface.messageBar().pushCritical("FilterMate", QCoreApplication.translate("FilterMateApp", "Error during filtering: {0}").format(str(e)))
+            if self._layer_in_project(source_layer) is None:
+                # 2026-10-17: the source layer removed while the results were applied: no error to show
+                logger.info(f"FilterResultHandler stopped, source layer removed: {e}")
+            else:
+                logger.error(f"FilterResultHandler failed: {e}")
+                iface.messageBar().pushCritical("FilterMate", QCoreApplication.translate("FilterMateApp", "Error during filtering: {0}").format(str(e)))
             if self.dockwidget is not None and not callable(getattr(self.dockwidget, '_end_post_filter_window', None)):
                 self._release_filter_protection(reconnect=True)  # failed before the post-filter window opened
 
@@ -2812,7 +2917,7 @@ class FilterMateApp:
         """Save project variables to database. Delegates to DatabaseManager."""
         global ENV_VARS
 
-        if self.dockwidget is None:
+        if self.dockwidget is None or getattr(self, '_unloading', False):
             return
 
         self.CONFIG_DATA = self.dockwidget.CONFIG_DATA

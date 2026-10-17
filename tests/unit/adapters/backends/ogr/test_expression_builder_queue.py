@@ -142,6 +142,7 @@ class TestOGRApplyFilterQueueRouting:
             processing=fake_processing,
             core=types.SimpleNamespace(
                 QgsVectorLayer=MagicMock, QgsFeatureRequest=MagicMock, QgsGeometry=MagicMock,
+                QgsSpatialIndex=MagicMock,  # 2026-10-17: the feature-by-feature fallback (no selection)
             ),
         )
         monkeypatch.setitem(sys.modules, "qgis", fake_qgis)
@@ -205,10 +206,12 @@ class TestBufferedSourceCache:
         buffered.isValid.return_value = True
         calls = []
 
-        def fake_run(alg, params, feedback=None):
+        def fake_run(alg, params, feedback=None, context=None):
             calls.append((alg, dict(params)))
+            contexts.append(context)
             return {"OUTPUT": buffered}
 
+        contexts = []
         processing = types.SimpleNamespace(run=fake_run)
         monkeypatch.setitem(sys.modules, "qgis.processing", processing)
         monkeypatch.setattr(_mod, "QgsVectorLayer", MagicMock)
@@ -222,6 +225,8 @@ class TestBufferedSourceCache:
         # a different distance is a different buffer
         builder._apply_buffer_to_layer(source, 30.0)
         assert len(calls) == 2
+        # 2026-10-17: an explicit context, never built by processing.run() from the worker thread
+        assert all(context is not None for context in contexts)
 
 
 class TestFetchPkValues:

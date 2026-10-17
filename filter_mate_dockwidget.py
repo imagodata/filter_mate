@@ -153,6 +153,9 @@ except ImportError: STYLE_MANAGERS_AVAILABLE = False; ThemeManager = IconManager
 # Allows sql_utils.safe_set_subset_string() to detach the widget BEFORE subset change
 _active_dockwidget = None
 
+# Bound on the disconnect loop of _disconnect_layer_selection_signal (one call per duplicate)
+_MAX_SELECTION_CONNECTIONS = 32
+
 
 class ClickableLabel(QtWidgets.QLabel):
     """QLabel that properly handles mouse clicks for menus."""
@@ -363,23 +366,34 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         """
         if not layer or not layer.isValid():
             return False
+        if not isinstance(layer, QgsVectorLayer):
+            return False  # raster / point cloud layers have no feature selection
         try:
-            # Disconnect first (idempotent)
-            try:
-                layer.selectionChanged.disconnect(self.on_layer_selection_changed)
-                was_connected = True
-            except TypeError:
-                was_connected = False
-            # Always reconnect
+            # 2026-10-17: every connection removed, then one made. Several call sites
+            # connected (some unconditionally) and the layer change disconnected once:
+            # each layer change could add a connection, and the previous layer kept one
+            # (its selection then drove the panel of the new current layer).
+            self._disconnect_layer_selection_signal(layer)
             layer.selectionChanged.connect(self.on_layer_selection_changed)
             self.current_layer_selection_connection = True
-            if not was_connected:
-                logger.warning(f"⚠️ selectionChanged NOT connected for {layer.name()} - reconnected")
             return True
         except Exception as e:
             logger.error(f"❌ _ensure_layer_signals_connected failed: {e}")
             self.current_layer_selection_connection = False
             return False
+
+    def _disconnect_layer_selection_signal(self, layer) -> None:
+        """Remove every connection of ``layer.selectionChanged`` to on_layer_selection_changed.
+
+        A connection made twice needs two disconnects: disconnect until Qt says none is left.
+        """
+        if layer is None:
+            return
+        for _ in range(_MAX_SELECTION_CONNECTIONS):
+            try:
+                layer.selectionChanged.disconnect(self.on_layer_selection_changed)
+            except (TypeError, RuntimeError, AttributeError):  # none left, layer deleted, not a vector layer
+                return
 
     def _connect_feature_picker_layer_deletion(self, layer):
         """
@@ -2130,9 +2144,7 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             logger.warning("⚠️ _controller_integration is None - using legacy code paths only")
 
         if self.current_layer and not self.current_layer_selection_connection:
-            try: self.current_layer.selectionChanged.connect(self.on_layer_selection_changed); self.current_layer_selection_connection = True
-            except Exception:  # nosec B110 - Signal may already be connected - expected
-                pass
+            self._ensure_layer_signals_connected(self.current_layer)
         self.widgetsInitialized.emit(); self._setup_keyboard_shortcuts()
         if self._pending_layers_update:
             self._pending_layers_update = False; pl, pr, weak_self = self.PROJECT_LAYERS, self.PROJECT, weakref.ref(self)
@@ -4554,8 +4566,7 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         try:
             # Check if signal needs to be connected
             if not self.current_layer_selection_connection:
-                self.current_layer.selectionChanged.connect(self.on_layer_selection_changed)
-                self.current_layer_selection_connection = True
+                self._ensure_layer_signals_connected(self.current_layer)
                 logger.debug(f"✅ _ensure_selection_changed_connected: Connected selectionChanged signal for layer '{self.current_layer.name()}'")
             else:
                 logger.debug(f"ℹ️ _ensure_selection_changed_connected: Signal already connected for layer '{self.current_layer.name()}'")
@@ -4577,12 +4588,8 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
 
         # FIX v5: Ensure signal stays connected (self-healing)
         if self.current_layer and not self.current_layer_selection_connection:
-            try:
-                self.current_layer.selectionChanged.connect(self.on_layer_selection_changed)
-                self.current_layer_selection_connection = True
+            if self._ensure_layer_signals_connected(self.current_layer):
                 logger.debug("on_layer_selection_changed: Re-connected selectionChanged signal (self-healing)")
-            except (TypeError, RuntimeError):
-                pass
 
         # FIX v10: DEBUG - Check delegation
         if self._controller_integration:
@@ -5156,11 +5163,9 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
                 return (False, None, None)
         except (RuntimeError, AttributeError, OSError):
             return (False, None, None)  # Layer source check failed
-        if self.current_layer is not None and self.current_layer_selection_connection is not None:
-            try:
-                self.current_layer.selectionChanged.disconnect(self.on_layer_selection_changed)
-            except (TypeError, RuntimeError, AttributeError):
-                pass
+        if self.current_layer is not None:
+            # every connection, whatever the flag says (2026-10-17)
+            self._disconnect_layer_selection_signal(self.current_layer)
             self.current_layer_selection_connection = None
 
         self.current_layer = layer
@@ -5547,13 +5552,9 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             except Exception:  # nosec B110 - signal connection best-effort, safe to ignore
                 pass
 
-        # Connect selectionChanged for tracking
+        # Connect selectionChanged for tracking (once: 2026-10-17)
         if self.current_layer:
-            try:
-                self.current_layer.selectionChanged.connect(self.on_layer_selection_changed)
-                self.current_layer_selection_connection = True
-            except Exception:  # nosec B110 - signal connection best-effort, safe to ignore
-                pass
+            self._ensure_layer_signals_connected(self.current_layer)
 
         # Restore exploring groupbox state
         if layer_props and "current_exploring_groupbox" in layer_props.get("exploring", {}):
@@ -5658,7 +5659,18 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         logger.debug(f"Caller stack:\n{''.join(traceback.format_stack()[-4:-1])}")
 
         if self._updating_current_layer:
-            logger.debug("current_layer_changed: Already updating, skipping")
+            # 2026-10-17: re-entered while a layer change runs (events are processed during it):
+            # the request was dropped, a layer the user picked then was shown in the combo box but
+            # never applied (dock smoke test, QGIS nightly). The latest request runs once the
+            # current change is over; a user pick is not replaced by an automatic change.
+            pending = getattr(self, '_layer_change_after_update', None)
+            if layer is not None and (manual_change or not (pending and pending[1])):
+                try:
+                    import time
+                    self._layer_change_after_update = (layer.id(), bool(manual_change), time.perf_counter())
+                except RuntimeError:  # layer deleted
+                    pass
+            logger.debug("current_layer_changed: Already updating, the request runs after it")
             return
 
         # FIX-5 (2026-01-16): CRITICAL - Ignore layer change signals during filtering
@@ -5692,7 +5704,8 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         except (RuntimeError, AttributeError):
             logger.warning("current_layer_changed: Layer C++ object deleted")
             return
-        if self._controller_integration and self._controller_integration.delegate_point_cloud_layer_change(layer):
+        if self._controller_integration and self._controller_integration.delegate_point_cloud_layer_change(
+                layer, manual_change=manual_change):
             return
         self._updating_current_layer = True
         # PERF 2026-09-12: "layer change → all widgets reloaded" latency; closed
@@ -5765,6 +5778,35 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             except (RuntimeError, AttributeError):
                 perf_mark_end("layer_change")
             logger.debug("current_layer_changed: Lock released")
+            self._run_layer_change_after_update(layer)
+
+    def _run_layer_change_after_update(self, applied_layer):
+        """Run the layer change requested while the previous one ran (see current_layer_changed)."""
+        pending = self.__dict__.pop('_layer_change_after_update', None)
+        if pending is None:
+            return
+        layer_id, manual_change, requested_at = pending
+        try:
+            if applied_layer is not None and applied_layer.id() == layer_id:
+                return  # the change that just ran was for that layer
+        except RuntimeError:
+            pass
+        weak_self = weakref.ref(self)
+
+        def replay():
+            dock = weak_self()
+            if dock is None:
+                return
+            # as _defer_layer_change: a pick made since this request, of another layer, wins
+            # (the recorded pick is never reset: an older one must not cancel the request)
+            picked_at, picked_id = getattr(dock, '_user_layer_pick', None) or (0.0, None)
+            if not manual_change and picked_at >= requested_at and picked_id not in (None, layer_id):
+                return
+            fresh = QgsProject.instance().mapLayer(layer_id)
+            if fresh is not None:
+                dock.current_layer_changed(fresh, manual_change=manual_change)
+
+        QTimer.singleShot(0, replay)
 
     def _defer_layer_change(self, layer, manual_change=False):
         """v4.0 Sprint 18: Defer layer change when plugin is busy.
@@ -6450,6 +6492,7 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         if project_layers is None: project_layers = {}
 
         self._updating_layers, self._plugin_busy = True, True
+        activate_awaited = False
 
         try:
             self._update_project_layers_data(project_layers, project)
@@ -6474,6 +6517,7 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
                 # v4.0.4: Emit signal after PROJECT_LAYERS is fully populated
                 logger.info(f"Emitting projectLayersReady signal ({len(self.PROJECT_LAYERS)} layers)")
                 self.projectLayersReady.emit()
+                activate_awaited = True
                 return
             if self.current_layer and self.current_layer.isValid():
                 if not self._signals_connected: self.connect_widgets_signals(); self._signals_connected = True
@@ -6493,6 +6537,12 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
                 )
         finally:
             self._updating_layers, self._plugin_busy = False, False
+            # 2026-10-17: a raster / point cloud picked before this registration is shown now (the
+            # vector refresh above showed the previous layer; the panel is no longer busy). In the
+            # finally: the branch that registers layers returns.
+            integration = getattr(self, '_controller_integration', None)
+            if activate_awaited and integration is not None and hasattr(integration, 'delegate_coverage_activate_awaited'):
+                integration.delegate_coverage_activate_awaited()
 
     def open_project_page(self):
         """v4.0 S18: Open project website page."""
@@ -6683,6 +6733,48 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
 
     def getProjectLayersEvent(self, event):
         if self.widgets_initialized: self.gettingProjectLayers.emit()
+
+    def release_qgis_connections(self):
+        """Plugin unload: undo what ties this dock to QGIS objects that outlive it.
+
+        2026-10-17: unload removes and deletes the dock without a closeEvent.
+        The layer tree view, the current layer and the theme watcher (a
+        singleton) kept calling the slots of the unloaded dock, its debounce
+        timers could still fire, and the module kept it as the active dock.
+        """
+        for timer_name in ('_feature_picker_debounce_timer', '_expression_debounce_timer'):
+            timer = getattr(self, timer_name, None)
+            if timer is not None:
+                try:
+                    timer.stop()
+                except RuntimeError:  # deleted with the dock
+                    pass
+        if self._theme_watcher is not None:
+            try:
+                self._theme_watcher.remove_callback(self._on_qgis_theme_changed)
+            except Exception as e:  # catch-all safety net: teardown goes on
+                logger.debug(f"Theme watcher callback not removed: {e}")
+        try:
+            self._disconnect_feature_picker_layer_deletion()
+        except Exception as e:  # catch-all safety net: may already be disconnected
+            logger.debug(f"Feature picker layer deletion not disconnected: {e}")
+        self._disconnect_layer_selection_signal(self.current_layer)
+        self.current_layer_selection_connection = None
+        try:
+            tree_view = self.widgets["QGIS"]["LAYER_TREE_VIEW"]
+            view, slots = tree_view["WIDGET"], [signal[-1] for signal in tree_view["SIGNALS"]]
+        except (AttributeError, KeyError, IndexError, TypeError):  # widgets never configured
+            view, slots = None, []
+        for slot in slots:
+            for _ in range(_MAX_SELECTION_CONNECTIONS):
+                try:
+                    view.currentLayerChanged.disconnect(slot)
+                except (TypeError, RuntimeError, AttributeError):  # none left / view deleted
+                    break
+        self._layer_tree_view_signal_connected = False
+        global _active_dockwidget
+        if _active_dockwidget is self:
+            _active_dockwidget = None
 
     def closeEvent(self, event):
         """Handle dockwidget close event.

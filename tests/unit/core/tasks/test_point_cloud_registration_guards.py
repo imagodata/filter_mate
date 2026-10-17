@@ -327,8 +327,10 @@ class TestAddPointCloudLayer:
         assert "spatial_index_pending" not in infos
         assert props["exploring"]["is_linking"] is False
         task.insert_properties_to_spatialite.assert_called_once_with("pc-1", props)
-        assert task.CONFIG_DATA["CURRENT_PROJECT"]["OPTIONS"]["LAYERS"]["LAYER_PROPERTIES_COUNT"] == (
+        # the task's count; the app's configuration is written by finished() (main thread)
+        assert task._layer_properties_count == (
             len(props["infos"]) + len(props["exploring"]) + len(props["filtering"]))
+        assert task.CONFIG_DATA["CURRENT_PROJECT"]["OPTIONS"]["LAYERS"]["LAYER_PROPERTIES_COUNT"] == 0
         assert ("pc-1", "filterMate_infos_layer_provider_type", POINT_CLOUD_PROVIDER_TYPE) in task._deferred_layer_variables
         assert ("pc-1", "filterMate_exploring_is_linking", False) in task._deferred_layer_variables
         assert task._deferred_warnings == []
@@ -353,7 +355,7 @@ class TestAddPointCloudLayer:
         assert props["filtering"]["buffer_type"] == "Round"
         task.insert_properties_to_spatialite.assert_not_called()
         assert task._deferred_layer_variables == []
-        assert task.CONFIG_DATA["CURRENT_PROJECT"]["OPTIONS"]["LAYERS"]["LAYER_PROPERTIES_COUNT"] == 44
+        assert task._layer_properties_count == 44
 
     def test_point_cloud_path_never_calls_the_vector_api(self, point_cloud_enabled):
         task = _task()
@@ -665,3 +667,55 @@ class TestRegistrationGuardsAst:
             assert defined == expected
             return
         raise AssertionError("guarded point cloud imports not found")
+
+
+@pytest.mark.unit
+class TestSharedStateStaysOnTheMainThread:
+    """2026-10-17: add_layers registered its layers in the app's PROJECT_LAYERS and counted their
+    properties in the app's CONFIG_DATA from the worker thread, while the main thread read both."""
+
+    def _run_add_layers(self, shared, config, layer):
+        task = _task()
+        task.task_parameters = {"task": {
+            "config_data": config, "db_file_path": "/tmp/fm.db", "project_uuid": "p",  # nosec B108
+            "layers": [layer], "project_layers": shared, "reset_all_layers_variables_flag": False,
+        }}
+        task._safe_spatialite_connect = MagicMock()
+        assert task.run() is True
+        return task
+
+    def test_the_worker_registers_in_its_own_copy(self, point_cloud_enabled):
+        known = {"infos": {"layer_geometry_type": "GeometryType.Polygon", "layer_name": "zones"}}
+        shared = {"zones": known}
+        config = {"CURRENT_PROJECT": {"OPTIONS": {"LAYERS": {"LAYER_PROPERTIES_COUNT": 0}}}}
+        task = self._run_add_layers(shared, config, _FakePointCloudLayer())
+        assert shared == {"zones": known}  # the app's dict, untouched by the worker
+        assert set(task.project_layers) == {"zones", "pc-1"} and task.changed_layer_ids == ["pc-1"]
+        assert task.project_layers["zones"] is known
+        assert config["CURRENT_PROJECT"]["OPTIONS"]["LAYERS"]["LAYER_PROPERTIES_COUNT"] == 0
+
+    def test_finished_writes_the_properties_count_back(self, point_cloud_enabled, monkeypatch):
+        monkeypatch.setattr(task_mod, "MESSAGE_TASKS_CATEGORIES", {"add_layers": "ManageLayers"})
+        config = {"CURRENT_PROJECT": {"OPTIONS": {"LAYERS": {"LAYER_PROPERTIES_COUNT": 0}}}}
+        task = self._run_add_layers({}, config, _FakePointCloudLayer())
+        task.exception = None
+        task._perf_run_started = None
+        task.resultingLayers = MagicMock()
+        task.finished(True)
+        assert task._layer_properties_count > 0
+        assert config["CURRENT_PROJECT"]["OPTIONS"]["LAYERS"]["LAYER_PROPERTIES_COUNT"] == \
+            task._layer_properties_count
+
+    def test_a_failed_task_reports_without_raising(self, point_cloud_enabled, monkeypatch):
+        """2026-10-17: ``raise self.exception`` in finished() reached QGIS's Python error handler."""
+        monkeypatch.setattr(task_mod, "MESSAGE_TASKS_CATEGORIES", {"add_layers": "ManageLayers"})
+        iface = MagicMock()
+        monkeypatch.setattr(task_mod, "iface", iface, raising=False)
+        monkeypatch.setattr(task_mod, "Qgis", MagicMock(), raising=False)
+        task = _task()
+        task.exception = RuntimeError("unable to open database file")
+        task.tr = lambda text: text
+        task._perf_run_started = None
+        task.resultingLayers = MagicMock()
+        task.finished(False)  # no exception
+        iface.messageBar.return_value.pushMessage.assert_called_once()

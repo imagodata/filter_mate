@@ -96,8 +96,8 @@ class FilterOrchestrator:
         self.subset_queue_callback = subset_queue_callback
         self.parent_task = parent_task
         self._get_predicates_callback = get_predicates_callback
-        # Target layers found empty after their filter (PostgreSQL only, the
-        # subset is applied in this worker); reported once per task by
+        # Target layers found empty after their filter (PostgreSQL only, a subset
+        # applied in place: without a subset queue); reported once per task by
         # report_empty_target_layers() instead of one WARNING per layer.
         self.empty_target_layers = []
 
@@ -908,9 +908,11 @@ class FilterOrchestrator:
         logger.debug(f"  - CRS: {layer.crs().authid()}")
 
         # Warn if no features after filtering. Only meaningful when the subset
-        # is already applied (PostgreSQL applies it in this worker); a LIMIT 1
+        # is already applied: 2026-10-17, a task queues it for the main thread on
+        # every backend (the layer still holds the previous one here); a LIMIT 1
         # probe stops at the first match instead of counting everything.
-        if layer.providerType() == QGIS_PROVIDER_POSTGRES and final_expression and not self._has_any_feature(layer):
+        if self.subset_queue_callback is None and layer.providerType() == QGIS_PROVIDER_POSTGRES \
+                and final_expression and not self._has_any_feature(layer):
             # 2026-09-14: one INFO line here; the task reports every empty
             # target in a single WARNING (7 identical warnings per cascade with
             # the centroid option were noise, the empty result is legitimate).

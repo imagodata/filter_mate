@@ -102,7 +102,10 @@ class ExploringController(BaseController, LayerSelectionMixin):
         logger.debug("Tearing down ExploringController")
         self._disconnect_all_signals()
         if self._features_cache:
-            self._features_cache.clear()
+            # ExploringFeaturesCache has invalidate_all(), no clear(): the AttributeError
+            # stopped the teardown here (2026-10-17, "Controller 'exploring' teardown failed")
+            clear = getattr(self._features_cache, 'invalidate_all', None) or getattr(self._features_cache, 'clear')
+            clear()
         self._current_layer = None
         self._current_field = None
         self._selected_features.clear()
@@ -2937,12 +2940,9 @@ class ExploringController(BaseController, LayerSelectionMixin):
 
             # FIX v5: Self-healing - ensure signal stays connected
             if self._dockwidget.current_layer and not self._dockwidget.current_layer_selection_connection:
-                try:
-                    self._dockwidget.current_layer.selectionChanged.connect(self._dockwidget.on_layer_selection_changed)
-                    self._dockwidget.current_layer_selection_connection = True
+                # once (2026-10-17): every previous connection removed first
+                if self._dockwidget._ensure_layer_signals_connected(self._dockwidget.current_layer):
                     logger.debug("handle_layer_selection_changed: Re-connected selectionChanged (self-healing)")
-                except (TypeError, RuntimeError):
-                    pass
             # Check recursion prevention flag
             if getattr(self._dockwidget, '_syncing_from_qgis', False):
                 logger.debug("handle_layer_selection_changed: Skipping (sync in progress)")

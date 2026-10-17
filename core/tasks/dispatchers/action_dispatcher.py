@@ -427,7 +427,12 @@ class CallbackActionHandler(BaseActionHandler):
                 layers_processed=context.layers_count
             )
         except Exception as e:  # catch-all safety net: callback must return ActionResult
-            logger.error(f"Callback execution failed: {e}", exc_info=True)
+            if isinstance(e, RuntimeError) and context.is_canceled and context.is_canceled():
+                # 2026-10-17: QGIS cancels a task whose layer is being removed; the worker
+                # then meets the deleted layer (RuntimeError). A canceled task, no error.
+                logger.info(f"Action stopped, task canceled: {e}")
+            else:
+                logger.error(f"Callback execution failed: {e}", exc_info=True)
             return ActionResult(
                 success=False,
                 action=self.action_type.value,

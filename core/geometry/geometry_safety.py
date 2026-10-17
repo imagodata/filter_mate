@@ -523,28 +523,13 @@ def create_geos_safe_layer(
 
         safe_layer.commitChanges()
 
-        # FIX v2.9.44: CRITICAL - Add layer to project registry BEFORE returning
-        # The layer can be garbage collected by Qt's C++ GC during the return from this function.
-        # Adding it to the project registry (with addToLegend=False) creates a strong C++ reference
-        # that survives the return. The caller is responsible for removing it when done.
-        # FIX v4.1.1: Register layer for cleanup after filtering completes
-        try:
-            from qgis.core import QgsProject
-            # PERF 2026-09-12: marker read by FilterMate's layersAdded/WillBeRemoved
-            # handlers so this scratch layer never triggers a layer-management task
-            safe_layer.setCustomProperty('filterMate/internal_temp', True)
-            QgsProject.instance().addMapLayer(safe_layer, False)  # addToLegend=False
-            logger.debug(f"create_geos_safe_layer: Added '{safe_layer.name()}' to project registry for GC protection")
-
-            # Register for cleanup after filtering completes
-            try:
-                from ..ports import get_backend_services
-                _backend_services = get_backend_services()
-                _backend_services.register_ogr_temp_layer(safe_layer.id())
-            except ImportError:
-                logger.debug("Could not import register_temp_layer - cleanup must be manual")
-        except Exception as add_err:
-            logger.warning(f"create_geos_safe_layer: Failed to add layer to project: {add_err}")
+        # 2026-10-17: not added to the project any more. It was ("FIX v2.9.44", against a
+        # garbage collection that does not happen: a layer created in Python lives as long as
+        # the caller's reference) from the filter task's worker thread, where the project's
+        # layersAdded / willBeRemoved signals then fired.
+        # PERF 2026-09-12: marker read by FilterMate's layersAdded/WillBeRemoved
+        # handlers so this scratch layer never triggers a layer-management task
+        safe_layer.setCustomProperty('filterMate/internal_temp', True)
 
         return safe_layer
 

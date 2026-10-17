@@ -257,6 +257,18 @@ class TestOverlappingLayerTasks:
         assert env.history_layers() == [("X",)]
         assert set(env.panel_layers()) == {"A", "X"}
 
+    def test_an_addition_keeps_the_current_entries_of_the_other_layers(self, tmp_path):
+        """2026-10-17: add_layers works on a copy; an entry the main thread replaced meanwhile wins."""
+        env = _Env(tmp_path, ["A"])
+        started_with = env.project_layers["A"]
+        env.project_layers["A"] = replaced = _layer("A")
+
+        env.handler.handle_task_completion(
+            {"A": started_with, "X": _layer("X")}, "add_layers", changed_layer_ids=["X"])
+
+        assert set(env.project_layers) == {"A", "X"}
+        assert env.project_layers["A"] is replaced
+
     def test_a_layer_removed_while_an_addition_ran_stays_unregistered(self, tmp_path):
         """Rasters turned off while point clouds are turned on: the removal finished first,
         the addition's result still held the rasters."""

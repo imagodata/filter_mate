@@ -509,6 +509,6 @@ def apply_qgis_buffer(
         buffered_layer = convert_geometry_collection_fn(buffered_layer)
 
     # Create spatial index
-    processing.run('qgis:createspatialindex', {"INPUT": buffered_layer})
+    processing.run('qgis:createspatialindex', {"INPUT": buffered_layer}, context=context)  # see the buffer
 
     return buffered_layer

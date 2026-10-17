@@ -125,6 +125,8 @@ class CoverageModeController(BaseController):
         self._preview_surface = None
         self._histogram_cache: Dict[Tuple[str, int, str], Tuple[list, float, float]] = {}
         self._stats_watched: set = set()  # point cloud layer ids whose statistics signal is connected
+        # layer id -> (layer, slot) of those connections: disconnected at teardown (2026-10-17)
+        self._stats_slots: Dict[str, Tuple[Any, Any]] = {}
         self._button_slots: List[Tuple[Any, Any]] = []
         # Vector sources: one entry per vector filter run, with the cross operation it recorded (if any).
         self._linked_runs: Dict[str, List[_LinkedRun]] = {}
@@ -132,6 +134,9 @@ class CoverageModeController(BaseController):
         self._running_task: Any = None
         self._export_task: Any = None
         self._hag_task: Any = None
+        # A raster / point cloud picked before add_layers registered it: activated once it is
+        # (the 'refresh' after the registration), unless another layer was picked meanwhile.
+        self._awaiting_registration: Optional[str] = None
         self._tidy_pending = False
         self._cache_warned = False
         self._project_connected: set = set()  # names of the QgsProject signals connected by setup()
@@ -211,6 +216,7 @@ class CoverageModeController(BaseController):
         self._panel_states.clear()
         self._histogram_cache.clear()
         self._stats_watched.clear()  # the same ids come back with new layers when the project is opened again
+        self._stats_slots.clear()  # their layers are gone
         self._schedule_cache_tidy()
 
     def _on_layers_removed(self, layer_ids) -> None:
@@ -223,6 +229,7 @@ class CoverageModeController(BaseController):
             self._linked_redo.pop(layer_id, None)
             self._panel_states.pop(layer_id, None)
             self._stats_watched.discard(layer_id)
+            self._stats_slots.pop(layer_id, None)
         self._schedule_cache_tidy()  # runs once the layers are gone
 
     def _unlink_dropped_run(self, source_id: str, op_id: Optional[int]) -> None:
@@ -336,6 +343,7 @@ class CoverageModeController(BaseController):
                 except Exception as exc:
                     logger.debug(f"[FM5] panel widget not released: {exc}")
         self._drop_map_tools()  # one QGIS could give back later would call a dead controller
+        self._disconnect_point_cloud_statistics()
         self._raster_panel = None
         self._pc_panel = None
         self._running_task = None
@@ -370,8 +378,14 @@ class CoverageModeController(BaseController):
         kind = _kind_of(layer)
         return getattr(kind, 'is_coverage', False)
 
-    def on_current_layer_changed(self, layer: Any) -> bool:
+    def on_current_layer_changed(self, layer: Any, manual_change: bool = False) -> bool:
         """Take over the layer change for a raster or point cloud layer.
+
+        Args:
+            layer: The new current layer.
+            manual_change: The user picked it (combo box): it replaces a layer waiting for
+                its registration. An automatic change (the dock's refresh after add_layers)
+                does not.
 
         Returns:
             True when handled here (the vector chain must stop): a raster /
@@ -379,7 +393,16 @@ class CoverageModeController(BaseController):
             one is shown.
         """
         kind = _kind_of(layer)
+        if manual_change and self._layer_id(layer) != self._awaiting_registration:
+            self._awaiting_registration = None  # the user picked another layer
         if getattr(kind, 'is_coverage', False):
+            if not self._is_registered(layer):
+                # 2026-10-17: picked before add_layers registered it (just added to the project):
+                # the panel read properties the layer did not have yet. It is activated once the
+                # dock has the registration (activate_awaited_layer); the current layer stays.
+                self._awaiting_registration = self._layer_id(layer)
+                logger.info(f"[FM5] {self._layer_name(layer)} not registered yet: shown once it is")
+                return True
             if not self._ensure_host():
                 logger.warning("[FM5] coverage layer selected but the panels are unavailable")
                 return False
@@ -394,6 +417,48 @@ class CoverageModeController(BaseController):
             self.deactivate()
         self._extras_call('show_vector', layer)
         return False
+
+    @staticmethod
+    def _layer_id(layer: Any) -> Optional[str]:
+        try:
+            return layer.id()
+        except (RuntimeError, AttributeError):
+            return None
+
+    def _is_registered(self, layer: Any) -> bool:
+        """True when ``layer`` is in the dock's PROJECT_LAYERS (add_layers registered it)."""
+        layer_id = self._layer_id(layer)
+        return layer_id is not None and layer_id in (getattr(self.dockwidget, 'PROJECT_LAYERS', None) or {})
+
+    def activate_awaited_layer(self) -> bool:
+        """The layer picked before its registration, now in the dock's PROJECT_LAYERS: shown.
+
+        Called by the dock once it has the layers of an add_layers (get_project_layers_from_app),
+        whatever layer the dock shows meanwhile.
+
+        Returns:
+            True when the awaited layer was activated.
+        """
+        layer_id = self._awaiting_registration
+        if layer_id is None or layer_id not in (getattr(self.dockwidget, 'PROJECT_LAYERS', None) or {}):
+            return False
+        self._awaiting_registration = None
+        try:
+            from qgis.core import QgsProject
+            layer = QgsProject.instance().mapLayer(layer_id)
+        except Exception as exc:  # catch-all safety net: project unavailable
+            logger.debug(f"[FM5] awaited layer not found: {exc}")
+            return False
+        if layer is None:
+            return False
+        # The user's pick, applied now: the automatic layer changes the dock deferred during the
+        # registration (its refresh re-applied the vector layer) give way to it, as to any pick.
+        import time
+        try:
+            self.dockwidget._user_layer_pick = (time.perf_counter(), layer_id)
+        except AttributeError:
+            pass
+        return bool(self.on_current_layer_changed(layer, manual_change=True))
 
     def _vector_chain_takes(self, layer: Any, kind: Any) -> bool:
         """True when the dock's vector chain will make ``layer`` the current layer (a listed vector layer)."""
@@ -472,12 +537,15 @@ class CoverageModeController(BaseController):
         old_layer = getattr(dw, 'current_layer', None)
         if old_layer is None or _same_layer(old_layer, incoming_layer):
             return
-        if getattr(dw, 'current_layer_selection_connection', None) is None:
-            return
-        try:
-            old_layer.selectionChanged.disconnect(dw.on_layer_selection_changed)
-        except (TypeError, RuntimeError, AttributeError) as exc:
-            logger.debug(f"[FM5] previous selectionChanged not disconnected: {exc}")
+        # 2026-10-17: every connection, whatever the flag says (it skipped the disconnect
+        # when unset, and one disconnect left a duplicate connection behind)
+        if hasattr(dw, '_disconnect_layer_selection_signal'):
+            dw._disconnect_layer_selection_signal(old_layer)
+        else:
+            try:
+                old_layer.selectionChanged.disconnect(dw.on_layer_selection_changed)
+            except (TypeError, RuntimeError, AttributeError) as exc:
+                logger.debug(f"[FM5] previous selectionChanged not disconnected: {exc}")
         dw.current_layer_selection_connection = None
 
     # === Dock layout ===
@@ -1037,8 +1105,20 @@ class CoverageModeController(BaseController):
         if signal is None or layer.id() in self._stats_watched:
             return
         layer_id = layer.id()
-        signal.connect(lambda *_args, lid=layer_id: self._on_point_cloud_statistics(lid))
+        slot = lambda *_args, lid=layer_id: self._on_point_cloud_statistics(lid)  # noqa: E731
+        signal.connect(slot)
         self._stats_watched.add(layer_id)
+        self._stats_slots[layer_id] = (layer, slot)
+
+    def _disconnect_point_cloud_statistics(self) -> None:
+        """Teardown: the point cloud layers outlive the controller; their statistics signal must not call it."""
+        for layer, slot in list(self._stats_slots.values()):
+            try:
+                layer.statisticsCalculationStateChanged.disconnect(slot)
+            except (TypeError, RuntimeError, AttributeError):  # not connected / layer deleted
+                pass
+        self._stats_slots.clear()
+        self._stats_watched.clear()
 
     def _on_point_cloud_statistics(self, layer_id: str) -> None:
         from ...core.domain.layer_kind import LayerKind
