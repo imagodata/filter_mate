@@ -62,7 +62,9 @@ def setup_logger(name: str, log_file: str = None, level=logging.INFO):
 
     Args:
         name: Logger name (e.g., 'FilterMate.Utils')
-        log_file: Path to log file (optional)
+        log_file: Log file (optional). Only its file name counts: it is always written in
+            the plugin's log folder (``FILTERMATE_LOG_DIR``, next to ``filtermate.log``),
+            never in the folder of the user's project that callers used to pass.
         level: Logging level (default: logging.INFO)
 
     Returns:
@@ -82,14 +84,9 @@ def setup_logger(name: str, log_file: str = None, level=logging.INFO):
 
     # File handler if log_file provided
     if log_file:
-        log_dir = os.path.dirname(log_file)
-        if log_dir and not os.path.exists(log_dir):
-            try:
-                os.makedirs(log_dir, exist_ok=True)
-            except OSError:
-                log_file = os.path.basename(log_file)
-
         try:
+            os.makedirs(_LOG_DIR, exist_ok=True)
+            log_file = os.path.join(_LOG_DIR, os.path.basename(log_file))
             file_handler = RotatingFileHandler(
                 log_file,
                 maxBytes=10 * 1024 * 1024,  # 10 MB
