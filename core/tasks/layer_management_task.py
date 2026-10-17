@@ -1057,6 +1057,7 @@ class LayersManagementEngineTask(QgsTask):
 
             # Layer exists - apply migration if needed
             self._migrate_legacy_geometry_field(layer_variables, layer)
+            self._migrate_unreliable_primary_key(layer_variables, layer)
         else:
             # New layer - search for primary key and build properties
             result = self.search_primary_key_from_layer(layer)
@@ -1287,6 +1288,37 @@ class LayersManagementEngineTask(QgsTask):
             logger.error(f"Error during PostgreSQL virtual_id cleanup: {e}")
 
         return cleaned_layer_ids
+
+    def _migrate_unreliable_primary_key(self, layer_variables, layer):
+        """Choose again a key the old fallbacks picked (2026-10-17).
+
+        Layers registered before core.domain.stable_key may hold "the first
+        integer field" ('population') or "the first field" as their key, and
+        their properties are read back from the project database. A stored key
+        that the provider does not declare and whose name is no known unique key
+        is chosen again (the feature id when nothing better exists). PostgreSQL
+        layers keep theirs (declared key or ctid).
+        """
+        infos = layer_variables.get("infos", {})
+        stored = infos.get("primary_key_name")
+        if not isinstance(stored, str) or not stored or stored == 'ctid':
+            return
+        try:
+            if layer.providerType() == 'postgres':
+                return
+            fields = layer.fields()
+            declared = [fields[index].name() for index in layer.primaryKeyAttributes()]
+        except (RuntimeError, AttributeError, IndexError):
+            return
+        from ..domain.stable_key import KNOWN_KEY_NAMES, LOCAL_ONLY_KEY_NAMES
+        if stored in declared or stored.lower() in KNOWN_KEY_NAMES + LOCAL_ONLY_KEY_NAMES:
+            return
+        result = self.search_primary_key_from_layer(layer)
+        if not isinstance(result, tuple) or len(result) != 4 or result[0] == stored:
+            return
+        infos["primary_key_name"], infos["primary_key_idx"], infos["primary_key_type"], \
+            infos["primary_key_is_numeric"] = result
+        logger.info(f"Layer '{layer.name()}': stored key '{stored}' is no unique key, now '{result[0]}'")
 
     def search_primary_key_from_layer(self, layer):
         """

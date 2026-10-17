@@ -183,3 +183,43 @@ def test_postgres_without_key_is_ctid():
     layer = _Layer("postgres", "dbname='x' table=\"public\".\"v\" (geom)", [('nom', False), ('population', True)])
     layer.featureCount = lambda: 10
     assert SEARCH(_Task(), layer) == ('ctid', -1, 'tid', False)
+
+
+def _migrate_unreliable_primary_key():
+    path = Path(__file__).resolve().parents[4] / "core" / "tasks" / "layer_management_task.py"
+    tree = ast.parse(path.read_text(encoding="utf-8"))
+    nodes = [item for node in tree.body if isinstance(node, ast.ClassDef) for item in node.body
+             if isinstance(item, ast.FunctionDef) and item.name == "_migrate_unreliable_primary_key"]
+    namespace = {"__name__": "core.tasks._fm_test_migrate_pk", "__package__": "core.tasks",
+                 "logger": logging.getLogger("fm.test.migrate_pk")}
+    exec(compile(ast.Module(body=nodes, type_ignores=[]), str(path), "exec"), namespace)
+    return namespace["_migrate_unreliable_primary_key"]
+
+
+MIGRATE = _migrate_unreliable_primary_key()
+
+
+class _MigratingTask(_Task):
+    search_primary_key_from_layer = SEARCH
+
+
+@pytest.mark.parametrize("stored, fields, declared, expected", [
+    ("population", [('nom', False), ('population', True)], (), "fid"),    # old "first integer field"
+    ("nom", [('nom', False)], (), "fid"),                                 # old "first field"
+    ("virtual_id", [], (), "fid"),                                        # old expression field
+    ("ID", [('ID', False), ('population', True)], (), "ID"),              # a known name: kept
+    ("code", [('code', False), ('population', True)], [0], "code"),       # declared: kept
+])
+def test_stored_unreliable_key_is_chosen_again(stored, fields, declared, expected):
+    layer = _Layer("ogr", "/data/communes.shp", fields, declared=declared)
+    variables = {"infos": {"primary_key_name": stored, "primary_key_idx": 1, "primary_key_type": "Integer",
+                           "primary_key_is_numeric": True}}
+    MIGRATE(_MigratingTask(), variables, layer)
+    assert variables["infos"]["primary_key_name"] == expected
+
+
+def test_postgres_stored_key_is_kept():
+    layer = _Layer("postgres", "dbname='x' table=\"public\".\"t\"", [('nom', False), ('population', True)])
+    variables = {"infos": {"primary_key_name": "population"}}
+    MIGRATE(_MigratingTask(), variables, layer)
+    assert variables["infos"]["primary_key_name"] == "population"
