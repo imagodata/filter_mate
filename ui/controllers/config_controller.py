@@ -888,8 +888,8 @@ class ConfigController(BaseController):
             message: Error message to display
         """
         try:
-            from ...config.feedback_config import show_error
-            show_error("FilterMate", message)
+            from ...infrastructure.feedback import show_error
+            show_error(message, "FilterMate")
         except ImportError:
             logger.error(f"UI Error: {message}")
 

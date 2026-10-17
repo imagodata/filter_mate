@@ -117,3 +117,22 @@ def test_switch_reaches_the_app_of_the_dock(controller_class, attribute):
     controller._apply_layer_kinds_change((True, True), summary)
     timer.singleShot.assert_called_once_with(0, app.apply_layer_kind_options)
     assert summary
+
+
+def test_show_error_reaches_the_message_bar_with_the_message_first(controller_class, monkeypatch):
+    """The import pointed at config.feedback_config (gone) and the arguments were swapped:
+    infrastructure.feedback.show_error(message, title)."""
+    pkg = controller_class.__module__.split(".ui.")[0]
+    shown = []
+    feedback = types.ModuleType(f"{pkg}.infrastructure.feedback")
+    feedback.show_error = lambda message, title="FilterMate": shown.append((message, title))
+    infrastructure = types.ModuleType(f"{pkg}.infrastructure")
+    infrastructure.__path__ = []
+    infrastructure.feedback = feedback
+    monkeypatch.setitem(sys.modules, infrastructure.__name__, infrastructure)
+    monkeypatch.setitem(sys.modules, feedback.__name__, feedback)
+    controller = controller_class.__new__(controller_class)
+
+    controller._show_error("something broke")
+
+    assert shown == [("something broke", "FilterMate")]
