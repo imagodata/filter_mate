@@ -8,6 +8,7 @@ This module provides centralized logging for FilterMate with:
 - Safe stream handling for QGIS shutdown
 - Pre-configured loggers for common modules
 - Automatic file logging to logs/filtermate.log
+- Passwords masked on every handler (``redaction.SecretMaskingFilter``)
 
 Usage:
     from ...infrastructure.logging import get_logger, setup_logger, get_app_logger  # noqa: F401
@@ -20,6 +21,8 @@ from logging.handlers import RotatingFileHandler  # noqa: F401
 import os  # noqa: F401
 import sys  # noqa: F401
 from datetime import datetime  # noqa: F401
+
+from .redaction import SecretMaskingFilter, install_secret_masking, mask_sensitive_text  # noqa: F401
 
 # Determine log file path (relative to plugin directory)
 _PLUGIN_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -94,6 +97,7 @@ def setup_logger(name: str, log_file: str = None, level=logging.INFO):
             )
             file_handler.setFormatter(formatter)
             file_handler.setLevel(level)
+            install_secret_masking(file_handler)
             logger.addHandler(file_handler)
         except (OSError, PermissionError):
             pass
@@ -102,6 +106,7 @@ def setup_logger(name: str, log_file: str = None, level=logging.INFO):
     console_handler = SafeStreamHandler(sys.stderr)
     console_handler.setFormatter(formatter)
     console_handler.setLevel(logging.WARNING)
+    install_secret_masking(console_handler)
     logger.addHandler(console_handler)
 
     return logger
@@ -205,6 +210,7 @@ def _ensure_root_logger_configured():
             console_handler = SafeStreamHandler(sys.stderr)
             console_handler.setFormatter(formatter)
             console_handler.setLevel(logging.WARNING)
+            install_secret_masking(console_handler)
             root_logger.addHandler(console_handler)
 
         # File handler - INFO and above (captures more detail), shared instance
@@ -221,10 +227,16 @@ def _ensure_root_logger_configured():
                     )
                     _file_handler.setFormatter(formatter)
                     _file_handler.setLevel(min(logging.INFO, root_level))
+                install_secret_masking(_file_handler)
                 root_logger.addHandler(_file_handler)
             except (OSError, PermissionError):
                 # Silently fail if file can't be created
                 pass
+
+        # Handlers added before this point (a second plugin load, a test) get the filter too
+        for handler in root_logger.handlers:
+            if isinstance(handler, (SafeStreamHandler, RotatingFileHandler)):
+                install_secret_masking(handler)
 
     _root_logger_configured = True
 
@@ -279,6 +291,9 @@ def flush_logs():
 
 __all__ = [
     'SafeStreamHandler',
+    'SecretMaskingFilter',
+    'install_secret_masking',
+    'mask_sensitive_text',
     'setup_logger',
     'get_logger',
     'set_log_level',

@@ -17,6 +17,8 @@ try:
 except ImportError:
     QCoreApplication = None
 
+from ..logging.redaction import mask_sensitive_text
+
 logger = logging.getLogger('FilterMate.Infrastructure.Database.SQLUtils')
 
 
@@ -286,7 +288,8 @@ def safe_set_subset_string(layer, subset_expression: str) -> bool:
                 logger.warning(f"setSubsetString returned False for layer {layer.name()}")
                 # Additional diagnostics for failure
                 logger.warning("[SQL] ❌ FAILED - Diagnostics:")
-                logger.warning(f"[SQL]   Layer source: {layer.source()[:200]}...")
+                # The source of a PostgreSQL layer without authcfg carries its password
+                logger.warning(f"[SQL]   Layer source: {mask_sensitive_text(layer.source())[:200]}...")
                 logger.warning(f"[SQL]   Count before: {_layer_count_label(layer)}")
                 logger.warning(f"[SQL]   Current subset: {layer.subsetString()[:200] if layer.subsetString() else 'None'}...")
 
@@ -311,17 +314,24 @@ def safe_set_subset_string(layer, subset_expression: str) -> bool:
                                 if conn:
                                     # Check if connection is in a broken/aborted transaction state
                                     try:
-                                        with conn.cursor() as cur:
-                                            cur.execute("SELECT 1")
-                                        conn.rollback()  # Keep the connection clean after the probe
-                                        logger.info("[SQL]   PostgreSQL connection (psycopg2 probe): OK")
-                                    except Exception as probe_inner:
                                         try:
-                                            conn.rollback()
-                                        except Exception:  # nosec B110 - best-effort rollback after connection probe failure
+                                            with conn.cursor() as cur:
+                                                cur.execute("SELECT 1")
+                                            conn.rollback()  # Keep the connection clean after the probe
+                                            logger.info("[SQL]   PostgreSQL connection (psycopg2 probe): OK")
+                                        except Exception as probe_inner:
+                                            try:
+                                                conn.rollback()
+                                            except Exception:  # nosec B110 - best-effort rollback after connection probe failure
+                                                pass
+                                            logger.warning(f"[SQL]   PostgreSQL connection BROKEN: {mask_sensitive_text(str(probe_inner))}")
+                                            logger.warning("[SQL]   → Root cause: prior query may have aborted the transaction")
+                                    finally:
+                                        # The probe opened its own connection: do not leak it
+                                        try:
+                                            conn.close()
+                                        except Exception:  # nosec B110 - best-effort close of the probe connection
                                             pass
-                                        logger.warning(f"[SQL]   PostgreSQL connection BROKEN: {probe_inner}")
-                                        logger.warning("[SQL]   → Root cause: prior query may have aborted the transaction")
                             except Exception as pg_probe_e:
                                 logger.debug(f"[SQL]   psycopg2 probe unavailable: {pg_probe_e}")
                 except Exception as diag_e:

@@ -43,6 +43,10 @@ def _load_database_manager():
     feedback = MagicMock()
     feedback.show_error = MagicMock()
     sys.modules[f"{_PKG}.infrastructure.feedback"] = feedback
+    _register(f"{_PKG}.infrastructure.logging")
+    redaction = MagicMock()
+    redaction.mask_sensitive_text = lambda text: text
+    sys.modules[f"{_PKG}.infrastructure.logging.redaction"] = redaction
 
     spec = importlib.util.spec_from_file_location(full, _REPO / "adapters" / "database_manager.py")
     module = importlib.util.module_from_spec(spec)

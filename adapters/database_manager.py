@@ -29,6 +29,7 @@ from qgis.core import (
 
 from ..infrastructure.utils.task_utils import sqlite_connect
 from ..infrastructure.feedback import show_error
+from ..infrastructure.logging.redaction import mask_sensitive_text
 
 logger = logging.getLogger('FilterMate.DatabaseManager')
 
@@ -148,7 +149,11 @@ class DatabaseManager:
         """
         Recursively clean an object for JSON serialization.
 
-        Removes non-serializable objects like database connections.
+        Removes non-serializable objects like database connections. The result
+        is written to config.json and to the project database, so
+        ``ACTIVE_POSTGRESQL`` (a live connection at run time) is never kept
+        whatever it holds - a URI there would carry the layer's password - and
+        a password in any other string is masked.
 
         Args:
             obj: Object to clean
@@ -158,13 +163,17 @@ class DatabaseManager:
         """
         if obj is None:
             return None
-        elif isinstance(obj, (str, int, float, bool)):
+        elif isinstance(obj, str):
+            return mask_sensitive_text(obj)
+        elif isinstance(obj, (int, float, bool)):
             return obj
         elif isinstance(obj, dict):
             cleaned = {}
             for key, value in obj.items():
                 # Skip connection objects (psycopg2, sqlite3, etc.)
-                if hasattr(value, 'cursor') and callable(getattr(value, 'cursor', None)):
+                if key == 'ACTIVE_POSTGRESQL':
+                    cleaned[key] = None if value else value  # never persisted: not a connection, not a URI
+                elif hasattr(value, 'cursor') and callable(getattr(value, 'cursor', None)):
                     cleaned[key] = None  # Replace connection with None
                 else:
                     cleaned[key] = self._clean_for_json(value)
