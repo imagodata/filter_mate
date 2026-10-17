@@ -1,0 +1,5 @@
+# FilterMate MCP server (runs outside QGIS, on the machine of the MCP client)
+# Install with: pip install -r requirements-mcp.txt   (Python 3.10 or later)
+# mcp 1.x (FastMCP) and 2.x (MCPServer) are both supported. 1.7 is the oldest release tested (the first with tool
+# annotations); with pydantic 2.12 or later, mcp 1.22 or later is needed (older ones import a pydantic internal).
+mcp>=1.7,<3
