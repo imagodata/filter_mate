@@ -455,7 +455,11 @@ class ExpressionFacadeHandler:
             operator: The operator string (possibly translated: ET, OU, UND, Y, etc.)
 
         Returns:
-            str: Normalized SQL operator ('AND', 'OR', 'AND NOT', 'NOT') or None.
+            str: Normalized SQL operator ('AND', 'OR', 'AND NOT') or None.
+
+        2026-10-17: a bare negation (NON, NICHT, NO, NÃO, NOT) maps to
+        'AND NOT'. The combiners write ``( old ) <operator> ( new )``; 'NOT'
+        gave ``( old ) NOT ( new )``, a syntax error on every backend.
         """
         if not operator:
             return None
@@ -468,28 +472,28 @@ class ExpressionFacadeHandler:
             'ET': 'AND',
             'OU': 'OR',
             'ET NON': 'AND NOT',
-            'NON': 'NOT',
+            'NON': 'AND NOT',
             # German
             'UND': 'AND',
             'ODER': 'OR',
             'UND NICHT': 'AND NOT',
-            'NICHT': 'NOT',
+            'NICHT': 'AND NOT',
             # Spanish
             'Y': 'AND',
             'O': 'OR',
             'Y NO': 'AND NOT',
-            'NO': 'NOT',
+            'NO': 'AND NOT',
             # Italian
             'E': 'AND',
             'E NON': 'AND NOT',
             # Portuguese
             'E NÃO': 'AND NOT',
-            'NÃO': 'NOT',
+            'NÃO': 'AND NOT',
             # Already English - just return as-is
             'AND': 'AND',
             'OR': 'OR',
             'AND NOT': 'AND NOT',
-            'NOT': 'NOT',
+            'NOT': 'AND NOT',
         }
 
         normalized = translations.get(op_upper, operator)
