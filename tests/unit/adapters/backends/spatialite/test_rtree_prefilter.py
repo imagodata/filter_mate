@@ -65,10 +65,15 @@ def _load():
 
 
 def _sanitizer():
-    name = f"{_PKG}.sanitizer"
+    name = f"{_PKG}.core.filter.expression_sanitizer"
     if name in sys.modules:
         return sys.modules[name]
-    return _load_file(name, _ROOT / "core" / "filter" / "expression_sanitizer.py", _PKG)
+    # Inside a core.filter package of its own: the sanitizer imports .sql_quotes.
+    for package, path in ((_PKG, _ROOT), (f"{_PKG}.core", _ROOT / "core"),
+                          (f"{_PKG}.core.filter", _ROOT / "core" / "filter")):
+        if package not in sys.modules:
+            _module(package, path)
+    return _load_file(name, _ROOT / "core" / "filter" / "expression_sanitizer.py", f"{_PKG}.core.filter")
 
 
 @pytest.fixture

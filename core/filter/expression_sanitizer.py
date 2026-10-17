@@ -20,6 +20,8 @@ import logging
 import re
 from typing import Optional
 
+from .sql_quotes import map_outside_quotes
+
 logger = logging.getLogger('FilterMate.Core.Filter.Sanitizer')
 
 
@@ -293,6 +295,70 @@ def _is_standalone_display_expression(expr: str) -> bool:
     return False
 
 
+# Translated operators, upper case and between whitespace, rewritten on text
+# whose literals and identifiers are masked (see sanitize_subset_string).
+_FRENCH_OPERATORS = (
+    (re.compile(r'\s+ET\s+NON\s+'), ' AND NOT '),
+    (re.compile(r'\s+ET\s+'), ' AND '),
+    (re.compile(r'\s+OU\s+'), ' OR '),
+    (re.compile(r'\s+NON\s+'), ' NOT '),
+)
+
+
+def _normalize_french_operators(masked: str) -> str:
+    for pattern, replacement in _FRENCH_OPERATORS:
+        if pattern.search(masked):
+            logger.info(
+                f"FilterMate: Normalizing French operator '{pattern.pattern}' to '{replacement}'"
+            )
+            masked = pattern.sub(replacement, masked)
+    return masked
+
+
+def _fix_structure(masked: str) -> str:
+    """Phases 2 and 3 of :func:`sanitize_subset_string`, on masked text."""
+    # ========================================================================
+    # PHASE 2: Fix unbalanced parentheses
+    # ========================================================================
+
+    # Count parentheses and fix if unbalanced
+    open_count = masked.count('(')
+    close_count = masked.count(')')
+
+    if close_count > open_count:
+        # Remove excess closing parentheses from the end
+        excess = close_count - open_count
+        # Remove trailing )))) patterns
+        trailing_parens = re.search(r'\)+\s*$', masked)
+        if trailing_parens:
+            parens_at_end = len(trailing_parens.group().strip())
+            if parens_at_end >= excess:
+                masked = re.sub(r'\){' + str(excess) + r'}\s*$', '', masked)
+                logger.info(f"FilterMate: Removed {excess} excess closing parentheses")
+
+    # PHASE 2.5 (v4.8.0) dropped every ``AND ( "field" )`` / ``OR ( "field" )``
+    # as a display expression glued to a filter (PostgreSQL: "argument of AND
+    # must be type boolean"). 2026-10-17: removed, it also dropped real
+    # conditions on boolean columns (``AND ( "actif" )``) and the layer showed
+    # more (AND) or fewer (OR) features without a word. Field-only display
+    # expressions are refused upstream (process_qgis_expression) and a
+    # standalone one by PHASE -1; a text column used as a condition now fails
+    # visibly instead of silently changing the result.
+
+    # ========================================================================
+    # PHASE 3: Clean up whitespace and orphaned operators
+    # ========================================================================
+
+    masked = re.sub(r'\s+', ' ', masked).strip()
+    masked = re.sub(r'\s+(AND|OR)\s*$', '', masked, flags=re.IGNORECASE)
+    masked = re.sub(r'^\s*(AND|OR)\s+', '', masked, flags=re.IGNORECASE)
+
+    # Remove duplicate AND/OR operators
+    masked = re.sub(r'\s+AND\s+AND\s+', ' AND ', masked, flags=re.IGNORECASE)
+    masked = re.sub(r'\s+OR\s+OR\s+', ' OR ', masked, flags=re.IGNORECASE)
+    return masked
+
+
 def sanitize_subset_string(subset_string: str) -> str:
     """
     Remove non-boolean display expressions and fix type casting issues in subset string.
@@ -350,22 +416,13 @@ def sanitize_subset_string(subset_string: str) -> str:
     #
     # FIX v2.5.12: Handle French operators that cause SQL syntax errors like:
     # "syntax error at or near 'ET'"
-
-    french_operators = [
-        (r'\)\s+ET\s+\(', ') AND ('),      # ) ET ( -> ) AND (
-        (r'\)\s+OU\s+\(', ') OR ('),       # ) OU ( -> ) OR (
-        (r'\s+ET\s+', ' AND '),            # ... ET ... -> ... AND ...
-        (r'\s+OU\s+', ' OR '),             # ... OU ... -> ... OR ...
-        (r'\s+ET\s+NON\s+', ' AND NOT '),  # ET NON -> AND NOT
-        (r'\s+NON\s+', ' NOT '),           # NON ... -> NOT ...
-    ]
-
-    for pattern, replacement in french_operators:
-        if re.search(pattern, sanitized, re.IGNORECASE):
-            logger.info(
-                f"FilterMate: Normalizing French operator '{pattern}' to '{replacement}'"
-            )
-            sanitized = re.sub(pattern, replacement, sanitized, flags=re.IGNORECASE)
+    #
+    # 2026-10-17: outside string literals and identifiers only, and upper case
+    # only. Case-insensitive on the whole string, it turned the value
+    # 'Plages, dunes et sable' into 'Plages, dunes AND sable' (0 features),
+    # and an unquoted lower-case column named "ou" into OR. The translated
+    # operators FilterMate stored were upper case (normalize_sql_operator).
+    sanitized = map_outside_quotes(sanitized, _normalize_french_operators)
 
     # ========================================================================
     # PHASE 1: Remove non-boolean display expressions
@@ -470,84 +527,10 @@ def sanitize_subset_string(subset_string: str) -> str:
         logger.info(f"FilterMate: Removing standalone coalesce: '{match.group()[:60]}...'")
         sanitized = re.sub(standalone_coalesce, '', sanitized, flags=re.IGNORECASE)
 
-    # ========================================================================
-    # PHASE 2: Fix unbalanced parentheses
-    # ========================================================================
-
-    # Count parentheses and fix if unbalanced
-    open_count = sanitized.count('(')
-    close_count = sanitized.count(')')
-
-    if close_count > open_count:
-        # Remove excess closing parentheses from the end
-        excess = close_count - open_count
-        # Remove trailing )))) patterns
-        trailing_parens = re.search(r'\)+\s*$', sanitized)
-        if trailing_parens:
-            parens_at_end = len(trailing_parens.group().strip())
-            if parens_at_end >= excess:
-                sanitized = re.sub(r'\){' + str(excess) + r'}\s*$', '', sanitized)
-                logger.info(f"FilterMate: Removed {excess} excess closing parentheses")
-
-    # ========================================================================
-    # PHASE 2.5: Remove non-boolean field references
-    # ========================================================================
-    # FIX v4.8.0 (2026-01-25): Handle PostgreSQL type errors
-    #
-    # Problem: QGIS expressions can generate clauses like:
-    #   1. AND ("field_name") - a text/varchar field used as boolean
-    #   2. AND ("field"::type < value) - comparison without proper type casting
-    #
-    # Error 1: "argument of AND must be type boolean, not type character varying"
-    # Error 2: "operator does not exist: character varying < integer"
-    #
-    # These typically come from rule-based symbology expressions or display expressions
-    # that return the field value itself rather than a boolean comparison.
-
-    # Pattern to match: AND ( "field_name" ) - field reference without comparison operator
-    # This matches: AND ( "any_field" ) where there's no =, <, >, IN, LIKE, IS, etc.
-    #
-    # The pattern looks for:
-    # - AND/OR followed by opening paren
-    # - Optional whitespace
-    # - Quoted field name (with optional table prefix)
-    # - Optional whitespace
-    # - Closing paren
-    # - NO comparison operators (=, <, >, !, IN, LIKE, IS, BETWEEN, etc.)
-
-    non_boolean_field_patterns = [
-        # Simple field reference: AND ( "field" )
-        r'\s+AND\s+\(\s*"[^"]+"\s*\)(?!\s*[=<>!])',
-        # Table.field reference: AND ( "table"."field" )
-        r'\s+AND\s+\(\s*"[^"]+"\s*\.\s*"[^"]+"\s*\)(?!\s*[=<>!])',
-        # Field with cast but no comparison: AND ( "field"::type )
-        r'\s+AND\s+\(\s*"[^"]+"(?:::\w+)?\s*\)(?!\s*[=<>!])',
-        # OR variants
-        r'\s+OR\s+\(\s*"[^"]+"\s*\)(?!\s*[=<>!])',
-        r'\s+OR\s+\(\s*"[^"]+"\s*\.\s*"[^"]+"\s*\)(?!\s*[=<>!])',
-    ]
-
-    for pattern in non_boolean_field_patterns:
-        match = re.search(pattern, sanitized, re.IGNORECASE)
-        if match:
-            matched_text = match.group()
-            logger.info(
-                "FilterMate: Removing non-boolean field expression (PostgreSQL type error fix): "
-                f"'{matched_text[:60]}'"
-            )
-            sanitized = re.sub(pattern, '', sanitized, flags=re.IGNORECASE)
-
-    # ========================================================================
-    # PHASE 3: Clean up whitespace and orphaned operators
-    # ========================================================================
-
-    sanitized = re.sub(r'\s+', ' ', sanitized).strip()
-    sanitized = re.sub(r'\s+(AND|OR)\s*$', '', sanitized, flags=re.IGNORECASE)
-    sanitized = re.sub(r'^\s*(AND|OR)\s+', '', sanitized, flags=re.IGNORECASE)
-
-    # Remove duplicate AND/OR operators
-    sanitized = re.sub(r'\s+AND\s+AND\s+', ' AND ', sanitized, flags=re.IGNORECASE)
-    sanitized = re.sub(r'\s+OR\s+OR\s+', ' OR ', sanitized, flags=re.IGNORECASE)
+    # Phases 2 and 3 run on the text with its literals and identifiers masked
+    # (2026-10-17): a ")" or a run of spaces inside 'b)' or 'Saint  Jean'
+    # belongs to the value, so it is neither counted nor squeezed.
+    sanitized = map_outside_quotes(sanitized, _fix_structure)
 
     if sanitized != subset_string:
         logger.info(
