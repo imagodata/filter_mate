@@ -317,7 +317,8 @@ class TestSessionBufferTables:
         select_sql, params = mock_cursor.execute.call_args_list[0].args
         assert "pg_tables" in select_sql and "schemaname =" not in select_sql
         # underscores escaped: fm_temp_buf_ab12cd34_ must not match fm_temp_bufXab12cd34...
-        assert params == ("fm\\_temp\\_buf\\_ab12cd34\\_%",)
+        assert params == ("fm!_temp!_buf!_ab12cd34!_%",)
+        assert "ESCAPE '!'" in select_sql
         drops = [c.args[0] for c in mock_cursor.execute.call_args_list[1:]]
         assert drops == [
             'DROP TABLE IF EXISTS "ref"."fm_temp_buf_ab12cd34_0123" CASCADE',

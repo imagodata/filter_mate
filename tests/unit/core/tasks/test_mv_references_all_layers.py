@@ -50,6 +50,15 @@ def test_task_exposes_its_target_layers():
     assert task.param_all_layers == [ducts, sheaths, roads]
 
 
+def test_layer_deleted_meanwhile_is_left_out():
+    task = _filter_task_property("param_all_layers")()
+    deleted = MagicMock()
+    deleted.id.side_effect = RuntimeError("wrapped C/C++ object has been deleted")
+    kept = _layer("ducts")
+    task.layers = {"postgresql": [(deleted, {}), (kept, {})]}
+    assert task.param_all_layers == [kept]
+
+
 def test_task_without_organized_layers_has_none():
     task = _filter_task_property("param_all_layers")()
     assert task.param_all_layers == []

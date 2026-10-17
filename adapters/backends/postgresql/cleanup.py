@@ -43,8 +43,11 @@ def session_token(session_id) -> str:
 
 
 def _like_prefix(prefix: str) -> str:
-    """LIKE pattern matching names that start with ``prefix`` (``_`` and ``%`` literal)."""
-    escaped = prefix.replace('\\', '\\\\').replace('_', '\\_').replace('%', '\\%')
+    """LIKE pattern (``ESCAPE '!'``) matching names that start with ``prefix`` (``_`` and ``%`` literal).
+
+    '!' rather than a backslash: no dependency on standard_conforming_strings.
+    """
+    escaped = prefix.replace('!', '!!').replace('_', '!_').replace('%', '!%')
     return escaped + '%'
 
 
@@ -57,7 +60,7 @@ def drop_session_buffer_tables(cursor, session_id) -> List[str]:
     The caller commits.
     """
     cursor.execute(
-        "SELECT schemaname, tablename FROM pg_tables WHERE tablename LIKE %s ESCAPE '\\'",
+        "SELECT schemaname, tablename FROM pg_tables WHERE tablename LIKE %s ESCAPE '!'",
         (_like_prefix(f"{BUFFER_TABLE_PREFIX}{session_token(session_id)}_"),),
     )
     dropped = []
@@ -643,7 +646,7 @@ class PostgreSQLCleanupService:
             # table, whichever it is.
             cursor.execute(
                 "SELECT schemaname, tablename FROM pg_tables "
-                "WHERE tablename LIKE %s ESCAPE '\\' AND NOT (schemaname = ANY(%s))",
+                "WHERE tablename LIKE %s ESCAPE '!' AND NOT (schemaname = ANY(%s))",
                 (_like_prefix(BUFFER_TABLE_PREFIX), schemas_to_check),
             )
             for schema, table_name in cursor.fetchall():

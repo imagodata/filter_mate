@@ -944,8 +944,13 @@ class FilterEngineTask(QgsTask):
         for entries in (getattr(self, 'layers', None) or {}).values():
             for entry in entries or []:
                 layer = entry[0] if isinstance(entry, (list, tuple)) else entry
-                if layer is not None:
-                    targets.append(layer)
+                if layer is None:
+                    continue
+                try:
+                    layer.id()
+                except RuntimeError:  # removed from the project meanwhile (C++ object deleted)
+                    continue
+                targets.append(layer)
         return targets
 
     def _queue_subset_string(self, layer, expression):
