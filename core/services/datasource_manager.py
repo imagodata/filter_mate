@@ -6,7 +6,6 @@ Extracts ~320 lines from filter_mate_app.py related to:
 - Spatialite database connections
 - PostgreSQL datasource management
 - Spatial index creation
-- Foreign data wrapper creation
 - Datasource tracking and lifecycle
 
 Follows Strangler Fig Pattern with dependency injection for testability.
@@ -19,7 +18,6 @@ from qgis.PyQt.QtCore import QObject
 # Local imports
 from ...config.config import ENV_VARS
 from ...infrastructure.logging import get_logger
-from ...infrastructure.database.sql_utils import sanitize_sql_identifier
 from ...infrastructure.utils.layer_utils import (
     get_datasource_connexion_from_layer,
     get_data_source_uri,
@@ -41,18 +39,9 @@ except ImportError:
     PROCESSING_AVAILABLE = False
     logger.warning("processing module not available - spatial index creation disabled")
 
-try:
-    from osgeo import ogr
-    OGR_AVAILABLE = True
-except ImportError:
-    OGR_AVAILABLE = False
-    logger.warning("GDAL/OGR not available - foreign data wrapper features disabled")
-
 # Raster and point cloud layers (FilterMate 5) are not vector datasources: their
 # files (.tif, .vrt, .jp2, .laz, .copc.laz...) match no OGR driver.
 COVERAGE_PROVIDER_TYPES = ('raster', 'pointcloud')
-# File-based vector datasources, the only ones a foreign data wrapper is made for
-FILE_DATASOURCE_TYPES = ('ogr', 'spatialite')
 
 
 class DatasourceManager(QObject):
@@ -64,7 +53,6 @@ class DatasourceManager(QObject):
     - PostgreSQL datasource tracking and temp schema creation
     - OGR datasource management (GeoPackage, Shapefiles, etc.)
     - Spatial index creation for layers
-    - Foreign data wrapper creation for multi-source access
     - Datasource lifecycle (add/update/remove)
 
     Phase 4.5: Extracts from filter_mate_app.py:
@@ -73,7 +61,6 @@ class DatasourceManager(QObject):
     - _update_datasource_for_layer() (77 lines)
     - _remove_datasource_for_layer() (77 lines)
     - update_datasource() (63 lines)
-    - create_foreign_data_wrapper() (31 lines)
     - create_spatial_index_for_layer() (15 lines)
 
     Total: ~356 lines extracted (target was ~320)
@@ -244,6 +231,29 @@ class DatasourceManager(QObject):
     # Datasource Tracking Operations
     # ====================
 
+    @staticmethod
+    def _postgresql_datasource_key(source_uri) -> str:
+        """Key of a PostgreSQL layer that has no authentication config.
+
+        Built from the service, or the user / host / port / database: the
+        password (which the URI of such a layer carries in clear) must never
+        end up in a dictionary that is logged or saved.
+
+        Args:
+            source_uri: QgsDataSourceUri of the layer.
+
+        Returns:
+            str: e.g. ``bob@db.example:5432/gis``, or '' when nothing identifies it.
+        """
+        service = source_uri.service()
+        if service:
+            return f"service={service}"
+        database = source_uri.database()
+        host = source_uri.host()
+        if not (database or host):
+            return ''
+        return f"{source_uri.username()}@{host}:{source_uri.port()}/{database}"
+
     def update_datasource_for_layer(self, layer_info: Dict):
         """
         Update project datasources for a given layer.
@@ -278,12 +288,17 @@ class DatasourceManager(QObject):
 
         layer = layers[0]
         source_uri, authcfg_id = get_data_source_uri(layer)
+        if source_uri is None:
+            return
 
-        if authcfg_id is not None:
-            # PostgreSQL connection with authentication
-            if authcfg_id not in self.project_datasources[layer_source_type].keys():
+        if authcfg_id is not None or layer_source_type == 'postgresql':
+            # PostgreSQL connection: keyed by the authentication config, or by the
+            # host / database / user of a layer without one. Never by the URI itself,
+            # which carries the password.
+            key = authcfg_id if authcfg_id is not None else self._postgresql_datasource_key(source_uri)
+            if key and key not in self.project_datasources[layer_source_type].keys():
                 connexion, source_uri = get_datasource_connexion_from_layer(layer)
-                self.project_datasources[layer_source_type][authcfg_id] = connexion
+                self.project_datasources[layer_source_type][key] = connexion
         else:
             # File-based datasource (GeoPackage, Shapefile, etc.)
             uri = source_uri.uri().strip()
@@ -333,11 +348,14 @@ class DatasourceManager(QObject):
 
         layer = layers[0]
         source_uri, authcfg_id = get_data_source_uri(layer)
+        if source_uri is None:
+            return
 
-        if authcfg_id is not None:
+        if authcfg_id is not None or layer_source_type == 'postgresql':
             # PostgreSQL connection - remove from tracking
-            if authcfg_id in self.project_datasources[layer_source_type].keys():
-                del self.project_datasources[layer_source_type][authcfg_id]
+            key = authcfg_id if authcfg_id is not None else self._postgresql_datasource_key(source_uri)
+            if key in self.project_datasources[layer_source_type].keys():
+                del self.project_datasources[layer_source_type][key]
         else:
             # File-based datasource - remove URI from list
             uri = source_uri.uri().strip()
@@ -360,24 +378,15 @@ class DatasourceManager(QObject):
         - PostgreSQL: If available and connections exist
         - Spatialite: Fallback for local operations
 
-        Also creates foreign data wrappers for OGR datasources if PostgreSQL active.
-
         Notes:
             - Updates CONFIG_DATA["CURRENT_PROJECT"]["OPTIONS"]["ACTIVE_POSTGRESQL"]
+              with a live connection object only, never with a URI or a path
             - Updates CONFIG_DATA["CURRENT_PROJECT"]["OPTIONS"]["IS_ACTIVE_POSTGRESQL"]
             - Shows warning if PostgreSQL layers detected but psycopg2 unavailable
-            - Creates foreign data wrappers for file-based datasources in PostgreSQL
+            - Runs no SQL: the foreign data wrappers once created here were removed
+              (the SQL was invalid and nothing read the tables)
         """
-        if not OGR_AVAILABLE:
-            logger.warning("OGR not available, skipping datasource update")
-            return
-
         config_data = self._get_config_data()
-
-        # Get OGR driver list
-        ogr_driver_list = [ogr.GetDriver(i).GetDescription() for i in range(ogr.GetDriverCount())]
-        ogr_driver_list.sort()
-        logger.debug(f"OGR drivers available: {ogr_driver_list}")
 
         # Check if PostgreSQL is available and if there are PostgreSQL connections
         if 'postgresql' in self.project_datasources and POSTGRESQL_AVAILABLE:
@@ -393,11 +402,19 @@ class DatasourceManager(QObject):
                     and not getattr(current_connection, 'closed', True)
                 )
                 if not is_valid_connection:
-                    # Assign fresh connection object from project_datasources
-                    config_data["CURRENT_PROJECT"]["OPTIONS"]["ACTIVE_POSTGRESQL"] = \
-                        self.project_datasources['postgresql'][postgresql_connexions[0]]
-                    config_data["CURRENT_PROJECT"]["OPTIONS"]["IS_ACTIVE_POSTGRESQL"] = True
-                    logger.debug("Assigned fresh PostgreSQL connection object to ACTIVE_POSTGRESQL")
+                    # Assign a fresh connection object from project_datasources. Only a
+                    # connection qualifies: a failed connection (None) or a leftover
+                    # URI / path must not become ACTIVE_POSTGRESQL, which is saved.
+                    fresh = next((c for c in self.project_datasources['postgresql'].values()
+                                  if hasattr(c, 'cursor') and callable(getattr(c, 'cursor', None))
+                                  and not isinstance(c, str)), None)
+                    if fresh is not None:
+                        config_data["CURRENT_PROJECT"]["OPTIONS"]["ACTIVE_POSTGRESQL"] = fresh
+                        config_data["CURRENT_PROJECT"]["OPTIONS"]["IS_ACTIVE_POSTGRESQL"] = True
+                        logger.debug("Assigned fresh PostgreSQL connection object to ACTIVE_POSTGRESQL")
+                    else:
+                        config_data["CURRENT_PROJECT"]["OPTIONS"]["ACTIVE_POSTGRESQL"] = ""
+                        config_data["CURRENT_PROJECT"]["OPTIONS"]["IS_ACTIVE_POSTGRESQL"] = False
             else:
                 config_data["CURRENT_PROJECT"]["OPTIONS"]["ACTIVE_POSTGRESQL"] = ""
                 config_data["CURRENT_PROJECT"]["OPTIONS"]["IS_ACTIVE_POSTGRESQL"] = False
@@ -417,76 +434,8 @@ class DatasourceManager(QObject):
             config_data["CURRENT_PROJECT"]["OPTIONS"]["ACTIVE_POSTGRESQL"] = ""
             config_data["CURRENT_PROJECT"]["OPTIONS"]["IS_ACTIVE_POSTGRESQL"] = False
 
-        # Create foreign data wrappers for file-based vector datasources, one per file
-        if config_data["CURRENT_PROJECT"]["OPTIONS"]["IS_ACTIVE_POSTGRESQL"] is True:
-            for current_datasource in FILE_DATASOURCE_TYPES:
-                for project_datasource, datasources in self.project_datasources.get(current_datasource, {}).items():
-                    if not datasources:
-                        continue  # no layer reads this file any more
-                    # Extract file extension safely (every datasource of a file shares its path)
-                    datasource_path = datasources[-1].split('|')[0]
-                    path_parts = datasource_path.split('.')
-                    # Check if there's an extension (at least 2 parts after split)
-                    datasource_ext = path_parts[-1] if len(path_parts) >= 2 else datasource_path
-                    datasource_type_name = [ogr_name for ogr_name in ogr_driver_list
-                                            if ogr_name.upper() == datasource_ext.upper()]
-                    if not datasource_type_name:
-                        # No OGR driver named after the extension (.shp is 'ESRI Shapefile'): no
-                        # wrapper. Taking [0] raised IndexError, which ended the layer task completion.
-                        continue
-                    self.create_foreign_data_wrapper(
-                        project_datasource,
-                        os.path.basename(project_datasource),
-                        datasource_type_name[0]
-                    )
-
         # Update CONFIG_DATA
         self._set_config_data(config_data)
-
-    def create_foreign_data_wrapper(self, project_datasource: str, datasource: str, format: str):
-        """
-        Create PostgreSQL foreign data wrapper for external datasource.
-
-        Args:
-            project_datasource: Full path to datasource file
-            datasource: Basename of datasource (for server naming)
-            format: OGR format name (e.g., 'GPKG', 'ESRI Shapefile')
-
-        Notes:
-            - Creates OGR foreign data wrapper extension if not exists
-            - Creates filter_mate_temp schema
-            - Creates server for datasource
-            - Imports foreign schema into PostgreSQL
-            - Requires active PostgreSQL connection
-        """
-        if not POSTGRESQL_AVAILABLE:
-            logger.warning("PostgreSQL not available, cannot create foreign data wrapper")
-            return
-
-        config_data = self._get_config_data()
-
-        sql_request = f"""CREATE EXTENSION IF NOT EXISTS ogr_fdw;
-                        CREATE SCHEMA IF NOT EXISTS filter_mate_temp AUTHORIZATION postgres;
-                        DROP SERVER IF exists server_{sanitize_sql_identifier(datasource)} CASCADE;
-                        CREATE SERVER server_{sanitize_sql_identifier(datasource)}
-                        FOREIGN DATA WRAPPER ogr_fdw OPTIONS (
-                            datasource '{project_datasource.replace(chr(92) + chr(92), chr(92))}',
-                            format '{format}');
-                        IMPORT FOREIGN SCHEMA ogr_all
-                        FROM SERVER server_{sanitize_sql_identifier(datasource)} INTO filter_mate_temp;"""
-
-        if config_data["CURRENT_PROJECT"]["OPTIONS"]["IS_ACTIVE_POSTGRESQL"] is True:
-            connexion = config_data["CURRENT_PROJECT"]["OPTIONS"]["ACTIVE_POSTGRESQL"]
-            # Validate that connexion is actually a connection object, not a string
-            if connexion is None or isinstance(connexion, str):
-                logger.warning("ACTIVE_POSTGRESQL is not a valid connection object, skipping foreign data wrapper creation")
-                return
-            try:
-                with connexion.cursor() as cursor:
-                    cursor.execute(sql_request)
-                logger.info(f"Created foreign data wrapper for {datasource}")
-            except Exception as e:
-                logger.error(f"Failed to create foreign data wrapper: {e}")
 
     # ====================
     # State Management

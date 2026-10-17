@@ -3075,8 +3075,3 @@ class FilterMateApp:
         if self._datasource_manager:
             self.project_datasources = self._datasource_manager.get_project_datasources()
             self._datasource_manager.update_datasource()
-
-    def create_foreign_data_wrapper(self, project_datasource, datasource, format):
-        """Create PostgreSQL foreign data wrapper via DatasourceManager."""
-        if self._datasource_manager:
-            self._datasource_manager.create_foreign_data_wrapper(project_datasource, datasource, format)
