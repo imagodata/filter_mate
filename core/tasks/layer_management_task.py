@@ -1719,7 +1719,9 @@ class LayersManagementEngineTask(QgsTask):
 
             # Create spatial index
             alg_params_createspatialindex = {"INPUT": layer}
-            processing.run('qgis:createspatialindex', alg_params_createspatialindex)
+            from qgis.core import QgsProcessingContext
+            # 2026-10-17: an explicit context: never built from the project / canvas in the worker
+            processing.run('qgis:createspatialindex', alg_params_createspatialindex, context=QgsProcessingContext())
 
             if self.isCanceled():
                 return False

@@ -298,9 +298,11 @@ class CreateSpatialIndexTask(BaseFilterMateTask):
 
                 try:
                     # Create spatial index using processing
+                    from qgis.core import QgsProcessingContext
+                    # 2026-10-17: an explicit context: never built from the project / canvas in the worker
                     processing.run("native:createspatialindex", {
                         'INPUT': layer
-                    })
+                    }, context=QgsProcessingContext())
                     self._created += 1
                 except Exception as e:
                     logger.warning(f"Failed to create index for {layer.name()}: {e}")

@@ -253,6 +253,22 @@ class CancellableFeedback(QgsProcessingFeedback if _HAS_PROCESSING_FEEDBACK else
                 pass
 
 
+def _worker_processing_kwargs(feedback=None) -> dict:
+    """``processing.run`` keyword arguments for the filter task's worker thread (2026-10-17).
+
+    An explicit QgsProcessingContext: without one, processing.run() builds its own from
+    the project and ``iface.mapCanvas()``, read from the worker thread: QGIS crashed
+    (segfault in createExpressionContext) while the main thread removed a layer.
+    """
+    kwargs = {'feedback': feedback}
+    try:
+        from qgis.core import QgsProcessingContext
+        kwargs['context'] = QgsProcessingContext()
+    except ImportError:  # test doubles of qgis.core
+        pass
+    return kwargs
+
+
 class OGRExpressionBuilder(GeometricFilterPort):
     """
     OGR expression builder.
@@ -531,7 +547,7 @@ class OGRExpressionBuilder(GeometricFilterPort):
                             'PREDICATE': predicate_codes,
                             'METHOD': 0  # New selection
                         },
-                        feedback=self._feedback
+                        **_worker_processing_kwargs(self._feedback)
                     )
                 except Exception as e:
                     self.last_error = f"native:selectbylocation processing failed: {e}"
@@ -1252,7 +1268,7 @@ class OGRExpressionBuilder(GeometricFilterPort):
                     'DISSOLVE': False,
                     'OUTPUT': 'memory:'
                 },
-                feedback=self._feedback if hasattr(self, '_feedback') else None
+                **_worker_processing_kwargs(self._feedback if hasattr(self, '_feedback') else None)
             )
 
             buffered_layer = result.get('OUTPUT')

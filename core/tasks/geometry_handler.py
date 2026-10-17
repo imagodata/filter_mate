@@ -437,7 +437,7 @@ class GeometryHandler:
             feedback=feedback,
         )
         layer = outputs['alg_source_layer_params_reprojectlayer']['OUTPUT']
-        processing.run('qgis:createspatialindex', {"INPUT": layer})
+        processing.run('qgis:createspatialindex', {"INPUT": layer}, context=context)  # not built from the worker
         return layer
 
     def fix_invalid_geometries(self, layer: Any, output_key: str) -> Any:
