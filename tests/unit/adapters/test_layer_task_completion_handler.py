@@ -12,11 +12,12 @@ LayerTaskCompletionHandler: end of the add_layers / remove_layers tasks.
 - Overlapping layer tasks: the result is merged into the current PROJECT_LAYERS
   instead of replacing it.
 
-The module is loaded from its file (no package: its optional perf_timer import
+The module is loaded from its file under stub parent packages (its optional perf_timer import
 falls back to a no-op) and runs against a real sqlite file and a real HistoryService.
 """
 import importlib.util
 import sqlite3
+import sys
 import types
 from pathlib import Path
 from unittest.mock import MagicMock
@@ -29,9 +30,18 @@ _REPO = Path(__file__).resolve().parents[3]
 
 
 def _load_handler_module():
+    # Stub parent packages (real paths) so the handler's lazy relative imports
+    # (``..core.domain.project_folder``) resolve; its optional perf_timer import still falls back.
+    pkg = "_fm_layer_task_completion_pkg"
+    for name, path in ((pkg, _REPO), (f"{pkg}.adapters", _REPO / "adapters"), (f"{pkg}.core", _REPO / "core"),
+                       (f"{pkg}.core.domain", _REPO / "core" / "domain")):
+        package = types.ModuleType(name)
+        package.__path__ = [str(path)]
+        sys.modules[name] = package
     spec = importlib.util.spec_from_file_location(
-        "_fm_layer_task_completion_handler", _REPO / "adapters" / "layer_task_completion_handler.py")
+        f"{pkg}.adapters.layer_task_completion_handler", _REPO / "adapters" / "layer_task_completion_handler.py")
     module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module
     spec.loader.exec_module(module)
     return module
 

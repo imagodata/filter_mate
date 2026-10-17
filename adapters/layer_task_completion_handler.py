@@ -12,7 +12,6 @@ import logging
 import weakref
 from typing import Dict, Callable, List, Optional, Any
 from qgis.PyQt.QtCore import QTimer
-from ..core.domain.project_folder import project_folder
 
 try:
     from ..infrastructure.perf_timer import perf_mark_end
@@ -242,6 +241,8 @@ class LayerTaskCompletionHandler:
         """Update ENV_VARS with current project paths."""
         project = self._get_project()
         env_vars = self._get_env_vars()
+
+        from ..core.domain.project_folder import project_folder  # lazy: the unit tests load this file alone
 
         # An unsaved project has no folder: Desktop (Windows) / home
         env_vars["PATH_ABSOLUTE_PROJECT"] = project_folder(project.readPath("./"))
