@@ -342,7 +342,7 @@ class PostgreSQLBackend(BackendPort):
             full_table = f'"{schema_name}"."{table_name}"' if schema_name else f'"{table_name}"'
 
             # Format FIDs for SQL (handle UUIDs vs integers)
-            formatted_fids = self._format_fids_for_sql(fids)
+            formatted_fids = self._format_fids_for_sql(fids, layer, pk_field)
 
             # Build SELECT query for MV
             # Include pk and geometry for spatial indexing
@@ -409,7 +409,7 @@ class PostgreSQLBackend(BackendPort):
                 logger.debug(traceback.format_exc())
                 # Try fallback: create temporary table instead
                 return self._create_source_selection_temp_table(
-                    conn, table_name, clean_pk_field, clean_geom_field, fids, formatted_fids
+                    conn, full_table, clean_pk_field, clean_geom_field, fids, formatted_fids
                 )
 
         except Exception as e:
@@ -459,35 +459,36 @@ class PostgreSQLBackend(BackendPort):
             logger.error(f"[PostgreSQL] Error extracting table info: {e}")
             return None, None
 
-    def _format_fids_for_sql(self, fids: List[Any]) -> str:
+    def _format_fids_for_sql(self, fids: List[Any], layer=None, pk_field: Optional[str] = None) -> str:
         """
         Format FID list for SQL IN clause.
 
-        Handles both UUIDs (strings) and integers.
+        2026-10-17: the literals come from core.filter.pk_formatter (the type
+        of ``pk_field`` in ``layer`` first, then every value). They end up in
+        a CREATE MATERIALIZED VIEW run through psycopg2: a key such as
+        ``L'Isle-Jourdain`` used to end the literal (second-order injection).
 
         Args:
             fids: List of feature IDs
+            layer: Layer holding ``pk_field`` (type of the key), optional
+            pk_field: Key field name, optional
 
         Returns:
             Formatted string for SQL IN clause
         """
         if not fids:
             return ""
-
-        # Check if UUIDs (strings) or integers
-        sample = fids[0]
-
-        if isinstance(sample, str):
-            # Quote strings/UUIDs
-            return ', '.join(f"'{str(fid)}'" for fid in fids)
-        else:
-            # Integers don't need quotes
-            return ', '.join(str(fid) for fid in fids)
+        try:
+            from ....core.filter.pk_formatter import format_pk_values_for_sql
+        except ImportError:
+            from core.filter.pk_formatter import format_pk_values_for_sql
+        clean_pk = pk_field.split('.')[-1].strip('"') if pk_field else None
+        return format_pk_values_for_sql(list(fids), layer=layer, pk_field=clean_pk)
 
     def _create_source_selection_temp_table(
         self,
         conn,
-        table_name: str,
+        full_table: str,
         pk_field: str,
         geom_field: str,
         fids: List[Any],
@@ -502,9 +503,13 @@ class PostgreSQLBackend(BackendPort):
         instead of TEMPORARY table. TEMPORARY tables are session-scoped and
         not visible to QGIS's PostgreSQL connection (different session).
 
+        2026-10-17: the name hashes EVERY key with the source table and the
+        session (the first ten keys alone gave two selections of one table,
+        or two tables, the same table), and the source is read schema-qualified.
+
         Args:
             conn: Database connection
-            table_name: Source table name
+            full_table: Schema-qualified, quoted source table (``"schema"."table"``)
             pk_field: Primary key field
             geom_field: Geometry field
             fids: List of FIDs
@@ -517,8 +522,10 @@ class PostgreSQLBackend(BackendPort):
             import hashlib
             from ....infrastructure.constants import DEFAULT_TEMP_SCHEMA
 
-            fid_hash = hashlib.md5(','.join(str(f) for f in fids[:10]).encode(), usedforsecurity=False).hexdigest()[:8]  # nosec B324
-            temp_name = f"fm_temp_src_sel_{fid_hash}"
+            digest = hashlib.md5(usedforsecurity=False)  # nosec B324 - a name, not a secret
+            digest.update(f"{self._session_id}|{full_table}|{pk_field}|".encode())
+            digest.update(formatted_fids.encode())
+            temp_name = f"fm_temp_src_sel_{digest.hexdigest()[:12]}"
 
             # FIX v4.3.1 (2026-01-22): Clean field names (remove table prefixes if present)
             clean_pk_field = pk_field.split('.')[-1].strip('"')
@@ -537,7 +544,7 @@ class PostgreSQLBackend(BackendPort):
             create_sql = f"""
                 CREATE TABLE "{DEFAULT_TEMP_SCHEMA}"."{temp_name}" AS
                 SELECT "{clean_pk_field}" as pk
-                FROM "{table_name}"
+                FROM {full_table}
                 WHERE "{clean_pk_field}" IN ({formatted_fids})
             """  # nosec B608 - identifiers quoted, values are numeric ids or SQL fragments FilterMate built from QGIS layer metadata
             cursor.execute(create_sql)

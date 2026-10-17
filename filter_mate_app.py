@@ -2691,11 +2691,14 @@ class FilterMateApp:
     def _show_task_completion_message(self, task_name, source_layer, provider_type, layer_count, is_fallback=False):
         """Show success message with backend info and feature counts."""
         from .config.feedback_config import should_show_message
-        feature_count = source_layer.featureCount()
+        from .adapters.qgis.source_capability_probe import feature_count_or_none
+        # 2026-10-17: a web service is counted by a server request: not on the main thread ("?").
+        feature_count = feature_count_or_none(source_layer)
+        count_text = "?" if feature_count is None or feature_count < 0 else "{:,}".format(feature_count)
         show_success_with_backend(provider_type, task_name, layer_count, is_fallback=is_fallback)
         if should_show_message('filter_count'):
             prefix = QCoreApplication.translate("FilterMateApp", "All filters cleared - ") if task_name == 'unfilter' else ""
-            show_info(QCoreApplication.translate("FilterMateApp", "{0}{1} features visible in main layer").format(prefix, "{:,}".format(feature_count)))
+            show_info(QCoreApplication.translate("FilterMateApp", "{0}{1} features visible in main layer").format(prefix, count_text))
 
     def filter_engine_task_completed(self, task_name, source_layer, task_parameters):
         """Handle completion of filtering operations via FilterResultHandler."""

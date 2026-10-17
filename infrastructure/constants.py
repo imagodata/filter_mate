@@ -34,15 +34,15 @@ QGIS_PROVIDER_SPATIALITE = 'spatialite'   # layer.providerType() for SpatiaLite 
 QGIS_PROVIDER_OGR = 'ogr'                # layer.providerType() for OGR/file layers
 QGIS_PROVIDER_MEMORY = 'memory'           # layer.providerType() for memory layers
 
-# Remote/distant providers that should be treated as available if layer is valid
+# Remote/distant providers that should be treated as available if layer is valid.
+# Lower case: compare with ``providerType().lower()`` (QGIS names them 'WFS', 'OAPIF').
+# 2026-10-17: a copy of core.domain.source_capability.REMOTE_SERVICE_PROVIDERS
+# (not imported: this module is loaded before core; a unit test keeps them equal).
+# Prefer classify(), which also knows GDAL services and remote files by their source.
 REMOTE_PROVIDERS = {
-    'WFS',                    # OGC Web Feature Service
-    'wfs',                    # Lowercase variant
-    'arcgisfeatureserver',    # ArcGIS Feature Service
-    'arcgismapserver',        # ArcGIS Map Service
-    'oapif',                  # OGC API Features
-    'wcs',                    # Web Coverage Service (raster, but listed for completeness)
-    'vectortile',             # Vector tiles
+    'wfs', 'oapif', 'arcgisfeatureserver', 'sensorthings',             # vector services
+    'vectortile', 'arcgisvectortileservice', 'xyzvectortiles',         # vector tiles
+    'wms', 'wcs', 'arcgismapserver',                                   # raster services
 }
 
 # Provider type mapping from QGIS internal names (v4.0 Regression Fix)
@@ -385,7 +385,10 @@ def get_provider_name(qgis_provider_type: str) -> str:
         >>> get_provider_name('postgres')
         'postgresql'
     """
-    return PROVIDER_TYPE_MAPPING.get(qgis_provider_type, qgis_provider_type)
+    if qgis_provider_type in PROVIDER_TYPE_MAPPING:
+        return PROVIDER_TYPE_MAPPING[qgis_provider_type]
+    # QGIS keys are case-sensitive ('WFS', 'OAPIF'): the mapping is matched case-insensitively.
+    return PROVIDER_TYPE_MAPPING.get((qgis_provider_type or '').lower(), qgis_provider_type)
 
 
 def get_provider_display_name(provider_type: str) -> str:

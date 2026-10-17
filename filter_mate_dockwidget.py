@@ -4304,14 +4304,13 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
                         pk_name = layer_props.get("infos", {}).get("primary_key_name")
                         pk_is_numeric = layer_props.get("infos", {}).get("primary_key_is_numeric", True)
 
-                        if pk_name and feature_ids_to_fetch:
-                            if pk_is_numeric:
-                                expr_str = f'"{pk_name}" IN ({",".join(str(v) for v in feature_ids_to_fetch)})'
-                            else:
-                                # Fix: Use proper string quoting for non-numeric primary keys
-                                quoted_values = ",".join(f"'{v}'" for v in feature_ids_to_fetch)
-                                expr_str = f'"{pk_name}" IN ({quoted_values})'
-                            request = QgsFeatureRequest(QgsExpression(expr_str))
+                        # 2026-10-17: a key that is no field ('$id', a legacy 'fid') is the
+                        # feature id, already asked above; text keys as QGIS expression literals.
+                        if pk_name and feature_ids_to_fetch and self.current_layer.fields().indexOf(pk_name) >= 0:
+                            from .core.filter.pk_formatter import QGIS_EXPRESSION, format_key_literal
+                            in_list = ",".join(format_key_literal(v, bool(pk_is_numeric), QGIS_EXPRESSION)
+                                               for v in feature_ids_to_fetch)
+                            request = QgsFeatureRequest(QgsExpression(f'"{pk_name}" IN ({in_list})'))
                             features = list(self.current_layer.getFeatures(request))
                             if features:
                                 logger.debug(f"  → Got {len(features)} features via expression")
@@ -4418,6 +4417,10 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         if not layer: return None
         try:
             MAX_FEATURES = 10000
+            # 2026-10-17: a web service / network database is neither counted nor
+            # scanned on the main thread: its (provider) extent.
+            from .adapters.qgis.source_capability_probe import counts_cheaply
+            if not counts_cheaply(layer): return layer.extent()
             layer.updateExtents()
             # PERF 2026-09-12: measured — asking the PostgreSQL provider for the
             # server-side filtered extent here (ST_Extent under an EXISTS subset)
@@ -5022,7 +5025,11 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         """v4.0 S18: Check if async expression evaluation should be used."""
         if not ASYNC_EXPRESSION_AVAILABLE or not self._expression_manager or not self.current_layer or not custom_expression:
             return False
-        return self.current_layer.featureCount() > self._async_expression_threshold
+        # 2026-10-17: a web service is not counted on the main thread, and an
+        # unknown count (None / -1) is a large layer: both go async.
+        from .adapters.qgis.source_capability_probe import feature_count_or_none
+        count = feature_count_or_none(self.current_layer)
+        return count is None or count < 0 or count > self._async_expression_threshold
 
     def exploring_link_widgets(self, expression=None, change_source=None):
         """v4.0 S18: → ExploringController."""

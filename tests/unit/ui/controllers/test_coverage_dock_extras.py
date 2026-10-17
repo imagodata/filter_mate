@@ -386,6 +386,11 @@ class TestVectorCardCount:
         assert not extras.feature_count_is_cheap("postgres", "")
         assert not extras.feature_count_is_cheap("wfs", "")
 
+    def test_web_providers_are_matched_whatever_their_case(self):
+        """QGIS names them 'WFS' and 'OAPIF': the lower-case list used to let them count on the main thread."""
+        for provider in ("WFS", "OAPIF", "oapif", "ArcGISFeatureServer", "sensorthings", "MSSQL"):
+            assert not extras.feature_count_is_cheap(provider, ""), provider
+
     def test_card_counts_local_unfiltered_layers_only(self, dock_extras, monkeypatch):
         monkeypatch.setattr(sys.modules["qgis.core"], "QgsWkbTypes",
                             types.SimpleNamespace(geometryDisplayString=lambda geometry_type: "Polygon"), raising=False)

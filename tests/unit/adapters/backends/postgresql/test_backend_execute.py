@@ -245,3 +245,41 @@ class TestSqlInjectionGuards:
         expression.sql = '"deleted_at" IS NULL AND "x" > 5'
         backend._execute_direct(expression, layer_info, connection)
         connection.cursor.return_value.execute.assert_called_once()
+
+
+class TestSourceSelectionKeyLiterals:
+    """2026-10-17: the source-selection MV / table run keys through psycopg2 (second-order injection)."""
+
+    def test_text_keys_are_escaped(self, backend):
+        assert backend._format_fids_for_sql(["L'Isle-Jourdain", "Auch"]) == "'L''Isle-Jourdain', 'Auch'"
+
+    def test_mixed_keys_are_never_written_raw(self, backend):
+        """The first value used to decide: a text key after an integer went in unquoted."""
+        assert backend._format_fids_for_sql([1, "1); DROP TABLE x; --"]) == "'1', '1); DROP TABLE x; --'"
+
+    def test_fallback_table_name_hashes_every_key_table_and_session(self, backend, monkeypatch):
+        constants = types.ModuleType(f"{ROOT}.infrastructure.constants")
+        constants.DEFAULT_TEMP_SCHEMA = "filtermate_temp"
+        infrastructure = types.ModuleType(f"{ROOT}.infrastructure")
+        infrastructure.__path__ = []
+        monkeypatch.setitem(sys.modules, f"{ROOT}.infrastructure", infrastructure)
+        monkeypatch.setitem(sys.modules, f"{ROOT}.infrastructure.constants", constants)
+        backend._session_id = "session-a"
+        conn = MagicMock()
+        cursor = conn.cursor.return_value
+        keys = list(range(20))
+
+        def table_for(full_table, values, session="session-a"):
+            backend._session_id = session
+            cursor.reset_mock()
+            return backend._create_source_selection_temp_table(
+                conn, full_table, "id", "geom", values, backend._format_fids_for_sql(values))
+
+        first = table_for('"public"."communes"', keys)
+        assert first.startswith('"filtermate_temp"."fm_temp_src_sel_')
+        create_sql = [c.args[0] for c in cursor.execute.call_args_list if "CREATE TABLE" in c.args[0]][0]
+        assert 'FROM "public"."communes"' in create_sql, "the source is read schema-qualified"
+        assert table_for('"public"."communes"', keys) == first
+        assert table_for('"public"."communes"', keys[:10] + [99] * 10) != first, "keys beyond the 10th count"
+        assert table_for('"other"."communes"', keys) != first
+        assert table_for('"public"."communes"', keys, session="session-b") != first

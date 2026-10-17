@@ -1114,11 +1114,23 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
         layer. The rows are sorted by display value client-side anyway, and the
         text filter searches the whole layer server-side. GeoPackage keeps the
         server order (batiment, 1.17 M rows: 0.6 s).
+
+        2026-10-17: same for web services and remote files (WFS, OGC API
+        Features, /vsicurl/...): QGIS sorts them client-side, so the limited
+        request downloaded the whole layer before keeping 1001 rows.
         """
         try:
-            return self.layer.providerType() != 'postgres'
+            provider = self.layer.providerType()
+            source = self.layer.source()
         except (RuntimeError, AttributeError):
             return True
+        if provider == 'postgres':
+            return False
+        try:
+            from ...core.domain.source_capability import classify
+        except ImportError:
+            from core.domain.source_capability import classify
+        return not classify(provider, source).is_remote
 
     CANVAS_DEFER_FALLBACK_MS = 15000
     CANVAS_DEFER_MAX_ROUNDS = 3
@@ -1185,7 +1197,7 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
         QTimer.singleShot(self.CANVAS_DEFER_FALLBACK_MS, lambda: run_deferred(True))
         logger.info(
             f"_populate_features_sync: {self._cached_layer_name} population deferred until the canvas "
-            f"finishes rendering (PostgreSQL, fallback {self.CANVAS_DEFER_FALLBACK_MS} ms "
+            f"finishes rendering (PostgreSQL / remote source, fallback {self.CANVAS_DEFER_FALLBACK_MS} ms "
             f"x{self.CANVAS_DEFER_MAX_ROUNDS + 1})"
         )
         return True
@@ -1245,7 +1257,7 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
 
         list_widget.clear()
 
-        identifier_field = list_widget.getIdentifierFieldName()
+        identifier_field = self._identifier_field_of_layer(list_widget.getIdentifierFieldName())
         identifier_numeric = bool(getattr(list_widget, 'identifier_field_type_numeric', False))
         expr, context = self._make_display_evaluator(expression)
 
@@ -1267,9 +1279,7 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
         search_text = (search_text or '').strip()
         display_sql = self._display_expression_sql(expression, list_widget)
         if search_text:
-            request.setFilterExpression(
-                f"lower(to_string({display_sql})) LIKE {QgsExpression.quotedValue('%' + search_text.lower() + '%')}"
-            )
+            request.setFilterExpression(self._search_expression(display_sql, search_text))
         server_sorted = False
         if fetch_limit > 0:
             # Sorted by display value so "the first N" is predictable, and one
@@ -1405,12 +1415,59 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
         context.appendScopes(QgsExpressionContextUtils.globalProjectLayerScopes(self.layer))
         return expr, context
 
+    def _search_expression(self, display_sql, search_text):
+        """Case-insensitive "contains" filter of the text search.
+
+        2026-10-17: on a web service (or remote file) whose display is a text
+        field, ``"field" ILIKE '%x%'``: QGIS translates it to the server's
+        filter (OGC PropertyIsLike matchCase=false, CQL2...), where
+        ``lower(to_string(...)) LIKE`` is evaluated client-side after
+        downloading every feature.
+        """
+        pattern = QgsExpression.quotedValue('%' + search_text + '%')
+        if not display_sql.startswith('(') and self._displays_remote_text_field(display_sql):
+            return f"{display_sql} ILIKE {pattern}"
+        return f"lower(to_string({display_sql})) LIKE {QgsExpression.quotedValue('%' + search_text.lower() + '%')}"
+
+    def _displays_remote_text_field(self, display_sql):
+        """Whether ``display_sql`` (a quoted field name) is a text field of a remote layer."""
+        if self._orders_server_side():
+            return False
+        try:
+            if self.layer.providerType() == 'postgres':
+                return False
+            fields = self.layer.fields()
+            index = fields.indexOf(display_sql.strip('"').replace('""', '"'))
+            if index < 0:
+                return False
+            field = fields.at(index)
+            is_date = getattr(field, 'isDateOrTime', lambda: False)()
+            return not field.isNumeric() and not is_date
+        except (RuntimeError, AttributeError):
+            return False
+
     @staticmethod
     def _display_expression_sql(expression, list_widget):
         """Display expression as an expression string (quoted when it is a bare field name)."""
         if list_widget.getExpressionFieldFlag() or QgsExpression(expression).isField():
             return QgsExpression.quotedColumnRef(expression.replace('"', ''))
         return f"({expression})"
+
+    def _identifier_field_of_layer(self, identifier_field):
+        """``identifier_field`` when it is a field of the layer, else None (rows keyed by feature id).
+
+        2026-10-17: a layer without a unique key field is keyed by its QGIS
+        feature id, recorded as 'fid' (core.domain.stable_key); a Shapefile or a
+        web layer has no field of that name.
+        """
+        if not identifier_field:
+            return None
+        try:
+            if self.layer.fields().indexOf(identifier_field) < 0:
+                return None
+        except (RuntimeError, AttributeError):
+            pass
+        return identifier_field
 
     @staticmethod
     def _row_from_feature(feature, identifier_field, expression, expr, context):
@@ -1428,11 +1485,16 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
         return (display_value, fid_value)
 
     def _fetch_rows_by_identifier(self, identifier_field, values, expression, identifier_numeric=False, chunk_size=500):
-        """Fetch ``(display_value, fid)`` rows for the given identifiers, in chunks."""
+        """Fetch ``(display_value, fid)`` rows for the given identifiers, in chunks.
+
+        2026-10-17: an identifier that is no field of the layer (the feature-id
+        key '$id' / a legacy 'fid') looks the rows up by feature id.
+        """
         rows = []
         values = list(values)
         if not values:
             return rows
+        identifier_field = self._identifier_field_of_layer(identifier_field)
         try:
             expr, context = self._make_display_evaluator(expression)
             for start in range(0, len(values), chunk_size):
@@ -1572,7 +1634,7 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
         """
         try:
             request = self._build_identifier_lookup_request(
-                identifier_field_name, [id_value], self._identifier_is_numeric())
+                self._identifier_field_of_layer(identifier_field_name), [id_value], self._identifier_is_numeric())
             request.setLimit(1)
             try:
                 filter_expression = request.filterExpression()
