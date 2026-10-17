@@ -725,8 +725,8 @@ def _renderer_band(renderer) -> Optional[int]:
         if callable(method):
             try:
                 return int(method())
-            except Exception:
-                continue
+            except (TypeError, ValueError, RuntimeError):
+                continue  # not a band number on this renderer: try the next accessor
     return None
 
 
