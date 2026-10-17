@@ -466,7 +466,8 @@ class FilterEngineTask(QgsTask):
                 # behaved that way through get_combine_operator()); the old
                 # `or 'AND'` kept every previous filter on the source layer.
                 combine_operator=self._get_source_combine_operator(),
-                task_bridge=self._task_bridge
+                task_bridge=self._task_bridge,
+                geometry_field=getattr(self, 'param_source_geom', None)
             )
         return self._attribute_executor
 

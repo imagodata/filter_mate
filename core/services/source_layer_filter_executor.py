@@ -177,11 +177,10 @@ class SourceLayerFilterExecutor:
             # HEXAGONAL MIGRATION v4.1: Use adapter instead of QgsExpression
             factory = get_qgis_factory()
             expr_adapter = factory.create_expression(task_expression)
-            # FIX v2.3.9: Use case-insensitive check for operators
-            task_expr_upper = task_expression.upper()
-            is_simple_field = expr_adapter.is_field() and not any(
-                op in task_expr_upper for op in ['=', '>', '<', '!', 'IN', 'LIKE', 'AND', 'OR']
-            )
+            # 2026-10-17: is_field() alone (a single column reference). The
+            # extra "'IN' in expression.upper()" test (v2.3.9) let
+            # "importance" / "origine" / "ordre" run as a filter.
+            is_simple_field = expr_adapter.is_field()
 
         # Check if skip_source_filter is enabled
         skip_source_filter = context.task_parameters["task"].get("skip_source_filter", False)
