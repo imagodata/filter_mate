@@ -1898,10 +1898,20 @@ class FilterMateApp:
 
         Processes the first queued add_layers operation from self._add_layers_queue.
         Called after a previous add_layers task completes or from safety timer.
+
+        2026-10-17: the service is handed this queue - the one manage_task
+        fills. It processed its own, always empty: layers added during an
+        add_layers task were never registered.
         """
         service = self._get_task_management_service()
         if service:
-            service.process_add_layers_queue(self.manage_task)
+            def run_queued(task_name, layers):
+                # layers removed from the project while they waited are left out
+                usable = self._filter_usable_layers(layers or [])
+                if usable:
+                    self.manage_task(task_name, usable)
+
+            service.process_add_layers_queue(run_queued, queue=self._add_layers_queue)
         else:
             logger.warning("TaskManagementService not available, cannot process queue")
 
@@ -2418,6 +2428,10 @@ class FilterMateApp:
                 task_parameters["task"] = self._build_common_task_params(
                     features, expression, layers_to_filter, include_history
                 )
+                # 2026-10-17: the user's settings (APP.OPTIONS: parallel
+                # filtering, thresholds, simplification...) for the task;
+                # nothing passed them, every reader used its defaults.
+                task_parameters["task"]["config_data"] = self.CONFIG_DATA
 
                 # v4.7: Delegate skip_source_filter logic
                 skip_source_filter = builder.determine_skip_source_filter(
@@ -2443,6 +2457,8 @@ class FilterMateApp:
                     export_params = builder.build_export_params(self.PROJECT_LAYERS, self.PROJECT)
                     if export_params:
                         export_params["task"]["session_id"] = self.session_id
+                        # 2026-10-17: the user's settings (STREAMING_EXPORT...)
+                        export_params["task"]["config_data"] = self.CONFIG_DATA
                         return {**task_parameters, **export_params}
 
                 # Fallback if TaskParameterBuilder unavailable
@@ -2675,11 +2691,14 @@ class FilterMateApp:
     def _show_task_completion_message(self, task_name, source_layer, provider_type, layer_count, is_fallback=False):
         """Show success message with backend info and feature counts."""
         from .config.feedback_config import should_show_message
-        feature_count = source_layer.featureCount()
+        from .adapters.qgis.source_capability_probe import feature_count_or_none
+        # 2026-10-17: a web service is counted by a server request: not on the main thread ("?").
+        feature_count = feature_count_or_none(source_layer)
+        count_text = "?" if feature_count is None or feature_count < 0 else "{:,}".format(feature_count)
         show_success_with_backend(provider_type, task_name, layer_count, is_fallback=is_fallback)
         if should_show_message('filter_count'):
             prefix = QCoreApplication.translate("FilterMateApp", "All filters cleared - ") if task_name == 'unfilter' else ""
-            show_info(QCoreApplication.translate("FilterMateApp", "{0}{1} features visible in main layer").format(prefix, "{:,}".format(feature_count)))
+            show_info(QCoreApplication.translate("FilterMateApp", "{0}{1} features visible in main layer").format(prefix, count_text))
 
     def filter_engine_task_completed(self, task_name, source_layer, task_parameters):
         """Handle completion of filtering operations via FilterResultHandler."""

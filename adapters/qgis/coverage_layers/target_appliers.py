@@ -46,6 +46,7 @@ from ....core.domain.cross_filter import (
     coverage_ratio_ok,
 )
 from ....core.domain.filter_state import LayerSnapshot
+from ....core.filter.pk_formatter import is_null_value
 from ....core.domain.layer_kind import LayerKind
 from . import cache
 from .gdal_warp import gdal_warp, polygonal_wkt
@@ -207,6 +208,16 @@ class TargetJob:
         return make_valid(transform_geometry(source_geometry, source_crs, self.crs, context))
 
 
+def translate(context: str, text: str) -> str:
+    """``QCoreApplication.translate``; the source text without Qt (or a mocked one)."""
+    try:
+        from qgis.PyQt.QtCore import QCoreApplication
+        translated = QCoreApplication.translate(context, text)
+    except Exception:  # nosec B110 - untranslated without Qt
+        return text
+    return translated if isinstance(translated, str) else text
+
+
 # --- vector -----------------------------------------------------------------
 
 def _is_polygon_layer(layer) -> bool:
@@ -238,6 +249,15 @@ class VectorTargetJob(TargetJob):
             self._source = QgsVectorLayerFeatureSource(layer)
         self._is_polygon = _is_polygon_layer(layer)
         self._pk, self._raw_pk = self._primary_key(layer)
+        # 2026-10-17: the key-list bounds of the source (core.domain.source_capability)
+        from ..source_capability_probe import capability_for_layer
+        self._capability = capability_for_layer(layer)
+        if self._pk is None:
+            self._error = translate(
+                "VectorTargetJob",
+                "{0}: no unique key field, its features cannot be listed in its filter "
+                "(a web service, or a virtual layer without a unique id column)."
+            ).format(layer.name())
         self._expression = ''
 
     def _unfiltered_source(self, layer: QgsVectorLayer):
@@ -268,13 +288,19 @@ class VectorTargetJob(TargetJob):
 
     @staticmethod
     def _primary_key(layer: QgsVectorLayer):
-        try:
-            from ....core.filter.source_filter_builder import get_primary_key_field
-            pk = get_primary_key_field(layer)
-        except Exception:
-            pk = None
-        if pk:
-            return pk, False
+        """``(key, raw)``: the stable key of core.domain.stable_key, or the feature id (raw ``FID`` / ``$id``).
+
+        2026-10-17: verdicts already proven only (this runs on the main thread:
+        no read of the layer). ``(None, False)`` where feature ids cannot be
+        listed (a web service or a virtual layer without key): refused. The FID
+        of a Shapefile / CSV is its row number, renumbered when the file is edited.
+        """
+        from ..source_capability_probe import stable_key_for_layer
+        choice = stable_key_for_layer(layer, scan=False)
+        if choice.is_field:
+            return choice.name, False
+        if choice.name is None:
+            return None, False
         if layer.providerType() == 'ogr':
             return 'FID', True
         return '$id', True
@@ -321,8 +347,28 @@ class VectorTargetJob(TargetJob):
             if matched and coverage > 0 and 'disjoint' not in request.methods:
                 matched = coverage_ratio_ok(target_geometry.area(), target_geometry.intersection(geometry).area(), coverage)
             if matched:
-                kept.append(feature.id() if self._raw_pk else feature.attribute(self._pk))
-        self._expression = build_in_expression(self._pk, kept, raw_field=self._raw_pk)
+                value = feature.id() if self._raw_pk else feature.attribute(self._pk)
+                if not is_null_value(value):  # a NULL key (None / null QVariant) matches nothing
+                    kept.append(value)
+        capability = self._capability
+        limit = capability.key_list_limit if capability is not None and capability.is_remote_service else None
+        if limit and len(kept) > limit:
+            self._source = None
+            self.outcome.message = translate(
+                "VectorTargetJob",
+                "{0} features to list, more than the {1} sent to a web service: narrow the source "
+                "or use an attribute filter."
+            ).format(f"{len(kept):,}", f"{limit:,}")
+            return
+        qgis_expression = capability is not None and capability.subset_is_qgis_expression
+        chunk = capability.in_list_max if capability is not None else None
+        if chunk and len(kept) > chunk:
+            lists = [build_in_expression(self._pk, kept[i:i + chunk], raw_field=self._raw_pk,
+                                         qgis_expression=qgis_expression) for i in range(0, len(kept), chunk)]
+            self._expression = "(" + " OR ".join(lists) + ")"
+        else:
+            self._expression = build_in_expression(self._pk, kept, raw_field=self._raw_pk,
+                                                   qgis_expression=qgis_expression)
         # Release the provider connection held by the feature source before the
         # subset is applied (an open GeoPackage reader made the count fail).
         # The unfiltered copy, a QObject of the main thread, goes in apply().

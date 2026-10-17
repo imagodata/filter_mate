@@ -11,12 +11,12 @@ import re
 _QUALIFIED = re.compile(r'^"((?:[^"]|"")*)"\."((?:[^"]|"")*)"$')
 
 
-def _like_to_regex(pattern):
+def _like_to_regex(pattern, escape="\\"):
     out = []
     i = 0
     while i < len(pattern):
         char = pattern[i]
-        if char == "\\" and i + 1 < len(pattern):
+        if char == escape and i + 1 < len(pattern):
             out.append(re.escape(pattern[i + 1]))
             i += 2
             continue
@@ -66,6 +66,12 @@ class FakeCursor:
         self._rows = []
         if flat.startswith("SELECT matviewname FROM pg_matviews"):
             self._rows = [(n,) for k, s, n in catalog.objects if k == "matview" and s == params[0]]
+        elif "ESCAPE '!'" in flat and ("FROM pg_tables" in flat or "FROM pg_matviews" in flat):
+            kind = "matview" if "pg_matviews" in flat else "table"
+            patterns = [_like_to_regex(p, "!") for p in params if isinstance(p, str) and "%" in p]
+            schemas = params[0] if params and isinstance(params[0], list) else None
+            self._rows = [(s, n) for k, s, n in catalog.objects if k == kind and any(p.match(n) for p in patterns)
+                          and (schemas is None or s in schemas)]
         elif "FROM pg_matviews" in flat or "FROM pg_tables" in flat:
             kind = "matview" if "pg_matviews" in flat else "table"
             patterns = [_like_to_regex(p) for p in params[0]]

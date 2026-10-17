@@ -51,6 +51,20 @@ except ImportError:
 logger = get_logger(__name__)
 
 
+def _history_count(layer) -> int:
+    """Feature count recorded in the history; -1 for a web service / network database (2026-10-17).
+
+    The history is written on the main thread before and after each filter:
+    QGIS counts a WFS / OGC API Features / MSSQL layer with a server request.
+    """
+    try:
+        from .qgis.source_capability_probe import feature_count_or_none
+    except ImportError:
+        return layer.featureCount()
+    count = feature_count_or_none(layer)
+    return -1 if count is None else count
+
+
 def _panel_layer_id(dockwidget) -> Optional[str]:
     """Id of the dock's current layer (None: no layer, or a deleted one)."""
     try:
@@ -868,7 +882,7 @@ class UndoRedoHandler:
 
             # Get current filter expression and feature count (NO push_state here!)
             assoc_filter = assoc_layer.subsetString()
-            assoc_count = assoc_layer.featureCount()
+            assoc_count = _history_count(assoc_layer)
 
             logger.info(f"  + Added remote layer {layer_name}: filter='{assoc_filter[:40] if assoc_filter else '(none)'}...'")
 
@@ -904,7 +918,7 @@ class UndoRedoHandler:
         history = self._history_manager.get_or_create_history(current_layer.id())
         if len(history._states) == 0:
             current_filter = current_layer.subsetString()
-            current_count = current_layer.featureCount()
+            current_count = _history_count(current_layer)
             history.push_state(
                 expression=current_filter,
                 feature_count=current_count,
@@ -927,7 +941,7 @@ class UndoRedoHandler:
                     assoc_history = self._history_manager.get_or_create_history(assoc_layer.id())
                     if len(assoc_history._states) == 0:
                         assoc_filter = assoc_layer.subsetString()
-                        assoc_count = assoc_layer.featureCount()
+                        assoc_count = _history_count(assoc_layer)
                         assoc_history.push_state(
                             expression=assoc_filter,
                             feature_count=assoc_count,
@@ -940,12 +954,12 @@ class UndoRedoHandler:
                         logger.info(f"FilterMate: Initialized history for associated layer {assoc_layer.name()}")
 
                     # Collect CURRENT state for all remote layers (for global state)
-                    remote_layers_info[assoc_layer.id()] = (assoc_layer.subsetString(), assoc_layer.featureCount())
+                    remote_layers_info[assoc_layer.id()] = (assoc_layer.subsetString(), _history_count(assoc_layer))
 
         # ALWAYS push global state BEFORE filtering if we have remote layers
         if remote_layers_info:
             current_filter = current_layer.subsetString()
-            current_count = current_layer.featureCount()
+            current_count = _history_count(current_layer)
             self._history_manager.push_global_state(
                 source_layer_id=current_layer.id(),
                 source_expression=current_filter,

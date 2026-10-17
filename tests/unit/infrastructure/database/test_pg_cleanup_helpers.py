@@ -12,6 +12,7 @@ import pytest
 
 from infrastructure.database.temp_objects import (
     pg_drop_filtermate_schema,
+    pg_drop_session_views,
     pg_drop_temp_objects,
     pg_find_temp_objects,
     pg_quote_ident,
@@ -174,3 +175,38 @@ def test_schema_content_splits_filtermate_and_foreign():
 
     assert sorted(n for _k, _s, n in objects) == sorted([f"fm_temp_mv_{SID}_x", f"mv_{SID}_legacy"])
     assert foreign == ["mine"]
+
+
+class TestDropSessionViews:
+    """The session cleanup at unload: this session's views in FilterMate's schemas, no CASCADE."""
+
+    OBJECTS = [
+        ("matview", "filter_mate_temp", f"fm_temp_mv_{SID}_a"),
+        ("matview", "filter_mate_temp", f"fm_temp_mv_{SID}_a_dump"),
+        ("matview", "filtermate_temp", f"fm_temp_mv_{SID}_old_schema"),
+        ("matview", "filter_mate_temp", f"mv_{SID}_legacy"),
+        ("matview", "filter_mate_temp", "fm_temp_mv_99999999_other_session"),
+        ("matview", "filter_mate_temp", f"fm_temp_mvXab12cd34_x"),
+        ("matview", "public", f"mv_{SID}_in_public"),               # legacy name outside our schemas
+        ("view", "filter_mate_temp", "user_view"),
+    ]
+
+    def test_only_this_sessions_views_of_the_temp_schemas_go(self):
+        catalog = FakePgCatalog(self.OBJECTS, dependents={f"fm_temp_mv_{SID}_a": [f"fm_temp_mv_{SID}_a_dump"]})
+        connection = FakeConnection(catalog)
+
+        dropped = pg_drop_session_views(connection, connection.cursor(), ["filter_mate_temp", "filtermate_temp"], SID)
+
+        assert sorted(n for _k, _s, n in dropped) == sorted([
+            f"fm_temp_mv_{SID}_a", f"fm_temp_mv_{SID}_a_dump", f"fm_temp_mv_{SID}_old_schema", f"mv_{SID}_legacy"])
+        assert sorted(n for _k, _s, n in catalog.objects) == sorted([
+            "fm_temp_mv_99999999_other_session", "fm_temp_mvXab12cd34_x", f"mv_{SID}_in_public", "user_view"])
+        assert all("CASCADE" not in s for s in catalog.statements())
+
+    def test_a_session_id_with_like_characters_matches_nothing_else(self):
+        catalog = FakePgCatalog([("matview", "filter_mate_temp", f"fm_temp_mv_{SID}_a")])
+        connection = FakeConnection(catalog)
+
+        assert pg_drop_session_views(connection, connection.cursor(), ["filter_mate_temp"], "%") == []
+        assert pg_drop_session_views(connection, connection.cursor(), ["filter_mate_temp"], "ab12_d34") == []
+        assert catalog.has(f"fm_temp_mv_{SID}_a")

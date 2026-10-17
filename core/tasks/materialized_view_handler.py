@@ -21,6 +21,7 @@ import os
 from typing import Any, List
 
 from ...infrastructure.logging import setup_logger
+from ...infrastructure.constants import DEFAULT_TEMP_SCHEMA
 from ...config.config import ENV_VARS
 
 # Setup logger
@@ -538,7 +539,7 @@ class MaterializedViewHandler:
             task_parameters=self.task.task_parameters,
             param_all_layers=getattr(self.task, 'param_all_layers', None),
             get_connection_fn=self.task._get_valid_postgresql_connection,
-            current_mv_schema=getattr(self.task, 'current_materialized_view_schema', 'filtermate_temp'),
+            current_mv_schema=getattr(self.task, 'current_materialized_view_schema', None) or DEFAULT_TEMP_SCHEMA,
         )
 
     # =========================================================================

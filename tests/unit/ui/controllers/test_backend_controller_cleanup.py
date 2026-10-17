@@ -126,6 +126,7 @@ def feedback():
 def backend_module(monkeypatch, feedback):
     qtcore = types.ModuleType("qgis.PyQt.QtCore")
     qtcore.pyqtSignal = lambda *args: MagicMock()
+    qtcore.QCoreApplication = MagicMock()
     qtwidgets = types.ModuleType("qgis.PyQt.QtWidgets")
     qtwidgets.QMenu = MagicMock()
     qtwidgets.QLabel = MagicMock()

@@ -74,7 +74,8 @@ def _load():
     _module(f"{_PKG}.config", _ROOT / "config")
     _module(f"{_PKG}.config.config", ENV_VARS={})
     # _log_filtering_summary imports ..optimization.logging_utils lazily
-    _module(f"{_PKG}.core.optimization")
+    # 2026-10-17: the real config_provider (pure) is loaded from the package path
+    _module(f"{_PKG}.core.optimization", _ROOT / "core" / "optimization")
     _module(f"{_PKG}.core.optimization.logging_utils", log_filtering_summary=MagicMock())
     spec = importlib.util.spec_from_file_location(full, _ROOT / "core" / "tasks" / "filtering_orchestrator.py")
     module = importlib.util.module_from_spec(spec)
@@ -242,3 +243,53 @@ class TestProgressWithoutTargets:
         mod = _load()
         res = _run_sequential(mod, {}, MagicMock(return_value=True))
         assert res["success"] is True
+
+
+@pytest.mark.unit
+class TestParallelFilteringSetting:
+    """2026-10-17: APP.OPTIONS.PARALLEL_FILTERING reaches the cascade.
+
+    The cascade read task_parameters['config'], a key nothing sets: the
+    parallel executor ran whatever the user chose.
+    """
+
+    @pytest.fixture(autouse=True)
+    def _qgis_core(self, monkeypatch):
+        # the cascade logs through qgis.core.QgsMessageLog; other test modules
+        # leave a qgis.core whose classes are bare MagicMock types
+        monkeypatch.setitem(sys.modules, "qgis.core", MagicMock())
+
+    def _run(self, mod, task_parameters, callback):
+        layers = {"postgresql": [(_layer("batiment"), {}), (_layer("route"), {})]}
+        return mod.FilteringOrchestrator().filter_all_layers_with_progress(
+            layers=layers, layers_count=2, task_parameters=task_parameters,
+            execute_geometric_filtering_callback=callback,
+            try_v3_multi_step_filter_callback=lambda layers: None,
+            is_canceled_callback=lambda: False,
+            set_progress_callback=lambda percent: None,
+            set_description_callback=lambda text: None,
+        )
+
+    @staticmethod
+    def _config(enabled):
+        return {"APP": {"OPTIONS": {"PARALLEL_FILTERING": {"enabled": {"value": enabled}}}}}
+
+    def test_disabled_setting_runs_sequentially(self, monkeypatch):
+        mod = _load()
+        parallel = MagicMock(return_value={"success": True})
+        monkeypatch.setattr(mod.FilteringOrchestrator, "_filter_all_layers_parallel", parallel)
+        callback = MagicMock(return_value=True)
+
+        self._run(mod, {"task": {"config_data": self._config(False)}}, callback)
+
+        parallel.assert_not_called()
+        assert callback.call_count == 2
+
+    def test_enabled_setting_runs_in_parallel(self, monkeypatch):
+        mod = _load()
+        parallel = MagicMock(return_value={"success": True})
+        monkeypatch.setattr(mod.FilteringOrchestrator, "_filter_all_layers_parallel", parallel)
+
+        self._run(mod, {"task": {"config_data": self._config(True)}}, MagicMock(return_value=True))
+
+        parallel.assert_called_once()

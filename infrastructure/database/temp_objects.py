@@ -299,8 +299,13 @@ def drop_filtermate_temp_tables(
 
 # PostgreSQL ---------------------------------------------------------------
 
-#: Schemas FilterMate creates for its own objects.
-PG_TEMP_SCHEMAS = ('filtermate_temp', 'filter_mate_temp')
+try:  # the one temp schema, and the spelling of earlier versions that only the cleanups read
+    from ..constants import DEFAULT_TEMP_SCHEMA, LEGACY_TEMP_SCHEMAS
+except ImportError:  # this module loaded on its own (tests): same values
+    DEFAULT_TEMP_SCHEMA, LEGACY_TEMP_SCHEMAS = 'filter_mate_temp', ('filtermate_temp',)
+
+#: Schemas FilterMate creates for its own objects (current one first).
+PG_TEMP_SCHEMAS = (DEFAULT_TEMP_SCHEMA,) + tuple(LEGACY_TEMP_SCHEMAS)
 
 #: Prefixes valid in any schema, by object kind.
 _PG_PREFIXES = {
@@ -527,3 +532,37 @@ def pg_drop_filtermate_schema(connexion, schema: str) -> dict:
             except Exception:  # nosec B110 - best-effort close
                 pass
     return result
+
+
+def _like_prefix(prefix: str) -> str:
+    """LIKE pattern (``ESCAPE '!'``) for names that start with ``prefix`` (``_`` and ``%`` literal)."""
+    return prefix.replace('!', '!!').replace('_', '!_').replace('%', '!%') + '%'
+
+
+def pg_drop_session_views(connexion, cursor, schemas, session_id: str) -> list:
+    """Drop the materialized views of one session in FilterMate's schemas, never with CASCADE.
+
+    ``fm_temp_mv_<session>_*`` (and the legacy ``mv_<session>_*``) in ``schemas``; the session id
+    is matched literally and every name is checked again by :func:`is_filtermate_pg_temp_object`
+    (the legacy name counts in FilterMate's own schemas only). Dependent views (``..._dump``) go
+    first. The caller commits what is left to commit.
+
+    Args:
+        connexion: psycopg2 connection (commit / rollback per object).
+        cursor: Cursor of that connection.
+        schemas: Schemas to look in (the temp schema, and the earlier spelling).
+        session_id: Session whose views go.
+
+    Returns:
+        list: The ``(kind, schema, name)`` tuples that are gone.
+    """
+    if not session_id:
+        return []
+    cursor.execute(
+        "SELECT schemaname, matviewname FROM pg_matviews WHERE schemaname = ANY(%s) "
+        "AND (matviewname LIKE %s ESCAPE '!' OR matviewname LIKE %s ESCAPE '!')",
+        (list(schemas), _like_prefix(f"fm_temp_mv_{session_id}_"), _like_prefix(f"mv_{session_id}_")))
+    objects = [('matview', schema, name) for schema, name in cursor.fetchall()
+               if is_filtermate_pg_temp_object('matview', schema, name)]
+    objects.sort(key=lambda o: (o[1], -len(o[2]), o[2]))
+    return pg_drop_temp_objects(connexion, cursor, objects)

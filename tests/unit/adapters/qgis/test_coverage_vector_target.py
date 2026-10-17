@@ -316,3 +316,60 @@ class TestPredicatesPerSourceFeature:
         """A negative buffer erasing each building, not their union: Contain keeps nothing (no silent union test)."""
         block = [(710, 410, 720, 420), (720, 410, 730, 420), (710, 420, 720, 430), (720, 420, 730, 430)]
         assert _task_kept(('Contain',), buffer=-6.0, buildings=block) == []
+
+
+class _KeyField:
+    def __init__(self, name):
+        self._name = name
+
+    def name(self):
+        return self._name
+
+
+class _WebLayer(FakeVectorLayer):
+    """A WFS target, with real field names (``cleabs``: a known unique key on a web service)."""
+
+    def __init__(self, field_names, features):
+        super().__init__("typename='communes' url='https://data.geopf.fr/wfs/ows'", name='communes', provider='WFS',
+                         features=features)
+        self._field_names = list(field_names)
+
+    def primaryKeyAttributes(self):
+        return []
+
+
+def _web_fields(layer):
+    """QgsFields-like iteration for the probe."""
+    class Fields(list):
+        def at(self, index):
+            return self[index]
+
+        def indexOf(self, name):
+            return next((i for i, field in enumerate(self) if field.name() == name), -1)
+    layer.fields = lambda: Fields(_KeyField(name) for name in layer._field_names)
+    return layer
+
+
+class TestWebServiceTargets:
+    """2026-10-17: a web service is filtered by a real key, at most key_list_limit (500) of them."""
+
+    def test_no_key_is_refused_instead_of_writing_dollar_id(self, engine):
+        layer = _web_fields(_WebLayer(['nom', 'population'], {fid: _box(*box) for fid, (_, box) in ZONES.items()}))
+        job = engine.VectorTargetJob(layer, None)
+        job.compute(_box(*EAST_HALF), fk.FakeCrs('EPSG:2154'), None, _request(), lambda: False)
+        assert not job.outcome.success and "no unique key field" in job.outcome.message
+        assert job._expression == ''
+
+    @pytest.mark.parametrize("count, applied", [(500, True), (501, False)])
+    def test_key_list_is_bounded(self, engine, count, applied):
+        features = {fid: _box(600, 100, 650, 150) for fid in range(1, count + 1)}
+        layer = _web_fields(_WebLayer(['cleabs', 'population'], features))
+        job = engine.VectorTargetJob(layer, None)
+        assert (job._pk, job._raw_pk) == ('cleabs', False)
+        job._source_fields = layer.fields  # the fake project has no layer
+        job.compute(_box(*EAST_HALF), fk.FakeCrs('EPSG:2154'), None, _request(), lambda: False)
+        assert job.outcome.success is applied
+        if applied:
+            assert job._expression.startswith('"cleabs" IN (1, 2')
+        else:
+            assert "more than the 500 sent to a web service" in job.outcome.message

@@ -50,6 +50,17 @@ DEFAULT_STABILIZATION_MS = 200
 DEFAULT_UPDATE_EXTENTS_THRESHOLD = 50000
 
 
+def _feature_count_or_none(layer):
+    """``layer.featureCount()``, None for no layer or a web service / network database (2026-10-17)."""
+    if layer is None:
+        return None
+    try:
+        from .qgis.source_capability_probe import feature_count_or_none
+    except ImportError:
+        return layer.featureCount()
+    return feature_count_or_none(layer)
+
+
 class LayerRefreshManager:
     """
     Manages layer refresh operations with stabilization and optimization.
@@ -122,8 +133,9 @@ class LayerRefreshManager:
             # Use GDAL error handler to suppress transient SQLite warnings
             with GdalErrorHandler():
                 # Skip updateExtents for large layers to prevent freeze
-                feature_count = layer.featureCount() if layer else 0
-                if 0 <= feature_count < self._update_extents_threshold:
+                # 2026-10-17: and for web services (count and extent are server requests)
+                feature_count = _feature_count_or_none(layer)
+                if feature_count is not None and 0 <= feature_count < self._update_extents_threshold:
                     layer.updateExtents()
                 # else: skip expensive updateExtents for very large layers
 
@@ -242,14 +254,14 @@ class TaskCompletionMessenger:
             layer_count: Number of layers affected
             is_fallback: True if OGR was used as fallback
         """
-        feature_count = layer.featureCount() if layer else 0
+        feature_count = _feature_count_or_none(layer)
 
         # Show backend success message
         self._show_success(provider_type, task_name, layer_count, is_fallback)
 
-        # Show feature count if configured
+        # Show feature count if configured ("?" for a web service, not counted on the main thread)
         if self._should_show('filter_count'):
-            count_str = "{:,}".format(feature_count)
+            count_str = "?" if feature_count is None or feature_count < 0 else "{:,}".format(feature_count)
             if task_name == 'filter':
                 self._show_info(
                     QCoreApplication.translate(

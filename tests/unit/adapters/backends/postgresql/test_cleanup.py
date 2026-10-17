@@ -63,6 +63,23 @@ _ensure_cleanup_mocks()
 import importlib.util
 import os
 
+
+def _load_real_constants():
+    """cleanup.py reads its schema names from infrastructure.constants (2026-10-17)."""
+    name = "filter_mate.infrastructure.constants"
+    if isinstance(sys.modules.get(name), types.ModuleType):
+        return
+    path = os.path.normpath(os.path.join(
+        os.path.dirname(__file__), "..", "..", "..", "..", "..", "infrastructure", "constants.py"
+    ))
+    spec = importlib.util.spec_from_file_location(name, path)
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[name] = module
+    spec.loader.exec_module(module)
+
+
+_load_real_constants()
+
 _cleanup_path = os.path.normpath(os.path.join(
     os.path.dirname(__file__),
     "..", "..", "..", "..", "..",
@@ -125,7 +142,7 @@ class TestInit:
 
     def test_default_schema(self):
         s = PostgreSQLCleanupService()
-        assert s.schema == "filtermate_temp"
+        assert s.schema == "filter_mate_temp"  # 2026-10-17: the one temp schema
 
     def test_metrics_returns_copy(self, service):
         m1 = service.metrics
@@ -327,11 +344,12 @@ class TestCleanupAllFilterMateObjects:
     def test_only_filtermate_objects_of_the_asked_schemas_go_without_cascade(self):
         catalog, service, (count, cleaned) = self._run(self.OBJECTS)
 
+        # the buffer table of the "other" schema goes too (buffers sit in the schema of their source table)
         assert sorted(n for _k, _s, n in catalog.objects) == sorted([
-            "filtermate_temp_notes", "filtermate_mv_report", "FILTERMATE_MV_X", "fm_temp_buf_x_ab12cd34"])
+            "filtermate_temp_notes", "filtermate_mv_report", "FILTERMATE_MV_X"])
         assert all("CASCADE" not in s for s in catalog.statements())
         assert "filtermate_temp" not in catalog.schemas and "public" in catalog.schemas
-        assert count == len(cleaned) == 5  # 4 objects + the schema
+        assert count == len(cleaned) == 6  # 5 objects + the schema
         assert any(c.startswith("SCHEMA:") for c in cleaned)
 
     def test_dry_run_changes_nothing(self):
@@ -341,7 +359,7 @@ class TestCleanupAllFilterMateObjects:
 
         count, cleaned = service.cleanup_all_filtermate_objects(FakeConnection(catalog), dry_run=True)
 
-        assert count == 4 and all(c.startswith("[DRY RUN]") for c in cleaned)
+        assert count == 5 and all(c.startswith("[DRY RUN]") for c in cleaned)
         assert catalog.statements() == [] and len(catalog.objects) == len(self.OBJECTS)
 
     def test_the_schema_stays_when_a_user_table_is_in_it(self):
@@ -359,7 +377,7 @@ class TestCleanupAllFilterMateObjects:
         count, views = service.cleanup_src_sel_views(FakeConnection(catalog), dry_run=True)
 
         patterns = [p for _sql, params in catalog.executed if params for p in params if isinstance(p, str)]
-        assert "filtermate\\_mv\\_src\\_sel\\_%" in patterns
+        assert "filtermate!_mv!_src!_sel!_%" in patterns
 
 
 # ===========================================================================
@@ -382,3 +400,60 @@ class TestGetSessionViewCount:
         conn.cursor.side_effect = Exception("error")
         count = service.get_session_view_count(conn)
         assert count == 0
+
+
+# ===========================================================================
+# Tests -- buffer tables of the dynamic buffers (2026-10-17)
+# ===========================================================================
+
+class TestSessionBufferTables:
+    """Buffer tables sit in the schema of their source table, not in the temp schema."""
+
+    def test_session_token_is_an_identifier_fragment(self):
+        assert _mod.session_token("AB12-cd_34") == "ab12cd34"
+        assert _mod.session_token("x" * 40) == "x" * 12
+        assert _mod.session_token(None) == "nosession"
+        assert _mod.session_token("--") == "nosession"
+
+    def test_drops_the_session_tables_of_every_schema_without_cascade(self):
+        from tests.unit.pg_fakes import FakeConnection, FakePgCatalog
+        md5 = "0123456789abcdef0123456789abcdef"
+        catalog = FakePgCatalog([
+            ("table", "ref", f"fm_temp_buf_ab12cd34_{md5}"),
+            ("table", 'l"est', f"fm_temp_buf_ab12cd34_{md5[::-1]}"),
+            ("table", "ref", f"fm_temp_buf_zzzzzzzz_{md5}"),       # another session
+            ("table", "ref", "fm_temp_bufXab12cd34_user"),          # not an underscore wildcard
+        ])
+        cursor = FakeConnection(catalog).cursor()
+
+        dropped = _mod.drop_session_buffer_tables(cursor, "ab12cd34")
+
+        assert sorted(dropped) == sorted([f"ref.fm_temp_buf_ab12cd34_{md5}", f'l"est.fm_temp_buf_ab12cd34_{md5[::-1]}'])
+        select_sql, params = catalog.executed[0]
+        assert "pg_tables" in select_sql and "ESCAPE '!'" in select_sql
+        assert params == ("fm!_temp!_buf!_ab12cd34!_%",)
+        drops = [s for s in catalog.statements() if s.startswith("DROP")]
+        assert drops == [f'DROP TABLE "ref"."fm_temp_buf_ab12cd34_{md5}"',
+                         f'DROP TABLE "l""est"."fm_temp_buf_ab12cd34_{md5[::-1]}"']
+        assert catalog.has("fm_temp_buf_zzzzzzzz_" + md5) and catalog.has("fm_temp_bufXab12cd34_user")
+
+    def test_a_refused_drop_does_not_abort_the_callers_transaction(self):
+        from tests.unit.pg_fakes import FakeConnection, FakePgCatalog
+        catalog = FakePgCatalog([("table", "ref", "fm_temp_buf_ab12cd34_a"), ("table", "ref", "fm_temp_buf_ab12cd34_b")],
+                                undroppable=["fm_temp_buf_ab12cd34_a"])
+        cursor = FakeConnection(catalog).cursor()
+
+        assert _mod.drop_session_buffer_tables(cursor, "ab12cd34") == ["ref.fm_temp_buf_ab12cd34_b"]
+        sqls = [" ".join(sql.split()) for sql, _p in catalog.executed]
+        assert "ROLLBACK TO SAVEPOINT fm_drop_buffer_table" in sqls
+
+    def test_full_cleanup_also_looks_outside_the_temp_schema(self):
+        from tests.unit.pg_fakes import FakeConnection, FakePgCatalog
+        catalog = FakePgCatalog([("table", "ref", "fm_temp_buf_ab12cd34_0123"),
+                                 ("table", "ref", "user_buffers")], schemas=["filter_mate_temp"])
+        service = PostgreSQLCleanupService(session_id=SID, schema="filter_mate_temp")
+
+        count, cleaned = service.cleanup_all_filtermate_objects(FakeConnection(catalog), include_public_schema=True)
+
+        assert not catalog.has("fm_temp_buf_ab12cd34_0123") and catalog.has("user_buffers")
+        assert any(c.startswith("TABLE:") and "fm_temp_buf_ab12cd34_0123" in c for c in cleaned)

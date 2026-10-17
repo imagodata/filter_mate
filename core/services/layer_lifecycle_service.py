@@ -31,8 +31,6 @@ except ImportError:
     QgsVectorLayer = Any
     QgsProject = Any
 
-from ...infrastructure.database.sql_utils import sanitize_sql_identifier
-
 try:
     from ...infrastructure.perf_timer import perf_mark_start
 except ImportError:  # test harnesses that stub the infrastructure package
@@ -399,36 +397,24 @@ class LayerLifecycleService:
 
             try:
                 with connexion.cursor() as cursor:
-                    # Find all materialized views for this session (unified fm_temp_* prefix v4.4.4)
-                    # Also check legacy mv_ prefix for backward compatibility
-                    cursor.execute("""
-                        SELECT matviewname FROM pg_matviews
-                        WHERE schemaname = %s
-                        AND (matviewname LIKE %s OR matviewname LIKE %s)
-                    """, (temp_schema, f"fm_temp_mv_{session_id}_%", f"mv_{session_id}_%"))
-                    views = cursor.fetchall()
+                    # This session's materialized views (fm_temp_mv_<session>_*, legacy mv_<session>_*)
+                    # in the temp schema and the one of earlier versions (infrastructure.constants).
+                    # Names are checked and dropped by the shared guards: exact prefixes, quoted
+                    # identifiers, no CASCADE (the indexes go with their view).
+                    from ...infrastructure.constants import LEGACY_TEMP_SCHEMAS
+                    from ...infrastructure.database.temp_objects import pg_drop_session_views
+                    schemas = [temp_schema] + [s for s in LEGACY_TEMP_SCHEMAS if s != temp_schema]
+                    dropped_views = pg_drop_session_views(connexion, cursor, schemas, session_id)
+                    if dropped_views:
+                        logger.info(f"Cleaned up {len(dropped_views)} materialized view(s) for session {session_id}")
 
-                    if views:
-                        count = 0
-                        safe_schema = sanitize_sql_identifier(temp_schema)
-                        for (view_name,) in views:
-                            try:
-                                # Drop associated index first (handle both new and legacy prefixes)
-                                if view_name.startswith('fm_temp_mv_'):
-                                    index_name = sanitize_sql_identifier(f"{temp_schema}_{view_name[11:]}_cluster")  # Remove 'fm_temp_mv_' prefix
-                                else:
-                                    index_name = sanitize_sql_identifier(f"{temp_schema}_{view_name[3:]}_cluster")  # Remove 'mv_' prefix (legacy)
-                                cursor.execute(f'DROP INDEX IF EXISTS "{index_name}" CASCADE;')
-                                # Drop the view
-                                safe_view = sanitize_sql_identifier(view_name)
-                                cursor.execute(f'DROP MATERIALIZED VIEW IF EXISTS "{safe_schema}"."{safe_view}" CASCADE;')
-                                count += 1
-                            except Exception as e:
-                                logger.debug(f"Error dropping view {view_name}: {e}")
-
-                        connexion.commit()
-                        if count > 0:
-                            logger.info(f"Cleaned up {count} materialized view(s) for session {session_id}")
+                    # 2026-10-17: the buffer tables of the dynamic buffers sit
+                    # in the schema of their source table, not in temp_schema.
+                    from ...adapters.backends.postgresql.cleanup import drop_session_buffer_tables
+                    dropped_tables = drop_session_buffer_tables(cursor, session_id)
+                    connexion.commit()
+                    if dropped_tables:
+                        logger.info(f"Cleaned up {len(dropped_tables)} buffer table(s) for session {session_id}")
 
                 # Record success for circuit breaker
                 pg_breaker.record_success()
@@ -454,7 +440,7 @@ class LayerLifecycleService:
         """
         Clean up orphaned FilterMate views from crashed sessions.
 
-        This method cleans views in both filtermate_temp and public schemas
+        This method cleans views in the temp schema(s) and the public schema
         that are no longer associated with an active session.
 
         Args:
@@ -489,7 +475,8 @@ class LayerLifecycleService:
                 PostgreSQLCleanupService
             )
 
-            service = PostgreSQLCleanupService(schema='filtermate_temp')
+            # 2026-10-17: the one temp schema; the legacy one is cleaned too
+            service = PostgreSQLCleanupService()
             count, views = service.cleanup_all_filtermate_objects(
                 connexion,
                 include_public_schema=include_public_schema,

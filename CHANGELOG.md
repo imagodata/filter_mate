@@ -4,6 +4,12 @@ All notable changes to FilterMate will be documented in this file.
 
 ## [Unreleased]
 
+### Added
+
+- **Selection strip between EXPLORING and FILTERING.** One band, in the colour of the source layer kind, says what EXPLORING hands over as the source geometry: the number of selected features (or "whole layer" / "no feature selected"), the raster range and its share of pixels, the points kept by the checked LiDAR classes (or the criteria when the classes have no count).
+- **Hybrid targets.** Each layer of the FILTERING "layers to filter" list says what the filter does to it ("features", "pixels in the zone", "points in the zone", with a tooltip); the context menu selects all raster or all point cloud layers.
+- **Centroids chosen target by target.** Each line or polygon target has its own centroid toggle in the list (point, raster and point cloud targets have none). The centroid button beside the list is now a square icon button: checked when every checked line / polygon target uses its centroids, partial when some do, disabled without such a target; a click sets them all. The choice is saved per source layer; projects saved before keep the old global setting.
+
 ### Changed
 
 - **Processing algorithms and shipped models are labelled in English** (names, parameters, help, messages). Their text was written in French in the source and never translated, so an English QGIS showed « Filtrer plusieurs couches (batch) »; French users keep the same labels through the French translation. Algorithm ids, model ids and parameter names are unchanged, so models, scripts and `qgis_process` calls keep working.

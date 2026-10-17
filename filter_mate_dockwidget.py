@@ -767,6 +767,7 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         # Create custom combobox widgets early so configure_widgets() can reference them
         from .ui.widgets.custom_widgets import QgsCheckableComboBoxLayer
         self.checkableComboBoxLayer_filtering_layers_to_filter = QgsCheckableComboBoxLayer(self.dockWidgetContents)
+        self.checkableComboBoxLayer_filtering_layers_to_filter.set_target_hints(True)  # vector / raster / point cloud
         # Height managed by QSS (20px standard)
         self.checkableComboBoxLayer_filtering_layers_to_filter.show()
         logger.debug(f"Created filtering layers widget: {self.checkableComboBoxLayer_filtering_layers_to_filter}")
@@ -781,6 +782,10 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         self.checkBox_filtering_use_centroids_distant_layers = QtWidgets.QCheckBox(self.dockWidgetContents)
         self.checkBox_filtering_use_centroids_distant_layers.setObjectName("checkBox_filtering_use_centroids_distant_layers")
         logger.debug(f"Created centroids distant layers checkbox: {self.checkBox_filtering_use_centroids_distant_layers}")
+        # FilterMate 5: centroids chosen target by target, the checkbox sums them up
+        from .ui.controllers.centroid_targets_sync import CentroidTargetsSync
+        self._centroid_targets = CentroidTargetsSync(self)
+        self._centroid_targets.connect()
 
         # Initialize ConfigurationManager BEFORE tab widget setup (needed for custom widget creation)
         from .ui.managers.configuration_manager import ConfigurationManager
@@ -2785,6 +2790,7 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
 
                     # v4.0.5: Apply state or force enabled
                     w.setEnabled(True if is_always_enabled else state)
+        self._schedule_centroid_targets()  # re-enabled without signal: the centroid button is computed again
 
     def connect_widgets_signals(self):
         """Connect all widget signals to their handlers.
@@ -3662,6 +3668,33 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         )
         self.exploring_groupbox_changed(groupbox)
 
+    def get_centroid_target_ids(self):
+        """FilterMate 5: ids of the targets tested by their centroids (None: the global flag applies)."""
+        sync = getattr(self, '_centroid_targets', None)
+        return sync.centroid_ids() if sync is not None else None
+
+    def _schedule_centroid_targets(self):
+        """FilterMate 5: refresh the centroid button from the per-target toggles (next event loop pass)."""
+        sync = getattr(self, '_centroid_targets', None)
+        if sync is not None:
+            sync.schedule()
+
+    def set_all_centroid_targets(self, enabled):
+        """FilterMate 5: every checked line / polygon target uses its centroids (or none does)."""
+        sync = getattr(self, '_centroid_targets', None)
+        if sync is not None:
+            sync.set_all(bool(enabled))
+
+    def refresh_selection_strip(self):
+        """FilterMate 5: refresh the selection strip above FILTERING (deferred, cheap)."""
+        integration = getattr(self, '_controller_integration', None)
+        coverage = getattr(integration, 'coverage_controller', None) if integration is not None else None
+        if coverage is not None:
+            try:
+                coverage.refresh_selection_strip()
+            except Exception as e:
+                logger.debug(f"refresh_selection_strip: {e}")
+
     def _update_exploring_buttons_state(self):
         """
         v4.0 S18: Update identify/zoom buttons based on layer validity.
@@ -3681,6 +3714,7 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
     def _configure_groupbox_common(self, groupbox_name):
         """v4.0 Sprint 17: Common groupbox configuration logic."""
         self.current_exploring_groupbox = groupbox_name
+        self.refresh_selection_strip()
         self.manageSignal(["EXPLORING", "SINGLE_SELECTION_FEATURES"], 'disconnect')
         self.manageSignal(["EXPLORING", "MULTIPLE_SELECTION_FEATURES"], 'disconnect')
 
@@ -4324,14 +4358,13 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
                         pk_name = layer_props.get("infos", {}).get("primary_key_name")
                         pk_is_numeric = layer_props.get("infos", {}).get("primary_key_is_numeric", True)
 
-                        if pk_name and feature_ids_to_fetch:
-                            if pk_is_numeric:
-                                expr_str = f'"{pk_name}" IN ({",".join(str(v) for v in feature_ids_to_fetch)})'
-                            else:
-                                # Fix: Use proper string quoting for non-numeric primary keys
-                                quoted_values = ",".join(f"'{v}'" for v in feature_ids_to_fetch)
-                                expr_str = f'"{pk_name}" IN ({quoted_values})'
-                            request = QgsFeatureRequest(QgsExpression(expr_str))
+                        # 2026-10-17: a key that is no field ('$id', a legacy 'fid') is the
+                        # feature id, already asked above; text keys as QGIS expression literals.
+                        if pk_name and feature_ids_to_fetch and self.current_layer.fields().indexOf(pk_name) >= 0:
+                            from .core.filter.pk_formatter import QGIS_EXPRESSION, format_key_literal
+                            in_list = ",".join(format_key_literal(v, bool(pk_is_numeric), QGIS_EXPRESSION)
+                                               for v in feature_ids_to_fetch)
+                            request = QgsFeatureRequest(QgsExpression(f'"{pk_name}" IN ({in_list})'))
                             features = list(self.current_layer.getFeatures(request))
                             if features:
                                 logger.debug(f"  → Got {len(features)} features via expression")
@@ -4438,6 +4471,10 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         if not layer: return None
         try:
             MAX_FEATURES = 10000
+            # 2026-10-17: a web service / network database is neither counted nor
+            # scanned on the main thread: its (provider) extent.
+            from .adapters.qgis.source_capability_probe import counts_cheaply
+            if not counts_cheaply(layer): return layer.extent()
             layer.updateExtents()
             # PERF 2026-09-12: measured — asking the PostgreSQL provider for the
             # server-side filtered extent here (ST_Extent under an EXISTS subset)
@@ -4547,6 +4584,7 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         """
         # FIX v10: DEBUG - Confirm signal is triggered
         logger.info(f"🔔 on_layer_selection_changed TRIGGERED: selected={len(selected)}, deselected={len(deselected)}, clearAndSelect={clearAndSelect}")
+        self.refresh_selection_strip()  # the EXPLORING widgets follow the map selection
 
         # FIX v5: Ensure signal stays connected (self-healing)
         if self.current_layer and not self.current_layer_selection_connection:
@@ -5042,7 +5080,11 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         """v4.0 S18: Check if async expression evaluation should be used."""
         if not ASYNC_EXPRESSION_AVAILABLE or not self._expression_manager or not self.current_layer or not custom_expression:
             return False
-        return self.current_layer.featureCount() > self._async_expression_threshold
+        # 2026-10-17: a web service is not counted on the main thread, and an
+        # unknown count (None / -1) is a large layer: both go async.
+        from .adapters.qgis.source_capability_probe import feature_count_or_none
+        count = feature_count_or_none(self.current_layer)
+        return count is None or count < 0 or count > self._async_expression_threshold
 
     def exploring_link_widgets(self, expression=None, change_source=None):
         """v4.0 S18: → ExploringController."""
@@ -6051,6 +6093,7 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         # Optional controller delegation for additional logic
         if self._controller_integration and hasattr(self._controller_integration, 'delegate_filtering_layers_to_filter_state_changed'):
             self._controller_integration.delegate_filtering_layers_to_filter_state_changed(is_checked)
+        self._schedule_centroid_targets()  # the centroid button follows the targets key
 
         logger.debug(f"filtering_layers_to_filter_state_changed: is_checked={is_checked}")
 
@@ -6543,13 +6586,16 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
                     "has_geometric_predicates": False, "geometric_predicates": [],
                     "has_buffer_value": False, "buffer_value": 0.0,
                     "buffer_value_property": False, "buffer_value_expression": "",
-                    "has_buffer_type": False, "buffer_type": "Round"
+                    "has_buffer_type": False, "buffer_type": "Round",
+                    "centroid_layers": [], "use_centroids_distant_layers": False
                 }
             }
             props_to_save = []
             for cat, props in defaults.items(): layer_props[cat].update(props); props_to_save.extend((cat, k) for k in props)
             self.settingLayerVariable.emit(layer, props_to_save); self._synchronize_layer_widgets(layer, layer_props)
             self._update_buffer_spinbox_style(0.0); self._reset_exploring_button_states(layer_props); self._reset_filtering_button_states(layer_props)
+            if getattr(self, '_centroid_targets', None) is not None:
+                self._centroid_targets.apply_stored()  # no target uses its centroids any more
             if should_show_message('layer_reset'):
                 self.iface.messageBar().pushSuccess("FilterMate", self.tr("Layer properties reset to defaults"))
         except Exception as e: self.iface.messageBar().pushCritical("FilterMate", self.tr("Error resetting layer properties: {}").format(str(e)))

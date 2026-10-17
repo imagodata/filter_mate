@@ -1104,27 +1104,37 @@ class ExploringController(BaseController, LayerSelectionMixin):
                             if isinstance(item, (list, tuple)) and len(item) > 1:
                                 pk_values.append(item[1])
 
-                        if pk_name and pk_values:
-                            if pk_is_numeric:
-                                in_list = ", ".join(str(v) for v in pk_values)
-                            else:
-                                # Escape single quotes for safe inline SQL
-                                in_list = ", ".join(
-                                    "'" + str(v).replace("'", "''") + "'" for v in pk_values
-                                )
-                            expr = f'"{pk_name}" IN ({in_list})'
-                            qgs_expr = QgsExpression(expr)
-                            if qgs_expr.isValid():
+                        # 2026-10-17: a key that is no field of the layer ('$id', a legacy
+                        # 'fid') is the feature id: '"fid" IN (...)' matched nothing.
+                        layer = self._dockwidget.current_layer
+                        request = None
+                        if pk_name and pk_values and layer.fields().indexOf(pk_name) < 0:
+                            fids = []
+                            for value in pk_values:
                                 try:
-                                    for feat in self._dockwidget.current_layer.getFeatures(QgsFeatureRequest(qgs_expr)):
-                                        if feat.hasGeometry() and not feat.geometry().isEmpty():
-                                            if extent.isEmpty():
-                                                extent = feat.geometry().boundingBox()
-                                            else:
-                                                extent.combineExtentWith(feat.geometry().boundingBox())
-                                            features_found += 1
-                                except Exception as e:
-                                    logger.debug(f"_compute_zoom_extent_for_mode: Error iterating batch: {e}")
+                                    fids.append(int(value))
+                                except (TypeError, ValueError):
+                                    continue
+                            request = QgsFeatureRequest().setFilterFids(fids)
+                        elif pk_name and pk_values:
+                            # QGIS expression literals (backslashes escaped), one shared formatter
+                            from ...core.filter.pk_formatter import QGIS_EXPRESSION, format_key_literal
+                            in_list = ", ".join(format_key_literal(v, bool(pk_is_numeric), QGIS_EXPRESSION)
+                                                for v in pk_values)
+                            qgs_expr = QgsExpression(f'"{pk_name}" IN ({in_list})')
+                            if qgs_expr.isValid():
+                                request = QgsFeatureRequest(qgs_expr)
+                        if request is not None:
+                            try:
+                                for feat in layer.getFeatures(request):
+                                    if feat.hasGeometry() and not feat.geometry().isEmpty():
+                                        if extent.isEmpty():
+                                            extent = feat.geometry().boundingBox()
+                                        else:
+                                            extent.combineExtentWith(feat.geometry().boundingBox())
+                                        features_found += 1
+                            except Exception as e:
+                                logger.debug(f"_compute_zoom_extent_for_mode: Error iterating batch: {e}")
 
             elif self._dockwidget.current_exploring_groupbox == "custom_selection":
                 # Custom selection: get expression and fetch matching features
@@ -1519,11 +1529,10 @@ class ExploringController(BaseController, LayerSelectionMixin):
                         # Try to get primary key value from feature
                         try:
                             pk_value = reloaded.attribute(pk_name)
-                            # Quote string values
-                            if isinstance(pk_value, str):
-                                expression = f'"{pk_name}" = \'{pk_value}\''
-                            else:
-                                expression = f'"{pk_name}" = {pk_value}'
+                            # Quote string values (2026-10-17: quotes doubled by the key formatter)
+                            from ...core.filter.pk_formatter import QGIS_EXPRESSION, format_key_literal
+                            literal = format_key_literal(pk_value, not isinstance(pk_value, str), QGIS_EXPRESSION)
+                            expression = f'"{pk_name}" = {literal}'
                             logger.info(f"SINGLE_SELECTION: Using PK expression: {expression}")  # nosec B608
                             return [reloaded], expression
                         except Exception as e:
@@ -1773,12 +1782,9 @@ class ExploringController(BaseController, LayerSelectionMixin):
                     # This applies to ALL providers (PostgreSQL, OGR, Spatialite)
                     # UUID FIX v4.0: Convert pk_value to string explicitly for non-numeric types
                     # Note: filter_task.py handles qualified names for PostgreSQL subsetString separately
-                    if pk_is_numeric is True:
-                        expression = f'"{pk_name}" = {pk_value}'
-                    else:
-                        # Convert to string and escape single quotes for UUID, text, etc.
-                        pk_value_str = str(pk_value).replace("'", "''")
-                        expression = f'"{pk_name}" = \'{pk_value_str}\''
+                    # 2026-10-17: the shared key formatter (QGIS expression literal, never a raw text value)
+                    from ...core.filter.pk_formatter import QGIS_EXPRESSION, format_key_literal
+                    expression = f'"{pk_name}" = {format_key_literal(pk_value, pk_is_numeric is True, QGIS_EXPRESSION)}'
                     logger.debug(f"Generated expression for {provider_type}: {expression}")
 
                     # CRITICAL: Also reload feature to ensure geometry is available for zoom
@@ -1844,6 +1850,13 @@ class ExploringController(BaseController, LayerSelectionMixin):
                 pk_name = layer_props["infos"].get("primary_key_name")
                 pk_is_numeric = layer_props["infos"].get("primary_key_is_numeric", True)
                 provider_type = layer_props["infos"].get("layer_provider_type", "")
+                # 2026-10-17: a key that is no field of the layer is the QGIS feature id
+                # (core.domain.stable_key: 'fid' of a Shapefile / web layer without a unique key)
+                try:
+                    if pk_name and self._dockwidget.current_layer.fields().indexOf(pk_name) < 0:
+                        pk_name = None
+                except (RuntimeError, AttributeError):
+                    pass
 
                 if pk_name is None:
                     # FALLBACK: Use feature IDs directly when no primary key is available
@@ -1884,18 +1897,33 @@ class ExploringController(BaseController, LayerSelectionMixin):
                             else:
                                 continue
 
-                            # Format value based on numeric type
-                            if pk_is_numeric:
-                                pk_values_list.append(str(pk_value))
-                            else:
-                                pk_value_str = str(pk_value).replace("'", "''")
-                                pk_values_list.append(f"'{pk_value_str}'")
+                            # Format value based on numeric type (2026-10-17: the shared key formatter)
+                            from ...core.filter.pk_formatter import QGIS_EXPRESSION, format_key_literal
+                            pk_values_list.append(format_key_literal(pk_value, bool(pk_is_numeric), QGIS_EXPRESSION))
                         except (KeyError, IndexError, AttributeError) as e:
                             logger.debug(f"Could not extract pk_value from feature: {e}")
                             continue
 
                     if pk_values_list:
-                        expression = f'"{pk_name}" IN ({", ".join(pk_values_list)})'
+                        # 2026-10-17: the key-list bounds of the source (core.domain.source_capability):
+                        # a web service gets at most key_list_limit keys (the expression becomes its
+                        # subset), Oracle IN lists hold at most 1000 literals.
+                        from ...core.domain.source_capability import classify_layer
+                        capability = classify_layer(self._dockwidget.current_layer)
+                        limit = capability.key_list_limit if capability.is_remote_service else None
+                        if limit and len(pk_values_list) > limit:
+                            from ...infrastructure.feedback import show_warning
+                            from qgis.PyQt.QtCore import QCoreApplication
+                            show_warning("FilterMate", QCoreApplication.translate(
+                                "ExploringController",
+                                "{0} features selected, more than the {1} a web service can be sent: "
+                                "narrow the selection or use an attribute filter."
+                            ).format(len(pk_values_list), limit))
+                            return features, None
+                        chunk = capability.in_list_max or len(pk_values_list)
+                        lists = [f'"{pk_name}" IN ({", ".join(pk_values_list[i:i + chunk])})'
+                                 for i in range(0, len(pk_values_list), chunk)]
+                        expression = lists[0] if len(lists) == 1 else "(" + " OR ".join(lists) + ")"
                         logger.debug(f"Generated IN expression for {len(pk_values_list)} features")
                     else:
                         logger.warning("Could not build expression from list - no valid pk_values")
@@ -2170,6 +2198,7 @@ class ExploringController(BaseController, LayerSelectionMixin):
         # This ensures the correct groupbox is shown when user selects from widgets
         feature_count = len(features)
         current_groupbox = dw.current_exploring_groupbox
+        self._note_selection_for_strip(feature_count, current_groupbox)
         is_selecting_from_button = dw.pushButton_checkable_exploring_selecting.isChecked() if hasattr(dw, 'pushButton_checkable_exploring_selecting') else False
 
         if is_selecting_from_button and not getattr(dw, '_syncing_from_qgis', False):
@@ -2249,6 +2278,17 @@ class ExploringController(BaseController, LayerSelectionMixin):
         dw._update_exploring_buttons_state()
 
         return features
+
+    def _note_selection_for_strip(self, feature_count, groupbox):
+        """FilterMate 5: tell the selection strip above FILTERING how many features EXPLORING hands over."""
+        integration = getattr(self._dockwidget, '_controller_integration', None)
+        coverage = getattr(integration, 'coverage_controller', None) if integration is not None else None
+        if coverage is None:
+            return
+        try:
+            coverage.note_exploring_selection(self._dockwidget.current_layer.id(), groupbox or '', feature_count)
+        except Exception as e:
+            logger.debug(f"selection strip not updated: {e}")
 
     def exploring_link_widgets(self, expression=None, change_source=None):
         """

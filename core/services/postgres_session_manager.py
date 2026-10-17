@@ -30,6 +30,7 @@ if TYPE_CHECKING:
     pass  # No QGIS type hints needed
 
 from ...infrastructure.database.sql_utils import sanitize_sql_identifier
+from ...infrastructure.constants import DEFAULT_TEMP_SCHEMA
 from ...infrastructure.database.temp_objects import pg_drop_filtermate_schema
 
 logger = logging.getLogger(__name__)
@@ -110,8 +111,8 @@ class PostgresSessionManager(QObject):
     cleanup_completed = pyqtSignal(str, int)  # session_id, count
     error_occurred = pyqtSignal(str, str)  # operation, error_message
 
-    # Default schema name
-    DEFAULT_SCHEMA = "filtermate_temp"
+    # Default schema name (2026-10-17: the one temp schema, see constants)
+    DEFAULT_SCHEMA = DEFAULT_TEMP_SCHEMA
 
     # View prefix pattern (unified fm_temp_mv_ prefix v4.4.4)
     VIEW_PREFIX = "fm_temp_mv_"

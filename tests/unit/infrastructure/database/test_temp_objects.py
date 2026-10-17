@@ -299,6 +299,10 @@ class TestPostgresNames:
         ("matview", "ref", "fm_temp_src_0123abcd"),
         ("matview", "filtermate_temp", f"fm_temp_chain_{SID}_0123abcd"),
         ("table", "ref", "fm_temp_buf_communes_0123abcd"),
+        # 2026-10-17 (lot 1b): fm_temp_buf_<session>_<md5>, in the schema of the source table
+        ("table", "ref", "fm_temp_buf_ab12cd34_0123456789abcdef0123456789abcdef"),
+        ("table", "Ref-2024", "fm_temp_buf_nosession_0123456789abcdef0123456789abcdef"),
+        ("matview", "filter_mate_temp", f"fm_temp_mv_{SID}_abc"),
         # the buffer table carries the name of its source table, whatever it is
         ("table", "ref", "fm_temp_buf_routes-2024_ab12cd34"),
         ("table", "ref", "fm_temp_buf_Routes Nat_ab12cd34"),
@@ -338,3 +342,18 @@ class TestPostgresNames:
         assert patterns
         assert all("\\_" in p and p.endswith("%") for p in patterns)
         assert not any(p.startswith("filtermate\\_%") for p in patterns)
+
+
+def test_the_temp_schemas_are_the_constants_of_the_plugin():
+    """One temp schema (infrastructure.constants); the earlier spelling is only read by the cleanups."""
+    from infrastructure import constants
+    from infrastructure.database import temp_objects
+    assert temp_objects.PG_TEMP_SCHEMAS == (constants.DEFAULT_TEMP_SCHEMA,) + tuple(constants.LEGACY_TEMP_SCHEMAS)
+    assert temp_objects.PG_TEMP_SCHEMAS[0] == "filter_mate_temp"
+    assert is_filtermate_pg_temp_object("matview", constants.DEFAULT_TEMP_SCHEMA,
+                                        constants.TABLE_PREFIX_MATERIALIZED + "x")
+    assert is_filtermate_pg_temp_object("table", "ref", constants.TABLE_PREFIX_BUFFER + "ab12cd34_" + "0" * 32)
+    # the legacy matview prefix of the constants is read in the temp schemas only
+    assert is_filtermate_pg_temp_object("matview", constants.DEFAULT_TEMP_SCHEMA,
+                                        constants.LEGACY_PREFIX_MATERIALIZED + SID + "_x")
+    assert not is_filtermate_pg_temp_object("matview", "public", constants.LEGACY_PREFIX_MATERIALIZED + SID + "_x")

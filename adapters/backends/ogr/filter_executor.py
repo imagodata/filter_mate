@@ -225,15 +225,13 @@ def format_ogr_pk_values(
     if not values:
         return ''
 
-    if is_numeric:
-        return ', '.join(str(v) for v in values)
-    else:
-        # Quote string values and escape internal quotes
-        formatted = []
-        for v in values:
-            str_val = str(v).replace("'", "''")
-            formatted.append(f"'{str_val}'")
-        return ', '.join(formatted)
+    # 2026-10-17: the one formatter of key literals (a non-numeric value in a
+    # numeric list is quoted, never written raw).
+    try:
+        from ....core.filter.pk_formatter import format_key_literal
+    except ImportError:
+        from core.filter.pk_formatter import format_key_literal
+    return ', '.join(format_key_literal(v, is_numeric) for v in values)
 
 
 def normalize_column_names_for_ogr(

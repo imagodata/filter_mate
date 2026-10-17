@@ -16,7 +16,7 @@ pure functions of this module, testable without Qt.
 import math
 from contextlib import contextmanager
 from enum import Enum
-from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Sequence, Tuple
+from typing import TYPE_CHECKING, Any, Collection, Dict, Iterable, List, Optional, Sequence, Tuple
 
 try:
     from qgis.PyQt.QtCore import Qt, QTimer, pyqtSignal
@@ -215,18 +215,18 @@ class PipetteMode(Enum):
 PIPETTE = PipetteMode.PIPETTE
 
 
-def default_band_layout(band_names: Sequence[str]) -> str:
+def default_band_layout(band_names: Sequence[str], alpha_bands: Collection[int] = ()) -> str:
     """Layout guessed from the bands: four colour bands are red, green, blue and infrared, otherwise red, green, blue.
 
     An alpha band is not a colour (an RGBA image is RGB). An infrared colour image (IRC) cannot be told
     from RGB by its bands: the user picks it.
     """
-    return "rgbn" if len(color_bands(band_names)) >= 4 else "rgb"
+    return "rgbn" if len(color_bands(band_names, alpha_bands)) >= 4 else "rgb"
 
 
-def layouts_for(band_names: Sequence[str]) -> List[str]:
+def layouts_for(band_names: Sequence[str], alpha_bands: Collection[int] = ()) -> List[str]:
     """Layouts an image can have: RGB + infrared needs four colour bands (A11)."""
-    return ["rgb", "irc", "rgbn"] if len(color_bands(band_names)) >= 4 else ["rgb", "irc"]
+    return ["rgb", "irc", "rgbn"] if len(color_bands(band_names, alpha_bands)) >= 4 else ["rgb", "irc"]
 
 
 def spectral_presets_for(layout: str) -> List[str]:
@@ -244,9 +244,16 @@ def spectral_expression(key: str, layout: str, reference: str) -> str:
     return ""
 
 
-def color_bands(band_names: Sequence[str]) -> List[int]:
-    """Band numbers a picked colour is made of: up to four, an alpha band left out."""
-    numbers = [number for number, name in enumerate(band_names, start=1) if "alpha" not in (name or "").lower()]
+def color_bands(band_names: Sequence[str], alpha_bands: Collection[int] = ()) -> List[int]:
+    """Band numbers a picked colour is made of: up to four, an alpha band left out.
+
+    Args:
+        alpha_bands: Numbers of the alpha bands (RasterBandInfo.is_alpha, from the colour
+            interpretation). 2026-10-17: QGIS names the bands "Band 4", a name holding
+            "alpha" is only the fallback.
+    """
+    numbers = [number for number, name in enumerate(band_names, start=1)
+               if number not in alpha_bands and "alpha" not in (name or "").lower()]
     return numbers[:4]
 
 
@@ -740,7 +747,7 @@ class RasterExploringPanel(QWidget):
         if not same_layer:
             self._histograms.clear()
             self._reference = sanitize_reference(summary.layer_name)
-            self._set_layout(default_band_layout([info.name for info in summary.bands]))
+            self._set_layout(default_band_layout(*self._band_names_and_alpha()))
             self._pipette_selection, self._picks, self._pick_kind = None, [], ""
             self._band_spans = {}
         self._coordinate_decimals = coordinate_decimals(min(summary.pixel_size_x, summary.pixel_size_y))
@@ -1201,9 +1208,13 @@ class RasterExploringPanel(QWidget):
 
     # === Spectral presets and colour pipette (multiband images) ===
 
+    def _band_names_and_alpha(self) -> Tuple[List[str], set]:
+        """Band names of the layer and the numbers of its alpha bands (colour interpretation)."""
+        bands = self._summary.bands if self._summary is not None else []
+        return [info.name for info in bands], {info.number for info in bands if getattr(info, "is_alpha", False)}
+
     def _set_layout(self, layout: str) -> None:
-        names = [info.name for info in self._summary.bands] if self._summary is not None else []
-        allowed = layouts_for(names)
+        allowed = layouts_for(*self._band_names_and_alpha())
         model = self._layout_combo.model()
         for index in range(self._layout_combo.count()):
             model.item(index).setEnabled(self._layout_combo.itemData(index) in allowed)
@@ -1223,8 +1234,7 @@ class RasterExploringPanel(QWidget):
 
         (A collapsible group hides and shows its children as it folds: they are disabled, not hidden.)
         """
-        names = [info.name for info in self._summary.bands] if self._summary is not None else []
-        usable = len(color_bands(names)) >= 3
+        usable = len(color_bands(*self._band_names_and_alpha())) >= 3
         tip = "" if usable else self.tr("Needs an image of three bands or more (red, green, blue...)")
         for widget in (self._layout_label, self._layout_combo, self._spectral_combo):
             widget.setEnabled(usable)
@@ -1267,8 +1277,7 @@ class RasterExploringPanel(QWidget):
         return 65535.0 if kind in ("UInt16", "Int16") else 255.0
 
     def _color_band_numbers(self) -> List[int]:
-        names = [info.name for info in self._summary.bands] if self._summary is not None else []
-        return color_bands(names)
+        return color_bands(*self._band_names_and_alpha())
 
     def set_color_sample(self, values: Dict[int, Optional[float]], extend: bool = False,
                          terrain: Optional[Dict[RasterDerivative, Optional[float]]] = None) -> None:

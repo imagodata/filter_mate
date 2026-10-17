@@ -90,8 +90,11 @@ class ViewConfig:
     concurrent_refresh: bool = True
 
     # Naming (unified fm_temp_* prefix v4.4.4+)
+    # 2026-10-17: infrastructure.constants TABLE_PREFIX_MATERIALIZED and
+    # DEFAULT_TEMP_SCHEMA (the port imports nothing from infrastructure);
+    # the schema was the legacy 'filtermate_temp'.
     prefix: str = "fm_temp_mv_"
-    schema: str = "filtermate_temp"
+    schema: str = "filter_mate_temp"
 
     # Spatialite specific
     use_rtree: bool = True

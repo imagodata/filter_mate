@@ -113,6 +113,15 @@ def _setup():
     # Mirror to short alias
     sys.modules['core.export'].__dict__.update(pkg.__dict__)
 
+    # 2026-10-17: the handler reads APP.OPTIONS.STREAMING_EXPORT through the
+    # (pure) config_provider
+    _ensure_package(f'{ROOT}.core.optimization', parent=f'{ROOT}.core')
+    _load_file_as(
+        f'{ROOT}.core.optimization.config_provider',
+        os.path.join(project_root, 'core', 'optimization', 'config_provider.py'),
+        f'{ROOT}.core.optimization',
+    )
+
     # Load the real export_handler
     handler_path = os.path.join(project_root, 'core', 'tasks', 'export_handler.py')
     _load_file_as(

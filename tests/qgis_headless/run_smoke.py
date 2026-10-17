@@ -238,6 +238,33 @@ def vector_to_raster():
           and dem.isValid(), f"source={dem.source()}")
 
 
+def raster_alpha_band():
+    """An RGBA orthophoto is RGB: its alpha band is told by the colour interpretation, not the name (2026-10-17)."""
+    from osgeo import gdal
+    from filter_mate.adapters.qgis.coverage_layers.raster_adapter import read_raster_summary
+    from filter_mate.ui.widgets.coverage_panels.raster_exploring_panel import (
+        default_band_layout, layouts_for, spectral_presets_for,
+    )
+    path = os.path.join(info['work'], 'ortho_rgba.tif')
+    dataset = gdal.GetDriverByName('GTiff').Create(path, 8, 8, 4, gdal.GDT_Byte, ['PHOTOMETRIC=RGB', 'ALPHA=YES'])
+    dataset.SetGeoTransform((600000, 0.25, 0, 6200002, 0, -0.25))
+    for band, colour in enumerate((gdal.GCI_RedBand, gdal.GCI_GreenBand, gdal.GCI_BlueBand, gdal.GCI_AlphaBand), 1):
+        dataset.GetRasterBand(band).SetColorInterpretation(colour)
+        dataset.GetRasterBand(band).Fill(255 if band == 4 else 40 * band)
+    dataset = None
+    layer = QgsRasterLayer(path, 'ortho_rgba', 'gdal')
+    summary = read_raster_summary(layer)
+    band_names = [band.name for band in summary.bands]
+    alpha = {band.number for band in summary.bands if band.is_alpha}
+    check('RGBA orthophoto: the alpha band is flagged by its colour interpretation',
+          layer.isValid() and alpha == {4}, f"bands={band_names} alpha={sorted(alpha)}")
+    layout = default_band_layout(band_names, alpha)
+    check('RGBA orthophoto: RGB layout, no infrared preset',
+          layout == 'rgb' and 'rgbn' not in layouts_for(band_names, alpha)
+          and not any(key.startswith('ndvi') for key in spectral_presets_for(layout)),
+          f"layout={layout} (by name only: {default_band_layout(band_names)})")
+
+
 def point_clouds():
     m = info['m']
     if Qgis.QGIS_VERSION_INT < POINT_CLOUD_MIN_VERSION:
@@ -730,6 +757,171 @@ def user_data_safety_two_databases():
     admin.close()
 
 
+# --- remote sources, stable keys, key literals (2026-10-17) ----------------------
+
+COMMUNES = (  # name, code (text), population (int): two communes share population 800
+    ("L'Isle-Jourdain", '32160', 9000),
+    ("L'Isle-Jourdain", '86112', 1200),
+    ('Auch', '32013', 22000),
+    ("L'Abergement-Clémenciat", '01001', 800),
+    ('Ambérieu-en-Bugey', '01004', 800),
+    ('Code sans zéro', '1001', 50),
+    ('Saint\\Backslash', '99001', None),  # a backslash in a text key, a NULL population
+)
+BACKSLASH_NAME = 'Saint\\Backslash'
+# Unreachable on purpose (connection refused at once): only the provider key is read.
+OFFLINE_SERVICES = (
+    ('WFS', "typename='communes' url='http://127.0.0.1:9/wfs' version='2.0.0'"),
+    ('OAPIF', "typename='communes' url='http://127.0.0.1:9/ogcapi'"),
+    ('arcgisfeatureserver', "url='http://127.0.0.1:9/arcgis/rest/services/x/FeatureServer/0'"),
+)
+
+
+def _old_heuristic_key(layer):
+    """The key layer_management_task chose before 2026-10-17 (no declared key)."""
+    fields = list(layer.fields())
+    for field in fields:
+        if field.name().lower() in ('id', 'fid', 'pk', 'gid', 'ogc_fid', 'objectid', 'oid', 'rowid'):
+            return field.name()
+    for field in fields:
+        if 'uuid' in field.name().lower() or 'guid' in field.name().lower():
+            return field.name()
+    for field in fields:
+        if field.isNumeric() and any(p in field.name().lower() for p in ('_id', 'id_', 'identifier')):
+            return field.name()
+    for field in fields:
+        if field.isNumeric():
+            return field.name()
+    return fields[0].name() if fields else None
+
+
+def _communes_layers():
+    """The communes as memory, Shapefile, GeoJSON and GeoPackage layers (no declared key but the GPKG fid)."""
+    from qgis.core import QgsFeature, QgsVectorFileWriter
+    memory = QgsVectorLayer('Point?crs=EPSG:2154&field=nom:string(60)&field=code:string(5)&field=population:integer',
+                            'communes_memory', 'memory')
+    features = []
+    for index, (name, code, population) in enumerate(COMMUNES):
+        feature = QgsFeature(memory.fields())
+        feature.setAttributes([name, code, population])
+        feature.setGeometry(QgsGeometry.fromPointXY(QgsPointXY(500000 + 1000 * index, 6300000)))
+        features.append(feature)
+    memory.dataProvider().addFeatures(features)
+    layers = {'memory': memory}
+    for driver, extension in (('ESRI Shapefile', 'shp'), ('GeoJSON', 'geojson'), ('GPKG', 'gpkg')):
+        path = os.path.join(info['work'], f'communes.{extension}')
+        options = QgsVectorFileWriter.SaveVectorOptions()
+        options.driverName = driver
+        options.fileEncoding = 'UTF-8'
+        result = QgsVectorFileWriter.writeAsVectorFormatV3(memory, path, project.transformContext(), options)
+        if result[0] != QgsVectorFileWriter.WriterError.NoError:
+            report('FAIL', f'write communes as {driver}', str(result))
+            continue
+        layers[extension] = QgsVectorLayer(path, f'communes_{extension}', 'ogr')
+    return layers
+
+
+def remote_sources():
+    from filter_mate.adapters.backends.ogr.expression_builder import OGRExpressionBuilder
+    from filter_mate.adapters.qgis.source_capability_probe import capability_for_layer
+    from filter_mate.core.domain.source_capability import Locality, classify
+    from qgis.core import QgsFeature
+    from filter_mate.core.domain.stable_key import FEATURE_ID_KEY
+    from filter_mate.core.filter.pk_formatter import format_key_literal, is_null_value
+    from filter_mate.core.tasks.layer_management_task import LayersManagementEngineTask
+
+    for key, uri in OFFLINE_SERVICES:
+        layer = QgsVectorLayer(uri, f'offline_{key}', key)
+        capability = capability_for_layer(layer)
+        check(f'{key} layer: providerType() and source capability', layer.providerType() == key
+              and capability.locality is Locality.REMOTE_SERVICE and not capability.counts_cheaply,
+              f"providerType()={layer.providerType()!r} classify={capability.locality.value}/"
+              f"{capability.server_filter.value} key_list_limit={capability.key_list_limit}")
+    check('GDAL TMS raster is a rendered image', not classify(
+        'gdal', '<GDAL_WMS><Service name="TMS"><ServerUrl>https://t/${z}/${x}/${y}.png</ServerUrl></Service></GDAL_WMS>',
+        True).has_raw_values)
+
+    task = type('KeyTask', (LayersManagementEngineTask,),
+                {'__init__': lambda self: None, 'isCanceled': lambda self: False})()
+    builder = OGRExpressionBuilder({})
+    for kind, layer in _communes_layers().items():
+        if not layer.isValid():
+            report('FAIL', f'communes {kind} valid')
+            continue
+        old = _old_heuristic_key(layer) if not list(layer.primaryKeyAttributes()) else 'declared'
+        key = task.search_primary_key_from_layer(layer)
+        backend_key = builder._get_primary_key(layer)
+        expected = 'fid' if kind == 'gpkg' else FEATURE_ID_KEY  # the GeoPackage declares its fid
+        check(f'{kind}: key without a unique key field is the feature id, never "population"',
+              key[0] == expected and backend_key == expected,
+              f"before: {old}; now: registration {key}, OGR backend {backend_key!r}")
+
+        def count(subset):
+            layer.setSubsetString('')
+            applied = layer.setSubsetString(subset)
+            shown = len(list(layer.getFeatures())) if applied else -1
+            layer.setSubsetString('')
+            return shown
+
+        clause = builder._build_fid_filter_with_values(layer, ["L'Isle-Jourdain"], 'nom')
+        before = '"nom" IN (' + repr("L'Isle-Jourdain") + ')'  # repr() of core/filter/expression_builder
+        check(f"{kind}: L'Isle-Jourdain key literal applied by setSubsetString", count(clause) == 2,
+              f"{clause} -> {count(clause)} feature(s); before {before} -> {count(before)}")
+        clause = builder._build_fid_filter_with_values(layer, [BACKSLASH_NAME], 'nom')
+        before = '"nom" IN (' + "'" + BACKSLASH_NAME + "')"
+        check(f"{kind}: a backslash in a key literal (QGIS expression escape on memory)", count(clause) == 1,
+              f"{clause} -> {count(clause)}; before {before} -> {count(before)}")
+        clause = builder._build_fid_filter_with_values(layer, ['01001'], 'code')
+        before = '"code" IN (01001)'
+        check(f"{kind}: text code '01001' stays a text literal", count(clause) == 1,
+              f"{clause} -> {count(clause)}; before {before} -> {count(before)}")
+        populations = [feature['population'] for feature in layer.getFeatures()]
+        nulls = [value for value in populations if is_null_value(value)]
+        check(f"{kind}: a NULL attribute is NULL, never 'NULL'", nulls and all(
+            format_key_literal(value, True) == 'NULL' for value in nulls),
+            f"{[repr(value) for value in nulls]} -> {[format_key_literal(value, True) for value in nulls]}")
+        ids = [feature.id() for feature in layer.getFeatures() if feature['code'] in ('01001', '32013')]
+        if layer.fields().indexOf(key[0]) < 0:
+            clause = builder._build_fid_filter(layer, ids)
+        else:
+            clause = builder._build_fid_filter_with_values(layer, ids, key[0])
+        before = '"population" IN (800, 22000)'
+        check(f'{kind}: feature-id key list keeps exactly the selected features', count(clause) == 2,
+              f"{clause} -> {count(clause)}; before {before} -> {count(before)}")
+
+    from qgis.core import QgsExpression
+    from filter_mate.core.filter.pk_formatter import qgis_string_literal
+    samples = ["L'Isle", 'b\\c', 'd\\', 'tab\there', 'line\nbreak', "''"]
+    check('QGIS expression literals are QgsExpression.quotedString', all(
+        qgis_string_literal(text) == QgsExpression.quotedString(text) for text in samples),
+        f"{[(qgis_string_literal(t), QgsExpression.quotedString(t)) for t in samples]}")
+
+    # A unique "id" is the key, a duplicated one is not (proven by reading it, in the task)
+    for label, values, expected in (('unique id', [1, 2, 3], 'id'), ('duplicated id', [1, 1, 3], FEATURE_ID_KEY),
+                                    ('id with a NULL', [1, None, 3], FEATURE_ID_KEY)):
+        layer = QgsVectorLayer('Point?crs=EPSG:2154&field=id:integer&field=population:integer', label, 'memory')
+        features = []
+        for value in values:
+            feature = QgsFeature(layer.fields())
+            feature.setAttributes([value, 10])
+            feature.setGeometry(QgsGeometry.fromPointXY(QgsPointXY(0, 0)))
+            features.append(feature)
+        layer.dataProvider().addFeatures(features)
+        key = task.search_primary_key_from_layer(layer)
+        check(f'memory layer with a {label}: key {expected}', key[0] == expected, f"{key}")
+
+    # Virtual layer without a uid column: fid / $id lists keep 0 feature, the key list is refused
+    memory = _communes_layers()['memory']
+    project.addMapLayer(memory)
+    virtual = QgsVectorLayer(f'?query=SELECT * FROM "{memory.name()}"', 'communes_virtual', 'virtual')
+    key = task.search_primary_key_from_layer(virtual)
+    refusal = builder._key_list_refusal(virtual)
+    check('virtual layer without uid: no key list (refused with a message)',
+          virtual.isValid() and key[0] == FEATURE_ID_KEY and bool(refusal) and 'virtual layer' in refusal,
+          f"valid={virtual.isValid()} key={key} refusal={refusal!r}")
+    project.removeMapLayer(memory.id())
+
+
 def environment():
     from filter_mate.adapters.qgis.coverage_layers import pdal_cli
     exe = pdal_cli.find_pdal()
@@ -765,9 +957,9 @@ def main():
           f"in {time.perf_counter() - started:.1f}s", flush=True)
 
     for step in (plugin_starts_without_iface, provider_lists_algorithms, load_layers, raster_to_vector,
-                 vector_to_raster, point_clouds, user_data_safety,
-                 user_data_safety_postgresql,
-                 user_data_safety_native_spatialite, user_data_safety_two_databases, environment):
+                 vector_to_raster, raster_alpha_band, point_clouds, remote_sources, user_data_safety,
+                 user_data_safety_postgresql, user_data_safety_native_spatialite,
+                 user_data_safety_two_databases, environment):
         if (step is not plugin_starts_without_iface
                 and QgsApplication.processingRegistry().providerById('filtermate') is None):
             report('SKIP', step.__name__, 'no FilterMate Processing provider')

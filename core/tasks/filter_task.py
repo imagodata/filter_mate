@@ -73,7 +73,7 @@ POSTGRESQL_AVAILABLE = _pg_availability.postgresql_available
 # Import constants (migrated to infrastructure)
 from ...infrastructure.constants import (
     PROVIDER_POSTGRES, PROVIDER_SPATIALITE, PROVIDER_OGR,
-    QGIS_PROVIDER_POSTGRES,
+    QGIS_PROVIDER_POSTGRES, DEFAULT_TEMP_SCHEMA,
 )
 
 # Backend architecture (migrated to adapters.backends)
@@ -364,7 +364,7 @@ class FilterEngineTask(QgsTask):
         }
         # Use QgsProject.instance() directly - always available in QGIS
         self.PROJECT = QgsProject.instance()
-        self.current_materialized_view_schema = 'filter_mate_temp'
+        self.current_materialized_view_schema = DEFAULT_TEMP_SCHEMA
 
         # Session ID for multi-client materialized view isolation
         # Retrieved from task_parameters, defaults to 'default' for backward compatibility
@@ -920,6 +920,29 @@ class FilterEngineTask(QgsTask):
         self.layers_count = result.layers_count
         self.provider_list = result.provider_list
 
+    @property
+    def param_all_layers(self):
+        """Target layers of the task, every provider (``self.layers`` flattened).
+
+        2026-10-17: the materialized view handler registers these layers as
+        users of the MVs it creates, and the cleanup frees their references;
+        both read ``param_all_layers``, which nothing defined. Only the
+        source layer was registered, and unfiltering it dropped (CASCADE)
+        MVs the distant layers' subsets still referenced.
+        """
+        targets = []
+        for entries in (getattr(self, 'layers', None) or {}).values():
+            for entry in entries or []:
+                layer = entry[0] if isinstance(entry, (list, tuple)) else entry
+                if layer is None:
+                    continue
+                try:
+                    layer.id()
+                except RuntimeError:  # removed from the project meanwhile (C++ object deleted)
+                    continue
+                targets.append(layer)
+        return targets
+
     def _queue_subset_string(self, layer, expression):
         """
         Queue a subset string request for thread-safe application in finished().
@@ -1443,7 +1466,7 @@ class FilterEngineTask(QgsTask):
             buffer_type=self.task_parameters.get("filtering", {}).get("buffer_type", "Round"),
             primary_key_name=getattr(self, 'primary_key_name', None),
             session_id=getattr(self, 'session_id', None),
-            mv_schema=getattr(self, 'current_materialized_view_schema', 'filter_mate_temp'),
+            mv_schema=getattr(self, 'current_materialized_view_schema', None) or DEFAULT_TEMP_SCHEMA,
             source_feature_count=source_fc,
             source_layer=self.source_layer,
         )
