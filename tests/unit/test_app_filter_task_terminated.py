@@ -21,7 +21,7 @@ _APP = Path(__file__).resolve().parents[2] / "filter_mate_app.py"
 _PKG = "fm_app_task_terminated_test"
 _METHODS = ["_execute_filter_task", "_save_current_layer_before_filter", "_set_filter_protection_flags",
             "_filter_engine_task_terminated", "_release_filter_protection", "filter_engine_task_completed",
-            "_filter_engine_task_succeeded"]
+            "_filter_engine_task_succeeded", "_layer_in_project"]
 
 
 class _Signal:
@@ -36,12 +36,29 @@ class _Signal:
             slot()
 
 
+class _Project:
+    """QgsProject.instance(): the layers still in the project, by id."""
+    layers = {}
+
+    @classmethod
+    def instance(cls):
+        return cls
+
+    @classmethod
+    def mapLayer(cls, layer_id):
+        return cls.layers.get(layer_id)
+
+
 class _Task:
     def __init__(self, description, task_name, task_parameters, backend_registry=None):
         self._description = description
         self.taskCompleted, self.taskTerminated = _Signal(), _Signal()
         self.task_parameters = dict(task_parameters, _copied_by_the_task=True)
         self.canceled = False
+        self.dependent_layers = None
+
+    def setDependentLayers(self, layers):
+        self.dependent_layers = list(layers)
 
     def cancel(self):
         self.canceled = True
@@ -67,7 +84,8 @@ def _extract():
     sys.modules[_PKG + ".core.tasks"] = tasks
     namespace = {"__package__": _PKG, "__name__": _PKG + ".filter_mate_app", "logger": MagicMock(),
                  "iface": MagicMock(), "QCoreApplication": MagicMock(), "perf_mark_start": lambda name: None,
-                 "QgsApplication": MagicMock()}
+                 "QgsApplication": MagicMock(), "QgsProject": _Project,
+                 "sip": types.SimpleNamespace(isdeleted=lambda obj: getattr(obj, "deleted", False) is True)}
     exec(compile(ast.Module(body=methods, type_ignores=[]), str(_APP), "exec"), namespace)
     return namespace
 
@@ -89,7 +107,12 @@ def app():
         _unfreeze_canvas_after_task=MagicMock(),
     )
     for name in _METHODS:
-        setattr(instance, name, types.MethodType(namespace[name], instance))
+        method = namespace[name]
+        if isinstance(method, staticmethod):
+            setattr(instance, name, method.__func__)
+        else:
+            setattr(instance, name, types.MethodType(method, instance))
+    _Project.layers = {"zones": zones}
     return instance
 
 
@@ -229,3 +252,35 @@ def test_an_outdated_task_that_was_not_canceled_reports_nothing(app):
     _launch(app)
     first.taskCompleted.emit()  # completed before the cancel reached it
     app._filter_result_handler.handle_task_completion.assert_not_called()
+
+
+def test_a_task_depends_on_its_layers(app):
+    """QGIS cancels a task whose layers are being removed."""
+    roads = MagicMock()
+    roads.id.return_value = "roads"
+    app.PROJECT.mapLayersByName.return_value = [roads]
+    app._execute_filter_task("filter", {"task": {"layers": [{"layer_id": "roads", "layer_name": "roads"}]}})
+    assert app.appTasks["filter"].dependent_layers == [app.dockwidget.current_layer, roads]
+
+
+def test_a_source_layer_removed_before_the_completion_is_no_error(app):
+    task = _launch(app)
+    _Project.layers = {}  # removed from the project
+    task.taskCompleted.emit()
+    app._filter_result_handler.handle_task_completion.assert_not_called()
+    app._filter_result_handler.handle_task_terminated.assert_called_once_with("zones")
+
+
+def test_a_source_layer_deleted_during_the_completion_is_no_error(app):
+    namespace_iface = app.filter_engine_task_completed.__func__.__globals__["iface"]
+    namespace_iface.reset_mock()
+    _launch(app)
+
+    def remove(**kwargs):
+        _Project.layers = {}
+        raise RuntimeError("wrapped C/C++ object of type QgsVectorLayer has been deleted")
+
+    app._filter_result_handler.handle_task_completion.side_effect = remove
+    app.filter_engine_task_completed("filter", app.dockwidget.current_layer, {})
+    namespace_iface.messageBar.return_value.pushCritical.assert_not_called()
+    assert app.dockwidget._filtering_in_progress is False  # the protection still ends

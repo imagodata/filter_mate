@@ -1332,6 +1332,11 @@ class FilterMateApp:
             backend_registry=self._backend_registry  # v4.0.1: Hexagonal DI
         )
         logger.info(f"✓ FilterEngineTask created: {self.appTasks[task_name].description()}")
+        # 2026-10-17: QGIS cancels a task whose layers are being removed - only add_layers declared them,
+        # a filter went on with deleted layers (crash risk, an error message at its completion).
+        self.appTasks[task_name].setDependentLayers(
+            ([current_layer] if current_layer is not None else []) + layers
+        )
 
         # Filter/unfilter/reset bookkeeping uses current_layer; skip for export
         # which has its own independent flow.
@@ -1542,7 +1547,23 @@ class FilterMateApp:
             logger.info(f"Filter task '{task_name}' {'canceled' if canceled else 'replaced'}: results ignored")
             self._filter_engine_task_terminated(generation, current_layer_id_before_filter)
             return
+        source_layer = self._layer_in_project(source_layer)
+        if source_layer is None:
+            # removed meanwhile: nothing to report on, no error either
+            logger.info(f"Filter task '{task_name}': source layer removed meanwhile, results ignored")
+            self._filter_engine_task_terminated(generation, current_layer_id_before_filter)
+            return
         self.filter_engine_task_completed(task_name, source_layer, task_parameters)
+
+    @staticmethod
+    def _layer_in_project(layer):
+        """The layer if it is still in the project (its C++ object alive), else None."""
+        try:
+            if layer is None or sip.isdeleted(layer):
+                return None
+            return QgsProject.instance().mapLayer(layer.id())
+        except RuntimeError:  # deleted between the checks
+            return None
 
     def _filter_engine_task_terminated(self, generation, current_layer_id_before_filter):
         """A filter / unfilter / reset task failed or was canceled: its protection ends as after a completed one.
@@ -2761,8 +2782,12 @@ class FilterMateApp:
                 current_layer_id_before_filter=current_layer_id
             )
         except Exception as e:
-            logger.error(f"FilterResultHandler failed: {e}")
-            iface.messageBar().pushCritical("FilterMate", QCoreApplication.translate("FilterMateApp", "Error during filtering: {0}").format(str(e)))
+            if self._layer_in_project(source_layer) is None:
+                # 2026-10-17: the source layer removed while the results were applied: no error to show
+                logger.info(f"FilterResultHandler stopped, source layer removed: {e}")
+            else:
+                logger.error(f"FilterResultHandler failed: {e}")
+                iface.messageBar().pushCritical("FilterMate", QCoreApplication.translate("FilterMateApp", "Error during filtering: {0}").format(str(e)))
             if self.dockwidget is not None and not callable(getattr(self.dockwidget, '_end_post_filter_window', None)):
                 self._release_filter_protection(reconnect=True)  # failed before the post-filter window opened
 

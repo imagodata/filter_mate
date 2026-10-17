@@ -79,15 +79,16 @@ class TestSafeCancelAllTasks:
         assert not processing.canceled and not other.canceled
         assert layers.canceled and export.canceled
 
-    def test_a_running_filter_is_left_alone(self, task_manager):
-        """Canceled, a filter left the panel in "filtering" state with the current-layer combo box
-        blocked (lifted on taskCompleted only); the former loop practically never reached it."""
+    def test_a_running_filter_is_canceled(self, task_manager):
+        """2026-10-17: left running before (its protections were lifted on taskCompleted only, its
+        cancel() dropped PostgreSQL views on the main thread): a project change or an unload left
+        it running over layers being removed."""
         filtering = FilterEngineTask(58, "Filtering data")
         task_manager([filtering])
 
         tms.TaskManagementService().safe_cancel_all_tasks()
 
-        assert not filtering.canceled
+        assert filtering.canceled
 
     def test_tasks_that_cannot_be_canceled_are_left(self, task_manager):
         task = LayersManagementEngineTask(3, "Adding layers", can_cancel=False)
