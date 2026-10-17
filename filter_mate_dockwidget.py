@@ -161,6 +161,9 @@ except ImportError: STYLE_MANAGERS_AVAILABLE = False; ThemeManager = IconManager
 # Allows sql_utils.safe_set_subset_string() to detach the widget BEFORE subset change
 _active_dockwidget = None
 
+# Bound on the disconnect loop of _disconnect_layer_selection_signal (one call per duplicate)
+_MAX_SELECTION_CONNECTIONS = 32
+
 
 class ClickableLabel(QtWidgets.QLabel):
     """QLabel that properly handles mouse clicks for menus."""
@@ -371,23 +374,34 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         """
         if not layer or not layer.isValid():
             return False
+        if not isinstance(layer, QgsVectorLayer):
+            return False  # raster / point cloud layers have no feature selection
         try:
-            # Disconnect first (idempotent)
-            try:
-                layer.selectionChanged.disconnect(self.on_layer_selection_changed)
-                was_connected = True
-            except TypeError:
-                was_connected = False
-            # Always reconnect
+            # 2026-10-17: every connection removed, then one made. Several call sites
+            # connected (some unconditionally) and the layer change disconnected once:
+            # each layer change could add a connection, and the previous layer kept one
+            # (its selection then drove the panel of the new current layer).
+            self._disconnect_layer_selection_signal(layer)
             layer.selectionChanged.connect(self.on_layer_selection_changed)
             self.current_layer_selection_connection = True
-            if not was_connected:
-                logger.warning(f"⚠️ selectionChanged NOT connected for {layer.name()} - reconnected")
             return True
         except Exception as e:
             logger.error(f"❌ _ensure_layer_signals_connected failed: {e}")
             self.current_layer_selection_connection = False
             return False
+
+    def _disconnect_layer_selection_signal(self, layer) -> None:
+        """Remove every connection of ``layer.selectionChanged`` to on_layer_selection_changed.
+
+        A connection made twice needs two disconnects: disconnect until Qt says none is left.
+        """
+        if layer is None:
+            return
+        for _ in range(_MAX_SELECTION_CONNECTIONS):
+            try:
+                layer.selectionChanged.disconnect(self.on_layer_selection_changed)
+            except (TypeError, RuntimeError, AttributeError):  # none left, layer deleted, not a vector layer
+                return
 
     def _connect_feature_picker_layer_deletion(self, layer):
         """
@@ -2106,9 +2120,7 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             logger.warning("⚠️ _controller_integration is None - using legacy code paths only")
 
         if self.current_layer and not self.current_layer_selection_connection:
-            try: self.current_layer.selectionChanged.connect(self.on_layer_selection_changed); self.current_layer_selection_connection = True
-            except Exception:  # nosec B110 - Signal may already be connected - expected
-                pass
+            self._ensure_layer_signals_connected(self.current_layer)
         self.widgetsInitialized.emit(); self._setup_keyboard_shortcuts()
         if self._pending_layers_update:
             self._pending_layers_update = False; pl, pr, weak_self = self.PROJECT_LAYERS, self.PROJECT, weakref.ref(self)
@@ -4545,8 +4557,7 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         try:
             # Check if signal needs to be connected
             if not self.current_layer_selection_connection:
-                self.current_layer.selectionChanged.connect(self.on_layer_selection_changed)
-                self.current_layer_selection_connection = True
+                self._ensure_layer_signals_connected(self.current_layer)
                 logger.debug(f"✅ _ensure_selection_changed_connected: Connected selectionChanged signal for layer '{self.current_layer.name()}'")
             else:
                 logger.debug(f"ℹ️ _ensure_selection_changed_connected: Signal already connected for layer '{self.current_layer.name()}'")
@@ -4568,12 +4579,8 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
 
         # FIX v5: Ensure signal stays connected (self-healing)
         if self.current_layer and not self.current_layer_selection_connection:
-            try:
-                self.current_layer.selectionChanged.connect(self.on_layer_selection_changed)
-                self.current_layer_selection_connection = True
+            if self._ensure_layer_signals_connected(self.current_layer):
                 logger.debug("on_layer_selection_changed: Re-connected selectionChanged signal (self-healing)")
-            except (TypeError, RuntimeError):
-                pass
 
         # FIX v10: DEBUG - Check delegation
         if self._controller_integration:
@@ -5147,11 +5154,9 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
                 return (False, None, None)
         except (RuntimeError, AttributeError, OSError):
             return (False, None, None)  # Layer source check failed
-        if self.current_layer is not None and self.current_layer_selection_connection is not None:
-            try:
-                self.current_layer.selectionChanged.disconnect(self.on_layer_selection_changed)
-            except (TypeError, RuntimeError, AttributeError):
-                pass
+        if self.current_layer is not None:
+            # every connection, whatever the flag says (2026-10-17)
+            self._disconnect_layer_selection_signal(self.current_layer)
             self.current_layer_selection_connection = None
 
         self.current_layer = layer
@@ -5538,13 +5543,9 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             except Exception:  # nosec B110 - signal connection best-effort, safe to ignore
                 pass
 
-        # Connect selectionChanged for tracking
+        # Connect selectionChanged for tracking (once: 2026-10-17)
         if self.current_layer:
-            try:
-                self.current_layer.selectionChanged.connect(self.on_layer_selection_changed)
-                self.current_layer_selection_connection = True
-            except Exception:  # nosec B110 - signal connection best-effort, safe to ignore
-                pass
+            self._ensure_layer_signals_connected(self.current_layer)
 
         # Restore exploring groupbox state
         if layer_props and "current_exploring_groupbox" in layer_props.get("exploring", {}):

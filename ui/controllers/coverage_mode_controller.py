@@ -472,12 +472,15 @@ class CoverageModeController(BaseController):
         old_layer = getattr(dw, 'current_layer', None)
         if old_layer is None or _same_layer(old_layer, incoming_layer):
             return
-        if getattr(dw, 'current_layer_selection_connection', None) is None:
-            return
-        try:
-            old_layer.selectionChanged.disconnect(dw.on_layer_selection_changed)
-        except (TypeError, RuntimeError, AttributeError) as exc:
-            logger.debug(f"[FM5] previous selectionChanged not disconnected: {exc}")
+        # 2026-10-17: every connection, whatever the flag says (it skipped the disconnect
+        # when unset, and one disconnect left a duplicate connection behind)
+        if hasattr(dw, '_disconnect_layer_selection_signal'):
+            dw._disconnect_layer_selection_signal(old_layer)
+        else:
+            try:
+                old_layer.selectionChanged.disconnect(dw.on_layer_selection_changed)
+            except (TypeError, RuntimeError, AttributeError) as exc:
+                logger.debug(f"[FM5] previous selectionChanged not disconnected: {exc}")
         dw.current_layer_selection_connection = None
 
     # === Dock layout ===
