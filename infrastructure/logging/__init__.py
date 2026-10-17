@@ -7,7 +7,7 @@ This module provides centralized logging for FilterMate with:
 - File rotation (10 MB max, 5 backups)
 - Safe stream handling for QGIS shutdown
 - Pre-configured loggers for common modules
-- Automatic file logging to logs/filtermate.log
+- Automatic file logging to logs/filtermate.log (folder overridable with FILTERMATE_LOG_DIR)
 - Passwords masked on every handler (``redaction.SecretMaskingFilter``)
 
 Usage:
@@ -26,7 +26,9 @@ from .redaction import SecretMaskingFilter, install_secret_masking, mask_sensiti
 
 # Determine log file path (relative to plugin directory)
 _PLUGIN_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-_LOG_DIR = os.path.join(_PLUGIN_DIR, 'logs')
+# FILTERMATE_LOG_DIR moves the log folder (the test suite points it to a temporary
+# folder so that running pytest never writes in the repository's logs/)
+_LOG_DIR = os.environ.get('FILTERMATE_LOG_DIR') or os.path.join(_PLUGIN_DIR, 'logs')
 _LOG_FILE = os.path.join(_LOG_DIR, 'filtermate.log')
 
 # Ensure logs directory exists
