@@ -71,11 +71,40 @@ def fix(path: str) -> int:
             kept[source] = message
         if not context.findall('message'):
             root.remove(context)
-    ET.indent(tree, space='    ')
-    body = ET.tostring(root, encoding='unicode')
-    with open(path, 'w', encoding='utf-8') as handle:
-        handle.write('<?xml version="1.0" encoding="utf-8"?>\n<!DOCTYPE TS>\n' + body + '\n')
+    write_ts(tree, path)
     return restored
+
+
+def _escape(text: str, source: bool) -> str:
+    """Escape as pylupdate5 does: ``"`` always, ``'`` only in an all-ASCII source text."""
+    text = (text or '').replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;').replace('"', '&quot;')
+    if source and text.isascii():
+        text = text.replace("'", '&apos;')
+    return text
+
+
+def write_ts(tree, path: str) -> None:
+    """Write a .ts file in the layout of pylupdate5, so a run of this script only shows its own changes."""
+    root = tree.getroot()
+    attributes = ''.join(f' {key}="{_escape(value, False)}"' for key, value in root.attrib.items())
+    lines = ['<?xml version="1.0" encoding="utf-8"?>', '<!DOCTYPE TS>', f'<TS{attributes}>']
+    for context in root.findall('context'):
+        lines += ['<context>', f'    <name>{_escape(context.findtext("name"), False)}</name>']
+        for message in context.findall('message'):
+            lines.append('    <message>')
+            for location in message.findall('location'):
+                lines.append(f'        <location filename="{_escape(location.get("filename"), False)}" '
+                             f'line="{location.get("line")}"/>')
+            lines.append(f'        <source>{_escape(message.findtext("source"), True)}</source>')
+            translation = message.find('translation')
+            kind = translation.get('type')
+            opening = f'<translation type="{kind}">' if kind else '<translation>'
+            lines.append(f'        {opening}{_escape(translation.text, False)}</translation>')
+            lines.append('    </message>')
+        lines.append('</context>')
+    lines.append('</TS>')
+    with open(path, 'w', encoding='utf-8', newline='\n') as handle:
+        handle.write('\n'.join(lines) + '\n')
 
 
 if __name__ == '__main__':
