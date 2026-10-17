@@ -151,6 +151,22 @@ ANALYSIS_RASTER_PROVIDERS = ('gdal', 'virtualraster', 'postgresraster')
 NON_ANALYSIS_RASTER_PROVIDERS = ('wms', 'wcs', 'arcgismapserver', 'grassraster')
 
 
+def _renders_an_image(layer: Any) -> bool:
+    """A GDAL raster whose pixels are a rendered image: ``WMS:...`` / ``<GDAL_WMS>`` (WMS, TMS, XYZ tiles).
+
+    2026-10-17: the provider is 'gdal', so the provider list alone took these
+    basemaps for rasters of values (see core.domain.source_capability).
+    """
+    try:
+        from ...core.domain.source_capability import classify
+    except ImportError:
+        from core.domain.source_capability import classify
+    try:
+        return not classify(layer.providerType(), layer.source(), is_raster=True).has_raw_values
+    except (TypeError, RuntimeError, AttributeError):
+        return False
+
+
 def exclude_non_analysis_rasters(combo: Any) -> None:
     """Hide web / non analysable rasters from a ``QgsMapLayerComboBox``.
 
@@ -178,7 +194,9 @@ def is_non_analysis_raster(layer: Any) -> bool:
         from qgis.core import QgsVectorLayer
         if raster_type is QgsVectorLayer:  # mocked qgis.core: one class for both
             return False
-        return isinstance(layer, raster_type) and layer.providerType() not in ANALYSIS_RASTER_PROVIDERS
+        if not isinstance(layer, raster_type):
+            return False
+        return layer.providerType() not in ANALYSIS_RASTER_PROVIDERS or _renders_an_image(layer)
     except (ImportError, TypeError, RuntimeError, AttributeError):
         return False
 
@@ -193,7 +211,7 @@ def is_raster_layer(layer: Any) -> bool:
     try:
         if not isinstance(layer, layer_type):
             return False
-        return layer.providerType() in ANALYSIS_RASTER_PROVIDERS
+        return layer.providerType() in ANALYSIS_RASTER_PROVIDERS and not _renders_an_image(layer)
     except (TypeError, RuntimeError, AttributeError):
         return False
 

@@ -44,9 +44,11 @@ ICON_3D = '<path d="M12 2l9 5v10l-9 5-9-5V7z"/><path d="M12 12l9-5M12 12L3 7M12 
 # (the 3D action is ``mActionNew3DMapCanvas`` in QGIS 4.2, ``mActionNew3DMapView`` in older builds).
 ACTION_ELEVATION_PROFILE = ('mActionElevationProfile',)
 ACTION_NEW_3D_VIEW = ('mActionNew3DMapCanvas', 'mActionNew3DMapView')
-# Vector providers whose feature count is a server / database query: the card leaves it out
-# (it is read on the main thread at every layer change).
-UNCOUNTED_PROVIDERS = ('postgres', 'oracle', 'mssql', 'hana', 'wfs', 'oapif', 'arcgisfeatureserver', 'virtual')
+# Vector providers whose feature count is a database query: the card leaves it out (it is
+# read on the main thread at every layer change). Web services and remote files are left
+# out too, by core.domain.source_capability (compared case-insensitively: QGIS names its web
+# providers 'WFS' and 'OAPIF').
+UNCOUNTED_PROVIDERS = ('postgres', 'oracle', 'mssql', 'hana', 'virtual')
 
 
 def _identity(text: str) -> str:
@@ -143,13 +145,19 @@ def vector_card_text(geometry_label: str, feature_count: Optional[int],
     return " · ".join(parts)
 
 
-def feature_count_is_cheap(provider: str, subset: str) -> bool:
+def feature_count_is_cheap(provider: str, subset: str, source: str = '') -> bool:
     """Whether the card may count the features: a local source without a filter.
 
     A filtered GeoPackage / Spatialite layer counts through its subset
     (``EXISTS``, ``ST_DWithin``...), a database or web layer runs a query.
     """
-    return not (subset or '').strip() and (provider or '') not in UNCOUNTED_PROVIDERS
+    if (subset or '').strip() or (provider or '').lower() in UNCOUNTED_PROVIDERS:
+        return False
+    try:
+        from ...core.domain.source_capability import classify
+    except ImportError:
+        from core.domain.source_capability import classify
+    return classify(provider, source).counts_cheaply
 
 
 def card_html(name: str, kind_label: str, meta: str, color: str, square: bool) -> str:
@@ -495,7 +503,8 @@ class CoverageDockExtras(QObject):
         except Exception:
             geometry = ''
         try:
-            count = layer.featureCount() if feature_count_is_cheap(layer.providerType(), layer.subsetString()) else None
+            cheap = feature_count_is_cheap(layer.providerType(), layer.subsetString(), layer.source())
+            count = layer.featureCount() if cheap else None
         except Exception:
             count = None
         return vector_card_text(geometry, count, self.tr)

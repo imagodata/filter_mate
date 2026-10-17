@@ -608,6 +608,27 @@ def test_other_formats_keep_the_plain_list():
     assert clause.startswith('"fid" IN (0, 1, 2')
 
 
+def _text_key_layer(storage="ESRI Shapefile"):
+    """Layer whose key field is a text field (QgsField.isNumeric() False)."""
+    layer = _gpkg_layer(storage)
+    layer.fields.return_value.__getitem__.return_value.isNumeric.return_value = False
+    return layer
+
+
+def test_text_key_values_are_escaped_literals():
+    """2026-10-17: f"'{v}'" let the quote of L'Isle-Jourdain end the literal."""
+    builder = ogr_builder.OGRExpressionBuilder(task_params={})
+    clause = builder._build_fid_filter_with_values(_text_key_layer(), ["L'Isle-Jourdain", "Auch"], "nom")
+    assert clause == "\"nom\" IN ('L''Isle-Jourdain', 'Auch')"
+
+
+def test_text_key_made_of_digits_stays_quoted():
+    """'01001' (INSEE code, text field) was read as the number 1001: the first values decided first."""
+    builder = ogr_builder.OGRExpressionBuilder(task_params={})
+    clause = builder._build_fid_filter_with_values(_text_key_layer(), ["01001", "31555"], "insee")
+    assert clause == "\"insee\" IN ('01001', '31555')"
+
+
 def _many_roads(count):
     return _Layer("troncon_de_route", [_Feature(fid, _Geom("near")) for fid in range(count)])
 
@@ -667,3 +688,219 @@ def test_key_list_bound_only_for_ogr_files(provider, storage, bounded):
 def test_json_key_clause_keeps_the_values(values, numeric, expected):
     clause = ogr_builder.OGRExpressionBuilder(task_params={})._json_key_clause('"k"', values, numeric)
     assert clause == f"\"k\" IN (SELECT value FROM json_each('{expected}'))"
+
+
+# ---------------------------------------------------------------------------
+# Stable key and web-service guards (2026-10-17)
+# ---------------------------------------------------------------------------
+
+WFS_URI = "typename='ADMINEXPRESS-COG.LATEST:commune' url='https://data.geopf.fr/wfs/ows' version='auto'"
+
+
+class _KeyField:
+    def __init__(self, name):
+        self._name = name
+
+    def name(self):
+        return self._name
+
+
+class _KeyFields:
+    def __init__(self, names):
+        self._names = list(names)
+
+    def __iter__(self):
+        return iter(_KeyField(name) for name in self._names)
+
+    def indexOf(self, name):
+        return self._names.index(name) if name in self._names else -1
+
+    def at(self, index):
+        return _KeyField(self._names[index])
+
+
+class _ServiceLayer(_Layer):
+    """A web layer (WFS by default) with real field names."""
+
+    def __init__(self, *args, provider="WFS", source=WFS_URI, field_names=("nom", "population"), **kwargs):
+        super().__init__(*args, **kwargs)
+        self._provider, self._source, self._field_names = provider, source, list(field_names)
+
+    def providerType(self):
+        return self._provider
+
+    def source(self):
+        return self._source
+
+    def fields(self):
+        return _KeyFields(self._field_names)
+
+    def dataProvider(self):
+        return types.SimpleNamespace(storageType=lambda: "", pkAttributeIndexes=lambda: [])
+
+
+@pytest.mark.parametrize("provider, source, field_names, expected", [
+    ("ogr", "/data/communes.shp", ["nom", "population"], "$id"),        # was "population"
+    ("ogr", "/data/communes.shp", ["nom", "population", "ID"], "$id"),  # "ID" not proven unique here
+    ("WFS", WFS_URI, ["cleabs", "nom_officiel", "code_insee", "population"], "cleabs"),
+    ("WFS", WFS_URI, ["fid", "population"], "$id"),                     # a WFS "fid" is never trusted
+])
+def test_primary_key_never_falls_back_to_the_first_integer_field(provider, source, field_names, expected):
+    """Names only (the uniqueness probe is not loaded here; see test_stable_key.py)."""
+    layer = _ServiceLayer("communes", provider=provider, source=source, field_names=field_names)
+    builder = ogr_builder.OGRExpressionBuilder(task_params={})
+    assert builder._get_primary_key(layer) == expected
+
+
+def test_primary_key_is_the_stable_key_of_the_probe(monkeypatch):
+    monkeypatch.setattr(ogr_builder, "stable_key", lambda layer: ogr_builder.KeyChoice("ID", "named"))
+    layer = _ServiceLayer("communes", provider="ogr", source="/data/communes.shp", field_names=["ID", "nom"])
+    assert ogr_builder.OGRExpressionBuilder(task_params={})._get_primary_key(layer) == "ID"
+
+
+def test_virtual_layer_without_key_is_refused(qgis):
+    """QGIS 3.44 / 4.2: on a virtual layer without uid, fid IN / $id IN keep 0 feature without an error."""
+    qgis.relations["near"] = {"intersects"}
+    queue = MagicMock()
+    builder = ogr_builder.OGRExpressionBuilder(task_params={"_subset_queue_callback": queue})
+    builder.source_geom = _rivers(3)
+    view = _ServiceLayer("vue", [_Feature(1, _Geom("near"))], provider="virtual", source="?query=SELECT * FROM t")
+    assert builder.apply_filter(view, '{"predicates": ["ST_Intersects"]}') is False
+    assert "virtual layer" in builder.last_error and builder.user_warnings == [builder.last_error]
+    queue.assert_not_called()
+
+
+def _with_text_key(layer):
+    field = MagicMock()
+    field.isNumeric.return_value = False
+    fields = MagicMock()
+    fields.indexOf.side_effect = lambda name: 0 if name == "name" else -1
+    fields.__getitem__ = MagicMock(return_value=field)
+    layer.fields = lambda: fields
+    return layer
+
+
+def test_memory_text_keys_are_qgis_expression_literals():
+    r"""A backslash is an escape in a QGIS expression: 'b\c' matched nothing on a memory layer."""
+    builder = ogr_builder.OGRExpressionBuilder(task_params={})
+    memory = _ServiceLayer("m", provider="memory", source="Point?crs=EPSG:4326", field_names=["name"])
+    clause = builder._build_fid_filter_with_values(_with_text_key(memory), ["b\\c", "L'Isle"], "name")
+    assert clause == '"name" IN (' + "'b" + "\\" * 2 + "c', 'L''Isle')"
+    shapefile = _ServiceLayer("s", provider="ogr", source="/data/x.shp", field_names=["name"])
+    clause = builder._build_fid_filter_with_values(_with_text_key(shapefile), ["b\\c"], "name")
+    assert clause == '"name" IN (' + "'b" + "\\" + "c')"
+
+
+def test_null_qvariant_keys_are_dropped():
+    class _Null:
+        def isNull(self):
+            return True
+
+    builder = ogr_builder.OGRExpressionBuilder(task_params={})
+    clause = builder._json_key_clause('"k"', [1, _Null(), 2], numeric=True)
+    assert clause == '"k" IN (SELECT value FROM json_each(\'[1,2]\'))'
+
+
+def test_web_service_without_key_is_refused_before_any_request(qgis):
+    qgis.relations["near"] = {"intersects"}
+    queue = MagicMock()
+    builder = ogr_builder.OGRExpressionBuilder(task_params={"_subset_queue_callback": queue})
+    builder.source_geom = _rivers(3)
+    communes = _ServiceLayer("communes", [_Feature(1, _Geom("near"))])
+    assert builder.apply_filter(communes, '{"predicates": ["ST_Intersects"]}') is False
+    assert "no unique key field" in builder.last_error and "is left unfiltered" in builder.last_error
+    assert builder.user_warnings == [builder.last_error]
+    assert not communes.requests, "refused before reading the service"
+    queue.assert_not_called()
+
+
+@pytest.mark.parametrize("count, applied", [(500, True), (501, False)])
+def test_web_service_key_list_is_bounded(qgis, count, applied):
+    qgis.relations.update({f"commune{i}": {"intersects"} for i in range(count)})
+    queue = MagicMock()
+    builder = ogr_builder.OGRExpressionBuilder(task_params={"_subset_queue_callback": queue})
+    builder.source_geom = _rivers(3)
+    builder._fetch_pk_values = lambda layer, ids, pk: [f"COMMUNE_{i:06d}" for i in sorted(ids)]
+    communes = _ServiceLayer("communes", [_Feature(i, _Geom(f"commune{i}")) for i in range(count)],
+                             field_names=["cleabs", "population"])
+    assert builder.apply_filter(communes, '{"predicates": ["ST_Intersects"]}') is applied, builder.last_error
+    if applied:
+        subset = queue.call_args.args[1]
+        assert subset.startswith("\"cleabs\" IN ('COMMUNE_000000', ")
+    else:
+        assert "more than the 500 sent to a web service" in builder.last_error
+        queue.assert_not_called()
+
+
+def test_oracle_key_lists_are_split_by_1000():
+    builder = ogr_builder.OGRExpressionBuilder(task_params={})
+    layer = _ServiceLayer("communes", provider="oracle", source="dbname='x' table=\"A\".\"COMMUNES\"",
+                          field_names=["ID"])
+    clause = builder._in_list(layer, '"ID"', [str(i) for i in range(2500)])
+    assert clause.count(" IN (") == 3 and clause.startswith('("ID" IN (0, 1') and " OR " in clause
+    assert builder._in_list(_ServiceLayer("x", provider="mssql", source="", field_names=["ID"]), '"ID"',
+                            ["1", "2"]) == '"ID" IN (1, 2)'
+
+
+def test_memory_layer_without_key_is_filtered_by_feature_id():
+    builder = ogr_builder.OGRExpressionBuilder(task_params={})
+    layer = _ServiceLayer("points", provider="memory", source="Point?crs=EPSG:2154", field_names=["nom"])
+    assert builder._build_fid_filter(layer, [3, 7]) == "$id IN (3, 7)"
+
+
+class _NoDecodeRegistry:
+    """QGIS 3.44 decodes nothing for a WFS URI."""
+
+    def decodeUri(self, provider, source):
+        return {}
+
+    def encodeUri(self, provider, parts):  # pragma: no cover - must not be used
+        raise AssertionError("encodeUri without parts")
+
+
+def test_unfiltered_web_layer_when_decode_uri_gives_nothing(qgis, monkeypatch):
+    made = []
+
+    class _ClonedWfs:
+        def __init__(self, source, name, provider):
+            made.append((source, provider))
+            self._subset = "\"nom_officiel\" = 'Auch'"
+
+        def isValid(self):
+            return True
+
+        def subsetString(self):
+            return self._subset
+
+        def setSubsetString(self, subset):
+            self._subset = subset
+            return True
+
+    monkeypatch.setattr(sys.modules["qgis.core"], "QgsProviderRegistry",
+                        types.SimpleNamespace(instance=lambda: _NoDecodeRegistry()))
+    monkeypatch.setattr(sys.modules["qgis.core"], "QgsVectorLayer", _ClonedWfs)
+    builder = ogr_builder.OGRExpressionBuilder(task_params={})
+    layer = _ServiceLayer("communes", subset="\"nom_officiel\" = 'Auch'",
+                          source="filter='\"nom_officiel\" = ''Auch''' " + WFS_URI)
+    clone = builder._unfiltered_target(layer)
+    assert isinstance(clone, _ClonedWfs) and clone.subsetString() == ""
+    assert made == [(layer.source(), "WFS")]
+
+
+def test_unfiltered_target_drops_the_wfs_filter_key(qgis, monkeypatch):
+    seen = {}
+
+    class _Registry2:
+        def decodeUri(self, provider, source):
+            return {"path": "communes", "filter": "\"a\" = 1", "typename": "x"}
+
+        def encodeUri(self, provider, parts):
+            seen.update(parts)
+            return "clone:communes"
+
+    monkeypatch.setattr(sys.modules["qgis.core"], "QgsProviderRegistry",
+                        types.SimpleNamespace(instance=lambda: _Registry2()))
+    builder = ogr_builder.OGRExpressionBuilder(task_params={})
+    layer = _ServiceLayer("communes", subset="\"a\" = 1", layer_id="communes")
+    builder._unfiltered_target(layer)
+    assert "filter" not in seen and seen["typename"] == "x"

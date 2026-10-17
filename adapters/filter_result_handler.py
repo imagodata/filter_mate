@@ -58,6 +58,24 @@ def _panel_layer_id(dockwidget) -> Optional[str]:
         return None
 
 
+def _feature_count_or_none(layer) -> Optional[int]:
+    """``layer.featureCount()``, None for a web service / network database (2026-10-17).
+
+    QGIS counts a WFS / OGC API Features / ArcGIS layer with a request to the
+    server: this runs on the main thread after every filter.
+    """
+    try:
+        from .qgis.source_capability_probe import feature_count_or_none
+    except ImportError:
+        return layer.featureCount() if layer is not None else None
+    return feature_count_or_none(layer)
+
+
+def _count_text(feature_count: Optional[int]) -> str:
+    """``12,438``, ``?`` when the count is not known."""
+    return "?" if feature_count is None or feature_count < 0 else "{:,}".format(feature_count)
+
+
 class FilterResultHandler:
     """
     Handles filter operation completion and result application.
@@ -157,7 +175,7 @@ class FilterResultHandler:
 
         # Get task metadata
         perf_mark_start("post_filter_count")
-        feature_count = source_layer.featureCount()
+        feature_count = _feature_count_or_none(source_layer)
         perf_mark_end("post_filter_count", source_layer.name())
         provider_type = task_parameters["infos"].get("layer_provider_type", "unknown")
         layer_count = len(task_parameters.get("task", {}).get("layers", [])) + 1
@@ -170,7 +188,9 @@ class FilterResultHandler:
         perf_mark_start("post_filter_history")
         if task_name == 'filter':
             if self._push_filter_to_history:
-                self._push_filter_to_history(source_layer, task_parameters, feature_count, provider_type, layer_count)
+                self._push_filter_to_history(source_layer, task_parameters,
+                                             feature_count if feature_count is not None else -1,
+                                             provider_type, layer_count)
         elif task_name == 'reset':
             if self._clear_filter_history:
                 self._clear_filter_history(source_layer, task_parameters)
@@ -335,12 +355,12 @@ class FilterResultHandler:
                 second provider round-trip); computed here when omitted
         """
         if feature_count is None:
-            feature_count = source_layer.featureCount()
+            feature_count = _feature_count_or_none(source_layer)
         show_success_with_backend(provider_type, task_name, layer_count, is_fallback=is_fallback)
 
         # Only show feature count if configured to do so
         if should_show_message('filter_count'):
-            count_str = "{:,}".format(feature_count)
+            count_str = _count_text(feature_count)
             if task_name == 'filter':
                 show_info(
                     QCoreApplication.translate(
