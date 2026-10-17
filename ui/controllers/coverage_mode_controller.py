@@ -819,7 +819,6 @@ class CoverageModeController(BaseController):
         raster, pc = self._raster_panel, self._pc_panel
         raster.bandChanged.connect(self._on_raster_band_changed)
         raster.selectionChanged.connect(self._on_raster_selection_changed)
-        raster.previewToggled.connect(self._on_raster_preview_toggled)
         pc.criteriaChanged.connect(self._on_point_cloud_criteria_changed)
 
     def _populate_raster(self, layer: Any) -> None:
@@ -942,7 +941,7 @@ class CoverageModeController(BaseController):
             logger.debug(f"[FM5] raster expression not validated: {exc}")
 
     def _on_raster_preview_toggled(self, enabled: bool) -> None:
-        # The dock button and the panel box show the same state (either one can toggle it).
+        # The rail preview button is the only switch: the panel only keeps its state.
         self._set_selecting_checked(enabled)
         self._call(self._raster_panel, 'set_preview_checked', enabled)
         self._preview_active = bool(enabled)

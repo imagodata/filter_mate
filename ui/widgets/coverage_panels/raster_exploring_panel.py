@@ -22,7 +22,7 @@ try:
     from qgis.PyQt.QtCore import Qt, QTimer, pyqtSignal
     from qgis.PyQt.QtGui import QColor, QFontDatabase, QIcon, QPixmap
     from qgis.PyQt.QtWidgets import (
-        QCheckBox, QComboBox, QDoubleSpinBox, QGroupBox, QHBoxLayout, QLabel, QLineEdit,
+        QComboBox, QDoubleSpinBox, QGroupBox, QHBoxLayout, QLabel, QLineEdit,
         QListWidget, QListWidgetItem, QPushButton, QSizePolicy, QVBoxLayout, QWidget,
     )
     QT_AVAILABLE = True
@@ -424,12 +424,13 @@ class RasterExploringPanel(QWidget):
             sends its histogram with :meth:`set_histogram`).
         selectionChanged(): The selection changed; debounced by 250 ms for
             the spin boxes, the histogram, the class list and the expression.
-        previewToggled(bool): The "Preview on the map" box was toggled.
+
+    The map preview has no switch here: the preview button of the EXPLORING rail
+    drives it (:meth:`set_preview_checked`).
     """
 
     bandChanged = pyqtSignal(int)
     selectionChanged = pyqtSignal()
-    previewToggled = pyqtSignal(bool)
     summaryChanged = pyqtSignal()  # kept ratio updated: the selection strip under EXPLORING follows
 
     def __init__(self, parent=None):
@@ -443,6 +444,7 @@ class RasterExploringPanel(QWidget):
         self._layer_id: Optional[str] = None
         self._reference = DEFAULT_REFERENCE
         self._mode = RasterSelectionMode.RANGE
+        self._preview_on = False  # the rail preview button is down
         self._derivative = RasterDerivative.VALUE
         self._layout = "rgb"
         self._pipette_selection: Optional[RasterSelection] = None  # what the PIPETTE group selects
@@ -678,9 +680,6 @@ class RasterExploringPanel(QWidget):
 
         self._kept_ratio_label = QLabel("", self._range_group)
         group_layout.addWidget(self._kept_ratio_label)
-        self._preview_check = QCheckBox(self.tr("Preview on the map (hide the other pixels)"), self._range_group)
-        self._preview_check.toggled.connect(self.previewToggled.emit)
-        group_layout.addWidget(self._preview_check)
         self.set_kept_ratio(None)
         return self._range_group
 
@@ -784,12 +783,11 @@ class RasterExploringPanel(QWidget):
 
     def preview_enabled(self) -> bool:
         """Whether the map preview is asked for a mode it supports (range or classes)."""
-        return self._preview_check.isChecked() and self._mode is not RasterSelectionMode.EXPRESSION
+        return self._preview_on and self._mode is not RasterSelectionMode.EXPRESSION
 
     def set_preview_checked(self, checked: bool) -> None:
-        """Check or uncheck the "Preview on the map" box (the dock button changed it). Does not emit."""
-        with _signals_blocked(self._preview_check):
-            self._preview_check.setChecked(bool(checked))
+        """Follow the preview button of the EXPLORING rail (the only switch of the map preview). Does not emit."""
+        self._preview_on = bool(checked)
 
     def current_derivative(self) -> RasterDerivative:
         """Quantity the selection applies to: the one of the combo in range mode, the pixel value otherwise.
@@ -898,9 +896,9 @@ class RasterExploringPanel(QWidget):
         self._apply_band()
         self._set_range(None, None)
         self._set_all_classes(Qt.CheckState.Unchecked, emit=False)
-        with _signals_blocked(self._expression_edit, self._preview_check):
+        with _signals_blocked(self._expression_edit):
             self._expression_edit.clear()
-            self._preview_check.setChecked(False)
+        self._preview_on = False
         self.set_expression_status(True, "")
         self.set_kept_ratio(None)
         self._last_pixel = None
@@ -918,7 +916,7 @@ class RasterExploringPanel(QWidget):
             "maximum": self._high,
             "classes": self._checked_classes(),
             "expression": self._expression_edit.text(),
-            "preview": self._preview_check.isChecked(),
+            "preview": self._preview_on,
             "derivative": self._derivative.value,
             "layout": self._layout,
             "pipette_selection": self._pipette_selection.to_dict() if self._pipette_selection is not None else None,
@@ -952,9 +950,9 @@ class RasterExploringPanel(QWidget):
             for item in self._class_items():
                 checked = int(item.data(Qt.ItemDataRole.UserRole)) in wanted
                 item.setCheckState(Qt.CheckState.Checked if checked else Qt.CheckState.Unchecked)
-        with _signals_blocked(self._expression_edit, self._preview_check):
+        with _signals_blocked(self._expression_edit):
             self._expression_edit.setText(parsed["expression"])
-            self._preview_check.setChecked(parsed["preview"])
+        self._preview_on = parsed["preview"]
         mode = parsed["mode"]
         if mode is RasterSelectionMode.CLASSES and not self._has_classes():
             mode = RasterSelectionMode.RANGE
