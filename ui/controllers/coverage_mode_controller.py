@@ -125,6 +125,8 @@ class CoverageModeController(BaseController):
         self._preview_surface = None
         self._histogram_cache: Dict[Tuple[str, int, str], Tuple[list, float, float]] = {}
         self._stats_watched: set = set()  # point cloud layer ids whose statistics signal is connected
+        # layer id -> (layer, slot) of those connections: disconnected at teardown (2026-10-17)
+        self._stats_slots: Dict[str, Tuple[Any, Any]] = {}
         self._button_slots: List[Tuple[Any, Any]] = []
         # Vector sources: one entry per vector filter run, with the cross operation it recorded (if any).
         self._linked_runs: Dict[str, List[_LinkedRun]] = {}
@@ -214,6 +216,7 @@ class CoverageModeController(BaseController):
         self._panel_states.clear()
         self._histogram_cache.clear()
         self._stats_watched.clear()  # the same ids come back with new layers when the project is opened again
+        self._stats_slots.clear()  # their layers are gone
         self._schedule_cache_tidy()
 
     def _on_layers_removed(self, layer_ids) -> None:
@@ -226,6 +229,7 @@ class CoverageModeController(BaseController):
             self._linked_redo.pop(layer_id, None)
             self._panel_states.pop(layer_id, None)
             self._stats_watched.discard(layer_id)
+            self._stats_slots.pop(layer_id, None)
         self._schedule_cache_tidy()  # runs once the layers are gone
 
     def _unlink_dropped_run(self, source_id: str, op_id: Optional[int]) -> None:
@@ -339,6 +343,7 @@ class CoverageModeController(BaseController):
                 except Exception as exc:
                     logger.debug(f"[FM5] panel widget not released: {exc}")
         self._drop_map_tools()  # one QGIS could give back later would call a dead controller
+        self._disconnect_point_cloud_statistics()
         self._raster_panel = None
         self._pc_panel = None
         self._running_task = None
@@ -1078,8 +1083,20 @@ class CoverageModeController(BaseController):
         if signal is None or layer.id() in self._stats_watched:
             return
         layer_id = layer.id()
-        signal.connect(lambda *_args, lid=layer_id: self._on_point_cloud_statistics(lid))
+        slot = lambda *_args, lid=layer_id: self._on_point_cloud_statistics(lid)  # noqa: E731
+        signal.connect(slot)
         self._stats_watched.add(layer_id)
+        self._stats_slots[layer_id] = (layer, slot)
+
+    def _disconnect_point_cloud_statistics(self) -> None:
+        """Teardown: the point cloud layers outlive the controller; their statistics signal must not call it."""
+        for layer, slot in list(self._stats_slots.values()):
+            try:
+                layer.statisticsCalculationStateChanged.disconnect(slot)
+            except (TypeError, RuntimeError, AttributeError):  # not connected / layer deleted
+                pass
+        self._stats_slots.clear()
+        self._stats_watched.clear()
 
     def _on_point_cloud_statistics(self, layer_id: str) -> None:
         from ...core.domain.layer_kind import LayerKind

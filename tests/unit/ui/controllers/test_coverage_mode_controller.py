@@ -8,6 +8,7 @@ BaseController, the capability module, the cross filter service and the
 feedback helpers are stubs; the pure domain modules are the real ones.
 """
 import importlib.util
+import inspect
 import pathlib
 import sys
 import types
@@ -562,6 +563,11 @@ class FakeSignal:
     def connect(self, slot):
         self.slots.append(slot)
 
+    def disconnect(self, slot):
+        if slot not in self.slots:
+            raise TypeError("not connected")
+        self.slots.remove(slot)
+
     def emit(self, *args):
         for slot in list(self.slots):
             slot(*args)
@@ -615,6 +621,17 @@ class TestPointCloudStatisticsRefresh:
         ctrl._watch_point_cloud_statistics(layer)
         ctrl._watch_point_cloud_statistics(layer)
         assert len(layer.statisticsCalculationStateChanged.slots) == 1
+
+    def test_teardown_disconnects_the_statistics_signal(self, ctrl_module, monkeypatch):
+        """2026-10-17: the lambda stayed connected: the layer called the controller of an unloaded dock."""
+        layer = StatsLayer("p1")
+        ctrl, _ = self._controller(ctrl_module, layer, monkeypatch)
+        ctrl._watch_point_cloud_statistics(layer)
+        ctrl._disconnect_point_cloud_statistics()
+        assert layer.statisticsCalculationStateChanged.slots == []
+        ctrl._watch_point_cloud_statistics(layer)  # watched again once set up again
+        assert len(layer.statisticsCalculationStateChanged.slots) == 1
+        assert "_disconnect_point_cloud_statistics" in inspect.getsource(type(ctrl).teardown)
 
 
 # ---------------------------------------------------------------------------
