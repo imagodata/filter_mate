@@ -142,13 +142,34 @@ class SpatialiteFilterExecutor(FilterExecutorPort):
             logger.error(f"[Spatialite] Failed to apply Spatialite subset: {e}")
             return False
 
-    def cleanup_resources(self) -> None:
-        """Clean up temporary tables."""
+    def cleanup_resources(self, session_id: Optional[str] = None, db_paths: Optional[List[str]] = None,
+                          exclude_referenced_by: Optional[List[str]] = None) -> int:
+        """Clean up the temporary tables of a session.
+
+        The registry calls this at the end of every task, without arguments: nothing is
+        dropped then, because the filter the task has just made reads its temp table until
+        the main thread applies the queued subset. Tables go only when the caller names the
+        session and the databases, and never those a layer is still filtered through.
+
+        Args:
+            session_id: Session whose tables are dropped.
+            db_paths: Databases to clean.
+            exclude_referenced_by: Subset strings of layers in use.
+
+        Returns:
+            int: Number of tables dropped.
+        """
+        if not session_id or not db_paths:
+            return 0
+        dropped = 0
         try:
-            cleanup_session_temp_tables()
-            logger.debug("[Spatialite] Spatialite temp tables cleaned up")
+            for db_path in db_paths:
+                dropped += cleanup_session_temp_tables(
+                    db_path, session_id, exclude_referenced_by=exclude_referenced_by)
+            logger.debug(f"[Spatialite] Spatialite temp tables cleaned up ({dropped})")
         except Exception as e:
             logger.warning(f"[Spatialite] Spatialite cleanup failed: {e}")
+        return dropped
 
     @property
     def backend_name(self) -> str:

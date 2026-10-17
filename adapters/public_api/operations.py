@@ -670,6 +670,8 @@ def export_layers(layers: Sequence, folder: str, vector_format: str = "GPKG", ra
             continue
         resolved.append(layer)
     used: set = set()
+    from ...core.export.target_guard import ProjectSources
+    sources = ProjectSources(project)  # the files the project layers read from, once for the whole export
     total = max(1, len(resolved))
     for index, layer in enumerate(resolved):
         if feedback is not None and feedback.isCanceled():
@@ -681,14 +683,14 @@ def export_layers(layers: Sequence, folder: str, vector_format: str = "GPKG", ra
         try:
             if kind is LayerKind.VECTOR:
                 driver, extension = VECTOR_EXPORT_FORMATS[vector_format]
-                path = _output_file(_unique_path(output_path(folder, name, extension), used))
+                path = _output_file(_unique_path(output_path(folder, name, extension), used), sources)
                 block, release = _child_feedback(feedback, index, total, QgsFeedback)
                 try:
                     ok, path, message = _export_vector(layer, path, driver, crs, project, feedback=block)
                 finally:
                     release()
             elif kind is LayerKind.RASTER:
-                path = _output_file(_unique_path(output_path(folder, name, '.tif'), used))
+                path = _output_file(_unique_path(output_path(folder, name, '.tif'), used), sources)
                 block, release = _child_feedback(feedback, index, total, QgsRasterBlockFeedback)
                 try:
                     result = export_raster(layer, path, raster_format, crs, feedback=block)
@@ -697,7 +699,7 @@ def export_layers(layers: Sequence, folder: str, vector_format: str = "GPKG", ra
                 ok, path, message = result.success, result.path, result.message
             elif kind is LayerKind.POINT_CLOUD:
                 path = _output_file(_unique_path(output_path(folder, name, POINT_CLOUD_FORMATS[point_cloud_format]),
-                                                 used))
+                                                 used), sources)
                 result = export_point_cloud(layer, path, point_cloud_format, crs)
                 ok, path, message = result.success, result.path, result.message
             else:
@@ -720,10 +722,20 @@ def export_layers(layers: Sequence, folder: str, vector_format: str = "GPKG", ra
     return report
 
 
-def _output_file(path: str) -> str:
-    """``path``, unless it is a symbolic link: writing would follow it anywhere (ValueError)."""
+def _output_file(path: str, sources=None) -> str:
+    """``path``, unless writing it would be unsafe (ValueError).
+
+    Refused: a symbolic link (the writer would follow it anywhere) and, when
+    ``sources`` (the project's :class:`ProjectSources`, worked out once per export) is
+    given, the file another layer of the project is read from (the writer overwrites its
+    target: every layer stored in it would be lost).
+    """
     if os.path.islink(path):
         raise ValueError(f"not written: {path} is a symbolic link")
+    if sources is not None:
+        name = sources.layer_using(path)
+        if name is not None:
+            raise ValueError(f"not written: {path} is the data source of the layer '{name}'")
     return path
 
 

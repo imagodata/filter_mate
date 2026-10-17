@@ -111,7 +111,7 @@ rsync -a --quiet \
     --exclude='requirements-*.txt' \
     --exclude='config/backups' \
     --exclude='config/backups/**' \
-    --exclude='logs/*.log' \
+    --exclude='logs/*' \
     --exclude='logs/.gitkeep' \
     --exclude='examples' \
     --exclude='examples/**' \

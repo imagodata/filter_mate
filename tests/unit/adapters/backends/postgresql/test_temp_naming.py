@@ -175,6 +175,8 @@ _SCANNED = ("adapters", "core", "infrastructure", "config", "ui", "extensions")
 _ALLOWED = {
     PLUGIN_ROOT / "infrastructure" / "constants.py",
     PLUGIN_ROOT / "ui" / "controllers" / "backend_controller.py",
+    # name rules of the cleanups: reads the constants, keeps the values as a fallback when loaded alone
+    PLUGIN_ROOT / "infrastructure" / "database" / "temp_objects.py",
 }
 
 

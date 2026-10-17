@@ -443,6 +443,65 @@ def _configured_config_directory(config_json_path):
     return None
 
 
+def _write_config_json(path, data):
+    """Write config.json atomically (temp file + replace), UTF-8.
+
+    A crash or a full disk in the middle of ``open(path, 'w')`` left a
+    truncated file that the next start replaced with the defaults.
+    """
+    try:
+        # Imported here: infrastructure.utils imports this module at load time
+        from filter_mate.infrastructure.utils.atomic_io import atomic_json_write
+    except ImportError as error:
+        QgsMessageLog.logMessage(
+            f"FilterMate: atomic helper unavailable ({error}); config.json written with a local temp file",
+            "FilterMate",
+            Qgis.MessageLevel.Warning
+        )
+        import tempfile
+        text = json.dumps(data, indent=4, ensure_ascii=False)
+        fd, tmp_path = tempfile.mkstemp(prefix=".fm_", suffix=".tmp", dir=os.path.dirname(os.path.abspath(path)))
+        try:
+            with os.fdopen(fd, 'w', encoding='utf-8') as outfile:
+                outfile.write(text)
+            os.replace(tmp_path, path)
+        except BaseException:
+            try:
+                os.unlink(tmp_path)
+            except OSError:
+                pass
+            raise
+        return
+    atomic_json_write(path, data, indent=4)
+
+
+def _keep_unreadable_config(path, reason):
+    """Copy a config.json that cannot be used before the defaults replace it.
+
+    Args:
+        path: The config.json that failed to load.
+        reason: Why (shown in the QGIS message log).
+    """
+    try:
+        from filter_mate.infrastructure.utils.atomic_io import backup_corrupt_file
+    except ImportError as error:
+        QgsMessageLog.logMessage(
+            f"FilterMate: {path} cannot be used ({reason}) and could not be kept ({error}); "
+            "default settings are used.",
+            "FilterMate",
+            Qgis.MessageLevel.Warning
+        )
+        return
+    backup = backup_corrupt_file(path)
+    if backup:
+        QgsMessageLog.logMessage(
+            f"FilterMate: {path} cannot be used ({reason}). Your file was kept as {backup}; "
+            "default settings are used.",
+            "FilterMate",
+            Qgis.MessageLevel.Warning
+        )
+
+
 def init_env_vars():
     """
     Initialize environment variables and configuration paths.
@@ -539,8 +598,7 @@ def init_env_vars():
             with open(config_default_path, 'r', encoding='utf-8') as f:
                 default_data = json.load(f)
             if _migrate_config(CONFIG_DATA, default_data):
-                with open(config_json_path, 'w', encoding='utf-8') as f:
-                    json.dump(CONFIG_DATA, f, indent=4, ensure_ascii=False)
+                _write_config_json(config_json_path, CONFIG_DATA)
                 QgsMessageLog.logMessage(
                     "FilterMate: Configuration migrated to latest structure",
                     "FilterMate",
@@ -559,6 +617,8 @@ def init_env_vars():
             "FilterMate",
             Qgis.MessageLevel.Warning
         )
+        # The defaults below are written over this file by the next save: keep a copy
+        _keep_unreadable_config(config_json_path, str(e))
         # Try to load default config as second option
         try:
             with open(config_default_path, 'r', encoding='utf-8') as f:
@@ -588,13 +648,13 @@ def init_env_vars():
             Qgis.MessageLevel.Warning
         )
         # Use hardcoded fallback instead of raising
+        _keep_unreadable_config(config_json_path, "no APP section")
         CONFIG_DATA = get_fallback_config()
         using_fallback = True
 
         # Try to write fallback to disk for next time
         try:
-            with open(config_json_path, 'w', encoding='utf-8') as outfile:
-                outfile.write(json.dumps(CONFIG_DATA, indent=4))
+            _write_config_json(config_json_path, CONFIG_DATA)
             QgsMessageLog.logMessage(
                 f"FilterMate: Fallback configuration saved: {config_json_path}",
                 "FilterMate",
@@ -669,6 +729,20 @@ def init_env_vars():
     # Auto-migrate sducournau → imagodata URLs (v4.5.1 org migration)
     options = CONFIG_DATA.get(app_key, {}).get("OPTIONS", {})
     config_dirty = False
+
+    # Passwords an older version saved here (the URI of a PostgreSQL layer): mask them once
+    try:
+        from filter_mate.infrastructure.logging.redaction import scrub_secrets_in_place
+        scrubbed = scrub_secrets_in_place(CONFIG_DATA)
+    except ImportError:
+        scrubbed = 0
+    if scrubbed:
+        config_dirty = True
+        QgsMessageLog.logMessage(
+            f"FilterMate: masked {scrubbed} saved connection password(s) in {config_json_path}",
+            "FilterMate",
+            Qgis.MessageLevel.Info
+        )
     for key in ("GITHUB_PAGE", "GITHUB_REPOSITORY", "DISCORD_INVITE", "QGIS_PLUGIN_REPOSITORY"):
         val = _get_option_value(options.get(key), "")
         if "sducournau" in val:
@@ -689,8 +763,7 @@ def init_env_vars():
 
     if config_dirty:
         try:
-            with open(config_json_path, 'w', encoding='utf-8') as outfile:
-                outfile.write(json.dumps(CONFIG_DATA, indent=4))
+            _write_config_json(config_json_path, CONFIG_DATA)
         except Exception as e:
             QgsMessageLog.logMessage(
                 f"Could not update config.json: {e}",

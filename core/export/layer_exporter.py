@@ -26,6 +26,11 @@ from dataclasses import dataclass
 from typing import Optional, List, Any
 
 try:
+    from qgis.PyQt.QtCore import QCoreApplication
+except ImportError:
+    QCoreApplication = None
+
+try:
     from qgis.core import (
         QgsVectorLayer,
         QgsVectorFileWriter,
@@ -46,6 +51,24 @@ except ImportError:
     QgsProject = Any
 
 logger = logging.getLogger('FilterMate.Export')
+
+
+def _tr(message: str) -> str:
+    """Translate a user-facing message (plain text without a running QGIS)."""
+    if QCoreApplication is not None:
+        translated = QCoreApplication.translate("LayerExporter", message)
+        if isinstance(translated, str):
+            return translated
+    return message
+
+
+# File behind a layer source and "which project layer reads this file": see target_guard.py
+from .target_guard import (  # noqa: E402,F401
+    ProjectSources,
+    layer_source_file_path,
+    layer_source_file_paths,
+    same_file,
+)
 
 # =============================================================================
 # Format registry — single source of truth for OGR driver ↔ extension lookup.
@@ -405,6 +428,11 @@ class LayerExporter:
             project: QgsProject instance or None to use current project
         """
         self.project = project or (QgsProject.instance() if QGIS_AVAILABLE else None)
+        self._project_sources: Optional[ProjectSources] = None
+
+    def refresh_project_sources(self) -> None:
+        """Forget the files the project layers read from (worked out again at the next check)."""
+        self._project_sources = None
 
     def export(self, config: ExportConfig) -> ExportResult:
         """
@@ -421,6 +449,8 @@ class LayerExporter:
                 success=False,
                 error_message="QGIS not available"
             )
+
+        self.refresh_project_sources()  # a new export looks at the project as it is now
 
         if not self.project:
             return ExportResult(
@@ -449,6 +479,48 @@ class LayerExporter:
 
         # Multiple layers to directory
         return self.export_multiple_to_directory(config)
+
+    def find_layer_using_file(self, output_path: str) -> Optional[str]:
+        """Name of the project layer that reads from ``output_path``, if any.
+
+        Args:
+            output_path: Intended export target.
+
+        Returns:
+            str: The layer name, or None when no layer of the project is stored there.
+        """
+        if not output_path or not self.project:
+            return None
+        if self._project_sources is None:
+            # Once per export, not once per layer: a batch asks for every target
+            self._project_sources = ProjectSources(self.project)
+        return self._project_sources.layer_using(output_path)
+
+    def _refuse_project_source(self, output_path: str) -> Optional[ExportResult]:
+        """A failed ExportResult when ``output_path`` is the file of a project layer.
+
+        Writers overwrite their target (``CreateOrOverwriteFile``,
+        ``qgis:package`` OVERWRITE, ``os.remove``) and the failure cleanup
+        deletes it: exporting onto the GeoPackage a layer is read from would
+        destroy every layer stored in it.
+
+        Args:
+            output_path: Intended export target.
+
+        Returns:
+            ExportResult: The refusal, or None when the target is free to write.
+        """
+        layer_name = self.find_layer_using_file(output_path)
+        if layer_name is None:
+            return None
+        logger.error(f"Export refused: {output_path} is the source of layer '{layer_name}'")
+        return ExportResult(
+            success=False,
+            error_message=_tr(
+                "Cannot export to '{path}': this file is the data source of the layer '{layer}' "
+                "of the project and would be overwritten. Choose another file."
+            ).format(path=output_path, layer=layer_name),
+        )
 
     def export_single_layer(
         self,
@@ -480,6 +552,10 @@ class LayerExporter:
                 success=False,
                 error_message=f"Layer '{layer_name}' not found in project"
             )
+
+        refusal = self._refuse_project_source(output_path)
+        if refusal is not None:
+            return refusal
 
         # Determine CRS
         current_projection = projection if projection else layer.sourceCrs()
@@ -613,6 +689,10 @@ class LayerExporter:
                 error_message="No valid layers found for GPKG export"
             )
 
+        refusal = self._refuse_project_source(output_path)
+        if refusal is not None:
+            return refusal
+
         # If user picked a target CRS that differs from any layer's source
         # CRS, ``qgis:package`` would silently keep the source CRS. Fall back
         # to a manual writer loop so reprojection actually happens.
@@ -695,6 +775,10 @@ class LayerExporter:
             if QgsProject.instance() is not None
             else QgsCoordinateTransformContext()
         )
+
+        refusal = self._refuse_project_source(output_path)
+        if refusal is not None:
+            return refusal
 
         # Remove any existing output so the first writer call doesn't append
         # to stale data from a previous run.
@@ -862,6 +946,9 @@ class LayerExporter:
                     zip_path = config.output_path
                     if not zip_path.endswith('.zip'):
                         zip_path = zip_path + '.zip'
+                    refusal = self._refuse_project_source(zip_path)
+                    if refusal is not None:
+                        return refusal
 
                     with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
                         for root, dirs, files in os.walk(temp_dir):
