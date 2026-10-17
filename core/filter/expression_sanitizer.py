@@ -21,6 +21,7 @@ import re
 from typing import Optional
 
 from .sql_quotes import IDENTIFIER_PLACEHOLDER, LITERAL_PLACEHOLDER, mask_quoted, unmask_quoted
+from .sql_quotes import strip_outer_parens as _strip_outer_parens
 
 logger = logging.getLogger('FilterMate.Core.Filter.Sanitizer')
 
@@ -565,11 +566,10 @@ def sanitize_subset_string(subset_string: str, text_fields=None) -> str:
     return sanitized
 
 
-_TOPLEVEL_TOKEN_RE = re.compile(r'\(|\)|\b(?:AND|OR|BETWEEN|CASE)\b', re.IGNORECASE)
-_IN_CLAUSE_RE = re.compile(
-    rf'^{IDENTIFIER_PLACEHOLDER}(?:\s*\.\s*{IDENTIFIER_PLACEHOLDER})?\s+IN\s*\(',
-    re.IGNORECASE,
-)
+# Parentheses and words; only AND / OR / BETWEEN / CASE matter (matching every
+# word is twice as fast as a keyword alternation on a 100,000-key list).
+_TOPLEVEL_TOKEN_RE = re.compile(r'[()]|[A-Za-z_]\w*')
+_CHAIN_WORDS = frozenset(('AND', 'OR', 'BETWEEN', 'CASE'))
 
 
 def _split_toplevel_and(masked: str) -> Optional[list]:
@@ -588,6 +588,8 @@ def _split_toplevel_and(masked: str) -> Optional[list]:
             depth += 1
         elif token == ')':
             depth -= 1
+        elif token not in _CHAIN_WORDS:
+            continue
         elif token == 'CASE':
             return None
         elif depth == 0:
@@ -604,38 +606,6 @@ def _split_toplevel_and(masked: str) -> Optional[list]:
     return pieces
 
 
-def _strip_outer_parens(masked: str) -> str:
-    """``( x )`` -> ``x`` while the outer parentheses enclose the whole text."""
-    text = masked.strip()
-    while text.startswith('(') and text.endswith(')'):
-        depth = 0
-        for i, char in enumerate(text):
-            if char == '(':
-                depth += 1
-            elif char == ')':
-                depth -= 1
-                if depth == 0 and i < len(text) - 1:
-                    return text
-        text = text[1:-1].strip()
-    return text
-
-
-def _is_in_clause(masked: str) -> bool:
-    """``"field" IN (...)`` / ``"t"."field" IN (...)`` and nothing after the list."""
-    match = _IN_CLAUSE_RE.match(masked)
-    if not match:
-        return False
-    depth = 0
-    for i in range(match.end() - 1, len(masked)):
-        if masked[i] == '(':
-            depth += 1
-        elif masked[i] == ')':
-            depth -= 1
-            if depth == 0:
-                return masked[i + 1:].strip() == ''
-    return False
-
-
 def _flat_conjuncts(masked: str) -> list:
     """Operands of nested AND chains: ``(A AND B) AND C`` -> A, B, C."""
     term = _strip_outer_parens(masked)
@@ -648,51 +618,74 @@ def _flat_conjuncts(masked: str) -> list:
     return flat
 
 
-def _comparison_key(masked: str, parts: list) -> str:
+_PLACEHOLDER_INDEX_RE = re.compile('([\x02\x04\x06])\\d+')
+
+
+def _shape_key(masked: str) -> str:
+    """A term with spacing and keyword case normalized, its quoted parts reduced to their kind.
+
+    Equal comparison keys imply equal shapes: the (costly) comparison keys are
+    only computed for terms of the same shape.
+    """
+    # str methods, not re.sub with a callback: a key list has 100,000 commas
+    text = ' '.join(masked.split())
+    for spaced, tight in ((' (', '('), ('( ', '('), (' )', ')'), (') ', ')'), (' ,', ','), (', ', ',')):
+        text = text.replace(spaced, tight)
+    return _PLACEHOLDER_INDEX_RE.sub(r'\1', text.upper())
+
+
+def _comparison_key(masked: str, parts) -> str:
     """Text of a term with spacing and keyword case normalized (quoted parts verbatim)."""
-    text = re.sub(r'\s+', ' ', masked).strip()
-    text = re.sub(r'\s*([(),])\s*', r'\1', text).upper()
-    return unmask_quoted(text, parts)
+    text = ' '.join(masked.split())
+    for spaced, tight in ((' (', '('), ('( ', '('), (' )', ')'), (') ', ')'), (' ,', ','), (', ', ',')):
+        text = text.replace(spaced, tight)
+    return unmask_quoted(text.upper(), parts)
 
 
 def optimize_duplicate_in_clauses(expression: str) -> str:
     """
-    Remove duplicate IN clauses from an expression.
+    Remove duplicate conditions from an AND chain.
 
     OPTIMIZATION v2.5.13: Multi-step filtering generates duplicate clauses like:
     (A AND fid IN (1,2,3)) AND (fid IN (1,2,3)) AND (fid IN (1,2,3))
 
-    2026-10-17: only an operand of the top-level AND chain that is the SAME
-    ``"field" IN (...)`` clause as an operand already kept (spacing and keyword
-    case aside, values compared verbatim) is removed: ``X AND X`` is ``X``.
-    It used to keep the first IN clause of each FIELD, so
+    2026-10-17: an operand of the top-level AND chain is removed only when it
+    is the SAME condition as an operand already kept, nested AND chains
+    included (spacing and keyword case aside, values compared verbatim):
+    ``X AND X`` is ``X``, so ``((B AND A) AND A)`` gives ``(B AND A)``. It used
+    to keep the first IN clause of each FIELD, so
     ``("fid" IN (1,2,3)) AND ("fid" IN (2,3))`` lost its second condition, and
-    parentheses or spaces inside values were miscounted / squeezed.
+    parentheses or spaces inside values were miscounted / squeezed. Nothing
+    is removed around a depth-0 OR or a CASE.
 
     Args:
-        expression: SQL expression potentially containing duplicate IN clauses
+        expression: SQL expression potentially containing duplicate conditions
 
     Returns:
-        str: Optimized expression with duplicate IN clauses removed
+        str: Optimized expression with duplicate conditions removed
     """
     if not expression:
         return expression
 
     masked, parts = mask_quoted(expression)
-    pieces = _split_toplevel_and(masked)
+    pieces = _split_toplevel_and(_strip_outer_parens(masked))
     if not pieces or len(pieces) <= 1:
         return expression  # No duplicates possible
 
     kept = []
-    seen = set()
+    seen = {}  # shape key -> masked terms already kept with that shape
     for piece in pieces:
         term = _strip_outer_parens(piece)
-        key = _comparison_key(term, parts)
-        if _is_in_clause(term) and key in seen:
-            logger.debug(f"FilterMate: Removed duplicate clause {unmask_quoted(term, parts)[:60]}")
+        shape = _shape_key(term)
+        candidates = seen.get(shape, ())
+        if candidates and _comparison_key(term, parts) in {_comparison_key(other, parts) for other in candidates}:
+            logger.debug(f"FilterMate: Removed duplicate condition {unmask_quoted(piece, parts)[:60]}")
             continue
         kept.append(piece)
-        seen.update(_comparison_key(flat, parts) for flat in _flat_conjuncts(piece))
+        # a term without AND is its only conjunct (no second scan of a key list)
+        flats = _flat_conjuncts(term) if 'AND' in term.upper() else [term]
+        for flat in flats:
+            seen.setdefault(shape if flat == term else _shape_key(flat), []).append(flat)
 
     if len(kept) == len(pieces):
         return expression
@@ -703,7 +696,7 @@ def optimize_duplicate_in_clauses(expression: str) -> str:
     savings = len(expression) - len(result)
     pct = 100 * savings / len(expression)
     logger.info(
-        f"FilterMate: OPTIMIZATION - Removed {len(pieces) - len(kept)} duplicate IN clauses, "
+        f"FilterMate: OPTIMIZATION - Removed {len(pieces) - len(kept)} duplicate conditions, "
         f"{savings} bytes ({pct:.1f}% reduction)"
     )
 

@@ -37,7 +37,7 @@ class TestSqlQuotes:
 
     def test_doubled_quotes_stay_inside_their_literal(self):
         masked, parts = mask_quoted("\"nom\" = 'l''ET'' ' ET \"x\" = 1")
-        assert parts == ['"nom"', "'l''ET'' '", '"x"']
+        assert list(parts) == ['"nom"', "'l''ET'' '", '"x"']
         assert ' ET ' in masked
 
     def test_transform_only_sees_unquoted_text(self):
@@ -46,7 +46,7 @@ class TestSqlQuotes:
 
     def test_backslash_escaped_quote_stays_inside_its_literal(self):
         masked, parts = mask_quoted("\"nom\" = 'it\\'s et' ET \"x\" = 1")
-        assert parts == ['"nom"', "'it\\'s et'", '"x"']
+        assert list(parts) == ['"nom"', "'it\\'s et'", '"x"']
         assert ' ET ' in masked
 
     @pytest.mark.parametrize("text, hidden", [

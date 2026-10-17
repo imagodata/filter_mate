@@ -22,7 +22,7 @@ import re
 from enum import Enum
 from typing import Optional, List, Dict, Tuple
 
-from .sql_quotes import mask_quoted, unmask_quoted
+from .sql_quotes import mask_quoted, strip_outer_parens, unmask_quoted
 
 logger = logging.getLogger('FilterMate.Core.Filter.Combiner')
 
@@ -52,26 +52,24 @@ def normalize_expression(expr: str) -> str:
     if not expr:
         return ""
     masked, parts = mask_quoted(expr)
-    # Normalize whitespace: replace multiple spaces with single space
-    masked = re.sub(r'\s+', ' ', masked).strip()
-    # Remove outer parentheses if present
-    while masked.startswith('(') and masked.endswith(')'):
-        # Check if these are matching outer parentheses
-        depth = 0
-        is_outer = True
-        for i, char in enumerate(masked):
-            if char == '(':
-                depth += 1
-            elif char == ')':
-                depth -= 1
-                if depth == 0 and i < len(masked) - 1:
-                    is_outer = False
-                    break
-        if is_outer and depth == 0:
-            masked = masked[1:-1].strip()
-        else:
-            break
+    # Normalize whitespace (replace runs with one space), remove outer parentheses
+    masked = strip_outer_parens(re.sub(r'\s+', ' ', masked))
     return unmask_quoted(masked, parts)
+
+
+def _same_expression(first: str, second: str) -> bool:
+    """normalize_expression(first) == normalize_expression(second), without unmasking.
+
+    Two texts normalize alike iff their normalized masked forms and their
+    quoted parts are equal (stripping spaces and outer parentheses never
+    drops a quoted part); unmasking a 100,000-value list costs 30 ms.
+    """
+    if ''.join(first.split()).strip('()') != ''.join(second.split()).strip('()'):
+        return False  # necessary condition, cheap
+    first_masked, first_parts = mask_quoted(first)
+    second_masked, second_parts = mask_quoted(second)
+    return (tuple(first_parts) == tuple(second_parts)
+            and strip_outer_parens(' '.join(first_masked.split())) == strip_outer_parens(' '.join(second_masked.split())))
 
 
 def _strip_where_prefix(expression: str) -> str:
@@ -595,7 +593,7 @@ def combine_with_old_subset(
         )
 
     # If expressions are identical, don't duplicate (exact for AND and OR only)
-    if combine_operator in ('AND', 'OR') and normalize_expression(new_expression) == normalize_expression(old_subset):
+    if combine_operator in ('AND', 'OR') and _same_expression(new_expression, old_subset):
         logger.info("FilterMate: New expression identical to old subset - skipping duplication")
         return new_expression
 

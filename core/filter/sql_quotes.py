@@ -21,8 +21,9 @@ parenthesis or whitespace. Those control characters, when the text itself
 contains them, are hidden too (restored verbatim, never read as placeholders).
 """
 
+import functools
 import re
-from typing import Callable, List, Tuple
+from typing import Callable, List, Sequence, Tuple
 
 # A masked string literal / identifier, as it appears in masked text.
 LITERAL_PLACEHOLDER = '\x02\\d+\x03'
@@ -44,7 +45,7 @@ _QUOTED_RE = re.compile(
 _MASKED_CHARS = ("'", '"', '$', '-', '/', '\x02', '\x03', '\x04', '\x05', '\x06', '\x07')
 
 
-def mask_quoted(text: str) -> Tuple[str, List[str]]:
+def mask_quoted(text: str) -> Tuple[str, Sequence[str]]:
     """Replace string literals, identifiers and comments by placeholders.
 
     Args:
@@ -52,9 +53,16 @@ def mask_quoted(text: str) -> Tuple[str, List[str]]:
 
     Returns:
         Tuple of (masked text, quoted parts); :func:`unmask_quoted` restores.
+        The parts are a tuple: the result is cached (a combination masks the
+        same 100,000-key subset several times).
     """
     if not text or not any(char in text for char in _MASKED_CHARS):
-        return text, []
+        return text, ()
+    return _mask(text)
+
+
+@functools.lru_cache(maxsize=8)
+def _mask(text: str) -> Tuple[str, Tuple[str, ...]]:
     parts: List[str] = []
 
     def _hide(match):
@@ -69,10 +77,10 @@ def mask_quoted(text: str) -> Tuple[str, List[str]]:
         parts.append(quoted)
         return f'{opening}{len(parts) - 1}{closing}'
 
-    return _QUOTED_RE.sub(_hide, text), parts
+    return _QUOTED_RE.sub(_hide, text), tuple(parts)
 
 
-def unmask_quoted(masked: str, parts: List[str]) -> str:
+def unmask_quoted(masked: str, parts: Sequence[str]) -> str:
     """Put back the quoted parts hidden by :func:`mask_quoted`."""
     if not parts:
         return masked
@@ -89,6 +97,33 @@ def map_outside_quotes(text: str, transform: Callable[[str], str]) -> str:
         return text
     masked, parts = mask_quoted(text)
     return unmask_quoted(transform(masked), parts)
+
+
+_PAREN_RE = re.compile(r'[()]')
+
+
+def matching_close(masked: str, open_index: int) -> int:
+    """Index of the ``)`` closing the ``(`` at ``open_index`` of masked text, -1 if none.
+
+    Visits the parentheses only (a key list of 100,000 values has two).
+    """
+    depth = 0
+    for match in _PAREN_RE.finditer(masked, open_index):
+        if match.group() == '(':
+            depth += 1
+        else:
+            depth -= 1
+            if depth == 0:
+                return match.start()
+    return -1
+
+
+def strip_outer_parens(masked: str) -> str:
+    """``( x )`` -> ``x`` while the outer parentheses enclose the whole masked text."""
+    text = masked.strip()
+    while text.startswith('(') and text.endswith(')') and matching_close(text, 0) == len(text) - 1:
+        text = text[1:-1].strip()
+    return text
 
 
 _COMPARISON_RE = re.compile(r'[=<>~@]|&&|\b(?:IN|LIKE|ILIKE|IS|BETWEEN|NOT|AND|OR|SIMILAR)\b', re.IGNORECASE)

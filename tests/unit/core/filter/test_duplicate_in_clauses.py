@@ -62,3 +62,19 @@ def test_value_case_matters():
 def test_spaces_inside_values_are_kept():
     expression = "( \"nom\" IN ('Saint  Jean') ) AND ( \"x\" = 1 ) AND ( \"nom\" IN ('Saint  Jean') )"
     assert optimize_duplicate_in_clauses(expression) == "( \"nom\" IN ('Saint  Jean') ) AND ( \"x\" = 1 )"
+
+
+# --- review follow-up (2026-10-17): any identical condition of the AND chain ----
+
+def test_identical_non_in_condition_is_deduplicated():
+    assert optimize_duplicate_in_clauses('((B AND A) AND A)') == '(B AND A)'
+
+
+def test_identical_comparison_repeated_at_top_level():
+    expression = '( "nature" = \'Route\' ) AND ( "x" > 1 ) AND ( "nature"  =  \'Route\' )'
+    assert optimize_duplicate_in_clauses(expression) == '( "nature" = \'Route\' ) AND ( "x" > 1 )'
+
+
+def test_condition_kept_when_only_nested_under_or():
+    expression = '( "a" = 1 OR "b" = 2 ) AND ( "a" = 1 )'
+    assert optimize_duplicate_in_clauses(expression) == expression
