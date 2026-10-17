@@ -42,6 +42,7 @@ from dataclasses import dataclass
 from enum import Enum
 
 from ....infrastructure.database.sql_utils import sanitize_sql_identifier
+from ....infrastructure.constants import DEFAULT_TEMP_SCHEMA
 
 logger = logging.getLogger('FilterMate.Backend.PostgreSQL.FilterChainOptimizer')
 
@@ -109,7 +110,7 @@ class FilterChainOptimizer:
     """
 
     # Configuration (unified fm_temp_* prefix)
-    MV_SCHEMA = "filtermate_temp"
+    MV_SCHEMA = DEFAULT_TEMP_SCHEMA  # 2026-10-17: was 'filtermate_temp' (see constants)
     MV_PREFIX = "fm_temp_chain_"
 
     # Thresholds for optimization decisions
@@ -277,7 +278,7 @@ class FilterChainOptimizer:
             AND EXISTS (SELECT 1 FROM zone_pop WHERE ST_Intersects(...))
 
         Generates:
-            EXISTS (SELECT 1 FROM filtermate_temp.fm_chain_xxx AS __source
+            EXISTS (SELECT 1 FROM filter_mate_temp.fm_chain_xxx AS __source
                     WHERE ST_Intersects("distant"."geom", __source."geom"))
 
         Args:

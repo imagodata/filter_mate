@@ -337,7 +337,10 @@ class OptimizationManager:
             return False
 
         if hasattr(dockwidget, 'checkBox_filtering_use_centroids_distant_layers'):
-            return dockwidget.checkBox_filtering_use_centroids_distant_layers.isChecked()
+            # Partial (only some targets use their centroids) is not "already enabled".
+            from qgis.PyQt.QtCore import Qt
+            checkbox = dockwidget.checkBox_filtering_use_centroids_distant_layers
+            return checkbox.checkState() == Qt.CheckState.Checked
         elif hasattr(dockwidget, 'checkBox_filtering_use_centroids_source_layer'):
             return dockwidget.checkBox_filtering_use_centroids_source_layer.isChecked()
 
@@ -498,8 +501,13 @@ class OptimizationManager:
 
     def _apply_centroid_optimization(self, dockwidget):
         """Apply centroid optimization to UI widgets."""
+        # FilterMate 5: centroids are chosen target by target, the global button sets every
+        # line / polygon target checked in FILTERING.
+        if hasattr(dockwidget, 'set_all_centroid_targets'):
+            dockwidget.set_all_centroid_targets(True)
+            logger.info("AUTO-OPTIMIZATION: centroids for every line / polygon target")
         # Update distant layers centroid checkbox
-        if hasattr(dockwidget, 'checkBox_filtering_use_centroids_distant_layers'):
+        elif hasattr(dockwidget, 'checkBox_filtering_use_centroids_distant_layers'):
             if not dockwidget.checkBox_filtering_use_centroids_distant_layers.isChecked():
                 dockwidget.checkBox_filtering_use_centroids_distant_layers.setChecked(True)
                 logger.info("AUTO-OPTIMIZATION: Enabled 'use_centroids_distant_layers' checkbox")

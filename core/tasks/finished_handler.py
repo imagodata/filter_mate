@@ -107,7 +107,7 @@ class FinishedHandler:
         Called by QGIS task manager when task completes. Performs:
         1. Display warning messages collected during task execution
         2. Apply pending subset string requests on main Qt thread
-        3. Cleanup PostgreSQL materialized views (for reset/unfilter/export only)
+        3. Cleanup PostgreSQL materialized views (for reset/unfilter only)
         4. Cleanup memory layers
         5. Show success/error message in QGIS message bar
         6. Cleanup OGR temp layers and safe_intersect layers
@@ -174,7 +174,9 @@ class FinishedHandler:
         # Only cleanup MVs on reset/unfilter actions, NOT on filter
         # When filtering, materialized views are referenced by the layer's subsetString.
         # Cleaning them up would invalidate the filter expression causing empty results.
-        if task_action in ('reset', 'unfilter', 'export'):
+        # 2026-10-17: nor on export, which creates no MV and leaves the
+        # filters in place (it dropped the MVs the filtered layers used).
+        if task_action in ('reset', 'unfilter'):
             cleanup_mv_fn()
 
         # E6: Delegate memory layer cleanup to task_completion_handler

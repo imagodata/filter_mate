@@ -169,7 +169,8 @@ class TaskManagementService:
 
     def process_add_layers_queue(
         self,
-        manage_task_callback: Callable[[str, List[Any]], None]
+        manage_task_callback: Callable[[str, List[Any]], None],
+        queue: Optional[List[Any]] = None
     ) -> None:
         """
         Process queued add_layers operations.
@@ -179,13 +180,17 @@ class TaskManagementService:
 
         Args:
             manage_task_callback: Callback to trigger manage_task('add_layers', layers)
+            queue: The queue to process (2026-10-17: FilterMateApp passes the
+                one manage_task fills; this service's own queue otherwise)
         """
+        pending = self._add_layers_queue if queue is None else queue
+
         # Prevent concurrent queue processing
         if self._processing_queue:
             logger.debug("Queue already being processed, skipping")
             return
 
-        if not self._add_layers_queue:
+        if not pending:
             logger.debug("Queue is empty, nothing to process")
             return
 
@@ -193,8 +198,8 @@ class TaskManagementService:
 
         try:
             # Get first queued operation
-            queued_layers = self._add_layers_queue.pop(0)
-            logger.info(f"Processing queued add_layers operation with {len(queued_layers) if queued_layers else 0} layers (queue size: {len(self._add_layers_queue)})")
+            queued_layers = pending.pop(0)
+            logger.info(f"Processing queued add_layers operation with {len(queued_layers) if queued_layers else 0} layers (queue size: {len(pending)})")
 
             # Process via callback (which will increment _pending_add_layers_tasks)
             manage_task_callback('add_layers', queued_layers)

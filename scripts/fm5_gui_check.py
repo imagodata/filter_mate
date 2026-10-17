@@ -191,6 +191,74 @@ def s_vector_undo_check():
     check('V undo restores point cloud', layer('lhd').source() == TILE)
 
 
+def s_centroid_registry():
+    """A target checked the way a click in the list does it (no checkedItemsChanged)."""
+    d = dock()
+    combo = d.checkableComboBoxLayer_filtering_layers_to_filter
+    for row in range(combo.count()):  # what a click in the list does: no checkedItemsChanged
+        item = combo.model().item(row)
+        item.setCheckState(Qt.CheckState.Checked if item.text().startswith('parcelle [') else Qt.CheckState.Unchecked)
+
+
+def s_centroid_registry_check():
+    button = dock().checkBox_filtering_use_centroids_distant_layers
+    check('centroids: a polygon target checked in the list enables the button', button.isEnabled()
+          and button.checkState() == Qt.CheckState.Unchecked, f'{button.isEnabled()} {button.checkState()}')
+
+
+def s_centroid_setup():
+    """Centroids chosen target by target: parcels by their centroids, roads by their full geometry."""
+    d = dock()
+    set_targets(['parcelle', 'troncon_de_route'])
+    set_predicates(['Intersect'])
+    if d.pushButton_checkable_filtering_buffer_value.isChecked():
+        d.pushButton_checkable_filtering_buffer_value.setChecked(False)
+    combo = d.checkableComboBoxLayer_filtering_layers_to_filter
+    parcels, roads = layer('parcelle').id(), layer('troncon_de_route').id()
+    eligible = combo.centroid_eligible_ids()
+    check('centroids: line and polygon targets have a toggle, rasters and point clouds none',
+          parcels in eligible and roads in eligible and layer('mnt').id() not in eligible and layer('lhd').id() not in eligible,
+          str(eligible))
+    combo.set_centroid_layer_ids([parcels], emit=True)
+    button = d.checkBox_filtering_use_centroids_distant_layers
+    check('centroids: one target of two -> partial button', button.isEnabled()
+          and button.checkState() == Qt.CheckState.PartiallyChecked, str(button.checkState()))
+    check('centroids: the task gets the chosen targets', d.get_centroid_target_ids() == [parcels], str(d.get_centroid_target_ids()))
+    props = d.PROJECT_LAYERS[layer('batiment').id()]['filtering']
+    check('centroids: stored on the source layer', props.get('centroid_layers') == [parcels], str(props.get('centroid_layers')))
+    button.click()  # partial -> every checked line / polygon target
+    check('centroids: the button sets every target', sorted(combo.centroid_layer_ids()) == sorted([parcels, roads])
+          and button.checkState() == Qt.CheckState.Checked, str(combo.centroid_layer_ids()))
+    button.click()
+    check('centroids: and clears them', combo.centroid_layer_ids() == [] and button.checkState() == Qt.CheckState.Unchecked)
+    combo.set_centroid_layer_ids([parcels], emit=True)
+    save(d, '02b-centroid-targets')
+
+
+def s_centroid_filter():
+    run_task('filter')
+
+
+def s_centroid_check():
+    parcels, roads = layer('parcelle').subsetString(), layer('troncon_de_route').subsetString()
+    log(f'parcels subset: {parcels[:400]}')
+    log(f'roads subset: {roads[:400]}')
+    check('centroids: parcels tested by their centroids', 'PointOnSurface' in parcels or 'Centroid' in parcels, parcels[:120])
+    check('centroids: roads tested by their full geometry', roads != '' and 'PointOnSurface' not in roads and 'Centroid' not in roads,
+          roads[:120])
+
+
+def s_centroid_unfilter():
+    run_task('unfilter')
+    dock().checkableComboBoxLayer_filtering_layers_to_filter.set_centroid_layer_ids([], emit=True)
+
+
+def s_centroid_unfilter_check():
+    check('centroids: unfilter restores the targets', layer('parcelle').subsetString() == ''
+          and layer('troncon_de_route').subsetString() == '')
+    set_targets([])
+
+
 def s_raster_source():
     dock().comboBox_filtering_current_layer.setLayer(layer('mnt'))
 
@@ -622,6 +690,7 @@ def s_finish():
 STEPS = [
     (s_setup, 1500), (s_open_plugin, 6000), (s_vector_source, 3000), (s_vector_select, 2000),
     (s_vector_filter, 9000), (s_vector_check, 1000), (s_vector_undo, 3000), (s_vector_undo_check, 1000),
+    (s_centroid_registry, 800), (s_centroid_registry_check, 500), (s_centroid_setup, 1500), (s_centroid_filter, 9000), (s_centroid_check, 1000), (s_centroid_unfilter, 4000), (s_centroid_unfilter_check, 1000),
     (s_raster_source, 3000), (s_raster_mode, 2500), (s_raster_preview, 1500), (s_raster_preview_check, 1000),
     (s_raster_filter, 8000), (s_raster_check, 1000), (s_raster_unfilter, 3000), (s_raster_unfilter_check, 1000),
     (s_pipette_ortho, 3500), (s_pipette_ortho_check, 1500), (s_pipette_ortho_shot, 1500), (s_pipette_dem, 3000), (s_pipette_dem_check, 1000),

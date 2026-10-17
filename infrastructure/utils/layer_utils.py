@@ -62,7 +62,14 @@ PROVIDER_SPATIALITE = 'spatialite'
 PROVIDER_OGR = 'ogr'
 PROVIDER_MEMORY = 'memory'
 
-REMOTE_PROVIDERS = {'WFS', 'wfs', 'arcgisfeatureserver', 'oapif'}
+
+def _source_capability(layer):
+    """core.domain.source_capability of ``layer`` (web services, remote files, databases)."""
+    try:
+        from ...core.domain.source_capability import classify_layer
+    except ImportError:
+        from core.domain.source_capability import classify_layer
+    return classify_layer(layer)
 
 
 # =============================================================================
@@ -99,8 +106,8 @@ def detect_layer_provider_type(layer) -> str:
     except (RuntimeError, AttributeError):
         return 'unknown'
 
-    # Remote providers use OGR-style filtering
-    if provider_type in REMOTE_PROVIDERS:
+    # Remote providers (WFS, OGC API Features, ArcGIS...) use OGR-style filtering
+    if _source_capability(layer).is_remote_service:
         return 'ogr'
 
     # Direct matches
@@ -111,6 +118,9 @@ def detect_layer_provider_type(layer) -> str:
     elif provider_type == 'memory':
         return 'memory'
     elif provider_type == 'ogr':
+        # 2026-10-17: a remote GeoPackage / SQLite (/vsicurl/.../x.gpkg) is read over the network: OGR
+        if _source_capability(layer).is_remote:
+            return 'ogr'
         # Check if it's a GeoPackage or SQLite file - these support Spatialite SQL
         try:
             source = layer.source()

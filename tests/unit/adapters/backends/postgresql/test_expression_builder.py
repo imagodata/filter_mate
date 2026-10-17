@@ -98,6 +98,34 @@ _ensure_module_mocks()
 import importlib.util
 import os
 
+
+def _load_real_cleanup():
+    """The builder names its buffer tables with cleanup.session_token (2026-10-17)."""
+    name = "filter_mate.adapters.backends.postgresql.cleanup"
+    if isinstance(sys.modules.get(name), types.ModuleType):
+        return
+    constants_name = "filter_mate.infrastructure.constants"
+    if not isinstance(sys.modules.get(constants_name), types.ModuleType):
+        constants_path = os.path.normpath(os.path.join(
+            os.path.dirname(__file__), "..", "..", "..", "..", "..", "infrastructure", "constants.py"
+        ))
+        constants_spec = importlib.util.spec_from_file_location(constants_name, constants_path)
+        constants_module = importlib.util.module_from_spec(constants_spec)
+        sys.modules[constants_name] = constants_module
+        constants_spec.loader.exec_module(constants_module)
+    path = os.path.normpath(os.path.join(
+        os.path.dirname(__file__), "..", "..", "..", "..", "..",
+        "adapters", "backends", "postgresql", "cleanup.py"
+    ))
+    spec = importlib.util.spec_from_file_location(name, path)
+    module = importlib.util.module_from_spec(spec)
+    module.__package__ = "filter_mate.adapters.backends.postgresql"
+    sys.modules[name] = module
+    spec.loader.exec_module(module)
+
+
+_load_real_cleanup()
+
 _builder_path = os.path.normpath(os.path.join(
     os.path.dirname(__file__),
     "..", "..", "..", "..", "..",
@@ -265,10 +293,10 @@ class TestBuildSimpleWktExpression:
             source_srid=4326,
             buffer_value=500,
         )
-        # Should use ST_Transform to 3857 for metric buffer
-        assert "ST_Transform" in expr
-        assert "3857" in expr
-        assert "500" in expr
+        # 2026-10-17: metric buffer on the geography (EPSG:3857 metres are
+        # 1/cos(latitude) too short)
+        assert "::geography, 500" in expr
+        assert "3857" not in expr
 
     def test_zero_buffer_ignored(self, builder):
         expr = builder._build_simple_wkt_expression(
@@ -509,8 +537,10 @@ class TestNoSilentEmptyFilter:
         result = self._build(
             builder, source_geom='"public"."rivers"."geom"', source_wkt=wkt, source_feature_count=691
         )
-        assert "EXISTS" in result
-        assert '"public"."rivers"' in result
+        # 2026-10-17: crosses runs against the union of the source table rows
+        assert ('ST_Crosses("roads"."geom", (SELECT ST_Union(ST_MakeValid(__fm_union."geom")) '
+                'FROM "public"."rivers" AS __fm_union))') in result
+        assert "ST_GeomFromText" not in result
 
     def test_unbuildable_predicates_return_none_not_empty_filter(self, builder, monkeypatch):
         monkeypatch.setattr(builder, "_build_exists_expression", lambda **kwargs: None)
@@ -653,7 +683,8 @@ class TestIndexAwarePredicate:
             layer_props={},
             raw_geom_expr='"b"."geom"',
         )
-        assert 'ST_Within("b"."geom", ST_Buffer(__source."geom", 50' in expr
+        # 2026-10-17: within runs against the union of the source rows
+        assert 'HAVING ST_Within("b"."geom", ST_Buffer(ST_Union(ST_MakeValid(__source."geom")), 50' in expr
         builder.task_params["buffer_endcap_style"] = "flat"
         expr = builder._build_exists_expression(
             geom_expr='"b"."geom"',
@@ -676,7 +707,9 @@ class TestIndexAwarePredicate:
             layer_props={},
             raw_geom_expr='"b"."geom"',
         )
-        assert 'ST_Buffer(__source."geom", -10' in expr and 'ST_DWithin' not in expr
+        # 2026-10-17: the erosion applies to the union of the source rows
+        assert 'ST_Buffer(ST_Union(ST_MakeValid(__source."geom")), -10' in expr
+        assert 'ST_DWithin' not in expr
 
     def test_simple_wkt_path_uses_dwithin(self, builder):
         expr = builder._build_simple_wkt_expression(
@@ -722,7 +755,7 @@ class TestSourceEnvelopePrefilter:
 
     def test_no_prefilter_for_disjoint(self, builder):
         expr = self._expr(builder, predicate_func="ST_Disjoint")
-        assert expr.startswith('EXISTS (')
+        assert expr.startswith('("b"."geom" IS NOT NULL AND NOT EXISTS (')
 
     def test_no_prefilter_for_combined_exists_filters(self, builder):
         expr = self._expr(builder, source_filter='EXISTS (SELECT 1 FROM "s"."zone" AS __source WHERE 1=1)')
@@ -756,3 +789,486 @@ class TestSourceSelectionMvAsSource:
         assert 'FROM "filtermate_temp"."fm_temp_mv_session_ab_cd" AS __source WHERE (TRUE))' in expr
         assert '"ign"."troncon_de_route"' not in expr
         assert 'IN (SELECT pk' not in expr
+
+
+# ===========================================================================
+# Tests -- dynamic buffer tables (2026-10-17)
+# ===========================================================================
+
+class _RecordingCursor:
+    """Cursor double: records (sql, params) and answers the existence check."""
+
+    def __init__(self, existing_tables=()):
+        self.calls = []
+        self._existing = set(existing_tables)
+        self._last = None
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *exc):
+        return False
+
+    def execute(self, sql, params=None):
+        self.calls.append((sql, params))
+        self._last = (sql, params)
+
+    def fetchone(self):
+        sql, params = self._last
+        if "information_schema.tables" in sql:
+            return (params is not None and (params[0], params[1]) in self._existing,)
+        if "COUNT(*)" in sql:
+            return (3,)
+        return None
+
+
+class _RecordingConnexion:
+    def __init__(self, cursor):
+        self._cursor = cursor
+
+    def cursor(self):
+        return self._cursor
+
+    def commit(self):
+        pass
+
+    def rollback(self):
+        pass
+
+
+class TestDynamicBufferTable:
+    """The pre-computed buffer table of a dynamic buffer must never serve another selection.
+
+    It was named fm_temp_buf_<table>_<md5(expression)[:8]> and reused when it
+    existed: a second filter on another selection (or by another user, or
+    after an edit) got the buffers of the first one.
+    """
+
+    @pytest.fixture(autouse=True)
+    def _constants(self, monkeypatch):
+        constants = sys.modules["filter_mate.infrastructure.constants"]
+        monkeypatch.setattr(constants, "TABLE_PREFIX_BUFFER", "fm_temp_buf_", raising=False)
+        executor = sys.modules["filter_mate.adapters.backends.postgresql.filter_executor"]
+        monkeypatch.setattr(executor, "qgis_expression_to_postgis", lambda expr: expr, raising=False)
+
+    @staticmethod
+    def _builder(session_id="sess01"):
+        return PostgreSQLExpressionBuilder(task_params={
+            "buffer_endcap_style": "round",
+            "buffer_segments": 5,
+            "task": {"session_id": session_id},
+        })
+
+    def test_name_depends_on_the_selection(self):
+        b = self._builder()
+        first = b._buffer_table_name("ref", "demand_points", '"homecount" * 2', '"demand_points"."fid" IN (1, 2)')
+        second = b._buffer_table_name("ref", "demand_points", '"homecount" * 2', '"demand_points"."fid" IN (3)')
+        assert first != second
+
+    def test_name_depends_on_schema_table_and_expression(self):
+        b = self._builder()
+        base = b._buffer_table_name("ref", "demand_points", '"homecount" * 2', None)
+        assert base != b._buffer_table_name("other", "demand_points", '"homecount" * 2', None)
+        assert base != b._buffer_table_name("ref", "ducts", '"homecount" * 2', None)
+        assert base != b._buffer_table_name("ref", "demand_points", '"homecount" * 3', None)
+
+    def test_name_carries_the_session_for_cleanup(self):
+        name = self._builder("ab12cd34")._buffer_table_name("ref", "t", "10", None)
+        assert name.startswith("fm_temp_buf_ab12cd34_")
+        other_session = self._builder("ff00ff00")._buffer_table_name("ref", "t", "10", None)
+        assert other_session != name
+
+    def test_same_task_reuses_the_name_another_task_does_not(self):
+        b = self._builder()
+        name = b._buffer_table_name("ref", "t", "10", None)
+        assert b._buffer_table_name("ref", "t", "10", None) == name
+        # a new task (new task_parameters) never picks up the old table
+        assert self._builder()._buffer_table_name("ref", "t", "10", None) != name
+        # the app reuses the layer's PROJECT_LAYERS entry and rebuilds its "task" section
+        b.task_params["task"] = {"session_id": "sess01"}
+        assert b._buffer_table_name("ref", "t", "10", None) != name
+
+    def test_name_fits_a_postgresql_identifier(self):
+        b = self._builder("a" * 40)
+        name = b._buffer_table_name("s" * 80, "t" * 80, "10", "x" * 500)
+        assert len(name) <= 63
+        assert len(f"idx_{name}_geom") <= 63
+
+    def _build(self, b, cursor, monkeypatch, schema="ref", table="demand_points", source_filter='"fid" IN (1)'):
+        utils = sys.modules["filter_mate.infrastructure.utils"]
+        monkeypatch.setattr(
+            utils, "get_datasource_connexion_from_layer",
+            lambda layer: (_RecordingConnexion(cursor), None), raising=False
+        )
+        return b._build_exists_with_buffer_table(
+            geom_expr='"ducts"."geom"',
+            predicate_func="ST_Intersects",
+            source_schema=schema,
+            source_table=table,
+            source_geom_field="geom",
+            buffer_expression='"homecount" * 2',
+            source_filter=source_filter,
+            layer_props={"layer": MagicMock()},
+            buffer_table_name=b._buffer_table_name(schema, table, '"homecount" * 2', source_filter),
+        )
+
+    def test_existence_check_and_regclass_are_bound_parameters(self, monkeypatch):
+        b = self._builder()
+        cursor = _RecordingCursor()
+        self._build(b, cursor, monkeypatch, schema="l'ouest", table='bâti "neuf"')
+        exists_sql, exists_params = next(c for c in cursor.calls if "information_schema.tables" in c[0])
+        assert "l'ouest" not in exists_sql and exists_params[0] == "l'ouest"
+        regclass_sql, regclass_params = next(c for c in cursor.calls if "regclass" in c[0])
+        assert "%s::regclass" in regclass_sql
+        assert regclass_params == ('"l\'ouest"."bâti ""neuf"""',)
+        create_sql = next(sql for sql, _ in cursor.calls if "CREATE TABLE" in sql)
+        assert 'FROM "l\'ouest"."bâti ""neuf"""' in create_sql
+
+    def test_creates_the_table_from_the_selection(self, monkeypatch):
+        b = self._builder()
+        cursor = _RecordingCursor()
+        expr = self._build(b, cursor, monkeypatch)
+        create_sql = next(sql for sql, _ in cursor.calls if "CREATE TABLE" in sql)
+        assert 'WHERE "fid" IN (1)' in create_sql
+        name = b._buffer_table_name("ref", "demand_points", '"homecount" * 2', '"fid" IN (1)')
+        assert f'"ref"."{name}"' in create_sql
+        assert f'"ref"."{name}" AS __buffer' in expr
+
+    def test_exists_expression_names_the_table_after_the_selection(self, monkeypatch):
+        b = self._builder()
+        seen = {}
+
+        def fake_table_expr(**kwargs):
+            seen.update(kwargs)
+            return "EXISTS (buffer)"
+
+        monkeypatch.setattr(b, "_build_exists_with_buffer_table", fake_table_expr)
+        b._build_exists_expression(
+            geom_expr='"ducts"."geom"',
+            predicate_func="ST_Intersects",
+            source_geom='"ref"."demand_points"."geom"',
+            source_filter='"demand_points"."fid" IN (7)',
+            buffer_value=None,
+            layer_props={},
+            original_source_table="demand_points",
+            buffer_expression='"homecount" * 2',
+        )
+        assert seen["buffer_table_name"] == b._buffer_table_name(
+            "ref", "demand_points", '"homecount" * 2', '"demand_points"."fid" IN (7)'
+        )
+
+
+# ===========================================================================
+# Tests -- predicates against the union of the selected source features
+# ===========================================================================
+
+class TestPredicatesAgainstSourceUnion:
+    """2026-10-17: a target is tested against the UNION of the selected source features.
+
+    Spatialite and OGR test the target against one geometry, the union of the
+    selection. ``EXISTS (... ST_<pred>(target, __source.geom) ...)`` tested it
+    against each source feature: ST_Disjoint kept every target disjoint from
+    ONE feature (almost the whole layer with two distant sources), ST_Within
+    rejected a target spanning two adjacent source polygons, ST_Contains kept
+    a target containing one of the selected features only.
+
+    Semantics checked on PostGIS 3.4 (A = [0,10]x[0,10], B = [10,20]x[0,10]):
+    - intersects: EXISTS(any feature) == ST_Intersects(t, A u B) - unchanged;
+    - disjoint: ST_Disjoint(t, A u B) == NOT EXISTS(ST_Intersects(t, feature));
+    - within / coveredby / touches (and an erosion) only depend on the
+      features near t: EXISTS (... WHERE row && t HAVING pred(t, ST_Union(rows))),
+      e.g. [5,15]x[2,8] is within A u B but within neither A nor B;
+    - contains / covers / equals / overlaps / crosses depend on every
+      selected feature: against the union computed once (alias __fm_union).
+    """
+
+    FILTER = '"commune"."fid" IN (1, 2)'
+    UNION = ('(SELECT ST_Union(ST_MakeValid(__fm_union."geom")) FROM "s"."commune" AS __fm_union '
+             'WHERE (__fm_union."fid" IN (1, 2)))')
+
+    def _expr(self, builder, predicate_func, **kwargs):
+        params = dict(
+            geom_expr='"b"."geom"',
+            predicate_func=predicate_func,
+            source_geom='"s"."commune"."geom"',
+            source_filter=self.FILTER,
+            buffer_value=None,
+            layer_props={},
+            original_source_table="commune",
+            raw_geom_expr='"b"."geom"',
+        )
+        params.update(kwargs)
+        return builder._build_exists_expression(**params)
+
+    def test_intersects_keeps_the_exists_form(self, builder):
+        expr = self._expr(builder, "ST_Intersects")
+        assert ('EXISTS (SELECT 1 FROM "s"."commune" AS __source WHERE '
+                'ST_Intersects("b"."geom", __source."geom") AND (__source."fid" IN (1, 2)))') in expr
+        assert "ST_Union" not in expr
+
+    def test_disjoint_is_not_exists_intersects(self, builder):
+        expr = self._expr(builder, "ST_Disjoint")
+        assert expr == ('("b"."geom" IS NOT NULL AND NOT EXISTS (SELECT 1 FROM "s"."commune" AS __source WHERE '
+                        'ST_Intersects("b"."geom", __source."geom") AND (__source."fid" IN (1, 2))))')
+
+    def test_disjoint_with_buffer_is_not_exists_dwithin(self, builder):
+        expr = self._expr(builder, "ST_Disjoint", buffer_value=20)
+        assert expr == ('("b"."geom" IS NOT NULL AND NOT EXISTS (SELECT 1 FROM "s"."commune" AS __source WHERE '
+                        'ST_DWithin("b"."geom", __source."geom", 20) AND (__source."fid" IN (1, 2))))')
+
+    @pytest.mark.parametrize("predicate_func", ["ST_Within", "ST_Touches", "ST_CoveredBy"])
+    def test_local_predicates_union_the_rows_near_the_target(self, builder, predicate_func):
+        expr = self._expr(builder, predicate_func)
+        assert ('EXISTS (SELECT 1 FROM "s"."commune" AS __source WHERE __source."geom" && "b"."geom" '
+                'AND (__source."fid" IN (1, 2)) '
+                f'HAVING {predicate_func}("b"."geom", ST_Union(ST_MakeValid(__source."geom"))))') in expr
+
+    @pytest.mark.parametrize("predicate_func", ["ST_Contains", "ST_Overlaps", "ST_Crosses", "ST_Equals", "ST_Covers"])
+    def test_global_predicates_test_the_union_once(self, builder, predicate_func):
+        expr = self._expr(builder, predicate_func)
+        assert f'{predicate_func}("b"."geom", {self.UNION})' in expr
+        assert "EXISTS" not in expr
+        assert "__source" not in expr  # read as a corrupted subset outside EXISTS
+
+    def test_local_union_with_buffer_reaches_the_buffer(self, builder):
+        expr = self._expr(builder, "ST_Within", buffer_value=20)
+        assert ('WHERE __source."geom" && ST_Expand("b"."geom", 20.0) AND (__source."fid" IN (1, 2)) '
+                'HAVING ST_Within("b"."geom", ST_Buffer(ST_Union(ST_MakeValid(__source."geom")), 20, \'quad_segs=5\'))') in expr
+
+    def test_global_union_with_buffer_buffers_the_union(self, builder):
+        expr = self._expr(builder, "ST_Contains", buffer_value=20)
+        assert f"ST_Contains(\"b\".\"geom\", ST_Buffer({self.UNION}, 20, 'quad_segs=5'))" in expr
+
+    def test_negative_buffer_erodes_the_local_union_for_intersects_too(self, builder):
+        # erosion does not distribute over the union: buffer(A u B, -d) != buffer(A, -d) u buffer(B, -d)
+        expr = self._expr(builder, "ST_Intersects", buffer_value=-5)
+        assert ('WHERE __source."geom" && ST_Expand("b"."geom", 5.0) AND (__source."fid" IN (1, 2)) '
+                'HAVING ST_Intersects("b"."geom", ST_Buffer(ST_Union(ST_MakeValid(__source."geom")), -5, '
+                '\'quad_segs=5\')))') in expr
+
+    def test_negative_buffer_disjoint_keeps_targets_far_from_every_source(self, builder):
+        expr = self._expr(builder, "ST_Disjoint", buffer_value=-5)
+        assert expr.startswith('("b"."geom" IS NOT NULL AND NOT EXISTS (SELECT 1 FROM "s"."commune" AS __source')
+        assert 'HAVING ST_Intersects("b"."geom", ST_Buffer(ST_Union(' in expr
+
+    def test_whole_source_union_without_filter(self, builder):
+        expr = self._expr(builder, "ST_Contains", source_filter=None)
+        # the union is only computed for a target whose bbox holds the union bbox
+        assert expr == ('CASE WHEN "b"."geom" ~ (SELECT ST_SetSRID(ST_Expand(ST_Extent(__fm_union."geom")::geometry, 0.0), '
+                        'MAX(ST_SRID(__fm_union."geom"))) FROM "s"."commune" AS __fm_union) '
+                        'THEN ST_Contains("b"."geom", (SELECT ST_Union(ST_MakeValid(__fm_union."geom")) '
+                        'FROM "s"."commune" AS __fm_union)) ELSE FALSE END')
+
+    def test_overlaps_needs_a_bbox_overlap_grown_by_the_buffer(self, builder):
+        expr = self._expr(builder, "ST_Overlaps", source_filter=None, buffer_value=5)
+        assert expr.startswith('CASE WHEN "b"."geom" && (SELECT ST_SetSRID(ST_Expand(ST_Extent(__fm_union."geom")::geometry, 5.0)')
+
+    def test_centroid_mode_reaches_from_the_point(self, builder):
+        expr = self._expr(builder, "ST_Within", geom_expr='ST_PointOnSurface("b"."geom")', source_filter=None)
+        assert expr == ('EXISTS (SELECT 1 FROM "s"."commune" AS __source WHERE __source."geom" && '
+                        'ST_PointOnSurface("b"."geom") HAVING ST_Within(ST_PointOnSurface("b"."geom"), '
+                        'ST_Union(ST_MakeValid(__source."geom"))))')
+
+    def test_buffer_table_disjoint_and_within(self, builder):
+        disjoint = builder._predicate_against_sources(
+            "ST_Disjoint", '"b"."geom"', "__buffer.buffered_geom", '"s"."fm_temp_buf_x" AS __buffer', [], None, None
+        )
+        assert disjoint == ('("b"."geom" IS NOT NULL AND NOT EXISTS (SELECT 1 FROM "s"."fm_temp_buf_x" AS __buffer '
+                            'WHERE ST_Intersects("b"."geom", __buffer.buffered_geom)))')
+        within = builder._predicate_against_sources(
+            "ST_Within", '"b"."geom"', "__buffer.buffered_geom", '"s"."fm_temp_buf_x" AS __buffer', [], None, None
+        )
+        assert within == ('EXISTS (SELECT 1 FROM "s"."fm_temp_buf_x" AS __buffer WHERE __buffer.buffered_geom && '
+                          '"b"."geom" HAVING ST_Within("b"."geom", ST_Union(ST_MakeValid(__buffer.buffered_geom))))')
+
+    def test_chained_disjoint_filter_stays_negated(self, builder, monkeypatch):
+        """A source already filtered with disjoint chains NOT EXISTS, not EXISTS."""
+        inner = 'EXISTS (SELECT 1 FROM "s"."zone" AS __source WHERE ST_Intersects("src"."geom", __source."geom"))'
+        combiner = sys.modules["filter_mate.core.filter.expression_combiner"]
+        monkeypatch.setattr(combiner, "extract_exists_clauses", lambda expr: [{"sql": inner}], raising=False)
+        monkeypatch.setattr(
+            combiner, "adapt_exists_for_nested_context",
+            lambda exists_sql, original_table, new_alias, original_schema=None:
+                exists_sql.replace(f'"{original_table}".', f"{new_alias}."),
+            raising=False,
+        )
+        result = builder.build_expression(
+            layer_props={"layer_name": "b", "layer_table_name": "b"},
+            predicates={"intersects": "ST_Intersects"},
+            source_geom='"s"."src"."geom"',
+            source_filter=f"NOT {inner}",
+            source_feature_count=500,
+            source_table_name="src",
+        )
+        assert result.endswith(
+            ' AND NOT EXISTS (SELECT 1 FROM "s"."zone" AS __source WHERE ST_Intersects("b"."geom", __source."geom"))'
+        )
+
+    def test_chain_mv_expression_uses_the_same_semantics(self, builder):
+        expr = builder._build_optimized_mv_expression(
+            geom_expr='"b"."geom"', predicates={"disjoint": "ST_Disjoint"}, mv_name='"filtermate_temp"."fm_temp_chain_x"'
+        )
+        assert expr.startswith('("b"."geom" IS NOT NULL AND NOT EXISTS (SELECT 1 FROM "filtermate_temp"."fm_temp_chain_x" AS __chain')
+        assert 'ST_Intersects("b"."geom", __chain."geom")' in expr
+
+
+# ===========================================================================
+# Tests -- source and target SRIDs (2026-10-17)
+# ===========================================================================
+
+class TestSourceTargetSrid:
+    """The source geometry is brought to the SRID of the target, the buffer stays metric.
+
+    A GeoJSON source in EPSG:4326 against a BD TOPO table in EPSG:2154 gave
+    "Operation on mixed SRID geometries"; a 100 m buffer around a source in
+    degrees was 100 degrees.
+    """
+
+    WKT_4326 = "ST_MakeValid(ST_GeomFromText('POINT(1.44 43.6)', 4326))"
+    WKT_2154 = "ST_MakeValid(ST_GeomFromText('POINT(574000 6280000)', 2154))"
+
+    @staticmethod
+    def _builder(source_authid=None):
+        params = {"buffer_endcap_style": "round", "buffer_segments": 5}
+        if source_authid:
+            params["infos"] = {"layer_crs_authid": source_authid}
+        return PostgreSQLExpressionBuilder(task_params=params)
+
+    def _wkt(self, builder, wkt, source_srid, target_srid, buffer_value=None, predicate_func="ST_Intersects"):
+        return builder._build_simple_wkt_expression(
+            geom_expr='"t"."geom"',
+            predicate_func=predicate_func,
+            source_wkt=wkt,
+            source_srid=source_srid,
+            buffer_value=buffer_value,
+            raw_geom_expr='"t"."geom"',
+            target_srid=target_srid,
+        )
+
+    def test_layer_srid(self):
+        layer = MagicMock()
+        layer.dataProvider.return_value.crs.return_value.postgisSrid.return_value = 2154
+        assert PostgreSQLExpressionBuilder._layer_srid(layer) == 2154
+        assert PostgreSQLExpressionBuilder._layer_srid(MagicMock()) is None  # no integer SRID
+        assert PostgreSQLExpressionBuilder._layer_srid(None) is None
+
+    def test_authid_to_srid(self):
+        assert PostgreSQLExpressionBuilder._authid_to_srid("EPSG:4326") == 4326
+        assert PostgreSQLExpressionBuilder._authid_to_srid("USER:100000") is None
+        assert PostgreSQLExpressionBuilder._authid_to_srid(None) is None
+
+    def test_wkt_is_reprojected_to_the_target(self, builder):
+        expr = self._wkt(builder, "POINT(1.44 43.6)", 4326, 2154)
+        assert expr == f'ST_Intersects("t"."geom", ST_Transform({self.WKT_4326}, 2154))'
+
+    def test_wkt_same_srid_is_left_alone(self, builder):
+        expr = self._wkt(builder, "POINT(574000 6280000)", 2154, 2154)
+        assert expr == f'ST_Intersects("t"."geom", {self.WKT_2154})'
+
+    def test_wkt_geographic_source_metric_target_buffers_in_target_metres(self, builder):
+        expr = self._wkt(builder, "POINT(1.44 43.6)", 4326, 2154, buffer_value=100)
+        assert expr == f'ST_DWithin("t"."geom", ST_Transform({self.WKT_4326}, 2154), 100)'
+
+    def test_wkt_metric_source_geographic_target_buffers_before_the_transform(self, builder):
+        expr = self._wkt(builder, "POINT(574000 6280000)", 2154, 4326, buffer_value=100)
+        assert expr == (
+            f"ST_Intersects(\"t\".\"geom\", ST_Transform(ST_Buffer({self.WKT_2154}, 100, 'quad_segs=5'), 4326))"
+        )
+
+    def test_wkt_geographic_source_and_target_buffer_on_the_geography(self, builder):
+        expr = self._wkt(builder, "POINT(1.44 43.6)", 4326, 4326, buffer_value=500)
+        assert expr == (
+            f"ST_Intersects(\"t\".\"geom\", ST_Buffer(({self.WKT_4326})::geography, 500, 'quad_segs=5')::geometry)"
+        )
+
+    def test_wkt_negative_geography_buffer_is_validated(self, builder):
+        expr = self._wkt(builder, "POINT(1.44 43.6)", 4326, 4326, buffer_value=-5)
+        assert "ST_IsEmpty(ST_MakeValid(ST_Buffer((" in expr and "::geography, -5" in expr
+
+    def _exists(self, builder, target_srid, buffer_value=None, source_filter=None, predicate_func="ST_Intersects"):
+        return builder._build_exists_expression(
+            geom_expr='"b"."geom"',
+            predicate_func=predicate_func,
+            source_geom='"s"."commune"."geom"',
+            source_filter=source_filter,
+            buffer_value=buffer_value,
+            layer_props={},
+            original_source_table="commune",
+            raw_geom_expr='"b"."geom"',
+            target_srid=target_srid,
+        )
+
+    def test_exists_reprojects_the_source_rows(self):
+        expr = self._exists(self._builder("EPSG:4326"), 2154)
+        assert expr == ('EXISTS (SELECT 1 FROM "s"."commune" AS __source WHERE '
+                        'ST_Intersects("b"."geom", ST_Transform(__source."geom", 2154)))')
+
+    def test_exists_same_srid_is_left_alone(self):
+        expr = self._exists(self._builder("EPSG:2154"), 2154, buffer_value=50)
+        assert expr == ('EXISTS (SELECT 1 FROM "s"."commune" AS __source WHERE '
+                        'ST_DWithin("b"."geom", __source."geom", 50))')
+
+    def test_exists_geographic_source_buffers_in_target_metres(self):
+        expr = self._exists(self._builder("EPSG:4326"), 2154, buffer_value=50)
+        assert 'ST_DWithin("b"."geom", ST_Transform(__source."geom", 2154), 50)' in expr
+
+    def test_exists_geographic_source_and_target_buffer_on_the_geography(self):
+        expr = self._exists(self._builder("EPSG:4326"), 4326, buffer_value=50)
+        assert "ST_DWithin" not in expr
+        assert "ST_Intersects(\"b\".\"geom\", ST_Buffer((__source.\"geom\")::geography, 50, 'quad_segs=5')::geometry)" in expr
+
+    def test_exists_envelope_prefilter_is_in_the_target_srid(self):
+        expr = self._exists(self._builder("EPSG:4326"), 2154, buffer_value=20, source_filter='"commune"."fid" IN (1)')
+        assert expr.startswith(
+            '("b"."geom" && (SELECT ST_SetSRID(ST_Expand(ST_Extent(ST_Transform(__source."geom", 2154))::geometry, 20.0), '
+            'MAX(ST_SRID(ST_Transform(__source."geom", 2154))))'
+        )
+
+    def test_union_predicates_reproject_the_rows(self):
+        expr = self._exists(self._builder("EPSG:4326"), 2154, predicate_func="ST_Within")
+        assert expr == ('EXISTS (SELECT 1 FROM "s"."commune" AS __source WHERE ST_Transform(__source."geom", 2154) '
+                        '&& "b"."geom" HAVING ST_Within("b"."geom", ST_Union(ST_MakeValid(ST_Transform(__source."geom", 2154)))))')
+
+    def test_buffer_table_rows_are_reprojected(self, monkeypatch):
+        b = TestDynamicBufferTable._builder()
+        b.task_params["infos"] = {"layer_crs_authid": "EPSG:4326"}
+        constants = sys.modules["filter_mate.infrastructure.constants"]
+        monkeypatch.setattr(constants, "TABLE_PREFIX_BUFFER", "fm_temp_buf_", raising=False)
+        executor = sys.modules["filter_mate.adapters.backends.postgresql.filter_executor"]
+        monkeypatch.setattr(executor, "qgis_expression_to_postgis", lambda expr: expr, raising=False)
+        cursor = _RecordingCursor()
+        utils = sys.modules["filter_mate.infrastructure.utils"]
+        monkeypatch.setattr(utils, "get_datasource_connexion_from_layer",
+                            lambda layer: (_RecordingConnexion(cursor), None), raising=False)
+        expr = b._build_exists_with_buffer_table(
+            geom_expr='"ducts"."geom"', predicate_func="ST_Intersects", source_schema="ref",
+            source_table="demand_points", source_geom_field="geom", buffer_expression='"homecount" * 2',
+            source_filter=None, layer_props={"layer": MagicMock()}, target_srid=2154,
+        )
+        assert 'ST_Intersects("ducts"."geom", ST_Transform(__buffer.buffered_geom, 2154))' in expr
+
+    def test_erosion_on_a_geographic_target_erodes_the_union_on_the_geography(self):
+        expr = self._exists(self._builder("EPSG:2154"), 4326, buffer_value=-1, predicate_func="ST_Within")
+        assert ('HAVING ST_Within("b"."geom", ST_Buffer((ST_Union(ST_MakeValid(ST_Transform(__source."geom", 4326))))'
+                '::geography, -1, \'quad_segs=5\')::geometry))') in expr
+        # reach in degrees, an upper bound of 1 m below 85° of latitude
+        assert 'ST_Transform(__source."geom", 4326) && ST_Expand("b"."geom", ' in expr
+
+    def test_dynamic_buffer_of_a_geographic_source_is_in_metres(self, monkeypatch):
+        b = TestDynamicBufferTable._builder()
+        b.task_params["infos"] = {"layer_crs_authid": "EPSG:4326"}
+        constants = sys.modules["filter_mate.infrastructure.constants"]
+        monkeypatch.setattr(constants, "TABLE_PREFIX_BUFFER", "fm_temp_buf_", raising=False)
+        executor = sys.modules["filter_mate.adapters.backends.postgresql.filter_executor"]
+        monkeypatch.setattr(executor, "qgis_expression_to_postgis", lambda expr: expr, raising=False)
+        cursor = _RecordingCursor()
+        utils = sys.modules["filter_mate.infrastructure.utils"]
+        monkeypatch.setattr(utils, "get_datasource_connexion_from_layer",
+                            lambda layer: (_RecordingConnexion(cursor), None), raising=False)
+        b._build_exists_with_buffer_table(
+            geom_expr='"ducts"."geom"', predicate_func="ST_Intersects", source_schema="ref",
+            source_table="demand_points", source_geom_field="geom", buffer_expression='"homecount" * 2',
+            source_filter=None, layer_props={"layer": MagicMock()}, target_srid=4326,
+        )
+        create_sql = next(sql for sql, _ in cursor.calls if "CREATE TABLE" in sql)
+        assert 'ST_Buffer(("geom")::geography, "homecount" * 2, \'quad_segs=5\')::geometry' in create_sql

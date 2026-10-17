@@ -396,11 +396,19 @@ class TestExcludeNonAnalysisRasters:
 
 
 class _FakeRasterLayer:
-    def __init__(self, provider="gdal"):
+    def __init__(self, provider="gdal", source="/data/dem.tif"):
         self._provider = provider
+        self._source = source
 
     def providerType(self):
         return self._provider
+
+    def source(self):
+        return self._source
+
+
+GDAL_WMS_XML = ('<GDAL_WMS><Service name="TMS"><ServerUrl>https://tile.openstreetmap.org/${z}/${x}/${y}.png'
+                '</ServerUrl></Service></GDAL_WMS>')
 
 
 class TestIsNonAnalysisRaster:
@@ -417,6 +425,17 @@ class TestIsNonAnalysisRaster:
     @pytest.mark.parametrize("provider", ["gdal", "virtualraster", "postgresraster"])
     def test_analysable_rasters(self, core, provider):
         assert cap.is_non_analysis_raster(_FakeRasterLayer(provider)) is False
+
+    @pytest.mark.parametrize("source", [GDAL_WMS_XML, "WMS:https://example.org/wms?SERVICE=WMS&LAYERS=ortho"])
+    def test_gdal_rendered_services_are_not_rasters_of_values(self, core, env, source):
+        """2026-10-17: provider 'gdal', but the pixels are a rendered image (TMS / WMS through GDAL)."""
+        layer = _FakeRasterLayer("gdal", source)
+        assert cap.is_non_analysis_raster(layer) is True
+        assert cap.is_raster_layer(layer) is False
+
+    @pytest.mark.parametrize("source", ["/vsicurl/https://example.org/dem.tif", "WCS:https://example.org/wcs"])
+    def test_gdal_remote_values_stay_rasters_of_values(self, core, source):
+        assert cap.is_non_analysis_raster(_FakeRasterLayer("gdal", source)) is False
 
     def test_vector_and_none(self, core):
         assert cap.is_non_analysis_raster(_FakeVectorLayer()) is False

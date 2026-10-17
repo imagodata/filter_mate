@@ -120,6 +120,20 @@ def apply_feature_picker_fetch_limit(picker) -> None:
 logger = logging.getLogger('FilterMate.UI.Widgets.CustomWidgets')
 
 
+# Target layers of FILTERING may be vector, raster or point cloud layers (FilterMate 5):
+# each item carries a short hint of what the filter does to it, right-aligned in the list.
+TARGET_HINT_ROLE = 0x0101  # Qt.UserRole + 1
+# Line / polygon targets: True / False = tested by their centroids or not (None: not applicable).
+CENTROID_ROLE = 0x0102  # Qt.UserRole + 2
+CENTROID_TOGGLE_SIZE = 16
+COVERAGE_GEOMETRY_KINDS = {'GeometryType.Raster': 'raster', 'GeometryType.PointCloud': 'point_cloud'}
+
+
+def target_kind(geometry_type) -> str:
+    """``'vector'``, ``'raster'`` or ``'point_cloud'`` from a ``layer_geometry_type`` value."""
+    return COVERAGE_GEOMETRY_KINDS.get(str(geometry_type or ''), 'vector')
+
+
 class ItemDelegate(QStyledItemDelegate):
     """
     Custom item delegate for checkable combobox items with icons.
@@ -139,6 +153,42 @@ class ItemDelegate(QStyledItemDelegate):
 
     def getCheckboxRect(self, option):
         return QRect(4, 4, 18, 18).translated(option.rect.topLeft())
+
+    @staticmethod
+    def trailing_layout(rect, metrics, index):
+        """``(centroid toggle rect or None, hint x, hint width)`` at the right of an item."""
+        hint = index.data(TARGET_HINT_ROLE)
+        hint_width = metrics.horizontalAdvance(hint) + 12 if hint else 0
+        hint_x = rect.x() + rect.width() - hint_width
+        toggle = None
+        if index.data(CENTROID_ROLE) is not None:
+            size = CENTROID_TOGGLE_SIZE
+            toggle = QRect(hint_x - size - 6, rect.y() + (rect.height() - size) // 2, size, size)
+        return toggle, hint_x, hint_width
+
+    @staticmethod
+    def paint_centroid_toggle(painter, rect, on, color):
+        """Centroid glyph of the mockup (square, centre dot); on: on a tinted rounded square."""
+        painter.save()
+        painter.setRenderHint(QtGui.QPainter.RenderHint.Antialiasing, True)
+        glyph = QColor(color)
+        if on:
+            fill = QColor(color)
+            fill.setAlphaF(0.18)
+            painter.setPen(QtGui.QPen(Qt.PenStyle.NoPen))
+            painter.setBrush(QBrush(fill))
+            painter.drawRoundedRect(rect, 3, 3)
+        else:
+            glyph.setAlphaF(0.35)
+        pen = QtGui.QPen(glyph)
+        pen.setWidthF(1.3)
+        painter.setPen(pen)
+        painter.setBrush(QBrush(Qt.BrushStyle.NoBrush))
+        inner = rect.adjusted(3, 3, -3, -3)
+        painter.drawRect(inner)
+        painter.setBrush(QBrush(glyph))
+        painter.drawEllipse(inner.center(), 1.6, 1.6)
+        painter.restore()
 
     def getItemRect(self, item):
         size_hint = item.sizeHint()
@@ -180,7 +230,23 @@ class ItemDelegate(QStyledItemDelegate):
             # Position text after checkbox + icon + margins
             text_x = x + CHECKBOX_WIDTH + (ICON_SIZE + 4 if icon_drawn else 0)
             text_y = y + dy // 2 + 4  # Center vertically with offset
-            painter.drawText(text_x, text_y, text)
+            # FilterMate 5: what the filter does to this target, muted and right-aligned;
+            # the layer name is elided before it rather than drawn under it.
+            hint = index.data(TARGET_HINT_ROLE)
+            metrics = painter.fontMetrics()
+            toggle, hint_x, hint_width = self.trailing_layout(option.rect, metrics, index)
+            right = toggle.x() - 4 if toggle is not None else hint_x - 4
+            available = max(0, right - text_x)
+            painter.drawText(text_x, text_y, metrics.elidedText(text, Qt.TextElideMode.ElideRight, available))
+            if hint:
+                muted = QColor(painter.pen().color())
+                muted.setAlphaF(0.6)
+                painter.save()
+                painter.setPen(muted)
+                painter.drawText(hint_x + 4, text_y, hint)
+                painter.restore()
+            if toggle is not None:
+                self.paint_centroid_toggle(painter, toggle, bool(index.data(CENTROID_ROLE)), painter.pen().color())
 
         # Indicate Selected
         painter.setPen(QtGui.QPen(Qt.PenStyle.NoPen))
@@ -225,6 +291,8 @@ class QgsCheckableComboBoxLayer(QComboBox):
     """
 
     checkedItemsChanged = pyqtSignal(list)
+    centroidsChanged = pyqtSignal(list)  # ids of the targets tested by their centroids
+    populated = pyqtSignal()  # items were added: emitted once the filling is over (next event loop pass)
 
     def __init__(self, parent=None):
         super(QgsCheckableComboBoxLayer, self).__init__(parent)
@@ -248,6 +316,11 @@ class QgsCheckableComboBoxLayer(QComboBox):
         self.setFont(font)
         self.setIconSize(QSize(36, 20))
 
+        self._target_hints = False  # FILTERING targets: hint of the filter effect per layer kind
+        self._populated_timer = QTimer(self)
+        self._populated_timer.setSingleShot(True)
+        self._populated_timer.setInterval(0)
+        self._populated_timer.timeout.connect(self.populated.emit)
         self.setModel(QtGui.QStandardItemModel(self))
         self.setItemDelegate(ItemDelegate(self))
         self.createMenuContext()
@@ -290,6 +363,107 @@ class QgsCheckableComboBoxLayer(QComboBox):
         self.context_menu.addAction(self.action_check_all_geometry_polygon)
         self.context_menu.addAction(self.action_uncheck_all_geometry_polygon)
 
+        # FilterMate 5: raster and point cloud targets, shown only when the list holds some.
+        self.action_check_all_raster = QAction(self.tr('Select all raster layers'), self)
+        self.action_check_all_raster.triggered.connect(partial(self.select_by_geometry, 'GeometryType.Raster', Qt.CheckState.Checked))
+        self.action_uncheck_all_raster = QAction(self.tr('De-select all raster layers'), self)
+        self.action_uncheck_all_raster.triggered.connect(partial(self.select_by_geometry, 'GeometryType.Raster', Qt.CheckState.Unchecked))
+        self.action_check_all_point_cloud = QAction(self.tr('Select all point cloud layers'), self)
+        self.action_check_all_point_cloud.triggered.connect(partial(self.select_by_geometry, 'GeometryType.PointCloud', Qt.CheckState.Checked))
+        self.action_uncheck_all_point_cloud = QAction(self.tr('De-select all point cloud layers'), self)
+        self.action_uncheck_all_point_cloud.triggered.connect(partial(self.select_by_geometry, 'GeometryType.PointCloud', Qt.CheckState.Unchecked))
+        self._raster_separator = self.context_menu.addSeparator()
+        self.context_menu.addAction(self.action_check_all_raster)
+        self.context_menu.addAction(self.action_uncheck_all_raster)
+        self._point_cloud_separator = self.context_menu.addSeparator()
+        self.context_menu.addAction(self.action_check_all_point_cloud)
+        self.context_menu.addAction(self.action_uncheck_all_point_cloud)
+
+    def set_target_hints(self, enabled):
+        """Show, right of each item added from now on, what the filter does to it (FILTERING targets)."""
+        self._target_hints = bool(enabled)
+
+    def geometry_types(self):
+        """Set of the ``layer_geometry_type`` values of the listed layers."""
+        types = set()
+        for i in range(self.count()):
+            item = self.model().item(i)
+            data = item.data(Qt.ItemDataRole.UserRole) if item else None
+            if isinstance(data, dict) and data.get("layer_geometry_type"):
+                types.add(data["layer_geometry_type"])
+        return types
+
+    def _sync_kind_actions(self):
+        """Raster / point cloud entries of the context menu only when such layers are listed."""
+        types = self.geometry_types()
+        for geometry_type, widgets in (
+                ('GeometryType.Raster', (self._raster_separator, self.action_check_all_raster,
+                                         self.action_uncheck_all_raster)),
+                ('GeometryType.PointCloud', (self._point_cloud_separator, self.action_check_all_point_cloud,
+                                             self.action_uncheck_all_point_cloud))):
+            for widget in widgets:
+                widget.setVisible(geometry_type in types)
+
+    def _target_hint(self, kind):
+        """Short hint of what the filter does to a target of ``kind`` (right of the list item)."""
+        return {'raster': self.tr('pixels in the zone'), 'point_cloud': self.tr('points in the zone')}.get(
+            kind, self.tr('features'))
+
+    def _target_tooltip(self, kind):
+        """What the filter does to a target of ``kind`` (tooltip of the list item)."""
+        return {
+            'raster': self.tr('Raster target: the pixels outside the source geometry become NoData '
+                              '(those inside with Disjoint)'),
+            'point_cloud': self.tr('Point cloud target: the points outside the source geometry are removed '
+                                   '(those inside with Disjoint)'),
+        }.get(kind, self.tr('Vector target: the features that satisfy the geometric predicate are kept'))
+
+    def _items(self):
+        for i in range(self.count()):
+            item = self.model().item(i)
+            if item is not None:
+                yield item
+
+    @staticmethod
+    def _item_layer_id(item):
+        data = item.data(Qt.ItemDataRole.UserRole)
+        return data.get("layer_id") if isinstance(data, dict) else None
+
+    def centroid_layer_ids(self):
+        """Ids of the line / polygon targets whose centroid toggle is on (checked or not)."""
+        return [self._item_layer_id(item) for item in self._items() if item.data(CENTROID_ROLE)]
+
+    def centroid_eligible_ids(self, checked_only=False):
+        """Ids of the targets that can be tested by their centroids (line / polygon layers)."""
+        return [self._item_layer_id(item) for item in self._items()
+                if item.data(CENTROID_ROLE) is not None
+                and (not checked_only or item.checkState() == Qt.CheckState.Checked)]
+
+    def set_centroid_layer_ids(self, layer_ids, emit=False):
+        """Turn the centroid toggle on for ``layer_ids`` and off for the other eligible targets."""
+        wanted = set(layer_ids or ())
+        for item in self._items():
+            if item.data(CENTROID_ROLE) is not None:
+                item.setData(self._item_layer_id(item) in wanted, CENTROID_ROLE)
+        self.view().viewport().update()
+        if emit:
+            self.centroidsChanged.emit(self.centroid_layer_ids())
+
+    def clear_centroid_toggles(self):
+        """No centroid toggle at all (the source is a raster or a point cloud: its targets are clipped)."""
+        for item in self._items():
+            if item.data(CENTROID_ROLE) is not None:
+                item.setData(None, CENTROID_ROLE)
+        self.view().viewport().update()
+
+    def _centroid_toggle_at(self, pos):
+        """Item whose centroid toggle is under ``pos`` (viewport coordinates), else None."""
+        index = self.view().indexAt(pos)
+        if not index.isValid() or index.data(CENTROID_ROLE) is None:
+            return None
+        toggle, _x, _w = ItemDelegate.trailing_layout(self.view().visualRect(index), self.view().viewport().fontMetrics(), index)
+        return self.model().itemFromIndex(index) if toggle is not None and toggle.adjusted(-3, -2, 3, 2).contains(pos) else None
+
     def addItem(self, icon, text, data=None):
         """
         Add an item to the combobox with icon and optional data.
@@ -322,8 +496,18 @@ class QgsCheckableComboBoxLayer(QComboBox):
 
         if data is not None:
             item.setData(data, role=Qt.ItemDataRole.UserRole)
+        if self._target_hints:
+            kind = target_kind(data.get('layer_geometry_type') if isinstance(data, dict) else None)
+            item.setData(self._target_hint(kind), TARGET_HINT_ROLE)
+            tooltip = f"{text}\n{self._target_tooltip(kind)}"
+            from ...core.domain.centroid_targets import centroid_eligible
+            if centroid_eligible(data.get('layer_geometry_type') if isinstance(data, dict) else None):
+                item.setData(False, CENTROID_ROLE)
+                tooltip += "\n" + self.tr('Click the square on the right to test this layer by its centroids')
+            item.setToolTip(tooltip)
 
         self.model().appendRow(item)
+        self._populated_timer.start()
 
     def setItemCheckState(self, i, state=None):
         """Set or toggle the check state of an item."""
@@ -389,6 +573,12 @@ class QgsCheckableComboBoxLayer(QComboBox):
     def eventFilter(self, obj, event):
         """Handle mouse events for item selection and context menu."""
         if event.type() == QEvent.Type.MouseButtonRelease and obj == self.view().viewport() and event.button() == Qt.MouseButton.LeftButton:
+            position = event.position().toPoint() if hasattr(event, 'position') else event.pos()
+            toggled = self._centroid_toggle_at(position)
+            if toggled is not None:  # the centroid toggle of a line / polygon target, not its check box
+                toggled.setData(not toggled.data(CENTROID_ROLE), CENTROID_ROLE)
+                self.centroidsChanged.emit(self.centroid_layer_ids())
+                return True
             index = self.view().currentIndex()
             item = self.model().itemFromIndex(index)
             if item:
@@ -399,6 +589,7 @@ class QgsCheckableComboBoxLayer(QComboBox):
                     item.setCheckState(Qt.CheckState.Checked)
             return True
         elif event.type() == QEvent.Type.MouseButtonRelease and obj in [self.view().viewport(), self] and event.button() == Qt.MouseButton.RightButton:
+            self._sync_kind_actions()
             action = self.context_menu.exec(QCursor.pos())
             if action:
                 return True
@@ -1114,11 +1305,23 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
         layer. The rows are sorted by display value client-side anyway, and the
         text filter searches the whole layer server-side. GeoPackage keeps the
         server order (batiment, 1.17 M rows: 0.6 s).
+
+        2026-10-17: same for web services and remote files (WFS, OGC API
+        Features, /vsicurl/...): QGIS sorts them client-side, so the limited
+        request downloaded the whole layer before keeping 1001 rows.
         """
         try:
-            return self.layer.providerType() != 'postgres'
+            provider = self.layer.providerType()
+            source = self.layer.source()
         except (RuntimeError, AttributeError):
             return True
+        if provider == 'postgres':
+            return False
+        try:
+            from ...core.domain.source_capability import classify
+        except ImportError:
+            from core.domain.source_capability import classify
+        return not classify(provider, source).is_remote
 
     CANVAS_DEFER_FALLBACK_MS = 15000
     CANVAS_DEFER_MAX_ROUNDS = 3
@@ -1185,7 +1388,7 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
         QTimer.singleShot(self.CANVAS_DEFER_FALLBACK_MS, lambda: run_deferred(True))
         logger.info(
             f"_populate_features_sync: {self._cached_layer_name} population deferred until the canvas "
-            f"finishes rendering (PostgreSQL, fallback {self.CANVAS_DEFER_FALLBACK_MS} ms "
+            f"finishes rendering (PostgreSQL / remote source, fallback {self.CANVAS_DEFER_FALLBACK_MS} ms "
             f"x{self.CANVAS_DEFER_MAX_ROUNDS + 1})"
         )
         return True
@@ -1245,7 +1448,7 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
 
         list_widget.clear()
 
-        identifier_field = list_widget.getIdentifierFieldName()
+        identifier_field = self._identifier_field_of_layer(list_widget.getIdentifierFieldName())
         identifier_numeric = bool(getattr(list_widget, 'identifier_field_type_numeric', False))
         expr, context = self._make_display_evaluator(expression)
 
@@ -1267,9 +1470,7 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
         search_text = (search_text or '').strip()
         display_sql = self._display_expression_sql(expression, list_widget)
         if search_text:
-            request.setFilterExpression(
-                f"lower(to_string({display_sql})) LIKE {QgsExpression.quotedValue('%' + search_text.lower() + '%')}"
-            )
+            request.setFilterExpression(self._search_expression(display_sql, search_text))
         server_sorted = False
         if fetch_limit > 0:
             # Sorted by display value so "the first N" is predictable, and one
@@ -1405,12 +1606,59 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
         context.appendScopes(QgsExpressionContextUtils.globalProjectLayerScopes(self.layer))
         return expr, context
 
+    def _search_expression(self, display_sql, search_text):
+        """Case-insensitive "contains" filter of the text search.
+
+        2026-10-17: on a web service (or remote file) whose display is a text
+        field, ``"field" ILIKE '%x%'``: QGIS translates it to the server's
+        filter (OGC PropertyIsLike matchCase=false, CQL2...), where
+        ``lower(to_string(...)) LIKE`` is evaluated client-side after
+        downloading every feature.
+        """
+        pattern = QgsExpression.quotedValue('%' + search_text + '%')
+        if not display_sql.startswith('(') and self._displays_remote_text_field(display_sql):
+            return f"{display_sql} ILIKE {pattern}"
+        return f"lower(to_string({display_sql})) LIKE {QgsExpression.quotedValue('%' + search_text.lower() + '%')}"
+
+    def _displays_remote_text_field(self, display_sql):
+        """Whether ``display_sql`` (a quoted field name) is a text field of a remote layer."""
+        if self._orders_server_side():
+            return False
+        try:
+            if self.layer.providerType() == 'postgres':
+                return False
+            fields = self.layer.fields()
+            index = fields.indexOf(display_sql.strip('"').replace('""', '"'))
+            if index < 0:
+                return False
+            field = fields.at(index)
+            is_date = getattr(field, 'isDateOrTime', lambda: False)()
+            return not field.isNumeric() and not is_date
+        except (RuntimeError, AttributeError):
+            return False
+
     @staticmethod
     def _display_expression_sql(expression, list_widget):
         """Display expression as an expression string (quoted when it is a bare field name)."""
         if list_widget.getExpressionFieldFlag() or QgsExpression(expression).isField():
             return QgsExpression.quotedColumnRef(expression.replace('"', ''))
         return f"({expression})"
+
+    def _identifier_field_of_layer(self, identifier_field):
+        """``identifier_field`` when it is a field of the layer, else None (rows keyed by feature id).
+
+        2026-10-17: a layer without a unique key field is keyed by its QGIS
+        feature id, recorded as 'fid' (core.domain.stable_key); a Shapefile or a
+        web layer has no field of that name.
+        """
+        if not identifier_field:
+            return None
+        try:
+            if self.layer.fields().indexOf(identifier_field) < 0:
+                return None
+        except (RuntimeError, AttributeError):
+            pass
+        return identifier_field
 
     @staticmethod
     def _row_from_feature(feature, identifier_field, expression, expr, context):
@@ -1428,11 +1676,16 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
         return (display_value, fid_value)
 
     def _fetch_rows_by_identifier(self, identifier_field, values, expression, identifier_numeric=False, chunk_size=500):
-        """Fetch ``(display_value, fid)`` rows for the given identifiers, in chunks."""
+        """Fetch ``(display_value, fid)`` rows for the given identifiers, in chunks.
+
+        2026-10-17: an identifier that is no field of the layer (the feature-id
+        key '$id' / a legacy 'fid') looks the rows up by feature id.
+        """
         rows = []
         values = list(values)
         if not values:
             return rows
+        identifier_field = self._identifier_field_of_layer(identifier_field)
         try:
             expr, context = self._make_display_evaluator(expression)
             for start in range(0, len(values), chunk_size):
@@ -1572,7 +1825,7 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
         """
         try:
             request = self._build_identifier_lookup_request(
-                identifier_field_name, [id_value], self._identifier_is_numeric())
+                self._identifier_field_of_layer(identifier_field_name), [id_value], self._identifier_is_numeric())
             request.setLimit(1)
             try:
                 filter_expression = request.filterExpression()

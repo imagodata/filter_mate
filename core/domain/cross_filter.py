@@ -151,15 +151,19 @@ def quote_identifier(name: str) -> str:
     return '"' + str(name).replace('"', '""') + '"'
 
 
-def _sql_literal(value) -> str:
+def _sql_literal(value, qgis_expression: bool = False) -> str:
     if isinstance(value, bool):
         return "1" if value else "0"
     if isinstance(value, (int, float)):
         return repr(value) if isinstance(value, float) else str(value)
-    return "'" + str(value).replace("'", "''") + "'"
+    text = str(value).replace("'", "''")
+    if qgis_expression:  # a QGIS expression reads a backslash as an escape (QgsExpression.quotedString)
+        text = text.replace('\\', '\\\\').replace('\n', '\\n').replace('\t', '\\t')
+    return "'" + text + "'"
 
 
-def build_in_expression(field_name: Optional[str], values: Sequence, raw_field: bool = False) -> str:
+def build_in_expression(field_name: Optional[str], values: Sequence, raw_field: bool = False,
+                        qgis_expression: bool = False) -> str:
     """Build ``"field" IN (v1, v2, ...)``, or a false predicate for no value.
 
     Args:
@@ -167,6 +171,8 @@ def build_in_expression(field_name: Optional[str], values: Sequence, raw_field: 
             (``FID`` for OGR special fields, ``$id`` for QGIS expressions).
         values: Key values of the kept features.
         raw_field: Do not quote the field name.
+        qgis_expression: The subset is a QGIS expression (memory, delimited text,
+            WFS, OGC API Features): backslashes escaped in text literals.
 
     Returns:
         A subset expression valid for PostgreSQL, Spatialite, OGR SQL and QGIS expressions.
@@ -175,7 +181,7 @@ def build_in_expression(field_name: Optional[str], values: Sequence, raw_field: 
         return "1 = 0"
     field = str(field_name) if raw_field else quote_identifier(field_name)
     unique = list(dict.fromkeys(values))
-    return f"{field} IN ({', '.join(_sql_literal(v) for v in unique)})"
+    return f"{field} IN ({', '.join(_sql_literal(v, qgis_expression) for v in unique)})"
 
 
 @dataclass(frozen=True)

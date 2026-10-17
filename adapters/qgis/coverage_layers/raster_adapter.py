@@ -64,6 +64,25 @@ class RasterBandInfo:
     name: str
     data_type: str
     nodata: Optional[float]
+    is_alpha: bool = False  # 2026-10-17: transparency band (colour interpretation), not a colour
+
+
+def is_alpha_band(provider, band: int) -> bool:
+    """Whether ``band`` is the alpha (transparency) band, by its colour interpretation.
+
+    2026-10-17: QGIS names the bands of a GeoTIFF "Band 1" ... "Band 4", so
+    the name says nothing: an RGBA orthophoto was taken for RGB + infrared
+    and the NDVI preset read the alpha band as infrared. Same test as
+    snapshots._sync_alpha_band: ``Qgis.RasterColorInterpretation.AlphaBand``
+    (QGIS 3.30+), the value 6 of ``QgsRaster.AlphaBand`` before.
+    """
+    try:
+        interpretation = getattr(Qgis, 'RasterColorInterpretation', None)
+        alpha_value = interpretation.AlphaBand if interpretation is not None else 6
+        return provider.colorInterpretation(band) == alpha_value
+    except Exception as exc:
+        logger.debug(f"[FM5] colour interpretation of band {band} unreadable: {exc}")
+        return False
 
 
 @dataclass
@@ -118,7 +137,8 @@ def read_raster_summary(layer: QgsRasterLayer) -> RasterSummary:
                 nodata = float(provider.sourceNoDataValue(number))
         except Exception:
             nodata = None
-        bands.append(RasterBandInfo(number, layer.bandName(number), _data_type_name(provider.dataType(number)), nodata))
+        bands.append(RasterBandInfo(number, layer.bandName(number), _data_type_name(provider.dataType(number)), nodata,
+                                    is_alpha=is_alpha_band(provider, number)))
     width, height = layer.width(), layer.height()
     extent = layer.extent()
     return RasterSummary(
