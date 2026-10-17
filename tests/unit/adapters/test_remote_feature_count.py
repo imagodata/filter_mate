@@ -121,3 +121,9 @@ def test_filtered_extent_of_a_web_service_is_not_scanned():
     layer.updateExtents = lambda: (_ for _ in ()).throw(AssertionError("updateExtents of a web service"))
     assert method(None, layer) == "provider extent"
     assert layer.counted == 0
+
+
+def test_layer_refresh_uses_the_real_gdal_error_handler():
+    """The import named a module that does not exist: the no-op test double was silently used."""
+    module = _load("layer_refresh_manager")
+    assert module.GdalErrorHandler.__module__.endswith("infrastructure.utils")
