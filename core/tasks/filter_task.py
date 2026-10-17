@@ -1704,12 +1704,6 @@ class FilterEngineTask(QgsTask):
         """Normalize column names for PostgreSQL. Delegates to ExpressionFacadeHandler."""
         return self._expr_facade.normalize_column_names_for_postgresql(expression, field_names)
 
-    def _qualify_field_names_in_expression(self, expression, field_names, primary_key_name, table_name, is_postgresql):
-        """Qualify field names in expression. Delegates to ExpressionFacadeHandler."""
-        return self._expr_facade.qualify_field_names_in_expression(
-            expression, field_names, primary_key_name, table_name, is_postgresql
-        )
-
     def _build_combined_filter_expression(self, new_expression, old_subset, combine_operator, layer_props=None):
         """Build combined filter expression. Delegates to ExpressionFacadeHandler."""
         return self._expr_facade.build_combined_filter_expression(

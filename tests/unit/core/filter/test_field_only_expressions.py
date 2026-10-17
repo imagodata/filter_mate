@@ -75,7 +75,6 @@ def _executor(module, provider='ogr', geometry_field=None):
     layer.fields.return_value = []
     executor = module.AttributeFilterExecutor(layer=layer, provider_type=provider, primary_key='fid',
                                               geometry_field=geometry_field)
-    executor._qualify_field_names = lambda expression: expression
     return executor
 
 
