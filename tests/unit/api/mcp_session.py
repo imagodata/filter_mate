@@ -30,6 +30,7 @@ class McpSession:
         self._stop = None
         self._error = None
         self.session = None
+        self.init_result = None
         self._thread = threading.Thread(target=self._run, daemon=True)
 
     def _run(self):
@@ -40,7 +41,7 @@ class McpSession:
         try:
             async with stdio_client(self._params) as (read, write):
                 async with ClientSession(read, write) as session:
-                    await session.initialize()
+                    self.init_result = await session.initialize()
                     self.session = session
                     self._ready.set()
                     await self._stop.wait()

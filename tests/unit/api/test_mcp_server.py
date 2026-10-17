@@ -290,6 +290,18 @@ def test_resources(mcp, fake_api):
     assert json.loads(mcp.run(mcp.session.read_resource("filtermate://state")).contents[0].text) == []
 
 
+def test_a_failing_resource_carries_the_readable_message(mcp, fake_api):
+    fake_api.expected_key = "another-key"
+    with pytest.raises(Exception) as info:
+        mcp.run(mcp.session.read_resource("filtermate://layers"))
+    assert "rejected the API key" in str(info.value)
+
+
+def test_instructions_warn_that_undo_is_not_idempotent(mcp):
+    instructions = mcp.init_result.instructions
+    assert "undo_filter / redo_filter are not idempotent" in instructions and "read filter_state" in instructions
+
+
 # --- start-up ---------------------------------------------------------------------------
 
 def run_server(*args, env=None, cwd=None):
@@ -319,6 +331,19 @@ def test_other_key_variable(tmp_path, _fake_api_server):
     _fake_api_server.respond("GET", "/layers", [])
     with McpSession(params) as session:
         assert not is_error(session.call("list_layers"))
+
+
+def test_serves_when_run_as_a_script_from_any_folder(tmp_path, _fake_api_server):
+    """The documented way: the path of __main__.py, no PYTHONPATH, no package install, an unrelated cwd."""
+    script = ROOT / "filtermate_api" / "mcp" / "__main__.py"
+    _fake_api_server.reset()
+    _fake_api_server.respond("GET", "/layers", [{"name": "communes"}])
+    params = StdioServerParameters(
+        command=sys.executable, args=[str(script), "--url", _fake_api_server.url],
+        env={"FILTERMATE_API_KEY": "test-key-0123456789"}, cwd=str(tmp_path))
+    with McpSession(params) as session:
+        result = session.call("list_layers")
+    assert not is_error(result) and "communes" in text_of(result)
 
 
 def test_runs_as_a_script_from_any_folder(tmp_path, _fake_api_server):

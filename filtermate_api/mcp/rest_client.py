@@ -7,7 +7,9 @@ QGIS, and what to do next.
 
 from __future__ import annotations
 
+import http.client
 import json
+import socket
 import urllib.error
 import urllib.request
 from typing import Any, Dict, Optional
@@ -79,44 +81,78 @@ class FilterMateClient:
             FilterMateAPIError: unreachable API, timeout, or an HTTP error status.
         """
         url = self._base_url + path
+        if not url.lower().startswith(("http://", "https://")):  # urllib would also open ftp: and file: URLs
+            raise FilterMateAPIError(f"Invalid FilterMate REST API URL {url!r}: only http and https are supported.")
         headers = {API_KEY_HEADER: self._api_key, "Accept": "application/json"}
         data = None
         if body is None and method != "GET":
             body = {}  # a JSON object, like every other write: some routes take no body, none minds one
         if body is not None:
-            data = json.dumps(body).encode("utf-8")
+            data = json.dumps(body, ensure_ascii=False).encode("utf-8")
             headers["Content-Type"] = "application/json"
-        request = urllib.request.Request(url, data=data, headers=headers, method=method)
         try:
-            with self._opener.open(request, timeout=self._timeout) as response:
-                raw = response.read(_MAX_RESPONSE_BYTES + 1)
-        except urllib.error.HTTPError as exc:
+            request = urllib.request.Request(url, data=data, headers=headers, method=method)
+        except ValueError as exc:  # unknown URL type, bad characters
+            raise FilterMateAPIError(f"Invalid FilterMate REST API URL {url!r}: {exc}") from None
+        try:
             try:
-                raw = exc.read(_MAX_RESPONSE_BYTES)
-            finally:
-                exc.close()
-            raise self._http_error(method, path, exc.code, exc.headers, raw) from None
+                with self._opener.open(request, timeout=self._timeout) as response:
+                    raw = response.read(_MAX_RESPONSE_BYTES + 1)
+            except urllib.error.HTTPError as exc:
+                try:
+                    raw = exc.read(_MAX_RESPONSE_BYTES)
+                except (OSError, http.client.HTTPException):
+                    raw = b""  # the status line is what matters; the body never arrived
+                finally:
+                    exc.close()
+                raise self._http_error(method, path, exc.code, exc.headers, raw) from None
+        except FilterMateAPIError:
+            raise
         except urllib.error.URLError as exc:
             reason = exc.reason
             if isinstance(reason, TimeoutError):
                 raise self._timeout_error(method, path) from None
             raise FilterMateAPIError(
-                f"Cannot reach the FilterMate REST API at {self._base_url} ({reason}). {_START_HINT}") from None
+                f"Cannot reach the FilterMate REST API at {self._base_url} ({reason}). "
+                f"{_START_HINT}{self._maybe_applied(method, reason)}") from None
         except TimeoutError:
             raise self._timeout_error(method, path) from None
-        except OSError as exc:
+        except (OSError, http.client.HTTPException) as exc:
+            # Includes RemoteDisconnected, ConnectionReset, BadStatusLine, IncompleteRead, InvalidURL.
             raise FilterMateAPIError(
-                f"Connection to the FilterMate REST API at {self._base_url} failed ({exc}). {_START_HINT}") from None
+                f"The connection to the FilterMate REST API at {self._base_url} failed "
+                f"({type(exc).__name__}: {exc}). Check that QGIS and the API are still running."
+                f"{self._maybe_applied(method, exc)}") from None
+        except Exception as exc:  # last resort: whatever happens, the assistant gets a readable error
+            raise FilterMateAPIError(
+                f"Unexpected error calling the FilterMate REST API ({type(exc).__name__}: {exc})."
+                f"{self._maybe_applied(method, exc)}") from None
         if len(raw) > _MAX_RESPONSE_BYTES:
             raise FilterMateAPIError("The FilterMate REST API answer is too large to be read.")
         try:
             return json.loads(raw.decode("utf-8")) if raw else None
         except ValueError:
+            if method != "GET":
+                raise FilterMateAPIError(
+                    f"{self._base_url} sent an answer that is not JSON (truncated, or not the FilterMate REST "
+                    f"API: check --url and the port).{self._maybe_applied(method, None)}") from None
             raise FilterMateAPIError(
                 f"{self._base_url} did not answer JSON: this is not the FilterMate REST API "
                 "(check --url and the port).") from None
 
     # -- error translation ---------------------------------------------------
+
+    @staticmethod
+    def _maybe_applied(method: str, cause: Optional[BaseException]) -> str:
+        """Warning appended to a failure of a change that may have reached QGIS before the link broke."""
+        if method == "GET":
+            return ""
+        if isinstance(cause, urllib.error.URLError):
+            cause = cause.reason
+        if isinstance(cause, (ConnectionRefusedError, socket.gaierror)) or isinstance(cause, str):
+            return ""  # never connected: nothing was sent
+        return (" The operation may have been applied in QGIS: read filter_state before retrying, "
+                "so that the change is not applied twice.")
 
     def _timeout_error(self, method: str, path: str) -> FilterMateAPIError:
         writes = method != "GET"
@@ -140,13 +176,28 @@ class FilterMateClient:
             retry = headers.get("Retry-After") if headers is not None else None
             when = f" Retry in about {retry} s." if retry else " Retry in a moment."
             return FilterMateAPIError(
-                f"QGIS is busy (a FilterMate operation or a long task is running); nothing was changed.{when} "
-                f"Server said: {detail}", status)
+                f"{detail}. HTTP 503: QGIS (or the favorites store) is busy or not ready; nothing was changed."
+                f"{when}", status)
         if status == 422:
             return FilterMateAPIError(f"The request was rejected as invalid (HTTP 422): {detail}", status)
         if status == 404:
+            if detail == "Not Found":  # FastAPI's answer for a route that does not exist
+                return FilterMateAPIError(
+                    f"The FilterMate REST API has no endpoint {method} {path} (HTTP 404): the API running in QGIS "
+                    "is older than this MCP server, or --url does not point at it. Update the FilterMate plugin.",
+                    status)
+            if path == "/filters/apply":
+                return FilterMateAPIError(
+                    "HTTP 404: vector layer not found by its name, or expression refused by the data provider "
+                    "(check the SQL syntax of the provider, e.g. quoting of field names). "
+                    f"Use list_layers for the names. Server said: {detail}", status)
             return FilterMateAPIError(f"Not found (HTTP 404): {detail}. Use list_layers / list_favorites "
                                       "to see what exists.", status)
+        if status == 413:
+            return FilterMateAPIError(
+                "The request is too large for the FilterMate REST API (HTTP 413; the limit is 1 MiB by default, "
+                "FILTERMATE_API_MAX_BODY_BYTES on the QGIS side): shorten the expression or WKT geometry, or "
+                f"split the layer list. Server said: {detail}", status)
         if status == 409:
             return FilterMateAPIError(f"Nothing to do (HTTP 409): {detail}", status)
         return FilterMateAPIError(f"{method} {path} failed (HTTP {status}): {detail}", status)

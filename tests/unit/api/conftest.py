@@ -16,6 +16,8 @@ from typing import Any, Dict, List, Optional, Tuple
 import pytest
 
 API_KEY = "test-key-0123456789"
+DROP = "drop"            # close the connection without answering
+TRUNCATED = "truncated"  # announce 100 bytes of JSON, send 1, close
 
 
 class FakeRestApi:
@@ -67,7 +69,7 @@ class FakeRestApi:
                 except ValueError:
                     body = raw
                 api.requests.append({
-                    "method": self.command, "path": self.path, "body": body,
+                    "method": self.command, "path": self.path, "body": body, "raw_body": raw,
                     "headers": {k.lower(): v for k, v in self.headers.items()},
                 })
                 if api.delay:
@@ -81,6 +83,18 @@ class FakeRestApi:
                 self._send(status, payload, headers)
 
             def _send(self, status: int, payload: Any, headers: Dict[str, str]) -> None:
+                if payload == DROP:
+                    self.close_connection = True
+                    return
+                if payload == TRUNCATED:
+                    self.send_response(status)
+                    self.send_header("Content-Type", "application/json")
+                    self.send_header("Content-Length", "100")
+                    self.end_headers()
+                    self.wfile.write(b"{")
+                    self.wfile.flush()
+                    self.close_connection = True
+                    return
                 data = payload if isinstance(payload, bytes) else json.dumps(payload).encode("utf-8")
                 self.send_response(status)
                 self.send_header("Content-Type", "application/json")

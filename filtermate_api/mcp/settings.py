@@ -8,7 +8,7 @@ in shell history and client configuration files shown on screen).
 from __future__ import annotations
 
 import argparse
-import ipaddress
+import math
 import re
 import sys
 from dataclasses import dataclass, field
@@ -20,6 +20,10 @@ DEFAULT_KEY_ENV = "FILTERMATE_API_KEY"
 # REST API calls wait up to 30 s for the QGIS main thread (main_thread.py);
 # the MCP side must outlast that to read the 503 instead of timing out first.
 DEFAULT_TIMEOUT_SECONDS = 45.0
+MAX_TIMEOUT_SECONDS = 600.0
+
+# The names the REST API itself treats as loopback (filtermate_api/config.py): same list, same strictness.
+_LOOPBACK_HOSTS = frozenset({"127.0.0.1", "localhost", "::1"})
 
 _ENV_NAME = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
 
@@ -44,15 +48,8 @@ class MCPSettings:
 
 
 def is_loopback_host(host: Optional[str]) -> bool:
-    """True for ``localhost`` and loopback IP literals (127.0.0.0/8, ::1)."""
-    if not host:
-        return False
-    if host.lower() == "localhost":
-        return True
-    try:
-        return ipaddress.ip_address(host).is_loopback
-    except ValueError:
-        return False
+    """True for ``127.0.0.1``, ``localhost`` and ``::1``, the loopback names of the REST API."""
+    return bool(host) and host.lower() in _LOOPBACK_HOSTS
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -78,7 +75,7 @@ def build_parser() -> argparse.ArgumentParser:
         help="accept an API URL that is not on this machine (the key then travels over the network)")
     parser.add_argument(
         "--timeout", type=float, default=DEFAULT_TIMEOUT_SECONDS, metavar="SECONDS",
-        help="HTTP timeout per call (default: %(default).0f, above the 30 s wait of the API for QGIS)")
+        help="HTTP timeout per call, at most 600 (default: %(default).0f, above the 30 s wait of the API for QGIS)")
     return parser
 
 
@@ -103,23 +100,31 @@ def parse_settings(argv: Optional[Sequence[str]], environ: Mapping[str, str]) ->
         raise ConfigError(
             "--api-key-env takes the NAME of an environment variable (e.g. FILTERMATE_API_KEY), "
             "never the key itself.")
-    api_key = (environ.get(env_name) or "").strip()
+    api_key = environ.get(env_name) or ""
     if not api_key:
+        # A variable name is upper case by convention; anything else may be a key given by mistake: not echoed.
+        shown = f"variable {env_name}" if env_name == env_name.upper() and len(env_name) <= 40 else (
+            "variable named by --api-key-env")
         raise ConfigError(
-            f"No API key: set the environment variable {env_name} to the FilterMate API key "
+            f"No API key: set the environment {shown} to the FilterMate API key "
             "(the key configured in QGIS for the REST API). An AI assistant able to change your "
             "layer filters must authenticate, so the server refuses to start without one.")
     if not api_key.isascii() or not api_key.isprintable():
-        raise ConfigError(f"The API key in {env_name} must be printable ASCII.")
+        raise ConfigError("The API key in the environment must be printable ASCII.")
+    if api_key != api_key.strip():
+        # The API compares the key as is: a trailing newline or space from a copy-paste would never match.
+        raise ConfigError("The API key in the environment has leading or trailing whitespace: remove it.")
 
     base_url = _check_url(args.url, args.allow_remote)
-    if not args.timeout > 0:
-        raise ConfigError("--timeout must be a positive number of seconds.")
+    if not (math.isfinite(args.timeout) and 0 < args.timeout <= MAX_TIMEOUT_SECONDS):
+        raise ConfigError(f"--timeout must be between 0 and {MAX_TIMEOUT_SECONDS:.0f} seconds.")
     return MCPSettings(base_url=base_url, api_key=api_key, timeout=args.timeout,
                        allow_remote=args.allow_remote)
 
 
 def _check_url(url: str, allow_remote: bool) -> str:
+    if any(ch.isspace() or not ch.isprintable() for ch in url):
+        raise ConfigError("Invalid --url: no spaces or control characters.")
     try:
         parts = urlsplit(url)
         host = parts.hostname

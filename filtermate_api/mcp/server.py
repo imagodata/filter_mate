@@ -19,10 +19,10 @@ from pydantic import BaseModel, ConfigDict, Field
 
 try:  # mcp 2.x
     from mcp.server.mcpserver import MCPServer as _Server
-    from mcp.server.mcpserver.exceptions import ToolError
+    from mcp.server.mcpserver.exceptions import ResourceError, ToolError
 except ImportError:  # mcp 1.x
     from mcp.server.fastmcp import FastMCP as _Server
-    from mcp.server.fastmcp.exceptions import ToolError
+    from mcp.server.fastmcp.exceptions import ResourceError, ToolError
 from mcp.types import ToolAnnotations
 
 from .rest_client import FilterMateAPIError, FilterMateClient, quote_segment
@@ -36,6 +36,8 @@ Drives FilterMate, the QGIS filtering plugin, through its local REST API. QGIS m
 Typical workflow: list_layers (names, ids, kinds), then cross_filter / geometry_filter / point_cloud_filter / \
 apply_filter to filter, filter_state to see what is filtered now, export_layers to write the filtered layers, \
 clear_filters to put layers back on their original source.
+undo_filter / redo_filter are not idempotent: after one (also after an error or a timeout), read filter_state \
+before calling it again.
 
 Filters change the layers of the open QGIS project in place (visible to the user at once). They can be reverted with \
 clear_filters; undo_filter / redo_filter only cover the vector history of the dock. Nothing here edits the data \
@@ -56,8 +58,6 @@ _OPERATOR_DOC = (
     "How to combine with the previous filter of each target: AND (keep what both filters keep), OR (keep what "
     "either keeps), AND NOT (remove the new selection from the previous filter). Omit to replace the previous filter."
 )
-_LAYERS_DOC = "Layers are designated by QGIS layer id or by name (the first layer of that name); list_layers gives both."
-
 
 def _write(title: str, idempotent: bool, destructive: bool = False) -> ToolAnnotations:
     return ToolAnnotations(title=title, readOnlyHint=False, destructiveHint=destructive,
@@ -190,10 +190,11 @@ def build_server(client: FilterMateClient) -> Any:
     async def undo_filter() -> Dict[str, Any]:
         """Undo the last step of the dock's vector filter history (the dock's Undo button).
 
-        Returns the step rolled back to (layer_name, expression, is_clear) and active_filters. Only covers steps
-        recorded by the dock itself: nothing done through these tools (apply_filter, cross_filter,
-        geometry_filter, point_cloud_filter, clear_filters, apply_favorite) is recorded there, so use
-        clear_filters to revert those. Fails with 'Nothing to undo' when the history is empty.
+        Returns the step rolled back to (layer_name, expression, is_clear) and active_filters. Only steps recorded
+        by the dock itself are undone: nothing done through these tools (apply_filter, cross_filter,
+        geometry_filter, point_cloud_filter, clear_filters, apply_favorite) is, so use clear_filters to revert
+        those. Fails with 'Nothing to undo' when the history is empty. Not idempotent: each call undoes one more
+        step, so after an error or a timeout read filter_state before calling again.
         """
         return await call("POST", "/filters/undo")
 
@@ -201,7 +202,8 @@ def build_server(client: FilterMateClient) -> Any:
     async def redo_filter() -> Dict[str, Any]:
         """Redo the step undone last in the dock's vector filter history (the dock's Redo button).
 
-        Same answer as undo_filter. Fails with 'Nothing to redo' when there is nothing to redo.
+        Same answer and same caution as undo_filter (not idempotent: read filter_state after an error or a timeout).
+        Fails with 'Nothing to redo' when there is nothing to redo.
         """
         return await call("POST", "/filters/redo")
 
@@ -287,7 +289,8 @@ def build_server(client: FilterMateClient) -> Any:
         """Keep only some points (by class, elevation, intensity, return number or expression) on point cloud layers.
 
         The same criteria apply to every listed layer, e.g. all the tiles of a LiDAR HD dataset. Sets the layer
-        filter (e.g. 'Classification = 6 AND Z >= 1000'). Not in the undo history: revert with clear_filters.
+        filter (e.g. 'Classification = 6 AND Z >= 1000'). It is one step of the dock's history of those point clouds
+        (the dock's Undo on the layer reverts it) but undo_filter does not undo it: revert with clear_filters.
         Returns done (layers filtered), failed and skipped.
         """
         return await call("POST", "/filters/point-cloud", _body(layers=layers, criteria=criteria, operator=operator))
@@ -344,16 +347,23 @@ def build_server(client: FilterMateClient) -> Any:
             point_cloud_format=point_cloud_format, crs=crs))
 
     # -- resources (read-only mirrors of two GET tools) --------------------------
+    # Synchronous on purpose: async resource functions return '<coroutine ...>' in mcp 1.9.0 / 1.10.0.
+
+    def read(path: str) -> str:
+        try:
+            return json.dumps(client.request("GET", path), indent=2, ensure_ascii=False)
+        except FilterMateAPIError as exc:
+            raise ResourceError(str(exc)) from None
 
     @mcp.resource("filtermate://layers", name="layers", mime_type="application/json",
                   description="Layers of the open QGIS project known to FilterMate (same as list_layers).")
-    async def layers_resource() -> str:
-        return json.dumps(await call("GET", "/layers"), indent=2)
+    def layers_resource() -> str:
+        return read("/layers")
 
     @mcp.resource("filtermate://state", name="state", mime_type="application/json",
                   description="Layers FilterMate filters now (same as filter_state).")
-    async def state_resource() -> str:
-        return json.dumps(await call("GET", "/filters/state"), indent=2)
+    def state_resource() -> str:
+        return read("/filters/state")
 
     return mcp
 
