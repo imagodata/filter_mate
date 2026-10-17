@@ -430,6 +430,14 @@ class LayerLifecycleService:
                         if count > 0:
                             logger.info(f"Cleaned up {count} materialized view(s) for session {session_id}")
 
+                    # 2026-10-17: the buffer tables of the dynamic buffers sit
+                    # in the schema of their source table, not in temp_schema.
+                    from ...adapters.backends.postgresql.cleanup import drop_session_buffer_tables
+                    dropped_tables = drop_session_buffer_tables(cursor, session_id)
+                    connexion.commit()
+                    if dropped_tables:
+                        logger.info(f"Cleaned up {len(dropped_tables)} buffer table(s) for session {session_id}")
+
                 # Record success for circuit breaker
                 pg_breaker.record_success()
             finally:

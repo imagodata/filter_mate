@@ -279,3 +279,38 @@ class TestGetSessionViewCount:
         conn.cursor.side_effect = Exception("error")
         count = service.get_session_view_count(conn)
         assert count == 0
+
+
+# ===========================================================================
+# Tests -- buffer tables of the dynamic buffers (2026-10-17)
+# ===========================================================================
+
+class TestSessionBufferTables:
+    """Buffer tables sit in the schema of their source table, not in the temp schema."""
+
+    def test_session_token_is_an_identifier_fragment(self):
+        assert _mod.session_token("AB12-cd_34") == "ab12cd34"
+        assert _mod.session_token("x" * 40) == "x" * 12
+        assert _mod.session_token(None) == "nosession"
+        assert _mod.session_token("--") == "nosession"
+
+    def test_drops_the_session_tables_of_every_schema(self, mock_cursor):
+        mock_cursor.fetchall.return_value = [("ref", "fm_temp_buf_ab12cd34_0123"), ('l"est', "fm_temp_buf_ab12cd34_4567")]
+        dropped = _mod.drop_session_buffer_tables(mock_cursor, "ab12cd34")
+        select_sql, params = mock_cursor.execute.call_args_list[0].args
+        assert "pg_tables" in select_sql and "schemaname =" not in select_sql
+        # underscores escaped: fm_temp_buf_ab12cd34_ must not match fm_temp_bufXab12cd34...
+        assert params == ("fm\\_temp\\_buf\\_ab12cd34\\_%",)
+        drops = [c.args[0] for c in mock_cursor.execute.call_args_list[1:]]
+        assert drops == [
+            'DROP TABLE IF EXISTS "ref"."fm_temp_buf_ab12cd34_0123" CASCADE',
+            'DROP TABLE IF EXISTS "l""est"."fm_temp_buf_ab12cd34_4567" CASCADE',
+        ]
+        assert dropped == ["ref.fm_temp_buf_ab12cd34_0123", 'l"est.fm_temp_buf_ab12cd34_4567']
+
+    def test_full_cleanup_also_looks_outside_the_temp_schema(self, service, mock_connexion, mock_cursor):
+        mock_cursor.fetchone.return_value = (1,)
+        mock_cursor.fetchall.return_value = []
+        service.cleanup_all_filtermate_objects(mock_connexion, include_public_schema=True)
+        sqls = [c.args[0] for c in mock_cursor.execute.call_args_list]
+        assert any("NOT (schemaname = ANY(%s))" in sql for sql in sqls)

@@ -98,6 +98,25 @@ _ensure_module_mocks()
 import importlib.util
 import os
 
+
+def _load_real_cleanup():
+    """The builder names its buffer tables with cleanup.session_token (2026-10-17)."""
+    name = "filter_mate.adapters.backends.postgresql.cleanup"
+    if isinstance(sys.modules.get(name), types.ModuleType):
+        return
+    path = os.path.normpath(os.path.join(
+        os.path.dirname(__file__), "..", "..", "..", "..", "..",
+        "adapters", "backends", "postgresql", "cleanup.py"
+    ))
+    spec = importlib.util.spec_from_file_location(name, path)
+    module = importlib.util.module_from_spec(spec)
+    module.__package__ = "filter_mate.adapters.backends.postgresql"
+    sys.modules[name] = module
+    spec.loader.exec_module(module)
+
+
+_load_real_cleanup()
+
 _builder_path = os.path.normpath(os.path.join(
     os.path.dirname(__file__),
     "..", "..", "..", "..", "..",
@@ -756,3 +775,167 @@ class TestSourceSelectionMvAsSource:
         assert 'FROM "filtermate_temp"."fm_temp_mv_session_ab_cd" AS __source WHERE (TRUE))' in expr
         assert '"ign"."troncon_de_route"' not in expr
         assert 'IN (SELECT pk' not in expr
+
+
+# ===========================================================================
+# Tests -- dynamic buffer tables (2026-10-17)
+# ===========================================================================
+
+class _RecordingCursor:
+    """Cursor double: records (sql, params) and answers the existence check."""
+
+    def __init__(self, existing_tables=()):
+        self.calls = []
+        self._existing = set(existing_tables)
+        self._last = None
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *exc):
+        return False
+
+    def execute(self, sql, params=None):
+        self.calls.append((sql, params))
+        self._last = (sql, params)
+
+    def fetchone(self):
+        sql, params = self._last
+        if "information_schema.tables" in sql:
+            return (params is not None and (params[0], params[1]) in self._existing,)
+        if "COUNT(*)" in sql:
+            return (3,)
+        return None
+
+
+class _RecordingConnexion:
+    def __init__(self, cursor):
+        self._cursor = cursor
+
+    def cursor(self):
+        return self._cursor
+
+    def commit(self):
+        pass
+
+    def rollback(self):
+        pass
+
+
+class TestDynamicBufferTable:
+    """The pre-computed buffer table of a dynamic buffer must never serve another selection.
+
+    It was named fm_temp_buf_<table>_<md5(expression)[:8]> and reused when it
+    existed: a second filter on another selection (or by another user, or
+    after an edit) got the buffers of the first one.
+    """
+
+    @pytest.fixture(autouse=True)
+    def _constants(self, monkeypatch):
+        constants = sys.modules["filter_mate.infrastructure.constants"]
+        monkeypatch.setattr(constants, "TABLE_PREFIX_BUFFER", "fm_temp_buf_", raising=False)
+        executor = sys.modules["filter_mate.adapters.backends.postgresql.filter_executor"]
+        monkeypatch.setattr(executor, "qgis_expression_to_postgis", lambda expr: expr, raising=False)
+
+    @staticmethod
+    def _builder(session_id="sess01"):
+        return PostgreSQLExpressionBuilder(task_params={
+            "buffer_endcap_style": "round",
+            "buffer_segments": 5,
+            "task": {"session_id": session_id},
+        })
+
+    def test_name_depends_on_the_selection(self):
+        b = self._builder()
+        first = b._buffer_table_name("ref", "demand_points", '"homecount" * 2', '"demand_points"."fid" IN (1, 2)')
+        second = b._buffer_table_name("ref", "demand_points", '"homecount" * 2', '"demand_points"."fid" IN (3)')
+        assert first != second
+
+    def test_name_depends_on_schema_table_and_expression(self):
+        b = self._builder()
+        base = b._buffer_table_name("ref", "demand_points", '"homecount" * 2', None)
+        assert base != b._buffer_table_name("other", "demand_points", '"homecount" * 2', None)
+        assert base != b._buffer_table_name("ref", "ducts", '"homecount" * 2', None)
+        assert base != b._buffer_table_name("ref", "demand_points", '"homecount" * 3', None)
+
+    def test_name_carries_the_session_for_cleanup(self):
+        name = self._builder("ab12cd34")._buffer_table_name("ref", "t", "10", None)
+        assert name.startswith("fm_temp_buf_ab12cd34_")
+        other_session = self._builder("ff00ff00")._buffer_table_name("ref", "t", "10", None)
+        assert other_session != name
+
+    def test_same_task_reuses_the_name_another_task_does_not(self):
+        b = self._builder()
+        name = b._buffer_table_name("ref", "t", "10", None)
+        assert b._buffer_table_name("ref", "t", "10", None) == name
+        # a new task (new task_parameters) never picks up the old table
+        assert self._builder()._buffer_table_name("ref", "t", "10", None) != name
+
+    def test_name_fits_a_postgresql_identifier(self):
+        b = self._builder("a" * 40)
+        name = b._buffer_table_name("s" * 80, "t" * 80, "10", "x" * 500)
+        assert len(name) <= 63
+        assert len(f"idx_{name}_geom") <= 63
+
+    def _build(self, b, cursor, monkeypatch, schema="ref", table="demand_points", source_filter='"fid" IN (1)'):
+        utils = sys.modules["filter_mate.infrastructure.utils"]
+        monkeypatch.setattr(
+            utils, "get_datasource_connexion_from_layer",
+            lambda layer: (_RecordingConnexion(cursor), None), raising=False
+        )
+        return b._build_exists_with_buffer_table(
+            geom_expr='"ducts"."geom"',
+            predicate_func="ST_Intersects",
+            source_schema=schema,
+            source_table=table,
+            source_geom_field="geom",
+            buffer_expression='"homecount" * 2',
+            source_filter=source_filter,
+            layer_props={"layer": MagicMock()},
+            buffer_table_name=b._buffer_table_name(schema, table, '"homecount" * 2', source_filter),
+        )
+
+    def test_existence_check_and_regclass_are_bound_parameters(self, monkeypatch):
+        b = self._builder()
+        cursor = _RecordingCursor()
+        self._build(b, cursor, monkeypatch, schema="l'ouest", table='bâti "neuf"')
+        exists_sql, exists_params = next(c for c in cursor.calls if "information_schema.tables" in c[0])
+        assert "l'ouest" not in exists_sql and exists_params[0] == "l'ouest"
+        regclass_sql, regclass_params = next(c for c in cursor.calls if "regclass" in c[0])
+        assert "%s::regclass" in regclass_sql
+        assert regclass_params == ('"l\'ouest"."bâti ""neuf"""',)
+        create_sql = next(sql for sql, _ in cursor.calls if "CREATE TABLE" in sql)
+        assert 'FROM "l\'ouest"."bâti ""neuf"""' in create_sql
+
+    def test_creates_the_table_from_the_selection(self, monkeypatch):
+        b = self._builder()
+        cursor = _RecordingCursor()
+        expr = self._build(b, cursor, monkeypatch)
+        create_sql = next(sql for sql, _ in cursor.calls if "CREATE TABLE" in sql)
+        assert 'WHERE "fid" IN (1)' in create_sql
+        name = b._buffer_table_name("ref", "demand_points", '"homecount" * 2', '"fid" IN (1)')
+        assert f'"ref"."{name}"' in create_sql
+        assert f'"ref"."{name}" AS __buffer' in expr
+
+    def test_exists_expression_names_the_table_after_the_selection(self, monkeypatch):
+        b = self._builder()
+        seen = {}
+
+        def fake_table_expr(**kwargs):
+            seen.update(kwargs)
+            return "EXISTS (buffer)"
+
+        monkeypatch.setattr(b, "_build_exists_with_buffer_table", fake_table_expr)
+        b._build_exists_expression(
+            geom_expr='"ducts"."geom"',
+            predicate_func="ST_Intersects",
+            source_geom='"ref"."demand_points"."geom"',
+            source_filter='"demand_points"."fid" IN (7)',
+            buffer_value=None,
+            layer_props={},
+            original_source_table="demand_points",
+            buffer_expression='"homecount" * 2',
+        )
+        assert seen["buffer_table_name"] == b._buffer_table_name(
+            "ref", "demand_points", '"homecount" * 2', '"demand_points"."fid" IN (7)'
+        )

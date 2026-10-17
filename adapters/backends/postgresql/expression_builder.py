@@ -20,8 +20,10 @@ Date: January 2026
 
 from __future__ import annotations
 
+import hashlib
 import logging
 import re
+import uuid
 from typing import TYPE_CHECKING, Dict, List, Optional, Tuple, Any
 
 if TYPE_CHECKING:
@@ -820,6 +822,62 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
             self.log_warning(f"Could not set query timeout: {e}")
             # Non-critical - continue anyway
 
+    @staticmethod
+    def _quote_ident(name) -> str:
+        """``name`` as a quoted PostgreSQL identifier (embedded double quotes doubled)."""
+        return '"' + str(name).replace('"', '""') + '"'
+
+    def _buffer_table_name(
+        self,
+        source_schema: str,
+        source_table: str,
+        buffer_expression: str,
+        source_filter: Optional[str],
+    ) -> str:
+        """Name of the pre-computed buffer table of a dynamic buffer.
+
+        2026-10-17: it was ``fm_temp_buf_<table>_<md5(expression)[:8]>`` and an
+        existing table was reused, so a second filter on another selection
+        (or by another user, or after an edit of the source) got the buffers
+        of the first one. The name is now
+        ``fm_temp_buf_<session>_<md5(task, schema, table, expression, filter)>``:
+
+        - the selection (source filter), schema, table and expression decide
+          what the table holds;
+        - the task token makes the reuse of v4.2.19 (the distant layers of
+          one task share the table) stop at the end of the task, while the
+          tables of earlier tasks stay in place for the layers that still
+          reference them;
+        - the session prefix lets the session cleanup find the table in
+          whatever schema it was created (the source schema).
+
+        At most 12 + 12 + 1 + 20 = 45 characters: the 63-character identifier
+        limit is never reached, also with the ``idx_..._geom`` index name.
+        """
+        from ....infrastructure.constants import TABLE_PREFIX_BUFFER
+        params = self.task_params if self.task_params is not None else {}
+        task_token = params.get('_fm_buffer_table_task_token')
+        if not task_token:
+            task_token = uuid.uuid4().hex
+            params['_fm_buffer_table_task_token'] = task_token
+        session = self._session_token()
+        digest = hashlib.md5(
+            "\x1f".join([
+                task_token, str(source_schema), str(source_table),
+                buffer_expression or "", source_filter or "",
+            ]).encode("utf-8"),
+            usedforsecurity=False,
+        ).hexdigest()[:20]
+        return f"{TABLE_PREFIX_BUFFER}{session}_{digest}"
+
+    def _session_token(self) -> str:
+        """The session id reduced to ``[0-9a-z]{1,12}`` (``nosession`` without one)."""
+        params = self.task_params or {}
+        task_section = params.get('task') if isinstance(params.get('task'), dict) else {}
+        session_id = params.get('session_id') or task_section.get('session_id') or ''
+        from .cleanup import session_token
+        return session_token(session_id)
+
     def _build_exists_with_buffer_table(
         self,
         geom_expr: str,
@@ -883,15 +941,9 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
             temp_table_name = buffer_table_name
             self.log_debug(f"Using provided buffer table name: {temp_table_name}")
         elif buffer_expression:
-            # FIX v4.2.19 (2026-01-21): Use stable table name based on buffer content, not session
-            # Generate unique temp table name using hash of buffer expression
-            # This ensures the same source + same buffer = same table name
-            # Fixes filter chaining: table created once and reused across all chained filters
-            # FIX v4.3.7 (2026-01-23): Use standard naming convention fm_buf_*
-            from ....infrastructure.constants import TABLE_PREFIX_BUFFER
-            import hashlib
-            buffer_hash = hashlib.md5(buffer_expression.encode(), usedforsecurity=False).hexdigest()[:8]
-            temp_table_name = f"{TABLE_PREFIX_BUFFER}{source_table}_{buffer_hash}"
+            # 2026-10-17: named after the selection, the session and the task
+            # (see _buffer_table_name), no longer after the expression alone.
+            temp_table_name = self._buffer_table_name(source_schema, source_table, buffer_expression, source_filter)
         else:
             self.log_error("No buffer_table_name or buffer_expression provided")
             return None
@@ -916,23 +968,31 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
         # No need to create schema - we're using the same schema as the source table
         self.log_debug(f"Using existing schema {temp_schema} (source table schema)")
 
+        q_temp_table = f"{self._quote_ident(temp_schema)}.{self._quote_ident(temp_table_name)}"
+        q_source_table = f"{self._quote_ident(source_schema)}.{self._quote_ident(source_table)}"
+
         # FIX v4.2.19: Check if table already exists (for filter chaining)
+        # 2026-10-17: the name carries the task token (_buffer_table_name), so
+        # an existing table was built by this very task for this selection.
         try:
             with connexion.cursor() as cursor:
-                cursor.execute(f"""
+                cursor.execute(
+                    """
                     SELECT EXISTS (
                         SELECT 1 FROM information_schema.tables
-                        WHERE table_schema = '{temp_schema}'
-                        AND table_name = '{temp_table_name}'
+                        WHERE table_schema = %s
+                        AND table_name = %s
                     )
-                """)  # nosec B608 - identifiers quoted, values are numeric ids or SQL fragments FilterMate built from QGIS layer metadata
+                    """,
+                    (temp_schema, temp_table_name),
+                )
                 table_exists = cursor.fetchone()[0]
                 if table_exists:
                     self.log_info(f"♻️ Reusing existing buffer table: {temp_schema}.{temp_table_name}")
                     # FIX v4.2.20: Build EXISTS expression using existing table
                     exists_expr = f'''EXISTS (
               SELECT 1
-              FROM "{temp_schema}"."{temp_table_name}" AS __buffer
+              FROM {q_temp_table} AS __buffer
               WHERE {predicate_func}({geom_expr}, __buffer.buffered_geom)
               )'''  # nosec B608 - identifiers quoted, values are numeric ids or SQL fragments FilterMate built from QGIS layer metadata
                     self.log_debug(f"Reuse buffer table expression: {exists_expr}")
@@ -952,14 +1012,17 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
         primary_key_column = None
         try:
             with connexion.cursor() as cursor:
-                cursor.execute(f"""
+                cursor.execute(
+                    """
                     SELECT a.attname
                     FROM pg_index i
                     JOIN pg_attribute a ON a.attrelid = i.indrelid AND a.attnum = ANY(i.indkey)
-                    WHERE i.indrelid = '"{source_schema}"."{source_table}"'::regclass
+                    WHERE i.indrelid = %s::regclass
                     AND i.indisprimary
                     LIMIT 1
-                """)  # nosec B608 - identifiers quoted, values are numeric ids or SQL fragments FilterMate built from QGIS layer metadata
+                    """,
+                    (q_source_table,),
+                )
                 result = cursor.fetchone()
                 if result:
                     primary_key_column = result[0]
@@ -988,7 +1051,7 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
                 self.log_warning(f"PK fallback detection failed: {fallback_err}")
 
         # If still no PK, skip source_id column entirely (buffer table still works for filtering)
-        pk_select = f'"{primary_key_column}" as source_id,' if primary_key_column else ''
+        pk_select = f'{self._quote_ident(primary_key_column)} as source_id,' if primary_key_column else ''
         if not primary_key_column:
             self.log_warning("No primary key found - creating buffer table without source_id column")
 
@@ -1000,23 +1063,23 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
         # buffer_expr_sql already contains unqualified field names (e.g., "homecount", not "table"."homecount")
         # DDL: identifiers come from QGIS layer metadata (trusted), can't be parameterized
         sql_create = f"""
-            CREATE TABLE IF NOT EXISTS "{temp_schema}"."{temp_table_name}" AS
+            CREATE TABLE IF NOT EXISTS {q_temp_table} AS
             SELECT
                 {pk_select}
                 ST_Buffer(
-                    "{source_geom_field}",
+                    {self._quote_ident(source_geom_field)},
                     {buffer_expr_sql},
                     'quad_segs=5'
                 ) as buffered_geom
-            FROM "{source_schema}"."{source_table}"
+            FROM {q_source_table}
             {f"WHERE {source_filter}" if source_filter else ""}
         """  # nosec B608
 
         # Create spatial index
-        sql_index = f'CREATE INDEX IF NOT EXISTS "idx_{temp_table_name}_geom" ON "{temp_schema}"."{temp_table_name}" USING GIST (buffered_geom)'  # nosec B608
+        sql_index = f'CREATE INDEX IF NOT EXISTS "idx_{temp_table_name}_geom" ON {q_temp_table} USING GIST (buffered_geom)'  # nosec B608
 
         # Analyze for query planner
-        sql_analyze = f'ANALYZE "{temp_schema}"."{temp_table_name}"'
+        sql_analyze = f'ANALYZE {q_temp_table}'
 
         try:
             with connexion.cursor() as cursor:
@@ -1032,7 +1095,7 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
                 self.log_debug("✓ Statistics updated")
 
                 # Get row count for logging
-                cursor.execute(f'SELECT COUNT(*) FROM "{temp_schema}"."{temp_table_name}"')  # nosec B608
+                cursor.execute(f'SELECT COUNT(*) FROM {q_temp_table}')  # nosec B608
                 row_count = cursor.fetchone()[0]
 
             # FIX v4.3.6 (2026-01-22): COMMIT the transaction!
@@ -1049,7 +1112,7 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
             # Build EXISTS using buffer table (with schema prefix for QGIS visibility)
             exists_expr = f"""EXISTS (
                 SELECT 1
-                FROM "{temp_schema}"."{temp_table_name}" AS __buffer
+                FROM {q_temp_table} AS __buffer
                 WHERE {predicate_func}({geom_expr}, __buffer.buffered_geom)
             )"""  # nosec B608 - identifiers quoted, values are numeric ids or SQL fragments FilterMate built from QGIS layer metadata
 
@@ -1369,10 +1432,6 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
         # So compute the table name first, then decide whether to create it or reuse it
         buffer_table_name = None
         if buffer_expression and buffer_expression.strip():
-            # FIX v4.3.7 (2026-01-23): Use standard naming convention fm_buf_*
-            from ....infrastructure.constants import TABLE_PREFIX_BUFFER
-            import hashlib
-            buffer_hash = hashlib.md5(buffer_expression.encode(), usedforsecurity=False).hexdigest()[:8]
             # CRITICAL FIX v4.2.20: For buffer table name, use CURRENT source_table (where buffer is defined)
             # NOT original_source_table (which is the first layer in the filter chain)
             # Example: zone_pop → demand_points (WITH buffer) → ducts → sheaths
@@ -1382,7 +1441,9 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
             #     → Reuse table: fm_buf_demand_points_xxx (same name!)
             #   - At sheaths: source_table="demand_points", buffer_expression still set
             #     → Reuse table: fm_buf_demand_points_xxx (same name!)
-            buffer_table_name = f"{TABLE_PREFIX_BUFFER}{source_table}_{buffer_hash}"
+            # 2026-10-17: the name also covers the selection, the session and
+            # the task (_buffer_table_name): the reuse above stays within one task.
+            buffer_table_name = self._buffer_table_name(source_schema, source_table, buffer_expression, source_filter)
             self.log_debug(f"Calculated buffer table name: {buffer_table_name} (from {source_table})")
 
         # FIX v4.2.17 (2026-01-21): Don't apply buffer_expression in filter chaining context
