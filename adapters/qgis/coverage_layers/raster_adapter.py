@@ -13,6 +13,8 @@ a source geometry.
 import logging
 import math
 import sys
+import warnings
+from urllib.parse import quote
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Tuple
 
@@ -142,10 +144,23 @@ def _all_stats():
     return stats.Min | stats.Max | stats.Mean | stats.StdDev
 
 
+# The bindings flag every ``stats`` argument of bandStatistics() as the deprecated int
+# overload, a real Qgis.RasterBandStatistics included (QGIS 3.44 and 4.2). Leaving
+# ``stats`` out computes every statistic and gives another range (8-252 instead of
+# 10-243 on an RGB ortho), so the call is kept and the false warning silenced here only.
+warnings.filterwarnings('ignore', message=r'QgsRasterInterface\.bandStatistics\(\) is deprecated',
+                        category=DeprecationWarning, module=__name__)
+
+
+def band_statistics(provider, band: int, extent: QgsRectangle, sample_size: int):
+    """Minimum, maximum, mean and standard deviation of ``band`` over ``extent``."""
+    return provider.bandStatistics(band, _all_stats(), extent, sample_size)
+
+
 def band_range(layer: QgsRasterLayer, band: int, sample_size: int = 250000) -> Tuple[Optional[float], Optional[float], Optional[float]]:
     """``(minimum, maximum, mean)`` of a band, estimated on ``sample_size`` pixels."""
     try:
-        stats = layer.dataProvider().bandStatistics(band, _all_stats(), layer.extent(), sample_size)
+        stats = band_statistics(layer.dataProvider(), band, layer.extent(), sample_size)
     except Exception as exc:
         logger.debug(f"[FM5] band statistics failed: {exc}")
         return None, None, None
@@ -444,6 +459,23 @@ def _virtual_parameters(layer: QgsRasterLayer, formula: str, reference: str,
     return params
 
 
+_EMPTY_CRS = '%3Fcrs%26'
+
+
+def _encode_virtual_uri(params) -> str:
+    """``encodeVirtualRasterProviderUri`` that keeps a CRS without authority id.
+
+    A custom CRS (a GeoTIFF whose WKT matches no EPSG code) is written ``crs=``
+    empty, and the virtual raster provider refuses the URI: its WKT is written
+    instead, encoded once (verified on QGIS 4.2).
+    """
+    uri = QgsRasterDataProvider.encodeVirtualRasterProviderUri(params)
+    crs = params.crs
+    if crs.isValid() and not crs.authid() and uri.startswith(_EMPTY_CRS):
+        uri = '%3Fcrs%3D' + quote(crs.toWkt(), safe='') + '%26' + uri[len(_EMPTY_CRS):]
+    return uri
+
+
 def raster_reference(layer: QgsRasterLayer) -> str:
     """Name used for ``layer`` in raster calculator formulas."""
     name = ''.join(c if c.isalnum() or c == '_' else '_' for c in layer.name()) or 'raster'
@@ -455,7 +487,7 @@ def selection_virtual_layer(layer: QgsRasterLayer, selection: RasterSelection,
     """Virtual raster equal to 1 where ``selection`` keeps the pixel, 0 elsewhere (main thread)."""
     reference = raster_reference(layer)
     formula = selection.to_calc_formula(reference)
-    uri = QgsRasterDataProvider.encodeVirtualRasterProviderUri(_virtual_parameters(layer, formula, reference, source, provider))
+    uri = _encode_virtual_uri(_virtual_parameters(layer, formula, reference, source, provider))
     virtual = QgsRasterLayer(uri, f"{layer.name()}_selection", 'virtualraster')
     return virtual if virtual.isValid() else None
 
@@ -484,7 +516,7 @@ def selection_virtual_uri(layer_source: str, layer_provider: str, layer: QgsRast
     value = f'"{reference}@{selection.band}"'
     formula = f"{value} / ( {condition} )"
     params = _virtual_parameters(layer, formula, reference, layer_source, layer_provider)
-    return QgsRasterDataProvider.encodeVirtualRasterProviderUri(params), None
+    return _encode_virtual_uri(params), None
 
 
 def set_user_nodata(layer: QgsRasterLayer, nodata: Optional[float]) -> None:

@@ -841,7 +841,7 @@ class CoverageDockExtras(QObject):
             return
         try:
             from qgis.core import QgsCoordinateTransform, QgsProject
-            from ...adapters.qgis.coverage_layers.raster_adapter import _all_stats
+            from ...adapters.qgis.coverage_layers.raster_adapter import band_statistics
             canvas = self._canvas()
             transform = QgsCoordinateTransform(canvas.mapSettings().destinationCrs(), layer.crs(), QgsProject.instance())
             rect = transform.transformBoundingBox(extent).intersect(layer.extent())
@@ -858,7 +858,7 @@ class CoverageDockExtras(QObject):
                 else:
                     panel.set_zone_statistics(*found)
                 return
-            stats = base.dataProvider().bandStatistics(band, _all_stats(), rect, ZONE_SAMPLE_SIZE)
+            stats = band_statistics(base.dataProvider(), band, rect, ZONE_SAMPLE_SIZE)
         except Exception as exc:
             logger.debug(f"[FM5] statistics of the rectangle unreadable: {exc}")
             return
