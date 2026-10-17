@@ -205,8 +205,8 @@ def is_layer_source_available(
         return True
 
     # For remote providers, trust QGIS validity
-    remote_providers = {'WFS', 'wfs', 'arcgisfeatureserver', 'oapif'}
-    if provider in remote_providers:
+    remote_providers = {'wfs', 'arcgisfeatureserver', 'oapif'}
+    if (provider or '').lower() in remote_providers:
         return True
 
     # For PostgreSQL, always available via QGIS API

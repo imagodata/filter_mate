@@ -735,7 +735,7 @@ class LayerService(QObject):
             'wfs': ('WFS', '🌐'),
         }
 
-        return providers.get(provider_type, (provider_type, '📄'))
+        return providers.get((provider_type or '').lower(), (provider_type, '📄'))
 
     def cleanup_for_removed_layers(
         self,

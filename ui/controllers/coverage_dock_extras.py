@@ -45,8 +45,10 @@ ICON_3D = '<path d="M12 2l9 5v10l-9 5-9-5V7z"/><path d="M12 12l9-5M12 12L3 7M12 
 ACTION_ELEVATION_PROFILE = ('mActionElevationProfile',)
 ACTION_NEW_3D_VIEW = ('mActionNew3DMapCanvas', 'mActionNew3DMapView')
 # Vector providers whose feature count is a server / database query: the card leaves it out
-# (it is read on the main thread at every layer change).
-UNCOUNTED_PROVIDERS = ('postgres', 'oracle', 'mssql', 'hana', 'wfs', 'oapif', 'arcgisfeatureserver', 'virtual')
+# (it is read on the main thread at every layer change). Lower case: QGIS names its web
+# providers 'WFS' and 'OAPIF' (compared case-insensitively, see feature_count_is_cheap).
+UNCOUNTED_PROVIDERS = ('postgres', 'oracle', 'mssql', 'hana', 'wfs', 'oapif', 'arcgisfeatureserver',
+                       'sensorthings', 'virtual')
 
 
 def _identity(text: str) -> str:
@@ -149,7 +151,7 @@ def feature_count_is_cheap(provider: str, subset: str) -> bool:
     A filtered GeoPackage / Spatialite layer counts through its subset
     (``EXISTS``, ``ST_DWithin``...), a database or web layer runs a query.
     """
-    return not (subset or '').strip() and (provider or '') not in UNCOUNTED_PROVIDERS
+    return not (subset or '').strip() and (provider or '').lower() not in UNCOUNTED_PROVIDERS
 
 
 def card_html(name: str, kind_label: str, meta: str, color: str, square: bool) -> str:

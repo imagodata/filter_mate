@@ -288,7 +288,7 @@ class ExportingController(BaseController):
             # Collect diagnostic info
             qgis_layers = [layer_item for layer_item in project.mapLayers().values() if isinstance(layer_item, QgsVectorLayer)]
             postgres_layers = [layer_item for layer_item in qgis_layers if layer_item.providerType() == 'postgres']
-            remote_layers = [layer_item for layer_item in qgis_layers if layer_item.providerType() in REMOTE_PROVIDERS]
+            remote_layers = [layer_item for layer_item in qgis_layers if layer_item.providerType().lower() in REMOTE_PROVIDERS]
 
             # Find layers missing from PROJECT_LAYERS
             # Exclude non-spatial layers: add_project_layer intentionally skips them (isSpatial() = False)

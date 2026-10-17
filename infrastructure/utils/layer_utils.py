@@ -62,7 +62,8 @@ PROVIDER_SPATIALITE = 'spatialite'
 PROVIDER_OGR = 'ogr'
 PROVIDER_MEMORY = 'memory'
 
-REMOTE_PROVIDERS = {'WFS', 'wfs', 'arcgisfeatureserver', 'oapif'}
+# Lower case, compared with ``providerType().lower()`` (QGIS: 'WFS', 'OAPIF').
+REMOTE_PROVIDERS = {'wfs', 'arcgisfeatureserver', 'oapif'}
 
 
 # =============================================================================
@@ -100,7 +101,7 @@ def detect_layer_provider_type(layer) -> str:
         return 'unknown'
 
     # Remote providers use OGR-style filtering
-    if provider_type in REMOTE_PROVIDERS:
+    if (provider_type or '').lower() in REMOTE_PROVIDERS:
         return 'ogr'
 
     # Direct matches

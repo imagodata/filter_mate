@@ -150,7 +150,7 @@ class LayerSelectionMixin:
         except (AttributeError, RuntimeError):
             return 'unknown'
 
-        return self.PROVIDER_TYPE_MAP.get(provider, 'unknown')
+        return self.PROVIDER_TYPE_MAP.get((provider or '').lower(), 'unknown')
 
     def get_all_vector_layers(self) -> List[QgsVectorLayer]:
         """
