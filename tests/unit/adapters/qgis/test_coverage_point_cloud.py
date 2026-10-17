@@ -415,7 +415,15 @@ class TestFootprint:
         monkeypatch.setattr(footprint, 'MAX_GRID_CELLS', 400)
         result = footprint.footprint_geometry(FakeCloudLayer(points=_points(200, *box)), 0.5)
         (rows, cols), _, _ = grids[0]
-        assert rows * cols <= 400 and result.cell_size > 0.5
+        assert rows * cols <= 400 and result.cell_size > 0.5 and result.coarse
+
+    def test_coarse_footprint_is_flagged_in_the_details(self, engine, monkeypatch):
+        monkeypatch.setattr(footprint, 'open_point_cloud', lambda s, n, p: FakeCloudLayer(s, p))
+        monkeypatch.setattr(footprint, 'footprint_geometry',
+                            lambda *a, **k: footprint.FootprintResult(fk.FakeGeometry.fromWkt(EAST), 10, 25.0, coarse=True))
+        job = source_jobs.PointCloudSourceJob(FakeCloudLayer())
+        job.compute(_request(), lambda: False)
+        assert job.details['coarse'] is True and job.details['cell_size'] == 25.0
 
     def test_read_in_tiles_of_a_bounded_size(self, engine, grids, monkeypatch):
         monkeypatch.setattr(footprint, 'POINTS_PER_CALL', 50)
@@ -423,6 +431,15 @@ class TestFootprint:
         layer = FakeCloudLayer(points=_points(300, 1, 1, 99, 99))
         result = footprint.footprint_geometry(layer, 1.0)
         assert max(layer.provider.calls) <= 50 and result.points_read == 300 and not result.truncated
+
+    def test_corridor_is_cut_along_its_length(self, engine, grids, monkeypatch):
+        """A saturated strip narrower than two minimum tiles is split along its long side, not truncated."""
+        monkeypatch.setattr(footprint, 'POINTS_PER_CALL', 50)
+        layer = FakeCloudLayer(points=_points(300, 1, 1, 1999, 29))
+        layer.extent = lambda: fk.FakeRectangle(0, 0, 2000, 30)
+        result = footprint.footprint_geometry(layer, 1.0)
+        assert result.points_read == 300 and not result.truncated
+        assert max(layer.provider.calls) <= 50
 
     def test_points_limit_is_reported(self, engine, grids):
         result = footprint.footprint_geometry(FakeCloudLayer(points=_points(300, 1, 1, 99, 99)), 1.0, points_limit=100)
@@ -478,10 +495,10 @@ class TestSelectionCheck:
                 self.feature = feature
 
         class Expression:
-            """``<attribute> = <number>`` only."""
+            """``<attribute> = <number>`` only; a text or NULL compared with a number is false (no error), like QGIS."""
 
             def __init__(self, text):
-                self.name, self.value = (part.strip(' ()') for part in text.split('='))
+                self.name, self.value = (part.strip(' ()\n') for part in text.split('='))
 
             def hasParserError(self):
                 return False
@@ -489,9 +506,13 @@ class TestSelectionCheck:
             def prepare(self, context):
                 pass
 
+            def referencedColumns(self):
+                return {self.name}
+
             def evaluate(self, context):
                 feature = context.feature
-                return feature.values[feature.fields.index(self.name)] == float(self.value)
+                value = feature.values[feature.fields.index(self.name)]
+                return isinstance(value, (int, float)) and value == float(self.value)
 
             def hasEvalError(self):
                 return False
@@ -507,6 +528,24 @@ class TestSelectionCheck:
 
     def test_selected_points_pass(self, engine, expressions):
         footprint.selection_check('(Classification = 6)')([{'X': 1.0, 'Y': 1.0, 'Classification': 6}] * 500)
+
+    def test_gps_time_text_is_read_as_its_number(self, engine, expressions):
+        """QGIS >= 3.42 identify(): GpsTime is a date text for COPC, the number is under 'GpsTime (raw)'."""
+        point = {'X': 1.0, 'Y': 1.0, 'GpsTime': '2021-03-04T10:00:00Z', 'GpsTime (raw)': 330000000.5}
+        footprint.selection_check('(GpsTime = 330000000.5\n)')([point] * 10)
+        with pytest.raises(RuntimeError, match='outside the selection'):
+            footprint.selection_check('(GpsTime = 1.0\n)')([point])
+
+    def test_a_text_or_null_the_expression_reads_turns_the_check_off(self, engine, expressions):
+        check = footprint.selection_check('(Intensity = 5\n)')
+        check([{'X': 1.0, 'Y': 1.0, 'Intensity': None}])
+        check([{'X': 1.0, 'Y': 1.0, 'Intensity': 2}])  # off for the run: no reliable check
+
+    def test_other_texts_do_not_matter(self, engine, expressions):
+        """A text attribute the expression does not read leaves the check on."""
+        check = footprint.selection_check('(Classification = 6\n)')
+        with pytest.raises(RuntimeError, match='outside the selection'):
+            check([{'X': 1.0, 'Classification': 2, 'GpsTime': 'Thu 12:34:56'}])
 
     def test_nothing_to_check_without_subset(self, engine):
         assert footprint.selection_check('') is None

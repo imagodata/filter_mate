@@ -18,6 +18,7 @@ import os
 import logging
 import tempfile
 import shutil
+import threading
 import zipfile
 from typing import Optional, List
 from dataclasses import dataclass, field
@@ -44,13 +45,38 @@ logger = logging.getLogger('FilterMate.Export.Batch')
 # folder leaves out: both exports run at the same time, and the coverage
 # files have their own archive (``<name>_raster_lidar.zip``).
 COVERAGE_EXPORT_SUBFOLDER = 'raster_lidar'
+# Subfolders an export is writing raster / point cloud files to: the next
+# ZIP of their folder leaves them out (a folder of that name the user made
+# is archived as any other).
+_coverage_folders = set()
+_coverage_folders_lock = threading.Lock()
 
 
 def coverage_export_folder(folder: Optional[str], zip_path: Optional[str], with_vector: bool) -> Optional[str]:
-    """Folder of the raster / point cloud files of an export to ``folder``."""
+    """Folder of the raster / point cloud files of an export to ``folder`` (recorded for the vector ZIP)."""
     if folder and zip_path and with_vector:
-        return os.path.join(folder, COVERAGE_EXPORT_SUBFOLDER)
+        subfolder = os.path.join(folder, COVERAGE_EXPORT_SUBFOLDER)
+        with _coverage_folders_lock:
+            _coverage_folders.add(os.path.abspath(subfolder))
+        return subfolder
     return folder
+
+
+def release_coverage_folder(subfolder: Optional[str]) -> None:
+    """The export that would write to ``subfolder`` did not start (dialog canceled)."""
+    if subfolder:
+        with _coverage_folders_lock:
+            _coverage_folders.discard(os.path.abspath(subfolder))
+
+
+def _take_coverage_folder(folder: str) -> bool:
+    """True (once) when an export writes raster / point cloud files into ``folder``'s subfolder."""
+    subfolder = os.path.abspath(os.path.join(folder, COVERAGE_EXPORT_SUBFOLDER))
+    with _coverage_folders_lock:
+        if subfolder in _coverage_folders:
+            _coverage_folders.discard(subfolder)
+            return True
+    return False
 
 
 def sanitize_filename(filename: str) -> str:
@@ -462,15 +488,18 @@ class BatchExporter:
         Returns:
             True if successful, False otherwise
         """
-        # Archives written meanwhile, when the ZIP goes into the folder itself:
-        # this one, and the raster / point cloud one (coverage_mode_controller._zip_exports).
-        base = zip_path[:-4] if zip_path.lower().endswith('.zip') else zip_path
-        archives = {os.path.abspath(zip_path), os.path.abspath(f"{base}_raster_lidar.zip")}
+        # The archive itself when it is saved into the folder, and, when a
+        # raster / point cloud export runs alongside, its subfolder and its
+        # archive (coverage_mode_controller._zip_exports).
+        archives = {os.path.abspath(zip_path)}
+        coverage = _take_coverage_folder(folder_to_zip)
+        if coverage:
+            base = zip_path[:-4] if zip_path.lower().endswith('.zip') else zip_path
+            archives.add(os.path.abspath(f"{base}_raster_lidar.zip"))
         try:
             with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
                 for root, dirs, files in os.walk(folder_to_zip):
-                    if root == folder_to_zip:
-                        # Written by the raster / point cloud export meanwhile.
+                    if coverage and root == folder_to_zip:
                         dirs[:] = [name for name in dirs if name != COVERAGE_EXPORT_SUBFOLDER]
                     for file in files:
                         file_path = os.path.join(root, file)

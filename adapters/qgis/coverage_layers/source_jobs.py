@@ -283,6 +283,9 @@ class PointCloudSourceJob(SourceJob):
             self.details['truncated'] = True
             logger.warning(f"[FM5] footprint of '{self.layer_name}' read the maximum of {result.points_read} points: "
                            f"it may miss areas, use a coarser resolution")
+        if result.coarse:
+            # Wider than the resolution asked for: the footprint covers more than the points.
+            self.details['coarse'] = True
         return result.geometry
 
     def apply(self, layer) -> Optional[LayerSnapshot]:

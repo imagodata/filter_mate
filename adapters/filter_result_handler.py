@@ -40,6 +40,24 @@ from ..infrastructure.feedback import show_success_with_backend, show_info
 logger = get_app_logger()
 
 
+def _record_pending_pick(dockwidget) -> None:
+    """Look at a user input on the current-layer combo box not looked at yet (``_record_pending_layer_pick``,
+    ConfigurationManager._stamp_user_layer_picks): code that puts the source layer back runs it first, as it can
+    run in the same pass of the event loop as the input, before the call the input posted."""
+    record_pending_pick = getattr(dockwidget, '_record_pending_layer_pick', None)
+    if callable(record_pending_pick):
+        record_pending_pick()
+
+
+def _panel_layer_id(dockwidget) -> Optional[str]:
+    """Id of the dock's current layer (None: no layer, or a deleted one)."""
+    try:
+        layer = getattr(dockwidget, 'current_layer', None)
+        return layer.id() if layer is not None else None
+    except RuntimeError:
+        return None
+
+
 class FilterResultHandler:
     """
     Handles filter operation completion and result application.
@@ -120,6 +138,9 @@ class FilterResultHandler:
         """
         if task_name not in ('filter', 'unfilter', 'reset'):
             return
+        # A layer picked during the task: recorded before the source layer is put back in the combo box below
+        # (applied when the post-filter window opens).
+        _record_pending_pick(self._get_dockwidget() if self._get_dockwidget else None)
 
         # v2.9.19: Clear Spatialite cache for all affected layers when unfiltering/resetting
         # This ensures the multi-step cache doesn't interfere with subsequent filter operations
@@ -208,6 +229,26 @@ class FilterResultHandler:
             perf_mark_end(f"task_{task_name}", f"{source_layer.name()}, {layer_count} layer(s)")
         except (RuntimeError, AttributeError):
             perf_mark_end(f"task_{task_name}")
+
+    def handle_task_terminated(self, current_layer_id_before_filter: Optional[str] = None) -> None:
+        """
+        Handle a filter task that failed or was canceled.
+
+        FilterMateApp._set_filter_protection_flags blocked the current-layer combo box, disconnected
+        its handler and the layer tree link, and set the filtering flag; the completion undoes it,
+        a failed or canceled task never reached it. Same post-filter window as after a completion
+        (a layer picked during the task is applied at once).
+
+        Args:
+            current_layer_id_before_filter: Layer ID that was active before filtering
+        """
+        dockwidget = self._get_dockwidget() if self._get_dockwidget else None
+        if not dockwidget:
+            return
+        logger.info("Filter task terminated: ending the protection of the current layer")
+        _record_pending_pick(dockwidget)
+        self._reconnect_layer_tree_view_signal()
+        self._schedule_delayed_reconnection(current_layer_id_before_filter)
 
     def _clear_spatialite_cache(self, source_layer: QgsVectorLayer, task_parameters: Dict[str, Any]) -> None:
         """
@@ -870,14 +911,27 @@ class FilterResultHandler:
         generation = getattr(dockwidget, '_combo_protection_gen', 0) + 1
         dockwidget._combo_protection_gen = generation
         protection_started = time.perf_counter()
+        # Picks count from the task's start (FilterMateApp._set_filter_protection_flags): the combo
+        # box was blocked during the task, a layer picked then was shown but never applied.
+        picks_since = min(protection_started, getattr(dockwidget, '_combo_blocked_at', None) or protection_started)
 
         def window_current():
             return getattr(dockwidget, '_combo_protection_gen', None) == generation
+
+        def user_picked():
+            """A layer other than the source picked during the task or in this window."""
+            picked_at, picked_id = getattr(dockwidget, '_user_layer_pick', None) or (0.0, None)
+            return picked_at >= picks_since and picked_id not in (None, saved_layer_id)
 
         def restore_combobox_if_needed():
             """Check and restore combobox to saved layer if it was changed."""
             try:
                 if not dockwidget or not window_current():
+                    return
+                # This check and a user input can fall due in one pass of the event loop: it used to put the
+                # source layer back over the pick (which now ends the window).
+                _record_pending_pick(dockwidget)
+                if not window_current() or user_picked():
                     return
                 saved_layer = QgsProject.instance().mapLayer(saved_layer_id)
                 if saved_layer and saved_layer.isValid():
@@ -894,6 +948,11 @@ class FilterResultHandler:
                             f"v3.0.19: 🔧 RESTORING combobox from '{current_name}' to '{saved_layer.name()}'",
                             "FilterMate", Qgis.MessageLevel.Warning
                         )
+                        if _panel_layer_id(dockwidget) not in (None, saved_layer_id):
+                            # The panel moved too (an undo in the window lets async layer changes through, a
+                            # raster page can show): back through the layer change, so that the coverage panel
+                            # follows. Ignored while the filtering flag is set.
+                            dockwidget.current_layer_changed(saved_layer, manual_change=True)
                         # Keep signals blocked during restore
                         dockwidget.comboBox_filtering_current_layer.setLayer(saved_layer)
                         dockwidget.current_layer = saved_layer
@@ -935,10 +994,11 @@ class FilterResultHandler:
                 logger.error(f"v3.0.19: Error reconnecting combobox: {e}")
 
         def apply_user_pick():
-            """The layer the user picked in this window (signals blocked: never processed) becomes current."""
+            """The layer the user picked during the task or in this window (signals blocked: never processed)
+            becomes current."""
             try:
-                picked_at, picked_id = getattr(dockwidget, '_user_layer_pick', (0.0, None))
-                if picked_at < protection_started or not picked_id:
+                picked_at, picked_id = getattr(dockwidget, '_user_layer_pick', None) or (0.0, None)
+                if picked_at < picks_since or not picked_id:
                     return
                 app = getattr(dockwidget, 'app', None)
                 if app is not None and (getattr(app, '_initializing_project', False)
@@ -951,7 +1011,8 @@ class FilterResultHandler:
                 if current is not None and current.id() == picked_id:
                     return
                 logger.info(f"Applying the layer picked during the post-filter window: '{picked.name()}'")
-                if dockwidget.comboBox_filtering_current_layer.currentLayer() is not picked:
+                shown = dockwidget.comboBox_filtering_current_layer.currentLayer()
+                if shown is None or shown.id() != picked_id:
                     dockwidget.comboBox_filtering_current_layer.setLayer(picked)  # signals connected: applies it
                 else:
                     dockwidget.current_layer_changed(picked, manual_change=True)
@@ -959,6 +1020,9 @@ class FilterResultHandler:
                 logger.debug(f"Layer picked during the post-filter window not applied: {e}")
 
         dockwidget._end_post_filter_window = unblock_and_reconnect_combobox
+        if user_picked():  # during the task: applied now, not put back
+            unblock_and_reconnect_combobox()
+            return
 
         # Schedule checks during protection window (signals still blocked)
         # v4.1.3: Reduced delays for faster response time

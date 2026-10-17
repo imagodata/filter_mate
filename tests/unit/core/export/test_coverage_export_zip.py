@@ -34,28 +34,58 @@ class TestCoverageFolder:
         assert coverage_export_folder(None, '/out.zip', True) is None
 
 
+def _names(archive):
+    with zipfile.ZipFile(archive) as handle:
+        return sorted(name.replace(os.sep, "/") for name in handle.namelist())
+
+
 class TestFolderZip:
-    def test_coverage_subfolder_left_out(self, tmp_path):
-        from core.export.batch_exporter import COVERAGE_EXPORT_SUBFOLDER, BatchExporter
-        (tmp_path / "roads.gpkg").write_bytes(b"gpkg")
-        coverage = tmp_path / COVERAGE_EXPORT_SUBFOLDER
+    def _coverage_files(self, folder):
+        from core.export.batch_exporter import COVERAGE_EXPORT_SUBFOLDER
+        (folder / "roads.gpkg").write_bytes(b"gpkg")
+        coverage = folder / COVERAGE_EXPORT_SUBFOLDER
         coverage.mkdir()
         (coverage / "dem.tif.staging.tif").write_bytes(b"half written")
         (coverage / "cloud.laz").write_bytes(b"LASF")
+
+    def test_coverage_subfolder_left_out(self, tmp_path):
+        """The raster / point cloud export of the same run writes there (recorded by coverage_export_folder)."""
+        from core.export.batch_exporter import BatchExporter, coverage_export_folder
+        self._coverage_files(tmp_path)
+        archive = tmp_path.parent / "vector.zip"
+        coverage_export_folder(str(tmp_path), str(archive), True)
+        assert BatchExporter.create_zip_archive(str(archive), str(tmp_path)) is True
+        assert _names(archive) == ["roads.gpkg"]
+        # recorded for that ZIP only: the next export of the folder archives it as any folder
+        assert BatchExporter.create_zip_archive(str(archive), str(tmp_path)) is True
+        assert _names(archive) == ["raster_lidar/cloud.laz", "raster_lidar/dem.tif.staging.tif", "roads.gpkg"]
+
+    def test_user_folder_of_that_name_kept_in_a_vector_only_export(self, tmp_path):
+        from core.export.batch_exporter import BatchExporter
+        self._coverage_files(tmp_path)
         archive = tmp_path.parent / "vector.zip"
         assert BatchExporter.create_zip_archive(str(archive), str(tmp_path)) is True
-        with zipfile.ZipFile(archive) as handle:
-            assert handle.namelist() == ["roads.gpkg"]
+        assert _names(archive) == ["raster_lidar/cloud.laz", "raster_lidar/dem.tif.staging.tif", "roads.gpkg"]
+
+    def test_canceled_export_releases_the_folder(self, tmp_path):
+        from core.export.batch_exporter import BatchExporter, coverage_export_folder, release_coverage_folder
+        self._coverage_files(tmp_path)
+        archive = tmp_path.parent / "vector.zip"
+        release_coverage_folder(coverage_export_folder(str(tmp_path), str(archive), True))
+        assert BatchExporter.create_zip_archive(str(archive), str(tmp_path)) is True
+        assert "raster_lidar/cloud.laz" in _names(archive)
 
     def test_archives_written_in_the_folder_left_out(self, tmp_path):
-        """A ZIP saved into the exported folder: neither itself nor the raster / point cloud archive."""
-        from core.export.batch_exporter import BatchExporter
+        """A ZIP saved into the exported folder: never itself; the raster / point cloud archive of the same run."""
+        from core.export.batch_exporter import BatchExporter, coverage_export_folder
         (tmp_path / "roads.gpkg").write_bytes(b"gpkg")
         (tmp_path / "export_raster_lidar.zip").write_bytes(b"PK half written")
         archive = tmp_path / "export.zip"
         assert BatchExporter.create_zip_archive(str(archive), str(tmp_path)) is True
-        with zipfile.ZipFile(archive) as handle:
-            assert handle.namelist() == ["roads.gpkg"]
+        assert _names(archive) == ["export_raster_lidar.zip", "roads.gpkg"]
+        coverage_export_folder(str(tmp_path), str(archive), True)
+        assert BatchExporter.create_zip_archive(str(archive), str(tmp_path)) is True
+        assert _names(archive) == ["roads.gpkg"]
 
     def test_vector_folder_unchanged(self, tmp_path):
         """Vector only: every file and subfolder of the export folder, as before."""

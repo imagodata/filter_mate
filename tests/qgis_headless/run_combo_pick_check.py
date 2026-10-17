@@ -4,7 +4,9 @@ Layer pick detector of the current-layer combo box, in a real QGIS (CI: official
 
 ConfigurationManager._stamp_user_layer_picks records ``_user_layer_pick`` only when a user input really
 changed the layer, also while the combo's signals are blocked (post-filter window) and through the
-type-to-find completer popup. Built from the real functions (extracted from the source, no plugin load)
+type-to-find completer popup; also when a window check runs before the call the detector posted, and when
+the combo takes the item only after its popup is closed (Qt 5 macOS). Built from the real functions
+(extracted from the source, no plugin load)
 on a QgsMapLayerComboBox with four memory layers:
 
     xvfb-run -a python3 tests/qgis_headless/run_combo_pick_check.py
@@ -93,5 +95,37 @@ def search(text):
 
 
 results.append(step('search "gam" + Down + Return (completer)', lambda: search('gam'), True))
+
+
+def window_check_in_the_same_pass():
+    """A check of the post-filter / undo window due in the same pass of the event loop as the key press runs
+    before the call the detector posted: it looks at the input first (it put the source layer back, CI 3.34)."""
+    QTest.keyClick(combo, Qt.Key.Key_Down)
+    getattr(d, '_record_pending_layer_pick', lambda: None)()
+    d.seen_by_the_check = getattr(d, '_user_layer_pick', None) is not None
+
+
+combo.setLayer(layers[0])
+d.seen_by_the_check = None
+results.append(step('Down + a window check before the posted call', window_check_in_the_same_pass, True))
+results.append(bool(d.seen_by_the_check))
+print(f"{'OK ' if d.seen_by_the_check else 'BAD'} {'  ... the window check saw the pick':42s} {d.seen_by_the_check}",
+      flush=True)
+
+
+def popup_closed_then_item_taken():
+    """Qt 5 macOS order: the call posted by the click runs in hidePopup's own event loops, before the combo box
+    takes the item (itemSelected comes after hidePopup)."""
+    combo.showPopup()
+    app.processEvents()
+    QTest.keyClick(combo.view(), Qt.Key.Key_Shift)  # an input in the popup, looked at: no change yet
+    for _ in range(5):
+        app.processEvents()
+    combo.hidePopup()
+    combo.setCurrentIndex((combo.currentIndex() + 1) % combo.count())
+
+
+combo.setLayer(layers[0])
+results.append(step('popup closed, then the item taken (macOS)', popup_closed_then_item_taken, True))
 print('ALL OK' if all(results) else 'SOME BAD', flush=True)
 os._exit(0 if all(results) else 1)

@@ -5635,7 +5635,7 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             return
         if self._plugin_busy:
             logger.debug("current_layer_changed: Plugin busy, deferring")
-            self._defer_layer_change(layer)
+            self._defer_layer_change(layer, manual_change)
             return
         try: _ = layer.id()
         except (RuntimeError, AttributeError):
@@ -5715,18 +5715,41 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
                 perf_mark_end("layer_change")
             logger.debug("current_layer_changed: Lock released")
 
-    def _defer_layer_change(self, layer):
-        """v4.0 Sprint 18: Defer layer change when plugin is busy."""
+    def _defer_layer_change(self, layer, manual_change=False):
+        """v4.0 Sprint 18: Defer layer change when plugin is busy.
+
+        A manual change (the combo box's handler) stays manual; the same change deferred twice (the pick
+        detector of the combo box also applies a pick the panel did not take) is replayed once. A deferred
+        change gives way to another layer the user picked since (``_user_layer_pick``,
+        ConfigurationManager._stamp_user_layer_picks).
+        """
+        import time
         from qgis.PyQt.QtCore import QTimer
         from qgis.core import QgsProject
         captured_id = layer.id() if layer else None
+        key = (captured_id, bool(manual_change))
+        deferred = self.__dict__.setdefault('_deferred_layer_changes', set())
+        if key in deferred:
+            return
+        deferred.add(key)
+        deferred_at = time.perf_counter()
         weak_self = weakref.ref(self)
 
         def safe_change():
             s = weak_self()
-            if s and captured_id:
-                fresh = QgsProject.instance().mapLayer(captured_id)
-                if fresh: s.current_layer_changed(fresh)
+            if not s:
+                return
+            deferred.discard(key)
+            if not captured_id:
+                return
+            record_pending_pick = getattr(s, '_record_pending_layer_pick', None)
+            if callable(record_pending_pick):
+                record_pending_pick()  # an input in the same pass of the event loop is looked at first
+            picked_at, picked_id = getattr(s, '_user_layer_pick', None) or (0.0, None)
+            if picked_at >= deferred_at and picked_id != captured_id:
+                return
+            fresh = QgsProject.instance().mapLayer(captured_id)
+            if fresh: s.current_layer_changed(fresh, manual_change=manual_change)
         QTimer.singleShot(150, safe_change)
 
     def _reset_selection_tracking_for_layer(self, layer):
@@ -6914,6 +6937,10 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
 
                     def _on_rejected():
                         logger.info(f"{current_datatype} export cancelled by user")
+                        pending = getattr(self, '_pending_coverage_export', None)
+                        if pending:
+                            from .core.export.batch_exporter import release_coverage_folder
+                            release_coverage_folder(pending[1])
                         self._pending_coverage_export = None
                         dialog.deleteLater()
                         self._export_recap_dialog = None

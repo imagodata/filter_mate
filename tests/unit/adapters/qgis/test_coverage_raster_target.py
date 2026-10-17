@@ -249,6 +249,38 @@ class TestCombinedAreas:
         assert not job.outcome.success and job.outcome.message == engine.NO_AREA and calls == []
 
 
+class OldGeosGeometry(fk.FakeGeometry):
+    """GEOS of QGIS 3.22 - 3.28: an overlay with a collection holding lines fails (null result)."""
+
+    def _op(self, name, other):
+        for geometry in (self, other):
+            if geometry._g is not None and geometry.asWkt().upper().startswith('GEOMETRYCOLLECTION'):
+                return fk.FakeGeometry(None, error='IllegalArgumentException: Overlay input is mixed-dimension')
+        return super()._op(name, other)
+
+
+class TestOldGeos:
+    def test_combination_uses_the_polygons_only(self, engine, monkeypatch):
+        monkeypatch.setattr(engine, 'QgsGeometry', OldGeosGeometry)
+        previous = "GEOMETRYCOLLECTION(POLYGON((0 0,5 0,5 10,0 10,0 0)),LINESTRING(5 0,9 9))"
+        new = OldGeosGeometry.fromWkt("GEOMETRYCOLLECTION(POLYGON((2 0,8 0,8 10,2 10,2 0)),POINT(9 9))")
+        kept = engine._combine_geometry(previous, 'inside', new, None, 'AND')
+        assert kept.area() == pytest.approx(30.0)
+
+
+class TestSourceParts:
+    def test_parts_kept_alive_with_their_engines(self, engine):
+        """A QgsGeos engine points to its geometry: SourceParts keeps the geometries it was given."""
+        import gc
+        import weakref
+        part = fk.FakeGeometry.fromRect(fk.FakeRectangle(0, 0, 5, 5))
+        alive = weakref.ref(part)
+        parts = geometry_tools.SourceParts([part])
+        del part
+        gc.collect()
+        assert alive() is not None and parts.matches(fk.FakeGeometry.fromRect(fk.FakeRectangle(-1, -1, 6, 6)), ['contains'])
+
+
 class TestSourceClipVrt:
     def test_vrt_of_the_source_clip_is_settled(self, engine, monkeypatch):
         """The clip of a multiband / expression source is not a task target: its VRT is settled here."""

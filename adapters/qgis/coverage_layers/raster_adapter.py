@@ -408,11 +408,14 @@ def selection_geometry(provider: QgsRasterDataProvider, selection: RasterSelecti
     cell_y = extent.height() / height
     geotransform = (extent.xMinimum(), cell_x, 0.0, extent.yMaximum(), 0.0, -cell_y)
     kept = int(mask.sum())
-    # The sieve removes the speckle of a large selection read pixel for pixel.
-    # A small one (a rare class, a narrow range) is kept as it is, and so is a
-    # subsampled grid: each of its cells already stands for several pixels.
-    if kept < SIEVE_MIN_KEPT_PIXELS or width < native_width or height < native_height:
+    # The sieve removes the speckle of a large selection, which would make
+    # countless polygons. A small one (a rare class, a narrow range) is kept as
+    # it is; on a subsampled grid each cell already stands for several pixels:
+    # only lone cells go. The sieve never empties a selection (mask_to_geometry).
+    if kept < SIEVE_MIN_KEPT_PIXELS:
         sieve_pixels = 0
+    elif width < native_width or height < native_height:
+        sieve_pixels = min(sieve_pixels, 2)
     geometry = mask_to_geometry(mask, geotransform, crs_wkt, sieve_pixels=sieve_pixels, simplify_tolerance=min(cell_x, cell_y) * 0.5)
     return SelectionGeometryResult(geometry, kept, int(mask.size), max(cell_x, cell_y))
 
