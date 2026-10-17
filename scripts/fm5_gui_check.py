@@ -428,7 +428,8 @@ def s_terrain_mode():
     check('terrain: preset becomes a slope selection',
           selection is not None and selection.derivative.value == 'slope_degrees' and selection.maximum == 5.0
           and selection.minimum is None, str(selection))
-    check('terrain: preview stays available, expression button off', panel._preview_check.isEnabled() and not panel._use_range_button.isEnabled())
+    check('terrain: preview button stays available, expression button off',
+          dock().pushButton_checkable_exploring_selecting.isEnabled() and not panel._use_range_button.isEnabled())
     panel._set_range(None, 15.0)
     panel._emit_now()
     set_targets(['parcelle', 'batiment'])
