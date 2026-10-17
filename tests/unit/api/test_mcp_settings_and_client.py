@@ -113,7 +113,7 @@ def test_the_key_is_not_stripped_but_stray_whitespace_is_refused():
 
 
 def test_a_key_mistaken_for_a_variable_name_is_not_echoed():
-    secret = "Zk3pQ9vLmN2xR7sT"
+    secret = "NotARealKey" * 2  # must look like a variable name
     with pytest.raises(ConfigError) as info:
         parse_settings(["--api-key-env", secret], {})
     assert secret not in str(info.value)
