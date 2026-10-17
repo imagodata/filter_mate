@@ -19,6 +19,8 @@ from dataclasses import dataclass
 logger = logging.getLogger(__name__)
 
 RASTER_FORMATS = {'GTiff': '.tif', 'COG': '.tif'}
+# Side files GDAL keeps next to a raster (statistics, overviews, masks).
+RASTER_SIDE_FILES = ('.aux.xml', '.ovr', '.ovr.aux.xml', '.msk', '.msk.aux.xml')
 POINT_CLOUD_FORMATS = {'LAZ': '.laz', 'LAS': '.las', 'COPC': '.copc.laz', 'GPKG': '.gpkg', 'CSV': '.csv'}
 
 
@@ -110,7 +112,7 @@ class RasterExportJob:
                     raise RuntimeError(gdal.GetLastErrorMsg() or 'gdal.Translate failed')
                 _remove(current)
                 current = cog
-            os.replace(current, path)
+            _replace_raster(current, path)
         except Exception as exc:
             for name in written:
                 _remove(name)
@@ -138,6 +140,20 @@ def _remove(path: str) -> None:
         os.remove(path)
     except OSError:
         pass
+
+
+def _replace_raster(written: str, path: str) -> None:
+    """Rename a complete raster ``path``, with its side files.
+
+    GDAL's Create used to remove the side files of the file it replaced: the
+    statistics and overviews of a previous export must not describe the new one.
+    """
+    for suffix in RASTER_SIDE_FILES:
+        _remove(path + suffix)
+    os.replace(written, path)
+    for suffix in RASTER_SIDE_FILES:
+        if os.path.exists(written + suffix):
+            os.replace(written + suffix, path + suffix)
 
 
 class PointCloudExportJob:
