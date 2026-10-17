@@ -85,3 +85,32 @@ def test_user_pick_before_undo_does_not_disable_the_protection(handler_module, m
     dock._user_layer_pick = (earlier, 'other')
     handler_module._test_timers[0]()
     dock.comboBox_filtering_current_layer.setLayer.assert_called_once_with(source)
+
+
+def test_a_pick_not_looked_at_yet_is_looked_at_first(handler_module, monkeypatch):
+    """The check and the key press fall due in one pass: the check runs before the call the pick detector
+    posted (ConfigurationManager._stamp_user_layer_picks), it used to put the source layer back over the pick."""
+    dock, source = _setup(handler_module, monkeypatch)
+    dock._record_pending_layer_pick = lambda: setattr(dock, '_user_layer_pick', (time.perf_counter(), 'other'))
+    handler_module._test_timers[0]()
+    dock.comboBox_filtering_current_layer.setLayer.assert_not_called()
+
+
+def test_the_panel_moved_too_is_put_back_through_the_layer_change(handler_module, monkeypatch):
+    """An async change showed another layer's page (a raster): the coverage panel must follow, not only the
+    combo box and ``current_layer``."""
+    dock, source = _setup(handler_module, monkeypatch)
+    dock.current_layer = dock.comboBox_filtering_current_layer.currentLayer.return_value
+    dock.current_layer_changed = MagicMock()
+    handler_module._test_timers[0]()
+    dock.current_layer_changed.assert_called_once_with(source, manual_change=True)
+    dock.comboBox_filtering_current_layer.setLayer.assert_called_once_with(source)
+    assert dock.current_layer is source
+
+
+def test_only_the_combo_box_moved_is_put_back_without_a_layer_change(handler_module, monkeypatch):
+    dock, source = _setup(handler_module, monkeypatch)
+    dock.current_layer_changed = MagicMock()
+    handler_module._test_timers[0]()
+    dock.current_layer_changed.assert_not_called()
+    dock.comboBox_filtering_current_layer.setLayer.assert_called_once_with(source)

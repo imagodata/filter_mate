@@ -689,3 +689,13 @@ Result: Que veux-tu faire dans cette session ?
   le minimum déplié par un minuteur 0 ms → mesuré dans la même passe, ATTRIBUTES déplié vaut 34 px et paraît vide
   (même pour `grab()`). Autre piège QGIS : `QgsCollapsibleGroupBox.setCollapsed` ne fait que noter l'état quand la
   boîte est cachée → le panneau réapplique `setCollapsed(isCollapsed())` dans son `showEvent`.
+- [2026-10-16] Choix de couche vs vérifications différées (branche `claude/v5-audit-layer-pick`, échec CI 3.34
+  « picked=dem combo=zones ») : un minuteur échu dans la même passe de boucle qu'une entrée s'exécute AVANT l'appel
+  posté par l'eventFilter avec `singleShot(0)` (`activateTimers` enchaîne les minuteurs échus, les événements
+  postés passent après). Tout code qui remet la couche source (vérifications post-filtre / undo, complétion ou
+  échec de la tâche, `_defer_layer_change`) appelle d'abord `dock._record_pending_layer_pick()` puis cède à un
+  `_user_layer_pick` plus récent. Qt 5 macOS : `hidePopup` fait clignoter l'élément dans des boucles imbriquées
+  avant `itemSelected` → la fermeture du popup après une entrée dans le popup compte comme une entrée. Course
+  rendue certaine dans le smoke GUI (`s_undo_pick_race` : `singleShot(150)` de la touche, undo, `sleep`). Un choix
+  fait pendant la tâche filtre est appliqué à la fin (`_combo_blocked_at`) ; une tâche échouée / annulée rouvre la
+  fenêtre (`_filter_engine_task_terminated`, garde de génération pour annuler-relancer).

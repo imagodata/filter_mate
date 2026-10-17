@@ -1350,6 +1350,10 @@ class FilterMateApp:
                 lambda tn=task_name, cl=current_layer, tp=task_parameters:
                     self.filter_engine_task_completed(tn, cl, tp)
             )
+            self.appTasks[task_name].taskTerminated.connect(
+                lambda gen=getattr(self.dockwidget, '_combo_protection_gen', None),
+                lid=self._current_layer_id_before_filter: self._filter_engine_task_terminated(gen, lid)
+            )
 
         # Cancel conflicting tasks and add to task manager
         self._cancel_conflicting_tasks()
@@ -1485,11 +1489,17 @@ class FilterMateApp:
 
     def _set_filter_protection_flags(self, current_layer):
         """Set protection flags and disconnect signals during filtering."""
+        import time
         if not self.dockwidget: return
         if self._current_layer_id_before_filter: self.dockwidget._saved_layer_id_before_filter = self._current_layer_id_before_filter
         # A new task: the timers of the previous post-filter window must not unblock the combo box during it.
         self.dockwidget._combo_protection_gen = getattr(self.dockwidget, '_combo_protection_gen', 0) + 1
         self.dockwidget._end_post_filter_window = None
+        # A layer picked from now on is only shown by the combo box: applied when the task is over. Still blocked
+        # by the task this one cancels (a second click on Filter): a layer picked during that one counts too.
+        if not (self.dockwidget.comboBox_filtering_current_layer.signalsBlocked()
+                and getattr(self.dockwidget, '_combo_blocked_at', None)):
+            self.dockwidget._combo_blocked_at = time.perf_counter()
         self.dockwidget._filtering_in_progress = True
         try:
             self.dockwidget.manageSignal(["FILTERING", "CURRENT_LAYER"], 'disconnect')
@@ -1497,6 +1507,41 @@ class FilterMateApp:
             self.dockwidget.manageSignal(["QGIS", "LAYER_TREE_VIEW"], 'disconnect')
         except Exception:  # nosec B110 - Signal may already be disconnected - expected during filtering protection
             pass
+
+    def _filter_engine_task_terminated(self, generation, current_layer_id_before_filter):
+        """A filter / unfilter / reset task failed or was canceled: its protection ends as after a completed one.
+
+        Only the completion (FilterResultHandler) undid _set_filter_protection_flags: after a failed or
+        canceled task the current-layer combo box stayed blocked and the filtering flag set, the panel
+        ignored every layer change. A newer task (cancel and relaunch) owns the protection: left alone.
+        """
+        if getattr(self, '_unloading', False) or self.dockwidget is None:
+            return
+        if getattr(self.dockwidget, '_combo_protection_gen', None) != generation:
+            return
+        if getattr(self, '_removing_all_layers', False):
+            self._release_filter_protection(reconnect=False)
+            return
+        if self._filter_result_handler:
+            self._filter_result_handler.handle_task_terminated(current_layer_id_before_filter)
+
+    def _release_filter_protection(self, reconnect):
+        """Lift _set_filter_protection_flags at once, without a post-filter window.
+
+        For a task that ends while the project closes (no window over its layers; ``reconnect`` False: the
+        teardown disconnected the panel's signals, the next project connects them) or whose completion
+        failed. Else the panel kept waiting for the task: layer picks shown, never applied, and
+        get_project_layers_from_app skipped the next project's layers.
+        """
+        if self.dockwidget is None:
+            return
+        self.dockwidget._filtering_in_progress = False
+        try:
+            self.dockwidget.comboBox_filtering_current_layer.blockSignals(False)
+            if reconnect:
+                self.dockwidget.manageSignal(["FILTERING", "CURRENT_LAYER"], 'connect', 'layerChanged')
+        except (RuntimeError, AttributeError) as e:  # widgets deleted with the dock
+            logger.debug(f"Filter protection not fully lifted: {e}")
 
     def _show_filter_start_message(self, task_name, task_parameters, layers_props, layers, current_layer):
         """Show informational message about filtering operation starting."""
@@ -2638,7 +2683,11 @@ class FilterMateApp:
 
     def filter_engine_task_completed(self, task_name, source_layer, task_parameters):
         """Handle completion of filtering operations via FilterResultHandler."""
-        if getattr(self, '_unloading', False) or getattr(self, '_removing_all_layers', False):
+        if getattr(self, '_unloading', False):
+            return
+        if getattr(self, '_removing_all_layers', False):
+            # A filter left running at a project change: the next project must find the panel free.
+            self._release_filter_protection(reconnect=False)
             return
         if not self._filter_result_handler:
             logger.error("FilterResultHandler not available")
@@ -2656,6 +2705,8 @@ class FilterMateApp:
         except Exception as e:
             logger.error(f"FilterResultHandler failed: {e}")
             iface.messageBar().pushCritical("FilterMate", QCoreApplication.translate("FilterMateApp", "Error during filtering: {0}").format(str(e)))
+            if self.dockwidget is not None and not callable(getattr(self.dockwidget, '_end_post_filter_window', None)):
+                self._release_filter_protection(reconnect=True)  # failed before the post-filter window opened
 
     def apply_subset_filter(self, task_name, layer):
         """Apply or remove subset filter expression on a layer. Delegates to FilterApplicationService."""

@@ -483,6 +483,45 @@ def s_user_pick_after_undo_check():
           f"dock={dock_layer.name() if dock_layer else None} signals blocked at the pick={STATE['blocked_at_pick']}")
 
 
+def s_undo_pick_race():
+    """The same pick, made certain to race a check of the undo (it failed once in CI): the key press and the
+    undo's first check (+200 ms, adapters/undo_redo_handler.py) fall due in one pass of the event loop. The
+    press runs first and changes the combo box (signals blocked: post-filter window), then the check, before the
+    call the pick detector posted for the press: the check put the source layer back, the detector saw no change."""
+    combo = dock().comboBox_filtering_current_layer
+    race = STATE['race'] = {'from': combo.currentLayer().name() if combo.currentLayer() else None}
+
+    def pick():
+        race['blocked'] = combo.signalsBlocked()
+        race['at'] = time.perf_counter() - STATE['perf0']
+        before = combo.currentLayer()
+        for key in (Qt.Key.Key_Down, Qt.Key.Key_Up):
+            press(key)
+            if combo.currentLayer() is not None and combo.currentLayer() is not before:
+                break
+        race['picked'] = combo.currentLayer().name() if combo.currentLayer() else None
+
+    QTimer.singleShot(150, pick)  # due before the undo's first check
+    run_task('undo')
+    time.sleep(0.4)  # both due when the event loop runs again: one pass, the press first
+    return settled()
+
+
+def s_undo_pick_race_check():
+    race = STATE['race']
+    current = dock().comboBox_filtering_current_layer.currentLayer()
+    dock_layer = getattr(dock(), 'current_layer', None)
+    if not check('a layer picked as a check of the undo falls due is kept and applied',
+                 race.get('picked') not in (None, race['from']) and current is not None
+                 and current.name() == race['picked'] and dock_layer is not None and dock_layer.name() == race['picked'],
+                 f"picked={race.get('picked')} (from {race['from']}) combo={current.name() if current else None} "
+                 f"dock={dock_layer.name() if dock_layer else None} signals blocked at the pick={race.get('blocked')}"):
+        pick = getattr(dock(), '_user_layer_pick', None)
+        print(f"   press at {race.get('at', 0):.2f}s, recorded pick={pick}"
+              + (f" at {pick[0] - STATE['perf0']:.2f}s" if pick else ''), flush=True)
+        dump_recent(30, ('current_layer_changed ENTRY', 'estor', 'DELAYED', 'picked', 'protection', 'Unblocked'))
+
+
 def s_raster_source():
     dock().comboBox_filtering_current_layer.setLayer(layer('dem'))
     return switched_to('dem', coverage_page=True)
@@ -642,6 +681,7 @@ def s_finish():
 STEPS = [s_setup, s_open_plugin, s_dock_ready, s_layout_check, s_pick_before_late_refresh, s_late_refresh_check,
          s_vector_source, s_vector_select, s_vector_filter, s_vector_check, s_vector_undo_check,
          s_user_pick_after_undo_check,
+         s_vector_source, s_vector_select, s_vector_filter, s_undo_pick_race, s_undo_pick_race_check,
          s_raster_source, s_raster_select, s_raster_filter, s_raster_check, s_raster_settled,
          s_point_cloud_source, s_point_cloud_select, s_point_cloud_filter, s_point_cloud_check, s_point_cloud_settled,
          s_back_to_vector, s_rasters_off, s_rasters_off_check, s_rasters_on_check,
