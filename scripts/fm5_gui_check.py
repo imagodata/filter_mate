@@ -246,6 +246,162 @@ def s_raster_unfilter_check():
           and layer('batiment').subsetString() == '')
 
 
+# --- raster: colour pipette on every kind of raster ---------------------------------
+
+def _cell_point(extent, col, row, size=100):
+    from qgis.core import QgsPointXY
+    return QgsPointXY(extent.xMinimum() + (col + 0.5) * extent.width() / size, extent.yMaximum() - (row + 0.5) * extent.height() / size)
+
+
+def s_pipette_ortho():
+    import numpy as np
+    from osgeo import gdal
+    ext = layer('mnt').extent()
+    path = os.path.join(OUT, 'ortho_test.tif')
+    nx = ny = 100
+    pixels = np.zeros((3, ny, nx), 'uint8')
+    pixels[0], pixels[1], pixels[2] = 40, 140, 50                              # green field
+    pixels[:, 20:40, 20:40] = np.array([20, 120, 200])[:, None, None]          # blue "pool", 400 px
+    pixels[:, 60:80, 60:80] = np.array([200, 40, 40])[:, None, None]           # red "roof", 400 px
+    ds = gdal.GetDriverByName('GTiff').Create(path, nx, ny, 3, gdal.GDT_Byte)
+    ds.SetGeoTransform((ext.xMinimum(), ext.width() / nx, 0, ext.yMaximum(), 0, -ext.height() / ny))
+    ds.SetProjection(layer('mnt').crs().toWkt())
+    for band in range(3):
+        ds.GetRasterBand(band + 1).WriteArray(pixels[band])
+    ds.FlushCache()
+    ds = None
+    QgsProject.instance().addMapLayer(QgsRasterLayer(path, 'ortho', 'gdal'))
+    dock().comboBox_filtering_current_layer.setLayer(layer('ortho'))
+
+
+def _kept(selection, name='ortho'):
+    from filter_mate.adapters.qgis.coverage_layers.raster_adapter import read_band_array, selection_virtual_layer
+    virtual = selection_virtual_layer(layer(name), selection)
+    return int((read_band_array(virtual.dataProvider(), 1, virtual.extent(), 100, 100) == 1).sum())
+
+
+def s_pipette_ortho_check():
+    ctrl = controller()
+    panel = ctrl._raster_panel
+    ext = layer('mnt').extent()
+    button = ctrl._extras._tools['pushButton_checkable_exploring_raster_pipette']
+    check('pipette: a rail button, visible on a raster', button.isVisible() and not button.icon().isNull())
+    check('pipette: one PIPETTE group holds tolerance, bands and presets', all(
+          w.parent() is panel._pipette_group for w in (panel._tolerance_spin, panel._layout_combo, panel._spectral_combo)))
+    check('pipette: its group is exclusive like the others', panel._pipette_group.isCheckable()
+          and panel._pipette_group in panel._mode_groups.values())
+    check('pipette: bands layout and presets usable on a 3-band image', panel._spectral_combo.isEnabled() and panel._layout_combo.isEnabled())
+    button.setChecked(True)
+    check('pipette: the tool makes its group the active one', panel.active_mode().value == 'pipette'
+          and panel._pipette_group.isChecked() and not panel._range_group.isChecked() and not panel._expression_group.isChecked())
+    check('pipette: puts the pixel picker on the map', iface.mapCanvas().mapTool() is ctrl._pixel_tool)
+    ctrl._on_pixel_picked(_cell_point(ext, 30, 30), False)  # the pool
+    selection = panel.selection()
+    check('pipette: an image gives a similar-colour selection', selection is not None and selection.mode.value == 'expression'
+          and 'abs("ortho@1" - 20)' in selection.expression, (selection.expression if selection else '')[:90])
+    check('pipette: the expression group is left alone', panel._expression_edit.text() == '', panel._expression_edit.text()[:60])
+    check('pipette: the pool is selected, nothing else', _kept(selection) == 400, str(_kept(selection)))
+    ctrl._on_pixel_picked(_cell_point(ext, 70, 70), True)  # Ctrl+click: the roof is added
+    check('pipette: Ctrl+click adds the roof (pool + roof)', _kept(panel.selection()) == 800, str(_kept(panel.selection())))
+    panel._tolerance_spin.setValue(100.0)  # the whole observed range of each band: the green field too
+    check('pipette: the tolerance widens the selection', _kept(panel.selection()) > 800, str(_kept(panel.selection())))
+    panel._tolerance_spin.setValue(12.0)
+    panel._layout_combo.setCurrentIndex(panel._layout_combo.findData('irc'))
+    check('pipette: IRC layout offers the infrared presets', panel._spectral_combo.count() == 4, str(panel._spectral_combo.count()))
+    panel._spectral_combo.activated.emit(1)
+    check('pipette: a spectral preset is the pipette selection', panel.active_mode().value == 'pipette'
+          and '"ortho@1" - "ortho@2"' in panel.selection().expression, panel.selection().expression)
+
+
+def s_pipette_ortho_shot():
+    # A separate step: grabbed in the same event loop turn as the picks, the dock is not laid out yet.
+    badge = dock().backend_indicator_label.text()
+    check('pipette: the badge still names the raster after a layer was added', 'Raster' in badge, badge)
+    save(dock(), '07b-pipette-ortho-panel')
+    ctrl = controller()
+    ctrl._extras._tools['pushButton_checkable_exploring_raster_pipette'].setChecked(False)
+    check('pipette: off leaves the picker', iface.mapCanvas().mapTool() is not ctrl._pixel_tool)
+
+
+def s_pipette_dem():
+    dock().comboBox_filtering_current_layer.setLayer(layer('mnt'))
+
+
+def s_pipette_dem_check():
+    from qgis.core import QgsPointXY
+    ctrl = controller()
+    panel = ctrl._raster_panel
+    ext = layer('mnt').extent()
+    check('pipette: bands layout and presets greyed out on a single band', not panel._spectral_combo.isEnabled() and not panel._layout_combo.isEnabled())
+    button = ctrl._extras._tools['pushButton_checkable_exploring_raster_pipette']
+    panel._tolerance_spin.setValue(5.0)
+    button.setChecked(True)
+    centre = QgsPointXY(ext.center().x(), ext.center().y())
+    from filter_mate.adapters.qgis.coverage_layers.raster_adapter import identify_values
+    value = identify_values(layer('mnt'), centre)[1]
+    range_before = (panel._low, panel._high)
+    ctrl._on_pixel_picked(centre, False)
+    low_bound, high_bound = panel._data_bounds()
+
+    def expected(percent):
+        """Range value +/- tolerance; a side past the data is open (None), as everywhere in the panel."""
+        tol = percent / 100.0 * (high_bound - low_bound)
+        return (None if value - tol <= low_bound else value - tol), (None if value + tol >= high_bound else value + tol)
+
+    def same(a, b):
+        return (a is None and b is None) or (a is not None and b is not None and abs(a - b) < 0.01)
+
+    selection = panel.selection()
+    low, high = expected(5.0)
+    check('pipette: a DEM gives value +/- tolerance', selection is not None and selection.mode.value == 'range'
+          and same(selection.minimum, low) and same(selection.maximum, high),
+          f"{selection.minimum if selection else None}..{selection.maximum if selection else None}, expected {low}..{high} around {value:.2f}")
+    panel._tolerance_spin.setValue(10.0)
+    selection = panel.selection()
+    low, high = expected(10.0)
+    check('pipette: the tolerance rewrites the range', same(selection.minimum, low) and same(selection.maximum, high),
+          f"{selection.minimum}..{selection.maximum}, expected {low}..{high}")
+    check('pipette: the range group is left alone', (panel._low, panel._high) == range_before, f"{range_before} -> {(panel._low, panel._high)}")
+    far = QgsPointXY(ext.xMinimum() + ext.width() * 0.1, ext.yMinimum() + ext.height() * 0.1)
+    before = (selection.minimum, selection.maximum)
+    ctrl._on_pixel_picked(far, True)
+    after = panel.selection()
+    inf = float('inf')
+    lo = lambda v, d: d if v is None else v  # noqa: E731
+    widened = (after is None) or (lo(after.minimum, -inf) <= lo(before[0], -inf) and lo(after.maximum, inf) >= lo(before[1], inf)
+                                  and (after.minimum, after.maximum) != before)
+    check('pipette: Ctrl+click widens the range', widened, f"{before} -> {(after.minimum, after.maximum) if after else None}")
+    button.setChecked(False)
+    panel._tolerance_spin.setValue(12.0)
+    panel.reset()
+
+
+def s_pipette_classes():
+    dock().comboBox_filtering_current_layer.setLayer(layer('classes'))
+
+
+def s_pipette_classes_check():
+    ctrl = controller()
+    panel = ctrl._raster_panel
+    ext = layer('classes').extent()
+    from qgis.core import QgsPointXY
+    from filter_mate.adapters.qgis.coverage_layers.raster_adapter import identify_values
+    button = ctrl._extras._tools['pushButton_checkable_exploring_raster_pipette']
+    button.setChecked(True)
+    centre = QgsPointXY(ext.center().x(), ext.center().y())
+    value = identify_values(layer('classes'), centre)[1]
+    ctrl._on_pixel_picked(centre, False)
+    selection = panel.selection()
+    if panel._has_classes():
+        check('pipette: a classified raster selects the class', selection is not None and selection.mode.value == 'classes'
+              and sorted(selection.classes) == [int(round(value))], f"{selection} for {value}")
+    else:
+        check('pipette: a plain single-band raster gives a range', selection is not None and selection.mode.value == 'range', str(selection))
+    button.setChecked(False)
+    panel.reset()
+    dock().comboBox_filtering_current_layer.setLayer(layer('mnt'))
+
+
 # --- raster: terrain derivative (slope) --------------------------------------
 
 def s_terrain_source():
@@ -467,6 +623,8 @@ STEPS = [
     (s_vector_filter, 9000), (s_vector_check, 1000), (s_vector_undo, 3000), (s_vector_undo_check, 1000),
     (s_raster_source, 3000), (s_raster_mode, 2500), (s_raster_preview, 1500), (s_raster_preview_check, 1000),
     (s_raster_filter, 8000), (s_raster_check, 1000), (s_raster_unfilter, 3000), (s_raster_unfilter_check, 1000),
+    (s_pipette_ortho, 3500), (s_pipette_ortho_check, 1500), (s_pipette_ortho_shot, 1500), (s_pipette_dem, 3000), (s_pipette_dem_check, 1000),
+    (s_pipette_classes, 3000), (s_pipette_classes_check, 1000),
     (s_terrain_source, 3000), (s_terrain_mode, 2500), (s_terrain_preview, 2500), (s_terrain_preview_check, 1000), (s_terrain_pick, 1500), (s_terrain_filter, 8000), (s_terrain_check, 1000),
     (s_terrain_unfilter, 3000), (s_terrain_unfilter_check, 1000),
     (s_pc_source, 4000), (s_pc_mode, 2500), (s_pc_filter, 15000), (s_pc_check, 1000),

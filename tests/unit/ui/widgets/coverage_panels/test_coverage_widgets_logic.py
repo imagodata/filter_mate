@@ -255,6 +255,104 @@ class TestDerivativeInTheState:
         assert raster.format_preset("Gentle", 5.0, 15.0) == "Gentle (5–15)"
 
 
+class TestSpectralPresets:
+    def test_layouts_offer_the_presets_their_colours_allow(self):
+        assert raster.spectral_presets_for("rgb") == ["exg_vegetation"]
+        assert raster.spectral_presets_for("irc") == ["ndvi_vegetation", "ndvi_bare", "ndwi_water"]
+        assert raster.spectral_presets_for("rgbn") == ["ndvi_vegetation", "ndvi_bare", "ndwi_water", "exg_vegetation"]
+        assert raster.spectral_presets_for("unknown") == []
+
+    def test_ndvi_on_an_irc_image_uses_bands_one_and_two(self):
+        assert raster.spectral_expression("ndvi_vegetation", "irc", "ortho") == (
+            '("ortho@1" - "ortho@2") / ("ortho@1" + "ortho@2") > 0.3')
+
+    def test_ndvi_on_rgbn_uses_the_fourth_band_for_the_infrared(self):
+        assert raster.spectral_expression("ndvi_vegetation", "rgbn", "img") == (
+            '("img@4" - "img@1") / ("img@4" + "img@1") > 0.3')
+
+    def test_water_index_is_green_against_infrared(self):
+        assert raster.spectral_expression("ndwi_water", "irc", "o") == '("o@3" - "o@1") / ("o@3" + "o@1") > 0.1'
+
+    def test_missing_colour_gives_nothing(self):
+        assert raster.spectral_expression("ndvi_vegetation", "rgb", "o") == ""
+        assert raster.spectral_expression("nope", "rgb", "o") == ""
+
+    def test_layout_guess(self):
+        assert raster.default_band_layout(["Red", "Green", "Blue"]) == "rgb"
+        assert raster.default_band_layout(["R", "G", "B", "N"]) == "rgbn"
+        assert raster.default_band_layout(["Band 1"]) == "rgb"
+
+
+class TestPipetteReviewFixes:
+    def test_alpha_is_not_an_infrared_band(self):
+        assert raster.default_band_layout(["Red", "Green", "Blue", "Alpha"]) == "rgb"
+        assert raster.layouts_for(["Red", "Green", "Blue", "Alpha"]) == ["rgb", "irc"]
+        assert raster.layouts_for(["R", "G", "B", "N"]) == ["rgb", "irc", "rgbn"]
+
+    def test_one_tolerance_per_band(self):
+        text = raster.color_similarity_expression("o", [1, 2], [(10, 20)], [5, 500])
+        assert text == '(abs("o@1" - 10) <= 5 AND abs("o@2" - 20) <= 500)'
+
+    def test_numbers_are_not_rounded_to_six_digits(self):
+        text = raster.color_similarity_expression("o", [1], [(123456789,)], 0)
+        assert '"o@1" - 123456789)' in text
+        assert '0.123456789' in raster.color_similarity_expression("o", [1], [(0.123456789,)], 0)
+
+    def test_picks_survive_the_state(self):
+        parsed = raster.parse_raster_state({"pipette_kind": "color", "pipette_picks": [[20, 120, 200], [200, 40, 40], "x"]})
+        assert parsed["pipette_kind"] == "color" and parsed["pipette_picks"] == [[20.0, 120.0, 200.0], [200.0, 40.0, 40.0]]
+        assert raster.parse_raster_state({"pipette_kind": "weird", "pipette_picks": "1"})["pipette_kind"] == ""
+        assert raster.parse_raster_state({"pipette_picks": [1300.5, 2]})["pipette_picks"] == [1300.5, 2]
+
+    def test_odd_values_in_a_state_do_not_raise(self):
+        parsed = raster.parse_raster_state({"expression": 42, "layout": ["rgb"]})
+        assert parsed["expression"] == "" and parsed["layout"] == ""
+
+
+class TestPipetteGroupState:
+    def test_pipette_mode_round_trip(self):
+        parsed = raster.parse_raster_state({"mode": "pipette", "pipette_selection": {"mode": "classes", "classes": [3]}})
+        assert parsed["mode"] is raster.PIPETTE
+
+    def test_pipette_selection_is_its_own(self):
+        state = {"mode": "pipette", "minimum": 1.0, "maximum": 9.0,
+                 "pipette_selection": {"band": 1, "mode": "range", "minimum": 200.0, "maximum": 260.0}}
+        selection = raster.build_raster_selection(state)
+        assert (selection.minimum, selection.maximum) == (200.0, 260.0)  # not the range group
+
+    def test_slope_range_picked(self):
+        selection = raster.build_raster_selection({"mode": "pipette", "pipette_selection": {
+            "mode": "range", "maximum": 12.0, "derivative": "slope_degrees"}})
+        assert selection.derivative.value == "slope_degrees"
+
+    def test_nothing_picked_selects_nothing(self):
+        assert raster.build_raster_selection({"mode": "pipette"}) is None
+        assert raster.build_raster_selection({"mode": "pipette", "pipette_selection": {"mode": "nope"}}) is None
+
+
+class TestColorPipette:
+    def test_one_color_within_a_tolerance(self):
+        assert raster.color_similarity_expression("ortho", [1, 2, 3], [(12, 100, 180)], 30) == (
+            '(abs("ortho@1" - 12) <= 30 AND abs("ortho@2" - 100) <= 30 AND abs("ortho@3" - 180) <= 30)')
+
+    def test_several_colors_are_ored(self):
+        text = raster.color_similarity_expression("o", [1, 2], [(1, 2), (3, 4)], 5)
+        assert text == '(abs("o@1" - 1) <= 5 AND abs("o@2" - 2) <= 5) OR (abs("o@1" - 3) <= 5 AND abs("o@2" - 4) <= 5)'
+
+    def test_no_sample_no_expression(self):
+        assert raster.color_similarity_expression("o", [1], [], 5) == ""
+
+    def test_tolerance_is_a_share_of_the_range(self):
+        assert raster.tolerance_value(12, 255) == 30.6
+        assert raster.tolerance_value(0, 255) == 0.0
+        assert raster.tolerance_value(-5, 255) == 0.0
+
+    def test_alpha_is_not_part_of_a_color(self):
+        assert raster.color_bands(["Red", "Green", "Blue", "Alpha"]) == [1, 2, 3]
+        assert raster.color_bands(["R", "G", "B", "N", "Alpha"]) == [1, 2, 3, 4]
+        assert raster.color_bands(["Gray", "Alpha"]) == [1]
+
+
 class TestDerivedValueText:
     def test_unit_follows_the_quantity(self):
         D = raster.RasterDerivative

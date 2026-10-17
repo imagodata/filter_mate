@@ -125,6 +125,8 @@ def s_raster_check():
     check('raster: only raster groups (no vector group)', not any(g.isVisible() for g in groups) and ctrl()._raster_panel.isVisible()
           and not ctrl()._pc_panel.isVisible())
     check('raster: linking hidden', not d.pushButton_checkable_exploring_linking_widgets.isVisible())
+    pipette = tool('pushButton_checkable_exploring_raster_pipette')
+    check('raster: pipette tool visible with its icon', pipette is not None and pipette.isVisible() and not pipette.icon().isNull())
     link = tool('pushButton_checkable_exploring_raster_link')
     check('raster: style link on the rail, its icon drawn', link is not None and link.isVisible() and not link.icon().isNull())
     check('raster: no other extra tool on the rail (hover, statistics) nor the point cloud ones',
@@ -323,7 +325,7 @@ def s_pc_check():
     check('pc: no other extra tool on the rail (profile and 3D are the QGIS ones, no raster tool)',
           all(tool(n) is None or not tool(n).isVisible() for n in (
               'pushButton_exploring_point_cloud_profile', 'pushButton_exploring_point_cloud_3d',
-              'pushButton_checkable_exploring_raster_link')))
+              'pushButton_checkable_exploring_raster_link', 'pushButton_checkable_exploring_raster_pipette')))
     vgroups = [d.mGroupBox_exploring_single_selection, d.mGroupBox_exploring_multiple_selection, d.mGroupBox_exploring_custom_selection]
     check('pc: only point cloud groups (no vector, no raster group)', not any(g.isVisible() for g in vgroups)
           and ctrl()._pc_panel.isVisible() and not ctrl()._raster_panel.isVisible())

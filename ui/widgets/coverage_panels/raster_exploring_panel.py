@@ -15,6 +15,7 @@ pure functions of this module, testable without Qt.
 """
 import math
 from contextlib import contextmanager
+from enum import Enum
 from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Sequence, Tuple
 
 try:
@@ -38,7 +39,7 @@ try:
 except ImportError:
     QgsCollapsibleGroupBox = None
 
-from ....core.domain.raster_filter_criteria import RasterDerivative, RasterSelection, RasterSelectionMode
+from ....core.domain.raster_filter_criteria import DERIVATIVE_BOUNDS, RasterDerivative, RasterSelection, RasterSelectionMode
 from .histogram_widget import RangeHistogramWidget, normalize_range, spin_bounds
 
 if TYPE_CHECKING:
@@ -189,6 +190,95 @@ def format_derived_value(derivative: RasterDerivative, value: Optional[float], n
     return f"{float(value):.{DERIVATIVE_DECIMALS}f}{DERIVATIVE_SUFFIXES.get(derivative, '')}"
 
 
+# Band layouts of a multiband image: band number of each colour (NIR: near infrared).
+BAND_LAYOUTS = {
+    "rgb": {"R": 1, "G": 2, "B": 3},
+    "irc": {"NIR": 1, "R": 2, "G": 3},  # IGN infrared colour orthophoto
+    "rgbn": {"R": 1, "G": 2, "B": 3, "NIR": 4},
+}
+# key, colours needed, raster calculator template ({R} -> "image@2"...).
+SPECTRAL_PRESETS = (
+    ("ndvi_vegetation", ("NIR", "R"), "({NIR} - {R}) / ({NIR} + {R}) > 0.3"),
+    ("ndvi_bare", ("NIR", "R"), "({NIR} - {R}) / ({NIR} + {R}) < 0.1"),
+    ("ndwi_water", ("G", "NIR"), "({G} - {NIR}) / ({G} + {NIR}) > 0.1"),
+    ("exg_vegetation", ("R", "G", "B"), "(2 * {G} - {R} - {B}) / ({R} + {G} + {B}) > 0.1"),
+)
+DEFAULT_COLOR_TOLERANCE = 12.0  # percent of the value range, per band
+
+
+class PipetteMode(Enum):
+    """The PIPETTE group, exclusive like the selection modes; its selection is the result of the last picks."""
+
+    PIPETTE = "pipette"
+
+
+PIPETTE = PipetteMode.PIPETTE
+
+
+def default_band_layout(band_names: Sequence[str]) -> str:
+    """Layout guessed from the bands: four colour bands are red, green, blue and infrared, otherwise red, green, blue.
+
+    An alpha band is not a colour (an RGBA image is RGB). An infrared colour image (IRC) cannot be told
+    from RGB by its bands: the user picks it.
+    """
+    return "rgbn" if len(color_bands(band_names)) >= 4 else "rgb"
+
+
+def layouts_for(band_names: Sequence[str]) -> List[str]:
+    """Layouts an image can have: RGB + infrared needs four colour bands (A11)."""
+    return ["rgb", "irc", "rgbn"] if len(color_bands(band_names)) >= 4 else ["rgb", "irc"]
+
+
+def spectral_presets_for(layout: str) -> List[str]:
+    """Keys of the presets whose colours exist in ``layout`` (e.g. no NDVI on a plain RGB image)."""
+    colours = BAND_LAYOUTS.get(layout, {})
+    return [key for key, needs, _template in SPECTRAL_PRESETS if all(c in colours for c in needs)]
+
+
+def spectral_expression(key: str, layout: str, reference: str) -> str:
+    """Raster calculator expression of a preset on ``layout``; ``""`` when the layout lacks a colour."""
+    colours = BAND_LAYOUTS.get(layout, {})
+    for name, needs, template in SPECTRAL_PRESETS:
+        if name == key and all(c in colours for c in needs):
+            return template.format(**{c: f'"{reference}@{colours[c]}"' for c in needs})
+    return ""
+
+
+def color_bands(band_names: Sequence[str]) -> List[int]:
+    """Band numbers a picked colour is made of: up to four, an alpha band left out."""
+    numbers = [number for number, name in enumerate(band_names, start=1) if "alpha" not in (name or "").lower()]
+    return numbers[:4]
+
+
+def tolerance_value(percent: float, span: float) -> float:
+    """Tolerance in band units: ``percent`` of the value range."""
+    return round(max(0.0, float(percent)) / 100.0 * float(span), 6)
+
+
+def _number(value: float) -> str:
+    """Number for an expression, exact enough that the clicked pixel keeps itself (no 6-digit rounding)."""
+    return repr(float(value)) if float(value) != int(float(value)) else str(int(float(value)))
+
+
+def color_similarity_expression(reference: str, bands: Sequence[int], samples: Sequence[Sequence[float]],
+                                tolerance) -> str:
+    """Expression keeping the pixels within the tolerance of a sampled colour, on every band; samples are ORed.
+
+    ``(abs("img@1" - 12) <= 30 AND abs("img@2" - 100) <= 30 AND ...) OR (...)``
+
+    Args:
+        tolerance: One value for every band, or one per band (in ``bands`` order).
+    """
+    tolerances = list(tolerance) if isinstance(tolerance, (list, tuple)) else [tolerance] * len(bands)
+    clauses = []
+    for sample in samples:
+        parts = [f'abs("{reference}@{band}" - {_number(value)}) <= {_number(tol)}'
+                 for band, value, tol in zip(bands, sample, tolerances)]
+        if parts:
+            clauses.append("(" + " AND ".join(parts) + ")")
+    return " OR ".join(clauses)
+
+
 def derivative_presets(derivative: RasterDerivative) -> List[Tuple[str, Bound, Bound]]:
     """Usual thresholds of a derivative: ``(key, low, high)``, ``None`` bound = open side.
 
@@ -229,17 +319,29 @@ def _optional_float(value: Any) -> Bound:
     return number if math.isfinite(number) else None
 
 
+def _parse_picks(raw: Any) -> List[Any]:
+    """Picks of a saved state: numbers or lists of numbers; anything else is dropped."""
+    picks = []
+    for pick in raw if isinstance(raw, list) else []:
+        if isinstance(pick, list) and pick and all(_optional_float(v) is not None for v in pick):
+            picks.append([float(v) for v in pick])
+        elif _optional_float(pick) is not None:
+            picks.append(float(pick) if float(pick) != int(float(pick)) else int(float(pick)))
+    return picks
+
+
 def parse_raster_state(state: Any) -> Dict[str, Any]:
     """Normalise a saved panel state; missing or invalid entries get their default.
 
     Returns:
-        Dict with ``layer_id``, ``mode`` (RasterSelectionMode), ``band`` (>= 1),
+        Dict with ``layer_id``, ``mode`` (RasterSelectionMode or PIPETTE), ``band`` (>= 1),
         ``minimum`` / ``maximum`` (ordered, None = unbounded), ``classes``
         (sorted ints), ``expression``, ``preview`` and ``derivative`` (RasterDerivative).
     """
     state = state if isinstance(state, dict) else {}
+    raw_mode = state.get("mode", RasterSelectionMode.RANGE.value)
     try:
-        mode = RasterSelectionMode(state.get("mode", RasterSelectionMode.RANGE.value))
+        mode = PIPETTE if raw_mode == PIPETTE.value else RasterSelectionMode(raw_mode)
     except ValueError:
         mode = RasterSelectionMode.RANGE
     try:
@@ -265,9 +367,13 @@ def parse_raster_state(state: Any) -> Dict[str, Any]:
         "minimum": low,
         "maximum": high,
         "classes": sorted(classes),
-        "expression": str(state.get("expression") or ""),
+        "expression": state.get("expression") if isinstance(state.get("expression"), str) else "",
         "preview": bool(state.get("preview", False)),
         "derivative": derivative,
+        "layout": state.get("layout") if isinstance(state.get("layout"), str) and state.get("layout") in BAND_LAYOUTS else "",
+        "pipette_selection": state.get("pipette_selection") if isinstance(state.get("pipette_selection"), dict) else None,
+        "pipette_kind": state.get("pipette_kind") if state.get("pipette_kind") in ("color", "value", "classes", "preset") else "",
+        "pipette_picks": _parse_picks(state.get("pipette_picks")),
     }
 
 
@@ -279,6 +385,12 @@ def build_raster_selection(state: Any) -> Optional[RasterSelection]:
     """
     parsed = parse_raster_state(state)
     mode = parsed["mode"]
+    if mode is PIPETTE:
+        try:
+            selection = RasterSelection.from_dict(parsed["pipette_selection"] or {})
+        except (ValueError, TypeError):
+            return None
+        return None if not parsed["pipette_selection"] or selection.is_empty else selection
     if mode is RasterSelectionMode.RANGE:
         selection = RasterSelection(band=parsed["band"], mode=mode, derivative=parsed["derivative"],
                                     minimum=parsed["minimum"], maximum=parsed["maximum"])
@@ -332,6 +444,12 @@ class RasterExploringPanel(QWidget):
         self._reference = DEFAULT_REFERENCE
         self._mode = RasterSelectionMode.RANGE
         self._derivative = RasterDerivative.VALUE
+        self._layout = "rgb"
+        self._pipette_selection: Optional[RasterSelection] = None  # what the PIPETTE group selects
+        self._pick_kind = ""  # "color", "value", "classes" or "preset": what the picks are
+        self._picks: List[Any] = []  # colours (tuples), values or class codes picked, in order
+        self._band_spans: Dict[int, float] = {}  # observed value range of each band (statistics of the layer)
+        self._pipette_on = False  # the pipette tool is on the map
         self._low: Bound = None
         self._high: Bound = None
         self._decimals = FLOAT_DECIMALS
@@ -407,6 +525,7 @@ class RasterExploringPanel(QWidget):
         if hasattr(self._pixel_group, 'setCollapsed'):
             self._pixel_group.setCollapsed(True)  # opened by the first picked pixel
         layout.addWidget(self._pixel_group)
+        layout.addWidget(self._build_pipette_group())
         layout.addWidget(self._build_range_group())
         layout.addWidget(self._build_classes_group())
         layout.addWidget(self._build_expression_group())
@@ -416,12 +535,61 @@ class RasterExploringPanel(QWidget):
             RasterSelectionMode.RANGE: self._range_group,
             RasterSelectionMode.CLASSES: self._classes_group,
             RasterSelectionMode.EXPRESSION: self._expression_group,
+            PIPETTE: self._pipette_group,
         }
         for mode, group in self._mode_groups.items():
             group.toggled.connect(lambda checked, m=mode: self._on_group_toggled(m, checked))
             if hasattr(group, "collapsedStateChanged"):
                 group.collapsedStateChanged.connect(lambda collapsed, m=mode: self._on_group_collapsed(m, collapsed))
         self._classes_group.setVisible(False)
+
+    def _build_pipette_group(self) -> Any:
+        """Everything the pipette needs, in one group: tolerance, last pick, band layout, spectral presets."""
+        self._pipette_group = self._make_group(self.tr("PIPETTE"), "mGroupBox_raster_pipette", checkable=True)
+        group_layout = self._pipette_group.layout()
+        tolerance_row = QHBoxLayout()
+        tolerance_row.addWidget(QLabel(self.tr("Tolerance ±"), self._pipette_group))
+        self._tolerance_spin = QDoubleSpinBox(self._pipette_group)
+        self._tolerance_spin.setRange(0.0, 100.0)
+        self._tolerance_spin.setDecimals(1)
+        self._tolerance_spin.setSuffix(" %")
+        self._tolerance_spin.setValue(DEFAULT_COLOR_TOLERANCE)
+        self._tolerance_spin.setKeyboardTracking(False)
+        self._tolerance_spin.setToolTip(self.tr("Tolerance around the picked color or value, in % of the value range"))
+        self._tolerance_spin.setAccessibleName(self.tr("Pipette tolerance"))
+        self._tolerance_spin.valueChanged.connect(self._on_tolerance_changed)
+        tolerance_row.addWidget(self._tolerance_spin)
+        group_layout.addLayout(tolerance_row)
+        self._sample_label = QLabel("", self._pipette_group)
+        self._sample_label.setWordWrap(True)
+        group_layout.addWidget(self._sample_label)
+        # Multiband images (orthophotos): which band is which, then the usual indexes.
+        layout_row = QHBoxLayout()
+        self._layout_label = QLabel(self.tr("Bands"), self._pipette_group)
+        layout_row.addWidget(self._layout_label)
+        self._layout_combo = QComboBox(self._pipette_group)
+        self._layout_combo.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
+        self._layout_combo.setToolTip(self.tr("What the bands of the image are: the presets and the pipette use them"))
+        self._layout_combo.setAccessibleName(self.tr("Band layout"))
+        for key, label in (("rgb", self.tr("RGB (red, green, blue)")), ("irc", self.tr("IRC (infrared, red, green)")),
+                           ("rgbn", self.tr("RGB + infrared"))):
+            self._layout_combo.addItem(label, key)
+        self._layout_combo.currentIndexChanged.connect(self._on_layout_index_changed)
+        layout_row.addWidget(self._layout_combo)
+        group_layout.addLayout(layout_row)
+        self._spectral_combo = QComboBox(self._pipette_group)
+        self._spectral_combo.setToolTip(self.tr("Write the expression of a usual index (vegetation, water...)"))
+        self._spectral_combo.setAccessibleName(self.tr("Spectral presets"))
+        self._spectral_combo.activated.connect(self._on_spectral_preset)
+        group_layout.addWidget(self._spectral_combo)
+        self._fill_spectral_presets()
+        return self._pipette_group
+
+    def show_pipette_active(self, active: bool) -> None:
+        """The pipette is on (or off) the map: on, its group becomes the active one."""
+        self._pipette_on = bool(active)
+        if active:
+            self._activate_mode(PIPETTE)
 
     def _build_pixel_group(self) -> Any:
         group = self._make_group(self.tr("PIXEL VALUE"), "mGroupBox_raster_pixel_value", checkable=False)
@@ -473,8 +641,8 @@ class RasterExploringPanel(QWidget):
 
     def show_picker_active(self, active: bool) -> None:
         """The pixel picker is on the map: the pixel group opens so the next click is seen."""
-        if active and hasattr(self._pixel_group, 'setCollapsed'):
-            self._pixel_group.setCollapsed(False)
+        if active and not self._pipette_on and hasattr(self._pixel_group, 'setCollapsed'):
+            self._pixel_group.setCollapsed(False)  # the pipette shows its result in its own group
 
     def _build_range_group(self) -> Any:
         self._range_group = self._make_group(self.tr("VALUE RANGE"), "mGroupBox_raster_value_range", checkable=True)
@@ -544,6 +712,7 @@ class RasterExploringPanel(QWidget):
         self._expression_edit.setAccessibleName(self.tr("Raster expression"))
         self._expression_edit.textChanged.connect(self._schedule_selection_changed)
         group_layout.addWidget(self._expression_edit)
+
         self._expression_status = QLabel("", self._expression_group)
         self._expression_status.setWordWrap(True)
         group_layout.addWidget(self._expression_status)
@@ -571,6 +740,9 @@ class RasterExploringPanel(QWidget):
         if not same_layer:
             self._histograms.clear()
             self._reference = sanitize_reference(summary.layer_name)
+            self._set_layout(default_band_layout([info.name for info in summary.bands]))
+            self._pipette_selection, self._picks, self._pick_kind = None, [], ""
+            self._band_spans = {}
         self._coordinate_decimals = coordinate_decimals(min(summary.pixel_size_x, summary.pixel_size_y))
 
         with _signals_blocked(self._band_combo):
@@ -578,6 +750,7 @@ class RasterExploringPanel(QWidget):
             for info in summary.bands:
                 self._band_combo.addItem(band_label(info.number, info.name, info.data_type), int(info.number))
         self._fill_classes(summary.classes)
+        self._show_spectral_rows()
         if saved is not None:
             self.restore_state(saved)
         else:
@@ -621,9 +794,9 @@ class RasterExploringPanel(QWidget):
     def current_derivative(self) -> RasterDerivative:
         """Quantity the selection applies to: the one of the combo in range mode, the pixel value otherwise.
 
-        Classes and expressions read pixel values, whatever the combo says.
+        Classes and expressions read pixel values, whatever the combo says; the pipette picks in the quantity.
         """
-        return self._derivative if self._mode is RasterSelectionMode.RANGE else RasterDerivative.VALUE
+        return self._derivative if self._mode in (RasterSelectionMode.RANGE, PIPETTE) else RasterDerivative.VALUE
 
     def current_band(self) -> int:
         """1-based number of the selected band (1 when no band is listed)."""
@@ -672,7 +845,7 @@ class RasterExploringPanel(QWidget):
             shown = format_derived_value(self._derivative, terrain.get(self._derivative), self.tr("NoData"))
         self._history = push_history(self._history, (float(x), float(y), values.get(band), band, shown))
         self._refresh_pixel_display()
-        if hasattr(self._pixel_group, 'setCollapsed'):
+        if not self._pipette_on and hasattr(self._pixel_group, 'setCollapsed'):
             self._pixel_group.setCollapsed(False)
         value = terrain.get(self._derivative) if self._derivative.is_terrain else values.get(band)
         if extend and value is not None and self._mode is RasterSelectionMode.RANGE:
@@ -716,6 +889,8 @@ class RasterExploringPanel(QWidget):
         self.set_hover_value(None, None)
         self._zone_label.setVisible(False)
         self._zone_label.setText("")
+        self._pipette_selection, self._picks, self._pick_kind = None, [], ""
+        self._sample_label.setText("")
         if self._band_combo.count():
             with _signals_blocked(self._band_combo):
                 self._band_combo.setCurrentIndex(0)
@@ -745,6 +920,10 @@ class RasterExploringPanel(QWidget):
             "expression": self._expression_edit.text(),
             "preview": self._preview_check.isChecked(),
             "derivative": self._derivative.value,
+            "layout": self._layout,
+            "pipette_selection": self._pipette_selection.to_dict() if self._pipette_selection is not None else None,
+            "pipette_picks": [list(pick) if isinstance(pick, tuple) else pick for pick in self._picks],
+            "pipette_kind": self._pick_kind,
         }
 
     def restore_state(self, state: Dict[str, Any]) -> None:
@@ -756,6 +935,16 @@ class RasterExploringPanel(QWidget):
             with _signals_blocked(self._band_combo):
                 self._band_combo.setCurrentIndex(index)
         self._set_derivative(parsed["derivative"])
+        if parsed["layout"]:
+            self._set_layout(parsed["layout"])
+        self._pick_kind = parsed["pipette_kind"]
+        self._picks = [tuple(pick) if self._pick_kind == "color" else pick for pick in parsed["pipette_picks"]]
+        try:
+            data = parsed["pipette_selection"]
+            self._pipette_selection = RasterSelection.from_dict(data) if data else None
+        except (ValueError, TypeError):
+            self._pipette_selection = None
+        self._show_pipette_result()
         self._apply_band()
         self._set_range(parsed["minimum"], parsed["maximum"])
         wanted = set(parsed["classes"])
@@ -866,7 +1055,13 @@ class RasterExploringPanel(QWidget):
             return None, None
         return cached[1], cached[2]
 
+    def _forget_picks(self) -> None:
+        """Picks were read on another band or quantity: they and their selection no longer apply (A3)."""
+        self._picks, self._pick_kind, self._pipette_selection = [], "", None
+        self._show_pipette_result()
+
     def _on_band_index_changed(self, _index: int) -> None:
+        self._forget_picks()
         self._apply_band()
         self._set_range(None, None)
         self._refresh_pixel_display()
@@ -894,6 +1089,7 @@ class RasterExploringPanel(QWidget):
         except ValueError:
             derivative = RasterDerivative.VALUE
         self._set_derivative(derivative)
+        self._forget_picks()
         self._apply_band()
         self._set_range(None, None)  # the old bounds were in another unit
         self._refresh_pixel_display()
@@ -926,7 +1122,7 @@ class RasterExploringPanel(QWidget):
         """Enable what makes sense for the quantity: a derivative has no raster calculator expression."""
         terrain = self._derivative.is_terrain
         self._use_range_button.setEnabled(not terrain)
-        self._derivative_combo.setEnabled(self._mode is RasterSelectionMode.RANGE)
+        self._derivative_combo.setEnabled(self._mode in (RasterSelectionMode.RANGE, PIPETTE))
 
     # === Range ===
 
@@ -1000,6 +1196,175 @@ class RasterExploringPanel(QWidget):
             self._expression_edit.setText(formula)
         self.set_expression_status(True, "")
         self._emit_now()
+
+    # === Spectral presets and colour pipette (multiband images) ===
+
+    def _set_layout(self, layout: str) -> None:
+        names = [info.name for info in self._summary.bands] if self._summary is not None else []
+        allowed = layouts_for(names)
+        model = self._layout_combo.model()
+        for index in range(self._layout_combo.count()):
+            model.item(index).setEnabled(self._layout_combo.itemData(index) in allowed)
+        self._layout = layout if layout in allowed else "rgb"
+        with _signals_blocked(self._layout_combo):
+            self._layout_combo.setCurrentIndex(max(0, self._layout_combo.findData(self._layout)))
+        self._fill_spectral_presets()
+
+    def _on_layout_index_changed(self, _index: int) -> None:
+        self._set_layout(self._layout_combo.currentData())
+        # Picked colours are band values: they stay. A preset read other bands: it is dropped.
+        if self._pick_kind == "preset":
+            self._forget_picks()
+
+    def _show_spectral_rows(self) -> None:
+        """Bands layout and spectral presets only make sense for an image of three bands or more: greyed out otherwise.
+
+        (A collapsible group hides and shows its children as it folds: they are disabled, not hidden.)
+        """
+        names = [info.name for info in self._summary.bands] if self._summary is not None else []
+        usable = len(color_bands(names)) >= 3
+        tip = "" if usable else self.tr("Needs an image of three bands or more (red, green, blue...)")
+        for widget in (self._layout_label, self._layout_combo, self._spectral_combo):
+            widget.setEnabled(usable)
+        self._layout_combo.setToolTip(tip or self.tr("What the bands of the image are: the presets and the pipette use them"))
+        self._spectral_combo.setToolTip(tip or self.tr("Write the expression of a usual index (vegetation, water...)"))
+
+    def _fill_spectral_presets(self) -> None:
+        names = {"ndvi_vegetation": self.tr("Vegetation (NDVI > 0.3)"), "ndvi_bare": self.tr("No vegetation (NDVI < 0.1)"),
+                 "ndwi_water": self.tr("Water (NDWI > 0.1)"), "exg_vegetation": self.tr("Vegetation (excess green)")}
+        with _signals_blocked(self._spectral_combo):
+            self._spectral_combo.clear()
+            self._spectral_combo.addItem(self.tr("Spectral presets…"), None)
+            for key in spectral_presets_for(self._layout):
+                self._spectral_combo.addItem(names[key], key)
+
+    def _on_spectral_preset(self, index: int) -> None:
+        key = self._spectral_combo.itemData(index)
+        name = self._spectral_combo.itemText(index)
+        self._spectral_combo.setCurrentIndex(0)
+        if key is None:
+            return
+        self._picks, self._pick_kind, self._preset_name = [], "preset", name
+        self._set_pipette_selection(RasterSelection(band=self.current_band(), mode=RasterSelectionMode.EXPRESSION,
+                                                    expression=spectral_expression(key, self._layout, self._reference)))
+
+    def set_band_spans(self, spans: Dict[int, float]) -> None:
+        """Observed value range of each band (``max - min``), the base of the pipette tolerance."""
+        self._band_spans = {int(band): float(span) for band, span in (spans or {}).items() if span and span > 0}
+
+    def _value_span(self, band: int = 0) -> float:
+        """Value range of ``band`` (the current one by default): its statistics, its histogram, else its type."""
+        band = band or self.current_band()
+        if band in self._band_spans:
+            return self._band_spans[band]
+        cached = self._histograms.get((band, RasterDerivative.VALUE))
+        if cached and cached[2] > cached[1]:
+            return float(cached[2] - cached[1])
+        info = self._band_info(band)
+        kind = info.data_type if info is not None else "Byte"
+        return 65535.0 if kind in ("UInt16", "Int16") else 255.0
+
+    def _color_band_numbers(self) -> List[int]:
+        names = [info.name for info in self._summary.bands] if self._summary is not None else []
+        return color_bands(names)
+
+    def set_color_sample(self, values: Dict[int, Optional[float]], extend: bool = False,
+                         terrain: Optional[Dict[RasterDerivative, Optional[float]]] = None) -> None:
+        """A pixel was clicked with the pipette: the PIPETTE group selects the pixels that look like it.
+
+        An image of several bands selects a similar color (an expression); a classified raster selects
+        the class; a single band (DTM, index) or a slope / aspect... selects a range around the value.
+
+        Args:
+            values: Band number -> value of the clicked pixel (None for NoData).
+            extend: Ctrl+click; the color, class or value is added to the ones already picked.
+            terrain: Slope, aspect... of the pixel, read when the pipette picks one.
+        """
+        bands = self._color_band_numbers()
+        band = self.current_band()
+        if len(bands) >= 2 and not self._derivative.is_terrain:
+            kind, pick = "color", tuple(values.get(number) for number in bands)
+            missing = any(value is None for value in pick)
+        elif self._has_classes() and not self._derivative.is_terrain:
+            value = values.get(band)
+            kind, pick, missing = "classes", (None if value is None else int(round(value))), value is None
+        else:
+            value = (terrain or {}).get(self._derivative) if self._derivative.is_terrain else values.get(band)
+            kind, pick, missing = "value", value, value is None
+        flat = pick if isinstance(pick, tuple) else (pick,)
+        missing = missing or any(value is None or not math.isfinite(value) for value in flat)
+        if missing:
+            self._sample_label.setText(self.tr("This pixel has no value (NoData): pick another one"))
+            return
+        if not extend or kind != self._pick_kind:
+            self._picks = []
+        self._pick_kind = kind
+        if pick not in self._picks:
+            self._picks.append(pick)
+        self._apply_picks()
+
+    def _apply_picks(self) -> None:
+        """Selection of the picks: a colour expression, the classes, or a range around the values."""
+        band = self.current_band()
+        if self._pick_kind == "color":
+            bands = self._color_band_numbers()
+            tolerances = [tolerance_value(self._tolerance_spin.value(), self._value_span(number)) for number in bands]
+            expression = color_similarity_expression(self._reference, bands, self._picks, tolerances)
+            selection = RasterSelection(band=band, mode=RasterSelectionMode.EXPRESSION, expression=expression)
+        elif self._pick_kind == "classes":
+            selection = RasterSelection(band=band, mode=RasterSelectionMode.CLASSES, classes=frozenset(self._picks))
+        else:
+            low_bound, high_bound = self._data_bounds()
+            known = low_bound is not None and high_bound is not None and high_bound > low_bound
+            if known:
+                span = high_bound - low_bound
+            elif self._derivative.is_terrain:
+                span = DERIVATIVE_BOUNDS.get(self._derivative, (0.0, 100.0))[1]  # no histogram yet: the natural range
+            else:
+                span = self._value_span(band)
+            tolerance = tolerance_value(self._tolerance_spin.value(), span)
+            low, high = normalize_range(min(self._picks) - tolerance, max(self._picks) + tolerance, low_bound, high_bound)
+            selection = RasterSelection(band=band, mode=RasterSelectionMode.RANGE, derivative=self._derivative,
+                                        minimum=low, maximum=high)
+        self._set_pipette_selection(selection)
+
+    def _set_pipette_selection(self, selection: Optional[RasterSelection]) -> None:
+        self._pipette_selection = None if selection is None or selection.is_empty else selection
+        self._show_pipette_result()
+        if self._pipette_selection is None and self._picks:
+            # A range over every value is no constraint (A7): say why nothing is selected.
+            self._sample_label.setText(self.tr("The tolerance covers every value: lower it"))
+        self._activate_mode(PIPETTE, emit=False)
+        self._emit_now()
+
+    def _show_pipette_result(self) -> None:
+        """One line under the tolerance: what the pipette selects (its expression as tooltip)."""
+        selection = self._pipette_selection
+        if selection is None:
+            self._sample_label.setText("")
+            self._sample_label.setToolTip("")
+            return
+        if selection.mode is RasterSelectionMode.RANGE:
+            decimals = self._range_decimals()
+            suffix = DERIVATIVE_SUFFIXES.get(selection.derivative, "")
+            low = "−∞" if selection.minimum is None else f"{selection.minimum:.{decimals}f}"
+            high = "+∞" if selection.maximum is None else f"{selection.maximum:.{decimals}f}"
+            text = self.tr("Range {0} → {1}{2}").format(low, high, suffix)
+        elif selection.mode is RasterSelectionMode.CLASSES:
+            text = self.tr("Class(es) {0}").format(", ".join(str(code) for code in sorted(selection.classes)))
+        elif self._pick_kind == "color":
+            last = ", ".join(f"{value:g}" for value in self._picks[-1]) if self._picks else ""
+            text = self.tr("{0} color(s), last: {1}").format(len(self._picks), last)
+        elif self._pick_kind == "preset":
+            text = getattr(self, "_preset_name", "")
+        else:
+            text = self.tr("Expression")
+        self._sample_label.setText(text)
+        self._sample_label.setToolTip(selection.describe())
+
+    def _on_tolerance_changed(self, _value: float) -> None:
+        if self._picks and self._pick_kind in ("color", "value"):
+            self._apply_picks()
 
     # === Pixel value ===
 
