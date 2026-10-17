@@ -456,8 +456,37 @@ class ExpressionEvaluationManager:
         if on_cancelled:
             task.signals.cancelled.connect(on_cancelled)
 
+        # 2026-10-17 (review): the feature source is a snapshot taken here, on the main
+        # thread. An evaluation queued behind a filter task ran on the source of before the
+        # filter: when the layer's subset changes before the evaluation ends, it starts again
+        # on the new one (the new task cancels this one).
+        subset_changed = getattr(layer, 'subsetStringChanged', None)
+
+        def _on_subset_changed(*_args):
+            _disconnect_subset_watch()
+            if self._active_tasks.get(layer_id) is task:
+                logger.debug(f"Subset of '{layer.name()}' changed: expression evaluation started again")
+                self.evaluate(layer, expression, on_complete=on_complete, on_error=on_error,
+                              on_progress=on_progress, on_cancelled=on_cancelled, limit=limit,
+                              description=description, cancel_existing=True)
+
+        def _disconnect_subset_watch():
+            if subset_changed is None:
+                return
+            try:
+                subset_changed.disconnect(_on_subset_changed)
+            except (TypeError, RuntimeError):  # already disconnected / layer deleted
+                pass
+
+        if subset_changed is not None:
+            try:
+                subset_changed.connect(_on_subset_changed)
+            except (TypeError, RuntimeError, AttributeError):
+                subset_changed = None
+
         # Track and cleanup
         def _on_task_done(*args):
+            _disconnect_subset_watch()
             # 2026-10-17: only this task's entry. The previous task, canceled by this
             # call, ends later and removed the entry that already held its successor.
             if self._active_tasks.get(layer_id) is task:

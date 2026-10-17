@@ -380,3 +380,27 @@ class TestThreadSafety:
         ExpressionEvaluationTask.run(fake)
         fake.layer.dataProvider.assert_not_called()
         fake.layer.isValid.assert_not_called()
+
+    def test_a_subset_change_before_the_end_restarts_the_evaluation(self, manager, valid_layer, patched_task):
+        """2026-10-17 review: the snapshot of the source predates a filter applied while it was queued."""
+        slots = []
+        valid_layer.subsetStringChanged.connect.side_effect = slots.append
+        valid_layer.subsetStringChanged.disconnect.side_effect = lambda slot: slots.remove(slot)
+        on_complete = MagicMock()
+        first = manager.evaluate(layer=valid_layer, expression='"a" > 0', on_complete=on_complete)
+        assert len(slots) == 1
+        slots[0]()  # the filter task applied its subset
+        second = manager._active_tasks["layer_42"]
+        assert second is not first
+        first.cancel.assert_called_once_with()
+        second.signals.finished.connect.assert_any_call(on_complete)  # same callbacks
+        assert len(slots) == 1  # the first watch is gone, the second one remains
+
+    def test_the_watch_ends_with_the_task(self, manager, valid_layer, patched_task):
+        slots = []
+        valid_layer.subsetStringChanged.connect.side_effect = slots.append
+        valid_layer.subsetStringChanged.disconnect.side_effect = lambda slot: slots.remove(slot)
+        task = manager.evaluate(layer=valid_layer, expression='"a" > 0')
+        task.signals.finished.connect.call_args_list[-1].args[0]()  # _on_task_done
+        assert slots == []
+
