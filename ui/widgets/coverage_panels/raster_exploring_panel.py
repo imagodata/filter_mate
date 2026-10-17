@@ -432,6 +432,7 @@ class RasterExploringPanel(QWidget):
     bandChanged = pyqtSignal(int)
     selectionChanged = pyqtSignal()
     summaryChanged = pyqtSignal()  # kept ratio updated: the selection strip under EXPLORING follows
+    modeChosen = pyqtSignal(str)  # the user made a group the active one (its value): its rail tool follows
 
     def __init__(self, parent=None):
         """Build the panel.
@@ -990,6 +991,7 @@ class RasterExploringPanel(QWidget):
             return
         if checked:
             self._activate_mode(mode)
+            self.modeChosen.emit(mode.value)
             return
         # Unchecking the active group leaves nothing selected: keep it checked,
         # as the vector exploring groups do.
@@ -1004,6 +1006,7 @@ class RasterExploringPanel(QWidget):
         if mode is RasterSelectionMode.CLASSES and not self._has_classes():
             return
         self._activate_mode(mode)
+        self.modeChosen.emit(mode.value)
 
     # === Selection change notification ===
 
