@@ -87,7 +87,8 @@ def test_vector_current_layer_gets_the_backend_badge():
 
 
 def test_unload_tears_the_controllers_down_before_removing_the_dock():
-    unload = _extract(_ROOT / "filter_mate.py", "FilterMate", "unload", {"logger": MagicMock()})
+    unload = _extract(_ROOT / "filter_mate.py", "FilterMate", "unload",
+                      {"logger": MagicMock(), "QCoreApplication": MagicMock()})
     plugin, steps = MagicMock(), MagicMock()
     plugin.actions = []
     dock = plugin.app.dockwidget

@@ -337,6 +337,11 @@ class FilterMateApp:
         self._disconnect_all_signals()
         self._stop_pending_layer_additions()
         self._safe_cancel_all_tasks()
+        # A filter task just canceled ends later (its run() returns at the next check): its
+        # completion does nothing once unloading, the canvas it froze is thawed now.
+        frozen_token = getattr(self, '_canvas_frozen_token', None)
+        if frozen_token is not None:
+            self._unfreeze_canvas_after_task(frozen_token)
         service = self._get_layer_lifecycle_service()
         if service:
             auto_cleanup_enabled = getattr(self.dockwidget, '_pg_auto_cleanup_enabled', True) if self.dockwidget else True
@@ -1116,6 +1121,16 @@ class FilterMateApp:
             logger.debug("Layer store signals disconnected")
         except (TypeError, RuntimeError) as e:
             logger.debug(f"Could not disconnect layer store signals: {e}")
+
+        # The project's fileNameChanged (2026-10-17: an unloaded instance saved its variables
+        # into the next session's project)
+        previous_slot = getattr(self, '_project_filename_slot', None)
+        if previous_slot is not None and getattr(self, 'PROJECT', None) is not None:
+            try:
+                self.PROJECT.fileNameChanged.disconnect(previous_slot)
+            except (TypeError, RuntimeError) as e:  # not connected / project deleted
+                logger.debug(f"fileNameChanged slot not disconnected: {e}")
+            self._project_filename_slot = None
 
         # Disconnect dockwidget signals
         if self._dockwidget_signals_connected and self.dockwidget:
@@ -2944,7 +2959,7 @@ class FilterMateApp:
         """Save project variables to database. Delegates to DatabaseManager."""
         global ENV_VARS
 
-        if self.dockwidget is None:
+        if self.dockwidget is None or getattr(self, '_unloading', False):
             return
 
         self.CONFIG_DATA = self.dockwidget.CONFIG_DATA

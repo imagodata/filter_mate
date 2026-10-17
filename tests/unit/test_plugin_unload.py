@@ -80,3 +80,45 @@ class TestUnload:
         source = ast.unparse(_methods(["initGui"])[0])
         assert "singleShot(30000" not in source
         assert "self._stale_cache_timer" in source
+
+
+@pytest.mark.unit
+class TestUnloadLeavesNothingBehind:
+    """2026-10-17: what a reload of the plugin left in QGIS."""
+
+    def test_the_toolbar_leaves_the_main_window(self):
+        """addToolBar() puts it in the main window; removeToolBarIcon() acts on the Plugins toolbar."""
+        plugin = _plugin(["unload"])
+        toolbar = plugin.toolbar
+        plugin.unload()
+        plugin.iface.mainWindow.return_value.removeToolBar.assert_called_once_with(toolbar)
+        toolbar.deleteLater.assert_called_once_with()
+        assert plugin.toolbar is None
+
+    def test_the_translator_is_removed(self):
+        plugin = _plugin(["unload"])
+        translator = plugin.translator = MagicMock()
+        qcore = plugin.unload.__func__.__globals__["QCoreApplication"]
+        qcore.reset_mock()
+        plugin.unload()
+        qcore.removeTranslator.assert_called_once_with(translator)
+        assert plugin.translator is None
+
+    def test_the_dependency_check_timer_is_stopped(self):
+        """QTimer.singleShot(1500 / 2000, check_and_clear_warnings) could not be canceled."""
+        plugin = _plugin(["unload"])
+        timer = plugin._dependency_check_timer = MagicMock()
+        plugin.unload()
+        timer.stop.assert_called_once_with()
+        source = ast.unparse(_methods(["_install_message_filter"])[0])
+        assert "singleShot" not in source and "clearWidgets" not in source
+
+    def test_the_app_is_gone_and_the_dock_released(self):
+        """perform_reinitialization skips an unloaded plugin by testing self.app is None."""
+        plugin = _plugin(["unload"])
+        app = plugin.app = MagicMock()
+        app.dockwidget._controller_integration = None
+        plugin.unload()
+        app.dockwidget.release_qgis_connections.assert_called_once_with()
+        app.cleanup.assert_called_once_with()
+        assert plugin.app is None

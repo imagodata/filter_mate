@@ -6674,6 +6674,48 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
     def getProjectLayersEvent(self, event):
         if self.widgets_initialized: self.gettingProjectLayers.emit()
 
+    def release_qgis_connections(self):
+        """Plugin unload: undo what ties this dock to QGIS objects that outlive it.
+
+        2026-10-17: unload removes and deletes the dock without a closeEvent.
+        The layer tree view, the current layer and the theme watcher (a
+        singleton) kept calling the slots of the unloaded dock, its debounce
+        timers could still fire, and the module kept it as the active dock.
+        """
+        for timer_name in ('_feature_picker_debounce_timer', '_expression_debounce_timer'):
+            timer = getattr(self, timer_name, None)
+            if timer is not None:
+                try:
+                    timer.stop()
+                except RuntimeError:  # deleted with the dock
+                    pass
+        if self._theme_watcher is not None:
+            try:
+                self._theme_watcher.remove_callback(self._on_qgis_theme_changed)
+            except Exception as e:  # catch-all safety net: teardown goes on
+                logger.debug(f"Theme watcher callback not removed: {e}")
+        try:
+            self._disconnect_feature_picker_layer_deletion()
+        except Exception as e:  # catch-all safety net: may already be disconnected
+            logger.debug(f"Feature picker layer deletion not disconnected: {e}")
+        self._disconnect_layer_selection_signal(self.current_layer)
+        self.current_layer_selection_connection = None
+        try:
+            tree_view = self.widgets["QGIS"]["LAYER_TREE_VIEW"]
+            view, slots = tree_view["WIDGET"], [signal[-1] for signal in tree_view["SIGNALS"]]
+        except (AttributeError, KeyError, IndexError, TypeError):  # widgets never configured
+            view, slots = None, []
+        for slot in slots:
+            for _ in range(_MAX_SELECTION_CONNECTIONS):
+                try:
+                    view.currentLayerChanged.disconnect(slot)
+                except (TypeError, RuntimeError, AttributeError):  # none left / view deleted
+                    break
+        self._layer_tree_view_signal_connected = False
+        global _active_dockwidget
+        if _active_dockwidget is self:
+            _active_dockwidget = None
+
     def closeEvent(self, event):
         """Handle dockwidget close event.
 

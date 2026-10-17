@@ -219,6 +219,33 @@ def format_backend_summary(provider_counts: dict) -> str:
     return ", ".join(parts)
 
 
+def remove_message_bar_items(message_bar, matches) -> int:
+    """Remove the message bar items ``matches(title, text)`` accepts, and only those.
+
+    2026-10-17: instead of ``clearWidgets()``, which removed every message of
+    the bar (other plugins' and QGIS's included).
+
+    Args:
+        message_bar: A QgsMessageBar.
+        matches: Callable(title: str, text: str) -> bool.
+
+    Returns:
+        Number of items removed (0 when the bar cannot list its items).
+    """
+    items = getattr(message_bar, 'items', None)
+    if not callable(items):
+        return 0
+    removed = 0
+    for item in list(items()):
+        try:
+            if matches(str(item.title() or ''), str(item.text() or '')):
+                message_bar.popWidget(item)
+                removed += 1
+        except (RuntimeError, AttributeError):  # item deleted meanwhile
+            continue
+    return removed
+
+
 __all__ = [
     'BACKEND_INFO',
     'get_backend_display_name',
@@ -232,4 +259,5 @@ __all__ = [
     'show_performance_warning',
     'show_error_with_context',
     'format_backend_summary',
+    'remove_message_bar_items',
 ]
