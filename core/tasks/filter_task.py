@@ -2628,7 +2628,7 @@ class FilterEngineTask(QgsTask):
             return ogr_execute_reset(
                 layer=layer,
                 queue_subset_func=self._queue_subset_string,
-                cleanup_temp_layers=True
+                cleanup_temp_layers=False  # worker thread: the project is left to finished()
             )
 
         # Fallback: simple subset clear

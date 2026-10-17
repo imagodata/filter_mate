@@ -528,6 +528,13 @@ class FinishedHandler:
         Args:
             task_parameters: Task parameters dict that may contain backend instances.
         """
+        # 2026-10-17: layers registered as OGR temporary layers are removed from the
+        # project here, on the main thread (a reset did it from the worker).
+        try:
+            from ..ports.backend_services import get_backend_services
+            get_backend_services().cleanup_ogr_temp_layers()
+        except Exception as cleanup_err:  # catch-all safety net: a cleanup must not break finished()
+            logger.debug(f"OGR temp layer registry cleanup failed (non-critical): {cleanup_err}")
         try:
             # Import cleanup function from OGR backend
             from ..backends.ogr_backend import cleanup_ogr_temp_layers

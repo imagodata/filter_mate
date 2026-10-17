@@ -534,7 +534,7 @@ class SubsetManagementHandler:
             return ogr_execute_reset_fn(
                 layer=layer,
                 queue_subset_func=queue_subset_fn,
-                cleanup_temp_layers=True
+                cleanup_temp_layers=False  # worker thread: the project is left to finished()
             )
 
         # Fallback: simple subset clear

@@ -521,11 +521,12 @@ class OGRExpressionBuilder(GeometricFilterPort):
                 # Within approximate them on this fallback only (exact on the
                 # union path, see _select_against_union).
                 predicate_codes = [self.PREDICATE_CODES.get(name, 0) for name in names]
+                selection_layer = self._selection_layer(target, layer)
                 try:
                     processing.run(
                         'native:selectbylocation',
                         {
-                            'INPUT': target,
+                            'INPUT': selection_layer,
                             'INTERSECT': source_layer,
                             'PREDICATE': predicate_codes,
                             'METHOD': 0  # New selection
@@ -536,8 +537,8 @@ class OGRExpressionBuilder(GeometricFilterPort):
                     self.last_error = f"native:selectbylocation processing failed: {e}"
                     self.log_error(self.last_error)
                     return False
-                selected_ids = list(target.selectedFeatureIds())
-                target.removeSelection()
+                selected_ids = list(selection_layer.selectedFeatureIds())
+                selection_layer.removeSelection()
             self.log_info(f"  - {'Intersecting' if complement else 'Selected'}: {len(selected_ids)} features")
 
             refusal = self._key_list_refusal(layer, len(selected_ids))
@@ -712,6 +713,38 @@ class OGRExpressionBuilder(GeometricFilterPort):
             "the new filter is computed inside it"
         )
         return layer
+
+    def _selection_layer(self, target, layer):
+        """The layer select-by-location may select in: never the project's layer when avoidable.
+
+        2026-10-17: the selection was made on ``target``, the project's layer
+        itself when it has no subset: from the worker thread (selectionChanged
+        reached the dock from it) and the user's selection on the target was
+        wiped by the removeSelection() that followed. A second layer on the
+        same source and subset has the same feature ids. A memory layer
+        cannot be reopened: its own selection is used, as before.
+
+        Args:
+            target: The layer to read (``_unfiltered_target``).
+            layer: The project's target layer.
+
+        Returns:
+            A layer whose selection belongs to this filter, or ``target``.
+        """
+        if target is not layer:
+            return target  # already a second layer
+        try:
+            from qgis.core import QgsVectorLayer
+            provider = layer.providerType()
+            if provider != 'memory':
+                copy = QgsVectorLayer(layer.source(), f"{layer.name()} (selection)", provider)
+                if copy.isValid() and copy.subsetString() == layer.subsetString():
+                    self._temp_layers_keep_alive.append(copy)
+                    return copy
+        except Exception as exc:  # nosec B110 - falls back to the layer itself below
+            self.log_debug(f"  - Second layer for the selection of {layer.name()} unavailable: {exc}")
+        self.log_warning(f"  ⚠️ {layer.name()}: the selection of the layer itself is used for this filter")
+        return target
 
     @staticmethod
     def _rescans_key_lists(layer) -> bool:
