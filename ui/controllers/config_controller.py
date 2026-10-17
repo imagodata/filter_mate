@@ -802,7 +802,7 @@ class ConfigController(BaseController):
                 self.dockwidget.plugin_dir + '/config/config.json'
             )
 
-            with open(config_json_path, 'r') as infile:
+            with open(config_json_path, 'r', encoding='utf-8') as infile:
                 self.dockwidget.CONFIG_DATA = json.load(infile)
             # Sync ENV_VARS so all code reading from it sees reverted values
             ENV_VARS["CONFIG_DATA"] = self.dockwidget.CONFIG_DATA

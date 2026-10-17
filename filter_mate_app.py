@@ -53,7 +53,7 @@ from qgis.utils import iface
 
 import os.path
 from .config.config import init_env_vars, ENV_VARS, _get_option_value  # noqa: F401 - ENV_VARS used via global
-import json
+from .infrastructure.utils.atomic_io import atomic_json_write
 
 # Core tasks (migrated from modules/tasks/)
 
@@ -2834,8 +2834,8 @@ class FilterMateApp:
             # Also save to config file - use cleaned data to avoid non-serializable objects
             # (e.g., psycopg2 connections that may be stored in CONFIG_DATA)
             config_data_clean = self._database_manager._clean_for_json(self.CONFIG_DATA)
-            with open(ENV_VARS["CONFIG_JSON_PATH"], 'w') as outfile:
-                outfile.write(json.dumps(config_data_clean, indent=4))
+            # Atomic, UTF-8: a crash in the middle used to leave a truncated config.json
+            atomic_json_write(ENV_VARS["CONFIG_JSON_PATH"], config_data_clean, indent=4)
 
             # Save favorites to project
             if self.favorites_manager is not None:
@@ -3041,8 +3041,3 @@ class FilterMateApp:
         if self._datasource_manager:
             self.project_datasources = self._datasource_manager.get_project_datasources()
             self._datasource_manager.update_datasource()
-
-    def create_foreign_data_wrapper(self, project_datasource, datasource, format):
-        """Create PostgreSQL foreign data wrapper via DatasourceManager."""
-        if self._datasource_manager:
-            self._datasource_manager.create_foreign_data_wrapper(project_datasource, datasource, format)

@@ -23,6 +23,8 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any, Dict, List, Optional
 
+from .config_io import write_config_json
+
 logger = logging.getLogger('FilterMate.Extensions')
 
 # Base config keys every extension gets for free (merged with extension schema).
@@ -425,16 +427,12 @@ class BaseExtension(ABC):
                     existing_ext[ext_id] = slice_data
         existing_ext[self.metadata.id] = our_slice
 
-        try:
-            with open(config_path, "w", encoding="utf-8") as fh:
-                json.dump(live_data, fh, indent=2, ensure_ascii=False)
-            return True
-        except OSError as exc:
-            logger.warning(
-                "Failed to persist config for extension '%s': %s",
-                self.metadata.id, exc,
-            )
+        # JSON-safe copy (the live data may hold a connection), swapped in atomically;
+        # a failure is logged as a warning and leaves the previous file
+        if not write_config_json(config_path, live_data):
+            logger.warning("Failed to persist config for extension '%s'", self.metadata.id)
             return False
+        return True
 
     # --- Convenience shortcuts for the common keys ---------------------
 

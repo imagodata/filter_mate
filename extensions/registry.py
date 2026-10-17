@@ -21,6 +21,7 @@ import os
 from typing import Any, Dict, List, Optional
 
 from .base import BaseExtension, ExtensionState
+from .config_io import write_config_json
 
 logger = logging.getLogger('FilterMate.Extensions.Registry')
 
@@ -361,21 +362,9 @@ class ExtensionRegistry:
         else:
             live_data["EXTENSIONS"] = merged_ext
 
-        # Written next to it, then swapped in: a failure never leaves a
-        # truncated config.json.
-        tmp_path = f"{config_path}.tmp"
-        try:
-            with open(tmp_path, 'w', encoding='utf-8') as f:
-                json.dump(live_data, f, indent=2, ensure_ascii=False)
-            os.replace(tmp_path, config_path)
-            return True
-        except (OSError, TypeError, ValueError) as exc:
-            logger.warning("Could not persist config.json: %s", exc)
-            try:
-                os.remove(tmp_path)
-            except OSError:
-                pass
-            return False
+        # JSON-safe copy (the live data may hold a connection), written next to the
+        # file then swapped in: a failure is a warning and leaves the previous file.
+        return write_config_json(config_path, live_data)
 
     def _show_missing_deps_message(self, ext: BaseExtension, iface: Any) -> None:
         """Say once, in the message bar, that an extension waits for its dependencies.

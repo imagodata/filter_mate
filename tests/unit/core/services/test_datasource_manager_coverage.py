@@ -1,12 +1,21 @@
 # -*- coding: utf-8 -*-
 """
-DatasourceManager in a PostgreSQL session with raster / point cloud layers.
+DatasourceManager in a PostgreSQL session.
 
 FilterMate 5 registers rasters and point clouds; their files (.tif, .vrt, .jp2,
 .laz, .copc.laz) match no OGR driver, and update_datasource() took
 ``datasource_type_name[0]`` of an empty list to create a foreign data wrapper:
 IndexError at the end of every add_layers / remove_layers task. The same
 happened with a shapefile (no driver is named "SHP") or a memory layer.
+
+The foreign data wrapper itself is gone: its SQL was never valid (the dot of
+``server_x.gpkg``), it interpolated the path unescaped, CREATE EXTENSION /
+DROP SERVER CASCADE ran on the user's database and the failed transaction was
+left "idle in transaction (aborted)" on the shared connection, and nothing
+ever read the imported tables.
+
+A PostgreSQL layer without authcfg used to be filed as a "path" made of its
+whole URI, password included, then written to config.json as ACTIVE_POSTGRESQL.
 
 The real module runs in a private package whose imports are stubs.
 """
@@ -21,7 +30,6 @@ import pytest
 
 _REPO = Path(__file__).resolve().parents[4]
 _PKG = "_fm_dsm_pkg"
-_DRIVERS = ["CSV", "ESRI Shapefile", "GPKG", "GeoJSON", "SQLite"]
 
 
 def _module(name, path=None, **attrs):
@@ -84,11 +92,6 @@ class _Layer:
 
 
 def _manager(monkeypatch, layers=(), postgresql_active=True):
-    fake_ogr = types.SimpleNamespace(
-        GetDriverCount=lambda: len(_DRIVERS),
-        GetDriver=lambda i: types.SimpleNamespace(GetDescription=lambda: _DRIVERS[i]))
-    monkeypatch.setattr(dsm, "ogr", fake_ogr, raising=False)
-    monkeypatch.setattr(dsm, "OGR_AVAILABLE", True)
     monkeypatch.setattr(dsm, "get_data_source_uri", lambda layer: (_Uri(layer.source), None))
     by_name = {layer.id(): layer for layer in layers}
     project = MagicMock()
@@ -99,10 +102,12 @@ def _manager(monkeypatch, layers=(), postgresql_active=True):
         get_config_data_callback=lambda: config, set_config_data_callback=MagicMock(),
         get_db_file_path_callback=lambda: "", get_temp_schema_callback=lambda: "filter_mate_temp",
         show_error_callback=MagicMock(), show_warning_callback=MagicMock())
+    manager.config = config
+    opened = MagicMock(name="get_datasource_connexion_from_layer", return_value=(MagicMock(closed=False), None))
+    monkeypatch.setattr(dsm, "get_datasource_connexion_from_layer", opened)
+    manager.opened = opened
     if postgresql_active:
-        connection = MagicMock(closed=False)
-        manager.project_datasources['postgresql'] = {'authcfg1': connection}
-    manager.create_foreign_data_wrapper = MagicMock()
+        manager.project_datasources['postgresql'] = {'authcfg1': None}
     return manager
 
 
@@ -124,7 +129,6 @@ class TestCoverageLayersAreNotTracked:
         manager.update_datasource()  # IndexError before
 
         assert provider not in manager.project_datasources
-        manager.create_foreign_data_wrapper.assert_not_called()
 
     def test_remove_ignores_coverage_layers(self, monkeypatch):
         manager = _manager(monkeypatch, [_Layer("cov", "/data/dem.tif")])
@@ -135,45 +139,138 @@ class TestCoverageLayersAreNotTracked:
 
 
 @pytest.mark.unit
-class TestForeignDataWrappers:
+class TestNoForeignDataWrapper:
 
-    def test_one_wrapper_per_vector_file(self, monkeypatch):
+    def test_the_wrapper_is_gone(self):
+        assert "create_foreign_data_wrapper" not in vars(dsm.DatasourceManager)
+        assert not hasattr(dsm, "OGR_AVAILABLE")
+
+    def test_update_datasource_opens_no_connection_and_stores_none(self, monkeypatch):
         layers = [_Layer("roads", "/data/base.gpkg|layername=roads"),
-                  _Layer("rivers", "/data/base.gpkg|layername=rivers"),
-                  _Layer("zones", "/data/zones.geojson")]
+                  _Layer("zones", "/data/zones.geojson"),
+                  _Layer("parcels", "/data/parcels.shp")]
         manager = _manager(monkeypatch, layers)
         for layer in layers:
-            manager.update_datasource_for_layer(_info(layer.id(), "spatialite" if "gpkg" in layer.source else "ogr"))
+            manager.update_datasource_for_layer(
+                _info(layer.id(), "spatialite" if "gpkg" in layer.source else "ogr"))
 
         manager.update_datasource()
 
-        calls = sorted(c.args for c in manager.create_foreign_data_wrapper.call_args_list)
-        assert calls == [("/data/base.gpkg", "base.gpkg", "GPKG"), ("/data/zones.geojson", "zones.geojson", "GeoJSON")]
+        manager.opened.assert_not_called()
+        options = manager.config["CURRENT_PROJECT"]["OPTIONS"]
+        assert options["ACTIVE_POSTGRESQL"] == ""
+        assert options["IS_ACTIVE_POSTGRESQL"] is True  # PostgreSQL layers are in the project
 
-    @pytest.mark.parametrize("source", ["/data/parcels.shp", "Point?crs=EPSG:4326&uid={1}", "/data/no_extension"])
-    def test_no_wrapper_without_a_driver_named_after_the_extension(self, monkeypatch, source):
-        manager = _manager(monkeypatch, [_Layer("lyr", source), _Layer("zones", "/data/zones.geojson")])
-        manager.update_datasource_for_layer(_info("lyr", "ogr"))
-        manager.update_datasource_for_layer(_info("zones", "ogr"))
-
-        manager.update_datasource()  # IndexError before
-
-        assert [c.args[2] for c in manager.create_foreign_data_wrapper.call_args_list] == ["GeoJSON"]
-
-    def test_file_without_layer_left(self, monkeypatch):
-        """A file whose datasources were all removed got the format of the previous file,
-        or an unbound name when it came first."""
+    def test_a_connection_left_in_the_config_is_removed(self, monkeypatch):
         manager = _manager(monkeypatch)
-        manager.project_datasources['ogr'] = {"/data/old.shp": [], "/data/zones.geojson": ["/data/zones.geojson"]}
+        manager.config["CURRENT_PROJECT"]["OPTIONS"]["ACTIVE_POSTGRESQL"] = MagicMock(closed=False)
 
         manager.update_datasource()
 
-        assert [c.args[0] for c in manager.create_foreign_data_wrapper.call_args_list] == ["/data/zones.geojson"]
+        assert manager.config["CURRENT_PROJECT"]["OPTIONS"]["ACTIVE_POSTGRESQL"] == ""
 
-    def test_no_wrapper_without_postgresql(self, monkeypatch):
-        manager = _manager(monkeypatch, [_Layer("zones", "/data/zones.geojson")], postgresql_active=False)
-        manager.update_datasource_for_layer(_info("zones", "ogr"))
+    def test_active_connection_does_not_need_osgeo(self, monkeypatch):
+        """The OGR driver list was only there for the wrappers."""
+        monkeypatch.setitem(sys.modules, "osgeo", None)
+        manager = _manager(monkeypatch)
 
         manager.update_datasource()
 
-        manager.create_foreign_data_wrapper.assert_not_called()
+        assert manager.config["CURRENT_PROJECT"]["OPTIONS"]["IS_ACTIVE_POSTGRESQL"] is True
+        assert manager.config["CURRENT_PROJECT"]["OPTIONS"]["ACTIVE_POSTGRESQL"] == ""
+
+
+class _PgUri:
+    """The accessors of QgsDataSourceUri the manager may use."""
+
+    def __init__(self, source, host="db.example", port="5432", database="gis", username="bob", service=""):
+        self._source = source
+        self._host, self._port, self._database = host, port, database
+        self._username, self._service = username, service
+
+    def uri(self):
+        return self._source
+
+    def host(self):
+        return self._host
+
+    def port(self):
+        return self._port
+
+    def database(self):
+        return self._database
+
+    def username(self):
+        return self._username
+
+    def service(self):
+        return self._service
+
+
+PG_SOURCE = ("dbname='gis' host=db.example port=5432 user='bob' password='s3cret' "
+             "sslmode=disable key='id' table=\"public\".\"roads\" (geom)")
+
+
+@pytest.mark.unit
+class TestPostgresWithoutAuthcfg:
+    """ACTIVE_POSTGRESQL never holds a connection (nor a URI): each task opens its own, from its source layer."""
+
+    def _pg_manager(self, monkeypatch):
+        manager = _manager(monkeypatch, [_Layer("roads", PG_SOURCE)], postgresql_active=False)
+        monkeypatch.setattr(dsm, "get_data_source_uri", lambda layer: (_PgUri(layer.source), None))
+        return manager
+
+    def test_the_uri_is_not_filed_as_a_path_and_no_connection_is_opened(self, monkeypatch):
+        manager = self._pg_manager(monkeypatch)
+
+        manager.update_datasource_for_layer(_info("roads", "postgresql"))
+
+        tracked = manager.project_datasources["postgresql"]
+        assert list(tracked.values()) == [None]
+        assert "s3cret" not in repr(list(tracked))
+        assert "password" not in repr(list(tracked))
+        manager.opened.assert_not_called()
+
+    def test_two_layers_of_one_database_are_one_entry(self, monkeypatch):
+        manager = self._pg_manager(monkeypatch)
+        manager.update_datasource_for_layer(_info("roads", "postgresql"))
+        manager.update_datasource_for_layer(_info("roads", "postgresql"))
+
+        assert len(manager.project_datasources["postgresql"]) == 1
+
+    def test_authcfg_layers_open_no_connection_either(self, monkeypatch):
+        manager = _manager(monkeypatch, [_Layer("roads", PG_SOURCE)], postgresql_active=False)
+        monkeypatch.setattr(dsm, "get_data_source_uri", lambda layer: (_PgUri(layer.source), "cfg123"))
+
+        manager.update_datasource_for_layer(_info("roads", "postgresql"))
+
+        assert manager.project_datasources["postgresql"] == {"cfg123": None}
+        manager.opened.assert_not_called()
+
+    def test_active_postgresql_stays_empty(self, monkeypatch):
+        manager = self._pg_manager(monkeypatch)
+        manager.update_datasource_for_layer(_info("roads", "postgresql"))
+
+        manager.update_datasource()
+
+        options = manager.config["CURRENT_PROJECT"]["OPTIONS"]
+        assert options["ACTIVE_POSTGRESQL"] == ""
+        assert options["IS_ACTIVE_POSTGRESQL"] is True
+        manager.opened.assert_not_called()
+
+    def test_remove_forgets_it(self, monkeypatch):
+        manager = self._pg_manager(monkeypatch)
+        manager.update_datasource_for_layer(_info("roads", "postgresql"))
+
+        manager.remove_datasource_for_layer(_info("roads", "postgresql"))
+
+        assert manager.project_datasources["postgresql"] == {}
+
+    def test_without_postgresql_layers_nothing_is_active(self, monkeypatch):
+        manager = _manager(monkeypatch, postgresql_active=False)
+
+        manager.update_datasource()
+
+        options = manager.config["CURRENT_PROJECT"]["OPTIONS"]
+        assert options["ACTIVE_POSTGRESQL"] == ""
+        assert options["IS_ACTIVE_POSTGRESQL"] is False

@@ -63,7 +63,7 @@ def _setup():
     sys.modules['core.tasks'] = sys.modules[f'{ROOT}.core.tasks']
 
     # Mock leaf modules the handler imports indirectly
-    infra = _ensure_package(f'{ROOT}.infrastructure', parent=ROOT)
+    _ensure_package(f'{ROOT}.infrastructure', parent=ROOT)
     _ensure_package(f'{ROOT}.infrastructure.streaming', parent=f'{ROOT}.infrastructure')
     sys.modules[f'{ROOT}.infrastructure.logging'] = MagicMock(setup_logger=MagicMock(return_value=MagicMock()))
     # The streaming package's __init__ re-exports from result_streaming. We
@@ -87,7 +87,7 @@ def _setup():
 
     # Load real modules
     export_dir = os.path.join(project_root, 'core', 'export')
-    for name in ('layer_exporter', 'batch_exporter', 'style_exporter',
+    for name in ('target_guard', 'layer_exporter', 'batch_exporter', 'style_exporter',
                  'export_validator', 'gpkg_layer_tree_writer'):
         _load_file_as(
             f'{ROOT}.core.export.{name}',
