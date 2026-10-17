@@ -30,11 +30,16 @@ def _is_processing(message) -> bool:
 
 
 def _context(root, name):
-    for context in root.findall('context'):
+    """The context ``name``, made at its place among the others (pylupdate5 sorts them by name)."""
+    contexts = root.findall('context')
+    for context in contexts:
         if context.findtext('name') == name:
             return context
-    context = ET.SubElement(root, 'context')
+    context = ET.Element('context')
     ET.SubElement(context, 'name').text = name
+    following = next((index for index, other in enumerate(list(root))
+                      if other.tag == 'context' and other.findtext('name') > name), len(root))
+    root.insert(following, context)
     return context
 
 
@@ -66,8 +71,11 @@ def fix(path: str) -> int:
                     translation.text = old.text
                     translation.attrib.pop('type', None)
                     restored += 1
+                # In its place: pylupdate5 keeps the order of the previous file, so does this script.
+                target.insert(list(target).index(previous), message)
                 target.remove(previous)
-            target.append(message)
+            else:
+                target.append(message)
             kept[source] = message
         if not context.findall('message'):
             root.remove(context)
