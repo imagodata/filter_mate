@@ -282,6 +282,12 @@ class LayersManagementEngineTask(QgsTask):
 
         global ENV_VARS
         self.PROJECT = ENV_VARS["PROJECT"]
+        # The Processing settings for the worker's contexts, read here on the main thread (2026-10-17)
+        try:
+            from ...infrastructure.utils.processing_context import capture_processing_settings
+            capture_processing_settings()
+        except ImportError:  # test doubles of the plugin packages
+            pass
 
     def _ensure_db_directory_exists(self):
         """
@@ -1719,9 +1725,10 @@ class LayersManagementEngineTask(QgsTask):
 
             # Create spatial index
             alg_params_createspatialindex = {"INPUT": layer}
-            from qgis.core import QgsProcessingContext
+            from ...infrastructure.utils.processing_context import worker_processing_context
             # 2026-10-17: an explicit context: never built from the project / canvas in the worker
-            processing.run('qgis:createspatialindex', alg_params_createspatialindex, context=QgsProcessingContext())
+            processing.run('qgis:createspatialindex', alg_params_createspatialindex,
+                           context=worker_processing_context())
 
             if self.isCanceled():
                 return False

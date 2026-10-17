@@ -142,6 +142,7 @@ class TestOGRApplyFilterQueueRouting:
             processing=fake_processing,
             core=types.SimpleNamespace(
                 QgsVectorLayer=MagicMock, QgsFeatureRequest=MagicMock, QgsGeometry=MagicMock,
+                QgsSpatialIndex=MagicMock,  # 2026-10-17: the feature-by-feature fallback (no selection)
             ),
         )
         monkeypatch.setitem(sys.modules, "qgis", fake_qgis)

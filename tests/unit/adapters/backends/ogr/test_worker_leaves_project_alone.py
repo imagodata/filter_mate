@@ -116,48 +116,93 @@ def test_the_prepared_memory_source_is_not_added_to_the_project(project, monkeyp
     memory.setCustomProperty.assert_called_once_with('filterMate/internal_temp', True)
 
 
-def test_the_selection_is_made_in_a_second_layer(monkeypatch):
-    builder = _builder().OGRExpressionBuilder(task_params={})
-    created = []
+class _Engine:
+    """A prepared source geometry: the target names it relates to, by predicate."""
 
-    def second_layer(uri, name, provider):
-        copy = MagicMock()
-        copy.isValid.return_value = True
-        copy.subsetString.return_value = '"kind" = 2'
-        copy.args = (uri, name, provider)
-        created.append(copy)
-        return copy
+    def __init__(self, relations):
+        self.relations = relations  # {"intersects": {...}, "within": {...}, ...} target names
 
-    monkeypatch.setattr(sys.modules["qgis.core"], "QgsVectorLayer", second_layer, raising=False)
-    roads = MagicMock()
-    roads.providerType.return_value = "ogr"
-    roads.source.return_value = '/data/roads.gpkg|layername=roads|subset="kind" = 2'
-    roads.subsetString.return_value = '"kind" = 2'
-    roads.name.return_value = "roads"
-    selection_layer = builder._selection_layer(roads, roads)
-    assert selection_layer is created[0] and selection_layer is not roads
-    assert created[0].args == ('/data/roads.gpkg|layername=roads|subset="kind" = 2', "roads (selection)", "ogr")
-    assert selection_layer in builder._temp_layers_keep_alive
+    def _test(self, name):
+        return lambda geometry: geometry in self.relations.get(name, set())
+
+    def __getattr__(self, name):
+        if name in ("intersects", "within", "contains", "isEqual", "touches", "overlaps", "crosses"):
+            return self._test(name)
+        raise AttributeError(name)
+
+    def prepareGeometry(self):
+        pass
 
 
-def test_a_second_layer_already_read_is_used_as_is():
-    builder = _builder().OGRExpressionBuilder(task_params={})
-    clone, roads = MagicMock(), MagicMock()
-    assert builder._selection_layer(clone, roads) is clone
+class _Feature:
+    def __init__(self, fid, geometry):
+        self._fid, self._geometry = fid, geometry
+
+    def id(self):
+        return self._fid
+
+    def hasGeometry(self):
+        return True
+
+    def geometry(self):
+        return types.SimpleNamespace(constGet=lambda: self._geometry, isEmpty=lambda: False,
+                                     boundingBox=lambda: self._geometry, engine_key=self._geometry)
 
 
-def test_a_memory_target_keeps_its_own_selection():
-    builder = _builder().OGRExpressionBuilder(task_params={})
-    scratch = MagicMock()
-    scratch.providerType.return_value = "memory"
-    scratch.name.return_value = "scratch"
-    assert builder._selection_layer(scratch, scratch) is scratch
-    assert builder.warnings
+def _feature_by_feature(monkeypatch, source_relations, target_names, predicates):
+    """Source features (their relations to the targets), target features named after their geometry."""
+    sources = [_Feature(index, f"src{index}") for index in range(len(source_relations))]
+    engines = {f"src{index}": _Engine(relations) for index, relations in enumerate(source_relations)}
+
+    class _Index:
+        def __init__(self):
+            self.ids = []
+
+        def addFeature(self, feature):
+            self.ids.append(feature.id())
+
+        def intersects(self, bbox):
+            return list(self.ids)  # every source is a candidate: the engines decide
+
+    qgis_core = sys.modules["qgis.core"]
+    monkeypatch.setattr(qgis_core, "QgsSpatialIndex", _Index, raising=False)
+    monkeypatch.setattr(qgis_core, "QgsFeatureRequest", MagicMock(), raising=False)
+    monkeypatch.setattr(qgis_core, "QgsGeometry",
+                        types.SimpleNamespace(createGeometryEngine=lambda geometry: engines[geometry]), raising=False)
+    builder = _builder().OGRExpressionBuilder(task_params={"_processing_settings": {"transform_context": "ctx"}})
+    builder._feedback = None
+    source = MagicMock()
+    source.getFeatures.return_value = iter(sources)
+    target = MagicMock()
+    target.getFeatures.return_value = iter([_Feature(index + 100, name) for index, name in enumerate(target_names)])
+    project = MagicMock()
+    selected = builder._select_feature_by_feature(target, source, predicates)
+    project.assert_not_called()
+    return selected
 
 
-def test_the_fallback_reads_the_selection_of_the_second_layer():
+def test_the_fallback_tests_each_target_against_the_sources_without_selecting(monkeypatch):
+    selected = _feature_by_feature(
+        monkeypatch,
+        # the target within the source <=> the source contains the target (union path directions)
+        [{"intersects": {"a", "b"}, "contains": {"a"}}, {"intersects": {"c"}, "contains": set()}],
+        ["a", "b", "c", "d"], ["within"])
+    assert selected == [100]  # only "a" is within a source feature
+
+
+def test_the_fallback_intersects_and_disjoint(monkeypatch):
+    relations = [{"intersects": {"a"}}, {"intersects": {"c"}}]
+    assert _feature_by_feature(monkeypatch, relations, ["a", "b", "c"], ["intersects"]) == [100, 102]
+    assert _feature_by_feature(monkeypatch, relations, ["a", "b", "c"], ["disjoint"]) == [101]
+
+
+def test_the_fallback_reads_no_selection_and_opens_no_layer():
     source = (PLUGIN_ROOT / "adapters" / "backends" / "ogr" / "expression_builder.py").read_text(encoding="utf-8")
-    fallback = source[source.index("'native:selectbylocation',"):]
-    fallback = fallback[:fallback.index("self.log_info(")]
-    assert "'INPUT': selection_layer" in fallback
-    assert "selection_layer.selectedFeatureIds()" in fallback and "target.selectedFeatureIds()" not in fallback
+    body = source[source.index("    def apply_filter("):source.index("    def _unfiltered_target(")]
+    assert "processing.run(" not in body and "selectedFeatureIds" not in body and "removeSelection" not in body
+    assert "_select_feature_by_feature(target, source_layer, names)" in body
+
+
+def test_the_transform_context_is_the_one_captured_on_the_main_thread():
+    builder = _builder().OGRExpressionBuilder(task_params={"_processing_settings": {"transform_context": "ctx"}})
+    assert builder._transform_context() == "ctx"

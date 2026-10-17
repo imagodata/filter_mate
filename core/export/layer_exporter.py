@@ -718,7 +718,14 @@ class LayerExporter:
         }
 
         try:
-            output = processing.run("qgis:package", alg_parameters)
+            # 2026-10-17: an explicit context, never built from the project / canvas in the worker
+            try:
+                from ...infrastructure.utils.processing_context import worker_processing_context
+                context = worker_processing_context()
+            except ImportError:  # test doubles of the plugin packages
+                context = None
+            output = (processing.run("qgis:package", alg_parameters, context=context) if context is not None
+                      else processing.run("qgis:package", alg_parameters))
 
             if not output or 'OUTPUT' not in output:
                 return ExportResult(

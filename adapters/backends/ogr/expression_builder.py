@@ -253,19 +253,27 @@ class CancellableFeedback(QgsProcessingFeedback if _HAS_PROCESSING_FEEDBACK else
                 pass
 
 
-def _worker_processing_kwargs(feedback=None) -> dict:
+def _worker_processing_kwargs(feedback=None, settings=None) -> dict:
     """``processing.run`` keyword arguments for the filter task's worker thread (2026-10-17).
 
     An explicit QgsProcessingContext: without one, processing.run() builds its own from
     the project and ``iface.mapCanvas()``, read from the worker thread: QGIS crashed
-    (segfault in createExpressionContext) while the main thread removed a layer.
+    (segfault in createExpressionContext) while the main thread removed a layer. It
+    carries the Processing settings captured on the main thread when the task was
+    created (invalid geometry check, project transform context, ellipsoid).
     """
     kwargs = {'feedback': feedback}
     try:
-        from qgis.core import QgsProcessingContext
-        kwargs['context'] = QgsProcessingContext()
-    except ImportError:  # test doubles of qgis.core
-        pass
+        from ....infrastructure.utils.processing_context import worker_processing_context
+        context = worker_processing_context(settings)
+    except ImportError:  # test doubles of the plugin packages
+        try:
+            from qgis.core import QgsProcessingContext
+            context = QgsProcessingContext()
+        except ImportError:  # test doubles of qgis.core
+            context = None
+    if context is not None:
+        kwargs['context'] = context
     return kwargs
 
 
@@ -472,7 +480,6 @@ class OGRExpressionBuilder(GeometricFilterPort):
             _last_operation_thread = current_thread
 
         try:
-            from qgis import processing
             from qgis.core import QgsVectorLayer
 
             # Parse parameters
@@ -543,28 +550,14 @@ class OGRExpressionBuilder(GeometricFilterPort):
                         self.last_error = f"Failed to apply static buffer ({buffer_value}m)"
                         self.log_error(self.last_error)
                         return False
-                # select-by-location has no Covers / CoveredBy: Contains /
-                # Within approximate them on this fallback only (exact on the
-                # union path, see _select_against_union).
-                predicate_codes = [self.PREDICATE_CODES.get(name, 0) for name in names]
-                selection_layer = self._selection_layer(target, layer)
-                try:
-                    processing.run(
-                        'native:selectbylocation',
-                        {
-                            'INPUT': selection_layer,
-                            'INTERSECT': source_layer,
-                            'PREDICATE': predicate_codes,
-                            'METHOD': 0  # New selection
-                        },
-                        **_worker_processing_kwargs(self._feedback)
-                    )
-                except Exception as e:
-                    self.last_error = f"native:selectbylocation processing failed: {e}"
-                    self.log_error(self.last_error)
+                # 2026-10-17 (review): each target feature tested against the source features,
+                # read by the worker like the union path reads the target. native:selectbylocation
+                # selected in the project's layer from the worker thread (selection signals there,
+                # the user's selection wiped); a second layer on the same source cost a provider
+                # and could not exist for a memory / virtual target. Covers / CoveredBy are exact.
+                selected_ids = self._select_feature_by_feature(target, source_layer, names)
+                if selected_ids is None:
                     return False
-                selected_ids = list(selection_layer.selectedFeatureIds())
-                selection_layer.removeSelection()
             self.log_info(f"  - {'Intersecting' if complement else 'Selected'}: {len(selected_ids)} features")
 
             refusal = self._key_list_refusal(layer, len(selected_ids))
@@ -739,38 +732,6 @@ class OGRExpressionBuilder(GeometricFilterPort):
             "the new filter is computed inside it"
         )
         return layer
-
-    def _selection_layer(self, target, layer):
-        """The layer select-by-location may select in: never the project's layer when avoidable.
-
-        2026-10-17: the selection was made on ``target``, the project's layer
-        itself when it has no subset: from the worker thread (selectionChanged
-        reached the dock from it) and the user's selection on the target was
-        wiped by the removeSelection() that followed. A second layer on the
-        same source and subset has the same feature ids. A memory layer
-        cannot be reopened: its own selection is used, as before.
-
-        Args:
-            target: The layer to read (``_unfiltered_target``).
-            layer: The project's target layer.
-
-        Returns:
-            A layer whose selection belongs to this filter, or ``target``.
-        """
-        if target is not layer:
-            return target  # already a second layer
-        try:
-            from qgis.core import QgsVectorLayer
-            provider = layer.providerType()
-            if provider != 'memory':
-                copy = QgsVectorLayer(layer.source(), f"{layer.name()} (selection)", provider)
-                if copy.isValid() and copy.subsetString() == layer.subsetString():
-                    self._temp_layers_keep_alive.append(copy)
-                    return copy
-        except Exception as exc:  # nosec B110 - falls back to the layer itself below
-            self.log_debug(f"  - Second layer for the selection of {layer.name()} unavailable: {exc}")
-        self.log_warning(f"  ⚠️ {layer.name()}: the selection of the layer itself is used for this filter")
-        return target
 
     @staticmethod
     def _rescans_key_lists(layer) -> bool:
@@ -1192,7 +1153,7 @@ class OGRExpressionBuilder(GeometricFilterPort):
         network: Crosses 0.94 s, Intersects 0.43 s in QGIS 4.2.3.
         Returns None (last_error set) when cancelled.
         """
-        from qgis.core import QgsFeatureRequest, QgsGeometry, QgsProject
+        from qgis.core import QgsFeatureRequest, QgsGeometry
 
         names = {str(name).lower().replace('st_', '') for name in predicates}
         if union.isEmpty():
@@ -1202,7 +1163,7 @@ class OGRExpressionBuilder(GeometricFilterPort):
         engine = QgsGeometry.createGeometryEngine(union.constGet())
         engine.prepareGeometry()
         request = QgsFeatureRequest().setNoAttributes()
-        request.setDestinationCrs(union_crs, QgsProject.instance().transformContext())
+        request.setDestinationCrs(union_crs, self._transform_context())
         if 'disjoint' not in names:  # every predicate but Disjoint needs a shared point
             request.setFilterRect(union.boundingBox())
         tests = {
@@ -1234,6 +1195,95 @@ class OGRExpressionBuilder(GeometricFilterPort):
                     selected.append(feature.id())
                 continue
             if 'intersects' in names or any(name in tests and tests[name](geometry) for name in names):
+                selected.append(feature.id())
+        return selected
+
+    def _processing_settings(self):
+        """The Processing settings the task captured on the main thread (None: the last captured)."""
+        params = self.task_params if isinstance(self.task_params, dict) else {}
+        return params.get('_processing_settings')
+
+    def _transform_context(self):
+        """The project's transform context, captured on the main thread when the task was created.
+
+        2026-10-17: read from the worker (``QgsProject.instance().transformContext()``) only
+        when nothing was captured (a builder used outside a FilterMate task).
+        """
+        settings = self._processing_settings() or {}
+        context = settings.get('transform_context')
+        if context is None:
+            try:
+                from ....infrastructure.utils.processing_context import captured_transform_context
+                context = captured_transform_context()
+            except ImportError:  # test doubles of the plugin packages
+                context = None
+        if context is None:
+            try:
+                from qgis.core import QgsProject
+                context = QgsProject.instance().transformContext()
+            except ImportError:  # test doubles of qgis.core
+                return None
+        return context
+
+    def _select_feature_by_feature(self, target, source_layer, predicates) -> Optional[list]:
+        """Ids of the ``target`` features related to ANY source feature by any of ``predicates``.
+
+        The fallback when the source cannot be merged into one geometry: the source
+        features are indexed (in the target's CRS) and each target feature is tested
+        against those whose bounding box it meets, with the directions of the union
+        path (Contains = the target contains the source...). Disjoint: the targets
+        meeting no source feature. No selection, no second layer, no Processing.
+        Returns None (last_error set) when cancelled.
+        """
+        from qgis.core import QgsFeatureRequest, QgsGeometry, QgsSpatialIndex
+
+        names = {str(name).lower().replace('st_', '') for name in predicates}
+        request = QgsFeatureRequest().setNoAttributes()
+        transform_context = self._transform_context()
+        if transform_context is not None:
+            request.setDestinationCrs(target.crs(), transform_context)
+        index = QgsSpatialIndex()
+        engines = {}
+        for position, feature in enumerate(source_layer.getFeatures(request)):
+            if position % 1000 == 0 and self._feedback is not None and self._feedback.isCanceled():
+                self.last_error = "OGR selection cancelled"
+                return None
+            if not feature.hasGeometry() or feature.geometry().isEmpty():
+                continue
+            engine = QgsGeometry.createGeometryEngine(feature.geometry().constGet())
+            engine.prepareGeometry()
+            engines[feature.id()] = engine
+            index.addFeature(feature)
+
+        def related(engine, geometry):
+            tests = {
+                'contains': engine.within,     # target contains source
+                'equals': engine.isEqual,
+                'touches': engine.touches,
+                'overlaps': engine.overlaps,
+                'within': engine.contains,     # target within source
+                'crosses': engine.crosses,
+                'covers': lambda g: _de9im_any(engine.relate(g), COVERED_BY_PATTERNS),
+                'coveredby': lambda g: _de9im_any(engine.relate(g), COVERS_PATTERNS),
+            }
+            return 'intersects' in names or any(name in tests and tests[name](geometry) for name in names)
+
+        selected = []
+        for position, feature in enumerate(target.getFeatures(QgsFeatureRequest().setNoAttributes())):
+            if position % 1000 == 0 and self._feedback is not None and self._feedback.isCanceled():
+                self.last_error = "OGR selection cancelled"
+                return None
+            if not feature.hasGeometry():
+                continue
+            target_geometry = feature.geometry()
+            geometry = target_geometry.constGet()
+            meeting = [engines[fid] for fid in index.intersects(target_geometry.boundingBox())
+                       if fid in engines and engines[fid].intersects(geometry)]
+            if not meeting:
+                if 'disjoint' in names:
+                    selected.append(feature.id())
+                continue
+            if any(related(engine, geometry) for engine in meeting):
                 selected.append(feature.id())
         return selected
 
@@ -1286,7 +1336,8 @@ class OGRExpressionBuilder(GeometricFilterPort):
                     'DISSOLVE': False,
                     'OUTPUT': 'memory:'
                 },
-                **_worker_processing_kwargs(self._feedback if hasattr(self, '_feedback') else None)
+                **_worker_processing_kwargs(self._feedback if hasattr(self, '_feedback') else None,
+                                            self._processing_settings())
             )
 
             buffered_layer = result.get('OUTPUT')

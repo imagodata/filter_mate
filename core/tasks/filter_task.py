@@ -299,6 +299,13 @@ class FilterEngineTask(QgsTask):
         self.task_action = task_action
         # This task's own copy: what the worker writes stays in it (2026-10-17)
         self.task_parameters = task_scoped_parameters(task_parameters)
+        # The Processing settings of the worker's contexts (invalid geometry check, project
+        # transform context, ellipsoid), read here on the main thread (2026-10-17)
+        try:
+            from ...infrastructure.utils.processing_context import capture_processing_settings
+            self.task_parameters['_processing_settings'] = capture_processing_settings()
+        except Exception:  # nosec B110 - the workers then use a context without the settings
+            pass
 
         # H1 (audit 2026-04-29): stamp the subset-change token NOW (main
         # thread, before run() is queued). FilterResultHandler reads this
