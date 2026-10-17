@@ -43,9 +43,44 @@ _CANONICAL_INT_RE = re.compile(r'-?(?:0|[1-9][0-9]*)\Z')
 _SQL_NUMBER_RE = re.compile(r'-?(?:0|[1-9][0-9]*)(?:\.[0-9]+)?(?:[eE][-+]?[0-9]+)?\Z')
 
 
+# Dialects of a key literal: SQL (OGR SQL, SQLite / GeoPackage, PostgreSQL...) doubles the
+# quotes only; a QGIS expression (memory / delimited text / WFS / OGC API Features subsets,
+# exploring expressions) also reads a backslash as an escape: 'b\c' there is "b" + "c".
+SQL = 'sql'
+QGIS_EXPRESSION = 'qgis'
+
+
 def sql_string_literal(value: Any) -> str:
     """``value`` as an SQL string literal: ``L'Isle`` -> ``'L''Isle'``."""
     return "'" + str(value).replace("'", "''") + "'"
+
+
+def qgis_string_literal(value: Any) -> str:
+    r"""``value`` as a QGIS expression string literal (``QgsExpression.quotedString``).
+
+    Quotes doubled, backslash, newline and tab escaped: ``b\c`` -> ``'b\\c'``.
+    """
+    text = str(value).replace("'", "''").replace('\\', '\\\\').replace('\n', '\\n').replace('\t', '\\t')
+    return "'" + text + "'"
+
+
+def is_null_value(value: Any) -> bool:
+    """None, or a null Qt value: QGIS 3 / PyQt5 gives a NULL attribute as a null ``QVariant``.
+
+    Duck-typed (``isNull()``) so this module stays free of Qt; a null
+    ``QDate`` is NULL too.
+    """
+    if value is None:
+        return True
+    if isinstance(value, (str, bytes, int, float)):
+        return False
+    is_null = getattr(value, 'isNull', None)
+    if callable(is_null):
+        try:
+            return bool(is_null())
+        except Exception:  # nosec B110 - not a Qt value
+            return False
+    return False
 
 
 def _is_number(value: Any) -> bool:
@@ -64,7 +99,7 @@ def key_values_look_numeric(values: Iterable[Any]) -> bool:
     """
     seen = False
     for value in values:
-        if value is None:
+        if is_null_value(value):
             continue
         if not (isinstance(value, (int, float)) or _is_canonical_int_text(value)):
             return False
@@ -86,17 +121,17 @@ def key_field(layer: Any, pk_field: Optional[str]) -> Any:
     return None
 
 
-def format_key_literal(value: Any, numeric: bool) -> str:
-    """One key value as an SQL literal.
+def format_key_literal(value: Any, numeric: bool, dialect: str = SQL) -> str:
+    """One key value as an SQL literal (``dialect`` QGIS_EXPRESSION: a QGIS expression literal).
 
     Numeric keys are written unquoted only when the value is a number (an
     integral float as an integer) or a number written as text (``'12'``,
     ``'1.5'``); any other value - text, a code with a
     leading zero, a value that would inject SQL - is a quoted literal, which
-    SQL compares with a numeric column as well. None is ``NULL`` (matches
-    nothing in an IN list).
+    SQL compares with a numeric column as well. None (or a null QVariant) is
+    ``NULL`` (matches nothing in an IN list).
     """
-    if value is None:
+    if is_null_value(value):
         return 'NULL'
     if numeric:
         if isinstance(value, (bool, int)):
@@ -105,7 +140,7 @@ def format_key_literal(value: Any, numeric: bool) -> str:
             return str(int(value)) if value.is_integer() else repr(value)
         if isinstance(value, str) and _SQL_NUMBER_RE.match(value):
             return value
-    return sql_string_literal(value)
+    return qgis_string_literal(value) if dialect == QGIS_EXPRESSION else sql_string_literal(value)
 
 
 def is_pk_numeric(
@@ -136,7 +171,7 @@ def is_pk_numeric(
             if field.isNumeric():
                 logger.debug(f"PK '{pk_field}' detected as numeric from schema")
                 return True
-            values = [v for v in (sample_values or []) if v is not None]
+            values = [v for v in (sample_values or []) if not is_null_value(v)]
             numeric = bool(values) and all(_is_number(v) for v in values)
             logger.debug(f"PK '{pk_field}' detected as {'numeric' if numeric else 'text'} (text field)")
             return numeric
@@ -154,7 +189,8 @@ def format_pk_values_for_sql(
     values: List,
     is_numeric: Optional[bool] = None,
     layer: Optional['QgsVectorLayer'] = None,
-    pk_field: Optional[str] = None
+    pk_field: Optional[str] = None,
+    dialect: str = SQL
 ) -> str:
     """
     Format primary key values for SQL IN clause.
@@ -171,6 +207,7 @@ def format_pk_values_for_sql(
         is_numeric: Whether PK is numeric (optional, auto-detected if None)
         layer: QgsVectorLayer to check PK type (optional, for auto-detection)
         pk_field: Primary key field name (optional, for auto-detection)
+        dialect: SQL (default) or QGIS_EXPRESSION (backslashes escaped)
 
     Returns:
         str: Comma-separated values formatted for SQL IN clause
@@ -185,4 +222,4 @@ def format_pk_values_for_sql(
             is_numeric = key_values_look_numeric(values)
             logger.debug(f"PK type detected from values: {'numeric' if is_numeric else 'text'}")
 
-    return ', '.join(format_key_literal(v, is_numeric) for v in values)
+    return ', '.join(format_key_literal(v, is_numeric, dialect) for v in values)

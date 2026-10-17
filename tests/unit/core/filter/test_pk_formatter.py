@@ -137,3 +137,31 @@ def test_feature_collector_formats_with_the_shared_formatter():
     FeatureCollector = _feature_collector_class()
     assert FeatureCollector.format_ids_for_sql(["L'Isle", "01001"], is_numeric=False) == "'L''Isle', '01001'"
     assert FeatureCollector.format_ids_for_sql([1, INJECTION], is_numeric=True) == "1, '1); DROP TABLE communes; --'"
+
+
+class _NullVariant:
+    """QGIS 3 / PyQt5: a NULL attribute is a null QVariant, not None."""
+
+    def isNull(self):
+        return True
+
+
+class TestNullAndQgisDialect:
+    def test_null_qvariant_is_null(self):
+        from core.filter.pk_formatter import is_null_value
+        assert is_null_value(None) and is_null_value(_NullVariant())
+        assert not is_null_value(0) and not is_null_value('') and not is_null_value('NULL')
+        assert format_key_literal(_NullVariant(), True) == 'NULL'
+        assert format_key_literal(_NullVariant(), False) == 'NULL'
+
+    def test_null_qvariants_do_not_make_keys_text(self):
+        assert key_values_look_numeric([10, _NullVariant(), 20])
+        assert format_pk_values_for_sql([10, _NullVariant()]) == '10, NULL'
+
+    def test_qgis_expression_literal_escapes_backslashes(self):
+        from core.filter.pk_formatter import QGIS_EXPRESSION, qgis_string_literal
+        backslash = "\\"
+        assert qgis_string_literal("b" + backslash + "c") == "'b" + backslash * 2 + "c'"
+        assert qgis_string_literal("L'Isle") == "'L''Isle'"
+        assert format_key_literal("b" + backslash + "c", False, QGIS_EXPRESSION) == "'b" + backslash * 2 + "c'"
+        assert format_key_literal("b" + backslash + "c", False) == "'b" + backslash + "c'"   # SQL: unchanged
