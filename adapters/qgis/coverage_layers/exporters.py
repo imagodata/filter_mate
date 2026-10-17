@@ -47,6 +47,12 @@ def partial_path(path: str, extension: str) -> str:
     return path + '.partial' + extension
 
 
+def set_creation_options(writer, options) -> None:
+    """GDAL creation options of a ``QgsRasterFileWriter``: ``setCreateOptions`` is deprecated since QGIS 3.44."""
+    setter = getattr(writer, 'setCreationOptions', None) or writer.setCreateOptions
+    setter(list(options))
+
+
 class RasterExportJob:
     """Write a raster layer as it is currently displayed (filtered pixels = NoData).
 
@@ -78,7 +84,7 @@ class RasterExportJob:
         staging = path + '.staging.tif'
         writer = QgsRasterFileWriter(staging)
         writer.setOutputFormat('GTiff')
-        writer.setCreateOptions([f'COMPRESS={self.compress}', 'TILED=YES', 'BIGTIFF=IF_SAFER'])
+        set_creation_options(writer, [f'COMPRESS={self.compress}', 'TILED=YES', 'BIGTIFF=IF_SAFER'])
         error = writer.writeRaster(self.pipe, self.columns, self.rows, self.extent, self.layer_crs, self.context, feedback)
         canceled = feedback is not None and feedback.isCanceled()
         if int(error) != 0 or canceled:  # canceled after the last block: still canceled
