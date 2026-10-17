@@ -119,14 +119,6 @@ try:
 except ImportError:
     ASYNC_EXPRESSION_AVAILABLE = False; get_expression_manager = None
 
-# Icon utilities for dark mode (migrated to ui/)
-try: from .ui.icons import IconThemeManager, get_themed_icon; ICON_THEME_AVAILABLE = True
-except ImportError: ICON_THEME_AVAILABLE = False
-
-# UI configuration system
-try: from .ui import widget_utils as ui_utils; UI_CONFIG_AVAILABLE = True
-except ImportError: UI_CONFIG_AVAILABLE = False
-
 # MVC Controllers
 try:
     from .ui.controllers.integration import ControllerIntegration
@@ -580,9 +572,6 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             '"batch_output_folder":false,"batch_zip":false }'
         )
         self.pending_config_changes, self.config_changes_pending = [], False
-        if ICON_THEME_AVAILABLE:
-            try: IconThemeManager.set_theme(StyleLoader.detect_qgis_theme())
-            except Exception as e: logger.debug(f"IconThemeManager init (non-critical): {e}")
         self.setupUi(self)
 
         # PyQt6's dynamic `uic` loader can't resolve the `features` <set>
@@ -740,7 +729,7 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         """v4.0 S18: Fix toolBox_tabTools icons with absolute paths."""
         for idx, icon_file in {0: "filter_multi.png", 1: "save.png", 2: "parameters.png"}.items():
             p = os.path.join(self.plugin_dir, "icons", icon_file)
-            if os.path.exists(p): self.toolBox_tabTools.setItemIcon(idx, get_themed_icon(p) if ICON_THEME_AVAILABLE else QtGui.QIcon(p))
+            if os.path.exists(p): self.toolBox_tabTools.setItemIcon(idx, QtGui.QIcon(p))
 
     def setupUiCustom(self) -> None:
         """Initialize custom UI components and configuration.
@@ -856,8 +845,7 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
                     if self._icon_manager:
                         self._icon_manager.set_button_icon(w, p)
                     else:
-                        icon = get_themed_icon(p) if ICON_THEME_AVAILABLE else QtGui.QIcon(p)
-                        w.setIcon(icon)
+                        w.setIcon(QtGui.QIcon(p))
                     w.setIconSize(QtCore.QSize(sz, sz))
                     self._name_icon_button(w, grp, name)
                     loaded_count += 1
@@ -2421,8 +2409,7 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         if file_path and self._icon_manager:
             self._icon_manager.set_button_icon(wgt["WIDGET"], file_path)
         elif file_path:
-            icon = get_themed_icon(file_path) if ICON_THEME_AVAILABLE else QtGui.QIcon(file_path)
-            wgt["WIDGET"].setIcon(icon)
+            wgt["WIDGET"].setIcon(QtGui.QIcon(file_path))
 
     def switch_widget_icon(self, widget_path, state):
         """v4.0 Sprint 17: Switch widget icon based on state."""
@@ -2432,8 +2419,7 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         if self._icon_manager:
             self._icon_manager.set_button_icon(widget, icon_path)
         else:
-            icon = get_themed_icon(icon_path) if ICON_THEME_AVAILABLE else QtGui.QIcon(icon_path)
-            widget.setIcon(icon)
+            widget.setIcon(QtGui.QIcon(icon_path))
 
     def icon_per_geometry_type(self, geometry_type):
         """v4.0 Sprint 17: Get cached icon for geometry type.
@@ -2621,8 +2607,8 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         return self._combobox_population_manager.populate_filtering_layers_direct(layer)
 
     def _apply_auto_configuration(self):
-        """Apply auto-configuration from environment."""
-        return ui_utils.auto_configure_from_environment(self.CONFIG_DATA) if UI_CONFIG_AVAILABLE else {}
+        """Apply auto-configuration from environment (ui.widget_utils is gone: nothing to apply)."""
+        return {}
 
     def _apply_stylesheet(self):
         """
@@ -2668,8 +2654,6 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
 
         if self._icon_manager:
             self._icon_manager.setup()
-        elif ICON_THEME_AVAILABLE:
-            IconThemeManager.set_theme(StyleLoader.detect_qgis_theme())
 
         if self._button_styler:
             self._button_styler.setup()
@@ -2697,7 +2681,6 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         """Setup QGIS theme watcher for dark/light mode switching."""
         try:
             self._theme_watcher = QGISThemeWatcher.get_instance(); current_theme = StyleLoader.detect_qgis_theme()
-            if ICON_THEME_AVAILABLE: IconThemeManager.set_theme(current_theme)
             self._theme_watcher.add_callback(self._on_qgis_theme_changed)
             if not self._theme_watcher.is_watching: self._theme_watcher.start_watching()
             if current_theme == 'dark': self._refresh_icons_for_theme()
@@ -2709,7 +2692,6 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             from .config.theme_helpers import get_active_theme
             if get_active_theme(self.CONFIG_DATA) != 'auto':
                 return
-            if ICON_THEME_AVAILABLE: IconThemeManager.set_theme(new_theme)
             if self._theme_manager:
                 self._theme_manager.on_theme_changed(new_theme)
             else:
@@ -2724,17 +2706,6 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         if self._icon_manager:
             self._icon_manager.apply()
             return
-        if not ICON_THEME_AVAILABLE or not self.widgets_initialized: return
-        try:
-            for idx, icon in enumerate(["filter_multi.png", "save.png", "parameters.png"]):
-                p = os.path.join(self.plugin_dir, "icons", icon)
-                if os.path.exists(p): self.toolBox_tabTools.setItemIcon(idx, get_themed_icon(p))
-            for wg in self.widgets:
-                for wn in self.widgets[wg]:
-                    wi = self.widgets[wg][wn]
-                    if wi.get("TYPE") != "PushButton": continue
-                    if (ip := wi.get("ICON") or wi.get("ICON_ON_FALSE")) and os.path.exists(ip): wi.get("WIDGET").setIcon(get_themed_icon(ip)); wi.get("WIDGET").setProperty('icon_path', ip)
-        except Exception as e: logger.debug(f"refresh_button_icons cosmetic update: {e}")
 
     def set_widgets_enabled_state(self, state):
         """
