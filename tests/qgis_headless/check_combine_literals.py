@@ -161,6 +161,53 @@ def combine_scenarios(label, layer, provider_type):
         check(f"{label} ({old}) {operator} ({new})", expected, got, detail)
 
 
+def structure_scenarios(label, layer, table, sqlite):
+    """Subset shapes FilterMate writes: R-tree prefilter, JSON key list, correlated EXISTS, CASE / BETWEEN."""
+    from filter_mate.core.filter.expression_combiner import combine_with_old_subset
+    from filter_mate.core.filter.expression_sanitizer import optimize_duplicate_in_clauses
+    provider_type = 'ogr' if sqlite else 'postgresql'
+    if sqlite:
+        # GDAL names the outer GeoPackage table "m": no correlation by table name
+        nested = '"id" IN (SELECT s."id" - 1 FROM "lieux" AS s WHERE s."nom" = \'Route\')'  # nosec B608
+    else:
+        nested = (f'EXISTS (SELECT 1 FROM "{table}" AS s WHERE s."id" = "{table}"."id" + 1 '  # nosec B608
+                  "AND s.\"nom\" = 'Route')")  # id 9 (id 10 is 'Route')
+    exists = f'EXISTS (SELECT 1 FROM "{table}" AS s WHERE s."nom" = \'Route\') AND "id" < 3'  # nosec B608
+    cases = [
+        (nested, '"id" > 5', 'AND', 1),
+        (nested, '"id" > 5', 'OR', 7),
+        (exists, '"id" = 12', 'OR', 3),
+        (exists, '"id" = 1', 'AND NOT', 1),
+        ("CASE WHEN \"nom\" = 'Case-Pilote' THEN 1 ELSE 0 END = 1 AND \"id\" BETWEEN 1 AND 8", '"id" > 10', 'OR', 3),
+        ('( "id" BETWEEN 2 AND 9 ) AND ( "id" BETWEEN 2 AND 9 )', '"id" > 5', 'AND', 4),
+    ]
+    if sqlite:
+        rtree = ('ROWID IN (SELECT id FROM "rtree_lieux_geom" WHERE minx <= 700065 AND maxx >= 700005) '  # nosec B608
+                 'AND "id" > 2')  # ids 3..6
+        cases += [
+            (rtree, "\"nom\" = 'Route'", 'OR', 5),
+            (rtree, "\"nom\" = 'Route'", 'AND', 0),
+            (rtree, '"id" = 4', 'AND NOT', 3),
+            ('"fid" IN (SELECT value FROM json_each(\'[1,2,3]\'))', '"id" = 12', 'OR', 4),
+            ('"fid" IN (SELECT value FROM json_each(\'[1,2,3]\'))', '"id" IN (2, 3)', 'AND', 2),
+        ]
+    for old, new, operator, expected in cases:
+        combined = combine_with_old_subset(new, old, operator, provider_type, optimize_duplicate_in_clauses)
+        got, detail = apply(layer, combined)
+        check(f"{label} ({old[:60]}) {operator} ({new})", expected, got, detail)
+
+
+def field_only_scenarios(label, layer, provider):
+    """AttributeFilterExecutor.process_qgis_expression with the real QgsExpression."""
+    from filter_mate.core.tasks.executors.attribute_filter_executor import AttributeFilterExecutor
+    executor = AttributeFilterExecutor(layer=layer, provider_type=provider, primary_key='id', geometry_field='geom')
+    for expression, kept in (('"nom"', False), ('"pop"', False), ("coalesce(\"nom\", 'OR')", False),
+                             ("\"nom\" = 'Route'", True), ('"pop" > 100', True)):
+        processed, _ = executor.process_qgis_expression(expression)
+        check(f"{label} field-only check {expression}", 'kept' if kept else 'refused',
+              'kept' if processed else 'refused', f"processed={processed!r}")
+
+
 def conversion_scenarios(label, layer, provider):
     """ExpressionService.to_sql (attribute expression of a SQL source layer) then setSubsetString."""
     from filter_mate.core.domain.filter_expression import ProviderType
@@ -299,9 +346,12 @@ def main():
     for label, layer, backend, has_boolean in layers:
         steps.append((subset_scenarios, (label, layer, has_boolean)))
         steps.append((combine_scenarios, (label, layer, 'postgresql' if backend == 'postgresql' else 'ogr')))
+        steps.append((field_only_scenarios, (label, layer, backend)))
         if backend in ('spatialite', 'postgresql'):
             steps.append((conversion_scenarios, (label, layer, backend)))
             steps.append((buffer_expression_scenarios, (label, layer, backend)))
+            steps.append((structure_scenarios, (label, layer, 'lieux' if backend == 'spatialite' else 'fm_lieux',
+                                                backend == 'spatialite')))
     steps.append((target_scenarios, ('gpkg', gpkg, 'spatialite')))
     steps.append((target_scenarios, ('shp', shp, 'ogr', source)))
     if dsn:

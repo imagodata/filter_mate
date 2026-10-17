@@ -341,7 +341,12 @@ def subset_literals():
     """
     script = os.path.join(HERE, 'check_combine_literals.py')
     environment = {key: value for key, value in os.environ.items() if key != 'FM_PG_DSN'}
-    run = subprocess.run([sys.executable, script], capture_output=True, text=True, timeout=600, env=environment)
+    try:
+        run = subprocess.run([sys.executable, script], capture_output=True, text=True, timeout=600, env=environment)
+    except subprocess.TimeoutExpired as exc:
+        output = exc.stdout.decode(errors='replace') if isinstance(exc.stdout, bytes) else (exc.stdout or '')
+        check('literals: scenario script ran to the end', False, f"timeout after 600 s: {output.strip()[-300:]}")
+        return
     lines = [line for line in run.stdout.splitlines() if line.startswith(('PASS', 'FAIL'))]
     for line in lines:
         status, _, rest = line.partition(' ')
