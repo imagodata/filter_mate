@@ -16,7 +16,8 @@ from unittest.mock import MagicMock
 import pytest
 
 _MODULE = Path(__file__).resolve().parents[4] / "ui" / "widgets" / "custom_widgets.py"
-_NAMES = ("_canvas_is_drawing", "_defer_populate_while_canvas_draws", "_orders_server_side")
+_NAMES = ("_canvas_is_drawing", "_defer_populate_while_canvas_draws", "_orders_server_side",
+          "_layer_id_or_none", "_cancel_deferred_populate")
 
 
 def _methods(timer):
@@ -120,3 +121,54 @@ class TestDeferWhileCanvasDraws:
         canvas.isDrawing.return_value = False
         timer.singleShot.call_args.args[1]()
         widget._populate_features_sync.assert_called_once()
+
+
+@pytest.mark.unit
+class TestDeferredRequestFollowsTheLayer:
+    """2026-10-17: the closure ran the first request's expression on whatever layer the widget showed then."""
+
+    def test_the_latest_request_runs(self):
+        timer = MagicMock()
+        widget, canvas = _widget("postgres", True, timer)
+        widget._defer_populate_while_canvas_draws('"a"', False, False, None)
+        widget._defer_populate_while_canvas_draws('"b"', True, False, "rue")  # absorbed, but remembered
+        canvas.mapCanvasRefreshed.connect.call_args.args[0]()
+        widget._populate_features_sync.assert_called_once_with('"b"', preserve_checked=True, force_full=False,
+                                                               search_text="rue")
+
+    def test_a_layer_change_drops_the_waiting_population(self):
+        timer = MagicMock()
+        widget, canvas = _widget("postgres", True, timer)
+        widget.layer.id.return_value = "roads"
+        widget._defer_populate_while_canvas_draws('"cleabs"', False, False, None)
+        widget._cancel_deferred_populate()  # setLayer with another layer
+        widget.layer = MagicMock()
+        widget.layer.id.return_value = "rivers"
+        run_deferred = canvas.mapCanvasRefreshed.connect.call_args.args[0]
+        run_deferred()
+        widget._populate_features_sync.assert_not_called()
+        canvas.mapCanvasRefreshed.disconnect.assert_called_with(run_deferred)  # no longer waits
+
+    def test_a_layer_changed_without_cancel_is_not_populated_with_the_old_request(self):
+        timer = MagicMock()
+        widget, canvas = _widget("postgres", True, timer)
+        widget.layer.id.return_value = "roads"
+        widget._defer_populate_while_canvas_draws('"cleabs"', False, False, None)
+        widget.layer = MagicMock()
+        widget.layer.id.return_value = "rivers"
+        canvas.mapCanvasRefreshed.connect.call_args.args[0]()
+        widget._populate_features_sync.assert_not_called()
+
+    def test_a_canceled_wait_does_not_run_with_the_next_one(self):
+        timer = MagicMock()
+        widget, canvas = _widget("postgres", True, timer)
+        widget._defer_populate_while_canvas_draws('"a"', False, False, None)
+        first = canvas.mapCanvasRefreshed.connect.call_args.args[0]
+        widget._cancel_deferred_populate()
+        widget._defer_populate_while_canvas_draws('"b"', False, False, None)  # armed again
+        second = canvas.mapCanvasRefreshed.connect.call_args.args[0]
+        first()  # the old wait: superseded
+        widget._populate_features_sync.assert_not_called()
+        second()
+        widget._populate_features_sync.assert_called_once_with('"b"', preserve_checked=False, force_full=False,
+                                                               search_text=None)
