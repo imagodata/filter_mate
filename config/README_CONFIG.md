@@ -12,7 +12,6 @@ This folder holds the default configuration and the helpers that load, migrate, 
 | `config_validator.py` | Structural validation of the loaded file (sections, `_CONFIG_VERSION`, value types, `choices`). Called by `init_env_vars()`; it only logs. |
 | `feedback_config.py` | Message verbosity (`minimal`, `normal`, `verbose`): `should_show_message(category)`, `set_feedback_level_from_string`. |
 | `theme_helpers.py` | `get_active_theme`, `get_theme_colors` and related readers of the theme settings. |
-| `config_metadata.py`, `config_metadata_handler.py` | Metadata lookups (`ConfigMetadata`, `get_config_metadata`). See "Metadata API" below. |
 | `config.v2.example.json` | Example of a proposed v2 layout (lower-case keys). Not used by the code. |
 
 ## Where the active file is
@@ -56,9 +55,9 @@ cache_gb = _get_option_int(options.get("CROSS_FILTER", {}).get("cache_max_gb"), 
 
 Extensions add their own keys under `EXTENSIONS.<id>` by returning them from `config_schema()` (see `extensions/base.py`).
 
-## Metadata API
+## Metadata
 
-`ConfigMetadata` reads `config/config_schema.json`. That file was removed (commit `cf9e96f2`), so `get_metadata()` returns `None` for every path, `get_widget_type()` returns `'textbox'` and `validate_value()` accepts anything. The description, choices and limits live in `config.default.json` instead. `ConfigEditorWidget` and `SimpleConfigDialog` (`ui/dialogs/config_editor_widget.py`) build a form from that metadata; the dock does not use them.
+The description, choices and limits of every setting live in `config.default.json`; `config.py` overlays them on the user's file at each start (`_sync_metadata`). The former `config_schema.json`, `ConfigMetadata` and `ConfigMetadataHandler` (which only read that file) were removed. `ConfigEditorWidget` and `SimpleConfigDialog` (`ui/dialogs/config_editor_widget.py`) build a form without metadata hints; the dock does not use them.
 
 ## Tests
 
