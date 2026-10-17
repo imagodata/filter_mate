@@ -106,6 +106,12 @@ def _kept_area(geometry: QgsGeometry) -> Optional[str]:
     return polygonal_wkt(geometry.asWkt())
 
 
+def _polygons(geometry: QgsGeometry) -> QgsGeometry:
+    """The polygon parts of ``geometry`` (an empty geometry when it has none)."""
+    wkt = _kept_area(geometry)
+    return QgsGeometry.fromWkt(wkt) if wkt is not None else QgsGeometry()
+
+
 def _combine_geometry(previous_wkt: str, previous_side: str, new: QgsGeometry, side: CoverageSide,
                       operator: Optional[str]) -> QgsGeometry:
     """Combine the kept area of an already derived target with a new kept area.
@@ -115,11 +121,13 @@ def _combine_geometry(previous_wkt: str, previous_side: str, new: QgsGeometry, s
     """
     if not previous_wkt or not operator:
         return new
-    previous = QgsGeometry.fromWkt(previous_wkt)
+    # Polygons only: overlays of collections holding lines fail in older GEOS (QGIS 3.22 - 3.28).
+    previous = _polygons(QgsGeometry.fromWkt(previous_wkt))
     if previous.isEmpty():
         return new
     op = operator.upper()
-    if new is None or new.isEmpty():
+    new = _polygons(new)
+    if new.isEmpty():
         # Nothing new kept (outside of a source covering the whole layer):
         # AND keeps nothing, OR and AND NOT keep the previous area.
         return previous if op in ('OR', 'AND NOT') else new

@@ -200,11 +200,13 @@ class SourceParts:
     def __init__(self, parts: Sequence[QgsGeometry]) -> None:
         from qgis.core import QgsSpatialIndex
         self._engines = []
+        self._parts = []  # an engine keeps a pointer to its geometry: kept alive with it
         self._index = QgsSpatialIndex()
         for part in parts:
             if part is None or part.isEmpty():
                 continue
             self._index.addFeature(len(self._engines), part.boundingBox())
+            self._parts.append(part)
             self._engines.append(prepared_engine(part))
 
     def matches(self, target_geometry: QgsGeometry, methods: Sequence[str]) -> bool:
