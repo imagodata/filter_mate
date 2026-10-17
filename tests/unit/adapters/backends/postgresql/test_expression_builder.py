@@ -874,6 +874,9 @@ class TestDynamicBufferTable:
         assert b._buffer_table_name("ref", "t", "10", None) == name
         # a new task (new task_parameters) never picks up the old table
         assert self._builder()._buffer_table_name("ref", "t", "10", None) != name
+        # the app reuses the layer's PROJECT_LAYERS entry and rebuilds its "task" section
+        b.task_params["task"] = {"session_id": "sess01"}
+        assert b._buffer_table_name("ref", "t", "10", None) != name
 
     def test_name_fits_a_postgresql_identifier(self):
         b = self._builder("a" * 40)

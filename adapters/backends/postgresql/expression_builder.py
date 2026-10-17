@@ -984,10 +984,14 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
         """
         from ....infrastructure.constants import TABLE_PREFIX_BUFFER
         params = self.task_params if self.task_params is not None else {}
-        task_token = params.get('_fm_buffer_table_task_token')
+        # The token lives in the "task" section: the app rebuilds it for each
+        # task, while the top-level dict is the layer's PROJECT_LAYERS entry,
+        # which outlives the task.
+        holder = params.get('task') if isinstance(params.get('task'), dict) else params
+        task_token = holder.get('_fm_buffer_table_task_token')
         if not task_token:
             task_token = uuid.uuid4().hex
-            params['_fm_buffer_table_task_token'] = task_token
+            holder['_fm_buffer_table_task_token'] = task_token
         session = self._session_token()
         digest = hashlib.md5(
             "\x1f".join([
