@@ -4,6 +4,7 @@ import importlib.util
 import os
 import pathlib
 import sys
+import types
 
 import pytest
 
@@ -22,6 +23,7 @@ def _fakes():
 fk = _fakes()
 exporters = fk.load("exporters")
 task_module = fk.load("cross_filter_task")
+footprint = fk.load("point_cloud_footprint")
 
 
 def _write_tif(path, size=4):
@@ -227,8 +229,8 @@ class TestPointCloudExporterMissing:
 
     @pytest.fixture
     def no_exporter(self, monkeypatch):
-        monkeypatch.delattr(sys.modules['qgis.core'], 'QgsPointCloudLayerExporter', raising=False)
-        monkeypatch.setattr(type(sys.modules['qgis.core']), '__getattr__', _missing_exporter, raising=False)
+        # A qgis.core without the class: 'from qgis.core import QgsPointCloudLayerExporter' raises ImportError.
+        monkeypatch.setitem(sys.modules, 'qgis.core', types.ModuleType('qgis.core'))
 
     def test_export_reports_the_version_instead_of_raising(self, no_exporter, tmp_path):
         result = exporters.PointCloudExportJob(FakeCloud(), str(tmp_path / 'cloud.laz')).run()
@@ -236,13 +238,8 @@ class TestPointCloudExporterMissing:
         assert os.listdir(tmp_path) == []
 
     def test_exact_clip_reports_the_version(self, no_exporter):
-        footprint = fk.load("point_cloud_footprint")
         assert footprint.point_cloud_exporter_class() is None
         assert 'QGIS 3.28' in footprint.exporter_unavailable_message()
-
-
-def _missing_exporter(self, name):
-    raise ImportError(f"cannot import name {name}")
 
 
 class TestTasksCancel:
