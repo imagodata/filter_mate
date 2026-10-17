@@ -125,50 +125,19 @@ def s_raster_check():
     check('raster: only raster groups (no vector group)', not any(g.isVisible() for g in groups) and ctrl()._raster_panel.isVisible()
           and not ctrl()._pc_panel.isVisible())
     check('raster: linking hidden', not d.pushButton_checkable_exploring_linking_widgets.isVisible())
-    hover, zone = tool('pushButton_checkable_exploring_raster_hover'), tool('pushButton_checkable_exploring_raster_zone')
-    check('raster: hover tool visible', hover is not None and hover.isVisible())
-    check('raster: zone tool visible', zone is not None and zone.isVisible())
-    check('raster: hover icon drawn', hover is not None and not hover.icon().isNull())
-    check('raster: pc tools hidden', not tool('pushButton_exploring_point_cloud_profile').isVisible())
-    rail = [w.objectName() for w in d.pushButton_exploring_identify.parentWidget().findChildren(type(hover))
+    pipette = tool('pushButton_checkable_exploring_raster_pipette')
+    check('raster: pipette tool visible with its icon', pipette is not None and pipette.isVisible() and not pipette.icon().isNull())
+    link = tool('pushButton_checkable_exploring_raster_link')
+    check('raster: style link on the rail, its icon drawn', link is not None and link.isVisible() and not link.icon().isNull())
+    check('raster: no other extra tool on the rail (hover, statistics) nor the point cloud ones',
+          all(tool(n) is None or not tool(n).isVisible() for n in (
+              'pushButton_checkable_exploring_raster_hover', 'pushButton_checkable_exploring_raster_zone',
+              'pushButton_checkable_exploring_point_cloud_pipette',
+              'pushButton_exploring_point_cloud_profile', 'pushButton_exploring_point_cloud_3d')))
+    rail = [w.objectName() for w in d.pushButton_exploring_identify.parentWidget().findChildren(type(d.pushButton_exploring_identify))
             if w.isVisible() and w.geometry().x() < 80]
     log('visible rail buttons: ' + ', '.join(rail))
     save('raster')
-
-
-def s_hover():
-    hover = tool('pushButton_checkable_exploring_raster_hover')
-    hover.setChecked(True)
-    centre = iface.mapCanvas().extent().center()
-    iface.mapCanvas().xyCoordinates.emit(QgsPointXY(centre))
-
-
-def s_hover_check():
-    panel = ctrl()._raster_panel
-    label = panel._hover_label
-    check('raster: value under the cursor shown', not label.isHidden() and 'Under the cursor' in label.text(),
-          f'{label.text()!r} hidden={label.isHidden()} collapsed={getattr(panel._pixel_group, "isCollapsed", lambda: None)()} '
-          f'connected={ctrl()._extras._hover_connected}')
-    tool('pushButton_checkable_exploring_raster_hover').setChecked(False)
-    check('raster: hover line hidden when off', not label.isVisible())
-
-
-def s_zone():
-    zone = tool('pushButton_checkable_exploring_raster_zone')
-    zone.setChecked(True)
-    extras = ctrl()._extras
-    check('raster: rectangle map tool active', iface.mapCanvas().mapTool() is extras._zone_tool)
-    extent = iface.mapCanvas().extent()
-    small = QgsRectangle(extent.center().x() - 100, extent.center().y() - 100, extent.center().x() + 100, extent.center().y() + 100)
-    extras._on_zone_drawn(small)
-
-
-def s_zone_check():
-    panel = ctrl()._raster_panel
-    check('raster: zone statistics shown', panel._zone_label.isVisible() and 'min' in panel._zone_label.text(), panel._zone_label.text())
-    save('raster_tools')
-    iface.actionPan().trigger()
-    check('raster: zone button follows another map tool', not tool('pushButton_checkable_exploring_raster_zone').isChecked())
 
 
 def s_picker():
@@ -241,6 +210,21 @@ def s_raster_tools_check():
     before = STATE['raster_extent']
     check('raster tools: zoom frames the selected range (not the whole layer)',
           canvas_extent.width() <= layer.extent().width() * 1.06, f'{before.width():.0f} -> {canvas_extent.width():.0f}')
+    import tempfile
+    from xml.dom import minidom
+    saved = os.path.join(tempfile.gettempdir(), 'fm5_rail_link.qgs')
+    QgsProject.instance().write(saved)
+    QgsProject.instance().setFileName('')
+    QgsProject.instance().setDirty(False)
+    written = None
+    for node in minidom.parse(saved).getElementsByTagName('maplayer'):
+        ids = node.getElementsByTagName('id')
+        if ids and ids[0].firstChild.data == layer.id():
+            enhancement = node.getElementsByTagName('contrastEnhancement')
+            if enhancement:
+                written = float(enhancement[0].getElementsByTagName('minValue')[0].firstChild.data)
+    check('raster tools: a saved project keeps the style from before the link',
+          written is not None and abs(written - low) > 1e-6, f'written min {written} vs linked {low}')
     link = d.findChild(QAbstractButton, 'pushButton_checkable_exploring_raster_link')
     if link is not None:
         link.setChecked(False)
@@ -254,18 +238,13 @@ def s_handover():
     iface.actionPan().trigger()
     pan = canvas.mapTool()
     d, c = dock(), ctrl()
-    zone = tool('pushButton_checkable_exploring_raster_zone')
     d.pushButton_exploring_identify.click()
     check('handover: pixel picker on', canvas.mapTool() is c._pixel_tool)
-    zone.setChecked(True)
-    check('handover: zone on over picker', canvas.mapTool() is c._extras._zone_tool)
-    zone.setChecked(False)
-    check('handover: zone off restores pan, not the picker', canvas.mapTool() is pan, type(canvas.mapTool()).__name__)
-    zone.setChecked(True)
     d.pushButton_exploring_identify.click()
-    check('handover: picker over zone, button follows', canvas.mapTool() is c._pixel_tool and not zone.isChecked())
+    check('handover: picker off restores pan', canvas.mapTool() is pan, type(canvas.mapTool()).__name__)
     d.pushButton_exploring_identify.click()
-    check('handover: picker off restores pan, not the zone tool', canvas.mapTool() is pan, type(canvas.mapTool()).__name__)
+    iface.actionPan().trigger()  # QGIS now remembers the picker as the tool to give back
+    STATE['old_picker'] = c._pixel_tool
 
 
 def s_alignment():
@@ -287,24 +266,72 @@ def s_pc():
     dock().comboBox_filtering_current_layer.setLayer(layer('lhd'))
 
 
+def s_pc_pipette():
+    canvas = iface.mapCanvas()
+    iface.actionPan().trigger()
+    STATE['pan'] = canvas.mapTool()
+    c = ctrl()
+    pipette = tool('pushButton_checkable_exploring_point_cloud_pipette')
+    pipette.setChecked(True)
+    check('pc pipette: the class picker is on the map', canvas.mapTool() is c._class_tool and c._class_tool is not None)
+    STATE['pc_extent'] = canvas.extent()
+    from qgis.core import QgsCoordinateTransform
+    lhd = layer('lhd')
+    centre = lhd.extent().center()
+    to_map = QgsCoordinateTransform(lhd.crs(), canvas.mapSettings().destinationCrs(), QgsProject.instance())
+    canvas.setExtent(to_map.transformBoundingBox(QgsRectangle(centre.x() - 100, centre.y() - 100, centre.x() + 100, centre.y() + 100)))
+    STATE['pc_click'] = to_map.transform(centre)
+    canvas.refresh()
+
+
+def s_pc_pipette_check():
+    canvas, c = iface.mapCanvas(), ctrl()
+    panel = c._pc_panel
+    panel._check_codes(())
+    c._on_class_picked(STATE['pc_click'], False)
+    picked = panel._checked_codes()
+    check('pc pipette: a click checks one class', len(picked) == 1 and panel._classes_group.isChecked(), str(picked))
+    others = [code for code in panel._present_codes() if code not in picked]
+    if others:
+        panel.select_class(others[0], extend=True)
+        check('pc pipette: Ctrl+click adds a class', panel._checked_codes() == sorted(picked + others[:1]), str(panel._checked_codes()))
+    pipette = tool('pushButton_checkable_exploring_point_cloud_pipette')
+    pipette.setChecked(False)
+    check('pc pipette: off gives the map back to pan', canvas.mapTool() is STATE['pan'], type(canvas.mapTool()).__name__)
+    pipette.setChecked(True)
+    iface.actionPan().trigger()
+    check('pc pipette: button follows another map tool', not pipette.isChecked())
+    canvas.setMapTool(c._class_tool)  # what a right click after Pan does
+    check('pc pipette: button down again when QGIS gives the tool back', pipette.isChecked())
+    pipette.setChecked(False)
+    iface.actionPan().trigger()
+    panel.reset()
+    canvas.setExtent(STATE['pc_extent'])
+
+
 def s_pc_check():
     d = dock()
+    from qgis.PyQt import sip
+    old = STATE.get('old_picker')
+    check('pc: the raster picker left behind Pan is deleted with its layer',
+          old is not None and sip.isdeleted(old) and ctrl()._pixel_tool is None)
     from qgis.PyQt.QtWidgets import QLabel
     card = d.findChild(QLabel, 'label_exploring_coverage_layer')
     check('pc: layer card', card is not None and 'points' in card.text(), card.text() if card else '')
     hint = d.findChild(QLabel, 'label_filtering_source_geometry')
     check('pc: no source geometry line', hint is None or not hint.isVisible())
-    profile, view3d = tool('pushButton_exploring_point_cloud_profile'), tool('pushButton_exploring_point_cloud_3d')
-    check('pc: profile tool visible and enabled', profile.isVisible() and profile.isEnabled())
-    check('pc: 3D tool visible', view3d.isVisible(), f'enabled={view3d.isEnabled()}')
+    pipette = tool('pushButton_checkable_exploring_point_cloud_pipette')
+    check('pc: class pipette on the rail, its icon drawn', pipette is not None and pipette.isVisible() and not pipette.icon().isNull())
+    check('pc: no other extra tool on the rail (profile and 3D are the QGIS ones, no raster tool)',
+          all(tool(n) is None or not tool(n).isVisible() for n in (
+              'pushButton_exploring_point_cloud_profile', 'pushButton_exploring_point_cloud_3d',
+              'pushButton_checkable_exploring_raster_link', 'pushButton_checkable_exploring_raster_pipette')))
     vgroups = [d.mGroupBox_exploring_single_selection, d.mGroupBox_exploring_multiple_selection, d.mGroupBox_exploring_custom_selection]
     check('pc: only point cloud groups (no vector, no raster group)', not any(g.isVisible() for g in vgroups)
           and ctrl()._pc_panel.isVisible() and not ctrl()._raster_panel.isVisible())
-    check('pc: raster tools hidden', not tool('pushButton_checkable_exploring_raster_hover').isVisible())
     save('point_cloud')
     host = ctrl()._host
     check('pc: panel fits the dock (no sideways scroll)', host.parentWidget().width() <= host.parentWidget().parentWidget().width() + 2, f'{host.parentWidget().width()} vs {host.parentWidget().parentWidget().width()}')
-    profile.click()
 
 
 def s_pc_groups():
@@ -328,8 +355,9 @@ def s_pc_conditions():
     pc = ctrl()._pc_panel
     module = sys.modules[type(pc).__module__]
     names = pc.condition_attributes()
-    check('pc conditions: layer attributes offered (not X / Y / Classification)',
-          'Z' in names and 'Intensity' in names and not {'X', 'Y', 'Classification'} & set(names), ', '.join(names))
+    # Classification is a condition too since the class with a height above the DTM (76d0548c).
+    check('pc conditions: layer attributes offered (not X / Y)',
+          'Z' in names and 'Intensity' in names and not {'X', 'Y'} & set(names), ', '.join(names))
     pc._ranges_group.setChecked(True)
     pc.restore_state(dict(pc.state(), conditions=[]))
     add = pc.findChild(QPushButton, 'pushButton_point_cloud_add_condition')
@@ -385,12 +413,6 @@ def s_pc_conditions():
     # Back to the classes, without conditions (restore_state does not emit: no preview left behind).
     pc.restore_state(dict(pc.state(), conditions=[], classes_enabled=True, ranges_enabled=False))
     check('pc conditions: back to classes', pc._classes_group.isChecked() and not pc._ranges_group.isChecked())
-
-
-def s_profile_check():
-    from qgis.PyQt.QtWidgets import QDockWidget
-    docks = [w.windowTitle() for w in iface.mainWindow().findChildren(QDockWidget) if w.isVisible()]
-    check('pc: elevation profile opened', any('Elevation' in t or 'Profil' in t for t in docks), ', '.join(docks))
 
 
 def s_back():
@@ -702,8 +724,8 @@ def s_finish():
 
 
 STEPS = [(s_setup, 1500), (s_open, 6000), (s_vector, 3500), (s_vector_check, 500), (s_raster, 4000),
-         (s_raster_check, 500), (s_hover, 1500), (s_hover_check, 500), (s_zone, 2000), (s_zone_check, 1000), (s_picker, 800), (s_picker_check, 500), (s_raster_tools, 2500), (s_raster_tools_check, 500), (s_handover, 1000), (s_alignment, 500),
-         (s_pc, 5000), (s_pc_check, 3000), (s_profile_check, 500), (s_pc_groups, 800), (s_pc_conditions, 800), (s_pc_statistics, 300), (s_spacing_pc, 300), (s_probe, 500), (s_back, 4000), (s_back_check, 500), (s_alignment, 500), (s_sections_gap, 300), (s_harmony, 300), (s_spacing_scale, 300), (s_rail_minimum, 300), (s_badge_gap, 300), (s_source_row, 300),
+         (s_raster_check, 500), (s_picker, 800), (s_picker_check, 500), (s_raster_tools, 2500), (s_raster_tools_check, 500), (s_handover, 1000), (s_alignment, 500),
+         (s_pc, 5000), (s_pc_check, 3000), (s_pc_pipette, 1500), (s_pc_pipette_check, 1500), (s_pc_groups, 800), (s_pc_conditions, 800), (s_pc_statistics, 300), (s_spacing_pc, 300), (s_probe, 500), (s_back, 4000), (s_back_check, 500), (s_alignment, 500), (s_sections_gap, 300), (s_harmony, 300), (s_spacing_scale, 300), (s_rail_minimum, 300), (s_badge_gap, 300), (s_source_row, 300),
          (s_scrollbar_margin, 300), (s_resize_lower, 1500), (s_resize_lower_check, 500),
          (s_list_grow, 1500), (s_list_grow_check, 500), (s_font_reload, 6000), (s_font_reload_check, 500),
          (s_finish, 500)]

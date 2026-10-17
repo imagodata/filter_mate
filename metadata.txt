@@ -8,29 +8,29 @@ name=FilterMate
 qgisMinimumVersion=3.22
 qgisMaximumVersion=4.99
 supportsQt6=yes
-description=Explore, filter and export vector, raster and LiDAR point cloud layers from one panel, on any data source (PostgreSQL, Spatialite, GeoPackage, OGR). QGIS 3.22 to 4.x.
+description=🧭 Explore, 🔍 filter and 📦 export vector 🗺️, raster 🏔️ and LiDAR point cloud ☁️ layers from one panel, on any data source (PostgreSQL, Spatialite, GeoPackage, OGR). QGIS 3.22 to 4.x.
 version=5.0.0
 author=imagodata
 email=simon.ducournau+filter_mate@gmail.com
 
-about=FilterMate explores, filters and exports vector, raster and LiDAR point cloud layers from one panel.
+about=🧭 FilterMate explores, filters and exports vector, raster and LiDAR point cloud layers from one panel.
 
     Pick a layer, select what matters on it, and FilterMate filters the other layers of the project by their relation to that selection: buildings within 50 m of a road, parcels on a gentle slope, LiDAR points under the buildings, a DTM clipped to a commune. Filters stay on the project layers (no copies), can be undone, saved as favorites, exported and replayed from Processing.
 
-    EXPLORING selects on the current layer, whatever its kind:
-    - vector: one feature, several, or an expression;
-    - raster: band, pixel value picked on the map, value range on a live histogram, classes, raster calculator expression;
-    - point cloud (LAS, LAZ, COPC, EPT, VPC): ASPRS / LiDAR HD classes, Z, intensity and return ranges, attribute conditions, height above a DTM.
+    🧭 EXPLORING selects on the current layer, whatever its kind:
+    - 🗺️ vector: one feature, several, or an expression;
+    - 🏔️ raster: band, pixel value picked on the map, value range on a live histogram, classes, raster calculator expression;
+    - ☁️ point cloud (LAS, LAZ, COPC, EPT, VPC): ASPRS / LiDAR HD classes, Z, intensity and return ranges, attribute conditions, height above a DTM.
 
-    FILTERING relates that selection to layers of any kind (9 source / target combinations) with geometric predicates, a buffer, AND / OR with existing filters and a minimum coverage. Filtered rasters and point clouds keep their id, style and place in the layer tree, and the project is always saved with the original sources.
+    🔍 FILTERING relates that selection to layers of any kind (9 source / target combinations) with geometric predicates, a buffer, AND / OR with existing filters and a minimum coverage. Filtered rasters and point clouds keep their id, style and place in the layer tree, and the project is always saved with the original sources.
 
-    EXPORTING writes the filtered layers: vector formats, GeoPackage with an embedded QGIS project, GeoTIFF / COG, LAZ / LAS / COPC.
+    📦 EXPORTING writes the filtered layers: vector formats, GeoPackage with an embedded QGIS project, GeoTIFF / COG, LAZ / LAS / COPC.
 
-    Also: PostgreSQL / PostGIS, Spatialite, GeoPackage and OGR backends with spatial indexes; undo / redo; favorites shared through git repositories; Processing algorithms and models, qgis_process, Python and REST APIs; light and dark themes; 34 languages. QGIS 3.22 to 4.x, Qt5 and Qt6.
+    ✨ Also: PostgreSQL / PostGIS, Spatialite, GeoPackage and OGR backends with spatial indexes; undo / redo; favorites shared through git repositories; Processing algorithms and models, qgis_process, Python and REST APIs; light and dark themes; 34 languages. QGIS 3.22 to 4.x, Qt5 and Qt6.
 
-    Optional: psycopg2 for PostgreSQL, PDAL 2.4+ for the height above a DTM and COPC writing.
+    🔧 Optional: psycopg2 for PostgreSQL, PDAL 2.4+ for the height above a DTM and COPC writing.
 
-    User guide: https://imagodata.github.io/filter_mate/guide.html
+    📖 User guide: https://imagodata.github.io/filter_mate/guide.html
 
 tracker=https://github.com/imagodata/filter_mate/issues
 repository=https://github.com/imagodata/filter_mate

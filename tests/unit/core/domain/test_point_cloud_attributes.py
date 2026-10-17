@@ -85,9 +85,10 @@ class TestRegistry:
 
 
 class TestConditionAttributes:
-    def test_layer_order_without_x_y_and_classification(self):
+    def test_layer_order_without_x_y(self):
+        # Classification is a condition too: "class AND height above the DTM" goes through it
         names = ("X", "Y", "Z", "Classification", "Intensity", "Amplitude", "Z")
-        assert condition_attributes(names) == ["Z", "Intensity", "Amplitude"]
+        assert condition_attributes(names) == ["Z", "Classification", "Intensity", "Amplitude"]
 
     def test_unknown_schema_falls_back(self):
         assert condition_attributes(()) == list(FALLBACK_CONDITION_ATTRIBUTES)

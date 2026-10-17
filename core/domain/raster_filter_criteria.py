@@ -233,6 +233,34 @@ class RasterSelectionMode(Enum):
     EXPRESSION = "expression"
 
 
+class RasterDerivative(Enum):
+    """Quantity the RANGE of a selection is read on: the pixel value or a terrain derivative.
+
+    A derivative is computed from the band read as an elevation model (DTM), over the
+    3 x 3 neighbourhood of each pixel; the raster calculator has none of them, so only
+    a RANGE selection can use one.
+    """
+
+    VALUE = "value"
+    SLOPE_DEGREES = "slope_degrees"
+    SLOPE_PERCENT = "slope_percent"
+    ASPECT = "aspect"
+    HILLSHADE = "hillshade"
+    ROUGHNESS = "roughness"
+
+    @property
+    def is_terrain(self) -> bool:
+        return self is not RasterDerivative.VALUE
+
+
+# Natural bounds of the derivatives that have some (None: unbounded above).
+DERIVATIVE_BOUNDS = {
+    RasterDerivative.SLOPE_DEGREES: (0.0, 90.0),
+    RasterDerivative.ASPECT: (0.0, 360.0),
+    RasterDerivative.HILLSHADE: (0.0, 255.0),
+}
+
+
 @dataclass(frozen=True)
 class RasterSelection:
     """Pixels kept by a raster EXPLORING selection.
@@ -245,6 +273,8 @@ class RasterSelection:
         classes: Pixel values kept for CLASSES (paletted / categorical rasters).
         expression: Raster calculator expression for EXPRESSION, using
             ``"<ref>@<band>"`` references; a pixel is kept where it is not 0.
+        derivative: Quantity the RANGE bounds apply to (slope, aspect... of the
+            band read as a DTM); the pixel value by default.
     """
 
     band: int = 1
@@ -253,10 +283,15 @@ class RasterSelection:
     maximum: Optional[float] = None
     classes: frozenset = frozenset()
     expression: str = ""
+    derivative: RasterDerivative = RasterDerivative.VALUE
 
     def __post_init__(self):
+        if not isinstance(self.derivative, RasterDerivative):
+            object.__setattr__(self, "derivative", _derivative_from(self.derivative))
         if self.band < 1:
             raise ValueError(f"band must be >= 1, got {self.band}")
+        if self.derivative.is_terrain and self.mode is not RasterSelectionMode.RANGE:
+            raise ValueError(f"a {self.derivative.value} selection must use the range mode, not {self.mode.value}")
         if (self.mode is RasterSelectionMode.RANGE and self.minimum is not None
                 and self.maximum is not None and self.minimum > self.maximum):
             raise ValueError(f"minimum ({self.minimum}) > maximum ({self.maximum})")
@@ -294,7 +329,12 @@ class RasterSelection:
 
         Returns:
             Formula such as ``("mnt@1" >= 200 AND "mnt@1" <= 260)``.
+
+        Raises:
+            ValueError: For a terrain derivative, which the raster calculator cannot compute.
         """
+        if self.derivative.is_terrain:
+            raise ValueError("a terrain derivative cannot be written as a raster calculator formula")
         ref = f'"{reference}@{self.band}"'
         if self.mode is RasterSelectionMode.RANGE:
             parts = []
@@ -314,7 +354,8 @@ class RasterSelection:
         if self.mode is RasterSelectionMode.RANGE:
             low = "-∞" if self.minimum is None else _fmt(self.minimum)
             high = "+∞" if self.maximum is None else _fmt(self.maximum)
-            return f"band {self.band} in [{low} ; {high}]"
+            what = "band" if not self.derivative.is_terrain else self.derivative.value.replace("_", " ") + " of band"
+            return f"{what} {self.band} in [{low} ; {high}]"
         if self.mode is RasterSelectionMode.CLASSES:
             return f"band {self.band} classes " + ", ".join(_fmt(c) for c in sorted(self.classes))
         return self.expression.strip()
@@ -327,6 +368,7 @@ class RasterSelection:
             "maximum": self.maximum,
             "classes": sorted(self.classes),
             "expression": self.expression,
+            "derivative": self.derivative.value,
         }
 
     @classmethod
@@ -338,6 +380,7 @@ class RasterSelection:
             maximum=data.get("maximum"),
             classes=frozenset(int(c) for c in data.get("classes", ()) or ()),
             expression=data.get("expression", "") or "",
+            derivative=_derivative_from(data.get("derivative")),
         )
 
 
@@ -346,3 +389,11 @@ def _fmt(value) -> str:
     if isinstance(value, float) and value.is_integer():
         return str(int(value))
     return repr(value) if isinstance(value, float) else str(value)
+
+
+def _derivative_from(value) -> RasterDerivative:
+    """Derivative named ``value``; the pixel value when missing (older saved states)."""
+    try:
+        return RasterDerivative(value or RasterDerivative.VALUE.value)
+    except ValueError:
+        raise ValueError(f"unknown raster derivative {value!r}") from None

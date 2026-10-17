@@ -189,9 +189,13 @@ class RasterSelectionBody(BaseModel):
     classes: List[int] = Field(default_factory=list, description="classes: pixel values kept")
     expression: str = Field(default="", max_length=2000,
                             description='expression: raster calculator expression, e.g. "mnt@1" > 1200')
+    derivative: Literal["value", "slope_degrees", "slope_percent", "aspect", "hillshade", "roughness"] = Field(
+        default="value", description="range: quantity the bounds apply to (the band is read as a DTM)")
 
     @model_validator(mode="after")
     def _check_mode(self) -> "RasterSelectionBody":
+        if self.derivative != "value" and self.mode != "range":
+            raise ValueError("a terrain derivative only works with the range mode")
         if self.mode == "range":
             if self.minimum is None and self.maximum is None:
                 raise ValueError("a range needs a minimum, a maximum or both")

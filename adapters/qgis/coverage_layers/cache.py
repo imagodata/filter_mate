@@ -20,6 +20,7 @@ still writing (:func:`new_path` until :func:`settle`).
 import errno
 import logging
 import os
+import re
 import shutil
 import socket
 import stat
@@ -32,6 +33,7 @@ from typing import Dict, Iterable, Optional, Tuple
 logger = logging.getLogger(__name__)
 
 LOCK_NAME = '.session.lock'
+_SESSION_NAME = re.compile(r'session_[0-9a-f]{10}$')
 # A folder unlocked for less than this may be a session being created.
 _UNLOCKED_GRACE_SECONDS = 60.0
 # Folders whose liveness cannot be told (another computer, file systems
@@ -48,6 +50,7 @@ _session_dir: Optional[str] = None
 _session_lock_handle = None
 _override_root: Optional[str] = None
 _fallback_root: Optional[str] = None
+_own_temp_folder: Optional[str] = None  # tempfile.mkdtemp folder of the fallback root
 _closed = False
 _in_flight: set = set()
 
@@ -114,6 +117,7 @@ def _private_temp_root() -> str:
     one made by another user, or a link, is never used (the derived files
     written there could be read or replaced, a link could send them anywhere).
     """
+    global _own_temp_folder
     root = temp_root()
     folder = os.path.dirname(root)
     try:
@@ -122,12 +126,17 @@ def _private_temp_root() -> str:
             return root
     except OSError:
         pass
-    return os.path.join(tempfile.mkdtemp(prefix='filtermate-'), 'cache')
+    _own_temp_folder = tempfile.mkdtemp(prefix='filtermate-')  # removed with the session
+    return os.path.join(_own_temp_folder, 'cache')
 
 
 def _owned_privately(folder: str) -> bool:
     info = os.lstat(folder)
     if stat.S_ISLNK(info.st_mode) or not stat.S_ISDIR(info.st_mode):
+        return False
+    # A Windows junction is no link for lstat; realpath resolves it.
+    resolved = os.path.join(os.path.realpath(os.path.dirname(folder)), os.path.basename(folder))
+    if os.path.normcase(os.path.realpath(folder)) != os.path.normcase(resolved):
         return False
     if hasattr(os, 'getuid'):  # POSIX: the system temp folder is shared by every user
         if info.st_uid != os.getuid():
@@ -193,7 +202,14 @@ def _create_session(root: str) -> str:
     global _session_lock_handle
     folder = os.path.join(root, f"session_{uuid.uuid4().hex[:10]}")
     os.makedirs(folder, exist_ok=True)
-    handle = open(os.path.join(folder, LOCK_NAME), 'a+')
+    try:
+        handle = open(os.path.join(folder, LOCK_NAME), 'a+')
+    except OSError:
+        try:
+            os.rmdir(folder)  # never a session folder without its lock file
+        except OSError:
+            pass
+        raise
     locked = None
     for _attempt in range(_LOCK_ATTEMPTS):
         locked = _try_lock(handle)
@@ -277,7 +293,10 @@ def cleanup_stale_sessions(keep: str = '', root: Optional[str] = None) -> int:
     sharing the folder, file system without locks) is removed once it is
     older than a day. Locked folders are kept, and so are the folders without
     the lock file of FilterMate: ``cache_dir`` may be a folder holding other
-    data, where a ``session_*`` folder is not necessarily FilterMate's.
+    data, where a ``session_*`` folder is not necessarily FilterMate's (only
+    an empty ``session_<10 hex>`` folder a day old goes: QGIS stopped before
+    its lock file was written). The lock file is removed last, so a folder
+    that cannot be emptied yet stays recognizable.
 
     Args:
         keep: Folder never removed (the current session).
@@ -296,19 +315,24 @@ def cleanup_stale_sessions(keep: str = '', root: Optional[str] = None) -> int:
         if not name.startswith('session_') or os.path.normcase(path) == os.path.normcase(keep or ''):
             continue
         try:
-            if not os.path.isdir(path) or not os.path.isfile(os.path.join(path, LOCK_NAME)):
+            if not os.path.isdir(path):
+                continue
+            age = now - os.path.getmtime(path)
+            if not os.path.isfile(os.path.join(path, LOCK_NAME)):
+                if _SESSION_NAME.match(name) and age >= _UNKNOWN_MAX_AGE_HOURS * 3600.0:
+                    os.rmdir(path)  # fails, and keeps it, unless it is empty
+                    removed += 1
                 continue
             locked, host = session_state(path)
             if locked is True:
                 continue
-            age = now - os.path.getmtime(path)
             if locked is False and host == this_host:
                 if age < _UNLOCKED_GRACE_SECONDS:
                     continue
             elif age < _UNKNOWN_MAX_AGE_HOURS * 3600.0:
                 continue
-            shutil.rmtree(path, ignore_errors=True)
-            removed += 1
+            if _empty_session(path) and _remove_emptied_session(path):
+                removed += 1
         except OSError:
             continue
     if removed:
@@ -377,6 +401,21 @@ def in_session(source: str) -> bool:
     """
     folder = _session_dir
     return bool(folder and source and os.path.basename(folder) in source)
+
+
+def session_relative(source: str) -> Optional[str]:
+    """What follows the current session folder in ``source`` ('/' separators); None when not in it.
+
+    Names a file of the session whatever the spelling of the folders before
+    it: QgsPathResolver resolves a cache root reached through a link, and
+    writes '/' for the '\\' of Windows paths.
+    """
+    folder = _session_dir
+    if not folder or not source:
+        return None
+    name = os.path.basename(folder)
+    index = source.find(name)
+    return None if index < 0 else source[index + len(name):].replace('\\', '/')
 
 
 def _entries(folder: str):
@@ -466,14 +505,60 @@ def collect_garbage(referenced: Iterable[str]) -> int:
     return removed
 
 
+def _empty_session(folder: str) -> bool:
+    """Remove everything in a session folder but its lock file; True when nothing else is left."""
+    try:
+        entries = _entries(folder)
+    except OSError:
+        return False
+    for entry in entries:
+        try:
+            if entry.is_dir(follow_symlinks=False):
+                shutil.rmtree(entry.path)
+            else:
+                os.remove(entry.path)
+        except OSError:
+            pass  # still open (Windows): the folder and its lock file stay
+    try:
+        return not _entries(folder)
+    except OSError:
+        return False
+
+
+def _remove_emptied_session(folder: str) -> bool:
+    """Remove the lock file, then the folder, of a session :func:`_empty_session` emptied."""
+    try:
+        lock = os.path.join(folder, LOCK_NAME)
+        if os.path.exists(lock):
+            os.remove(lock)
+        os.rmdir(folder)
+        return True
+    except OSError:
+        return False
+
+
 def purge_session() -> None:
-    """Delete the session folder and close the cache (call once no layer uses its files)."""
-    global _session_dir, _closed
+    """Delete the session folder and close the cache (call once no layer uses its files).
+
+    The lock file goes last: a file that cannot be removed yet (Windows:
+    still open) leaves the folder with its lock file, released, which the
+    next session of this computer removes.
+    """
+    global _session_dir, _closed, _fallback_root, _own_temp_folder
     with _lock:
         folder, _session_dir = _session_dir, None
         _closed = True
         _in_flight.clear()
+    emptied = bool(folder) and os.path.isdir(folder) and _empty_session(folder)
+    with _lock:
         _release_session_lock()
-    if folder and os.path.isdir(folder):
-        shutil.rmtree(folder, ignore_errors=True)
+    if emptied and _remove_emptied_session(folder):
         logger.debug(f"[FM5] cache session removed: {folder}")
+    if _own_temp_folder:
+        try:
+            os.rmdir(os.path.join(_own_temp_folder, 'cache'))
+            os.rmdir(_own_temp_folder)
+            _fallback_root = None
+        except OSError:
+            pass
+        _own_temp_folder = None

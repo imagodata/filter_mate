@@ -9,7 +9,8 @@ propagates to the caller.
 """
 import logging
 import math
-from typing import Any, List, Optional, Tuple
+import re
+from typing import Any, Dict, Iterable, List, Optional, Tuple
 
 from ...core.domain import point_cloud_attributes as pc_attributes
 from ...core.domain.point_cloud_filter_criteria import (
@@ -101,8 +102,8 @@ def _read_classes(stats: Any) -> Tuple[Tuple[int, int], ...]:
                     pairs[code_int] = _to_int(count, -1)
             if pairs:
                 return tuple(sorted(pairs.items()))
-        except Exception:
-            pass
+        except Exception as exc:
+            logger.debug(f"[FM5] class statistics unreadable: {exc}")
     available = getattr(stats, 'availableClasses', None)
     if callable(available):
         try:
@@ -112,16 +113,16 @@ def _read_classes(stats: Any) -> Tuple[Tuple[int, int], ...]:
                 if code_int >= 0:
                     codes.add(code_int)
             return tuple((code, -1) for code in sorted(codes))
-        except Exception:
-            pass
+        except Exception as exc:
+            logger.debug(f"[FM5] available classes unreadable: {exc}")
     return ()
 
 
 def _read_ranges(stats: Any, attributes: Tuple[str, ...]) -> Tuple[PointCloudAttributeSummary, ...]:
     """Min/max of the attributes present on the layer (the attribute conditions are built on them).
 
-    The standard ones come first; X, Y and Classification are left out (the
-    classes are counted by :func:`_read_classes`).
+    The standard ones come first; X and Y are left out. Classification stays: the classes
+    are counted by :func:`_read_classes`, but a condition on it needs its bounds.
     """
     if stats is None:
         return ()
@@ -198,3 +199,49 @@ def apply_point_cloud_subset(layer: Any, subset_string: str) -> bool:
 def get_point_cloud_subset(layer: Any) -> str:
     """Current subset string of the layer, ``""`` when unavailable."""
     return str(_safe_call(layer, 'subsetString', '') or '')
+
+
+def class_code(value: Any) -> int:
+    """Classification code of an identified point: ``2``, ``"2"`` or ``"2 (Ground)"`` (identify tool); -1 otherwise."""
+    if isinstance(value, str):
+        match = re.match(r"\s*(\d+)", value)
+        return int(match.group(1)) if match else -1
+    return _to_int(value)
+
+
+def dominant_class(points: Iterable[Any]) -> Optional[int]:
+    """Most frequent classification code of identified points (lowest code on a tie), None without one."""
+    counts: Dict[int, int] = {}
+    for point in points or ():
+        try:
+            code = class_code(point.get(_CLASSIFICATION_ATTRIBUTE))
+        except AttributeError:
+            continue
+        if code >= 0:
+            counts[code] = counts.get(code, 0) + 1
+    if not counts:
+        return None
+    return min(counts, key=lambda code: (-counts[code], code))
+
+
+def may_have_classes(layer: Any) -> bool:
+    """False only for a layer that lists its attributes without Classification (no class to pick)."""
+    names = _read_attribute_names(layer)
+    return not names or _CLASSIFICATION_ATTRIBUTE in names
+
+
+def class_at(layer: Any, canvas: Any, point: Any) -> Optional[int]:
+    """Classification of the points drawn under ``point`` (canvas CRS), within the identify search radius.
+
+    Reads the points with the QGIS identify tool (the layer renderer, so a filtered out point is not
+    picked) and keeps the class most of them have; None without a classified point there.
+    """
+    try:
+        from qgis.gui import QgsMapToolIdentify
+        modes = getattr(QgsMapToolIdentify, 'IdentifyMode', QgsMapToolIdentify)
+        pixel = canvas.getCoordinateTransform().transform(point)
+        results = QgsMapToolIdentify(canvas).identify(round(pixel.x()), round(pixel.y()), [layer], modes.TopDownAll)
+    except Exception as exc:
+        logger.debug(f"[PC] points not identified on '{_layer_label(layer)}': {exc}")
+        return None
+    return dominant_class(getattr(result, 'mAttributes', None) for result in results)

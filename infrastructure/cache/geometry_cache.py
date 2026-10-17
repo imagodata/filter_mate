@@ -66,7 +66,7 @@ class SourceGeometryCache:
         self._access_order = []  # FIFO: First In, First Out
         logger.info(f"✓ SourceGeometryCache initialized (max size: {max_size})")
 
-    def get_cache_key(self, features, buffer_value, target_crs_authid, layer_id=None, subset_string=None):
+    def get_cache_key(self, features, buffer_value, target_crs_authid, layer_id=None, subset_string=None, variant=None):
         """
         Generate unique cache key for a geometry.
 
@@ -76,6 +76,9 @@ class SourceGeometryCache:
             target_crs_authid: Target CRS authid (e.g., 'EPSG:3857')
             layer_id: Source layer ID (optional, avoids collisions)
             subset_string: Active subset string on layer (optional, invalidates cache on filter change)
+            variant: Any other hashable input that shapes the cached geometry
+                (2026-10-16: the predicates, which decide whether the source
+                WKT may be simplified)
 
         Returns:
             tuple: Unique cache key
@@ -91,9 +94,9 @@ class SourceGeometryCache:
 
         # Include layer_id and subset_string in key to avoid collisions
         # subset_string is critical: if filter changes, geometry must be recalculated
-        return (feature_ids, buffer_value, target_crs_authid, layer_id, subset_string)
+        return (feature_ids, buffer_value, target_crs_authid, layer_id, subset_string, variant)
 
-    def get(self, features, buffer_value, target_crs_authid, layer_id=None, subset_string=None):
+    def get(self, features, buffer_value, target_crs_authid, layer_id=None, subset_string=None, variant=None):
         """
         Retrieve geometry from cache if it exists.
 
@@ -103,11 +106,12 @@ class SourceGeometryCache:
             target_crs_authid: Target CRS authid
             layer_id: Source layer ID (optional)
             subset_string: Active subset string (optional)
+            variant: See get_cache_key
 
         Returns:
             dict or None: Cached geometry data (wkt, bbox, etc.) or None if not found
         """
-        key = self.get_cache_key(features, buffer_value, target_crs_authid, layer_id, subset_string)
+        key = self.get_cache_key(features, buffer_value, target_crs_authid, layer_id, subset_string, variant)
 
         if key in self._cache:
             # Update access order (move to end)
@@ -121,7 +125,7 @@ class SourceGeometryCache:
         logger.debug("Cache MISS: Geometry not in cache")
         return None
 
-    def put(self, features, buffer_value, target_crs_authid, geometry_data, layer_id=None, subset_string=None):
+    def put(self, features, buffer_value, target_crs_authid, geometry_data, layer_id=None, subset_string=None, variant=None):
         """
         Store geometry in cache.
 
@@ -132,8 +136,9 @@ class SourceGeometryCache:
             geometry_data: Data to cache (dict with wkt, bbox, etc.)
             layer_id: Source layer ID (optional)
             subset_string: Active subset string (optional)
+            variant: See get_cache_key
         """
-        key = self.get_cache_key(features, buffer_value, target_crs_authid, layer_id, subset_string)
+        key = self.get_cache_key(features, buffer_value, target_crs_authid, layer_id, subset_string, variant)
 
         # Check cache limit
         if len(self._cache) >= self._max_cache_size:

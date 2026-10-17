@@ -662,30 +662,28 @@ class TestGeometryHandler:
         )
         assert result is None
 
-    def test_simplify_geometry_adaptive_returns_original_on_none(self):
-        """simplify_geometry_adaptive should return None for None geometry."""
-        result = self.handler.simplify_geometry_adaptive(None)
-        assert result is None
+    @pytest.mark.parametrize("authid, geographic", [
+        ("EPSG:4326", True), ("IGNF:WGS84G", True), ("EPSG:6318", True), ("EPSG:7844", True),
+        ("EPSG:2154", False), ("EPSG:4647", False), ("EPSG:4087", False), ("ESRI:102110", False),
+    ])
+    def test_wkt_precision_asks_qgis_whether_the_crs_is_geographic(self, authid, geographic):
+        """2026-10-16: the 4000 < srid < 5000 guess gave degrees 3 decimals (~100 m)."""
+        import core.tasks.geometry_handler as module
 
-    def test_simplify_geometry_adaptive_returns_original_on_empty(self):
-        """simplify_geometry_adaptive should return empty geometry unchanged."""
-        mock_geom = MagicMock()
-        mock_geom.isEmpty.return_value = True
-        # Empty geometry evaluates as falsy
-        mock_geom.__bool__ = MagicMock(return_value=True)
+        crs = MagicMock()
+        crs.isValid.return_value = True
+        crs.isGeographic.return_value = geographic
+        with patch.object(module, "QgsCoordinateReferenceSystem", return_value=crs):
+            assert self.handler.get_wkt_precision(authid) == (8 if geographic else 3)
 
-        result = self.handler.simplify_geometry_adaptive(mock_geom)
-        assert result is mock_geom
+    def test_wkt_precision_unknown_crs_is_finest(self):
+        import core.tasks.geometry_handler as module
 
-    def test_simplify_geometry_adaptive_no_adapter(self):
-        """When adapter is not available, should return original geometry."""
-        self.mock_bs.get_geometry_preparation_adapter.return_value = None
-        mock_geom = MagicMock()
-        mock_geom.isEmpty.return_value = False
-        mock_geom.__bool__ = MagicMock(return_value=True)
-
-        result = self.handler.simplify_geometry_adaptive(mock_geom)
-        assert result is mock_geom
+        crs = MagicMock()
+        crs.isValid.return_value = False
+        with patch.object(module, "QgsCoordinateReferenceSystem", return_value=crs):
+            assert self.handler.get_wkt_precision("FOO:1") == 8
+        assert self.handler.get_wkt_precision(None) == 8
 
 
 # ===========================================================================

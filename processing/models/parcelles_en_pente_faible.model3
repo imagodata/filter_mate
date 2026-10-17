@@ -16,7 +16,7 @@
         <Option name="outputs_collapsed" type="bool" value="false"/>
         <Option name="parameters_collapsed" type="bool" value="false"/>
       </Option>
-      <Option name="component_description" type="QString" value="Écrire les couches filtrées"/>
+      <Option name="component_description" type="QString" value="Write the filtered layers"/>
       <Option name="component_height" type="double" value="30"/>
       <Option name="component_pos_x" type="double" value="520"/>
       <Option name="component_pos_y" type="double" value="440"/>
@@ -37,7 +37,7 @@
             <Option name="outputs_collapsed" type="bool" value="false"/>
             <Option name="parameters_collapsed" type="bool" value="false"/>
           </Option>
-          <Option name="component_description" type="QString" value="Dossier de sortie"/>
+          <Option name="component_description" type="QString" value="Output folder"/>
           <Option name="component_height" type="double" value="30"/>
           <Option name="component_pos_x" type="double" value="820"/>
           <Option name="component_pos_y" type="double" value="440"/>
@@ -95,7 +95,7 @@
         <Option name="outputs_collapsed" type="bool" value="false"/>
         <Option name="parameters_collapsed" type="bool" value="false"/>
       </Option>
-      <Option name="component_description" type="QString" value="Pente du MNT"/>
+      <Option name="component_description" type="QString" value="DTM slope"/>
       <Option name="component_height" type="double" value="30"/>
       <Option name="component_pos_x" type="double" value="520"/>
       <Option name="component_pos_y" type="double" value="120"/>
@@ -141,7 +141,7 @@
         <Option name="outputs_collapsed" type="bool" value="false"/>
         <Option name="parameters_collapsed" type="bool" value="false"/>
       </Option>
-      <Option name="component_description" type="QString" value="Parcelles dans la zone de pente faible"/>
+      <Option name="component_description" type="QString" value="Parcels in the gentle slope zone"/>
       <Option name="component_height" type="double" value="30"/>
       <Option name="component_pos_x" type="double" value="520"/>
       <Option name="component_pos_y" type="double" value="280"/>
@@ -228,12 +228,12 @@
   <Option name="groupBoxes"/>
   <Option name="help" type="Map">
     <Option name="ALG_CREATOR" type="QString" value="FilterMate"/>
-    <Option name="ALG_DESC" type="QString" value="Calcule la pente du MNT (native:slope), retient les pixels sous la pente maximale et garde les couches cibles (parcelles, bâtiments...) dont au moins la part choisie de la surface est dans cette zone, puis écrit le résultat en GPKG."/>
+    <Option name="ALG_DESC" type="QString" value="Computes the slope of the DTM (native:slope), keeps the pixels under the maximum slope and keeps the target layers (parcels, buildings...) of which at least the chosen share of the area is in this zone, then writes the result as GPKG."/>
     <Option name="ALG_VERSION" type="QString" value="5.0"/>
   </Option>
   <Option name="internal_version" type="QString" value="Version2"/>
   <Option name="modelVariables"/>
-  <Option name="model_group" type="QString" value="Modèles FilterMate"/>
+  <Option name="model_group" type="QString" value="FilterMate models"/>
   <Option name="model_name" type="QString" value="parcelles_en_pente_faible"/>
   <Option name="outputGroup" type="QString" value=""/>
   <Option name="outputOrder"/>
@@ -241,7 +241,7 @@
     <Option name="cibles" type="Map">
       <Option name="default" type="invalid"/>
       <Option name="defaultGui" type="invalid"/>
-      <Option name="description" type="QString" value="Couches à filtrer (parcelles...)"/>
+      <Option name="description" type="QString" value="Layers to filter (parcels...)"/>
       <Option name="flags" type="int" value="0"/>
       <Option name="help" type="QString" value=""/>
       <Option name="layer_type" type="int" value="2"/>
@@ -254,7 +254,7 @@
       <Option name="data_type" type="int" value="1"/>
       <Option name="default" type="double" value="50"/>
       <Option name="defaultGui" type="invalid"/>
-      <Option name="description" type="QString" value="Part minimale en pente faible (%)"/>
+      <Option name="description" type="QString" value="Minimum share on a gentle slope (%)"/>
       <Option name="flags" type="int" value="0"/>
       <Option name="help" type="QString" value=""/>
       <Option name="max" type="double" value="100"/>
@@ -267,7 +267,7 @@
       <Option name="create_by_default" type="bool" value="true"/>
       <Option name="default" type="invalid"/>
       <Option name="defaultGui" type="invalid"/>
-      <Option name="description" type="QString" value="Dossier de sortie"/>
+      <Option name="description" type="QString" value="Output folder"/>
       <Option name="flags" type="int" value="0"/>
       <Option name="help" type="QString" value=""/>
       <Option name="metadata" type="Map">
@@ -282,7 +282,7 @@
     <Option name="mnt" type="Map">
       <Option name="default" type="invalid"/>
       <Option name="defaultGui" type="invalid"/>
-      <Option name="description" type="QString" value="MNT"/>
+      <Option name="description" type="QString" value="DTM"/>
       <Option name="flags" type="int" value="0"/>
       <Option name="help" type="QString" value=""/>
       <Option name="metadata"/>
@@ -293,7 +293,7 @@
       <Option name="data_type" type="int" value="1"/>
       <Option name="default" type="double" value="15"/>
       <Option name="defaultGui" type="invalid"/>
-      <Option name="description" type="QString" value="Pente maximale (degrés)"/>
+      <Option name="description" type="QString" value="Maximum slope (degrees)"/>
       <Option name="flags" type="int" value="0"/>
       <Option name="help" type="QString" value=""/>
       <Option name="max" type="double" value="90"/>
@@ -317,7 +317,7 @@
         <Option name="outputs_collapsed" type="bool" value="false"/>
         <Option name="parameters_collapsed" type="bool" value="false"/>
       </Option>
-      <Option name="component_description" type="QString" value="Couches à filtrer (parcelles...)"/>
+      <Option name="component_description" type="QString" value="Layers to filter (parcels...)"/>
       <Option name="component_height" type="double" value="30"/>
       <Option name="component_pos_x" type="double" value="140"/>
       <Option name="component_pos_y" type="double" value="260"/>
@@ -338,7 +338,7 @@
         <Option name="outputs_collapsed" type="bool" value="false"/>
         <Option name="parameters_collapsed" type="bool" value="false"/>
       </Option>
-      <Option name="component_description" type="QString" value="Part minimale en pente faible (%)"/>
+      <Option name="component_description" type="QString" value="Minimum share on a gentle slope (%)"/>
       <Option name="component_height" type="double" value="30"/>
       <Option name="component_pos_x" type="double" value="140"/>
       <Option name="component_pos_y" type="double" value="350"/>
@@ -359,7 +359,7 @@
         <Option name="outputs_collapsed" type="bool" value="false"/>
         <Option name="parameters_collapsed" type="bool" value="false"/>
       </Option>
-      <Option name="component_description" type="QString" value="MNT"/>
+      <Option name="component_description" type="QString" value="DTM"/>
       <Option name="component_height" type="double" value="30"/>
       <Option name="component_pos_x" type="double" value="140"/>
       <Option name="component_pos_y" type="double" value="80"/>
@@ -380,7 +380,7 @@
         <Option name="outputs_collapsed" type="bool" value="false"/>
         <Option name="parameters_collapsed" type="bool" value="false"/>
       </Option>
-      <Option name="component_description" type="QString" value="Pente maximale (degrés)"/>
+      <Option name="component_description" type="QString" value="Maximum slope (degrees)"/>
       <Option name="component_height" type="double" value="30"/>
       <Option name="component_pos_x" type="double" value="140"/>
       <Option name="component_pos_y" type="double" value="170"/>

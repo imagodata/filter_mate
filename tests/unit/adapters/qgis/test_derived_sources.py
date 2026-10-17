@@ -1,10 +1,13 @@
 # -*- coding: utf-8 -*-
 """FilterMate 5 derived sources: project file hook, copies, Unfilter, unload, replay on reopen."""
+import gc
 import importlib
 import json
+import os
 import pathlib
 import sys
 import types
+import weakref
 from xml.dom import minidom
 
 import pytest
@@ -222,8 +225,11 @@ class Node:
     def toElement(self):
         return self
 
+    def parentNode(self):
+        return Node(self.node.parentNode)
+
     def elementsByTagName(self, tag):
-        found = [Node(node) for node in self.node.getElementsByTagName(tag)]
+        found = [Node(node) for node in self.node.getElementsByTagName(tag)] if self.node is not None else []
         return types.SimpleNamespace(count=lambda: len(found), at=lambda index: found[index])
 
     def createTextNode(self, text):
@@ -544,8 +550,29 @@ class TestSourceChangedByTheUser:
         raster = _raster(env)
         clip(raster, f"{env.session}/ortho_1a2b3c4d.vrt", LayerKind.RASTER, alpha=4)
         raster.setDataSource(f"{env.home}/data/new.tif", "ortho", "gdal", None)
-        assert env.project.write()[1][raster.id()].datasource == "./data/new.tif"
+        text, saved = env.project.write()
+        assert saved[raster.id()].datasource == "./data/new.tif"
         assert not env.reg.is_derived(raster.id()) and snapshots.DERIVED_PROPERTY not in raster.props
+        # QGIS wrote the custom properties before the hook ran: the written one goes too.
+        assert saved[raster.id()].stored is None and "session_" not in text
+
+    def test_changed_back_to_the_original_is_not_replayed(self, env):
+        raster = _raster(env)
+        original = raster.source()
+        clip(raster, f"{env.session}/ortho_1a2b3c4d.vrt", LayerKind.RASTER)
+        raster.setDataSource(original, "ortho", "gdal", None)
+        saved = env.project.write()[1][raster.id()]
+        assert saved.stored is None
+        project, _ = _reopen(env, saved, FakeRaster, raster.id(), env.home)
+        assert snapshots.pending_replays(project) == []
+
+    def test_layer_still_on_a_session_file_is_not_the_users(self, env):
+        raster = _raster(env)
+        original = raster.source()
+        clip(raster, f"{env.session}/ortho_1a2b3c4d.vrt", LayerKind.RASTER)
+        raster._source = f"{env.session}/ortho_9f8e7d6c.vrt"  # stale registry entry
+        assert env.project.write()[1][raster.id()].datasource == "./data/ortho.tif"
+        assert env.reg.restore_all(env.project) == 1 and raster.source() == original
 
     def test_unload_leaves_it(self, env):
         raster = _raster(env)
@@ -730,3 +757,171 @@ def test_unload_waits_a_bounded_time_for_the_canceled_tasks(monkeypatch):
     assert [task.canceled for task in tasks] == [True, False, True, True]
     assert tasks[0].waits == [2000] and tasks[2].waits == [1500]
     assert tasks[3].waits == [] and tasks[1].waits == []  # budget spent: never waitForFinished(0)
+
+
+# --- Review of PR #116 --------------------------------------------------------------
+
+class TestCopiesSpelledDifferently:
+    """A copy read back from a .qlr: QgsPathResolver resolves links, writes '/' on Windows."""
+
+    @pytest.mark.parametrize("spelling", ["link", "separators"])
+    def test_copy_is_recognized(self, env, tmp_path, spelling):
+        raster = _raster(env)
+        clip(raster, f"{env.session}/ortho_1a2b3c4d.vrt", LayerKind.RASTER)
+        if spelling == "link":
+            if os.name == "nt":
+                pytest.skip("symbolic links need privileges")
+            link = tmp_path / "link"
+            os.symlink(os.path.dirname(env.session), str(link))
+            source = str(link / os.path.basename(env.session) / "ortho_1a2b3c4d.vrt")
+        else:
+            source = env.session.replace("/", "\\") + "\\ortho_1a2b3c4d.vrt"
+        copy = raster.clone("ortho_copy")
+        copy._source = source
+        env.project.add(copy)
+        assert env.reg.is_derived("ortho_copy") and env.reg.get("ortho_copy").source == source
+        assert env.project.write()[1]["ortho_copy"].datasource == "./data/ortho.tif"
+        assert _unfilter(env, copy, LayerKind.RASTER) == ["ortho_copy"]
+        assert copy.source() == f"{env.home}/data/ortho.tif"
+
+    def test_copy_spelled_differently_adopted_from_its_property(self, env):
+        raster = _raster(env)
+        clip(raster, f"{env.session}/ortho_1a2b3c4d.vrt", LayerKind.RASTER)
+        copy = raster.clone("ortho_copy")
+        copy._source = env.session.replace("/", "\\") + "\\ortho_1a2b3c4d.vrt"
+        _unfilter(env, raster, LayerKind.RASTER)
+        env.project.add(copy)
+        assert env.reg.get("ortho_copy").pristine_source == f"{env.home}/data/ortho.tif"
+
+
+def test_save_as_elsewhere_before_the_replay(env):
+    raster = _raster(env)
+    clip(raster, f"{env.session}/ortho_1a2b3c4d.vrt", LayerKind.RASTER)
+    saved = env.project.write()[1][raster.id()]
+    project, reopened = _reopen(env, saved, FakeRaster, raster.id(), env.home)  # replay not run yet
+    archive = FakeProject(env.home + "/archive")  # Save As in a sub folder
+    archive.layers = project.layers
+    copy = archive.write()[1][raster.id()]
+    project, reopened = _reopen(env, copy, FakeRaster, raster.id(), env.home + "/archive")
+    assert reopened.source() == f"{env.home}/data/ortho.tif"
+    assert [layer for layer, _ in snapshots.pending_replays(project)] == [reopened]
+
+
+class TestOtherProjects:
+
+    def test_unload_restores_the_layers_of_every_hooked_project(self, env, tmp_path):
+        other = FakeProject(str(tmp_path / "other"))
+        env.reg.install(other)
+        layer = other.add(FakeRaster("o", str(tmp_path / "other" / "data" / "o.tif")))
+        original = layer.source()
+        clip(layer, f"{env.session}/o_1a2b3c4d.vrt", LayerKind.RASTER)
+        assert env.reg.restore_all() == 1 and layer.source() == original
+
+    def test_hooks_do_not_keep_a_project_alive(self, env, tmp_path):
+        other = FakeProject(str(tmp_path / "other"))
+        env.reg.install(other)
+        ref = weakref.ref(other)
+        del other
+        gc.collect()
+        assert ref() is None
+        env.reg.uninstall()  # a project gone: nothing to disconnect, no error
+
+
+class TestUserAlphaBand:
+
+    @pytest.mark.parametrize("how", ["unfilter", "unload"])
+    def test_alpha_band_chosen_by_the_user_comes_back(self, env, how):
+        raster = _raster(env)
+        raster.renderer().setAlphaBand(3)
+        clip(raster, f"{env.session}/ortho_1a2b3c4d.vrt", LayerKind.RASTER, alpha=5)
+        if how == "unfilter":
+            _unfilter(env, raster, LayerKind.RASTER)
+        else:
+            env.reg.restore_all(env.project)
+        assert raster.renderer().alphaBand() == 3
+
+    def test_copy_adopted_from_its_property_keeps_the_original_alpha(self, env):
+        raster = _raster(env)
+        raster.renderer().setAlphaBand(2)
+        clip(raster, f"{env.session}/ortho_1a2b3c4d.vrt", LayerKind.RASTER, alpha=4)
+        copy = raster.clone("ortho_copy")
+        _unfilter(env, raster, LayerKind.RASTER)  # the model and its alpha band are forgotten
+        env.project.add(copy)
+        assert env.project.write()[1]["ortho_copy"].alpha == "2"
+
+
+def test_copy_adopted_while_writing_gets_the_property_written(env):
+    raster = _raster(env)
+    clip(raster, f"{env.session}/ortho_1a2b3c4d.vrt", LayerKind.RASTER)
+    copy = raster.clone("ortho_copy")
+    copy.props.clear()
+    env.project.layers["ortho_copy"] = copy  # added while the hooks were not listening
+    stored = env.project.write()[1]["ortho_copy"].stored
+    assert stored is not None and stored["geometry_wkt"] == GEOMETRY
+
+
+class TestHeightAboveGroundTerms:
+
+    @pytest.mark.parametrize("subset, kept", [
+        ("Classification = 2 AND HeightAboveGround >= 2", "Classification = 2"),
+        ("HeightAboveGround >= 2 and (Classification = 2 OR Classification = 6)",
+         "(Classification = 2 OR Classification = 6)"),
+        ("Classification = 2 OR HeightAboveGround >= 2", ""),
+        ("(Classification = 2 AND HeightAboveGround >= 2)", ""),
+        ("\"Name\" = 'x AND y' AND HeightAboveGround >= 2", "\"Name\" = 'x AND y'"),
+        ("BAND = 1 AND HeightAboveGround > 2 AND ORDER > 3", "BAND = 1 AND ORDER > 3"),
+        ("HeightAboveGround >= 2", ""),
+        ("Classification = 2", "Classification = 2"),
+    ])
+    def test_terms_dropped(self, subset, kept):
+        assert snapshots.without_terms(subset, "HeightAboveGround") == kept
+
+    def test_other_terms_kept_in_the_project_and_on_unload(self, env):
+        cloud = _cloud(env)
+        enrich(cloud, f"{env.session}/lidar_hag_1a2b3c4d.copc.laz")
+        clip(cloud, f"{env.session}/lidar_5e6f7a8b.copc.laz", LayerKind.POINT_CLOUD)
+        assert cloud.setSubsetString("Classification = 2 AND HeightAboveGround >= 2")
+        assert env.project.write()[1][cloud.id()].subset == "Classification = 2"
+        env.reg.restore_all(env.project)
+        assert cloud.subsetString() == "Classification = 2"
+
+
+def test_adoption_error_does_not_stop_unload(env):
+    raster = _raster(env)
+    original = raster.source()
+    clip(raster, f"{env.session}/ortho_1a2b3c4d.vrt", LayerKind.RASTER)
+    broken = FakeRaster("broken", f"{env.home}/data/broken.tif")
+
+    def source():
+        raise ValueError("provider gone")
+
+    broken.source = source
+    env.project.layers["broken"] = broken
+    assert env.reg.restore_all(env.project) == 1 and raster.source() == original
+
+
+def test_unload_closes_the_cache_whatever_fails(env, monkeypatch):
+    def cancel_all():
+        raise RuntimeError("task deleted")
+
+    monkeypatch.setattr(service_mod, "all_services", lambda: [types.SimpleNamespace(cancel_all=cancel_all)])
+    monkeypatch.setattr(service_mod, "stop_filtermate_tasks", lambda: 0)
+    with pytest.raises(RuntimeError):
+        service_mod.release_coverage_layers()
+    assert cache.is_closed() and not env.project.writeMapLayer.slots
+
+
+def test_favorite_of_a_derived_layer_holds_no_cache_path(env, monkeypatch):
+    from fm_derived_sources_test.adapters.qgis.coverage_layers import favorites_bridge
+    monkeypatch.setattr(favorites_bridge, "_kind",
+                        lambda layer: LayerKind.POINT_CLOUD if isinstance(layer, FakeCloud) else LayerKind.RASTER)
+    raster, cloud = _raster(env), _cloud(env)
+    clip(raster, f"{env.session}/ortho_1a2b3c4d.vrt", LayerKind.RASTER)
+    enrich(cloud, f"{env.session}/lidar_hag_1a2b3c4d.copc.laz")
+    _unfilter(env, cloud, LayerKind.POINT_CLOUD)  # still on its enriched file
+    entries = favorites_bridge.capture(env.project)
+    assert len(entries) == 2 and "session_" not in json.dumps(entries)
+    by_name = {entry["layer_name"]: LayerSnapshot.from_dict(entry) for entry in entries}
+    assert by_name["ortho"].derived and by_name["ortho"].base_source == f"{env.home}/data/ortho.tif"
+    assert by_name["ortho"].geometry_wkt == GEOMETRY
+    assert by_name["lidar"].base_source == f"{env.home}/data/lidar.copc.laz"

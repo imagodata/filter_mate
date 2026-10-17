@@ -472,6 +472,54 @@ class TestBuildExpression:
         assert "__source" in result
 
 
+class TestNoSilentEmptyFilter:
+    """2026-10-16: a WKT-only source (non-PostgreSQL source layer) must never end as "1 = 0".
+
+    MAX_WKT_LENGTH relied on the SpatiaLite executor shrinking the source to
+    ~100 KB; with an exact source the EXISTS branch received a WKT, could not
+    parse a table reference and every PostgreSQL target came out empty.
+    """
+
+    def _build(self, builder, **kwargs):
+        args = dict(
+            layer_props={"layer_name": "roads", "layer_table_name": "roads"},
+            predicates={"crosses": "ST_Crosses"},
+            source_srid=2154,
+        )
+        args.update(kwargs)
+        return builder.build_expression(**args)
+
+    def test_many_features_small_wkt_without_source_table_inlines_the_wkt(self, builder):
+        wkt = "MULTILINESTRING((0 0, 1 1), (2 2, 3 3))"
+        result = self._build(builder, source_geom=wkt, source_wkt=wkt, source_feature_count=691)
+        assert result != "1 = 0"
+        assert "ST_Crosses" in result and "ST_GeomFromText" in result
+        assert "EXISTS" not in result
+
+    def test_large_wkt_without_source_table_returns_none_for_ogr_fallback(self, builder):
+        wkt = "MULTILINESTRING((0 0" + ", 1 1" * (builder.MAX_WKT_LENGTH // 5) + "))"
+        result = self._build(builder, source_geom=wkt, source_wkt=wkt, source_feature_count=691)
+        assert result is None
+
+    def test_no_source_at_all_returns_none(self, builder):
+        assert self._build(builder, source_geom=None, source_wkt=None, source_feature_count=691) is None
+
+    def test_large_wkt_with_source_table_uses_exists(self, builder):
+        wkt = "MULTILINESTRING((0 0" + ", 1 1" * (builder.MAX_WKT_LENGTH // 5) + "))"
+        result = self._build(
+            builder, source_geom='"public"."rivers"."geom"', source_wkt=wkt, source_feature_count=691
+        )
+        assert "EXISTS" in result
+        assert '"public"."rivers"' in result
+
+    def test_unbuildable_predicates_return_none_not_empty_filter(self, builder, monkeypatch):
+        monkeypatch.setattr(builder, "_build_exists_expression", lambda **kwargs: None)
+        result = self._build(
+            builder, source_geom='"public"."rivers"."geom"', source_wkt=None, source_feature_count=691
+        )
+        assert result is None
+
+
 class TestApplyFilterQueueRouting:
     """2026-04-29: same Qt-thread-safety fix as the spatialite backend.
 

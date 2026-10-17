@@ -14,6 +14,7 @@ not require pulling in ``filter_mate.core.optimization.config_provider``
 import ast
 import importlib.util
 import json
+import os
 import sys
 import types
 from pathlib import Path
@@ -549,6 +550,37 @@ class TestActiveConfigPath:
                             types.SimpleNamespace(qgisSettingsDirPath=lambda: profile))
         expected = str(tmp_path / "profiles" / "default" / "FilterMate" / "config.json")
         assert config_helpers.get_config_json_path() == expected
+
+    def _profile_config(self, config_helpers, monkeypatch, tmp_path, sqlite_path):
+        monkeypatch.delitem(config_helpers.ENV_VARS, "CONFIG_JSON_PATH", raising=False)
+        profile = tmp_path / "QGIS4" / "profiles" / "default"
+        (profile / "FilterMate").mkdir(parents=True)
+        (profile / "FilterMate" / "config.json").write_text(json.dumps({
+            "APP": {"DOCKWIDGET": {"LANGUAGE": {"value": "vi"}},
+                    "OPTIONS": {"APP_SQLITE_PATH": {"value": sqlite_path}}}}), encoding="utf-8")
+        monkeypatch.setattr(config_helpers, "QgsApplication",
+                            types.SimpleNamespace(qgisSettingsDirPath=lambda: str(profile) + "/"))
+        return profile / "FilterMate" / "config.json"
+
+    def test_before_init_env_vars_follows_the_configured_folder(self, config_helpers, monkeypatch, tmp_path):
+        """A QGIS 4 profile whose config points to the QGIS 3 FilterMate folder: init_env_vars()
+        saves there, so the forced language is read there too (the profile copy is stale)."""
+        shared = tmp_path / "QGIS3" / "profiles" / "default" / "FilterMate"
+        shared.mkdir(parents=True)
+        self._profile_config(config_helpers, monkeypatch, tmp_path, str(shared))
+        assert config_helpers.get_config_json_path() == os.path.join(os.path.normpath(str(shared)), "config.json")
+
+    @pytest.mark.parametrize("configured", ["", "/no/such/parent/FilterMate"])
+    def test_before_init_env_vars_ignores_an_unusable_folder(self, config_helpers, monkeypatch, tmp_path,
+                                                             configured):
+        profile_json = self._profile_config(config_helpers, monkeypatch, tmp_path, configured)
+        assert config_helpers.get_config_json_path() == str(profile_json)
+
+    def test_before_init_env_vars_without_profile_config(self, config_helpers, monkeypatch, tmp_path):
+        monkeypatch.delitem(config_helpers.ENV_VARS, "CONFIG_JSON_PATH", raising=False)
+        monkeypatch.setattr(config_helpers, "QgsApplication",
+                            types.SimpleNamespace(qgisSettingsDirPath=lambda: str(tmp_path) + "/"))
+        assert config_helpers.get_config_json_path() == str(tmp_path / "FilterMate" / "config.json")
 
 
 class TestConfigFilesAreUtf8:

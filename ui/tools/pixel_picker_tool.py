@@ -4,7 +4,8 @@ Pixel picker map tool of the raster EXPLORING panel.
 
 A click emits the map point (canvas CRS); Ctrl+click asks the panel to
 extend the value range to the picked value. The last picked point is marked
-on the map (raster amber cross) until the tool is put away.
+on the map (a cross in the kind colour, raster amber by default) until the tool
+is put away. The point cloud class pipette uses it too.
 """
 from qgis.PyQt.QtCore import Qt, pyqtSignal
 from qgis.PyQt.QtGui import QColor
@@ -26,10 +27,11 @@ class PixelPickerTool(QgsMapToolEmitPoint):
 
     picked = pyqtSignal(object, bool)
 
-    def __init__(self, canvas) -> None:
+    def __init__(self, canvas, color: str = MARKER_COLOR) -> None:
         super().__init__(canvas)
         self.setCursor(Qt.CursorShape.CrossCursor)
         self._marker = None
+        self._color = color
 
     def canvasReleaseEvent(self, event) -> None:  # noqa: N802 - Qt override
         if event.button() != Qt.MouseButton.LeftButton:
@@ -46,7 +48,7 @@ class PixelPickerTool(QgsMapToolEmitPoint):
             if self._marker is None:
                 marker = QgsVertexMarker(self.canvas())
                 marker.setIconType(_marker_icon('ICON_CROSS'))
-                marker.setColor(QColor(MARKER_COLOR))
+                marker.setColor(QColor(self._color))
                 marker.setIconSize(MARKER_SIZE)
                 marker.setPenWidth(MARKER_PEN_WIDTH)
                 self._marker = marker
