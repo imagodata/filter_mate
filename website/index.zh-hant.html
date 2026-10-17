@@ -68,7 +68,7 @@
         </div>
     </div>
     <a class="hero-scroll" href="#workflow"><span>了解操作流程</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></a>
-    <p class="credit">BD TOPO® 3.5 © IGN，上加龍省。使用 QGIS 4.2 與 FilterMate 4.9.2 錄製。</p>
+    <p class="credit">BD TOPO® 3.5 © IGN，上加龍省。使用 QGIS 4.2 與 FilterMate 5.0 錄製。</p>
 </header>
 
 <section class="proof-strip" aria-label="主要優點">
@@ -99,15 +99,17 @@
 <section class="home-section fm5" id="fm5" aria-labelledby="fm5-title">
     <div class="home-container capability-layout">
         <div class="fm5-visual">
-            <div class="fm5-shots">
-                <img src="img/guide/fm5_raster_exploring.png" alt="網格圖層的 EXPLORING 面板：波段、數值範圍與直方圖" loading="lazy" width="440" height="1086">
-                <img src="img/guide/fm5_pointcloud_exploring.png" alt="點雲的 EXPLORING 面板：LiDAR 分類" loading="lazy" width="440" height="1086">
+            <div class="fm5-videos">
+                <button class="example-media" type="button" data-watch data-video="video/slope.mp4" data-poster="video/slope.webp" aria-label="觀看坡度範例"><img src="video/slope.webp" alt="在直方圖上選取地形模型中坡度大於 30 % 的範圍，以及大部分位於其上的地籍" loading="lazy" width="1280" height="720"><span class="case-number" aria-hidden="true">網格</span><span class="media-play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>觀看</span></button>
+                <button class="example-media" type="button" data-watch data-video="video/heights.mp4" data-poster="video/heights.webp" aria-label="觀看建物高度範例"><img src="video/heights.webp" alt="高出地面 9 公尺以上的 LiDAR 建物點，以及其所屬的建物" loading="lazy" width="1280" height="720"><span class="case-number" aria-hidden="true">LiDAR</span><span class="media-play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>觀看</span></button>
+                <button class="example-media" type="button" data-watch data-video="video/pruning.mp4" data-poster="video/pruning.webp" aria-label="觀看修剪範例"><img src="video/pruning.webp" alt="距道路 3 公尺內、高於 8 公尺的樹木，以及需要修剪的路段" loading="lazy" width="1280" height="720"><span class="case-number" aria-hidden="true">LiDAR</span><span class="media-play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>觀看</span></button>
+                <button class="example-media" type="button" data-watch data-video="video/survey.mp4" data-poster="video/survey.webp" aria-label="觀看測量資料交付範例"><img src="video/survey.webp" alt="以教堂及其周圍 50 公尺裁切地形模型與點雲，再將兩者匯出" loading="lazy" width="1280" height="720"><span class="case-number" aria-hidden="true">裁切</span><span class="media-play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>觀看</span></button>
             </div>
-            <p class="fm5-caption">面板會跟著目前圖層變化：左為網格，右為點雲。</p>
+            <p class="fm5-caption">於 QGIS 4.2 錄製，範圍為庇里牛斯山 Estavar 周圍一平方公里：LiDAR HD（2,040 萬點）、由其計算的地形模型、BD TOPO® © IGN 與 Etalab 地籍。</p>
         </div>
         <div>
             <div class="section-heading"><p class="section-kicker">FilterMate 5 新功能</p><h2 id="fm5-title">網格與 LiDAR 點雲，像任何圖層一樣篩選。</h2><p>將網格或點雲設為目前圖層，EXPLORING 就會顯示對應的工具；FILTERING 再把選取結果與任何類型的圖層關聯起來。</p></div>
-            <ul class="capability-list"><li><strong>網格</strong><span>波段、像元選取、含直方圖與即時預覽的數值範圍、分類、網格運算式。</span></li><li><strong>點雲</strong><span>ASPRS 與 LiDAR HD 分類、Z、強度與回波範圍、相對 DTM 的高度。</span></li><li><strong>任意方向</strong><span>向量、網格與點雲都能當來源或目標：九種組合，並支援緩衝區、最小覆蓋率與 Disjoint。</span></li><li><strong>可安心復原</strong><span>裁切後的圖層保留原有 ID 與樣式。復原、重做與專案檔都會回到原始資料來源。</span></li><li><strong>匯出</strong><span>網格輸出 GeoTIFF 與 COG；點雲輸出 LAZ、LAS、COPC、GPKG 與 CSV。</span></li><li><strong>自動化</strong><span>七個 Processing 演算法、四個模型、qgis_process，以及 Python 與 REST API。</span></li><li><strong>已測試</strong><span>CI 在 QGIS 3.22、3.28、3.34、3.44 與 4.2 上，透過 Processing 與面板本身進行測試。</span></li></ul>
+            <ul class="capability-list"><li><strong>網格</strong><span>波段、像素選取、含直方圖與即時預覽的數值範圍、由 DTM 計算的坡度、坡向、山體陰影或粗糙度、類別、網格運算式。</span></li><li><strong>點雲</strong><span>ASPRS 與 LiDAR HD 類別、任一屬性的條件、類別結合高於 DTM 的高度。</span></li><li><strong>任意方向</strong><span>向量、網格與點雲都能當來源或目標：九種組合，並支援緩衝區、最小覆蓋率與 Disjoint。</span></li><li><strong>可安心復原</strong><span>裁切後的圖層保留原有 ID 與樣式。復原、重做與專案檔都會回到原始資料來源。</span></li><li><strong>匯出</strong><span>網格輸出 GeoTIFF 與 COG；點雲輸出 LAZ、LAS、COPC、GPKG 與 CSV。</span></li><li><strong>自動化</strong><span>九個 Processing 演算法、四個模型、qgis_process，以及 Python 與 REST API。</span></li><li><strong>已測試</strong><span>CI 在 QGIS 3.22、3.28、3.34、3.44 與 4.2 上，透過 Processing 與面板本身進行測試。</span></li></ul>
             <a class="inline-cta" href="guide.html#raster-lidar" hreflang="en">閱讀 FilterMate 5 指南 <span aria-hidden="true">→</span> <small lang="en">(EN)</small></a>
         </div>
     </div>
@@ -126,11 +128,11 @@
             </article>
             <article class="example-card">
                 <button class="example-media" type="button" data-watch data-video="video/noise.mp4" data-poster="video/noise.webp" aria-label="觀看道路周邊篩選範例"><img src="video/noise.webp" alt="Muret 主要道路周邊篩選出的建築物" loading="lazy" width="1280" height="720"><span class="case-number" aria-hidden="true">02</span><span class="media-play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>觀看</span></button>
-                <div class="example-body"><p class="example-label">都市規劃 · Muret</p><h3>以可變環域找出道路周邊建築物</h3><p>QGIS 運算式依道路類別設定 300 公尺或 250 公尺的距離。</p><p class="result"><strong>1,999</strong> 棟建築物及 <strong>74</strong> 處公眾使用設施</p><a href="stories.html#s2" hreflang="en">查看設定與結果 <span aria-hidden="true">→</span> <small lang="en">(EN)</small></a></div>
+                <div class="example-body"><p class="example-label">都市規劃 · Muret</p><h3>以可變環域找出道路周邊建築物</h3><p>QGIS 運算式依道路類別設定 300 公尺或 250 公尺的距離。</p><p class="result"><strong>2,753</strong> 棟建築物及 <strong>78</strong> 處公眾使用設施</p><a href="stories.html#s2" hreflang="en">查看設定與結果 <span aria-hidden="true">→</span> <small lang="en">(EN)</small></a></div>
             </article>
             <article class="example-card">
                 <button class="example-media" type="button" data-watch data-video="video/bridges.mp4" data-poster="video/bridges.webp" aria-label="觀看交會位置偵測範例"><img src="video/bridges.webp" alt="Toulouse Métropole 的道路與水道交會位置" loading="lazy" width="1280" height="720"><span class="case-number" aria-hidden="true">03</span><span class="media-play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>觀看</span></button>
-                <div class="example-body"><p class="example-label">構造物 · Toulouse Métropole</p><h3>找出與常年水道的交會位置</h3><p>Cross 空間關係會排除僅沿著水道行經的道路。</p><p class="result"><strong>1,112</strong> 個路段及 <strong>190</strong> 個構造物</p><a href="stories.html#s4" hreflang="en">查看設定與結果 <span aria-hidden="true">→</span> <small lang="en">(EN)</small></a></div>
+                <div class="example-body"><p class="example-label">構造物 · Toulouse Métropole</p><h3>找出與常年水道的交會位置</h3><p>Cross 空間關係會排除僅沿著水道行經的道路。</p><p class="result"><strong>708</strong> 個路段及 <strong>364</strong> 個構造物</p><a href="stories.html#s4" hreflang="en">查看設定與結果 <span aria-hidden="true">→</span> <small lang="en">(EN)</small></a></div>
             </article>
             <article class="example-card">
                 <button class="example-media" type="button" data-watch data-video="video/hamlets.mp4" data-poster="video/hamlets.webp" aria-label="觀看偏遠聚落範例"><img src="video/hamlets.webp" alt="Aspet 距離鋪面道路超過 200 公尺的聚落" loading="lazy" width="1280" height="720"><span class="case-number" aria-hidden="true">04</span><span class="media-play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>觀看</span></button>

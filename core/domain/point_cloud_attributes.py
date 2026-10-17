@@ -98,8 +98,10 @@ ATTRIBUTE_ALIASES: Dict[str, str] = {
 _BY_KEY: Dict[str, PointCloudAttribute] = {item.name.lower(): item for item in KNOWN_ATTRIBUTES}
 _BY_KEY.update({alias.lower(): _BY_KEY[name.lower()] for alias, name in ATTRIBUTE_ALIASES.items()})
 
-# Not offered as conditions: the classes have their own group, X / Y are the map.
-NON_CONDITION_ATTRIBUTES = (X, Y, CLASSIFICATION)
+# Not offered as conditions: X / Y are the map. Classification is offered although the
+# classes have their own group: the groups are exclusive and the height above the DTM
+# belongs to the conditions, so "class AND height" (buildings above 9 m) needs it here.
+NON_CONDITION_ATTRIBUTES = (X, Y)
 # Offered when the layer does not list its attributes.
 FALLBACK_CONDITION_ATTRIBUTES = (Z, INTENSITY, RETURN_NUMBER, NUMBER_OF_RETURNS)
 

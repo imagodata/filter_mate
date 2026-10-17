@@ -16,7 +16,7 @@
         <Option name="outputs_collapsed" type="bool" value="false"/>
         <Option name="parameters_collapsed" type="bool" value="false"/>
       </Option>
-      <Option name="component_description" type="QString" value="Garder la végétation"/>
+      <Option name="component_description" type="QString" value="Keep the vegetation"/>
       <Option name="component_height" type="double" value="30"/>
       <Option name="component_pos_x" type="double" value="520"/>
       <Option name="component_pos_y" type="double" value="120"/>
@@ -62,7 +62,7 @@
         <Option name="outputs_collapsed" type="bool" value="false"/>
         <Option name="parameters_collapsed" type="bool" value="false"/>
       </Option>
-      <Option name="component_description" type="QString" value="Limiter au couloir des lignes"/>
+      <Option name="component_description" type="QString" value="Limit to the line corridor"/>
       <Option name="component_height" type="double" value="30"/>
       <Option name="component_pos_x" type="double" value="520"/>
       <Option name="component_pos_y" type="double" value="280"/>
@@ -135,7 +135,7 @@
         <Option name="outputs_collapsed" type="bool" value="false"/>
         <Option name="parameters_collapsed" type="bool" value="false"/>
       </Option>
-      <Option name="component_description" type="QString" value="Écrire les points en COPC"/>
+      <Option name="component_description" type="QString" value="Write the points as COPC"/>
       <Option name="component_height" type="double" value="30"/>
       <Option name="component_pos_x" type="double" value="520"/>
       <Option name="component_pos_y" type="double" value="440"/>
@@ -156,7 +156,7 @@
             <Option name="outputs_collapsed" type="bool" value="false"/>
             <Option name="parameters_collapsed" type="bool" value="false"/>
           </Option>
-          <Option name="component_description" type="QString" value="Dossier de sortie"/>
+          <Option name="component_description" type="QString" value="Output folder"/>
           <Option name="component_height" type="double" value="30"/>
           <Option name="component_pos_x" type="double" value="820"/>
           <Option name="component_pos_y" type="double" value="440"/>
@@ -204,12 +204,12 @@
   <Option name="groupBoxes"/>
   <Option name="help" type="Map">
     <Option name="ALG_CREATOR" type="QString" value="FilterMate"/>
-    <Option name="ALG_DESC" type="QString" value="Garde les points de végétation (classes ASPRS 4 et 5 par défaut) des nuages choisis, limite les nuages au couloir autour des lignes (tampon) et écrit les points restants en COPC. Points de départ d'un contrôle d'élagage : lignes électriques, voies ferrées, routes."/>
+    <Option name="ALG_DESC" type="QString" value="Keeps the vegetation points (ASPRS classes 4 and 5 by default) of the chosen point clouds, limits the clouds to the corridor around the lines (buffer) and writes the remaining points as COPC. Starting points for a pruning check: power lines, railways, roads."/>
     <Option name="ALG_VERSION" type="QString" value="5.0"/>
   </Option>
   <Option name="internal_version" type="QString" value="Version2"/>
   <Option name="modelVariables"/>
-  <Option name="model_group" type="QString" value="Modèles FilterMate"/>
+  <Option name="model_group" type="QString" value="FilterMate models"/>
   <Option name="model_name" type="QString" value="vegetation_pres_des_lignes"/>
   <Option name="outputGroup" type="QString" value=""/>
   <Option name="outputOrder"/>
@@ -217,7 +217,7 @@
     <Option name="classes" type="Map">
       <Option name="default" type="QString" value="4,5"/>
       <Option name="defaultGui" type="invalid"/>
-      <Option name="description" type="QString" value="Classes de végétation"/>
+      <Option name="description" type="QString" value="Vegetation classes"/>
       <Option name="flags" type="int" value="0"/>
       <Option name="help" type="QString" value=""/>
       <Option name="metadata"/>
@@ -229,7 +229,7 @@
       <Option name="data_type" type="int" value="1"/>
       <Option name="default" type="double" value="10"/>
       <Option name="defaultGui" type="invalid"/>
-      <Option name="description" type="QString" value="Demi-largeur du couloir"/>
+      <Option name="description" type="QString" value="Corridor half-width"/>
       <Option name="flags" type="int" value="0"/>
       <Option name="help" type="QString" value=""/>
       <Option name="max" type="double" value="1.7976931348623157e+308"/>
@@ -242,7 +242,7 @@
       <Option name="create_by_default" type="bool" value="true"/>
       <Option name="default" type="invalid"/>
       <Option name="defaultGui" type="invalid"/>
-      <Option name="description" type="QString" value="Dossier de sortie"/>
+      <Option name="description" type="QString" value="Output folder"/>
       <Option name="flags" type="int" value="0"/>
       <Option name="help" type="QString" value=""/>
       <Option name="metadata" type="Map">
@@ -260,7 +260,7 @@
       </Option>
       <Option name="default" type="invalid"/>
       <Option name="defaultGui" type="invalid"/>
-      <Option name="description" type="QString" value="Lignes (réseau)"/>
+      <Option name="description" type="QString" value="Lines (network)"/>
       <Option name="flags" type="int" value="0"/>
       <Option name="help" type="QString" value=""/>
       <Option name="metadata"/>
@@ -270,7 +270,7 @@
     <Option name="nuages" type="Map">
       <Option name="default" type="invalid"/>
       <Option name="defaultGui" type="invalid"/>
-      <Option name="description" type="QString" value="Nuages de points"/>
+      <Option name="description" type="QString" value="Point clouds"/>
       <Option name="flags" type="int" value="0"/>
       <Option name="help" type="QString" value=""/>
       <Option name="layer_type" type="int" value="-2"/>
@@ -294,7 +294,7 @@
         <Option name="outputs_collapsed" type="bool" value="false"/>
         <Option name="parameters_collapsed" type="bool" value="false"/>
       </Option>
-      <Option name="component_description" type="QString" value="Classes de végétation"/>
+      <Option name="component_description" type="QString" value="Vegetation classes"/>
       <Option name="component_height" type="double" value="30"/>
       <Option name="component_pos_x" type="double" value="140"/>
       <Option name="component_pos_y" type="double" value="260"/>
@@ -315,7 +315,7 @@
         <Option name="outputs_collapsed" type="bool" value="false"/>
         <Option name="parameters_collapsed" type="bool" value="false"/>
       </Option>
-      <Option name="component_description" type="QString" value="Demi-largeur du couloir"/>
+      <Option name="component_description" type="QString" value="Corridor half-width"/>
       <Option name="component_height" type="double" value="30"/>
       <Option name="component_pos_x" type="double" value="140"/>
       <Option name="component_pos_y" type="double" value="350"/>
@@ -336,7 +336,7 @@
         <Option name="outputs_collapsed" type="bool" value="false"/>
         <Option name="parameters_collapsed" type="bool" value="false"/>
       </Option>
-      <Option name="component_description" type="QString" value="Lignes (réseau)"/>
+      <Option name="component_description" type="QString" value="Lines (network)"/>
       <Option name="component_height" type="double" value="30"/>
       <Option name="component_pos_x" type="double" value="140"/>
       <Option name="component_pos_y" type="double" value="80"/>
@@ -357,7 +357,7 @@
         <Option name="outputs_collapsed" type="bool" value="false"/>
         <Option name="parameters_collapsed" type="bool" value="false"/>
       </Option>
-      <Option name="component_description" type="QString" value="Nuages de points"/>
+      <Option name="component_description" type="QString" value="Point clouds"/>
       <Option name="component_height" type="double" value="30"/>
       <Option name="component_pos_x" type="double" value="140"/>
       <Option name="component_pos_y" type="double" value="170"/>

@@ -18,6 +18,7 @@ from typing import Dict, List, Optional, Tuple
 
 from qgis.core import (
     Qgis,
+    QgsCoordinateReferenceSystem,
     QgsPointXY,
     QgsRasterBandStats,
     QgsRasterDataProvider,
@@ -25,7 +26,13 @@ from qgis.core import (
     QgsRectangle,
 )
 
-from ....core.domain.raster_filter_criteria import RasterSelection, RasterSelectionMode
+from ....core.domain.raster_filter_criteria import (
+    DERIVATIVE_BOUNDS,
+    RasterDerivative,
+    RasterSelection,
+    RasterSelectionMode,
+)
+from .terrain import derive, ground_cell_size
 
 logger = logging.getLogger(__name__)
 
@@ -131,7 +138,8 @@ def _all_stats():
     stat = getattr(Qgis, 'RasterBandStatistic', None)
     if stat is not None:
         return stat.Min | stat.Max | stat.Mean | stat.StdDev
-    return QgsRasterBandStats.Min | QgsRasterBandStats.Max | QgsRasterBandStats.Mean | QgsRasterBandStats.StdDev
+    stats = QgsRasterBandStats.Stats
+    return stats.Min | stats.Max | stats.Mean | stats.StdDev
 
 
 def band_range(layer: QgsRasterLayer, band: int, sample_size: int = 250000) -> Tuple[Optional[float], Optional[float], Optional[float]]:
@@ -170,7 +178,7 @@ def identify_values(layer: QgsRasterLayer, point: QgsPointXY) -> Dict[int, Optio
         fmt = Qgis.RasterIdentifyFormat.Value
     except AttributeError:
         from qgis.core import QgsRaster
-        fmt = QgsRaster.IdentifyFormatValue
+        fmt = QgsRaster.IdentifyFormat.IdentifyFormatValue
     result = layer.dataProvider().identify(point, fmt)
     values: Dict[int, Optional[float]] = {}
     if not result.isValid():
@@ -205,14 +213,146 @@ def read_band_array(provider: QgsRasterDataProvider, band: int, extent: QgsRecta
     try:
         if block.hasNoDataValue():
             array[array == float(block.noDataValue())] = np.nan
-    except Exception:
-        pass
+    except Exception as exc:
+        logger.debug(f"[FM5] source NoData not applied: {exc}")
     try:
         for user_range in provider.userNoDataValues(band) or []:
             array[(array >= user_range.min()) & (array <= user_range.max())] = np.nan
-    except Exception:
-        pass
+    except Exception as exc:
+        logger.debug(f"[FM5] user NoData ranges not applied: {exc}")
     return array
+
+
+def crs_kind(crs) -> str:
+    """``"geographic"`` (degrees), ``"mercator"`` (EPSG:3857) or ``"projected"``: how a cell size reaches the ground."""
+    try:
+        if crs.isGeographic():
+            return 'geographic'
+        if crs.authid() in ('EPSG:3857', 'EPSG:900913'):
+            return 'mercator'
+    except Exception as exc:
+        logger.debug(f"[FM5] CRS kind unknown, read as projected: {exc}")
+    return 'projected'
+
+
+def derived_array(array, derivative: RasterDerivative, extent: QgsRectangle, kind):
+    """``derivative`` of a band grid read over ``extent`` (the grid shape gives the cell size).
+
+    Args:
+        array: Band read by :func:`read_band_array`.
+        derivative: Quantity to compute; ``VALUE`` returns ``array``.
+        extent: Extent covered by ``array``, in the layer CRS.
+        kind: :func:`crs_kind` of the layer CRS (degrees and Web Mercator cells are converted to metres);
+            True / False are read as geographic / projected.
+    """
+    import math
+    if not derivative.is_terrain:
+        return array
+    if isinstance(kind, bool):
+        kind = 'geographic' if kind else 'projected'
+    height, width = array.shape
+    centre = (extent.yMinimum() + extent.yMaximum()) / 2.0
+    if kind == 'mercator':  # northing -> latitude
+        latitude = math.degrees(2.0 * math.atan(math.exp(centre / 6378137.0)) - math.pi / 2.0)
+    else:
+        latitude = centre if kind == 'geographic' else 0.0
+    size_x, size_y = ground_cell_size(extent.width() / width, extent.height() / height,
+                                      kind == 'geographic', latitude, mercator=kind == 'mercator')
+    return derive(array, derivative, size_x, size_y)
+
+
+_PICKED_DERIVATIVES = (RasterDerivative.SLOPE_DEGREES, RasterDerivative.SLOPE_PERCENT, RasterDerivative.ASPECT,
+                       RasterDerivative.HILLSHADE, RasterDerivative.ROUGHNESS)
+
+
+def terrain_values_at(layer: QgsRasterLayer, point: QgsPointXY, band: int) -> Dict[RasterDerivative, Optional[float]]:
+    """Slope, aspect, hillshade and roughness of the pixel under ``point`` (layer CRS), the band read as a DTM.
+
+    Read on the 3 x 3 pixels around it at the native resolution; a pixel on the border
+    uses the window moved inside the raster. Empty when the point is outside the layer,
+    the raster is smaller than 3 x 3 pixels or the band cannot be read; a value is None
+    where it is undefined (NoData around, flat pixel has no aspect).
+    """
+    import math
+    extent = layer.extent()
+    width, height = layer.width(), layer.height()
+    if width < 3 or height < 3 or not extent.contains(point):
+        return {}
+    size_x, size_y = extent.width() / width, extent.height() / height
+    col = min(width - 1, max(0, int((point.x() - extent.xMinimum()) / size_x)))
+    row = min(height - 1, max(0, int((extent.yMaximum() - point.y()) / size_y)))
+    first_col = min(max(col - 1, 0), width - 3)
+    first_row = min(max(row - 1, 0), height - 3)
+    window = QgsRectangle(extent.xMinimum() + first_col * size_x, extent.yMaximum() - (first_row + 3) * size_y,
+                          extent.xMinimum() + (first_col + 3) * size_x, extent.yMaximum() - first_row * size_y)
+    try:
+        array = read_band_array(layer.dataProvider(), band, window, 3, 3)
+    except Exception as exc:
+        logger.debug(f"[FM5] terrain values not read: {exc}")
+        return {}
+    kind = crs_kind(layer.crs())
+    values: Dict[RasterDerivative, Optional[float]] = {}
+    for derivative in _PICKED_DERIVATIVES:
+        result = derived_array(array, derivative, window, kind)[row - first_row, col - first_col]
+        values[derivative] = float(result) if math.isfinite(result) else None
+    return values
+
+
+def derivative_zone_statistics(layer: QgsRasterLayer, band: int, rect: QgsRectangle, derivative: RasterDerivative,
+                               max_pixels: int = 250000):
+    """``(minimum, maximum, mean, count)`` of a terrain derivative over ``rect`` (layer CRS); None without a valid pixel.
+
+    The rectangle is read on its own pixels, so a pixel of its border sees an extrapolated
+    neighbourhood. ``count`` is the number of valid pixels of the grid read.
+    """
+    import numpy as np
+    extent = layer.extent()
+    rect = rect.intersect(extent)
+    if rect.isEmpty() or not layer.width() or not layer.height():
+        return None
+    native_x = max(1, int(round(rect.width() / (extent.width() / layer.width()))))
+    native_y = max(1, int(round(rect.height() / (extent.height() / layer.height()))))
+    width, height = _grid_for(rect, native_x, native_y, max_pixels)
+    try:
+        array = read_band_array(layer.dataProvider(), band, rect, width, height)
+        values = derived_array(array, derivative, rect, crs_kind(layer.crs()))
+    except Exception as exc:
+        logger.debug(f"[FM5] derivative zone statistics failed: {exc}")
+        return None
+    values = values[np.isfinite(values)]
+    if values.size == 0:
+        return None
+    return float(values.min()), float(values.max()), float(values.mean()), int(values.size)
+
+
+def derivative_histogram(layer: QgsRasterLayer, band: int, derivative: RasterDerivative, bins: int = 64,
+                         max_pixels: int = 1000000) -> Tuple[List[int], float, float]:
+    """Histogram of a terrain derivative of ``band``: ``(counts, minimum, maximum)``.
+
+    Computed on the band read on at most ``max_pixels`` pixels. A coarser grid
+    smooths the relief, so the slopes of a large raster are underestimated
+    here; the filter itself reads up to its own (larger) pixel budget.
+    Empty counts when the band cannot be read or has no valid pixel.
+    """
+    import numpy as np
+    extent = layer.extent()
+    width, height = _grid_for(extent, layer.width(), layer.height(), max_pixels)
+    try:
+        array = read_band_array(layer.dataProvider(), band, extent, width, height)
+        values = derived_array(array, derivative, extent, crs_kind(layer.crs()))
+    except Exception as exc:
+        logger.debug(f"[FM5] derivative histogram failed: {exc}")
+        return [], 0.0, 0.0
+    values = values[np.isfinite(values)]
+    if values.size == 0:
+        return [], 0.0, 0.0
+    low, high = DERIVATIVE_BOUNDS.get(derivative, (float(values.min()), float(values.max())))
+    if derivative not in DERIVATIVE_BOUNDS:
+        high = float(values.max())
+    if not high > low:
+        high = low + 1.0
+    counts, _edges = np.histogram(values, bins=int(bins), range=(low, high))
+    return [int(c) for c in counts], float(low), float(high)
 
 
 def selection_mask(array, selection: RasterSelection):
@@ -260,6 +400,9 @@ def selection_geometry(provider: QgsRasterDataProvider, selection: RasterSelecti
         mask = ~np.isnan(array) & (array != 0)
     else:
         array = read_band_array(provider, selection.band, extent, width, height)
+        if selection.derivative.is_terrain:
+            kind = crs_kind(QgsCoordinateReferenceSystem.fromWkt(crs_wkt))
+            array = derived_array(array, selection.derivative, extent, kind)
         mask = selection_mask(array, selection)
     cell_x = extent.width() / width
     cell_y = extent.height() / height
@@ -447,7 +590,9 @@ def apply_selection_preview(layer: QgsRasterLayer, selection: RasterSelection,
     """
     from qgis.core import QgsRasterTransparency
     renderer = layer.renderer()
-    if renderer is None or selection.is_empty or selection.mode is RasterSelectionMode.EXPRESSION:
+    if (renderer is None or selection.is_empty or selection.mode is RasterSelectionMode.EXPRESSION
+            or selection.derivative.is_terrain):
+        # A derivative has no transparency ranges: the renderer only knows the pixel values.
         clear_selection_preview(layer)
         return False
     saved = layer.customProperty(_PREVIEW_PROPERTY)
@@ -537,8 +682,11 @@ def selection_extent(layer: QgsRasterLayer, selection: RasterSelection, max_pixe
     if selection is None or selection.is_empty or selection.mode is RasterSelectionMode.EXPRESSION:
         return None
     extent = layer.extent()
+    if selection.derivative.is_terrain:
+        max_pixels = max(max_pixels, 1000000)  # the grid of the histogram: a slope depends on the pixel size
     width, height = _grid_for(extent, layer.width(), layer.height(), max_pixels)
     array = read_band_array(layer.dataProvider(), selection.band, extent, width, height)
+    array = derived_array(array, selection.derivative, extent, crs_kind(layer.crs()))
     bounds = mask_bounds(selection_mask(array, selection))
     if bounds is None:
         return None
@@ -556,14 +704,39 @@ def rescale_values(values: List[float], old_min: float, old_max: float, low: flo
     return [low + (value - old_min) / span * (high - low) for value in values]
 
 
-_LINKED_RENDERERS: Dict[str, object] = {}
+_LINKED_RENDERERS: Dict[str, object] = {}  # layer id -> copy of the style before the link
+_STRETCHED: Dict[str, int] = {}  # layer id -> address of the renderer the link stretched
+_SAVE_HOOKED: List[object] = []  # projects whose writeMapLayer writes the original style back
+
+
+def _address(renderer) -> int:
+    """Identity of the C++ renderer behind a wrapper (a style set from the style panel is another one)."""
+    try:
+        from qgis.PyQt import sip
+        return int(sip.unwrapinstance(renderer))
+    except Exception:
+        return id(renderer)
+
+
+def _renderer_band(renderer) -> Optional[int]:
+    """Band a single band style reads; None when the renderer does not tell."""
+    for name in ('inputBand', 'grayBand', 'band'):
+        method = getattr(renderer, name, None)
+        if callable(method):
+            try:
+                return int(method())
+            except (TypeError, ValueError, RuntimeError):
+                continue  # not a band number on this renderer: try the next accessor
+    return None
 
 
 def link_range_to_style(layer: QgsRasterLayer, band: int, low: float, high: float) -> bool:
     """Stretch the layer style over ``[low, high]``: grey contrast or pseudocolour ramp stops.
 
-    The first call keeps a copy of the renderer, restored by :func:`unlink_range_from_style`.
-    Returns False for a renderer that has no single band range (multiband, paletted, ...).
+    The first call keeps a copy of the renderer, restored by :func:`unlink_range_from_style`
+    and written in a saved project instead of the stretched one. A style changed by the user
+    since (style panel) becomes the one kept. Returns False for a renderer that has no single
+    band range (multiband, paletted, ...) or that reads another band than ``band``.
     """
     renderer = layer.renderer()
     if renderer is None or low is None or high is None or high <= low:
@@ -571,8 +744,12 @@ def link_range_to_style(layer: QgsRasterLayer, band: int, low: float, high: floa
     kind = renderer.type()
     if kind not in ('singlebandgray', 'singlebandpseudocolor'):
         return False
-    if layer.id() not in _LINKED_RENDERERS:
+    style_band = _renderer_band(renderer)
+    if band is not None and style_band is not None and style_band != int(band):
+        return False  # the range is in the units of another band
+    if layer.id() not in _LINKED_RENDERERS or _STRETCHED.get(layer.id()) != _address(renderer):
         _LINKED_RENDERERS[layer.id()] = renderer.clone()
+        _hook_project_save()
     try:
         if kind == 'singlebandgray':
             enhancement = renderer.contrastEnhancement()
@@ -596,8 +773,59 @@ def link_range_to_style(layer: QgsRasterLayer, band: int, low: float, high: floa
     except Exception as exc:
         logger.debug(f"[FM5] range not linked to the style: {exc}")
         return False
+    _STRETCHED[layer.id()] = _address(renderer)
     layer.triggerRepaint()
     return True
+
+
+def _hook_project_save() -> None:
+    from qgis.core import QgsProject
+    project = QgsProject.instance()
+    if any(hooked is project for hooked in _SAVE_HOOKED):
+        return
+    project.writeMapLayer.connect(_write_original_style)
+    _SAVE_HOOKED.append(project)
+
+
+def _unhook_project_save() -> None:
+    while _SAVE_HOOKED:
+        project = _SAVE_HOOKED.pop()
+        try:
+            project.writeMapLayer.disconnect(_write_original_style)
+        except (TypeError, RuntimeError):
+            pass
+
+
+def _write_original_style(layer, element, document) -> None:
+    """A saved project keeps the style of a linked raster as it was before the link.
+
+    The written ``<rasterrenderer>`` is replaced by the kept copy; what other hooks or the
+    selection preview put on it (alpha band, transparency) stays, as when unlinking.
+    """
+    try:
+        saved = _LINKED_RENDERERS.get(layer.id())
+        if saved is None or _STRETCHED.get(layer.id()) != _address(layer.renderer()):
+            return  # not linked, or a style set by the user since: written as it is
+        pipe = element.firstChildElement('pipe')
+        written = pipe.firstChildElement('rasterrenderer')
+        if written.isNull():
+            return
+        saved.writeXml(document, pipe)
+        original = pipe.lastChildElement('rasterrenderer')
+        if original.isNull() or original == written:
+            return
+        if written.hasAttribute('alphaBand'):
+            original.setAttribute('alphaBand', written.attribute('alphaBand'))
+        transparency = written.firstChildElement('rasterTransparency')
+        if not transparency.isNull():
+            previous = original.firstChildElement('rasterTransparency')
+            if not previous.isNull():
+                original.removeChild(previous)
+            original.appendChild(transparency.cloneNode(True))
+        pipe.insertBefore(original, written)
+        pipe.removeChild(written)
+    except Exception as exc:
+        logger.warning(f"[FM5] original style of a linked raster not written in the project: {exc}")
 
 
 def is_style_linked(layer: QgsRasterLayer) -> bool:
@@ -607,9 +835,12 @@ def is_style_linked(layer: QgsRasterLayer) -> bool:
 def unlink_range_from_style(layer: QgsRasterLayer) -> bool:
     """Give the layer back the style it had before :func:`link_range_to_style`."""
     saved = _LINKED_RENDERERS.pop(layer.id(), None) if layer is not None else None
+    stretched = _STRETCHED.pop(layer.id(), None) if layer is not None else None
     if saved is None:
         return False
     current = layer.renderer()
+    if current is not None and stretched is not None and _address(current) != stretched:
+        return False  # the user set another style since the link: it stays
     transparency = current.rasterTransparency() if current is not None else None
     restored = saved.clone()
     if transparency is not None:
@@ -630,9 +861,11 @@ def forget_linked_styles(layer_ids=None) -> None:
     """
     if layer_ids is None:
         _LINKED_RENDERERS.clear()
+        _STRETCHED.clear()
         return
     for layer_id in layer_ids:
         _LINKED_RENDERERS.pop(layer_id, None)
+        _STRETCHED.pop(layer_id, None)
 
 
 def unlink_all_styles(project=None) -> int:
@@ -648,4 +881,6 @@ def unlink_all_styles(project=None) -> int:
         except RuntimeError:
             pass
         _LINKED_RENDERERS.pop(layer_id, None)
+        _STRETCHED.pop(layer_id, None)
+    _unhook_project_save()
     return restored

@@ -3,24 +3,33 @@
 Capture and restore the filter state of a layer of any kind, and keep track of
 layers whose data source was swapped for a FilterMate derived file.
 
-Derived sources must never be written into a project file: the registry
-listens to ``QgsProject.writeMapLayer`` and writes the original source back
-in the saved XML (with a ``<filtermate_derived>`` element marking the layer),
-while the layer itself keeps showing the filtered data. When the plugin
-unloads, :meth:`DerivedSourceRegistry.restore_all` puts every layer back on
-its original source.
+A project file must not depend on a derived source: the registry listens to
+``QgsProject.writeMapLayer`` and writes the original source back in the
+saved layer (``<maplayer>``, with a ``<filtermate_derived>`` element marking
+it) and in its layer tree node, while the layer itself keeps showing the
+filtered data. When the plugin unloads,
+:meth:`DerivedSourceRegistry.restore_all` puts every layer back on its
+original source.
 
-A layer definition file (``.qlr``, also what copy / paste of layers goes
-through) is written by ``QgsLayerDefinition`` without any project signal: a
-derived layer exported that way keeps its cache path. Pasted in the same
-session, the copy is recognized and registered (``layersAdded``); a ``.qlr``
-opened after the session ended points at a removed file.
+Limits, QGIS giving no hook there:
+
+* references written after the layers keep the cache path: the legend of a
+  layout with its own layer tree, a layout map with locked layers, the
+  terrain of the project, elevation profiles. They find their layer by id
+  first, so they keep working as long as the layer is in the project;
+* a layer definition file (``.qlr``, also what copy / paste of layers goes
+  through) is written by ``QgsLayerDefinition`` without any project signal:
+  a derived layer exported that way keeps its cache path. Pasted in the same
+  session, the copy is recognized and registered (``layersAdded``); a
+  ``.qlr`` opened after the session ended points at a removed file.
 """
 import dataclasses
 import functools
 import json
 import logging
-from typing import Dict, List, Optional, Tuple
+import re
+import weakref
+from typing import Callable, Dict, List, Optional, Tuple
 
 from qgis.core import QgsDataProvider, QgsMapLayer, QgsProject, QgsProviderRegistry
 
@@ -31,12 +40,31 @@ from . import cache
 logger = logging.getLogger(__name__)
 
 DERIVED_PROPERTY = 'filtermate/derived'
+# Keys of the property beside the LayerSnapshot fields (from_dict ignores them).
+_ALPHA_KEY = 'original_alpha_band'
+_ABSOLUTE_KEY = 'original_absolute_source'  # the relative original_source needs the project folder of the save
 # Dimension added by a height above ground run (hag_task): the original cloud has none.
 HAG_DIMENSION = 'HeightAboveGround'
 
 
 def _supports_subset(layer: QgsMapLayer) -> bool:
     return hasattr(layer, 'subsetString') and hasattr(layer, 'setSubsetString')
+
+
+def _same_source(a: str, b: str) -> bool:
+    """Same source, also for a file of the cache session spelled differently (link, separators)."""
+    if a == b:
+        return True
+    tail = cache.session_relative(a)
+    return tail is not None and tail == cache.session_relative(b)
+
+
+def _reference(project: QgsProject) -> Callable[[], Optional[QgsProject]]:
+    # The current project lives as long as QGIS (its Python wrapper may be
+    # rebuilt); the hooks never keep any other project alive.
+    if project is QgsProject.instance():
+        return lambda: project
+    return weakref.ref(project)
 
 
 class DerivedSourceRegistry:
@@ -48,8 +76,8 @@ class DerivedSourceRegistry:
         # VRT may add one (integer raster without NoData), which the original
         # source written in the project does not have.
         self._alpha: Dict[str, int] = {}
-        # Projects the hooks are connected to, with their (signal, slot) pairs.
-        self._hooks: List[Tuple[QgsProject, tuple]] = []
+        # Projects the hooks are connected to: (reference, writeMapLayer slot).
+        self._hooks: List[Tuple[Callable[[], Optional[QgsProject]], Callable]] = []
 
     # --- bookkeeping --------------------------------------------------------
 
@@ -64,7 +92,8 @@ class DerivedSourceRegistry:
 
         The state is also kept as the ``filtermate/derived`` custom property of
         the layer, saved with the project, so the filter can be rebuilt when the
-        project is opened again (see :func:`replay_project_filters`).
+        project is opened again (see :func:`replay_project_filters`), with the
+        alpha band of the original source for a copy of the layer.
         """
         if snapshot.derived:
             self._derived[snapshot.layer_id] = snapshot
@@ -78,7 +107,10 @@ class DerivedSourceRegistry:
         if layer is not None:
             try:
                 if snapshot.derived and (snapshot.geometry_wkt or snapshot.selection):
-                    layer.setCustomProperty(DERIVED_PROPERTY, json.dumps(snapshot.to_dict()))
+                    state = snapshot.to_dict()
+                    if snapshot.layer_id in self._alpha:
+                        state[_ALPHA_KEY] = self._alpha[snapshot.layer_id]
+                    layer.setCustomProperty(DERIVED_PROPERTY, json.dumps(state))
                 else:
                     layer.removeCustomProperty(DERIVED_PROPERTY)
             except RuntimeError:
@@ -99,6 +131,10 @@ class DerivedSourceRegistry:
         if renderer is not None and hasattr(renderer, 'alphaBand'):
             self._alpha[layer.id()] = renderer.alphaBand()
 
+    def original_alpha_band(self, layer_id: str) -> Optional[int]:
+        """Alpha band the raster had on its original source; None when unknown."""
+        return self._alpha.get(layer_id)
+
     def _drop(self, layer) -> None:
         """The user changed the data source of a derived layer since: it is theirs now."""
         self.forget(layer.id())
@@ -116,21 +152,25 @@ class DerivedSourceRegistry:
         saved with the path of the session cache, broken once the cache is
         removed, and Unfilter would keep that file as its base. Its model is
         the registered layer showing the same source, else its own property
-        when the file belongs to the current session.
+        when the file belongs to the current session (sources compared with
+        :func:`_same_source`: a copy read back from a ``.qlr`` may spell the
+        cache path differently).
         """
         source = layer.source()
         if not source:
             return None
-        model = next((known for known in self._derived.values() if known.source == source), None)
+        model = next((known for known in self._derived.values() if _same_source(known.source, source)), None)
+        alpha = self._alpha.get(model.layer_id) if model is not None else None
         if model is None and cache.in_session(source):
-            stored = _stored_snapshot(layer)
-            if stored is not None and stored.derived and stored.source == source:
-                model = stored
+            state = _stored_state(layer)
+            stored = _snapshot_of(state)
+            if stored is not None and stored.derived and _same_source(stored.source, source):
+                model, alpha = stored, state.get(_ALPHA_KEY)
         if model is None:
             return None
-        if model.layer_id in self._alpha:
-            self._alpha[layer.id()] = self._alpha[model.layer_id]
-        snapshot = dataclasses.replace(model, layer_id=layer.id(),
+        if alpha is not None:
+            self._alpha[layer.id()] = alpha
+        snapshot = dataclasses.replace(model, layer_id=layer.id(), source=source, provider=layer.providerType(),
                                        subset=layer.subsetString() if _supports_subset(layer) else '')
         self.record(snapshot, layer)
         logger.info(f"[FM5] '{layer.name()}' is a copy of a filtered layer: its original source is kept")
@@ -142,26 +182,38 @@ class DerivedSourceRegistry:
         """Connect the hooks to ``project`` (the current project by default).
 
         Every project gets its own hooks: installing them on another project
-        (automation with ``project=``) keeps those of the current project.
+        (automation with ``project=``) keeps those of the current project, and
+        does not keep that project alive.
         """
         project = project or QgsProject.instance()
-        if any(known is project for known, _ in self._hooks):
+        self._hooks = [(reference, slot) for reference, slot in self._hooks if reference() is not None]
+        if any(reference() is project for reference, _ in self._hooks):
             return
-        connections = ((project.writeMapLayer, functools.partial(self._on_write_map_layer, project)),
-                       (project.layersAdded, self._on_layers_added),
-                       (project.layersWillBeRemoved, self._on_layers_removed))
-        for signal, slot in connections:
-            signal.connect(slot)
-        self._hooks.append((project, connections))
+        reference = _reference(project)
+        slot = functools.partial(self._on_write_map_layer, reference)
+        project.writeMapLayer.connect(slot)
+        project.layersAdded.connect(self._on_layers_added)
+        project.layersWillBeRemoved.connect(self._on_layers_removed)
+        self._hooks.append((reference, slot))
 
     def uninstall(self) -> None:
-        for _project, connections in self._hooks:
-            for signal, slot in connections:
+        for project, slot in self._live_hooks():
+            try:
+                connections = ((project.writeMapLayer, slot), (project.layersAdded, self._on_layers_added),
+                               (project.layersWillBeRemoved, self._on_layers_removed))
+            except RuntimeError:
+                continue  # deleted by QGIS: so are its connections
+            for signal, connected in connections:
                 try:
-                    signal.disconnect(slot)
+                    signal.disconnect(connected)
                 except (TypeError, RuntimeError):
                     pass
         self._hooks = []
+
+    def _live_hooks(self) -> List[Tuple[QgsProject, Callable]]:
+        """``(project, writeMapLayer slot)`` of the hooked projects still alive."""
+        return [(project, slot) for project, slot in ((reference(), slot) for reference, slot in self._hooks)
+                if project is not None]
 
     def _on_layers_removed(self, layer_ids) -> None:
         for layer_id in layer_ids or []:
@@ -175,16 +227,25 @@ class DerivedSourceRegistry:
             except Exception as exc:
                 logger.debug(f"[FM5] added layer not checked for a derived source: {exc}")
 
-    def _on_write_map_layer(self, project, layer, element, document) -> None:
+    def _is_the_users(self, layer, snapshot: LayerSnapshot) -> bool:
+        """True when the user changed the data source of a derived layer since (Change Data Source…)."""
+        current = layer.source()
+        return not _same_source(current, snapshot.source) and not cache.in_session(current)
+
+    def _on_write_map_layer(self, reference, layer, element, document) -> None:
+        project = reference()
         try:
             snapshot = self._derived.get(layer.id()) or self._adopt(layer)
-            current = layer.source()
-        except RuntimeError:
-            return
-        if snapshot is None or not snapshot.pristine_source:
-            return
-        if current != snapshot.source:
-            self._drop(layer)  # Change Data Source…: the source written is the user's
+            if snapshot is None or not snapshot.pristine_source or project is None:
+                return
+            if self._is_the_users(layer, snapshot):
+                # The source written is the user's; QGIS wrote the custom
+                # properties before this signal: the stored filter goes too.
+                self._drop(layer)
+                _remove_custom_property(element, DERIVED_PROPERTY)
+                return
+        except Exception as exc:
+            logger.debug(f"[FM5] layer not checked for a derived source when written: {exc}")
             return
         try:
             source = _project_source(project, snapshot.pristine_source, snapshot.pristine_provider, write=True)
@@ -197,13 +258,15 @@ class DerivedSourceRegistry:
                 renderer.setAttribute('alphaBand', str(alpha))
             subset = element.firstChildElement('subset')
             if snapshot.enriched_source and not subset.isNull() and HAG_DIMENSION in subset.text():
-                _set_text(element, document, 'subset', '')  # the original cloud would reject it
-            # What opening the project needs to clip the layer again
-            # (pending_replays): the original source as written, no cache path.
-            stored = dataclasses.replace(snapshot, source='', provider='', original_source=source,
-                                         original_provider=snapshot.pristine_provider,
-                                         enriched_source='', enriched_provider='')
-            _set_custom_property(element, DERIVED_PROPERTY, json.dumps(stored.to_dict()))
+                # The original cloud would reject it: its other terms stay.
+                _set_text(element, document, 'subset', without_terms(subset.text(), HAG_DIMENSION))
+            if snapshot.geometry_wkt or snapshot.selection:
+                # What opening the project needs to clip the layer again
+                # (pending_replays): the original source as written, no cache
+                # path, and absolute for a project saved elsewhere before that.
+                state = portable_snapshot(snapshot, source).to_dict()
+                state[_ABSOLUTE_KEY] = snapshot.pristine_source
+                _set_custom_property(element, document, DERIVED_PROPERTY, json.dumps(state))
             _set_tree_layer_source(document, snapshot.layer_id, source, snapshot.pristine_provider)
             marker = document.createElement('filtermate_derived')
             marker.setAttribute('kind', snapshot.kind)
@@ -220,29 +283,46 @@ class DerivedSourceRegistry:
         be opened (moved file, offline share): invalid there, it still points
         at its data, not at a cache file removed right after. A point cloud
         keeps its subset when its original source accepts it.
+
+        Args:
+            project: Only this project; by default the current project and
+                every other project the hooks are connected to.
         """
-        project = project or QgsProject.instance()
+        if project is not None:
+            projects = [project]
+        else:
+            current = QgsProject.instance()
+            projects = [current] + [other for other, _ in self._live_hooks() if other is not current]
+        restored = 0
+        for each in projects:
+            try:
+                restored += self._restore_project(each)
+            except RuntimeError as exc:
+                logger.debug(f"[FM5] project gone before its layers were restored: {exc}")
+        self._derived.clear()
+        self._alpha.clear()
+        return restored
+
+    def _restore_project(self, project: QgsProject) -> int:
         for layer in list(project.mapLayers().values()):
             try:
                 if layer.id() not in self._derived:
                     self._adopt(layer)  # a copy made while the hooks were not connected
-            except RuntimeError:
-                continue
+            except Exception as exc:
+                logger.debug(f"[FM5] layer not checked for a derived source on unload: {exc}")
         restored = 0
         for layer_id, snapshot in list(self._derived.items()):
             layer = project.mapLayer(layer_id)
             if layer is None:
                 continue
             try:
-                if layer.source() != snapshot.source:
+                if self._is_the_users(layer, snapshot):
                     self._drop(layer)
                     continue
                 self._put_back(layer, snapshot)
                 restored += 1
             except Exception as exc:
                 logger.warning(f"[FM5] '{layer_id}' not restored to its original source: {exc}")
-        self._derived.clear()
-        self._alpha.clear()
         return restored
 
     def _put_back(self, layer, snapshot: LayerSnapshot) -> None:
@@ -251,9 +331,9 @@ class DerivedSourceRegistry:
         # A layer turning invalid keeps its style for the day its source is
         # repaired (``<originalStyle>`` in the project): FilterMate's state
         # (property, alpha band of the VRT) goes before the source changes.
-        alpha, renderer = self._alpha.get(layer.id()), layer.renderer()
-        if alpha is not None and renderer is not None:
-            renderer.setAlphaBand(alpha)
+        alpha = self._alpha.get(layer.id())
+        if alpha is not None:
+            _restore_alpha_band(layer, alpha)
         self.record(LayerSnapshot(layer.id(), snapshot.kind), layer)
         layer.setDataSource(snapshot.pristine_source, layer.name(), snapshot.pristine_provider,
                             QgsDataProvider.ProviderOptions(), False)
@@ -262,21 +342,85 @@ class DerivedSourceRegistry:
                            f"{snapshot.pristine_source}")
         else:
             if snapshot.kind == LayerKind.RASTER.value:
-                _sync_alpha_band(layer)
+                _restore_alpha_band(layer, alpha)
             if subset and not _set_subset(layer, subset):
-                _set_subset(layer, '')  # HeightAboveGround of an enriched cloud: unknown to the original
+                # HeightAboveGround of an enriched cloud, unknown to the original: the other terms stay.
+                reduced = without_terms(subset, HAG_DIMENSION)
+                if not (reduced and reduced != subset and _set_subset(layer, reduced)):
+                    _set_subset(layer, '')
         layer.triggerRepaint()
 
 
-def _stored_snapshot(layer) -> Optional[LayerSnapshot]:
-    """The ``filtermate/derived`` property of ``layer``; None when absent or unreadable."""
+def _stored_state(layer) -> Optional[dict]:
+    """The ``filtermate/derived`` property of ``layer`` as a dict; None when absent or unreadable."""
     raw = layer.customProperty(DERIVED_PROPERTY)
     if not raw:
         return None
     try:
-        return LayerSnapshot.from_dict(json.loads(raw))
+        state = json.loads(raw)
     except (TypeError, ValueError):
         return None
+    return state if isinstance(state, dict) else None
+
+
+def _snapshot_of(state: Optional[dict]) -> Optional[LayerSnapshot]:
+    if state is None:
+        return None
+    try:
+        return LayerSnapshot.from_dict(state)
+    except TypeError:
+        return None
+
+
+def portable_snapshot(snapshot: LayerSnapshot, original_source: str = '') -> LayerSnapshot:
+    """``snapshot`` without the session cache, to clip the layer again later (project file, favorite).
+
+    A derived snapshot keeps its filter (kept area, side, raster selection)
+    and gets the source before any FilterMate change as its original, or
+    ``original_source`` (that source as written in a project).
+    """
+    if not snapshot.derived:
+        return snapshot
+    return dataclasses.replace(snapshot, source='', provider='',
+                               original_source=original_source or snapshot.pristine_source,
+                               original_provider=snapshot.pristine_provider,
+                               enriched_source='', enriched_provider='')
+
+
+def without_terms(expression: str, word: str) -> str:
+    """``expression`` without the top-level ``AND`` terms naming ``word``.
+
+    Returns '' when ``expression`` is not a plain conjunction (a top-level
+    ``OR``) or when every term names ``word``. Quotes and parentheses are
+    honored: ``A AND (B OR word > 2)`` keeps ``A``.
+    """
+    terms, depth, quote, start, index = [], 0, None, 0, 0
+    while index < len(expression):
+        char = expression[index]
+        if quote:
+            if char == quote:
+                quote = None  # a doubled quote reopens at once
+        elif char in '\'"':
+            quote = char
+        elif char == '(':
+            depth += 1
+        elif char == ')':
+            depth -= 1
+        elif depth == 0 and (index == 0 or not (expression[index - 1].isalnum() or expression[index - 1] == '_')):
+            match = _BOOLEAN_WORD.match(expression, index)
+            if match:
+                if match.group(1).upper() == 'OR':
+                    return ''
+                terms.append(expression[start:index])
+                index = start = match.end()
+                continue
+        index += 1
+    terms.append(expression[start:])
+    kept = [term.strip() for term in terms if word not in term]
+    return '' if any(not term for term in kept) else ' AND '.join(kept)
+
+
+_BOOLEAN_WORD = re.compile(r'(AND|OR)\b', re.IGNORECASE)
 
 
 def _project_source(project: QgsProject, source: str, provider: str, write: bool) -> str:
@@ -308,13 +452,38 @@ def _set_text(element, document, tag: str, text: str) -> None:
     child.appendChild(document.createTextNode(text))
 
 
-def _set_custom_property(element, name: str, value: str) -> None:
-    """Value of the custom property ``name`` in a written layer (QgsXmlUtils variant map)."""
+def _custom_property_options(element, name: str) -> list:
+    """``<Option name=...>`` elements of the custom property ``name`` in a written layer."""
     options = element.firstChildElement('customproperties').elementsByTagName('Option')
-    for index in range(options.count()):
-        option = options.at(index).toElement()
-        if option.attribute('name') == name:
-            option.setAttribute('value', value)
+    found = [options.at(index).toElement() for index in range(options.count())]
+    return [option for option in found if option.attribute('name') == name]
+
+
+def _set_custom_property(element, document, name: str, value: str) -> None:
+    """Value of the custom property ``name`` in a written layer (QgsXmlUtils variant map), added when absent."""
+    options = _custom_property_options(element, name)
+    for option in options:
+        option.setAttribute('value', value)
+    if options:
+        return
+    properties = element.firstChildElement('customproperties')
+    if properties.isNull():
+        properties = document.createElement('customproperties')
+        element.appendChild(properties)
+    variant_map = properties.firstChildElement('Option')
+    if variant_map.isNull():
+        variant_map = document.createElement('Option')
+        properties.appendChild(variant_map)
+    variant_map.setAttribute('type', 'Map')  # an empty map is written as <Option/>
+    option = document.createElement('Option')
+    for attribute, text in (('type', 'QString'), ('name', name), ('value', value)):
+        option.setAttribute(attribute, text)
+    variant_map.appendChild(option)
+
+
+def _remove_custom_property(element, name: str) -> None:
+    for option in _custom_property_options(element, name):
+        option.parentNode().removeChild(option)
 
 
 def _set_tree_layer_source(document, layer_id: str, source: str, provider: str) -> None:
@@ -389,7 +558,8 @@ def restore_snapshot(layer: QgsMapLayer, snapshot: LayerSnapshot,
             raise RuntimeError(f"source '{snapshot.source}' could not be opened")
         changed = True
         if snapshot.kind == LayerKind.RASTER.value:
-            _sync_alpha_band(layer)
+            # Back on the original source: the alpha band it had (the user's choice).
+            _restore_alpha_band(layer, None if snapshot.derived else reg.original_alpha_band(layer.id()))
             if snapshot.provider == 'virtualraster' and snapshot.nodata is not None:
                 from .raster_adapter import set_user_nodata
                 set_user_nodata(layer, snapshot.nodata)
@@ -420,6 +590,16 @@ def swap_source(layer, source: str, provider: str, derived_registry: Optional[De
     logger.warning(f"[FM5] '{layer.name()}': '{source}' could not be opened, previous source restored")
     layer.setDataSource(previous_source, layer.name(), previous_provider, QgsDataProvider.ProviderOptions(), False)
     return False
+
+
+def _restore_alpha_band(layer, alpha: Optional[int]) -> None:
+    """Alpha band ``alpha`` (the one of the original source), or the one of the current source when None."""
+    if alpha is None:
+        _sync_alpha_band(layer)
+        return
+    renderer = layer.renderer()
+    if renderer is not None and hasattr(renderer, 'setAlphaBand'):
+        renderer.setAlphaBand(alpha)
 
 
 def _sync_alpha_band(layer) -> None:
@@ -456,18 +636,21 @@ def pending_replays(project: Optional[QgsProject] = None):
             continue
         if not raw:
             continue
-        try:
-            snapshot = LayerSnapshot.from_dict(json.loads(raw))
-        except (TypeError, ValueError):
+        state = _stored_state(layer)
+        snapshot = _snapshot_of(state)
+        if snapshot is None:
             layer.removeCustomProperty(DERIVED_PROPERTY)
             continue
         if registry().is_derived(layer.id()) or not (snapshot.geometry_wkt or snapshot.selection):
             continue
         # The project holds the source before any FilterMate change (that of
         # an enriched cloud too), relative when the project uses relative
-        # paths: compared once resolved again, so a moved project replays.
-        original = _project_source(project, snapshot.pristine_source, snapshot.pristine_provider, write=False)
-        if layer.source() != original:
+        # paths: resolved again, so a moved project replays; the absolute one
+        # serves a project saved elsewhere since (Save As before the replay).
+        candidates = {_project_source(project, snapshot.pristine_source, snapshot.pristine_provider, write=False),
+                      state.get(_ABSOLUTE_KEY) or ''}
+        current = layer.source().replace('\\', '/')
+        if not any(candidate and candidate.replace('\\', '/') == current for candidate in candidates):
             continue  # the user changed the source since: the stored filter no longer applies
         pending.append((layer, dataclasses.replace(snapshot, original_source=layer.source(),
                                                    original_provider=layer.providerType(),

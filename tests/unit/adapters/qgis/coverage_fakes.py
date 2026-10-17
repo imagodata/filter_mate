@@ -61,6 +61,7 @@ class FakeTask:
     """QgsTask: cancel() / isCanceled() / setProgress()."""
 
     CanCancel = 1
+    Flag = types.SimpleNamespace(CanCancel=1)  # QgsTask.Flag.CanCancel, the name Qt6 / QGIS 4 keeps
 
     def __init__(self, description='', flags=0):
         self.description = description

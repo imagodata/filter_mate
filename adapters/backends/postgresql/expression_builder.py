@@ -279,6 +279,23 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
                 buffer_value=buffer_value
             )
 
+        # 2026-10-16: EXISTS needs a source table ("schema"."table"."geom").
+        # A source that is only a WKT (non-PostgreSQL source layer) used to
+        # reach _build_exists_expression(), fail to parse and end as a silent
+        # "1 = 0". Inline it when it is small enough whatever the feature
+        # count; otherwise return None so the caller hands the layer to the
+        # OGR backend (exact).
+        if not use_simple_wkt and not self._is_source_table_reference(source_geom):
+            if source_wkt is not None and source_srid is not None and wkt_length <= self.MAX_WKT_LENGTH:
+                use_simple_wkt = True
+                self.log_info(f"📝 No source table for EXISTS: using SIMPLE WKT mode ({wkt_length} chars)")
+            else:
+                self.log_error(
+                    f"No source table for EXISTS and source WKT unusable ({wkt_length:,} chars, "
+                    f"limit {self.MAX_WKT_LENGTH:,}) - no PostgreSQL expression, OGR fallback"
+                )
+                return None
+
         # Build predicate expressions
         predicate_expressions = []
 
@@ -383,8 +400,13 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
 
         # Combine predicates with OR (any predicate match)
         if not predicate_expressions:
-            self.log_warning("No predicate expressions generated")
-            return "1 = 0"  # No results
+            if not sorted_predicates:
+                self.log_warning("No predicates specified")
+                return "1 = 0"  # No results
+            # 2026-10-16: predicates were asked for but none could be built:
+            # an error, not an empty result (the caller falls back to OGR).
+            self.log_error("No predicate expression could be built - no PostgreSQL expression")
+            return None
 
         if len(predicate_expressions) == 1:
             final_expr = predicate_expressions[0]
@@ -1613,6 +1635,11 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
         self.log_debug(f"   Full EXISTS: {exists_expr[:500]}...")
 
         return exists_expr
+
+    @staticmethod
+    def _is_source_table_reference(source_geom) -> bool:
+        """Whether ``source_geom`` names a table column (``"table"."geom"``), as EXISTS needs."""
+        return isinstance(source_geom, str) and re.search(r'"[^"]+"\."[^"]+"', source_geom) is not None
 
     def _parse_source_table_reference(self, source_geom: str) -> Optional[Dict]:
         """Parse source table reference from geometry expression.

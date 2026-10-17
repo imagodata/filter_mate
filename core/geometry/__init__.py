@@ -2,7 +2,7 @@
 Geometry Operations Module
 
 EPIC-1 Phase E2: Extracted from filter_task.py god class.
-EPIC-1 Phase E7.5: Added simplify_buffer_result.
+EPIC-1 Phase E7.5: Added simplify_buffer_result (removed 2026-10-16: lossy, unused).
 EPIC-1 Phase E13: Added geometry_safety module.
 
 This module provides geometry processing functionality:
@@ -19,7 +19,6 @@ Used by FilterEngineTask for spatial operations.
 from .buffer_processor import (  # noqa: F401
     apply_qgis_buffer,
     create_buffered_memory_layer,
-    simplify_buffer_result,
     BufferConfig
 )
 
@@ -56,7 +55,6 @@ __all__ = [
     # Buffer
     'apply_qgis_buffer',
     'create_buffered_memory_layer',
-    'simplify_buffer_result',
     'BufferConfig',
 
     # Repair

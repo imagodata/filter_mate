@@ -291,6 +291,185 @@ class TestBuildExpression:
 
 
 # ===========================================================================
+# Tests -- large source WKT (2026-10-16)
+# ===========================================================================
+
+def _long_linestring(min_chars):
+    """A valid-looking MULTILINESTRING WKT of at least ``min_chars`` characters (and at most 30 more)."""
+    pair = 26  # len("560000.500 6280000.250, ") + 2
+    count = max(2, (min_chars - 19) // pair + 1)
+    coords = ", ".join(f"{560000 + i * 0.5:.3f} {6280000 + (i % 7) * 0.25:.3f}" for i in range(count))
+    wkt = f"MULTILINESTRING(({coords}))"
+    while len(wkt) < min_chars:
+        count += 1
+        coords += f", {560000 + count * 0.5:.3f} 6280000.000"
+        wkt = f"MULTILINESTRING(({coords}))"
+    return wkt
+
+
+class TestLargeSourceWkt:
+    """The builder never generalizes the source; too large → OGR backend (exact)."""
+
+    @pytest.fixture(autouse=True)
+    def _json1(self, monkeypatch):
+        # The OGR backend's long key lists need JSON1 in GDAL's SQLite.
+        monkeypatch.setattr(_mod, "json1_available", lambda: True)
+
+    def test_thresholds_are_consistent(self):
+        assert _mod.SPATIALITE_WKT_STATIC_INLINE_LIMIT == 100_000
+        assert _mod.SPATIALITE_WKT_INLINE_MAX_LENGTH == 1_000_000
+        # A subset is evaluated by every count, extent and full-extent render.
+        assert _mod.SPATIALITE_INLINE_BUDGET_SECONDS == 1.0
+        assert not hasattr(SpatialiteExpressionBuilder, "_simplify_wkt")
+
+    @pytest.mark.parametrize("predicate", ["crosses", "touches", "intersects"])
+    def test_source_up_to_the_limit_is_inlined_untouched(self, builder, predicate):
+        # No candidate count (no GeoPackage R-tree): the static 100 KB limit.
+        wkt = _long_linestring(_mod.SPATIALITE_WKT_STATIC_INLINE_LIMIT - 1_000)
+        assert len(wkt) <= _mod.SPATIALITE_WKT_STATIC_INLINE_LIMIT
+        expr = builder.build_expression(
+            layer_props={"layer_name": "test", "layer_geometry_field": "geom"},
+            predicates={predicate: True},
+            source_geom=wkt,
+        )
+        assert expr != USE_OGR_FALLBACK
+        assert f"ST_GeomFromText('{wkt}'" in expr
+
+    @pytest.mark.parametrize("predicate", ["crosses", "intersects"])
+    def test_source_above_static_limit_without_count_goes_to_ogr(self, builder, predicate):
+        # The 236 KB Toulouse river network, target without an R-tree count.
+        wkt = _long_linestring(236_398)
+        assert len(wkt) > _mod.SPATIALITE_WKT_STATIC_INLINE_LIMIT
+        expr = builder.build_expression(
+            layer_props={"layer_name": "test", "layer_geometry_field": "geom"},
+            predicates={predicate: True},
+            source_geom=wkt,
+        )
+        assert expr == USE_OGR_FALLBACK
+
+    # 33.1 s: the Toulouse rivers; 16.7 s: the 87 KB Toulouse Metropole polygon on troncon_de_route.
+    @pytest.mark.parametrize("cost, inlined", [(0.4, True), (0.99, True), (1.01, False), (16.7, False), (33.1, False)])
+    def test_inline_decided_by_the_estimated_statement_cost(self, builder, monkeypatch, cost, inlined):
+        monkeypatch.setattr(builder, "_inline_cost_seconds", lambda *args: cost)
+        wkt = _long_linestring(236_398)
+        expr = builder.build_expression(
+            layer_props={"layer_name": "test", "layer_geometry_field": "geom"},
+            predicates={"crosses": True},
+            source_geom=wkt,
+        )
+        assert (expr != USE_OGR_FALLBACK) is inlined
+        if inlined:
+            assert f"ST_GeomFromText('{wkt}'" in expr
+
+    def test_never_inlined_above_the_absolute_cap(self, builder, monkeypatch):
+        monkeypatch.setattr(builder, "_inline_cost_seconds", lambda *args: 0.0)
+        wkt = _long_linestring(_mod.SPATIALITE_WKT_INLINE_MAX_LENGTH + 10)
+        expr = builder.build_expression(
+            layer_props={"layer_name": "test", "layer_geometry_field": "geom"},
+            predicates={"intersects": True},
+            source_geom=wkt,
+        )
+        assert expr == USE_OGR_FALLBACK
+
+    @pytest.mark.parametrize("predicates, windowed", [({"crosses": True}, True), ({"disjoint": True}, False)])
+    def test_inline_cost_counts_the_rtree_candidates(self, builder, mock_gpkg_layer, monkeypatch, predicates, windowed):
+        seen = []
+
+        def _count(path, table, geom_column, bbox=None):
+            seen.append((path, table, geom_column, bbox))
+            return 100_000
+
+        monkeypatch.setattr(_mod, "gpkg_rtree_count", _count)
+        monkeypatch.setattr(builder, "_source_bbox", lambda *args: (0.0, 0.0, 1.0, 1.0))
+        wkt = _long_linestring(236_398)
+        cost = builder._inline_cost_seconds(mock_gpkg_layer, "geom", wkt, 2154, 2154, None, predicates)
+        assert seen == [("/tmp/data.gpkg", "buildings", "geom", (0.0, 0.0, 1.0, 1.0) if windowed else None)]
+        # 100,000 candidates x 236 KB x 1.4 µs: about 33 s per statement.
+        assert cost == pytest.approx(100_000 * len(wkt) / 1000 * _mod.SPATIALITE_INLINE_COST_US_PER_ROW_KB / 1e6)
+        assert cost > _mod.SPATIALITE_INLINE_BUDGET_SECONDS
+
+    def test_inline_cost_unknown_without_geopackage(self, builder, mock_spatialite_layer):
+        assert builder._inline_cost_seconds(mock_spatialite_layer, "geom", "POINT(0 0)", 2154, 2154, None, {"crosses": True}) is None
+
+    def test_gpkg_rtree_count(self, tmp_path):
+        import sqlite3
+        path = tmp_path / "t.gpkg"
+        con = sqlite3.connect(path)
+        con.execute("CREATE TABLE gpkg_extensions (table_name, column_name, extension_name)")
+        con.execute("INSERT INTO gpkg_extensions VALUES ('roads', 'geom', 'gpkg_rtree_index')")
+        con.execute("CREATE VIRTUAL TABLE rtree_roads_geom USING rtree(id, minx, maxx, miny, maxy)")
+        con.executemany("INSERT INTO rtree_roads_geom VALUES (?, ?, ?, ?, ?)",
+                        [(i, i, i + 0.5, 0, 0.5) for i in range(100)])
+        con.commit()
+        con.close()
+        _mod.clear_rtree_cache()
+        assert _mod.gpkg_rtree_count(str(path), "roads", "geom") == 100
+        assert _mod.gpkg_rtree_count(str(path), "roads", "geom", (10.0, 0.0, 19.9, 1.0)) == 10
+        assert _mod.gpkg_rtree_count(str(path), "other", "geom") is None
+
+    @pytest.mark.parametrize("cost", [None, 16.7])
+    def test_without_json1_the_source_stays_inline(self, builder, monkeypatch, cost):
+        # 2026-10-17: the OGR backend could not write the key list (a plain
+        # list that long freezes QGIS): slow but exact inline subset.
+        monkeypatch.setattr(_mod, "json1_available", lambda: False)
+        monkeypatch.setattr(builder, "_inline_cost_seconds", lambda *args: cost)
+        wkt = _long_linestring(236_398)
+        expr = builder.build_expression(
+            layer_props={"layer_name": "test", "layer_geometry_field": "geom"},
+            predicates={"crosses": True},
+            source_geom=wkt,
+        )
+        assert expr != USE_OGR_FALLBACK
+        assert any("no JSON1" in w for w in builder._warnings)
+
+    def test_sql_buffer_doubles_the_estimate(self, builder, mock_gpkg_layer, monkeypatch):
+        monkeypatch.setattr(_mod, "gpkg_rtree_count", lambda *args: 100_000)
+        monkeypatch.setattr(builder, "_source_bbox", lambda *args: (0.0, 0.0, 1.0, 1.0))
+        wkt = _long_linestring(10_000)
+        plain = builder._inline_cost_seconds(mock_gpkg_layer, "geom", wkt, 2154, 2154, None, {"intersects": True})
+        buffered = builder._inline_cost_seconds(mock_gpkg_layer, "geom", wkt, 2154, 2154, 20.0, {"intersects": True})
+        assert buffered == pytest.approx(plain * _mod.SPATIALITE_INLINE_SQL_BUFFER_FACTOR)
+
+    def test_rtree_count_cache_is_bounded(self, tmp_path, monkeypatch):
+        import sqlite3
+        path = tmp_path / "t.gpkg"
+        con = sqlite3.connect(path)
+        con.execute("CREATE TABLE gpkg_extensions (table_name, column_name, extension_name)")
+        con.execute("INSERT INTO gpkg_extensions VALUES ('roads', 'geom', 'gpkg_rtree_index')")
+        con.execute("CREATE VIRTUAL TABLE rtree_roads_geom USING rtree(id, minx, maxx, miny, maxy)")
+        con.commit()
+        con.close()
+        _mod.clear_rtree_cache()
+        for index in range(_mod.RTREE_COUNT_CACHE_MAX + 10):
+            _mod.gpkg_rtree_count(str(path), "roads", "geom", (index, 0.0, index + 1.0, 1.0))
+        assert len(_mod._RTREE_COUNT_CACHE) <= _mod.RTREE_COUNT_CACHE_MAX
+
+    def test_source_bbox_parsed_once_per_task(self, monkeypatch):
+        # Builders are created per target layer but share the task (2026-10-17:
+        # the memo hangs on the task, not on task_params = PROJECT_LAYERS).
+        task = types.SimpleNamespace()
+        task_params = {"buffer_endcap_style": "round", "source_srid": 2154, "_parent_task": task,
+                       "_spatialite_source_bbox_cache": {"stale": 1}}
+        calls = []
+
+        def _compute(self, *args):
+            calls.append(args)
+            return (0.0, 0.0, 1.0, 1.0)
+
+        monkeypatch.setattr(SpatialiteExpressionBuilder, "_compute_source_bbox", _compute)
+        wkt = _long_linestring(50_000)
+        for _target in range(17):
+            bbox = SpatialiteExpressionBuilder(task_params)._source_bbox(wkt, 2154, 2154, None)
+            assert bbox == (0.0, 0.0, 1.0, 1.0)
+        assert len(calls) == 1
+        # Another source (or buffer) is computed again and replaces it.
+        SpatialiteExpressionBuilder(task_params)._source_bbox(wkt, 2154, 2154, 10.0)
+        assert len(calls) == 2
+        assert len(task._filtermate_task_caches["spatialite_source_bbox"]) == 1
+        assert "_spatialite_source_bbox_cache" not in task_params
+
+
+# ===========================================================================
 # Tests -- GeoPackage detection
 # ===========================================================================
 

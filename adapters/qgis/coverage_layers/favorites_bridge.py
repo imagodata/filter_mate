@@ -34,8 +34,12 @@ def is_coverage_layer(layer) -> bool:
 
 
 def capture(project: Optional[QgsProject] = None) -> List[Dict]:
-    """State of every filtered raster / point cloud layer of the project."""
-    from .snapshots import take_snapshot
+    """State of every filtered raster / point cloud layer of the project.
+
+    A derived layer is stored with its original source, never with a file of
+    the session cache (removed when QGIS closes).
+    """
+    from .snapshots import portable_snapshot, take_snapshot
     project = project or QgsProject.instance()
     entries = []
     for layer in project.mapLayers().values():
@@ -45,7 +49,7 @@ def capture(project: Optional[QgsProject] = None) -> List[Dict]:
         snapshot = take_snapshot(layer, kind)
         if not snapshot.derived and not snapshot.subset:
             continue
-        entry = snapshot.to_dict()
+        entry = portable_snapshot(snapshot).to_dict()
         entry['layer_name'] = layer.name()
         entries.append(entry)
     return entries

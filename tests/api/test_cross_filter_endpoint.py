@@ -71,6 +71,12 @@ class TestCrossFilter:
         assert response.json()["filtered"] == ["batiment", "lhd"]
         assert {item["name"]: item["has_active_filter"] for item in client.get("/layers").json()}["mnt"] is True
 
+    def test_raster_source_with_a_slope_range(self, client_factory, mixed_layers):
+        response = client_factory(layers=mixed_layers).post("/filters/cross", json={
+            "source_layer": "mnt", "target_layers": ["batiment"],
+            "raster_selection": {"band": 1, "mode": "range", "maximum": 15, "derivative": "slope_percent"}})
+        assert response.status_code == 200
+
     def test_point_cloud_source_with_criteria(self, client_factory, mixed_layers):
         response = client_factory(layers=mixed_layers).post("/filters/cross", json={
             "source_layer": "lhd", "target_layers": ["batiment", "lhd"], "predicates": ["Disjoint"],
@@ -88,6 +94,9 @@ class TestCrossFilter:
         {"source_layer": "mnt", "target_layers": ["lhd"], "raster_selection": {"mode": "classes"}},
         {"source_layer": "mnt", "target_layers": ["lhd"], "raster_selection": {"mode": "slope", "minimum": 1}},
         {"source_layer": "mnt", "target_layers": ["lhd"], "raster_selection": {"minimum": 1, "colour": "red"}},
+        {"source_layer": "mnt", "target_layers": ["lhd"], "raster_selection": {"maximum": 15, "derivative": "curvature"}},
+        {"source_layer": "mnt", "target_layers": ["lhd"],
+         "raster_selection": {"mode": "classes", "classes": [1], "derivative": "slope_degrees"}},
         {"source_layer": "lhd", "target_layers": ["mnt"], "point_cloud_criteria": {"classes": [300]}},
         {"source_layer": "lhd", "target_layers": ["mnt"], "point_cloud_criteria": {"return_number": 0}},
     ])

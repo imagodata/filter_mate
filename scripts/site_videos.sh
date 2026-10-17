@@ -5,6 +5,8 @@
 #   scripts/site_videos.sh render hero explore ... edit (scripts/site_video_render.py) into MP4 + WebP poster
 #   scripts/site_videos.sh publish hero ...        copy the edited MP4 / WebP into website/video/
 #   scripts/site_videos.sh all hero ...            clip, render and publish
+#   scripts/site_videos.sh data                    Estavar data of the raster / point cloud clips (FM_LIDAR_TILES:
+#                                                  folder with the LiDAR HD tiles 0617_6152 and 0617_6153)
 #
 # A clip name ending in -dark (hero-dark) is the dark version: QGIS with the Night Mapping theme,
 # published as video/<clip>-dark.mp4 / .webp; fm.js picks it when the site is dark.
@@ -14,8 +16,8 @@
 # is touched. A clip only waits for another recording, not for the user's own QGIS.
 #
 # Environment: FM_QGIS (QGIS install), FM_GPKG (BD TOPO 31 GeoPackage), FM5_DATA / FM5_GPKG /
-# FM5_TILE (Cerdagne MNT, vectors and LiDAR HD tile for the raster / point cloud clips),
-# FM_FFMPEG (ffmpeg.exe, Windows path).
+# FM5_TILE (Estavar DTM, vectors and LiDAR HD for the raster / point cloud clips),
+# FM_FFMPEG (ffmpeg.exe, Windows path), FM_PLUGIN_SRC (checkout used as the plugin, default: this one).
 set -euo pipefail
 
 REPO="$(cd "$(dirname "$0")/.." && pwd)"
@@ -30,11 +32,12 @@ mkdir -p "$W_LINUX/scripts" "$W_LINUX/plugins" "$W_LINUX/profiles" "$W_LINUX/sit
 
 sync_code() {
     cp "$REPO/scripts/site_videos.py" "$REPO/scripts/site_video_render.py" "$W_LINUX/scripts/"
+    [ -f "$REPO/scripts/site_stills.json" ] && cp "$REPO/scripts/site_stills.json" "$W_LINUX/scripts/"
     rsync -a --delete \
         --exclude .git --exclude .github --exclude .claude --exclude .serena --exclude _bmad --exclude _bmad-output \
         --exclude tests --exclude website --exclude docs --exclude scripts --exclude knowledge --exclude logs \
         --exclude __pycache__ --exclude '*.pyc' --exclude dist --exclude build \
-        "$REPO/" "$W_LINUX/plugins/filter_mate/"
+        "${FM_PLUGIN_SRC:-$REPO}/" "$W_LINUX/plugins/filter_mate/"
 }
 
 seed_profile() {
@@ -89,7 +92,7 @@ wait_qgis_idle() {
 }
 
 # Pass FM_* / FM5_* variables of this shell to the Windows QGIS.
-export WSLENV="${WSLENV:-}:FM_GPKG/w:FM5_DATA/w:FM5_GPKG/w:FM5_TILE/w:FM_TAKE"
+export WSLENV="${WSLENV:-}:FM_GPKG/w:FM5_DATA/w:FM5_GPKG/w:FM5_TILE/w:FM_TAKE:FM_MEASURE"
 for v in FM_GPKG FM5_DATA FM5_GPKG FM5_TILE; do [ -n "${!v:-}" ] || unset "$v"; done
 
 cmd="${1:-}"; shift || true
@@ -117,7 +120,48 @@ case "$cmd" in
             cp "$W_LINUX/site/$c.mp4" "$W_LINUX/site/$c.webp" "$REPO/website/video/"
             echo "published $c ($(du -h "$REPO/website/video/$c.mp4" | cut -f1))"
         done
+        # step images of the stories (site_stills.json / still() marks)
+        if [ -d "$W_LINUX/site/stills" ] && ls "$W_LINUX/site/stills/"*.webp >/dev/null 2>&1; then
+            mkdir -p "$REPO/website/img/stories"
+            cp "$W_LINUX/site/stills/"*.webp "$REPO/website/img/stories/"
+            echo "published $(ls "$W_LINUX/site/stills/"*.webp | wc -l) story images"
+        fi
+        ;;
+    data)
+        # One square kilometre of the village of Estavar (west of it lies Llívia, a Spanish enclave without French cadastre): LiDAR HD (IGN, COPC) cropped and merged with PDAL, DTM from its
+        # ground points, slope in percent, BD TOPO from the IGN WFS, Etalab cadastre of the commune (66072).
+        tiles="${FM_LIDAR_TILES:?folder of LHD_FXX_0617_6152 / 0617_6153 .copc.laz}"
+        tiles_w="$(wslpath -w "$tiles")"
+        D="$W_LINUX/data"; mkdir -p "$D"; cd "$D"
+        curl -sSL "https://cadastre.data.gouv.fr/bundler/cadastre-etalab/communes/66072/geojson/parcelles" | gunzip > parcelles.json
+        for t in batiment troncon_de_route troncon_hydrographique; do
+            curl -sSL -o "bdtopo_$t.json" "https://data.geopf.fr/wfs/ows?SERVICE=WFS&VERSION=2.0.0&REQUEST=GetFeature&TYPENAMES=BDTOPO_V3:$t&SRSNAME=EPSG:2154&BBOX=616800,6151900,618200,6153300,EPSG:2154&COUNT=5000&outputFormat=application/json"
+        done
+        bounds='([617000,618000],[6152100,6153100])'
+        cat > crop.json <<EOF2
+{"pipeline":[
+ {"type":"readers.copc","filename":"${tiles_w//\\/\\\\}\\\\LHD_FXX_0617_6152_PTS_C_LAMB93_IGN69.copc.laz","bounds":"$bounds"},
+ {"type":"readers.copc","filename":"${tiles_w//\\/\\\\}\\\\LHD_FXX_0617_6153_PTS_C_LAMB93_IGN69.copc.laz","bounds":"$bounds"},
+ {"type":"filters.merge"}, {"type":"filters.crop","bounds":"$bounds"},
+ {"type":"writers.copc","filename":"estavar_village.copc.laz","a_srs":"EPSG:2154"}]}
+EOF2
+        cat > dtm.json <<'EOF2'
+{"pipeline":[
+ {"type":"readers.copc","filename":"estavar_village.copc.laz"},
+ {"type":"filters.range","limits":"Classification[2:2]"},
+ {"type":"writers.gdal","filename":"mnt_village.tif","resolution":1,"output_type":"idw","window_size":12,"nodata":-9999,
+  "data_type":"float32","origin_x":617000,"origin_y":6152100,"width":1000,"height":1000,"gdalopts":"COMPRESS=DEFLATE,TILED=YES"}]}
+EOF2
+        printf '%s\r\n' '@echo off' "call \"$QGIS\\bin\\o4w_env.bat\"" 'cd /d %~dp0' \
+            'pdal pipeline crop.json || exit /b 1' 'pdal pipeline dtm.json || exit /b 1' \
+            'gdaldem slope -p -compute_edges mnt_village.tif pente_village.tif -co COMPRESS=DEFLATE' \
+            'del estavar.gpkg 2>nul' \
+            'ogr2ogr -f GPKG estavar.gpkg bdtopo_batiment.json -nln batiment -a_srs EPSG:2154' \
+            'ogr2ogr -f GPKG -update estavar.gpkg bdtopo_troncon_de_route.json -nln troncon_de_route -a_srs EPSG:2154' \
+            'ogr2ogr -f GPKG -update estavar.gpkg bdtopo_troncon_hydrographique.json -nln troncon_hydrographique -a_srs EPSG:2154' \
+            'ogr2ogr -f GPKG -update estavar.gpkg parcelles.json -nln parcelle -t_srs EPSG:2154' > prep.bat
+        cmd.exe /c prep.bat
         ;;
     *)
-        sed -n 2,16p "$0"; exit 1 ;;
+        sed -n 2,18p "$0"; exit 1 ;;
 esac

@@ -92,7 +92,8 @@ class GeometryCache:
         feature_ids: Optional[List[int]] = None,
         buffer_value: Optional[float] = None,
         target_crs_authid: Optional[str] = None,
-        subset_string: Optional[str] = None
+        subset_string: Optional[str] = None,
+        variant: Any = None
     ) -> Optional[Any]:
         """
         Get cached geometry for layer and context.
@@ -103,6 +104,7 @@ class GeometryCache:
             buffer_value: Optional buffer distance
             target_crs_authid: Optional target CRS
             subset_string: Optional active subset string
+            variant: Other hashable inputs of the geometry (e.g. predicates)
 
         Returns:
             Cached geometry data or None if not found
@@ -118,7 +120,8 @@ class GeometryCache:
             buffer_value=buffer,
             target_crs_authid=crs,
             layer_id=layer_id,
-            subset_string=subset_string
+            subset_string=subset_string,
+            variant=variant
         )
 
         if cached_data:
@@ -135,7 +138,8 @@ class GeometryCache:
         feature_ids: Optional[List[int]] = None,
         buffer_value: Optional[float] = None,
         target_crs_authid: Optional[str] = None,
-        subset_string: Optional[str] = None
+        subset_string: Optional[str] = None,
+        variant: Any = None
     ):
         """
         Store geometry in cache with context.
@@ -147,6 +151,7 @@ class GeometryCache:
             buffer_value: Optional buffer distance
             target_crs_authid: Optional target CRS
             subset_string: Optional active subset string
+            variant: Other hashable inputs of the geometry (e.g. predicates)
         """
         features = feature_ids if feature_ids else []
         buffer = buffer_value if buffer_value is not None else 0.0
@@ -158,7 +163,8 @@ class GeometryCache:
             target_crs_authid=crs,
             geometry_data=geometry,
             layer_id=layer_id,
-            subset_string=subset_string
+            subset_string=subset_string,
+            variant=variant
         )
 
         logger.debug(f"Cached geometry for layer {layer_id}")
