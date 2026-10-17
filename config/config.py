@@ -460,7 +460,7 @@ def _write_config_json(path, data):
     """
     try:
         # Imported here: infrastructure.utils imports this module at load time
-        from filter_mate.infrastructure.utils.atomic_io import atomic_json_write
+        from ..infrastructure.utils.atomic_io import atomic_json_write
     except ImportError as error:
         QgsMessageLog.logMessage(
             f"FilterMate: atomic helper unavailable ({error}); config.json written with a local temp file",
@@ -492,7 +492,7 @@ def _keep_unreadable_config(path, reason):
         reason: Why (shown in the QGIS message log).
     """
     try:
-        from filter_mate.infrastructure.utils.atomic_io import backup_corrupt_file
+        from ..infrastructure.utils.atomic_io import backup_corrupt_file
     except ImportError as error:
         QgsMessageLog.logMessage(
             f"FilterMate: {path} cannot be used ({reason}) and could not be kept ({error}); "
@@ -737,7 +737,7 @@ def init_env_vars():
 
     # Passwords an older version saved here (the URI of a PostgreSQL layer): mask them once
     try:
-        from filter_mate.infrastructure.logging.redaction import scrub_secrets_in_place
+        from ..infrastructure.logging.redaction import scrub_secrets_in_place
         scrubbed = scrub_secrets_in_place(CONFIG_DATA)
     except ImportError:
         scrubbed = 0

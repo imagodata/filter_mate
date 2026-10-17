@@ -98,6 +98,9 @@ class TestWriteConfigJson:
             parent.__path__ = []
             monkeypatch.setitem(sys.modules, name, parent)
         monkeypatch.setitem(sys.modules, module.__name__, module)
+        # config_io imports the writer relatively: re-root it under the fake filter_mate package
+        from tests.unit.extensions.plugin_alias import alias_package
+        alias_package(monkeypatch, "extensions.config_io")
 
         assert config_io.write_config_json(str(tmp_path / "config.json"), {"a": 1}) is True
 
@@ -124,6 +127,9 @@ def live_config(tmp_path, monkeypatch):
         monkeypatch.setitem(sys.modules, "filter_mate", root)
     monkeypatch.setitem(sys.modules, "filter_mate.config", package)
     monkeypatch.setitem(sys.modules, "filter_mate.config.config", module)
+    # the extension modules import config and the atomic writer relatively: re-root them under filter_mate
+    from tests.unit.extensions.plugin_alias import alias_package
+    alias_package(monkeypatch, "extensions.registry", "extensions.base", "extensions.config_io")
     return path, data, connection
 
 

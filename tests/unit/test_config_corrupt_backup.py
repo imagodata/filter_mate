@@ -32,19 +32,32 @@ def _load_by_path(name, path):
 
 @pytest.fixture
 def config_module(monkeypatch, tmp_path):
-    """config/config.py with the QGIS surface stubbed and the real atomic_io."""
-    for name in ("qgis", "qgis.core", "filter_mate", "filter_mate.core", "filter_mate.core.optimization",
-                 "filter_mate.core.optimization.config_provider"):
+    """config/config.py with the QGIS surface stubbed and the real atomic_io, loaded as part of a throw-away package.
+
+    config.py imports its helpers RELATIVELY (``..infrastructure.utils.atomic_io``): the package is a
+    stand-in for the plugin folder, whatever its name.
+    """
+    for name in ("qgis", "qgis.core"):
         if name not in sys.modules:
             monkeypatch.setitem(sys.modules, name, MagicMock())
-    atomic_io = _load_by_path("fmtest_cfg_atomic_io", _ROOT / "infrastructure" / "utils" / "atomic_io.py")
-    redaction = _load_by_path("fmtest_cfg_redaction", _ROOT / "infrastructure" / "logging" / "redaction.py")
-    for name in ("filter_mate.infrastructure", "filter_mate.infrastructure.utils", "filter_mate.infrastructure.logging"):
-        monkeypatch.setitem(sys.modules, name, types.ModuleType(name))
-    monkeypatch.setitem(sys.modules, "filter_mate.infrastructure.utils.atomic_io", atomic_io)
-    monkeypatch.setitem(sys.modules, "filter_mate.infrastructure.logging.redaction", redaction)
+    pkg = "fmtest_cfg_pkg"
+    for name, path in ((pkg, _ROOT), (f"{pkg}.config", _ROOT / "config"), (f"{pkg}.core", _ROOT / "core"),
+                       (f"{pkg}.core.optimization", _ROOT / "core" / "optimization"),
+                       (f"{pkg}.infrastructure", _ROOT / "infrastructure"),
+                       (f"{pkg}.infrastructure.utils", _ROOT / "infrastructure" / "utils"),
+                       (f"{pkg}.infrastructure.logging", _ROOT / "infrastructure" / "logging")):
+        package = types.ModuleType(name)
+        package.__path__ = [str(path)]
+        monkeypatch.setitem(sys.modules, name, package)
+    provider = types.ModuleType(f"{pkg}.core.optimization.config_provider")
+    provider.get_optimization_thresholds = MagicMock()
+    monkeypatch.setitem(sys.modules, provider.__name__, provider)
+    # the real helpers (the packages above are bare: their __init__ files import the whole plugin)
+    for name, path in ((f"{pkg}.infrastructure.utils.atomic_io", _ROOT / "infrastructure" / "utils" / "atomic_io.py"),
+                       (f"{pkg}.infrastructure.logging.redaction", _ROOT / "infrastructure" / "logging" / "redaction.py")):
+        monkeypatch.setitem(sys.modules, name, _load_by_path(name, path))
 
-    module = _load_by_path("fmtest_cfg_config", _ROOT / "config" / "config.py")
+    module = _load_by_path(f"{pkg}.config.config", _ROOT / "config" / "config.py")
     profile = tmp_path / "profile"
     profile.mkdir()
     monkeypatch.setattr(module, "QgsApplication", types.SimpleNamespace(qgisSettingsDirPath=lambda: str(profile)))
@@ -103,7 +116,7 @@ def test_the_same_broken_file_is_kept_once_across_starts(config_module):
 
 def test_a_missing_atomic_writer_does_not_stop_the_start(config_module, monkeypatch):
     """The import is protected: the file is then written directly and nothing is kept."""
-    monkeypatch.setitem(sys.modules, "filter_mate.infrastructure.utils.atomic_io", None)
+    monkeypatch.setitem(sys.modules, "fmtest_cfg_pkg.infrastructure.utils.atomic_io", None)
 
     names = _run(config_module, '{"APP": {"truncated')
 

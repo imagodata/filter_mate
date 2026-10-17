@@ -245,6 +245,9 @@ class TestSafeSetSubsetStringDiagnostics:
         utils = types.ModuleType("filter_mate.infrastructure.utils")
         utils.get_datasource_connexion_from_layer = lambda layer: (connection, None)
         monkeypatch.setitem(sys.modules, "filter_mate.infrastructure.utils", utils)
+        # sql_utils imports ...infrastructure.utils relatively: re-root it under the fake filter_mate package
+        from tests.unit.extensions.plugin_alias import alias_package
+        alias_package(monkeypatch, "infrastructure.database.sql_utils")
         return connection
 
     def test_failure_diagnostics_do_not_log_the_password(self, fake_probe):
