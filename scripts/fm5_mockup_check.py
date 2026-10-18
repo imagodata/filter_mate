@@ -395,9 +395,9 @@ def s_pc_pipette():
     iface.actionPan().trigger()
     STATE['pan'] = canvas.mapTool()
     c = ctrl()
-    pipette = tool('pushButton_checkable_exploring_point_cloud_pipette')
-    pipette.setChecked(True)
+    c.handle_exploring_action('identify')  # 2026-10-18: the Identify button is the class pipette
     check('pc pipette: the class picker is on the map', canvas.mapTool() is c._class_tool and c._class_tool is not None)
+    check('pc pipette: the Identify button is held down', dock().pushButton_exploring_identify.isDown())
     STATE['pc_extent'] = canvas.extent()
     from qgis.core import QgsCoordinateTransform
     lhd = layer('lhd')
@@ -421,12 +421,13 @@ def s_pc_pipette_check():
         check('pc pipette: Ctrl+click adds a class', panel._checked_codes() == sorted(picked + others[:1]), str(panel._checked_codes()))
     c._on_class_pick_toggled(False)
     check('pc pipette: off gives the map back to pan', canvas.mapTool() is STATE['pan'], type(canvas.mapTool()).__name__)
-    pipette.setChecked(True)
+    identify = dock().pushButton_exploring_identify
+    c._on_class_pick_toggled(True)
     iface.actionPan().trigger()
-    check('pc pipette: button follows another map tool', not pipette.isChecked())
+    check('pc pipette: button follows another map tool', not identify.isDown())
     canvas.setMapTool(c._class_tool)  # what a right click after Pan does
-    check('pc pipette: button down again when QGIS gives the tool back', pipette.isChecked())
-    pipette.setChecked(False)
+    check('pc pipette: button down again when QGIS gives the tool back', identify.isDown())
+    c._on_class_pick_toggled(False)
     iface.actionPan().trigger()
     panel.reset()
     canvas.setExtent(STATE['pc_extent'])

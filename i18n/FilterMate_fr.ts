@@ -5328,6 +5328,14 @@ Objet cliqué : seulement la tache de ces pixels où tombe le clic (une piscine,
         <source>roles guessed, to confirm</source>
         <translation>rôles devinés, à confirmer</translation>
     </message>
+    <message>
+        <source>Roles ▾</source>
+        <translation>Rôles ▾</translation>
+    </message>
+    <message>
+        <source>Give the bands their colour roles at once: RGB, IRC or RGB + near infrared</source>
+        <translation>Donner d'un coup leurs rôles couleur aux bandes : RVB, IRC ou RVB + proche infrarouge</translation>
+    </message>
 </context>
 <context>
     <name>RecommendationDialog</name>

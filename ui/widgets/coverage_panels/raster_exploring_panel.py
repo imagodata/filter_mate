@@ -35,7 +35,7 @@ EXPLORING (``summaryChanged``): the panel shows no figure of its own.
 import math
 from contextlib import contextmanager
 from enum import Enum
-from typing import TYPE_CHECKING, Any, Collection, Dict, Iterable, List, Optional, Sequence, Tuple
+from typing import TYPE_CHECKING, Any, Collection, Dict, List, Optional, Sequence, Tuple
 
 try:
     from qgis.PyQt.QtCore import Qt, QTimer, pyqtSignal
@@ -735,50 +735,49 @@ class RasterExploringPanel(QWidget):
         group = self._make_group(self.tr("BANDS"), "mGroupBox_raster_bands", checkable=False)
         self._bands_group = group
         group_layout = group.layout()
-        head = QHBoxLayout()
+        self._head_widget = QWidget(group)
+        self._head_widget.setObjectName("widget_raster_bands_head")
+        head = QHBoxLayout(self._head_widget)
+        head.setContentsMargins(0, 0, 0, 0)
         head.setSpacing(GAP)
-        self._pixel_coordinates_label = QLabel("", group)
+        self._pixel_coordinates_label = QLabel("", self._head_widget)
         self._pixel_coordinates_label.setObjectName("label_raster_pixel_coordinates")
         self._pixel_coordinates_label.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
         self._pixel_coordinates_label.setToolTip(self.tr("Last click of the pixel picker"))
         self._pixel_coordinates_label.setEnabled(False)  # muted, as a caption
+        self._pixel_coordinates_label.setWordWrap(True)
         head.addWidget(self._pixel_coordinates_label)
         head.addStretch(1)
-        self._roles_note = QLabel("", group)
+        self._roles_note = QLabel("", self._head_widget)
         self._roles_note.setObjectName("label_raster_roles_note")
         self._roles_note.setEnabled(False)
+        self._roles_note.setWordWrap(True)
         head.addWidget(self._roles_note)
-        group_layout.addLayout(head)
+        group_layout.addWidget(self._head_widget)
+
+        # Layout shortcuts in one small menu on the header line (2026-10-18: a row of buttons made the block tall).
+        self._layout_button = self._menu_button(self._head_widget, self.tr("Roles ▾"),
+                                                self.tr("Give the bands their colour roles at once: RGB, IRC or RGB + near infrared"),
+                                                "toolButton_raster_layout")
+        self._shortcut_buttons: Dict[str, Any] = {}
+        for key, label, tip in (("rgb", self.tr("RGB"), self.tr("Bands 1, 2, 3 are red, green, blue")),
+                                ("irc", self.tr("IRC"), self.tr("Bands 1, 2, 3 are infrared, red, green (IGN infrared colour orthophoto)")),
+                                ("rgbn", self.tr("RGB + NIR"), self.tr("Bands 1, 2, 3, 4 are red, green, blue, near infrared"))):
+            action = self._layout_button.menu().addAction(label)
+            action.setToolTip(tip)
+            action.triggered.connect(lambda _checked=False, k=key: self._on_layout_shortcut(k))
+            self._shortcut_buttons[key] = action
+        head.addWidget(self._layout_button)
 
         self._bands_holder = QWidget(group)
         self._bands_holder.setObjectName("widget_raster_bands")
         self._bands_grid = QGridLayout(self._bands_holder)
         self._bands_grid.setContentsMargins(0, 0, 0, 0)
         self._bands_grid.setHorizontalSpacing(GAP)
-        self._bands_grid.setVerticalSpacing(2)
+        self._bands_grid.setVerticalSpacing(0)
         group_layout.addWidget(self._bands_holder)
         self._active_group = QButtonGroup(self)
         self._active_group.setExclusive(True)
-
-        shortcuts = QHBoxLayout()
-        shortcuts.setSpacing(GAP)
-        self._shortcut_buttons: Dict[str, Any] = {}
-        for key, label, tip in (("rgb", self.tr("RGB"), self.tr("Bands 1, 2, 3 are red, green, blue")),
-                                ("irc", self.tr("IRC"), self.tr("Bands 1, 2, 3 are infrared, red, green (IGN infrared colour orthophoto)")),
-                                ("rgbn", self.tr("RGB + NIR"), self.tr("Bands 1, 2, 3, 4 are red, green, blue, near infrared"))):
-            button = QPushButton(label, group)
-            button.setObjectName(f"pushButton_raster_layout_{key}")
-            button.setToolTip(tip)
-            button.setFlat(True)
-            button.clicked.connect(lambda _checked=False, k=key: self._on_layout_shortcut(k))
-            shortcuts.addWidget(button)
-            self._shortcut_buttons[key] = button
-        shortcuts.addStretch(1)
-        self._shortcuts_widget = QWidget(group)
-        self._shortcuts_widget.setObjectName("widget_raster_layout_shortcuts")
-        self._shortcuts_widget.setLayout(shortcuts)
-        shortcuts.setContentsMargins(0, 0, 0, 0)
-        group_layout.addWidget(self._shortcuts_widget)
 
         # Readouts of the off-rail tools (value under the cursor, statistics of a rectangle).
         self._hover_label = QLabel("", group)
@@ -795,7 +794,11 @@ class RasterExploringPanel(QWidget):
         return group
 
     def _rebuild_band_rows(self) -> None:
-        """One row per band of the summary: active, pipette, role, name, type, value."""
+        """One compact row per band of the summary: active, pipette, role, name (type in its tooltip), value.
+
+        A single band shows neither the active radio nor the pipette box; fewer than
+        three colour bands show no role (the tooltips carry what the columns mean).
+        """
         for row in self._band_rows.values():
             for widget in row.values():
                 if hasattr(widget, 'deleteLater'):
@@ -807,20 +810,8 @@ class RasterExploringPanel(QWidget):
         self._band_rows = {}
         bands = self._summary.bands if self._summary is not None else []
         colours = len(self._colour_bands()) >= 3
-        headers = (self.tr("active"), self.tr("pipette"), self.tr("role"), self.tr("band"), self.tr("type"), self.tr("value"))
-        header_widgets = {}
-        for column, text in enumerate(headers):
-            label = QLabel(text, self._bands_holder)
-            label.setEnabled(False)
-            if column in (0, 1):
-                label.setAlignment(Qt.AlignmentFlag.AlignHCenter)
-            if column == 5:
-                label.setAlignment(Qt.AlignmentFlag.AlignRight)
-            label.setVisible(column != 2 or colours)
-            self._bands_grid.addWidget(label, 0, column)
-            header_widgets[f"header{column}"] = label
-        self._band_rows[0] = header_widgets  # pseudo band 0: the header row
-        for index, info in enumerate(bands, start=1):
+        several = len(bands) > 1
+        for index, info in enumerate(bands):
             number = int(info.number)
             radio = QRadioButton(self._bands_holder)
             radio.setObjectName(f"radioButton_raster_band_active_{number}")
@@ -831,21 +822,21 @@ class RasterExploringPanel(QWidget):
             check.setObjectName(f"checkBox_raster_band_pipette_{number}")
             check.setToolTip(self.tr("The pipette compares this band"))
             check.toggled.connect(lambda checked, n=number: self._on_pipette_band_toggled(n, checked))
-            role = QComboBox(self._bands_holder)
-            role.setObjectName(f"comboBox_raster_band_role_{number}")
-            role.setToolTip(self.tr("Colour the band holds: the spectral indexes and the chips use it"))
+            role = self._menu_button(self._bands_holder, "—",
+                                     self.tr("Colour the band holds: the spectral indexes and the chips use it"),
+                                     f"toolButton_raster_band_role_{number}")
             for key, label in ((ROLE_NONE, "—"), (ROLE_RED, self.tr("R")), (ROLE_GREEN, self.tr("G")),
                                (ROLE_BLUE, self.tr("B")), (ROLE_NIR, self.tr("NIR"))):
-                role.addItem(label, key)
-            role.setSizeAdjustPolicy(QComboBox.SizeAdjustPolicy.AdjustToContents)
-            role.currentIndexChanged.connect(lambda _index, n=number: self._on_role_changed(n))
+                action = role.menu().addAction(label)
+                action.triggered.connect(lambda _checked=False, n=number, k=key: self._on_role_changed(n, k))
             role.setVisible(colours)
             name = QLabel(self._band_text(info), self._bands_holder)
             name.setObjectName(f"label_raster_band_name_{number}")
-            name.setToolTip(info.name or "")
+            name.setToolTip(f"{info.name or ''} ({info.data_type})".strip())
             name.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
             kind = QLabel(info.data_type, self._bands_holder)
             kind.setEnabled(False)
+            kind.setVisible(not several)  # the type is read at a glance on a single band, in a tooltip otherwise
             value = QLabel("–", self._bands_holder)
             value.setObjectName(f"label_raster_band_value_{number}")
             value.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
@@ -853,6 +844,8 @@ class RasterExploringPanel(QWidget):
             swatch = QLabel(self._bands_holder)
             swatch.setFixedSize(10, 10)
             widgets = {"radio": radio, "check": check, "role": role, "swatch": swatch, "name": name, "kind": kind, "value": value}
+            radio.setVisible(several)
+            check.setVisible(several)
             for column, widget in enumerate((radio, check, role)):
                 self._bands_grid.addWidget(widget, index, column, Qt.AlignmentFlag.AlignHCenter if column < 2 else Qt.AlignmentFlag.AlignLeft)
             name_row = QHBoxLayout()
@@ -868,11 +861,11 @@ class RasterExploringPanel(QWidget):
             self._bands_grid.addWidget(value, index, 5)
             self._band_rows[number] = widgets
         self._bands_grid.setColumnStretch(3, 1)
-        self._shortcuts_widget.setVisible(colours)
+        self._layout_button.setVisible(colours)
         if colours:
-            four = len(self._colour_bands()) >= 4
-            self._shortcut_buttons["rgbn"].setEnabled(four)
+            self._shortcut_buttons["rgbn"].setEnabled(len(self._colour_bands()) >= 4)
         self._refresh_band_rows()
+        self._refresh_head()
 
     @staticmethod
     def _band_text(info: Any) -> str:
@@ -884,16 +877,14 @@ class RasterExploringPanel(QWidget):
         values = self._last_pixel[2] if self._last_pixel is not None else {}
         nodata = self.tr("NoData")
         for number, row in self._band_rows.items():
-            if number == 0:
-                continue
             info = self._band_info(number)
             active = number == self._active_band
-            with _signals_blocked(row["radio"], row["check"], row["role"]):
+            with _signals_blocked(row["radio"], row["check"]):
                 row["radio"].setChecked(active)
                 row["check"].setChecked(number in self._pipette_bands)
                 row["check"].setEnabled(not (info is not None and getattr(info, "is_alpha", False)))
                 role = self._roles.get(number, ROLE_NONE)
-                row["role"].setCurrentIndex(max(0, row["role"].findData(role)))
+                row["role"].setText(f"{self._role_short(role)} ▾")
             font = QFont(row["name"].font())
             font.setBold(active)
             row["name"].setFont(font)
@@ -924,6 +915,10 @@ class RasterExploringPanel(QWidget):
             return None
         return "#9e9e9e"
 
+    def _role_short(self, role: str) -> str:
+        return {ROLE_RED: self.tr("R"), ROLE_GREEN: self.tr("G"), ROLE_BLUE: self.tr("B"),
+                ROLE_NIR: self.tr("NIR")}.get(role, "—")
+
     def _role_name(self, role: str) -> str:
         return {ROLE_RED: self.tr("Red"), ROLE_GREEN: self.tr("Green"), ROLE_BLUE: self.tr("Blue"),
                 ROLE_NIR: self.tr("Near infrared")}.get(role, "")
@@ -931,8 +926,15 @@ class RasterExploringPanel(QWidget):
     def _refresh_roles_note(self) -> None:
         if len(self._colour_bands()) < 3:
             self._roles_note.setText("")
-            return
-        self._roles_note.setText(self.tr("roles guessed, to confirm") if self._roles_guessed else "")
+        else:
+            self._roles_note.setText(self.tr("roles guessed, to confirm") if self._roles_guessed else "")
+        self._refresh_head()
+
+    def _refresh_head(self) -> None:
+        """The head line of BANDS (last click, roles note, roles menu) only takes room when it holds something."""
+        shown = bool(self._pixel_coordinates_label.text() or self._roles_note.text()
+                     or (hasattr(self, "_layout_button") and not self._layout_button.isHidden()))
+        self._head_widget.setVisible(shown)
 
     # --- PIPETTE ---
 
@@ -975,6 +977,7 @@ class RasterExploringPanel(QWidget):
         tolerance_row.addWidget(self._tolerance_spin)
         self._quantity_label = QLabel("", self._pipette_group)
         self._quantity_label.setEnabled(False)
+        self._quantity_label.setWordWrap(True)
         tolerance_row.addWidget(self._quantity_label, 1)
         group_layout.addLayout(tolerance_row)
         self._chips_widget = QWidget(self._pipette_group)
@@ -1583,7 +1586,7 @@ class RasterExploringPanel(QWidget):
         self._show_band_histogram()
         self._refresh_band_rows()
         self._range_group.setTitle(self.tr("VALUE RANGE — band {0}").format(self.current_band())
-                                   if len(self._band_rows) > 2 else self.tr("VALUE RANGE"))
+                                   if len(self._band_rows) > 1 else self.tr("VALUE RANGE"))
 
     def _show_band_histogram(self) -> None:
         counts, minimum, maximum = self._histograms.get((self.current_band(), self._derivative), ([], 0.0, 0.0))
@@ -1631,11 +1634,10 @@ class RasterExploringPanel(QWidget):
         self._forget_picks(("color",))
         self._refresh_band_rows()
 
-    def _on_role_changed(self, number: int) -> None:
-        row = self._band_rows.get(number)
-        if row is None:
+    def _on_role_changed(self, number: int, role: str = ROLE_NONE) -> None:
+        if number not in self._band_rows:
             return
-        role = row["role"].currentData() or ROLE_NONE
+        role = role if role in ROLES else ROLE_NONE
         for other, other_role in list(self._roles.items()):
             if other != number and role and other_role == role:
                 del self._roles[other]  # a colour is held by one band
@@ -1942,6 +1944,7 @@ class RasterExploringPanel(QWidget):
         if self._last_pixel is None:
             self._pixel_coordinates_label.setText("")
             self._pixel_coordinates_label.setToolTip(self.tr("Last click of the pixel picker"))
+            self._refresh_head()
             return
         x, y, _values, terrain = self._last_pixel
         digits = self._coordinate_decimals
@@ -1957,3 +1960,4 @@ class RasterExploringPanel(QWidget):
             decimals = decimals_for(info.data_type) if info is not None else FLOAT_DECIMALS
             rows.append((f"{hx:.{digits}f} · {hy:.{digits}f}", shown or format_pixel_value(value, decimals, nodata), band))
         self._pixel_coordinates_label.setToolTip(history_html(rows, self.tr("LAST PICKS")) or "")
+        self._refresh_head()

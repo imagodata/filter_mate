@@ -952,6 +952,7 @@ class PointCloudExploringPanel(QWidget):
         note = QLabel(self.tr("Always combined (AND) with the active group"), group)
         note.setObjectName("label_point_cloud_height_note")
         note.setEnabled(False)
+        note.setWordWrap(True)  # a one-line caption would widen the panel past a 440 px dock
         badge = QLabel(self.tr("PDAL · derived cloud"), group)
         badge.setObjectName("label_point_cloud_height_badge")
         badge.setToolTip(self.tr("The height is computed by PDAL into a derived point cloud, in a background task"))
