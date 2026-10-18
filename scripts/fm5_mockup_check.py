@@ -298,6 +298,7 @@ def s_raster_tools():
     panel = c._raster_panel
     layer = c.active_layer
     STATE['raster_extent'] = iface.mapCanvas().extent()
+    panel._range_group.setChecked(True)  # the pipette of s_picker left PIPETTE active: the range is a VALUE RANGE gesture
     low, high = panel._data_bounds()
     STATE['range'] = (low + (high - low) * 0.4, low + (high - low) * 0.6)
     panel._set_range(*STATE['range'])
