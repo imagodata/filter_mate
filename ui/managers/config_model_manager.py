@@ -517,6 +517,9 @@ class ConfigModelManager:
                     "Using standard JsonView (SearchableJsonView not available)"
                 )
 
+            if hasattr(dw, '_refresh_config_view_theme'):
+                dw._refresh_config_view_theme()  # plugin theme, not the QGIS palette
+
             # Connect signal using centralized method
             self.connect_config_model_signal()
 

@@ -537,6 +537,8 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         if STYLE_MANAGERS_AVAILABLE:
             try: self._theme_manager, self._icon_manager, self._button_styler = ThemeManager(self), IconManager(self), ButtonStyler(self)
             except Exception as e: logger.warning(f"Style managers init failed: {e}")
+            if self._theme_manager is not None:
+                self._theme_manager.add_theme_changed_callback(lambda _theme: self._refresh_config_view_theme())
 
         # Controllers - v4.0 Sprint 16: MVC Controllers via ControllerIntegration
         logger.debug("_initialize_layer_state: Initializing controllers")
@@ -2745,9 +2747,17 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             else:
                 StyleLoader.set_theme_from_config(self.dockWidgetContents, self.CONFIG_DATA, 'auto')
             self._refresh_icons_for_theme()
-            if hasattr(self, 'config_view') and self.config_view: self.config_view.refresh_theme_stylesheet(force_dark=(new_theme == 'dark'))
+            self._refresh_config_view_theme()
             show_info("FilterMate", self.tr("Theme adapted: {0}").format(self.tr("Dark mode") if new_theme == 'dark' else self.tr("Light mode")))
         except Exception as e: logger.error(f"Error applying theme change: {e}")
+
+    def _refresh_config_view_theme(self):
+        """CONFIGURATION JSON view in the plugin theme (it may differ from the QGIS one)."""
+        view = getattr(self, 'config_view', None)
+        if view is None or not hasattr(view, 'refresh_theme_stylesheet'):
+            return
+        manager = getattr(self, '_theme_manager', None)
+        view.refresh_theme_stylesheet(force_dark=bool(manager.is_dark_mode) if manager is not None else None)
 
     def _refresh_icons_for_theme(self):
         """Refresh all button icons for the current theme."""

@@ -810,23 +810,15 @@ class RasterExploringPanel(QWidget):
     ROLE_COLOURS = {ROLE_RED: "#d9443a", ROLE_GREEN: "#4caf50", ROLE_BLUE: "#2f7fd8", ROLE_NIR: "#8e24aa"}
     CHIP_HEIGHT = 16
     ROW_CONTROL = 18  # height of the small controls of a band row
-    # Thin indicator of the active band (the dock stylesheet draws 18 px radios made for the main widgets).
-    # The box stays 14 px in every state: the checked ring is a 4 px border around a 6 px centre (2026-10-18:
-    # a 4 px border around the 12 px centre made a 20 px rounded square, clipped by the 18 px row).
-    RADIO_STYLE = ("QRadioButton { spacing: 0px; } "
-                   "QRadioButton::indicator { width: 12px; height: 12px; border-radius: 7px; "
-                   "border: 1px solid palette(mid); background: palette(base); image: none; } "
-                   "QRadioButton::indicator:checked { width: 6px; height: 6px; border-radius: 7px; "
-                   "border: 4px solid palette(highlight); background: palette(base); image: none; } "
-                   "QRadioButton::indicator:hover { border-color: palette(highlight); }")
-    PIPETTE_STYLE = ("QToolButton { border: none; border-radius: 3px; padding: 0; } "
-                     "QToolButton:checked { background: palette(midlight); }")
+    # The radios, the pipette toggles and the empty chips take the dock stylesheet (mockup.qss): the
+    # 17 px indicator of every check box and radio, theme tokens instead of the QGIS palette (2026-10-18:
+    # the inline QGIS palette styles kept the QGIS colours when the plugin theme differed from QGIS').
 
     def _pipette_icons(self) -> Tuple[Any, Any]:
         """``(on, off)`` pipette icons: the text colour of the theme, and a muted grey; ``(None, None)`` without QtSvg."""
         try:
-            from ...styles.mockup_design import render_icon
-            dark = self.palette().window().color().lightness() < 128
+            from ...styles.mockup_design import plugin_is_dark, render_icon
+            dark = plugin_is_dark(self)
             return render_icon('class_pipette', dark), render_icon('class_pipette', dark, '#9e9e9e')
         except Exception:
             return None, None
@@ -860,7 +852,6 @@ class RasterExploringPanel(QWidget):
             every.setObjectName("radioButton_raster_band_active_all")
             every.setToolTip(self.tr("The value range applies to every colour band at once (a pixel is kept when "
                                      "each band is in the range); the histogram shows the first one"))
-            every.setStyleSheet(self.RADIO_STYLE + " QRadioButton { spacing: 6px; }")
             every.setFixedHeight(self.ROW_CONTROL + 2)
             every.toggled.connect(lambda checked: self._on_active_band_toggled(ALL_BANDS, checked))
             self._active_group.addButton(every, ALL_BANDS)
@@ -873,7 +864,6 @@ class RasterExploringPanel(QWidget):
             radio.setObjectName(f"radioButton_raster_band_active_{number}")
             radio.setToolTip(self.tr("Active band: the one the range, the histogram and the picker read"))
             radio.toggled.connect(lambda checked, n=number: self._on_active_band_toggled(n, checked))
-            radio.setStyleSheet(self.RADIO_STYLE)
             radio.setFixedSize(self.ROW_CONTROL, self.ROW_CONTROL)  # a narrower cell clipped the round indicator
             radio.setVisible(several)
             self._active_group.addButton(radio, number)
@@ -888,7 +878,7 @@ class RasterExploringPanel(QWidget):
             else:
                 pipette.setText("✎")
             pipette.setFixedSize(self.ROW_CONTROL, self.ROW_CONTROL)
-            pipette.setStyleSheet(self.PIPETTE_STYLE)
+            pipette.setProperty("fm_band_toggle", True)
             pipette.toggled.connect(lambda checked, n=number: self._on_pipette_band_toggled(n, checked))
             pipette.setVisible(several)
             chip = self._menu_button(self._bands_holder, "—",
@@ -946,19 +936,19 @@ class RasterExploringPanel(QWidget):
             self._shortcut_buttons[key].append(action)
 
     def _style_chip(self, chip: Any, role: str) -> None:
-        """A rounded colour chip with the role letters; dashed and empty without a role."""
+        """A rounded colour chip with the role letters; dashed and empty without a role (mockup.qss)."""
         colour = self.ROLE_COLOURS.get(role)
         radius = self.CHIP_HEIGHT // 2
+        chip.setProperty("fm_band_chip", "role" if colour else "empty")
         if colour:
             chip.setStyleSheet(
                 f"QToolButton {{ background: {colour}; color: white; border: none; border-radius: {radius}px; "
                 f"padding: 0 6px; font-size: 10px; font-weight: 600; min-width: 14px; }} "
                 "QToolButton::menu-indicator { image: none; width: 0; }")
         else:
-            chip.setStyleSheet(
-                f"QToolButton {{ background: transparent; color: palette(mid); border: 1px dashed palette(mid); "
-                f"border-radius: {radius}px; padding: 0 6px; font-size: 10px; min-width: 14px; }} "
-                "QToolButton::menu-indicator { image: none; width: 0; }")
+            chip.setStyleSheet("")
+        chip.style().unpolish(chip)
+        chip.style().polish(chip)
         chip.setText(self._role_short(role) if colour else "—")
 
     @staticmethod

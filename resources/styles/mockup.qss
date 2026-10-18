@@ -141,11 +141,7 @@
     color: {fm_text};
     background: transparent;
 }
-#dockWidgetContents QgsCollapsibleGroupBox::indicator,
-#dockWidgetContents QGroupBox::indicator {
-    width: 16px;
-    height: 16px;
-}
+/* Group check boxes: see "Check boxes and radio buttons" below (one indicator for all). */
 #dockWidgetContents QgsCollapsibleGroupBox QToolButton#collapseButton,
 #dockWidgetContents QgsCollapsibleGroupBox > QToolButton {
     background: transparent;
@@ -269,6 +265,20 @@
     selection-background-color: {fm_active};
     selection-color: {fm_text};
 }
+/* control_surfaces.qss paints the unfocused fields with a surface derived from the QGIS palette
+   (":!focus" outranks the rule above): grey fields under Blend of Gray, #2c2c2c beside the #333
+   combos in the dark theme. Before the :disabled rules below, which must still win. */
+#dockWidgetContents QLineEdit:!focus,
+#dockWidgetContents QSpinBox:!focus,
+#dockWidgetContents QDoubleSpinBox:!focus {
+    background-color: {fm_field};
+    color: {fm_text};
+}
+#dockWidgetContents QgsFeaturePickerWidget QLineEdit:!focus,
+#dockWidgetContents QgsFieldExpressionWidget QLineEdit:!focus,
+#dockWidgetContents QgsMapLayerComboBox QLineEdit:!focus {
+    background: transparent;
+}
 #dockWidgetContents QComboBox:hover,
 #dockWidgetContents QLineEdit:hover,
 #dockWidgetContents QPlainTextEdit:hover,
@@ -299,9 +309,38 @@
     background: transparent;
     border: none;
 }
+/* Drop-down button: the field's own surface and the chevron of the spin boxes. Unstyled, the
+   native button took the QGIS palette: black on the light dock under Blend of Gray, grey on
+   the dark one. */
+/* Buttons inside the composite fields (previous / next feature, expression ε): the field surface.
+   themed_controls.qss paints them with the QGIS-derived control surface (solid grey under
+   Blend of Gray). */
+#dockWidgetContents QgsFeaturePickerWidget QToolButton,
+#dockWidgetContents QgsFieldExpressionWidget QToolButton {
+    background-color: {fm_field};
+    border: 1px solid {fm_field_border};
+    border-radius: 4px;
+}
+#dockWidgetContents QgsFeaturePickerWidget QToolButton:hover,
+#dockWidgetContents QgsFieldExpressionWidget QToolButton:hover {
+    border-color: {fm_field_hover};
+}
+#dockWidgetContents QgsFeaturePickerWidget QToolButton:disabled,
+#dockWidgetContents QgsFieldExpressionWidget QToolButton:disabled {
+    background-color: {fm_group};
+    border-color: {fm_group_border};
+}
 #dockWidgetContents QComboBox::drop-down {
+    subcontrol-origin: padding;
+    subcontrol-position: top right;
     border: none;
     width: 20px;
+    background: transparent;
+}
+#dockWidgetContents QComboBox::down-arrow {
+    image: url({spin_down_icon});
+    width: 10px;
+    height: 10px;
 }
 #dockWidgetContents QComboBox QAbstractItemView,
 #dockWidgetContents QListWidget,
@@ -316,27 +355,112 @@
     outline: none;
 }
 
-/* --- Check boxes -------------------------------------------------------- */
+/* --- Check boxes and radio buttons -------------------------------------- */
 
-#dockWidgetContents QCheckBox {
+/* One indicator for every check box, radio, list item and checkable group: a 17 px box
+   (15 + 1 px border) in every state. default.qss draws 18 + 2 px borders and widens them
+   to 2 px on hover / checked: the label moved by 2 px when a box was ticked, and radios
+   kept that older look next to the 5.0 check boxes. The glyph (check, dot) is the text
+   colour on the accent: dark on the light blue accent of the dark theme. */
+#dockWidgetContents QCheckBox,
+#dockWidgetContents QRadioButton {
     color: {fm_text};
+    background-color: transparent;
     spacing: 8px;
 }
+#dockWidgetContents QCheckBox:hover,
+#dockWidgetContents QRadioButton:hover {
+    background-color: transparent;
+}
+#dockWidgetContents QCheckBox:disabled,
+#dockWidgetContents QRadioButton:disabled {
+    color: {fm_text_disabled};
+}
 #dockWidgetContents QCheckBox::indicator,
+#dockWidgetContents QRadioButton::indicator,
 #dockWidgetContents QListWidget::indicator,
-#dockWidgetContents QgsCollapsibleGroupBox::indicator {
+#dockWidgetContents QgsCollapsibleGroupBox::indicator,
+#dockWidgetContents QGroupBox::indicator {
     width: 15px;
     height: 15px;
     border: 1px solid {fm_field_hover};
     border-radius: 3px;
     background-color: {fm_field};
+    image: none;
+}
+#dockWidgetContents QRadioButton::indicator {
+    border-radius: 8px;
+}
+#dockWidgetContents QCheckBox::indicator:hover,
+#dockWidgetContents QRadioButton::indicator:hover,
+#dockWidgetContents QListWidget::indicator:hover,
+#dockWidgetContents QgsCollapsibleGroupBox::indicator:hover,
+#dockWidgetContents QGroupBox::indicator:hover {
+    border: 1px solid {fm_accent};
 }
 #dockWidgetContents QCheckBox::indicator:checked,
+#dockWidgetContents QCheckBox::indicator:checked:hover,
 #dockWidgetContents QListWidget::indicator:checked,
-#dockWidgetContents QgsCollapsibleGroupBox::indicator:checked {
+#dockWidgetContents QgsCollapsibleGroupBox::indicator:checked,
+#dockWidgetContents QGroupBox::indicator:checked {
     background-color: {fm_accent};
+    border: 1px solid {fm_accent};
+    image: url({control_check_glyph});
+}
+#dockWidgetContents QRadioButton::indicator:checked,
+#dockWidgetContents QRadioButton::indicator:checked:hover {
+    background-color: {fm_accent};
+    border: 1px solid {fm_accent};
+    image: url({control_radio_glyph});
+}
+#dockWidgetContents QCheckBox::indicator:indeterminate,
+#dockWidgetContents QListWidget::indicator:indeterminate {
+    background-color: {fm_active};
+    border: 1px solid {fm_accent};
+    image: none;
+}
+#dockWidgetContents QCheckBox::indicator:disabled,
+#dockWidgetContents QRadioButton::indicator:disabled,
+#dockWidgetContents QgsCollapsibleGroupBox::indicator:disabled {
+    background-color: {fm_group};
+    border: 1px solid {fm_group_border};
+}
+#dockWidgetContents QCheckBox::indicator:checked:disabled,
+#dockWidgetContents QRadioButton::indicator:checked:disabled,
+#dockWidgetContents QgsCollapsibleGroupBox::indicator:checked:disabled {
+    background-color: {fm_text_disabled};
+    border: 1px solid {fm_text_disabled};
+}
+
+/* Small toggles of the raster band rows (the band the pipette compares). */
+#dockWidgetContents QToolButton[fm_band_toggle="true"] {
+    background: transparent;
+    border: none;
+    border-radius: 3px;
+    padding: 0px;
+}
+#dockWidgetContents QToolButton[fm_band_toggle="true"]:hover {
+    background-color: {fm_hover};
+}
+#dockWidgetContents QToolButton[fm_band_toggle="true"]:checked {
+    background-color: {fm_active};
+}
+/* Band role chip without a role: dashed outline (a role paints the chip its colour). */
+#dockWidgetContents QToolButton[fm_band_chip="empty"] {
+    background: transparent;
+    color: {fm_text_muted};
+    border: 1px dashed {fm_field_hover};
+    border-radius: 8px;
+    padding: 0px 6px;
+    font-size: 10px;
+    min-width: 14px;
+}
+#dockWidgetContents QToolButton[fm_band_chip="empty"]:hover {
     border-color: {fm_accent};
-    image: url({control_check_icon});
+}
+#dockWidgetContents QToolButton[fm_band_chip]::menu-indicator {
+    image: none;
+    width: 0px;
 }
 
 /* --- Plain buttons inside panels (presets, All / None, ...) -------------- */
