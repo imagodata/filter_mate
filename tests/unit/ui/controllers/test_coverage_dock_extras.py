@@ -578,6 +578,19 @@ class TestPointCloudObjectDetector:
         dock_extras.dock._class_pipette_enabled(FakeLayer("p1"))
         assert detector.isEnabled() and detector.toolTip() == "Object detector: click the map"
 
+    def test_detector_without_the_identify_button_is_released_on_a_cloud_without_classes(self, dock_extras,
+                                                                                         monkeypatch):
+        _identify, detector, _value, calls = self._rail(dock_extras)
+        dock_extras.controller.dockwidget = types.SimpleNamespace()  # no Identify button
+        dock_extras.dock.tr = lambda text, *_args: text
+        adapter = types.ModuleType(f"{_PKG}.adapters.qgis.point_cloud_layer_adapter")
+        adapter.may_have_classes = lambda layer: False
+        monkeypatch.setitem(sys.modules, adapter.__name__, adapter)
+        detector.setChecked(True)
+        dock_extras.dock._class_pipette_enabled(FakeLayer("p1"))
+        assert not detector.isEnabled() and not detector.isChecked()
+        assert calls == [("detector", True), ("detector", False)]  # the picker left the map
+
 
 class TestClassPipette:
     def _pipette(self, env):

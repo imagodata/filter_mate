@@ -130,9 +130,16 @@ OBJECT_TARGET = "object"  # the object under the click (the cluster of points of
 SIMILAR_OBJECTS_TARGET = "similar_objects"  # every object of the cloud like the clicked one
 OBJECT_TARGETS = (OBJECT_TARGET, SIMILAR_OBJECTS_TARGET)
 DEFAULT_SIMILAR_RATIO = (0.5, 2.0)  # area of a similar object: x 0.5 to x 2 the clicked one
-# Above this many objects the subset string keeps one X / Y box per class (the source geometry
-# of the cross filter stays exact: it is cut by the objects themselves).
-MAX_OBJECT_BOXES = 24
+# Above this many objects the subset string keeps one X / Y box per class (the source geometry of the
+# cross filter stays exact: it is cut by the objects themselves; the panel and the strip say it). QGIS
+# evaluates the subset for every point it decodes: the boxes are grouped by class, the class tested
+# first, so a point of another class costs one comparison and a point of the class about two a box
+# (X >= xmin fails for the boxes on one side, X <= xmax on the other), with the AND / OR of the
+# point cloud expressions evaluated lazily (C++ && / ||). 64 boxes of buildings (10 % of a LiDAR HD
+# tile) then cost about 14 comparisons a point, less than 24 boxes each testing its class (about 28).
+MAX_OBJECT_BOXES = 64
+# Decimals of the X / Y bounds of a box: 1e-9 degree is 0.1 mm (6 decimals were 0.1 m in a geographic CRS).
+BOX_DECIMALS = 9
 
 
 # ---------------------------------------------------------------------------
@@ -313,12 +320,17 @@ def parse_objects_state(value: Any) -> Dict[str, Any]:
     }
 
 
-def object_box_clause(code: int, box: Sequence[float]) -> str:
-    """``Classification = 6 AND X >= .. AND X <= .. AND Y >= .. AND Y <= ..``: the points of an object's box."""
+def box_coordinate(value: float) -> str:
+    """A bound of a box, :data:`BOX_DECIMALS` decimals without trailing zeros (``652000``, ``2.123456789``)."""
+    text = f"{float(value):.{BOX_DECIMALS}f}".rstrip("0").rstrip(".")
+    return "0" if text in ("", "-", "-0") else text
+
+
+def box_clause(box: Sequence[float]) -> str:
+    """``X >= .. AND X <= .. AND Y >= .. AND Y <= ..``: the points of a box ``[xmin, ymin, xmax, ymax]``."""
     xmin, ymin, xmax, ymax = box
-    return (f"{CLASSIFICATION_ATTRIBUTE} = {int(code)} AND {X_ATTRIBUTE} >= {format_number(xmin)} AND "
-            f"{X_ATTRIBUTE} <= {format_number(xmax)} AND {Y_ATTRIBUTE} >= {format_number(ymin)} AND "
-            f"{Y_ATTRIBUTE} <= {format_number(ymax)}")
+    return (f"{X_ATTRIBUTE} >= {box_coordinate(xmin)} AND {X_ATTRIBUTE} <= {box_coordinate(xmax)} AND "
+            f"{Y_ATTRIBUTE} >= {box_coordinate(ymin)} AND {Y_ATTRIBUTE} <= {box_coordinate(ymax)}")
 
 
 def class_boxes(boxes: Iterable[Sequence[float]]) -> List[List[float]]:
@@ -334,16 +346,28 @@ def class_boxes(boxes: Iterable[Sequence[float]]) -> List[List[float]]:
 def object_expression(boxes: Sequence[Sequence[float]], limit: int = MAX_OBJECT_BOXES) -> str:
     """Subset of the points in the boxes of the objects, each with its class (``[code, xmin, ymin, xmax, ymax]``).
 
-    One clause per object, ORed (each parenthesised when there are several); over ``limit``
-    objects (similar objects), one box per class. ``""`` without a box.
+    The boxes of a class are grouped behind its class test (``Classification = 6 AND ((box) OR (box))``),
+    the classes ORed in the order of their first object, each parenthesised when there are several;
+    over ``limit`` objects (similar objects), one box per class (:func:`boxes_merged`). ``""`` without a box.
     """
     boxes = list(boxes)
     if len(boxes) > limit:
         boxes = class_boxes(boxes)
-    clauses = [object_box_clause(entry[0], entry[1:]) for entry in boxes]
+    groups: Dict[int, List[str]] = {}
+    for entry in boxes:
+        groups.setdefault(int(entry[0]), []).append(box_clause(entry[1:]))
+    clauses = []
+    for code, group in groups.items():
+        inner = group[0] if len(group) == 1 else "(" + " OR ".join(f"({clause})" for clause in group) + ")"
+        clauses.append(f"{CLASSIFICATION_ATTRIBUTE} = {code} AND {inner}")
     if len(clauses) == 1:
         return clauses[0]
     return " OR ".join(f"({clause})" for clause in clauses)
+
+
+def boxes_merged(objects: Dict[str, Any], limit: int = MAX_OBJECT_BOXES) -> bool:
+    """Whether the subset keeps one box per class for a parsed objects state: it shows the whole class in it."""
+    return len(objects_boxes(objects)) > limit
 
 
 def objects_boxes(objects: Dict[str, Any]) -> List[List[float]]:
@@ -366,8 +390,12 @@ def class_selection_summary(checked: int, shown: int, kept_points: Optional[int]
     return f"{text} · {counted}" if counted else text
 
 
-def object_summary(count: int, area: Optional[float], truncated: bool, translate: Any = str) -> str:
-    """Line under the class list while the detector holds objects: ``"3 object(s) · 125 m²"``, ``"… · cut"``."""
+def object_summary(count: int, area: Optional[float], truncated: bool, translate: Any = str, merged: bool = False) -> str:
+    """Line under the class list while the detector holds objects: ``"3 object(s) · 125 m²"``, ``"… · cut"``.
+
+    ``merged``: the subset keeps one box per class (:func:`boxes_merged`), said so: the preview and
+    the filtered cloud show the whole class in that box, not the objects alone.
+    """
     try:
         from ..selection_strip import objects_text
         text = objects_text(count, area, translate)
@@ -375,6 +403,8 @@ def object_summary(count: int, area: Optional[float], truncated: bool, translate
         text = translate("{0} object(s)").format(int(count))
     if truncated:
         text += " · " + translate("cut at the window read")
+    if merged:
+        text += " · " + translate("shown as the whole class in their box")
     return text
 
 
@@ -1318,6 +1348,7 @@ class PointCloudExploringPanel(QWidget):
         # The line of the detected objects (object_summary, selection_strip.objects_text).
         self.tr("{0} object(s)")
         self.tr("cut at the window read")
+        self.tr("shown as the whole class in their box")
 
     def _build_expression_group(self) -> Any:
         self._expression_group = self._make_group(self.tr("EXPRESSION"), "mGroupBox_point_cloud_expression", checked=False)
@@ -1506,12 +1537,14 @@ class PointCloudExploringPanel(QWidget):
 
         Its class is checked in CLASSES, which becomes the active group; the classes checked are
         those of the objects. False when the class is not listed (nothing changes).
+
+        The objects kept while another group was the active one come back with CLASSES (they are
+        its selection, as its checked classes): a Ctrl+click adds to them.
         """
         parsed = _parse_object_item(item)
         if parsed is None or parsed["code"] not in self._present_codes() or self._classes_group.isHidden():
             return False
         if not self._classes_group.isChecked():
-            extend = False  # objects left under another active group do not come back
             self._activate_group(self._classes_group)
         self._objects["items"] = [*(self._objects["items"] if extend else []), parsed]
         self._objects["detected"] = None
@@ -1537,12 +1570,36 @@ class PointCloudExploringPanel(QWidget):
         self._changed()
         self.summaryChanged.emit()
 
-    def detected_objects(self) -> Optional[Tuple[Optional[int], Optional[float], bool]]:
-        """``(count, area in m², truncated)`` of the detected objects while CLASSES is active; None otherwise."""
-        detected = self._objects["detected"]
-        if detected is None or not self._objects["items"] or not self._classes_group.isChecked():
+    def detected_objects(self) -> Optional[Tuple[Optional[int], Optional[float], bool, bool]]:
+        """``(count, area in m², truncated, merged)`` of the objects while CLASSES is active; None otherwise.
+
+        Not read yet (:meth:`objects_pending`): the clicked objects, without area. ``merged``: the subset
+        keeps one box per class (:func:`boxes_merged`).
+        """
+        items = self._objects["items"]
+        if not items or not self._classes_group.isChecked():
             return None
-        return detected["count"], detected["area"], detected["truncated"]
+        merged = boxes_merged(self._objects)
+        detected = self._objects["detected"]
+        if detected is None:
+            return len(items), None, any(item["truncated"] for item in items), merged
+        return detected["count"], detected["area"], detected["truncated"], merged
+
+    def objects_pending(self) -> bool:
+        """Clicked objects whose detection is missing (a restored state, a read that failed): to be read again."""
+        return bool(self._objects["items"]) and self._objects["detected"] is None
+
+    def tiles_expression(self) -> str:
+        """Subset for the other tiles of the dataset (:meth:`apply_to_tiles`).
+
+        The boxes of the objects are in the coordinates of this tile (no point of another tile is in
+        them): with objects, their classes go alone; :meth:`expression` otherwise.
+        """
+        if not self._objects["items"] or not self._classes_group.isChecked():
+            return self.expression()
+        state = self.state()
+        state["objects"] = {}
+        return build_point_cloud_expression(state, self._hag_available)
 
     def object_zone_wkt(self) -> str:
         """WKT (layer CRS) of the detected objects while CLASSES is the active group; ``""`` otherwise."""
@@ -1869,9 +1926,16 @@ class PointCloudExploringPanel(QWidget):
             count = detected["count"] if detected is not None and detected["count"] is not None else len(items)
             truncated = detected["truncated"] if detected is not None else any(item["truncated"] for item in items)
             area = detected["area"] if detected is not None else None
-            self._class_summary_label.setText(object_summary(count, area, truncated, self.tr))
-            self._class_summary_label.setToolTip(self.tr(
-                "An object runs past the largest window read around the click and was cut there") if truncated else "")
+            merged = boxes_merged(self._objects)
+            self._class_summary_label.setText(object_summary(count, area, truncated, self.tr, merged))
+            tips = []
+            if truncated:
+                tips.append(self.tr("An object runs past the largest window read around the click and was cut there"))
+            if merged:
+                tips.append(self.tr("Too many objects for the subset of the cloud: the preview and the filtered cloud "
+                                    "keep every point of their class in the box around them; the targets are cut by "
+                                    "the objects themselves"))
+            self._class_summary_label.setToolTip("\n".join(tips))
             return
         self._class_summary_label.setToolTip("")
         checked, shown, kept, total = self._class_counts()

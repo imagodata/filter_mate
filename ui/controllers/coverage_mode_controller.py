@@ -58,6 +58,9 @@ PC_PICK_MODES = ('class', 'value', 'object', 'similar')
 PC_OBJECT_MODES = ('object', 'similar')
 # Footprints of a whole class read for the similar objects: a ratio edited reads none again.
 PC_FOOTPRINT_CACHE_SIZE = 4
+# Decimals of the WKT of the point cloud objects: 1e-9 degree in a geographic CRS (the vertices are
+# on the cells, whole metres in a projected one: no trailing digit is written).
+WKT_PRECISION = 9
 
 
 def _kind_of(layer: Any):
@@ -167,6 +170,7 @@ class CoverageModeController(BaseController):
         # (layer id, source, filter, class) -> footprint of the class, for the similar point cloud objects
         self._pc_footprints: 'OrderedDict[tuple, Any]' = OrderedDict()
         self._pc_outline_wkt = ''  # the point cloud objects drawn by the outline ('' when it shows none)
+        self._pc_reader: Any = None  # (key, private copy) the detector reads while a preview is applied
         # (source, layer name, expression) or (source, band, derivative) -> grid of the veil, None when unreadable
         self._surfaces: 'OrderedDict[tuple, Any]' = OrderedDict()
         self._expression_timer: Any = None  # reads an expression once the input settles
@@ -266,6 +270,7 @@ class CoverageModeController(BaseController):
         self._surfaces.clear()
         self._detected = None
         self._pc_footprints.clear()
+        self._pc_reader = None
         self._stats_watched.clear()  # the same ids come back with new layers when the project is opened again
         self._stats_slots.clear()  # their layers are gone
         self._schedule_cache_tidy()
@@ -366,6 +371,7 @@ class CoverageModeController(BaseController):
         self._hide_detected_objects()
         self._detected = None
         self._pc_footprints.clear()
+        self._pc_reader = None
         if self._extras is not None:
             self._extras_call('teardown')
             self._extras = None
@@ -606,6 +612,7 @@ class CoverageModeController(BaseController):
             logger.debug(f"[FM5] panel state not saved: {exc}")
         self._stop_preview(layer)
         self._hide_detected_objects()  # drawn again from the saved state when the layer comes back
+        self._pc_reader = None  # the copy of the outgoing layer is not kept open
 
     @staticmethod
     def _disconnect_previous_vector_selection(dw: Any, incoming_layer: Any) -> None:
@@ -933,7 +940,10 @@ class CoverageModeController(BaseController):
                         logger.debug(f"[FM5] histogram not refreshed after the restore: {exc}")
                     self._show_detected_objects()  # the outline left with the layer comes back with it
                 if self._kind is LayerKind.POINT_CLOUD:
-                    self._show_point_cloud_objects()  # the objects of the detector, as found then
+                    if getattr(panel, 'objects_pending', lambda: False)():
+                        self._refresh_point_cloud_objects()  # clicked objects never read (or a read failed)
+                    else:
+                        self._show_point_cloud_objects()  # the objects of the detector, as found then
                 if self._kind is LayerKind.RASTER and state.get('preview'):
                     # The preview box comes back checked: so do the button and the mask on the map.
                     self._on_raster_preview_toggled(True)
@@ -1528,6 +1538,7 @@ class CoverageModeController(BaseController):
                 if panel is not None:
                     panel.reset()  # does not emit: its outline goes here
                 self._hide_detected_objects()
+                self._sync_object_pick_mode()  # the target is back to the clicked object
                 self._panel_states.pop(layer.id(), None)
         except Exception as exc:
             logger.warning(f"[FM5] exploring action '{action}' failed: {exc}", exc_info=True)
@@ -1785,16 +1796,17 @@ class CoverageModeController(BaseController):
         return 'similar' if target == 'similar_objects' else 'object'
 
     def _on_point_cloud_object_target(self, target: str) -> None:
-        """A target of the detector chosen in the rail menus: the detector on the map follows (R4), the clicked
-        objects are read again for it."""
+        """A target of the detector chosen in the rail menus: the detector goes on the map in it (R4), the clicked
+        objects are read again for it when it changed."""
         panel = self._pc_panel
         if panel is None or not hasattr(panel, 'set_object_target'):
             return
-        panel.set_object_target(target)
-        if self._pc_pick_mode in PC_OBJECT_MODES and self._tool_on_map(self._class_tool):
-            self._pc_pick_mode = self._object_pick_mode()
-            self._extras_call('set_class_pipette_checked', True, self._pc_pick_mode)
-        self._refresh_point_cloud_objects()
+        changed = panel.set_object_target(target)
+        # R4: a target chosen in the rail menus is the detector in that target, on the map, as the three
+        # target buttons of the raster rail (the picker already there switches mode).
+        self._on_class_pick_toggled(True, self._object_pick_mode())
+        if changed:
+            self._refresh_point_cloud_objects()
 
     def _on_point_cloud_group_chosen(self, group: str) -> None:
         """The user made a group of the point cloud panel the active one: its tool follows (R1).
@@ -1893,53 +1905,90 @@ class CoverageModeController(BaseController):
     def _on_object_picked(self, point: Any, extend: bool) -> None:
         """The object detector: the object of the class clicked under ``point`` (canvas CRS); Ctrl+click adds one.
 
-        The class is the one the class pipette reads (the points drawn there); the object is the
-        cluster of points of that class around the click (``point_cloud_objects.object_footprint``).
         Each object keeps its class; a second click inside an object of the same class adds nothing.
+        The objects are read once: the new one, or (the target changed) those clicked before.
         """
-        layer, panel, iface = self._active_layer, self._pc_panel, self._iface()
-        from ...adapters.qgis.point_cloud_layer_adapter import class_at
+        panel, iface = self._pc_panel, self._iface()
         # The mode of the picker is the target (they only differ if the panel was restored apart from the tool).
-        if panel.set_object_target('similar_objects' if self._pc_pick_mode == 'similar' else 'object'):
-            self._refresh_point_cloud_objects()  # the objects clicked before, for this target
-        canvas = iface.mapCanvas()
-        code = class_at(layer, canvas, point)
-        selecting = getattr(self.dockwidget, 'pushButton_checkable_exploring_selecting', None)
+        retargeted = panel.set_object_target('similar_objects' if self._pc_pick_mode == 'similar' else 'object')
+        message, added = self._pick_point_cloud_object(self._active_layer, panel, iface.mapCanvas(), point, extend)
+        if added or retargeted:
+            self._refresh_point_cloud_objects()
+        if message:
+            self._push_info(message)
+
+    def _pick_point_cloud_object(self, layer: Any, panel: Any, canvas: Any, point: Any, extend: bool) -> Tuple[str, bool]:
+        """``(message, added)`` of a click of the detector: the object under it handed to the panel.
+
+        The class is the one the class pipette reads (the points drawn there), the object the cluster
+        of points of that class around the click (``point_cloud_objects.object_footprint``). While a
+        preview is applied to the layer, both are read on a copy of the layer filtered on its own
+        filter (:meth:`_object_reader`): the preview hides the other buildings.
+        """
+        from ...adapters.qgis.coverage_layers.point_cloud_objects import class_under, object_footprint
+        from ...adapters.qgis.point_cloud_layer_adapter import class_at
+        x, y, radius = self._layer_click(layer, canvas, point)
+        try:
+            with _wait_cursor():
+                reader, on_map = self._object_reader(layer)
+                code = class_at(layer, canvas, point) if on_map else class_under(reader, x, y, radius)
+        except RuntimeError as exc:
+            return self.tr("Object not read: {0}").format(exc), False
         if code is None:
-            message = self.tr("No classified point under the click")
-            if selecting is not None and selecting.isChecked():
-                message = f"{message}: " + self.tr(
-                    "only the points drawn on the map can be picked: turn the preview off to pick a class it hides")
-        else:
-            x, y, radius = self._layer_click(layer, canvas, point)
-            if extend and any(item['code'] == code and self._contains(item['wkt'], x, y) for item in panel.object_items()):
-                return  # a second click on the same building
-            try:
-                from ...adapters.qgis.coverage_layers.point_cloud_objects import object_footprint
-                with _wait_cursor():
-                    found = object_footprint(layer, x, y, code, seed_radius=radius)
-            except RuntimeError as exc:
-                logger.debug(f"[FM5] point cloud object not read, layer deleted: {exc}")
-                return
-            except Exception as exc:
-                logger.warning(f"[FM5] point cloud object detection failed: {exc}", exc_info=True)
-                return
-            geometry = found.geometry
-            if found.message:
-                message = self.tr("Object not read: {0}").format(found.message)
-            elif (geometry is None or geometry.isEmpty()) and found.truncated:
-                message = self.tr("Too many points around the click: the object could not be read")
-            elif geometry is None or geometry.isEmpty():
-                message = self.tr("No point of class {0} under the click: click on the object itself").format(code)
-            else:
-                box = geometry.boundingBox()
-                item = {"x": x, "y": y, "code": code, "wkt": geometry.asWkt(6), "truncated": found.truncated,
-                        "box": [box.xMinimum(), box.yMinimum(), box.xMaximum(), box.yMaximum()]}
-                if panel.add_object(item, extend):
-                    self._refresh_point_cloud_objects()
-                    return
-                message = self.tr("Class {0} is not in the class list of the layer").format(code)
-        self._push_info(message)
+            return self.tr("No classified point under the click"), False
+        if extend and any(item['code'] == code and self._contains(item['wkt'], x, y) for item in panel.object_items()):
+            return '', False  # a second click on the same building
+        try:
+            with _wait_cursor():
+                found = object_footprint(reader, x, y, code, seed_radius=radius)
+        except RuntimeError as exc:
+            logger.debug(f"[FM5] point cloud object not read, layer deleted: {exc}")
+            return '', False
+        except Exception as exc:
+            logger.warning(f"[FM5] point cloud object detection failed: {exc}", exc_info=True)
+            return '', False
+        geometry = found.geometry
+        if found.message:
+            return self.tr("Object not read: {0}").format(found.message), False
+        if (geometry is None or geometry.isEmpty()) and found.truncated:
+            return self.tr("Too many points around the click: the object could not be read"), False
+        if geometry is None or geometry.isEmpty():
+            return self.tr("No point of class {0} under the click: click on the object itself").format(code), False
+        box = geometry.boundingBox()
+        item = {"x": x, "y": y, "code": code, "wkt": geometry.asWkt(WKT_PRECISION), "truncated": found.truncated,
+                "box": [box.xMinimum(), box.yMinimum(), box.xMaximum(), box.yMaximum()]}
+        if panel.add_object(item, extend):
+            return '', True
+        return self.tr("Class {0} is not in the class list of the layer").format(code), False
+
+    def _object_reader(self, layer: Any) -> Tuple[Any, bool]:
+        """``(layer read, read on the map)`` for a click of the detector.
+
+        The project layer itself (its class read on the map, as the class pipette), unless a preview is
+        applied to it: then a private copy filtered on the filter the preview was put over (the one the
+        similar objects are read through), opened once for the layer and that filter.
+
+        Raises:
+            RuntimeError: The copy cannot be read.
+        """
+        base = self._preview_base_subset
+        if base is None or (layer.subsetString() or '') == (base or ''):
+            return layer, True
+        key = (layer.id(), layer.source(), layer.providerType(), base)
+        if self._pc_reader is not None and self._pc_reader[0] == key:
+            return self._pc_reader[1], False
+        from ...adapters.qgis.coverage_layers.point_cloud_objects import base_copy
+        copy = base_copy(layer, base)
+        self._pc_reader = (key, copy)
+        return copy, False
+
+    def _sync_object_pick_mode(self) -> None:
+        """The detector on the map follows the target of the panel (a reset brings it back to the clicked object)."""
+        if self._pc_pick_mode in PC_OBJECT_MODES and self._tool_on_map(self._class_tool):
+            mode = self._object_pick_mode()
+            if mode != self._pc_pick_mode:
+                self._pc_pick_mode = mode
+                self._extras_call('set_class_pipette_checked', True, mode)
 
     def _push_info(self, message: str) -> None:
         iface = self._iface()
@@ -2004,7 +2053,7 @@ class CoverageModeController(BaseController):
                 truncated = truncated or cut
             empty = geometry is None or geometry.isEmpty()
             area = None if empty else self._ground_area(geometry, layer)
-            panel.set_detected_objects('' if empty else geometry.asWkt(6), boxes, count, area, truncated)
+            panel.set_detected_objects('' if empty else geometry.asWkt(WKT_PRECISION), boxes, count, area, truncated)
         except RuntimeError as exc:
             logger.debug(f"[FM5] point cloud objects not read, layer deleted: {exc}")
             return
@@ -2339,7 +2388,13 @@ class CoverageModeController(BaseController):
             elif not targets:
                 show_warning(self.tr("Select points first: classes, attribute ranges or an expression"))
                 return
-            siblings = self._apply_to_sibling_tiles(layer, expression, source_op) if self._pc_panel.apply_to_tiles() else []
+            siblings = []
+            if self._pc_panel.apply_to_tiles():
+                tiles = self._pc_panel.tiles_expression() if hasattr(self._pc_panel, 'tiles_expression') else expression
+                if tiles != expression:
+                    logger.info(f"[FM5] other tiles of the dataset: the boxes of the objects are in the coordinates of "
+                                f"'{self._layer_name(layer)}', their classes go alone: {tiles}")
+                siblings = self._apply_to_sibling_tiles(layer, tiles, source_op)
             if not targets:
                 after = take_snapshot(layer, LayerKind.POINT_CLOUD)
                 changes = (((before, after),) if not after.same_state(before) else ()) + tuple(siblings)
@@ -2524,6 +2579,7 @@ class CoverageModeController(BaseController):
             if panel is not None:
                 panel.reset()  # does not emit: its outline goes here
             self._hide_detected_objects()
+            self._sync_object_pick_mode()
             self._panel_states.pop(layer.id(), None)
         self._finish_restore(restored)
 

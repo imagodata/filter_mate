@@ -36,7 +36,7 @@ import time
 from dataclasses import dataclass, field
 from typing import Any, Callable, List, Optional, Sequence, Tuple
 
-from qgis.core import QgsGeometry, QgsRectangle
+from qgis.core import QgsDoubleRange, QgsGeometry, QgsRectangle
 
 logger = logging.getLogger(__name__)
 
@@ -238,10 +238,11 @@ def _readable_reason(layer) -> str:
 def object_footprint(layer, x: float, y: float, code: int, seed_radius: float = 0.0,
                      resolution: float = OBJECT_RESOLUTION, start: float = OBJECT_WINDOW_START,
                      limit: float = OBJECT_WINDOW_MAX, points_limit: int = OBJECT_POINTS_LIMIT) -> PointCloudObject:
-    """The object of class ``code`` under ``(x, y)`` (layer CRS), read from ``layer`` itself (main thread).
+    """The object of class ``code`` under ``(x, y)`` (layer CRS), read from ``layer`` (main thread).
 
     ``identify`` honours the subset string of the layer and reads every class: the points
-    of ``code`` are kept in Python.
+    of ``code`` are kept in Python. ``layer`` is the project layer, or its :func:`base_copy`
+    while a preview is applied to it.
 
     Args:
         seed_radius: Search radius of the click, in layer units (a click between the points of a roof).
@@ -269,7 +270,7 @@ def object_footprint(layer, x: float, y: float, code: int, seed_radius: float = 
         area = QgsRectangle(xmin, ymin, xmax, ymax)
         area.grow(cell * 0.5)  # identify() leaves out the points on the edge of the area
         xs, ys, truncated = _read_xy(provider, cell, area, int(points_limit), None, None, keep=keep)
-        read['truncated'] = read['truncated'] or truncated
+        read['truncated'] = truncated  # the last read is the final window: a smaller one saturated does not count
         read['points'] += len(xs)
         return xs, ys
 
@@ -286,6 +287,53 @@ def object_footprint(layer, x: float, y: float, code: int, seed_radius: float = 
     logger.info(f"⏱ [FM5] point cloud object: class {code}, {grid.points} points, window of "
                 f"{2 * grid.half / scale:.0f} m{', cut' if truncated else ''}, {elapsed:.2f} s")
     return PointCloudObject(geometry, grid.points, truncated, cell)
+
+
+# Points read around a click to tell its class on a private copy (the preview hides the others from the map).
+CLASS_UNDER_POINTS = 20000
+
+
+def base_copy(layer, base_subset: str = ''):
+    """A private copy of ``layer`` filtered on ``base_subset`` only (main thread): its filter, not its live preview.
+
+    The object under a click is read through it while the preview (or the subset of the objects)
+    is applied to the project layer: ``identify`` honours the subset, a click on another building
+    read nothing there, or an object cut to the box of the first one.
+
+    Opening it reads the header and the root of the octree (COPC: the LAS header, the COPC info
+    record and the first hierarchy page; EPT: ``ept.json``), no statistics nor index (see
+    :func:`point_cloud_footprint.open_point_cloud`).
+
+    Raises:
+        RuntimeError: The copy cannot be read, or refused the filter (the reason).
+    """
+    from .point_cloud_footprint import open_point_cloud
+    reason = _readable_reason(layer)
+    if reason:
+        raise RuntimeError(reason)
+    copy = open_point_cloud(layer.source(), f"{layer.name()}_objects", layer.providerType())
+    reason = _readable_reason(copy)
+    if reason:
+        raise RuntimeError(reason)
+    base = (base_subset or '').strip()
+    # Spelled in parentheses, as class_subset: not the cache key of the project layer's own text.
+    if base and not copy.setSubsetString(f"({base}\n)"):
+        raise RuntimeError(f"the filter was rejected by the point cloud: {base[:120]}")
+    return copy
+
+
+def class_under(layer, x: float, y: float, radius: float = 0.0, resolution: float = OBJECT_RESOLUTION) -> Optional[int]:
+    """Most frequent class of the points of ``layer`` within ``radius`` (layer units, a cell at least) of ``(x, y)``.
+
+    What the class pipette reads on the map, read from the points instead (a private copy is not drawn).
+    """
+    from ..point_cloud_layer_adapter import dominant_class
+    from .point_cloud_footprint import layer_resolution
+    cell = layer_resolution(resolution, layer.crs())
+    half = max(float(radius or 0.0), cell)
+    area = QgsRectangle(x - half, y - half, x + half, y + half)
+    points = layer.dataProvider().identify(cell, QgsGeometry.fromRect(area), QgsDoubleRange(), CLASS_UNDER_POINTS)
+    return dominant_class(points)
 
 
 def class_subset(code: int, base_subset: str = '') -> str:

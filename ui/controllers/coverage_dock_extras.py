@@ -316,6 +316,7 @@ class CoverageDockExtras(QObject):
         self.tr("raster expression")
         self.tr("all points")
         self.tr("{0} object(s)")
+        self.tr("shown as the whole class in their box")
 
     # === Building ===
 
@@ -888,19 +889,24 @@ class CoverageDockExtras(QObject):
             self.dockwidget, 'pushButton_exploring_identify', None)
 
     def _class_pipette_enabled(self, layer: Any) -> None:
-        """A point cloud without the Classification attribute has no class to pick."""
-        button = self._class_pipette_button()
-        if button is None:
-            return
+        """A point cloud without the Classification attribute has no class to pick, nor object to detect.
+
+        The detector is followed whether the class pipette (the Identify button) exists or not; a detector
+        left down is released, which takes the picker off the map.
+        """
         from ...adapters.qgis.point_cloud_layer_adapter import may_have_classes
         enabled = may_have_classes(layer)
-        button.setEnabled(enabled)
-        button.setToolTip(self._class_pipette_tip if enabled else self.tr(
-            "Class pipette: this point cloud has no Classification attribute"))
+        button = self._class_pipette_button()
+        if button is not None:
+            button.setEnabled(enabled)
+            button.setToolTip(self._class_pipette_tip if enabled else self.tr(
+                "Class pipette: this point cloud has no Classification attribute"))
         detector = self._tools.get(PC_OBJECT_BUTTON)
         if detector is not None:
             if self._pc_object_tip is None:
                 self._pc_object_tip = detector.toolTip()
+            if not enabled and detector.isChecked():
+                detector.setChecked(False)  # runs the toggled slot: the picker leaves the map
             detector.setEnabled(enabled)
             detector.setToolTip(self._pc_object_tip if enabled else self.tr(
                 "Object detector: this point cloud has no Classification attribute"))

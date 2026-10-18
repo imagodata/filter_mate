@@ -7,7 +7,8 @@ and point cloud rails and the tests, so the same rules hold everywhere:
 - R1: a tool tied to a group is available only while that group is active.
 - R2: a tool put on makes its group the active one.
 - R3: the active group and the tool on the map come back with the layer.
-- R4: the rail and the group show one sub-mode (the pipette targets, the class / value pipette).
+- R4: the rail and the group show one sub-mode (the pipette targets, the class / value pipette, the
+  targets of the point cloud detector); a target chosen on the rail (a button, a menu) puts its tool on.
 - R5: a tool QGIS drops releases its button; the group stays.
 
 The vector groups are also chosen by the number of features (:func:`group_for_count`): the rule

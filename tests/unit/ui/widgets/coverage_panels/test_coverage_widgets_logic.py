@@ -943,7 +943,25 @@ class TestPointCloudObjects:
         objects = {"target": "similar_objects", "items": [_object(6, (0, 0, 1, 1))],
                    "detected": {"wkt": "", "boxes": [[6, 0, 0, 1, 1], [6, 5, 5, 6, 6]], "count": 2}}
         state = {"classes_enabled": True, "classes": [6], "objects": objects}
-        assert cloud.build_point_cloud_expression(state).count("Classification = 6") == 2
+        assert cloud.build_point_cloud_expression(state) == (
+            "Classification = 6 AND ((X >= 0 AND X <= 1 AND Y >= 0 AND Y <= 1) OR (X >= 5 AND X <= 6 AND Y >= 5 AND Y <= 6))")
+
+    def test_the_boxes_of_a_class_are_grouped_behind_its_test(self):
+        # The class is tested once a point: a point of another class costs one comparison.
+        boxes = [[6, 0, 0, 1, 1], [5, 10, 10, 11, 11], [6, 2, 2, 3, 3]]
+        assert cloud.object_expression(boxes) == (
+            "(Classification = 6 AND ((X >= 0 AND X <= 1 AND Y >= 0 AND Y <= 1) OR (X >= 2 AND X <= 3 AND Y >= 2 AND Y <= 3)))"
+            " OR (Classification = 5 AND X >= 10 AND X <= 11 AND Y >= 10 AND Y <= 11)")
+
+    def test_merged_boxes_are_said(self):
+        objects = cloud.parse_objects_state({"items": [_object(6, (0, 0, 1, 1))], "detected": {
+            "boxes": [[6, i, i, i + 1, i + 1] for i in range(cloud.MAX_OBJECT_BOXES + 1)], "count": 65}})
+        assert cloud.boxes_merged(objects) and not cloud.boxes_merged(cloud.parse_objects_state({}))
+        assert cloud.object_summary(65, None, False, merged=True) == "65 object(s) · shown as the whole class in their box"
+
+    def test_degrees_keep_nine_decimals(self):
+        assert cloud.box_coordinate(2.123456789) == "2.123456789" and cloud.box_coordinate(652000.0) == "652000"
+        assert cloud.box_coordinate(-0.0) == "0"
 
     def test_objects_are_wrapped_before_the_height(self):
         state = {"classes_enabled": True, "classes": [5, 6], "hag_enabled": True, "hag_min": 2, "hag_layer_id": "dtm",

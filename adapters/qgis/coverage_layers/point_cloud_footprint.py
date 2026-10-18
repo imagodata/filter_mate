@@ -291,9 +291,11 @@ def footprint_geometry(layer, resolution: float = DEFAULT_RESOLUTION, extent: Op
             cell *= 1.05
         logger.warning(f"[FM5] footprint of {len(xs)} points over {span_x:.3g} x {span_y:.3g}: cells of {cell:.3g} "
                        f"instead of {resolution:.3g} (grid limit)")
-    # Cells aligned on the scanned area, the grid limited to the points read (+ margin).
-    left = area.xMinimum() + (math.floor((float(xs.min()) - area.xMinimum()) / cell) - margin) * cell
-    top = area.yMaximum() - (math.floor((area.yMaximum() - float(ys.max())) / cell) - margin) * cell
+    # Cells on the multiples of the cell size (as the objects of point_cloud_objects, measured on the same
+    # cells: an area compared with a grid half a cell off differed by 10-20 % on a tree of 5 x 5 m), the
+    # grid limited to the points read (+ margin).
+    left = (math.floor(float(xs.min()) / cell) - margin) * cell
+    top = (math.floor(float(ys.max()) / cell) + 1 + margin) * cell
     cols = int(math.floor((float(xs.max()) - left) / cell)) + 1 + margin
     rows = int(math.floor((top - float(ys.min())) / cell)) + 1 + margin
     ci = np.clip(np.floor((xs - left) / cell).astype('int64'), 0, cols - 1)

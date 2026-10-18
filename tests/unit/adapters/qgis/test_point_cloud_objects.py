@@ -308,3 +308,85 @@ class TestSimilarObjects:
                                      cell_size=1.0)
         found = objects.similar_objects_footprint(None, 6, [100.0], (0.5, 2.0), footprint=read)
         assert found.geometry == ("union", 2) and len(found.parts) == 2 and found.total == 3 and found.truncated
+
+
+class TestFinalWindow:
+    def test_a_small_window_at_the_limit_does_not_cut_the_object(self, qgis_fakes):
+        """The first window of a long building saturated the points limit: the final window did not."""
+        roof = [(x + 0.25, y + 0.25, 6) for x in np.arange(100, 200, 0.5) for y in np.arange(100, 104, 0.5)]
+        layer = FakeLayer(roof)
+        first = {"done": False}
+        identify = layer.provider.identify
+
+        def saturated_once(resolution, geometry, zrange, limit):
+            points = identify(resolution, geometry, zrange, limit)
+            if not first["done"]:
+                first["done"] = True
+                return points + [{"X": 150.0, "Y": 150.0, "Classification": 2}] * (limit - len(points))
+            return points
+
+        layer.provider.identify = saturated_once
+        found = objects.object_footprint(layer, 150.0, 102.0, 6, resolution=1.0, points_limit=len(roof) + 100)
+        assert found.points == len(roof) and not found.truncated
+
+
+class TestSameCellsAsTheFootprint:
+    """2026-10-18 review: the object and the footprint of its class are measured on the same cells."""
+
+    def _footprint_cells(self, monkeypatch, layer, cell):
+        grids = []
+
+        def mask_to_geometry(region, geotransform, crs_wkt, sieve_pixels=0, simplify_tolerance=0.0):
+            grids.append((region.copy(), geotransform))
+            return "footprint geometry"
+
+        monkeypatch.setattr(geometry_tools, "mask_to_geometry", mask_to_geometry)
+        monkeypatch.setattr(footprint, "QgsRectangle", fk.FakeRectangle)
+        footprint.footprint_geometry(layer, cell)
+        return grids[0]
+
+    @pytest.mark.parametrize("offset", [0.0, 0.3, 0.7, 1.4])
+    def test_a_tree_has_the_same_cells(self, qgis_fakes, monkeypatch, offset):
+        tree = [(x + offset, y + offset, 5) for x in np.arange(1000.1, 1005, 0.4) for y in np.arange(2000.1, 2005, 0.4)]
+        layer = FakeLayer(tree)
+        layer.extent = lambda: fk.FakeRectangle(987.3, 1981.9, 1031.7, 2033.2)  # an extent off the cells
+        objects.object_footprint(layer, 1002.5 + offset, 2002.5 + offset, 5)
+        region, object_transform = qgis_fakes[0][:2]
+        grid, transform = self._footprint_cells(monkeypatch, layer, 2.0)
+        assert transform[0] % 2.0 == 0 and transform[3] % 2.0 == 0  # cells on the multiples of their size
+        assert (object_transform[0] - transform[0]) % 2.0 == 0 and (object_transform[3] - transform[3]) % 2.0 == 0
+        assert int(region.sum()) == int(grid.sum())
+
+
+class TestReadThroughACopy:
+    def test_class_under_the_click(self, qgis_fakes, monkeypatch):
+        monkeypatch.setattr(objects, "QgsGeometry", types.SimpleNamespace(fromRect=lambda rect: types.SimpleNamespace(rect=rect)))
+        points = [(10.2, 10.2, 6), (10.4, 10.6, 6), (10.8, 10.1, 2), (30.0, 30.0, 5)]
+        layer = FakeLayer(points)
+        assert objects.class_under(layer, 10.5, 10.5, 1.0) == 6
+        assert objects.class_under(layer, 50.0, 50.0, 1.0) is None
+
+    def test_the_copy_keeps_the_filter_not_the_preview(self, monkeypatch):
+        opened = []
+
+        class Copy(FakeLayer):
+            def __init__(self):
+                super().__init__([])
+                self.subsets = []
+
+            def setSubsetString(self, subset):
+                self.subsets.append(subset)
+                return True
+
+        def open_point_cloud(source, name, provider):
+            opened.append((source, provider))
+            return Copy()
+
+        monkeypatch.setattr(footprint, "open_point_cloud", open_point_cloud)
+        layer = FakeLayer([])
+        layer.source, layer.name = (lambda: "/data/tile.copc.laz"), (lambda: "tile")
+        assert objects.base_copy(layer, "Z > 0 -- low").subsets == ["(Z > 0 -- low\n)"]
+        assert objects.base_copy(layer, "").subsets == []
+        assert opened == [("/data/tile.copc.laz", "copc")] * 2
+        with pytest.raises(RuntimeError, match="VPC"):
+            objects.base_copy(FakeLayer([], provider="vpc"))
