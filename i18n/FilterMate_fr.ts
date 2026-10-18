@@ -307,6 +307,66 @@
         <source>{0} object(s)</source>
         <translation>{0} objet(s)</translation>
     </message>
+    <message>
+        <source>Value pipette: click the map and a condition is written on the attribute chosen in ATTRIBUTES (Z, intensity...), around the value of the point there, with the tolerance of the panel. Ctrl+click adds another condition (OR)</source>
+        <translation>Pipette de valeur : cliquez la carte et une condition est écrite sur l'attribut choisi dans ATTRIBUTS (Z, intensité...), autour de la valeur du point à cet endroit, avec la tolérance du panneau. Ctrl+clic ajoute une autre condition (OU)</translation>
+    </message>
+    <message>
+        <source>Zone: drag a rectangle on the map and X / Y conditions are written in ATTRIBUTES</source>
+        <translation>Zone : tracez un rectangle sur la carte et des conditions X / Y sont écrites dans ATTRIBUTS</translation>
+    </message>
+    <message>
+        <source>More tools: the value under the cursor, the statistics of a rectangle</source>
+        <translation>Autres outils : la valeur sous le curseur, les statistiques d'un rectangle</translation>
+    </message>
+    <message>
+        <source>More tools: the elevation profile and the 3D view of QGIS</source>
+        <translation>Autres outils : le profil d'élévation et la vue 3D de QGIS</translation>
+    </message>
+    <message>
+        <source>Value under the cursor</source>
+        <translation>Valeur sous le curseur</translation>
+    </message>
+    <message>
+        <source>Statistics of a rectangle</source>
+        <translation>Statistiques d'un rectangle</translation>
+    </message>
+    <message>
+        <source>Elevation profile</source>
+        <translation>Profil d'élévation</translation>
+    </message>
+    <message>
+        <source>3D view</source>
+        <translation>Vue 3D</translation>
+    </message>
+    <message>
+        <source>This point cloud has no X / Y attribute to filter on</source>
+        <translation>Ce nuage de points n'a pas d'attribut X / Y à filtrer</translation>
+    </message>
+    <message>
+        <source>Zone: draw a rectangle, a polygon, a freehand shape or a circle on the map (right-click the button for the shape); its X / Y box goes to ATTRIBUTES, the shape itself cuts the targets</source>
+        <translation>Zone : tracez un rectangle, un polygone, une forme à main levée ou un cercle sur la carte (clic droit sur le bouton pour la forme) ; sa boîte X / Y va dans ATTRIBUTS, la forme elle-même découpe les cibles</translation>
+    </message>
+    <message>
+        <source>Zone shape</source>
+        <translation>Forme de la zone</translation>
+    </message>
+    <message>
+        <source>Rectangle</source>
+        <translation>Rectangle</translation>
+    </message>
+    <message>
+        <source>Polygon</source>
+        <translation>Polygone</translation>
+    </message>
+    <message>
+        <source>Freehand</source>
+        <translation>Main levée</translation>
+    </message>
+    <message>
+        <source>Radius</source>
+        <translation>Rayon</translation>
+    </message>
 </context>
 <context>
     <name>CoverageModeController</name>
@@ -602,6 +662,18 @@
     <message>
         <source>Not used for raster layers: the pipette reads the bands</source>
         <translation>Sans usage pour un raster : la pipette lit les bandes</translation>
+    </message>
+    <message>
+        <source>No point drawn under the click</source>
+        <translation>Aucun point dessiné sous le clic</translation>
+    </message>
+    <message>
+        <source>This point has no {0}</source>
+        <translation>Ce point n'a pas de {0}</translation>
+    </message>
+    <message>
+        <source>{0} cannot be used in a condition</source>
+        <translation>{0} ne peut pas servir dans une condition</translation>
     </message>
 </context>
 <context>
@@ -3162,6 +3234,18 @@ Assurez-vous que la table PostgreSQL a une CLÉ PRIMAIRE définie.</translation>
     <message>
         <source>The height is computed by PDAL into a derived point cloud, in a background task</source>
         <translation>La hauteur est calculée par PDAL dans un nuage dérivé, en tâche de fond</translation>
+    </message>
+    <message>
+        <source>Pipette on</source>
+        <translation>Pipette sur</translation>
+    </message>
+    <message>
+        <source>Attribute the value pipette of the rail reads under the click</source>
+        <translation>Attribut que la pipette de valeur du rail lit sous le clic</translation>
+    </message>
+    <message>
+        <source>Tolerance around the picked value, in % of the observed range of the attribute</source>
+        <translation>Tolérance autour de la valeur prélevée, en % de la plage observée de l'attribut</translation>
     </message>
 </context>
 <context>

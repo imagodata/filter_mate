@@ -1477,7 +1477,8 @@ class TestToolFollowsTheChosenGroup:
         monkeypatch.setattr(controller, "_extras_call", lambda name, *args: calls.append((name,) + args))
         monkeypatch.setattr(controller, "_on_color_pick_toggled",
                             lambda on, target=None: calls.append(("pipette", on) if target is None else ("pipette", on, target)))
-        monkeypatch.setattr(controller, "_on_class_pick_toggled", lambda on: calls.append(("class pipette", on)))
+        monkeypatch.setattr(controller, "_on_class_pick_toggled",
+                            lambda on, mode="class": calls.append(("class pipette", on) if not on else ("class pipette", on, mode)))
         monkeypatch.setattr(controller, "_deactivate_class_tool", lambda: calls.append(("class pipette", False)))
         return controller, calls
 
@@ -1505,23 +1506,33 @@ class TestToolFollowsTheChosenGroup:
         controller, calls = self._controller(ctrl_module, monkeypatch)
         controller._class_tool = None
         controller._on_point_cloud_group_chosen("classes")
-        assert calls == [("class pipette", True)]
+        assert calls == [("class pipette", True, "class"), ("stop_zone_tool",)]
 
-    def test_attributes_or_expression_take_the_class_pipette_off(self, ctrl_module, monkeypatch):
+    def test_attributes_group_switches_the_picker_to_the_value_pipette(self, ctrl_module, monkeypatch):
+        # 2026-10-18: ATTRIBUTES has its own tools (value pipette, zone); the picker changes mode, not map tool.
         tool = object()
         controller, calls = self._controller(ctrl_module, monkeypatch, map_tool=tool)
         controller._class_tool = tool
         controller._on_point_cloud_group_chosen("ranges")
-        assert calls == [("class pipette", False)]
+        assert calls == [("class pipette", True, "value")]
+
+    def test_expression_takes_the_picker_off(self, ctrl_module, monkeypatch):
+        tool = object()
+        controller, calls = self._controller(ctrl_module, monkeypatch, map_tool=tool)
+        controller._class_tool = tool
+        controller._on_point_cloud_group_chosen("expression")
+        assert calls == [("class pipette", False), ("stop_zone_tool",)]
 
     def test_classes_group_with_the_class_pipette_already_on(self, ctrl_module, monkeypatch):
         tool = object()
         controller, calls = self._controller(ctrl_module, monkeypatch, map_tool=tool)
         controller._class_tool = tool
+        controller._pc_pick_mode = "class"
         controller._on_point_cloud_group_chosen("classes")
+        assert calls == [("stop_zone_tool",)]
         controller._class_tool = None
         controller._on_point_cloud_group_chosen("expression")
-        assert calls == []
+        assert calls == [("stop_zone_tool",), ("stop_zone_tool",)]
 
 
 @pytest.mark.unit
@@ -1581,14 +1592,15 @@ class TestIdentifyIsTheClassPipette:
         iface = MagicMock()
         iface.mapCanvas.return_value = canvas
         monkeypatch.setattr(controller, "_iface", lambda: iface)
-        monkeypatch.setattr(controller, "_on_class_pick_toggled", lambda on: calls.append(("class pipette", on)))
+        monkeypatch.setattr(controller, "_on_class_pick_toggled",
+                            lambda on, mode="class": calls.append(("class pipette", on) if not on else ("class pipette", on, mode)))
         monkeypatch.setattr(controller, "_identify_point_cloud", lambda: calls.append(("qgis identify",)))
         return controller, calls
 
     def test_identify_puts_the_class_pipette_on(self, ctrl_module, layers, monkeypatch):
         controller, calls = self._controller(ctrl_module, layers, monkeypatch)
         assert controller.handle_exploring_action("identify") is True
-        assert calls == [("class pipette", True)]
+        assert calls == [("class pipette", True, "class")]
 
     def test_identify_again_takes_it_off(self, ctrl_module, layers, monkeypatch):
         tool = object()
@@ -1596,6 +1608,53 @@ class TestIdentifyIsTheClassPipette:
         controller._class_tool = tool
         controller.handle_exploring_action("identify")
         assert calls == [("class pipette", False)]
+
+    def test_identify_switches_the_value_pipette_back_to_the_class_one(self, ctrl_module, layers, monkeypatch):
+        tool = object()
+        controller, calls = self._controller(ctrl_module, layers, monkeypatch, map_tool=tool)
+        controller._class_tool, controller._pc_pick_mode = tool, "value"
+        controller.handle_exploring_action("identify")
+        assert calls == [("class pipette", True, "class")]
+
+
+@pytest.mark.unit
+class TestValuePipette:
+    """2026-10-18: the value pipette of ATTRIBUTES writes a condition around the attribute of the point clicked."""
+
+    def _controller(self, ctrl_module, layers, monkeypatch, attributes):
+        controller = ctrl_module.CoverageModeController(_dock())
+        controller._active_layer, controller._kind = layers["p1"], _kind(ctrl_module, "POINT_CLOUD")
+        controller._pc_pick_mode = "value"
+        panel = MagicMock()
+        panel.pick_attribute.return_value = "Z"
+        panel.add_value_condition.return_value = True
+        controller._pc_panel = panel
+        canvas = MagicMock()
+        iface = MagicMock()
+        iface.mapCanvas.return_value = canvas
+        monkeypatch.setattr(controller, "_iface", lambda: iface)
+        adapter = types.ModuleType(f"{_PKG}.adapters.qgis.point_cloud_layer_adapter")
+        adapter.attributes_at = lambda layer, canvas, point: attributes
+        adapter.attribute_value = lambda attrs, name: None if not attrs else attrs.get(name)
+        monkeypatch.setitem(sys.modules, adapter.__name__, adapter)
+        return controller, panel, iface
+
+    def test_a_click_writes_a_condition_on_the_chosen_attribute(self, ctrl_module, layers, monkeypatch):
+        controller, panel, iface = self._controller(ctrl_module, layers, monkeypatch, {"Z": 1245.3, "Classification": 6})
+        controller._on_class_picked(object(), False)
+        panel.add_value_condition.assert_called_once_with("Z", 1245.3, False)
+        iface.messageBar().pushInfo.assert_not_called()
+
+    def test_ctrl_click_adds_an_or_condition(self, ctrl_module, layers, monkeypatch):
+        controller, panel, _iface = self._controller(ctrl_module, layers, monkeypatch, {"Z": 12.0})
+        controller._on_class_picked(object(), True)
+        panel.add_value_condition.assert_called_once_with("Z", 12.0, True)
+
+    def test_no_point_under_the_click_is_said(self, ctrl_module, layers, monkeypatch):
+        controller, panel, iface = self._controller(ctrl_module, layers, monkeypatch, None)
+        controller._on_class_picked(object(), False)
+        panel.add_value_condition.assert_not_called()
+        assert iface.messageBar().pushInfo.called
 
 
 @pytest.mark.unit
@@ -1627,7 +1686,8 @@ class TestToolComesBackWithTheLayer:
         monkeypatch.setattr(controller, "_iface", lambda: iface)
         monkeypatch.setattr(controller, "_on_color_pick_toggled",
                             lambda on, target=None: calls.append(("pipette", on, target)))
-        monkeypatch.setattr(controller, "_on_class_pick_toggled", lambda on: calls.append(("class pipette", on)))
+        monkeypatch.setattr(controller, "_on_class_pick_toggled",
+                            lambda on, mode="class": calls.append(("class pipette", on) if not on else ("class pipette", on, mode)))
         monkeypatch.setattr(controller, "_deactivate_pixel_tool", lambda: None)
         monkeypatch.setattr(controller, "_deactivate_class_tool", lambda: None)
         monkeypatch.setattr(controller, "_drop_map_tools", lambda: None)
@@ -1664,7 +1724,9 @@ class TestToolComesBackWithTheLayer:
     def test_point_cloud_restore_puts_the_class_pipette_back(self, ctrl_module, layers, monkeypatch):
         controller, calls = self._controller(ctrl_module, layers, monkeypatch, "POINT_CLOUD")
         controller._restore_tool({"class_pipette_on": True})
-        assert calls == [("class pipette", True)]
+        assert calls == [("class pipette", True, "class")]
+        controller._restore_tool({"class_pipette_on": True, "pc_tool": "value"})
+        assert calls[-1] == ("class pipette", True, "value")
 
 
 @pytest.mark.unit

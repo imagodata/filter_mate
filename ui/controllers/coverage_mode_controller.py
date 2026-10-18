@@ -138,6 +138,7 @@ class CoverageModeController(BaseController):
         self._color_pick = False  # the pipette: a click on the map picks a colour to select
         self._mask_overlay = None  # veil of a terrain derivative or expression preview (canvas item)
         self._object_outline = None  # outline of the objects the pipette detected (rubber band)
+        self._pc_pick_mode = 'class'  # what a click of the point cloud picker does: 'class' or 'value'
         self._detected: Any = None  # (key, SelectionGeometryResult) of the last object detection
         # (source, layer name, expression) or (source, band, derivative) -> grid of the veil, None when unreadable
         self._surfaces: 'OrderedDict[tuple, Any]' = OrderedDict()
@@ -568,6 +569,7 @@ class CoverageModeController(BaseController):
                 if target is not None:
                     state['pipette_target'] = target
                 state['class_pipette_on'] = bool(class_pipette_on)
+                state['pc_tool'] = self._pc_pick_mode if class_pipette_on else ''
             self._panel_states[layer.id()] = state
         except Exception as exc:
             logger.debug(f"[FM5] panel state not saved: {exc}")
@@ -911,7 +913,7 @@ class CoverageModeController(BaseController):
             target = state.get('pipette_target') or 'similar'
             self._on_color_pick_toggled(True, target)
         elif self._kind is LayerKind.POINT_CLOUD and state.get('class_pipette_on'):
-            self._on_class_pick_toggled(True)
+            self._on_class_pick_toggled(True, state.get('pc_tool') or 'class')
 
     def _tool_on_map(self, tool: Any) -> bool:
         """Whether ``tool`` is the current map tool of the canvas."""
@@ -1548,9 +1550,27 @@ class CoverageModeController(BaseController):
         canvas.setExtent(extent)
         canvas.refresh()
 
+    def _zone_geometry(self) -> Any:
+        """The shape drawn with the Zone tool on the point cloud (layer CRS), None without one."""
+        panel = self._pc_panel
+        wkt = panel.zone_wkt() if panel is not None and hasattr(panel, 'zone_wkt') else ''
+        if not wkt:
+            return None
+        try:
+            from qgis.core import QgsGeometry
+            geometry = QgsGeometry.fromWkt(wkt)
+            return geometry if geometry is not None and not geometry.isEmpty() else None
+        except Exception as exc:
+            logger.debug(f"[FM5] zone of the point cloud unreadable: {exc}")
+            return None
+
     def _toggle_class_tool(self) -> None:
-        """The Identify button of a point cloud: the class pipette goes on the map, or leaves it."""
-        self._on_class_pick_toggled(not self._tool_on_map(self._class_tool))
+        """The Identify button of a point cloud: the class pipette goes on the map, or leaves it.
+
+        With the picker on the map as the value pipette, the click switches it to the class pipette.
+        """
+        on_map = self._tool_on_map(self._class_tool)
+        self._on_class_pick_toggled(not on_map or self._pc_pick_mode != 'class', 'class')
 
     def _identify_point_cloud(self) -> None:
         """QGIS identify tool on the point cloud (kept for the automation API; the rail uses the class pipette)."""
@@ -1665,16 +1685,25 @@ class CoverageModeController(BaseController):
 
     # === Point cloud: class pipette ===
 
-    def _on_class_pick_toggled(self, enabled: bool) -> None:
-        """The class pipette of the rail: a picker in the point cloud colour goes on the map (or leaves it)."""
+    def _on_class_pick_toggled(self, enabled: bool, mode: str = 'class') -> None:
+        """The class pipette (Identify) or the value pipette of the rail: one picker in the point cloud colour.
+
+        Args:
+            enabled: Whether the picker goes on the map.
+            mode: ``'class'`` (a click checks the class in CLASSES) or ``'value'`` (a click writes a
+                condition on the attribute chosen in ATTRIBUTES).
+        """
         iface = self._iface()
         if iface is None:
             return
         if not enabled:
             self._deactivate_class_tool()
             return
+        self._pc_pick_mode = 'value' if mode == 'value' else 'class'
         canvas = iface.mapCanvas()
         if self._class_tool is not None and canvas.mapTool() is self._class_tool:
+            self._extras_call('set_class_pipette_checked', True, self._pc_pick_mode)  # same tool, other button
+            self._show_pc_pick_group()
             return
         if self._class_tool is None:
             from ..styles.mockup_design import KIND_COLORS
@@ -1682,23 +1711,56 @@ class CoverageModeController(BaseController):
             self._class_tool = PixelPickerTool(canvas, KIND_COLORS['point_cloud'])
             self._class_tool.picked.connect(self._on_class_picked)
             # The rail button follows the map: up when another tool takes over, down when QGIS gives it back.
-            self._class_tool.activated.connect(lambda: self._extras_call('set_class_pipette_checked', True))
-            self._class_tool.deactivated.connect(lambda: self._extras_call('set_class_pipette_checked', False))
+            self._class_tool.activated.connect(lambda: self._extras_call('set_class_pipette_checked', True, self._pc_pick_mode))
+            self._class_tool.deactivated.connect(lambda: self._extras_call('set_class_pipette_checked', False, self._pc_pick_mode))
         self._previous_class_map_tool = canvas.mapTool()
         canvas.setMapTool(self._class_tool)
-        if self._pc_panel is not None and hasattr(self._pc_panel, 'show_class_pipette_active'):
-            self._pc_panel.show_class_pipette_active()
+        self._show_pc_pick_group()
+
+    def _show_pc_pick_group(self) -> None:
+        """The group of the picker mode becomes the active one (R2)."""
+        panel = self._pc_panel
+        if panel is None:
+            return
+        if self._pc_pick_mode == 'value':
+            self._call(panel, 'show_value_pipette_active')
+        else:
+            self._call(panel, 'show_class_pipette_active')
+
+    def _on_value_pick_toggled(self, enabled: bool) -> None:
+        """The value pipette of the rail (ATTRIBUTES)."""
+        self._on_class_pick_toggled(enabled, 'value')
 
     def _on_point_cloud_group_chosen(self, group: str) -> None:
-        """The user made a group of the point cloud panel the active one: the class pipette follows CLASSES."""
+        """The user made a group of the point cloud panel the active one: its tool follows (R1).
+
+        CLASSES arms the class pipette, ATTRIBUTES the value pipette (the zone tool stays if it is
+        on), EXPRESSION takes the picker off the map.
+        """
         iface = self._iface()
         if iface is None:
             return
         on_map = self._class_tool is not None and iface.mapCanvas().mapTool() is self._class_tool
-        if group == 'classes' and not on_map:
-            self._on_class_pick_toggled(True)  # the tool's activated signal puts the rail button down
-        elif group != 'classes' and on_map:
-            self._deactivate_class_tool()
+        if group == 'classes':
+            if not on_map or self._pc_pick_mode != 'class':
+                self._on_class_pick_toggled(True, 'class')  # the tool's activated signal puts the rail button down
+            self._extras_call('stop_zone_tool')
+        elif group == 'ranges':
+            if self._extras_zone_on():
+                return  # the zone tool made the group active: keep it
+            if not on_map or self._pc_pick_mode != 'value':
+                self._on_class_pick_toggled(True, 'value')
+        else:
+            if on_map:
+                self._deactivate_class_tool()
+            self._extras_call('stop_zone_tool')
+
+    def _extras_zone_on(self) -> bool:
+        extras = self._extras
+        try:
+            return bool(extras is not None and extras.zone_tool_on())
+        except Exception:
+            return False
 
     def _deactivate_class_tool(self) -> None:
         if self._class_tool is None:
@@ -1707,10 +1769,16 @@ class CoverageModeController(BaseController):
         self._release_map_tool(self._class_tool, previous)
 
     def _on_class_picked(self, point: Any, extend: bool) -> None:
-        """Check the class of the points under the click (Ctrl+click: added to the checked classes)."""
+        """Check the class of the points under the click (Ctrl+click: added to the checked classes).
+
+        As the value pipette, the click writes a condition on the chosen attribute instead.
+        """
         from ...core.domain.layer_kind import LayerKind
         layer, panel, iface = self._active_layer, self._pc_panel, self._iface()
         if layer is None or panel is None or iface is None or self._kind is not LayerKind.POINT_CLOUD:
+            return
+        if self._pc_pick_mode == 'value':
+            self._on_value_picked(point, extend)
             return
         from ...adapters.qgis.point_cloud_layer_adapter import class_at
         code = class_at(layer, iface.mapCanvas(), point)
@@ -1725,6 +1793,26 @@ class CoverageModeController(BaseController):
             message = self.tr("Class {0} is already checked").format(code) + f": {hidden}"
         elif not panel.select_class(code, extend):
             message = self.tr("Class {0} is not in the class list of the layer").format(code)
+        else:
+            return
+        try:
+            iface.messageBar().pushInfo("FilterMate", message)
+        except RuntimeError:
+            pass  # message bar deleted (QGIS closing)
+
+    def _on_value_picked(self, point: Any, extend: bool) -> None:
+        """The value pipette: a condition ``attribute between v - d and v + d`` on the attribute of the panel."""
+        layer, panel, iface = self._active_layer, self._pc_panel, self._iface()
+        from ...adapters.qgis.point_cloud_layer_adapter import attribute_value, attributes_at
+        attribute = panel.pick_attribute()
+        attributes = attributes_at(layer, iface.mapCanvas(), point)
+        value = attribute_value(attributes, attribute)
+        if attributes is None:
+            message = self.tr("No point drawn under the click")
+        elif value is None:
+            message = self.tr("This point has no {0}").format(attribute)
+        elif not panel.add_value_condition(attribute, value, extend):
+            message = self.tr("{0} cannot be used in a condition").format(attribute)
         else:
             return
         try:
@@ -1993,7 +2081,8 @@ class CoverageModeController(BaseController):
             from ...adapters.qgis.coverage_layers.source_jobs import PointCloudSourceJob
             if siblings:
                 self.service.history.push(CrossOperation(layer.id(), tuple(siblings), 'point cloud tiles'))
-            source_job = PointCloudSourceJob(layer, float(_option('point_cloud_footprint_resolution', 2.0)), before=before)
+            source_job = PointCloudSourceJob(layer, float(_option('point_cloud_footprint_resolution', 2.0)), before=before,
+                                             zone=self._zone_geometry())
         self._start_task(request, source_job)
 
     def _point_cloud_attributes(self, layer: Any) -> List[str]:

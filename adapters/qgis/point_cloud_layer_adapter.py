@@ -224,6 +224,42 @@ def dominant_class(points: Iterable[Any]) -> Optional[int]:
     return min(counts, key=lambda code: (-counts[code], code))
 
 
+def attributes_at(layer: Any, canvas: Any, point: Any) -> Optional[Dict[str, Any]]:
+    """Attributes of the first point drawn under ``point`` (canvas CRS), None without a point there.
+
+    Same identify read as :func:`class_at` (the layer renderer: a filtered out point is not read).
+    """
+    try:
+        from qgis.gui import QgsMapToolIdentify
+        modes = getattr(QgsMapToolIdentify, 'IdentifyMode', QgsMapToolIdentify)
+        pixel = canvas.getCoordinateTransform().transform(point)
+        results = QgsMapToolIdentify(canvas).identify(round(pixel.x()), round(pixel.y()), [layer], modes.TopDownAll)
+    except Exception as exc:
+        logger.debug(f"[PC] points not identified on '{_layer_label(layer)}': {exc}")
+        return None
+    for result in results:
+        attributes = getattr(result, 'mAttributes', None)
+        if attributes:
+            return dict(attributes)
+    return None
+
+
+def attribute_value(attributes: Optional[Dict[str, Any]], name: str) -> Optional[float]:
+    """Numeric value of ``name`` in identified point attributes (registry spelling or alias), None when absent."""
+    if not attributes:
+        return None
+    from ...core.domain.point_cloud_attributes import canonical_attribute_name
+    wanted = canonical_attribute_name(name) or str(name)
+    for key, value in attributes.items():
+        if key == name or canonical_attribute_name(key) == wanted:
+            try:
+                number = float(value)
+            except (TypeError, ValueError):
+                return None
+            return number if number == number else None  # NaN
+    return None
+
+
 def may_have_classes(layer: Any) -> bool:
     """False only for a layer that lists its attributes without Classification (no class to pick)."""
     names = _read_attribute_names(layer)

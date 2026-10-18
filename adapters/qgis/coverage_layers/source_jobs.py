@@ -329,13 +329,22 @@ class PointCloudSourceJob(SourceJob):
 
     kind = LayerKind.POINT_CLOUD
 
-    def __init__(self, layer, resolution: float = 2.0, before: Optional[LayerSnapshot] = None) -> None:
+    def __init__(self, layer, resolution: float = 2.0, before: Optional[LayerSnapshot] = None,
+                 zone: Optional[QgsGeometry] = None) -> None:
+        """Footprint of the points kept by the subset of ``layer``, within ``zone`` when one was drawn.
+
+        Args:
+            zone: Polygon drawn with the Zone tool (layer CRS): the footprint is read inside its
+                bounding box and cut to it, so a polygon or a circle applies exactly to the targets
+                (the subset string of the cloud itself only knows its X / Y bounds).
+        """
         super().__init__(layer)
         if before is not None:
             # Snapshot taken before the controller applied the selection subset.
             self.before = before
         from .point_cloud_footprint import layer_resolution
         self._resolution = layer_resolution(resolution, self.crs)
+        self._zone = zone if zone is not None and not zone.isEmpty() else None
         self._layer = None
         self._error = ''
         if layer.providerType() == 'vpc':
@@ -366,7 +375,8 @@ class PointCloudSourceJob(SourceJob):
             return QgsGeometry()
         try:
             result = footprint_geometry(self._layer, self._resolution, is_canceled=is_canceled,
-                                        check=selection_check(self._subset))
+                                        check=selection_check(self._subset),
+                                        extent=self._zone.boundingBox() if self._zone is not None else None)
         except RuntimeError as exc:
             self.message = str(exc)
             return QgsGeometry()
@@ -381,6 +391,9 @@ class PointCloudSourceJob(SourceJob):
         if result.coarse:
             # Wider than the resolution asked for: the footprint covers more than the points.
             self.details['coarse'] = True
+        if self._zone is not None and result.geometry is not None and not result.geometry.isEmpty():
+            self.details['zone'] = True
+            return result.geometry.intersection(self._zone)
         return result.geometry
 
     def apply(self, layer) -> Optional[LayerSnapshot]:

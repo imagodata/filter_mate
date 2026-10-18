@@ -442,6 +442,42 @@ class TestSourceCopy:
         assert job.compute(_request(), lambda: False).isEmpty() and 'outside the selection' in job.message
 
 
+class TestZoneOfTheSource:
+    """2026-10-18: a shape drawn with the Zone tool cuts the footprint of the source (and bounds its read)."""
+
+    def test_footprint_is_read_in_the_zone_box_and_cut_to_the_shape(self, engine, monkeypatch):
+        live = FakeCloudLayer(subset='Classification = 6', points=[(10, 10, 6)])
+        monkeypatch.setattr(footprint, 'open_point_cloud', lambda s, n, p: FakeCloudLayer(s, p, points=[(10, 10, 6)]))
+        seen = {}
+
+        def fake_footprint(layer, resolution, extent=None, **kwargs):
+            seen['extent'] = extent
+            return footprint.FootprintResult(fk.FakeGeometry.fromWkt('POLYGON((0 0, 40 0, 40 40, 0 40, 0 0))'),
+                                             points_read=1, cell_size=2.0, truncated=False, coarse=False)
+
+        monkeypatch.setattr(footprint, 'footprint_geometry', fake_footprint)
+        zone = fk.FakeGeometry.fromWkt('POLYGON((0 0, 20 0, 20 20, 0 20, 0 0))')
+        job = source_jobs.PointCloudSourceJob(live, zone=zone)
+        geometry = job.compute(_request(), lambda: False)
+        assert seen['extent'] is not None and seen['extent'].xMaximum() == 20
+        assert abs(geometry.area() - 400) < 1e-6 and job.details.get('zone') is True
+
+    def test_without_a_zone_nothing_changes(self, engine, monkeypatch):
+        live = FakeCloudLayer(subset='Classification = 6', points=[(10, 10, 6)])
+        monkeypatch.setattr(footprint, 'open_point_cloud', lambda s, n, p: FakeCloudLayer(s, p, points=[(10, 10, 6)]))
+        seen = {}
+
+        def fake_footprint(layer, resolution, extent=None, **kwargs):
+            seen['extent'] = extent
+            return footprint.FootprintResult(fk.FakeGeometry.fromWkt('POLYGON((0 0, 40 0, 40 40, 0 40, 0 0))'),
+                                             points_read=1, cell_size=2.0, truncated=False, coarse=False)
+
+        monkeypatch.setattr(footprint, 'footprint_geometry', fake_footprint)
+        job = source_jobs.PointCloudSourceJob(live)
+        geometry = job.compute(_request(), lambda: False)
+        assert seen['extent'] is None and abs(geometry.area() - 1600) < 1e-6 and 'zone' not in job.details
+
+
 def _points(n, x0, y0, x1, y1, seed=1):
     rng = np.random.default_rng(seed)
     return [(float(x), float(y), 6) for x, y in zip(rng.uniform(x0, x1, n), rng.uniform(y0, y1, n))]

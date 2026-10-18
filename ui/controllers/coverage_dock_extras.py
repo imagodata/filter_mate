@@ -52,6 +52,13 @@ ICON_PIPETTE = '<path d="M20.5 3.5a2.1 2.1 0 0 0-3 0L14 7l-1.5-1.5-1.5 1.5 1.5 1
 ICON_DETECTOR = ('<path d="M7 5c3-2.5 8-2 10.5 1 2 2.5 1.5 6.5-.5 9S11 20 8 18.5 3 13.5 3.5 10 5.5 6.3 7 5z" stroke-dasharray="2.5 2"/>'
                  '<path d="M11 9v6M8 12h6"/>')
 ICON_3D = '<path d="M12 2l9 5v10l-9 5-9-5V7z"/><path d="M12 12l9-5M12 12L3 7M12 12v10"/>'
+# Value pipette of a point cloud: the pipette with a small scale beside it.
+ICON_VALUE_PIPETTE = ('<path d="M20.5 3.5a2.1 2.1 0 0 0-3 0L14 7l-1.5-1.5-1.5 1.5 1.5 1.5L4 16v4h4l7.5-7.5L17 14l1.5-1.5L17 11l3.5-3.5a2.1 2.1 0 0 0 0-3z"/>'
+                      '<path d="M3 3v8M3 3h2M3 5.5h2M3 8h2M3 10.5h2"/>')
+# Zone of a point cloud: a dashed rectangle drawn on the map.
+ICON_PC_ZONE = '<rect x="3" y="5" width="18" height="14" rx="1" stroke-dasharray="2.5 2"/><path d="M8 19V5"/><path d="M3 10h18"/>'
+# More tools: three dots.
+ICON_MORE = '<circle cx="5" cy="12" r="1.6" fill="currentColor"/><circle cx="12" cy="12" r="1.6" fill="currentColor"/><circle cx="19" cy="12" r="1.6" fill="currentColor"/>'
 
 # QGIS main window actions run by the point cloud tools, first name found wins
 # (the 3D action is ``mActionNew3DMapCanvas`` in QGIS 4.2, ``mActionNew3DMapView`` in older builds).
@@ -191,11 +198,14 @@ def card_html(name: str, kind_label: str, meta: str, color: str, square: bool) -
 # put on the rail: the picker reads the value and QGIS has its own statistics, profile and 3D tools. List
 # a tool here to bring it back.
 RAIL_TOOLS = {
+    # Seven buttons a rail, raster and point cloud alike (vector keeps its six): the shared ones
+    # (zoom, preview, reset, plus Identify on a point cloud) and the tools of the groups.
     'raster': ('pushButton_checkable_exploring_raster_pipette', 'pushButton_checkable_exploring_raster_detector',
-               'pushButton_checkable_exploring_raster_link'),
-    # 2026-10-18: the class pipette took the place of the Identify button (handle_exploring_action):
-    # no extra tool on the point cloud rail.
-    'point_cloud': (),
+               'pushButton_checkable_exploring_raster_link', 'pushButton_exploring_raster_more'),
+    # 2026-10-18: Identify is the class pipette (CLASSES); the value pipette and the zone are the tools of
+    # ATTRIBUTES; the elevation profile and the 3D view are in the "more" menu.
+    'point_cloud': ('pushButton_checkable_exploring_point_cloud_value_pipette',
+                    'pushButton_checkable_exploring_point_cloud_zone', 'pushButton_exploring_point_cloud_more'),
 }
 _RAIL_TOOL_NAMES = frozenset(name for names in RAIL_TOOLS.values() for name in names)
 
@@ -238,6 +248,9 @@ class CoverageDockExtras(QObject):
         self._hover_timer = None
         self._zone_tool = None
         self._zone_previous_tool = None
+        self._pc_zone_tool = None  # the shapes of the QGIS selection tools, on a point cloud
+        self._pc_zone_previous_tool = None
+        self._pc_zone_shape = 'rectangle'
         self._layer_id: Optional[str] = None
         self._hover_base = None
         self._hover_base_key: Optional[Tuple[str, str]] = None  # (layer id, source) the base was opened for
@@ -367,6 +380,19 @@ class CoverageDockExtras(QObject):
             ('pushButton_checkable_exploring_raster_link', True, self._link_tip, self._on_link_toggled),
             ('pushButton_checkable_exploring_point_cloud_pipette', True, self._class_pipette_tip,
              self._on_class_pipette_toggled),
+            ('pushButton_checkable_exploring_point_cloud_value_pipette', True,
+             self.tr("Value pipette: click the map and a condition is written on the attribute chosen in ATTRIBUTES "
+                     "(Z, intensity...), around the value of the point there, with the tolerance of the panel. "
+                     "Ctrl+click adds another condition (OR)"),
+             self._on_value_pipette_toggled),
+            ('pushButton_checkable_exploring_point_cloud_zone', True,
+             self.tr("Zone: draw a rectangle, a polygon, a freehand shape or a circle on the map (right-click the "
+                     "button for the shape); its X / Y box goes to ATTRIBUTES, the shape itself cuts the targets"),
+             self._on_pc_zone_toggled),
+            ('pushButton_exploring_raster_more', False,
+             self.tr("More tools: the value under the cursor, the statistics of a rectangle"), self._show_raster_more_menu),
+            ('pushButton_exploring_point_cloud_more', False,
+             self.tr("More tools: the elevation profile and the 3D view of QGIS"), self._show_point_cloud_more_menu),
             ('pushButton_exploring_point_cloud_profile', False,
              self.tr("Elevation profile: open the QGIS elevation profile of the map"), self._open_elevation_profile),
             ('pushButton_exploring_point_cloud_3d', False,
@@ -393,6 +419,10 @@ class CoverageDockExtras(QObject):
                 button.clicked.connect(slot)
             layout.insertWidget(index + offset, button, 0, layout.itemAt(layout.indexOf(anchor)).alignment())
             self._tools[name] = button
+            if name == 'pushButton_checkable_exploring_point_cloud_zone':
+                from qgis.PyQt.QtCore import Qt
+                button.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
+                button.customContextMenuRequested.connect(self._on_pc_zone_context_menu)
 
     def _refresh_icons(self) -> None:
         """Draw the tool icons in the text color of the current theme."""
@@ -409,6 +439,10 @@ class CoverageDockExtras(QObject):
             'pushButton_checkable_exploring_raster_zone': ICON_ZONE,
             'pushButton_checkable_exploring_raster_link': ICON_LINK_STYLE,
             'pushButton_checkable_exploring_point_cloud_pipette': ICON_PIPETTE,
+            'pushButton_checkable_exploring_point_cloud_value_pipette': ICON_VALUE_PIPETTE,
+            'pushButton_checkable_exploring_point_cloud_zone': ICON_PC_ZONE,
+            'pushButton_exploring_raster_more': ICON_MORE,
+            'pushButton_exploring_point_cloud_more': ICON_MORE,
             'pushButton_exploring_point_cloud_profile': ICON_PROFILE,
             'pushButton_exploring_point_cloud_3d': ICON_3D,
         }
@@ -513,12 +547,15 @@ class CoverageDockExtras(QObject):
         """Stop the map interactions of the outgoing layer (hover, rectangle tool)."""
         for name in ('pushButton_checkable_exploring_raster_pipette', 'pushButton_checkable_exploring_raster_detector',
                      'pushButton_checkable_exploring_raster_hover', 'pushButton_checkable_exploring_raster_zone',
-                     'pushButton_checkable_exploring_raster_link', 'pushButton_checkable_exploring_point_cloud_pipette'):
+                     'pushButton_checkable_exploring_raster_link', 'pushButton_checkable_exploring_point_cloud_pipette',
+                     'pushButton_checkable_exploring_point_cloud_value_pipette',
+                     'pushButton_checkable_exploring_point_cloud_zone'):
             button = self._tools.get(name)
             if button is not None:
                 self._guarded(self._uncheck, button)
         self._guarded(self._stop_hover)
         self._guarded(self._stop_zone_tool)
+        self._guarded(self._stop_pc_zone_tool)
         self._hover_base, self._hover_base_key = None, None
 
     @staticmethod
@@ -802,19 +839,190 @@ class CoverageDockExtras(QObject):
         button.setToolTip(self._class_pipette_tip if enabled else self.tr(
             "Class pipette: this point cloud has no Classification attribute"))
 
-    def set_class_pipette_checked(self, checked: bool) -> None:
-        """The class picker went on or left the map: its button (held down) follows without running its slot."""
+    def set_class_pipette_checked(self, checked: bool, mode: str = 'class') -> None:
+        """The point cloud picker went on or left the map: the button of its mode follows, the other one is up.
+
+        Args:
+            checked: Whether the picker is on the map.
+            mode: ``'class'`` (the Identify button, held down) or ``'value'`` (the value pipette button).
+        """
         button = self._class_pipette_button()
+        if button is not None:
+            button.blockSignals(True)
+            try:
+                down = bool(checked) and mode != 'value'
+                if button.isCheckable():
+                    button.setChecked(down)
+                else:
+                    button.setDown(down)
+            finally:
+                button.blockSignals(False)
+        value = self._tools.get('pushButton_checkable_exploring_point_cloud_value_pipette')
+        if value is not None:
+            value.blockSignals(True)
+            try:
+                value.setChecked(bool(checked) and mode == 'value')
+            finally:
+                value.blockSignals(False)
+
+    def _on_value_pipette_toggled(self, checked: bool) -> None:
+        self._controller._on_value_pick_toggled(checked)
+
+    def zone_tool_on(self) -> bool:
+        """Whether a zone tool (the raster rectangle or the point cloud shape) is the current map tool."""
+        canvas = self._canvas()
+        if canvas is None:
+            return False
+        current = canvas.mapTool()
+        return bool((self._zone_tool is not None and current is self._zone_tool)
+                    or (self._pc_zone_tool is not None and current is self._pc_zone_tool))
+
+    def stop_zone_tool(self) -> None:
+        """Take the zone tools off the map (their buttons follow)."""
+        self._stop_zone_tool()
+        self._stop_pc_zone_tool()
+        self._sync_zone_buttons(False)
+
+    # === Point cloud: zone (the shapes of the QGIS selection tools) ===
+
+    def _on_pc_zone_toggled(self, checked: bool) -> None:
+        if checked:
+            self._start_pc_zone_tool()
+            self._sync_zone_buttons(True)
+            panel = getattr(self._controller, '_pc_panel', None)
+            if panel is not None and hasattr(panel, 'show_zone_active'):
+                panel.show_zone_active()  # R2: the tool makes ATTRIBUTES the active group
+        else:
+            self._stop_pc_zone_tool()
+            self._sync_zone_buttons(False)
+
+    def _start_pc_zone_tool(self) -> None:
+        canvas = self._canvas()
+        if canvas is None:
+            return
+        try:
+            from ..tools.zone_tools import ShapeZoneTool
+        except ImportError:
+            return
+        if self._pc_zone_tool is None:
+            self._pc_zone_tool = ShapeZoneTool(canvas, self._pc_zone_shape)
+            self._pc_zone_tool.zoneDrawn.connect(self._on_point_cloud_zone_drawn)
+            self._pc_zone_tool.deactivated.connect(self._on_pc_zone_tool_deactivated)
+        else:
+            self._pc_zone_tool.set_shape(self._pc_zone_shape)
+        current = canvas.mapTool()
+        if current is self._pc_zone_tool:
+            return
+        controller = self._controller
+        if current is not None and current is getattr(controller, '_class_tool', None):
+            # Take over the tool the picker would have restored: never restore the picker itself.
+            current, controller._previous_class_map_tool = controller._previous_class_map_tool, None
+        self._pc_zone_previous_tool = current
+        canvas.setMapTool(self._pc_zone_tool)
+
+    def _stop_pc_zone_tool(self) -> None:
+        canvas = self._canvas()
+        if canvas is None or self._pc_zone_tool is None or canvas.mapTool() is not self._pc_zone_tool:
+            self._pc_zone_previous_tool = None
+            return
+        previous, self._pc_zone_previous_tool = self._pc_zone_previous_tool, None
+        try:
+            if previous is not None and previous is not self._pc_zone_tool:
+                canvas.setMapTool(previous)
+                return
+        except RuntimeError:
+            pass  # the previous tool was deleted (plugin unloaded)
+        canvas.unsetMapTool(self._pc_zone_tool)
+
+    def _on_pc_zone_tool_deactivated(self) -> None:
+        self._pc_zone_previous_tool = None
+        self._sync_zone_buttons(False)
+
+    def set_pc_zone_shape(self, shape: str) -> None:
+        """Shape the Zone tool draws next: ``rectangle``, ``polygon``, ``freehand`` or ``radius``."""
+        from ..tools.zone_tools import SHAPES
+        if shape not in SHAPES:
+            return
+        self._pc_zone_shape = shape
+        if self._pc_zone_tool is not None:
+            self._pc_zone_tool.set_shape(shape)
+
+    def pc_zone_shape(self) -> str:
+        return self._pc_zone_shape
+
+    def _zone_shape_menu(self, parent: Any) -> Any:
+        """Menu of the four shapes (one checked), shared by the Zone button and the "more" menu."""
+        from qgis.PyQt.QtWidgets import QMenu
+        try:
+            from qgis.PyQt.QtGui import QActionGroup
+        except ImportError:  # Qt5: QActionGroup is in QtWidgets
+            from qgis.PyQt.QtWidgets import QActionGroup
+        menu = QMenu(self.tr("Zone shape"), parent)
+        group = QActionGroup(menu)
+        group.setExclusive(True)
+        for key, label in (('rectangle', self.tr("Rectangle")), ('polygon', self.tr("Polygon")),
+                           ('freehand', self.tr("Freehand")), ('radius', self.tr("Radius"))):
+            action = menu.addAction(label)
+            action.setCheckable(True)
+            action.setChecked(key == self._pc_zone_shape)
+            action.triggered.connect(lambda _checked=False, k=key: self.set_pc_zone_shape(k))
+            group.addAction(action)
+        return menu
+
+    def _on_pc_zone_context_menu(self, position: Any) -> None:
+        button = self._tools.get('pushButton_checkable_exploring_point_cloud_zone')
         if button is None:
             return
-        button.blockSignals(True)
-        try:
-            if button.isCheckable():
-                button.setChecked(bool(checked))
-            else:
-                button.setDown(bool(checked))
-        finally:
-            button.blockSignals(False)
+        menu = self._zone_shape_menu(button)
+        menu.exec(button.mapToGlobal(position))
+
+    def _sync_zone_buttons(self, checked: bool) -> None:
+        for name in ('pushButton_checkable_exploring_raster_zone', 'pushButton_checkable_exploring_point_cloud_zone'):
+            button = self._tools.get(name)
+            if button is not None and button.isChecked() != checked:
+                button.blockSignals(True)
+                try:
+                    button.setChecked(checked)
+                finally:
+                    button.blockSignals(False)
+
+    # === More tools (menus of the "..." buttons) ===
+
+    def _popup(self, button: Any, menu: Any) -> None:
+        menu.exec(button.mapToGlobal(button.rect().bottomLeft()))  # PyQt5 and PyQt6 both spell it exec
+
+    def _show_raster_more_menu(self, *_args) -> None:
+        """Value under the cursor and statistics of a rectangle: the raster tools kept off the rail."""
+        from qgis.PyQt.QtWidgets import QMenu
+        button = self._tools.get('pushButton_exploring_raster_more')
+        if button is None:
+            return
+        menu = QMenu(button)
+        hover = menu.addAction(self.tr("Value under the cursor"))
+        hover.setCheckable(True)
+        hover.setChecked(bool(self._hover_connected))
+        hover.toggled.connect(self._on_hover_toggled)
+        zone = menu.addAction(self.tr("Statistics of a rectangle"))
+        zone.setCheckable(True)
+        zone.setChecked(self.zone_tool_on())
+        zone.toggled.connect(self._on_zone_toggled)
+        self._popup(button, menu)
+
+    def _show_point_cloud_more_menu(self, *_args) -> None:
+        """Elevation profile and 3D view: the QGIS tools, from the rail."""
+        from qgis.PyQt.QtWidgets import QMenu
+        button = self._tools.get('pushButton_exploring_point_cloud_more')
+        if button is None:
+            return
+        menu = QMenu(button)
+        menu.addMenu(self._zone_shape_menu(menu))
+        menu.addSeparator()
+        for text, names, slot in ((self.tr("Elevation profile"), ACTION_ELEVATION_PROFILE, self._open_elevation_profile),
+                                  (self.tr("3D view"), ACTION_NEW_3D_VIEW, self._open_3d_view)):
+            action = menu.addAction(text)
+            action.setEnabled(self._main_window_action(names) is not None)
+            action.triggered.connect(slot)
+        self._popup(button, menu)
 
     # === Raster: colour pipette ===
 
@@ -1017,8 +1225,14 @@ class CoverageDockExtras(QObject):
     def _on_zone_toggled(self, checked: bool) -> None:
         if checked:
             self._start_zone_tool()
+            self._sync_zone_buttons(True)
+            panel = getattr(self._controller, '_pc_panel', None)
+            kind = getattr(getattr(self._controller, 'active_kind', None), 'value', '')
+            if kind == 'point_cloud' and panel is not None and hasattr(panel, 'show_zone_active'):
+                panel.show_zone_active()  # R2: the tool makes ATTRIBUTES the active group
         else:
             self._stop_zone_tool()
+            self._sync_zone_buttons(False)
 
     def _start_zone_tool(self) -> None:
         canvas = self._canvas()
@@ -1077,11 +1291,7 @@ class CoverageDockExtras(QObject):
             # The pixel picker just remembered the rectangle tool: hand it the tool before ours.
             controller._previous_map_tool = self._zone_previous_tool
         self._zone_previous_tool = None
-        button = self._tools.get('pushButton_checkable_exploring_raster_zone')
-        if button is not None and button.isChecked():
-            button.blockSignals(True)
-            button.setChecked(False)
-            button.blockSignals(False)
+        self._sync_zone_buttons(False)
 
     def _on_zone_drawn(self, extent: Any) -> None:
         controller = self._controller
@@ -1121,6 +1331,30 @@ class CoverageDockExtras(QObject):
         pixels = zone_pixel_estimate(rect.width(), rect.height(), size_x, size_y)
         count = int(stats.elementCount) if pixels is not None and pixels <= ZONE_SAMPLE_SIZE else None
         panel.set_zone_statistics(float(stats.minimumValue), float(stats.maximumValue), float(stats.mean), count)
+
+    def _on_point_cloud_zone_drawn(self, geometry: Any) -> None:
+        """A shape drawn on a point cloud: its X / Y box in ATTRIBUTES, the shape kept for the targets (layer CRS)."""
+        controller = self._controller
+        layer, panel = controller.active_layer, getattr(controller, '_pc_panel', None)
+        if layer is None or panel is None or geometry is None or geometry.isEmpty():
+            return
+        try:
+            from qgis.core import QgsCoordinateTransform, QgsGeometry, QgsProject
+            canvas = self._canvas()
+            shape = QgsGeometry(geometry)
+            transform = QgsCoordinateTransform(canvas.mapSettings().destinationCrs(), layer.crs(), QgsProject.instance())
+            shape.transform(transform)
+        except Exception as exc:
+            logger.debug(f"[FM5] zone not reprojected to the point cloud CRS: {exc}")
+            shape = geometry
+        rect = shape.boundingBox()
+        if not panel.add_zone_conditions(rect.xMinimum(), rect.yMinimum(), rect.xMaximum(), rect.yMaximum(),
+                                         shape.asWkt(6)):
+            iface = controller._iface()
+            try:
+                iface.messageBar().pushInfo("FilterMate", self.tr("This point cloud has no X / Y attribute to filter on"))
+            except (AttributeError, RuntimeError):
+                pass
 
     # === Point cloud: profile and 3D view ===
 
