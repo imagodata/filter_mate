@@ -314,6 +314,9 @@ class TestSimilarObjects:
         assert seen["reconstruct"] is False and seen["opening"] == raster_adapter.OBJECT_OPENING
         without = raster_adapter.similar_objects_geometry(None, RasterSelection(**kwargs), extent, 100, 100, "")
         assert without.objects == 3
+        # Read on coarse cells (over the pixel limit), the patches keep their outline: the clicked objects too.
+        raster_adapter.similar_objects_geometry(None, RasterSelection(**kwargs), extent, 100, 100, "", max_pixels=2500)
+        assert seen["reconstruct"] is True
 
     def test_no_clicked_object_gives_nothing(self, monkeypatch):
         monkeypatch.setattr(raster_adapter, "object_geometry",

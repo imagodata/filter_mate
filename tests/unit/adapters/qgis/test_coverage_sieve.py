@@ -173,6 +173,19 @@ class TestOpening:
             expected[row, col] = False
         assert opened == _cells_of(expected)
 
+    def test_a_coarse_read_only_fills_the_holes(self, cells, monkeypatch):
+        grid = np.zeros((12, 20))
+        grid[2:9, 2:9] = 7
+        grid[5, 5] = 0
+        grid[5, 9:12] = 7  # a cell-wide line: two pixels wide at the native resolution, kept
+        grid[2:9, 12:18] = 7
+        raster = Raster(b1=grid)
+        result = _select(monkeypatch, raster, CLASS_7, native=(24, 40), max_pixels=240, sieve_pixels=0, opening=1)
+        assert result.coarse and result.decimation == 2
+        expected = grid == 7
+        expected[5, 5] = True
+        assert result.geometry == _cells_of(expected)
+
     def test_without_the_opening_nothing_changes(self, cells, monkeypatch):
         grid = np.zeros((6, 6))
         grid[1, 1:5] = 7  # a thin line: opened away, kept without

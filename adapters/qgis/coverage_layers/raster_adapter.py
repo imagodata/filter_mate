@@ -766,8 +766,8 @@ def selection_geometry(provider: QgsRasterDataProvider, selection: RasterSelecti
         progress: Callable receiving the progress in percent.
         opening: Radius of the opening of :func:`patch_cores` on each tile (the
             similar objects: the patches are cut at their pixel-wide bridges, as
-            the clicked objects are, and their holes are filled); 0: the pixels
-            as they are.
+            the clicked objects are, and their holes are filled; a coarse read
+            only fills the holes); 0: the pixels as they are.
     """
     from .geometry_tools import make_valid, merge_tile_polygons, patch_cores, pixel_to_map, polygonize_mask
     if selection.seeds and selection.similar:
@@ -829,7 +829,8 @@ def selection_geometry(provider: QgsRasterDataProvider, selection: RasterSelecti
             mask = selection_mask(array, selection)
         if opening > 0 and mask.any():
             # The margin holds the neighbours the cores read; a hole cut by the window edge is not one.
-            mask = fill_holes(patch_cores(mask, opening))
+            # A coarse cell stands for k x k pixels: a cell-wide bridge is no pixel-wide one, nothing is cut.
+            mask = fill_holes(mask if coarse else patch_cores(mask, opening))
         if mask.any():
             core = (slice(row - top, row - top + rows), slice(col - left, col - left + cols))
             kept += int(mask[core].sum())
@@ -1165,13 +1166,16 @@ def similar_objects_geometry(provider: QgsRasterDataProvider, selection: RasterS
     clicked objects were, and the patches within the bounds are kept. ``objects`` counts them;
     ``kept_pixels`` is estimated from their area and the cell size.
 
-    The clicked objects are measured as the patches are (:func:`patch_cores`): without their
-    corners and the ring of their diagonal edges, on both sides alike.
+    The clicked objects are measured as the patches are: at the native resolution, without
+    their corners and the ring of their diagonal edges (:func:`patch_cores`) on both sides
+    alike; over ``max_pixels`` the patches are read on coarse cells and keep their outline,
+    so the clicked objects keep theirs.
     """
     from dataclasses import replace
     from .geometry_tools import compactness, union_geometries
+    coarse = _decimation(native_width, native_height, max_pixels) > 1
     reference = object_geometry(provider, selection, extent, native_width, native_height, crs_wkt,
-                                provider_for=provider_for, opening=OBJECT_OPENING, reconstruct=False)
+                                provider_for=provider_for, opening=OBJECT_OPENING, reconstruct=coarse)
     clicked = geometry_parts(reference.geometry)
     bounds = similar_area_bounds([part.area() for part in clicked], selection.similar)
     if bounds is None:
