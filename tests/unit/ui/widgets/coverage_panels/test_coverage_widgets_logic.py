@@ -350,6 +350,8 @@ class TestObjectDetectionState:
         assert parsed["pipette_target"] == raster.PICK_SIMILAR_OBJECTS and parsed["pipette_similar"] == (0.25, 3.0)
         assert raster.parse_raster_state({"pipette_similar": [0, 2]})["pipette_similar"] == raster.DEFAULT_SIMILAR_RATIO
         assert raster.parse_raster_state({"pipette_similar": "x"})["pipette_similar"] == raster.DEFAULT_SIMILAR_RATIO
+        assert raster.parse_raster_state({})["pipette_shape"] is True  # a state before the shape: on
+        assert raster.parse_raster_state({"pipette_shape": False})["pipette_shape"] is False
 
     def test_similar_selection_from_the_state(self):
         selection = raster.build_raster_selection({"mode": "pipette", "pipette_selection": {

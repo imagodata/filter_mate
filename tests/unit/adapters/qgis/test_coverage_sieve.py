@@ -153,6 +153,34 @@ _CRS = types.SimpleNamespace(fromWkt=lambda wkt: fk.FakeCrs('EPSG:2154'))
 CLASS_7 = RasterSelection(mode=RasterSelectionMode.CLASSES, band=1, classes=(7,))
 
 
+class TestOpening:
+    """2026-10-18: the similar objects open each tile (bridges cut, holes filled) before polygonizing."""
+
+    def test_the_bridge_goes_and_the_hole_is_filled(self, cells, monkeypatch):
+        grid = np.zeros((12, 20))
+        grid[2:9, 2:9] = 7  # a pool
+        grid[5, 5] = 0  # a ladder in it
+        grid[5, 9:12] = 7  # a line of its colour to the lawn
+        grid[2:9, 12:18] = 7  # the lawn
+        raster = Raster(b1=grid)
+        plain = _select(monkeypatch, raster, CLASS_7, sieve_pixels=0).geometry
+        opened = _select(monkeypatch, raster, CLASS_7, sieve_pixels=0, opening=1).geometry
+        assert plain == _cells_of(grid == 7)
+        expected = np.zeros((12, 20), dtype=bool)
+        expected[2:9, 2:9] = True  # the hole filled, the corners of the opened patches go
+        expected[2:9, 12:18] = True
+        for row, col in ((2, 2), (2, 8), (8, 2), (8, 8), (2, 12), (2, 17), (8, 12), (8, 17)):
+            expected[row, col] = False
+        assert opened == _cells_of(expected)
+
+    def test_without_the_opening_nothing_changes(self, cells, monkeypatch):
+        grid = np.zeros((6, 6))
+        grid[1, 1:5] = 7  # a thin line: opened away, kept without
+        raster = Raster(b1=grid)
+        assert _select(monkeypatch, raster, CLASS_7, sieve_pixels=0).geometry == _cells_of(grid == 7)
+        assert _select(monkeypatch, raster, CLASS_7, sieve_pixels=0, opening=1).geometry == frozenset()
+
+
 class TestTiles:
     def test_tiles_cover_the_grid_row_by_row(self):
         assert list(raster_adapter._tiles(5, 3, 2)) == [(0, 0, 2, 2), (0, 2, 2, 2), (0, 4, 2, 1),

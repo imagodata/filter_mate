@@ -41,7 +41,7 @@ try:
     from qgis.PyQt.QtCore import QSize, Qt, QTimer, pyqtSignal
     from qgis.PyQt.QtGui import QColor, QFont, QFontDatabase, QIcon, QPixmap
     from qgis.PyQt.QtWidgets import (
-        QButtonGroup, QComboBox, QDoubleSpinBox, QGridLayout, QGroupBox, QHBoxLayout, QLabel,
+        QButtonGroup, QCheckBox, QComboBox, QDoubleSpinBox, QGridLayout, QGroupBox, QHBoxLayout, QLabel,
         QMenu, QPlainTextEdit, QPushButton, QRadioButton, QSizePolicy, QToolButton, QVBoxLayout, QWidget,
     )
     QT_AVAILABLE = True
@@ -577,6 +577,7 @@ def parse_raster_state(state: Any) -> Dict[str, Any]:
         "pipette_seeds": _parse_seeds(state.get("pipette_seeds")),
         "pipette_target": state.get("pipette_target") if state.get("pipette_target") in PICK_TARGETS else PICK_SIMILAR,
         "pipette_similar": _parse_ratio(state.get("pipette_similar")),
+        "pipette_shape": bool(state.get("pipette_shape", True)),  # states before the shape: on, the default
         "pipette_on": bool(state.get("pipette_on", False)),
         # "Every band" mode of the range: the bounds apply to each of ``range_bands``, ANDed.
         "all_bands": bool(state.get("all_bands", False)),
@@ -1090,6 +1091,15 @@ class RasterExploringPanel(QWidget):
         similar_row.addWidget(self._similar_low_spin)
         similar_row.addWidget(QLabel(self.tr("to ×"), self._similar_widget))
         similar_row.addWidget(self._similar_high_spin)
+        # Shape too: a road of the colour and area of a pool is not a pool (compactness within the same ratios).
+        self._similar_shape_check = QCheckBox(self.tr("same shape"), self._similar_widget)
+        self._similar_shape_check.setObjectName("checkBox_raster_similar_shape")
+        self._similar_shape_check.setChecked(True)
+        self._similar_shape_check.setToolTip(self.tr("Keep only the objects shaped like the clicked ones: their "
+                                                     "compactness (4π × area / perimeter², 1 for a disc) within the "
+                                                     "same ratios; off, a road of the area of a pool is a pool"))
+        self._similar_shape_check.toggled.connect(self._on_similar_ratio_changed)
+        similar_row.addWidget(self._similar_shape_check)
         similar_row.addStretch(1)
         self._similar_widget.setVisible(False)
         group_layout.addWidget(self._similar_widget)
@@ -1585,6 +1595,7 @@ class RasterExploringPanel(QWidget):
             "pipette_seeds": [[x, y, list(pick) if isinstance(pick, tuple) else pick] for x, y, pick in self._seeds],
             "pipette_target": self._pick_target,
             "pipette_similar": list(self.similar_ratio()),
+            "pipette_shape": self.similar_shape(),
             "pipette_on": self._pipette_on,
             "all_bands": self._all_bands,
             "range_bands": self._range_bands() if self._all_bands else [],
@@ -1615,9 +1626,10 @@ class RasterExploringPanel(QWidget):
         self._pick_kind = parsed["pipette_kind"]
         self._picks = [tuple(pick) if self._pick_kind == "color" else pick for pick in parsed["pipette_picks"]]
         self._seeds = list(parsed["pipette_seeds"])
-        with _signals_blocked(self._similar_low_spin, self._similar_high_spin):
+        with _signals_blocked(self._similar_low_spin, self._similar_high_spin, self._similar_shape_check):
             self._similar_low_spin.setValue(parsed["pipette_similar"][0])
             self._similar_high_spin.setValue(parsed["pipette_similar"][1])
+            self._similar_shape_check.setChecked(parsed["pipette_shape"])
         self._set_pick_target(parsed["pipette_target"])
         try:
             data = parsed["pipette_selection"]
@@ -1996,15 +2008,17 @@ class RasterExploringPanel(QWidget):
             objects = tuple(self._picks_selection([pick], ((x, y),)) for x, y, pick in self._seeds)
         similar = self.similar_ratio() if objects and self._pick_target == PICK_SIMILAR_OBJECTS else ()
         selection = self._picks_selection(self._picks, tuple(seed[:2] for seed in self._seeds) if objects else (),
-                                          objects, similar)
+                                          objects, similar, bool(similar) and self.similar_shape())
         self._set_pipette_selection(selection, debounced)
 
     def _picks_selection(self, picks: Sequence[Any], seeds: Tuple[Tuple[float, float], ...] = (),
-                         objects: Tuple[RasterSelection, ...] = (), similar: Tuple[float, float] = ()) -> RasterSelection:
+                         objects: Tuple[RasterSelection, ...] = (), similar: Tuple[float, float] = (),
+                         shape: bool = False) -> RasterSelection:
         """Selection keeping what looks like ``picks`` (of the current kind), around ``seeds`` when given.
 
         Args:
             similar: Area ratios of the similar objects mode (empty otherwise).
+            shape: The similar objects must be shaped like the clicked ones too.
         """
         band = self.current_band()
         if self._pick_kind == "color":
@@ -2012,10 +2026,10 @@ class RasterExploringPanel(QWidget):
             tolerances = [tolerance_value(self._tolerance_spin.value(), self._value_span(number)) for number in bands]
             expression = color_similarity_expression(self._reference, bands, picks, tolerances)
             return RasterSelection(band=band, mode=RasterSelectionMode.EXPRESSION, expression=expression,
-                                   seeds=seeds, objects=objects, similar=similar)
+                                   seeds=seeds, objects=objects, similar=similar, shape=shape)
         if self._pick_kind == "classes":
             return RasterSelection(band=band, mode=RasterSelectionMode.CLASSES, classes=frozenset(picks),
-                                   seeds=seeds, objects=objects, similar=similar)
+                                   seeds=seeds, objects=objects, similar=similar, shape=shape)
         low_bound, high_bound = self._data_bounds()
         known = low_bound is not None and high_bound is not None and high_bound > low_bound
         if known:
@@ -2027,14 +2041,18 @@ class RasterExploringPanel(QWidget):
         tolerance = tolerance_value(self._tolerance_spin.value(), span)
         low, high = normalize_range(min(picks) - tolerance, max(picks) + tolerance, low_bound, high_bound)
         return RasterSelection(band=band, mode=RasterSelectionMode.RANGE, derivative=self._derivative,
-                               minimum=low, maximum=high, seeds=seeds, objects=objects, similar=similar)
+                               minimum=low, maximum=high, seeds=seeds, objects=objects, similar=similar, shape=shape)
 
     def similar_ratio(self) -> Tuple[float, float]:
         """``(low, high)`` area ratios of the similar objects mode."""
         low, high = float(self._similar_low_spin.value()), float(self._similar_high_spin.value())
         return (min(low, high), max(low, high))
 
-    def _on_similar_ratio_changed(self, _value: float) -> None:
+    def similar_shape(self) -> bool:
+        """Whether the similar objects must be shaped like the clicked ones (compactness within the ratios)."""
+        return bool(self._similar_shape_check.isChecked())
+
+    def _on_similar_ratio_changed(self, _value: Any) -> None:
         if self._pick_target == PICK_SIMILAR_OBJECTS and self._picks and self._pick_kind in ("color", "value", "classes"):
             self._apply_picks(debounced=True)
 

@@ -290,6 +290,10 @@ class RasterSelection:
             the smallest clicked object and ``high`` times the largest one is
             selected (all the pools like this one). Needs seeds. Empty: the
             clicked objects only (object detection) or every kept pixel.
+        shape: In the similar objects mode, the patches must also have the shape of
+            the clicked objects: a compactness (``4 π area / perimeter²``) between
+            ``low`` times the lowest clicked one and ``high`` times the highest. A
+            road of the colour and area of a pool is not a pool. False: area only.
     """
 
     band: int = 1
@@ -302,11 +306,13 @@ class RasterSelection:
     seeds: Tuple[Tuple[float, float], ...] = ()
     objects: Tuple["RasterSelection", ...] = ()
     similar: Tuple[float, float] = ()
+    shape: bool = False
 
     def __post_init__(self):
         object.__setattr__(self, "similar", _similar_from(self.similar))
         if self.similar and not (self.seeds or self.objects):
             raise ValueError("similar objects need a clicked object (a seed)")
+        object.__setattr__(self, "shape", bool(self.shape) and bool(self.similar))
         if not isinstance(self.derivative, RasterDerivative):
             object.__setattr__(self, "derivative", _derivative_from(self.derivative))
         object.__setattr__(self, "seeds", _seeds_from(self.seeds))
@@ -392,6 +398,8 @@ class RasterSelection:
         if self.seeds and self.similar:
             text += (f" · objects like the one(s) under {len(self.seeds)} click(s), "
                      f"×{_fmt(self.similar[0])} to ×{_fmt(self.similar[1])} in area")
+            if self.shape:
+                text += " and in shape"
         elif self.seeds:
             text += f" · object(s) under {len(self.seeds)} click(s)"
         return text
@@ -412,6 +420,8 @@ class RasterSelection:
             data["objects"] = [item.to_dict() for item in self.objects]
         if self.similar:
             data["similar"] = list(self.similar)
+        if self.shape:
+            data["shape"] = True
         return data
 
     @classmethod
@@ -427,6 +437,7 @@ class RasterSelection:
             seeds=data.get("seeds") or (),
             objects=tuple(cls.from_dict(item) for item in data.get("objects") or ()),
             similar=tuple(data.get("similar") or ()),
+            shape=bool(data.get("shape", False)),
         )
 
 
