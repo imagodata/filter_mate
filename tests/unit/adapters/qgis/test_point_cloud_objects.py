@@ -127,8 +127,11 @@ class TestGrowObject:
 
     def test_a_long_building_grows_the_window(self):
         cloud = Cloud((100, 100, 200, 110))  # 100 m long: past the 64 m window
-        grid = objects.grow_object(cloud.read, 105.0, 105.0, 1.0)
+        grid = objects.grow_object(cloud.read, 105.0, 105.0, 1.0, limit=128.0)
         assert len(cloud.reads) == 2 and not grid.truncated and grid.half == 128.0
+        # With the default limit (a window of 128 m) it is cut: the click is 95 m from its far end.
+        cloud = Cloud((100, 100, 200, 110))
+        assert objects.grow_object(cloud.read, 105.0, 105.0, 1.0).truncated
         assert grid.points == len(cloud.xs)
 
     def test_a_forest_is_cut_at_the_largest_window(self):
@@ -212,11 +215,13 @@ def qgis_fakes(monkeypatch):
 
 
 class TestObjectFootprint:
+    """The scenes are laid out on cells of 1 m (the default is 2 m: a click on a LiDAR HD tile in a few seconds)."""
+
     def test_the_class_of_the_click_only(self, qgis_fakes):
         roof = [(x + 0.25, y + 0.25, 6) for x in np.arange(100, 110, 0.5) for y in np.arange(100, 110, 0.5)]
         tree = [(x + 0.25, y + 0.25, 5) for x in np.arange(108, 116, 0.5) for y in np.arange(100, 108, 0.5)]
         layer = FakeLayer(roof + tree)
-        found = objects.object_footprint(layer, 105.0, 105.0, 6)
+        found = objects.object_footprint(layer, 105.0, 105.0, 6, resolution=1.0)
         assert found.geometry == "object geometry" and found.points == len(roof) and not found.truncated
         region, geotransform, tolerance = qgis_fakes[0]
         assert region.sum() == 12 * 12 - 4 and tolerance == 0.5  # the tree over the roof is another object
@@ -232,9 +237,9 @@ class TestObjectFootprint:
 
     def test_the_points_limit_cuts_the_object(self, qgis_fakes):
         roof = [(x + 0.25, y + 0.25, 6) for x in np.arange(100, 110, 0.5) for y in np.arange(100, 110, 0.5)]
-        found = objects.object_footprint(FakeLayer(roof), 100.5, 105.0, 6, points_limit=50)
+        found = objects.object_footprint(FakeLayer(roof), 100.5, 105.0, 6, points_limit=50, resolution=1.0)
         assert found.points == 50 and found.truncated
-        found = objects.object_footprint(FakeLayer(roof), 105.0, 105.0, 6, points_limit=50)
+        found = objects.object_footprint(FakeLayer(roof), 105.0, 105.0, 6, points_limit=50, resolution=1.0)
         assert found.points == 0 and found.truncated  # nothing found: the limit says why
 
     def test_a_virtual_point_cloud_is_refused(self, qgis_fakes):

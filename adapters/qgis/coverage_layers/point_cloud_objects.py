@@ -4,14 +4,21 @@ Object detection on a point cloud: the cluster of points of one class under a cl
 
 A building, a tree: the points around the click are read with
 ``QgsPointCloudDataProvider.identify`` at :data:`OBJECT_RESOLUTION` (the octree
-level of 1 m, on the layer of the project and the main thread, as the class
+level of 2 m, on the layer of the project and the main thread, as the class
 pipette), those of the clicked class are binned on a grid of cells of that size,
 the gaps between the points are closed by one cell (as the footprint of a source,
 :func:`point_cloud_footprint.footprint_geometry`) and the 4-connected patch of
 cells under the click is followed (:func:`raster_adapter.flood_fill`), its holes
 filled (a courtyard). The window read starts at 64 m a side around the click and
-grows four times while the patch touches its side, up to 256 m: a larger patch
+grows four times while the patch touches its side, up to 128 m: a larger patch
 (a forest) is cut there (``truncated``).
+
+Measured on a LiDAR HD tile (25 M points, QGIS 4.2): ``identify`` turns every
+point read into a dict of its attributes, about 30 000 points a second, and
+reads every class: a click in a forest read at 1 m over 256 m took 11 s, the
+footprint of the vegetation class of the whole tile at 1 m 49 s. Cells of 2 m
+(the resolution of the footprint of a source) and a window of 128 m keep a
+click under a few seconds; a car is then two cells long.
 
 Similar objects: the footprint of the whole class (a private copy of the layer
 filtered on the class, :func:`point_cloud_footprint.footprint_geometry` at the
@@ -31,22 +38,23 @@ from typing import Any, Callable, List, Optional, Sequence, Tuple
 
 from qgis.core import QgsGeometry, QgsRectangle
 
-from .point_cloud_footprint import DEFAULT_POINTS_LIMIT
-
 logger = logging.getLogger(__name__)
 
 # Cell size in metres (degrees for a cloud in a geographic CRS, see point_cloud_footprint.layer_resolution):
-# also the level of detail read, the clicked objects and the similar ones alike.
-OBJECT_RESOLUTION = 1.0
+# also the level of detail read, the clicked objects and the similar ones alike (see the module docstring).
+OBJECT_RESOLUTION = 2.0
 # Half side in metres of the first window read around a click: 64 m, a house, a tree, a block of flats.
 OBJECT_WINDOW_START = 32.0
-# Largest half side: 256 m. Read on the main thread at each click (every class: identify cannot filter);
+# Largest half side: 128 m. Read on the main thread at each click (every class: identify cannot filter);
 # a patch still larger (a forest, a hedge) is cut and the panel says so.
-OBJECT_WINDOW_MAX = 128.0
-# The window grows four times at each step: 64 m, then 256 m; two reads at most.
+OBJECT_WINDOW_MAX = 64.0
+# The window grows four times at each step: 64 m, then 128 m (the limit); two reads at most.
 OBJECT_WINDOW_GROWTH = 4
-# Points read (every class) for one object at most: about 0.1 M in a window of 256 m at 1 m.
+# Points read (every class) for one object at most: about 0.1 M in a window of 128 m at 2 m.
 OBJECT_POINTS_LIMIT = 500000
+# Points read for the footprint of a class (the similar objects, whole layer): about 30 s at most;
+# beyond, the footprint is truncated and the panel says some objects may be missing.
+CLASS_POINTS_LIMIT = 1000000
 # Gaps between the points closed by this many cells, as the footprint of a source does.
 OBJECT_DILATE_CELLS = 1
 # A click between two points of the object: the nearest cell of the class within this many cells
@@ -292,7 +300,7 @@ def class_subset(code: int, base_subset: str = '') -> str:
 
 
 def class_footprint(layer, code: int, base_subset: str = '', resolution: float = OBJECT_RESOLUTION,
-                    points_limit: int = DEFAULT_POINTS_LIMIT):
+                    points_limit: int = CLASS_POINTS_LIMIT):
     """Footprint (:class:`point_cloud_footprint.FootprintResult`) of the points of class ``code`` of ``layer``.
 
     Read from a private copy of the layer filtered on the class and ``base_subset`` (the
