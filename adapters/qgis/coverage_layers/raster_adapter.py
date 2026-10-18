@@ -822,8 +822,10 @@ def selection_geometry(provider: QgsRasterDataProvider, selection: RasterSelecti
                                    tiles=len(tiles), coarse=coarse, decimation=k, smoothing=smoothing, vertices=vertices)
 
 
-def _within_budget(geometry, max_vertices: int):
-    """``geometry`` (cell coordinates) simplified, keeping its patches, until it holds ``max_vertices`` vertices.
+def _within_budget(geometry, max_vertices: int, cell: float = 1.0):
+    """``geometry`` simplified, keeping its patches, until it holds ``max_vertices`` vertices.
+
+    ``cell``: size of a cell in the units of ``geometry`` (1 in cell coordinates).
 
     The tiles already fit their share: this only catches what the smoothing
     cannot merge (many isolated patches). Deterministic; logged when it stays over.
@@ -832,7 +834,7 @@ def _within_budget(geometry, max_vertices: int):
     if geometry.isEmpty() or geometry.constGet().nCoordinates() <= max_vertices:
         return geometry
     for tolerance in _SIMPLIFY_TOLERANCES:
-        simplified = geometry.simplify(tolerance)  # topology preserving: no patch collapses
+        simplified = geometry.simplify(tolerance * cell)  # topology preserving: no patch collapses
         if simplified is not None and not simplified.isEmpty():
             geometry = make_valid(simplified)
         if geometry.constGet().nCoordinates() <= max_vertices:
@@ -1016,6 +1018,8 @@ def object_geometry(provider: QgsRasterDataProvider, selection: RasterSelection,
     if truncated:
         logger.info(f"[FM5] object detection: an object is larger than {2 * limit + 1} pixels, cut at the window read")
     geometry = union_geometries(geometries) if geometries else QgsGeometry()
+    # Bounded like the tiled selection (a patch running over a field has a long outline).
+    geometry = _within_budget(geometry, SOURCE_MAX_VERTICES, min(size_x, size_y))
     return SelectionGeometryResult(geometry, kept, total, max(size_x, size_y), truncated, len(geometries))
 
 

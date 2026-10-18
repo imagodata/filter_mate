@@ -430,6 +430,18 @@ class TestTilePolygonsWithGdal:
             tiled[row:row + rr, col:col + cc] = cells[row - top:row - top + rr, col - left:col - left + cc]
         assert (tiled == whole).all()
 
+    def test_a_geometry_over_the_budget_keeps_its_patches(self, polygons):
+        """What the smoothing cannot merge (an object outline, isolated patches) is simplified, never dropped."""
+        rows, cols = np.mgrid[0:200, 0:200]
+        mask = (rows > cols + 10) | (rows + 7 < cols // 3)  # two staircase outlines
+        mask[2:6, 190:194] = True  # an isolated patch
+        parts = geometry_tools.polygonize_mask(mask, (0.0, 0.25, 0.0, 50.0, 0.0, -0.25))
+        geometry = geometry_tools.merge_tile_polygons(parts, [])
+        before = geometry.nCoordinates()
+        bounded = raster_adapter._within_budget(geometry, before // 4, cell=0.25)
+        assert bounded.nCoordinates() <= before // 4
+        assert len(bounded.asGeometryCollection()) == len(geometry.asGeometryCollection())
+
     def test_cells_are_moved_to_the_map(self, polygons):
         mask = np.zeros((4, 4), dtype=bool)
         mask[1, 2] = True

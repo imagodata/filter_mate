@@ -90,6 +90,12 @@ class _Shape:
     def isEmpty(self):
         return False
 
+    def constGet(self):  # the vertex budget counts it: a light outline
+        return self
+
+    def nCoordinates(self):
+        return 4
+
 
 def _detect(seeds, **kwargs):
     selection = RasterSelection(mode=RasterSelectionMode.CLASSES, classes=frozenset({1}), seeds=tuple(seeds))
