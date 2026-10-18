@@ -12,7 +12,8 @@ Future phases: Zonal Stats criteria, Histogram ranges, Band compositions.
 """
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Dict, Optional
+import math
+from typing import Dict, Optional, Tuple
 
 
 class SamplingMethod(Enum):
@@ -275,6 +276,15 @@ class RasterSelection:
             ``"<ref>@<band>"`` references; a pixel is kept where it is not 0.
         derivative: Quantity the RANGE bounds apply to (slope, aspect... of the
             band read as a DTM); the pixel value by default.
+        seeds: Points ``(x, y)`` in the layer CRS (clicks of the pipette in object
+            detection): only the patches of kept pixels that hold one of them are
+            selected, a pool rather than every pixel of its colour. Empty: every
+            kept pixel of the raster.
+        objects: One selection per seed, each with its own criterion (the colour,
+            class or value picked there): a pool and the lawn beside it, clicked
+            one after the other, stay two objects instead of one patch of both
+            colours. The criterion of this selection is then their union (what
+            the whole raster would keep). Empty: every seed grows in this criterion.
     """
 
     band: int = 1
@@ -284,10 +294,20 @@ class RasterSelection:
     classes: frozenset = frozenset()
     expression: str = ""
     derivative: RasterDerivative = RasterDerivative.VALUE
+    seeds: Tuple[Tuple[float, float], ...] = ()
+    objects: Tuple["RasterSelection", ...] = ()
 
     def __post_init__(self):
         if not isinstance(self.derivative, RasterDerivative):
             object.__setattr__(self, "derivative", _derivative_from(self.derivative))
+        object.__setattr__(self, "seeds", _seeds_from(self.seeds))
+        objects = tuple(self.objects or ())
+        for item in objects:
+            if not isinstance(item, RasterSelection) or len(item.seeds) != 1 or item.objects:
+                raise ValueError("an object is a selection of one seed, without objects of its own")
+        object.__setattr__(self, "objects", objects)
+        if objects and not self.seeds:
+            object.__setattr__(self, "seeds", _seeds_from(item.seeds[0] for item in objects))
         if self.band < 1:
             raise ValueError(f"band must be >= 1, got {self.band}")
         if self.derivative.is_terrain and self.mode is not RasterSelectionMode.RANGE:
@@ -355,13 +375,17 @@ class RasterSelection:
             low = "-∞" if self.minimum is None else _fmt(self.minimum)
             high = "+∞" if self.maximum is None else _fmt(self.maximum)
             what = "band" if not self.derivative.is_terrain else self.derivative.value.replace("_", " ") + " of band"
-            return f"{what} {self.band} in [{low} ; {high}]"
-        if self.mode is RasterSelectionMode.CLASSES:
-            return f"band {self.band} classes " + ", ".join(_fmt(c) for c in sorted(self.classes))
-        return self.expression.strip()
+            text = f"{what} {self.band} in [{low} ; {high}]"
+        elif self.mode is RasterSelectionMode.CLASSES:
+            text = f"band {self.band} classes " + ", ".join(_fmt(c) for c in sorted(self.classes))
+        else:
+            text = self.expression.strip()
+        if self.seeds:
+            text += f" · object(s) under {len(self.seeds)} click(s)"
+        return text
 
     def to_dict(self) -> Dict:
-        return {
+        data = {
             "band": self.band,
             "mode": self.mode.value,
             "minimum": self.minimum,
@@ -370,6 +394,11 @@ class RasterSelection:
             "expression": self.expression,
             "derivative": self.derivative.value,
         }
+        if self.seeds:  # older readers see the same keys as before without object detection
+            data["seeds"] = [list(seed) for seed in self.seeds]
+        if self.objects:
+            data["objects"] = [item.to_dict() for item in self.objects]
+        return data
 
     @classmethod
     def from_dict(cls, data: Dict) -> "RasterSelection":
@@ -381,6 +410,8 @@ class RasterSelection:
             classes=frozenset(int(c) for c in data.get("classes", ()) or ()),
             expression=data.get("expression", "") or "",
             derivative=_derivative_from(data.get("derivative")),
+            seeds=data.get("seeds") or (),
+            objects=tuple(cls.from_dict(item) for item in data.get("objects") or ()),
         )
 
 
@@ -389,6 +420,25 @@ def _fmt(value) -> str:
     if isinstance(value, float) and value.is_integer():
         return str(int(value))
     return repr(value) if isinstance(value, float) else str(value)
+
+
+def _seeds_from(value) -> Tuple[Tuple[float, float], ...]:
+    """Seeds as a tuple of ``(x, y)`` floats, in order, without duplicates.
+
+    Raises:
+        ValueError: For a seed that is not two finite numbers.
+    """
+    seeds = []
+    for seed in value or ():
+        try:
+            x, y = (float(v) for v in seed)
+        except (TypeError, ValueError):
+            raise ValueError(f"a seed is a point (x, y), got {seed!r}") from None
+        if not (math.isfinite(x) and math.isfinite(y)):
+            raise ValueError(f"a seed must be finite, got {seed!r}")
+        if (x, y) not in seeds:
+            seeds.append((x, y))
+    return tuple(seeds)
 
 
 def _derivative_from(value) -> RasterDerivative:

@@ -204,3 +204,64 @@ class MaskOverlay:
                 self._canvas.scene().removeItem(item)
             except RuntimeError:  # the canvas is gone (plugin unloaded)
                 pass
+
+
+def _polygon_type():
+    """Polygon geometry type of a rubber band: ``Qgis.GeometryType`` (3.30+), ``QgsWkbTypes`` before."""
+    from qgis.core import Qgis
+    geometry_type = getattr(Qgis, 'GeometryType', None)
+    if geometry_type is not None and hasattr(geometry_type, 'Polygon'):
+        return geometry_type.Polygon
+    from qgis.core import QgsWkbTypes
+    return QgsWkbTypes.GeometryType.PolygonGeometry
+
+
+class ObjectOutline:
+    """Outline of the objects the pipette detected, in the map selection colour.
+
+    One rubber band, created at the first outline and reset afterwards: the scene
+    does not delete an item it removes, a band per click would pile up.
+    """
+
+    def __init__(self, canvas) -> None:
+        self._canvas = canvas
+        self._band = None
+        self._shown = False
+
+    @property
+    def visible(self) -> bool:
+        return self._shown
+
+    def show(self, geometry, layer) -> None:
+        """Draw ``geometry`` (in the CRS of ``layer``) on the map, replacing the previous outline."""
+        if geometry is None or geometry.isEmpty():
+            self.hide()
+            return
+        if self._band is None:
+            from qgis.gui import QgsRubberBand
+            from qgis.PyQt.QtGui import QColor
+            band = QgsRubberBand(self._canvas, _polygon_type())
+            colour = QColor(self._canvas.selectionColor())
+            colour.setAlpha(255)
+            fill = QColor(colour)
+            fill.setAlpha(70)
+            band.setStrokeColor(colour)
+            band.setFillColor(fill)
+            band.setWidth(2)
+            self._band = band
+        self._band.setToGeometry(geometry, layer.crs())  # reprojected to the map CRS (the layer overload is a vector one)
+        self._band.show()
+        self._shown = True
+
+    def geometry(self):
+        """The outline drawn (map CRS), None when hidden."""
+        return self._band.asGeometry() if self._band is not None and self._shown else None
+
+    def hide(self) -> None:
+        self._shown = False
+        if self._band is not None:
+            try:
+                self._band.reset(_polygon_type())
+                self._band.hide()
+            except RuntimeError:  # the canvas is gone (plugin unloaded)
+                self._band = None

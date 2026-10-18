@@ -165,6 +165,34 @@ class TestSnapshotsAndHistory:
 
 
 class TestRasterSelection:
+    def test_seeds_are_points_in_order_without_duplicates(self):
+        sel = RasterSelection(minimum=1, seeds=[[1, 2], (3.5, 4), (1.0, 2.0)])
+        assert sel.seeds == ((1.0, 2.0), (3.5, 4.0))
+        with pytest.raises(ValueError):
+            RasterSelection(minimum=1, seeds=[(1, float("nan"))])
+        with pytest.raises(ValueError):
+            RasterSelection(minimum=1, seeds=[(1, 2, 3)])
+
+    def test_seeds_round_trip_and_older_dicts(self):
+        sel = RasterSelection(mode=RasterSelectionMode.EXPRESSION, expression='"o@1" > 3', seeds=((10.0, 20.0),))
+        assert sel.to_dict()["seeds"] == [[10.0, 20.0]]
+        assert RasterSelection.from_dict(sel.to_dict()) == sel
+        assert "seeds" not in RasterSelection(minimum=1).to_dict()  # same dict as before without detection
+        assert RasterSelection.from_dict({"mode": "range", "minimum": 1}).seeds == ()
+
+    def test_objects_have_one_seed_each_and_give_the_seeds(self):
+        pool = RasterSelection(mode=RasterSelectionMode.CLASSES, classes=frozenset({1}), seeds=((1, 2),))
+        roof = RasterSelection(mode=RasterSelectionMode.CLASSES, classes=frozenset({2}), seeds=((3, 4),))
+        both = RasterSelection(mode=RasterSelectionMode.CLASSES, classes=frozenset({1, 2}), objects=(pool, roof))
+        assert both.seeds == ((1.0, 2.0), (3.0, 4.0))
+        assert RasterSelection.from_dict(both.to_dict()) == both
+        with pytest.raises(ValueError):
+            RasterSelection(minimum=1, objects=(RasterSelection(minimum=1),))  # an object without its seed
+
+    def test_seeds_are_described(self):
+        sel = RasterSelection(minimum=1, maximum=2, seeds=((0, 0), (1, 1)))
+        assert sel.describe() == "band 1 in [1 ; 2] · object(s) under 2 click(s)"
+
     def test_range_formula_and_keeps(self):
         sel = RasterSelection(band=2, minimum=200.0, maximum=260.5)
         assert sel.to_calc_formula("mnt") == '("mnt@2" >= 200 AND "mnt@2" <= 260.5)'

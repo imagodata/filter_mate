@@ -81,6 +81,11 @@ def _same_layer(first: Any, second: Any) -> bool:
         return False
 
 
+def _detects_objects(selection: Any) -> bool:
+    """A selection of the pipette in object detection: the patches under its clicks only."""
+    return bool(getattr(selection, 'seeds', ()))
+
+
 def _is_expression(selection: Any) -> bool:
     """A raster calculator expression selection: a colour of the pipette, a spectral preset, a typed one."""
     return getattr(getattr(selection, 'mode', None), 'value', '') == 'expression'
@@ -132,6 +137,8 @@ class CoverageModeController(BaseController):
         self._preview_active = False
         self._color_pick = False  # the pipette: a click on the map picks a colour to select
         self._mask_overlay = None  # veil of a terrain derivative or expression preview (canvas item)
+        self._object_outline = None  # outline of the objects the pipette detected (rubber band)
+        self._detected: Any = None  # (key, SelectionGeometryResult) of the last object detection
         # (source, layer name, expression) or (source, band, derivative) -> grid of the veil, None when unreadable
         self._surfaces: 'OrderedDict[tuple, Any]' = OrderedDict()
         self._expression_timer: Any = None  # reads an expression once the input settles
@@ -229,6 +236,7 @@ class CoverageModeController(BaseController):
         self._panel_states.clear()
         self._histogram_cache.clear()
         self._surfaces.clear()
+        self._detected = None
         self._stats_watched.clear()  # the same ids come back with new layers when the project is opened again
         self._stats_slots.clear()  # their layers are gone
         self._schedule_cache_tidy()
@@ -324,6 +332,8 @@ class CoverageModeController(BaseController):
             except RuntimeError:
                 pass  # deleted with the dock
         self._surfaces.clear()
+        self._hide_detected_objects()
+        self._detected = None
         if self._extras is not None:
             self._extras_call('teardown')
             self._extras = None
@@ -551,6 +561,7 @@ class CoverageModeController(BaseController):
         except Exception as exc:
             logger.debug(f"[FM5] panel state not saved: {exc}")
         self._stop_preview(layer)
+        self._hide_detected_objects()  # drawn again from the saved state when the layer comes back
 
     @staticmethod
     def _disconnect_previous_vector_selection(dw: Any, incoming_layer: Any) -> None:
@@ -871,6 +882,7 @@ class CoverageModeController(BaseController):
                         self._refresh_histogram(layer, panel.current_band())
                     except Exception as exc:
                         logger.debug(f"[FM5] histogram not refreshed after the restore: {exc}")
+                    self._show_detected_objects()  # the outline left with the layer comes back with it
                 if self._kind is LayerKind.RASTER and state.get('preview'):
                     # The preview box comes back checked: so do the button and the mask on the map.
                     self._on_raster_preview_toggled(True)
@@ -999,6 +1011,11 @@ class CoverageModeController(BaseController):
         if panel is None or layer is None:
             return
         selection = panel.selection()
+        if _detects_objects(selection):
+            result = self._detected_result(layer, selection)
+            total = getattr(result, 'total_pixels', 0)
+            panel.set_kept_ratio(result.kept_pixels / total if result is not None and total else None)
+            return
         if selection is not None and _is_expression(selection):
             # A colour of the pipette, a spectral preset: no histogram tells, the expression is read, for
             # the preview only (half a second on this thread) and once the input settles.
@@ -1023,6 +1040,7 @@ class CoverageModeController(BaseController):
         panel.set_kept_ratio(kept / total)
 
     def _on_raster_selection_changed(self) -> None:
+        self._show_detected_objects()
         self._update_kept_ratio()
         panel = self._raster_panel
         selection = panel.selection() if panel is not None else None
@@ -1058,6 +1076,11 @@ class CoverageModeController(BaseController):
             return
         from ...adapters.qgis.coverage_layers.raster_adapter import apply_selection_preview, clear_selection_preview
         selection = panel.selection()
+        if _detects_objects(selection):
+            # Detected objects: their outline is the preview, a veil would show every pixel of their colour.
+            clear_selection_preview(layer)
+            self._hide_derivative_preview()
+            return
         if selection is not None and (selection.derivative.is_terrain or _is_expression(selection)):
             # Neither a slope nor a colour (several bands) is a value of the band the renderer makes transparent.
             clear_selection_preview(layer)  # a value preview left from before the quantity changed
@@ -1174,6 +1197,94 @@ class CoverageModeController(BaseController):
     def _hide_derivative_preview(self) -> None:
         if self._mask_overlay is not None:
             self._mask_overlay.hide()
+
+    # === Object detection (pipette) ===
+
+    def _detected_result(self, layer: Any, selection: Any, read: bool = False) -> Any:
+        """Objects under the clicks of ``selection`` (a SelectionGeometryResult), None when not read.
+
+        ``read`` True reads them when they are not the last ones read: a window of
+        native pixels around each click, on this thread (a click, a tolerance that settled).
+        """
+        try:
+            key = (self._histogram_key(layer, 0)[0], layer.name(), selection)
+        except RuntimeError:
+            return None  # layer deleted
+        if self._detected is not None and self._detected[0] == key:
+            return self._detected[1]
+        if not read:
+            return None
+        from ...adapters.qgis.coverage_layers.raster_adapter import layer_object_geometry
+        try:
+            from qgis.PyQt.QtCore import Qt
+            from qgis.PyQt.QtWidgets import QApplication
+            QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
+        except Exception:
+            QApplication = None
+        try:
+            result = layer_object_geometry(self._base_raster(layer), selection)
+        except RuntimeError as exc:
+            logger.debug(f"[FM5] objects not detected, layer deleted: {exc}")
+            return None
+        except Exception as exc:
+            logger.warning(f"[FM5] object detection failed: {exc}", exc_info=True)
+            return None  # not kept: the same selection is read again at its next change
+        finally:
+            if QApplication is not None:
+                QApplication.restoreOverrideCursor()
+        self._detected = (key, result)
+        return result
+
+    def _show_detected_objects(self) -> None:
+        """Detect the objects under the pipette clicks, outline them and tell their number and area."""
+        layer, panel = self._active_layer, self._raster_panel
+        selection = panel.selection() if panel is not None else None
+        if layer is None or not _detects_objects(selection):
+            self._hide_detected_objects()
+            return
+        result = self._detected_result(layer, selection, read=True)
+        if result is None:
+            self._hide_detected_objects()
+            self._call(panel, 'show_detected_objects', None)
+            return
+        geometry = result.geometry
+        area = None
+        if geometry is not None and not geometry.isEmpty():
+            area = self._ground_area(geometry, layer)
+        # The objects found, not the parts of their union: two touching objects are still two.
+        self._call(panel, 'show_detected_objects', result.objects, area, result.truncated)
+        self._update_kept_ratio()  # read now: a ratio asked before (a layer coming back) found none
+        iface = self._iface()
+        canvas = iface.mapCanvas() if iface is not None else None
+        if canvas is None:
+            return
+        try:
+            if self._object_outline is None:
+                from ...adapters.qgis.coverage_layers.preview_overlay import ObjectOutline
+                self._object_outline = ObjectOutline(canvas)
+            self._object_outline.show(geometry, layer)
+        except Exception as exc:
+            logger.warning(f"[FM5] detected objects not drawn: {exc}", exc_info=True)
+
+    @staticmethod
+    def _ground_area(geometry: Any, layer: Any) -> Optional[float]:
+        """Area of ``geometry`` (layer CRS) in square metres, on the project ellipsoid; None when unknown."""
+        try:
+            from qgis.core import Qgis, QgsDistanceArea, QgsProject, QgsUnitTypes
+            measure = QgsDistanceArea()
+            project = QgsProject.instance()
+            measure.setSourceCrs(layer.crs(), project.transformContext())
+            measure.setEllipsoid(project.ellipsoid() or 'NONE')
+            area_unit = getattr(Qgis, 'AreaUnit', None)
+            square_metres = area_unit.SquareMeters if area_unit is not None else QgsUnitTypes.AreaSquareMeters
+            return float(measure.convertAreaMeasurement(measure.measureArea(geometry), square_metres))
+        except Exception as exc:
+            logger.debug(f"[FM5] area of the detected objects unknown: {exc}")
+            return None
+
+    def _hide_detected_objects(self) -> None:
+        if self._object_outline is not None:
+            self._object_outline.hide()
 
     def _populate_point_cloud(self, layer: Any, keep_kept: bool = False) -> None:
         try:
@@ -1335,7 +1446,8 @@ class CoverageModeController(BaseController):
                 self._stop_preview(layer)
                 panel = self._current_panel()
                 if panel is not None:
-                    panel.reset()
+                    panel.reset()  # does not emit: its outline goes here
+                self._hide_detected_objects()
                 self._panel_states.pop(layer.id(), None)
         except Exception as exc:
             logger.warning(f"[FM5] exploring action '{action}' failed: {exc}", exc_info=True)
@@ -1374,7 +1486,12 @@ class CoverageModeController(BaseController):
         extent = None
         try:
             from ...adapters.qgis.coverage_layers.raster_adapter import selection_extent
-            extent = selection_extent(self._base_raster(layer), selection) if selection is not None else None
+            if _detects_objects(selection):
+                result = self._detected_result(layer, selection, read=True)
+                geometry = result.geometry if result is not None else None
+                extent = geometry.boundingBox() if geometry is not None and not geometry.isEmpty() else None
+            else:
+                extent = selection_extent(self._base_raster(layer), selection) if selection is not None else None
         except Exception as exc:
             logger.debug(f"[FM5] extent of the selected range not computed: {exc}")
         if extent is None or extent.isEmpty():
@@ -1589,7 +1706,7 @@ class CoverageModeController(BaseController):
         # With the colour pipette Ctrl+click adds a colour: it does not extend the range.
         self._raster_panel.set_pixel_values(layer_point.x(), layer_point.y(), values, extend and not self._color_pick, terrain)
         if self._color_pick:
-            self._raster_panel.set_color_sample(values, extend, terrain)
+            self._raster_panel.set_color_sample(values, extend, terrain, (layer_point.x(), layer_point.y()))
 
     def _terrain_at(self, base: Any, layer_point: Any) -> dict:
         """Slope, aspect... under ``layer_point`` while the range applies to one; empty otherwise."""
@@ -1963,7 +2080,8 @@ class CoverageModeController(BaseController):
         if reset:
             panel = self._current_panel()
             if panel is not None:
-                panel.reset()
+                panel.reset()  # does not emit: its outline goes here
+            self._hide_detected_objects()
             self._panel_states.pop(layer.id(), None)
         self._finish_restore(restored)
 

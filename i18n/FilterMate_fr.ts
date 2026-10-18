@@ -5040,6 +5040,58 @@ Seules les couches du projet sont filtrées. Le filtre est annulable depuis Filt
         <source>Expression</source>
         <translation>Expression</translation>
     </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="0"/>
+        <source>Select</source>
+        <translation>Sélectionner</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="0"/>
+        <source>Similar pixels (whole raster)</source>
+        <translation>Pixels semblables (tout le raster)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="0"/>
+        <source>Clicked object (detection)</source>
+        <translation>Objet cliqué (détection)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="0"/>
+        <source>Similar pixels: every pixel of the raster close to the picked color or value.
+Clicked object: only the patch of such pixels the click falls in (a pool, a roof, a field); Ctrl+click adds another object.</source>
+        <translation>Pixels semblables : tous les pixels du raster proches de la couleur ou de la valeur prélevée.
+Objet cliqué : seulement la tache de ces pixels où tombe le clic (une piscine, un toit, un champ) ; Ctrl+clic ajoute un autre objet.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="0"/>
+        <source>What the pipette selects</source>
+        <translation>Ce que sélectionne la pipette</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="0"/>
+        <source>{0} — detecting {1} object(s)…</source>
+        <translation>{0} — détection de {1} objet(s)…</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="0"/>
+        <source>The object could not be read</source>
+        <translation>L&apos;objet n&apos;a pas pu être lu</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="0"/>
+        <source>No object under the click: raise the tolerance or click another pixel</source>
+        <translation>Aucun objet sous le clic : augmentez la tolérance ou cliquez sur un autre pixel</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="0"/>
+        <source>{0} object(s) detected</source>
+        <translation>{0} objet(s) détecté(s)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="0"/>
+        <source>{0} (cut: larger than the window read, lower the tolerance)</source>
+        <translation>{0} (coupé : plus grand que la fenêtre lue, baissez la tolérance)</translation>
+    </message>
 </context>
 <context>
     <name>RecommendationDialog</name>
