@@ -417,27 +417,24 @@ class ConfigController(BaseController):
             if new_theme_value:
                 logger.info(f"ACTIVE_THEME changed to: {new_theme_value}")
 
-                # Import StyleLoader
-                try:
-                    from ui.styles import StyleLoader
-                except ImportError:
-                    logger.warning("StyleLoader not available")
-                    return
-
-                if new_theme_value == 'auto':
-                    # Auto-detect and apply theme
-                    StyleLoader.set_theme_from_config(
-                        self.dockwidget.dockWidgetContents,
-                        self.dockwidget.CONFIG_DATA,
-                        None
-                    )
+                # Through the theme manager: it re-applies the stylesheet and notifies the icon manager,
+                # the button styler and the CONFIGURATION view ('default' means auto there).
+                manager = getattr(self.dockwidget, '_theme_manager', None)
+                if manager is not None:
+                    manager.set_theme(new_theme_value)
                 else:
-                    # Apply specified theme (default, dark, light)
+                    try:
+                        from ..styles import StyleLoader  # "from ui.styles" failed inside the plugin package
+                    except ImportError:
+                        logger.warning("StyleLoader not available")
+                        return
                     StyleLoader.set_theme_from_config(
                         self.dockwidget.dockWidgetContents,
                         self.dockwidget.CONFIG_DATA,
-                        new_theme_value
+                        None if new_theme_value == 'auto' else new_theme_value
                     )
+                    if hasattr(self.dockwidget, '_refresh_config_view_theme'):
+                        self.dockwidget._refresh_config_view_theme()
 
                 changes_summary.append(f"Theme: {new_theme_value}")
                 self.theme_changed.emit(new_theme_value)

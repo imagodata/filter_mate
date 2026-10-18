@@ -52,6 +52,15 @@ class JsonView(QtWidgets.QTreeView):
         header.setMinimumSectionSize(100)
         header.setHighlightSections(False)
 
+    def refresh_theme_stylesheet(self, force_dark=None):
+        """Re-apply the dark or light stylesheet after a theme change.
+
+        Args:
+            force_dark: True / False to follow the plugin theme, None to detect it from the QGIS palette.
+        """
+        self._forced_dark = force_dark
+        self._apply_theme_stylesheet()
+
     def _apply_theme_stylesheet(self):
         """Apply stylesheet based on detected theme (dark/light)."""
         # Check if theme was forced externally

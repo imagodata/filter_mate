@@ -124,6 +124,11 @@ class StyleLoader:
             'button_active_background': active_background,
             'button_active_border': '#222222' if dark else colors.get('color_accent_dark', '#01579B'),
             'control_check_icon': os.path.join(os.path.dirname(path), 'check_white.svg').replace('\\', '/'),
+            # Check / radio glyphs of mockup.qss, in fm_accent_text: dark on the light dark-theme accent.
+            'control_check_glyph': os.path.join(os.path.dirname(path),
+                                          'check_dark.svg' if dark else 'check_white.svg').replace('\\', '/'),
+            'control_radio_glyph': os.path.join(os.path.dirname(path),
+                                          'radio_dot_dark.svg' if dark else 'radio_dot_white.svg').replace('\\', '/'),
             # Spin box steppers: drawn by the stylesheet on every platform (see mockup.qss).
             'spin_up_icon': os.path.join(os.path.dirname(path), 'spin_up.svg').replace('\\', '/'),
             'spin_down_icon': os.path.join(os.path.dirname(path), 'spin_down.svg').replace('\\', '/'),

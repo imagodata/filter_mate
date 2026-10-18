@@ -18,7 +18,7 @@ One place for the look of the dock:
 Pure functions except :func:`render_icon`, which needs QtSvg.
 """
 import logging
-from typing import Dict, Optional
+from typing import Any, Dict, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -158,6 +158,9 @@ ICON_BODIES: Dict[str, str] = {
     # 2026-10-18: an eye over a few points, no longer the same drawing as 'track'.
     'live_preview': '<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="9" cy="12" r="1.2"/>'
                     '<circle cx="12.5" cy="10.2" r="1.2"/><circle cx="14.8" cy="13.6" r="1.2"/>',
+    # Collapse arrows of the groups (QGIS draws them dark in every theme: invisible on the dark dock).
+    'group_expand': '<path d="M9 6l7 6-7 6z" fill="currentColor"/>',
+    'group_collapse': '<path d="M6 9l6 7 6-7z" fill="currentColor"/>',
     'star': '<path d="M12 3l2.8 5.8 6.2.9-4.5 4.4 1.1 6.2L12 17.4 6.4 20.3l1.1-6.2L3 9.7l6.2-.9z" fill="currentColor"/>',
 }
 
@@ -285,6 +288,43 @@ def icon_key_for(filename: str) -> Optional[str]:
 def icon_color(key: str, dark: bool) -> str:
     palette = tokens(dark)
     return palette['fm_danger'] if key in DANGER_ICONS else palette['fm_icon']
+
+
+def stylesheet_is_dark(widget: Any) -> Optional[bool]:
+    """Variant of the FilterMate stylesheet applied above ``widget``, None before any is applied.
+
+    Read from the radio glyph the stylesheet names (style_loader picks it with the token variant),
+    so it is the theme actually drawn, whatever the managers or the QGIS palette say.
+    """
+    owner = widget
+    while owner is not None:
+        try:
+            sheet = owner.styleSheet() if hasattr(owner, 'styleSheet') else ''
+        except RuntimeError:
+            return None
+        if sheet:
+            if 'radio_dot_dark.svg' in sheet:
+                return True
+            if 'radio_dot_white.svg' in sheet:
+                return False
+        owner = owner.parentWidget()
+    return None
+
+
+def plugin_is_dark(widget: Any) -> bool:
+    """Plugin theme of the dock holding ``widget``, which may differ from QGIS'.
+
+    The applied stylesheet first, then the icon manager of the dock, then the widget palette.
+    """
+    applied = stylesheet_is_dark(widget)
+    if applied is not None:
+        return applied
+    owner = widget
+    while owner is not None and getattr(owner, '_icon_manager', None) is None:
+        owner = owner.parentWidget()
+    if owner is not None:
+        return bool(getattr(owner._icon_manager, 'is_dark_mode', False))
+    return widget.palette().window().color().lightness() < 128
 
 
 def svg_document(key: str, color: str) -> str:

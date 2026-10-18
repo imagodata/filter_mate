@@ -666,12 +666,22 @@ class _CollapsedBand(QObject if QObject is not None else object):
         self._pending = False
         self._collapsed = False
         self._expanded_min = group.minimumHeight()
+        self._arrow = None
         group.installEventFilter(self)
+        self._arrow = _collapse_button(group)
+        if self._arrow is not None:
+            self._arrow.installEventFilter(self)
         self.fit()
 
     def eventFilter(self, watched, event):  # noqa: N802 - Qt override
         try:
-            if event.type() in (QEvent.Type.Show, QEvent.Type.Resize):
+            if watched is self._arrow:
+                if event.type() == QEvent.Type.Paint:
+                    try:
+                        self._tint_arrow()  # QGIS sets its icon again on every setCollapsed, even unchanged
+                    except Exception as exc:  # never an error box on every paint
+                        logger.debug(f"Collapse arrow not tinted: {exc}")
+            elif event.type() in (QEvent.Type.Show, QEvent.Type.Resize):
                 self._schedule()
         except RuntimeError:
             pass  # plugin closing
@@ -704,6 +714,31 @@ class _CollapsedBand(QObject if QObject is not None else object):
                     group.setMaximumHeight(QWIDGETSIZE_MAX)
         except RuntimeError:
             pass  # group deleted
+
+    def _tint_arrow(self) -> None:
+        """Collapse arrow in the muted text colour of the plugin theme.
+
+        QGIS sets a dark theme icon on every ``setCollapsed`` (also with an unchanged state, which
+        the dock does on layer changes): nearly invisible on the dark dock. Checked before each
+        paint of the button; ``setIcon`` within the paint only schedules one more paint.
+        """
+        button = self._arrow
+        if button is None:
+            return
+        from ..styles.mockup_design import plugin_is_dark, render_icon, tokens
+        dark = plugin_is_dark(self._group)
+        key = 'group_expand' if self._group.isCollapsed() else 'group_collapse'
+        icon = render_icon(key, dark, tokens(dark)['fm_text_muted'])
+        if icon is not None and button.icon().cacheKey() != icon.cacheKey():
+            button.setIcon(icon)
+
+
+def _collapse_button(group: Any) -> Any:
+    """The collapse arrow of a QgsCollapsibleGroupBox (None for a plain QGroupBox)."""
+    from qgis.PyQt.QtWidgets import QAbstractButton
+    return next((b for b in group.findChildren(QAbstractButton)
+                 if b.parentWidget() is group and (b.objectName() == 'collapseButton'
+                                                   or type(b).__name__ == 'QgsGroupBoxCollapseButton')), None)
 
 
 COLLAPSE_BUTTON_HEIGHT = BAND - 2  # inside the borders: arrow and title centred in the band
@@ -759,8 +794,44 @@ def fit_panel(panel: Any) -> None:
     _set_layout(panel.layout(), (0, 0, 0, 0), GAP)
     for row in _row_layouts(panel.layout()):
         row.setSpacing(GAP)
+    title_size = _exploring_title_size(panel)
     for group in panel.findChildren(QGroupBox):
         fit_group(group)
+        _title_font(group, title_size)
+
+
+def _exploring_title_size(widget: Any) -> float:
+    """Point size of the vector EXPLORING group titles (set in the .ui), 10 without the dock."""
+    owner = widget
+    while owner is not None and getattr(owner, 'mGroupBox_exploring_single_selection', None) is None:
+        owner = owner.parentWidget()
+    if owner is None:
+        return 10.0
+    size = owner.mGroupBox_exploring_single_selection.font().pointSizeF()
+    return size if size > 0 else 10.0
+
+
+def _title_font(group: Any, size: float) -> None:
+    """Group title at ``size`` like the vector EXPLORING titles, its content at the size it had.
+
+    The panel groups took the 9 pt dock font for their titles, the vector ones 10 pt (2026-10-18).
+    A group's font is also its content's: the direct children keep the former size explicitly.
+    """
+    from qgis.PyQt.QtCore import Qt
+    from qgis.PyQt.QtGui import QFont
+    from qgis.PyQt.QtWidgets import QWidget
+    current = group.font()
+    if size <= 0 or current.pointSizeF() <= 0 or current.pointSizeF() >= size:
+        return
+    content = QFont(current)
+    content.setPointSizeF(current.pointSizeF())  # explicit: the children no longer inherit the title size
+    for child in group.children():
+        if (isinstance(child, QWidget) and not child.isWindow()
+                and not child.testAttribute(Qt.WidgetAttribute.WA_SetFont)):  # an own font (mono value) stays
+            child.setFont(content)
+    title = QFont(current)
+    title.setPointSizeF(size)
+    group.setFont(title)
 
 
 def _crs_row_gap(dw: Any) -> None:

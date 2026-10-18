@@ -517,6 +517,12 @@ class ConfigModelManager:
                     "Using standard JsonView (SearchableJsonView not available)"
                 )
 
+            if hasattr(dw, '_refresh_config_view_theme'):
+                try:
+                    dw._refresh_config_view_theme()  # plugin theme, not the QGIS palette
+                except Exception as e:
+                    logger.debug(f"Config view theme not refreshed: {e}")
+
             # Connect signal using centralized method
             self.connect_config_model_signal()
 
