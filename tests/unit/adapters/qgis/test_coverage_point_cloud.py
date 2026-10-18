@@ -217,7 +217,7 @@ class TestSourceWithoutArea:
     def test_outside_a_line_keeps_everything(self, engine, pdal):
         source, pipelines = pdal
         job = _compute(engine.PointCloudTargetJob(FakeCloudLayer(source), None), LINE, 'Disjoint')
-        assert job.outcome.success and pipelines[0][1]['type'] == 'filters.crop'
+        assert job.outcome.success and 'polygon' in pipelines[0][0]
 
 
 class TestNothingKept:
@@ -262,13 +262,33 @@ class TestNothingKept:
         job = _compute(engine.PointCloudTargetJob(layer, 'OR'), "POLYGON((-10 -10,110 -10,110 110,-10 110,-10 -10))",
                        'Disjoint')
         assert job.outcome.success, job.outcome.message
-        assert pipelines[0][1]['type'] == 'filters.crop' and not job.outcome.emptied
+        assert 'polygon' in pipelines[0][0] and not job.outcome.emptied
         assert fk.FakeGeometry.fromWkt(job._geometry_wkt).area() == pytest.approx(5000.0)
 
     def test_exporter_gets_the_area_outside(self, engine, exporter):
         job = _compute(engine.PointCloudTargetJob(FakeCloudLayer(), None), "POLYGON((500 500,600 500,600 600,500 600,500 500))")
         assert job.outcome.success and job._geometry_wkt and job.outcome.emptied
         assert not exporter[0].geometry.boundingBox().intersects(job._extent)
+
+
+class TestPdalClipStages:
+    """2026-10-18: filters.crop after readers.copc tested every point the reader had already clipped
+    (vegetation footprint, 25 M points: 285 s, 148 s with the reader alone, same points)."""
+
+    def test_copc_is_clipped_by_its_reader_alone(self, engine, pdal):
+        source, pipelines = pdal
+        _compute(engine.PointCloudTargetJob(FakeCloudLayer(source), None), EAST)
+        reader, writer = pipelines[0]
+        assert reader['type'] == 'readers.copc' and reader['polygon'].upper().startswith(('POLYGON', 'MULTIPOLYGON'))
+        assert writer['type'] == 'writers.copc'
+
+    def test_las_is_clipped_by_filters_crop(self, engine, pdal, tmp_path):
+        _, pipelines = pdal
+        las = tmp_path / "cloud.laz"
+        las.write_bytes(b"")
+        _compute(engine.PointCloudTargetJob(FakeCloudLayer(str(las), 'pdal'), None), EAST)
+        reader, crop, _ = pipelines[0]
+        assert reader['type'] == 'readers.las' and 'polygon' not in reader and crop['type'] == 'filters.crop'
 
 
 class TestBboxEmptied:

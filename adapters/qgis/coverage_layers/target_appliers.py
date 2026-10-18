@@ -662,9 +662,12 @@ class PointCloudTargetJob(TargetJob):
         stages = [reader]
         if polygon is None:
             stages.append({"type": "filters.head", "count": 0})
+        elif reader["type"] == 'readers.copc':
+            # The COPC reader clips exactly and skips the octree nodes outside the
+            # polygon; a filters.crop after it tested every kept point again: 285 s
+            # instead of 148 s for a vegetation footprint of 42 000 vertices (25 M points).
+            reader["polygon"] = polygon
         else:
-            if reader["type"] == 'readers.copc':
-                reader["polygon"] = polygon
             stages.append({"type": "filters.crop", "polygon": polygon})
         stages.append({"type": "writers.copc", "filename": path, "forward": "all", "extra_dims": "all",
                        "a_srs": pdal_cli.srs_for(self.crs)})
