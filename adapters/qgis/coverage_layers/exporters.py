@@ -200,7 +200,9 @@ class PointCloudExportJob:
     """
 
     def __init__(self, layer, path: str, fmt: str = 'LAZ', crs=None) -> None:
-        from .point_cloud_footprint import exporter_unavailable_message, index_ready, point_cloud_exporter_class
+        from .point_cloud_footprint import (
+            exporter_unavailable_message, index_ready, point_cloud_exporter_class, qgis_reads_las,
+        )
         self.layer_name = layer.name()
         self.path = path
         self.fmt = fmt.upper() if fmt else 'LAZ'
@@ -213,6 +215,9 @@ class PointCloudExportJob:
             return
         if self.fmt not in POINT_CLOUD_FORMATS:
             self.error = f'unsupported point cloud format {self.fmt}'
+            return
+        if self.fmt in ('LAZ', 'LAS', 'COPC') and not qgis_reads_las():
+            self.error = 'QGIS is built without PDAL: it cannot write LAS / LAZ files, export as GeoPackage or CSV'
             return
         # The exporter reads the layer index without checking it (crash on a null one).
         if layer.providerType() == 'vpc':

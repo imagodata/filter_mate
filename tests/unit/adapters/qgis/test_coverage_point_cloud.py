@@ -178,6 +178,7 @@ def exporter(monkeypatch):
 
     monkeypatch.setattr(sys.modules['qgis.core'], 'QgsPointCloudLayerExporter', Exporter, raising=False)
     monkeypatch.setattr(pdal_cli, 'copc_unavailable_reason', lambda: 'pdal not found')
+    monkeypatch.setattr(footprint, 'qgis_reads_las', lambda: True)
     monkeypatch.setattr(footprint, 'open_point_cloud', lambda source, name, provider: FakeCloudLayer(source, provider))
     return made
 
@@ -314,6 +315,21 @@ class TestVirtualPointCloud:
         job = source_jobs.PointCloudSourceJob(FakeCloudLayer('/data/tiles.vpc', 'vpc'))
         assert job.compute(_request(), lambda: False).isEmpty()
         assert 'virtual point cloud' in job.message
+
+
+class TestQgisWithoutPdal:
+    """2026-10-18: QGIS built without PDAL wrote no LAS and opened none; the clip ran, then failed obscurely."""
+
+    def test_clip_refused_before_the_export(self, engine, exporter, monkeypatch):
+        monkeypatch.setattr(footprint, 'qgis_reads_las', lambda: False)
+        job = _compute(engine.PointCloudTargetJob(FakeCloudLayer(), None), EAST)
+        assert not job.outcome.success and 'built without PDAL' in job.outcome.message
+        assert exporter == []
+
+    def test_bbox_mode_still_works(self, engine, monkeypatch):
+        monkeypatch.setattr(footprint, 'qgis_reads_las', lambda: False)
+        job = _compute(engine.PointCloudTargetJob(FakeCloudLayer(), None, 'bbox'), EAST)
+        assert job.outcome.success
 
 
 class TestExporterCancel:

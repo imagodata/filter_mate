@@ -584,11 +584,15 @@ class PointCloudTargetJob(TargetJob):
     def _prepare_exporter(self) -> None:
         """QgsPointCloudLayerExporter must be prepared on the main thread."""
         from .point_cloud_footprint import (
-            exporter_unavailable_message, index_ready, open_point_cloud, point_cloud_exporter_class,
+            exporter_unavailable_message, index_ready, open_point_cloud, point_cloud_exporter_class, qgis_reads_las,
         )
         exporter_class = point_cloud_exporter_class()
         if exporter_class is None:
             self._unsupported = exporter_unavailable_message()
+            return
+        if not qgis_reads_las():
+            self._unsupported = ("QGIS is built without PDAL: it can neither write nor open the clipped LAS file; "
+                                 "install the pdal tool (2.4 or later) or use the bbox clip mode")
             return
         base = open_point_cloud(self._base_source, f"{self.layer_name}_base", self._base_provider)
         if not base.isValid():

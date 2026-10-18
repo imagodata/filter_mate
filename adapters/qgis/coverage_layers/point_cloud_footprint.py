@@ -62,6 +62,18 @@ def point_cloud_exporter_class():
     return QgsPointCloudLayerExporter
 
 
+def qgis_reads_las() -> bool:
+    """True when QGIS has its ``pdal`` provider (LAS / LAZ files).
+
+    Built without PDAL (some Linux packages, the qgis/qgis Docker images),
+    QGIS opens no LAS / LAZ file and its exporter writes none either, without
+    an error: a clip through the exporter ran to its end, then could not be
+    opened ("derived point cloud could not be opened").
+    """
+    from qgis.core import QgsProviderRegistry
+    return 'pdal' in QgsProviderRegistry.instance().providerList()
+
+
 def exporter_unavailable_message() -> str:
     """User-facing reason why the exporter is missing (translated)."""
     text = "QGIS 3.28 or newer is required to export or exactly clip a point cloud"
