@@ -557,7 +557,12 @@ def s_back_check():
           and d.pushButton_exploring_identify.icon().pixmap(32, 32).toImage() == STATE.get('vec_identify'))
     check('back to vector: only vector groups', d.mGroupBox_exploring_single_selection.isVisible() and not ctrl()._host.isVisible())
     check('back to vector: linking visible again', d.pushButton_checkable_exploring_linking_widgets.isVisible())
-    check('back to vector: kind tools hidden', not any(b.isVisible() for b in ctrl()._extras._tools.values()))
+    import importlib
+    _tools_for = importlib.import_module('filter_mate.ui.controllers.coverage_dock_extras').tools_for
+    vector_tools = set(_tools_for('vector'))  # 2026-10-18: the vector rail has its own tools (similar, more)
+    check('back to vector: kind tools hidden, the vector ones shown',
+          all(b.isVisible() == (n in vector_tools) for n, b in ctrl()._extras._tools.items()),
+          ', '.join(n for n, b in ctrl()._extras._tools.items() if b.isVisible()))
     card = d.findChild(QLabel, 'label_exploring_coverage_layer')
     check('back to vector: vector layer card', card is not None and card.isVisible() and 'Vector' in card.text(),
           card.text() if card else '')

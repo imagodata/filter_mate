@@ -159,6 +159,30 @@ def rail_plan(visible) -> list:
     return plan
 
 
+def rail_floor(button_heights, gap: int) -> int:
+    """Height under which the rail buttons would overlap: the shown buttons plus one gap around each."""
+    heights = [int(h) for h in button_heights]
+    return sum(heights) + gap * (len(heights) + 1) if heights else 0
+
+
+COMPACT_BUTTON_MIN = 22  # a rail button never goes under this (16 px icon with a margin)
+
+
+def compact_height(available: int, count: int, gap: int, natural: int) -> int:
+    """Height of the rail buttons for the band height ``available``: natural when it fits, else compacted.
+
+    A vector layer with eight tools and collapsed groups gives the rail a 260 px band for
+    342 px of buttons (2026-10-18): rather than overlapping, or forcing EXPLORING taller (the
+    splitter could no longer shrink it), the buttons share the band with one gap around each,
+    never under :data:`COMPACT_BUTTON_MIN`.
+    """
+    if count <= 0:
+        return natural
+    if rail_floor([natural] * count, gap) <= available:
+        return natural
+    return max(COMPACT_BUTTON_MIN, min(natural, (available - gap * (count + 1)) // count))
+
+
 class _RailSpreader(QObject if QObject is not None else object):
     """Keeps the EXPLORING tools spread over the whole height of their grey band.
 
@@ -168,9 +192,10 @@ class _RailSpreader(QObject if QObject is not None else object):
     point cloud tools of ``coverage_dock_extras``, tracking and linking hidden).
     """
 
-    def __init__(self, rail: Any, layout: Any) -> None:
+    def __init__(self, rail: Any, layout: Any, dw: Any = None) -> None:
         super().__init__(rail)
         self._layout = layout
+        self._dw = dw
         self._state = None
         self._watched = set()
         self._pending = False
@@ -182,6 +207,8 @@ class _RailSpreader(QObject if QObject is not None else object):
             if event.type() in (QEvent.Type.ShowToParent, QEvent.Type.HideToParent,
                                 QEvent.Type.ChildAdded, QEvent.Type.LayoutRequest):
                 self._schedule()
+            elif event.type() == QEvent.Type.Resize and watched is self.parent():
+                self._fit()  # the band changed: the buttons fit it (compact or natural)
         except RuntimeError:
             pass  # plugin closing
         return False
@@ -225,8 +252,54 @@ class _RailSpreader(QObject if QObject is not None else object):
             margins = layout.contentsMargins()
             layout.setContentsMargins(margins.left(), 0, margins.right(), 0)
             layout.invalidate()
+            self._fit([button for (button, _), shown in zip(buttons, visible) if shown])
         except RuntimeError:
             pass  # plugin closing
+
+    def _shown_buttons(self) -> list:
+        layout = self._layout
+        return [layout.itemAt(i).widget() for i in range(layout.count())
+                if layout.itemAt(i).widget() is not None and not layout.itemAt(i).widget().isHidden()]
+
+    def _fit(self, shown=None) -> None:
+        """The shown buttons take their natural height when the band has room, else a compact one.
+
+        The frame keeps its configured minimum (the splitter can still shrink EXPLORING): a band
+        shorter than the buttons plus their gaps compacts the buttons (:func:`compact_height`)
+        instead of overlapping them. The natural height (the dimensions manager's) is kept on
+        each button and given back when the band grows.
+        """
+        rail = self.parent()
+        if rail is None:
+            return
+        try:
+            buttons = self._shown_buttons() if shown is None else list(shown)
+            if not buttons:
+                return
+            naturals = []
+            for button in buttons:
+                natural = button.property('fm_natural_height')
+                if natural is None:
+                    natural = max(button.minimumHeight(), button.sizeHint().height())
+                    button.setProperty('fm_natural_height', natural)
+                    button.setProperty('fm_natural_max', button.maximumHeight())
+                naturals.append(int(natural))
+            margins = self._layout.contentsMargins()
+            available = rail.height() - margins.top() - margins.bottom()
+            if available <= 0:
+                return
+            natural = max(naturals)
+            height = compact_height(available, len(buttons), GAP, natural)
+            for button in buttons:
+                wanted = min(height, int(button.property('fm_natural_height')))
+                if height >= natural:  # room enough: the natural sizes come back
+                    if button.minimumHeight() != wanted or button.maximumHeight() != int(button.property('fm_natural_max')):
+                        button.setMinimumHeight(wanted)
+                        button.setMaximumHeight(int(button.property('fm_natural_max')))
+                elif button.minimumHeight() != wanted or button.maximumHeight() != wanted:
+                    button.setFixedHeight(wanted)
+        except RuntimeError:
+            pass
 
 
 def pack_exploring_rail(dw: Any) -> bool:
@@ -239,7 +312,7 @@ def pack_exploring_rail(dw: Any) -> bool:
         if layout.itemAt(index).spacerItem() is not None:
             layout.takeAt(index)
     layout.setProperty('fm_packed', True)
-    dw._fm_rail_spreader = _RailSpreader(rail, layout)
+    dw._fm_rail_spreader = _RailSpreader(rail, layout, dw)
     return True
 
 
