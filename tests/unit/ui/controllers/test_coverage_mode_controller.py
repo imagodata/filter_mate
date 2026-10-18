@@ -746,6 +746,7 @@ def adapters(monkeypatch, ctrl_module):
     raster.band_histogram = lambda layer, band, bins=64: calls.append(("histogram", band)) or ([1, 1], 0.0, 10.0)
     raster.derivative_histogram = lambda layer, band, derivative, bins=64: calls.append(
         ("derivative_histogram", band, derivative.value)) or ([2, 1], 0.0, 90.0)
+    raster.SOURCE_MAX_PIXELS = 400000000
     snapshots = types.ModuleType(f"{package.__name__}.snapshots")
     snapshots.derived = {}
     snapshots.registry = lambda: types.SimpleNamespace(get=snapshots.derived.get, install=lambda *a: None)
@@ -1664,3 +1665,57 @@ class TestToolComesBackWithTheLayer:
         controller, calls = self._controller(ctrl_module, layers, monkeypatch, "POINT_CLOUD")
         controller._restore_tool({"class_pipette_on": True})
         assert calls == [("class pipette", True)]
+
+
+@pytest.mark.unit
+class TestRasterSourceWithoutTarget:
+    """2026-10-18: the polygons of a raster selection are read at the native resolution, tile by tile:
+    without a target, a source masked by them is filtered in the task, never on the main thread."""
+
+    @pytest.fixture
+    def jobs(self, monkeypatch, adapters):
+        module = types.ModuleType(f"{adapters.package.__name__}.source_jobs")
+        module.created = []
+
+        class Job:
+            def __init__(self, layer, selection, max_pixels):
+                self.layer_id, self.layer_name, self.max_pixels = layer.id(), layer.id(), max_pixels
+                self.clips_source = selection.clips
+                self.before = "before"
+                self.applied = []
+                module.created.append(self)
+
+            def apply(self, layer):
+                self.applied.append(layer.id())
+                return None
+
+        module.RasterSourceJob = Job
+        monkeypatch.setitem(sys.modules, module.__name__, module)
+        return module
+
+    def _run(self, ctrl_module, layers, monkeypatch, clips):
+        controller = ctrl_module.CoverageModeController(_dock())
+        controller._active_layer, controller._kind = layers["r1"], _kind(ctrl_module, "RASTER")
+        controller._raster_panel = MagicMock()
+        controller._raster_panel.selection.return_value = types.SimpleNamespace(clips=clips, describe=lambda: "blue")
+        monkeypatch.setattr(controller, "_filtering_settings", lambda: dict(targets=[], source_operator=None))
+        monkeypatch.setattr(controller, "_build_request", lambda *a: "request")
+        monkeypatch.setattr(controller, "_schedule_cache_tidy", lambda *a: None)
+        controller._run_filter(layers["r1"])
+        return controller
+
+    def test_masked_source_goes_to_the_task(self, ctrl_module, layers, jobs, monkeypatch):
+        service, done = ctrl_module._test_service, []
+        monkeypatch.setattr(service, "run", lambda request, job, on_done=None: service.calls.append(
+            ("run", request, job)) or done.append(on_done))
+        self._run(ctrl_module, layers, monkeypatch, clips=True)
+        job = jobs.created[0]
+        assert job.applied == [] and job.max_pixels == 400000000
+        assert service.calls == [("run", "request", job)]
+        done[0](types.SimpleNamespace(outcomes=[], error=""), True)
+        assert ctrl_module._test_feedback.messages[-1] == ("info", "Raster filtered: {0}".format("blue"))
+
+    def test_band_range_is_still_applied_at_once(self, ctrl_module, layers, jobs, monkeypatch):
+        self._run(ctrl_module, layers, monkeypatch, clips=False)
+        assert jobs.created[0].applied == ["r1"] and ctrl_module._test_service.calls == []
+        assert ctrl_module._test_feedback.messages[-1] == ("info", "Raster filtered: {0}".format("blue"))

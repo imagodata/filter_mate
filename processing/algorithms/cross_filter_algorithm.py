@@ -124,7 +124,7 @@ class CrossFilterFromRasterAlgorithm(FilterMateAlgorithm):
             self.FILTER_SOURCE, self.tr("Also hide the source raster outside the selection"), defaultValue=False))
         self.add_target_parameters(QgsProcessingParameterDistance(
             self.BUFFER, self.tr("Buffer"), defaultValue=0.0, parentParameterName=self.SOURCE))
-        # Sans valeur : réglage CROSS_FILTER.raster_selection_max_pixels (4 000 000 par défaut).
+        # Sans valeur : réglage CROSS_FILTER.raster_source_max_pixels (400 000 000 par défaut).
         self.addParameter(advanced(QgsProcessingParameterNumber(
             self.MAX_PIXELS, self.tr("Maximum pixels read (beyond: resampling)"),
             type=QgsProcessingParameterNumber.Type.Integer, optional=True, minValue=10000)))

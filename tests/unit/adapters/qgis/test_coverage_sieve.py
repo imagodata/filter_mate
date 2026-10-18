@@ -1,8 +1,17 @@
 # -*- coding: utf-8 -*-
-"""FilterMate 5 raster selection polygons: the 4-pixel sieve never empties nor shrinks a small selection."""
+"""FilterMate 5 raster selection polygons, read tile by tile (2026-10-18).
+
+* the 4-pixel sieve never empties nor shrinks a small selection;
+* a tiled read gives the cells of the whole grid read at once: the margin
+  covers the neighbours of a slope and the patches the sieve looks at;
+* the NoData pixels of a band an expression reads are not kept;
+* the read stops between tiles when the task is canceled, and reports its progress.
+"""
 import importlib.util
+import logging
 import pathlib
 import sys
+import types
 
 import pytest
 
@@ -23,8 +32,8 @@ def _fakes():
 fk = _fakes()
 raster_adapter = fk.load("raster_adapter")
 geometry_tools = fk.load("geometry_tools")
-RasterSelection = fk.load("core.domain.raster_filter_criteria").RasterSelection
-RasterSelectionMode = fk.load("core.domain.raster_filter_criteria").RasterSelectionMode
+_criteria = fk.load("core.domain.raster_filter_criteria")
+RasterSelection, RasterSelectionMode = _criteria.RasterSelection, _criteria.RasterSelectionMode
 
 
 def _gdal_arrays():
@@ -35,55 +44,265 @@ def _gdal_arrays():
         pytest.skip(f"osgeo.gdal_array unavailable: {exc}")
 
 
+class Raster:
+    """Bands of a raster over (0, 0, width, height), read like the QGIS provider: nearest pixel centre."""
+
+    def __init__(self, **bands):
+        self.bands = {int(name[1:]): np.asarray(array, dtype='float64') for name, array in bands.items()}
+        self.height, self.width = next(iter(self.bands.values())).shape
+        self.reads = []
+
+    def read(self, band, extent, width, height):
+        self.reads.append((band, width, height))
+        data = self.bands[band]
+        xs = extent.xMinimum() + (np.arange(width) + 0.5) * extent.width() / width
+        ys = extent.yMaximum() - (np.arange(height) + 0.5) * extent.height() / height
+        cols = np.floor(xs).astype(int)
+        rows = np.floor(self.height - ys).astype(int)
+        return data[np.ix_(rows, cols)].copy()
+
+
+def _lone_cells_removed(mask):
+    """Stand-in for the GDAL sieve: a cell without a true 8-neighbour goes (local, like the real one)."""
+    padded = np.pad(mask, 1)
+    neighbours = sum(padded[1 + dy:1 + dy + mask.shape[0], 1 + dx:1 + dx + mask.shape[1]]
+                     for dy in (-1, 0, 1) for dx in (-1, 0, 1) if dy or dx)
+    return mask & (neighbours > 0)
+
+
+class Cell:
+    """A polygon of one cell, in cell coordinates."""
+
+    def __init__(self, x, y):
+        self.xy = (x, y)
+
+    def boundingBox(self):
+        return fk.FakeRectangle(self.xy[0], self.xy[1], self.xy[0] + 1, self.xy[1] + 1)
+
+
 @pytest.fixture
-def sieves(monkeypatch):
-    """selection_geometry with the polygonization recorded (sieve size, grid)."""
-    calls = []
+def cells(monkeypatch):
+    """Polygonization replaced by cell sets: the result geometry is the set of (column, row) kept."""
+    calls = {'sieve': [], 'edge': 0}
 
-    def mask_to_geometry(mask, geotransform, crs_wkt, sieve_pixels=0, simplify_tolerance=0.0):
-        calls.append(sieve_pixels)
-        return object()  # the polygons, not looked at here
+    def sieve_mask(mask, sieve_pixels):
+        calls['sieve'].append(sieve_pixels)
+        return _lone_cells_removed(mask != 0)
 
-    monkeypatch.setattr(geometry_tools, 'mask_to_geometry', mask_to_geometry)
+    def polygonize_mask(mask, cells_transform):
+        col, _, _, row, _, _ = cells_transform
+        rows, cols = np.nonzero(mask)
+        return [Cell(int(col) + c, int(row) + r) for r, c in zip(rows, cols)]
+
+    def merge_tile_polygons(inner, edge):
+        calls['edge'] += len(edge)
+        return frozenset(cell.xy for cell in list(inner) + list(edge))
+
+    monkeypatch.setattr(geometry_tools, 'sieve_mask', sieve_mask)
+    monkeypatch.setattr(geometry_tools, 'polygonize_mask', polygonize_mask)
+    monkeypatch.setattr(geometry_tools, 'merge_tile_polygons', merge_tile_polygons)
+    monkeypatch.setattr(geometry_tools, 'pixel_to_map', lambda geometry, transform: geometry)
+    monkeypatch.setattr(geometry_tools, 'make_valid', lambda geometry: geometry)
+    monkeypatch.setattr(raster_adapter, 'QgsRectangle', fk.FakeRectangle)
+    monkeypatch.setattr(raster_adapter, 'crs_kind', lambda crs: 'projected')
+    monkeypatch.setattr(raster_adapter, 'QgsCoordinateReferenceSystem', _CRS)
     return calls
 
 
-def _select(monkeypatch, data, native, max_pixels=4000000):
-    def read_band_array(provider, band, extent, width, height):
-        assert (height, width) == data.shape, "the test array is the grid read"
-        return data.astype('float64')
+def _select(monkeypatch, raster, selection, native=None, **kwargs):
+    monkeypatch.setattr(raster_adapter, 'read_band_array', lambda provider, band, extent, width, height:
+                        provider.read(band, extent, width, height))
+    height, width = native or (raster.height, raster.width)
+    extent = fk.FakeRectangle(0, 0, raster.width, raster.height)
+    return raster_adapter.selection_geometry(raster, selection, extent, width, height, '', **kwargs)
 
-    monkeypatch.setattr(raster_adapter, 'read_band_array', read_band_array)
-    selection = RasterSelection(mode=RasterSelectionMode.CLASSES, band=1, classes=(7,))
-    return raster_adapter.selection_geometry(None, selection, fk.FakeRectangle(0, 0, native[1], native[0]),
-                                             native[1], native[0], '', max_pixels=max_pixels)
+
+def _cells_of(mask):
+    rows, cols = np.nonzero(mask)
+    return frozenset(zip(cols.tolist(), rows.tolist()))
+
+
+_CRS = types.SimpleNamespace(fromWkt=lambda wkt: fk.FakeCrs('EPSG:2154'))
+CLASS_7 = RasterSelection(mode=RasterSelectionMode.CLASSES, band=1, classes=(7,))
+
+
+class TestTiles:
+    def test_tiles_cover_the_grid_row_by_row(self):
+        assert list(raster_adapter._tiles(5, 3, 2)) == [(0, 0, 2, 2), (0, 2, 2, 2), (0, 4, 2, 1),
+                                                         (2, 0, 1, 2), (2, 2, 1, 2), (2, 4, 1, 1)]
+
+    def test_polygons_on_a_shared_edge_go_through_the_union(self):
+        inner, edge = [], []
+        # Tile (row 0, col 10, 10 x 10) of a 20 x 20 grid: its left and bottom edges are shared.
+        shared = (10, None, None, 10)
+        raster_adapter._sort_tile_polygons([Cell(10, 3), Cell(15, 5), Cell(19, 0), Cell(12, 9)], shared, (inner, edge))
+        assert [c.xy for c in inner] == [(15, 5), (19, 0)]  # the raster border is no shared edge
+        assert [c.xy for c in edge] == [(10, 3), (12, 9)]
+
+
+class TestTiledReadIsTheWholeRead:
+    def test_range_with_sieve(self, monkeypatch, cells):
+        rng = np.random.default_rng(1)
+        data = rng.random((150, 130)) * 100
+        data[10:40, 5:30] = 90
+        selection = RasterSelection(band=1, minimum=45.0)
+        whole = _select(monkeypatch, Raster(b1=data), selection, tile_size=10000)
+        tiled = _select(monkeypatch, Raster(b1=data), selection, tile_size=16)
+        assert tiled.tiles == 90 and whole.tiles == 1
+        assert whole.kept_pixels >= raster_adapter.SIEVE_MIN_KEPT_PIXELS  # the sieve applies
+        assert tiled.geometry == whole.geometry == _cells_of(_lone_cells_removed(data >= 45.0)) != _cells_of(data >= 45.0)
+        assert tiled.kept_pixels == whole.kept_pixels == int((data >= 45.0).sum())
+        assert cells['edge'] > 0
+
+    def test_slope_reads_the_neighbours_across_the_tile_edges(self, monkeypatch, cells):
+        terrain = fk.load("terrain")
+        rng = np.random.default_rng(2)
+        rows, cols = np.mgrid[0:50, 0:70]
+        dtm = 100 + 0.8 * rows + 3 * np.sin(cols / 4.0) + rng.random((50, 70)) * 2
+        selection = RasterSelection(band=1, minimum=40.0, derivative='slope_degrees')
+        whole = _select(monkeypatch, Raster(b1=dtm), selection, tile_size=10000, sieve_pixels=0)
+        tiled = _select(monkeypatch, Raster(b1=dtm), selection, tile_size=9, sieve_pixels=0)
+        slope = terrain.derive(dtm, selection.derivative, 1.0, 1.0)
+        assert whole.geometry == _cells_of(slope >= 40.0)
+        assert 0 < len(tiled.geometry) < dtm.size
+        assert tiled.geometry == whole.geometry
+
+    def test_slope_with_sieve(self, monkeypatch, cells):
+        terrain = fk.load("terrain")
+        rng = np.random.default_rng(3)
+        dtm = rng.random((150, 150)) * 3  # rough: the slope changes from pixel to pixel
+        slope = terrain.derive(dtm, _criteria.RasterDerivative.SLOPE_DEGREES, 1.0, 1.0)
+        threshold = float(np.median(slope))
+        selection = RasterSelection(band=1, minimum=threshold, derivative='slope_degrees')
+        whole = _select(monkeypatch, Raster(b1=dtm), selection, tile_size=10000)
+        tiled = _select(monkeypatch, Raster(b1=dtm), selection, tile_size=11)
+        assert whole.kept_pixels >= raster_adapter.SIEVE_MIN_KEPT_PIXELS  # the sieve applies
+        assert whole.geometry == _cells_of(_lone_cells_removed(slope >= threshold)) != _cells_of(slope >= threshold)
+        assert tiled.geometry == whole.geometry
 
 
 class TestSieveChoice:
-    def test_small_selection_is_not_sieved(self, monkeypatch, sieves):
+    def test_small_selection_is_not_sieved(self, monkeypatch, cells):
         data = np.ones((200, 200))
         data[10, 10] = data[50, 60] = data[51, 60] = 7  # a rare class: three pixels
-        result = _select(monkeypatch, data, (200, 200))
-        assert sieves == [0] and result.kept_pixels == 3
+        result = _select(monkeypatch, Raster(b1=data), CLASS_7)
+        assert result.kept_pixels == 3 and result.geometry == {(10, 10), (60, 50), (60, 51)}
 
-    def test_large_selection_read_pixel_for_pixel_is_sieved(self, monkeypatch, sieves):
+    def test_large_selection_read_pixel_for_pixel_is_sieved(self, monkeypatch, cells):
         data = np.ones((200, 200))
         data[:100, :] = 7  # 20 000 pixels
-        _select(monkeypatch, data, (200, 200))
-        assert sieves == [4]
+        data[150, 150] = 7  # speckle
+        result = _select(monkeypatch, Raster(b1=data), CLASS_7)
+        assert set(cells['sieve']) == {4} and (150, 150) not in result.geometry and len(result.geometry) == 20000
 
-    def test_subsampled_grid_loses_lone_cells_only(self, monkeypatch, sieves):
+    def test_subsampled_grid_loses_lone_cells_only(self, monkeypatch, cells, caplog):
         """Over max_pixels each cell stands for several pixels: 4 cells are not speckle, a lone cell is."""
         data = np.ones((200, 200))
         data[:100, :] = 7
-        _select(monkeypatch, data, (800, 800), max_pixels=40000)
-        assert sieves == [2]
+        with caplog.at_level(logging.INFO):
+            result = _select(monkeypatch, Raster(b1=data), CLASS_7, native=(800, 800), max_pixels=40000)
+        assert set(cells['sieve']) == {2} and result.coarse and result.grid == (200, 200)
+        assert any('⏱ [FM5]' in record.getMessage() and 'over the limit of 40000' in record.getMessage()
+                   for record in caplog.records)
 
-    def test_small_subsampled_selection_is_not_sieved(self, monkeypatch, sieves):
+    def test_native_grid_below_the_limit_is_not_coarse(self, monkeypatch, cells, caplog):
+        data = np.ones((100, 100))
+        with caplog.at_level(logging.INFO):
+            result = _select(monkeypatch, Raster(b1=data), CLASS_7, max_pixels=10000)
+        assert not result.coarse and result.grid == (100, 100) and not caplog.records
+
+    def test_small_subsampled_selection_is_not_sieved(self, monkeypatch, cells):
         data = np.ones((100, 100))
         data[:50, :] = 7  # 5 000 cells
-        _select(monkeypatch, data, (400, 400), max_pixels=10000)
-        assert sieves == [0]
+        data[80, 80] = 7
+        result = _select(monkeypatch, Raster(b1=data), CLASS_7, native=(400, 400), max_pixels=10000)
+        assert (80, 80) in result.geometry and len(result.geometry) == 5001
+
+    def test_the_sieve_never_empties_a_selection(self, monkeypatch, cells):
+        data = np.ones((300, 300))
+        data[::2, ::2] = 7  # 22 500 lone pixels: all speckle
+        result = _select(monkeypatch, Raster(b1=data), CLASS_7, tile_size=64)
+        assert result.kept_pixels == 22500 and len(result.geometry) == 22500
+
+
+class TestExpressionNoData:
+    def test_nodata_of_a_band_read_by_the_expression_is_not_kept(self, monkeypatch, cells):
+        """The virtual raster has no NoData: 255 on the blue band passes a pool's blue test."""
+        nan = float('nan')
+        virtual = Raster(b1=np.ones((4, 4)))  # the comparison kept every pixel
+        blue = np.full((4, 4), 228.0)
+        blue[0, 0] = blue[3, 2] = nan
+        base = Raster(b1=np.full((4, 4), 98.0), b3=blue)
+        selection = RasterSelection(mode=RasterSelectionMode.EXPRESSION, expression='"o@3" > 0')
+        result = _select(monkeypatch, virtual, selection, nodata_provider=base, nodata_bands=[3], tile_size=3)
+        assert result.kept_pixels == 14 and (0, 0) not in result.geometry and (2, 3) not in result.geometry
+        unmasked = _select(monkeypatch, virtual, selection, tile_size=3)
+        assert unmasked.kept_pixels == 16
+
+
+class TestCancelAndProgress:
+    def test_canceled_between_tiles(self, monkeypatch, cells):
+        raster = Raster(b1=np.full((40, 40), 7.0))
+        asked = []
+
+        def is_canceled():
+            asked.append(1)
+            return len(asked) > 2
+
+        result = _select(monkeypatch, raster, CLASS_7, tile_size=10, is_canceled=is_canceled)
+        assert result.canceled and len(raster.reads) == 2
+
+    def test_progress_grows_to_100(self, monkeypatch, cells):
+        values = []
+        _select(monkeypatch, Raster(b1=np.full((40, 40), 7.0)), CLASS_7, tile_size=10, progress=values.append)
+        assert len(values) == 17 and values == sorted(values) and values[-1] == 100.0
+
+
+class TestTilePolygonsWithGdal:
+    """sieve_mask / polygonize_mask / merge_tile_polygons / pixel_to_map themselves (GDAL, OGR backed geometries)."""
+
+    @pytest.fixture
+    def polygons(self, monkeypatch):
+        _gdal_arrays()
+        fk.install(monkeypatch, geometry_tools, raster_adapter)
+        monkeypatch.setattr(raster_adapter, 'crs_kind', lambda crs: 'projected')
+        monkeypatch.setattr(raster_adapter, 'QgsCoordinateReferenceSystem', _CRS)
+        monkeypatch.setattr(raster_adapter, 'read_band_array', lambda provider, band, extent, width, height:
+                            provider.read(band, extent, width, height))
+
+    def _geometry(self, raster, selection, tile_size, sieve_pixels=4):
+        extent = fk.FakeRectangle(0, 0, raster.width, raster.height)
+        return raster_adapter.selection_geometry(raster, selection, extent, raster.width, raster.height, '',
+                                                 tile_size=tile_size, sieve_pixels=sieve_pixels)
+
+    def test_tiles_merge_into_the_polygons_of_the_whole_grid(self, polygons):
+        rng = np.random.default_rng(4)
+        data = rng.random((90, 70)) * 100
+        data[20:70, 10:60] = 95  # one large patch across several tiles
+        selection = RasterSelection(band=1, minimum=85.0)
+        whole = self._geometry(Raster(b1=data), selection, 10000)
+        tiled = self._geometry(Raster(b1=data), selection, 16)
+        assert tiled.geometry.isGeosValid() and whole.geometry.isGeosValid()
+        assert tiled.geometry.symDifference(whole.geometry).area() == pytest.approx(0.0)
+        assert tiled.geometry.area() == pytest.approx(whole.geometry.area())
+        big = max(tiled.geometry.asGeometryCollection(), key=lambda part: part.area())
+        assert big.area() >= 50 * 50  # the patch is one polygon, not one per tile
+
+    def test_unsieved_area_is_the_pixel_count(self, polygons):
+        rng = np.random.default_rng(5)
+        data = (rng.random((40, 40)) > 0.7) * 7.0
+        result = self._geometry(Raster(b1=data), CLASS_7, 9, sieve_pixels=0)
+        assert result.geometry.area() == pytest.approx(float((data == 7).sum()))
+
+    def test_cells_are_moved_to_the_map(self, polygons):
+        mask = np.zeros((4, 4), dtype=bool)
+        mask[1, 2] = True
+        cell = geometry_tools.merge_tile_polygons(geometry_tools.polygonize_mask(mask, (0.0, 1.0, 0.0, 0.0, 0.0, 1.0)), [])
+        moved = geometry_tools.pixel_to_map(cell, (615999.31, 0.25, 0.0, 6153000.65, 0.0, -0.25))
+        box = moved.boundingBox()
+        assert (box.xMinimum(), box.xMaximum()) == pytest.approx((615999.81, 616000.06))
+        assert (box.yMinimum(), box.yMaximum()) == pytest.approx((6153000.15, 6153000.40))
+        assert moved.area() == pytest.approx(0.0625)
 
 
 class TestSieveNeverEmpties:
@@ -106,3 +325,53 @@ class TestSieveNeverEmpties:
         mask[15, 15] = 1
         geometry = geometry_tools.mask_to_geometry(mask, (0, 1, 0, 20, 0, -1), '', sieve_pixels=4)
         assert geometry.area() == pytest.approx(100.0)
+
+
+class TestTaskProgress:
+    """The tiles of a raster source fill the first half of the task's bar, the targets the second."""
+
+    @pytest.fixture(autouse=True)
+    def _project(self, monkeypatch):
+        self.task_module = fk.load("cross_filter_task")
+        fk.install(monkeypatch, self.task_module)
+        monkeypatch.setattr(fk.FakeProject, 'transformContext', lambda self: None, raising=False)
+
+    def _run(self, source, targets):
+        task_module = self.task_module
+        task = task_module.CrossFilterTask('t', None, source, targets)
+        values = []
+        task.setProgress = values.append
+        task.isCanceled = lambda: False
+        assert task.run(), task.error
+        return values
+
+    class Source:
+        kind = types.SimpleNamespace(value='raster')
+        message, elapsed, details, crs = '', 0.0, {}, None
+
+        def __init__(self, reports):
+            self.reports_progress = reports
+            self.progress = None
+
+        def compute(self, request, is_canceled):
+            if self.progress is not None:
+                for percent in (50.0, 100.0):
+                    self.progress(percent)
+            return types.SimpleNamespace(isEmpty=lambda: False)
+
+    class Target:
+        layer_name = 'target'
+        outcome = types.SimpleNamespace(message='')
+
+        def compute(self, *args):
+            pass
+
+    def test_raster_source_then_targets(self):
+        assert self._run(self.Source(True), [self.Target(), self.Target()]) == [25.0, 50.0, 75.0, 100.0]
+
+    def test_raster_source_alone_fills_the_bar(self):
+        assert self._run(self.Source(True), []) == [50.0, 100.0]
+
+    def test_other_sources_leave_the_bar_to_the_targets(self):
+        source = self.Source(False)
+        assert self._run(source, [self.Target(), self.Target()]) == [50.0, 100.0] and source.progress is None

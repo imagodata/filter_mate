@@ -1941,13 +1941,25 @@ class CoverageModeController(BaseController):
                 show_warning(self.tr("Select pixels first: a value range, classes or a raster expression"))
                 return
             from ...adapters.qgis.coverage_layers.source_jobs import RasterSourceJob
-            source_job = RasterSourceJob(layer, selection, int(_option('raster_selection_max_pixels', 4000000)))
-            if not targets:
+            # Read and bounded by the job (raster_adapter.source_max_pixels): "4e8", 0, text...
+            source_job = RasterSourceJob(layer, selection, _option('raster_source_max_pixels', None))
+            done_message = self.tr("Raster filtered: {0}").format(selection.describe())
+            if not targets and not source_job.clips_source:
+                # A virtual raster of the band: nothing to read, done here.
                 before = source_job.before
                 after = source_job.apply(layer)
                 if after is not None:
                     self.service.history.push(CrossOperation(layer.id(), ((before, after),), 'raster selection'))
-                self._after_run(layer, [], self.tr("Raster filtered: {0}").format(selection.describe()))
+                self._after_run(layer, [], done_message)
+                return
+            if not targets:
+                if source_job.clip_refusal:
+                    # Nothing to filter: said before the pixels are read.
+                    source_job.release()
+                    show_warning(self.tr("Filter not applied: {0}").format(source_job.clip_refusal))
+                    return
+                # Masked by the polygons of the selection, read at the native resolution: in the task.
+                self._start_task(request, source_job, done_message=done_message)
                 return
         else:
             expression = self._point_cloud_expression()
@@ -2022,7 +2034,8 @@ class CoverageModeController(BaseController):
                 logger.debug(f"[FM5] sibling tile '{other.name()}' not filtered: {exc}")
         return changes
 
-    def _start_task(self, request: Any, source_job: Any) -> None:
+    def _start_task(self, request: Any, source_job: Any, done_message: str = '') -> None:
+        """Run the cross filter in a task; ``done_message`` is shown instead of the target count when there is none."""
         show_info, _ = _feedback()
         dw = self.dockwidget
         layer_name = source_job.layer_name
@@ -2043,8 +2056,19 @@ class CoverageModeController(BaseController):
                 show_warning(self.tr("Filter not applied: {0}").format(task.error or self.tr("canceled")))
                 self._after_run(layer, [], '')
                 return
+            notes = self._source_notes(source_job)
+            if done_message and not task.outcomes:
+                if layer is None or not task.changes:
+                    # Not applied: no pixel selected, a VRT that did not open, the layer removed meanwhile.
+                    reason = getattr(source_job, 'message', '') or ('layer removed' if layer is None else 'nothing changed')
+                    _, show_warning = _feedback()
+                    show_warning(self.tr("Filter not applied: {0}").format(reason))
+                    self._after_run(layer, [], '')
+                    return
+                self._after_run(layer, [], ' — '.join([done_message] + notes))
+                return
             failures = [o for o in task.outcomes if not o.success]
-            parts = [self.tr("{0} target(s) filtered").format(len(task.outcomes) - len(failures))]
+            parts = [self.tr("{0} target(s) filtered").format(len(task.outcomes) - len(failures))] + notes
             emptied = self._emptied_text(task.outcomes)
             if emptied:
                 parts.append(emptied)
@@ -2063,6 +2087,17 @@ class CoverageModeController(BaseController):
             dw.launchingTask  # noqa: B018 - presence check only
         except AttributeError:
             pass
+
+    def _source_notes(self, source_job: Any) -> List[str]:
+        """What the user should know about how a raster selection was read (once per task)."""
+        details = getattr(source_job, 'details', None) or {}
+        notes = []
+        if details.get('decimation'):
+            notes.append(self.tr("raster selection read every {0} pixels: over the pixel limit of the settings").format(
+                details['decimation']))
+        if details.get('smoothing'):
+            notes.append(self.tr("dense raster selection smoothed to keep its outline light"))
+        return notes
 
     @staticmethod
     def _rollback_source(source_job: Any, layer: Any) -> None:

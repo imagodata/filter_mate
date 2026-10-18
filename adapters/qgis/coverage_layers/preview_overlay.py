@@ -9,8 +9,7 @@ covered by a white veil drawn by a canvas item: no layer is added to the project
 left alone.
 """
 import math
-import re
-from typing import Iterable, List, Optional, Tuple
+from typing import Iterable, Optional, Tuple
 
 from qgis.core import QgsCoordinateReferenceSystem, QgsCoordinateTransform, QgsPointXY, QgsProject, QgsRectangle
 from qgis.gui import QgsMapCanvasItem
@@ -18,8 +17,8 @@ from qgis.PyQt.QtCore import QRectF
 from qgis.PyQt.QtGui import QImage
 
 from ....core.domain.raster_filter_criteria import RasterDerivative, RasterSelection
-from .raster_adapter import (_grid_for, crs_kind, derived_array, raster_reference, read_band_array, selection_mask,
-                             selection_virtual_layer)
+from .raster_adapter import (_grid_for, crs_kind, derived_array, expression_mask, raster_reference, read_band_array,
+                             referenced_bands, selection_mask, selection_virtual_layer)
 
 # RGBA of the pixels the selection drops.
 VEIL = (255, 255, 255, 190)
@@ -64,21 +63,14 @@ class DerivativeSurface:
         return _veil(selection_mask(self.values, selection))
 
 
-def referenced_bands(expression: str, reference: str) -> List[int]:
-    """Band numbers ``expression`` reads from the layer named ``reference`` (``"ortho@3"`` -> 3), sorted."""
-    pattern = '"' + re.escape(reference) + r'@(\d+)"'
-    return sorted({int(number) for number in re.findall(pattern, expression or '')})
-
-
 class ExpressionSurface:
     """Pixels kept by a raster calculator expression (colour pipette, spectral preset), read once.
 
     The raster calculator evaluates it through the virtual raster the filter
     uses (:func:`raster_adapter.selection_virtual_layer`): the preview keeps
-    what the filter keeps, on a coarser grid. The virtual raster has no NoData:
-    a comparison on a NoData pixel gives 0 or 1 (255, the NoData of an 8 bit
-    orthophoto, is within 27 of a pool's blue). The pixels with NoData in a
-    band the expression reads are therefore neither kept nor counted.
+    what the filter keeps, on a coarser grid. The pixels with NoData in a band
+    the expression reads are neither kept nor counted
+    (:func:`raster_adapter.expression_mask`).
 
     Attributes:
         key: ``(source, expression)`` it was read for.
@@ -88,7 +80,6 @@ class ExpressionSurface:
     """
 
     def __init__(self, layer, selection: RasterSelection, max_pixels: int = EXPRESSION_PREVIEW_MAX_PIXELS) -> None:
-        import numpy as np
         extent = layer.extent()
         width, height = _grid_for(extent, layer.width(), layer.height(), max_pixels)
         self.key = (layer.source(), selection.expression)
@@ -101,13 +92,9 @@ class ExpressionSurface:
         virtual = selection_virtual_layer(layer, selection)
         if virtual is None:
             return  # the raster calculator refused the expression
-        array = read_band_array(virtual.dataProvider(), 1, extent, width, height)
-        valid = ~np.isnan(array)
-        provider = layer.dataProvider()
-        for band in referenced_bands(selection.expression, raster_reference(layer)):
-            if band <= layer.bandCount():
-                valid &= ~np.isnan(read_band_array(provider, band, extent, width, height))
-        self.mask = valid & (array != 0)
+        bands = [band for band in referenced_bands(selection.expression, raster_reference(layer))
+                 if band <= layer.bandCount()]
+        self.mask, valid = expression_mask(virtual.dataProvider(), layer.dataProvider(), bands, extent, width, height)
         count = int(valid.sum())
         self.kept_ratio = float(self.mask.sum()) / count if count else None
 

@@ -324,7 +324,8 @@ def cross_filter(source, targets: Sequence, predicates: Sequence[str] = ("Inters
         source_operator: Combination of ``point_cloud_criteria`` with the source's subset.
         filter_source: Raster source: also mask the source raster outside the selection.
         footprint_resolution: Point cloud source: cell size of the footprint (default: config, 2 m).
-        max_pixels: Raster source: maximum pixels read (default: config, 4 000 000).
+        max_pixels: Raster source: pixels read at the native resolution, a coarser grid beyond
+            (default: config, 400 000 000).
         feedback: Optional ``QgsFeedback``: progress over the targets, cancellation.
 
     Returns:
@@ -418,7 +419,8 @@ def _source_job(layer, kind: LayerKind, report: OperationReport, selected_only: 
             raise ValueError("a raster source needs a pixel selection (range, classes or expression)")
         if raster_selection.band > layer.bandCount():
             raise ValueError(f"'{layer.name()}' has {layer.bandCount()} band(s), band {raster_selection.band} requested")
-        pixels = int(max_pixels or _option('raster_selection_max_pixels', 4000000))
+        # Read and bounded by the job (raster_adapter.source_max_pixels).
+        pixels = max_pixels or _option('raster_source_max_pixels', None)
         return source_jobs.RasterSourceJob(layer, raster_selection, pixels, filter_source=filter_source)
     # Point cloud: the criteria become the source subset, its footprint is the source geometry.
     from ...core.domain.cross_filter import combine_subset
