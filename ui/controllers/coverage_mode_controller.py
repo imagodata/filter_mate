@@ -823,6 +823,23 @@ class CoverageModeController(BaseController):
         self._call(badge, 'setToolTip', self.tr("{0} layer: selection in EXPLORING, relation in FILTERING").format(label))
         self._call(badge, 'setStyleSheet', badge_stylesheet(name, color))
 
+    def _only_page_sizes(self, page: Any) -> None:
+        """The stack is as wide as its shown page only.
+
+        A QStackedWidget's minimum width is the widest of its pages: the raster panel grown by its
+        picks (chips, coordinates, zone statistics) made the point cloud panel 395 px wide in a
+        358 px dock, with a sideways scroll (2026-10-18). The hidden page ignores its size.
+        """
+        try:
+            from qgis.PyQt.QtWidgets import QSizePolicy
+            for panel in (self._raster_panel, self._pc_panel):
+                if panel is None:
+                    continue
+                policy = QSizePolicy.Policy.Preferred if panel is page else QSizePolicy.Policy.Ignored
+                panel.setSizePolicy(policy, policy)
+        except Exception as exc:
+            logger.debug(f"[FM5] page size policies not set: {exc}")
+
     def _apply_layout(self, kind: Any, keep_preview: bool = False) -> None:
         from ...core.domain.layer_kind import LayerKind
         dw = self.dockwidget
@@ -830,7 +847,9 @@ class CoverageModeController(BaseController):
             self._call(widget, 'setVisible', False)
         self._call(getattr(dw, 'frame_exploring', None), 'setEnabled', True)
         if self._host is not None:
-            self._host.setCurrentWidget(self._raster_panel if kind is LayerKind.RASTER else self._pc_panel)
+            page = self._raster_panel if kind is LayerKind.RASTER else self._pc_panel
+            self._host.setCurrentWidget(page)
+            self._only_page_sizes(page)
             self._host.setVisible(True)
         self._call(self._coverage_spin, 'setVisible', True)
         tips = {
