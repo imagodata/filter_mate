@@ -71,6 +71,8 @@ def button(name):
 
 PIPETTE = 'pushButton_checkable_exploring_raster_pipette'
 DETECTOR = 'pushButton_checkable_exploring_raster_detector'
+VALUE_PIPETTE = 'pushButton_checkable_exploring_point_cloud_value_pipette'
+PC_ZONE = 'pushButton_checkable_exploring_point_cloud_zone'
 
 
 def class_pipette_button():
@@ -103,6 +105,16 @@ def detector_on():
     panel = ctrl._raster_panel
     return (button(DETECTOR).isChecked() and not button(PIPETTE).isChecked() and panel.pick_target() == 'object'
             and ctrl._pixel_tool is not None and map_tool() is ctrl._pixel_tool)
+
+
+def value_pipette_on():
+    ctrl = controller()
+    return (button(VALUE_PIPETTE).isChecked() and not class_pipette_button().isDown() and ctrl._pc_pick_mode == 'value'
+            and ctrl._class_tool is not None and map_tool() is ctrl._class_tool)
+
+
+def zone_on():
+    return button(PC_ZONE).isChecked() and tool_name() == 'ShapeZoneTool'
 
 
 # --- steps ----------------------------------------------------------------
@@ -184,8 +196,8 @@ def s_point_cloud_check():
     check('point cloud: the class pipette (Identify) is usable', class_pipette_button().isEnabled()
           and not panel._classes_group.isHidden())
     panel._ranges_group.setChecked(True)
-    check('point cloud: ATTRIBUTES checked, no class pipette', class_pipette_off() and panel._ranges_group.isChecked(),
-          tool_name())
+    check('point cloud: ATTRIBUTES checked arms the value pipette, not the class one',
+          value_pipette_on() and panel._ranges_group.isChecked(), tool_name())
     panel._classes_group.setChecked(True)
     check('point cloud: CLASSES checked puts the class pipette on', class_pipette_on() and panel._classes_group.isChecked(),
           tool_name())
@@ -196,13 +208,47 @@ def s_point_cloud_check():
     check('point cloud: CLASSES expanded puts the class pipette on', class_pipette_on() and panel._classes_group.isChecked(),
           tool_name())
     panel._ranges_group.setChecked(True)
-    check('point cloud: ATTRIBUTES checked takes the class pipette off', class_pipette_off(), tool_name())
+    check('point cloud: ATTRIBUTES checked switches the picker to the value pipette',
+          value_pipette_on() and not class_pipette_button().isDown(), tool_name())
     controller().handle_exploring_action('identify')
     check('point cloud: the Identify button makes CLASSES active',
           class_pipette_on() and panel._classes_group.isChecked() and not panel._ranges_group.isChecked(), tool_name())
     controller().handle_exploring_action('identify')
     check('point cloud: Identify again takes the class pipette off and leaves CLASSES active',
           class_pipette_off() and panel._classes_group.isChecked(), tool_name())
+    # 2026-10-18: ATTRIBUTES has two tools, the value pipette and the zone; seven buttons on the rail.
+    rail = [n for n in ('pushButton_exploring_identify', 'pushButton_exploring_zoom', 'pushButton_checkable_exploring_selecting',
+                        'pushButton_exploring_reset_layer_properties') if getattr(dock(), n).isVisible()]
+    rail += [n for n in (VALUE_PIPETTE, PC_ZONE, 'pushButton_exploring_point_cloud_more') if button(n).isVisible()]
+    check('point cloud: seven buttons on the rail', len(rail) == 7, ', '.join(rail))
+    button(VALUE_PIPETTE).setChecked(True)
+    check('point cloud: the value pipette button makes ATTRIBUTES active, the class pipette up',
+          value_pipette_on() and panel._ranges_group.isChecked() and not panel._classes_group.isChecked(), tool_name())
+    panel._classes_group.setChecked(True)
+    check('point cloud: CLASSES checked switches the picker to the class pipette',
+          class_pipette_on() and not button(VALUE_PIPETTE).isChecked(), tool_name())
+    panel._ranges_group.setChecked(True)
+    check('point cloud: ATTRIBUTES checked switches it back to the value pipette', value_pipette_on(), tool_name())
+    button(PC_ZONE).setChecked(True)
+    check('point cloud: the zone button puts the rectangle tool on, ATTRIBUTES stays active',
+          zone_on() and panel._ranges_group.isChecked() and not button(VALUE_PIPETTE).isChecked(), tool_name())
+    from qgis.core import QgsGeometry
+    extras = controller()._extras
+    extras.set_pc_zone_shape('polygon')
+    check('point cloud: the zone shape follows the menu', extras.pc_zone_shape() == 'polygon' and extras._pc_zone_tool.shape == 'polygon')
+    extent = layer('lhd').extent()
+    shape = QgsGeometry.fromWkt(f"POLYGON(({extent.xMinimum()} {extent.yMinimum()}, {extent.center().x()} {extent.yMinimum()}, "
+                                f"{extent.center().x()} {extent.center().y()}, {extent.xMinimum()} {extent.yMinimum()}))")
+    extras._on_point_cloud_zone_drawn(shape)  # what the tool emits (canvas CRS = layer CRS here)
+    rows = [row.attribute() for row in panel._condition_rows]
+    check('point cloud: a drawn shape writes X and Y conditions and keeps its WKT',
+          'X' in rows and 'Y' in rows and panel.zone_wkt().startswith('Polygon') or panel.zone_wkt().upper().startswith('POLYGON'),
+          f"{rows} {panel.zone_wkt()[:40]}")
+    panel._expression_group.setChecked(True)
+    check('point cloud: EXPRESSION takes the zone tool off', not zone_on() and tool_name() != 'ShapeZoneTool',
+          tool_name())
+    panel._classes_group.setChecked(True)
+    controller().handle_exploring_action('identify')
     controller().handle_exploring_action('identify')
     check('point cloud: the class pipette is on before leaving the layer', class_pipette_on(), tool_name())
 

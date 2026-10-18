@@ -484,8 +484,9 @@ def s_pc_conditions():
     module = sys.modules[type(pc).__module__]
     names = pc.condition_attributes()
     # Classification is a condition too since the class with a height above the DTM (76d0548c).
-    check('pc conditions: layer attributes offered (not X / Y)',
-          'Z' in names and 'Intensity' in names and not {'X', 'Y'} & set(names), ', '.join(names))
+    # 2026-10-18: X and Y come last, for the zone tool; "+ Condition" never starts on them.
+    check('pc conditions: layer attributes offered, X / Y last for the zone tool',
+          'Z' in names and 'Intensity' in names and names[-2:] == ['X', 'Y'], ', '.join(names))
     pc._ranges_group.setChecked(True)
     pc.restore_state(dict(pc.state(), conditions=[]))
     add = pc.findChild(QPushButton, 'pushButton_point_cloud_add_condition')

@@ -60,7 +60,7 @@ from ....core.domain import point_cloud_attributes as pc_attributes
 from ....core.domain.point_cloud_attributes import (
     JOIN_AND, JOIN_OR, OP_BETWEEN, OP_EQUAL, OP_GREATER_OR_EQUAL, OP_LESS, OP_LESS_OR_EQUAL,
     OPERATOR_SYMBOLS, OPERATORS, attribute_info, condition_attributes, conditions_criteria,
-    conditions_have_or, parse_conditions,
+    conditions_have_or, parse_condition, parse_conditions,
 )
 from ....core.domain.point_cloud_filter_criteria import (
     PointCloudFilterCriteria, PointCloudLayerSummary, format_number,
@@ -79,7 +79,11 @@ except Exception:  # the design module is not importable (tests without the ui p
 Bound = Optional[float]
 
 CLASSIFICATION_ATTRIBUTE = pc_attributes.CLASSIFICATION
+X_ATTRIBUTE = pc_attributes.X
+Y_ATTRIBUTE = pc_attributes.Y
+ZONE_ATTRIBUTES = (X_ATTRIBUTE, Y_ATTRIBUTE)
 Z_ATTRIBUTE = pc_attributes.Z
+DEFAULT_PICK_TOLERANCE = 5.0  # value pipette: ± percent of the observed range of the attribute
 INTENSITY_ATTRIBUTE = pc_attributes.INTENSITY
 RETURN_NUMBER_ATTRIBUTE = pc_attributes.RETURN_NUMBER
 NUMBER_OF_RETURNS_ATTRIBUTE = pc_attributes.NUMBER_OF_RETURNS
@@ -188,6 +192,31 @@ def weight_share(count: int, maximum: int) -> float:
     if count is None or maximum is None or int(count) <= 0 or int(maximum) <= 0:
         return 0.0
     return min(1.0, int(count) / int(maximum))
+
+
+def value_condition(attribute: str, value: float, tolerance_percent: float,
+                    bounds: Optional[Tuple[float, float]], join: str = JOIN_AND) -> Dict[str, Any]:
+    """Condition of the value pipette: ``attribute between value - d and value + d``.
+
+    ``d`` is ``tolerance_percent`` of the observed range of the attribute (``bounds``); without
+    bounds, of the value itself (at least 1).
+    """
+    value = float(value)
+    if bounds is not None and bounds[1] > bounds[0]:
+        span = float(bounds[1]) - float(bounds[0])
+    else:
+        span = max(abs(value), 1.0)
+    delta = round(max(0.0, float(tolerance_percent)) / 100.0 * span, 6)
+    return parse_condition({"attribute": attribute, "op": OP_BETWEEN, "low": value - delta, "high": value + delta,
+                            "join": join})
+
+
+def zone_conditions(xmin: float, ymin: float, xmax: float, ymax: float) -> List[Dict[str, Any]]:
+    """The two conditions of a rectangle drawn on the map: ``X between`` and ``Y between``, ANDed."""
+    return parse_conditions([
+        {"attribute": X_ATTRIBUTE, "op": OP_BETWEEN, "low": min(xmin, xmax), "high": max(xmin, xmax), "join": JOIN_AND},
+        {"attribute": Y_ATTRIBUTE, "op": OP_BETWEEN, "low": min(ymin, ymax), "high": max(ymin, ymax), "join": JOIN_AND},
+    ])
 
 
 def inverted_codes(present_codes: Iterable[int], checked_codes: Iterable[int]) -> Tuple[int, ...]:
@@ -357,7 +386,13 @@ def parse_point_cloud_state(state: Any) -> Dict[str, Any]:
     conditions = state.get("conditions")
     hag_min = _optional_float(state.get("hag_min"))
     hag_layer_id = state.get("hag_layer_id")
+    pick_tolerance = _optional_float(state.get("pick_tolerance"))
+    pick_attribute = state.get("pick_attribute")
+    zone_wkt = state.get("zone_wkt")
     return {
+        "zone_wkt": zone_wkt if isinstance(zone_wkt, str) else "",
+        "pick_attribute": pick_attribute if isinstance(pick_attribute, str) and pick_attribute else Z_ATTRIBUTE,
+        "pick_tolerance": DEFAULT_PICK_TOLERANCE if pick_tolerance is None or pick_tolerance < 0 else pick_tolerance,
         "layer_id": state.get("layer_id"),
         "classes_enabled": bool(state.get("classes_enabled", True)),
         "classes": sorted(classes),
@@ -764,6 +799,7 @@ class PointCloudExploringPanel(QWidget):
         self._hag_available = True
         self._hag_tooltip = ""
         self._custom_expression = ""
+        self._zone_wkt = ""  # the shape drawn with the Zone tool (layer CRS), WKT; its box is in the conditions
         self.setObjectName("widget_point_cloud_exploring_panel")
         self._debounce = QTimer(self)
         self._debounce.setSingleShot(True)
@@ -916,6 +952,33 @@ class PointCloudExploringPanel(QWidget):
         actions.addWidget(self._add_condition_button)
         actions.addStretch()
         group.layout().addWidget(actions_widget)
+
+        # The value pipette of the rail: which attribute a click reads, and the tolerance around it.
+        pick_widget = QWidget(group)
+        pick_widget.setObjectName("widget_point_cloud_value_pipette")
+        pick = QHBoxLayout(pick_widget)
+        pick.setContentsMargins(0, 0, 0, 0)
+        pick.setSpacing(GAP)
+        pick.addWidget(QLabel(self.tr("Pipette on"), pick_widget))
+        self._pick_attribute_combo = _make_combo(pick_widget, SPIN_MIN_WIDTH,
+                                                 self.tr("Attribute the value pipette of the rail reads under the click"))
+        self._pick_attribute_combo.setObjectName("comboBox_point_cloud_pick_attribute")
+        self._pick_attribute_combo.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
+        self._pick_attribute_combo.currentIndexChanged.connect(self._on_pick_attribute_changed)
+        pick.addWidget(self._pick_attribute_combo, 1)
+        pick.addWidget(QLabel("±", pick_widget))
+        self._pick_tolerance_spin = QDoubleSpinBox(pick_widget)
+        self._pick_tolerance_spin.setObjectName("doubleSpinBox_point_cloud_pick_tolerance")
+        self._pick_tolerance_spin.setRange(0.0, 100.0)
+        self._pick_tolerance_spin.setDecimals(1)
+        self._pick_tolerance_spin.setSuffix(" %")
+        self._pick_tolerance_spin.setValue(DEFAULT_PICK_TOLERANCE)
+        self._pick_tolerance_spin.setKeyboardTracking(False)
+        self._pick_tolerance_spin.setMinimumWidth(SPIN_MIN_WIDTH)
+        self._pick_tolerance_spin.setToolTip(self.tr("Tolerance around the picked value, in % of the observed range of the attribute"))
+        pick.addWidget(self._pick_tolerance_spin)
+        self._pick_widget = pick_widget
+        group.layout().addWidget(pick_widget)
 
         # The returns: one choice, not a condition inserted in the list (its row is kept in step).
         returns_widget = QWidget(group)
@@ -1087,10 +1150,17 @@ class PointCloudExploringPanel(QWidget):
         self._classes_group.setVisible(has_classes)
 
         names = condition_attributes(attributes, [item.name for item in summary.ranges])
-        self._condition_choices = [(name, self._attribute_label(name)) for name in names]
-        bounds = ((name, summary_bounds(summary, name)) for name in names)
+        # X and Y are offered to the conditions too: the zone tool of the rail writes them.
+        zone = [name for name in ZONE_ATTRIBUTES if attribute_available(attributes, name)]
+        self._condition_choices = [(name, self._attribute_label(name)) for name in (*names, *zone)]
+        bounds = ((name, summary_bounds(summary, name)) for name in (*names, *zone))
         self._condition_bounds = {name: value for name, value in bounds if value is not None}
         self._add_condition_button.setEnabled(bool(names))
+        with _signals_blocked(self._pick_attribute_combo):
+            self._pick_attribute_combo.clear()
+            for name in names:
+                self._pick_attribute_combo.addItem(self._attribute_label(name), name)
+        self._pick_widget.setVisible(bool(names))
         presets = return_presets_available(attributes)
         self._fill_return_combo(presets)
         self._returns_widget.setVisible(bool(presets))
@@ -1112,6 +1182,91 @@ class PointCloudExploringPanel(QWidget):
     def hag_settings(self) -> Optional[Tuple[str, float]]:
         """``(DTM layer id, minimum height)`` when the height above DTM filter is on, else None."""
         return hag_from_state(self.state(), self._hag_available)
+
+    # === Value pipette and zone of the rail (tools of ATTRIBUTES) ===
+
+    def pick_attribute(self) -> str:
+        """Attribute the value pipette reads under a click (``Z`` by default)."""
+        return self._pick_attribute_combo.currentData() or Z_ATTRIBUTE
+
+    def set_pick_attribute(self, name: str) -> None:
+        """Choose the attribute of the value pipette (ignored when the layer does not offer it). Does not emit."""
+        index = self._pick_attribute_combo.findData(name)
+        if index >= 0:
+            with _signals_blocked(self._pick_attribute_combo):
+                self._pick_attribute_combo.setCurrentIndex(index)
+
+    def pick_attributes(self) -> List[str]:
+        """Attributes the value pipette can read, in layer order."""
+        return [self._pick_attribute_combo.itemData(i) for i in range(self._pick_attribute_combo.count())]
+
+    def pick_tolerance(self) -> float:
+        """Tolerance of the value pipette, in % of the observed range of the attribute."""
+        return float(self._pick_tolerance_spin.value())
+
+    def add_value_condition(self, attribute: str, value: float, extend: bool = False) -> bool:
+        """A click of the value pipette: ``attribute between value - d and value + d`` in ATTRIBUTES.
+
+        Replaces the condition already on that attribute; with ``extend`` (Ctrl+click) a new
+        condition is added, ORed with the previous one. ATTRIBUTES becomes the active group.
+        Returns False when the attribute is not offered.
+        """
+        if attribute not in dict(self._condition_choices):
+            return False
+        self.show_value_pipette_active()
+        condition = value_condition(attribute, value, self.pick_tolerance(), self._condition_bounds.get(attribute),
+                                    JOIN_OR if extend else JOIN_AND)
+        if not extend:
+            for row in self._condition_rows:
+                if row.attribute() == attribute:
+                    condition["join"] = row.join()
+                    row.set_condition(condition)
+                    self._changed()
+                    return True
+        self._append_row(condition)
+        self._changed()
+        return True
+
+    def add_zone_conditions(self, xmin: float, ymin: float, xmax: float, ymax: float, wkt: str = "") -> bool:
+        """A shape drawn with the Zone tool: ``X between`` and ``Y between`` in ATTRIBUTES (replacing the previous ones).
+
+        Args:
+            wkt: The shape itself (layer CRS), kept for the source geometry of the cross filter: a
+                polygon or a circle then applies exactly to the targets, while the subset string of
+                the cloud only knows the box.
+        """
+        if not all(name in dict(self._condition_choices) for name in ZONE_ATTRIBUTES):
+            return False
+        self.show_zone_active()
+        for row in list(self._condition_rows):
+            if row.attribute() in ZONE_ATTRIBUTES:
+                self._drop_row(row)
+        for condition in zone_conditions(xmin, ymin, xmax, ymax):
+            self._append_row(condition)
+        self._zone_wkt = str(wkt or "")
+        self._update_first_row()
+        self._changed()
+        return True
+
+    def zone_wkt(self) -> str:
+        """WKT (layer CRS) of the shape drawn with the Zone tool while its X / Y conditions are in the list; ``""`` otherwise."""
+        if not self._zone_wkt:
+            return ""
+        if not any(row.attribute() in ZONE_ATTRIBUTES for row in self._condition_rows) or not self._ranges_group.isChecked():
+            return ""
+        return self._zone_wkt
+
+    def show_value_pipette_active(self) -> None:
+        """The value pipette went on the map: ATTRIBUTES becomes the active group, as a pick would make it."""
+        if not self._ranges_group.isChecked():
+            self._activate_group(self._ranges_group)
+
+    def show_zone_active(self) -> None:
+        """The zone tool went on the map: ATTRIBUTES becomes the active group."""
+        self.show_value_pipette_active()
+
+    def _on_pick_attribute_changed(self, _index: int) -> None:
+        pass  # the pipette reads the combo when it clicks
 
     def apply_to_tiles(self) -> bool:
         """Whether the filter should also go to the other tiles of the dataset."""
@@ -1169,6 +1324,9 @@ class PointCloudExploringPanel(QWidget):
             "expression_enabled": expression_enabled,
             "expression": self._expression_edit.toPlainText() if expression_enabled else self._custom_expression,
             "apply_to_tiles": self._apply_tiles_check.isChecked(),
+            "pick_attribute": self.pick_attribute(),
+            "pick_tolerance": self.pick_tolerance(),
+            "zone_wkt": self._zone_wkt,
         }
 
     def restore_state(self, state: Dict[str, Any]) -> None:
@@ -1192,6 +1350,10 @@ class PointCloudExploringPanel(QWidget):
             self._restore_hag_layer(parsed["hag_layer_id"])
             self._apply_tiles_check.setChecked(parsed["apply_to_tiles"])
             self._expression_group.setChecked(parsed["expression_enabled"])
+        with _signals_blocked(self._pick_tolerance_spin):
+            self._pick_tolerance_spin.setValue(parsed["pick_tolerance"])
+        self.set_pick_attribute(parsed["pick_attribute"])
+        self._zone_wkt = parsed["zone_wkt"]
         self._set_conditions(parsed["conditions"])
         self._custom_expression = parsed["expression"]
         self._apply_expression_mode(parsed["expression_enabled"])
@@ -1447,7 +1609,7 @@ class PointCloudExploringPanel(QWidget):
 
     def _on_add_condition(self, *_args) -> None:
         """New ``between`` row on the first attribute not used yet, every value kept until edited."""
-        names = self.condition_attributes()
+        names = [name for name in self.condition_attributes() if name not in ZONE_ATTRIBUTES]
         if not names:
             return
         used = {row.attribute() for row in self._condition_rows}
@@ -1457,6 +1619,8 @@ class PointCloudExploringPanel(QWidget):
 
     def _on_remove_condition(self, row: Any) -> None:
         if row in self._condition_rows:
+            if row.attribute() in ZONE_ATTRIBUTES:
+                self._zone_wkt = ""  # the box is edited by hand: the drawn shape no longer applies
             self._drop_row(row)
             self._update_first_row()
             self._changed()

@@ -108,16 +108,26 @@ class TestPointCloudCard:
 
 
 class TestTools:
-    def test_raster_rail_adds_the_pipette_the_detector_and_the_style_link(self):
-        # Picker, zoom, preview and reset are the shared buttons; the pipette and the object detector are the
-        # two tools of the PIPETTE group (2026-10-18). Hover and statistics are off the rail.
+    def test_raster_rail_adds_the_pipette_the_detector_the_style_link_and_more(self):
+        # Zoom, preview and reset are the shared buttons; the pipette and the object detector are the two
+        # tools of the PIPETTE group, the style link the tool of VALUE RANGE; hover and statistics live in
+        # the "more" menu (seven buttons, like the point cloud rail).
         assert extras.tools_for("raster") == ["pushButton_checkable_exploring_raster_pipette",
                                               "pushButton_checkable_exploring_raster_detector",
-                                              "pushButton_checkable_exploring_raster_link"]
+                                              "pushButton_checkable_exploring_raster_link",
+                                              "pushButton_exploring_raster_more"]
 
-    def test_point_cloud_rail_adds_nothing_the_identify_button_is_the_class_pipette(self):
-        # 2026-10-18: the class pipette took the place of the Identify button; profile and 3D are QGIS tools.
-        assert extras.tools_for("point_cloud") == []
+    def test_point_cloud_rail_adds_the_value_pipette_the_zone_and_more(self):
+        # 2026-10-18: Identify is the class pipette (CLASSES); the value pipette and the zone are the tools
+        # of ATTRIBUTES; profile and 3D view are in the "more" menu (seven buttons).
+        assert extras.tools_for("point_cloud") == ["pushButton_checkable_exploring_point_cloud_value_pipette",
+                                                   "pushButton_checkable_exploring_point_cloud_zone",
+                                                   "pushButton_exploring_point_cloud_more"]
+
+    def test_the_rails_have_the_same_size(self):
+        shared_raster = 3  # zoom, preview, reset (Identify hidden)
+        shared_point_cloud = 4  # identify (class pipette), zoom, preview, reset
+        assert shared_raster + len(extras.tools_for("raster")) == shared_point_cloud + len(extras.tools_for("point_cloud")) == 7
 
     def test_detector_has_its_own_icon(self):
         assert extras.ICON_DETECTOR.strip().startswith("<") and extras.ICON_DETECTOR != extras.ICON_PIPETTE
@@ -132,7 +142,8 @@ class TestTools:
 
     def test_every_tool_has_an_icon(self):
         assert all(body.strip().startswith("<") for body in (extras.ICON_HOVER, extras.ICON_ZONE, extras.ICON_LINK_STYLE,
-                                                            extras.ICON_PIPETTE, extras.ICON_PROFILE, extras.ICON_3D))
+                                                            extras.ICON_PIPETTE, extras.ICON_PROFILE, extras.ICON_3D,
+                                                            extras.ICON_VALUE_PIPETTE, extras.ICON_PC_ZONE, extras.ICON_MORE))
 
 
 class TestZone:

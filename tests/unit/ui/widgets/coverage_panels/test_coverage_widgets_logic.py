@@ -673,7 +673,8 @@ class TestPointCloudCriteriaFromState:
         ]
         state = {"layer_id": "lidar", "classes_enabled": False, "classes": [], "ranges_enabled": True,
                  "conditions": conditions, "hag_enabled": False, "hag_min": 2.0, "hag_layer_id": None,
-                 "expression_enabled": False, "expression": "", "apply_to_tiles": True}
+                 "expression_enabled": False, "expression": "", "apply_to_tiles": True,
+                 "pick_attribute": "Z", "pick_tolerance": 5.0, "zone_wkt": ""}
         assert cloud.parse_point_cloud_state(state) == state
 
 
@@ -836,6 +837,37 @@ class TestEveryBandMode:
         parsed = raster.parse_raster_state({"all_bands": 1, "range_bands": [3, "1", 3]})
         assert parsed["all_bands"] is True and parsed["range_bands"] == [3, 1]
         assert raster.parse_raster_state({})["all_bands"] is False
+
+
+class TestValuePipetteAndZone:
+    """2026-10-18: the tools of ATTRIBUTES write conditions."""
+
+    def test_value_condition_uses_the_observed_range(self):
+        condition = cloud.value_condition("Z", 1245.0, 5.0, (1189.0, 1389.0))
+        assert condition["attribute"] == "Z" and condition["op"] == "between"
+        assert (condition["low"], condition["high"]) == (1235.0, 1255.0) and condition["join"] == "AND"
+
+    def test_value_condition_without_bounds_uses_the_value(self):
+        condition = cloud.value_condition("Intensity", 200.0, 10.0, None, "OR")
+        assert (condition["low"], condition["high"]) == (180.0, 220.0) and condition["join"] == "OR"
+        assert cloud.value_condition("Z", 0.0, 10.0, None)["high"] == 0.1  # a span of at least 1
+
+    def test_zone_conditions_are_x_and_y_between(self):
+        conditions = cloud.zone_conditions(10.0, 30.0, 5.0, 20.0)
+        assert [c["attribute"] for c in conditions] == ["X", "Y"]
+        assert (conditions[0]["low"], conditions[0]["high"]) == (5.0, 10.0)
+        assert (conditions[1]["low"], conditions[1]["high"]) == (20.0, 30.0)
+        assert all(c["join"] == "AND" for c in conditions)
+
+    def test_zone_conditions_make_a_subset_string(self):
+        state = {"classes_enabled": False, "ranges_enabled": True, "conditions": cloud.zone_conditions(1, 2, 3, 4)}
+        assert cloud.build_point_cloud_expression(state) == "X >= 1 AND X <= 3 AND Y >= 2 AND Y <= 4"
+
+    def test_pick_settings_in_the_state(self):
+        parsed = cloud.parse_point_cloud_state({"pick_attribute": "Intensity", "pick_tolerance": 12.5})
+        assert (parsed["pick_attribute"], parsed["pick_tolerance"]) == ("Intensity", 12.5)
+        parsed = cloud.parse_point_cloud_state({"pick_attribute": 3, "pick_tolerance": -1})
+        assert (parsed["pick_attribute"], parsed["pick_tolerance"]) == ("Z", cloud.DEFAULT_PICK_TOLERANCE)
 
 
 class TestPointCloudClassLists:
