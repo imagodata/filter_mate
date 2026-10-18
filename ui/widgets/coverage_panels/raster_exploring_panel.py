@@ -857,7 +857,7 @@ class RasterExploringPanel(QWidget):
             radio.setToolTip(self.tr("Active band: the one the range, the histogram and the picker read"))
             radio.toggled.connect(lambda checked, n=number: self._on_active_band_toggled(n, checked))
             radio.setStyleSheet(self.RADIO_STYLE)
-            radio.setFixedHeight(self.ROW_CONTROL)
+            radio.setFixedSize(self.ROW_CONTROL, self.ROW_CONTROL)  # a narrower cell clipped the round indicator
             radio.setVisible(several)
             self._active_group.addButton(radio, number)
             pipette = QToolButton(self._bands_holder)
