@@ -9,7 +9,10 @@
     <meta property="og:description" content="Välj en plats eller ett uttryck och filtrera alla berörda lager — utan att skriva SQL.">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://imagodata.github.io/filter_mate/index.sv.html">
-    <meta property="og:image" content="https://imagodata.github.io/filter_mate/video/hero.webp">
+    <meta property="og:image" content="https://imagodata.github.io/filter_mate/img/share/directions.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta name="twitter:card" content="summary_large_image">
     <link rel="canonical" href="https://imagodata.github.io/filter_mate/index.sv.html">
     <link rel="alternate" hreflang="en" href="https://imagodata.github.io/filter_mate/">
     <link rel="alternate" hreflang="fr" href="https://imagodata.github.io/filter_mate/index.fr.html">
@@ -115,6 +118,32 @@
     </div>
 </section>
 
+<section class="home-section directions" id="directions" aria-labelledby="directions-title">
+    <div class="home-container">
+        <div class="section-heading"><p class="section-kicker">Åt alla håll</p><h2 id="directions-title">Nio kombinationer. En panel.</h2><p>Vilken typ av lager som helst kan vara filtrets källa eller dess mål. Varje cell anger vad filtret behåller; de färgade länkar till ett dokumenterat användningsfall.</p></div>
+        <div class="matrix-wrap">
+        <table class="matrix-grid">
+            <thead><tr><th scope="col"><span class="matrix-axis">Källa ↓ · Mål →</span></th><th scope="col">Vektor</th><th scope="col">Raster</th><th scope="col">Punktmoln</th></tr></thead>
+            <tbody>
+                <tr><th scope="row">Vektor<small>Valda objekt eller ett uttryck</small></th>
+                    <td><a href="stories.html#s2" hreflang="en"><strong>Objekt</strong><span>Byggnader nära huvudvägarna</span> <small lang="en">(EN)</small></a></td>
+                    <td><a href="stories.html#s12" hreflang="en"><strong>Pixlar</strong><span>Terrängmodellen runt kyrkan</span> <small lang="en">(EN)</small></a></td>
+                    <td><a href="stories.html#s12" hreflang="en"><strong>Punkter</strong><span>Punktmolnet runt kyrkan</span> <small lang="en">(EN)</small></a></td></tr>
+                <tr><th scope="row">Raster<small>Ett värdeintervall, en färg, ett objekt, ett index</small></th>
+                    <td><a href="stories.html#s9" hreflang="en"><strong>Objekt</strong><span>Fastigheter i branta sluttningar</span> <small lang="en">(EN)</small></a></td>
+                    <td><div class="matrix-cell"><strong>Pixlar</strong><span>En NDVI-mask applicerad på ett annat ortofoto</span></div></td>
+                    <td><div class="matrix-cell"><strong>Punkter</strong><span>LiDAR-punkter under taken som valts på ett ortofoto</span></div></td></tr>
+                <tr><th scope="row">Punktmoln<small>Klasser, höjd över en terrängmodell</small></th>
+                    <td><a href="stories.html#s10" hreflang="en"><strong>Objekt</strong><span>Byggnadshöjder mätta med LiDAR</span> <small lang="en">(EN)</small></a></td>
+                    <td><div class="matrix-cell"><strong>Pixlar</strong><span>En terrängmodell begränsad till markpunkterna</span></div></td>
+                    <td><div class="matrix-cell"><strong>Punkter</strong><span>Hög vegetation nära kraftledningar</span></div></td></tr>
+            </tbody>
+        </table>
+        </div>
+        <p class="matrix-note">Buffert, minsta täckning, Disjoint och operatorerna AND / OR / AND NOT gäller i varje cell. <a href="guide.html#combinations" hreflang="en">Läs kombinationstabellen i guiden <small lang="en">(EN)</small></a>.</p>
+    </div>
+</section>
+
 <section class="home-section examples" id="examples" aria-labelledby="examples-title">
     <div class="home-container">
         <div class="section-heading section-heading-row">
@@ -139,7 +168,7 @@
                 <div class="example-body"><p class="example-label">Närhet till vägar · Aspet</p><h3>Småorter långt från belagda vägar</h3><p>Disjoint med en buffert på 200 m hittar det som ligger utanför bufferten.</p><p class="result"><strong>22</strong> småorter bortom 200 m</p><a href="stories.html#s6" hreflang="en">Se inställningar och resultat <span aria-hidden="true">→</span> <small lang="en">(EN)</small></a></div>
             </article>
         </div>
-        <a class="inline-cta" href="stories.html" hreflang="en">Se alla åtta användningsfall <span aria-hidden="true">→</span> <small lang="en">(EN)</small></a>
+        <a class="inline-cta" href="stories.html" hreflang="en">Se alla tolv användningsfall <span aria-hidden="true">→</span> <small lang="en">(EN)</small></a>
     </div>
 </section>
 

@@ -9,7 +9,10 @@
     <meta property="og:description" content="Wählen Sie einen Ort oder einen Ausdruck und filtern Sie die zugehörigen Ebenen — ohne SQL.">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://imagodata.github.io/filter_mate/index.de.html">
-    <meta property="og:image" content="https://imagodata.github.io/filter_mate/video/hero.webp">
+    <meta property="og:image" content="https://imagodata.github.io/filter_mate/img/share/directions.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta name="twitter:card" content="summary_large_image">
     <link rel="canonical" href="https://imagodata.github.io/filter_mate/index.de.html">
     <link rel="alternate" hreflang="en" href="https://imagodata.github.io/filter_mate/">
     <link rel="alternate" hreflang="fr" href="https://imagodata.github.io/filter_mate/index.fr.html">
@@ -115,6 +118,32 @@
     </div>
 </section>
 
+<section class="home-section directions" id="directions" aria-labelledby="directions-title">
+    <div class="home-container">
+        <div class="section-heading"><p class="section-kicker">In jede Richtung</p><h2 id="directions-title">Neun Kombinationen. Ein Panel.</h2><p>Jede Art von Ebene kann Quelle oder Ziel des Filters sein. Jede Zelle nennt, was der Filter behält; die farbigen führen zu einem dokumentierten Anwendungsfall.</p></div>
+        <div class="matrix-wrap">
+        <table class="matrix-grid">
+            <thead><tr><th scope="col"><span class="matrix-axis">Quelle ↓ · Ziel →</span></th><th scope="col">Vektor</th><th scope="col">Raster</th><th scope="col">Punktwolke</th></tr></thead>
+            <tbody>
+                <tr><th scope="row">Vektor<small>Ausgewählte Objekte oder ein Ausdruck</small></th>
+                    <td><a href="stories.html#s2" hreflang="en"><strong>Objekte</strong><span>Gebäude nahe den Hauptstraßen</span> <small lang="en">(EN)</small></a></td>
+                    <td><a href="stories.html#s12" hreflang="en"><strong>Pixel</strong><span>Das Geländemodell rund um die Kirche</span> <small lang="en">(EN)</small></a></td>
+                    <td><a href="stories.html#s12" hreflang="en"><strong>Punkte</strong><span>Die Punktwolke rund um die Kirche</span> <small lang="en">(EN)</small></a></td></tr>
+                <tr><th scope="row">Raster<small>Ein Wertebereich, eine Farbe, ein Objekt, ein Index</small></th>
+                    <td><a href="stories.html#s9" hreflang="en"><strong>Objekte</strong><span>Flurstücke in steiler Hanglage</span> <small lang="en">(EN)</small></a></td>
+                    <td><div class="matrix-cell"><strong>Pixel</strong><span>Eine NDVI-Maske auf ein anderes Orthofoto angewendet</span></div></td>
+                    <td><div class="matrix-cell"><strong>Punkte</strong><span>LiDAR-Punkte unter den auf einem Orthofoto gewählten Dächern</span></div></td></tr>
+                <tr><th scope="row">Punktwolke<small>Klassen, Höhe über einem Geländemodell</small></th>
+                    <td><a href="stories.html#s10" hreflang="en"><strong>Objekte</strong><span>Gebäudehöhen, per LiDAR gemessen</span> <small lang="en">(EN)</small></a></td>
+                    <td><div class="matrix-cell"><strong>Pixel</strong><span>Ein Geländemodell, beschränkt auf die Bodenpunkte</span></div></td>
+                    <td><div class="matrix-cell"><strong>Punkte</strong><span>Hohe Vegetation nahe Stromleitungen</span></div></td></tr>
+            </tbody>
+        </table>
+        </div>
+        <p class="matrix-note">Puffer, Mindestabdeckung, Disjoint und die Operatoren AND / OR / AND NOT gelten in jeder Zelle. <a href="guide.html#combinations" hreflang="en">Die Kombinationstabelle im Handbuch lesen <small lang="en">(EN)</small></a>.</p>
+    </div>
+</section>
+
 <section class="home-section examples" id="examples" aria-labelledby="examples-title">
     <div class="home-container">
         <div class="section-heading section-heading-row">
@@ -139,7 +168,7 @@
                 <div class="example-body"><p class="example-label">Straßennähe · Aspet</p><h3>Weiler fernab befestigter Straßen</h3><p>Disjoint mit einem 200-m-Puffer findet Objekte außerhalb des Puffers.</p><p class="result"><strong>22</strong> Weiler jenseits von 200 m</p><a href="stories.html#s6" hreflang="en">Einstellungen und Ergebnis <span aria-hidden="true">→</span> <small lang="en">(EN)</small></a></div>
             </article>
         </div>
-        <a class="inline-cta" href="stories.html" hreflang="en">Alle acht Anwendungsfälle <span aria-hidden="true">→</span> <small lang="en">(EN)</small></a>
+        <a class="inline-cta" href="stories.html" hreflang="en">Alle zwölf Anwendungsfälle <span aria-hidden="true">→</span> <small lang="en">(EN)</small></a>
     </div>
 </section>
 
