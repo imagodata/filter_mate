@@ -14,7 +14,8 @@ It removes the favorite it created and quits QGIS at the end.
 
 Set ``FM_GUIDE_OUT`` (default: a temp folder) and ``FM_GUIDE_GPKG`` for your
 machine; the PNGs carry the names used by the guide, so ``FM_GUIDE_OUT`` can be
-``website/img/guide``. Run it with a throwaway profile (``--profiles-path``):
+``website/img/guide``. ``FM_GUIDE_UNTIL`` (a step name such as ``s_favorites_menu``)
+stops the run after that step, to refresh one image without retaking them all. Run it with a throwaway profile (``--profiles-path``):
 the modal first-run dialogs are switched off through QSettings. The layer names,
 the road feature id and the field used for the custom-selection expression are
 specific to the demo GeoPackage (commune 31 extract) and must be adapted for
@@ -48,11 +49,13 @@ def save(widget, name, max_width=None):
         log('save failed ' + name + '\n' + traceback.format_exc())
 
 def screen_save(widget, name):
+    """Save a popup by rendering the widget itself.
+
+    Never grab the screen pixels under it (``grabWindow(0, ...)``): with QGIS
+    minimised or off-screen they belong to whatever else is on the desktop.
+    """
     try:
-        g = widget.geometry()
-        p = widget.mapToGlobal(widget.rect().topLeft()) if widget.parent() else widget.pos()
-        scr = QApplication.primaryScreen()
-        pm = scr.grabWindow(0, p.x(), p.y(), widget.width(), widget.height())
+        pm = widget.grab()
         ok = pm.save(os.path.join(OUT, name + '.png'), 'PNG')
         log(f'screen saved {name} {pm.width()}x{pm.height()} ok={ok}')
     except Exception:
@@ -318,6 +321,11 @@ STEPS = [
     (1000, s_cleanup_favorite),
     (1500, s_quit),
 ]
+
+UNTIL = os.environ.get('FM_GUIDE_UNTIL')  # e.g. s_favorites_menu: stop after that step (then clean up and quit)
+if UNTIL:
+    names = [fn.__name__ for _, fn in STEPS]
+    STEPS[:] = STEPS[:names.index(UNTIL) + 1] + [STEPS[names.index('s_cleanup_favorite')], STEPS[-1]]
 
 def run_steps(i=0):
     if i >= len(STEPS):
