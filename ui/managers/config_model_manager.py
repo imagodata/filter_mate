@@ -381,6 +381,34 @@ class ConfigModelManager:
         except Exception as e:
             logger.error(f"Could not connect config_model signal: {e}")
 
+    @staticmethod
+    def _layer_kind_flags():
+        """(point clouds usable, rasters usable) as the options say now, None when unreadable."""
+        try:
+            from ...adapters.qgis.point_cloud_capability import get_point_cloud_layer_type, get_raster_layer_type
+            return get_point_cloud_layer_type() is not None, get_raster_layer_type() is not None
+        except Exception as e:
+            logger.debug(f"Layer kind flags unreadable: {e}")
+            return None
+
+    def _realign_layer_kinds(self, before):
+        """The configuration read from disk turned rasters / point clouds on or off: register or
+        unregister those layers and re-filter the current-layer list (FilterMateApp.apply_layer_kind_options).
+
+        2026-10-18: a reload switching both kinds off left them in the current-layer list while
+        the next add_layers task ignored them (« not in PROJECT_LAYERS »).
+        """
+        after = self._layer_kind_flags()
+        if before is None or after is None or after == before:
+            return
+        dw = self.dockwidget
+        app = getattr(dw, 'filter_mate_app', None) or getattr(dw, 'app', None)
+        apply_options = getattr(app, 'apply_layer_kind_options', None)
+        if callable(apply_options):
+            from qgis.PyQt.QtCore import QTimer
+            QTimer.singleShot(0, apply_options)
+            logger.info(f"Layer kinds changed by the configuration reload (point clouds={after[0]}, rasters={after[1]})")
+
     # ========================================
     # MODEL & VIEW SETUP
     # ========================================
@@ -418,15 +446,24 @@ class ConfigModelManager:
             # when the env hasn't been initialised yet.
             import os
             try:
-                from ...config.config import ENV_VARS
+                from ...config.config import ENV_VARS, load_migrated_config
             except Exception:
                 ENV_VARS = {}
+                load_migrated_config = None
             config_path = ENV_VARS.get("CONFIG_JSON_PATH") or os.path.join(
                 dw.plugin_dir, 'config', 'config.json'
             )
+            kinds_before = self._layer_kind_flags()
             try:
-                with open(config_path, 'r', encoding='utf-8') as f:
-                    fresh_config = json.load(f)
+                # 2026-10-18: migrated like at start (a file without the RASTER /
+                # POINT_CLOUD sections turned both layer kinds off here).
+                if load_migrated_config is not None:
+                    fresh_config = load_migrated_config(config_path)
+                    if fresh_config is None:
+                        raise ValueError(f"{config_path} unreadable or without APP section")
+                else:
+                    with open(config_path, 'r', encoding='utf-8') as f:
+                        fresh_config = json.load(f)
                 # Mutate dw.CONFIG_DATA in place when possible so other
                 # holders of the live reference (registry seed slices,
                 # app.CONFIG_DATA) are not orphaned.
@@ -445,6 +482,7 @@ class ConfigModelManager:
                 logger.info(f"Config reloaded from {config_path}")
             except Exception as e:
                 logger.warning(f"Could not reload config from disk: {e}")
+            self._realign_layer_kinds(kinds_before)
 
             from ...ui.widgets.json_view.model import JsonModel
             dw.config_model = JsonModel(
