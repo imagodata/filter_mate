@@ -41,7 +41,7 @@ try:
     from qgis.PyQt.QtCore import QSize, Qt, QTimer, pyqtSignal
     from qgis.PyQt.QtGui import QColor, QFont, QFontDatabase, QIcon, QPixmap
     from qgis.PyQt.QtWidgets import (
-        QButtonGroup, QCheckBox, QComboBox, QDoubleSpinBox, QGridLayout, QGroupBox, QHBoxLayout, QLabel,
+        QButtonGroup, QComboBox, QDoubleSpinBox, QGridLayout, QGroupBox, QHBoxLayout, QLabel,
         QMenu, QPlainTextEdit, QPushButton, QRadioButton, QSizePolicy, QToolButton, QVBoxLayout, QWidget,
     )
     QT_AVAILABLE = True
