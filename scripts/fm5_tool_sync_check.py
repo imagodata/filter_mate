@@ -15,18 +15,22 @@ off, the pipette button off leaves the group alone; the detector button is the s
 the object target (R4, 2026-10-18). Point cloud: CLASSES puts the class pipette on (the
 Identify button, since 2026-10-18), ATTRIBUTES / EXPRESSION take it off, the class pipette on
 makes CLASSES active.
+Vector (2026-10-18): Link and the similar features tool follow the single / multiple selections
+(R1), the similar tool puts the "Select" mode on (R2), the number of features selected on the map
+chooses the group, the "more" menu runs the QGIS selection tools.
 Selecting a layer never puts a tool on the map by itself.
 """
 import os
 import traceback
 
 from qgis.PyQt.QtCore import QTimer
-from qgis.core import QgsApplication, QgsPointCloudLayer, QgsProject, QgsRasterLayer
+from qgis.core import QgsApplication, QgsPointCloudLayer, QgsProject, QgsRasterLayer, QgsVectorLayer
 from qgis.utils import iface, plugins
 
 ORTHO = os.environ.get('FM5_ORTHO', r'C:\Users\Simon\Documents\FilterMate_test_v5\data\ortho_rvb.tif')
 TILE = os.environ.get('FM5_TILE', r'\\wsl.localhost\Ubuntu\home\simon\dev\ign-lidar-spheron-training\data\raw_tiles'
                                   r'\pyrenees_villages_cerdagne\LHD_FXX_0616_6153_PTS_C_LAMB93_IGN69.copc.laz')
+PARCELS = os.environ.get('FM5_PARCELS', r'C:\Users\Simon\Documents\FilterMate_test_v5\data\cerdagne.gpkg|layername=parcelle')
 OUT = os.environ.get('FM5_OUT', os.path.join(os.environ.get('LOCALAPPDATA', ''), 'Temp', 'fm5', 'tool_sync'))
 os.makedirs(OUT, exist_ok=True)
 LOG = os.path.join(OUT, 'fm5_tool_sync.log')
@@ -134,6 +138,7 @@ def s_setup():
     project = QgsProject.instance()
     project.addMapLayer(QgsRasterLayer(ORTHO, 'ortho', 'gdal'))
     project.addMapLayer(QgsPointCloudLayer(TILE, 'lhd', 'copc'))
+    project.addMapLayer(QgsVectorLayer(PARCELS, 'parcelle', 'ogr'))
     iface.mapCanvas().setExtent(layer('ortho').extent())
     iface.actionPan().trigger()
     check('layers loaded', all(lyr.isValid() for lyr in project.mapLayers().values()), str(len(project.mapLayers())))
@@ -295,6 +300,91 @@ def s_raster_last_check():
     button(PIPETTE).setChecked(False)
 
 
+VECTOR_SIMILAR = 'pushButton_checkable_exploring_vector_similar'
+VECTOR_MORE = 'pushButton_exploring_vector_more'
+
+
+def s_vector():
+    dock().comboBox_filtering_current_layer.setLayer(layer('parcelle'))
+
+
+def s_vector_check():
+    d = dock()
+    link = d.pushButton_checkable_exploring_linking_widgets
+    select = d.pushButton_checkable_exploring_selecting
+    rail = [n for n in ('pushButton_exploring_identify', 'pushButton_exploring_zoom', 'pushButton_checkable_exploring_selecting',
+                        'pushButton_checkable_exploring_tracking', 'pushButton_checkable_exploring_linking_widgets',
+                        'pushButton_exploring_reset_layer_properties') if getattr(d, n).isVisible()]
+    rail += [n for n in (VECTOR_SIMILAR, VECTOR_MORE) if button(n).isVisible()]
+    check('vector: eight buttons on the rail', len(rail) == 8, ', '.join(rail))
+    check('vector: the layer puts no tool on the map', tool_name() == 'QgsMapToolPan', tool_name())
+    d.exploring_groupbox_changed('single_selection')
+    check('vector: Link available in the single selection (R1)', link.isEnabled() and button(VECTOR_SIMILAR).isEnabled())
+    d.exploring_groupbox_changed('custom_selection')
+    check('vector: the custom selection disables Link and the similar tool (R1)',
+          not link.isEnabled() and not button(VECTOR_SIMILAR).isEnabled(), link.toolTip())
+    d.exploring_groupbox_changed('multiple_selection')
+    check('vector: the multiple selection gives them back', link.isEnabled() and button(VECTOR_SIMILAR).isEnabled())
+    button(VECTOR_SIMILAR).setChecked(True)
+    check('vector: the similar tool puts the Select mode on and takes the map (R2)',
+          select.isChecked() and tool_name() == 'SimilarFeaturesTool', tool_name())
+    d.exploring_groupbox_changed('custom_selection')
+    check('vector: the custom selection takes the similar tool off (R1)',
+          not button(VECTOR_SIMILAR).isChecked() and tool_name() != 'SimilarFeaturesTool', tool_name())
+    d.exploring_groupbox_changed('single_selection')
+    button(VECTOR_SIMILAR).setChecked(True)
+    iface.actionPan().trigger()
+    check('vector: the pan tool releases the similar button, the group stays (R5)',
+          not button(VECTOR_SIMILAR).isChecked() and d.current_exploring_groupbox == 'single_selection', tool_name())
+    lyr = layer('parcelle')
+    ids = [f.id() for f in lyr.getFeatures()][:3]
+    lyr.selectByIds(ids[:2])
+
+
+def s_vector_count_check():
+    d = dock()
+    lyr = layer('parcelle')
+    check('vector: two features from the map make the multiple selection active',
+          d.current_exploring_groupbox == 'multiple_selection', d.current_exploring_groupbox)
+    ids = [f.id() for f in lyr.getFeatures()][:1]
+    lyr.selectByIds(ids)
+
+
+def s_vector_one_check():
+    d = dock()
+    check('vector: one feature from the map makes the single selection active',
+          d.current_exploring_groupbox == 'single_selection', d.current_exploring_groupbox)
+    extras = controller()._extras
+    extras._select_with_qgis(('mActionSelectPolygon',), mode=True)
+    # The QGIS selection tools are not exposed to Python: the map tool reads as a plain QgsMapTool,
+    # the checked action tells which one is on.
+    check('vector: the polygon tool of the menu keeps the Select mode and takes the map',
+          d.pushButton_checkable_exploring_selecting.isChecked() and iface.actionSelectPolygon().isChecked()
+          and tool_name() not in ('QgsMapToolPan', 'SimilarFeaturesTool'), tool_name())
+    lyr = layer('parcelle')
+    lyr.removeSelection()
+    d.exploring_groupbox_changed('single_selection')
+    button(VECTOR_SIMILAR).setChecked(True)
+    feature = next(lyr.getFeatures())
+    extras._on_similar_feature_clicked(feature, False)
+    expression = extras._group_expression(lyr)
+    check('vector: a clicked feature selects every feature with its value',
+          lyr.selectedFeatureCount() >= 1 and tool_name() == 'SimilarFeaturesTool',
+          f"{expression}: {lyr.selectedFeatureCount()} selected")
+    STATE['similar_count'] = lyr.selectedFeatureCount()
+
+
+def s_vector_similar_check():
+    d = dock()
+    count = STATE.get('similar_count', 0)
+    expected = 'multiple_selection' if count > 1 else 'single_selection'
+    check('vector: the similar selection reaches the panel and chooses the group by its count',
+          d.current_exploring_groupbox == expected, f"{count} features, {d.current_exploring_groupbox}")
+    d.pushButton_checkable_exploring_selecting.setChecked(False)
+    check('vector: Select off gives the pan tool back and releases the similar tool (R5)',
+          tool_name() == 'QgsMapToolPan' and not button(VECTOR_SIMILAR).isChecked(), tool_name())
+
+
 def s_finish():
     failed = [name for name, ok in STATE['results'] if not ok]
     log(f"\n{len(STATE['results']) - len(failed)}/{len(STATE['results'])} checks passed")
@@ -307,6 +397,8 @@ STEPS = [
     (s_setup, 1500), (s_open_plugin, 6000), (s_raster, 3000), (s_raster_check, 1500),
     (s_point_cloud, 4000), (s_point_cloud_check, 1500), (s_back_to_raster, 3000), (s_back_to_raster_check, 500),
     (s_point_cloud_again, 3000), (s_point_cloud_again_check, 500), (s_raster_last, 3000), (s_raster_last_check, 500),
+    (s_vector, 4000), (s_vector_check, 1500), (s_vector_count_check, 1500), (s_vector_one_check, 1500),
+    (s_vector_similar_check, 1500),
     (s_finish, 500),
 ]
 

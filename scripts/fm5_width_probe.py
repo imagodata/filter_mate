@@ -96,12 +96,26 @@ def s_probe(name):
     return step
 
 
+def s_bands():
+    """BANDS open on the ortho, the second band active: the band rows (radios, pipette toggles, chips) are grabbed."""
+    try:
+        panel = controller()._raster_panel
+        panel._bands_group.setCollapsed(False)
+        rows = {k: v for k, v in panel._band_rows.items() if k != 0}
+        if len(rows) > 1:
+            sorted(rows)[1] and rows[sorted(rows)[1]]['radio'].setChecked(True)
+        QTimer.singleShot(600, lambda: panel._bands_group.grab().save(
+            os.path.join(os.path.dirname(LOG), 'width_probe_bands.png'), 'PNG'))
+    except Exception:
+        log(traceback.format_exc())
+
+
 def s_finish():
     QgsApplication.instance().quit()
 
 
 STEPS = [(s_setup, 1500), (s_open, 6000), (s_layer('mnt'), 3000), (s_probe('mnt'), 1500),
-         (s_layer('ortho'), 3000), (s_probe('ortho'), 1500), (s_finish, 500)]
+         (s_layer('ortho'), 3000), (s_probe('ortho'), 1500), (s_bands, 1500), (s_finish, 500)]
 
 
 def run_step(index=0):

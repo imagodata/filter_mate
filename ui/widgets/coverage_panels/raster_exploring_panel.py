@@ -809,11 +809,14 @@ class RasterExploringPanel(QWidget):
     ROLE_COLOURS = {ROLE_RED: "#d9443a", ROLE_GREEN: "#4caf50", ROLE_BLUE: "#2f7fd8", ROLE_NIR: "#8e24aa"}
     CHIP_HEIGHT = 16
     ROW_CONTROL = 18  # height of the small controls of a band row
-    # Thin indicator of the active band (the dock stylesheet draws 28 px radios made for the main widgets).
+    # Thin indicator of the active band (the dock stylesheet draws 18 px radios made for the main widgets).
+    # The box stays 14 px in every state: the checked ring is a 4 px border around a 6 px centre (2026-10-18:
+    # a 4 px border around the 12 px centre made a 20 px rounded square, clipped by the 18 px row).
     RADIO_STYLE = ("QRadioButton { spacing: 0px; } "
                    "QRadioButton::indicator { width: 12px; height: 12px; border-radius: 7px; "
                    "border: 1px solid palette(mid); background: palette(base); image: none; } "
-                   "QRadioButton::indicator:checked { border: 4px solid palette(highlight); background: palette(base); } "
+                   "QRadioButton::indicator:checked { width: 6px; height: 6px; border-radius: 7px; "
+                   "border: 4px solid palette(highlight); background: palette(base); image: none; } "
                    "QRadioButton::indicator:hover { border-color: palette(highlight); }")
     PIPETTE_STYLE = ("QToolButton { border: none; border-radius: 3px; padding: 0; } "
                      "QToolButton:checked { background: palette(midlight); }")

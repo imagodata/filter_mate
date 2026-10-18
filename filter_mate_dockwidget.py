@@ -901,7 +901,7 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             ("EXPLORING", "ZOOM"): self.tr("Zoom to the selected features"),
             ("EXPLORING", "IS_SELECTING"): self.tr("Select the features on the map"),
             ("EXPLORING", "IS_TRACKING"): self.tr("Follow the features on the map"),
-            ("EXPLORING", "IS_LINKING"): self.tr("Link the three selection modes"),
+            ("EXPLORING", "IS_LINKING"): self.tr("Link the single and multiple selections"),
             ("EXPLORING", "RESET_ALL_LAYER_PROPERTIES"): self.tr("Reset the layer properties"),
             ("FILTERING", "AUTO_CURRENT_LAYER"): self.tr("Follow the current layer"),
             ("FILTERING", "HAS_LAYERS_TO_FILTER"): self.tr("Layers to filter"),
@@ -3716,6 +3716,7 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         """v4.0 Sprint 17: Common groupbox configuration logic."""
         self.current_exploring_groupbox = groupbox_name
         self.refresh_selection_strip()
+        self._sync_exploring_tools_with_group(groupbox_name)
         self.manageSignal(["EXPLORING", "SINGLE_SELECTION_FEATURES"], 'disconnect')
         self.manageSignal(["EXPLORING", "MULTIPLE_SELECTION_FEATURES"], 'disconnect')
 
@@ -4918,32 +4919,37 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         self._update_exploring_buttons_state()
         logger.info("exploring_select_features: DONE")
 
-    def _sync_groupbox_state_with_selecting(self, is_selecting: bool):
+    def _sync_exploring_tools_with_group(self, groupbox):
+        """FilterMate 5 (R1): the rail tools tied to the groups follow the active one (Link ↔ single / multiple).
+
+        The rule table is ui/controllers/selection_modes.py, shared with the raster and point cloud rails.
         """
-        FIX 2026-01-15: Synchronize groupbox enabled state with IS_SELECTING button.
+        integration = getattr(self, '_controller_integration', None)
+        coverage = getattr(integration, 'coverage_controller', None) if integration is not None else None
+        if coverage is not None:
+            try:
+                coverage.sync_vector_tools(groupbox)
+            except Exception as e:
+                logger.debug(f"_sync_exploring_tools_with_group: {e}")
 
-        When IS_SELECTING is active, enable the current groupbox for interaction.
-        When inactive, the groupbox state depends on other conditions.
+    def _sync_groupbox_state_with_selecting(self, is_selecting: bool):
+        """The active group stays usable whether "Select" is on or off; its tools follow it (R1).
 
-        Args:
-            is_selecting: True if IS_SELECTING button is checked, False otherwise
+        2026-10-18: "Select" is a mode shared by the three groups, it never disables one (the
+        docstring used to promise a disabling that never happened).
         """
         if not self.widgets_initialized or not self.current_exploring_groupbox:
             return
-
         try:
-            # Get the active groupbox widget
             groupbox_map = {
                 "single_selection": self.mGroupBox_exploring_single_selection,
                 "multiple_selection": self.mGroupBox_exploring_multiple_selection,
                 "custom_selection": self.mGroupBox_exploring_custom_selection
             }
-
             current_groupbox_widget = groupbox_map.get(self.current_exploring_groupbox)
             if current_groupbox_widget:
-                # Enable groupbox when selecting is active
                 current_groupbox_widget.setEnabled(True)
-                logger.debug(f"_sync_groupbox_state_with_selecting: {self.current_exploring_groupbox} enabled={is_selecting}")
+            self._sync_exploring_tools_with_group(self.current_exploring_groupbox)
         except Exception as e:
             logger.debug(f"_sync_groupbox_state_with_selecting error: {e}")
 
@@ -6647,6 +6653,11 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             exp = layer_props["exploring"]
             for key, prop in [("IS_SELECTING", "is_selecting"), ("IS_TRACKING", "is_tracking"), ("IS_LINKING", "is_linking")]:
                 w = self.widgets["EXPLORING"][key]["WIDGET"]
+                if key == "IS_SELECTING" and w.isChecked() and not exp[prop]:
+                    # 2026-10-18: through its handler, so the map selection is cleared and the pan tool comes
+                    # back (under a signal blocker the button went up while the selection tool stayed on).
+                    w.setChecked(False)
+                    continue
                 with SignalBlocker(w):
                     w.setChecked(exp[prop])
         except Exception as e:
