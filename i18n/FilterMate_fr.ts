@@ -416,6 +416,16 @@
         <translation>Raster filtré : {0}</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2096"/>
+        <source>raster selection read every {0} pixels: over the pixel limit of the settings</source>
+        <translation>sélection raster lue tous les {0} pixels : au-delà de la limite de pixels des paramètres</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2099"/>
+        <source>dense raster selection smoothed to keep its outline light</source>
+        <translation>sélection raster dense lissée pour garder un contour léger</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/coverage_mode_controller.py" line="1620"/>
         <source>The point cloud expression was rejected: {0}</source>
         <translation>L'expression du nuage de points a été refusée : {0}</translation>
