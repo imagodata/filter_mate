@@ -952,7 +952,11 @@ class CoverageDockExtras(QObject):
 
     def _zone_shape_menu(self, parent: Any) -> Any:
         """Menu of the four shapes (one checked), shared by the Zone button and the "more" menu."""
-        from qgis.PyQt.QtWidgets import QActionGroup, QMenu
+        from qgis.PyQt.QtWidgets import QMenu
+        try:
+            from qgis.PyQt.QtGui import QActionGroup
+        except ImportError:  # Qt5: QActionGroup is in QtWidgets
+            from qgis.PyQt.QtWidgets import QActionGroup
         menu = QMenu(self.tr("Zone shape"), parent)
         group = QActionGroup(menu)
         group.setExclusive(True)
@@ -970,10 +974,7 @@ class CoverageDockExtras(QObject):
         if button is None:
             return
         menu = self._zone_shape_menu(button)
-        try:
-            menu.exec(button.mapToGlobal(position))
-        except AttributeError:  # Qt5
-            menu.exec_(button.mapToGlobal(position))
+        menu.exec(button.mapToGlobal(position))
 
     def _sync_zone_buttons(self, checked: bool) -> None:
         for name in ('pushButton_checkable_exploring_raster_zone', 'pushButton_checkable_exploring_point_cloud_zone'):
@@ -988,10 +989,7 @@ class CoverageDockExtras(QObject):
     # === More tools (menus of the "..." buttons) ===
 
     def _popup(self, button: Any, menu: Any) -> None:
-        try:
-            menu.exec(button.mapToGlobal(button.rect().bottomLeft()))
-        except AttributeError:  # Qt5
-            menu.exec_(button.mapToGlobal(button.rect().bottomLeft()))
+        menu.exec(button.mapToGlobal(button.rect().bottomLeft()))  # PyQt5 and PyQt6 both spell it exec
 
     def _show_raster_more_menu(self, *_args) -> None:
         """Value under the cursor and statistics of a rectangle: the raster tools kept off the rail."""
