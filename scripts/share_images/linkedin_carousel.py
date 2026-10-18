@@ -13,14 +13,14 @@ h1{margin:16px 0 8px;font:700 76px/.98 'Barlow Condensed','Arial Narrow',sans-se
 h1 em{font-style:normal;color:#1f66b8}
 h2{margin:18px 0 10px;font:700 46px/1.02 'Barlow Condensed',sans-serif}
 .lead{margin:0;font-size:24px;line-height:1.35;color:#4a5a63;max-width:900px}
-.shot{display:block;width:952px;height:562px;object-fit:cover;object-position:right top;border:2px solid #16232b;margin-top:22px;background:#fff}
-.cols{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-top:18px}
-.box{padding:16px 18px;border:1.5px solid #cfd3c8;background:#fff}
+.shot{display:block;width:968px;height:572px;object-fit:cover;object-position:right top;border:2px solid #16232b;margin-top:22px;background:#fff}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-top:22px}
+.box{padding:20px 22px;border:1.5px solid #cfd3c8;background:#fff;min-height:250px;box-sizing:border-box}
 .box b{display:block;font:600 14px/1.3 Barlow,sans-serif;letter-spacing:.1em;text-transform:uppercase;color:#4a5a63;margin-bottom:8px}
-.box p{margin:0;font-size:20px;line-height:1.35}
+.box p{margin:0;font-size:23px;line-height:1.4}
 .box code{font-size:18px}
 .box.result{background:#e4eef9;border:2.5px solid #1f66b8}
-.box.result p{font:600 24px/1.3 Barlow,sans-serif;color:#16232b}
+.box.result p{font:600 27px/1.35 Barlow,sans-serif;color:#16232b}
 .dir{display:inline-block;margin-top:14px;padding:6px 12px;background:#ffd83d;border:2px solid #16232b;font:600 18px/1.2 Barlow,sans-serif}
 .list{margin:34px 0 0;padding:0;list-style:none}
 .list li{display:grid;grid-template-columns:70px 1fr;align-items:baseline;gap:14px;padding:14px 0;border-top:1.5px solid #cfd3c8;font-size:26px;line-height:1.3}
