@@ -734,7 +734,7 @@ def selection_geometry(provider: QgsRasterDataProvider, selection: RasterSelecti
                        sieve_pixels: int = 4, nodata_provider: Optional[QgsRasterDataProvider] = None,
                        nodata_bands=(), is_canceled=None, progress=None, tile_size: int = SOURCE_TILE_SIZE,
                        max_vertices: int = SOURCE_MAX_VERTICES, provider_for=None,
-                       cell_reader=None) -> SelectionGeometryResult:
+                       cell_reader=None, opening: int = 0) -> SelectionGeometryResult:
     """Polygons of the pixels kept by ``selection`` (call from a task with cloned providers).
 
     The raster is read tile by tile at its native resolution, or every ``k``
@@ -764,8 +764,12 @@ def selection_geometry(provider: QgsRasterDataProvider, selection: RasterSelecti
         is_canceled: Callable checked between tiles; a canceled read returns an
             empty geometry with ``canceled`` set.
         progress: Callable receiving the progress in percent.
+        opening: Radius of the opening of :func:`patch_cores` on each tile (the
+            similar objects: the patches are cut at their pixel-wide bridges, as
+            the clicked objects are; nothing on a coarse read); 0: the pixels as
+            they are.
     """
-    from .geometry_tools import make_valid, merge_tile_polygons, pixel_to_map, polygonize_mask
+    from .geometry_tools import make_valid, merge_tile_polygons, patch_cores, pixel_to_map, polygonize_mask
     if selection.seeds and selection.similar:
         return similar_objects_geometry(provider, selection, extent, native_width, native_height, crs_wkt,
                                         max_pixels=max_pixels, provider_for=provider_for, patch_provider=provider,
@@ -823,6 +827,11 @@ def selection_geometry(provider: QgsRasterDataProvider, selection: RasterSelecti
             if ground is not None:
                 array = derive(array, selection.derivative, *ground)
             mask = selection_mask(array, selection)
+        if opening > 0 and not coarse and mask.any():
+            # The margin holds the neighbours the cores read. A coarse cell stands for k x k pixels:
+            # a cell-wide bridge is no pixel-wide one, nothing is cut. The holes stay: filled tile by
+            # tile, a hole on a tile edge would be half filled and a courtyard wider than a tile never.
+            mask = patch_cores(mask, opening)
         if mask.any():
             core = (slice(row - top, row - top + rows), slice(col - left, col - left + cols))
             kept += int(mask[core].sum())
@@ -911,6 +920,9 @@ OBJECT_WINDOW_START = 128
 OBJECT_WINDOW_MAX = 512
 # The window grows four times at each step: 257, then 1025 pixels; two reads at most.
 OBJECT_WINDOW_GROWTH = 4
+# Opening radius (cells) of the patch cores of the object modes: the pixel-wide bridges between a pool
+# and the lawn beside it, of its colour along the shady edge, are cut (see patch_cores).
+OBJECT_OPENING = 1
 
 
 def flood_fill(mask, seeds):
@@ -954,6 +966,64 @@ def fill_holes(region):
     border += [(row, 0) for row in range(rows)] + [(row, cols - 1) for row in range(rows)]
     outside = flood_fill(~region, border)
     return ~outside
+
+
+def object_region(mask, seed, opening: int = OBJECT_OPENING, reconstruct: bool = True):
+    """Patch of ``mask`` under ``seed`` (``(row, col)``), without the pixel-wide bridges that leave it.
+
+    The patch is followed on the cores of the patches (:func:`patch_cores`,
+    ``opening`` the radius of its opening; 0: on ``mask`` itself) from the seed or,
+    when the cores leave it out (a corner of the pool), from the nearest core of
+    its patch (:func:`_core_seed`), then, with ``reconstruct``, the cells taken
+    from its outline are given back: the cells of ``mask`` next to it that belong
+    to no core. A pool and the lawn touching it by a line of pixels of its colour
+    stay two objects, the pool keeping its full size (its corners too); the first
+    pixel of the line stays with it, never the lawn. A patch too thin to have a
+    core (a path, a fence) is followed on ``mask`` itself.
+    """
+    import numpy as np
+    from .geometry_tools import dilate_mask, patch_cores
+    mask = np.asarray(mask, dtype=bool)
+    if opening <= 0:
+        return flood_fill(mask, [seed])
+    cores = patch_cores(mask, opening)
+    start = _core_seed(mask, cores, seed)
+    if start is None:
+        return flood_fill(mask, [seed])
+    region = flood_fill(cores, [start])
+    if reconstruct:
+        region = region | (dilate_mask(region) & mask & ~cores)
+    return region
+
+
+# A click on a cell the cores leave out (a corner, the ring of a diagonal edge) starts from the nearest
+# core of its patch within this many cells: the diagonal neighbour of a corner is two steps away.
+CORE_SEED_RADIUS = 2
+
+
+def _core_seed(mask, cores, seed, radius: int = CORE_SEED_RADIUS):
+    """``seed`` when it is a core, else the nearest core of its patch within ``radius`` cells; None without one.
+
+    The patch is followed on ``mask`` in the square of ``radius`` around the seed only
+    (a leak through a bridge is what the cores avoid). A seed off the grid or on a dropped
+    cell, or a patch too thin to have a core nearby (a path), gives None.
+    """
+    import numpy as np
+    row, col = int(seed[0]), int(seed[1])
+    rows, cols = mask.shape
+    if not (0 <= row < rows and 0 <= col < cols) or not mask[row, col]:
+        return None
+    if cores[row, col]:
+        return (row, col)
+    row0, col0 = max(0, row - radius), max(0, col - radius)
+    window = (slice(row0, row + radius + 1), slice(col0, col + radius + 1))
+    local = flood_fill(mask[window], [(row - row0, col - col0)]) & cores[window]
+    candidates = np.argwhere(local)
+    if not candidates.size:
+        return None
+    distances = np.abs(candidates[:, 0] - (row - row0)) + np.abs(candidates[:, 1] - (col - col0))
+    best = candidates[int(np.argmin(distances))]
+    return (int(best[0]) + row0, int(best[1]) + col0)
 
 
 def _object_window(extent: QgsRectangle, native_width: int, native_height: int, x: float, y: float, half: int):
@@ -1004,19 +1074,28 @@ def object_parts(selection: RasterSelection) -> List[Tuple[RasterSelection, Tupl
 
 def object_geometry(provider: QgsRasterDataProvider, selection: RasterSelection, extent: QgsRectangle,
                     native_width: int, native_height: int, crs_wkt: str, start: int = OBJECT_WINDOW_START,
-                    limit: int = OBJECT_WINDOW_MAX, provider_for=None) -> SelectionGeometryResult:
+                    limit: int = OBJECT_WINDOW_MAX, provider_for=None, opening: int = OBJECT_OPENING,
+                    reconstruct: bool = True, fill: bool = True, simplify: bool = True) -> SelectionGeometryResult:
     """Outline of the objects under the seeds of ``selection``: the patch of kept pixels each click falls in.
 
     Read at the native resolution in a window around each click, grown while
     the patch touches a side of the window that is not the raster edge, up to
     ``limit``: a patch still larger is cut at the window (``truncated``). The
-    holes of an object are filled. A click on a dropped pixel gives no object, a
-    click inside an object already found adds nothing.
+    patch is followed without the pixel-wide bridges leaving it
+    (:func:`object_region`) and its holes are filled. A click on a dropped
+    pixel gives no object, a click inside an object already found adds nothing.
 
     Args:
         provider_for: ``criterion -> provider`` for the objects of their own
             criterion (an expression is read through its own virtual raster);
             None: ``provider`` for every object.
+        opening: Radius of the opening cutting the bridges (0: none).
+        reconstruct: Give the object back the outline cells the opening took
+            (False: the opened patch, as the similar objects are measured).
+        fill: Fill the holes of the objects (False: as the similar objects are
+            measured, whose holes stay).
+        simplify: Simplify the outline by half a pixel (False: the staircase of
+            the pixels, as the similar objects are measured).
     """
     import numpy as np
     from .geometry_tools import mask_to_geometry, union_geometries
@@ -1041,7 +1120,7 @@ def object_geometry(provider: QgsRasterDataProvider, selection: RasterSelection,
             _rectangle, bounds, (row, col) = window
             col0, row0, col1, row1 = bounds
             mask = _window_mask(source, criterion, extent, size_x, size_y, bounds, native_width, native_height, crs_wkt)
-            region = flood_fill(mask, [(row, col)])
+            region = object_region(mask, (row, col), opening, reconstruct)
             if not region.any():
                 break
             touches = ((row0 > 0 and region[0].any()) or (row1 < native_height and region[-1].any())
@@ -1050,9 +1129,11 @@ def object_geometry(provider: QgsRasterDataProvider, selection: RasterSelection,
                 half = min(limit, half * OBJECT_WINDOW_GROWTH)
                 continue
             truncated = truncated or touches
-            region = fill_holes(region)
+            if fill:
+                region = fill_holes(region)
             geotransform = (extent.xMinimum() + col0 * size_x, size_x, 0.0, extent.yMaximum() - row0 * size_y, 0.0, -size_y)
-            geometry = mask_to_geometry(region, geotransform, crs_wkt, simplify_tolerance=min(size_x, size_y) * 0.5)
+            geometry = mask_to_geometry(region, geotransform, crs_wkt,
+                                        simplify_tolerance=min(size_x, size_y) * 0.5 if simplify else 0.0)
             if geometry is not None and not geometry.isEmpty():
                 geometries.append(geometry)
                 kept += int(np.count_nonzero(region))
@@ -1085,6 +1166,17 @@ def similar_area_bounds(areas, ratio) -> Optional[Tuple[float, float]]:
     return min(areas) * min(low, high), max(areas) * max(low, high)
 
 
+def similar_shape_bounds(compactnesses, ratio) -> Optional[Tuple[float, float]]:
+    """``(lowest, highest)`` compactness a patch may have to be shaped like the clicked objects; None without one.
+
+    The same ``(low, high)`` ratios as the areas, applied to the compactness
+    (``4 π area / perimeter²``, 1 for a disc) of the clicked objects; a compactness
+    never exceeds 1. A road of the colour and area of a pool is three times less compact.
+    """
+    bounds = similar_area_bounds(compactnesses, ratio)
+    return None if bounds is None else (bounds[0], min(1.0, bounds[1]))
+
+
 def geometry_parts(geometry) -> list:
     """The polygons of a geometry: its parts for a multipart one, itself otherwise; nothing for an empty one."""
     if geometry is None:
@@ -1108,29 +1200,44 @@ def similar_objects_geometry(provider: QgsRasterDataProvider, selection: RasterS
     """Every patch of kept pixels of the raster whose area is like the clicked objects' (``selection.similar``).
 
     The clicked objects are read first (:func:`object_geometry`, native resolution): their areas
-    give the bounds. The whole raster is then polygonized with the criterion of the selection
-    (:func:`selection_geometry`, ``patch_provider``: the virtual raster of an expression) and the
-    patches within the bounds are kept. ``objects`` counts them; ``kept_pixels`` is estimated from
-    their area and the cell size.
+    give the bounds, and their compactness too when ``selection.shape`` asks for the shape. The
+    whole raster is then polygonized with the criterion of the selection (:func:`selection_geometry`,
+    ``patch_provider``: the virtual raster of an expression), its patches cut at their pixel-wide
+    bridges as the clicked objects were, and the patches within the bounds are kept. ``objects``
+    counts them; ``kept_pixels`` is estimated from their area and the cell size.
+
+    The clicked objects are measured as the patches are: at the native resolution, without
+    their corners and the ring of their diagonal edges (:func:`patch_cores`) on both sides
+    alike; over ``max_pixels`` the patches are read on coarse cells and keep their outline,
+    so the clicked objects keep theirs. Holes stay and outlines keep the staircase of the
+    pixels on both sides (a courtyard, an inner ring, count in the area and the perimeter).
     """
     from dataclasses import replace
-    from .geometry_tools import union_geometries
+    from .geometry_tools import compactness, union_geometries
+    coarse = _decimation(native_width, native_height, max_pixels) > 1
     reference = object_geometry(provider, selection, extent, native_width, native_height, crs_wkt,
-                                provider_for=provider_for)
-    bounds = similar_area_bounds([part.area() for part in geometry_parts(reference.geometry)], selection.similar)
+                                provider_for=provider_for, opening=OBJECT_OPENING, reconstruct=coarse,
+                                fill=False, simplify=False)
+    clicked = geometry_parts(reference.geometry)
+    bounds = similar_area_bounds([part.area() for part in clicked], selection.similar)
     if bounds is None:
         return SelectionGeometryResult(QgsGeometry(), 0, reference.total_pixels, reference.cell_size, reference.truncated, 0)
-    plain = replace(selection, seeds=(), objects=(), similar=())
+    shape = similar_shape_bounds([compactness(part) for part in clicked], selection.similar) if selection.shape else None
+    plain = replace(selection, seeds=(), objects=(), similar=(), shape=False)
     patches = selection_geometry(patch_provider or provider, plain, extent, native_width, native_height, crs_wkt,
-                                 max_pixels=max_pixels, **selection_kwargs)
+                                 max_pixels=max_pixels, opening=OBJECT_OPENING, **selection_kwargs)
     if patches.canceled:
         return patches
-    kept_parts = [part for part in geometry_parts(patches.geometry) if bounds[0] <= part.area() <= bounds[1]]
+    parts = geometry_parts(patches.geometry)
+    kept_parts = [part for part in parts if bounds[0] <= part.area() <= bounds[1]
+                  and (shape is None or shape[0] <= compactness(part) <= shape[1])]
     geometry = union_geometries(kept_parts) if kept_parts else QgsGeometry()
     cell = float(patches.cell_size) if patches.cell_size else 0.0
     kept = int(round(sum(part.area() for part in kept_parts) / (cell * cell))) if cell > 0 else 0
-    logger.info(f"[FM5] similar objects: {len(kept_parts)} of {len(geometry_parts(patches.geometry))} patches within "
-                f"{bounds[0]:.1f}-{bounds[1]:.1f} map units² (clicked objects: {reference.objects})")
+    logger.info(f"[FM5] similar objects: {len(kept_parts)} of {len(parts)} patches within "
+                f"{bounds[0]:.1f}-{bounds[1]:.1f} map units²"
+                + (f" and a compactness of {shape[0]:.2f}-{shape[1]:.2f}" if shape is not None else "")
+                + f" (clicked objects: {reference.objects})")
     return SelectionGeometryResult(geometry, kept, patches.total_pixels, patches.cell_size, reference.truncated,
                                    len(kept_parts), grid=patches.grid, tiles=patches.tiles, coarse=patches.coarse,
                                    decimation=patches.decimation, smoothing=patches.smoothing, blocks=patches.blocks,
@@ -1171,7 +1278,7 @@ def layer_object_geometry(layer: QgsRasterLayer, selection: RasterSelection) -> 
 
     if selection.similar:
         from dataclasses import replace
-        plain = replace(selection, seeds=(), objects=(), similar=())
+        plain = replace(selection, seeds=(), objects=(), similar=(), shape=False)
         virtual = selection_virtual_layer(layer, plain) if plain.mode is RasterSelectionMode.EXPRESSION else None
         if plain.mode is RasterSelectionMode.EXPRESSION and virtual is None:
             return SelectionGeometryResult(QgsGeometry(), 0, layer.width() * layer.height(), 0.0)

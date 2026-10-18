@@ -249,6 +249,13 @@ class FakeGeometry:
     def area(self):
         return self._g.GetArea() if self._g is not None else 0.0
 
+    def length(self):
+        """Perimeter of a polygon, as QgsGeometry.length() (OGR's Length() is 0 for a surface)."""
+        if self._g is None:
+            return 0.0
+        boundary = self._g.Boundary()
+        return boundary.Length() if boundary is not None else self._g.Length()
+
     def boundingBox(self):
         if self.isEmpty():
             return FakeRectangle()

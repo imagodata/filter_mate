@@ -23,6 +23,14 @@ the class pipette of the rail (the Identify button) checks the class clicked
 on the map. The point counts and the current filter go to the selection strip
 under EXPLORING, not to the panel (2026-10-18 audit).
 
+The object detector of the rail is a tool of CLASSES too: a click keeps the
+object under it (the cluster of points of its class, a building, a tree), or
+every object of the cloud like it (similar objects, within area ratios). Each
+object keeps its class; the classes of the objects are checked, the subset
+string keeps the X / Y box of each object with its class, and the objects
+themselves cut the source geometry of the cross filter (:meth:`zone_wkt`).
+Editing the class list by hand drops the objects.
+
 The panel only reads a ``PointCloudLayerSummary`` (and the DTM layer combo);
 the state handling - criteria and expression building, presets, migration of
 older states, count formatting - is done by pure functions of this module and
@@ -116,6 +124,22 @@ CLASS_COLORS: Dict[int, str] = {
 DEFAULT_CLASS_COLOR = "#9e9e9e"
 CLASS_COUNT_ROLE = 0x0101  # Qt.UserRole + 1: points of the class, -1 when unknown
 RETURN_ANY = "any"  # the "Returns" row: no return condition
+
+# Object detector of the rail (CLASSES): what a click selects.
+OBJECT_TARGET = "object"  # the object under the click (the cluster of points of its class)
+SIMILAR_OBJECTS_TARGET = "similar_objects"  # every object of the cloud like the clicked one
+OBJECT_TARGETS = (OBJECT_TARGET, SIMILAR_OBJECTS_TARGET)
+DEFAULT_SIMILAR_RATIO = (0.5, 2.0)  # area of a similar object: x 0.5 to x 2 the clicked one
+# Above this many objects the subset string keeps one X / Y box per class (the source geometry of the
+# cross filter stays exact: it is cut by the objects themselves; the panel and the strip say it). QGIS
+# evaluates the subset for every point it decodes: the boxes are grouped by class, the class tested
+# first, so a point of another class costs one comparison and a point of the class about two a box
+# (X >= xmin fails for the boxes on one side, X <= xmax on the other), with the AND / OR of the
+# point cloud expressions evaluated lazily (C++ && / ||). 64 boxes of buildings (10 % of a LiDAR HD
+# tile) then cost about 14 comparisons a point, less than 24 boxes each testing its class (about 28).
+MAX_OBJECT_BOXES = 64
+# Decimals of the X / Y bounds of a box: 1e-9 degree is 0.1 mm (6 decimals were 0.1 m in a geographic CRS).
+BOX_DECIMALS = 9
 
 
 # ---------------------------------------------------------------------------
@@ -230,6 +254,132 @@ def picked_class_codes(checked_codes: Iterable[int], code: int, extend: bool) ->
     return tuple(sorted({int(code), *checked_codes})) if extend else (int(code),)
 
 
+def _parse_box(value: Any) -> Optional[List[float]]:
+    """``[xmin, ymin, xmax, ymax]`` of finite numbers (sides ordered), None when invalid."""
+    if not isinstance(value, (list, tuple)) or len(value) != 4:
+        return None
+    numbers = [_optional_float(item) for item in value]
+    if any(number is None for number in numbers):
+        return None
+    xmin, ymin, xmax, ymax = numbers
+    return [min(xmin, xmax), min(ymin, ymax), max(xmin, xmax), max(ymin, ymax)]
+
+
+def _parse_code(value: Any) -> Optional[int]:
+    number = _optional_float(value)
+    return int(number) if number is not None and number.is_integer() and 0 <= number <= 255 else None
+
+
+def _parse_object_item(value: Any) -> Optional[Dict[str, Any]]:
+    """A clicked object: ``{"x", "y", "code", "box", "wkt", "truncated"}`` (layer CRS), None when invalid."""
+    if not isinstance(value, dict):
+        return None
+    x, y, code, box = _optional_float(value.get("x")), _optional_float(value.get("y")), _parse_code(value.get("code")), \
+        _parse_box(value.get("box"))
+    if x is None or y is None or code is None or box is None:
+        return None
+    wkt = value.get("wkt")
+    return {"x": x, "y": y, "code": code, "box": box, "wkt": wkt if isinstance(wkt, str) else "",
+            "truncated": bool(value.get("truncated", False))}
+
+
+def _parse_detected(value: Any) -> Optional[Dict[str, Any]]:
+    """What the detection found: ``{"wkt", "boxes", "count", "area", "truncated"}``, None when nothing was read."""
+    if not isinstance(value, dict):
+        return None
+    boxes = []
+    for entry in value.get("boxes") or ():
+        if isinstance(entry, (list, tuple)) and len(entry) == 5:
+            code, box = _parse_code(entry[0]), _parse_box(entry[1:])
+            if code is not None and box is not None:
+                boxes.append([code, *box])
+    count = _optional_float(value.get("count"))
+    area = _optional_float(value.get("area"))
+    wkt = value.get("wkt")
+    return {"wkt": wkt if isinstance(wkt, str) else "", "boxes": boxes,
+            "count": int(count) if count is not None and count >= 0 else None,
+            "area": area if area is not None and area >= 0 else None, "truncated": bool(value.get("truncated", False))}
+
+
+def parse_objects_state(value: Any) -> Dict[str, Any]:
+    """Normalise the object detector part of a panel state (idempotent).
+
+    ``{"target": "object" | "similar_objects", "ratio": [low, high], "items": [clicked objects],
+    "detected": what was found for them or None}``.
+    """
+    value = value if isinstance(value, dict) else {}
+    target = value.get("target")
+    low, high = _parse_bounds(value.get("ratio"))
+    ratio = [low, high] if low is not None and high is not None and low > 0 else list(DEFAULT_SIMILAR_RATIO)
+    items = [item for item in (_parse_object_item(entry) for entry in value.get("items") or ()) if item is not None]
+    return {
+        "target": target if target in OBJECT_TARGETS else OBJECT_TARGET,
+        "ratio": ratio,
+        "items": items,
+        "detected": _parse_detected(value.get("detected")) if items else None,
+    }
+
+
+def box_coordinate(value: float) -> str:
+    """A bound of a box, :data:`BOX_DECIMALS` decimals without trailing zeros (``652000``, ``2.123456789``)."""
+    text = f"{float(value):.{BOX_DECIMALS}f}".rstrip("0").rstrip(".")
+    return "0" if text in ("", "-", "-0") else text
+
+
+def box_clause(box: Sequence[float]) -> str:
+    """``X >= .. AND X <= .. AND Y >= .. AND Y <= ..``: the points of a box ``[xmin, ymin, xmax, ymax]``."""
+    xmin, ymin, xmax, ymax = box
+    return (f"{X_ATTRIBUTE} >= {box_coordinate(xmin)} AND {X_ATTRIBUTE} <= {box_coordinate(xmax)} AND "
+            f"{Y_ATTRIBUTE} >= {box_coordinate(ymin)} AND {Y_ATTRIBUTE} <= {box_coordinate(ymax)}")
+
+
+def class_boxes(boxes: Iterable[Sequence[float]]) -> List[List[float]]:
+    """One ``[code, xmin, ymin, xmax, ymax]`` box per class, covering its boxes, in class order."""
+    merged: Dict[int, List[float]] = {}
+    for code, xmin, ymin, xmax, ymax in boxes:
+        box = merged.get(int(code))
+        merged[int(code)] = [min(box[0], xmin), min(box[1], ymin), max(box[2], xmax), max(box[3], ymax)] if box \
+            else [xmin, ymin, xmax, ymax]
+    return [[code, *merged[code]] for code in sorted(merged)]
+
+
+def object_expression(boxes: Sequence[Sequence[float]], limit: int = MAX_OBJECT_BOXES) -> str:
+    """Subset of the points in the boxes of the objects, each with its class (``[code, xmin, ymin, xmax, ymax]``).
+
+    The boxes of a class are grouped behind its class test (``Classification = 6 AND ((box) OR (box))``),
+    the classes ORed in the order of their first object, each parenthesised when there are several;
+    over ``limit`` objects (similar objects), one box per class (:func:`boxes_merged`). ``""`` without a box.
+    """
+    boxes = list(boxes)
+    if len(boxes) > limit:
+        boxes = class_boxes(boxes)
+    groups: Dict[int, List[str]] = {}
+    for entry in boxes:
+        groups.setdefault(int(entry[0]), []).append(box_clause(entry[1:]))
+    clauses = []
+    for code, group in groups.items():
+        inner = group[0] if len(group) == 1 else "(" + " OR ".join(f"({clause})" for clause in group) + ")"
+        clauses.append(f"{CLASSIFICATION_ATTRIBUTE} = {code} AND {inner}")
+    if len(clauses) == 1:
+        return clauses[0]
+    return " OR ".join(f"({clause})" for clause in clauses)
+
+
+def boxes_merged(objects: Dict[str, Any], limit: int = MAX_OBJECT_BOXES) -> bool:
+    """Whether the subset keeps one box per class for a parsed objects state: it shows the whole class in it."""
+    return len(objects_boxes(objects)) > limit
+
+
+def objects_boxes(objects: Dict[str, Any]) -> List[List[float]]:
+    """Boxes the subset string keeps for a parsed objects state: those found, else those of the clicks."""
+    if not objects["items"]:
+        return []
+    detected = objects["detected"]
+    if detected is not None and detected["boxes"]:
+        return detected["boxes"]
+    return [[item["code"], *item["box"]] for item in objects["items"]]
+
+
 def class_selection_summary(checked: int, shown: int, kept_points: Optional[int], total_points: Optional[int]) -> str:
     """Line under the class list: ``"3 of 12 classes · 9.8 M / 38.4 M points (25.5 %)"``.
 
@@ -238,6 +388,24 @@ def class_selection_summary(checked: int, shown: int, kept_points: Optional[int]
     text = f"{checked} / {shown}"
     counted = format_point_counts(kept_points, total_points)
     return f"{text} · {counted}" if counted else text
+
+
+def object_summary(count: int, area: Optional[float], truncated: bool, translate: Any = str, merged: bool = False) -> str:
+    """Line under the class list while the detector holds objects: ``"3 object(s) · 125 m²"``, ``"… · cut"``.
+
+    ``merged``: the subset keeps one box per class (:func:`boxes_merged`), said so: the preview and
+    the filtered cloud show the whole class in that box, not the objects alone.
+    """
+    try:
+        from ..selection_strip import objects_text
+        text = objects_text(count, area, translate)
+    except ImportError:  # the widgets package is not importable (tests of this module alone)
+        text = translate("{0} object(s)").format(int(count))
+    if truncated:
+        text += " · " + translate("cut at the window read")
+    if merged:
+        text += " · " + translate("shown as the whole class in their box")
+    return text
 
 
 def attribute_available(attributes: Sequence[str], name: str) -> bool:
@@ -404,7 +572,15 @@ def parse_point_cloud_state(state: Any) -> Dict[str, Any]:
         "expression_enabled": bool(state.get("expression_enabled", False)),
         "expression": str(state.get("expression") or ""),
         "apply_to_tiles": bool(state.get("apply_to_tiles", False)),
+        "objects": parse_objects_state(state.get("objects")),
     }
+
+
+def _object_clause(parsed: Dict[str, Any]) -> str:
+    """Subset clause of the detected objects of a parsed state while CLASSES is checked, ``""`` otherwise."""
+    if not parsed["classes_enabled"]:
+        return ""
+    return object_expression(objects_boxes(parsed["objects"]))
 
 
 def build_point_cloud_criteria(state: Any) -> PointCloudFilterCriteria:
@@ -415,16 +591,18 @@ def build_point_cloud_criteria(state: Any) -> PointCloudFilterCriteria:
 
     An AND chain of conditions gives ranges (``between``, ``>=``, ``<=``) and
     extra clauses (the other operators); a chain with an OR is one extra
-    clause. The height above the DTM is not part of the criteria (see
-    :func:`build_point_cloud_expression`).
+    clause. Objects detected in CLASSES replace their classes by the box of
+    each object, with its class (:func:`object_expression`). The height above
+    the DTM is not part of the criteria (see :func:`build_point_cloud_expression`).
     """
     parsed = parse_point_cloud_state(state)
-    codes = parsed["classes"] if parsed["classes_enabled"] else ()
+    objects = _object_clause(parsed)
+    codes = parsed["classes"] if parsed["classes_enabled"] and not objects else ()
     ranges, extra_clauses = conditions_criteria(parsed["conditions"]) if parsed["ranges_enabled"] else ((), ())
     return PointCloudFilterCriteria(
         classification_codes=frozenset(codes),
         ranges=ranges,
-        extra_clauses=extra_clauses,
+        extra_clauses=((objects,) if objects else ()) + tuple(extra_clauses),
     )
 
 
@@ -463,7 +641,7 @@ def build_point_cloud_expression(state: Any, hag_available: bool = True) -> str:
         base, wrap = parsed["expression"], True
     else:
         base = generated_expression(parsed)
-        wrap = parsed["ranges_enabled"] and conditions_have_or(parsed["conditions"])
+        wrap = (parsed["ranges_enabled"] and conditions_have_or(parsed["conditions"])) or " OR " in _object_clause(parsed)
     hag = hag_from_state(parsed, hag_available)
     return compose_expression(base, None if hag is None else hag[1], wrap)
 
@@ -783,6 +961,9 @@ class PointCloudExploringPanel(QWidget):
     applyToTilesToggled = pyqtSignal(bool)
     summaryChanged = pyqtSignal()  # point counts updated: the selection strip under EXPLORING follows
     groupChosen = pyqtSignal(str)  # the user made a group the active one ("classes", "ranges", "expression")
+    # The objects of the detector must be read again (similar objects ratio edited), or were dropped
+    # (the class list edited by hand): the controller reads them and calls set_detected_objects.
+    objectsChanged = pyqtSignal()
 
     def __init__(self, parent=None):
         """Build the panel.
@@ -800,6 +981,7 @@ class PointCloudExploringPanel(QWidget):
         self._hag_tooltip = ""
         self._custom_expression = ""
         self._zone_wkt = ""  # the shape drawn with the Zone tool (layer CRS), WKT; its box is in the conditions
+        self._objects: Dict[str, Any] = parse_objects_state({})  # the object detector of the rail (CLASSES)
         self.setObjectName("widget_point_cloud_exploring_panel")
         self._debounce = QTimer(self)
         self._debounce.setSingleShot(True)
@@ -896,6 +1078,7 @@ class PointCloudExploringPanel(QWidget):
         self._classes_list.setObjectName("listWidget_point_cloud_classes")
         self._classes_list.setMaximumHeight(240)
         self._classes_list.setAccessibleName(self.tr("Point classes"))
+        self._classes_list.itemChanged.connect(self._drop_objects)  # first: the expression shown follows at once
         self._classes_list.itemChanged.connect(self._changed)
         self._classes_list.itemChanged.connect(self._update_class_summary)
         self._weight_delegate = ClassWeightDelegate(self._classes_list)
@@ -916,11 +1099,53 @@ class PointCloudExploringPanel(QWidget):
         self._absent_list.setObjectName("listWidget_point_cloud_absent_classes")
         self._absent_list.setMaximumHeight(160)
         self._absent_list.setAccessibleName(self.tr("Classes absent from the layer"))
+        self._absent_list.itemChanged.connect(self._drop_objects)
         self._absent_list.itemChanged.connect(self._changed)
         self._absent_list.itemChanged.connect(self._update_class_summary)
         self._absent_list.setVisible(False)
         group_layout.addWidget(self._absent_list)
+        group_layout.addWidget(self._build_object_ratio_row())
         return self._classes_group
+
+    def _build_object_ratio_row(self) -> Any:
+        """Similar objects of the detector: how far from the clicked objects' area an object may be.
+
+        In a holder: expanding a QgsCollapsibleGroupBox shows again every direct child it hid,
+        and the row is shown in the similar objects target only.
+        """
+        holder = QWidget(self._classes_group)
+        holder.setObjectName("widget_point_cloud_similar_ratio_holder")
+        holder_layout = QVBoxLayout(holder)
+        holder_layout.setContentsMargins(0, 0, 0, 0)
+        self._object_ratio_widget = QWidget(holder)
+        self._object_ratio_widget.setObjectName("widget_point_cloud_similar_ratio")
+        row = QHBoxLayout(self._object_ratio_widget)
+        row.setContentsMargins(0, 0, 0, 0)
+        row.setSpacing(GAP)
+        row.addWidget(QLabel(self.tr("Similar objects: area ×"), self._object_ratio_widget))
+        self._object_low_spin = QDoubleSpinBox(self._object_ratio_widget)
+        self._object_high_spin = QDoubleSpinBox(self._object_ratio_widget)
+        for spin, value, name, tip in (
+                (self._object_low_spin, DEFAULT_SIMILAR_RATIO[0], "doubleSpinBox_point_cloud_similar_low",
+                 self.tr("Smallest similar object, as a share of the smallest clicked one")),
+                (self._object_high_spin, DEFAULT_SIMILAR_RATIO[1], "doubleSpinBox_point_cloud_similar_high",
+                 self.tr("Largest similar object, as a multiple of the largest clicked one"))):
+            spin.setObjectName(name)
+            spin.setRange(0.01, 100.0)
+            spin.setDecimals(2)
+            spin.setSingleStep(0.25)
+            spin.setValue(value)
+            spin.setKeyboardTracking(False)
+            spin.setToolTip(tip)
+            spin.setMinimumWidth(SPIN_MIN_WIDTH)
+            spin.valueChanged.connect(self._on_object_ratio_changed)
+        row.addWidget(self._object_low_spin)
+        row.addWidget(QLabel(self.tr("to ×"), self._object_ratio_widget))
+        row.addWidget(self._object_high_spin)
+        row.addStretch(1)
+        self._object_ratio_widget.setVisible(False)
+        holder_layout.addWidget(self._object_ratio_widget)
+        return holder
 
     def _on_absent_toggled(self, checked: bool) -> None:
         self._absent_list.setVisible(bool(checked) and self._absent_list.count() > 0)
@@ -1096,7 +1321,8 @@ class PointCloudExploringPanel(QWidget):
         """Literal tr() calls of the attribute labels of the registry, for pylupdate.
 
         The labels come from ``core.domain.point_cloud_attributes`` and are
-        translated at run time in this class context (see :meth:`_attribute_label`).
+        translated at run time in this class context (see :meth:`_attribute_label`),
+        as the texts of the module helpers given ``self.tr``.
         """
         self.tr("Intensity")
         self.tr("Return number")
@@ -1119,6 +1345,10 @@ class PointCloudExploringPanel(QWidget):
         self.tr("Scanner channel")
         self.tr("Classification flags")
         self.tr("Height above ground")
+        # The line of the detected objects (object_summary, selection_strip.objects_text).
+        self.tr("{0} object(s)")
+        self.tr("cut at the window read")
+        self.tr("shown as the whole class in their box")
 
     def _build_expression_group(self) -> Any:
         self._expression_group = self._make_group(self.tr("EXPRESSION"), "mGroupBox_point_cloud_expression", checked=False)
@@ -1249,12 +1479,15 @@ class PointCloudExploringPanel(QWidget):
         return True
 
     def zone_wkt(self) -> str:
-        """WKT (layer CRS) of the shape drawn with the Zone tool while its X / Y conditions are in the list; ``""`` otherwise."""
-        if not self._zone_wkt:
-            return ""
-        if not any(row.attribute() in ZONE_ATTRIBUTES for row in self._condition_rows) or not self._ranges_group.isChecked():
-            return ""
-        return self._zone_wkt
+        """WKT (layer CRS) of the shape that cuts the source geometry of the cross filter; ``""`` without one.
+
+        The shape drawn with the Zone tool while its X / Y conditions are in ATTRIBUTES, the active
+        group; else the objects of the detector while CLASSES is (:meth:`object_zone_wkt`).
+        """
+        if (self._zone_wkt and self._ranges_group.isChecked()
+                and any(row.attribute() in ZONE_ATTRIBUTES for row in self._condition_rows)):
+            return self._zone_wkt
+        return self.object_zone_wkt()
 
     def show_value_pipette_active(self) -> None:
         """The value pipette went on the map: ATTRIBUTES becomes the active group, as a pick would make it."""
@@ -1267,6 +1500,135 @@ class PointCloudExploringPanel(QWidget):
 
     def _on_pick_attribute_changed(self, _index: int) -> None:
         pass  # the pipette reads the combo when it clicks
+
+    # === Object detector of the rail (a tool of CLASSES) ===
+
+    def object_target(self) -> str:
+        """What a click of the detector selects: :data:`OBJECT_TARGET` or :data:`SIMILAR_OBJECTS_TARGET`."""
+        return self._objects["target"]
+
+    def set_object_target(self, target: str) -> bool:
+        """Adopt the target chosen in the rail menus; True when it changed. Does not emit ``objectsChanged``.
+
+        The clicked objects stay: what was found for them is dropped until the controller reads them again.
+        """
+        target = target if target in OBJECT_TARGETS else OBJECT_TARGET
+        if target == self._objects["target"]:
+            return False
+        self._objects["target"] = target
+        self._object_ratio_widget.setVisible(target == SIMILAR_OBJECTS_TARGET)
+        if self._objects["items"]:
+            self._objects["detected"] = None
+            self._update_class_summary()
+            self._changed()
+        return True
+
+    def object_ratio(self) -> Tuple[float, float]:
+        """``(low, high)`` area ratios of the similar objects."""
+        low, high = self._objects["ratio"]
+        return float(low), float(high)
+
+    def object_items(self) -> List[Dict[str, Any]]:
+        """The clicked objects (copies): ``{"x", "y", "code", "box", "wkt", "truncated"}``, layer CRS."""
+        return [dict(item, box=list(item["box"])) for item in self._objects["items"]]
+
+    def add_object(self, item: Dict[str, Any], extend: bool = False) -> bool:
+        """An object found under a click of the detector (see :meth:`object_items`); Ctrl+click (``extend``) adds it.
+
+        Its class is checked in CLASSES, which becomes the active group; the classes checked are
+        those of the objects. False when the class is not listed (nothing changes).
+
+        The objects kept while another group was the active one come back with CLASSES (they are
+        its selection, as its checked classes): a Ctrl+click adds to them.
+        """
+        parsed = _parse_object_item(item)
+        if parsed is None or parsed["code"] not in self._present_codes() or self._classes_group.isHidden():
+            return False
+        if not self._classes_group.isChecked():
+            self._activate_group(self._classes_group)
+        self._objects["items"] = [*(self._objects["items"] if extend else []), parsed]
+        self._objects["detected"] = None
+        self._check_codes(sorted({entry["code"] for entry in self._objects["items"]}))  # emits, summary updated
+        return True
+
+    def set_detected_objects(self, wkt: str, boxes: Sequence[Sequence[float]], count: Optional[int],
+                             area: Optional[float] = None, truncated: bool = False) -> None:
+        """What the controller found for the clicked objects (or the similar ones), for the subset and the targets.
+
+        Args:
+            wkt: Their geometry (layer CRS), the source geometry of the cross filter is cut by it.
+            boxes: ``[code, xmin, ymin, xmax, ymax]`` of each object, for the subset string.
+            count: Objects found (similar objects: those of the cloud), None when unknown.
+            area: Their ground area in square metres, None when unknown.
+            truncated: An object was cut at the window read, or the cloud at its points limit.
+        """
+        if not self._objects["items"]:
+            return
+        self._objects["detected"] = _parse_detected({"wkt": wkt, "boxes": [list(box) for box in boxes],
+                                                     "count": count, "area": area, "truncated": truncated})
+        self._update_class_summary()
+        self._changed()
+        self.summaryChanged.emit()
+
+    def detected_objects(self) -> Optional[Tuple[Optional[int], Optional[float], bool, bool]]:
+        """``(count, area in m², truncated, merged)`` of the objects while CLASSES is active; None otherwise.
+
+        Not read yet (:meth:`objects_pending`): the clicked objects, without area. ``merged``: the subset
+        keeps one box per class (:func:`boxes_merged`).
+        """
+        items = self._objects["items"]
+        if not items or not self._classes_group.isChecked():
+            return None
+        merged = boxes_merged(self._objects)
+        detected = self._objects["detected"]
+        if detected is None:
+            return len(items), None, any(item["truncated"] for item in items), merged
+        return detected["count"], detected["area"], detected["truncated"], merged
+
+    def objects_pending(self) -> bool:
+        """Clicked objects whose detection is missing (a restored state, a read that failed): to be read again."""
+        return bool(self._objects["items"]) and self._objects["detected"] is None
+
+    def tiles_expression(self) -> str:
+        """Subset for the other tiles of the dataset (:meth:`apply_to_tiles`).
+
+        The boxes of the objects are in the coordinates of this tile (no point of another tile is in
+        them): with objects, their classes go alone; :meth:`expression` otherwise.
+        """
+        if not self._objects["items"] or not self._classes_group.isChecked():
+            return self.expression()
+        state = self.state()
+        state["objects"] = {}
+        return build_point_cloud_expression(state, self._hag_available)
+
+    def object_zone_wkt(self) -> str:
+        """WKT (layer CRS) of the detected objects while CLASSES is the active group; ``""`` otherwise."""
+        detected = self._objects["detected"]
+        if detected is None or not self._objects["items"] or not self._classes_group.isChecked():
+            return ""
+        return detected["wkt"]
+
+    def _drop_objects(self, *_args) -> None:
+        """The class list was edited by hand (or by the class pipette): whole classes, no object any more."""
+        if not self._objects["items"]:
+            return
+        self._objects["items"], self._objects["detected"] = [], None
+        self._update_class_summary()
+        self.objectsChanged.emit()  # the outline goes
+
+    def _on_object_ratio_changed(self, _value: Any) -> None:
+        low, high = float(self._object_low_spin.value()), float(self._object_high_spin.value())
+        self._objects["ratio"] = [min(low, high), max(low, high)]
+        if self._objects["target"] == SIMILAR_OBJECTS_TARGET and self._objects["items"]:
+            self.objectsChanged.emit()
+
+    def _restore_objects(self, objects: Dict[str, Any]) -> None:
+        """The detector part of a restored state (parsed). Does not emit."""
+        self._objects = parse_objects_state(objects)
+        with _signals_blocked(self._object_low_spin, self._object_high_spin):
+            self._object_low_spin.setValue(self._objects["ratio"][0])
+            self._object_high_spin.setValue(self._objects["ratio"][1])
+        self._object_ratio_widget.setVisible(self._objects["target"] == SIMILAR_OBJECTS_TARGET)
 
     def apply_to_tiles(self) -> bool:
         """Whether the filter should also go to the other tiles of the dataset."""
@@ -1327,6 +1689,7 @@ class PointCloudExploringPanel(QWidget):
             "pick_attribute": self.pick_attribute(),
             "pick_tolerance": self.pick_tolerance(),
             "zone_wkt": self._zone_wkt,
+            "objects": parse_objects_state(self._objects),  # a copy
         }
 
     def restore_state(self, state: Dict[str, Any]) -> None:
@@ -1334,6 +1697,7 @@ class PointCloudExploringPanel(QWidget):
         self._debounce.stop()
         parsed = parse_point_cloud_state(state)
         wanted = set(parsed["classes"])
+        self._restore_objects(parsed["objects"])
         widgets = (self._classes_group, self._ranges_group, self._expression_group, self._classes_list,
                    self._absent_list, self._hag_group, self._hag_spin, self._hag_layer_combo, self._apply_tiles_check)
         with _signals_blocked(*widgets):
@@ -1510,12 +1874,16 @@ class PointCloudExploringPanel(QWidget):
         return self._checked_codes()
 
     def select_class(self, code: int, extend: bool = False) -> bool:
-        """Check the class picked on the map (added to the checked ones with ``extend``); False when not listed."""
+        """Check the class picked on the map (added to the checked ones with ``extend``); False when not listed.
+
+        The whole class: the objects of the detector are dropped.
+        """
         if int(code) not in self._present_codes() or self._classes_group.isHidden():
             return False
         if not self._classes_group.isChecked():
             extend = False  # classes left checked under another active group do not come back
             self._classes_group.setChecked(True)
+        self._drop_objects()
         self._check_codes(picked_class_codes(self._checked_codes(), code, extend))
         return True
 
@@ -1528,6 +1896,7 @@ class PointCloudExploringPanel(QWidget):
     def _on_quick_selection(self, data: Any) -> None:
         if data is None:
             return
+        self._drop_objects()  # whole classes from now on
         action, name = data
         if action == "preset":
             self._apply_preset(name)
@@ -1550,16 +1919,35 @@ class PointCloudExploringPanel(QWidget):
         return len(checked), len(items), kept, total
 
     def _update_class_summary(self, *_args) -> None:
-        """Checked classes and the points they hold, under the list."""
+        """Checked classes and the points they hold, under the list; the objects found while there are."""
+        items = self._objects["items"]
+        if items:
+            detected = self._objects["detected"]
+            count = detected["count"] if detected is not None and detected["count"] is not None else len(items)
+            truncated = detected["truncated"] if detected is not None else any(item["truncated"] for item in items)
+            area = detected["area"] if detected is not None else None
+            merged = boxes_merged(self._objects)
+            self._class_summary_label.setText(object_summary(count, area, truncated, self.tr, merged))
+            tips = []
+            if truncated:
+                tips.append(self.tr("An object runs past the largest window read around the click and was cut there"))
+            if merged:
+                tips.append(self.tr("Too many objects for the subset of the cloud: the preview and the filtered cloud "
+                                    "keep every point of their class in the box around them; the targets are cut by "
+                                    "the objects themselves"))
+            self._class_summary_label.setToolTip("\n".join(tips))
+            return
+        self._class_summary_label.setToolTip("")
         checked, shown, kept, total = self._class_counts()
         self._class_summary_label.setText(class_selection_summary(checked, shown, kept if checked else None, total))
 
     def class_point_counts(self) -> Tuple[Optional[int], Optional[int]]:
         """``(kept, total)`` points of the checked classes while CLASSES is the active group, else ``(None, None)``.
 
-        Exact from the layer statistics; no class checked keeps no constraint (None).
+        Exact from the layer statistics; no class checked keeps no constraint (None), nor do detected
+        objects (a part of their classes).
         """
-        if not self._classes_group.isChecked():
+        if not self._classes_group.isChecked() or self._objects["items"]:
             return None, None
         checked, _shown, kept, total = self._class_counts()
         return (kept, total) if checked and kept is not None else (None, None)

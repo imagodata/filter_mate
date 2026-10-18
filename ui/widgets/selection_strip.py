@@ -146,8 +146,18 @@ def _area_text(square_metres: Optional[float]) -> str:
     return f"{value / 1e6:.2f} km²"
 
 
+def objects_text(count: Optional[int], area: Optional[float], translate: Callable[[str], str] = _identity) -> str:
+    """``"3 object(s) · 125 m²"``, without the area when unknown; ``""`` without a count."""
+    if count is None:
+        return ""
+    text = translate("{0} object(s)").format(int(count))
+    area_text = _area_text(area)
+    return f"{text} · {area_text}" if area_text else text
+
+
 def point_cloud_strip_value(kept: Optional[int], total: Optional[int], expression: str = "",
-                            at_most: bool = False, translate: Callable[[str], str] = _identity) -> str:
+                            at_most: bool = False, translate: Callable[[str], str] = _identity,
+                            detected=None) -> str:
     """Value of the point cloud strip.
 
     Args:
@@ -156,8 +166,16 @@ def point_cloud_strip_value(kept: Optional[int], total: Optional[int], expressio
         expression: Subset expression of the criteria (shown when the points cannot be counted).
         at_most: The count is an upper bound (the height above the DTM filters further).
         translate: Translation function of the caller.
+        detected: ``(count, area in m², truncated, merged)`` of the object detector, None without objects:
+            shown instead of their expression (one X / Y box per object); ``merged``: the subset keeps
+            one box per class, said so (the preview shows the whole class in that box).
     """
     from .coverage_panels.point_cloud_exploring_panel import format_count, format_point_counts
+    if detected is not None and detected[0] is not None:
+        text = objects_text(detected[0], detected[1] if len(detected) > 1 else None, translate)
+        if len(detected) > 3 and detected[3]:
+            text += " · " + translate("shown as the whole class in their box")
+        return text
     if kept is not None and kept >= 0:
         counted = format_point_counts(kept, total)
         return f"≤ {counted}" if at_most else counted

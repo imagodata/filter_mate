@@ -63,6 +63,166 @@ class TestFloodFill:
         assert filled[2, 2] and not filled[0, 0]
 
 
+class TestMorphology:
+    """2026-10-18: opening (numpy only) cutting the pixel-wide bridges of the object modes."""
+
+    def test_dilate_grows_a_diamond_and_erode_shrinks_it_back(self):
+        dot = np.zeros((5, 5), dtype=bool)
+        dot[2, 2] = True
+        grown = geometry_tools.dilate_mask(dot)
+        assert int(grown.sum()) == 5 and grown[1, 2] and grown[2, 1] and not grown[1, 1]
+        assert geometry_tools.erode_mask(grown).tolist() == dot.tolist()
+        assert int(geometry_tools.dilate_mask(dot, 2).sum()) == 13
+        assert geometry_tools.dilate_mask(dot, 0).tolist() == dot.tolist()
+
+    def test_erosion_keeps_the_edge_cells_of_the_grid(self):
+        # The outside counts as set: a patch on the raster edge is not eaten from that side.
+        full = np.ones((3, 4), dtype=bool)
+        assert geometry_tools.erode_mask(full).all()
+
+    def test_the_cores_cut_a_bridge_and_keep_the_blobs(self):
+        mask = np.zeros((7, 15), dtype=bool)
+        mask[1:6, 1:6] = True  # a pool
+        mask[3, 6:10] = True  # a line of pixels of its colour
+        mask[1:6, 10:14] = True  # the lawn
+        cores = geometry_tools.patch_cores(mask)
+        assert not cores[3, 6:10].any()
+        assert cores[1:6, 1:6].sum() == 25 - 4 and cores[1:6, 10:14].sum() == 20 - 4  # the corners go
+        # The opening alone gives the ends of the line back (a line of two pixels would join them again).
+        opened = geometry_tools.open_mask(mask)
+        assert opened[3, 6] and opened[3, 9] and not opened[3, 7:9].any()
+
+    def test_a_line_of_any_length_is_cut(self):
+        for length in (1, 2, 3):
+            mask = np.zeros((7, 12 + length), dtype=bool)
+            mask[1:6, 1:6] = True
+            mask[3, 6:6 + length] = True
+            mask[1:6, 6 + length:11 + length] = True
+            cores = geometry_tools.patch_cores(mask)
+            assert not cores[3, 6:6 + length].any(), length
+            assert int(raster_adapter.flood_fill(cores, [(3, 3)]).sum()) == 21, length
+
+    def test_a_corridor_two_cells_wide_is_cut_by_the_opening(self):
+        mask = np.zeros((8, 16), dtype=bool)
+        mask[1:7, 1:6] = True
+        mask[3:5, 6:10] = True  # two cells wide, four long
+        mask[1:7, 10:15] = True
+        cores = geometry_tools.patch_cores(mask)
+        assert not cores[3:5, 7:9].any() and not raster_adapter.flood_fill(cores, [(3, 3)])[1:7, 10:15].any()
+
+    def test_a_thin_patch_has_no_core(self):
+        line = np.zeros((5, 9), dtype=bool)
+        line[2, 1:8] = True
+        assert not geometry_tools.patch_cores(line).any()
+        assert not geometry_tools.open_mask(line).any()
+
+    def test_compactness(self):
+        assert abs(geometry_tools.compactness(_Part(100.0, 40.0)) - 0.785) < 0.01  # a square of 10
+        assert abs(geometry_tools.compactness(_Part(100.0, 104.0)) - 0.116) < 0.01  # a road of 50 x 2
+        assert geometry_tools.compactness(_Part(0.0, 0.0)) == 0.0
+        assert geometry_tools.compactness(None) == 0.0
+        if fk.ogr is not None:
+            square = fk.FakeGeometry.fromWkt("POLYGON((0 0, 10 0, 10 10, 0 10, 0 0))")
+            assert abs(geometry_tools.compactness(square) - 0.785) < 0.01
+
+
+class _Part:
+    """A polygon known by its area and perimeter (no OGR needed)."""
+
+    def __init__(self, area, perimeter):
+        self._area, self._perimeter = float(area), float(perimeter)
+
+    def area(self):
+        return self._area
+
+    def length(self):
+        return self._perimeter
+
+    def isEmpty(self):
+        return self._area <= 0
+
+    def isMultipart(self):
+        return False
+
+
+class _Multi:
+    """A multipolygon of :class:`_Part`."""
+
+    def __init__(self, parts):
+        self.parts = list(parts)
+
+    def isEmpty(self):
+        return not self.parts
+
+    def isMultipart(self):
+        return True
+
+    def asGeometryCollection(self):
+        return list(self.parts)
+
+
+class TestObjectRegion:
+    """The patch under the click without the bridges that leave it."""
+
+    @staticmethod
+    def _scene():
+        mask = np.zeros((7, 15), dtype=bool)
+        mask[1:6, 1:6] = True  # a pool
+        mask[3, 6:10] = True  # a line of pixels of its colour, along the shady edge
+        mask[1:6, 10:14] = True  # the lawn
+        return mask
+
+    def test_the_pool_stays_apart_from_the_lawn_and_keeps_its_corners(self):
+        mask = self._scene()
+        region = raster_adapter.object_region(mask, (3, 3))
+        assert region[1:6, 1:6].all()  # the corners are given back
+        assert not region[1:6, 10:14].any()  # the lawn is another object
+        assert region[3, 6] and not region[3, 7:10].any()  # the first pixel of the line stays with the pool
+        assert int(region.sum()) == 26
+
+    def test_a_click_on_a_corner_starts_from_the_nearest_core(self):
+        # The corner (1, 1) is no core: the object is the pool all the same, not the whole mask.
+        mask = self._scene()
+        region = raster_adapter.object_region(mask, (1, 1))
+        assert int(region.sum()) == 26 and not region[1:6, 10:14].any()
+        assert raster_adapter._core_seed(mask, geometry_tools.patch_cores(mask), (1, 1)) in ((1, 2), (2, 1))  # an edge cell
+        assert raster_adapter._core_seed(mask, geometry_tools.patch_cores(mask), (3, 3)) == (3, 3)
+        # The ring of a diagonal edge: its inner neighbour.
+        diamond = np.zeros((9, 9), dtype=bool)
+        for row in range(9):
+            for col in range(9):
+                diamond[row, col] = abs(row - 4) + abs(col - 4) <= 4
+        cores = geometry_tools.patch_cores(diamond)
+        assert not cores[0, 4] and raster_adapter._core_seed(diamond, cores, (0, 4)) == (1, 4)
+        assert int(raster_adapter.object_region(diamond, (0, 4)).sum()) == int(diamond.sum())
+
+    def test_a_corner_next_to_another_patch_stays_in_its_own(self):
+        # The nearest core must be of the clicked patch: a lawn one cell away across a gap is not it.
+        mask = np.zeros((8, 8), dtype=bool)
+        mask[1:4, 1:4] = True  # a 3 x 3 patch: its corners are no cores
+        mask[1:7, 5:8] = True  # another patch, two cells from its corner
+        assert raster_adapter._core_seed(mask, geometry_tools.patch_cores(mask), (3, 3)) in ((2, 3), (3, 2))
+        assert int(raster_adapter.object_region(mask, (3, 3)).sum()) == 9
+
+    def test_without_the_opening_the_pool_leaks(self):
+        mask = self._scene()
+        assert int(raster_adapter.object_region(mask, (3, 3), opening=0).sum()) == int(mask.sum())
+
+    def test_the_opened_patch_without_its_outline(self):
+        mask = self._scene()
+        region = raster_adapter.object_region(mask, (3, 3), reconstruct=False)
+        assert int(region.sum()) == 25 - 4 and not region[1, 1]
+
+    def test_a_thin_object_is_followed_as_it_is(self):
+        mask = np.zeros((5, 9), dtype=bool)
+        mask[2, 1:8] = True  # a path: too thin to survive the opening
+        region = raster_adapter.object_region(mask, (2, 4))
+        assert int(region.sum()) == 7
+
+    def test_a_click_on_a_dropped_pixel_finds_nothing(self):
+        assert not raster_adapter.object_region(self._scene(), (0, 0)).any()
+
+
 @pytest.fixture
 def scene(monkeypatch):
     """A 1000 x 1000 raster of 1 m pixels; the mask is what the selection keeps, the windows read are recorded."""
@@ -147,6 +307,41 @@ class TestSimilarObjects:
         assert result.kept_pixels == 164 and result.total_pixels == 10000
         plain = calls[0]
         assert plain.seeds == () and plain.similar == () and plain.classes == frozenset({1})
+
+    def test_shape_bounds_follow_the_clicked_objects_up_to_a_disc(self):
+        assert raster_adapter.similar_shape_bounds([0.8, 0.6], (0.5, 2.0)) == (0.3, 1.0)
+        assert raster_adapter.similar_shape_bounds([0.2], (0.5, 2.0)) == (0.1, 0.4)
+        assert raster_adapter.similar_shape_bounds([], (0.5, 2.0)) is None
+
+    def test_the_shape_keeps_the_pools_and_drops_the_road(self, monkeypatch):
+        clicked = _Part(100.0, 40.0)  # a square pool of 10 m: compactness 0.79
+        # The same pool, a pool of 9 m (81 m²), a road of 50 x 2 m (100 m², compactness 0.12).
+        patches = _Multi([_Part(100.0, 40.0), _Part(81.0, 36.0), _Part(100.0, 104.0)])
+        seen = {}
+
+        def object_geometry(*_args, **kwargs):
+            seen.update(kwargs)
+            return raster_adapter.SelectionGeometryResult(clicked, 100, 10000, 1.0, False, 1)
+
+        def selection_geometry(_provider, _plain, *_args, **kwargs):
+            seen.update(opening=kwargs.get("opening"))
+            return raster_adapter.SelectionGeometryResult(patches, 281, 10000, 1.0, grid=(100, 100))
+
+        monkeypatch.setattr(raster_adapter, "object_geometry", object_geometry)
+        monkeypatch.setattr(raster_adapter, "selection_geometry", selection_geometry)
+        monkeypatch.setattr(raster_adapter, "QgsGeometry", _Shape)
+        monkeypatch.setattr(geometry_tools, "union_geometries", _Multi)
+        kwargs = dict(mode=RasterSelectionMode.CLASSES, classes=frozenset({1}), seeds=((5.0, 5.0),), similar=(0.5, 2.0))
+        extent = fk.FakeRectangle(0, 0, 100, 100)
+        with_shape = raster_adapter.similar_objects_geometry(None, RasterSelection(shape=True, **kwargs), extent, 100, 100, "")
+        assert with_shape.objects == 2 and with_shape.kept_pixels == 181
+        assert seen["reconstruct"] is False and seen["opening"] == raster_adapter.OBJECT_OPENING
+        assert seen["fill"] is False and seen["simplify"] is False  # measured as the patches are
+        without = raster_adapter.similar_objects_geometry(None, RasterSelection(**kwargs), extent, 100, 100, "")
+        assert without.objects == 3
+        # Read on coarse cells (over the pixel limit), the patches keep their outline: the clicked objects too.
+        raster_adapter.similar_objects_geometry(None, RasterSelection(**kwargs), extent, 100, 100, "", max_pixels=2500)
+        assert seen["reconstruct"] is True
 
     def test_no_clicked_object_gives_nothing(self, monkeypatch):
         monkeypatch.setattr(raster_adapter, "object_geometry",

@@ -220,6 +220,71 @@ def mask_to_geometry(mask, geotransform: Tuple[float, float, float, float, float
     return result
 
 
+# --- morphology (numpy only: QGIS ships no scipy) ----------------------------
+
+def dilate_mask(mask, radius: int = 1):
+    """``mask`` grown by ``radius`` cells in the four directions (a diamond of that radius)."""
+    import numpy as np
+    grid = np.asarray(mask, dtype=bool)
+    for _ in range(max(0, int(radius))):
+        grown = grid.copy()
+        grown[1:, :] |= grid[:-1, :]
+        grown[:-1, :] |= grid[1:, :]
+        grown[:, 1:] |= grid[:, :-1]
+        grown[:, :-1] |= grid[:, 1:]
+        grid = grown
+    return grid
+
+
+def erode_mask(mask, radius: int = 1):
+    """``mask`` shrunk by ``radius`` cells: a cell stays set when its four neighbours are.
+
+    The outside of the grid counts as set: a patch on the edge keeps its edge cells (the
+    window read around a click is grown when the patch reaches its side, not eroded there).
+    """
+    import numpy as np
+    return ~dilate_mask(~np.asarray(mask, dtype=bool), radius)
+
+
+def open_mask(mask, radius: int = 1):
+    """Opening of ``mask``: eroded then dilated by ``radius``.
+
+    The pixel-wide bridges and the specks thinner than ``2 radius + 1`` cells go, the
+    patches keep their size: a pool stays apart from the lawn it touches by a line of
+    pixels of its colour. A patch thinner than that (a path, a fence) goes with them.
+    """
+    return dilate_mask(erode_mask(mask, radius), radius)
+
+
+def patch_cores(mask, radius: int = 1):
+    """The patches of ``mask`` without the pixel-wide bridges and corridors that join them.
+
+    A cell stays when at least three of its four neighbours are set (the outside of
+    the grid counts as set) and the opening of ``radius`` keeps it. The first rule
+    cuts a line of pixels of any length (its cells have two neighbours) and takes the
+    corners of a patch; the opening cuts a corridor two cells wide once it is longer
+    than ``2 radius``. Each patch keeps its edge cells along the axes, loses the ring
+    of a diagonal edge; a patch thinner than three cells goes entirely.
+    """
+    import numpy as np
+    grid = np.asarray(mask, dtype=bool)
+    padded = np.pad(grid, 1, constant_values=True)
+    neighbours = (padded[:-2, 1:-1].astype(np.int8) + padded[2:, 1:-1] + padded[1:-1, :-2] + padded[1:-1, 2:])
+    return grid & (neighbours >= 3) & open_mask(grid, radius)
+
+
+def compactness(geometry) -> float:
+    """``4 π area / perimeter²`` of a polygon: 1 for a disc, towards 0 for a line; 0 when unknown."""
+    import math
+    try:
+        area, perimeter = float(geometry.area()), float(geometry.length())
+    except (AttributeError, TypeError):
+        return 0.0
+    if not (area > 0 and perimeter > 0):
+        return 0.0
+    return min(1.0, 4.0 * math.pi * area / (perimeter * perimeter))
+
+
 # Predicates a target can test against the union of the source features:
 # intersecting the union is intersecting one of them, being disjoint from it
 # is being disjoint from all of them. The others hold when ONE source feature

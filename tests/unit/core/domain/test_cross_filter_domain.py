@@ -200,6 +200,12 @@ class TestRasterSelection:
         assert sel.to_dict()["similar"] == [0.5, 2.0]
         assert RasterSelection.from_dict(sel.to_dict()) == sel
         assert "similar" not in RasterSelection(minimum=1, seeds=((0, 0),)).to_dict()
+        # The shape (compactness within the ratios) only applies to similar objects.
+        shaped = RasterSelection(minimum=1, seeds=((0, 0),), similar=(0.5, 2), shape=True)
+        assert shaped.shape and shaped.to_dict()["shape"] is True and "and in shape" in shaped.describe()
+        assert RasterSelection.from_dict(shaped.to_dict()) == shaped
+        assert "shape" not in sel.to_dict() and "in shape" not in sel.describe()
+        assert not RasterSelection(minimum=1, seeds=((0, 0),), shape=True).shape
         assert sel.describe().endswith("objects like the one(s) under 1 click(s), ×0.5 to ×2 in area")
         with pytest.raises(ValueError):
             RasterSelection(minimum=1, similar=(0.5, 2))  # without a clicked object

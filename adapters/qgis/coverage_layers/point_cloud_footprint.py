@@ -210,8 +210,13 @@ def _split(tile: QgsRectangle, overlap: float, min_side: float) -> List[QgsRecta
 
 
 def _read_xy(provider, resolution: float, area: QgsRectangle, points_limit: int,
-             is_canceled: Optional[Callable[[], bool]], check: Optional[CheckFn]):
-    """X and Y of the points of ``area`` (numpy arrays) and whether some were left out."""
+             is_canceled: Optional[Callable[[], bool]], check: Optional[CheckFn],
+             keep: Optional[Callable[[dict], bool]] = None):
+    """X and Y of the points of ``area`` (numpy arrays) and whether some were left out.
+
+    ``keep``: only the points it accepts are returned (the class of an object, read from a
+    layer filtered otherwise); ``points_limit`` still counts every point read.
+    """
     import numpy as np
     xs, ys = [], []
     total, truncated = 0, False
@@ -234,9 +239,11 @@ def _read_xy(provider, resolution: float, area: QgsRectangle, points_limit: int,
             truncated = True
         if check is not None:
             check(points)
+        total += len(points)
+        if keep is not None:
+            points = [p for p in points if keep(p)]
         xs.append(np.fromiter((p.get('X', 0.0) for p in points), dtype='float64', count=len(points)))
         ys.append(np.fromiter((p.get('Y', 0.0) for p in points), dtype='float64', count=len(points)))
-        total += len(points)
         points = None  # noqa: F841 - the dicts go before the next call
     if not xs:
         return np.zeros(0), np.zeros(0), truncated
@@ -284,9 +291,11 @@ def footprint_geometry(layer, resolution: float = DEFAULT_RESOLUTION, extent: Op
             cell *= 1.05
         logger.warning(f"[FM5] footprint of {len(xs)} points over {span_x:.3g} x {span_y:.3g}: cells of {cell:.3g} "
                        f"instead of {resolution:.3g} (grid limit)")
-    # Cells aligned on the scanned area, the grid limited to the points read (+ margin).
-    left = area.xMinimum() + (math.floor((float(xs.min()) - area.xMinimum()) / cell) - margin) * cell
-    top = area.yMaximum() - (math.floor((area.yMaximum() - float(ys.max())) / cell) - margin) * cell
+    # Cells on the multiples of the cell size (as the objects of point_cloud_objects, measured on the same
+    # cells: an area compared with a grid half a cell off differed by 10-20 % on a tree of 5 x 5 m), the
+    # grid limited to the points read (+ margin).
+    left = (math.floor(float(xs.min()) / cell) - margin) * cell
+    top = (math.floor(float(ys.max()) / cell) + 1 + margin) * cell
     cols = int(math.floor((float(xs.max()) - left) / cell)) + 1 + margin
     rows = int(math.floor((top - float(ys.min())) / cell)) + 1 + margin
     ci = np.clip(np.floor((xs - left) / cell).astype('int64'), 0, cols - 1)

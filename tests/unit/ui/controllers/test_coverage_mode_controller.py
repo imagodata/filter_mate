@@ -1817,3 +1817,376 @@ class TestRasterSourceWithoutTarget:
         self._run(ctrl_module, layers, monkeypatch, clips=False)
         assert jobs.created[0].applied == ["r1"] and ctrl_module._test_service.calls == []
         assert ctrl_module._test_feedback.messages[-1] == ("info", "Raster filtered: {0}".format("blue"))
+
+
+class FakeShape:
+    """QgsGeometry of a box, written ``BOX x0 y0 x1 y1`` (or a union ``U[...]`` of boxes)."""
+
+    def __init__(self, wkt=""):
+        self.wkt = wkt
+        self.boxes = []
+        for part in wkt.replace("U[", "").replace("]", "").split(";"):
+            if part.startswith("BOX"):
+                self.boxes.append(tuple(float(v) for v in part.split()[1:]))
+
+    @classmethod
+    def fromWkt(cls, wkt):
+        return cls(wkt)
+
+    def isEmpty(self):
+        return not self.boxes
+
+    def area(self):
+        return sum((x1 - x0) * (y1 - y0) for x0, y0, x1, y1 in self.boxes)
+
+    def contains(self, point):
+        return any(x0 <= point.x() <= x1 and y0 <= point.y() <= y1 for x0, y0, x1, y1 in self.boxes)
+
+    def asWkt(self, precision=17):
+        return self.wkt
+
+    def boundingBox(self):
+        x0, y0, x1, y1 = (min(b[0] for b in self.boxes), min(b[1] for b in self.boxes),
+                          max(b[2] for b in self.boxes), max(b[3] for b in self.boxes))
+        return types.SimpleNamespace(xMinimum=lambda: x0, yMinimum=lambda: y0, xMaximum=lambda: x1, yMaximum=lambda: y1)
+
+
+class FakePoint:
+    def __init__(self, x, y):
+        self._x, self._y = x, y
+
+    def x(self):
+        return self._x
+
+    def y(self):
+        return self._y
+
+
+class FakeObjectsPanel:
+    """The object detector part of the point cloud panel."""
+
+    def __init__(self, target="object", codes=(2, 5, 6)):
+        self.target, self.codes, self.items, self.detected = target, set(codes), [], None
+        self.ratio = (0.5, 2.0)
+
+    def object_target(self):
+        return self.target
+
+    def set_object_target(self, target):
+        changed, self.target = target != self.target, target
+        return changed
+
+    def object_ratio(self):
+        return self.ratio
+
+    def object_items(self):
+        return [dict(item) for item in self.items]
+
+    def add_object(self, item, extend=False):
+        if item["code"] not in self.codes:
+            return False
+        self.items = (self.items if extend else []) + [dict(item)]
+        self.detected = None
+        return True
+
+    def set_detected_objects(self, wkt, boxes, count, area=None, truncated=False):
+        self.detected = (wkt, [list(box) for box in boxes], count, area, truncated)
+
+    def object_zone_wkt(self):
+        return self.detected[0] if self.detected and self.items else ""
+
+
+@pytest.mark.unit
+class TestPointCloudObjectDetector:
+    """2026-10-18: the object detector of CLASSES (point_cloud_objects), on the class picker."""
+
+    def _controller(self, ctrl_module, layers, monkeypatch, mode="object", target="object", code=6, map_tool=None):
+        controller = ctrl_module.CoverageModeController(_dock())
+        controller._active_layer, controller._kind = layers["p1"], _kind(ctrl_module, "POINT_CLOUD")
+        controller._pc_pick_mode = mode
+        layers["p1"].providerType = lambda: "copc"
+        panel = FakeObjectsPanel(target)
+        controller._pc_panel = panel
+        canvas = MagicMock()
+        canvas.mapTool.return_value = map_tool
+        iface = MagicMock()
+        iface.mapCanvas.return_value = canvas
+        extras = []
+        monkeypatch.setattr(controller, "_iface", lambda: iface)
+        monkeypatch.setattr(controller, "_extras_call", lambda name, *args: extras.append((name,) + args))
+        monkeypatch.setattr(controller, "_layer_click", lambda layer, canvas, point: (point.x(), point.y(), 0.5))
+        monkeypatch.setattr(controller, "_ground_area", lambda geometry, layer: geometry.area())
+        core = sys.modules["qgis.core"]
+        monkeypatch.setattr(core, "QgsGeometry", FakeShape, raising=False)
+        monkeypatch.setattr(core, "QgsPointXY", FakePoint, raising=False)
+        package = types.ModuleType(f"{_PKG}.adapters.qgis.coverage_layers")
+        package.__path__ = []
+        monkeypatch.setitem(sys.modules, package.__name__, package)
+        reads = types.SimpleNamespace(objects=[], footprints=[], similar=[], outlines=[], on_map=[], under=[],
+                                      copies=[], readers=[])
+        adapter = types.ModuleType(f"{_PKG}.adapters.qgis.point_cloud_layer_adapter")
+        adapter.class_at = lambda layer, canvas, point: reads.on_map.append(layer.id()) or code
+        objects = types.ModuleType(f"{package.__name__}.point_cloud_objects")
+        objects.found = {}  # (x, y) -> box of the object read there
+        objects.similar_parts = {}  # code -> boxes of the similar objects
+
+        def object_footprint(layer, x, y, code, seed_radius=0.0):
+            reads.objects.append((x, y, code))
+            reads.readers.append(layer)
+            box = objects.found.get((x, y))
+            wkt = "BOX " + " ".join(str(v) for v in box) if box else ""
+            return types.SimpleNamespace(geometry=FakeShape(wkt), truncated=False, message="", points=12)
+
+        def class_footprint(layer, code, base_subset=""):
+            reads.footprints.append((code, base_subset))
+            return f"footprint {code}"
+
+        def similar_objects_footprint(layer, code, areas, ratio, base_subset="", footprint=None):
+            reads.similar.append((code, tuple(areas), tuple(ratio), footprint))
+            parts = [FakeShape("BOX " + " ".join(str(v) for v in box)) for box in objects.similar_parts.get(code, [])]
+            union = FakeShape("U[" + ";".join(part.wkt for part in parts) + "]")
+            return types.SimpleNamespace(parts=parts, geometry=union, truncated=False, total=10)
+
+        def base_copy(layer, base_subset=""):
+            reads.copies.append(base_subset)
+            return types.SimpleNamespace(name="copy", base=base_subset)
+
+        objects.object_footprint = object_footprint
+        objects.class_footprint = class_footprint
+        objects.base_copy = base_copy
+        objects.class_under = lambda layer, x, y, radius=0.0: reads.under.append((layer.name, x, y)) or code
+        objects.similar_objects_footprint = similar_objects_footprint
+        tools = types.ModuleType(f"{package.__name__}.geometry_tools")
+        tools.union_geometries = lambda shapes: FakeShape("U[" + ";".join(shape.wkt for shape in shapes) + "]")
+        overlay = types.ModuleType(f"{package.__name__}.preview_overlay")
+
+        class ObjectOutline:
+            def __init__(self, canvas):
+                self.visible = False
+
+            def show(self, geometry, layer):
+                reads.outlines.append(geometry.wkt)
+                self.visible = True
+
+            def hide(self):
+                reads.outlines.append(None)
+                self.visible = False
+
+        overlay.ObjectOutline = ObjectOutline
+        for module in (adapter, objects, tools, overlay):
+            monkeypatch.setitem(sys.modules, module.__name__, module)
+        return controller, panel, iface, reads, objects, extras
+
+    def test_a_click_selects_the_object_under_it(self, ctrl_module, layers, monkeypatch):
+        controller, panel, iface, reads, objects, extras = self._controller(ctrl_module, layers, monkeypatch)
+        objects.found[(1.0, 1.0)] = (0, 0, 2, 3)
+        controller._on_class_picked(FakePoint(1.0, 1.0), False)
+        assert reads.objects == [(1.0, 1.0, 6)]
+        assert [(item["code"], item["box"], item["wkt"]) for item in panel.items] == [(6, [0, 0, 2, 3], "BOX 0 0 2 3")]
+        assert panel.detected == ("U[BOX 0 0 2 3]", [[6, 0, 0, 2, 3]], 1, 6.0, False)
+        assert reads.outlines == ["U[BOX 0 0 2 3]"] and ("schedule_strip",) in extras
+        iface.messageBar().pushInfo.assert_not_called()
+
+    def test_ctrl_click_adds_an_object_of_another_class(self, ctrl_module, layers, monkeypatch):
+        controller, panel, _iface, reads, objects, _extras = self._controller(ctrl_module, layers, monkeypatch, code=5)
+        panel.items = [{"x": 1.0, "y": 1.0, "code": 6, "box": [0, 0, 2, 3], "wkt": "BOX 0 0 2 3", "truncated": True}]
+        objects.found[(1.0, 1.0)] = (0, 0, 4, 4)  # a tree over the roof: another object
+        controller._on_class_picked(FakePoint(1.0, 1.0), True)
+        assert [item["code"] for item in panel.items] == [6, 5]
+        assert panel.detected[1] == [[6, 0, 0, 2, 3], [5, 0, 0, 4, 4]] and panel.detected[2] == 2
+        assert panel.detected[4] is True  # an object was cut
+
+    def test_ctrl_click_inside_an_object_of_its_class_reads_nothing(self, ctrl_module, layers, monkeypatch):
+        controller, panel, _iface, reads, _objects, _extras = self._controller(ctrl_module, layers, monkeypatch)
+        panel.items = [{"x": 1.0, "y": 1.0, "code": 6, "box": [0, 0, 2, 3], "wkt": "BOX 0 0 2 3", "truncated": False}]
+        controller._on_class_picked(FakePoint(1.5, 2.0), True)
+        assert reads.objects == [] and len(panel.items) == 1
+
+    def test_no_point_of_the_class_under_the_click_is_said(self, ctrl_module, layers, monkeypatch):
+        controller, panel, iface, reads, _objects, _extras = self._controller(ctrl_module, layers, monkeypatch)
+        controller._on_class_picked(FakePoint(9.0, 9.0), False)
+        assert reads.objects == [(9.0, 9.0, 6)] and panel.items == []
+        assert "No point of class" in iface.messageBar().pushInfo.call_args.args[1]
+
+    def test_no_class_under_the_click_reads_nothing(self, ctrl_module, layers, monkeypatch):
+        controller, panel, iface, reads, _objects, _extras = self._controller(ctrl_module, layers, monkeypatch, code=None)
+        controller._on_class_picked(FakePoint(9.0, 9.0), False)
+        assert reads.objects == [] and iface.messageBar().pushInfo.called
+
+    def test_similar_objects_are_read_class_by_class_and_the_footprint_kept(self, ctrl_module, layers, monkeypatch):
+        controller, panel, _iface, reads, objects, _extras = self._controller(
+            ctrl_module, layers, monkeypatch, mode="similar", target="similar_objects")
+        layers["p1"]._subset = "Classification != 7"
+        objects.found[(1.0, 1.0)] = (0, 0, 2, 3)
+        objects.similar_parts[6] = [(0, 0, 2, 3), (10, 10, 12, 13), (20, 20, 21, 25)]
+        controller._on_class_picked(FakePoint(1.0, 1.0), False)
+        assert reads.similar == [(6, (6.0,), (0.5, 2.0), "footprint 6")]
+        assert reads.footprints == [(6, "Classification != 7")]  # through the filter of the layer
+        _wkt, boxes, count, area, _truncated = panel.detected
+        assert count == 3 and boxes[1] == [6, 10, 10, 12, 13] and area == 6.0 + 6.0 + 5.0
+        panel.ratio = (0.9, 1.1)
+        controller._refresh_point_cloud_objects()  # a ratio edited: the class is not read again
+        assert reads.footprints == [(6, "Classification != 7")] and reads.similar[-1][2] == (0.9, 1.1)
+
+    def test_similar_objects_read_through_the_filter_not_the_preview(self, ctrl_module, layers, monkeypatch):
+        controller, _panel, _iface, reads, objects, _extras = self._controller(
+            ctrl_module, layers, monkeypatch, mode="similar", target="similar_objects")
+        controller._preview_base_subset = ""
+        layers["p1"]._subset = "Classification = 6 AND X >= 0"  # the live preview
+        objects.found[(1.0, 1.0)] = (0, 0, 2, 3)
+        objects.similar_parts[6] = [(0, 0, 2, 3)]
+        controller._on_class_picked(FakePoint(1.0, 1.0), False)
+        assert reads.footprints == [(6, "")]
+
+    def test_no_similar_object_keeps_the_clicked_ones(self, ctrl_module, layers, monkeypatch):
+        controller, panel, iface, _reads, objects, _extras = self._controller(
+            ctrl_module, layers, monkeypatch, mode="similar", target="similar_objects")
+        objects.found[(1.0, 1.0)] = (0, 0, 2, 3)
+        controller._on_class_picked(FakePoint(1.0, 1.0), False)
+        assert panel.detected[1] == [[6, 0, 0, 2, 3]] and panel.detected[2] == 1
+        assert "No similar object" in iface.messageBar().pushInfo.call_args.args[1]
+
+    def test_the_picker_mode_sets_the_target(self, ctrl_module, layers, monkeypatch):
+        controller, panel, _iface, _reads, objects, _extras = self._controller(
+            ctrl_module, layers, monkeypatch, mode="similar", target="object")
+        objects.found[(1.0, 1.0)] = (0, 0, 2, 3)
+        controller._on_class_picked(FakePoint(1.0, 1.0), False)
+        assert panel.target == "similar_objects"
+
+    def test_dropped_objects_take_the_outline_off(self, ctrl_module, layers, monkeypatch):
+        controller, panel, _iface, reads, objects, _extras = self._controller(ctrl_module, layers, monkeypatch)
+        objects.found[(1.0, 1.0)] = (0, 0, 2, 3)
+        controller._on_class_picked(FakePoint(1.0, 1.0), False)
+        panel.items, panel.detected = [], None  # the class list edited by hand
+        controller._refresh_point_cloud_objects()
+        assert reads.outlines == ["U[BOX 0 0 2 3]", None] and controller._pc_outline_wkt == ""
+
+    def test_target_from_the_menu_switches_the_detector_on_the_map(self, ctrl_module, layers, monkeypatch):
+        tool = object()
+        controller, panel, _iface, _reads, _objects, extras = self._controller(ctrl_module, layers, monkeypatch,
+                                                                              map_tool=tool)
+        controller._class_tool = tool
+        controller._on_point_cloud_object_target("similar_objects")
+        assert panel.target == "similar_objects" and controller._pc_pick_mode == "similar"
+        assert ("set_class_pipette_checked", True, "similar") in extras
+
+    def test_target_from_the_menu_switches_the_value_pipette_to_the_detector(self, ctrl_module, layers, monkeypatch):
+        # R4: the target chosen is the detector in that target (as the three target buttons of the raster rail).
+        tool = object()
+        controller, panel, _iface, _reads, _objects, extras = self._controller(ctrl_module, layers, monkeypatch,
+                                                                              mode="value", map_tool=tool)
+        controller._class_tool = tool
+        controller._on_point_cloud_object_target("similar_objects")
+        assert panel.target == "similar_objects" and controller._pc_pick_mode == "similar"
+        assert ("set_class_pipette_checked", True, "similar") in extras
+
+    def test_target_from_the_menu_puts_the_detector_on(self, ctrl_module, layers, monkeypatch):
+        controller, panel, _iface, _reads, _objects, _extras = self._controller(ctrl_module, layers, monkeypatch)
+        calls = []
+        monkeypatch.setattr(controller, "_on_class_pick_toggled", lambda on, mode="class": calls.append((on, mode)))
+        controller._on_point_cloud_object_target("similar_objects")
+        assert calls == [(True, "similar")]
+
+    def test_the_same_target_reads_nothing_again(self, ctrl_module, layers, monkeypatch):
+        controller, panel, _iface, reads, _objects, _extras = self._controller(
+            ctrl_module, layers, monkeypatch, mode="similar", target="similar_objects")
+        monkeypatch.setattr(controller, "_on_class_pick_toggled", lambda on, mode="class": None)
+        panel.items = [{"x": 1.0, "y": 1.0, "code": 6, "box": [0, 0, 2, 3], "wkt": "BOX 0 0 2 3", "truncated": False}]
+        controller._on_point_cloud_object_target("similar_objects")
+        assert reads.similar == [] and reads.footprints == []
+        controller._on_point_cloud_object_target("object")
+        assert panel.detected is not None and panel.detected[2] == 1  # changed: read again (the clicked object)
+
+    def test_a_click_with_a_new_target_reads_once(self, ctrl_module, layers, monkeypatch):
+        controller, panel, _iface, reads, objects, _extras = self._controller(
+            ctrl_module, layers, monkeypatch, mode="similar", target="object")
+        panel.items = [{"x": 1.0, "y": 1.0, "code": 6, "box": [0, 0, 2, 3], "wkt": "BOX 0 0 2 3", "truncated": False}]
+        objects.found[(20.0, 20.0)] = (19, 19, 22, 22)
+        objects.similar_parts[6] = [(19, 19, 22, 22)]
+        controller._on_class_picked(FakePoint(20.0, 20.0), False)
+        assert len(reads.similar) == 1 and reads.similar[0][1] == (9.0,)  # the new object only, read once
+
+    def test_preview_on_reads_the_click_on_a_copy_of_the_filter(self, ctrl_module, layers, monkeypatch):
+        controller, panel, _iface, reads, objects, _extras = self._controller(ctrl_module, layers, monkeypatch)
+        controller._preview_base_subset = "Z > 0"
+        layers["p1"]._subset = "(Z > 0) AND (Classification = 6 AND X >= 0 AND X <= 2 AND Y >= 0 AND Y <= 3)"
+        objects.found[(20.0, 20.0)] = (19, 19, 22, 22)
+        controller._on_class_picked(FakePoint(20.0, 20.0), False)
+        controller._on_class_picked(FakePoint(20.0, 20.0), False)
+        assert reads.copies == ["Z > 0"]  # opened once for the layer and that filter
+        assert reads.on_map == [] and reads.under == [("copy", 20.0, 20.0)] * 2
+        assert all(getattr(reader, "name", None) == "copy" for reader in reads.readers)
+        assert panel.items and panel.items[0]["box"] == [19, 19, 22, 22]
+
+    def test_without_preview_the_click_is_read_on_the_layer(self, ctrl_module, layers, monkeypatch):
+        controller, _panel, _iface, reads, objects, _extras = self._controller(ctrl_module, layers, monkeypatch)
+        controller._preview_base_subset = "Z > 0"
+        layers["p1"]._subset = "Z > 0"  # the preview keeps nothing more
+        objects.found[(1.0, 1.0)] = (0, 0, 2, 3)
+        controller._on_class_picked(FakePoint(1.0, 1.0), False)
+        assert reads.copies == [] and reads.on_map == ["p1"] and reads.readers == [layers["p1"]]
+
+    def test_reset_brings_the_detector_back_to_the_clicked_object(self, ctrl_module, layers, monkeypatch):
+        tool = object()
+        controller, panel, _iface, _reads, _objects, extras = self._controller(
+            ctrl_module, layers, monkeypatch, mode="similar", target="similar_objects", map_tool=tool)
+        controller._class_tool = tool
+        monkeypatch.setattr(controller, "_stop_preview", lambda layer: None)
+        monkeypatch.setattr(controller, "_current_panel", lambda: types.SimpleNamespace(
+            reset=lambda: setattr(panel, "target", "object")))
+        controller.handle_exploring_action("reset")
+        assert controller._pc_pick_mode == "object" and ("set_class_pipette_checked", True, "object") in extras
+
+    def test_objects_never_read_are_read_when_the_layer_comes_back(self, ctrl_module, layers, monkeypatch):
+        controller, panel, _iface, reads, _objects, _extras = self._controller(ctrl_module, layers, monkeypatch)
+        panel.items = [{"x": 1.0, "y": 1.0, "code": 6, "box": [0, 0, 2, 3], "wkt": "BOX 0 0 2 3", "truncated": False}]
+        panel.restore_state = lambda state: None
+        panel.objects_pending = lambda: panel.detected is None
+        monkeypatch.setattr(controller, "_restore_tool", lambda state: None)
+        controller._panel_states["p1"] = {"objects": {}}
+        controller._restore_panel_state(layers["p1"])
+        assert panel.detected == ("U[BOX 0 0 2 3]", [[6, 0, 0, 2, 3]], 1, 6.0, False)
+        assert reads.outlines == ["U[BOX 0 0 2 3]"]
+
+    @pytest.mark.parametrize("target, mode", [("object", "object"), ("similar_objects", "similar")])
+    def test_detector_button_uses_the_target_of_the_panel(self, ctrl_module, layers, monkeypatch, target, mode):
+        controller, _panel, _iface, _reads, _objects, _extras = self._controller(ctrl_module, layers, monkeypatch,
+                                                                                target=target)
+        calls = []
+        monkeypatch.setattr(controller, "_on_class_pick_toggled", lambda on, mode="class": calls.append((on, mode)))
+        controller._on_object_pick_toggled(True)
+        assert calls == [(True, mode)]
+
+    @pytest.mark.parametrize("asked, kept", [("object", "object"), ("similar", "similar"), ("value", "value"),
+                                             ("pool", "class")])
+    def test_picker_modes(self, ctrl_module, layers, monkeypatch, asked, kept):
+        tool = object()
+        controller, _panel, _iface, _reads, _objects, extras = self._controller(ctrl_module, layers, monkeypatch,
+                                                                               mode="class", map_tool=tool)
+        controller._class_tool = tool
+        controller._on_class_pick_toggled(True, asked)
+        assert controller._pc_pick_mode == kept and extras[0] == ("set_class_pipette_checked", True, kept)
+
+    def test_classes_group_keeps_the_detector(self, ctrl_module, layers, monkeypatch):
+        tool = object()
+        controller, _panel, _iface, _reads, _objects, extras = self._controller(ctrl_module, layers, monkeypatch,
+                                                                               map_tool=tool)
+        controller._class_tool = tool
+        calls = []
+        monkeypatch.setattr(controller, "_on_class_pick_toggled", lambda on, mode="class": calls.append((on, mode)))
+        controller._on_point_cloud_group_chosen("classes")
+        assert calls == [] and extras == [("stop_zone_tool",)]
+
+    def test_restore_puts_the_detector_back(self, ctrl_module, layers, monkeypatch):
+        controller, _panel, _iface, _reads, _objects, _extras = self._controller(ctrl_module, layers, monkeypatch)
+        calls = []
+        monkeypatch.setattr(controller, "_on_class_pick_toggled", lambda on, mode="class": calls.append((on, mode)))
+        controller._restore_tool({"class_pipette_on": True, "pc_tool": "similar"})
+        assert calls == [(True, "similar")]
+
+    def test_outline_of_the_point_cloud_never_hides_a_raster_one(self, ctrl_module, layers, monkeypatch):
+        controller, _panel, _iface, reads, _objects, _extras = self._controller(ctrl_module, layers, monkeypatch)
+        controller._kind = _kind(ctrl_module, "RASTER")
+        controller._pc_outline_wkt = "BOX 0 0 1 1"
+        controller._show_point_cloud_objects()  # a late criteriaChanged of the point cloud panel
+        assert reads.outlines == [] and controller._pc_outline_wkt == "BOX 0 0 1 1"
