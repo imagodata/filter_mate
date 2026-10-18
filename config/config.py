@@ -511,6 +511,45 @@ def _keep_unreadable_config(path, reason):
         )
 
 
+def load_migrated_config(path, default_path=None):
+    """Read a config.json and bring it to the structure of config.default.json.
+
+    Every config.json FilterMate reads goes through :func:`_migrate_config`:
+    a file left by an older version has no ``APP.OPTIONS.RASTER`` /
+    ``POINT_CLOUD`` section, and an absent section reads as "off" (2026-10-18:
+    the rasters and point clouds of a project were then never registered).
+    The migrated file is written back.
+
+    Args:
+        path: The config.json to read.
+        default_path: config.default.json (the one next to this module when None).
+
+    Returns:
+        dict: The migrated configuration, or None when ``path`` is unreadable
+        or has no APP section.
+    """
+    try:
+        with open(path, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+    except (OSError, ValueError):
+        return None
+    if not (isinstance(data, dict) and ("APP" in data or "app" in data)):
+        return None
+    try:
+        with open(default_path or os.path.join(os.path.dirname(__file__), 'config.default.json'),
+                  'r', encoding='utf-8') as f:
+            default_data = json.load(f)
+        if _migrate_config(data, default_data):
+            _write_config_json(path, data)
+    except (OSError, ValueError, TypeError, AttributeError) as error:
+        QgsMessageLog.logMessage(
+            f"FilterMate: {path} not migrated: {error}",
+            "FilterMate",
+            Qgis.MessageLevel.Info
+        )
+    return data
+
+
 def init_env_vars():
     """
     Initialize environment variables and configuration paths.
@@ -726,14 +765,31 @@ def init_env_vars():
                 Qgis.MessageLevel.Warning
             )
 
+        config_dirty = False
         if path_is_valid:
             PLUGIN_CONFIG_DIRECTORY = configured_path
             # Update config_json_path if directory changed
-            config_json_path = os.path.join(PLUGIN_CONFIG_DIRECTORY, 'config.json')
+            redirected_path = os.path.join(PLUGIN_CONFIG_DIRECTORY, 'config.json')
+            if os.path.normcase(os.path.normpath(redirected_path)) != os.path.normcase(os.path.normpath(config_json_path)):
+                config_json_path = redirected_path
+                # 2026-10-18: the Configuration tab reloads and saves this file, not the one read
+                # above (a QGIS 4 profile pointing at the QGIS 3 one): it is the configuration,
+                # migrated like the first one. Until then its missing RASTER / POINT_CLOUD
+                # sections turned both layer kinds off one second after start.
+                redirected_data = load_migrated_config(config_json_path, config_default_path)
+                if redirected_data is not None:
+                    CONFIG_DATA = redirected_data
+                    app_key = "APP" if "APP" in CONFIG_DATA else "app"
+                    CONFIG_DATA[app_key].setdefault("OPTIONS", {})
+                else:
+                    if os.path.exists(config_json_path):
+                        _keep_unreadable_config(config_json_path, "unreadable or no APP section")
+                    config_dirty = True  # the configuration read above becomes this file
+    else:
+        config_dirty = False
 
     # Auto-migrate sducournau → imagodata URLs (v4.5.1 org migration)
     options = CONFIG_DATA.get(app_key, {}).get("OPTIONS", {})
-    config_dirty = False
 
     # Passwords an older version saved here (the URI of a PostgreSQL layer): mask them once
     try:
