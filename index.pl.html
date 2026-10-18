@@ -9,7 +9,10 @@
     <meta property="og:description" content="Wybierz miejsce lub wyrażenie i przefiltruj powiązane warstwy — bez pisania SQL.">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://imagodata.github.io/filter_mate/index.pl.html">
-    <meta property="og:image" content="https://imagodata.github.io/filter_mate/video/hero.webp">
+    <meta property="og:image" content="https://imagodata.github.io/filter_mate/img/share/directions.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta name="twitter:card" content="summary_large_image">
     <link rel="canonical" href="https://imagodata.github.io/filter_mate/index.pl.html">
     <link rel="alternate" hreflang="en" href="https://imagodata.github.io/filter_mate/">
     <link rel="alternate" hreflang="fr" href="https://imagodata.github.io/filter_mate/index.fr.html">
@@ -115,6 +118,32 @@
     </div>
 </section>
 
+<section class="home-section directions" id="directions" aria-labelledby="directions-title">
+    <div class="home-container">
+        <div class="section-heading"><p class="section-kicker">W każdym kierunku</p><h2 id="directions-title">Dziewięć kombinacji. Jeden panel.</h2><p>Każdy rodzaj warstwy może być źródłem filtru lub jego celem. Każda komórka mówi, co filtr zachowuje; kolorowe prowadzą do udokumentowanego przykładu.</p></div>
+        <div class="matrix-wrap">
+        <table class="matrix-grid">
+            <thead><tr><th scope="col"><span class="matrix-axis">Źródło ↓ · Cel →</span></th><th scope="col">Wektor</th><th scope="col">Raster</th><th scope="col">Chmura punktów</th></tr></thead>
+            <tbody>
+                <tr><th scope="row">Wektor<small>Zaznaczone obiekty lub wyrażenie</small></th>
+                    <td><a href="stories.html#s2" hreflang="en"><strong>Obiekty</strong><span>Budynki przy głównych drogach</span> <small lang="en">(EN)</small></a></td>
+                    <td><a href="stories.html#s12" hreflang="en"><strong>Piksele</strong><span>Model terenu wokół kościoła</span> <small lang="en">(EN)</small></a></td>
+                    <td><a href="stories.html#s12" hreflang="en"><strong>Punkty</strong><span>Chmura punktów wokół kościoła</span> <small lang="en">(EN)</small></a></td></tr>
+                <tr><th scope="row">Raster<small>Zakres wartości, kolor, obiekt, wskaźnik</small></th>
+                    <td><a href="stories.html#s9" hreflang="en"><strong>Obiekty</strong><span>Działki na stromych zboczach</span> <small lang="en">(EN)</small></a></td>
+                    <td><div class="matrix-cell"><strong>Piksele</strong><span>Maska NDVI nałożona na inną ortofotomapę</span></div></td>
+                    <td><div class="matrix-cell"><strong>Punkty</strong><span>Punkty LiDAR pod dachami wskazanymi na ortofotomapie</span></div></td></tr>
+                <tr><th scope="row">Chmura punktów<small>Klasy, wysokość nad modelem terenu</small></th>
+                    <td><a href="stories.html#s10" hreflang="en"><strong>Obiekty</strong><span>Wysokości budynków zmierzone LiDAR-em</span> <small lang="en">(EN)</small></a></td>
+                    <td><div class="matrix-cell"><strong>Piksele</strong><span>Model terenu ograniczony do punktów gruntu</span></div></td>
+                    <td><div class="matrix-cell"><strong>Punkty</strong><span>Wysoka roślinność przy liniach energetycznych</span></div></td></tr>
+            </tbody>
+        </table>
+        </div>
+        <p class="matrix-note">Bufor, minimalne pokrycie, Disjoint i operatory AND / OR / AND NOT działają w każdej komórce. <a href="guide.html#combinations" hreflang="en">Zobacz tabelę kombinacji w przewodniku <small lang="en">(EN)</small></a>.</p>
+    </div>
+</section>
+
 <section class="home-section examples" id="examples" aria-labelledby="examples-title">
     <div class="home-container">
         <div class="section-heading section-heading-row">
@@ -139,7 +168,7 @@
                 <div class="example-body"><p class="example-label">Bliskość dróg · Aspet</p><h3>Osady daleko od dróg utwardzonych</h3><p>Disjoint z buforem 200 m wyszukuje obiekty położone poza buforem.</p><p class="result"><strong>22</strong> osady w odległości ponad 200 m</p><a href="stories.html#s6" hreflang="en">Zobacz ustawienia i wynik <span aria-hidden="true">→</span> <small lang="en">(EN)</small></a></div>
             </article>
         </div>
-        <a class="inline-cta" href="stories.html" hreflang="en">Zobacz wszystkie osiem przykładów <span aria-hidden="true">→</span> <small lang="en">(EN)</small></a>
+        <a class="inline-cta" href="stories.html" hreflang="en">Zobacz wszystkie dwanaście przykładów <span aria-hidden="true">→</span> <small lang="en">(EN)</small></a>
     </div>
 </section>
 
