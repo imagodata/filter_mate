@@ -183,18 +183,24 @@ class RasterSourceJob(SourceJob):
         return base if base.isValid() else layer
 
     def _raw_geometry(self, is_canceled) -> QgsGeometry:
-        from .raster_adapter import selection_geometry
+        from .raster_adapter import _decimation, gdal_cell_reader, selection_geometry
         if self._provider is None:
             self.message = 'raster provider unavailable'
             return QgsGeometry()
         if is_canceled():
             self.message = 'canceled'
             return QgsGeometry()
+        cell_reader = None
+        if (self.selection.mode is not RasterSelectionMode.EXPRESSION and self.before.base_provider == 'gdal'
+                and _decimation(self._width, self._height, self._max_pixels) > 1):
+            # Over the pixel limit: cells read by GDAL, alike from every tile.
+            cell_reader = gdal_cell_reader(self.before.base_source, self._provider)
         result = selection_geometry(self._provider, self.selection, self._extent, self._width, self._height,
                                     self._crs_wkt, max_pixels=self._max_pixels,
                                     nodata_provider=getattr(self, '_nodata_provider', None),
                                     nodata_bands=getattr(self, '_nodata_bands', ()), is_canceled=is_canceled,
-                                    progress=getattr(self, 'progress', None), provider_for=self._object_provider)
+                                    progress=getattr(self, 'progress', None), provider_for=self._object_provider,
+                                    cell_reader=cell_reader)
         if result.canceled or is_canceled():  # the final union cannot be interrupted: its result is dropped
             self.message = 'canceled'
             return QgsGeometry()

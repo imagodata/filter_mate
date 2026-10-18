@@ -392,6 +392,32 @@ class TestTilePolygonsWithGdal:
                 drawn += polygon._g.GetGeometryRef(index).GetPointCount() - 1  # the closing point
         assert raster_adapter.mask_corners(mask) == drawn
 
+    @pytest.mark.parametrize("overviews", [None, [2, 4, 8]])
+    def test_cells_over_the_limit_are_read_alike_from_every_tile(self, polygons, tmp_path, overviews):
+        """Over the pixel limit a cell is one pixel of k x k (GDAL), whether read in a tile or with the whole raster."""
+        from osgeo import gdal
+        rows, cols = np.mgrid[0:301, 0:499]
+        data = (cols * 1000 + rows).astype('float64')
+        path = str(tmp_path / "index.tif")
+        dataset = gdal.GetDriverByName('GTiff').Create(path, 499, 301, 1, gdal.GDT_Float64)
+        dataset.SetGeoTransform((615999.31, 0.2, 0, 6153000.65, 0, -0.2))
+        dataset.GetRasterBand(1).WriteArray(data)
+        if overviews:
+            dataset.BuildOverviews('NEAREST', overviews)
+        dataset = None
+        read = raster_adapter.gdal_cell_reader(path)
+        k, width, height = 4, 499 // 4, 301 // 4
+        whole = read(1, 0, 0, width, height, k)
+        if not overviews:
+            assert (whole == data[k // 2::k, k // 2::k][:height, :width]).all()  # the pixel at the cell centre
+        tiled = np.full((height, width), np.nan)
+        for row, col, rr, cc in raster_adapter._tiles(width, height, 16):
+            top, left = max(0, row - 3), max(0, col - 3)
+            bottom, right = min(height, row + rr + 3), min(width, col + cc + 3)
+            cells = read(1, left, top, right - left, bottom - top, k)
+            tiled[row:row + rr, col:col + cc] = cells[row - top:row - top + rr, col - left:col - left + cc]
+        assert (tiled == whole).all()
+
     def test_cells_are_moved_to_the_map(self, polygons):
         mask = np.zeros((4, 4), dtype=bool)
         mask[1, 2] = True

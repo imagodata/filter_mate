@@ -531,6 +531,61 @@ def _decimation(width: int, height: int, max_pixels: int) -> int:
     return k
 
 
+def gdal_cell_reader(source: str, provider: Optional[QgsRasterDataProvider] = None):
+    """``read(band, col, row, cols, rows, k)``: cells of ``k`` x ``k`` pixels of a GDAL file, NaN for NoData.
+
+    Over the pixel limit, the QGIS provider resamples a window to the size asked
+    for on its own and takes a pixel up to 3 pixels off the cell, differently
+    for a tile and for the whole raster (measured on QGIS 3.44 and 4.2, with
+    overviews or not). Here a cell is one pixel of the overview whose factor
+    divides ``k``, indexed in that overview (GDAL alone maps a window to an
+    overview of ``ceil(width / f)`` pixels by its scale, which drifts), or of
+    the band itself: the same pixels from any tile. Opened in the thread that
+    reads; None when ``source`` does not open. ``provider`` gives the user NoData ranges.
+    """
+    from osgeo import gdal
+    try:
+        dataset = gdal.OpenEx(source, gdal.OF_RASTER | gdal.OF_READONLY)
+        plain = gdal.OpenEx(source, gdal.OF_RASTER | gdal.OF_READONLY, open_options=['OVERVIEW_LEVEL=NONE'])
+    except RuntimeError as exc:  # gdal.UseExceptions() set by another plugin
+        logger.debug(f"[FM5] '{source}' not opened by GDAL: {exc}")
+        return None
+    if dataset is None or plain is None:
+        return None
+
+    def cells_band(band: int, k: int):
+        """``(gdal band, factor)``: the overview of the largest factor dividing ``k``, else the band (no overview)."""
+        base = dataset.GetRasterBand(band)
+        best, factor = plain.GetRasterBand(band), 1
+        for index in range(base.GetOverviewCount()):
+            overview = base.GetOverview(index)
+            ratio = base.XSize / float(overview.XSize) if overview is not None and overview.XSize else 0.0
+            f = int(round(ratio))
+            if f > factor and abs(ratio - f) < 0.5 and k % f == 0:
+                best, factor = overview, f
+        return best, factor
+
+    def read(band: int, col: int, row: int, cols: int, rows: int, k: int):
+        import numpy as np
+        source_band, factor = cells_band(band, k)
+        step = k // factor
+        array = source_band.ReadAsArray(col * step, row * step, cols * step, rows * step, buf_xsize=cols,
+                                        buf_ysize=rows, resample_alg=gdal.GRIORA_NearestNeighbour)
+        if array is None:
+            raise RuntimeError(f"GDAL could not read band {band} of '{source}'")
+        array = array.astype('float64')
+        nodata = dataset.GetRasterBand(band).GetNoDataValue()
+        if nodata is not None and (provider is None or provider.useSourceNoDataValue(band)):
+            array[array == nodata] = np.nan
+        if provider is not None:
+            for user_range in provider.userNoDataValues(band) or []:
+                array[(array >= user_range.min()) & (array <= user_range.max())] = np.nan
+        return array
+
+    read.datasets = (dataset, plain)  # open as long as the reader lives
+    return read
+
+
 def _tiles(width: int, height: int, size: int):
     """``(row, col, rows, cols)`` of the tiles covering a ``width`` x ``height`` grid, row by row."""
     size = max(1, int(size))
@@ -612,13 +667,17 @@ def selection_geometry(provider: QgsRasterDataProvider, selection: RasterSelecti
                        native_width: int, native_height: int, crs_wkt: str, max_pixels: int = SOURCE_MAX_PIXELS,
                        sieve_pixels: int = 4, nodata_provider: Optional[QgsRasterDataProvider] = None,
                        nodata_bands=(), is_canceled=None, progress=None, tile_size: int = SOURCE_TILE_SIZE,
-                       max_vertices: int = SOURCE_MAX_VERTICES, provider_for=None) -> SelectionGeometryResult:
+                       max_vertices: int = SOURCE_MAX_VERTICES, provider_for=None,
+                       cell_reader=None) -> SelectionGeometryResult:
     """Polygons of the pixels kept by ``selection`` (call from a task with cloned providers).
 
     The raster is read tile by tile at its native resolution, or every ``k``
-    pixels beyond ``max_pixels`` (``k`` a power of two: the tile windows start
-    on whole cells of ``k`` x ``k`` pixels, like the overviews GDAL reads them
-    from, so a tile reads what one block of the whole raster would). Each tile
+    pixels beyond ``max_pixels`` (``k`` a power of two, like the overviews; the
+    last ``k - 1`` pixels of a side are left out). Over the limit, a band of a
+    GDAL file is read through ``cell_reader`` (:func:`gdal_cell_reader`), the
+    same pixels from a tile or the whole raster; an expression goes through its
+    virtual raster, which QGIS resamples by window: a cell may then take a pixel
+    of its neighbour near a tile edge. Each tile
     is polygonized in cell coordinates, where the edges two tiles share are the
     same integers, and the union is moved to the map at the end. A tile is
     read with a margin: a slope needs the neighbours of its edge pixels, the
@@ -646,7 +705,9 @@ def selection_geometry(provider: QgsRasterDataProvider, selection: RasterSelecti
                                provider_for=provider_for)
     native_x, native_y = extent.width() / native_width, extent.height() / native_height
     k = _decimation(native_width, native_height, max_pixels)
-    width, height = math.ceil(native_width / k), math.ceil(native_height / k)
+    # Whole cells only: a window running past the raster is resampled by QGIS to fit, off
+    # the cells (measured). Over the limit, the last k - 1 pixels of a side are left out.
+    width, height = max(1, native_width // k), max(1, native_height // k)
     cell_x, cell_y = native_x * k, native_y * k
     coarse = k > 1
     if coarse:
@@ -681,7 +742,10 @@ def selection_geometry(provider: QgsRasterDataProvider, selection: RasterSelecti
             mask, _valid = expression_mask(provider, nodata_provider, nodata_bands if nodata_provider is not None else (),
                                            window, right - left, bottom - top)
         else:
-            array = read_band_array(provider, selection.band, window, right - left, bottom - top)
+            if coarse and cell_reader is not None:
+                array = cell_reader(selection.band, left, top, right - left, bottom - top, k)
+            else:
+                array = read_band_array(provider, selection.band, window, right - left, bottom - top)
             if ground is not None:
                 array = derive(array, selection.derivative, *ground)
             mask = selection_mask(array, selection)
@@ -716,9 +780,6 @@ def selection_geometry(provider: QgsRasterDataProvider, selection: RasterSelecti
     if progress is not None:
         progress(95.0)
     geometry = make_valid(pixel_to_map(geometry, (extent.xMinimum(), cell_x, 0.0, extent.yMaximum(), 0.0, -cell_y)))
-    if coarse and not geometry.isEmpty() and (width * k != native_width or height * k != native_height):
-        # The last cells run past the raster by less than a cell.
-        geometry = make_valid(geometry.intersection(QgsGeometry.fromRect(extent)))
     if progress is not None:
         progress(100.0)
     vertices = geometry.constGet().nCoordinates() if not geometry.isEmpty() else 0
