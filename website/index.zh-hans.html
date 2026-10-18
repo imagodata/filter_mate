@@ -9,7 +9,10 @@
     <meta property="og:description" content="选择位置或表达式，即可筛选周边相关图层，无需编写 SQL。">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://imagodata.github.io/filter_mate/index.zh-hans.html">
-    <meta property="og:image" content="https://imagodata.github.io/filter_mate/video/hero.webp">
+    <meta property="og:image" content="https://imagodata.github.io/filter_mate/img/share/directions.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta name="twitter:card" content="summary_large_image">
     <link rel="canonical" href="https://imagodata.github.io/filter_mate/index.zh-hans.html">
     <link rel="alternate" hreflang="en" href="https://imagodata.github.io/filter_mate/">
     <link rel="alternate" hreflang="fr" href="https://imagodata.github.io/filter_mate/index.fr.html">
@@ -115,6 +118,32 @@
     </div>
 </section>
 
+<section class="home-section directions" id="directions" aria-labelledby="directions-title">
+    <div class="home-container">
+        <div class="section-heading"><p class="section-kicker">任意方向</p><h2 id="directions-title">九种组合，一个面板。</h2><p>任何类型的图层都可以是筛选的来源或目标。每个格子说明筛选保留的内容；有颜色的格子链接到已记录的应用案例。</p></div>
+        <div class="matrix-wrap">
+        <table class="matrix-grid">
+            <thead><tr><th scope="col"><span class="matrix-axis">来源 ↓ · 目标 →</span></th><th scope="col">矢量</th><th scope="col">栅格</th><th scope="col">点云</th></tr></thead>
+            <tbody>
+                <tr><th scope="row">矢量<small>选中的要素或表达式</small></th>
+                    <td><a href="stories.html#s2" hreflang="en"><strong>要素</strong><span>主要道路附近的建筑物</span> <small lang="en">(EN)</small></a></td>
+                    <td><a href="stories.html#s12" hreflang="en"><strong>像素</strong><span>教堂周围的地形模型</span> <small lang="en">(EN)</small></a></td>
+                    <td><a href="stories.html#s12" hreflang="en"><strong>点</strong><span>教堂周围的点云</span> <small lang="en">(EN)</small></a></td></tr>
+                <tr><th scope="row">栅格<small>数值范围、颜色、对象或指数</small></th>
+                    <td><a href="stories.html#s9" hreflang="en"><strong>要素</strong><span>陡坡上的地块</span> <small lang="en">(EN)</small></a></td>
+                    <td><div class="matrix-cell"><strong>像素</strong><span>应用到另一张正射影像的 NDVI 掩膜</span></div></td>
+                    <td><div class="matrix-cell"><strong>点</strong><span>在正射影像上点选的屋顶下方的 LiDAR 点</span></div></td></tr>
+                <tr><th scope="row">点云<small>类别、相对地形模型的高度</small></th>
+                    <td><a href="stories.html#s10" hreflang="en"><strong>要素</strong><span>用 LiDAR 测量的建筑高度</span> <small lang="en">(EN)</small></a></td>
+                    <td><div class="matrix-cell"><strong>像素</strong><span>仅限地面点的地形模型</span></div></td>
+                    <td><div class="matrix-cell"><strong>点</strong><span>电力线附近的高大植被</span></div></td></tr>
+            </tbody>
+        </table>
+        </div>
+        <p class="matrix-note">缓冲区、最小覆盖率、Disjoint 以及 AND / OR / AND NOT 运算符适用于每个格子。 <a href="guide.html#combinations" hreflang="en">阅读指南中的组合表 <small lang="en">(EN)</small></a>.</p>
+    </div>
+</section>
+
 <section class="home-section examples" id="examples" aria-labelledby="examples-title">
     <div class="home-container">
         <div class="section-heading section-heading-row">
@@ -139,7 +168,7 @@
                 <div class="example-body"><p class="example-label">道路邻近性 · Aspet</p><h3>远离铺装道路的聚落</h3><p>Disjoint 搭配 200 米缓冲区，可找出缓冲区外的要素。</p><p class="result"><strong>22</strong> 个距离超过 200 米的聚落</p><a href="stories.html#s6" hreflang="en">查看设置和结果 <span aria-hidden="true">→</span> <small lang="en">(EN)</small></a></div>
             </article>
         </div>
-        <a class="inline-cta" href="stories.html" hreflang="en">浏览全部八个应用案例 <span aria-hidden="true">→</span> <small lang="en">(EN)</small></a>
+        <a class="inline-cta" href="stories.html" hreflang="en">浏览全部十二个应用案例 <span aria-hidden="true">→</span> <small lang="en">(EN)</small></a>
     </div>
 </section>
 

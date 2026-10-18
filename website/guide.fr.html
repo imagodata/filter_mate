@@ -14,6 +14,9 @@
     <link rel="alternate" hreflang="fr" href="https://imagodata.github.io/filter_mate/guide.fr.html">
     <link rel="canonical" href="https://imagodata.github.io/filter_mate/guide.fr.html">
     <meta property="og:image" content="https://imagodata.github.io/filter_mate/video/hero.webp">
+    <meta property="og:image:width" content="1280">
+    <meta property="og:image:height" content="720">
+    <meta name="twitter:card" content="summary_large_image">
     <link rel="icon" type="image/png" href="favicon.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -31,7 +34,7 @@
     <ul class="nav-links" id="navLinks">
         <li><a href="guide.fr.html" aria-current="page">Guide utilisateur</a></li>
         <li><a href="stories.fr.html">Cas d'usage</a></li>
-        <li><a href="roadmap.html" hreflang="en">Feuille de route</a></li>
+        <li><a href="roadmap.fr.html">Feuille de route</a></li>
         <li><a href="https://github.com/imagodata/filter_mate">GitHub</a></li>
         <li><span class="lang" aria-label="Langue"><a href="guide.html" hreflang="en" data-lang-link lang="en">EN</a><a href="guide.fr.html" hreflang="fr" aria-current="true">FR</a></span></li>
         <li><a class="btn btn-primary" href="https://plugins.qgis.org/plugins/filter_mate/">Installer</a></li>
@@ -617,9 +620,10 @@ processing.run("filtermate:batch_filter", {
     </div>
     <h3>Raster</h3>
     <ul>
-        <li><strong>Valeur au pixel</strong> : le bouton Identifier devient une pipette ; Ctrl+clic étend la plage à la valeur relevée.</li>
-        <li><strong>Plage de valeurs</strong> : faites glisser les poignées de l'histogramme ; le bouton Sélectionner (ou la case d'aperçu) masque les autres pixels sur la carte.</li>
-        <li><strong>Classes</strong> pour les rasters à palette (occupation du sol), ou <strong>expression</strong> de la calculatrice raster.</li>
+        <li><strong>Bandes</strong> : une ligne par bande avec son rôle de couleur (R, V, B, PIR, lu dans le rendu ou deviné), la bande active et les bandes que la pipette compare ; raccourcis RVB, IRC et RVB + PIR.</li>
+        <li><strong>Pipette</strong> sur la carte, avec une tolérance : les <em>pixels similaires</em> de tout le raster (une couleur sur une orthophoto, une valeur, une classe d'un raster à palette), <em>l'objet cliqué</em> seul (la tache connexe sous le clic : une piscine, un toit, une parcelle) ou <em>tous les objets semblables à celui cliqué</em> (les taches dont la surface reste dans les ratios choisis). Ctrl+clic ajoute un relevé ; la carte détoure les objets et le bandeau de sélection donne la part retenue.</li>
+        <li><strong>Plage de valeurs</strong> : faites glisser les poignées de l'histogramme, sur une bande ou sur toutes les bandes de couleur à la fois ; la grandeur peut être la valeur elle-même ou, depuis un MNT, la <strong>pente</strong> (degrés ou %), l'<strong>exposition</strong>, l'<strong>ombrage</strong> ou la <strong>rugosité</strong>. Le bouton Sélectionner (ou la case d'aperçu) masque les autres pixels sur la carte.</li>
+        <li>Une <strong>expression</strong> de la calculatrice raster, avec un menu Insérer pour les références de bandes et les préréglages spectraux permis par les rôles : NDVI végétation, NDVI sol nu, NDWI eau, ExG végétation.</li>
     </ul>
     <h3>Nuage de points</h3>
     <ul>
@@ -627,6 +631,7 @@ processing.run("filtermate:batch_filter", {
         <li><strong>Plages</strong> Z (au millimètre), intensité, retour ; <strong>hauteur au-dessus d'un MNT</strong> calculée avec PDAL.</li>
         <li>Conditions enchaînées par AND / OR sur tout attribut, classification comprise : <code>Classification = 6</code> avec une hauteur au-dessus du MNT d’au moins 9 m garde les toits hauts (histoire 10).</li>
         <li>Option « appliquer aux autres dalles du jeu » pour les données livrées en dalles (LiDAR HD).</li>
+        <li>Sur le rail : le bouton Identifier relève une <strong>classe</strong>, la <strong>pipette de valeur</strong> écrit une condition autour de la valeur relevée sur l'attribut choisi (Ctrl+clic ajoute un OU), et l'outil <strong>zone</strong> dessine un rectangle, un polygone, une forme à main levée ou un cercle qui découpe l'emprise de la source.</li>
     </ul>
     <figure class="video-figure">
         <button class="example-media" type="button" data-watch data-video="video/heights.mp4" data-poster="video/heights.webp" aria-label="Regarder l’exemple de hauteur du bâti"><img src="video/heights.webp" alt="Points LiDAR de bâtiment à plus de 9 m au-dessus du terrain et les bâtiments auxquels ils appartiennent" loading="lazy" width="1280" height="720"><span class="media-play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Regarder</span></button>
@@ -647,12 +652,36 @@ processing.run("filtermate:batch_filter", {
         <button class="example-media" type="button" data-watch data-video="video/survey.mp4" data-poster="video/survey.webp" aria-label="Regarder l’exemple de lot de relevé"><img src="video/survey.webp" alt="L’église et ses abords à 50 m découpent le modèle de terrain et le nuage de points, puis les deux sont exportés" loading="lazy" width="1280" height="720"><span class="media-play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Regarder</span></button>
         <figcaption>Source vecteur, cibles raster et nuage de points : l’église et 50 m autour découpent les deux, puis EXPORTING les écrit dans un ZIP.</figcaption>
     </figure>
-    <h3>Neuf combinaisons</h3>
+    <h3 id="combinaisons">Neuf combinaisons</h3>
     <p>
-        La source (la couche courante) et les cibles peuvent être de n'importe quel type : vecteur → vecteur, vecteur → raster, vecteur → nuage de points, raster → vecteur, raster → raster,
-        raster → nuage de points, nuage de points → vecteur, nuage de points → raster et nuage de points → nuage de points. FILTERING garde sa forme : couches à filtrer, opérateurs de combinaison,
-        prédicats géométriques et tampon. Un réglage est nouveau : la <strong>couverture minimale</strong> (%) des polygones par la géométrie source. <strong>Disjoint</strong>,
-        déjà l'un des huit prédicats, garde ce qui se trouve à l'extérieur de la géométrie source, quel que soit le type de cible.
+        La source (la couche courante) et les cibles peuvent être de n'importe quel type. FILTERING garde sa forme : couches à filtrer, opérateurs de combinaison
+        (AND, OR, AND NOT, ou remplacement quand la combinaison est décochée), prédicats géométriques, tampon et centroïdes. Un réglage est nouveau : la
+        <strong>couverture minimale</strong> (%) des polygones par la géométrie source. <strong>Disjoint</strong>, déjà l'un des huit prédicats, garde ce qui se trouve
+        à l'extérieur de la géométrie source, quel que soit le type de cible. Chaque case renvoie au cas d'usage qui la montre ; les autres fonctionnent de la même
+        façon et sont couvertes par les scénarios automatisés.
+    </p>
+    <div class="table-wrap">
+    <table class="matrix">
+        <thead><tr><th>Source ↓ &nbsp;·&nbsp; cible →</th><th>Cible vecteur</th><th>Cible raster</th><th>Cible nuage de points</th></tr></thead>
+        <tbody>
+            <tr><th><strong>Vecteur</strong><br><small>entités sélectionnées, une expression ou l'outil entités similaires ; tampon et centroïdes s'appliquent</small></th>
+                <td>Entités gardées par le prédicat. <a href="stories.fr.html#s1">Cas d'usage 1 à 8</a>.</td>
+                <td>Pixels dans la géométrie, par un VRT découpé. <a href="stories.fr.html#s12">Cas d'usage 12</a>.</td>
+                <td>Points dans la géométrie, par un COPC dérivé. <a href="stories.fr.html#s12">Cas d'usage 12</a>.</td></tr>
+            <tr><th><strong>Raster</strong><br><small>les pixels gardés, vectorisés : plage, pipette, objet, indice, dérivé de terrain</small></th>
+                <td>Entités gardées, avec une couverture minimale pour les polygones. <a href="stories.fr.html#s9">Cas d'usage 9</a>.</td>
+                <td>Pixels d'un autre raster sous les pixels gardés : un masque NDVI de l'ortho IRC appliqué à l'ortho RVB.</td>
+                <td>Points sous les pixels gardés : les points LiDAR des toits relevés sur une orthophoto.</td></tr>
+            <tr><th><strong>Nuage de points</strong><br><small>l'emprise des points gardés : classes, Z, intensité, retours, hauteur au-dessus d'un MNT, zone</small></th>
+                <td>Entités gardées, avec une couverture minimale. <a href="stories.fr.html#s10">Cas d'usage 10 et 11</a>.</td>
+                <td>Pixels sous les points gardés : un MNT restreint aux points sol.</td>
+                <td>Points d'un autre nuage dans l'emprise : la végétation haute à moins de 10 m des lignes électriques, dalle par dalle.</td></tr>
+        </tbody>
+    </table>
+    </div>
+    <p>
+        Une dixième source se passe de couche : une géométrie fixe (WKT ou emprise) donnée à l'API Python ou REST, ou à l'algorithme <code>cross_filter_from_geometry</code>.
+        Une cible identique à la source est refusée, comme les couches sans géométrie.
     </p>
     <div class="fig-row">
         <figure class="narrow">
@@ -739,7 +768,7 @@ processing.run("filtermate:batch_filter", {
 
 <footer class="doc-foot">
     <p>FilterMate 5.0, GPL-3.0, par imagodata. Données des vidéos et des captures : BD TOPO® © IGN, Licence Ouverte 2.0.</p>
-    <p><a href="index.fr.html">Accueil</a>, <a href="guide.fr.html">Guide utilisateur</a>, <a href="stories.fr.html">Cas d'usage</a>, <a href="roadmap.html">Feuille de route</a>, <a href="https://github.com/imagodata/filter_mate">GitHub</a></p>
+    <p><a href="index.fr.html">Accueil</a>, <a href="guide.fr.html">Guide utilisateur</a>, <a href="stories.fr.html">Cas d'usage</a>, <a href="roadmap.fr.html">Feuille de route</a>, <a href="https://github.com/imagodata/filter_mate">GitHub</a></p>
 </footer>
 
 </main>

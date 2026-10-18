@@ -9,7 +9,10 @@
     <meta property="og:description" content="Scegli un luogo o un’espressione e filtra tutti i layer pertinenti — senza scrivere SQL.">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://imagodata.github.io/filter_mate/index.it.html">
-    <meta property="og:image" content="https://imagodata.github.io/filter_mate/video/hero.webp">
+    <meta property="og:image" content="https://imagodata.github.io/filter_mate/img/share/directions.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta name="twitter:card" content="summary_large_image">
     <link rel="canonical" href="https://imagodata.github.io/filter_mate/index.it.html">
     <link rel="alternate" hreflang="en" href="https://imagodata.github.io/filter_mate/">
     <link rel="alternate" hreflang="fr" href="https://imagodata.github.io/filter_mate/index.fr.html">
@@ -115,6 +118,32 @@
     </div>
 </section>
 
+<section class="home-section directions" id="directions" aria-labelledby="directions-title">
+    <div class="home-container">
+        <div class="section-heading"><p class="section-kicker">In ogni direzione</p><h2 id="directions-title">Nove combinazioni. Un pannello.</h2><p>Qualsiasi tipo di layer può essere l’origine del filtro o la sua destinazione. Ogni cella indica ciò che il filtro conserva; quelle colorate rimandano a un caso d’uso documentato.</p></div>
+        <div class="matrix-wrap">
+        <table class="matrix-grid">
+            <thead><tr><th scope="col"><span class="matrix-axis">Origine ↓ · Destinazione →</span></th><th scope="col">Vettore</th><th scope="col">Raster</th><th scope="col">Nuvola di punti</th></tr></thead>
+            <tbody>
+                <tr><th scope="row">Vettore<small>Elementi selezionati o un’espressione</small></th>
+                    <td><a href="stories.html#s2" hreflang="en"><strong>Elementi</strong><span>Edifici vicino alle strade principali</span> <small lang="en">(EN)</small></a></td>
+                    <td><a href="stories.html#s12" hreflang="en"><strong>Pixel</strong><span>Il modello del terreno intorno alla chiesa</span> <small lang="en">(EN)</small></a></td>
+                    <td><a href="stories.html#s12" hreflang="en"><strong>Punti</strong><span>La nuvola di punti intorno alla chiesa</span> <small lang="en">(EN)</small></a></td></tr>
+                <tr><th scope="row">Raster<small>Un intervallo di valori, un colore, un oggetto, un indice</small></th>
+                    <td><a href="stories.html#s9" hreflang="en"><strong>Elementi</strong><span>Particelle su pendii ripidi</span> <small lang="en">(EN)</small></a></td>
+                    <td><div class="matrix-cell"><strong>Pixel</strong><span>Una maschera NDVI applicata a un’altra ortofoto</span></div></td>
+                    <td><div class="matrix-cell"><strong>Punti</strong><span>Punti LiDAR sotto i tetti scelti su un’ortofoto</span></div></td></tr>
+                <tr><th scope="row">Nuvola di punti<small>Classi, altezza sopra un modello del terreno</small></th>
+                    <td><a href="stories.html#s10" hreflang="en"><strong>Elementi</strong><span>Altezze degli edifici misurate dal LiDAR</span> <small lang="en">(EN)</small></a></td>
+                    <td><div class="matrix-cell"><strong>Pixel</strong><span>Un modello del terreno limitato ai punti a terra</span></div></td>
+                    <td><div class="matrix-cell"><strong>Punti</strong><span>Vegetazione alta vicino alle linee elettriche</span></div></td></tr>
+            </tbody>
+        </table>
+        </div>
+        <p class="matrix-note">Buffer, copertura minima, Disjoint e gli operatori AND / OR / AND NOT valgono in ogni cella. <a href="guide.html#combinations" hreflang="en">Leggi la tabella delle combinazioni nella guida <small lang="en">(EN)</small></a>.</p>
+    </div>
+</section>
+
 <section class="home-section examples" id="examples" aria-labelledby="examples-title">
     <div class="home-container">
         <div class="section-heading section-heading-row">
@@ -139,7 +168,7 @@
                 <div class="example-body"><p class="example-label">Prossimità alle strade · Aspet</p><h3>Frazioni lontane dalle strade asfaltate</h3><p>Disjoint con un buffer di 200 m trova ciò che si trova al di fuori del buffer.</p><p class="result"><strong>22</strong> frazioni oltre i 200 m</p><a href="stories.html#s6" hreflang="en">Vedi impostazioni e risultato <span aria-hidden="true">→</span> <small lang="en">(EN)</small></a></div>
             </article>
         </div>
-        <a class="inline-cta" href="stories.html" hreflang="en">Esplora tutti gli otto casi d’uso <span aria-hidden="true">→</span> <small lang="en">(EN)</small></a>
+        <a class="inline-cta" href="stories.html" hreflang="en">Esplora tutti i dodici casi d’uso <span aria-hidden="true">→</span> <small lang="en">(EN)</small></a>
     </div>
 </section>
 

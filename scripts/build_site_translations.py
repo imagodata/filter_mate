@@ -131,7 +131,7 @@ def build(check=False):
     for lang in ('en', 'fr'):
         file = ROOT / LANGUAGES[lang][1]
         write(file, update_languages(file.read_text(encoding='utf-8'), lang))
-    urls = [filename for _, filename in LANGUAGES.values()] + ['guide.html', 'guide.fr.html', 'stories.html', 'stories.fr.html', 'roadmap.html']
+    urls = [filename for _, filename in LANGUAGES.values()] + ['guide.html', 'guide.fr.html', 'stories.html', 'stories.fr.html', 'roadmap.html', 'roadmap.fr.html']
     sitemap = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
     sitemap += ''.join(f'  <url><loc>https://imagodata.github.io/filter_mate/{name if name != "index.html" else ""}</loc></url>\n' for name in urls)
     write(ROOT / 'sitemap.xml', sitemap + '</urlset>\n')

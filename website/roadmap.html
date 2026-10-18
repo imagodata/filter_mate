@@ -3,8 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FilterMate 5.0 — Raster & LiDAR</title>
-    <meta name="description" content="FilterMate 5.0, released 2026-10-15: EXPLORING adapts to raster and point cloud layers, FILTERING relates vector, raster and LiDAR layers in any direction with its usual predicates and buffer.">
+    <title>FilterMate 5.0 — Raster & LiDAR, and what's new since</title>
+    <meta name="description" content="FilterMate 5.0, released 2026-10-15: EXPLORING adapts to raster and point cloud layers, FILTERING relates vector, raster and LiDAR layers in any direction with its usual predicates and buffer. Plus what has landed since: pipette targets, similar features, synced selection modes, MCP server.">
+    <meta property="og:title" content="FilterMate 5.0 — Raster & LiDAR, and what's new since">
+    <meta property="og:description" content="Vector, raster and LiDAR point clouds filtered from one panel, in every direction. What 5.0 delivers and what has landed since.">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://imagodata.github.io/filter_mate/roadmap.html">
+    <meta property="og:image" content="https://imagodata.github.io/filter_mate/img/share/directions.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta name="twitter:card" content="summary_large_image">
+    <link rel="canonical" href="https://imagodata.github.io/filter_mate/roadmap.html">
+    <link rel="alternate" hreflang="en" href="https://imagodata.github.io/filter_mate/roadmap.html">
+    <link rel="alternate" hreflang="fr" href="https://imagodata.github.io/filter_mate/roadmap.fr.html">
     <link rel="icon" type="image/png" href="favicon.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -24,6 +35,7 @@
         <li><a href="stories.html">Use cases</a></li>
         <li><a href="roadmap.html" aria-current="page">Roadmap</a></li>
         <li><a href="https://github.com/imagodata/filter_mate">GitHub</a></li>
+        <li><span class="lang" aria-label="Language"><a href="roadmap.html" hreflang="en" aria-current="true">EN</a><a href="roadmap.fr.html" hreflang="fr" data-lang-link lang="fr">FR</a></span></li>
         <li><a class="btn btn-primary" href="https://plugins.qgis.org/plugins/filter_mate/">Install</a></li>
     </ul>
 </nav>
@@ -216,6 +228,64 @@
 
 <hr class="divider">
 
+<!-- ===== SINCE 5.0.0 ===== -->
+<section class="section" id="since">
+    <div class="container">
+        <div class="section-header fade-in">
+            <div class="section-label timeline"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M2 12h20"/></svg>
+                What's new
+            </div>
+            <h2 class="section-title">Since the 5.0.0 release</h2>
+            <p class="section-subtitle">Merged on the main branch between 2026-10-16 and 2026-10-18, on its way to the next release on plugins.qgis.org. Details in the <a href="https://github.com/imagodata/filter_mate/blob/main/CHANGELOG.md">changelog</a>.</p>
+        </div>
+        <div class="features-grid">
+            <div class="feature-card highlight fade-in">
+                <span class="star-label">Pipette</span>
+                <div class="feature-title">Three targets for the raster pipette</div>
+                <div class="feature-desc">Similar pixels of the whole raster (a colour on an orthophoto, a value, a class), the clicked object only (the connected patch: a pool, a roof, a field, outlined on the map) or every object of the raster like the clicked one, within chosen area ratios. Ctrl+click adds a pick; the selection strip gives the kept share.</div>
+                <div class="feature-tags"><span class="tag must">EXPLORING</span><span class="tag sprint">Raster</span></div>
+            </div>
+            <div class="feature-card fade-in">
+                <div class="feature-title">Bands, every-band mode, spectral presets</div>
+                <div class="feature-desc">A BANDS block with the colour role of each band (R, G, B, NIR; RGB, IRC and RGB + NIR shortcuts), a value range applied to every colour band at once, and NDVI / NDWI / ExG presets in the raster expression.</div>
+                <div class="feature-tags"><span class="tag must">EXPLORING</span><span class="tag sprint">Raster</span></div>
+            </div>
+            <div class="feature-card fade-in">
+                <div class="feature-title">Raster source at the native resolution</div>
+                <div class="feature-desc">The selected pixels are read tile by tile at full resolution in a background task, within a budget of 200,000 vertices: a 125 m² pool on 25 cm pixels stays exact where the previous 4-megapixel grid lost half of it.</div>
+                <div class="feature-tags"><span class="tag should">FILTERING</span><span class="tag sprint">Raster</span></div>
+            </div>
+            <div class="feature-card fade-in">
+                <div class="feature-title">Point cloud rail: value pipette and zone</div>
+                <div class="feature-desc">A click writes a condition around the picked value of the chosen attribute; a rectangle, polygon, freehand shape or circle cuts the footprint of the source. Emptied targets are named as such, the COPC clip runs twice as fast, a geographic source is read at the right resolution.</div>
+                <div class="feature-tags"><span class="tag must">EXPLORING</span><span class="tag sprint">LiDAR</span></div>
+            </div>
+            <div class="feature-card fade-in">
+                <div class="feature-title">Similar features and synced selection modes</div>
+                <div class="feature-desc">On a vector layer, one click selects every feature with the clicked one's value of the group expression. The rail tools and the selection groups of the three kinds follow the same five rules: a tool is available with its group, switching it on activates the group, both come back with the layer.</div>
+                <div class="feature-tags"><span class="tag must">EXPLORING</span><span class="tag sprint">Vector</span></div>
+            </div>
+            <div class="feature-card fade-in">
+                <div class="feature-title">Selection strip, hybrid targets, centroids per target</div>
+                <div class="feature-desc">One band between EXPLORING and FILTERING says what the source hands over (features, raster range and pixel share, LiDAR classes and points). Each target says what the filter does to it; each line or polygon target has its own centroid toggle.</div>
+                <div class="feature-tags"><span class="tag should">FILTERING</span></div>
+            </div>
+            <div class="feature-card fade-in">
+                <div class="feature-title">MCP server for AI assistants</div>
+                <div class="feature-desc">A Model Context Protocol server over stdio, started outside QGIS, with one tool per REST endpoint: list layers, apply or cross filter, geometry and point cloud filters, favorites, export. The API key comes from the environment; remote URLs are refused unless allowed.</div>
+                <div class="feature-tags"><span class="tag should">Automation</span><span class="tag sprint">REST</span></div>
+            </div>
+            <div class="feature-card fade-in">
+                <div class="feature-title">Fixes</div>
+                <div class="feature-desc">Rasters and point clouds missing from the targets when a QGIS 3 config.json was redirected; a colour selection with no preview; point cloud exports reading a copy of the layer (36 s instead of 153 s); the last Qt6 enums; the plugin repository security scan clean again.</div>
+                <div class="feature-tags"><span class="tag sprint">Fixed</span></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<hr class="divider">
+
 <!-- ===== CTA ===== -->
 <section class="cta-section">
     <div class="container">
@@ -236,7 +306,7 @@
 
 </main>
 <footer class="doc-foot">
-    <p>FilterMate, GPL-3.0, by <a href="https://github.com/imagodata">imagodata</a>. <a href="index.html">Home</a>, <a href="guide.html">User guide</a>, <a href="stories.html">Use cases</a>.</p>
+    <p>FilterMate, GPL-3.0, by <a href="https://github.com/imagodata">imagodata</a>. <a href="index.html">Home</a>, <a href="guide.html">User guide</a>, <a href="stories.html">Use cases</a>, <a href="roadmap.fr.html" hreflang="fr" lang="fr">version française</a>.</p>
 </footer>
 
 <script src="assets/fm.js"></script>

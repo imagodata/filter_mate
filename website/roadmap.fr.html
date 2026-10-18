@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FilterMate 5.0 — Raster et LiDAR, et les nouveautés depuis</title>
+    <meta name="description" content="FilterMate 5.0, sortie le 15 octobre 2026 : EXPLORING s’adapte aux rasters et aux nuages de points, FILTERING relie vecteur, raster et LiDAR dans tous les sens avec ses prédicats et son tampon habituels. Et ce qui est arrivé depuis : cibles de la pipette, entités similaires, modes de sélection synchronisés, serveur MCP.">
+    <meta property="og:title" content="FilterMate 5.0 — Raster et LiDAR, et les nouveautés depuis">
+    <meta property="og:description" content="Vecteur, raster et nuages de points LiDAR filtrés depuis un seul panneau, dans tous les sens. Ce que la 5.0 apporte et ce qui est arrivé depuis.">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://imagodata.github.io/filter_mate/roadmap.fr.html">
+    <meta property="og:image" content="https://imagodata.github.io/filter_mate/img/share/directions.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta name="twitter:card" content="summary_large_image">
+    <link rel="canonical" href="https://imagodata.github.io/filter_mate/roadmap.fr.html">
+    <link rel="alternate" hreflang="en" href="https://imagodata.github.io/filter_mate/roadmap.html">
+    <link rel="alternate" hreflang="fr" href="https://imagodata.github.io/filter_mate/roadmap.fr.html">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/fm.css">
+</head>
+<body class="roadmap">
+<a class="skip" href="#main">Aller au contenu</a>
+
+<nav class="nav" aria-label="Navigation principale">
+    <a href="index.fr.html" class="nav-brand"><img src="logo.png" alt="" width="32" height="32">FilterMate</a>
+    <button class="nav-toggle" aria-expanded="false" aria-controls="navLinks" aria-label="Menu">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+    </button>
+    <ul class="nav-links" id="navLinks">
+        <li><a href="guide.fr.html">Guide utilisateur</a></li>
+        <li><a href="stories.fr.html">Cas d’usage</a></li>
+        <li><a href="roadmap.fr.html" aria-current="page">Feuille de route</a></li>
+        <li><a href="https://github.com/imagodata/filter_mate">GitHub</a></li>
+        <li><span class="lang" aria-label="Langue"><a href="roadmap.html" hreflang="en" data-lang-link lang="en">EN</a><a href="roadmap.fr.html" hreflang="fr" aria-current="true">FR</a></span></li>
+        <li><a class="btn btn-primary" href="https://plugins.qgis.org/plugins/filter_mate/">Installer</a></li>
+    </ul>
+</nav>
+<main id="main">
+
+<!-- ===== HERO ===== -->
+<header class="hero">
+    <div class="container">
+        <div class="hero-badge fade-in">
+            <span class="pulse"></span>
+            Sortie dans FilterMate 5.0 · 15 octobre 2026
+        </div>
+        <h1 class="fade-in fade-in-delay-1">Au-delà du vecteur :<br><span class="gradient">filtrer rasters et LiDAR</span></h1>
+        <p class="fade-in fade-in-delay-2">EXPLORING sélectionne sur la couche courante, quel que soit son type. FILTERING relie cette sélection aux couches vecteur, raster et nuage de points avec ses prédicats et son tampon habituels.</p>
+        <p class="roadmap-note fade-in fade-in-delay-2"><strong>Sortie le 15 octobre 2026.</strong> FilterMate 5.0 filtre les couches vecteur, raster et nuage de points. La prise en charge des rasters et des nuages de points est active par défaut et se désactive dans l’onglet Configuration. Chaque version est testée en CI sur QGIS 3.22, 3.28, 3.34, 3.44 et 4.2, via Processing et via le panneau lui-même.</p>
+        <div class="hero-stats fade-in fade-in-delay-3">
+            <div class="hero-stat">
+                <div class="num">3</div>
+                <div class="label">Types de couches</div>
+            </div>
+            <div class="hero-stat">
+                <div class="num">9</div>
+                <div class="label">Couples source → cible</div>
+            </div>
+            <div class="hero-stat">
+                <div class="num">25.1 M</div>
+                <div class="label">Points dans la dalle de test</div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- ===== MODEL ===== -->
+<section class="section" id="model">
+    <div class="container">
+        <div class="section-header fade-in">
+            <div class="section-label timeline"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                Fonctionnement
+            </div>
+            <h2 class="section-title">EXPLORING sélectionne, FILTERING relie</h2>
+            <p class="section-subtitle">La sélection sur la source devient une géométrie source ; chaque type de cible applique les prédicats géométriques à sa façon.</p>
+        </div>
+        <div class="features-grid">
+            <div class="feature-card highlight fade-in">
+                <span class="star-label">Inchangé</span>
+                <div class="feature-title">Source vecteur</div>
+                <div class="feature-desc">Les entités choisies dans EXPLORING (simple, multiple, expression), comme aujourd’hui. Les cibles vecteur gardent le moteur existant ; les cibles raster et nuage de points sont découpées par la même géométrie tamponnée.</div>
+                <div class="feature-tags"><span class="tag must">Sélection</span><span class="tag sprint">Entités</span></div>
+            </div>
+            <div class="feature-card fade-in">
+                <div class="feature-title">Source raster</div>
+                <div class="feature-desc">Une plage de valeurs sur un histogramme, les classes d’un raster à palette ou une expression de la calculatrice raster. Les pixels gardés sont vectorisés et deviennent la géométrie source.</div>
+                <div class="feature-tags"><span class="tag must">Sélection</span><span class="tag sprint">Pixels</span></div>
+            </div>
+            <div class="feature-card fade-in">
+                <div class="feature-title">Source nuage de points</div>
+                <div class="feature-desc">Classes ASPRS / LiDAR HD, plages de Z, d’intensité et de retour, hauteur au-dessus d’un MNT. L’emprise des points gardés devient la géométrie source.</div>
+                <div class="feature-tags"><span class="tag must">Sélection</span><span class="tag sprint">Points</span></div>
+            </div>
+            <div class="feature-card fade-in">
+                <div class="feature-title">Cibles vecteur</div>
+                <div class="feature-desc">Les entités qui satisfont les prédicats, avec une couverture minimale facultative pour les polygones (par exemple les parcelles à 50 % au moins dans une plage d’altitude).</div>
+                <div class="feature-tags"><span class="tag should">Cible</span><span class="tag sprint">Sous-ensemble</span></div>
+            </div>
+            <div class="feature-card fade-in">
+                <div class="feature-title">Cibles raster</div>
+                <div class="feature-desc">Les pixels hors de la géométrie source passent en NoData par un fichier virtuel découpé ; Disjoint garde l’extérieur. La couche garde son identifiant, son style et sa place dans la légende.</div>
+                <div class="feature-tags"><span class="tag should">Cible</span><span class="tag sprint">VRT découpé</span></div>
+            </div>
+            <div class="feature-card fade-in">
+                <div class="feature-title">Cibles nuage de points</div>
+                <div class="feature-desc">Les points hors de la géométrie source sont retirés par un fichier COPC dérivé écrit avec PDAL (ou l’exporteur QGIS) ; Disjoint garde l’extérieur.</div>
+                <div class="feature-tags"><span class="tag should">Cible</span><span class="tag sprint">COPC dérivé</span></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<hr class="divider">
+
+<!-- ===== RASTER SECTION ===== -->
+<section class="section" id="raster">
+    <div class="container">
+        <div class="section-header fade-in">
+            <div class="section-label raster"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+                Raster
+            </div>
+            <h2 class="section-title">Un panneau EXPLORING pour les rasters</h2>
+            <p class="section-subtitle">Bande, pipette de pixel, plage de valeurs, classes et expression raster, avec un aperçu en direct sur la carte.</p>
+        </div>
+        <div class="features-grid">
+            <div class="feature-card highlight fade-in">
+                <span class="star-label">Fonction clé</span>
+                <div class="feature-title">Pipette de pixel</div>
+                <div class="feature-desc">Cliquez sur la carte pour lire la valeur de chaque bande ; Ctrl+clic étend la plage sélectionnée jusqu’à cette valeur.</div>
+                <div class="feature-tags"><span class="tag must">EXPLORING</span></div>
+            </div>
+            <div class="feature-card fade-in">
+                <div class="feature-title">Plage de valeurs et histogramme</div>
+                <div class="feature-desc">Faites glisser les deux poignées de l’histogramme ou saisissez les bornes ; la part de pixels sélectionnés se met à jour au fil de l’eau et un aperçu masque les autres pixels.</div>
+                <div class="feature-tags"><span class="tag must">EXPLORING</span></div>
+            </div>
+            <div class="feature-card fade-in">
+                <div class="feature-title">Classes et expressions</div>
+                <div class="feature-desc">Les rasters à palette (occupation du sol) se sélectionnent par classes ; tout raster accepte une expression de la calculatrice raster, y compris entre plusieurs rasters.</div>
+                <div class="feature-tags"><span class="tag must">EXPLORING</span></div>
+            </div>
+            <div class="feature-card fade-in">
+                <div class="feature-title">Export</div>
+                <div class="feature-desc">Un raster filtré s’écrit en GeoTIFF ou en Cloud Optimized GeoTIFF, les pixels hors du filtre mis en NoData.</div>
+                <div class="feature-tags"><span class="tag should">EXPORTING</span><span class="tag sprint">GeoTIFF / COG</span></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<hr class="divider">
+
+<!-- ===== LIDAR / POINT CLOUD SECTION ===== -->
+<section class="section" id="lidar">
+    <div class="container">
+        <div class="section-header fade-in">
+            <div class="section-label lidar"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"/><circle cx="6" cy="6" r="1"/><circle cx="18" cy="6" r="1"/><circle cx="6" cy="18" r="1"/><circle cx="18" cy="18" r="1"/><circle cx="12" cy="4" r="1"/><circle cx="4" cy="12" r="1"/><circle cx="20" cy="12" r="1"/><circle cx="12" cy="20" r="1"/></svg>
+                LiDAR et nuage de points
+            </div>
+            <h2 class="section-title">Un panneau EXPLORING pour les nuages de points</h2>
+            <p class="section-subtitle">LAS, LAZ, COPC, EPT et nuages de points virtuels ; les critères se cumulent et la saisie du panneau est conservée par couche.</p>
+        </div>
+        <div class="features-grid">
+            <div class="feature-card highlight-purple fade-in">
+                <span class="star-label">Fonction clé</span>
+                <div class="feature-title">Classes avec préréglages</div>
+                <div class="feature-desc">Les classes ASPRS plus celles du LiDAR HD (sursol pérenne, points virtuels…), avec des préréglages : sol, végétation, bâtiments, sursol, eau, sans bruit.</div>
+                <div class="feature-tags"><span class="tag must">EXPLORING</span></div>
+            </div>
+            <div class="feature-card fade-in">
+                <div class="feature-title">Plages d’attributs</div>
+                <div class="feature-desc">Z à trois décimales, intensité, premier / dernier / unique retour, et une expression modifiable pour le reste.</div>
+                <div class="feature-tags"><span class="tag must">EXPLORING</span></div>
+            </div>
+            <div class="feature-card fade-in">
+                <div class="feature-title">Hauteur au-dessus d’un MNT</div>
+                <div class="feature-desc">Choisissez un modèle de terrain : PDAL ajoute une dimension HeightAboveGround, puis « végétation de plus de 2 m » devient un filtre en direct.</div>
+                <div class="feature-tags"><span class="tag should">EXPLORING</span><span class="tag sprint">PDAL</span></div>
+            </div>
+            <div class="feature-card fade-in">
+                <div class="feature-title">Dalles et export</div>
+                <div class="feature-desc">Appliquez une sélection à toutes les dalles d’un jeu LiDAR HD ; exportez les points filtrés en LAZ, COPC, GeoPackage ou CSV.</div>
+                <div class="feature-tags"><span class="tag should">EXPORTING</span><span class="tag sprint">LAZ / COPC</span></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<hr class="divider">
+
+<!-- ===== STATUS ===== -->
+<section class="section" id="timeline">
+    <div class="container">
+        <div class="section-header fade-in">
+            <div class="section-label timeline"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                État
+            </div>
+            <h2 class="section-title">Ce que la 5.0 apporte</h2>
+            <p class="section-subtitle">Temps mesurés sur une dalle LiDAR HD de l’IGN (1 km², 25,1 millions de points) avec un MNT à 1 m et les bâtiments BD TOPO, QGIS 4.2.</p>
+        </div>
+        <div class="timeline fade-in">
+            <div class="timeline-item">
+                <div class="timeline-dot s0">1</div>
+                <div class="timeline-sprint">Livré</div>
+                <div class="timeline-title">Panneaux, filtres croisés, export</div>
+                <div class="timeline-desc">Panneaux raster et nuage de points, les neuf couples source → cible, annuler / rétablir, favoris, enregistrement et réouverture du projet, export de chaque type, neuf algorithmes Processing, quatre modèles, les API Python et REST.</div>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-dot s1">2</div>
+                <div class="timeline-sprint">Mesuré</div>
+                <div class="timeline-title">D’une fraction de seconde à quelques secondes</div>
+                <div class="timeline-desc">Raster découpé par des bâtiments : 0,5 s. Nuage de points découpé par cinq bâtiments : 0,7 s. Parcelles par plage d’altitude : 0,2 s. Nuage de points découpé par une zone d’altitude : 14 s (4 millions de points réécrits).</div>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-dot s2">3</div>
+                <div class="timeline-sprint">Testé</div>
+                <div class="timeline-title">QGIS 3.22 à 4.2</div>
+                <div class="timeline-desc">Un job de CI charge FilterMate dans les images Docker officielles de QGIS (3.22, 3.28, 3.34, 3.44, 4.2) et pilote le panneau sous Xvfb. Les nuages de points demandent QGIS 3.26 ou plus récent ; PDAL 2.4 ou plus récent est facultatif (hauteur au-dessus d’un MNT, écriture COPC directe).</div>
+                <div class="timeline-milestone">FilterMate 5.0</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<hr class="divider">
+
+<!-- ===== SINCE 5.0.0 ===== -->
+<section class="section" id="since">
+    <div class="container">
+        <div class="section-header fade-in">
+            <div class="section-label timeline"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M2 12h20"/></svg>
+                Nouveautés
+            </div>
+            <h2 class="section-title">Depuis la sortie de la 5.0.0</h2>
+            <p class="section-subtitle">Fusionné sur la branche principale entre le 16 et le 18 octobre 2026, en route vers la prochaine version sur plugins.qgis.org. Détails dans le <a href="https://github.com/imagodata/filter_mate/blob/main/CHANGELOG.md" hreflang="en">changelog</a> (en anglais).</p>
+        </div>
+        <div class="features-grid">
+            <div class="feature-card highlight fade-in">
+                <span class="star-label">Pipette</span>
+                <div class="feature-title">Trois cibles pour la pipette raster</div>
+                <div class="feature-desc">Les pixels similaires de tout le raster (une couleur sur une orthophoto, une valeur, une classe), l’objet cliqué seul (la tache connexe : une piscine, un toit, une parcelle, détourée sur la carte) ou tous les objets du raster semblables à celui cliqué, dans des ratios de surface choisis. Ctrl+clic ajoute un relevé ; le bandeau de sélection donne la part retenue.</div>
+                <div class="feature-tags"><span class="tag must">EXPLORING</span><span class="tag sprint">Raster</span></div>
+            </div>
+            <div class="feature-card fade-in">
+                <div class="feature-title">Bandes, mode toutes bandes, préréglages spectraux</div>
+                <div class="feature-desc">Un bloc BANDES avec le rôle de couleur de chaque bande (R, V, B, PIR ; raccourcis RVB, IRC et RVB + PIR), une plage de valeurs appliquée à toutes les bandes de couleur à la fois, et des préréglages NDVI / NDWI / ExG dans l’expression raster.</div>
+                <div class="feature-tags"><span class="tag must">EXPLORING</span><span class="tag sprint">Raster</span></div>
+            </div>
+            <div class="feature-card fade-in">
+                <div class="feature-title">Source raster à la résolution native</div>
+                <div class="feature-desc">Les pixels sélectionnés sont lus dalle par dalle à pleine résolution dans une tâche de fond, dans un budget de 200 000 sommets : une piscine de 125 m² sur des pixels de 25 cm reste exacte là où l’ancienne grille de 4 mégapixels en perdait la moitié.</div>
+                <div class="feature-tags"><span class="tag should">FILTERING</span><span class="tag sprint">Raster</span></div>
+            </div>
+            <div class="feature-card fade-in">
+                <div class="feature-title">Rail nuage de points : pipette de valeur et zone</div>
+                <div class="feature-desc">Un clic écrit une condition autour de la valeur relevée sur l’attribut choisi ; un rectangle, un polygone, une forme à main levée ou un cercle découpe l’emprise de la source. Les cibles vidées sont nommées comme telles, le découpage COPC est deux fois plus rapide, une source en coordonnées géographiques est lue à la bonne résolution.</div>
+                <div class="feature-tags"><span class="tag must">EXPLORING</span><span class="tag sprint">LiDAR</span></div>
+            </div>
+            <div class="feature-card fade-in">
+                <div class="feature-title">Entités similaires et modes de sélection synchronisés</div>
+                <div class="feature-desc">Sur une couche vecteur, un clic sélectionne toutes les entités qui ont la valeur de l’entité cliquée pour l’expression du groupe. Les outils du rail et les groupes de sélection des trois types suivent les cinq mêmes règles : un outil est disponible avec son groupe, l’allumer active le groupe, les deux reviennent avec la couche.</div>
+                <div class="feature-tags"><span class="tag must">EXPLORING</span><span class="tag sprint">Vector</span></div>
+            </div>
+            <div class="feature-card fade-in">
+                <div class="feature-title">Bandeau de sélection, cibles hybrides, centroïdes par cible</div>
+                <div class="feature-desc">Un bandeau entre EXPLORING et FILTERING dit ce que la source transmet (entités, plage raster et part de pixels, classes et points LiDAR). Chaque cible dit ce que le filtre lui fait ; chaque cible ligne ou polygone a sa propre bascule de centroïde.</div>
+                <div class="feature-tags"><span class="tag should">FILTERING</span></div>
+            </div>
+            <div class="feature-card fade-in">
+                <div class="feature-title">Serveur MCP pour les assistants IA</div>
+                <div class="feature-desc">Un serveur Model Context Protocol sur stdio, lancé hors de QGIS, avec un outil par point d’entrée REST : lister les couches, appliquer ou croiser un filtre, filtres par géométrie et par nuage de points, favoris, export. La clé d’API vient de l’environnement ; les URL distantes sont refusées sauf autorisation.</div>
+                <div class="feature-tags"><span class="tag should">Automatisation</span><span class="tag sprint">REST</span></div>
+            </div>
+            <div class="feature-card fade-in">
+                <div class="feature-title">Correctifs</div>
+                <div class="feature-desc">Rasters et nuages de points absents des cibles quand un config.json QGIS 3 était redirigé ; une sélection de couleur sans aperçu ; les exports de nuage lisent une copie de la couche (36 s au lieu de 153 s) ; les derniers enums Qt6 ; le scan de sécurité du dépôt de plugins à nouveau propre.</div>
+                <div class="feature-tags"><span class="tag sprint">Corrigé</span></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<hr class="divider">
+
+<!-- ===== CTA ===== -->
+<section class="cta-section">
+    <div class="container">
+        <h2 class="fade-in">Envie de peser sur la suite ?</h2>
+        <p class="fade-in fade-in-delay-1">FilterMate est libre. Mettez une étoile au dépôt, signalez un problème ou rejoignez la discussion sur Discord.</p>
+        <div class="cta-buttons fade-in fade-in-delay-2">
+            <a href="https://github.com/imagodata/filter_mate" class="btn btn-primary" target="_blank" rel="noopener">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                Étoile sur GitHub
+            </a>
+            <a href="https://discord.gg/9DNbuVYQ" class="btn btn-ghost" target="_blank" rel="noopener">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 00-.0785-.037 19.7363 19.7363 0 00-4.8852 1.515.0699.0699 0 00-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 00.0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 00.0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 00-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 01-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 01.0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 01.0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 01-.0066.1276 12.2986 12.2986 0 01-1.873.8914.0766.0766 0 00-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 00.0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 00.0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 00-.0312-.0286z"/></svg>
+                Rejoindre Discord
+            </a>
+        </div>
+    </div>
+</section>
+
+</main>
+<footer class="doc-foot">
+    <p>FilterMate, GPL-3.0, par <a href="https://github.com/imagodata">imagodata</a>. <a href="index.fr.html">Accueil</a>, <a href="guide.fr.html">Guide utilisateur</a>, <a href="stories.fr.html">Cas d’usage</a>, <a href="roadmap.html" hreflang="en" lang="en">English version</a>.</p>
+</footer>
+
+<script src="assets/fm.js"></script>
+
+</body>
+</html>
