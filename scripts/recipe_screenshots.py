@@ -121,8 +121,7 @@ def save_widget(widget, name, max_width=None):
 
 
 def save_screen_rect(widget, name):
-    p = widget.mapToGlobal(widget.rect().topLeft()) if widget.parent() else widget.pos()
-    pm = QApplication.primaryScreen().grabWindow(0, p.x(), p.y(), widget.width(), widget.height())
+    pm = widget.grab()  # render the widget itself: screen pixels belong to the desktop when QGIS is minimised
     ok = pm.save(os.path.join(OUT, f'{RECIPE}-{name}.png'), 'PNG')
     log(f'saved screen {RECIPE}-{name} {pm.width()}x{pm.height()} ok={ok}')
 
