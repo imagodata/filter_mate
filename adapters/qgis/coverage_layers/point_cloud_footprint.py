@@ -26,6 +26,8 @@ from qgis.core import QgsDoubleRange, QgsGeometry, QgsRectangle
 logger = logging.getLogger(__name__)
 
 DEFAULT_RESOLUTION = 2.0
+# Metres in a degree of latitude: a resolution given in metres, for a cloud in a geographic CRS.
+METRES_PER_DEGREE = 111320.0
 DEFAULT_POINTS_LIMIT = 3000000
 # Points returned by one identify() call: a saturated tile is read again in four.
 POINTS_PER_CALL = 200000
@@ -46,6 +48,17 @@ class FootprintResult:
     cell_size: float
     truncated: bool = False
     coarse: bool = False  # cells larger than the resolution (grid limit)
+
+
+def layer_resolution(resolution: Optional[float], crs) -> float:
+    """``resolution`` (metres: config, API) in the units of a cloud in ``crs``.
+
+    A cloud in a geographic CRS is read and binned in degrees: 2.0 was taken as
+    2 degrees (3 points read, a footprint of whole degrees keeping every target
+    feature). Degrees of latitude: the cells are as fine or finer across.
+    """
+    resolution = float(resolution or DEFAULT_RESOLUTION)
+    return resolution / METRES_PER_DEGREE if crs.isGeographic() else resolution
 
 
 def point_cloud_exporter_class():
@@ -269,8 +282,8 @@ def footprint_geometry(layer, resolution: float = DEFAULT_RESOLUTION, extent: Op
         cell *= math.sqrt(cells(cell) / MAX_GRID_CELLS)
         while cells(cell) > MAX_GRID_CELLS:  # the margins do not shrink with the cells
             cell *= 1.05
-        logger.warning(f"[FM5] footprint of {len(xs)} points over {span_x:.0f} x {span_y:.0f}: cells of {cell:.2f} "
-                       f"instead of {resolution:.2f} (grid limit)")
+        logger.warning(f"[FM5] footprint of {len(xs)} points over {span_x:.3g} x {span_y:.3g}: cells of {cell:.3g} "
+                       f"instead of {resolution:.3g} (grid limit)")
     # Cells aligned on the scanned area, the grid limited to the points read (+ margin).
     left = area.xMinimum() + (math.floor((float(xs.min()) - area.xMinimum()) / cell) - margin) * cell
     top = area.yMaximum() - (math.floor((area.yMaximum() - float(ys.max())) / cell) - margin) * cell

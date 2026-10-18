@@ -464,6 +464,18 @@ class TestFootprint:
         job.compute(_request(), lambda: False)
         assert job.details['coarse'] is True and job.details['cell_size'] == 25.0
 
+    @pytest.mark.parametrize("crs, expected", [(fk.FakeCrs('EPSG:2154'), 2.0),
+                                               (fk.FakeCrs('EPSG:4326', geographic=True), 2.0 / 111320.0)])
+    def test_resolution_in_metres_whatever_the_crs(self, engine, monkeypatch, crs, expected):
+        """2026-10-18: a cloud in EPSG:4326 was read at 2 degrees (3 points, every target feature kept)."""
+        monkeypatch.setattr(footprint, 'open_point_cloud', lambda s, n, p: FakeCloudLayer(s, p, crs=crs))
+        asked = []
+        monkeypatch.setattr(footprint, 'footprint_geometry', lambda layer, resolution, **k: asked.append(resolution)
+                            or footprint.FootprintResult(fk.FakeGeometry.fromWkt(EAST), 10, resolution))
+        job = source_jobs.PointCloudSourceJob(FakeCloudLayer(crs=crs), 2.0)
+        job.compute(_request(), lambda: False)
+        assert asked == [pytest.approx(expected)]
+
     def test_read_in_tiles_of_a_bounded_size(self, engine, grids, monkeypatch):
         monkeypatch.setattr(footprint, 'POINTS_PER_CALL', 50)
         monkeypatch.setattr(footprint, 'MIN_TILE_CELLS', 1)
