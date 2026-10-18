@@ -664,9 +664,13 @@ def s_terrain_pick():
     centre = layer('mnt').extent().center()
     ctrl._on_pixel_picked(QgsPointXY(centre.x(), centre.y()), False)
     panel = ctrl._raster_panel
-    text, bands = panel._pixel_value_label.text(), panel._pixel_bands_label.text()
-    check('pixel picker: slope in degrees under the click', text.endswith(' °') and 0 <= float(text.split()[0]) <= 90, text)
-    check('pixel picker: aspect, hillshade and roughness listed', all(n in bands for n in ('Aspect', 'Hillshade', 'Roughness')), bands.replace(chr(10), ' | '))
+    # The BANDS block line of the last click: "X … · Y …  ·  Slope (degrees): 12.34 °  ·  Aspect …".
+    line = panel._pixel_coordinates_label.text()
+    parts = {part.split(':')[0].strip(): part.split(':', 1)[1].strip() for part in line.split('  ·  ') if ':' in part}
+    slope = next((value for name, value in parts.items() if name.startswith('Slope (degrees')), '')
+    check('pixel picker: slope in degrees under the click', slope.endswith(' °') and 0 <= float(slope.split()[0]) <= 90, line)
+    check('pixel picker: aspect, hillshade and roughness listed', all(any(k.startswith(n) for k in parts)
+          for n in ('Aspect', 'Hillshade', 'Roughness')), line)
     before = (panel._low, panel._high)
     ctrl._on_pixel_picked(QgsPointXY(centre.x() + 40, centre.y() + 40), True)  # Ctrl+click: the range grows to the slope
     check('pixel picker: Ctrl+click extends the range in degrees', (panel._low, panel._high) != before and panel._high is not None
