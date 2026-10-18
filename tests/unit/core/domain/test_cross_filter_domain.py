@@ -193,6 +193,21 @@ class TestRasterSelection:
         sel = RasterSelection(minimum=1, maximum=2, seeds=((0, 0), (1, 1)))
         assert sel.describe() == "band 1 in [1 ; 2] · object(s) under 2 click(s)"
 
+    def test_similar_objects_ratios(self):
+        # 2026-10-18: "similar objects" keeps every patch whose area is like the clicked objects'.
+        sel = RasterSelection(minimum=1, seeds=((0, 0),), similar=(2, 0.5))
+        assert sel.similar == (0.5, 2.0)  # ordered
+        assert sel.to_dict()["similar"] == [0.5, 2.0]
+        assert RasterSelection.from_dict(sel.to_dict()) == sel
+        assert "similar" not in RasterSelection(minimum=1, seeds=((0, 0),)).to_dict()
+        assert sel.describe().endswith("objects like the one(s) under 1 click(s), ×0.5 to ×2 in area")
+        with pytest.raises(ValueError):
+            RasterSelection(minimum=1, similar=(0.5, 2))  # without a clicked object
+        with pytest.raises(ValueError):
+            RasterSelection(minimum=1, seeds=((0, 0),), similar=(0, 2))
+        with pytest.raises(ValueError):
+            RasterSelection(minimum=1, seeds=((0, 0),), similar=(1,))
+
     def test_range_formula_and_keeps(self):
         sel = RasterSelection(band=2, minimum=200.0, maximum=260.5)
         assert sel.to_calc_formula("mnt") == '("mnt@2" >= 200 AND "mnt@2" <= 260.5)'

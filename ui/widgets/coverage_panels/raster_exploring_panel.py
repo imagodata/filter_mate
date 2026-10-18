@@ -259,6 +259,9 @@ DEFAULT_COLOR_TOLERANCE = 12.0  # percent of the value range, per band
 # What a pipette click selects: the pixels like it on the whole raster, or the object it falls in.
 PICK_SIMILAR = "similar"
 PICK_OBJECT = "object"
+PICK_SIMILAR_OBJECTS = "similar_objects"  # every object of the raster like the clicked one (colour and size)
+PICK_TARGETS = (PICK_SIMILAR, PICK_OBJECT, PICK_SIMILAR_OBJECTS)
+DEFAULT_SIMILAR_RATIO = (0.5, 2.0)  # area of a similar object: half to twice the clicked one
 # Words of a band name that say it is the near infrared one.
 _NIR_WORDS = ("nir", "infra", "pir", "near-ir", "near ir")
 
@@ -444,6 +447,15 @@ def _optional_float(value: Any) -> Bound:
     return number if math.isfinite(number) else None
 
 
+def _parse_ratio(raw: Any) -> Tuple[float, float]:
+    """``(low, high)`` area ratios of the similar objects of a saved state; the default pair for anything else."""
+    if isinstance(raw, (list, tuple)) and len(raw) == 2:
+        low, high = _optional_float(raw[0]), _optional_float(raw[1])
+        if low is not None and high is not None and low > 0 and high > 0:
+            return (min(low, high), max(low, high))
+    return DEFAULT_SIMILAR_RATIO
+
+
 def _parse_seeds(raw: Any) -> List[Tuple[float, float, Any]]:
     """Clicked points of a saved state, ``(x, y, pick)``: the pick (colour, value or class) read there.
 
@@ -563,7 +575,8 @@ def parse_raster_state(state: Any) -> Dict[str, Any]:
         "pipette_kind": state.get("pipette_kind") if state.get("pipette_kind") in ("color", "value", "classes", "preset") else "",
         "pipette_picks": _parse_picks(state.get("pipette_picks")),
         "pipette_seeds": _parse_seeds(state.get("pipette_seeds")),
-        "pipette_target": PICK_OBJECT if state.get("pipette_target") == PICK_OBJECT else PICK_SIMILAR,
+        "pipette_target": state.get("pipette_target") if state.get("pipette_target") in PICK_TARGETS else PICK_SIMILAR,
+        "pipette_similar": _parse_ratio(state.get("pipette_similar")),
         "pipette_on": bool(state.get("pipette_on", False)),
         # "Every band" mode of the range: the bounds apply to each of ``range_bands``, ANDed.
         "all_bands": bool(state.get("all_bands", False)),
@@ -1036,7 +1049,11 @@ class RasterExploringPanel(QWidget):
                                  self.tr("Every pixel of the raster close to the picked colour or value (the pipette of the rail)")),
                                 (PICK_OBJECT, self.tr("Clicked object"),
                                  self.tr("Only the patch of such pixels the click falls in: a pool, a roof, a field "
-                                         "(the object detector of the rail); Ctrl+click adds another object"))):
+                                         "(the object detector of the rail); Ctrl+click adds another object")),
+                                (PICK_SIMILAR_OBJECTS, self.tr("Similar objects"),
+                                 self.tr("Every object of the raster like the clicked one: the patches of such pixels "
+                                         "whose area is within the ratios below (the similar objects tool of the rail); "
+                                         "Ctrl+click adds another reference object"))):
             button = QRadioButton(label, self._pipette_group)
             button.setObjectName(f"radioButton_raster_pipette_{key}")
             button.setToolTip(tip)
@@ -1046,6 +1063,33 @@ class RasterExploringPanel(QWidget):
             target_row.addWidget(button)
         target_row.addStretch(1)
         group_layout.addLayout(target_row)
+        # Similar objects: how far from the clicked object's area a patch may be (shown in that target only).
+        self._similar_widget = QWidget(self._pipette_group)
+        self._similar_widget.setObjectName("widget_raster_similar_ratio")
+        similar_row = QHBoxLayout(self._similar_widget)
+        similar_row.setContentsMargins(0, 0, 0, 0)
+        similar_row.setSpacing(GAP)
+        similar_row.addWidget(QLabel(self.tr("Area ×"), self._similar_widget))
+        self._similar_low_spin = QDoubleSpinBox(self._similar_widget)
+        self._similar_high_spin = QDoubleSpinBox(self._similar_widget)
+        for spin, value, tip in ((self._similar_low_spin, DEFAULT_SIMILAR_RATIO[0],
+                                  self.tr("Smallest similar object, as a share of the smallest clicked one")),
+                                 (self._similar_high_spin, DEFAULT_SIMILAR_RATIO[1],
+                                  self.tr("Largest similar object, as a multiple of the largest clicked one"))):
+            spin.setRange(0.01, 100.0)
+            spin.setDecimals(2)
+            spin.setSingleStep(0.25)
+            spin.setValue(value)
+            spin.setKeyboardTracking(False)
+            spin.setToolTip(tip)
+            spin.setMinimumWidth(SPIN_MIN_WIDTH)
+            spin.valueChanged.connect(self._on_similar_ratio_changed)
+        similar_row.addWidget(self._similar_low_spin)
+        similar_row.addWidget(QLabel(self.tr("to ×"), self._similar_widget))
+        similar_row.addWidget(self._similar_high_spin)
+        similar_row.addStretch(1)
+        self._similar_widget.setVisible(False)
+        group_layout.addWidget(self._similar_widget)
         tolerance_row = QHBoxLayout()
         tolerance_row.setSpacing(GAP)
         tolerance_row.addWidget(QLabel(self.tr("Tolerance ±"), self._pipette_group))
@@ -1537,6 +1581,7 @@ class RasterExploringPanel(QWidget):
             "pipette_kind": self._pick_kind,
             "pipette_seeds": [[x, y, list(pick) if isinstance(pick, tuple) else pick] for x, y, pick in self._seeds],
             "pipette_target": self._pick_target,
+            "pipette_similar": list(self.similar_ratio()),
             "pipette_on": self._pipette_on,
             "all_bands": self._all_bands,
             "range_bands": self._range_bands() if self._all_bands else [],
@@ -1567,6 +1612,9 @@ class RasterExploringPanel(QWidget):
         self._pick_kind = parsed["pipette_kind"]
         self._picks = [tuple(pick) if self._pick_kind == "color" else pick for pick in parsed["pipette_picks"]]
         self._seeds = list(parsed["pipette_seeds"])
+        with _signals_blocked(self._similar_low_spin, self._similar_high_spin):
+            self._similar_low_spin.setValue(parsed["pipette_similar"][0])
+            self._similar_high_spin.setValue(parsed["pipette_similar"][1])
         self._set_pick_target(parsed["pipette_target"])
         try:
             data = parsed["pipette_selection"]
@@ -1941,25 +1989,30 @@ class RasterExploringPanel(QWidget):
             self._set_pipette_selection(self._pipette_selection, debounced)
             return
         objects: Tuple[RasterSelection, ...] = ()
-        if self._pick_target == PICK_OBJECT and self._seeds:
+        if self._pick_target in (PICK_OBJECT, PICK_SIMILAR_OBJECTS) and self._seeds:
             objects = tuple(self._picks_selection([pick], ((x, y),)) for x, y, pick in self._seeds)
+        similar = self.similar_ratio() if objects and self._pick_target == PICK_SIMILAR_OBJECTS else ()
         selection = self._picks_selection(self._picks, tuple(seed[:2] for seed in self._seeds) if objects else (),
-                                          objects)
+                                          objects, similar)
         self._set_pipette_selection(selection, debounced)
 
     def _picks_selection(self, picks: Sequence[Any], seeds: Tuple[Tuple[float, float], ...] = (),
-                         objects: Tuple[RasterSelection, ...] = ()) -> RasterSelection:
-        """Selection keeping what looks like ``picks`` (of the current kind), around ``seeds`` when given."""
+                         objects: Tuple[RasterSelection, ...] = (), similar: Tuple[float, float] = ()) -> RasterSelection:
+        """Selection keeping what looks like ``picks`` (of the current kind), around ``seeds`` when given.
+
+        Args:
+            similar: Area ratios of the similar objects mode (empty otherwise).
+        """
         band = self.current_band()
         if self._pick_kind == "color":
             bands = list(self._pipette_bands)
             tolerances = [tolerance_value(self._tolerance_spin.value(), self._value_span(number)) for number in bands]
             expression = color_similarity_expression(self._reference, bands, picks, tolerances)
             return RasterSelection(band=band, mode=RasterSelectionMode.EXPRESSION, expression=expression,
-                                   seeds=seeds, objects=objects)
+                                   seeds=seeds, objects=objects, similar=similar)
         if self._pick_kind == "classes":
             return RasterSelection(band=band, mode=RasterSelectionMode.CLASSES, classes=frozenset(picks),
-                                   seeds=seeds, objects=objects)
+                                   seeds=seeds, objects=objects, similar=similar)
         low_bound, high_bound = self._data_bounds()
         known = low_bound is not None and high_bound is not None and high_bound > low_bound
         if known:
@@ -1971,7 +2024,16 @@ class RasterExploringPanel(QWidget):
         tolerance = tolerance_value(self._tolerance_spin.value(), span)
         low, high = normalize_range(min(picks) - tolerance, max(picks) + tolerance, low_bound, high_bound)
         return RasterSelection(band=band, mode=RasterSelectionMode.RANGE, derivative=self._derivative,
-                               minimum=low, maximum=high, seeds=seeds, objects=objects)
+                               minimum=low, maximum=high, seeds=seeds, objects=objects, similar=similar)
+
+    def similar_ratio(self) -> Tuple[float, float]:
+        """``(low, high)`` area ratios of the similar objects mode."""
+        low, high = float(self._similar_low_spin.value()), float(self._similar_high_spin.value())
+        return (min(low, high), max(low, high))
+
+    def _on_similar_ratio_changed(self, _value: float) -> None:
+        if self._pick_target == PICK_SIMILAR_OBJECTS and self._picks and self._pick_kind in ("color", "value", "classes"):
+            self._apply_picks(debounced=True)
 
     def _set_pipette_selection(self, selection: Optional[RasterSelection], debounced: bool = False) -> None:
         self._pipette_selection = None if selection is None or selection.is_empty else selection
@@ -2030,7 +2092,7 @@ class RasterExploringPanel(QWidget):
         return self._detected
 
     def pick_target(self) -> str:
-        """What a click of the pipette selects: :data:`PICK_SIMILAR` or :data:`PICK_OBJECT`."""
+        """What a click of the pipette selects: :data:`PICK_SIMILAR`, :data:`PICK_OBJECT` or :data:`PICK_SIMILAR_OBJECTS`."""
         return self._pick_target
 
     def set_pick_target(self, target: str) -> None:
@@ -2040,13 +2102,15 @@ class RasterExploringPanel(QWidget):
             self._apply_picks()  # the same picks, on the whole raster or as objects
 
     def _set_pick_target(self, target: str) -> bool:
-        target = PICK_OBJECT if target == PICK_OBJECT else PICK_SIMILAR
+        target = target if target in PICK_TARGETS else PICK_SIMILAR
         changed = target != self._pick_target
         self._pick_target = target
         button = self._target_buttons.get(target)
         if button is not None:
             with _signals_blocked(*self._target_buttons.values()):
                 button.setChecked(True)
+        if hasattr(self, "_similar_widget"):
+            self._similar_widget.setVisible(target == PICK_SIMILAR_OBJECTS)
         return changed
 
     def _on_target_button(self, target: str, checked: bool) -> None:

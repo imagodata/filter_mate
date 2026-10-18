@@ -71,6 +71,7 @@ def button(name):
 
 PIPETTE = 'pushButton_checkable_exploring_raster_pipette'
 DETECTOR = 'pushButton_checkable_exploring_raster_detector'
+SIMILAR = 'pushButton_checkable_exploring_raster_similar'
 VALUE_PIPETTE = 'pushButton_checkable_exploring_point_cloud_value_pipette'
 PC_ZONE = 'pushButton_checkable_exploring_point_cloud_zone'
 
@@ -105,6 +106,13 @@ def detector_on():
     panel = ctrl._raster_panel
     return (button(DETECTOR).isChecked() and not button(PIPETTE).isChecked() and panel.pick_target() == 'object'
             and ctrl._pixel_tool is not None and map_tool() is ctrl._pixel_tool)
+
+
+def similar_on():
+    ctrl = controller()
+    panel = ctrl._raster_panel
+    return (button(SIMILAR).isChecked() and not button(PIPETTE).isChecked() and not button(DETECTOR).isChecked()
+            and panel.pick_target() == 'similar_objects' and ctrl._pixel_tool is not None and map_tool() is ctrl._pixel_tool)
 
 
 def value_pipette_on():
@@ -162,6 +170,12 @@ def s_raster_check():
           pipette_on() and not button(DETECTOR).isChecked() and panel.pick_target() == 'similar', tool_name())
     panel._target_buttons['object'].setChecked(True)  # the segmented control of the group
     check('raster: the group target moves the rail (R4)', detector_on(), tool_name())
+    button(SIMILAR).setChecked(True)
+    check('raster: the similar objects button is the third tool of PIPETTE',
+          similar_on() and panel.active_mode().value == 'pipette' and panel._similar_widget.isVisibleTo(panel), tool_name())
+    panel._target_buttons['similar'].setChecked(True)
+    check('raster: back to similar pixels from the group, the similar objects button goes up',
+          pipette_on() and not button(SIMILAR).isChecked() and not panel._similar_widget.isVisibleTo(panel), tool_name())
     panel._range_group.setChecked(True)
     check('raster: VALUE RANGE takes the detector off too', pipette_off() and not button(DETECTOR).isChecked(), tool_name())
     panel._target_buttons['similar'].setChecked(True)

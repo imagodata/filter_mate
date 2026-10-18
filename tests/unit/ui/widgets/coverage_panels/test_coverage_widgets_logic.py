@@ -345,6 +345,17 @@ class TestObjectDetectionState:
             "mode": "expression", "expression": '"o@1" > 3', "seeds": [[10, 20]]}})
         assert selection.seeds == ((10.0, 20.0),)
 
+    def test_similar_objects_target_and_ratio_in_the_state(self):
+        parsed = raster.parse_raster_state({"pipette_target": "similar_objects", "pipette_similar": [3, 0.25]})
+        assert parsed["pipette_target"] == raster.PICK_SIMILAR_OBJECTS and parsed["pipette_similar"] == (0.25, 3.0)
+        assert raster.parse_raster_state({"pipette_similar": [0, 2]})["pipette_similar"] == raster.DEFAULT_SIMILAR_RATIO
+        assert raster.parse_raster_state({"pipette_similar": "x"})["pipette_similar"] == raster.DEFAULT_SIMILAR_RATIO
+
+    def test_similar_selection_from_the_state(self):
+        selection = raster.build_raster_selection({"mode": "pipette", "pipette_selection": {
+            "mode": "classes", "classes": [3], "seeds": [[10, 20]], "similar": [0.5, 2.0]}})
+        assert selection.similar == (0.5, 2.0) and selection.seeds == ((10.0, 20.0),)
+
     def test_area_text(self):
         assert raster.format_area(125.4) == "125 m²"
         assert raster.format_area(2.34) == "2.3 m²"

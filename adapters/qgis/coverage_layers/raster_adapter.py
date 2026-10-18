@@ -766,6 +766,12 @@ def selection_geometry(provider: QgsRasterDataProvider, selection: RasterSelecti
         progress: Callable receiving the progress in percent.
     """
     from .geometry_tools import make_valid, merge_tile_polygons, pixel_to_map, polygonize_mask
+    if selection.seeds and selection.similar:
+        return similar_objects_geometry(provider, selection, extent, native_width, native_height, crs_wkt,
+                                        max_pixels=max_pixels, provider_for=provider_for, patch_provider=provider,
+                                        sieve_pixels=sieve_pixels, nodata_provider=nodata_provider,
+                                        nodata_bands=nodata_bands, is_canceled=is_canceled, progress=progress,
+                                        tile_size=tile_size, max_vertices=max_vertices, cell_reader=cell_reader)
     if selection.seeds:
         return object_geometry(provider, selection, extent, native_width, native_height, crs_wkt,
                                provider_for=provider_for)
@@ -1059,6 +1065,78 @@ def object_geometry(provider: QgsRasterDataProvider, selection: RasterSelection,
     return SelectionGeometryResult(geometry, kept, total, max(size_x, size_y), truncated, len(geometries))
 
 
+# --- similar objects ------------------------------------------------------
+
+# Pixels read for the live outline of the similar objects (main thread, at each click): the grid of the
+# preview, about half a second on an orthophoto; the task reads the full resolution.
+SIMILAR_LIVE_MAX_PIXELS = 4000000
+
+
+def similar_area_bounds(areas, ratio) -> Optional[Tuple[float, float]]:
+    """``(lowest, highest)`` area a patch may have to be like the clicked objects of ``areas``; None without one.
+
+    ``ratio`` is the ``(low, high)`` pair of the selection: ``low`` times the smallest clicked
+    object to ``high`` times the largest one.
+    """
+    areas = [float(area) for area in (areas or ()) if area is not None and area > 0]
+    if not areas or not ratio:
+        return None
+    low, high = float(ratio[0]), float(ratio[1])
+    return min(areas) * min(low, high), max(areas) * max(low, high)
+
+
+def geometry_parts(geometry) -> list:
+    """The polygons of a geometry: its parts for a multipart one, itself otherwise; nothing for an empty one."""
+    if geometry is None:
+        return []
+    try:
+        if geometry.isEmpty():
+            return []
+    except AttributeError:
+        pass
+    try:
+        if geometry.isMultipart():
+            return [part for part in geometry.asGeometryCollection() if part is not None and not part.isEmpty()]
+    except AttributeError:
+        pass
+    return [geometry]
+
+
+def similar_objects_geometry(provider: QgsRasterDataProvider, selection: RasterSelection, extent: QgsRectangle,
+                             native_width: int, native_height: int, crs_wkt: str, max_pixels: int = SOURCE_MAX_PIXELS,
+                             provider_for=None, patch_provider=None, **selection_kwargs) -> SelectionGeometryResult:
+    """Every patch of kept pixels of the raster whose area is like the clicked objects' (``selection.similar``).
+
+    The clicked objects are read first (:func:`object_geometry`, native resolution): their areas
+    give the bounds. The whole raster is then polygonized with the criterion of the selection
+    (:func:`selection_geometry`, ``patch_provider``: the virtual raster of an expression) and the
+    patches within the bounds are kept. ``objects`` counts them; ``kept_pixels`` is estimated from
+    their area and the cell size.
+    """
+    from dataclasses import replace
+    from .geometry_tools import union_geometries
+    reference = object_geometry(provider, selection, extent, native_width, native_height, crs_wkt,
+                                provider_for=provider_for)
+    bounds = similar_area_bounds([part.area() for part in geometry_parts(reference.geometry)], selection.similar)
+    if bounds is None:
+        return SelectionGeometryResult(QgsGeometry(), 0, reference.total_pixels, reference.cell_size, reference.truncated, 0)
+    plain = replace(selection, seeds=(), objects=(), similar=())
+    patches = selection_geometry(patch_provider or provider, plain, extent, native_width, native_height, crs_wkt,
+                                 max_pixels=max_pixels, **selection_kwargs)
+    if patches.canceled:
+        return patches
+    kept_parts = [part for part in geometry_parts(patches.geometry) if bounds[0] <= part.area() <= bounds[1]]
+    geometry = union_geometries(kept_parts) if kept_parts else QgsGeometry()
+    cell = float(patches.cell_size) if patches.cell_size else 0.0
+    kept = int(round(sum(part.area() for part in kept_parts) / (cell * cell))) if cell > 0 else 0
+    logger.info(f"[FM5] similar objects: {len(kept_parts)} of {len(geometry_parts(patches.geometry))} patches within "
+                f"{bounds[0]:.1f}-{bounds[1]:.1f} map units² (clicked objects: {reference.objects})")
+    return SelectionGeometryResult(geometry, kept, patches.total_pixels, patches.cell_size, reference.truncated,
+                                   len(kept_parts), grid=patches.grid, tiles=patches.tiles, coarse=patches.coarse,
+                                   decimation=patches.decimation, smoothing=patches.smoothing, blocks=patches.blocks,
+                                   vertices=patches.vertices)
+
+
 def _inside_any(geometries, x: float, y: float) -> bool:
     """Whether ``(x, y)`` falls in one of ``geometries`` (an object already found)."""
     for geometry in geometries:
@@ -1091,6 +1169,16 @@ def layer_object_geometry(layer: QgsRasterLayer, selection: RasterSelection) -> 
         virtual = virtuals.get(criterion.expression)
         return virtual.dataProvider() if virtual is not None else None
 
+    if selection.similar:
+        from dataclasses import replace
+        plain = replace(selection, seeds=(), objects=(), similar=())
+        virtual = selection_virtual_layer(layer, plain) if plain.mode is RasterSelectionMode.EXPRESSION else None
+        if plain.mode is RasterSelectionMode.EXPRESSION and virtual is None:
+            return SelectionGeometryResult(QgsGeometry(), 0, layer.width() * layer.height(), 0.0)
+        return similar_objects_geometry(base, selection, layer.extent(), layer.width(), layer.height(),
+                                        layer.crs().toWkt(), max_pixels=SIMILAR_LIVE_MAX_PIXELS,
+                                        provider_for=provider_for,
+                                        patch_provider=virtual.dataProvider() if virtual is not None else base)
     return object_geometry(base, selection, layer.extent(), layer.width(), layer.height(), layer.crs().toWkt(),
                            provider_for=provider_for)
 
