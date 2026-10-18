@@ -241,7 +241,7 @@ def s_raster_check():
     hint = d.findChild(QLabel, 'label_filtering_source_geometry')
     check('raster: no source geometry line', hint is None or not hint.isVisible())
     check('raster: tracking hidden', not d.pushButton_checkable_exploring_tracking.isVisible())
-    check('raster: pixel picker icon on the identify button', d.pushButton_exploring_identify.icon().pixmap(32, 32).toImage() != STATE.get('vec_identify'))
+    check('raster: identify (pixel picker) hidden, the pipette reads the bands', not d.pushButton_exploring_identify.isVisible())
     groups = [d.mGroupBox_exploring_single_selection, d.mGroupBox_exploring_multiple_selection, d.mGroupBox_exploring_custom_selection]
     check('raster: only raster groups (no vector group)', not any(g.isVisible() for g in groups) and ctrl()._raster_panel.isVisible()
           and not ctrl()._pc_panel.isVisible())
@@ -267,7 +267,7 @@ def s_raster_check():
 def s_picker():
     d, c = dock(), ctrl()
     iface.actionPan().trigger()
-    d.pushButton_exploring_identify.click()
+    c._extras._tools['pushButton_checkable_exploring_raster_pipette'].setChecked(True)
     tool = c._pixel_tool
     centre = iface.mapCanvas().extent().center()
     tool.show_marker(centre)
@@ -279,7 +279,7 @@ def s_picker_check():
     d, c = dock(), ctrl()
     panel = c._raster_panel
     tool = c._pixel_tool
-    check('picker: pipette button held down while active', d.pushButton_exploring_identify.isDown())
+    check('picker: pipette button down while active', ctrl()._extras._tools['pushButton_checkable_exploring_raster_pipette'].isChecked())
     check('picker: bands group open', not panel._bands_group.isCollapsed())
     check('picker: picked point marked on the map', tool._marker is not None and tool._marker.isVisible())
     history = panel._pixel_coordinates_label.toolTip()
@@ -288,7 +288,8 @@ def s_picker_check():
     check('picker: the band rows show the values', panel._band_rows[1]['value'].text() not in ('', '–'),
           panel._band_rows[1]['value'].text())
     iface.actionPan().trigger()
-    check('picker: marker and held button cleared with another map tool', tool._marker is None and not d.pushButton_exploring_identify.isDown())
+    check('picker: marker and button cleared with another map tool', tool._marker is None
+          and not ctrl()._extras._tools['pushButton_checkable_exploring_raster_pipette'].isChecked())
 
 
 def s_raster_tools():
@@ -297,6 +298,7 @@ def s_raster_tools():
     panel = c._raster_panel
     layer = c.active_layer
     STATE['raster_extent'] = iface.mapCanvas().extent()
+    panel._range_group.setChecked(True)  # the pipette of s_picker left PIPETTE active: the range is a VALUE RANGE gesture
     low, high = panel._data_bounds()
     STATE['range'] = (low + (high - low) * 0.4, low + (high - low) * 0.6)
     panel._set_range(*STATE['range'])
@@ -362,11 +364,12 @@ def s_handover():
     iface.actionPan().trigger()
     pan = canvas.mapTool()
     d, c = dock(), ctrl()
-    d.pushButton_exploring_identify.click()
+    pipette = tool('pushButton_checkable_exploring_raster_pipette')
+    pipette.setChecked(True)
     check('handover: pixel picker on', canvas.mapTool() is c._pixel_tool)
-    d.pushButton_exploring_identify.click()
+    pipette.setChecked(False)
     check('handover: picker off restores pan', canvas.mapTool() is pan, type(canvas.mapTool()).__name__)
-    d.pushButton_exploring_identify.click()
+    pipette.setChecked(True)
     iface.actionPan().trigger()  # QGIS now remembers the picker as the tool to give back
     STATE['old_picker'] = c._pixel_tool
 
@@ -549,7 +552,8 @@ def s_back_check():
     d = dock()
     from qgis.PyQt.QtWidgets import QLabel
     check('back to vector: tracking visible again', d.pushButton_checkable_exploring_tracking.isVisible())
-    check('back to vector: vector identify icon back', d.pushButton_exploring_identify.icon().pixmap(32, 32).toImage() == STATE.get('vec_identify'))
+    check('back to vector: identify button back with its vector icon', d.pushButton_exploring_identify.isVisible()
+          and d.pushButton_exploring_identify.icon().pixmap(32, 32).toImage() == STATE.get('vec_identify'))
     check('back to vector: only vector groups', d.mGroupBox_exploring_single_selection.isVisible() and not ctrl()._host.isVisible())
     check('back to vector: linking visible again', d.pushButton_checkable_exploring_linking_widgets.isVisible())
     check('back to vector: kind tools hidden', not any(b.isVisible() for b in ctrl()._extras._tools.values()))

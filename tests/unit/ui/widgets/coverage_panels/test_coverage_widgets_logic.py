@@ -810,6 +810,34 @@ class TestBandRoles:
         assert raster.parse_raster_state({})["pipette_on"] is False
 
 
+class TestEveryBandMode:
+    """2026-10-18: the value range may apply to every colour band at once (ANDed), as an expression."""
+
+    def test_expression_ands_the_range_of_every_band(self):
+        assert raster.all_bands_range_expression([1, 2, 3], 10.0, 50.0, "o") == (
+            '("o@1" >= 10 AND "o@1" <= 50) AND ("o@2" >= 10 AND "o@2" <= 50) AND ("o@3" >= 10 AND "o@3" <= 50)')
+        assert raster.all_bands_range_expression([1, 2], None, 50.0, "o") == '("o@1" <= 50) AND ("o@2" <= 50)'
+        assert raster.all_bands_range_expression([1, 2], None, None, "o") == ""
+        assert raster.all_bands_range_expression([], 1.0, 2.0, "o") == ""
+
+    def test_state_builds_an_expression_selection(self):
+        state = {"mode": "range", "band": 1, "minimum": 10.0, "maximum": 50.0, "all_bands": True,
+                 "range_bands": [1, 2, 3], "reference": "ortho"}
+        selection = raster.build_raster_selection(state)
+        assert selection.mode is RasterSelectionMode.EXPRESSION and selection.band == 1
+        assert selection.expression.startswith('("ortho@1" >= 10 AND "ortho@1" <= 50) AND ("ortho@2"')
+
+    def test_one_band_stays_a_plain_range(self):
+        state = {"mode": "range", "band": 2, "minimum": 10.0, "all_bands": True, "range_bands": [2]}
+        selection = raster.build_raster_selection(state)
+        assert selection.mode is RasterSelectionMode.RANGE and selection.band == 2
+
+    def test_state_keys_are_parsed(self):
+        parsed = raster.parse_raster_state({"all_bands": 1, "range_bands": [3, "1", 3]})
+        assert parsed["all_bands"] is True and parsed["range_bands"] == [3, 1]
+        assert raster.parse_raster_state({})["all_bands"] is False
+
+
 class TestPointCloudClassLists:
     def test_present_and_absent_classes(self):
         present, absent = cloud.split_classes([(2, 100), (6, 0), (9, -1), (5, 3)])

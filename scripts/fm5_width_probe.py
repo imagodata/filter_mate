@@ -90,6 +90,7 @@ def s_probe(name):
                     log(f"scroll area {area.objectName()} viewport {area.viewport().width()} widget {area.widget().width()} "
                         f"widget minHint {area.widget().minimumSizeHint().width()}")
             describe(panel, 0, 3)
+            d.grab().save(os.path.join(os.path.dirname(LOG), f'width_probe_{name}.png'), 'PNG')
         except Exception:
             log(traceback.format_exc())
     return step
