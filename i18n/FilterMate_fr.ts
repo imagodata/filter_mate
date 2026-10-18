@@ -589,6 +589,10 @@
         <source>Class pipette: click the map and the class of the points drawn there is checked. Ctrl+click adds another one</source>
         <translation>Pipette de classe : cliquez la carte et la classe des points dessinés là est cochée. Ctrl+clic en ajoute une autre</translation>
     </message>
+    <message>
+        <source>Not used for raster layers: the pipette reads the bands</source>
+        <translation>Sans usage pour un raster : la pipette lit les bandes</translation>
+    </message>
 </context>
 <context>
     <name>DatabaseManager</name>
@@ -5335,6 +5339,42 @@ Objet cliqué : seulement la tache de ces pixels où tombe le clic (une piscine,
     <message>
         <source>Give the bands their colour roles at once: RGB, IRC or RGB + near infrared</source>
         <translation>Donner d'un coup leurs rôles couleur aux bandes : RVB, IRC ou RVB + proche infrarouge</translation>
+    </message>
+    <message>
+        <source>Every band</source>
+        <translation>Toutes les bandes</translation>
+    </message>
+    <message>
+        <source>Every band: {0}</source>
+        <translation>Toutes les bandes : {0}</translation>
+    </message>
+    <message>
+        <source>No colour</source>
+        <translation>Aucune couleur</translation>
+    </message>
+    <message>
+        <source>VALUE RANGE — every band</source>
+        <translation>PLAGE DE VALEURS — toutes les bandes</translation>
+    </message>
+    <message>
+        <source>Value at the last click of the pipette</source>
+        <translation>Valeur au dernier clic de la pipette</translation>
+    </message>
+    <message>
+        <source> Roles guessed, to confirm.</source>
+        <translation> Rôles devinés, à confirmer.</translation>
+    </message>
+    <message>
+        <source>Colour the band holds: the spectral indexes and the chips use it. Click to change it</source>
+        <translation>Couleur portée par la bande : les indices spectraux et les puces s'en servent. Cliquer pour la changer</translation>
+    </message>
+    <message>
+        <source>The value range applies to every colour band at once (a pixel is kept when each band is in the range); the histogram shows the first one</source>
+        <translation>La plage de valeurs s'applique à toutes les bandes couleur à la fois (un pixel est gardé quand chaque bande est dans la plage) ; l'histogramme montre la première</translation>
+    </message>
+    <message>
+        <source>A slope, aspect... reads one band as a DTM: choose a band in BANDS first</source>
+        <translation>Une pente, une exposition... lit une bande comme un MNT : choisissez d'abord une bande dans BANDES</translation>
     </message>
 </context>
 <context>

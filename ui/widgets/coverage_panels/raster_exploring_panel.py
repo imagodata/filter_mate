@@ -895,7 +895,7 @@ class RasterExploringPanel(QWidget):
             value.setFixedHeight(self.ROW_CONTROL + 2)
             value.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
             value.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
-            value.setToolTip(self.tr("Value at the last click of the picker"))
+            value.setToolTip(self.tr("Value at the last click of the pipette"))
             widgets = {"radio": radio, "pipette": pipette, "chip": chip, "name": name, "kind": kind, "value": value}
             self._bands_grid.addWidget(radio, index, 0, Qt.AlignmentFlag.AlignHCenter)
             self._bands_grid.addWidget(pipette, index, 1, Qt.AlignmentFlag.AlignHCenter)
