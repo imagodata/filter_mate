@@ -325,7 +325,7 @@ def cross_filter(source, targets: Sequence, predicates: Sequence[str] = ("Inters
         filter_source: Raster source: also mask the source raster outside the selection.
         footprint_resolution: Point cloud source: cell size of the footprint (default: config, 2 m).
         max_pixels: Raster source: pixels read at the native resolution, a coarser grid beyond
-            (default: config, 400 000 000).
+            (default: config, 100 000 000).
         feedback: Optional ``QgsFeedback``: progress over the targets, cancellation.
 
     Returns:

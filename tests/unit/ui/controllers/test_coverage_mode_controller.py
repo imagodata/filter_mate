@@ -746,7 +746,7 @@ def adapters(monkeypatch, ctrl_module):
     raster.band_histogram = lambda layer, band, bins=64: calls.append(("histogram", band)) or ([1, 1], 0.0, 10.0)
     raster.derivative_histogram = lambda layer, band, derivative, bins=64: calls.append(
         ("derivative_histogram", band, derivative.value)) or ([2, 1], 0.0, 90.0)
-    raster.SOURCE_MAX_PIXELS = 400000000
+    raster.SOURCE_MAX_PIXELS = 100000000
     snapshots = types.ModuleType(f"{package.__name__}.snapshots")
     snapshots.derived = {}
     snapshots.registry = lambda: types.SimpleNamespace(get=snapshots.derived.get, install=lambda *a: None)

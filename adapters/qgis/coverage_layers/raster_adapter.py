@@ -485,9 +485,12 @@ class SelectionGeometryResult:
 # Below this many selected pixels the selection is polygonized without sieve.
 SIEVE_MIN_KEPT_PIXELS = 10000
 # The source geometry of a selection is read at the native resolution up to this
-# many pixels; beyond, every 2nd, 4th... pixel (a power of two, so that the tiles
-# and the overviews stay aligned) until the grid fits (logged, and told to the user).
-SOURCE_MAX_PIXELS = 400000000
+# many pixels; beyond, every 2nd, 4th... pixel (a power of two, like the overviews)
+# until the grid fits (logged, and told to the user). 100 million pixels: 6 km2 of
+# 25 cm orthophoto pixel for pixel, 25 km2 on cells of 50 cm (a 2 m x 2 m object
+# is 16 cells). Measured (QGIS 4.2, 2026-10-18): a dense, speckled selection of 400
+# million pixels took 141 s, 373 s with the majority smoothing; a quarter of that here.
+SOURCE_MAX_PIXELS = 100000000
 # A smaller limit is raised to this (a config value of 0 or 10 would be no grid at all).
 SOURCE_MIN_PIXELS = 10000
 # Vertices of the source geometry. It is stored (history, project) and every
@@ -626,23 +629,55 @@ def closing(mask, radius: int):
     return _box_count(dilated, radius, 1) == (2 * radius + 1) ** 2
 
 
+def majority(mask, radius: int):
+    """Cells set in at least half of the ``(2 radius + 1)`` square around them, plus the patches far from those.
+
+    A dense, speckled selection becomes the areas where it dominates, about as
+    large as it was; a set cell more than ``2 radius`` cells away from such an
+    area (an isolated pool, a sparse speckle) is kept as it is.
+    """
+    import numpy as np
+    inside = _box_count(np.ones(mask.shape, dtype=bool), radius, 0)
+    dominant = 2 * _box_count(mask, radius, 0) >= inside
+    near = _box_count(dominant, 2 * radius, 0) > 0
+    return dominant | (mask & ~near)
+
+
 def _fit_tile(window, core, sieve_pixels: int, allowance: float):
-    """``(mask, radius)``: the core of ``window`` sieved, closed by the smallest radius that fits ``allowance`` vertices.
+    """``(mask, radius)``: the core of ``window`` sieved, smoothed by the least that fits ``allowance`` vertices.
 
     The tile keeps its pixels when they fit. Otherwise it is a dense, speckled
-    selection (vegetation, a noisy slope): the closing merges its patches,
-    which is what the polygons lose, while an isolated object (a pool) stays.
-    The largest radius is kept when none fits.
+    selection (vegetation, a noisy slope), smoothed by a growing :func:`majority`
+    (the areas where it dominates; an isolated object stays), then, for a
+    speckle sparse everywhere, by a growing :func:`closing` (its patches merge).
+    The steps lose vertices in that order: the least one that fits is found by
+    bisection (4 tries instead of 10), the strongest kept when none fits.
     """
     from .geometry_tools import sieve_mask
-    radius, mask = 0, window
-    for radius in (0,) + _SMOOTHING_RADII:
-        mask = closing(window, radius) if radius else window
-        if sieve_pixels > 1:
-            mask = sieve_mask(mask, sieve_pixels)
-        if mask_corners(mask[core]) <= allowance:
-            break
-    return mask[core], radius
+    steps = [(None, 0)] + [(majority, radius) for radius in _SMOOTHING_RADII]
+    steps += [(closing, radius) for radius in _SMOOTHING_RADII]
+    tried = {}
+
+    def fits(index):
+        if index not in tried:
+            smooth, radius = steps[index]
+            mask = smooth(window, radius) if smooth is not None else window
+            if sieve_pixels > 1:
+                mask = sieve_mask(mask, sieve_pixels)
+            tried[index] = (mask[core], mask_corners(mask[core]) <= allowance)
+        return tried[index][1]
+
+    low, high = 0, len(steps) - 1
+    if not fits(low):
+        low += 1
+        while low < high:
+            middle = (low + high) // 2
+            if fits(middle):
+                high = middle
+            else:
+                low = middle + 1
+        fits(low)
+    return tried[low][0], steps[low][1]
 
 
 def _selection_mask_over(provider: QgsRasterDataProvider, selection: RasterSelection, extent: QgsRectangle,
@@ -723,9 +758,9 @@ def selection_geometry(provider: QgsRasterDataProvider, selection: RasterSelecti
                                                extent.xMinimum() + width * cell_x, extent.yMaximum()),
                                   width, height, crs_kind(QgsCoordinateReferenceSystem.fromWkt(crs_wkt)))
     sieving = bool(sieve_pixels and sieve_pixels > 1)
-    # Cells within the sieve size and twice the largest closing radius of a tile
-    # must be right; the outer ring of a derivative is not.
-    margin = (int(sieve_pixels) if sieving else 0) + 1 + 2 * _SMOOTHING_RADII[-1]
+    # Cells within the sieve size and three times the largest smoothing radius of
+    # a tile must be right (majority, then its neighbourhood); the outer ring of a derivative is not.
+    margin = (int(sieve_pixels) if sieving else 0) + 1 + 3 * _SMOOTHING_RADII[-1]
     tiles = list(_tiles(width, height, tile_size))
     # (inner, edge) polygons with the sieve and without; the latter while they may be the result.
     sieved, plain, keep_plain = ([], []), ([], []), True

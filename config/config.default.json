@@ -744,8 +744,8 @@
           "description": "How a point cloud target is clipped: exact (derived file, background task) or bbox (instant X/Y expression, approximate)"
         },
         "raster_source_max_pixels": {
-          "value": 400000000,
-          "description": "Above this pixel count, a raster selection is vectorized on a coarser grid of that many cells (below, at the native resolution, tile by tile)"
+          "value": 100000000,
+          "description": "Pixels of a raster selection read at the native resolution, tile by tile; beyond, every 2nd, 4th... pixel is read (the outline stays light either way)"
         },
         "point_cloud_footprint_resolution": {
           "value": 2.0,

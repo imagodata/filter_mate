@@ -282,6 +282,18 @@ class TestVertexBudget:
         lone[10:16, 12:18] = True
         assert (raster_adapter.closing(lone, 4) == lone).all()  # an isolated object stays as it is
 
+    def test_majority_keeps_about_the_area_and_the_isolated_objects(self):
+        rng = np.random.default_rng(10)
+        mask = np.zeros((120, 200), dtype=bool)
+        mask[:, :100] = np.kron(rng.random((15, 13)) < 0.5, np.ones((8, 8), dtype=bool))[:120, :100]
+        mask[:, :100] ^= rng.random((120, 100)) < 0.2  # speckle on blobs
+        mask[50:56, 160:166] = True  # a pool far away
+        smoothed = raster_adapter.majority(mask, 4)
+        share = smoothed[:, :100].mean() / mask[:, :100].mean()
+        assert 0.7 < share < 1.3  # neither emptied nor filled
+        assert raster_adapter.mask_corners(smoothed[:, :100]) < raster_adapter.mask_corners(mask[:, :100]) / 3
+        assert (smoothed[:, 120:] == mask[:, 120:]).all()
+
     def test_dense_tile_smoothed_isolated_object_kept(self, monkeypatch, cells):
         rng = np.random.default_rng(8)
         data = np.zeros((64, 128))
@@ -302,7 +314,7 @@ class TestVertexBudget:
         assert result.smoothing == 0 and result.geometry == _cells_of(data == 7)
 
     @pytest.mark.parametrize("value, expected", [
-        (None, 400000000), (0, 400000000), ("lots", 400000000), (True, 400000000), (-5, 400000000),
+        (None, 100000000), (0, 100000000), ("lots", 100000000), (True, 100000000), (-5, 100000000),
         ("4e8", 400000000), ("400 000 000", 400000000), ("16_000_000", 16000000), (2.5e7, 25000000),
         ({"value": "1e6"}, 1000000), (5, 10000)])
     def test_pixel_limit_read_from_the_settings(self, value, expected):

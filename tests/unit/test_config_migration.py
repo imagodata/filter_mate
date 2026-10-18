@@ -472,7 +472,7 @@ class TestDefaultConfigRasterAndCrossFilterSections:
     def test_cross_filter_options(self, default_config):
         section = default_config["APP"]["OPTIONS"]["CROSS_FILTER"]
         assert section["point_cloud_clip"]["value"] in section["point_cloud_clip"]["choices"]
-        assert section["raster_source_max_pixels"]["value"] >= 400000000
+        assert section["raster_source_max_pixels"]["value"] >= 100000000
         assert section["point_cloud_footprint_resolution"]["value"] > 0
         assert section["cache_max_gb"]["value"] > 0
         assert section["pdal_path"]["value"] == ""
@@ -660,7 +660,7 @@ class TestRasterSourceMaxPixelsRenamed:
         assert config_helpers._migrate_config(user, defaults) is True
         section = user["APP"]["OPTIONS"]["CROSS_FILTER"]
         assert "raster_selection_max_pixels" not in section
-        assert section["raster_source_max_pixels"]["value"] == 400000000
+        assert section["raster_source_max_pixels"]["value"] == 100000000
         assert config_helpers._migrate_config(user, defaults) is False  # idempotent
 
     @pytest.mark.parametrize("value", [16000000, "16000000", "lots"])
@@ -669,7 +669,7 @@ class TestRasterSourceMaxPixelsRenamed:
         defaults = json.loads(CONFIG_DEFAULT_PATH.read_text(encoding="utf-8"))
         user = self._old_config(value)
         config_helpers._migrate_config(user, defaults)
-        assert user["APP"]["OPTIONS"]["CROSS_FILTER"]["raster_source_max_pixels"]["value"] == 400000000
+        assert user["APP"]["OPTIONS"]["CROSS_FILTER"]["raster_source_max_pixels"]["value"] == 100000000
 
     def test_a_new_value_already_set_is_kept(self, config_helpers):
         defaults = json.loads(CONFIG_DEFAULT_PATH.read_text(encoding="utf-8"))
