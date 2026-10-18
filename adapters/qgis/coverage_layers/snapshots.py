@@ -581,14 +581,21 @@ def _set_subset(layer, subset: str) -> bool:
 
 
 def swap_source(layer, source: str, provider: str, derived_registry: Optional[DerivedSourceRegistry] = None) -> bool:
-    """``setDataSource`` that puts the previous source back when the new one is invalid."""
+    """``setDataSource`` that puts the previous source back when the new one is invalid.
+
+    The previous subset goes back with it: a new provider has none, and a
+    point cloud left without its own filter had no history entry to recover it.
+    """
     (derived_registry or registry()).remember_alpha_band(layer)
     previous_source, previous_provider = layer.source(), layer.providerType()
+    previous_subset = layer.subsetString() if _supports_subset(layer) else ''
     layer.setDataSource(source, layer.name(), provider, QgsDataProvider.ProviderOptions(), False)
     if layer.isValid():
         return True
     logger.warning(f"[FM5] '{layer.name()}': '{source}' could not be opened, previous source restored")
     layer.setDataSource(previous_source, layer.name(), previous_provider, QgsDataProvider.ProviderOptions(), False)
+    if previous_subset and not _set_subset(layer, previous_subset):
+        logger.warning(f"[FM5] '{layer.name()}': its filter could not be put back: {previous_subset[:120]}")
     return False
 
 
