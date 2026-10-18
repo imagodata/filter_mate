@@ -340,6 +340,10 @@ class QgsCheckableComboBoxLayer(QComboBox):
         self.action_check_all.triggered.connect(self.select_all)
         self.action_uncheck_all = QAction(self.tr('De-select All'), self)
         self.action_uncheck_all.triggered.connect(self.deselect_all)
+        self.action_check_all_vector = QAction(self.tr('Select all vector layers'), self)
+        self.action_check_all_vector.triggered.connect(partial(self.select_by_kind, 'vector', Qt.CheckState.Checked))
+        self.action_uncheck_all_vector = QAction(self.tr('De-select all vector layers'), self)
+        self.action_uncheck_all_vector.triggered.connect(partial(self.select_by_kind, 'vector', Qt.CheckState.Unchecked))
         self.action_check_all_geometry_line = QAction(self.tr('Select all layers by geometry type (Lines)'), self)
         self.action_check_all_geometry_line.triggered.connect(partial(self.select_by_geometry, 'GeometryType.Line', Qt.CheckState.Checked))
         self.action_uncheck_all_geometry_line = QAction(self.tr('De-Select all layers by geometry type (Lines)'), self)
@@ -355,6 +359,9 @@ class QgsCheckableComboBoxLayer(QComboBox):
 
         self.context_menu.addAction(self.action_check_all)
         self.context_menu.addAction(self.action_uncheck_all)
+        self.context_menu.addSeparator()
+        self.context_menu.addAction(self.action_check_all_vector)
+        self.context_menu.addAction(self.action_uncheck_all_vector)
         self.context_menu.addSeparator()
         self.context_menu.addAction(self.action_check_all_geometry_line)
         self.context_menu.addAction(self.action_uncheck_all_geometry_line)
@@ -571,6 +578,16 @@ class QgsCheckableComboBoxLayer(QComboBox):
                     if data["layer_geometry_type"] == geometry_type:
                         items_to_be_checked.append(i)
         self.setItemsCheckState(items_to_be_checked, state)
+
+    def select_by_kind(self, kind, state):
+        """Select/deselect every ``'vector'``, ``'raster'`` or ``'point_cloud'`` layer of the list."""
+        indexes = []
+        for i in range(self.count()):
+            item = self.model().item(i)
+            data = item.data(Qt.ItemDataRole.UserRole) if item else None
+            if isinstance(data, dict) and target_kind(data.get("layer_geometry_type")) == kind:
+                indexes.append(i)
+        self.setItemsCheckState(indexes, state)
 
     def eventFilter(self, obj, event):
         """Handle mouse events for item selection and context menu."""

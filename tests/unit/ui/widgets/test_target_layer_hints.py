@@ -130,3 +130,24 @@ def test_centroid_toggle_paints_with_a_float_centre(on):
     paint(Painter(), _Rect(), on, "color")
     assert [name for name, _args in calls].count("drawEllipse") == 1
     assert calls[-1][0] == "restore"
+
+
+def test_select_by_kind_checks_only_the_vector_layers():
+    """Context menu 'Select all vector layers': lines, points, polygons, no geometry; not raster / point cloud."""
+    qt = types.SimpleNamespace(ItemDataRole=types.SimpleNamespace(UserRole=256), CheckState=types.SimpleNamespace(Checked=2))
+    geometry_types = ["GeometryType.Polygon", "GeometryType.Raster", "GeometryType.Line",
+                      "GeometryType.PointCloud", "GeometryType.Point", "GeometryType.UnknownGeometry"]
+    items = [types.SimpleNamespace(data=lambda role, g=g: {"layer_geometry_type": g}) for g in geometry_types]
+    calls = []
+    combo = types.SimpleNamespace(count=lambda: len(items), model=lambda: types.SimpleNamespace(item=lambda i: items[i]),
+                                  setItemsCheckState=lambda indexes, state: calls.append((indexes, state)))
+    select_by_kind = _method("select_by_kind")
+    select_by_kind.__globals__.update(Qt=qt, target_kind=target_kind)
+    select_by_kind(combo, "vector", qt.CheckState.Checked)
+    assert calls == [([0, 2, 4, 5], qt.CheckState.Checked)]
+
+
+def test_vector_actions_are_in_the_context_menu():
+    source = _MODULE.read_text(encoding="utf-8")
+    assert "self.context_menu.addAction(self.action_check_all_vector)" in source
+    assert "self.context_menu.addAction(self.action_uncheck_all_vector)" in source
