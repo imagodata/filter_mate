@@ -213,7 +213,7 @@ def _polygon_type():
     if geometry_type is not None and hasattr(geometry_type, 'Polygon'):
         return geometry_type.Polygon
     from qgis.core import QgsWkbTypes
-    return QgsWkbTypes.PolygonGeometry
+    return QgsWkbTypes.GeometryType.PolygonGeometry
 
 
 class ObjectOutline:
