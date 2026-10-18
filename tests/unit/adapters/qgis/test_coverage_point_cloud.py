@@ -314,6 +314,43 @@ class TestBboxEmptied:
         assert job.outcome.success and not job.outcome.emptied
 
 
+class TestEmptyDerivedCloud:
+    """2026-10-18: an area over the cloud extent that holds no point gave an empty cloud reported as filtered."""
+
+    class _Provider:
+        def __init__(self, count):
+            self._count = count
+
+        def pointCount(self):
+            if isinstance(self._count, Exception):
+                raise self._count
+            return self._count
+
+    def _applied(self, engine, pdal, monkeypatch, count):
+        source, _ = pdal
+        layer = FakeCloudLayer(source)
+        monkeypatch.setattr(snapshots, 'swap_source', lambda *args, **kw: True)
+        monkeypatch.setattr(engine, 'registry', lambda: type('R', (), {'record': lambda self, *a: None})())
+        layer.provider = self._Provider(count)
+        layer.triggerRepaint = lambda: None
+        job = _compute(engine.PointCloudTargetJob(layer, None), EAST)
+        assert job.outcome.success and not job.outcome.emptied  # the area crosses the cloud extent
+        job.apply(layer)
+        return job
+
+    def test_no_point_in_the_area_is_reported(self, engine, pdal, monkeypatch):
+        assert self._applied(engine, pdal, monkeypatch, 0).outcome.emptied
+
+    def test_points_kept_are_not_reported(self, engine, pdal, monkeypatch):
+        assert not self._applied(engine, pdal, monkeypatch, 1234).outcome.emptied
+
+    def test_unknown_count_is_not_reported(self, engine, pdal, monkeypatch):
+        assert not self._applied(engine, pdal, monkeypatch, RuntimeError('no header')).outcome.emptied
+
+    def test_derived_point_count(self, engine):
+        assert engine.derived_point_count(type('L', (), {'dataProvider': lambda self: None})()) == -1
+
+
 class TestVirtualPointCloud:
     def test_target_refused_without_exporter(self, engine, exporter):
         job = _compute(engine.PointCloudTargetJob(FakeCloudLayer('/data/tiles.vpc', 'vpc'), None), EAST)

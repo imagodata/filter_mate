@@ -715,6 +715,10 @@ class PointCloudTargetJob(TargetJob):
             self.outcome.success = False
             self.outcome.message = 'derived point cloud could not be opened'
             return None
+        if not self.outcome.emptied and derived_point_count(layer) == 0:
+            # 2026-10-18: an area over the cloud extent that holds no point (a gap, a
+            # strip between flight lines) left an empty cloud reported as filtered.
+            self.outcome.emptied = True
         if self._own_subset:
             if self._derived_provider == 'pdal':
                 try:
@@ -732,6 +736,16 @@ class PointCloudTargetJob(TargetJob):
         registry().record(after, layer)
         layer.triggerRepaint()
         return after
+
+
+def derived_point_count(layer) -> int:
+    """Points of the file a point cloud layer now reads (its header, no point is read); -1 when unknown."""
+    try:
+        provider = layer.dataProvider()
+        count = provider.pointCount() if provider is not None else -1
+        return int(count) if count is not None else -1
+    except (AttributeError, RuntimeError, TypeError, ValueError):
+        return -1
 
 
 def make_job(layer, kind: LayerKind, operator: Optional[str], point_cloud_clip: str = 'exact') -> Optional[TargetJob]:
