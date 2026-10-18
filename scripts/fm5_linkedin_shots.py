@@ -373,9 +373,18 @@ def s2_source():
     return switched_to('batiment', coverage_page=False)
 
 
-def s2_select():
+def s2_field():
+    """The single-selection picker shows the building kind ("Eglise") instead of the first numeric field."""
     d = dock()
     d.mGroupBox_exploring_single_selection.setChecked(True)
+    d.mFieldExpressionWidget_exploring_single_selection.setExpression('"nature"')
+    picker = d.mFeaturePickerWidget_exploring_single_selection
+    since = time.time()
+    return lambda: picker.displayExpression() == '"nature"' and tasks_idle() and time.time() - since > 3.0
+
+
+def s2_select():
+    d = dock()
     feature = church()
     STATE['church_box'] = feature.geometry().boundingBox()
     d.mFeaturePickerWidget_exploring_single_selection.setFeature(feature.id())
@@ -535,7 +544,7 @@ def s_finish():
 
 STEPS = [s_setup, s_open_plugin, s_dock_ready,
          s1_source, s1_select, s1_filter, s1_shot, s1_settled,
-         s2_source, s2_select, s2_filter, s2_shot, s2_settled,
+         s2_source, s2_field, s2_select, s2_filter, s2_shot, s2_settled,
          s3_source, s3_select, s3_filter, s3_shot,
          s4_source, s4_select, s4_filter, s4_shot,
          s5_source, s5_select, s5_filter, s5_shot,
