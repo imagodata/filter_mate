@@ -42,6 +42,26 @@ def test_rail_plan_all_hidden():
     assert layout.rail_plan([]) == []
 
 
+def test_rail_floor_is_the_buttons_plus_one_gap_around_each():
+    # Eight 36 px tools (vector rail, 2026-10-18): 288 + 9 gaps of 6 = 342, the height under which they overlap.
+    assert layout.rail_floor([36] * 8, 6) == 342
+    assert layout.rail_floor([34, 34], 8) == 92
+    assert layout.rail_floor([], 6) == 0
+
+
+def test_compact_height_keeps_the_natural_size_when_the_band_has_room():
+    assert layout.compact_height(350, 8, 6, 36) == 36
+    assert layout.compact_height(260, 6, 6, 36) == 36  # the six vector buttons of before: 258 px
+
+
+def test_compact_height_shares_a_short_band_between_the_buttons():
+    # Eight tools in a 260 px band: (260 - 54) // 8 = 25 px, one gap around each, no overlap.
+    assert layout.compact_height(260, 8, 6, 36) == 25
+    assert layout.rail_floor([25] * 8, 6) <= 260
+    assert layout.compact_height(100, 8, 6, 36) == layout.COMPACT_BUTTON_MIN
+    assert layout.compact_height(260, 0, 6, 36) == 36
+
+
 def test_spacing_scale_comes_from_the_design_tokens():
     from importlib import import_module
     spacing = import_module(f"{_PKG}.ui.styles.mockup_design").SPACING
