@@ -13,6 +13,7 @@ from qgis.utils import iface, plugins
 
 ORTHO = os.environ.get('FM5_ORTHO', r'C:\Users\Simon\Documents\FilterMate_test_v5\data\ortho_rvb.tif')
 MNT = os.environ.get('FM5_MNT', r'C:\Users\Simon\Documents\FilterMate_test_v5\data\mnt_1m.tif')
+TILE = os.environ.get('FM5_TILE', r'C:\Users\Simon\Documents\FilterMate_test_v5\data\lidar_hd_cerdagne.copc.laz')
 LOG = os.path.join(os.environ.get('LOCALAPPDATA', ''), 'Temp', 'fm5', 'width_probe.log')
 os.makedirs(os.path.dirname(LOG), exist_ok=True)
 open(LOG, 'w', encoding='utf-8').close()
@@ -41,6 +42,9 @@ def s_setup():
     for path, name in ((MNT, 'mnt'), (ORTHO, 'ortho')):
         if os.path.exists(path):
             project.addMapLayer(QgsRasterLayer(path, name, 'gdal'))
+    if os.path.exists(TILE):
+        from qgis.core import QgsPointCloudLayer
+        project.addMapLayer(QgsPointCloudLayer(TILE, 'lhd', 'copc'))
     log(f"layers: {[lyr.name() for lyr in project.mapLayers().values()]}")
 
 
@@ -75,12 +79,12 @@ def describe(widget, depth=0, limit=4):
             describe(child, depth + 1, limit)
 
 
-def s_probe(name):
+def s_probe(name, which='_raster_panel'):
     def step():
         try:
             from qgis.PyQt.QtWidgets import QScrollArea, QStackedWidget
             d = dock()
-            panel = controller()._raster_panel
+            panel = getattr(controller(), which)
             log(f"=== {name}: dock width {d.width()}")
             stack = d.findChild(QStackedWidget, 'stackedWidget_exploring_coverage')
             if stack is not None:
@@ -115,7 +119,8 @@ def s_finish():
 
 
 STEPS = [(s_setup, 1500), (s_open, 6000), (s_layer('mnt'), 3000), (s_probe('mnt'), 1500),
-         (s_layer('ortho'), 3000), (s_probe('ortho'), 1500), (s_bands, 1500), (s_finish, 500)]
+         (s_layer('ortho'), 3000), (s_probe('ortho'), 1500), (s_bands, 1500),
+         (s_layer('lhd'), 5000), (s_probe('pc', '_pc_panel'), 1500), (s_finish, 500)]
 
 
 def run_step(index=0):
