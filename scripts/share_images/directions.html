@@ -1,0 +1,34 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+html,body{margin:0;width:1200px;height:630px;overflow:hidden;background:#f3f4ef;color:#16232b;font-family:Barlow,'Segoe UI',system-ui,sans-serif}
+.wrap{position:relative;box-sizing:border-box;width:1200px;height:630px;padding:44px 56px 40px;border:14px solid #16232b;}
+.wrap:after{content:"";position:absolute;inset:8px;border:1px solid #16232b;pointer-events:none}
+.kicker{display:flex;align-items:center;gap:12px;font-weight:600;font-size:17px;letter-spacing:.14em;text-transform:uppercase;color:#3f7a22}
+.kicker span{width:12px;height:12px;background:#ffd83d;border:2px solid #16232b}
+h1{margin:10px 0 22px;font:700 54px/1 'Barlow Condensed','Arial Narrow',sans-serif;letter-spacing:-.01em}
+h1 em{font-style:normal;color:#1f66b8}
+table{border-collapse:separate;border-spacing:8px;width:1096px;margin-left:-8px;font-size:17px}
+th,td{padding:0;vertical-align:top;text-align:left}
+thead th{padding:0 12px 8px;font:600 21px/1.1 'Barlow Condensed',sans-serif;text-align:center;border-bottom:3px solid #16232b}
+thead th:first-child{text-align:left;font:600 12px/1.3 Barlow,sans-serif;letter-spacing:.1em;text-transform:uppercase;color:#4a5a63;vertical-align:bottom}
+tbody th{width:200px;padding:12px 12px;background:#fbfbf8;border:1.5px solid #cfd3c8;font:600 21px/1.1 'Barlow Condensed',sans-serif}
+tbody th small{display:block;margin-top:5px;font:400 13.5px/1.3 Barlow,sans-serif;color:#4a5a63}
+td div{box-sizing:border-box;height:104px;padding:12px 12px;border:1.5px solid #cfd3c8;background:#fff}
+td div.on{border:2.5px solid #1f66b8;background:#e4eef9}
+td div.on b{color:#1f66b8}
+td b{display:block;font-size:17px;font-weight:600}
+td span{display:block;margin-top:4px;color:#4a5a63;font-size:14.5px;line-height:1.3}
+.foot{display:flex;justify-content:space-between;align-items:center;margin-top:16px;font-size:15px;color:#4a5a63}
+.foot strong{color:#16232b;font-weight:600}
+.key{display:inline-flex;align-items:center;gap:8px;margin-left:18px}.key i{width:14px;height:14px;border:2.5px solid #1f66b8;background:#e4eef9}
+</style></head><body><div class="wrap">
+<div class="kicker"><span></span>FilterMate 5 for QGIS</div>
+<h1>Nine combinations. <em>One panel.</em> Zero scripts.</h1>
+<table><thead><tr><th>Source ↓ · Target →</th><th>Vector</th><th>Raster</th><th>Point cloud</th></tr></thead><tbody>
+<tr><th>Vector<small>Selected features or an expression</small></th><td><div class="on"><b>Features</b><span>Buildings near the main roads</span></div></td><td><div class="on"><b>Pixels</b><span>The terrain model around the church</span></div></td><td><div class="on"><b>Points</b><span>The point cloud around the church</span></div></td></tr>
+<tr><th>Raster<small>A value range, a colour, an object, an index</small></th><td><div class="on"><b>Features</b><span>Parcels on steep slopes</span></div></td><td><div><b>Pixels</b><span>An NDVI mask applied to another orthophoto</span></div></td><td><div><b>Points</b><span>LiDAR points under the roofs picked on an orthophoto</span></div></td></tr>
+<tr><th>Point cloud<small>Classes, height above a terrain model</small></th><td><div class="on"><b>Features</b><span>Building heights measured by LiDAR</span></div></td><td><div><b>Pixels</b><span>A terrain model restricted to the ground points</span></div></td><td><div><b>Points</b><span>High vegetation near power lines</span></div></td></tr>
+</tbody></table>
+<div class="foot"><div><strong>imagodata.github.io/filter_mate</strong><span class="key"><i></i>documented use case</span></div><div>Vector, raster and LiDAR · QGIS 3.22 to 4.2 · GPL-3.0</div></div>
+</div></body></html>
