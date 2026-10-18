@@ -1143,8 +1143,8 @@ def _inside_any(geometries, x: float, y: float) -> bool:
         try:
             if geometry.contains(QgsPointXY(x, y)):
                 return True
-        except Exception:  # noqa: BLE001 - a geometry that cannot tell is not a hit
-            continue
+        except Exception as exc:  # noqa: BLE001 - a geometry that cannot tell is not a hit
+            logger.debug(f"[FM5] object containment test failed, not a hit: {exc}")
     return False
 
 

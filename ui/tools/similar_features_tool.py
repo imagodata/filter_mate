@@ -105,8 +105,8 @@ if QgsMapTool is not None:
             self._layer_getter = layer_getter
             try:
                 self.setCursor(Qt.CursorShape.CrossCursor)
-            except Exception:
-                pass
+            except Exception as exc:  # noqa: BLE001 - the default cursor is fine
+                logger.debug(f"[FM5] similar features tool keeps the default cursor: {exc}")
 
         def canvasReleaseEvent(self, event: Any) -> None:  # noqa: N802 - Qt override
             if event.button() != Qt.MouseButton.LeftButton:

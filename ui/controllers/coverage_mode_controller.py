@@ -1338,7 +1338,7 @@ class CoverageModeController(BaseController):
             measure.setSourceCrs(layer.crs(), project.transformContext())
             measure.setEllipsoid(project.ellipsoid() or 'NONE')
             area_unit = getattr(Qgis, 'AreaUnit', None)
-            square_metres = area_unit.SquareMeters if area_unit is not None else QgsUnitTypes.AreaSquareMeters
+            square_metres = area_unit.SquareMeters if area_unit is not None else QgsUnitTypes.AreaUnit.AreaSquareMeters
             return float(measure.convertAreaMeasurement(measure.measureArea(geometry), square_metres))
         except Exception as exc:
             logger.debug(f"[FM5] area of the detected objects unknown: {exc}")
