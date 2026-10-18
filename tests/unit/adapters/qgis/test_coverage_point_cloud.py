@@ -234,7 +234,7 @@ class TestNothingKept:
         monkeypatch.setattr(footprint, 'open_point_cloud', lambda s, n, p: FakeCloudLayer(s, p))
         layer = self._derived(source, "POLYGON((0 0,10 0,10 10,0 10,0 0))")
         job = _compute(engine.PointCloudTargetJob(layer, 'AND'), EAST)
-        assert job.outcome.success
+        assert job.outcome.success and job.outcome.emptied
         assert job._geometry_wkt and not fk.FakeGeometry.fromWkt(job._geometry_wkt).boundingBox().intersects(job._extent)
         assert pipelines[0][1] == {"type": "filters.head", "count": 0}
 
@@ -261,13 +261,36 @@ class TestNothingKept:
         job = _compute(engine.PointCloudTargetJob(layer, 'OR'), "POLYGON((-10 -10,110 -10,110 110,-10 110,-10 -10))",
                        'Disjoint')
         assert job.outcome.success, job.outcome.message
-        assert pipelines[0][1]['type'] == 'filters.crop'
+        assert pipelines[0][1]['type'] == 'filters.crop' and not job.outcome.emptied
         assert fk.FakeGeometry.fromWkt(job._geometry_wkt).area() == pytest.approx(5000.0)
 
     def test_exporter_gets_the_area_outside(self, engine, exporter):
         job = _compute(engine.PointCloudTargetJob(FakeCloudLayer(), None), "POLYGON((500 500,600 500,600 600,500 600,500 500))")
-        assert job.outcome.success and job._geometry_wkt
+        assert job.outcome.success and job._geometry_wkt and job.outcome.emptied
         assert not exporter[0].geometry.boundingBox().intersects(job._extent)
+
+
+class TestBboxEmptied:
+    """2026-10-18: the bbox clip of a cloud outside the source was reported "filtered" like any other."""
+
+    FAR = "POLYGON((500 500,600 500,600 600,500 600,500 500))"
+
+    def test_source_outside_the_cloud(self, engine):
+        job = _compute(engine.PointCloudTargetJob(FakeCloudLayer(), None, 'bbox'), self.FAR)
+        assert job.outcome.success and job.outcome.emptied
+
+    def test_source_on_the_cloud(self, engine):
+        job = _compute(engine.PointCloudTargetJob(FakeCloudLayer(), None, 'bbox'), EAST)
+        assert job.outcome.success and not job.outcome.emptied
+
+    def test_or_keeps_the_own_subset(self, engine):
+        job = _compute(engine.PointCloudTargetJob(FakeCloudLayer(subset='Classification = 6'), 'OR', 'bbox'), self.FAR)
+        assert job.outcome.success and not job.outcome.emptied
+
+    def test_pdal_clip_on_the_cloud(self, engine, pdal):
+        source, _ = pdal
+        job = _compute(engine.PointCloudTargetJob(FakeCloudLayer(source), None), EAST)
+        assert job.outcome.success and not job.outcome.emptied
 
 
 class TestVirtualPointCloud:

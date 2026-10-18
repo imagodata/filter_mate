@@ -141,6 +141,11 @@ def _combine_geometry(previous_wkt: str, previous_side: str, new: QgsGeometry, s
     return new
 
 
+def _keeps_previous(previous_subset: str, operator: Optional[str]) -> bool:
+    """True when nothing new combined with ``operator`` leaves the previous subset as it was (OR, AND NOT)."""
+    return bool((previous_subset or '').strip()) and (operator or '').strip().upper() in ('OR', 'AND NOT')
+
+
 def _simplified_for_cutline(geometry: QgsGeometry, tolerance: float, max_vertices: int = 20000) -> QgsGeometry:
     """Simplify a heavy cutline (vectorized selection) to keep the VRT fast to render."""
     try:
@@ -374,6 +379,8 @@ class VectorTargetJob(TargetJob):
         # The unfiltered copy, a QObject of the main thread, goes in apply().
         self._source = None
         self.outcome.kept_count = len(kept)
+        # OR / AND NOT nothing leave the previous subset as it was.
+        self.outcome.emptied = not kept and not _keeps_previous(self.before.subset, self.operator)
         self.outcome.success = True
         self.outcome.elapsed = time.perf_counter() - self._started
 
@@ -459,6 +466,7 @@ class RasterTargetJob(TargetJob):
                                      geometry, side, self.operator)
         self._side = side
         kept = _kept_area(geometry)
+        self.outcome.emptied = kept is None or not geometry.boundingBox().intersects(self._extent)
         # Nothing kept: clip with a degenerate polygon far outside the extent.
         geometry = QgsGeometry.fromWkt(kept) if kept is not None else _nothing_kept(self._extent)
         self._geometry_wkt = geometry.asWkt()
@@ -613,6 +621,8 @@ class PointCloudTargetJob(TargetJob):
                 self._expression = 'X = X' if side is CoverageSide.OUTSIDE else 'X < X'
             else:
                 self._expression = _bbox_expression(geometry, side is CoverageSide.OUTSIDE, self.crs.isGeographic())
+            self.outcome.emptied = (side is CoverageSide.INSIDE and not _keeps_previous(self._own_subset, self.operator)
+                                    and (geometry.isEmpty() or not geometry.boundingBox().intersects(self._extent)))
             self.outcome.success = True
             self.outcome.elapsed = time.perf_counter() - self._started
             return
@@ -632,6 +642,7 @@ class PointCloudTargetJob(TargetJob):
             # Nothing kept. Stored, not left empty: an empty state would be
             # dropped from the project and read as "no previous filter" by the next AND.
             polygon, geometry = None, _nothing_kept(self._extent)
+            self.outcome.emptied = True
         self._geometry_wkt = geometry.asWkt()
         if self._use_pdal:
             self._compute_pdal(polygon, is_canceled)

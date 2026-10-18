@@ -196,6 +196,20 @@ class TestGeosErrors:
         assert job.outcome.success and calls
         kept = fk.FakeGeometry.fromWkt(job._geometry_wkt).boundingBox()
         assert kept.xMaximum() < 0  # the degenerate polygon outside the extent
+        assert job.outcome.emptied
+
+    def test_source_outside_the_raster_empties_it(self, engine, monkeypatch):
+        _warp_recorder(monkeypatch)
+        job = engine.RasterTargetJob(FakeRasterLayer('/data/dem.tif', fk.FakeCrs('EPSG:2154')), None)
+        far = fk.FakeGeometry.fromRect(fk.FakeRectangle(50, 50, 60, 60))
+        job.compute(far, fk.FakeCrs('EPSG:2154'), None, _request(), lambda: False)
+        assert job.outcome.success and job.outcome.emptied
+
+    def test_source_on_the_raster_does_not_empty_it(self, engine, monkeypatch):
+        _warp_recorder(monkeypatch)
+        job = engine.RasterTargetJob(FakeRasterLayer('/data/dem.tif', fk.FakeCrs('EPSG:2154')), None)
+        job.compute(_east_half(), fk.FakeCrs('EPSG:2154'), None, _request(), lambda: False)
+        assert job.outcome.success and not job.outcome.emptied
 
 
 class TestCombinedAreas:

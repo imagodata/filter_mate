@@ -496,6 +496,62 @@ class TestFailuresCacheAndTeardown:
         controller._after_run(layers["r1"], [], "2 target(s) filtered")
         assert [kind for kind, _ in ctrl_module._test_feedback.messages] == ["warning", "info"]
 
+    def _outcomes(self, ctrl_module, *states):
+        """CrossFilterOutcome per ``(layer_id, success, emptied)``."""
+        cross = sys.modules[f"{_PKG}.core.domain.cross_filter"]
+        kind = ctrl_module._test_layer_kind.LayerKind.VECTOR
+        return [cross.CrossFilterOutcome(layer_id, kind, success, "boom" if not success else "", emptied=emptied)
+                for layer_id, success, emptied in states]
+
+    def _quiet(self, controller, monkeypatch):
+        for name in ("_refresh_canvas", "_refresh_counts", "update_undo_redo_buttons", "_schedule_cache_tidy"):
+            monkeypatch.setattr(controller, name, lambda *a, **k: None)
+
+    def test_emptied_targets_are_a_warning_naming_them(self, ctrl_module, layers, monkeypatch):
+        """2026-10-18: every target left with ``1 = 0`` still read "2 target(s) filtered", as an info."""
+        controller = ctrl_module.CoverageModeController(_dock())
+        self._quiet(controller, monkeypatch)
+        callbacks = []
+        ctrl_module._test_service.run = lambda request, job, on_done=None: callbacks.append(on_done)
+        controller._start_task(object(), types.SimpleNamespace(layer_name="lidar", layer_id="p1"))
+        task = types.SimpleNamespace(outcomes=self._outcomes(ctrl_module, ("v1", True, True), ("v2", True, True)),
+                                     error="")
+        callbacks[0](task, True)
+        assert ctrl_module._test_feedback.messages[-1] == (
+            "warning", "2 target(s) filtered — 2 left empty, nothing matches the selection: v1, v2")
+
+    def test_targets_keeping_something_stay_an_info(self, ctrl_module, layers, monkeypatch):
+        controller = ctrl_module.CoverageModeController(_dock())
+        self._quiet(controller, monkeypatch)
+        callbacks = []
+        ctrl_module._test_service.run = lambda request, job, on_done=None: callbacks.append(on_done)
+        controller._start_task(object(), types.SimpleNamespace(layer_name="lidar", layer_id="p1"))
+        callbacks[0](types.SimpleNamespace(outcomes=self._outcomes(ctrl_module, ("v1", True, False)), error=""), True)
+        assert ctrl_module._test_feedback.messages[-1] == ("info", "1 target(s) filtered")
+
+    def test_failed_target_is_never_called_emptied(self, ctrl_module, layers):
+        controller = ctrl_module.CoverageModeController(_dock())
+        assert controller._emptied_text(self._outcomes(ctrl_module, ("r1", False, True), ("p1", True, False))) == ""
+
+    def test_vector_source_names_its_emptied_targets(self, ctrl_module, layers, adapters, monkeypatch):
+        controller = ctrl_module.CoverageModeController(_dock())
+        self._quiet(controller, monkeypatch)
+        jobs = types.ModuleType(f"{adapters.package.__name__}.source_jobs")
+        jobs.VectorSourceJob = lambda source, features: object()
+        monkeypatch.setitem(sys.modules, jobs.__name__, jobs)
+        for name, value in (("_vector_source_features", lambda source: ["feature"]),
+                            ("_target_specs", lambda ids, exclude_id="": ids), ("_filtering_settings", lambda: {}),
+                            ("_build_request", lambda *a: object())):
+            monkeypatch.setattr(controller, name, value)
+        callbacks = []
+        ctrl_module._test_service.run = lambda request, job, on_done=None: callbacks.append(on_done)
+        controller._run_vector_source_filter(layers["v1"], ["r1", "p1"])
+        task = types.SimpleNamespace(outcomes=self._outcomes(ctrl_module, ("r1", True, True), ("p1", True, False)),
+                                     changes=[], error="")
+        callbacks[0](task, True)
+        assert ctrl_module._test_feedback.messages[-1] == (
+            "warning", "2 raster / point cloud target(s) filtered — 1 left empty, nothing matches the selection: r1")
+
     def test_removed_layers_leave_every_history(self, ctrl_module, layers, monkeypatch):
         controller = ctrl_module.CoverageModeController(_dock())
         tidies = []
