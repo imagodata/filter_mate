@@ -4570,6 +4570,16 @@ Seules les couches du projet sont filtrées. Le filtre est annulable depuis Filt
         <translation>Désélectionner toutes les couches par type de géométrie (Polygones)</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="343"/>
+        <source>Select all vector layers</source>
+        <translation>Sélectionner toutes les couches vecteur</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="345"/>
+        <source>De-select all vector layers</source>
+        <translation>Désélectionner toutes les couches vecteur</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/custom_widgets.py" line="367"/>
         <source>Select all raster layers</source>
         <translation>Sélectionner toutes les couches raster</translation>

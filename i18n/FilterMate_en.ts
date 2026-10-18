@@ -4548,6 +4548,16 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation>De-Select all layers by geometry type (Polygons)</translation>
     </message>
     <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="343"/>
+        <source>Select all vector layers</source>
+        <translation>Select all vector layers</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="345"/>
+        <source>De-select all vector layers</source>
+        <translation>De-select all vector layers</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/custom_widgets.py" line="367"/>
         <source>Select all raster layers</source>
         <translation>Select all raster layers</translation>
