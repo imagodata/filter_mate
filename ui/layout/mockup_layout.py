@@ -16,6 +16,7 @@ Layout changes of the FilterMate 5 design (mockup), applied once after setupUi.
   the buffer button: one switch, as in the mockup.
 """
 import logging
+import os
 from typing import Any
 
 try:
@@ -34,6 +35,19 @@ INSET = SPACING['fm_inset']    # group border -> its widgets (mockup.qss padding
 BAND = SPACING['fm_band']      # section header / collapsed group height
 DOCK_MARGIN = 2                # dockWidgetContents layout margin, part of EDGE
 QWIDGETSIZE_MAX = 16777215
+
+_SPLITTER_SHEET = (
+    "QSplitter::handle:vertical {{ margin: 0px 30px; background-color: transparent; image: url({grip}); }}"
+    "QSplitter::handle:vertical:hover, QSplitter::handle:vertical:pressed"
+    " {{ background-color: transparent; image: url({hover}); }}"
+)
+
+
+def _style_file(name: str) -> str:
+    """Path of a file of resources/styles, with forward slashes for a stylesheet url()."""
+    root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    return os.path.join(root, 'resources', 'styles', name).replace('\\', '/')
+
 
 BUFFER_TYPE_MAX_WIDTH = 110
 SEGMENTS_MAX_WIDTH = 64
@@ -706,7 +720,11 @@ def harmonize_spacing(dw: Any) -> bool:
         # EXPLORING -> FILTERING header, one block. The handle is handleWidth plus what the
         # stylesheets add around it (it came out 12 px, then 14): the width is lowered until
         # the handle measures one block. The splitter manager's sheet is replaced.
-        splitter.setStyleSheet("QSplitter::handle:vertical { margin: 0px 30px; border-radius: 2px; }")
+        # The handle shows a short centred grip (a bar of the dock width hugged the selection
+        # strip and the header on hover, and nothing showed at rest); this sheet beats the
+        # dock-wide handle colours of default.qss / mockup.qss.
+        splitter.setStyleSheet(_SPLITTER_SHEET.format(grip=_style_file('splitter_grip.svg'),
+                                                      hover=_style_file('splitter_grip_hover.svg')))
         handle = splitter.handle(1) if splitter.count() > 1 else None
         for width in range(BLOCK, 1, -1):
             splitter.setHandleWidth(width)
@@ -719,8 +737,9 @@ def harmonize_spacing(dw: Any) -> bool:
     if getattr(dw, '_fm_rail_spreader', None) is not None:
         dw._fm_rail_spreader.reset()
     _set_layout(getattr(dw, 'horizontalLayout_exploring_rail_and_groups', None), (RAIL_LEFT_INSET, 0, 0, 0), RAIL_GAP)
-    # A small right margin, like a default Qt layout, between the widgets and the scroll bar.
-    _set_layout(getattr(dw, 'gridLayout_main_header', None), (0, 0, SCROLLBAR_MARGIN, 0))
+    # A small right margin, like a default Qt layout, between the widgets and the scroll bar,
+    # and one gap under the last widget so a scrolled panel does not end flush on the edge.
+    _set_layout(getattr(dw, 'gridLayout_main_header', None), (0, 0, SCROLLBAR_MARGIN, GAP))
     _set_layout(getattr(dw, 'gridLayout_main_actions', None), (0, 0, 0, 0))
     _set_layout(getattr(dw, 'verticalLayout_exploring_tabs_content', None), (0, 0, 0, 0), GROUP_GAP)
     for name in ('mGroupBox_exploring_single_selection', 'mGroupBox_exploring_multiple_selection',

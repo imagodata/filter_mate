@@ -695,6 +695,9 @@ def s_spacing_scale():
     check('scale: FILTERING rows evenly spaced', min(row_gaps) >= gap and max(row_gaps) - min(row_gaps) <= 2, str(row_gaps))
     handle = d.splitter_main.handle(1)
     check('scale: splitter handle one block', handle.height() == block, str(handle.height()))
+    check('scale: splitter handle shows a centred grip', 'splitter_grip' in d.splitter_main.styleSheet())
+    bottom = d.gridLayout_main_header.contentsMargins().bottom()
+    check('scale: EXPLORING scroll content ends one gap above the edge', bottom == gap, f'{bottom} vs {gap}')
 
 
 def s_pc_statistics():
