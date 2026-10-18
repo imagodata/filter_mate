@@ -31,6 +31,7 @@ from .base_controller import BaseController
 from ..widgets.custom_widgets import apply_feature_picker_fetch_limit
 from ...infrastructure.signal_utils import SignalBlocker
 from .mixins.layer_selection_mixin import LayerSelectionMixin
+from .selection_modes import group_for_count
 
 try:
     from ...infrastructure.feedback import show_warning
@@ -2189,21 +2190,20 @@ class ExploringController(BaseController, LayerSelectionMixin):
         self._note_selection_for_strip(feature_count, current_groupbox)
         is_selecting_from_button = dw.pushButton_checkable_exploring_selecting.isChecked() if hasattr(dw, 'pushButton_checkable_exploring_selecting') else False
 
-        if is_selecting_from_button and not getattr(dw, '_syncing_from_qgis', False):
-            # Auto-switch only from single to multiple (not the reverse)
-            # FIX 2026-01-18: Don't auto-switch from multiple_selection to single_selection
-            # User should stay on multiple_selection even with 1 feature selected
-            # FIX 2026-01-19: Only switch if NOT already on multiple_selection to avoid list refresh
-            if feature_count > 1 and current_groupbox == "single_selection":
-                logger.info(f"handle_exploring_features_result: Auto-switching to multiple_selection ({feature_count} features from widget)")
+        if not getattr(dw, '_syncing_from_qgis', False):
+            # The number of features chooses the group (selection_modes.group_for_count, the rule shared
+            # with the map): several features from the widgets move the single selection to the multiple
+            # one, whether "Select" is on or not (2026-10-18; it used to need the button). The multiple list
+            # is never left from the widgets, and never reconfigured here (that cleared its checks).
+            target = group_for_count(current_groupbox, feature_count, from_map=False)
+            if target != current_groupbox:
+                logger.info(f"handle_exploring_features_result: {feature_count} features from the widgets, "
+                            f"{current_groupbox} -> {target}")
                 try:
-                    dw._force_exploring_groupbox_exclusive("multiple_selection")
-                    dw._configure_multiple_selection_groupbox()
+                    dw._force_exploring_groupbox_exclusive(target)
+                    self._configure_groupbox(target)
                 except Exception as e:
-                    logger.warning(f"Auto-switch to multiple_selection failed: {e}")
-            # FIX 2026-01-19: When already on multiple_selection, DON'T reconfigure to avoid clearing list
-            elif current_groupbox == "multiple_selection":
-                logger.debug(f"handle_exploring_features_result: Already on multiple_selection, skipping reconfigure ({feature_count} features)")
+                    logger.warning(f"Auto-switch to {target} failed: {e}")
 
         # Link widgets if is_linking is enabled
         if layer_props.get("exploring", {}).get("is_linking", False):
@@ -3027,6 +3027,15 @@ class ExploringController(BaseController, LayerSelectionMixin):
             logger.warning(f"Error in handle_layer_selection_changed: {type(e).__name__}: {e}")
             return False
 
+    def _configure_groupbox(self, groupbox: str) -> None:
+        """Configure the dock group made active by a count of features."""
+        dw = self._dockwidget
+        configure = {'single_selection': dw._configure_single_selection_groupbox,
+                     'multiple_selection': dw._configure_multiple_selection_groupbox,
+                     'custom_selection': dw._configure_custom_selection_groupbox}.get(groupbox)
+        if configure is not None:
+            configure()
+
     def _sync_widgets_from_qgis_selection(self) -> None:
         """
         Synchronize single and multiple selection widgets with QGIS selection.
@@ -3059,20 +3068,13 @@ class ExploringController(BaseController, LayerSelectionMixin):
             # which reset the checked items
             self._dockwidget._syncing_from_qgis = True
             try:
-                # Auto-switch groupbox based on selection count
-                # FIX 2026-01-19 v5: Bidirectional auto-switch based on selection count from canvas
-                if selected_count > 1 and current_groupbox == "single_selection":
-                    # Switch single -> multiple when multiple features selected
-                    logger.info(f"  🔀 Auto-switching to multiple_selection groupbox ({selected_count} features)")
-                    self._dockwidget._force_exploring_groupbox_exclusive("multiple_selection")
-                    self._dockwidget._configure_multiple_selection_groupbox()
-                    logger.info("  ✅ Switched to multiple_selection")
-                elif selected_count == 1 and current_groupbox == "multiple_selection":
-                    # FIX 2026-01-19 v5: Switch multiple -> single when only 1 feature selected from canvas
-                    logger.info("  🔀 Auto-switching to single_selection groupbox (1 feature from canvas)")
-                    self._dockwidget._force_exploring_groupbox_exclusive("single_selection")
-                    self._dockwidget._configure_single_selection_groupbox()
-                    logger.info("  ✅ Switched to single_selection")
+                # The number of features chooses the group (selection_modes.group_for_count, the rule shared
+                # with the widgets): several from the map move single -> multiple, one moves multiple -> single.
+                target = group_for_count(current_groupbox, selected_count, from_map=True)
+                if target != current_groupbox:
+                    logger.info(f"  🔀 {selected_count} features from the map: {current_groupbox} -> {target}")
+                    self._dockwidget._force_exploring_groupbox_exclusive(target)
+                    self._configure_groupbox(target)
                 else:
                     logger.info(f"  ℹ️ No groupbox switch needed (count={selected_count}, current={current_groupbox})")
                     # FIX 2026-01-19 v4: Do NOT call _configure_multiple_selection_groupbox when syncing from QGIS

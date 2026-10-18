@@ -371,6 +371,38 @@
         <source>Similar objects: click an object and every object of the raster like it is selected (the patches of such pixels whose area is within the ratios of the panel). Ctrl+click adds another reference object</source>
         <translation>Objets similaires : cliquez un objet et tous les objets du raster qui lui ressemblent sont sélectionnés (les taches de tels pixels dont la surface est dans les rapports du panneau). Ctrl+clic ajoute un autre objet de référence</translation>
     </message>
+    <message>
+        <source>More tools: the QGIS selection tools (rectangle, polygon, freehand, radius), select by expression, invert or clear the selection, the attribute table of the selection</source>
+        <translation>Plus d'outils : les outils de sélection QGIS (rectangle, polygone, main levée, rayon), la sélection par expression, inverser ou effacer la sélection, la table attributaire de la sélection</translation>
+    </message>
+    <message>
+        <source>Similar features: click a feature and every feature of the layer with the same value of the group's field (the display expression of the single / multiple selection) is selected. Ctrl+click adds another value</source>
+        <translation>Entités similaires : cliquez une entité et toutes les entités de la couche ayant la même valeur du champ du groupe (l'expression d'affichage de la sélection simple / multiple) sont sélectionnées. Ctrl+clic ajoute une autre valeur</translation>
+    </message>
+    <message>
+        <source>The link follows the single and multiple selections: make one of them the active group first</source>
+        <translation>Le lien suit les sélections simple et multiple : rendez l'une d'elles active d'abord</translation>
+    </message>
+    <message>
+        <source>Select on the map</source>
+        <translation>Sélectionner sur la carte</translation>
+    </message>
+    <message>
+        <source>Select by expression…</source>
+        <translation>Sélectionner par expression…</translation>
+    </message>
+    <message>
+        <source>Invert the selection</source>
+        <translation>Inverser la sélection</translation>
+    </message>
+    <message>
+        <source>Clear the selection</source>
+        <translation>Effacer la sélection</translation>
+    </message>
+    <message>
+        <source>Attribute table of the selection</source>
+        <translation>Table attributaire de la sélection</translation>
+    </message>
 </context>
 <context>
     <name>CoverageModeController</name>
@@ -2264,8 +2296,8 @@ Supprimer quand même ?</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget.py" line="886"/>
-        <source>Link the three selection modes</source>
-        <translation>Lier les trois modes de sélection</translation>
+        <source>Link the single and multiple selections</source>
+        <translation>Lier les sélections simple et multiple</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget.py" line="887"/>

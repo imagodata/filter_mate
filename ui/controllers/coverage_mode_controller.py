@@ -673,6 +673,10 @@ class CoverageModeController(BaseController):
         """The EXPLORING selection may have changed: the strip above FILTERING follows."""
         self._extras_call('schedule_strip')
 
+    def sync_vector_tools(self, groupbox: Optional[str]) -> None:
+        """The vector EXPLORING group changed: the rail tools tied to the groups follow (R1)."""
+        self._extras_call('sync_vector_tools', groupbox)
+
     def note_exploring_selection(self, layer_id: str, groupbox: str, count: int) -> None:
         """Features of the vector EXPLORING selection, for the strip above FILTERING."""
         self._extras_call('note_vector_selection', layer_id, groupbox, count)
