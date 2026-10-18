@@ -391,7 +391,7 @@ def s_pipette_ortho_check():
     check('pipette: its group is exclusive like the others', panel._pipette_group.isCheckable()
           and panel._pipette_group in panel._mode_groups.values())
     check('bands: three roles and the layout shortcuts on a 3-band image',
-          panel._layout_button.isVisibleTo(panel) and len(panel.band_roles()) == 3, str(panel.band_roles()))
+          any(a.isEnabled() for a in panel._shortcut_buttons['irc']) and len(panel.band_roles()) == 3, str(panel.band_roles()))
     check('bands: the detector is a second rail button of the PIPETTE group',
           ctrl._extras._tools['pushButton_checkable_exploring_raster_detector'].isVisible())
     button.setChecked(True)
@@ -524,7 +524,7 @@ def s_pipette_dem_check():
     ctrl = controller()
     panel = ctrl._raster_panel
     ext = layer('mnt').extent()
-    check('bands: no role nor layout shortcut on a single band', not panel._layout_button.isVisibleTo(panel)
+    check('bands: no role nor layout shortcut on a single band', not panel._shortcut_buttons['irc']
           and panel.band_roles() == {})
     button = ctrl._extras._tools['pushButton_checkable_exploring_raster_pipette']
     panel._tolerance_spin.setValue(5.0)

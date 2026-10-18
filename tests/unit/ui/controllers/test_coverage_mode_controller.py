@@ -1598,6 +1598,20 @@ class TestIdentifyIsTheClassPipette:
 
 
 @pytest.mark.unit
+class TestNoPixelPickerOnARaster:
+    """2026-10-18: the Identify button does nothing on a raster (hidden by the rail); the pipette reads the bands."""
+
+    def test_identify_is_a_no_op_on_a_raster(self, ctrl_module, layers, monkeypatch):
+        controller = ctrl_module.CoverageModeController(_dock())
+        controller._active_layer, controller._kind = layers["r1"], _kind(ctrl_module, "RASTER")
+        calls = []
+        monkeypatch.setattr(controller, "_toggle_pixel_tool", lambda: calls.append("picker"))
+        monkeypatch.setattr(controller, "_on_color_pick_toggled", lambda *a: calls.append("pipette"))
+        assert controller.handle_exploring_action("identify") is True
+        assert calls == []
+
+
+@pytest.mark.unit
 class TestToolComesBackWithTheLayer:
     """R3 (2026-10-18): the tool on the map leaves with the layer and is put back explicitly on its return."""
 
