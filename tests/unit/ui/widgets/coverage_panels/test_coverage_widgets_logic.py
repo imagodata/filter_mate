@@ -331,6 +331,28 @@ class TestPipetteGroupState:
         assert raster.build_raster_selection({"mode": "pipette", "pipette_selection": {"mode": "nope"}}) is None
 
 
+class TestObjectDetectionState:
+    def test_seeds_and_target_survive_the_state(self):
+        parsed = raster.parse_raster_state({"pipette_seeds": [[1, 2, [20, 120, 200]], [1, 2, 7], ["x", 3, 1],
+                                                              [4, 5], [7.5, 8, 6], [9, 9, "no"]],
+                                            "pipette_target": "object"})
+        assert parsed["pipette_seeds"] == [(1.0, 2.0, (20.0, 120.0, 200.0)), (7.5, 8.0, 6)]
+        assert parsed["pipette_target"] == raster.PICK_OBJECT
+        assert raster.parse_raster_state({"pipette_target": "weird"})["pipette_target"] == raster.PICK_SIMILAR
+
+    def test_detected_object_selection_from_the_state(self):
+        selection = raster.build_raster_selection({"mode": "pipette", "pipette_selection": {
+            "mode": "expression", "expression": '"o@1" > 3', "seeds": [[10, 20]]}})
+        assert selection.seeds == ((10.0, 20.0),)
+
+    def test_area_text(self):
+        assert raster.format_area(125.4) == "125 m²"
+        assert raster.format_area(2.34) == "2.3 m²"
+        assert raster.format_area(34000) == "3.4 ha"
+        assert raster.format_area(2150000) == "2.15 km²"
+        assert raster.format_area(None) == "" and raster.format_area(float("nan")) == ""
+
+
 class TestColorPipette:
     def test_one_color_within_a_tolerance(self):
         assert raster.color_similarity_expression("ortho", [1, 2, 3], [(12, 100, 180)], 30) == (

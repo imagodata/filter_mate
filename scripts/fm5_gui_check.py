@@ -360,6 +360,8 @@ def s_pipette_ortho():
     pixels = np.zeros((3, ny, nx), 'uint8')
     pixels[0], pixels[1], pixels[2] = 40, 140, 50                              # green field
     pixels[:, 20:40, 20:40] = np.array([20, 120, 200])[:, None, None]          # blue "pool", 400 px
+    pixels[:, 70:80, 20:30] = np.array([20, 120, 200])[:, None, None]          # a second pool, 100 px
+    pixels[:, 20:40, 40:45] = np.array([200, 40, 40])[:, None, None]           # red strip against the pool, 100 px
     pixels[:, 60:80, 60:80] = np.array([200, 40, 40])[:, None, None]           # red "roof", 400 px
     ds = gdal.GetDriverByName('GTiff').Create(path, nx, ny, 3, gdal.GDT_Byte)
     ds.SetGeoTransform((ext.xMinimum(), ext.width() / nx, 0, ext.yMaximum(), 0, -ext.height() / ny))
@@ -398,9 +400,9 @@ def s_pipette_ortho_check():
     check('pipette: an image gives a similar-colour selection', selection is not None and selection.mode.value == 'expression'
           and 'abs("ortho@1" - 20)' in selection.expression, (selection.expression if selection else '')[:90])
     check('pipette: the expression group is left alone', panel._expression_edit.text() == '', panel._expression_edit.text()[:60])
-    check('pipette: the pool is selected, nothing else', _kept(selection) == 400, str(_kept(selection)))
+    check('pipette: both pools are selected, nothing else', _kept(selection) == 500, str(_kept(selection)))
     ctrl._on_pixel_picked(_cell_point(ext, 70, 70), True)  # Ctrl+click: the roof is added
-    check('pipette: Ctrl+click adds the roof (pool + roof)', _kept(panel.selection()) == 800, str(_kept(panel.selection())))
+    check('pipette: Ctrl+click adds the reds (pools + roof + strip)', _kept(panel.selection()) == 1000, str(_kept(panel.selection())))
     panel._tolerance_spin.setValue(100.0)  # the whole observed range of each band: the green field too
     check('pipette: the tolerance widens the selection', _kept(panel.selection()) > 800, str(_kept(panel.selection())))
     panel._tolerance_spin.setValue(12.0)
@@ -409,6 +411,84 @@ def s_pipette_ortho_check():
     panel._spectral_combo.activated.emit(1)
     check('pipette: a spectral preset is the pipette selection', panel.active_mode().value == 'pipette'
           and '"ortho@1" - "ortho@2"' in panel.selection().expression, panel.selection().expression)
+
+
+def s_pipette_object():
+    """Object detection: the clicked pool only, not the other one of the same colour."""
+    ctrl = controller()
+    panel = ctrl._raster_panel
+    ext = layer('mnt').extent()
+    cell = (ext.width() / 100) * (ext.height() / 100)
+    panel._tolerance_spin.setValue(12.0)
+    combo = panel._target_combo
+    check('object: the PIPETTE group offers object detection', combo.parent() is panel._pipette_group
+          and combo.findData('object') >= 0)
+    ctrl._extras._tools['pushButton_checkable_exploring_raster_pipette'].setChecked(True)
+    combo.setCurrentIndex(combo.findData('object'))
+    ctrl._on_pixel_picked(_cell_point(ext, 30, 30), False)  # the big pool
+    selection = panel.selection()
+    check('object: the click is a seed of the selection', selection is not None and len(selection.seeds) == 1,
+          str(getattr(selection, 'seeds', None)))
+    drawn = ctrl._object_outline.geometry() if ctrl._object_outline is not None else None
+    area = drawn.area() if drawn is not None else 0.0
+    check('object: the clicked pool is outlined, not the other one', drawn is not None and abs(area / cell - 400) < 1,
+          f"{area / cell:.1f} cells")
+    check('object: the panel tells one object and its area', '1 object' in panel._sample_label.text(),
+          panel._sample_label.text())
+    check('object: the strip ratio is the object', panel.kept_ratio() is not None
+          and abs(panel.kept_ratio() - 400 / 10000) < 1e-6, str(panel.kept_ratio()))
+    ctrl._on_pixel_picked(_cell_point(ext, 25, 75), True)  # Ctrl+click: the second pool
+    drawn = ctrl._object_outline.geometry()
+    area = drawn.area() if drawn is not None else 0.0
+    check('object: Ctrl+click adds the second pool', abs(area / cell - 500) < 1 and '2 object' in panel._sample_label.text(),
+          f"{area / cell:.1f} cells, {panel._sample_label.text()}")
+    ctrl._on_pixel_picked(_cell_point(ext, 30, 30), False)  # the pool again...
+    ctrl._on_pixel_picked(_cell_point(ext, 70, 70), True)  # ... and Ctrl+click on the red roof, far from it
+    drawn = ctrl._object_outline.geometry()
+    area = drawn.area() if drawn is not None else 0.0
+    check('object: each object keeps its colour (the pool does not run into the red strip)',
+          abs(area / cell - 800) < 1 and '2 object' in panel._sample_label.text(),
+          f"{area / cell:.1f} cells, {panel._sample_label.text()}")
+    ctrl._on_pixel_picked(_cell_point(ext, 35, 35), True)  # a second click in the same pool
+    check('object: a second click in an object adds nothing', '2 object' in panel._sample_label.text()
+          and abs(panel.kept_ratio() - 800 / 10000) < 1e-6, f"{panel._sample_label.text()} {panel.kept_ratio()}")
+    ctrl._on_pixel_picked(_cell_point(ext, 30, 30), False)
+    combo.setCurrentIndex(combo.findData('similar'))
+    check('object: back to similar pixels, the outline goes', not ctrl._object_outline.visible
+          and not panel.selection().seeds)
+
+
+def s_object_filter():
+    ctrl = controller()
+    panel = ctrl._raster_panel
+    STATE['ortho_source'] = layer('ortho').source()
+    panel._target_combo.setCurrentIndex(panel._target_combo.findData('object'))
+    ctrl._on_pixel_picked(_cell_point(layer('mnt').extent(), 30, 30), False)  # the big pool only
+    set_targets(['parcelle', 'batiment'])
+    set_predicates(['Intersect'])
+    set_buffer(0.0)
+    ctrl._coverage_spin.setValue(1)
+    run_task('filter')
+
+
+def s_object_check():
+    ortho = layer('ortho')
+    check('object: the source is clipped to the detected object', ortho.source() != STATE.get('ortho_source'),
+          f"{ortho.providerType()} {ortho.source()[-60:]}")
+    parcelles = layer('parcelle')
+    check('object: the targets are filtered by it', parcelles.subsetString() != '', parcelles.subsetString()[:60])
+    log(f"object filter: {count(parcelles)} parcels, {count(layer('batiment'))} buildings")
+
+
+def s_object_unfilter():
+    run_task('unfilter')
+
+
+def s_object_unfilter_check():
+    check('object: unfilter gives the ortho back', layer('ortho').source() == STATE.get('ortho_source'),
+          layer('ortho').source()[-60:])
+    panel = controller()._raster_panel
+    panel._target_combo.setCurrentIndex(panel._target_combo.findData('similar'))
 
 
 def s_pipette_ortho_shot():
@@ -723,7 +803,9 @@ STEPS = [
     (s_centroid_registry, 800), (s_centroid_registry_check, 500), (s_centroid_setup, 1500), (s_centroid_popup, 1500), (s_centroid_filter, 9000), (s_centroid_check, 1000), (s_centroid_unfilter, 4000), (s_centroid_unfilter_check, 1000),
     (s_raster_source, 3000), (s_raster_mode, 2500), (s_raster_preview, 1500), (s_raster_preview_check, 1000),
     (s_raster_filter, 8000), (s_raster_check, 1000), (s_raster_unfilter, 3000), (s_raster_unfilter_check, 1000),
-    (s_pipette_ortho, 3500), (s_pipette_ortho_check, 1500), (s_pipette_ortho_shot, 1500), (s_pipette_dem, 3000), (s_pipette_dem_check, 1000),
+    (s_pipette_ortho, 3500), (s_pipette_ortho_check, 1500), (s_pipette_object, 1500),
+    (s_object_filter, 8000), (s_object_check, 1000), (s_object_unfilter, 3000), (s_object_unfilter_check, 1000),
+    (s_pipette_ortho_shot, 1500), (s_pipette_dem, 3000), (s_pipette_dem_check, 1000),
     (s_pipette_classes, 3000), (s_pipette_classes_check, 1000),
     (s_terrain_source, 3000), (s_terrain_mode, 2500), (s_terrain_preview, 2500), (s_terrain_preview_check, 1000), (s_terrain_pick, 1500), (s_terrain_filter, 8000), (s_terrain_check, 1000),
     (s_terrain_unfilter, 3000), (s_terrain_unfilter_check, 1000),

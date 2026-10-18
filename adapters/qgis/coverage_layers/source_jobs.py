@@ -141,6 +141,15 @@ class RasterSourceJob(SourceJob):
             base = self._base_layer(layer)
             provider = base.dataProvider() if base is not None else layer.dataProvider()
         self._provider = provider.clone() if provider is not None else None
+        self._object_providers = {}  # expression -> cloned provider of its virtual raster (object detection)
+        if selection.seeds:
+            from .raster_adapter import object_virtual_layers
+            self._object_virtuals = object_virtual_layers(layer, selection, self.before.base_source, self.before.base_provider)
+            self._object_providers = {expression: virtual.dataProvider().clone()
+                                      for expression, virtual in self._object_virtuals.items() if virtual is not None}
+            if any(c.mode is not RasterSelectionMode.EXPRESSION for c in selection.objects):
+                base = self._base_layer(layer)
+                self._object_base = (base.dataProvider() if base is not None else layer.dataProvider()).clone()
         self._derived_uri = ''
         self._nodata = None
 
@@ -161,21 +170,27 @@ class RasterSourceJob(SourceJob):
             self.message = 'canceled'
             return QgsGeometry()
         result = selection_geometry(self._provider, self.selection, self._extent, self._width, self._height,
-                                    self._crs_wkt, max_pixels=self._max_pixels)
+                                    self._crs_wkt, max_pixels=self._max_pixels, provider_for=self._object_provider)
         if is_canceled():  # the polygonization cannot be interrupted: its result is dropped
             self.message = 'canceled'
             return QgsGeometry()
         self.details.update(kept_pixels=result.kept_pixels, total_pixels=result.total_pixels, cell_size=result.cell_size)
         return result.geometry
 
+    def _object_provider(self, criterion):
+        """Provider an object of the selection is read from: its own virtual raster for an expression."""
+        if criterion.mode is RasterSelectionMode.EXPRESSION:
+            return self._object_providers.get(criterion.expression)
+        return getattr(self, '_object_base', None) or self._provider
+
     def apply(self, layer) -> Optional[LayerSnapshot]:
         if not self._filter_source or (self.selection.mode is RasterSelectionMode.EXPRESSION and self._virtual is None):
             return None
         if (self._band_count > 1 or self.selection.mode is RasterSelectionMode.EXPRESSION
-                or self.selection.derivative.is_terrain):
-            # Multiband (RGB...), expression or terrain derivative (the raster calculator
-            # has none): keep every band, mask outside the
-            # selected area with a clipped VRT (a virtual raster has one band).
+                or self.selection.derivative.is_terrain or self.selection.seeds):
+            # Multiband (RGB...), expression, terrain derivative or detected objects (the
+            # raster calculator has neither a slope nor a connected patch): keep every
+            # band, mask outside the selected area with a clipped VRT (a virtual raster has one band).
             return self._apply_clip(layer)
         from .raster_adapter import selection_virtual_uri, set_user_nodata
         nodata = -9999.0
@@ -315,6 +330,8 @@ def apply_stored_selection(layer, snapshot: LayerSnapshot) -> Optional[LayerSnap
         selection = RasterSelection.from_dict(json.loads(snapshot.selection))
     except (TypeError, ValueError, KeyError):
         return None
+    if selection.seeds:
+        return None  # a detected object is a clip of the source, not a formula (never stored as one)
     uri, _ = selection_virtual_uri(snapshot.base_source, snapshot.base_provider, layer, selection)
     if not swap_source(layer, uri, 'virtualraster'):
         return None

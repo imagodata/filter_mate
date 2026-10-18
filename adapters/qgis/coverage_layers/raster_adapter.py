@@ -21,6 +21,7 @@ from typing import Dict, List, Optional, Tuple
 from qgis.core import (
     Qgis,
     QgsCoordinateReferenceSystem,
+    QgsGeometry,
     QgsPointXY,
     QgsRasterBandStats,
     QgsRasterDataProvider,
@@ -413,32 +414,47 @@ class SelectionGeometryResult:
     kept_pixels: int
     total_pixels: int
     cell_size: float
+    truncated: bool = False  # object detection: an object went on past the largest window read
+    objects: int = 0  # object detection: number of objects found under the clicks
 
 
 # Below this many selected pixels the selection is polygonized without sieve.
 SIEVE_MIN_KEPT_PIXELS = 10000
 
 
+def _selection_mask_over(provider: QgsRasterDataProvider, selection: RasterSelection, extent: QgsRectangle,
+                         width: int, height: int, crs_wkt: str):
+    """Boolean grid (height, width) of the pixels ``selection`` keeps over ``extent``.
+
+    For an EXPRESSION selection, ``provider`` is the one of the virtual raster
+    built by :func:`selection_virtual_layer` (its band 1 is 1 where selected).
+    """
+    import numpy as np
+    if selection.mode is RasterSelectionMode.EXPRESSION:
+        array = read_band_array(provider, 1, extent, width, height)
+        return ~np.isnan(array) & (array != 0)
+    array = read_band_array(provider, selection.band, extent, width, height)
+    if selection.derivative.is_terrain:
+        kind = crs_kind(QgsCoordinateReferenceSystem.fromWkt(crs_wkt))
+        array = derived_array(array, selection.derivative, extent, kind)
+    return selection_mask(array, selection)
+
+
 def selection_geometry(provider: QgsRasterDataProvider, selection: RasterSelection, extent: QgsRectangle,
                        native_width: int, native_height: int, crs_wkt: str, max_pixels: int = 4000000,
-                       sieve_pixels: int = 4) -> SelectionGeometryResult:
+                       sieve_pixels: int = 4, provider_for=None) -> SelectionGeometryResult:
     """Polygons of the pixels kept by ``selection`` (call from a task with a cloned provider).
 
     For an EXPRESSION selection, pass the provider of the virtual raster built by
-    :func:`selection_virtual_layer` (its band 1 is 1 where selected).
+    :func:`selection_virtual_layer` (its band 1 is 1 where selected). A selection
+    with seeds keeps the objects under them (:func:`object_geometry`, ``provider_for``).
     """
-    import numpy as np
     from .geometry_tools import mask_to_geometry
+    if selection.seeds:
+        return object_geometry(provider, selection, extent, native_width, native_height, crs_wkt,
+                               provider_for=provider_for)
     width, height = _grid_for(extent, native_width, native_height, max_pixels)
-    if selection.mode is RasterSelectionMode.EXPRESSION:
-        array = read_band_array(provider, 1, extent, width, height)
-        mask = ~np.isnan(array) & (array != 0)
-    else:
-        array = read_band_array(provider, selection.band, extent, width, height)
-        if selection.derivative.is_terrain:
-            kind = crs_kind(QgsCoordinateReferenceSystem.fromWkt(crs_wkt))
-            array = derived_array(array, selection.derivative, extent, kind)
-        mask = selection_mask(array, selection)
+    mask = _selection_mask_over(provider, selection, extent, width, height, crs_wkt)
     cell_x = extent.width() / width
     cell_y = extent.height() / height
     geotransform = (extent.xMinimum(), cell_x, 0.0, extent.yMaximum(), 0.0, -cell_y)
@@ -453,6 +469,205 @@ def selection_geometry(provider: QgsRasterDataProvider, selection: RasterSelecti
         sieve_pixels = min(sieve_pixels, 2)
     geometry = mask_to_geometry(mask, geotransform, crs_wkt, sieve_pixels=sieve_pixels, simplify_tolerance=min(cell_x, cell_y) * 0.5)
     return SelectionGeometryResult(geometry, kept, int(mask.size), max(cell_x, cell_y))
+
+
+# --- object detection (pipette) --------------------------------------------
+
+# Half side, in native pixels, of the first window read around a click: 257 x 257
+# pixels, 64 m on a 25 cm orthophoto, which holds a pool or a house.
+OBJECT_WINDOW_START = 128
+# Largest half side: a 1025 x 1025 window, 256 m on a 25 cm orthophoto. Read on the
+# main thread at each click: a patch that runs over a field (a tolerance too wide)
+# takes 4 s at 2049 x 2049 on QGIS 4.2, 1 to 2 s here; it is cut and the panel says so.
+OBJECT_WINDOW_MAX = 512
+# The window grows four times at each step: 257, then 1025 pixels; two reads at most.
+OBJECT_WINDOW_GROWTH = 4
+
+
+def flood_fill(mask, seeds):
+    """Cells of ``mask`` 4-connected to one of ``seeds`` (``(row, col)``), as a boolean grid.
+
+    A scanline fill: each run of a row is filled at once and gives one seed per
+    run of the rows above and below, so the work follows the number of runs, not
+    of pixels. 4-connected: two patches touching by a corner stay apart (a pool
+    and the lawn beside it). A seed outside the grid or on a dropped cell fills nothing.
+    """
+    import numpy as np
+    mask = np.asarray(mask, dtype=bool)
+    rows, cols = mask.shape
+    filled = np.zeros_like(mask)
+    stack = [(int(row), int(col)) for row, col in seeds if 0 <= row < rows and 0 <= col < cols]
+    while stack:
+        row, col = stack.pop()
+        if not mask[row, col] or filled[row, col]:
+            continue
+        line = mask[row]
+        stops = np.flatnonzero(~line[:col])
+        left = int(stops[-1]) + 1 if stops.size else 0
+        stops = np.flatnonzero(~line[col:])
+        right = col + int(stops[0]) if stops.size else cols
+        filled[row, left:right] = True
+        for other in (row - 1, row + 1):
+            if 0 <= other < rows:
+                free = mask[other, left:right] & ~filled[other, left:right]
+                if free.any():
+                    starts = np.flatnonzero(free & ~np.concatenate(([False], free[:-1])))
+                    stack.extend((other, left + int(start)) for start in starts)
+    return filled
+
+
+def fill_holes(region):
+    """``region`` with its holes filled: the cells it encloses (a ladder, a reflection in a pool)."""
+    import numpy as np
+    region = np.asarray(region, dtype=bool)
+    rows, cols = region.shape
+    border = [(0, col) for col in range(cols)] + [(rows - 1, col) for col in range(cols)]
+    border += [(row, 0) for row in range(rows)] + [(row, cols - 1) for row in range(rows)]
+    outside = flood_fill(~region, border)
+    return ~outside
+
+
+def _object_window(extent: QgsRectangle, native_width: int, native_height: int, x: float, y: float, half: int):
+    """Window of native pixels around ``(x, y)``: ``(rectangle, (col0, row0, col1, row1), (row, col))``.
+
+    ``(row, col)`` is the clicked pixel in the window; None when the point is off the raster
+    (its right and bottom edges belong to the last pixel, as for identify).
+    """
+    size_x, size_y = extent.width() / native_width, extent.height() / native_height
+    if not (extent.xMinimum() <= x <= extent.xMaximum() and extent.yMinimum() <= y <= extent.yMaximum()):
+        return None
+    col = min(native_width - 1, int(math.floor((x - extent.xMinimum()) / size_x)))
+    row = min(native_height - 1, int(math.floor((extent.yMaximum() - y) / size_y)))
+    col0, col1 = max(0, col - half), min(native_width, col + half + 1)
+    row0, row1 = max(0, row - half), min(native_height, row + half + 1)
+    return _pixel_rectangle(extent, size_x, size_y, col0, row0, col1, row1), (col0, row0, col1, row1), (row - row0, col - col0)
+
+
+def _pixel_rectangle(extent: QgsRectangle, size_x: float, size_y: float, col0: int, row0: int, col1: int, row1: int):
+    return QgsRectangle(extent.xMinimum() + col0 * size_x, extent.yMaximum() - row1 * size_y,
+                        extent.xMinimum() + col1 * size_x, extent.yMaximum() - row0 * size_y)
+
+
+def _window_mask(provider, selection: RasterSelection, extent: QgsRectangle, size_x: float, size_y: float,
+                 bounds: Tuple[int, int, int, int], native_width: int, native_height: int, crs_wkt: str):
+    """Mask of ``selection`` over the window ``bounds``; a slope... is read with one more pixel around.
+
+    Without it the pixels of the window border would see an extrapolated neighbourhood
+    and could drop out of the range, stopping the patch one pixel short of the side.
+    """
+    col0, row0, col1, row1 = bounds
+    if not selection.derivative.is_terrain:
+        rectangle = _pixel_rectangle(extent, size_x, size_y, col0, row0, col1, row1)
+        return _selection_mask_over(provider, selection, rectangle, col1 - col0, row1 - row0, crs_wkt)
+    pad_col0, pad_row0 = max(0, col0 - 1), max(0, row0 - 1)
+    pad_col1, pad_row1 = min(native_width, col1 + 1), min(native_height, row1 + 1)
+    rectangle = _pixel_rectangle(extent, size_x, size_y, pad_col0, pad_row0, pad_col1, pad_row1)
+    mask = _selection_mask_over(provider, selection, rectangle, pad_col1 - pad_col0, pad_row1 - pad_row0, crs_wkt)
+    return mask[row0 - pad_row0:row0 - pad_row0 + row1 - row0, col0 - pad_col0:col0 - pad_col0 + col1 - col0]
+
+
+def object_parts(selection: RasterSelection) -> List[Tuple[RasterSelection, Tuple[float, float]]]:
+    """``(criterion, seed)`` of each object: its own criterion, else the one of the selection for every seed."""
+    if selection.objects:
+        return [(item, item.seeds[0]) for item in selection.objects]
+    return [(selection, seed) for seed in selection.seeds]
+
+
+def object_geometry(provider: QgsRasterDataProvider, selection: RasterSelection, extent: QgsRectangle,
+                    native_width: int, native_height: int, crs_wkt: str, start: int = OBJECT_WINDOW_START,
+                    limit: int = OBJECT_WINDOW_MAX, provider_for=None) -> SelectionGeometryResult:
+    """Outline of the objects under the seeds of ``selection``: the patch of kept pixels each click falls in.
+
+    Read at the native resolution in a window around each click, grown while
+    the patch touches a side of the window that is not the raster edge, up to
+    ``limit``: a patch still larger is cut at the window (``truncated``). The
+    holes of an object are filled. A click on a dropped pixel gives no object, a
+    click inside an object already found adds nothing.
+
+    Args:
+        provider_for: ``criterion -> provider`` for the objects of their own
+            criterion (an expression is read through its own virtual raster);
+            None: ``provider`` for every object.
+    """
+    import numpy as np
+    from .geometry_tools import mask_to_geometry, union_geometries
+    total = int(native_width) * int(native_height)
+    if native_width <= 0 or native_height <= 0 or extent.width() <= 0 or extent.height() <= 0:
+        return SelectionGeometryResult(QgsGeometry(), 0, max(0, total), 0.0)
+    size_x, size_y = extent.width() / native_width, extent.height() / native_height
+    geometries, kept, truncated = [], 0, False
+    for criterion, (x, y) in object_parts(selection):
+        if _inside_any(geometries, x, y):
+            continue  # a second click on the same pool
+        source = provider
+        if provider_for is not None:
+            source = provider_for(criterion)
+            if source is None:
+                continue  # its expression was refused by the raster calculator
+        half = max(1, int(start))
+        while True:
+            window = _object_window(extent, native_width, native_height, x, y, half)
+            if window is None:
+                break
+            _rectangle, bounds, (row, col) = window
+            col0, row0, col1, row1 = bounds
+            mask = _window_mask(source, criterion, extent, size_x, size_y, bounds, native_width, native_height, crs_wkt)
+            region = flood_fill(mask, [(row, col)])
+            if not region.any():
+                break
+            touches = ((row0 > 0 and region[0].any()) or (row1 < native_height and region[-1].any())
+                       or (col0 > 0 and region[:, 0].any()) or (col1 < native_width and region[:, -1].any()))
+            if touches and half < limit:
+                half = min(limit, half * OBJECT_WINDOW_GROWTH)
+                continue
+            truncated = truncated or touches
+            region = fill_holes(region)
+            geotransform = (extent.xMinimum() + col0 * size_x, size_x, 0.0, extent.yMaximum() - row0 * size_y, 0.0, -size_y)
+            geometry = mask_to_geometry(region, geotransform, crs_wkt, simplify_tolerance=min(size_x, size_y) * 0.5)
+            if geometry is not None and not geometry.isEmpty():
+                geometries.append(geometry)
+                kept += int(np.count_nonzero(region))
+            break
+    if truncated:
+        logger.info(f"[FM5] object detection: an object is larger than {2 * limit + 1} pixels, cut at the window read")
+    geometry = union_geometries(geometries) if geometries else QgsGeometry()
+    return SelectionGeometryResult(geometry, kept, total, max(size_x, size_y), truncated, len(geometries))
+
+
+def _inside_any(geometries, x: float, y: float) -> bool:
+    """Whether ``(x, y)`` falls in one of ``geometries`` (an object already found)."""
+    for geometry in geometries:
+        try:
+            if geometry.contains(QgsPointXY(x, y)):
+                return True
+        except Exception:  # noqa: BLE001 - a geometry that cannot tell is not a hit
+            continue
+    return False
+
+
+def object_virtual_layers(layer: QgsRasterLayer, selection: RasterSelection, source: Optional[str] = None,
+                          provider: Optional[str] = None) -> Dict[str, Optional[QgsRasterLayer]]:
+    """Virtual raster of each object expression of ``selection`` (main thread), by expression; None when refused."""
+    layers: Dict[str, Optional[QgsRasterLayer]] = {}
+    for criterion, _seed in object_parts(selection):
+        if criterion.mode is RasterSelectionMode.EXPRESSION and criterion.expression not in layers:
+            layers[criterion.expression] = selection_virtual_layer(layer, criterion, source, provider)
+    return layers
+
+
+def layer_object_geometry(layer: QgsRasterLayer, selection: RasterSelection) -> SelectionGeometryResult:
+    """:func:`object_geometry` read from ``layer`` itself (main thread: the pipette shows what it detects)."""
+    virtuals = object_virtual_layers(layer, selection)  # kept alive while their providers are read
+    base = layer.dataProvider()
+
+    def provider_for(criterion):
+        if criterion.mode is not RasterSelectionMode.EXPRESSION:
+            return base
+        virtual = virtuals.get(criterion.expression)
+        return virtual.dataProvider() if virtual is not None else None
+
+    return object_geometry(base, selection, layer.extent(), layer.width(), layer.height(), layer.crs().toWkt(),
+                           provider_for=provider_for)
 
 
 # --- virtual rasters -------------------------------------------------------
