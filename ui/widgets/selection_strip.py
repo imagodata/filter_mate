@@ -89,13 +89,14 @@ def percent_text(ratio: float) -> str:
 
 
 def raster_strip_value(selection, kept_ratio: Optional[float],
-                       translate: Callable[[str], str] = _identity) -> str:
-    """Value of the raster strip: ``"200 – 260 · 38.9 %"``, ``"3 classes · 12.0 %"``.
+                       translate: Callable[[str], str] = _identity, detected=None) -> str:
+    """Value of the raster strip: ``"200 – 260 · 38.9 %"``, ``"3 classes · 12.0 %"``, ``"… · 3 object(s) · 125 m²"``.
 
     Args:
         selection: The panel's ``RasterSelection`` (None: no constraint).
         kept_ratio: Share (0-1) of the pixels kept, None when unknown.
         translate: Translation function of the caller.
+        detected: ``(count, area in m², truncated)`` of the object detection, None without one.
     """
     if selection is None:
         return translate("no constraint")
@@ -120,7 +121,29 @@ def raster_strip_value(selection, kept_ratio: Optional[float],
         text = translate("raster expression")
     if kept_ratio is not None:
         text += f" · {percent_text(kept_ratio)}"
+    if detected is not None:
+        count, area = detected[0], detected[1] if len(detected) > 1 else None
+        if count is not None:
+            text += " · " + translate("{0} object(s)").format(int(count))
+        area_text = _area_text(area)
+        if area_text:
+            text += f" · {area_text}"
     return text
+
+
+def _area_text(square_metres: Optional[float]) -> str:
+    """``"125 m²"``, ``"3.4 ha"``, ``"2.15 km²"``; ``""`` when unknown."""
+    try:
+        value = float(square_metres)
+    except (TypeError, ValueError):
+        return ""
+    if math.isnan(value) or value < 0:
+        return ""
+    if value < 10000:
+        return f"{value:.0f} m²" if value >= 10 else f"{value:.1f} m²"
+    if value < 1e6:
+        return f"{value / 1e4:.1f} ha"
+    return f"{value / 1e6:.2f} km²"
 
 
 def point_cloud_strip_value(kept: Optional[int], total: Optional[int], expression: str = "",

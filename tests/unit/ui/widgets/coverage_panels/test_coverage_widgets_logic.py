@@ -711,10 +711,13 @@ class TestPointCloudExpression:
         assert cloud.build_point_cloud_expression(state) == "Classification = 5 AND HeightAboveGround >= 2.5"
         assert cloud.hag_from_state(state) == ("dtm", 2.5)
 
-    def test_height_needs_group_layer_and_availability(self):
+    def test_height_needs_layer_and_availability_whatever_the_active_group(self):
+        # 2026-10-18: HEIGHT / DTM is its own group, ANDed whatever the active group.
         base = {"classes": [5], "ranges_enabled": True, "hag_enabled": True, "hag_layer_id": "dtm"}
         assert cloud.build_point_cloud_expression(base, hag_available=False) == "Classification = 5"
-        assert cloud.hag_from_state(dict(base, ranges_enabled=False)) is None
+        assert cloud.hag_from_state(dict(base, ranges_enabled=False)) == ("dtm", cloud.DEFAULT_HAG_MIN)
+        assert cloud.build_point_cloud_expression(dict(base, ranges_enabled=False)) == (
+            "Classification = 5 AND HeightAboveGround >= 2")
         assert cloud.hag_from_state(dict(base, hag_layer_id=None)) is None
         assert cloud.hag_from_state(dict(base, hag_enabled=False)) is None
 
@@ -731,6 +734,91 @@ class TestPointCloudExpression:
     def test_height_alone(self):
         assert cloud.compose_expression("", 1.0) == "HeightAboveGround >= 1"
         assert cloud.compose_expression("Z > 3", None) == "Z > 3"
+
+
+class TestBandRoles:
+    """2026-10-18: the BANDS block, the roles of the bands read from the renderer or guessed."""
+
+    def test_roles_from_the_multiband_renderer_are_known(self):
+        roles, guessed = raster.default_roles(["Band 1", "Band 2", "Band 3", "Band 4"], (),
+                                              {"R": 2, "G": 3, "B": 4})
+        assert roles == {2: "R", 3: "G", 4: "B", 1: "NIR"} and guessed is False
+
+    def test_rgba_renderer_leaves_the_alpha_band_without_a_role(self):
+        roles, guessed = raster.default_roles(["Band 1", "Band 2", "Band 3", "Band 4"], {4}, {"R": 1, "G": 2, "B": 3})
+        assert roles == {1: "R", 2: "G", 3: "B"} and guessed is False
+
+    def test_without_a_colour_renderer_the_roles_are_guessed(self):
+        roles, guessed = raster.default_roles(["Band 1", "Band 2", "Band 3"], (), {"gray": 1})
+        assert roles == {1: "R", 2: "G", 3: "B"} and guessed is True
+        roles, guessed = raster.default_roles(["R", "G", "B", "N"], ())
+        assert roles == {1: "R", 2: "G", 3: "B", 4: "NIR"} and guessed is True
+
+    def test_a_band_named_infrared_takes_the_nir_role(self):
+        roles, guessed = raster.default_roles(["NIR", "Red", "Green"], ())
+        assert roles == {1: "NIR", 2: "R", 3: "G"} and guessed is True
+
+    def test_a_single_band_has_no_role(self):
+        assert raster.default_roles(["elevation"], ()) == ({}, False)
+        assert raster.default_roles(["Gray", "Alpha"], {2}) == ({}, False)
+
+    def test_layouts_and_roles_round_trip(self):
+        assert raster.roles_from_layout("irc", [1, 2, 3]) == {1: "NIR", 2: "R", 3: "G"}
+        assert raster.roles_from_layout("rgbn", [1, 2, 3]) == {1: "R", 2: "G", 3: "B"}  # no fourth band: no NIR
+        assert raster.layout_from_roles({1: "NIR", 2: "R", 3: "G"}) == "irc"
+        assert raster.layout_from_roles({1: "R", 2: "G", 3: "B", 4: "NIR"}) == "rgbn"
+        assert raster.layout_from_roles({2: "R", 3: "G", 4: "B", 1: "NIR"}) == ""  # a custom arrangement
+        assert raster.layout_from_roles({}) == ""
+
+    def test_spectral_presets_follow_the_roles(self):
+        roles = {2: "R", 3: "G", 4: "B", 1: "NIR"}
+        assert raster.spectral_presets_for(roles) == ["ndvi_vegetation", "ndvi_bare", "ndwi_water", "exg_vegetation"]
+        assert raster.spectral_expression("ndvi_vegetation", roles, "o") == '("o@1" - "o@2") / ("o@1" + "o@2") > 0.3'
+        assert raster.spectral_presets_for({1: "R", 2: "G", 3: "B"}) == ["exg_vegetation"]
+
+    def test_roles_in_the_state(self):
+        parsed = raster.parse_raster_state({"roles": {"1": "NIR", "2": "R", "x": "G", "3": "R", "4": "weird"},
+                                            "roles_chosen": True, "pipette_bands": [1, 2, 2, "3", 0]})
+        assert parsed["roles"] == {1: "NIR", 2: "R"} and parsed["roles_chosen"] is True
+        assert parsed["pipette_bands"] == [1, 2, 3]
+
+    def test_a_saved_layout_becomes_roles(self):
+        parsed = raster.parse_raster_state({"layout": "irc"})
+        assert parsed["roles"] == {1: "NIR", 2: "R", 3: "G"} and parsed["roles_chosen"] is True
+
+    def test_short_band_name(self):
+        assert raster.short_band_name(1, "Band 1: idw") == "idw"
+        assert raster.short_band_name(2, "Band 2") == ""
+        assert raster.short_band_name(3, "elevation") == "elevation"
+
+    def test_expression_starts_from_the_previous_group(self):
+        D = raster.RasterSelectionMode
+        assert raster.previous_group_formula(RasterSelection(band=1, mode=D.RANGE, minimum=200.0, maximum=260.0), "mnt") == (
+            '("mnt@1" >= 200 AND "mnt@1" <= 260)')
+        assert raster.previous_group_formula(RasterSelection(band=1, mode=D.EXPRESSION, expression=' "a@1" > 1 '), "a") == '"a@1" > 1'
+        assert raster.previous_group_formula(RasterSelection(band=1, mode=D.RANGE, maximum=12.0,
+                                                             derivative=raster.RasterDerivative.SLOPE_DEGREES), "m") == ""
+        assert raster.previous_group_formula(None, "m") == ""
+
+    def test_classes_mode_in_a_saved_state_still_builds_a_selection(self):
+        # The CLASSES group is gone from the panel; a saved selection of that mode stays readable.
+        selection = raster.build_raster_selection({"mode": "classes", "classes": [3]})
+        assert selection.mode is RasterSelectionMode.CLASSES
+
+    def test_pipette_on_is_part_of_the_state(self):
+        assert raster.parse_raster_state({"pipette_on": True})["pipette_on"] is True
+        assert raster.parse_raster_state({})["pipette_on"] is False
+
+
+class TestPointCloudClassLists:
+    def test_present_and_absent_classes(self):
+        present, absent = cloud.split_classes([(2, 100), (6, 0), (9, -1), (5, 3)])
+        assert present == [(2, 100), (9, -1), (5, 3)] and absent == [(6, 0)]
+
+    def test_weight_share(self):
+        assert cloud.weight_share(50, 100) == 0.5
+        assert cloud.weight_share(200, 100) == 1.0
+        assert cloud.weight_share(-1, 100) == 0.0 and cloud.weight_share(5, 0) == 0.0
 
 
 class TestModulesImportUnderMocks:
@@ -780,5 +868,5 @@ class TestDtmLayerCombo:
         path = _PROJECT_ROOT / "ui" / "widgets" / "coverage_panels" / "point_cloud_exploring_panel.py"
         tree = ast.parse(path.read_text(encoding="utf-8"))
         build = next(node for node in ast.walk(tree)
-                     if isinstance(node, ast.FunctionDef) and node.name == "_build_ranges_group")
+                     if isinstance(node, ast.FunctionDef) and node.name == "_build_hag_group")  # HEIGHT / DTM group
         assert "_dtm_rasters_only(self._hag_layer_combo)" in ast.unparse(build)

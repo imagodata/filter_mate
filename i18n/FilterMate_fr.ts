@@ -291,6 +291,22 @@
         <source>all points</source>
         <translation>tous les points</translation>
     </message>
+    <message>
+        <source>Current filter: {0}</source>
+        <translation>Filtre courant : {0}</translation>
+    </message>
+    <message>
+        <source>Object detector: click the map and the patch of pixels that look like the one you click is selected (a pool, a roof, a field, with the tolerance of the panel), not every pixel of its colour. Ctrl+click adds another object</source>
+        <translation>Détecteur d'objet : cliquez la carte et la tache de pixels qui ressemblent à celui cliqué est sélectionnée (une piscine, un toit, un champ, avec la tolérance du panneau), pas tous les pixels de sa couleur. Ctrl+clic ajoute un autre objet</translation>
+    </message>
+    <message>
+        <source>The style link follows the VALUE RANGE group: make it the active one first</source>
+        <translation>Le lien de style suit le groupe PLAGE DE VALEURS : rendez-le actif d'abord</translation>
+    </message>
+    <message>
+        <source>{0} object(s)</source>
+        <translation>{0} objet(s)</translation>
+    </message>
 </context>
 <context>
     <name>CoverageModeController</name>
@@ -568,6 +584,10 @@
         <location filename="../ui/controllers/coverage_mode_controller.py" line="1379"/>
         <source>Class {0} is not in the class list of the layer</source>
         <translation>La classe {0} n'est pas dans la liste des classes de la couche</translation>
+    </message>
+    <message>
+        <source>Class pipette: click the map and the class of the points drawn there is checked. Ctrl+click adds another one</source>
+        <translation>Pipette de classe : cliquez la carte et la classe des points dessinés là est cochée. Ctrl+clic en ajoute une autre</translation>
     </message>
 </context>
 <context>
@@ -3089,6 +3109,46 @@ Assurez-vous que la table PostgreSQL a une CLÉ PRIMAIRE définie.</translation>
         <source>Invert the selection</source>
         <translation>Inverser la sélection</translation>
     </message>
+    <message>
+        <source>Always combined (AND) with the active group</source>
+        <translation>Toujours combinée (ET) avec le groupe actif</translation>
+    </message>
+    <message>
+        <source>Any return</source>
+        <translation>Tous les retours</translation>
+    </message>
+    <message>
+        <source>Classes absent from the layer</source>
+        <translation>Classes absentes de la couche</translation>
+    </message>
+    <message>
+        <source>Classes of the standard that hold no point of this layer</source>
+        <translation>Classes de la norme sans aucun point dans cette couche</translation>
+    </message>
+    <message>
+        <source>HEIGHT / DTM</source>
+        <translation>HAUTEUR / MNT</translation>
+    </message>
+    <message>
+        <source>Keep every return, or the first, last or single returns of the laser pulses</source>
+        <translation>Garder tous les retours, ou les premiers, derniers ou uniques retours des impulsions laser</translation>
+    </message>
+    <message>
+        <source>Other classes, absent from the layer ({0})</source>
+        <translation>Autres classes, absentes de la couche ({0})</translation>
+    </message>
+    <message>
+        <source>PDAL · derived cloud</source>
+        <translation>PDAL · nuage dérivé</translation>
+    </message>
+    <message>
+        <source>Selection ▾</source>
+        <translation>Sélection ▾</translation>
+    </message>
+    <message>
+        <source>The height is computed by PDAL into a derived point cloud, in a background task</source>
+        <translation>La hauteur est calculée par PDAL dans un nuage dérivé, en tâche de fond</translation>
+    </message>
 </context>
 <context>
     <name>PointCloudFilterWidget</name>
@@ -5091,6 +5151,190 @@ Objet cliqué : seulement la tache de ces pixels où tombe le clic (une piscine,
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="0"/>
         <source>{0} (cut: larger than the window read, lower the tolerance)</source>
         <translation>{0} (coupé : plus grand que la fenêtre lue, baissez la tolérance)</translation>
+    </message>
+    <message>
+        <source>Active band: the one the range, the histogram and the picker read</source>
+        <translation>Bande active : celle que lisent la plage, l'histogramme et le picker</translation>
+    </message>
+    <message>
+        <source>An object is larger than the window read and was cut: lower the tolerance</source>
+        <translation>Un objet dépasse la fenêtre lue et a été coupé : baissez la tolérance</translation>
+    </message>
+    <message>
+        <source>B</source>
+        <translation>B</translation>
+    </message>
+    <message>
+        <source>G</source>
+        <translation>V</translation>
+    </message>
+    <message>
+        <source>R</source>
+        <translation>R</translation>
+    </message>
+    <message>
+        <source>NIR</source>
+        <translation>PIR</translation>
+    </message>
+    <message>
+        <source>BANDS</source>
+        <translation>BANDES</translation>
+    </message>
+    <message>
+        <source>Bands 1, 2, 3 are infrared, red, green (IGN infrared colour orthophoto)</source>
+        <translation>Les bandes 1, 2, 3 sont infrarouge, rouge, vert (orthophoto IRC IGN)</translation>
+    </message>
+    <message>
+        <source>Bands 1, 2, 3 are red, green, blue</source>
+        <translation>Les bandes 1, 2, 3 sont rouge, vert, bleu</translation>
+    </message>
+    <message>
+        <source>Bands 1, 2, 3, 4 are red, green, blue, near infrared</source>
+        <translation>Les bandes 1, 2, 3, 4 sont rouge, vert, bleu, proche infrarouge</translation>
+    </message>
+    <message>
+        <source>Blue</source>
+        <translation>Bleu</translation>
+    </message>
+    <message>
+        <source>Green</source>
+        <translation>Vert</translation>
+    </message>
+    <message>
+        <source>Red</source>
+        <translation>Rouge</translation>
+    </message>
+    <message>
+        <source>Near infrared</source>
+        <translation>Proche infrarouge</translation>
+    </message>
+    <message>
+        <source>Clicked object</source>
+        <translation>Objet cliqué</translation>
+    </message>
+    <message>
+        <source>Colour the band holds: the spectral indexes and the chips use it</source>
+        <translation>Couleur portée par la bande : les indices spectraux et les puces s'en servent</translation>
+    </message>
+    <message>
+        <source>Every pixel of the raster close to the picked colour or value (the pipette of the rail)</source>
+        <translation>Tous les pixels du raster proches de la couleur ou de la valeur prélevée (la pipette du rail)</translation>
+    </message>
+    <message>
+        <source>IRC</source>
+        <translation>IRC</translation>
+    </message>
+    <message>
+        <source>RGB</source>
+        <translation>RVB</translation>
+    </message>
+    <message>
+        <source>RGB + NIR</source>
+        <translation>RVB + PIR</translation>
+    </message>
+    <message>
+        <source>Insert a band reference, a usual spectral index or the current range</source>
+        <translation>Insérer une référence de bande, un indice spectral usuel ou la plage courante</translation>
+    </message>
+    <message>
+        <source>Insert ▾</source>
+        <translation>Insérer ▾</translation>
+    </message>
+    <message>
+        <source>Last click of the pixel picker</source>
+        <translation>Dernier clic du picker</translation>
+    </message>
+    <message>
+        <source>Only the patch of such pixels the click falls in: a pool, a roof, a field (the object detector of the rail); Ctrl+click adds another object</source>
+        <translation>Seulement la tache de tels pixels où tombe le clic : une piscine, un toit, un champ (le détecteur d'objet du rail) ; Ctrl+clic ajoute un autre objet</translation>
+    </message>
+    <message>
+        <source>Quantity</source>
+        <translation>Grandeur</translation>
+    </message>
+    <message>
+        <source>Quantity the range applies to. Slope, aspect, hillshade and roughness read the active band as a DTM.</source>
+        <translation>Grandeur à laquelle s'applique la plage. Pente, exposition, ombrage et rugosité lisent la bande active comme un MNT.</translation>
+    </message>
+    <message>
+        <source>Range</source>
+        <translation>Plage</translation>
+    </message>
+    <message>
+        <source>Remove this pick</source>
+        <translation>Retirer ce prélèvement</translation>
+    </message>
+    <message>
+        <source>Similar pixels</source>
+        <translation>Pixels semblables</translation>
+    </message>
+    <message>
+        <source>Spectral indexes</source>
+        <translation>Indices spectraux</translation>
+    </message>
+    <message>
+        <source>Statistics of the active band in the last rectangle drawn on the map</source>
+        <translation>Statistiques de la bande active dans le dernier rectangle tracé sur la carte</translation>
+    </message>
+    <message>
+        <source>The current value range</source>
+        <translation>La plage de valeurs courante</translation>
+    </message>
+    <message>
+        <source>The pipette compares this band</source>
+        <translation>La pipette compare cette bande</translation>
+    </message>
+    <message>
+        <source>Thresholds ▾</source>
+        <translation>Seuils ▾</translation>
+    </message>
+    <message>
+        <source>VALUE RANGE — band {0}</source>
+        <translation>PLAGE DE VALEURS — bande {0}</translation>
+    </message>
+    <message>
+        <source>Value of the active band under the cursor</source>
+        <translation>Valeur de la bande active sous le curseur</translation>
+    </message>
+    <message>
+        <source>active</source>
+        <translation>active</translation>
+    </message>
+    <message>
+        <source>band</source>
+        <translation>bande</translation>
+    </message>
+    <message>
+        <source>pipette</source>
+        <translation>pipette</translation>
+    </message>
+    <message>
+        <source>role</source>
+        <translation>rôle</translation>
+    </message>
+    <message>
+        <source>type</source>
+        <translation>type</translation>
+    </message>
+    <message>
+        <source>value</source>
+        <translation>valeur</translation>
+    </message>
+    <message>
+        <source>picks on: {0}</source>
+        <translation>prélève sur : {0}</translation>
+    </message>
+    <message>
+        <source>roles guessed, to confirm</source>
+        <translation>rôles devinés, à confirmer</translation>
+    </message>
+    <message>
+        <source>Roles ▾</source>
+        <translation>Rôles ▾</translation>
+    </message>
+    <message>
+        <source>Give the bands their colour roles at once: RGB, IRC or RGB + near infrared</source>
+        <translation>Donner d'un coup leurs rôles couleur aux bandes : RVB, IRC ou RVB + proche infrarouge</translation>
     </message>
 </context>
 <context>

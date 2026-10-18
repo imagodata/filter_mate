@@ -3,27 +3,46 @@
 Raster EXPLORING Panel.
 
 Shown in place of the vector exploring groups when the current layer is a
-raster. The user picks pixels by value range (histogram + spin boxes), by
-class (paletted rasters) or with a raster calculator expression; the three
-checkable groups are exclusive like the vector ones. The resulting
-:class:`RasterSelection` becomes the source geometry of FILTERING.
+raster. The panel is organised as the FilterMate 5 audit of 2026-10-18 asks:
+
+* **BANDS** (not checkable, on top): one row per band with the active band
+  (radio), whether the pipette compares the band (check box), its colour role
+  (red, green, blue, near infrared), its name and type, and its value at the
+  last click of the pixel picker. The roles are read from the renderer when it
+  is a multiband colour one, guessed otherwise (and said so) until the user
+  picks them or a shortcut (RGB, IRC, RGB + NIR).
+* **PIPETTE** (checkable): the settings of the two map tools of the rail, the
+  pipette (similar pixels on the whole raster) and the object detector (the
+  patch under the click): the target, the tolerance and the picks as chips.
+* **VALUE RANGE** (checkable): the quantity the range applies to (pixel value,
+  slope, aspect...), the histogram, the bounds and the usual thresholds.
+* **RASTER EXPRESSION** (checkable): a three line expression, an "Insert"
+  menu (band references, spectral indexes allowed by the roles, the current
+  range); checking it starts from the expression of the group that was active.
+
+The three checkable groups are exclusive like the vector ones. The resulting
+:class:`RasterSelection` becomes the source geometry of FILTERING. A paletted
+raster has no CLASSES group any more: a class value is a value like another,
+the pipette picks it (its palette label names the chip).
 
 The panel never reads the layer: the controller feeds it a ``RasterSummary``,
 histograms and picked pixel values, and listens to its signals. The state
-handling (selection building, value formatting, range extension) is done by
-pure functions of this module, testable without Qt.
+handling (selection building, value formatting, range extension, roles) is
+done by pure functions of this module, testable without Qt. The share of
+kept pixels and the detected objects go to the selection strip under
+EXPLORING (``summaryChanged``): the panel shows no figure of its own.
 """
 import math
 from contextlib import contextmanager
 from enum import Enum
-from typing import TYPE_CHECKING, Any, Collection, Dict, Iterable, List, Optional, Sequence, Tuple
+from typing import TYPE_CHECKING, Any, Collection, Dict, List, Optional, Sequence, Tuple
 
 try:
     from qgis.PyQt.QtCore import Qt, QTimer, pyqtSignal
-    from qgis.PyQt.QtGui import QColor, QFontDatabase, QIcon, QPixmap
+    from qgis.PyQt.QtGui import QColor, QFont, QIcon, QPixmap
     from qgis.PyQt.QtWidgets import (
-        QComboBox, QDoubleSpinBox, QGroupBox, QHBoxLayout, QLabel, QLineEdit,
-        QListWidget, QListWidgetItem, QPushButton, QSizePolicy, QVBoxLayout, QWidget,
+        QButtonGroup, QCheckBox, QComboBox, QDoubleSpinBox, QGridLayout, QGroupBox, QHBoxLayout, QLabel,
+        QMenu, QPlainTextEdit, QPushButton, QRadioButton, QSizePolicy, QToolButton, QVBoxLayout, QWidget,
     )
     QT_AVAILABLE = True
 except ImportError:
@@ -43,6 +62,12 @@ from ....core.domain.raster_filter_criteria import DERIVATIVE_BOUNDS, RasterDeri
 from ..selection_strip import percent_text
 from .histogram_widget import RangeHistogramWidget, normalize_range, spin_bounds
 
+try:
+    from ...styles.mockup_design import SPACING as _SPACING
+    GAP = int(_SPACING['fm_gap'])
+except Exception:  # the design module is not importable (tests without the ui package)
+    GAP = 6
+
 if TYPE_CHECKING:
     from ....adapters.qgis.coverage_layers.raster_adapter import RasterSummary
 
@@ -53,6 +78,7 @@ FLOAT_DECIMALS = 3
 HISTORY_SIZE = 5
 DEBOUNCE_MS = 250
 SPIN_MIN_WIDTH = 64
+EXPRESSION_LINES = 3
 DEFAULT_REFERENCE = "raster"
 _STATUS_OK_COLOR = "#2e7d32"
 _STATUS_ERROR_COLOR = "#c62828"
@@ -68,11 +94,20 @@ def decimals_for(data_type: str) -> int:
 
 
 def band_label(number: int, name: str, data_type: str) -> str:
-    """Band combo entry, such as ``"1 — elevation (Float32)"``."""
+    """Band entry, such as ``"1 — elevation (Float32)"``."""
     name = (name or "").strip()
     if name:
         return f"{number} — {name} ({data_type})"
     return f"{number} ({data_type})"
+
+
+def short_band_name(number: int, name: str) -> str:
+    """Band name without the ``"Band n"`` QGIS prefix: ``"Band 1: idw"`` -> ``"idw"``, ``"Band 2"`` -> ``""``."""
+    text = (name or "").strip()
+    prefix = f"band {int(number)}"
+    if text.lower().startswith(prefix):
+        text = text[len(prefix):].lstrip(" :-—–")
+    return text
 
 
 def format_class_value(value: float) -> str:
@@ -191,7 +226,10 @@ def format_derived_value(derivative: RasterDerivative, value: Optional[float], n
     return f"{float(value):.{DERIVATIVE_DECIMALS}f}{DERIVATIVE_SUFFIXES.get(derivative, '')}"
 
 
-# Band layouts of a multiband image: band number of each colour (NIR: near infrared).
+# Colour roles of the bands of an image. NIR: near infrared.
+ROLE_RED, ROLE_GREEN, ROLE_BLUE, ROLE_NIR, ROLE_NONE = "R", "G", "B", "NIR", ""
+ROLES = (ROLE_RED, ROLE_GREEN, ROLE_BLUE, ROLE_NIR)
+# Band layouts of a multiband image: band number of each colour, in the order of the colour bands.
 BAND_LAYOUTS = {
     "rgb": {"R": 1, "G": 2, "B": 3},
     "irc": {"NIR": 1, "R": 2, "G": 3},  # IGN infrared colour orthophoto
@@ -208,6 +246,8 @@ DEFAULT_COLOR_TOLERANCE = 12.0  # percent of the value range, per band
 # What a pipette click selects: the pixels like it on the whole raster, or the object it falls in.
 PICK_SIMILAR = "similar"
 PICK_OBJECT = "object"
+# Words of a band name that say it is the near infrared one.
+_NIR_WORDS = ("nir", "infra", "pir", "near-ir", "near ir")
 
 
 class PipetteMode(Enum):
@@ -217,6 +257,19 @@ class PipetteMode(Enum):
 
 
 PIPETTE = PipetteMode.PIPETTE
+
+
+def color_bands(band_names: Sequence[str], alpha_bands: Collection[int] = ()) -> List[int]:
+    """Band numbers a picked colour is made of by default: up to four, an alpha band left out.
+
+    Args:
+        alpha_bands: Numbers of the alpha bands (RasterBandInfo.is_alpha, from the colour
+            interpretation). 2026-10-17: QGIS names the bands "Band 4", a name holding
+            "alpha" is only the fallback.
+    """
+    numbers = [number for number, name in enumerate(band_names, start=1)
+               if number not in alpha_bands and "alpha" not in (name or "").lower()]
+    return numbers[:4]
 
 
 def default_band_layout(band_names: Sequence[str], alpha_bands: Collection[int] = ()) -> str:
@@ -233,32 +286,80 @@ def layouts_for(band_names: Sequence[str], alpha_bands: Collection[int] = ()) ->
     return ["rgb", "irc", "rgbn"] if len(color_bands(band_names, alpha_bands)) >= 4 else ["rgb", "irc"]
 
 
-def spectral_presets_for(layout: str) -> List[str]:
-    """Keys of the presets whose colours exist in ``layout`` (e.g. no NDVI on a plain RGB image)."""
+def roles_from_layout(layout: str, bands: Sequence[int]) -> Dict[int, str]:
+    """Role of each band for a layout applied to ``bands`` (the colour bands, in order): ``{1: "NIR", 2: "R"...}``."""
     colours = BAND_LAYOUTS.get(layout, {})
+    bands = [int(band) for band in bands]
+    roles = {}
+    for role, position in colours.items():
+        if 0 < position <= len(bands):
+            roles[bands[position - 1]] = role
+    return roles
+
+
+def layout_from_roles(roles: Dict[int, str]) -> str:
+    """Layout key whose roles are exactly ``roles`` on consecutive colour bands; ``""`` for any other arrangement."""
+    if not roles:
+        return ""
+    bands = sorted(int(band) for band, role in roles.items() if role)
+    for key in ("rgb", "irc", "rgbn"):
+        if roles_from_layout(key, bands) == {int(b): r for b, r in roles.items() if r}:
+            return key
+    return ""
+
+
+def default_roles(band_names: Sequence[str], alpha_bands: Collection[int] = (),
+                  renderer_bands: Optional[Dict[str, int]] = None) -> Tuple[Dict[int, str], bool]:
+    """Colour role of each band and whether it was guessed.
+
+    The multiband colour renderer of the layer says which band it draws in red, green and
+    blue (``renderer_bands``, ``{"R": 1, "G": 2, "B": 3}``): those roles are known; the one
+    colour band it does not draw, on a four band image, is the near infrared. Without such a
+    renderer, a band whose name says infrared takes NIR and the others follow the usual
+    layout; that guess is reported so the panel can say "guessed" until the user confirms.
+    An image of fewer than three colour bands has no roles.
+    """
+    colours = color_bands(band_names, alpha_bands)
+    if len(colours) < 3:
+        return {}, False
+    renderer_bands = {role: int(band) for role, band in (renderer_bands or {}).items()
+                      if role in (ROLE_RED, ROLE_GREEN, ROLE_BLUE) and int(band) in colours}
+    if len(renderer_bands) == 3:
+        roles = {band: role for role, band in renderer_bands.items()}
+        left = [band for band in colours if band not in roles]
+        if len(left) == 1:
+            roles[left[0]] = ROLE_NIR
+        return roles, False
+    named_nir = [number for number in colours
+                 if any(word in (band_names[number - 1] or "").lower() for word in _NIR_WORDS)]
+    if len(named_nir) == 1:
+        others = [band for band in colours if band != named_nir[0]][:3]
+        roles = {band: role for band, role in zip(others, (ROLE_RED, ROLE_GREEN, ROLE_BLUE))}
+        roles[named_nir[0]] = ROLE_NIR
+        return roles, True
+    return roles_from_layout(default_band_layout(band_names, alpha_bands), colours), True
+
+
+def _colours_of(layout_or_roles: Any) -> Dict[str, int]:
+    """``{"R": band, ...}`` of a layout key or of a ``{band: role}`` dict."""
+    if isinstance(layout_or_roles, dict):
+        return {role: int(band) for band, role in layout_or_roles.items() if role}
+    return dict(BAND_LAYOUTS.get(layout_or_roles, {}))
+
+
+def spectral_presets_for(layout_or_roles: Any) -> List[str]:
+    """Keys of the presets whose colours exist in a layout or in band roles (e.g. no NDVI on a plain RGB image)."""
+    colours = _colours_of(layout_or_roles)
     return [key for key, needs, _template in SPECTRAL_PRESETS if all(c in colours for c in needs)]
 
 
-def spectral_expression(key: str, layout: str, reference: str) -> str:
-    """Raster calculator expression of a preset on ``layout``; ``""`` when the layout lacks a colour."""
-    colours = BAND_LAYOUTS.get(layout, {})
+def spectral_expression(key: str, layout_or_roles: Any, reference: str) -> str:
+    """Raster calculator expression of a preset on a layout or on band roles; ``""`` when a colour is missing."""
+    colours = _colours_of(layout_or_roles)
     for name, needs, template in SPECTRAL_PRESETS:
         if name == key and all(c in colours for c in needs):
             return template.format(**{c: f'"{reference}@{colours[c]}"' for c in needs})
     return ""
-
-
-def color_bands(band_names: Sequence[str], alpha_bands: Collection[int] = ()) -> List[int]:
-    """Band numbers a picked colour is made of: up to four, an alpha band left out.
-
-    Args:
-        alpha_bands: Numbers of the alpha bands (RasterBandInfo.is_alpha, from the colour
-            interpretation). 2026-10-17: QGIS names the bands "Band 4", a name holding
-            "alpha" is only the fallback.
-    """
-    numbers = [number for number, name in enumerate(band_names, start=1)
-               if number not in alpha_bands and "alpha" not in (name or "").lower()]
-    return numbers[:4]
 
 
 def tolerance_value(percent: float, span: float) -> float:
@@ -308,7 +409,7 @@ def derivative_presets(derivative: RasterDerivative) -> List[Tuple[str, Bound, B
 
 
 def format_preset(label: str, low: Bound, high: Bound, suffix: str = "") -> str:
-    """Combo text of a preset: ``"Flat (< 5 °)"``."""
+    """Menu text of a preset: ``"Flat (< 5 °)"``."""
     def number(value: float) -> str:
         return f"{value:g}"
     if low is None:
@@ -368,13 +469,41 @@ def _parse_picks(raw: Any) -> List[Any]:
     return picks
 
 
+def _parse_roles(raw: Any) -> Dict[int, str]:
+    """Band roles of a saved state: ``{band: role}`` with known roles and positive bands, each role once."""
+    roles: Dict[int, str] = {}
+    if not isinstance(raw, dict):
+        return roles
+    for band, role in raw.items():
+        try:
+            number = int(band)
+        except (TypeError, ValueError):
+            continue
+        if number >= 1 and role in ROLES and role not in roles.values():
+            roles[number] = role
+    return roles
+
+
+def _parse_bands(raw: Any) -> List[int]:
+    """Band numbers of a saved state (the bands the pipette compares), positive, in order, each once."""
+    bands: List[int] = []
+    for value in raw if isinstance(raw, list) else []:
+        number = _optional_float(value)
+        if number is not None and number >= 1 and int(number) not in bands:
+            bands.append(int(number))
+    return bands
+
+
 def parse_raster_state(state: Any) -> Dict[str, Any]:
     """Normalise a saved panel state; missing or invalid entries get their default.
 
     Returns:
         Dict with ``layer_id``, ``mode`` (RasterSelectionMode or PIPETTE), ``band`` (>= 1),
         ``minimum`` / ``maximum`` (ordered, None = unbounded), ``classes``
-        (sorted ints), ``expression``, ``preview`` and ``derivative`` (RasterDerivative).
+        (sorted ints), ``expression``, ``preview``, ``derivative`` (RasterDerivative),
+        ``layout`` (a saved layout key, ``""`` otherwise), ``roles`` (band -> role, from the
+        saved roles or the saved layout), ``roles_chosen``, ``pipette_bands``, the pipette
+        keys and ``pipette_on`` (the pipette tool was on the map when the layer was left).
     """
     state = state if isinstance(state, dict) else {}
     raw_mode = state.get("mode", RasterSelectionMode.RANGE.value)
@@ -398,6 +527,11 @@ def parse_raster_state(state: Any) -> Dict[str, Any]:
         number = _optional_float(value)
         if number is not None:
             classes.add(int(round(number)))
+    layout = state.get("layout") if isinstance(state.get("layout"), str) and state.get("layout") in BAND_LAYOUTS else ""
+    roles = _parse_roles(state.get("roles"))
+    if not roles and layout:
+        bands = _parse_bands(state.get("pipette_bands")) or [1, 2, 3, 4]
+        roles = roles_from_layout(layout, bands)
     return {
         "layer_id": state.get("layer_id"),
         "mode": mode,
@@ -408,12 +542,16 @@ def parse_raster_state(state: Any) -> Dict[str, Any]:
         "expression": state.get("expression") if isinstance(state.get("expression"), str) else "",
         "preview": bool(state.get("preview", False)),
         "derivative": derivative,
-        "layout": state.get("layout") if isinstance(state.get("layout"), str) and state.get("layout") in BAND_LAYOUTS else "",
+        "layout": layout,
+        "roles": roles,
+        "roles_chosen": bool(state.get("roles_chosen", False)) or bool(layout and not state.get("roles")),
+        "pipette_bands": _parse_bands(state.get("pipette_bands")),
         "pipette_selection": state.get("pipette_selection") if isinstance(state.get("pipette_selection"), dict) else None,
         "pipette_kind": state.get("pipette_kind") if state.get("pipette_kind") in ("color", "value", "classes", "preset") else "",
         "pipette_picks": _parse_picks(state.get("pipette_picks")),
         "pipette_seeds": _parse_seeds(state.get("pipette_seeds")),
         "pipette_target": PICK_OBJECT if state.get("pipette_target") == PICK_OBJECT else PICK_SIMILAR,
+        "pipette_on": bool(state.get("pipette_on", False)),
     }
 
 
@@ -441,6 +579,23 @@ def build_raster_selection(state: Any) -> Optional[RasterSelection]:
     return None if selection.is_empty else selection
 
 
+def previous_group_formula(selection: Optional[RasterSelection], reference: str) -> str:
+    """Expression EXPRESSION starts from when the user checks it: the one of the selection that was active.
+
+    A range or classes become their raster calculator formula, a pipette colour its expression;
+    a terrain derivative has no formula (``""``), nor has an empty selection.
+    """
+    if selection is None or selection.is_empty:
+        return ""
+    try:
+        formula = selection.to_calc_formula(reference)
+    except ValueError:
+        return ""
+    if selection.mode is RasterSelectionMode.EXPRESSION:
+        return selection.expression.strip()
+    return "" if formula in ("0", "1") else formula
+
+
 @contextmanager
 def _signals_blocked(*widgets):
     """Block the signals of ``widgets`` for the duration of the block."""
@@ -457,13 +612,17 @@ def _signals_blocked(*widgets):
 # ---------------------------------------------------------------------------
 
 class RasterExploringPanel(QWidget):
-    """EXPLORING panel of a raster layer: band, pixel value, range, classes, expression.
+    """EXPLORING panel of a raster layer: bands, pipette, range, expression.
 
     Signals:
-        bandChanged(int): The user picked another band (the controller then
-            sends its histogram with :meth:`set_histogram`).
+        bandChanged(int): The user picked another active band or quantity (the controller
+            then sends its histogram with :meth:`set_histogram`).
         selectionChanged(): The selection changed; debounced by 250 ms for
-            the spin boxes, the histogram, the class list and the expression.
+            the spin boxes, the histogram and the expression.
+        summaryChanged(): The kept ratio or the detected objects changed: the strip follows.
+        modeChosen(str): The user made a group the active one (its value): its rail tool follows.
+        targetChanged(str): The user changed what the pipette selects (similar pixels or the
+            clicked object) in the panel: the rail buttons follow.
 
     The map preview has no switch here: the preview button of the EXPLORING rail
     drives it (:meth:`set_preview_checked`).
@@ -471,8 +630,9 @@ class RasterExploringPanel(QWidget):
 
     bandChanged = pyqtSignal(int)
     selectionChanged = pyqtSignal()
-    summaryChanged = pyqtSignal()  # kept ratio updated: the selection strip under EXPLORING follows
-    modeChosen = pyqtSignal(str)  # the user made a group the active one (its value): its rail tool follows
+    summaryChanged = pyqtSignal()
+    modeChosen = pyqtSignal(str)
+    targetChanged = pyqtSignal(str)
 
     def __init__(self, parent=None):
         """Build the panel.
@@ -487,7 +647,10 @@ class RasterExploringPanel(QWidget):
         self._mode = RasterSelectionMode.RANGE
         self._preview_on = False  # the rail preview button is down
         self._derivative = RasterDerivative.VALUE
-        self._layout = "rgb"
+        self._active_band = 1
+        self._roles: Dict[int, str] = {}  # band -> colour role
+        self._roles_guessed = False  # the roles were not read from the renderer nor chosen by the user
+        self._pipette_bands: List[int] = []  # bands a picked colour is made of
         self._pipette_selection: Optional[RasterSelection] = None  # what the PIPETTE group selects
         self._pick_kind = ""  # "color", "value", "classes" or "preset": what the picks are
         self._picks: List[Any] = []  # colours (tuples), values or class codes picked, in order
@@ -496,6 +659,7 @@ class RasterExploringPanel(QWidget):
         self._pick_target = PICK_SIMILAR  # PICK_OBJECT: a click selects the object under it only
         self._band_spans: Dict[int, float] = {}  # observed value range of each band (statistics of the layer)
         self._pipette_on = False  # the pipette tool is on the map
+        self._detected: Optional[Tuple[Optional[int], Optional[float], bool]] = None  # last object detection
         self._low: Bound = None
         self._high: Bound = None
         self._decimals = FLOAT_DECIMALS
@@ -506,6 +670,8 @@ class RasterExploringPanel(QWidget):
         self._history: List[Tuple[float, float, Optional[float], int, Optional[str]]] = []
         self._switching_mode = False
         self._kept_ratio: Optional[float] = None
+        self._band_rows: Dict[int, Dict[str, Any]] = {}  # band -> its row widgets
+        self._preset_name = ""
         self.setObjectName("widget_raster_exploring_panel")
         self._debounce = QTimer(self)
         self._debounce.setSingleShot(True)
@@ -527,90 +693,277 @@ class RasterExploringPanel(QWidget):
         group.setFlat(True)
         group.setCheckable(checkable)
         layout = QVBoxLayout(group)
-        layout.setContentsMargins(4, 4, 4, 4)
-        layout.setSpacing(4)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(GAP)
         return group
+
+    @staticmethod
+    def _menu_button(parent: Any, text: str, tip: str, object_name: str) -> Any:
+        button = QToolButton(parent)
+        button.setObjectName(object_name)
+        button.setText(text)
+        button.setToolTip(tip)
+        button.setAccessibleName(tip)
+        button.setPopupMode(QToolButton.ToolButtonPopupMode.InstantPopup)
+        button.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonTextOnly)
+        button.setMenu(QMenu(button))
+        return button
 
     def _build_ui(self) -> None:
         layout = QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
-        layout.setSpacing(4)
-
-        band_row = QHBoxLayout()
-        band_row.addWidget(QLabel(self.tr("Band"), self))
-        self._band_combo = QComboBox(self)
-        self._band_combo.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
-        self._band_combo.setToolTip(self.tr("Band whose values are selected"))
-        # Long band names must not widen the panel past a narrow dock.
-        self._band_combo.setSizeAdjustPolicy(QComboBox.SizeAdjustPolicy.AdjustToMinimumContentsLengthWithIcon)
-        self._band_combo.setMinimumContentsLength(8)
-        self._band_combo.currentIndexChanged.connect(self._on_band_index_changed)
-        band_row.addWidget(self._band_combo)
-        layout.addLayout(band_row)
-
-        derivative_row = QHBoxLayout()
-        derivative_row.addWidget(QLabel(self.tr("Compute on"), self))
-        self._derivative_combo = QComboBox(self)
-        self._derivative_combo.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
-        self._derivative_combo.setToolTip(self.tr(
-            "Quantity the range applies to. Slope, aspect, hillshade and roughness read the band as a DTM."))
-        self._derivative_combo.setSizeAdjustPolicy(QComboBox.SizeAdjustPolicy.AdjustToMinimumContentsLengthWithIcon)
-        self._derivative_combo.setMinimumContentsLength(8)
-        for derivative, label in ((RasterDerivative.VALUE, self.tr("Pixel value")),
-                                  (RasterDerivative.SLOPE_DEGREES, self.tr("Slope (degrees)")),
-                                  (RasterDerivative.SLOPE_PERCENT, self.tr("Slope (%)")),
-                                  (RasterDerivative.ASPECT, self.tr("Aspect (degrees)")),
-                                  (RasterDerivative.HILLSHADE, self.tr("Hillshade (0-255)")),
-                                  (RasterDerivative.ROUGHNESS, self.tr("Roughness (TRI, mean difference)"))):
-            self._derivative_combo.addItem(label, derivative.value)
-        self._derivative_combo.currentIndexChanged.connect(self._on_derivative_index_changed)
-        derivative_row.addWidget(self._derivative_combo)
-        layout.addLayout(derivative_row)
-
-        self._pixel_group = self._build_pixel_group()
-        if hasattr(self._pixel_group, 'setCollapsed'):
-            self._pixel_group.setCollapsed(True)  # opened by the first picked pixel
-        layout.addWidget(self._pixel_group)
+        layout.setSpacing(GAP)
+        layout.addWidget(self._build_bands_group())
         layout.addWidget(self._build_pipette_group())
         layout.addWidget(self._build_range_group())
-        layout.addWidget(self._build_classes_group())
         layout.addWidget(self._build_expression_group())
         layout.addStretch()
 
         self._mode_groups = {
-            RasterSelectionMode.RANGE: self._range_group,
-            RasterSelectionMode.CLASSES: self._classes_group,
-            RasterSelectionMode.EXPRESSION: self._expression_group,
             PIPETTE: self._pipette_group,
+            RasterSelectionMode.RANGE: self._range_group,
+            RasterSelectionMode.EXPRESSION: self._expression_group,
         }
         for mode, group in self._mode_groups.items():
             group.toggled.connect(lambda checked, m=mode: self._on_group_toggled(m, checked))
             if hasattr(group, "collapsedStateChanged"):
                 group.collapsedStateChanged.connect(lambda collapsed, m=mode: self._on_group_collapsed(m, collapsed))
-        self._classes_group.setVisible(False)
+
+    # --- BANDS ---
+
+    def _build_bands_group(self) -> Any:
+        group = self._make_group(self.tr("BANDS"), "mGroupBox_raster_bands", checkable=False)
+        self._bands_group = group
+        group_layout = group.layout()
+        self._head_widget = QWidget(group)
+        self._head_widget.setObjectName("widget_raster_bands_head")
+        head = QHBoxLayout(self._head_widget)
+        head.setContentsMargins(0, 0, 0, 0)
+        head.setSpacing(GAP)
+        self._pixel_coordinates_label = QLabel("", self._head_widget)
+        self._pixel_coordinates_label.setObjectName("label_raster_pixel_coordinates")
+        self._pixel_coordinates_label.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
+        self._pixel_coordinates_label.setToolTip(self.tr("Last click of the pixel picker"))
+        self._pixel_coordinates_label.setEnabled(False)  # muted, as a caption
+        self._pixel_coordinates_label.setWordWrap(True)
+        head.addWidget(self._pixel_coordinates_label)
+        head.addStretch(1)
+        self._roles_note = QLabel("", self._head_widget)
+        self._roles_note.setObjectName("label_raster_roles_note")
+        self._roles_note.setEnabled(False)
+        self._roles_note.setWordWrap(True)
+        head.addWidget(self._roles_note)
+        group_layout.addWidget(self._head_widget)
+
+        # Layout shortcuts in one small menu on the header line (2026-10-18: a row of buttons made the block tall).
+        self._layout_button = self._menu_button(self._head_widget, self.tr("Roles ▾"),
+                                                self.tr("Give the bands their colour roles at once: RGB, IRC or RGB + near infrared"),
+                                                "toolButton_raster_layout")
+        self._shortcut_buttons: Dict[str, Any] = {}
+        for key, label, tip in (("rgb", self.tr("RGB"), self.tr("Bands 1, 2, 3 are red, green, blue")),
+                                ("irc", self.tr("IRC"), self.tr("Bands 1, 2, 3 are infrared, red, green (IGN infrared colour orthophoto)")),
+                                ("rgbn", self.tr("RGB + NIR"), self.tr("Bands 1, 2, 3, 4 are red, green, blue, near infrared"))):
+            action = self._layout_button.menu().addAction(label)
+            action.setToolTip(tip)
+            action.triggered.connect(lambda _checked=False, k=key: self._on_layout_shortcut(k))
+            self._shortcut_buttons[key] = action
+        head.addWidget(self._layout_button)
+
+        self._bands_holder = QWidget(group)
+        self._bands_holder.setObjectName("widget_raster_bands")
+        self._bands_grid = QGridLayout(self._bands_holder)
+        self._bands_grid.setContentsMargins(0, 0, 0, 0)
+        self._bands_grid.setHorizontalSpacing(GAP)
+        self._bands_grid.setVerticalSpacing(0)
+        group_layout.addWidget(self._bands_holder)
+        self._active_group = QButtonGroup(self)
+        self._active_group.setExclusive(True)
+
+        # Readouts of the off-rail tools (value under the cursor, statistics of a rectangle).
+        self._hover_label = QLabel("", group)
+        self._hover_label.setWordWrap(True)
+        self._hover_label.setToolTip(self.tr("Value of the active band under the cursor"))
+        self._hover_label.setVisible(False)
+        group_layout.addWidget(self._hover_label)
+        self._zone_label = QLabel("", group)
+        self._zone_label.setWordWrap(True)
+        self._zone_label.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
+        self._zone_label.setToolTip(self.tr("Statistics of the active band in the last rectangle drawn on the map"))
+        self._zone_label.setVisible(False)
+        group_layout.addWidget(self._zone_label)
+        return group
+
+    def _rebuild_band_rows(self) -> None:
+        """One compact row per band of the summary: active, pipette, role, name (type in its tooltip), value.
+
+        A single band shows neither the active radio nor the pipette box; fewer than
+        three colour bands show no role (the tooltips carry what the columns mean).
+        """
+        for row in self._band_rows.values():
+            for widget in row.values():
+                if hasattr(widget, 'deleteLater'):
+                    self._bands_grid.removeWidget(widget)
+                    widget.setParent(None)
+                    widget.deleteLater()
+        for button in list(self._active_group.buttons()):
+            self._active_group.removeButton(button)
+        self._band_rows = {}
+        bands = self._summary.bands if self._summary is not None else []
+        colours = len(self._colour_bands()) >= 3
+        several = len(bands) > 1
+        for index, info in enumerate(bands):
+            number = int(info.number)
+            radio = QRadioButton(self._bands_holder)
+            radio.setObjectName(f"radioButton_raster_band_active_{number}")
+            radio.setToolTip(self.tr("Active band: the one the range, the histogram and the picker read"))
+            radio.toggled.connect(lambda checked, n=number: self._on_active_band_toggled(n, checked))
+            self._active_group.addButton(radio, number)
+            check = QCheckBox(self._bands_holder)
+            check.setObjectName(f"checkBox_raster_band_pipette_{number}")
+            check.setToolTip(self.tr("The pipette compares this band"))
+            check.toggled.connect(lambda checked, n=number: self._on_pipette_band_toggled(n, checked))
+            role = self._menu_button(self._bands_holder, "—",
+                                     self.tr("Colour the band holds: the spectral indexes and the chips use it"),
+                                     f"toolButton_raster_band_role_{number}")
+            for key, label in ((ROLE_NONE, "—"), (ROLE_RED, self.tr("R")), (ROLE_GREEN, self.tr("G")),
+                               (ROLE_BLUE, self.tr("B")), (ROLE_NIR, self.tr("NIR"))):
+                action = role.menu().addAction(label)
+                action.triggered.connect(lambda _checked=False, n=number, k=key: self._on_role_changed(n, k))
+            role.setVisible(colours)
+            name = QLabel(self._band_text(info), self._bands_holder)
+            name.setObjectName(f"label_raster_band_name_{number}")
+            name.setToolTip(f"{info.name or ''} ({info.data_type})".strip())
+            name.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
+            kind = QLabel(info.data_type, self._bands_holder)
+            kind.setEnabled(False)
+            kind.setVisible(not several)  # the type is read at a glance on a single band, in a tooltip otherwise
+            value = QLabel("–", self._bands_holder)
+            value.setObjectName(f"label_raster_band_value_{number}")
+            value.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
+            value.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
+            swatch = QLabel(self._bands_holder)
+            swatch.setFixedSize(10, 10)
+            widgets = {"radio": radio, "check": check, "role": role, "swatch": swatch, "name": name, "kind": kind, "value": value}
+            radio.setVisible(several)
+            check.setVisible(several)
+            for column, widget in enumerate((radio, check, role)):
+                self._bands_grid.addWidget(widget, index, column, Qt.AlignmentFlag.AlignHCenter if column < 2 else Qt.AlignmentFlag.AlignLeft)
+            name_row = QHBoxLayout()
+            name_row.setContentsMargins(0, 0, 0, 0)
+            name_row.setSpacing(4)
+            name_row.addWidget(swatch)
+            name_row.addWidget(name, 1)
+            holder = QWidget(self._bands_holder)
+            holder.setLayout(name_row)
+            widgets["holder"] = holder
+            self._bands_grid.addWidget(holder, index, 3)
+            self._bands_grid.addWidget(kind, index, 4)
+            self._bands_grid.addWidget(value, index, 5)
+            self._band_rows[number] = widgets
+        self._bands_grid.setColumnStretch(3, 1)
+        self._layout_button.setVisible(colours)
+        if colours:
+            self._shortcut_buttons["rgbn"].setEnabled(len(self._colour_bands()) >= 4)
+        self._refresh_band_rows()
+        self._refresh_head()
+
+    @staticmethod
+    def _band_text(info: Any) -> str:
+        short = short_band_name(info.number, info.name)
+        return f"{info.number} — {short}" if short else str(info.number)
+
+    def _refresh_band_rows(self) -> None:
+        """Rows follow the active band, the pipette bands, the roles and the last pixel."""
+        values = self._last_pixel[2] if self._last_pixel is not None else {}
+        nodata = self.tr("NoData")
+        for number, row in self._band_rows.items():
+            info = self._band_info(number)
+            active = number == self._active_band
+            with _signals_blocked(row["radio"], row["check"]):
+                row["radio"].setChecked(active)
+                row["check"].setChecked(number in self._pipette_bands)
+                row["check"].setEnabled(not (info is not None and getattr(info, "is_alpha", False)))
+                role = self._roles.get(number, ROLE_NONE)
+                row["role"].setText(f"{self._role_short(role)} ▾")
+            font = QFont(row["name"].font())
+            font.setBold(active)
+            row["name"].setFont(font)
+            row["value"].setFont(font)
+            decimals = decimals_for(info.data_type) if info is not None else FLOAT_DECIMALS
+            row["value"].setText(format_pixel_value(values.get(number), decimals, nodata) if values else "–")
+            pixmap = QPixmap(10, 10)
+            colour = self._role_colour(self._roles.get(number, ROLE_NONE), info)
+            if colour is None:
+                pixmap.fill(Qt.GlobalColor.transparent)
+            else:
+                pixmap.fill(QColor(colour))
+            row["swatch"].setPixmap(pixmap)
+            row["swatch"].setToolTip(self._role_name(self._roles.get(number, ROLE_NONE)))
+        self._refresh_roles_note()
+
+    @staticmethod
+    def _role_colour(role: str, info: Any) -> Optional[str]:
+        if role == ROLE_RED:
+            return "#d9443a"
+        if role == ROLE_GREEN:
+            return "#4caf50"
+        if role == ROLE_BLUE:
+            return "#2f7fd8"
+        if role == ROLE_NIR:
+            return "#8e24aa"
+        if info is not None and getattr(info, "is_alpha", False):
+            return None
+        return "#9e9e9e"
+
+    def _role_short(self, role: str) -> str:
+        return {ROLE_RED: self.tr("R"), ROLE_GREEN: self.tr("G"), ROLE_BLUE: self.tr("B"),
+                ROLE_NIR: self.tr("NIR")}.get(role, "—")
+
+    def _role_name(self, role: str) -> str:
+        return {ROLE_RED: self.tr("Red"), ROLE_GREEN: self.tr("Green"), ROLE_BLUE: self.tr("Blue"),
+                ROLE_NIR: self.tr("Near infrared")}.get(role, "")
+
+    def _refresh_roles_note(self) -> None:
+        if len(self._colour_bands()) < 3:
+            self._roles_note.setText("")
+        else:
+            self._roles_note.setText(self.tr("roles guessed, to confirm") if self._roles_guessed else "")
+        self._refresh_head()
+
+    def _refresh_head(self) -> None:
+        """The head line of BANDS (last click, roles note, roles menu) only takes room when it holds something."""
+        shown = bool(self._pixel_coordinates_label.text() or self._roles_note.text()
+                     or (hasattr(self, "_layout_button") and not self._layout_button.isHidden()))
+        self._head_widget.setVisible(shown)
+
+    # --- PIPETTE ---
 
     def _build_pipette_group(self) -> Any:
-        """Everything the pipette needs, in one group: tolerance, last pick, band layout, spectral presets."""
+        """The settings of the pipette and of the object detector: target, tolerance, picks."""
         self._pipette_group = self._make_group(self.tr("PIPETTE"), "mGroupBox_raster_pipette", checkable=True)
         group_layout = self._pipette_group.layout()
         target_row = QHBoxLayout()
+        target_row.setSpacing(GAP)
         target_row.addWidget(QLabel(self.tr("Select"), self._pipette_group))
-        self._target_combo = QComboBox(self._pipette_group)
-        self._target_combo.setObjectName("comboBox_raster_pipette_target")
-        self._target_combo.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
-        self._target_combo.setSizeAdjustPolicy(QComboBox.SizeAdjustPolicy.AdjustToMinimumContentsLengthWithIcon)
-        self._target_combo.setMinimumContentsLength(8)
-        self._target_combo.addItem(self.tr("Similar pixels (whole raster)"), PICK_SIMILAR)
-        self._target_combo.addItem(self.tr("Clicked object (detection)"), PICK_OBJECT)
-        self._target_combo.setToolTip(self.tr(
-            "Similar pixels: every pixel of the raster close to the picked color or value.\n"
-            "Clicked object: only the patch of such pixels the click falls in (a pool, a roof, a field); "
-            "Ctrl+click adds another object."))
-        self._target_combo.setAccessibleName(self.tr("What the pipette selects"))
-        self._target_combo.currentIndexChanged.connect(self._on_target_index_changed)
-        target_row.addWidget(self._target_combo)
+        self._target_buttons: Dict[str, Any] = {}
+        self._target_group = QButtonGroup(self)
+        self._target_group.setExclusive(True)
+        for key, label, tip in ((PICK_SIMILAR, self.tr("Similar pixels"),
+                                 self.tr("Every pixel of the raster close to the picked colour or value (the pipette of the rail)")),
+                                (PICK_OBJECT, self.tr("Clicked object"),
+                                 self.tr("Only the patch of such pixels the click falls in: a pool, a roof, a field "
+                                         "(the object detector of the rail); Ctrl+click adds another object"))):
+            button = QRadioButton(label, self._pipette_group)
+            button.setObjectName(f"radioButton_raster_pipette_{key}")
+            button.setToolTip(tip)
+            button.toggled.connect(lambda checked, k=key: self._on_target_button(k, checked))
+            self._target_group.addButton(button)
+            self._target_buttons[key] = button
+            target_row.addWidget(button)
+        target_row.addStretch(1)
         group_layout.addLayout(target_row)
         tolerance_row = QHBoxLayout()
+        tolerance_row.setSpacing(GAP)
         tolerance_row.addWidget(QLabel(self.tr("Tolerance ±"), self._pipette_group))
         self._tolerance_spin = QDoubleSpinBox(self._pipette_group)
         self._tolerance_spin.setRange(0.0, 100.0)
@@ -622,99 +975,143 @@ class RasterExploringPanel(QWidget):
         self._tolerance_spin.setAccessibleName(self.tr("Pipette tolerance"))
         self._tolerance_spin.valueChanged.connect(self._on_tolerance_changed)
         tolerance_row.addWidget(self._tolerance_spin)
+        self._quantity_label = QLabel("", self._pipette_group)
+        self._quantity_label.setEnabled(False)
+        self._quantity_label.setWordWrap(True)
+        tolerance_row.addWidget(self._quantity_label, 1)
         group_layout.addLayout(tolerance_row)
+        self._chips_widget = QWidget(self._pipette_group)
+        self._chips_widget.setObjectName("widget_raster_pipette_picks")
+        self._chips_layout = QVBoxLayout(self._chips_widget)
+        self._chips_layout.setContentsMargins(0, 0, 0, 0)
+        self._chips_layout.setSpacing(2)
+        group_layout.addWidget(self._chips_widget)
         self._sample_label = QLabel("", self._pipette_group)
+        self._sample_label.setObjectName("label_raster_pipette_status")
         self._sample_label.setWordWrap(True)
         group_layout.addWidget(self._sample_label)
-        # Multiband images (orthophotos): which band is which, then the usual indexes.
-        layout_row = QHBoxLayout()
-        self._layout_label = QLabel(self.tr("Bands"), self._pipette_group)
-        layout_row.addWidget(self._layout_label)
-        self._layout_combo = QComboBox(self._pipette_group)
-        self._layout_combo.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
-        self._layout_combo.setToolTip(self.tr("What the bands of the image are: the presets and the pipette use them"))
-        self._layout_combo.setAccessibleName(self.tr("Band layout"))
-        for key, label in (("rgb", self.tr("RGB (red, green, blue)")), ("irc", self.tr("IRC (infrared, red, green)")),
-                           ("rgbn", self.tr("RGB + infrared"))):
-            self._layout_combo.addItem(label, key)
-        self._layout_combo.currentIndexChanged.connect(self._on_layout_index_changed)
-        layout_row.addWidget(self._layout_combo)
-        group_layout.addLayout(layout_row)
-        self._spectral_combo = QComboBox(self._pipette_group)
-        self._spectral_combo.setToolTip(self.tr("Write the expression of a usual index (vegetation, water...)"))
-        self._spectral_combo.setAccessibleName(self.tr("Spectral presets"))
-        self._spectral_combo.activated.connect(self._on_spectral_preset)
-        group_layout.addWidget(self._spectral_combo)
-        self._fill_spectral_presets()
+        self._set_pick_target(PICK_SIMILAR)
         return self._pipette_group
 
+    def _rebuild_chips(self) -> None:
+        """One removable chip per pick: a colour swatch and its values, a class and its label, a value."""
+        while self._chips_layout.count():
+            item = self._chips_layout.takeAt(0)
+            widget = item.widget()
+            if widget is not None:
+                widget.setParent(None)
+                widget.deleteLater()
+        for index, pick in enumerate(self._picks):
+            chip = QPushButton(self._chips_widget)
+            chip.setObjectName(f"pushButton_raster_pick_{index}")
+            chip.setFlat(True)
+            chip.setToolTip(self.tr("Remove this pick"))
+            chip.setText(f"{self._chip_text(pick)}   ✕")
+            colour = self._chip_colour(pick)
+            if colour is not None:
+                pixmap = QPixmap(12, 12)
+                pixmap.fill(QColor(colour))
+                chip.setIcon(QIcon(pixmap))
+            chip.setSizePolicy(QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Fixed)
+            chip.clicked.connect(lambda _checked=False, i=index: self._remove_pick(i))
+            self._chips_layout.addWidget(chip, 0, Qt.AlignmentFlag.AlignLeft)
+        self._chips_widget.setVisible(bool(self._picks))
+
+    def _chip_text(self, pick: Any) -> str:
+        if self._pick_kind == "color" and isinstance(pick, tuple):
+            return " · ".join(f"{value:g}" for value in pick)
+        if self._pick_kind == "classes":
+            label = self._class_label(pick)
+            return f"{format_class_value(pick)} — {label}" if label else format_class_value(pick)
+        if self._derivative.is_terrain:
+            return format_derived_value(self._derivative, pick)
+        return format_pixel_value(pick, self._decimals)
+
+    def _chip_colour(self, pick: Any) -> Optional[str]:
+        if self._pick_kind == "classes":
+            return self._class_colour(pick)
+        if self._pick_kind == "color" and isinstance(pick, tuple):
+            by_role = {}
+            for band, value in zip(self._pipette_bands, pick):
+                role = self._roles.get(band, ROLE_NONE)
+                if role in (ROLE_RED, ROLE_GREEN, ROLE_BLUE) and value is not None:
+                    by_role[role] = value
+            if len(by_role) == 3:
+                span = max(1.0, max(self._value_span(band) for band in self._pipette_bands))
+                channel = lambda role: int(round(255 * min(1.0, max(0.0, float(by_role[role]) / span))))  # noqa: E731
+                return f"#{channel(ROLE_RED):02x}{channel(ROLE_GREEN):02x}{channel(ROLE_BLUE):02x}"
+            return "#9e9e9e"
+        return None
+
+    def _class_label(self, code: Any) -> str:
+        for value, label, _colour in (self._summary.classes if self._summary is not None else ()):
+            if int(round(float(value))) == int(code):
+                return label or ""
+        return ""
+
+    def _class_colour(self, code: Any) -> Optional[str]:
+        for value, _label, colour in (self._summary.classes if self._summary is not None else ()):
+            if int(round(float(value))) == int(code):
+                return colour or None
+        return None
+
+    def _remove_pick(self, index: int) -> None:
+        if not (0 <= index < len(self._picks)):
+            return
+        pick = self._picks.pop(index)
+        self._seeds = [seed for seed in self._seeds if seed[2] != pick]  # the objects grown from it go too
+        if self._picks:
+            self._apply_picks()
+        else:
+            self._pick_kind = ""
+            self._set_pipette_selection(None)
+
     def show_pipette_active(self, active: bool) -> None:
-        """The pipette is on (or off) the map: on, its group becomes the active one."""
+        """The pipette (or the detector) is on the map: on, its group becomes the active one."""
         self._pipette_on = bool(active)
         if active:
             self._activate_mode(PIPETTE)
 
-    def _build_pixel_group(self) -> Any:
-        group = self._make_group(self.tr("PIXEL VALUE"), "mGroupBox_raster_pixel_value", checkable=False)
-        group_layout = group.layout()
-        self._pixel_value_label = QLabel("–", group)
-        self._pixel_value_label.setObjectName("label_raster_pixel_value")
-        font = QFontDatabase.systemFont(QFontDatabase.SystemFont.FixedFont)
-        font.setPointSizeF(max(font.pointSizeF(), 9.0) + 6.0)
-        font.setBold(True)
-        self._pixel_value_label.setFont(font)
-        self._pixel_value_label.setAccessibleName(self.tr("Pixel value of the current band"))
-        self._pixel_value_label.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
-        # Value and coordinates on one line, as in the mockup: big value left, X / Y right.
-        value_row = QHBoxLayout()
-        value_row.setContentsMargins(0, 0, 0, 0)
-        value_row.addWidget(self._pixel_value_label, 0, Qt.AlignmentFlag.AlignBottom)
-        value_row.addStretch(1)
-        self._pixel_coordinates_label = QLabel("", group)
-        self._pixel_coordinates_label.setObjectName("label_raster_pixel_coordinates")
-        self._pixel_coordinates_label.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
-        self._pixel_coordinates_label.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignBottom)
-        value_row.addWidget(self._pixel_coordinates_label, 0, Qt.AlignmentFlag.AlignBottom)
-        group_layout.addLayout(value_row)
-        self._pixel_bands_label = QLabel("", group)
-        self._pixel_bands_label.setWordWrap(True)
-        group_layout.addWidget(self._pixel_bands_label)
-        self._pixel_history_label = QLabel("", group)
-        self._pixel_history_label.setTextFormat(Qt.TextFormat.RichText)
-        self._pixel_history_label.setWordWrap(True)
-        self._pixel_history_label.setToolTip(self.tr("Last {0} values picked").format(HISTORY_SIZE))
-        group_layout.addWidget(self._pixel_history_label)
-        self._hover_label = QLabel("", group)
-        self._hover_label.setWordWrap(True)  # a long value line must not widen the panel past the dock
-        self._hover_label.setToolTip(self.tr("Value of the current band under the cursor"))
-        self._hover_label.setVisible(False)
-        group_layout.addWidget(self._hover_label)
-        self._zone_label = QLabel("", group)
-        self._zone_label.setWordWrap(True)
-        self._zone_label.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
-        self._zone_label.setToolTip(self.tr("Statistics of the current band in the last rectangle drawn on the map"))
-        self._zone_label.setVisible(False)
-        group_layout.addWidget(self._zone_label)
-        help_label = QLabel(self.tr("Click on the map with the pixel picker. Ctrl+click extends the range to the value."), group)
-        help_label.setObjectName("label_raster_pixel_help")
-        help_label.setWordWrap(True)
-        help_label.setEnabled(False)  # muted caption in every theme
-        group_layout.insertWidget(group_layout.indexOf(self._pixel_bands_label), help_label)
-        return group
-
     def show_picker_active(self, active: bool) -> None:
-        """The pixel picker is on the map: the pixel group opens so the next click is seen."""
-        if active and not self._pipette_on and hasattr(self._pixel_group, 'setCollapsed'):
-            self._pixel_group.setCollapsed(False)  # the pipette shows its result in its own group
+        """The pixel picker is on the map: the bands open so the next click is seen."""
+        if active and hasattr(self._bands_group, 'setCollapsed'):
+            self._bands_group.setCollapsed(False)
+
+    # --- VALUE RANGE ---
 
     def _build_range_group(self) -> Any:
         self._range_group = self._make_group(self.tr("VALUE RANGE"), "mGroupBox_raster_value_range", checkable=True)
         group_layout = self._range_group.layout()
+        quantity_row = QHBoxLayout()
+        quantity_row.setSpacing(GAP)
+        quantity_row.addWidget(QLabel(self.tr("Quantity"), self._range_group))
+        self._derivative_combo = QComboBox(self._range_group)
+        self._derivative_combo.setObjectName("comboBox_raster_derivative")
+        self._derivative_combo.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
+        self._derivative_combo.setToolTip(self.tr(
+            "Quantity the range applies to. Slope, aspect, hillshade and roughness read the active band as a DTM."))
+        self._derivative_combo.setSizeAdjustPolicy(QComboBox.SizeAdjustPolicy.AdjustToMinimumContentsLengthWithIcon)
+        self._derivative_combo.setMinimumContentsLength(8)
+        for derivative, label in ((RasterDerivative.VALUE, self.tr("Pixel value")),
+                                  (RasterDerivative.SLOPE_DEGREES, self.tr("Slope (degrees)")),
+                                  (RasterDerivative.SLOPE_PERCENT, self.tr("Slope (%)")),
+                                  (RasterDerivative.ASPECT, self.tr("Aspect (degrees)")),
+                                  (RasterDerivative.HILLSHADE, self.tr("Hillshade (0-255)")),
+                                  (RasterDerivative.ROUGHNESS, self.tr("Roughness (TRI, mean difference)"))):
+            self._derivative_combo.addItem(label, derivative.value)
+        self._derivative_combo.currentIndexChanged.connect(self._on_derivative_index_changed)
+        quantity_row.addWidget(self._derivative_combo, 1)
+        self._presets_button = self._menu_button(self._range_group, self.tr("Thresholds ▾"),
+                                                 self.tr("Usual thresholds of the quantity"), "toolButton_raster_presets")
+        quantity_row.addWidget(self._presets_button)
+        group_layout.addLayout(quantity_row)
+
         self._histogram = RangeHistogramWidget(self._range_group)
         self._histogram.rangeChanged.connect(self._on_histogram_range_changed)
         group_layout.addWidget(self._histogram)
 
         spins_row = QHBoxLayout()
+        spins_row.setSpacing(GAP)
         self._min_spin = QDoubleSpinBox(self._range_group)
         self._max_spin = QDoubleSpinBox(self._range_group)
         for spin, label, tip in ((self._min_spin, self.tr("Min"), self.tr("Lowest value kept")),
@@ -731,64 +1128,94 @@ class RasterExploringPanel(QWidget):
         self._min_spin.valueChanged.connect(self._on_min_spin_changed)
         self._max_spin.valueChanged.connect(self._on_max_spin_changed)
         group_layout.addLayout(spins_row)
-
-        self._presets_combo = QComboBox(self._range_group)
-        self._presets_combo.setToolTip(self.tr("Usual thresholds of the quantity"))
-        self._presets_combo.setAccessibleName(self.tr("Usual thresholds"))
-        self._presets_combo.activated.connect(self._on_preset_activated)
-        group_layout.addWidget(self._presets_combo)
         self._fill_presets()
-
-        self._kept_ratio_label = QLabel("", self._range_group)
-        group_layout.addWidget(self._kept_ratio_label)
-        self.set_kept_ratio(None)
         return self._range_group
 
-    def _build_classes_group(self) -> Any:
-        self._classes_group = self._make_group(self.tr("CLASSES"), "mGroupBox_raster_classes", checkable=True)
-        group_layout = self._classes_group.layout()
-        self._classes_list = QListWidget(self._classes_group)
-        self._classes_list.setMaximumHeight(200)
-        self._classes_list.setAccessibleName(self.tr("Raster classes"))
-        self._classes_list.itemChanged.connect(self._schedule_selection_changed)
-        group_layout.addWidget(self._classes_list)
-        buttons_row = QHBoxLayout()
-        button_all = QPushButton(self.tr("All"), self._classes_group)
-        button_none = QPushButton(self.tr("None"), self._classes_group)
-        button_all.clicked.connect(lambda: self._set_all_classes(Qt.CheckState.Checked))
-        button_none.clicked.connect(lambda: self._set_all_classes(Qt.CheckState.Unchecked))
-        buttons_row.addWidget(button_all)
-        buttons_row.addWidget(button_none)
-        buttons_row.addStretch()
-        group_layout.addLayout(buttons_row)
-        return self._classes_group
+    # --- RASTER EXPRESSION ---
 
     def _build_expression_group(self) -> Any:
         self._expression_group = self._make_group(self.tr("RASTER EXPRESSION"), "mGroupBox_raster_expression", checkable=True)
         group_layout = self._expression_group.layout()
-        self._expression_edit = QLineEdit(self._expression_group)
-        self._expression_edit.setPlaceholderText('"mnt@1" > 200 AND "pente@1" < 15')
+        self._expression_edit = QPlainTextEdit(self._expression_group)
+        self._expression_edit.setObjectName("plainTextEdit_raster_expression")
         self._expression_edit.setToolTip(self.tr("Raster calculator expression; a pixel is kept where it is not 0"))
         self._expression_edit.setAccessibleName(self.tr("Raster expression"))
+        self._expression_edit.setTabChangesFocus(True)
+        metrics = self._expression_edit.fontMetrics()
+        self._expression_edit.setFixedHeight(metrics.lineSpacing() * EXPRESSION_LINES + 12)
         self._expression_edit.textChanged.connect(self._schedule_selection_changed)
         group_layout.addWidget(self._expression_edit)
-
-        self._expression_status = QLabel("", self._expression_group)
-        self._expression_status.setWordWrap(True)
-        group_layout.addWidget(self._expression_status)
         buttons_row = QHBoxLayout()
-        buttons_row.addStretch()
-        self._use_range_button = QPushButton(self.tr("Use the range"), self._expression_group)
-        self._use_range_button.setToolTip(self.tr("Write the current value range as an expression"))
-        self._use_range_button.clicked.connect(self._use_range_as_expression)
-        buttons_row.addWidget(self._use_range_button)
+        buttons_row.setSpacing(GAP)
+        self._insert_button = self._menu_button(self._expression_group, self.tr("Insert ▾"),
+                                                self.tr("Insert a band reference, a usual spectral index or the current range"),
+                                                "toolButton_raster_insert")
+        buttons_row.addWidget(self._insert_button)
+        self._expression_status = QLabel("", self._expression_group)
+        self._expression_status.setObjectName("label_raster_expression_status")
+        self._expression_status.setWordWrap(True)
+        buttons_row.addWidget(self._expression_status, 1)
         group_layout.addLayout(buttons_row)
+        self._fill_insert_menu()
         return self._expression_group
+
+    def _fill_insert_menu(self) -> None:
+        menu = self._insert_button.menu()
+        menu.clear()
+        bands = self._summary.bands if self._summary is not None else []
+        if bands:
+            menu.addSection(self.tr("Bands"))
+            for info in bands:
+                text = f'"{self._reference}@{info.number}"'
+                short = short_band_name(info.number, info.name)
+                action = menu.addAction(f"{text}  {short}".rstrip())
+                action.triggered.connect(lambda _checked=False, t=text: self._insert_text(t))
+        keys = spectral_presets_for(self._roles)
+        if keys:
+            menu.addSection(self.tr("Spectral indexes"))
+            names = self._spectral_names()
+            for key in keys:
+                action = menu.addAction(names[key])
+                action.triggered.connect(lambda _checked=False, k=key: self._insert_spectral(k))
+        menu.addSection(self.tr("Range"))
+        action = menu.addAction(self.tr("The current value range"))
+        action.triggered.connect(self._use_range_as_expression)
+        action.setEnabled(not self._derivative.is_terrain)
+
+    def _spectral_names(self) -> Dict[str, str]:
+        return {"ndvi_vegetation": self.tr("Vegetation (NDVI > 0.3)"), "ndvi_bare": self.tr("No vegetation (NDVI < 0.1)"),
+                "ndwi_water": self.tr("Water (NDWI > 0.1)"), "exg_vegetation": self.tr("Vegetation (excess green)")}
+
+    def _insert_text(self, text: str) -> None:
+        self._activate_mode(RasterSelectionMode.EXPRESSION, emit=False)
+        self._expression_edit.insertPlainText(text)
+        self._expression_edit.setFocus()
+
+    def _insert_spectral(self, key: str) -> None:
+        expression = spectral_expression(key, self._roles, self._reference)
+        if not expression:
+            return
+        self._activate_mode(RasterSelectionMode.EXPRESSION, emit=False)
+        with _signals_blocked(self._expression_edit):
+            self._expression_edit.setPlainText(expression)
+        self.set_expression_status(True, "")
+        self._emit_now()
+
+    def _use_range_as_expression(self) -> None:
+        formula = range_formula(self.current_band(), self._low, self._high, self._reference)
+        self._activate_mode(RasterSelectionMode.EXPRESSION, emit=False)
+        if not formula:
+            self.set_expression_status(False, self.tr("Set a value range first"))
+            return
+        with _signals_blocked(self._expression_edit):
+            self._expression_edit.setPlainText(formula)
+        self.set_expression_status(True, "")
+        self._emit_now()
 
     # === Public API ===
 
     def set_summary(self, summary: 'RasterSummary') -> None:
-        """Fill the bands and classes from a ``RasterSummary``.
+        """Fill the bands from a ``RasterSummary``.
 
         The current input is kept when ``summary`` describes the layer already
         shown (refresh); another layer starts from a reset panel.
@@ -800,21 +1227,29 @@ class RasterExploringPanel(QWidget):
         if not same_layer:
             self._histograms.clear()
             self._reference = sanitize_reference(summary.layer_name)
-            self._set_layout(default_band_layout(*self._band_names_and_alpha()))
             self._pipette_selection, self._picks, self._pick_kind, self._seeds = None, [], "", []
             self._band_spans = {}
+            self._detected = None
+            self._last_pixel = None
+            self._history = []
         self._coordinate_decimals = coordinate_decimals(min(summary.pixel_size_x, summary.pixel_size_y))
-
-        with _signals_blocked(self._band_combo):
-            self._band_combo.clear()
-            for info in summary.bands:
-                self._band_combo.addItem(band_label(info.number, info.name, info.data_type), int(info.number))
-        self._fill_classes(summary.classes)
-        self._show_spectral_rows()
+        self._default_bands()
+        self._rebuild_band_rows()
+        self._fill_insert_menu()
         if saved is not None:
             self.restore_state(saved)
         else:
             self.reset()
+
+    def _default_bands(self) -> None:
+        """Roles from the renderer (or guessed), every colour band compared by the pipette, first band active."""
+        names, alpha = self._band_names_and_alpha()
+        renderer_bands = getattr(self._summary, "renderer_bands", None) if self._summary is not None else None
+        self._roles, self._roles_guessed = default_roles(names, alpha, renderer_bands)
+        self._pipette_bands = color_bands(names, alpha)
+        numbers = [int(info.number) for info in (self._summary.bands if self._summary is not None else [])]
+        if self._active_band not in numbers:
+            self._active_band = numbers[0] if numbers else 1
 
     def set_histogram(self, band: int, counts: Sequence[int], minimum: float, maximum: float,
                       derivative: RasterDerivative = RasterDerivative.VALUE) -> None:
@@ -853,27 +1288,34 @@ class RasterExploringPanel(QWidget):
     def current_derivative(self) -> RasterDerivative:
         """Quantity the selection applies to: the one of the combo in range mode, the pixel value otherwise.
 
-        Classes and expressions read pixel values, whatever the combo says; the pipette picks in the quantity.
+        An expression reads pixel values, whatever the combo says; the pipette picks in the quantity.
         """
         return self._derivative if self._mode in (RasterSelectionMode.RANGE, PIPETTE) else RasterDerivative.VALUE
 
     def current_band(self) -> int:
-        """1-based number of the selected band (1 when no band is listed)."""
-        value = self._band_combo.currentData()
-        return 1 if value is None else int(value)
+        """1-based number of the active band (1 when no band is listed)."""
+        return int(self._active_band) if self._active_band else 1
+
+    def band_roles(self) -> Dict[int, str]:
+        """Colour role of each band (``{1: "NIR", 2: "R", 3: "G"}``); empty for a single band raster."""
+        return dict(self._roles)
+
+    def pipette_bands(self) -> List[int]:
+        """Bands a picked colour is made of, in band order."""
+        return list(self._pipette_bands)
 
     def set_reference(self, name: str) -> None:
         """Name of the layer in raster calculator formulas (``"mnt"`` -> ``"mnt@1"``)."""
         self._reference = name or DEFAULT_REFERENCE
+        self._fill_insert_menu()
 
     def set_kept_ratio(self, ratio: Optional[float]) -> None:
-        """Show the fraction (0-1) of pixels kept by the selection, None when unknown."""
+        """Remember the fraction (0-1) of pixels kept by the selection, None when unknown; the strip shows it."""
         self._kept_ratio = ratio
-        self._kept_ratio_label.setText(self.tr("Selected pixels: {0}").format(format_percent(ratio)))
         self.summaryChanged.emit()
 
     def kept_ratio(self) -> Optional[float]:
-        """Last fraction (0-1) of kept pixels shown, None when unknown."""
+        """Last fraction (0-1) of kept pixels, None when unknown."""
         return self._kept_ratio
 
     def set_expression_status(self, ok: bool, message: str) -> None:
@@ -884,7 +1326,7 @@ class RasterExploringPanel(QWidget):
 
     def set_pixel_values(self, x: float, y: float, values: Dict[int, Optional[float]], extend: bool = False,
                          terrain: Optional[Dict[RasterDerivative, Optional[float]]] = None) -> None:
-        """Show the values picked at ``(x, y)`` (one per band, None for NoData).
+        """Show the values picked at ``(x, y)`` (one per band, None for NoData) in the band rows.
 
         Args:
             x: Map abscissa of the click (layer CRS).
@@ -904,8 +1346,8 @@ class RasterExploringPanel(QWidget):
             shown = format_derived_value(self._derivative, terrain.get(self._derivative), self.tr("NoData"))
         self._history = push_history(self._history, (float(x), float(y), values.get(band), band, shown))
         self._refresh_pixel_display()
-        if not self._pipette_on and hasattr(self._pixel_group, 'setCollapsed'):
-            self._pixel_group.setCollapsed(False)
+        if hasattr(self._bands_group, 'setCollapsed'):
+            self._bands_group.setCollapsed(False)
         value = terrain.get(self._derivative) if self._derivative.is_terrain else values.get(band)
         if extend and value is not None and self._mode is RasterSelectionMode.RANGE:
             self._set_range(*extend_range(self._low, self._high, value))
@@ -915,7 +1357,7 @@ class RasterExploringPanel(QWidget):
                         derived: Optional[float] = None) -> None:
         """Show the value under the cursor; ``x`` None hides the line.
 
-        The value is the one of the current band, or ``derived`` (slope, aspect...) when the range
+        The value is the one of the active band, or ``derived`` (slope, aspect...) when the range
         applies to a terrain derivative. Unlike :meth:`set_pixel_values`, nothing is added to the history.
         """
         if x is None or y is None:
@@ -930,8 +1372,8 @@ class RasterExploringPanel(QWidget):
         self._hover_label.setText(self.tr("Under the cursor: {0}  (X {1:.{3}f}  Y {2:.{3}f})").format(text, x, y, digits))
         if self._hover_label.isHidden():
             self._hover_label.setVisible(True)
-            if hasattr(self._pixel_group, 'setCollapsed'):
-                self._pixel_group.setCollapsed(False)  # once per hover session: the user may fold it again
+            if hasattr(self._bands_group, 'setCollapsed'):
+                self._bands_group.setCollapsed(False)  # once per hover session: the user may fold it again
 
     def set_zone_statistics(self, minimum: Bound, maximum: Bound, mean: Bound = None,
                             count: Optional[int] = None) -> None:
@@ -939,33 +1381,37 @@ class RasterExploringPanel(QWidget):
         text = format_zone_statistics(minimum, maximum, mean, count, self._range_decimals())
         self._zone_label.setText(self.tr("Zone: {0}").format(text or self.tr("no pixel")))
         self._zone_label.setVisible(True)
-        if hasattr(self._pixel_group, 'setCollapsed'):
-            self._pixel_group.setCollapsed(False)
+        if hasattr(self._bands_group, 'setCollapsed'):
+            self._bands_group.setCollapsed(False)
 
     def reset(self) -> None:
-        """Back to the defaults: first band, no range, no class, no expression. Does not emit."""
+        """Back to the defaults: first band, roles from the layer, no range, no pick, no expression. Does not emit."""
         self._debounce.stop()
         self.set_hover_value(None, None)
         self._zone_label.setVisible(False)
         self._zone_label.setText("")
         self._pipette_selection, self._picks, self._pick_kind, self._seeds = None, [], "", []
+        self._detected = None
         self._sample_label.setText("")
-        if self._band_combo.count():
-            with _signals_blocked(self._band_combo):
-                self._band_combo.setCurrentIndex(0)
+        self._active_band = 0
+        self._default_bands()
+        self._set_pick_target(PICK_SIMILAR)
         self._set_derivative(RasterDerivative.VALUE)
         self._apply_band()
         self._set_range(None, None)
-        self._set_all_classes(Qt.CheckState.Unchecked, emit=False)
         with _signals_blocked(self._expression_edit):
             self._expression_edit.clear()
         self._preview_on = False
+        self._pipette_on = False
         self.set_expression_status(True, "")
-        self.set_kept_ratio(None)
+        self._kept_ratio = None
         self._last_pixel = None
         self._history = []
+        self._rebuild_chips()
         self._refresh_pixel_display()
+        self._fill_insert_menu()
         self._activate_mode(self._default_mode(), emit=False)
+        self.summaryChanged.emit()
 
     def state(self) -> Dict[str, Any]:
         """Input of the panel, to keep it per layer (see :meth:`restore_state`)."""
@@ -975,29 +1421,42 @@ class RasterExploringPanel(QWidget):
             "band": self.current_band(),
             "minimum": self._low,
             "maximum": self._high,
-            "classes": self._checked_classes(),
-            "expression": self._expression_edit.text(),
+            "classes": [],
+            "expression": self._expression_edit.toPlainText(),
             "preview": self._preview_on,
             "derivative": self._derivative.value,
-            "layout": self._layout,
+            "layout": layout_from_roles(self._roles),
+            "roles": {str(band): role for band, role in self._roles.items() if role},
+            "roles_chosen": not self._roles_guessed,
+            "pipette_bands": list(self._pipette_bands),
             "pipette_selection": self._pipette_selection.to_dict() if self._pipette_selection is not None else None,
             "pipette_picks": [list(pick) if isinstance(pick, tuple) else pick for pick in self._picks],
             "pipette_kind": self._pick_kind,
             "pipette_seeds": [[x, y, list(pick) if isinstance(pick, tuple) else pick] for x, y, pick in self._seeds],
             "pipette_target": self._pick_target,
+            "pipette_on": self._pipette_on,
         }
 
     def restore_state(self, state: Dict[str, Any]) -> None:
-        """Restore a :meth:`state`; unknown bands and classes are ignored. Does not emit."""
+        """Restore a :meth:`state`; unknown bands and roles are ignored. Does not emit.
+
+        The pipette tool itself is not put back on the map: the controller reads
+        ``pipette_on`` and does it explicitly (:meth:`pipette_was_on`).
+        """
         self._debounce.stop()
         parsed = parse_raster_state(state)
-        index = self._band_combo.findData(parsed["band"])
-        if index >= 0:
-            with _signals_blocked(self._band_combo):
-                self._band_combo.setCurrentIndex(index)
+        numbers = [int(info.number) for info in (self._summary.bands if self._summary is not None else [])]
+        if parsed["band"] in numbers:
+            self._active_band = parsed["band"]
+        roles = {band: role for band, role in parsed["roles"].items() if not numbers or band in numbers}
+        if roles:
+            self._roles = roles
+            self._roles_guessed = not parsed["roles_chosen"]
+        if parsed["pipette_bands"]:
+            kept = [band for band in parsed["pipette_bands"] if not numbers or band in numbers]
+            if kept:
+                self._pipette_bands = kept
         self._set_derivative(parsed["derivative"])
-        if parsed["layout"]:
-            self._set_layout(parsed["layout"])
         self._pick_kind = parsed["pipette_kind"]
         self._picks = [tuple(pick) if self._pick_kind == "color" else pick for pick in parsed["pipette_picks"]]
         self._seeds = list(parsed["pipette_seeds"])
@@ -1007,33 +1466,37 @@ class RasterExploringPanel(QWidget):
             self._pipette_selection = RasterSelection.from_dict(data) if data else None
         except (ValueError, TypeError):
             self._pipette_selection = None
-        self._show_pipette_result()
+        self._pipette_on = parsed["pipette_on"]
         self._apply_band()
         self._set_range(parsed["minimum"], parsed["maximum"])
-        wanted = set(parsed["classes"])
-        with _signals_blocked(self._classes_list):
-            for item in self._class_items():
-                checked = int(item.data(Qt.ItemDataRole.UserRole)) in wanted
-                item.setCheckState(Qt.CheckState.Checked if checked else Qt.CheckState.Unchecked)
         with _signals_blocked(self._expression_edit):
-            self._expression_edit.setText(parsed["expression"])
+            self._expression_edit.setPlainText(parsed["expression"])
         self._preview_on = parsed["preview"]
         mode = parsed["mode"]
-        if mode is RasterSelectionMode.CLASSES and not self._has_classes():
-            mode = RasterSelectionMode.RANGE
+        if mode is RasterSelectionMode.CLASSES:
+            mode = RasterSelectionMode.RANGE  # no CLASSES group any more: a class is picked with the pipette
         self._activate_mode(mode, emit=False)
+        self._rebuild_chips()
+        self._show_pipette_result()
         self._refresh_pixel_display()
+        self._fill_insert_menu()
+
+    def pipette_was_on(self) -> bool:
+        """Whether the pipette tool was on the map in the state last restored (or is on now)."""
+        return self._pipette_on
 
     # === Modes (exclusive groups) ===
 
     def _has_classes(self) -> bool:
-        return self._classes_list.count() > 0
+        return bool(self._summary is not None and self._summary.classes)
 
     def _default_mode(self) -> RasterSelectionMode:
-        return RasterSelectionMode.CLASSES if self._has_classes() else RasterSelectionMode.RANGE
+        return RasterSelectionMode.RANGE
 
     def _activate_mode(self, mode: RasterSelectionMode, emit: bool = True) -> None:
         """Check the group of ``mode``, uncheck and collapse the others."""
+        if mode not in self._mode_groups:
+            mode = RasterSelectionMode.RANGE
         self._switching_mode = True
         try:
             for group_mode, group in self._mode_groups.items():
@@ -1054,6 +1517,7 @@ class RasterExploringPanel(QWidget):
         if self._switching_mode:
             return
         if checked:
+            self._start_expression_from_previous(mode)
             self._activate_mode(mode)
             self.modeChosen.emit(mode.value)
             return
@@ -1067,10 +1531,20 @@ class RasterExploringPanel(QWidget):
         # Expanding a group makes it the active one, as for the vector groups.
         if self._switching_mode or collapsed or mode is self._mode:
             return
-        if mode is RasterSelectionMode.CLASSES and not self._has_classes():
-            return
+        self._start_expression_from_previous(mode)
         self._activate_mode(mode)
         self.modeChosen.emit(mode.value)
+
+    def _start_expression_from_previous(self, mode: RasterSelectionMode) -> None:
+        """EXPRESSION made active by the user with an empty text: it starts from the selection that was active."""
+        if mode is not RasterSelectionMode.EXPRESSION or mode is self._mode:
+            return
+        if self._expression_edit.toPlainText().strip():
+            return
+        formula = previous_group_formula(self.selection(), self._reference)
+        if formula:
+            with _signals_blocked(self._expression_edit):
+                self._expression_edit.setPlainText(formula)
 
     # === Selection change notification ===
 
@@ -1081,7 +1555,7 @@ class RasterExploringPanel(QWidget):
         self._debounce.stop()
         self.selectionChanged.emit()
 
-    # === Band ===
+    # === Bands ===
 
     def _band_info(self, number: int) -> Any:
         if self._summary is None:
@@ -1091,8 +1565,16 @@ class RasterExploringPanel(QWidget):
                 return info
         return None
 
+    def _band_names_and_alpha(self) -> Tuple[List[str], set]:
+        """Band names of the layer and the numbers of its alpha bands (colour interpretation)."""
+        bands = self._summary.bands if self._summary is not None else []
+        return [info.name for info in bands], {int(info.number) for info in bands if getattr(info, "is_alpha", False)}
+
+    def _colour_bands(self) -> List[int]:
+        return color_bands(*self._band_names_and_alpha())
+
     def _apply_band(self) -> None:
-        """Adopt the decimals and the cached histogram of the current band."""
+        """Adopt the decimals and the cached histogram of the active band."""
         info = self._band_info(self.current_band())
         self._decimals = decimals_for(info.data_type) if info is not None else FLOAT_DECIMALS
         # The pixel readouts keep the band decimals; the range follows the quantity it applies to.
@@ -1102,6 +1584,9 @@ class RasterExploringPanel(QWidget):
             self._min_spin.setDecimals(range_decimals)
             self._max_spin.setDecimals(range_decimals)
         self._show_band_histogram()
+        self._refresh_band_rows()
+        self._range_group.setTitle(self.tr("VALUE RANGE — band {0}").format(self.current_band())
+                                   if len(self._band_rows) > 1 else self.tr("VALUE RANGE"))
 
     def _show_band_histogram(self) -> None:
         counts, minimum, maximum = self._histograms.get((self.current_band(), self._derivative), ([], 0.0, 0.0))
@@ -1120,19 +1605,57 @@ class RasterExploringPanel(QWidget):
             return None, None
         return cached[1], cached[2]
 
-    def _forget_picks(self) -> None:
-        """Picks were read on another band or quantity: they and their selection no longer apply (A3)."""
+    def _forget_picks(self, kinds: Sequence[str] = ("color", "value", "classes", "preset")) -> None:
+        """Picks of ``kinds`` were read on another band, bands or quantity: they and their selection no longer apply."""
+        if self._pick_kind and self._pick_kind not in kinds:
+            return
         self._picks, self._pick_kind, self._pipette_selection, self._seeds = [], "", None, []
+        self._detected = None
+        self._rebuild_chips()
         self._show_pipette_result()
 
-    def _on_band_index_changed(self, _index: int) -> None:
-        self._forget_picks()
+    def _on_active_band_toggled(self, number: int, checked: bool) -> None:
+        if not checked or number == self._active_band:
+            return
+        self._active_band = number
+        self._forget_picks(("value", "classes"))
         self._apply_band()
         self._set_range(None, None)
         self._refresh_pixel_display()
         self._zone_label.setVisible(False)  # its statistics were those of the previous band
         self.bandChanged.emit(self.current_band())
         self._emit_now()
+
+    def _on_pipette_band_toggled(self, number: int, checked: bool) -> None:
+        bands = [band for band in self._pipette_bands if band != number]
+        if checked:
+            bands.append(number)
+        self._pipette_bands = sorted(bands)
+        self._forget_picks(("color",))
+        self._refresh_band_rows()
+
+    def _on_role_changed(self, number: int, role: str = ROLE_NONE) -> None:
+        if number not in self._band_rows:
+            return
+        role = role if role in ROLES else ROLE_NONE
+        for other, other_role in list(self._roles.items()):
+            if other != number and role and other_role == role:
+                del self._roles[other]  # a colour is held by one band
+        if role:
+            self._roles[number] = role
+        else:
+            self._roles.pop(number, None)
+        self._roles_guessed = False
+        self._refresh_band_rows()
+        self._fill_insert_menu()
+        self._forget_picks(("preset",))
+
+    def _on_layout_shortcut(self, key: str) -> None:
+        self._roles = roles_from_layout(key, self._colour_bands())
+        self._roles_guessed = False
+        self._refresh_band_rows()
+        self._fill_insert_menu()
+        self._forget_picks(("preset",))
 
     # === Derivative ===
 
@@ -1154,11 +1677,12 @@ class RasterExploringPanel(QWidget):
         except ValueError:
             derivative = RasterDerivative.VALUE
         self._set_derivative(derivative)
-        self._forget_picks()
+        self._forget_picks(("value",))
         self._apply_band()
         self._set_range(None, None)  # the old bounds were in another unit
         self._refresh_pixel_display()
         self._zone_label.setVisible(False)
+        self._fill_insert_menu()
         self.bandChanged.emit(self.current_band())  # the controller then sends the histogram
         self._emit_now()
 
@@ -1168,27 +1692,26 @@ class RasterExploringPanel(QWidget):
                  "west": self.tr("West"), "shadow": self.tr("Shadow"), "lit": self.tr("Lit")}
         suffix = DERIVATIVE_SUFFIXES.get(self._derivative, "")
         presets = derivative_presets(self._derivative)
-        with _signals_blocked(self._presets_combo):
-            self._presets_combo.clear()
-            self._presets_combo.addItem(self.tr("Usual thresholds…"), None)
-            for key, low, high in presets:
-                self._presets_combo.addItem(format_preset(names[key], low, high, suffix), (low, high))
-        self._presets_combo.setVisible(bool(presets))
+        menu = self._presets_button.menu()
+        menu.clear()
+        for key, low, high in presets:
+            action = menu.addAction(format_preset(names[key], low, high, suffix))
+            action.triggered.connect(lambda _checked=False, bounds=(low, high): self._on_preset_chosen(bounds))
+        self._presets_button.setVisible(bool(presets))
 
-    def _on_preset_activated(self, index: int) -> None:
-        bounds = self._presets_combo.itemData(index)
-        if bounds is None:
-            return
+    def _on_preset_chosen(self, bounds: Tuple[Bound, Bound]) -> None:
         self._set_range(*bounds)
-        self._presets_combo.setCurrentIndex(0)
         self._activate_mode(RasterSelectionMode.RANGE, emit=False)  # a usual threshold is a range selection
         self._emit_now()
 
     def _update_mode_controls(self) -> None:
-        """Enable what makes sense for the quantity: a derivative has no raster calculator expression."""
+        """Say in PIPETTE which quantity a value pick reads; the range menu entry needs a formula."""
         terrain = self._derivative.is_terrain
-        self._use_range_button.setEnabled(not terrain)
-        self._derivative_combo.setEnabled(self._mode in (RasterSelectionMode.RANGE, PIPETTE))
+        if hasattr(self, "_quantity_label"):
+            self._quantity_label.setText(
+                self.tr("picks on: {0}").format(self._derivative_combo.currentText()) if terrain else "")
+        if hasattr(self, "_insert_button"):
+            self._fill_insert_menu()
 
     # === Range ===
 
@@ -1220,109 +1743,14 @@ class RasterExploringPanel(QWidget):
         self._set_range(low, value)
         self._schedule_selection_changed()
 
-    # === Classes ===
-
-    def _fill_classes(self, classes: Iterable[Tuple[float, str, str]]) -> None:
-        with _signals_blocked(self._classes_list):
-            self._classes_list.clear()
-            for value, label, color in classes or ():
-                item = QListWidgetItem(f"{format_class_value(value)} — {label}")
-                pixmap = QPixmap(12, 12)
-                pixmap.fill(QColor(color))
-                item.setIcon(QIcon(pixmap))
-                item.setFlags(Qt.ItemFlag.ItemIsUserCheckable | Qt.ItemFlag.ItemIsEnabled)
-                item.setCheckState(Qt.CheckState.Unchecked)
-                item.setData(Qt.ItemDataRole.UserRole, int(round(float(value))))
-                self._classes_list.addItem(item)
-        self._classes_group.setVisible(self._has_classes())
-
-    def _class_items(self) -> List[Any]:
-        items = (self._classes_list.item(index) for index in range(self._classes_list.count()))
-        return [item for item in items if item is not None]
-
-    def _checked_classes(self) -> List[int]:
-        return sorted(int(item.data(Qt.ItemDataRole.UserRole)) for item in self._class_items()
-                      if item.checkState() == Qt.CheckState.Checked)
-
-    def _set_all_classes(self, state: Any, emit: bool = True) -> None:
-        with _signals_blocked(self._classes_list):
-            for item in self._class_items():
-                item.setCheckState(state)
-        if emit:
-            self._emit_now()
-
-    # === Expression ===
-
-    def _use_range_as_expression(self) -> None:
-        formula = range_formula(self.current_band(), self._low, self._high, self._reference)
-        if not formula:
-            self.set_expression_status(False, self.tr("Set a value range first"))
-            return
-        with _signals_blocked(self._expression_edit):
-            self._expression_edit.setText(formula)
-        self.set_expression_status(True, "")
-        self._emit_now()
-
-    # === Spectral presets and colour pipette (multiband images) ===
-
-    def _band_names_and_alpha(self) -> Tuple[List[str], set]:
-        """Band names of the layer and the numbers of its alpha bands (colour interpretation)."""
-        bands = self._summary.bands if self._summary is not None else []
-        return [info.name for info in bands], {info.number for info in bands if getattr(info, "is_alpha", False)}
-
-    def _set_layout(self, layout: str) -> None:
-        allowed = layouts_for(*self._band_names_and_alpha())
-        model = self._layout_combo.model()
-        for index in range(self._layout_combo.count()):
-            model.item(index).setEnabled(self._layout_combo.itemData(index) in allowed)
-        self._layout = layout if layout in allowed else "rgb"
-        with _signals_blocked(self._layout_combo):
-            self._layout_combo.setCurrentIndex(max(0, self._layout_combo.findData(self._layout)))
-        self._fill_spectral_presets()
-
-    def _on_layout_index_changed(self, _index: int) -> None:
-        self._set_layout(self._layout_combo.currentData())
-        # Picked colours are band values: they stay. A preset read other bands: it is dropped.
-        if self._pick_kind == "preset":
-            self._forget_picks()
-
-    def _show_spectral_rows(self) -> None:
-        """Bands layout and spectral presets only make sense for an image of three bands or more: greyed out otherwise.
-
-        (A collapsible group hides and shows its children as it folds: they are disabled, not hidden.)
-        """
-        usable = len(color_bands(*self._band_names_and_alpha())) >= 3
-        tip = "" if usable else self.tr("Needs an image of three bands or more (red, green, blue...)")
-        for widget in (self._layout_label, self._layout_combo, self._spectral_combo):
-            widget.setEnabled(usable)
-        self._layout_combo.setToolTip(tip or self.tr("What the bands of the image are: the presets and the pipette use them"))
-        self._spectral_combo.setToolTip(tip or self.tr("Write the expression of a usual index (vegetation, water...)"))
-
-    def _fill_spectral_presets(self) -> None:
-        names = {"ndvi_vegetation": self.tr("Vegetation (NDVI > 0.3)"), "ndvi_bare": self.tr("No vegetation (NDVI < 0.1)"),
-                 "ndwi_water": self.tr("Water (NDWI > 0.1)"), "exg_vegetation": self.tr("Vegetation (excess green)")}
-        with _signals_blocked(self._spectral_combo):
-            self._spectral_combo.clear()
-            self._spectral_combo.addItem(self.tr("Spectral presets…"), None)
-            for key in spectral_presets_for(self._layout):
-                self._spectral_combo.addItem(names[key], key)
-
-    def _on_spectral_preset(self, index: int) -> None:
-        key = self._spectral_combo.itemData(index)
-        name = self._spectral_combo.itemText(index)
-        self._spectral_combo.setCurrentIndex(0)
-        if key is None:
-            return
-        self._picks, self._pick_kind, self._preset_name, self._seeds = [], "preset", name, []
-        self._set_pipette_selection(RasterSelection(band=self.current_band(), mode=RasterSelectionMode.EXPRESSION,
-                                                    expression=spectral_expression(key, self._layout, self._reference)))
+    # === Pipette and object detector ===
 
     def set_band_spans(self, spans: Dict[int, float]) -> None:
         """Observed value range of each band (``max - min``), the base of the pipette tolerance."""
         self._band_spans = {int(band): float(span) for band, span in (spans or {}).items() if span and span > 0}
 
     def _value_span(self, band: int = 0) -> float:
-        """Value range of ``band`` (the current one by default): its statistics, its histogram, else its type."""
+        """Value range of ``band`` (the active one by default): its statistics, its histogram, else its type."""
         band = band or self.current_band()
         if band in self._band_spans:
             return self._band_spans[band]
@@ -1333,24 +1761,22 @@ class RasterExploringPanel(QWidget):
         kind = info.data_type if info is not None else "Byte"
         return 65535.0 if kind in ("UInt16", "Int16") else 255.0
 
-    def _color_band_numbers(self) -> List[int]:
-        return color_bands(*self._band_names_and_alpha())
-
     def set_color_sample(self, values: Dict[int, Optional[float]], extend: bool = False,
                          terrain: Optional[Dict[RasterDerivative, Optional[float]]] = None,
                          point: Optional[Tuple[float, float]] = None) -> None:
-        """A pixel was clicked with the pipette: the PIPETTE group selects the pixels that look like it.
+        """A pixel was clicked with the pipette or the detector: the PIPETTE group selects the pixels that look like it.
 
-        An image of several bands selects a similar color (an expression); a classified raster selects
-        the class; a single band (DTM, index) or a slope / aspect... selects a range around the value.
+        Two or more pipette bands select a similar colour (an expression); a paletted raster
+        selects the class under the click; a single band (DTM, index) or a slope / aspect...
+        selects a range around the value.
 
         Args:
             values: Band number -> value of the clicked pixel (None for NoData).
-            extend: Ctrl+click; the color, class or value is added to the ones already picked.
+            extend: Ctrl+click; the colour, class or value is added to the ones already picked.
             terrain: Slope, aspect... of the pixel, read when the pipette picks one.
             point: The clicked point (layer CRS): in object detection, the object grows from it.
         """
-        bands = self._color_band_numbers()
+        bands = list(self._pipette_bands)
         band = self.current_band()
         if len(bands) >= 2 and not self._derivative.is_terrain:
             kind, pick = "color", tuple(values.get(number) for number in bands)
@@ -1386,6 +1812,9 @@ class RasterExploringPanel(QWidget):
         Args:
             debounced: Signal the change after the input settles (the tolerance spin box), not at once.
         """
+        if self._pick_kind == "preset":  # a spectral index: no pick to read again
+            self._set_pipette_selection(self._pipette_selection, debounced)
+            return
         objects: Tuple[RasterSelection, ...] = ()
         if self._pick_target == PICK_OBJECT and self._seeds:
             objects = tuple(self._picks_selection([pick], ((x, y),)) for x, y, pick in self._seeds)
@@ -1398,7 +1827,7 @@ class RasterExploringPanel(QWidget):
         """Selection keeping what looks like ``picks`` (of the current kind), around ``seeds`` when given."""
         band = self.current_band()
         if self._pick_kind == "color":
-            bands = self._color_band_numbers()
+            bands = list(self._pipette_bands)
             tolerances = [tolerance_value(self._tolerance_spin.value(), self._value_span(number)) for number in bands]
             expression = color_similarity_expression(self._reference, bands, picks, tolerances)
             return RasterSelection(band=band, mode=RasterSelectionMode.EXPRESSION, expression=expression,
@@ -1421,6 +1850,8 @@ class RasterExploringPanel(QWidget):
 
     def _set_pipette_selection(self, selection: Optional[RasterSelection], debounced: bool = False) -> None:
         self._pipette_selection = None if selection is None or selection.is_empty else selection
+        self._detected = None
+        self._rebuild_chips()
         self._show_pipette_result()
         if self._pipette_selection is None and self._picks:
             # A range over every value is no constraint (A7): say why nothing is selected.
@@ -1432,34 +1863,20 @@ class RasterExploringPanel(QWidget):
             self._emit_now()
 
     def _show_pipette_result(self) -> None:
-        """One line under the tolerance: what the pipette selects (its expression as tooltip)."""
+        """The status line of the pipette: empty when the chips say it all; the expression as tooltip of the group."""
         selection = self._pipette_selection
         if selection is None:
-            self._sample_label.setText("")
-            self._sample_label.setToolTip("")
+            self._sample_label.setText("" if not self._picks else self._sample_label.text())
+            self._pipette_group.setToolTip("")
             return
-        if selection.mode is RasterSelectionMode.RANGE:
-            decimals = self._range_decimals()
-            suffix = DERIVATIVE_SUFFIXES.get(selection.derivative, "")
-            low = "−∞" if selection.minimum is None else f"{selection.minimum:.{decimals}f}"
-            high = "+∞" if selection.maximum is None else f"{selection.maximum:.{decimals}f}"
-            text = self.tr("Range {0} → {1}{2}").format(low, high, suffix)
-        elif selection.mode is RasterSelectionMode.CLASSES:
-            text = self.tr("Class(es) {0}").format(", ".join(str(code) for code in sorted(selection.classes)))
-        elif self._pick_kind == "color":
-            last = ", ".join(f"{value:g}" for value in self._picks[-1]) if self._picks else ""
-            text = self.tr("{0} color(s), last: {1}").format(len(self._picks), last)
-        elif self._pick_kind == "preset":
-            text = getattr(self, "_preset_name", "")
-        else:
-            text = self.tr("Expression")
-        if selection.seeds:
-            text = self.tr("{0} — detecting {1} object(s)…").format(text, len(selection.seeds))
-        self._sample_label.setText(text)
-        self._sample_label.setToolTip(selection.describe())
+        self._sample_label.setText("")
+        self._pipette_group.setToolTip(selection.describe())
 
     def show_detected_objects(self, count: Optional[int], area: Optional[float] = None, truncated: bool = False) -> None:
         """What object detection found for the current selection; ``count`` None: it could not be read.
+
+        The figures go to the selection strip (:meth:`detected_objects`); the status line only
+        says what went wrong.
 
         Args:
             count: Number of objects (separate patches) found under the clicks.
@@ -1468,71 +1885,79 @@ class RasterExploringPanel(QWidget):
         """
         selection = self._pipette_selection
         if selection is None or not selection.seeds:
+            self._detected = None
+            self.summaryChanged.emit()
             return
+        self._detected = (count, area, bool(truncated))
         if count is None:
             text = self.tr("The object could not be read")
         elif count == 0:
             text = self.tr("No object under the click: raise the tolerance or click another pixel")
+        elif truncated:
+            text = self.tr("An object is larger than the window read and was cut: lower the tolerance")
         else:
-            text = self.tr("{0} object(s) detected").format(count)
-            shown = format_area(area)
-            if shown:
-                text = f"{text} · {shown}"
-            if truncated:
-                text = self.tr("{0} (cut: larger than the window read, lower the tolerance)").format(text)
+            text = ""
         self._sample_label.setText(text)
+        self.summaryChanged.emit()
+
+    def detected_objects(self) -> Optional[Tuple[Optional[int], Optional[float], bool]]:
+        """``(count, area in m², truncated)`` of the last object detection; None when there is none."""
+        return self._detected
 
     def pick_target(self) -> str:
         """What a click of the pipette selects: :data:`PICK_SIMILAR` or :data:`PICK_OBJECT`."""
         return self._pick_target
 
-    def _set_pick_target(self, target: str) -> None:
-        self._pick_target = PICK_OBJECT if target == PICK_OBJECT else PICK_SIMILAR
-        with _signals_blocked(self._target_combo):
-            self._target_combo.setCurrentIndex(max(0, self._target_combo.findData(self._pick_target)))
-
-    def _on_target_index_changed(self, _index: int) -> None:
-        self._set_pick_target(self._target_combo.currentData())
-        if self._picks and self._pick_kind in ("color", "value", "classes"):
+    def set_pick_target(self, target: str) -> None:
+        """Adopt the target of the rail tool that went on the map (the detector or the pipette). Does not emit ``targetChanged``."""
+        changed = self._set_pick_target(target)
+        if changed and self._picks and self._pick_kind in ("color", "value", "classes"):
             self._apply_picks()  # the same picks, on the whole raster or as objects
+
+    def _set_pick_target(self, target: str) -> bool:
+        target = PICK_OBJECT if target == PICK_OBJECT else PICK_SIMILAR
+        changed = target != self._pick_target
+        self._pick_target = target
+        button = self._target_buttons.get(target)
+        if button is not None:
+            with _signals_blocked(*self._target_buttons.values()):
+                button.setChecked(True)
+        return changed
+
+    def _on_target_button(self, target: str, checked: bool) -> None:
+        if not checked or target == self._pick_target:
+            return
+        self._set_pick_target(target)
+        self.targetChanged.emit(self._pick_target)
+        if self._picks and self._pick_kind in ("color", "value", "classes"):
+            self._apply_picks()
 
     def _on_tolerance_changed(self, _value: float) -> None:
         # The selection follows at once, its signal once the wheel stops: each one may read the raster.
         if self._picks and self._pick_kind in ("color", "value"):
             self._apply_picks(debounced=True)
 
-    # === Pixel value ===
+    # === Pixel readout ===
 
     def _refresh_pixel_display(self) -> None:
+        self._refresh_band_rows()
         if self._last_pixel is None:
-            self._pixel_value_label.setText("–")
             self._pixel_coordinates_label.setText("")
-            self._pixel_bands_label.setText("")
-            self._pixel_history_label.setText("")
+            self._pixel_coordinates_label.setToolTip(self.tr("Last click of the pixel picker"))
+            self._refresh_head()
             return
-        x, y, values, terrain = self._last_pixel
-        nodata = self.tr("NoData")
-        if self._derivative.is_terrain:
-            # Picked while the range applied to the pixel value: no derivative read for this pixel.
-            self._pixel_value_label.setText(format_derived_value(self._derivative, terrain.get(self._derivative), nodata)
-                                            if terrain else "–")
-        else:
-            self._pixel_value_label.setText(format_pixel_value(values.get(self.current_band()), self._decimals, nodata))
+        x, y, _values, terrain = self._last_pixel
         digits = self._coordinate_decimals
-        self._pixel_coordinates_label.setText(f"X {x:.{digits}f} · Y {y:.{digits}f}")
-        lines = []
-        for band in sorted(values):
-            info = self._band_info(band)
-            decimals = decimals_for(info.data_type) if info is not None else FLOAT_DECIMALS
-            name = f"{band} — {info.name}" if info is not None and info.name else str(band)
-            lines.append(f"{name}: {format_pixel_value(values[band], decimals, nodata)}")
+        parts = [f"X {x:.{digits}f} · Y {y:.{digits}f}"]
+        nodata = self.tr("NoData")
         for derivative, value in terrain.items():
             name = self._derivative_combo.itemText(max(0, self._derivative_combo.findData(derivative.value)))
-            lines.append(f"{name}: {format_derived_value(derivative, value, nodata)}")
-        self._pixel_bands_label.setText("\n".join(lines))
+            parts.append(f"{name}: {format_derived_value(derivative, value, nodata)}")
+        self._pixel_coordinates_label.setText("  ·  ".join(parts))
         rows = []
         for hx, hy, value, band, shown in self._history:
             info = self._band_info(band)
             decimals = decimals_for(info.data_type) if info is not None else FLOAT_DECIMALS
             rows.append((f"{hx:.{digits}f} · {hy:.{digits}f}", shown or format_pixel_value(value, decimals, nodata), band))
-        self._pixel_history_label.setText(history_html(rows, self.tr("LAST PICKS")))
+        self._pixel_coordinates_label.setToolTip(history_html(rows, self.tr("LAST PICKS")) or "")
+        self._refresh_head()

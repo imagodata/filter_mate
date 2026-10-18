@@ -1474,7 +1474,8 @@ class TestToolFollowsTheChosenGroup:
         iface.mapCanvas.return_value = canvas
         monkeypatch.setattr(controller, "_iface", lambda: iface)
         monkeypatch.setattr(controller, "_extras_call", lambda name, *args: calls.append((name,) + args))
-        monkeypatch.setattr(controller, "_on_color_pick_toggled", lambda on: calls.append(("pipette", on)))
+        monkeypatch.setattr(controller, "_on_color_pick_toggled",
+                            lambda on, target=None: calls.append(("pipette", on) if target is None else ("pipette", on, target)))
         monkeypatch.setattr(controller, "_on_class_pick_toggled", lambda on: calls.append(("class pipette", on)))
         monkeypatch.setattr(controller, "_deactivate_class_tool", lambda: calls.append(("class pipette", False)))
         return controller, calls
@@ -1483,13 +1484,13 @@ class TestToolFollowsTheChosenGroup:
         controller, calls = self._controller(ctrl_module, monkeypatch)
         controller._color_pick = False
         controller._on_raster_mode_chosen("pipette")
-        assert calls == [("set_pipette_checked", True), ("pipette", True)]
+        assert calls == [("pipette", True)]  # the rail buttons follow inside _on_color_pick_toggled
 
     def test_another_group_takes_the_pipette_off(self, ctrl_module, monkeypatch):
         controller, calls = self._controller(ctrl_module, monkeypatch)
         controller._color_pick = True
         controller._on_raster_mode_chosen("range")
-        assert calls == [("set_pipette_checked", False), ("pipette", False)]
+        assert calls == [("pipette", False)]
 
     def test_nothing_changes_when_the_pipette_already_follows(self, ctrl_module, monkeypatch):
         controller, calls = self._controller(ctrl_module, monkeypatch)
@@ -1520,3 +1521,132 @@ class TestToolFollowsTheChosenGroup:
         controller._class_tool = None
         controller._on_point_cloud_group_chosen("expression")
         assert calls == []
+
+
+@pytest.mark.unit
+class TestPipetteAndDetectorButtons:
+    """2026-10-18: one picker tool, two rail buttons (pipette / detector) that set the target of the PIPETTE group."""
+
+    def _controller(self, ctrl_module, monkeypatch, map_tool=None):
+        controller = ctrl_module.CoverageModeController(_dock())
+        calls = []
+        canvas = MagicMock()
+        canvas.mapTool.return_value = map_tool
+        iface = MagicMock()
+        iface.mapCanvas.return_value = canvas
+        panel = MagicMock()
+        panel.pick_target.return_value = "similar"
+        controller._raster_panel = panel
+        monkeypatch.setattr(controller, "_iface", lambda: iface)
+        monkeypatch.setattr(controller, "_extras_call", lambda name, *args: calls.append((name,) + args))
+        monkeypatch.setattr(controller, "_toggle_pixel_tool", lambda: calls.append(("picker", "on")))
+        monkeypatch.setattr(controller, "_deactivate_pixel_tool", lambda: calls.append(("picker", "off")))
+        return controller, panel, calls
+
+    def test_detector_button_sets_the_object_target_and_puts_the_picker_on(self, ctrl_module, monkeypatch):
+        controller, panel, calls = self._controller(ctrl_module, monkeypatch)
+        controller._on_color_pick_toggled(True, "object")
+        panel.set_pick_target.assert_called_once_with("object")
+        panel.show_pipette_active.assert_called_once_with(True)
+        assert calls == [("set_pipette_checked", True, "object"), ("picker", "on")]
+        assert controller._color_pick is True
+
+    def test_pipette_button_off_takes_the_picker_off(self, ctrl_module, monkeypatch):
+        tool = object()
+        controller, panel, calls = self._controller(ctrl_module, monkeypatch, map_tool=tool)
+        controller._pixel_tool = tool
+        controller._on_color_pick_toggled(False, "similar")
+        assert calls == [("set_pipette_checked", False, "similar"), ("picker", "off")]
+        assert controller._color_pick is False
+
+    def test_without_a_target_the_panel_target_is_used(self, ctrl_module, monkeypatch):
+        controller, panel, calls = self._controller(ctrl_module, monkeypatch)
+        panel.pick_target.return_value = "object"
+        controller._on_color_pick_toggled(True)
+        panel.set_pick_target.assert_not_called()
+        assert calls[0] == ("set_pipette_checked", True, "object")
+
+
+@pytest.mark.unit
+class TestIdentifyIsTheClassPipette:
+    """2026-10-18: on a point cloud the Identify button toggles the class pipette, not the QGIS identify tool."""
+
+    def _controller(self, ctrl_module, layers, monkeypatch, map_tool=None):
+        controller = ctrl_module.CoverageModeController(_dock())
+        controller._active_layer, controller._kind = layers["p1"], _kind(ctrl_module, "POINT_CLOUD")
+        calls = []
+        canvas = MagicMock()
+        canvas.mapTool.return_value = map_tool
+        iface = MagicMock()
+        iface.mapCanvas.return_value = canvas
+        monkeypatch.setattr(controller, "_iface", lambda: iface)
+        monkeypatch.setattr(controller, "_on_class_pick_toggled", lambda on: calls.append(("class pipette", on)))
+        monkeypatch.setattr(controller, "_identify_point_cloud", lambda: calls.append(("qgis identify",)))
+        return controller, calls
+
+    def test_identify_puts_the_class_pipette_on(self, ctrl_module, layers, monkeypatch):
+        controller, calls = self._controller(ctrl_module, layers, monkeypatch)
+        assert controller.handle_exploring_action("identify") is True
+        assert calls == [("class pipette", True)]
+
+    def test_identify_again_takes_it_off(self, ctrl_module, layers, monkeypatch):
+        tool = object()
+        controller, calls = self._controller(ctrl_module, layers, monkeypatch, map_tool=tool)
+        controller._class_tool = tool
+        controller.handle_exploring_action("identify")
+        assert calls == [("class pipette", False)]
+
+
+@pytest.mark.unit
+class TestToolComesBackWithTheLayer:
+    """R3 (2026-10-18): the tool on the map leaves with the layer and is put back explicitly on its return."""
+
+    def _controller(self, ctrl_module, layers, monkeypatch, kind, map_tool=None):
+        controller = ctrl_module.CoverageModeController(_dock())
+        controller._active_layer, controller._kind = layers["r1" if kind == "RASTER" else "p1"], _kind(ctrl_module, kind)
+        calls = []
+        canvas = MagicMock()
+        canvas.mapTool.return_value = map_tool
+        iface = MagicMock()
+        iface.mapCanvas.return_value = canvas
+        monkeypatch.setattr(controller, "_iface", lambda: iface)
+        monkeypatch.setattr(controller, "_on_color_pick_toggled",
+                            lambda on, target=None: calls.append(("pipette", on, target)))
+        monkeypatch.setattr(controller, "_on_class_pick_toggled", lambda on: calls.append(("class pipette", on)))
+        monkeypatch.setattr(controller, "_deactivate_pixel_tool", lambda: None)
+        monkeypatch.setattr(controller, "_deactivate_class_tool", lambda: None)
+        monkeypatch.setattr(controller, "_drop_map_tools", lambda: None)
+        monkeypatch.setattr(controller, "_stop_preview", lambda layer: None)
+        monkeypatch.setattr(controller, "_hide_detected_objects", lambda: None)
+        return controller, calls
+
+    def test_raster_state_remembers_the_detector_on_the_map(self, ctrl_module, layers, monkeypatch):
+        tool = object()
+        controller, calls = self._controller(ctrl_module, layers, monkeypatch, "RASTER", map_tool=tool)
+        panel = MagicMock()
+        panel.state.return_value = {"mode": "pipette"}
+        panel.pick_target.return_value = "object"
+        controller._raster_panel, controller._pixel_tool, controller._color_pick = panel, tool, True
+        controller._leave_layer()
+        saved = controller._panel_states["r1"]
+        assert saved["pipette_on"] is True and saved["pipette_target"] == "object" and saved["class_pipette_on"] is False
+
+    def test_raster_state_without_a_tool(self, ctrl_module, layers, monkeypatch):
+        controller, calls = self._controller(ctrl_module, layers, monkeypatch, "RASTER")
+        panel = MagicMock()
+        panel.state.return_value = {"mode": "range"}
+        controller._raster_panel = panel
+        controller._leave_layer()
+        assert controller._panel_states["r1"]["pipette_on"] is False
+
+    def test_restore_puts_the_tool_back(self, ctrl_module, layers, monkeypatch):
+        controller, calls = self._controller(ctrl_module, layers, monkeypatch, "RASTER")
+        controller._restore_tool({"pipette_on": True, "pipette_target": "object"})
+        assert calls == [("pipette", True, "object")]
+        controller._restore_tool({"pipette_on": False})
+        assert calls == [("pipette", True, "object")]
+
+    def test_point_cloud_restore_puts_the_class_pipette_back(self, ctrl_module, layers, monkeypatch):
+        controller, calls = self._controller(ctrl_module, layers, monkeypatch, "POINT_CLOUD")
+        controller._restore_tool({"class_pipette_on": True})
+        assert calls == [("class pipette", True)]
