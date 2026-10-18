@@ -1,26 +1,42 @@
 # -*- coding: utf-8 -*-
-"""Map preview of a terrain derivative selection.
+"""Map preview of a terrain derivative or a raster calculator expression selection.
 
 The transparency preview of :func:`raster_adapter.apply_selection_preview` works on
-pixel values, which a slope or an aspect is not. Here the pixels the selection
-drops are covered by a white veil drawn by a canvas item: no layer is added to
-the project (FilterMate refreshes everything when a layer is added) and the
-layer style is left alone.
+the pixel values of one band, which a slope, an aspect or a colour (several bands:
+the pipette on an orthophoto) is not. Here the pixels the selection drops are
+covered by a white veil drawn by a canvas item: no layer is added to the project
+(FilterMate refreshes everything when a layer is added) and the layer style is
+left alone.
 """
-from typing import Optional
+import math
+import re
+from typing import Iterable, List, Optional, Tuple
 
-from qgis.core import QgsPointXY, QgsRectangle
+from qgis.core import QgsCoordinateReferenceSystem, QgsCoordinateTransform, QgsPointXY, QgsProject, QgsRectangle
 from qgis.gui import QgsMapCanvasItem
 from qgis.PyQt.QtCore import QRectF
 from qgis.PyQt.QtGui import QImage
 
 from ....core.domain.raster_filter_criteria import RasterDerivative, RasterSelection
-from .raster_adapter import _grid_for, crs_kind, derived_array, read_band_array, selection_mask
+from .raster_adapter import (_grid_for, crs_kind, derived_array, raster_reference, read_band_array, selection_mask,
+                             selection_virtual_layer)
 
 # RGBA of the pixels the selection drops.
 VEIL = (255, 255, 255, 190)
 # The preview is redrawn while a handle is dragged: a coarse grid keeps it light.
 PREVIEW_MAX_PIXELS = 500000
+# An expression is read again only when it changes (a pipette click). Its grid is
+# finer: a pool of 125 m2 on a 25 cm orthophoto keeps 112 m2 at 1 M cells, 74 m2 at
+# 500 000 (the overviews blur its edges out of the colour tolerance).
+EXPRESSION_PREVIEW_MAX_PIXELS = 1000000
+
+
+def _veil(mask):
+    """RGBA array (height, width, 4): the veil where ``mask`` is False, clear elsewhere."""
+    import numpy as np
+    rgba = np.zeros(mask.shape + (4,), dtype='uint8')
+    rgba[~mask] = VEIL  # NoData is dropped too
+    return rgba
 
 
 class DerivativeSurface:
@@ -39,15 +55,101 @@ class DerivativeSurface:
         self.values = derived_array(array, derivative, extent, crs_kind(layer.crs())).astype('float32')
         self.key = (layer.source(), int(band), derivative)
         self.extent = QgsRectangle(extent)
+        self.crs = QgsCoordinateReferenceSystem(layer.crs())
         self.crs_authid = layer.crs().authid()
+        self.cell_size = max(extent.width() / width, extent.height() / height)
 
     def veil(self, selection: RasterSelection):
         """RGBA array (height, width, 4): the veil where ``selection`` drops the pixel, clear elsewhere."""
+        return _veil(selection_mask(self.values, selection))
+
+
+def referenced_bands(expression: str, reference: str) -> List[int]:
+    """Band numbers ``expression`` reads from the layer named ``reference`` (``"ortho@3"`` -> 3), sorted."""
+    pattern = '"' + re.escape(reference) + r'@(\d+)"'
+    return sorted({int(number) for number in re.findall(pattern, expression or '')})
+
+
+class ExpressionSurface:
+    """Pixels kept by a raster calculator expression (colour pipette, spectral preset), read once.
+
+    The raster calculator evaluates it through the virtual raster the filter
+    uses (:func:`raster_adapter.selection_virtual_layer`): the preview keeps
+    what the filter keeps, on a coarser grid. The virtual raster has no NoData:
+    a comparison on a NoData pixel gives 0 or 1 (255, the NoData of an 8 bit
+    orthophoto, is within 27 of a pool's blue). The pixels with NoData in a
+    band the expression reads are therefore neither kept nor counted.
+
+    Attributes:
+        key: ``(source, expression)`` it was read for.
+        extent: Extent of the grid, layer CRS.
+        crs_authid: Authority id of the layer CRS ('' for a custom one).
+        kept_ratio: Share (0-1) of the pixels with a value that the expression keeps; None when unreadable.
+    """
+
+    def __init__(self, layer, selection: RasterSelection, max_pixels: int = EXPRESSION_PREVIEW_MAX_PIXELS) -> None:
         import numpy as np
-        mask = selection_mask(self.values, selection)
-        rgba = np.zeros(self.values.shape + (4,), dtype='uint8')
-        rgba[~mask] = VEIL  # NoData is dropped too
-        return rgba
+        extent = layer.extent()
+        width, height = _grid_for(extent, layer.width(), layer.height(), max_pixels)
+        self.key = (layer.source(), selection.expression)
+        self.extent = QgsRectangle(extent)
+        self.crs = QgsCoordinateReferenceSystem(layer.crs())
+        self.crs_authid = layer.crs().authid()
+        self.cell_size = max(extent.width() / width, extent.height() / height)
+        self.mask = None
+        self.kept_ratio = None
+        virtual = selection_virtual_layer(layer, selection)
+        if virtual is None:
+            return  # the raster calculator refused the expression
+        array = read_band_array(virtual.dataProvider(), 1, extent, width, height)
+        valid = ~np.isnan(array)
+        provider = layer.dataProvider()
+        for band in referenced_bands(selection.expression, raster_reference(layer)):
+            if band <= layer.bandCount():
+                valid &= ~np.isnan(read_band_array(provider, band, extent, width, height))
+        self.mask = valid & (array != 0)
+        count = int(valid.sum())
+        self.kept_ratio = float(self.mask.sum()) / count if count else None
+
+    def veil(self, _selection: Optional[RasterSelection] = None):
+        """RGBA array (height, width, 4): the veil where the expression drops the pixel; None when unreadable."""
+        return None if self.mask is None else _veil(self.mask)
+
+
+def corners_stay(moves: Iterable[Tuple[float, float, float, float]], tolerance: float) -> bool:
+    """Whether every ``(x, y, moved_x, moved_y)`` corner stays within ``tolerance`` (a non finite one does not)."""
+    for x, y, moved_x, moved_y in moves:
+        if not (math.isfinite(moved_x) and math.isfinite(moved_y)):
+            return False
+        if abs(moved_x - x) > tolerance or abs(moved_y - y) > tolerance:
+            return False
+    return True
+
+
+def fits_canvas(surface, canvas_crs, context=None) -> bool:
+    """Whether the veil of ``surface`` (a grid in the layer CRS) can be drawn as is on a map in ``canvas_crs``.
+
+    Same valid CRS, or one whose transformation moves no corner of the grid by
+    half a cell. 2026-10-18: a GeoTIFF in Lambert-93 whose datum GDAL does not
+    name (the orthophotos of the test project) is a custom CRS without authority
+    id, drawn by QGIS at the very place of the EPSG:2154 map: comparing the
+    authority ids refused its preview.
+    """
+    if not surface.crs.isValid() or not canvas_crs.isValid():
+        return False
+    if surface.crs == canvas_crs:
+        return True
+    try:
+        transform = QgsCoordinateTransform(surface.crs, canvas_crs, context or QgsProject.instance())
+        extent = surface.extent
+        moves = []
+        for x in (extent.xMinimum(), extent.xMaximum()):
+            for y in (extent.yMinimum(), extent.yMaximum()):
+                moved = transform.transform(QgsPointXY(x, y))
+                moves.append((x, y, moved.x(), moved.y()))
+    except Exception:  # QgsCsException: no transformation between the two CRS
+        return False
+    return corners_stay(moves, surface.cell_size / 2.0)
 
 
 class _MaskItem(QgsMapCanvasItem):

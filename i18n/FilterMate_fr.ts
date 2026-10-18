@@ -540,6 +540,11 @@
         <translation>L'aperçu d'une pente ou d'une exposition nécessite la carte dans le SCR du raster ({0})</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1165"/>
+        <source>The preview of a color or an expression needs the map in the CRS of the raster ({0})</source>
+        <translation>L'aperçu d'une couleur ou d'une expression nécessite la carte dans le SCR du raster ({0})</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/coverage_mode_controller.py" line="1371"/>
         <source>only the points drawn on the map can be picked: turn the preview off to pick a class it hides</source>
         <translation>seuls les points dessinés sur la carte peuvent être pointés : désactivez l'aperçu pour pointer une classe qu'il masque</translation>

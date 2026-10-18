@@ -13,6 +13,8 @@ The texts are built by pure functions of this module (testable without Qt);
 :class:`~ui.controllers.coverage_dock_extras.CoverageDockExtras` owns the widget,
 translates the texts and refreshes it.
 """
+import math
+from decimal import Decimal
 from typing import Callable, Optional
 
 try:
@@ -70,6 +72,22 @@ def vector_strip_value(groupbox: str, count: Optional[int], has_expression: bool
     return translate("whole layer")
 
 
+def percent_text(ratio: float) -> str:
+    """Fraction in [0, 1] as ``"38.9 %"``; two significant digits below 0.1 % (``"0.012 %"``), ``"–"`` for NaN.
+
+    2026-10-18: the pools a pipette click selects on an orthophoto are about 0.01 % of
+    its pixels, which "0.0 %" showed as nothing selected. The two notations meet at
+    0.1 % without a jump ("0.099 %", then "0.1 %"); no trailing zero ("0.01 %").
+    """
+    percent = float(ratio) * 100
+    if math.isnan(percent):
+        return "–"
+    percent = max(0.0, percent)
+    if 0 < percent < 0.1:
+        return f"{format(Decimal(f'{percent:.2g}'), 'f')} %"
+    return f"{percent:.1f} %"
+
+
 def raster_strip_value(selection, kept_ratio: Optional[float],
                        translate: Callable[[str], str] = _identity) -> str:
     """Value of the raster strip: ``"200 – 260 · 38.9 %"``, ``"3 classes · 12.0 %"``.
@@ -101,7 +119,7 @@ def raster_strip_value(selection, kept_ratio: Optional[float],
     else:
         text = translate("raster expression")
     if kept_ratio is not None:
-        text += f" · {float(kept_ratio) * 100:.1f} %"
+        text += f" · {percent_text(kept_ratio)}"
     return text
 
 

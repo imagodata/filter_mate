@@ -1153,6 +1153,168 @@ class TestRasterPreviewFollowsTheSelection:
         assert adapters.calls == [("clear", "r1")]
 
 
+def _color_selection(expression='(abs("ortho@1" - 98) <= 27.96 AND abs("ortho@3" - 228) <= 27.24)'):
+    """What the panel hands over after a pipette click on a pool of an RGB orthophoto."""
+    return types.SimpleNamespace(mode=types.SimpleNamespace(value="expression"), expression=expression, band=1,
+                                 derivative=types.SimpleNamespace(is_terrain=False))
+
+
+@pytest.fixture
+def overlay(monkeypatch, adapters):
+    """Stub ``preview_overlay``: surfaces counted, a veil drawn on a recorded overlay."""
+    module = types.ModuleType(f"{adapters.package.__name__}.preview_overlay")
+    module.read = []
+    module.shown = []
+
+    class ExpressionSurface:
+        def __init__(self, layer, selection):
+            module.read.append(selection.expression)
+            self.key = (layer.source(), selection.expression)
+            self.kept_ratio = 0.00012
+            self.extent = "extent"
+            self.crs_authid = ""
+            self.crs = MagicMock()
+
+        def veil(self, _selection=None):
+            return "veil"
+
+    class MaskOverlay:
+        def __init__(self, canvas):
+            pass
+
+        def show(self, veil, extent):
+            module.shown.append((veil, extent))
+
+        def hide(self):
+            module.shown.append(None)
+
+    module.ExpressionSurface = ExpressionSurface
+    module.DerivativeSurface = None
+    module.MaskOverlay = MaskOverlay
+    module.fits_canvas = lambda surface, crs: True
+    monkeypatch.setitem(sys.modules, module.__name__, module)
+    return module
+
+
+class FakeTimer:
+    """Single-shot QTimer stand-in: counts the (re)starts, fired by hand."""
+
+    def __init__(self):
+        self.starts = 0
+        self.active = False
+
+    def start(self):
+        self.starts += 1
+        self.active = True
+
+    def stop(self):
+        self.active = False
+
+    def isActive(self):
+        return self.active
+
+
+@pytest.mark.unit
+class TestColorPipetteFeedback:
+    """2026-10-18: a pipette click on a pool showed nothing, neither on the map nor as a pixel count."""
+
+    def _controller(self, ctrl_module, layers, monkeypatch, preview=True):
+        controller = ctrl_module.CoverageModeController(_dock())
+        controller._active_layer = layers["r1"]
+        controller._raster_panel = _value_panel()
+        controller._raster_panel.selection.return_value = _color_selection()
+        controller._raster_panel.preview_enabled.return_value = preview
+        controller._preview_active = preview
+        controller._expression_timer = FakeTimer()
+        monkeypatch.setattr(controller, "_base_raster", lambda layer: layer)
+        monkeypatch.setattr(controller, "_iface", lambda: MagicMock())
+        return controller
+
+    @staticmethod
+    def _settle(controller):
+        """The debounce timer fires."""
+        controller._expression_timer.stop()
+        controller._read_expression()
+
+    def test_nothing_is_read_while_the_preview_is_off(self, ctrl_module, layers, adapters, overlay, monkeypatch):
+        controller = self._controller(ctrl_module, layers, monkeypatch, preview=False)
+        controller._on_raster_selection_changed()
+        controller._read_expression()  # a timer left from before: the preview went off meanwhile
+        assert overlay.read == []
+        assert controller._expression_timer.starts == 0
+        controller._raster_panel.set_kept_ratio.assert_called_with(None)
+
+    def test_a_new_expression_is_read_once_the_input_settles(self, ctrl_module, layers, adapters, overlay,
+                                                             monkeypatch):
+        controller = self._controller(ctrl_module, layers, monkeypatch)
+        for tolerance in (27.96, 30.0, 33.0):  # the tolerance wheel
+            controller._raster_panel.selection.return_value = _color_selection(f'(abs("r1@1" - 98) <= {tolerance})')
+            controller._on_raster_selection_changed()
+        assert overlay.read == [] and overlay.shown == []
+        assert controller._expression_timer.active
+        self._settle(controller)
+        assert overlay.read == ['(abs("r1@1" - 98) <= 33.0)']  # the last one only
+        controller._raster_panel.set_kept_ratio.assert_called_with(0.00012)
+        assert overlay.shown[-1] == ("veil", "extent")
+        assert not [call for call in adapters.calls if call[0] == "apply"]  # one band's transparency cannot show a colour
+
+    def test_an_expression_already_read_is_shown_at_once(self, ctrl_module, layers, adapters, overlay, monkeypatch):
+        controller = self._controller(ctrl_module, layers, monkeypatch)
+        controller._on_raster_selection_changed()
+        self._settle(controller)
+        starts = controller._expression_timer.starts
+        controller._raster_panel.set_kept_ratio.reset_mock()
+        controller._on_raster_selection_changed()
+        assert controller._expression_timer.starts == starts
+        controller._raster_panel.set_kept_ratio.assert_called_with(0.00012)
+        assert len(overlay.read) == 1
+
+    def test_grids_survive_a_layer_switch_and_stay_few(self, ctrl_module, layers, adapters, overlay, monkeypatch):
+        controller = self._controller(ctrl_module, layers, monkeypatch)
+        controller._on_raster_selection_changed()
+        self._settle(controller)
+        controller._stop_preview(layers["r1"])  # leaving the layer, a filter
+        assert len(controller._surfaces) == 1
+        for index in range(ctrl_module.SURFACE_CACHE_SIZE + 2):
+            controller._selection_surface(layers["r1"], _color_selection(f'("r1@1" > {index})'))
+        assert len(controller._surfaces) == ctrl_module.SURFACE_CACHE_SIZE
+        assert ("/data/r1", "r1", _color_selection().expression) not in controller._surfaces  # the oldest went
+
+    def test_a_renamed_layer_is_read_again(self, ctrl_module, layers, adapters, overlay, monkeypatch):
+        controller = self._controller(ctrl_module, layers, monkeypatch)
+        controller._selection_surface(layers["r1"], _color_selection())
+        monkeypatch.setattr(layers["r1"], "name", lambda: "r1 renamed")  # its expressions read another reference
+        controller._selection_surface(layers["r1"], _color_selection())
+        assert len(overlay.read) == 2
+
+    def test_an_unreadable_expression_has_no_ratio_and_is_not_read_again(self, ctrl_module, layers, adapters,
+                                                                         overlay, monkeypatch):
+        controller = self._controller(ctrl_module, layers, monkeypatch)
+        attempts = []
+
+        def refuse(layer, selection):
+            attempts.append(selection.expression)
+            raise ValueError("unsupported raster data type")
+
+        monkeypatch.setattr(overlay, "ExpressionSurface", refuse)
+        controller._on_raster_selection_changed()
+        self._settle(controller)
+        controller._on_raster_selection_changed()
+        controller._raster_panel.set_kept_ratio.assert_called_with(None)
+        assert len(attempts) == 1
+
+    def test_the_crs_notice_is_given_once(self, ctrl_module, layers, adapters, overlay, monkeypatch):
+        controller = self._controller(ctrl_module, layers, monkeypatch)
+        iface = MagicMock()
+        monkeypatch.setattr(controller, "_iface", lambda: iface)
+        monkeypatch.setattr(overlay, "fits_canvas", lambda surface, crs: False)
+        controller._on_raster_selection_changed()
+        self._settle(controller)
+        for _ in range(3):
+            controller._apply_raster_preview()
+        assert iface.messageBar.return_value.pushInfo.call_count == 1
+
+
 @pytest.mark.unit
 class TestHistogramCache:
     """Constat 17: histograms survive a filter of the raster, and the cache is bounded."""

@@ -68,6 +68,21 @@ class TestRasterValue:
         selection = RasterSelection(minimum=200.0, maximum=260.0)
         assert strip.raster_strip_value(selection, 0.389) == "200 – 260 · 38.9 %"
 
+    def test_a_few_pixels_are_not_shown_as_none(self):
+        # 2026-10-18: the pools a pipette click selects are 0.012 % of an orthophoto, "0.0 %" read as nothing.
+        selection = RasterSelection(mode=Mode.EXPRESSION, expression='abs("ortho@1" - 98) <= 28')
+        assert strip.raster_strip_value(selection, 0.00012) == "raster expression · 0.012 %"
+        assert strip.percent_text(0.0) == "0.0 %"
+        assert strip.percent_text(1e-7) == "0.00001 %"
+        assert strip.percent_text(0.0001) == "0.01 %"  # no trailing zero
+
+    def test_the_two_notations_meet_at_a_tenth_of_a_percent(self):
+        assert [strip.percent_text(r) for r in (0.0005, 0.00099, 0.001, 0.00104)] == ["0.05 %", "0.099 %", "0.1 %", "0.1 %"]
+
+    def test_nan_and_negative(self):
+        assert strip.percent_text(float("nan")) == "–"
+        assert strip.percent_text(-0.2) == "0.0 %"
+
     def test_open_ranges(self):
         assert strip.raster_strip_value(RasterSelection(minimum=2.5), None) == "≥ 2.5"
         assert strip.raster_strip_value(RasterSelection(maximum=10.0), None) == "≤ 10"

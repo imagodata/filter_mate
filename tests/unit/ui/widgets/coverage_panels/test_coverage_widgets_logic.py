@@ -194,6 +194,7 @@ class TestRasterFormatting:
     def test_percent(self):
         assert raster.format_percent(0.3124) == "31.2 %"
         assert raster.format_percent(None) == "–"
+        assert raster.format_percent(0.00012) == "0.012 %"  # a pipette colour: a few pools of an orthophoto
 
     def test_reference_and_range_formula(self):
         assert raster.sanitize_reference("MNT 5m-2024") == "MNT_5m_2024"
