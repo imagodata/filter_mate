@@ -179,6 +179,7 @@ class FakeCloud:
 @pytest.fixture
 def cloud_export(monkeypatch):
     monkeypatch.setattr(sys.modules['qgis.core'], 'QgsPointCloudLayerExporter', FakeExporter, raising=False)
+    monkeypatch.setattr(footprint, 'qgis_reads_las', lambda: True)
     FakeExporter.made, FakeExporter.error = [], ''
     return FakeExporter
 
@@ -222,6 +223,16 @@ class TestPointCloudExport:
         result = exporters.PointCloudExportJob(cloud, str(tmp_path / 'cloud.laz')).run()
         assert not result.success and message in result.message
         assert cloud_export.made == []
+
+    @pytest.mark.parametrize("fmt, name, refused", [('LAZ', 'cloud.laz', True), ('COPC', 'cloud.copc.laz', True),
+                                                    ('GPKG', 'cloud.gpkg', False), ('CSV', 'cloud.csv', False)])
+    def test_qgis_without_pdal_writes_no_las(self, cloud_export, tmp_path, monkeypatch, fmt, name, refused):
+        """2026-10-18: the exporter of a QGIS built without PDAL wrote no LAS and said nothing:
+        "No such file or directory: cloud.partial.laz"."""
+        monkeypatch.setattr(footprint, 'qgis_reads_las', lambda: False)
+        result = exporters.PointCloudExportJob(FakeCloud(), str(tmp_path / name), fmt).run()
+        assert result.success is not refused
+        assert ('built without PDAL' in result.message) is refused
 
 
 class TestPointCloudExporterMissing:

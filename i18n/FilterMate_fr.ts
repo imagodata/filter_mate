@@ -485,6 +485,11 @@
         <translation>{0} cible(s) raster / nuage de points filtrée(s)</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1944"/>
+        <source>{0} left empty, nothing matches the selection: {1}</source>
+        <translation>{0} vidée(s), rien ne correspond à la sélection : {1}</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/coverage_mode_controller.py" line="2073"/>
         <source>Choose the DTM raster used for the height above ground</source>
         <translation>Choisissez le MNT servant au calcul de la hauteur au-dessus du sol</translation>

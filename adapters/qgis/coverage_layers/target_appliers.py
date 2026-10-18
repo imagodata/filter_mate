@@ -141,6 +141,11 @@ def _combine_geometry(previous_wkt: str, previous_side: str, new: QgsGeometry, s
     return new
 
 
+def _keeps_previous(previous_subset: str, operator: Optional[str]) -> bool:
+    """True when nothing new combined with ``operator`` leaves the previous subset as it was (OR, AND NOT)."""
+    return bool((previous_subset or '').strip()) and (operator or '').strip().upper() in ('OR', 'AND NOT')
+
+
 def _simplified_for_cutline(geometry: QgsGeometry, tolerance: float, max_vertices: int = 20000) -> QgsGeometry:
     """Simplify a heavy cutline (vectorized selection) to keep the VRT fast to render."""
     try:
@@ -374,6 +379,8 @@ class VectorTargetJob(TargetJob):
         # The unfiltered copy, a QObject of the main thread, goes in apply().
         self._source = None
         self.outcome.kept_count = len(kept)
+        # OR / AND NOT nothing leave the previous subset as it was.
+        self.outcome.emptied = not kept and not _keeps_previous(self.before.subset, self.operator)
         self.outcome.success = True
         self.outcome.elapsed = time.perf_counter() - self._started
 
@@ -459,6 +466,7 @@ class RasterTargetJob(TargetJob):
                                      geometry, side, self.operator)
         self._side = side
         kept = _kept_area(geometry)
+        self.outcome.emptied = kept is None or not geometry.boundingBox().intersects(self._extent)
         # Nothing kept: clip with a degenerate polygon far outside the extent.
         geometry = QgsGeometry.fromWkt(kept) if kept is not None else _nothing_kept(self._extent)
         self._geometry_wkt = geometry.asWkt()
@@ -576,11 +584,15 @@ class PointCloudTargetJob(TargetJob):
     def _prepare_exporter(self) -> None:
         """QgsPointCloudLayerExporter must be prepared on the main thread."""
         from .point_cloud_footprint import (
-            exporter_unavailable_message, index_ready, open_point_cloud, point_cloud_exporter_class,
+            exporter_unavailable_message, index_ready, open_point_cloud, point_cloud_exporter_class, qgis_reads_las,
         )
         exporter_class = point_cloud_exporter_class()
         if exporter_class is None:
             self._unsupported = exporter_unavailable_message()
+            return
+        if not qgis_reads_las():
+            self._unsupported = ("QGIS is built without PDAL: it can neither write nor open the clipped LAS file; "
+                                 "install the pdal tool (2.4 or later) or use the bbox clip mode")
             return
         base = open_point_cloud(self._base_source, f"{self.layer_name}_base", self._base_provider)
         if not base.isValid():
@@ -613,6 +625,8 @@ class PointCloudTargetJob(TargetJob):
                 self._expression = 'X = X' if side is CoverageSide.OUTSIDE else 'X < X'
             else:
                 self._expression = _bbox_expression(geometry, side is CoverageSide.OUTSIDE, self.crs.isGeographic())
+            self.outcome.emptied = (side is CoverageSide.INSIDE and not _keeps_previous(self._own_subset, self.operator)
+                                    and (geometry.isEmpty() or not geometry.boundingBox().intersects(self._extent)))
             self.outcome.success = True
             self.outcome.elapsed = time.perf_counter() - self._started
             return
@@ -632,6 +646,7 @@ class PointCloudTargetJob(TargetJob):
             # Nothing kept. Stored, not left empty: an empty state would be
             # dropped from the project and read as "no previous filter" by the next AND.
             polygon, geometry = None, _nothing_kept(self._extent)
+            self.outcome.emptied = True
         self._geometry_wkt = geometry.asWkt()
         if self._use_pdal:
             self._compute_pdal(polygon, is_canceled)
@@ -647,9 +662,12 @@ class PointCloudTargetJob(TargetJob):
         stages = [reader]
         if polygon is None:
             stages.append({"type": "filters.head", "count": 0})
+        elif reader["type"] == 'readers.copc':
+            # The COPC reader clips exactly and skips the octree nodes outside the
+            # polygon; a filters.crop after it tested every kept point again: 285 s
+            # instead of 148 s for a vegetation footprint of 42 000 vertices (25 M points).
+            reader["polygon"] = polygon
         else:
-            if reader["type"] == 'readers.copc':
-                reader["polygon"] = polygon
             stages.append({"type": "filters.crop", "polygon": polygon})
         stages.append({"type": "writers.copc", "filename": path, "forward": "all", "extra_dims": "all",
                        "a_srs": pdal_cli.srs_for(self.crs)})

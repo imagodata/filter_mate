@@ -178,6 +178,7 @@ def exporter(monkeypatch):
 
     monkeypatch.setattr(sys.modules['qgis.core'], 'QgsPointCloudLayerExporter', Exporter, raising=False)
     monkeypatch.setattr(pdal_cli, 'copc_unavailable_reason', lambda: 'pdal not found')
+    monkeypatch.setattr(footprint, 'qgis_reads_las', lambda: True)
     monkeypatch.setattr(footprint, 'open_point_cloud', lambda source, name, provider: FakeCloudLayer(source, provider))
     return made
 
@@ -216,7 +217,7 @@ class TestSourceWithoutArea:
     def test_outside_a_line_keeps_everything(self, engine, pdal):
         source, pipelines = pdal
         job = _compute(engine.PointCloudTargetJob(FakeCloudLayer(source), None), LINE, 'Disjoint')
-        assert job.outcome.success and pipelines[0][1]['type'] == 'filters.crop'
+        assert job.outcome.success and 'polygon' in pipelines[0][0]
 
 
 class TestNothingKept:
@@ -234,7 +235,7 @@ class TestNothingKept:
         monkeypatch.setattr(footprint, 'open_point_cloud', lambda s, n, p: FakeCloudLayer(s, p))
         layer = self._derived(source, "POLYGON((0 0,10 0,10 10,0 10,0 0))")
         job = _compute(engine.PointCloudTargetJob(layer, 'AND'), EAST)
-        assert job.outcome.success
+        assert job.outcome.success and job.outcome.emptied
         assert job._geometry_wkt and not fk.FakeGeometry.fromWkt(job._geometry_wkt).boundingBox().intersects(job._extent)
         assert pipelines[0][1] == {"type": "filters.head", "count": 0}
 
@@ -261,13 +262,56 @@ class TestNothingKept:
         job = _compute(engine.PointCloudTargetJob(layer, 'OR'), "POLYGON((-10 -10,110 -10,110 110,-10 110,-10 -10))",
                        'Disjoint')
         assert job.outcome.success, job.outcome.message
-        assert pipelines[0][1]['type'] == 'filters.crop'
+        assert 'polygon' in pipelines[0][0] and not job.outcome.emptied
         assert fk.FakeGeometry.fromWkt(job._geometry_wkt).area() == pytest.approx(5000.0)
 
     def test_exporter_gets_the_area_outside(self, engine, exporter):
         job = _compute(engine.PointCloudTargetJob(FakeCloudLayer(), None), "POLYGON((500 500,600 500,600 600,500 600,500 500))")
-        assert job.outcome.success and job._geometry_wkt
+        assert job.outcome.success and job._geometry_wkt and job.outcome.emptied
         assert not exporter[0].geometry.boundingBox().intersects(job._extent)
+
+
+class TestPdalClipStages:
+    """2026-10-18: filters.crop after readers.copc tested every point the reader had already clipped
+    (vegetation footprint, 25 M points: 285 s, 148 s with the reader alone, same points)."""
+
+    def test_copc_is_clipped_by_its_reader_alone(self, engine, pdal):
+        source, pipelines = pdal
+        _compute(engine.PointCloudTargetJob(FakeCloudLayer(source), None), EAST)
+        reader, writer = pipelines[0]
+        assert reader['type'] == 'readers.copc' and reader['polygon'].upper().startswith(('POLYGON', 'MULTIPOLYGON'))
+        assert writer['type'] == 'writers.copc'
+
+    def test_las_is_clipped_by_filters_crop(self, engine, pdal, tmp_path):
+        _, pipelines = pdal
+        las = tmp_path / "cloud.laz"
+        las.write_bytes(b"")
+        _compute(engine.PointCloudTargetJob(FakeCloudLayer(str(las), 'pdal'), None), EAST)
+        reader, crop, _ = pipelines[0]
+        assert reader['type'] == 'readers.las' and 'polygon' not in reader and crop['type'] == 'filters.crop'
+
+
+class TestBboxEmptied:
+    """2026-10-18: the bbox clip of a cloud outside the source was reported "filtered" like any other."""
+
+    FAR = "POLYGON((500 500,600 500,600 600,500 600,500 500))"
+
+    def test_source_outside_the_cloud(self, engine):
+        job = _compute(engine.PointCloudTargetJob(FakeCloudLayer(), None, 'bbox'), self.FAR)
+        assert job.outcome.success and job.outcome.emptied
+
+    def test_source_on_the_cloud(self, engine):
+        job = _compute(engine.PointCloudTargetJob(FakeCloudLayer(), None, 'bbox'), EAST)
+        assert job.outcome.success and not job.outcome.emptied
+
+    def test_or_keeps_the_own_subset(self, engine):
+        job = _compute(engine.PointCloudTargetJob(FakeCloudLayer(subset='Classification = 6'), 'OR', 'bbox'), self.FAR)
+        assert job.outcome.success and not job.outcome.emptied
+
+    def test_pdal_clip_on_the_cloud(self, engine, pdal):
+        source, _ = pdal
+        job = _compute(engine.PointCloudTargetJob(FakeCloudLayer(source), None), EAST)
+        assert job.outcome.success and not job.outcome.emptied
 
 
 class TestVirtualPointCloud:
@@ -291,6 +335,21 @@ class TestVirtualPointCloud:
         job = source_jobs.PointCloudSourceJob(FakeCloudLayer('/data/tiles.vpc', 'vpc'))
         assert job.compute(_request(), lambda: False).isEmpty()
         assert 'virtual point cloud' in job.message
+
+
+class TestQgisWithoutPdal:
+    """2026-10-18: QGIS built without PDAL wrote no LAS and opened none; the clip ran, then failed obscurely."""
+
+    def test_clip_refused_before_the_export(self, engine, exporter, monkeypatch):
+        monkeypatch.setattr(footprint, 'qgis_reads_las', lambda: False)
+        job = _compute(engine.PointCloudTargetJob(FakeCloudLayer(), None), EAST)
+        assert not job.outcome.success and 'built without PDAL' in job.outcome.message
+        assert exporter == []
+
+    def test_bbox_mode_still_works(self, engine, monkeypatch):
+        monkeypatch.setattr(footprint, 'qgis_reads_las', lambda: False)
+        job = _compute(engine.PointCloudTargetJob(FakeCloudLayer(), None, 'bbox'), EAST)
+        assert job.outcome.success
 
 
 class TestExporterCancel:
@@ -424,6 +483,18 @@ class TestFootprint:
         job = source_jobs.PointCloudSourceJob(FakeCloudLayer())
         job.compute(_request(), lambda: False)
         assert job.details['coarse'] is True and job.details['cell_size'] == 25.0
+
+    @pytest.mark.parametrize("crs, expected", [(fk.FakeCrs('EPSG:2154'), 2.0),
+                                               (fk.FakeCrs('EPSG:4326', geographic=True), 2.0 / 111320.0)])
+    def test_resolution_in_metres_whatever_the_crs(self, engine, monkeypatch, crs, expected):
+        """2026-10-18: a cloud in EPSG:4326 was read at 2 degrees (3 points, every target feature kept)."""
+        monkeypatch.setattr(footprint, 'open_point_cloud', lambda s, n, p: FakeCloudLayer(s, p, crs=crs))
+        asked = []
+        monkeypatch.setattr(footprint, 'footprint_geometry', lambda layer, resolution, **k: asked.append(resolution)
+                            or footprint.FootprintResult(fk.FakeGeometry.fromWkt(EAST), 10, resolution))
+        job = source_jobs.PointCloudSourceJob(FakeCloudLayer(crs=crs), 2.0)
+        job.compute(_request(), lambda: False)
+        assert asked == [pytest.approx(expected)]
 
     def test_read_in_tiles_of_a_bounded_size(self, engine, grids, monkeypatch):
         monkeypatch.setattr(footprint, 'POINTS_PER_CALL', 50)

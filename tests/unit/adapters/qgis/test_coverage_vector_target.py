@@ -233,6 +233,25 @@ class TestPreviousSubset:
         assert not job.outcome.success and 'without its current filter' in job.outcome.message
 
 
+class TestEmptiedTarget:
+    """2026-10-18: a target left with ``1 = 0`` was reported "filtered" like any other."""
+
+    FAR = (5000, 5000, 5100, 5100)  # meets no zone
+
+    @pytest.mark.parametrize("subset, operator, emptied", [
+        ('', None, True), ('ids:4', None, True), ('ids:4', 'AND', True), ('', 'OR', True),
+        ('ids:4', 'OR', False), ('ids:4', 'AND NOT', False)])
+    def test_nothing_kept(self, engine, subset, operator, emptied):
+        job = engine.VectorTargetJob(_zones(subset=subset), operator)
+        assert _run(job, _box(*self.FAR), _request(operator=operator)) == []
+        assert job.outcome.kept_count == 0 and job.outcome.emptied is emptied
+
+    def test_something_kept(self, engine):
+        job = engine.VectorTargetJob(_zones(), None)
+        _run(job, _box(*EAST_HALF), _request())
+        assert not job.outcome.emptied
+
+
 class TestMemoryLayer:
     """A memory layer opened again is empty: its own features are read, its subset left out."""
 

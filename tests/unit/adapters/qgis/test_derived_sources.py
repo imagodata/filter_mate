@@ -499,6 +499,19 @@ class TestCopies:
         assert not env.reg.is_derived("vrt")
 
 
+def test_failed_swap_keeps_the_subset_of_the_cloud(env):
+    # 2026-10-18: a derived cloud that cannot be opened (QGIS without the pdal
+    # provider) put the layer back on its source WITHOUT its own filter, and no
+    # history entry could bring it back.
+    cloud = _cloud(env)
+    cloud.setSubsetString("Classification = 6")
+    broken = f"{env.session}/lidar_1a2b3c4d.laz"
+    cloud.missing.add(broken)
+    assert not snapshots.swap_source(cloud, broken, "pdal")
+    assert cloud.source() == f"{env.home}/data/lidar.copc.laz" and cloud.providerType() == "copc"
+    assert cloud.subsetString() == "Classification = 6"
+
+
 # --- 4. Original source unavailable when the plugin unloads ---------------------
 
 def test_unload_puts_back_an_unavailable_original(env):

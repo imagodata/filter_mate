@@ -240,7 +240,8 @@ class PointCloudSourceJob(SourceJob):
         if before is not None:
             # Snapshot taken before the controller applied the selection subset.
             self.before = before
-        self._resolution = resolution
+        from .point_cloud_footprint import layer_resolution
+        self._resolution = layer_resolution(resolution, self.crs)
         self._layer = None
         self._error = ''
         if layer.providerType() == 'vpc':

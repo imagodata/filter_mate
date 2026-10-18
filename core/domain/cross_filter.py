@@ -245,3 +245,6 @@ class CrossFilterOutcome:
     kept_count: Optional[int] = None
     elapsed: float = 0.0
     details: dict = field(default_factory=dict)
+    # Filtered, yet nothing of it is left (``1 = 0``, every pixel NoData, no
+    # point): a success the user must still be warned about.
+    emptied: bool = False

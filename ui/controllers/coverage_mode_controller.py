@@ -1879,9 +1879,12 @@ class CoverageModeController(BaseController):
                 return
             failures = [o for o in task.outcomes if not o.success]
             parts = [self.tr("{0} target(s) filtered").format(len(task.outcomes) - len(failures))]
+            emptied = self._emptied_text(task.outcomes)
+            if emptied:
+                parts.append(emptied)
             if failures:
                 parts.append(self.tr("{0} failed: {1}").format(len(failures), self._failure_text(failures)))
-            self._after_run(layer, task.outcomes, ' — '.join(parts), warning=bool(failures))
+            self._after_run(layer, task.outcomes, ' — '.join(parts), warning=bool(failures or emptied))
 
         try:
             self._running_task = self.service.run(request, source_job, on_done=done)
@@ -1928,6 +1931,18 @@ class CoverageModeController(BaseController):
             name = self._layer_name(layer) if layer is not None else outcome.layer_id
             parts.append(f"{name}: {outcome.message or self.tr('failed')}")
         return '; '.join(parts)[:300]
+
+    def _emptied_text(self, outcomes) -> str:
+        """Warning naming the targets left with nothing (``1 = 0``, no pixel, no point); '' when none."""
+        names = []
+        for outcome in outcomes or []:
+            if outcome.success and getattr(outcome, 'emptied', False):
+                layer = self._map_layer(outcome.layer_id)
+                names.append(self._layer_name(layer) if layer is not None else outcome.layer_id)
+        if not names:
+            return ''
+        return self.tr("{0} left empty, nothing matches the selection: {1}").format(
+            len(names), ', '.join(names)[:300])
 
     def _refresh_counts(self, layer: Any) -> None:
         from ...core.domain.layer_kind import LayerKind
@@ -2139,9 +2154,13 @@ class CoverageModeController(BaseController):
                 message = self.tr("Raster / point cloud targets not filtered: {0}").format(task.error or self.tr("canceled"))
             else:
                 message = self.tr("{0} raster / point cloud target(s) filtered").format(len(task.outcomes) - len(failures))
+                emptied = self._emptied_text(task.outcomes)
+                if emptied:
+                    message += ' — ' + emptied
                 if failures:
                     message += ' — ' + self._failure_text(failures)
-            self._after_run(self._map_layer(source_id), task.outcomes, message, warning=not result or bool(failures))
+            self._after_run(self._map_layer(source_id), task.outcomes, message,
+                            warning=not result or bool(failures) or bool(emptied))
 
         task = self.service.run(request, job, on_done=done)
         if task is not None:
