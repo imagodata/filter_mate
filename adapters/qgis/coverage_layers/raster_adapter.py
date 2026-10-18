@@ -478,7 +478,8 @@ class SelectionGeometryResult:
     coarse: bool = False  # the grid is coarser than the raster (over max_pixels)
     canceled: bool = False
     decimation: int = 1  # pixels per cell side (1: native resolution)
-    smoothing: int = 0  # largest closing radius (cells) a tile needed to fit the vertex budget
+    smoothing: int = 0  # largest majority radius (cells) a tile needed to fit the vertex budget
+    blocks: int = 0  # largest block side (cells) a tile was read on to fit the vertex budget
     vertices: int = 0
 
 
@@ -489,7 +490,7 @@ SIEVE_MIN_KEPT_PIXELS = 10000
 # until the grid fits (logged, and told to the user). 100 million pixels: 6 km2 of
 # 25 cm orthophoto pixel for pixel, 25 km2 on cells of 50 cm (a 2 m x 2 m object
 # is 16 cells). Measured (QGIS 4.2, 2026-10-18): a dense, speckled selection of 400
-# million pixels took 141 s, 373 s with the majority smoothing; a quarter of that here.
+# million pixels took several minutes; a quarter of that here.
 SOURCE_MAX_PIXELS = 100000000
 # A smaller limit is raised to this (a config value of 0 or 10 would be no grid at all).
 SOURCE_MIN_PIXELS = 10000
@@ -501,7 +502,7 @@ SOURCE_MAX_VERTICES = 200000
 # Side of the tiles the source geometry is read by: about 4 million cells (32 MB
 # per float64 band array, a few arrays at a time), few enough tiles for the union.
 SOURCE_TILE_SIZE = 2048
-# Closing radii (cells) tried, in order, on a tile with too many vertices.
+# Majority radii (cells) tried, in order, on a tile with too many vertices (then coarser blocks).
 _SMOOTHING_RADII = (1, 2, 4, 8, 16)
 # Tolerances (cells) of the topology preserving simplification of a geometry still over the budget.
 _SIMPLIFY_TOLERANCES = (1.0, 2.0, 4.0, 8.0)
@@ -619,16 +620,6 @@ def _box_count(mask, radius: int, outside: int):
     return sums[size:, size:] - sums[:-size, size:] - sums[size:, :-size] + sums[:-size, :-size]
 
 
-def closing(mask, radius: int):
-    """Morphological closing by a square of side ``2 radius + 1``: gaps narrower than it are filled.
-
-    Never drops a set cell (outside the grid counts as set for the erosion): an
-    isolated patch stays as it is, nearby patches merge into one smooth area.
-    """
-    dilated = _box_count(mask, radius, 0) > 0
-    return _box_count(dilated, radius, 1) == (2 * radius + 1) ** 2
-
-
 def majority(mask, radius: int):
     """Cells set in at least half of the ``(2 radius + 1)`` square around them, plus the patches far from those.
 
@@ -643,28 +634,68 @@ def majority(mask, radius: int):
     return dominant | (mask & ~near)
 
 
-def _fit_tile(window, core, sieve_pixels: int, allowance: float):
-    """``(mask, radius)``: the core of ``window`` sieved, smoothed by the least that fits ``allowance`` vertices.
+def dense_blocks(mask, factor: int):
+    """``mask`` on blocks of ``factor`` x ``factor`` cells: its densest blocks, as many as hold its set cells.
+
+    The surface is kept by construction (to half a block): a speckle of one
+    cell in two keeps about the blocks where it is more than half (a majority),
+    a sparser one its densest blocks. A plain majority of the blocks loses most
+    of a sparse speckle (83 % of one cell in three, measured) and keeps too much
+    of an even one on blocks of 2 x 2 (+37 %: 11 blocks of 16 hold 2 cells or more).
+    Ties go to the block met first, row by row. Blocks start on multiples of
+    ``factor`` from the corner of ``mask``; a block cut by the side counts its own cells.
+    """
+    import numpy as np
+    rows, cols = mask.shape
+    pad = ((0, -rows % factor), (0, -cols % factor))
+    shape = ((rows + pad[0][1]) // factor, factor, (cols + pad[1][1]) // factor, factor)
+    kept = np.pad(mask != 0, pad).reshape(shape).sum(axis=(1, 3)).ravel()
+    cells = np.pad(np.ones(mask.shape, dtype=bool), pad).reshape(shape).sum(axis=(1, 3)).ravel()
+    order = np.argsort(-kept / cells, kind='stable')  # densest first, ties in block order
+    filled = np.cumsum(cells[order])
+    target = int(kept.sum())
+    count = int(np.searchsorted(filled, target))  # blocks before reaching the surface
+    if count < order.size and filled[count] - target < target - (filled[count - 1] if count else 0):
+        count += 1  # the block that reaches it comes closer than stopping short
+    blocks = np.zeros(kept.size, dtype=bool)
+    blocks[order[:count]] = True
+    blocks = blocks.reshape(shape[0], shape[2])
+    return np.repeat(np.repeat(blocks, factor, axis=0), factor, axis=1)[:rows, :cols]
+
+
+def _fit_tile(window, core, sieve_pixels: int, allowance: float, max_factor: int):
+    """``(mask, kind, size)``: the core of ``window`` sieved, smoothed by the least that fits ``allowance`` vertices.
 
     The tile keeps its pixels when they fit. Otherwise it is a dense, speckled
-    selection (vegetation, a noisy slope), smoothed by a growing :func:`majority`
-    (the areas where it dominates; an isolated object stays), then, for a
-    speckle sparse everywhere, by a growing :func:`closing` (its patches merge).
+    selection (vegetation, a noisy slope), first smoothed by a growing
+    :func:`majority` (``kind`` "majority", ``size`` its radius: the areas where
+    it dominates, an isolated object stays as it is). When that is not enough
+    (a speckle on every scale), the tile is read on coarser blocks by
+    :func:`dense_blocks` (``kind`` "blocks", ``size`` 2, 4, 8... cells up to
+    ``max_factor``, the tile side, so that blocks never straddle two tiles):
+    the surface is kept, an isolated object in a sparse block may go.
     The steps lose vertices in that order: the least one that fits is found by
-    bisection (4 tries instead of 10), the strongest kept when none fits.
+    bisection, the strongest kept when none fits. ``kind`` is '' when the pixels fit.
     """
     from .geometry_tools import sieve_mask
-    steps = [(None, 0)] + [(majority, radius) for radius in _SMOOTHING_RADII]
-    steps += [(closing, radius) for radius in _SMOOTHING_RADII]
+    steps = [('', 0)] + [('majority', radius) for radius in _SMOOTHING_RADII]
+    factor = 2
+    while factor <= max_factor:
+        steps.append(('blocks', factor))
+        factor *= 2
     tried = {}
 
     def fits(index):
         if index not in tried:
-            smooth, radius = steps[index]
-            mask = smooth(window, radius) if smooth is not None else window
-            if sieve_pixels > 1:
-                mask = sieve_mask(mask, sieve_pixels)
-            tried[index] = (mask[core], mask_corners(mask[core]) <= allowance)
+            kind, size = steps[index]
+            if kind == 'blocks':
+                mask = dense_blocks(window[core], size)  # blocks of at least 4 cells: nothing to sieve
+            else:
+                mask = majority(window, size) if kind else window
+                if sieve_pixels > 1:
+                    mask = sieve_mask(mask, sieve_pixels)
+                mask = mask[core]
+            tried[index] = (mask, mask_corners(mask) <= allowance)
         return tried[index][1]
 
     low, high = 0, len(steps) - 1
@@ -677,7 +708,7 @@ def _fit_tile(window, core, sieve_pixels: int, allowance: float):
             else:
                 low = middle + 1
         fits(low)
-    return tried[low][0], steps[low][1]
+    return (tried[low][0],) + steps[low]
 
 
 def _selection_mask_over(provider: QgsRasterDataProvider, selection: RasterSelection, extent: QgsRectangle,
@@ -762,9 +793,11 @@ def selection_geometry(provider: QgsRasterDataProvider, selection: RasterSelecti
     # a tile must be right (majority, then its neighbourhood); the outer ring of a derivative is not.
     margin = (int(sieve_pixels) if sieving else 0) + 1 + 3 * _SMOOTHING_RADII[-1]
     tiles = list(_tiles(width, height, tile_size))
+    # Blocks of the coarser reading start on multiples of their side: never across two tiles.
+    block_limit = int(tile_size) & -int(tile_size)
     # (inner, edge) polygons with the sieve and without; the latter while they may be the result.
     sieved, plain, keep_plain = ([], []), ([], []), True
-    kept, smoothing = 0, 0
+    kept, smoothing, blocks = 0, 0, 0
     for number, (row, col, rows, cols) in enumerate(tiles):
         if is_canceled is not None and is_canceled():
             return SelectionGeometryResult(QgsGeometry(), kept, width * height, max(cell_x, cell_y), grid=(width, height),
@@ -794,17 +827,19 @@ def selection_geometry(provider: QgsRasterDataProvider, selection: RasterSelecti
             shared = (col if col > 0 else None, col + cols if col + cols < width else None,
                       row if row > 0 else None, row + rows if row + rows < height else None)
             if sieving:
-                fitted, radius = _fit_tile(mask, core, sieve_pixels, allowance)
-                smoothing = max(smoothing, radius)
+                fitted, kind, size = _fit_tile(mask, core, sieve_pixels, allowance, block_limit)
+                smoothing = max(smoothing, size if kind == 'majority' else 0)
+                blocks = max(blocks, size if kind == 'blocks' else 0)
                 _sort_tile_polygons(polygonize_mask(fitted, cells), shared, sieved)
             if keep_plain:
-                fitted, radius = _fit_tile(mask, core, 0, allowance)
+                fitted, plain_kind, plain_size = _fit_tile(mask, core, 0, allowance, block_limit)
                 _sort_tile_polygons(polygonize_mask(fitted, cells), shared, plain)
                 # Both conditions only grow: the unsieved polygons can no longer be the result.
                 if sieving and kept >= SIEVE_MIN_KEPT_PIXELS and (sieved[0] or sieved[1]):
                     keep_plain, plain = False, ([], [])
                 else:
-                    smoothing = max(smoothing, radius)
+                    smoothing = max(smoothing, plain_size if plain_kind == 'majority' else 0)
+                    blocks = max(blocks, plain_size if plain_kind == 'blocks' else 0)
         if progress is not None:
             progress(85.0 * (number + 1) / len(tiles))
     # The sieve removes the speckle of a large selection, which would make
@@ -819,7 +854,8 @@ def selection_geometry(provider: QgsRasterDataProvider, selection: RasterSelecti
         progress(100.0)
     vertices = geometry.constGet().nCoordinates() if not geometry.isEmpty() else 0
     return SelectionGeometryResult(geometry, kept, width * height, max(cell_x, cell_y), grid=(width, height),
-                                   tiles=len(tiles), coarse=coarse, decimation=k, smoothing=smoothing, vertices=vertices)
+                                   tiles=len(tiles), coarse=coarse, decimation=k, smoothing=smoothing, blocks=blocks,
+                                   vertices=vertices)
 
 
 def _within_budget(geometry, max_vertices: int, cell: float = 1.0):

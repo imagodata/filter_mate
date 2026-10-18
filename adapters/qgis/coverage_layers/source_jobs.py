@@ -209,7 +209,9 @@ class RasterSourceJob(SourceJob):
         if result.coarse:
             self.details['decimation'] = result.decimation  # over raster_source_max_pixels: cells of k x k pixels
         if result.smoothing:
-            self.details['smoothing'] = result.smoothing  # closing radius (cells) of the densest tile
+            self.details['smoothing'] = result.smoothing  # majority radius (cells) of the densest tile
+        if result.blocks:
+            self.details['blocks'] = result.blocks  # block side (cells) a dense tile was read on
         return result.geometry
 
     def _object_provider(self, criterion):

@@ -2095,7 +2095,7 @@ class CoverageModeController(BaseController):
         if details.get('decimation'):
             notes.append(self.tr("raster selection read every {0} pixels: over the pixel limit of the settings").format(
                 details['decimation']))
-        if details.get('smoothing'):
+        if details.get('smoothing') or details.get('blocks'):
             notes.append(self.tr("dense raster selection smoothed to keep its outline light"))
         return notes
 

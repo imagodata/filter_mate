@@ -269,18 +269,19 @@ class TestVertexBudget:
         ring[2, 2] = False
         assert raster_adapter.mask_corners(ring) == 8
 
-    def test_closing_fills_narrow_gaps_and_never_drops_a_cell(self):
-        rng = np.random.default_rng(6)
-        mask = rng.random((40, 50)) < 0.4
-        for radius in (1, 2, 4):
-            closed = raster_adapter.closing(mask, radius)
-            assert not (mask & ~closed).any()
-        blocks = np.zeros((10, 12), dtype=bool)
-        blocks[2:8, 1:5] = blocks[2:8, 6:11] = True  # a gap one cell wide
-        assert raster_adapter.closing(blocks, 1)[2:8, 1:11].all()
-        lone = np.zeros((30, 30), dtype=bool)
-        lone[10:16, 12:18] = True
-        assert (raster_adapter.closing(lone, 4) == lone).all()  # an isolated object stays as it is
+    def test_dense_blocks_keep_the_surface(self):
+        mask = np.zeros((4, 6), dtype=bool)
+        mask[0:2, 0:2] = True  # a full block
+        mask[2, 4] = mask[3, 5] = True  # half a block
+        mask[0, 3] = True  # a quarter
+        blocks = raster_adapter.dense_blocks(mask, 2)  # 7 cells: the full block and the half one (8 cells)
+        assert blocks[0:2, 0:2].all() and blocks[2:4, 4:6].all() and blocks.sum() == 8
+        rng = np.random.default_rng(12)
+        for density in (0.1, 0.3, 0.5, 0.7):
+            noise = rng.random((512, 512)) < density
+            for factor in (2, 4, 8, 32):
+                share = raster_adapter.dense_blocks(noise, factor).sum() / float(noise.sum())
+                assert share == pytest.approx(1.0, abs=factor * factor / (2.0 * noise.sum()) + 1e-9)
 
     def test_majority_keeps_about_the_area_and_the_isolated_objects(self):
         rng = np.random.default_rng(10)
@@ -300,12 +301,25 @@ class TestVertexBudget:
         data[:, :64] = (rng.random((64, 64)) < 0.5) * 7  # vegetation-like speckle on the left tile
         data[20:26, 90:96] = 7  # a pool alone on the right tile
         result = _select(monkeypatch, Raster(b1=data), CLASS_7, tile_size=64, max_vertices=600)
-        assert result.smoothing > 0
+        assert result.smoothing > 0 or result.blocks > 0
         kept = np.zeros(data.shape, dtype=bool)
         for col, row in result.geometry:
             kept[row, col] = True
         assert raster_adapter.mask_corners(kept[:, :64]) <= 300  # the share of the left tile
+        assert abs(kept[:, :64].sum() / float((data[:, :64] == 7).sum()) - 1.0) <= 0.10  # the surface stays
         assert (kept[:, 64:] == (data[:, 64:] == 7)).all()  # the pool, cell for cell
+
+    def test_blocks_only_when_the_majority_is_not_enough(self, monkeypatch, cells):
+        """Correlated patches (a real NDVI) fit with the majority; white speckle needs coarser blocks."""
+        rng = np.random.default_rng(13)
+        patches = np.kron(rng.random((8, 8)) < 0.5, np.ones((16, 16), dtype=bool))  # 16-cell patches
+        patches ^= rng.random((128, 128)) < 0.05
+        smoothed = _select(monkeypatch, Raster(b1=patches * 7.0), CLASS_7, tile_size=128, max_vertices=800)
+        assert smoothed.smoothing > 0 and smoothed.blocks == 0
+        speckle = (rng.random((128, 128)) < 0.5) * 7.0
+        blocky = _select(monkeypatch, Raster(b1=speckle), CLASS_7, tile_size=128, max_vertices=800)
+        assert blocky.blocks > 0
+        assert abs(len(blocky.geometry) / float((speckle == 7).sum()) - 1.0) <= 0.10
 
     def test_a_light_selection_is_not_smoothed(self, monkeypatch, cells):
         data = np.zeros((64, 64))
