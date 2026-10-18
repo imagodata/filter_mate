@@ -663,15 +663,18 @@ class TestRasterSourceMaxPixelsRenamed:
         assert section["raster_source_max_pixels"]["value"] == 400000000
         assert config_helpers._migrate_config(user, defaults) is False  # idempotent
 
-    @pytest.mark.parametrize("value", [16000000, "16000000"])
-    def test_a_value_the_user_chose_is_carried_over(self, config_helpers, value):
+    @pytest.mark.parametrize("value", [16000000, "16000000", "lots"])
+    def test_the_old_value_is_never_carried_over(self, config_helpers, value):
+        """A grid of cells over the whole raster is not a count of pixels read at the native resolution."""
         defaults = json.loads(CONFIG_DEFAULT_PATH.read_text(encoding="utf-8"))
         user = self._old_config(value)
         config_helpers._migrate_config(user, defaults)
-        assert user["APP"]["OPTIONS"]["CROSS_FILTER"]["raster_source_max_pixels"]["value"] == 16000000
-
-    def test_an_unreadable_value_is_dropped(self, config_helpers):
-        defaults = json.loads(CONFIG_DEFAULT_PATH.read_text(encoding="utf-8"))
-        user = self._old_config("lots")
-        config_helpers._migrate_config(user, defaults)
         assert user["APP"]["OPTIONS"]["CROSS_FILTER"]["raster_source_max_pixels"]["value"] == 400000000
+
+    def test_a_new_value_already_set_is_kept(self, config_helpers):
+        defaults = json.loads(CONFIG_DEFAULT_PATH.read_text(encoding="utf-8"))
+        user = self._old_config(16000000)
+        user["APP"]["OPTIONS"]["CROSS_FILTER"]["raster_source_max_pixels"] = {"value": 50000000, "description": "x"}
+        config_helpers._migrate_config(user, defaults)
+        section = user["APP"]["OPTIONS"]["CROSS_FILTER"]
+        assert section["raster_source_max_pixels"]["value"] == 50000000 and "raster_selection_max_pixels" not in section

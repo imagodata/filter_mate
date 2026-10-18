@@ -1681,9 +1681,13 @@ class TestRasterSourceWithoutTarget:
             def __init__(self, layer, selection, max_pixels):
                 self.layer_id, self.layer_name, self.max_pixels = layer.id(), layer.id(), max_pixels
                 self.clips_source = selection.clips
+                self.clip_refusal = getattr(module, "refusal", "")
                 self.before = "before"
-                self.applied = []
+                self.applied, self.details, self.message, self.released = [], {}, "", False
                 module.created.append(self)
+
+            def release(self):
+                self.released = True
 
             def apply(self, layer):
                 self.applied.append(layer.id())
@@ -1704,16 +1708,48 @@ class TestRasterSourceWithoutTarget:
         controller._run_filter(layers["r1"])
         return controller
 
-    def test_masked_source_goes_to_the_task(self, ctrl_module, layers, jobs, monkeypatch):
+    def _task(self, ctrl_module, layers, monkeypatch, refusal=""):
         service, done = ctrl_module._test_service, []
         monkeypatch.setattr(service, "run", lambda request, job, on_done=None: service.calls.append(
             ("run", request, job)) or done.append(on_done))
+        monkeypatch.setattr(sys.modules[f"{ctrl_module.__name__.rsplit('.ui.', 1)[0]}.adapters.qgis.coverage_layers"
+                                        ".source_jobs"], "refusal", refusal, raising=False)
         self._run(ctrl_module, layers, monkeypatch, clips=True)
+        return service, done
+
+    def test_masked_source_goes_to_the_task(self, ctrl_module, layers, jobs, monkeypatch):
+        service, done = self._task(ctrl_module, layers, monkeypatch)
         job = jobs.created[0]
-        assert job.applied == [] and job.max_pixels == 400000000
+        assert job.applied == [] and job.max_pixels is None  # the job reads and bounds the setting
         assert service.calls == [("run", "request", job)]
-        done[0](types.SimpleNamespace(outcomes=[], error=""), True)
+        done[0](types.SimpleNamespace(outcomes=[], error="", changes=[("before", "after")]), True)
         assert ctrl_module._test_feedback.messages[-1] == ("info", "Raster filtered: {0}".format("blue"))
+
+    def test_coarse_read_is_told_once(self, ctrl_module, layers, jobs, monkeypatch):
+        service, done = self._task(ctrl_module, layers, monkeypatch)
+        jobs.created[0].details = {"decimation": 2, "smoothing": 4}
+        before = len(ctrl_module._test_feedback.messages)
+        done[0](types.SimpleNamespace(outcomes=[], error="", changes=[("before", "after")]), True)
+        new = ctrl_module._test_feedback.messages[before:]
+        assert len(new) == 1 and "every 2 pixels" in new[0][1] and "smoothed" in new[0][1]
+
+    def test_nothing_applied_is_a_warning_with_the_reason(self, ctrl_module, layers, jobs, monkeypatch):
+        service, done = self._task(ctrl_module, layers, monkeypatch)
+        jobs.created[0].message = "no pixel is selected: the source is left as it is"
+        done[0](types.SimpleNamespace(outcomes=[], error="", changes=[]), True)
+        assert ctrl_module._test_feedback.messages[-1] == (
+            "warning", "Filter not applied: {0}".format("no pixel is selected: the source is left as it is"))
+
+    def test_source_removed_during_the_task(self, ctrl_module, layers, jobs, monkeypatch):
+        service, done = self._task(ctrl_module, layers, monkeypatch)
+        del layers["r1"]
+        done[0](types.SimpleNamespace(outcomes=[], error="", changes=[]), True)
+        assert ctrl_module._test_feedback.messages[-1] == ("warning", "Filter not applied: {0}".format("layer removed"))
+
+    def test_source_that_cannot_be_masked_is_refused_before_reading(self, ctrl_module, layers, jobs, monkeypatch):
+        service, done = self._task(ctrl_module, layers, monkeypatch, refusal="not a GDAL file")
+        assert service.calls == [] and jobs.created[0].released
+        assert ctrl_module._test_feedback.messages[-1] == ("warning", "Filter not applied: {0}".format("not a GDAL file"))
 
     def test_band_range_is_still_applied_at_once(self, ctrl_module, layers, jobs, monkeypatch):
         self._run(ctrl_module, layers, monkeypatch, clips=False)

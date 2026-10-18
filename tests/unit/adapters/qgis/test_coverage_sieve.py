@@ -45,7 +45,13 @@ def _gdal_arrays():
 
 
 class Raster:
-    """Bands of a raster over (0, 0, width, height), read like the QGIS provider: nearest pixel centre."""
+    """Bands of the grid read, over (0, 0, width, height): one value per cell of 1 x 1.
+
+    The selection asks for whole cells only (asserted): at the native resolution
+    a cell is a pixel; over the pixel limit, ``k`` x ``k`` pixels with ``k`` a
+    power of two, which GDAL reads alike from a tile or the whole raster (checked
+    in QGIS by the coarse read probe). This stand-in therefore holds the cells.
+    """
 
     def __init__(self, **bands):
         self.bands = {int(name[1:]): np.asarray(array, dtype='float64') for name, array in bands.items()}
@@ -54,6 +60,9 @@ class Raster:
 
     def read(self, band, extent, width, height):
         self.reads.append((band, width, height))
+        for edge in (extent.xMinimum(), extent.xMaximum(), extent.yMinimum(), extent.yMaximum()):
+            assert edge == int(edge), f"window off the cells: {extent}"
+        assert (extent.width(), extent.height()) == (width, height), "one value per cell"
         data = self.bands[band]
         xs = extent.xMinimum() + (np.arange(width) + 0.5) * extent.width() / width
         ys = extent.yMaximum() - (np.arange(height) + 0.5) * extent.height() / height
@@ -68,6 +77,24 @@ def _lone_cells_removed(mask):
     neighbours = sum(padded[1 + dy:1 + dy + mask.shape[0], 1 + dx:1 + dx + mask.shape[1]]
                      for dy in (-1, 0, 1) for dx in (-1, 0, 1) if dy or dx)
     return mask & (neighbours > 0)
+
+
+class CellSet(frozenset):
+    """The merged geometry: the (column, row) of its cells; its vertices are their corners."""
+
+    def isEmpty(self):
+        return not self
+
+    def constGet(self):
+        return self
+
+    def nCoordinates(self):
+        if not self:
+            return 0
+        cols, rows = zip(*self)
+        mask = np.zeros((max(rows) + 1, max(cols) + 1), dtype=bool)
+        mask[list(rows), list(cols)] = True
+        return raster_adapter.mask_corners(mask)
 
 
 class Cell:
@@ -96,7 +123,7 @@ def cells(monkeypatch):
 
     def merge_tile_polygons(inner, edge):
         calls['edge'] += len(edge)
-        return frozenset(cell.xy for cell in list(inner) + list(edge))
+        return CellSet(cell.xy for cell in list(inner) + list(edge))
 
     monkeypatch.setattr(geometry_tools, 'sieve_mask', sieve_mask)
     monkeypatch.setattr(geometry_tools, 'polygonize_mask', polygonize_mask)
@@ -225,6 +252,68 @@ class TestSieveChoice:
         assert result.kept_pixels == 22500 and len(result.geometry) == 22500
 
 
+class TestVertexBudget:
+    """The geometry stays light: a dense, speckled tile is smoothed, an isolated object is kept as it is."""
+
+    def test_corners_are_the_vertices_polygonize_draws(self):
+        square = np.zeros((5, 5), dtype=bool)
+        square[1:4, 1:4] = True
+        assert raster_adapter.mask_corners(square) == 4
+        ell = square.copy()
+        ell[1, 3] = False
+        assert raster_adapter.mask_corners(ell) == 6
+        diagonal = np.zeros((4, 4), dtype=bool)
+        diagonal[1, 1] = diagonal[2, 2] = True
+        assert raster_adapter.mask_corners(diagonal) == 8  # two patches touching by a corner
+        ring = square.copy()
+        ring[2, 2] = False
+        assert raster_adapter.mask_corners(ring) == 8
+
+    def test_closing_fills_narrow_gaps_and_never_drops_a_cell(self):
+        rng = np.random.default_rng(6)
+        mask = rng.random((40, 50)) < 0.4
+        for radius in (1, 2, 4):
+            closed = raster_adapter.closing(mask, radius)
+            assert not (mask & ~closed).any()
+        blocks = np.zeros((10, 12), dtype=bool)
+        blocks[2:8, 1:5] = blocks[2:8, 6:11] = True  # a gap one cell wide
+        assert raster_adapter.closing(blocks, 1)[2:8, 1:11].all()
+        lone = np.zeros((30, 30), dtype=bool)
+        lone[10:16, 12:18] = True
+        assert (raster_adapter.closing(lone, 4) == lone).all()  # an isolated object stays as it is
+
+    def test_dense_tile_smoothed_isolated_object_kept(self, monkeypatch, cells):
+        rng = np.random.default_rng(8)
+        data = np.zeros((64, 128))
+        data[:, :64] = (rng.random((64, 64)) < 0.5) * 7  # vegetation-like speckle on the left tile
+        data[20:26, 90:96] = 7  # a pool alone on the right tile
+        result = _select(monkeypatch, Raster(b1=data), CLASS_7, tile_size=64, max_vertices=600)
+        assert result.smoothing > 0
+        kept = np.zeros(data.shape, dtype=bool)
+        for col, row in result.geometry:
+            kept[row, col] = True
+        assert raster_adapter.mask_corners(kept[:, :64]) <= 300  # the share of the left tile
+        assert (kept[:, 64:] == (data[:, 64:] == 7)).all()  # the pool, cell for cell
+
+    def test_a_light_selection_is_not_smoothed(self, monkeypatch, cells):
+        data = np.zeros((64, 64))
+        data[10:30, 5:40] = 7
+        result = _select(monkeypatch, Raster(b1=data), CLASS_7)
+        assert result.smoothing == 0 and result.geometry == _cells_of(data == 7)
+
+    @pytest.mark.parametrize("value, expected", [
+        (None, 400000000), (0, 400000000), ("lots", 400000000), (True, 400000000), (-5, 400000000),
+        ("4e8", 400000000), ("400 000 000", 400000000), ("16_000_000", 16000000), (2.5e7, 25000000),
+        ({"value": "1e6"}, 1000000), (5, 10000)])
+    def test_pixel_limit_read_from_the_settings(self, value, expected):
+        assert raster_adapter.source_max_pixels(value) == expected
+
+    @pytest.mark.parametrize("size, limit, k", [((20000, 20000), 400000000, 1), ((20001, 20000), 400000000, 2),
+                                                 ((800, 800), 40000, 4), ((801, 800), 40000, 8)])
+    def test_decimation_is_a_power_of_two(self, size, limit, k):
+        assert raster_adapter._decimation(size[0], size[1], limit) == k
+
+
 class TestExpressionNoData:
     def test_nodata_of_a_band_read_by_the_expression_is_not_kept(self, monkeypatch, cells):
         """The virtual raster has no NoData: 255 on the blue band passes a pool's blue test."""
@@ -255,7 +344,7 @@ class TestCancelAndProgress:
     def test_progress_grows_to_100(self, monkeypatch, cells):
         values = []
         _select(monkeypatch, Raster(b1=np.full((40, 40), 7.0)), CLASS_7, tile_size=10, progress=values.append)
-        assert len(values) == 17 and values == sorted(values) and values[-1] == 100.0
+        assert len(values) == 18 and values == sorted(values) and values[-1] == 100.0
 
 
 class TestTilePolygonsWithGdal:
@@ -293,6 +382,15 @@ class TestTilePolygonsWithGdal:
         data = (rng.random((40, 40)) > 0.7) * 7.0
         result = self._geometry(Raster(b1=data), CLASS_7, 9, sieve_pixels=0)
         assert result.geometry.area() == pytest.approx(float((data == 7).sum()))
+
+    def test_corners_count_the_vertices_gdal_draws(self, polygons):
+        rng = np.random.default_rng(9)
+        mask = rng.random((60, 70)) < 0.45
+        drawn = 0
+        for polygon in geometry_tools.polygonize_mask(mask, (0.0, 1.0, 0.0, 0.0, 0.0, 1.0)):
+            for index in range(polygon._g.GetGeometryCount()):
+                drawn += polygon._g.GetGeometryRef(index).GetPointCount() - 1  # the closing point
+        assert raster_adapter.mask_corners(mask) == drawn
 
     def test_cells_are_moved_to_the_map(self, polygons):
         mask = np.zeros((4, 4), dtype=bool)
@@ -353,7 +451,8 @@ class TestTaskProgress:
             self.reports_progress = reports
             self.progress = None
 
-        def compute(self, request, is_canceled):
+        def compute(self, request, is_canceled, buffer=True):
+            self.buffered = buffer
             if self.progress is not None:
                 for percent in (50.0, 100.0):
                     self.progress(percent)
@@ -371,6 +470,20 @@ class TestTaskProgress:
 
     def test_raster_source_alone_fills_the_bar(self):
         assert self._run(self.Source(True), []) == [50.0, 100.0]
+
+    def test_no_buffer_without_target(self):
+        """Without a target the source is masked by the selection as read: its buffer would be lost work."""
+        alone, with_targets = self.Source(True), self.Source(True)
+        self._run(alone, [])
+        self._run(with_targets, [self.Target()])
+        assert alone.buffered is False and with_targets.buffered is True
+
+    def test_the_clip_of_the_source_is_prepared_in_the_task(self):
+        source = self.Source(True)
+        prepared = []
+        source.prepare_apply = lambda is_canceled: prepared.append(is_canceled())
+        self._run(source, [])
+        assert prepared == [False]
 
     def test_other_sources_leave_the_bar_to_the_targets(self):
         source = self.Source(False)

@@ -283,6 +283,9 @@ class FakeGeometry:
     def constGet(self):
         return self
 
+    def nCoordinates(self):
+        return _count_points(self._g) if self._g is not None else 0
+
     def clone(self):
         return FakeGeometry(self)
 
@@ -304,6 +307,11 @@ class FakeTransform:
     def map(self, x, y):
         m11, m12, m21, m22, dx, dy = self.m
         return m11 * x + m21 * y + dx, m12 * x + m22 * y + dy
+
+
+def _count_points(geometry):
+    return geometry.GetPointCount() + sum(_count_points(geometry.GetGeometryRef(index))
+                                          for index in range(geometry.GetGeometryCount()))
 
 
 def _move_points(geometry, transform):
