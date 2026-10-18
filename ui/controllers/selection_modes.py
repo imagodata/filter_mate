@@ -34,7 +34,9 @@ GROUP_TOOLS: Dict[str, Dict[str, Tuple[str, ...]]] = {
         'expression': (),
     },
     'point_cloud': {
-        'classes': ('pushButton_exploring_identify',),  # the Identify button is the class pipette
+        # The Identify button is the class pipette, put on when CLASSES is chosen; the object detector is the
+        # other tool of the group (it makes CLASSES active, choosing CLASSES does not put it on).
+        'classes': ('pushButton_exploring_identify', 'pushButton_checkable_exploring_point_cloud_object'),
         'ranges': ('pushButton_checkable_exploring_point_cloud_value_pipette',
                    'pushButton_checkable_exploring_point_cloud_zone'),
         'expression': (),

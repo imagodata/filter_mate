@@ -210,8 +210,13 @@ def _split(tile: QgsRectangle, overlap: float, min_side: float) -> List[QgsRecta
 
 
 def _read_xy(provider, resolution: float, area: QgsRectangle, points_limit: int,
-             is_canceled: Optional[Callable[[], bool]], check: Optional[CheckFn]):
-    """X and Y of the points of ``area`` (numpy arrays) and whether some were left out."""
+             is_canceled: Optional[Callable[[], bool]], check: Optional[CheckFn],
+             keep: Optional[Callable[[dict], bool]] = None):
+    """X and Y of the points of ``area`` (numpy arrays) and whether some were left out.
+
+    ``keep``: only the points it accepts are returned (the class of an object, read from a
+    layer filtered otherwise); ``points_limit`` still counts every point read.
+    """
     import numpy as np
     xs, ys = [], []
     total, truncated = 0, False
@@ -234,9 +239,11 @@ def _read_xy(provider, resolution: float, area: QgsRectangle, points_limit: int,
             truncated = True
         if check is not None:
             check(points)
+        total += len(points)
+        if keep is not None:
+            points = [p for p in points if keep(p)]
         xs.append(np.fromiter((p.get('X', 0.0) for p in points), dtype='float64', count=len(points)))
         ys.append(np.fromiter((p.get('Y', 0.0) for p in points), dtype='float64', count=len(points)))
-        total += len(points)
         points = None  # noqa: F841 - the dicts go before the next call
     if not xs:
         return np.zeros(0), np.zeros(0), truncated

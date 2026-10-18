@@ -78,6 +78,7 @@ DETECTOR = 'pushButton_checkable_exploring_raster_detector'
 SIMILAR = 'pushButton_checkable_exploring_raster_similar'
 VALUE_PIPETTE = 'pushButton_checkable_exploring_point_cloud_value_pipette'
 PC_ZONE = 'pushButton_checkable_exploring_point_cloud_zone'
+PC_OBJECT = 'pushButton_checkable_exploring_point_cloud_object'
 
 
 def class_pipette_button():
@@ -123,6 +124,12 @@ def value_pipette_on():
     ctrl = controller()
     return (button(VALUE_PIPETTE).isChecked() and not class_pipette_button().isDown() and ctrl._pc_pick_mode == 'value'
             and ctrl._class_tool is not None and map_tool() is ctrl._class_tool)
+
+
+def pc_detector_on(mode='object'):
+    ctrl = controller()
+    return (button(PC_OBJECT).isChecked() and not class_pipette_button().isDown() and not button(VALUE_PIPETTE).isChecked()
+            and ctrl._pc_pick_mode == mode and ctrl._class_tool is not None and map_tool() is ctrl._class_tool)
 
 
 def zone_on():
@@ -235,11 +242,23 @@ def s_point_cloud_check():
     controller().handle_exploring_action('identify')
     check('point cloud: Identify again takes the class pipette off and leaves CLASSES active',
           class_pipette_off() and panel._classes_group.isChecked(), tool_name())
-    # 2026-10-18: ATTRIBUTES has two tools, the value pipette and the zone; seven buttons on the rail.
+    # 2026-10-18: CLASSES has two tools, the class pipette (Identify) and the object detector; ATTRIBUTES two,
+    # the value pipette and the zone; eight buttons on the rail.
     rail = [n for n in ('pushButton_exploring_identify', 'pushButton_exploring_zoom', 'pushButton_checkable_exploring_selecting',
                         'pushButton_exploring_reset_layer_properties') if getattr(dock(), n).isVisible()]
-    rail += [n for n in (VALUE_PIPETTE, PC_ZONE, 'pushButton_exploring_point_cloud_more') if button(n).isVisible()]
-    check('point cloud: seven buttons on the rail', len(rail) == 7, ', '.join(rail))
+    rail += [n for n in (PC_OBJECT, VALUE_PIPETTE, PC_ZONE, 'pushButton_exploring_point_cloud_more') if button(n).isVisible()]
+    check('point cloud: eight buttons on the rail', len(rail) == 8, ', '.join(rail))
+    panel._ranges_group.setChecked(True)
+    button(PC_OBJECT).setChecked(True)
+    check('point cloud: the object detector makes CLASSES active, the other pickers up',
+          pc_detector_on() and panel._classes_group.isChecked() and not panel._ranges_group.isChecked(), tool_name())
+    controller()._on_point_cloud_object_target('similar_objects')
+    check('point cloud: the detector menu switches it to the similar objects (R4)',
+          pc_detector_on('similar') and panel.object_target() == 'similar_objects', tool_name())
+    controller()._on_point_cloud_object_target('object')
+    controller().handle_exploring_action('identify')
+    check('point cloud: Identify switches the detector to the class pipette',
+          class_pipette_on() and not button(PC_OBJECT).isChecked(), tool_name())
     button(VALUE_PIPETTE).setChecked(True)
     check('point cloud: the value pipette button makes ATTRIBUTES active, the class pipette up',
           value_pipette_on() and panel._ranges_group.isChecked() and not panel._classes_group.isChecked(), tool_name())

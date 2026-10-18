@@ -122,10 +122,11 @@ class TestTools:
         assert set(extras.CoverageDockExtras.PIPETTE_BUTTONS) == {"similar", "object", "similar_objects"}
         assert extras.ICON_SIMILAR.strip().startswith("<")
 
-    def test_point_cloud_rail_adds_the_value_pipette_the_zone_and_more(self):
-        # 2026-10-18: Identify is the class pipette (CLASSES); the value pipette and the zone are the tools
-        # of ATTRIBUTES; profile and 3D view are in the "more" menu (seven buttons).
-        assert extras.tools_for("point_cloud") == ["pushButton_checkable_exploring_point_cloud_value_pipette",
+    def test_point_cloud_rail_adds_the_detector_the_value_pipette_the_zone_and_more(self):
+        # 2026-10-18: Identify is the class pipette and the object detector the other tool of CLASSES; the value
+        # pipette and the zone are the tools of ATTRIBUTES; profile and 3D view are in the "more" menu.
+        assert extras.tools_for("point_cloud") == ["pushButton_checkable_exploring_point_cloud_object",
+                                                   "pushButton_checkable_exploring_point_cloud_value_pipette",
                                                    "pushButton_checkable_exploring_point_cloud_zone",
                                                    "pushButton_exploring_point_cloud_more"]
 
@@ -136,7 +137,7 @@ class TestTools:
         raster = shared_raster + len(extras.tools_for("raster"))
         point_cloud = shared_point_cloud + len(extras.tools_for("point_cloud"))
         vector = shared_vector + len(extras.tools_for("vector"))
-        assert raster == 8 and point_cloud == 7 and vector == 8
+        assert raster == 8 and point_cloud == 8 and vector == 8
 
     def test_detector_has_its_own_icon(self):
         assert extras.ICON_DETECTOR.strip().startswith("<") and extras.ICON_DETECTOR != extras.ICON_PIPETTE
@@ -522,6 +523,62 @@ def test_value_under_the_cursor_reads_the_new_source_after_a_filter(dock_extras)
     assert env.controller.based == ["/data/r1.tif", "/cache/r1_cut.vrt"]
 
 
+class TestPointCloudObjectDetector:
+    """2026-10-18: the object detector of CLASSES shares the class picker; its button follows the picker mode."""
+
+    def _rail(self, env):
+        calls = []
+        env.controller._on_object_pick_toggled = lambda on: calls.append(("detector", on))
+        env.controller._on_class_pick_toggled = lambda on, mode="class": calls.append(("picker", on))
+        identify = FakeDockButton()
+        identify.setDown = lambda down: setattr(identify, "down", down)
+        identify.isCheckable = lambda: False
+        identify.down = False
+        env.controller.dockwidget = types.SimpleNamespace(pushButton_exploring_identify=identify)
+        detector = FakeDockButton(env.dock._on_pc_object_toggled)
+        value = FakeDockButton(env.dock._on_value_pipette_toggled)
+        env.controller._on_value_pick_toggled = lambda on: calls.append(("value", on))
+        env.dock._tools[extras.PC_OBJECT_BUTTON] = detector
+        env.dock._tools["pushButton_checkable_exploring_point_cloud_value_pipette"] = value
+        return identify, detector, value, calls
+
+    def test_button_puts_the_detector_on(self, dock_extras):
+        _identify, detector, _value, calls = self._rail(dock_extras)
+        detector.setChecked(True)
+        detector.setChecked(False)
+        assert calls == [("detector", True), ("detector", False)]
+
+    @pytest.mark.parametrize("mode, down", [("class", (True, False, False)), ("value", (False, False, True)),
+                                            ("object", (False, True, False)), ("similar", (False, True, False))])
+    def test_one_button_down_for_the_picker_mode(self, dock_extras, mode, down):
+        identify, detector, value, calls = self._rail(dock_extras)
+        dock_extras.dock.set_class_pipette_checked(True, mode)
+        assert (identify.down, detector.isChecked(), value.isChecked()) == down
+        assert calls == []  # signals blocked: the picker is not toggled back
+        dock_extras.dock.set_class_pipette_checked(False, mode)
+        assert (identify.down, detector.isChecked(), value.isChecked()) == (False, False, False)
+
+    def test_leaving_the_layer_takes_the_detector_off(self, dock_extras):
+        _identify, detector, _value, calls = self._rail(dock_extras)
+        detector.setChecked(True)
+        dock_extras.dock.leave()
+        assert calls == [("detector", True), ("detector", False)] and not detector.isChecked()
+
+    def test_detector_follows_the_classes_of_the_layer(self, dock_extras, monkeypatch):
+        identify, detector, _value, _calls = self._rail(dock_extras)
+        dock_extras.dock.tr = lambda text, *_args: text
+        detector.tip = "Object detector: click the map"
+        adapter = types.ModuleType(f"{_PKG}.adapters.qgis.point_cloud_layer_adapter")
+        adapter.may_have_classes = lambda layer: False
+        monkeypatch.setitem(sys.modules, adapter.__name__, adapter)
+        dock_extras.dock._class_pipette_tip = "Class pipette"
+        dock_extras.dock._class_pipette_enabled(FakeLayer("p1"))
+        assert not detector.isEnabled() and "no Classification" in detector.toolTip()
+        adapter.may_have_classes = lambda layer: True
+        dock_extras.dock._class_pipette_enabled(FakeLayer("p1"))
+        assert detector.isEnabled() and detector.toolTip() == "Object detector: click the map"
+
+
 class TestClassPipette:
     def _pipette(self, env):
         calls = []
@@ -640,6 +697,15 @@ class TestSelectionStrip:
         strip_env.dock._strip_kind = "point_cloud"
         strip_env.dock._update_strip()
         assert strip_env.dock._strip.content == ("point_cloud", "Kept points", "18.9 M / 38.4 M (49.2 %)")
+
+    def test_point_cloud_strip_shows_the_detected_objects(self, strip_env):
+        strip_env.controller._pc_panel = types.SimpleNamespace(
+            class_point_counts=lambda: (None, None), point_counts=lambda: (None, 38_400_000),
+            expression=lambda: "Classification = 6 AND X >= 1 AND X <= 2 AND Y >= 3 AND Y <= 4",
+            hag_settings=lambda: None, detected_objects=lambda: (3, 1250.0, False))
+        strip_env.dock._strip_kind = "point_cloud"
+        strip_env.dock._update_strip()
+        assert strip_env.dock._strip.content[2] == "3 object(s) · 1250 m²"
 
     def test_point_cloud_strip_shows_uncounted_criteria(self, strip_env):
         strip_env.controller._pc_panel = types.SimpleNamespace(

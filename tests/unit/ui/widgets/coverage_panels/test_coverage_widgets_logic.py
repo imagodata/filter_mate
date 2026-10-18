@@ -687,7 +687,8 @@ class TestPointCloudCriteriaFromState:
         state = {"layer_id": "lidar", "classes_enabled": False, "classes": [], "ranges_enabled": True,
                  "conditions": conditions, "hag_enabled": False, "hag_min": 2.0, "hag_layer_id": None,
                  "expression_enabled": False, "expression": "", "apply_to_tiles": True,
-                 "pick_attribute": "Z", "pick_tolerance": 5.0, "zone_wkt": ""}
+                 "pick_attribute": "Z", "pick_tolerance": 5.0, "zone_wkt": "",
+                 "objects": {"target": "object", "ratio": [0.5, 2.0], "items": [], "detected": None}}
         assert cloud.parse_point_cloud_state(state) == state
 
 
@@ -881,6 +882,80 @@ class TestValuePipetteAndZone:
         assert (parsed["pick_attribute"], parsed["pick_tolerance"]) == ("Intensity", 12.5)
         parsed = cloud.parse_point_cloud_state({"pick_attribute": 3, "pick_tolerance": -1})
         assert (parsed["pick_attribute"], parsed["pick_tolerance"]) == ("Z", cloud.DEFAULT_PICK_TOLERANCE)
+
+
+def _object(code, box, x=None, y=None, wkt="POLYGON((0 0,1 0,1 1,0 0))", truncated=False):
+    return {"x": box[0] if x is None else x, "y": box[1] if y is None else y, "code": code, "box": list(box),
+            "wkt": wkt, "truncated": truncated}
+
+
+class TestPointCloudObjects:
+    """2026-10-18: the object detector of CLASSES; each object keeps its class and its box goes to the subset."""
+
+    def test_default_objects_state(self):
+        assert cloud.parse_objects_state(None) == {"target": "object", "ratio": [0.5, 2.0], "items": [], "detected": None}
+
+    def test_objects_state_is_normalised_and_idempotent(self):
+        state = {"target": "similar_objects", "ratio": [3, 0.25],
+                 "items": [_object(6, (10, 20, 5, 30)), {"x": "a", "y": 1, "code": 6, "box": [0, 0, 1, 1]},
+                           _object(300, (0, 0, 1, 1)), _object(5, (0, 0, 1, 1), x=float("nan"))],
+                 "detected": {"wkt": "MULTIPOLYGON(...)", "boxes": [[6, 0, 0, 1, 1], [6, "x", 0, 1, 1], [7, 0, 0]],
+                              "count": 4, "area": -2, "truncated": 1}}
+        parsed = cloud.parse_objects_state(state)
+        assert parsed["target"] == "similar_objects" and parsed["ratio"] == [0.25, 3.0]
+        assert [item["code"] for item in parsed["items"]] == [6]  # the invalid ones are dropped
+        assert parsed["items"][0]["box"] == [5.0, 20.0, 10.0, 30.0]  # sides ordered
+        assert parsed["detected"] == {"wkt": "MULTIPOLYGON(...)", "boxes": [[6, 0.0, 0.0, 1.0, 1.0]], "count": 4,
+                                      "area": None, "truncated": True}
+        assert cloud.parse_objects_state(parsed) == parsed
+
+    def test_unknown_target_and_bad_ratio(self):
+        parsed = cloud.parse_objects_state({"target": "pool", "ratio": [0, 2]})
+        assert parsed["target"] == "object" and parsed["ratio"] == [0.5, 2.0]
+
+    def test_detection_without_object_is_dropped(self):
+        assert cloud.parse_objects_state({"detected": {"wkt": "POLYGON(...)"}})["detected"] is None
+
+    def test_one_object_is_its_class_in_its_box(self):
+        assert cloud.object_expression([[6, 1, 2, 3, 4.5]]) == (
+            "Classification = 6 AND X >= 1 AND X <= 3 AND Y >= 2 AND Y <= 4.5")
+
+    def test_objects_are_ored_each_with_its_class(self):
+        assert cloud.object_expression([[6, 0, 0, 1, 1], [5, 10, 10, 12, 12]]) == (
+            "(Classification = 6 AND X >= 0 AND X <= 1 AND Y >= 0 AND Y <= 1) OR "
+            "(Classification = 5 AND X >= 10 AND X <= 12 AND Y >= 10 AND Y <= 12)")
+
+    def test_many_objects_keep_one_box_per_class(self):
+        boxes = [[6, i, i, i + 1, i + 1] for i in range(5)] + [[2, 50, 60, 51, 61]]
+        assert cloud.object_expression(boxes, limit=4) == (
+            "(Classification = 2 AND X >= 50 AND X <= 51 AND Y >= 60 AND Y <= 61) OR "
+            "(Classification = 6 AND X >= 0 AND X <= 5 AND Y >= 0 AND Y <= 5)")
+        assert cloud.object_expression([]) == ""
+
+    def test_objects_replace_their_classes_in_the_subset(self):
+        state = {"classes_enabled": True, "classes": [6], "objects": {"items": [_object(6, (0, 0, 1, 1))]}}
+        assert cloud.build_point_cloud_expression(state) == "Classification = 6 AND X >= 0 AND X <= 1 AND Y >= 0 AND Y <= 1"
+
+    def test_the_detected_boxes_win_over_the_clicks(self):
+        objects = {"target": "similar_objects", "items": [_object(6, (0, 0, 1, 1))],
+                   "detected": {"wkt": "", "boxes": [[6, 0, 0, 1, 1], [6, 5, 5, 6, 6]], "count": 2}}
+        state = {"classes_enabled": True, "classes": [6], "objects": objects}
+        assert cloud.build_point_cloud_expression(state).count("Classification = 6") == 2
+
+    def test_objects_are_wrapped_before_the_height(self):
+        state = {"classes_enabled": True, "classes": [5, 6], "hag_enabled": True, "hag_min": 2, "hag_layer_id": "dtm",
+                 "objects": {"items": [_object(6, (0, 0, 1, 1)), _object(5, (2, 2, 3, 3))]}}
+        expression = cloud.build_point_cloud_expression(state)
+        assert expression.startswith("((Classification = 6") and expression.endswith(") AND HeightAboveGround >= 2")
+
+    def test_objects_apply_with_classes_only(self):
+        state = {"classes_enabled": False, "ranges_enabled": True, "conditions": cloud.zone_conditions(1, 2, 3, 4),
+                 "objects": {"items": [_object(6, (0, 0, 1, 1))]}}
+        assert cloud.build_point_cloud_expression(state) == "X >= 1 AND X <= 3 AND Y >= 2 AND Y <= 4"
+
+    def test_object_summary(self):
+        assert cloud.object_summary(3, 1250.0, False) == "3 object(s) · 1250 m²"
+        assert cloud.object_summary(1, None, True) == "1 object(s) · cut at the window read"
 
 
 class TestPointCloudClassLists:

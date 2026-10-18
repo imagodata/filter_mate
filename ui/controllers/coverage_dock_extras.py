@@ -78,6 +78,8 @@ ACTION_OPEN_TABLE_SELECTED = ('mActionOpenTableSelected',)
 VECTOR_LINK_BUTTON = 'pushButton_checkable_exploring_linking_widgets'
 VECTOR_SELECT_BUTTON = 'pushButton_checkable_exploring_selecting'
 VECTOR_SIMILAR_BUTTON = 'pushButton_checkable_exploring_vector_similar'
+# The object detector of a point cloud (CLASSES, 2026-10-18): the object under a click, or the similar ones.
+PC_OBJECT_BUTTON = 'pushButton_checkable_exploring_point_cloud_object'
 ACTION_NEW_3D_VIEW = ('mActionNew3DMapCanvas', 'mActionNew3DMapView')
 # Vector providers whose feature count is a database query: the card leaves it out (it is
 # read on the main thread at every layer change). Web services and remote files are left
@@ -221,9 +223,10 @@ RAIL_TOOLS = {
     'raster': ('pushButton_checkable_exploring_raster_pipette', 'pushButton_checkable_exploring_raster_detector',
                'pushButton_checkable_exploring_raster_similar', 'pushButton_checkable_exploring_raster_link',
                'pushButton_exploring_raster_more'),
-    # 2026-10-18: Identify is the class pipette (CLASSES); the value pipette and the zone are the tools of
-    # ATTRIBUTES; the elevation profile and the 3D view are in the "more" menu.
-    'point_cloud': ('pushButton_checkable_exploring_point_cloud_value_pipette',
+    # 2026-10-18: Identify is the class pipette and the object detector the other tool of CLASSES; the value
+    # pipette and the zone are the tools of ATTRIBUTES; the elevation profile and the 3D view are in the "more"
+    # menu. Eight buttons, like the raster and vector rails.
+    'point_cloud': (PC_OBJECT_BUTTON, 'pushButton_checkable_exploring_point_cloud_value_pipette',
                     'pushButton_checkable_exploring_point_cloud_zone', 'pushButton_exploring_point_cloud_more'),
 }
 _RAIL_TOOL_NAMES = frozenset(name for names in RAIL_TOOLS.values() for name in names)
@@ -273,6 +276,7 @@ class CoverageDockExtras(QObject):
         self._vector_similar_previous_tool = None
         self._vector_link_tip = None  # the Link tooltip of the dock, given back after the custom selection
         self._pc_zone_shape = 'rectangle'
+        self._pc_object_tip = None  # the detector tooltip, given back on a point cloud with classes
         self._layer_id: Optional[str] = None
         self._hover_base = None
         self._hover_base_key: Optional[Tuple[str, str]] = None  # (layer id, source) the base was opened for
@@ -407,6 +411,11 @@ class CoverageDockExtras(QObject):
             ('pushButton_checkable_exploring_raster_link', True, self._link_tip, self._on_link_toggled),
             ('pushButton_checkable_exploring_point_cloud_pipette', True, self._class_pipette_tip,
              self._on_class_pipette_toggled),
+            (PC_OBJECT_BUTTON, True,
+             self.tr("Object detector: click the map and the object under the click is selected (the cluster of "
+                     "points of its class: a building, a tree), not the whole class; or every object of the cloud "
+                     "like it (right-click the button for the target). Ctrl+click adds another object"),
+             self._on_pc_object_toggled),
             ('pushButton_checkable_exploring_point_cloud_value_pipette', True,
              self.tr("Value pipette: click the map and a condition is written on the attribute chosen in ATTRIBUTES "
                      "(Z, intensity...), around the value of the point there, with the tolerance of the panel. "
@@ -455,10 +464,11 @@ class CoverageDockExtras(QObject):
                 button.clicked.connect(slot)
             layout.insertWidget(index + offset, button, 0, layout.itemAt(layout.indexOf(anchor)).alignment())
             self._tools[name] = button
-            if name == 'pushButton_checkable_exploring_point_cloud_zone':
+            if name in ('pushButton_checkable_exploring_point_cloud_zone', PC_OBJECT_BUTTON):
                 from qgis.PyQt.QtCore import Qt
                 button.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
-                button.customContextMenuRequested.connect(self._on_pc_zone_context_menu)
+                button.customContextMenuRequested.connect(
+                    self._on_pc_object_context_menu if name == PC_OBJECT_BUTTON else self._on_pc_zone_context_menu)
 
     def _refresh_icons(self) -> None:
         """Draw the tool icons in the text color of the current theme."""
@@ -476,6 +486,7 @@ class CoverageDockExtras(QObject):
             'pushButton_checkable_exploring_raster_zone': ICON_ZONE,
             'pushButton_checkable_exploring_raster_link': ICON_LINK_STYLE,
             'pushButton_checkable_exploring_point_cloud_pipette': ICON_PIPETTE,
+            PC_OBJECT_BUTTON: ICON_DETECTOR,
             'pushButton_checkable_exploring_point_cloud_value_pipette': ICON_VALUE_PIPETTE,
             'pushButton_checkable_exploring_point_cloud_zone': ICON_PC_ZONE,
             'pushButton_exploring_raster_more': ICON_MORE,
@@ -594,7 +605,7 @@ class CoverageDockExtras(QObject):
                      'pushButton_checkable_exploring_raster_similar',
                      'pushButton_checkable_exploring_raster_hover', 'pushButton_checkable_exploring_raster_zone',
                      'pushButton_checkable_exploring_raster_link', 'pushButton_checkable_exploring_point_cloud_pipette',
-                     'pushButton_checkable_exploring_point_cloud_value_pipette',
+                     'pushButton_checkable_exploring_point_cloud_value_pipette', PC_OBJECT_BUTTON,
                      'pushButton_checkable_exploring_point_cloud_zone', VECTOR_SIMILAR_BUTTON):
             button = self._tools.get(name)
             if button is not None:
@@ -758,8 +769,9 @@ class CoverageDockExtras(QObject):
         kept, total = panel.class_point_counts()
         if total is None:
             total = panel.point_counts()[1]
+        detected = panel.detected_objects() if hasattr(panel, 'detected_objects') else None
         value = point_cloud_strip_value(kept, total, panel.expression(), panel.hag_settings() is not None,
-                                        self.tr)
+                                        self.tr, detected)
         current = panel.current_subset() if hasattr(panel, 'current_subset') else ''
         tooltip = self.tr("Source geometry: the footprint of the kept points")
         if current:
@@ -885,35 +897,77 @@ class CoverageDockExtras(QObject):
         button.setEnabled(enabled)
         button.setToolTip(self._class_pipette_tip if enabled else self.tr(
             "Class pipette: this point cloud has no Classification attribute"))
+        detector = self._tools.get(PC_OBJECT_BUTTON)
+        if detector is not None:
+            if self._pc_object_tip is None:
+                self._pc_object_tip = detector.toolTip()
+            detector.setEnabled(enabled)
+            detector.setToolTip(self._pc_object_tip if enabled else self.tr(
+                "Object detector: this point cloud has no Classification attribute"))
 
     def set_class_pipette_checked(self, checked: bool, mode: str = 'class') -> None:
-        """The point cloud picker went on or left the map: the button of its mode follows, the other one is up.
+        """The point cloud picker went on or left the map: the button of its mode follows, the others are up.
 
         Args:
             checked: Whether the picker is on the map.
-            mode: ``'class'`` (the Identify button, held down) or ``'value'`` (the value pipette button).
+            mode: ``'class'`` (the Identify button, held down), ``'value'`` (the value pipette button), ``'object'``
+                or ``'similar'`` (the object detector button, both targets).
         """
         button = self._class_pipette_button()
         if button is not None:
             button.blockSignals(True)
             try:
-                down = bool(checked) and mode != 'value'
+                down = bool(checked) and mode == 'class'
                 if button.isCheckable():
                     button.setChecked(down)
                 else:
                     button.setDown(down)
             finally:
                 button.blockSignals(False)
-        value = self._tools.get('pushButton_checkable_exploring_point_cloud_value_pipette')
-        if value is not None:
-            value.blockSignals(True)
-            try:
-                value.setChecked(bool(checked) and mode == 'value')
-            finally:
-                value.blockSignals(False)
+        for name, modes in (('pushButton_checkable_exploring_point_cloud_value_pipette', ('value',)),
+                            (PC_OBJECT_BUTTON, ('object', 'similar'))):
+            tool = self._tools.get(name)
+            if tool is not None:
+                tool.blockSignals(True)
+                try:
+                    tool.setChecked(bool(checked) and mode in modes)
+                finally:
+                    tool.blockSignals(False)
 
     def _on_value_pipette_toggled(self, checked: bool) -> None:
         self._controller._on_value_pick_toggled(checked)
+
+    # === Point cloud: object detector (CLASSES) ===
+
+    def _on_pc_object_toggled(self, checked: bool) -> None:
+        self._controller._on_object_pick_toggled(checked)
+
+    def _object_target_menu(self, parent: Any) -> Any:
+        """Menu of the two targets of the detector (one checked), shared by its button and the "more" menu."""
+        from qgis.PyQt.QtWidgets import QMenu
+        try:
+            from qgis.PyQt.QtGui import QActionGroup
+        except ImportError:  # Qt5: QActionGroup is in QtWidgets
+            from qgis.PyQt.QtWidgets import QActionGroup
+        panel = getattr(self._controller, '_pc_panel', None)
+        current = panel.object_target() if panel is not None and hasattr(panel, 'object_target') else 'object'
+        menu = QMenu(self.tr("Object detector"), parent)
+        group = QActionGroup(menu)
+        group.setExclusive(True)
+        for key, label in (('object', self.tr("Clicked object")), ('similar_objects', self.tr("Similar objects"))):
+            action = menu.addAction(label)
+            action.setCheckable(True)
+            action.setChecked(key == current)
+            action.triggered.connect(lambda _checked=False, k=key: self._controller._on_point_cloud_object_target(k))
+            group.addAction(action)
+        return menu
+
+    def _on_pc_object_context_menu(self, position: Any) -> None:
+        button = self._tools.get(PC_OBJECT_BUTTON)
+        if button is None:
+            return
+        menu = self._object_target_menu(button)
+        menu.exec(button.mapToGlobal(position))
 
     def zone_tool_on(self) -> bool:
         """Whether a zone tool (the raster rectangle or the point cloud shape) is the current map tool."""
@@ -1241,12 +1295,13 @@ class CoverageDockExtras(QObject):
         self._popup(button, menu)
 
     def _show_point_cloud_more_menu(self, *_args) -> None:
-        """Elevation profile and 3D view: the QGIS tools, from the rail."""
+        """The target of the object detector, the zone shape, then the QGIS elevation profile and 3D view."""
         from qgis.PyQt.QtWidgets import QMenu
         button = self._tools.get('pushButton_exploring_point_cloud_more')
         if button is None:
             return
         menu = QMenu(button)
+        menu.addMenu(self._object_target_menu(menu))
         menu.addMenu(self._zone_shape_menu(menu))
         menu.addSeparator()
         for text, names, slot in ((self.tr("Elevation profile"), ACTION_ELEVATION_PROFILE, self._open_elevation_profile),
