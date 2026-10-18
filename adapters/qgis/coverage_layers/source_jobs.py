@@ -29,6 +29,7 @@ logger = logging.getLogger(__name__)
 
 class SourceJob:
     kind = LayerKind.OTHER
+    reports_progress = False  # calls ``progress`` while computing (see CrossFilterTask.run)
 
     def __init__(self, layer) -> None:
         self.layer_id = layer.id()
@@ -40,14 +41,16 @@ class SourceJob:
         self.message = ''
         self.elapsed = 0.0
         self.details: dict = {}
+        # Set by the task before compute(): receives the progress of the source geometry in percent.
+        self.progress = None
 
-    def compute(self, request, is_canceled) -> QgsGeometry:
-        """Return the buffered source geometry (layer CRS)."""
+    def compute(self, request, is_canceled, buffer: bool = True) -> QgsGeometry:
+        """Return the buffered source geometry (layer CRS); ``buffer`` False (no target) returns it as read."""
         started = time.perf_counter()
         raw = self._raw_geometry(is_canceled)
         self.raw_geometry = raw
         self._computed = True
-        self.geometry = self._buffer(raw, request)
+        self.geometry = self._buffer(raw, request) if buffer else raw
         self.elapsed = time.perf_counter() - started
         return self.geometry
 
@@ -69,7 +72,7 @@ class SourceJob:
     def _raw_geometry(self, is_canceled) -> QgsGeometry:
         raise NotImplementedError
 
-    _QGIS_HANDLES = ('_layer', '_provider', '_virtual', '_base_keepalive')
+    _QGIS_HANDLES = ('_layer', '_provider', '_virtual', '_base_keepalive', '_nodata_provider')
 
     def release(self) -> None:
         """Drop the QGIS objects owned by the job (see TargetJob.release)."""
@@ -121,21 +124,33 @@ class RasterSourceJob(SourceJob):
     """Pixels kept by a :class:`RasterSelection` of a raster source."""
 
     kind = LayerKind.RASTER
+    reports_progress = True
 
-    def __init__(self, layer, selection: RasterSelection, max_pixels: int = 4000000, filter_source: bool = True) -> None:
+    def __init__(self, layer, selection: RasterSelection, max_pixels=None, filter_source: bool = True) -> None:
+        """``max_pixels``: ``CROSS_FILTER.raster_source_max_pixels`` as read from the config or an API call
+        (see :func:`raster_adapter.source_max_pixels`), the default when None."""
         super().__init__(layer)
-        from .raster_adapter import selection_virtual_layer
+        from .raster_adapter import raster_reference, referenced_bands, selection_virtual_layer, source_max_pixels
         self.selection = selection
-        self._max_pixels = max_pixels
+        self._max_pixels = source_max_pixels(max_pixels)
         self._filter_source = filter_source
         self._extent = QgsRectangle(layer.extent())
         self._width, self._height = layer.width(), layer.height()
         self._crs_wkt = layer.crs().toWkt()
         self._virtual = None
+        self._nodata_provider = None
+        self._nodata_bands: List[int] = []
         self._band_count = layer.bandCount()
         if selection.mode is RasterSelectionMode.EXPRESSION:
             self._virtual = selection_virtual_layer(layer, selection, self.before.base_source, self.before.base_provider)
             provider = self._virtual.dataProvider() if self._virtual is not None else None
+            # The virtual raster has no NoData: the pixels without a value in a band the
+            # expression reads are dropped from the raster it reads (raster_adapter.expression_mask).
+            base = self._base_layer(layer)
+            self._nodata_bands = [band for band in referenced_bands(selection.expression, raster_reference(layer))
+                                  if band <= base.bandCount()]
+            if self._nodata_bands:
+                self._nodata_provider = base.dataProvider().clone()
         else:
             # Read the original pixels, not a previously masked derived source.
             base = self._base_layer(layer)
@@ -152,6 +167,12 @@ class RasterSourceJob(SourceJob):
                 self._object_base = (base.dataProvider() if base is not None else layer.dataProvider()).clone()
         self._derived_uri = ''
         self._nodata = None
+        # The clip of the source itself, prepared in the task (prepare_apply), applied on the main thread.
+        self._clip_job = None
+        self._clip_prepared = False
+        if self.clips_source and not self.clip_refusal:
+            from .target_appliers import RasterTargetJob
+            self._clip_job = RasterTargetJob(layer, None)
 
     def _base_layer(self, layer):
         if not self.before.derived:
@@ -162,19 +183,35 @@ class RasterSourceJob(SourceJob):
         return base if base.isValid() else layer
 
     def _raw_geometry(self, is_canceled) -> QgsGeometry:
-        from .raster_adapter import selection_geometry
+        from .raster_adapter import _decimation, gdal_cell_reader, selection_geometry
         if self._provider is None:
             self.message = 'raster provider unavailable'
             return QgsGeometry()
         if is_canceled():
             self.message = 'canceled'
             return QgsGeometry()
+        cell_reader = None
+        if (self.selection.mode is not RasterSelectionMode.EXPRESSION and self.before.base_provider == 'gdal'
+                and _decimation(self._width, self._height, self._max_pixels) > 1):
+            # Over the pixel limit: cells read by GDAL, alike from every tile.
+            cell_reader = gdal_cell_reader(self.before.base_source, self._provider)
         result = selection_geometry(self._provider, self.selection, self._extent, self._width, self._height,
-                                    self._crs_wkt, max_pixels=self._max_pixels, provider_for=self._object_provider)
-        if is_canceled():  # the polygonization cannot be interrupted: its result is dropped
+                                    self._crs_wkt, max_pixels=self._max_pixels,
+                                    nodata_provider=getattr(self, '_nodata_provider', None),
+                                    nodata_bands=getattr(self, '_nodata_bands', ()), is_canceled=is_canceled,
+                                    progress=getattr(self, 'progress', None), provider_for=self._object_provider,
+                                    cell_reader=cell_reader)
+        if result.canceled or is_canceled():  # the final union cannot be interrupted: its result is dropped
             self.message = 'canceled'
             return QgsGeometry()
-        self.details.update(kept_pixels=result.kept_pixels, total_pixels=result.total_pixels, cell_size=result.cell_size)
+        self.details.update(kept_pixels=result.kept_pixels, total_pixels=result.total_pixels, cell_size=result.cell_size,
+                            grid=f"{result.grid[0]}x{result.grid[1]}", tiles=result.tiles, vertices=result.vertices)
+        if result.coarse:
+            self.details['decimation'] = result.decimation  # over raster_source_max_pixels: cells of k x k pixels
+        if result.smoothing:
+            self.details['smoothing'] = result.smoothing  # majority radius (cells) of the densest tile
+        if result.blocks:
+            self.details['blocks'] = result.blocks  # block side (cells) a dense tile was read on
         return result.geometry
 
     def _object_provider(self, criterion):
@@ -183,11 +220,50 @@ class RasterSourceJob(SourceJob):
             return self._object_providers.get(criterion.expression)
         return getattr(self, '_object_base', None) or self._provider
 
+    @property
+    def clip_refusal(self) -> str:
+        """Why the source cannot be masked by its selection ('' when it can, or is not masked)."""
+        if self.clips_source and self.before.base_provider != 'gdal':
+            return (f"the source cannot be masked: its provider ({self.before.base_provider}) is not a GDAL file; "
+                    "its pixels are still used as the selection")
+        return ''
+
+    @property
+    def outputs(self) -> List[str]:
+        """Cache files written for the clip of the source (settled once applied)."""
+        return list(self._clip_job.outputs) if getattr(self, '_clip_job', None) is not None else []
+
+    def prepare_apply(self, is_canceled) -> None:
+        """Clip of the source by its selection, computed off the main thread (the task, after compute()).
+
+        The geometry checks and the simplification of a heavy cutline are done
+        here: :meth:`apply` only switches the layer to the VRT.
+        """
+        from ....core.domain.cross_filter import CrossFilterRequest, TargetSpec
+        job = getattr(self, '_clip_job', None)
+        if job is None or self._clip_prepared or self.raw_geometry.isEmpty() or is_canceled():
+            return
+        request = CrossFilterRequest(self.layer_id, LayerKind.RASTER, targets=(TargetSpec(self.layer_id, LayerKind.RASTER),))
+        job.compute(self.raw_geometry, self.crs, QgsCoordinateTransformContext(), request, is_canceled)
+        self._clip_prepared = True
+
+    def release(self) -> None:
+        job = getattr(self, '_clip_job', None)
+        if job is not None:
+            job.release()
+        self._clip_job = None
+        super().release()
+
+    @property
+    def clips_source(self) -> bool:
+        """Whether :meth:`apply` masks the source with the selection geometry (computed in the task when it runs)."""
+        return bool(self._filter_source and (self._band_count > 1 or self.selection.mode is RasterSelectionMode.EXPRESSION
+                                             or self.selection.derivative.is_terrain or self.selection.seeds))
+
     def apply(self, layer) -> Optional[LayerSnapshot]:
         if not self._filter_source or (self.selection.mode is RasterSelectionMode.EXPRESSION and self._virtual is None):
             return None
-        if (self._band_count > 1 or self.selection.mode is RasterSelectionMode.EXPRESSION
-                or self.selection.derivative.is_terrain or self.selection.seeds):
+        if self.clips_source:
             # Multiband (RGB...), expression, terrain derivative or detected objects (the
             # raster calculator has neither a slope nor a connected patch): keep every
             # band, mask outside the selected area with a clipped VRT (a virtual raster has one band).
@@ -210,24 +286,27 @@ class RasterSourceJob(SourceJob):
         return self._record(layer, 'virtualraster', nodata=nodata)
 
     def _apply_clip(self, layer) -> Optional[LayerSnapshot]:
-        from .target_appliers import RasterTargetJob
-        from ....core.domain.cross_filter import CrossFilterRequest, TargetSpec
-        if not getattr(self, '_computed', False) and self._provider is not None:
-            # No target: the task never ran compute(), the selection is read here (main thread).
-            self.raw_geometry = self._raw_geometry(lambda: False)
+        if self.clip_refusal:  # checked before anything is read
+            self.message = self.clip_refusal
+            return None
+        if not getattr(self, '_clip_prepared', False):
+            # Synchronous API call (operations, no task): read and clipped in the caller's thread.
+            if not getattr(self, '_computed', False) and self._provider is not None:
+                self.raw_geometry = self._raw_geometry(lambda: False)
+            self.prepare_apply(lambda: False)
         if self.raw_geometry.isEmpty():
             self.message = self.message or 'no pixel is selected: the source is left as it is'
             return None
-        if self.before.base_provider != 'gdal':
-            self.message = (f"the source cannot be masked: its provider ({self.before.base_provider}) is not a GDAL file; "
-                            "its pixels are still used as the selection")
-            return None
         from . import cache
-        job = RasterTargetJob(layer, None)
-        request = CrossFilterRequest(self.layer_id, LayerKind.RASTER, targets=(TargetSpec(self.layer_id, LayerKind.RASTER),))
+        job = self._clip_job
         try:
-            job.compute(self.raw_geometry, self.crs, QgsCoordinateTransformContext(), request, lambda: False)
-            return job.apply(layer) if job.outcome.success else None
+            if not job.outcome.success:
+                self.message = self.message or job.outcome.message or 'the source could not be masked'
+                return None
+            after = job.apply(layer)
+            if after is None:
+                self.message = job.outcome.message or 'the masked source could not be opened'
+            return after
         finally:
             # Not a target of the task: its VRT is released for the cache cleaner here.
             cache.settle(job.outputs)

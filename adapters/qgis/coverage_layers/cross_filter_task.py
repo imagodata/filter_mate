@@ -41,8 +41,14 @@ class CrossFilterTask(QgsTask):
 
     def run(self) -> bool:
         started = time.perf_counter()
+        # A raster source reports the progress of its tiles: the first half of the bar, the targets the second.
+        reports = getattr(self.source_job, 'reports_progress', False)
+        source_share = (50.0 if self.target_jobs else 100.0) if reports else 0.0
         try:
-            geometry = self.source_job.compute(self.request, self.isCanceled)
+            if reports:
+                self.source_job.progress = lambda percent: self.setProgress(percent * source_share / 100.0)
+            # Without a target the buffer serves nothing: the source is masked by the selection as read.
+            geometry = self.source_job.compute(self.request, self.isCanceled, buffer=bool(self.target_jobs))
             logger.info(f"⏱ [FM5] source geometry ({self.source_job.kind.value}) in {self.source_job.elapsed:.2f}s "
                         f"{self.source_job.details}")
             if self.source_job.message:
@@ -68,7 +74,11 @@ class CrossFilterTask(QgsTask):
                 except Exception as exc:  # one target must not stop the others
                     logger.warning(f"[FM5] target '{job.layer_name}' failed: {exc}", exc_info=True)
                     job.outcome.message = str(exc)
-                self.setProgress(100.0 * (index + 1) / total)
+                self.setProgress(source_share + (100.0 - source_share) * (index + 1) / total)
+            prepare = getattr(self.source_job, 'prepare_apply', None)
+            if prepare is not None and not self.isCanceled():
+                # The clip of a masked raster source: computed here, only applied by finished().
+                prepare(self.isCanceled)
             return not self.isCanceled()
         except Exception as exc:
             logger.error(f"[FM5] cross filter failed: {exc}", exc_info=True)
@@ -114,7 +124,7 @@ class CrossFilterTask(QgsTask):
                 logger.info(f"⏱ [FM5] target {job.kind.value} '{job.layer_name}': success={job.outcome.success} "
                             f"kept={job.outcome.kept_count} {job.outcome.elapsed:.2f}s {job.outcome.message}")
         self.outcomes = [job.outcome for job in self.target_jobs]
-        cache.settle(path for job in self.target_jobs for path in getattr(job, 'outputs', ()))
+        cache.settle(path for job in [self.source_job] + list(self.target_jobs) for path in getattr(job, 'outputs', ()))
         for job in [self.source_job] + list(self.target_jobs):
             release = getattr(job, 'release', None)
             if release is not None:

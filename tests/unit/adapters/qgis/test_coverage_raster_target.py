@@ -31,6 +31,7 @@ cache = fk.load("cache")
 domain = fk.load("core.domain.cross_filter")
 LayerKind = fk.load("core.domain.layer_kind").LayerKind
 LayerSnapshot = fk.load("core.domain.filter_state").LayerSnapshot
+RasterSelection = fk.load("core.domain.raster_filter_criteria").RasterSelection
 
 
 class FakeRasterLayer:
@@ -296,30 +297,55 @@ class TestSourceParts:
 
 
 class TestSourceClipVrt:
-    def test_vrt_of_the_source_clip_is_settled(self, engine, monkeypatch):
+    class Job:
+        """RasterTargetJob stand-in for the clip of the source itself."""
+
+        def __init__(self, success=True, message=''):
+            self.outputs = ['/cache/dem_1234.vrt']
+            self.outcome = domain.CrossFilterOutcome('dem_id', LayerKind.RASTER, False)
+            self._success, self._message, self.computed = success, message, []
+
+        def compute(self, geometry, crs, context, request, is_canceled):
+            self.computed.append(is_canceled())
+            self.outcome.success, self.outcome.message = self._success, self._message
+
+        def apply(self, layer):
+            return 'after'
+
+    def _job(self, clip, provider='gdal'):
+        job = source_jobs.RasterSourceJob.__new__(source_jobs.RasterSourceJob)
+        job._computed, job._provider, job.message = True, object(), ''
+        job._filter_source, job._band_count = True, 3
+        job.selection = RasterSelection(band=1, minimum=1.0)
+        job.raw_geometry = _east_half()
+        job.before = LayerSnapshot('dem_id', 'raster', source='/data/dem.tif', provider=provider)
+        job.layer_id, job.crs = 'dem_id', fk.FakeCrs('EPSG:2154')
+        job._clip_job, job._clip_prepared = clip, False
+        return job
+
+    def test_clip_prepared_in_the_task_then_applied_and_settled(self, engine, monkeypatch):
         """The clip of a multiband / expression source is not a task target: its VRT is settled here."""
         settled = []
-
-        class Job:
-            def __init__(self, layer, operator):
-                self.outputs = ['/cache/dem_1234.vrt']
-                self.outcome = domain.CrossFilterOutcome('dem_id', LayerKind.RASTER, False)
-
-            def compute(self, *args):
-                self.outcome.success = True
-
-            def apply(self, layer):
-                return 'after'
-
-        monkeypatch.setattr(engine, 'RasterTargetJob', Job)
         monkeypatch.setattr(cache, 'settle', lambda paths: settled.append(list(paths)))
-        job = source_jobs.RasterSourceJob.__new__(source_jobs.RasterSourceJob)
-        job._computed, job._provider = True, object()
-        job.raw_geometry = _east_half()
-        job.before = LayerSnapshot('dem_id', 'raster', source='/data/dem.tif', provider='gdal')
-        job.layer_id, job.crs = 'dem_id', fk.FakeCrs('EPSG:2154')
+        clip = self.Job()
+        job = self._job(clip)
+        job.prepare_apply(lambda: False)  # the task, off the main thread
+        assert clip.computed == [False] and job.outputs == ['/cache/dem_1234.vrt']
         assert job._apply_clip(object()) == 'after'
+        assert clip.computed == [False]  # not computed again on the main thread
         assert settled == [['/cache/dem_1234.vrt']]
+
+    def test_failed_clip_tells_why(self, engine, monkeypatch):
+        monkeypatch.setattr(cache, 'settle', lambda paths: None)
+        job = self._job(self.Job(success=False, message='derived VRT could not be written'))
+        job.prepare_apply(lambda: False)
+        assert job._apply_clip(object()) is None and job.message == 'derived VRT could not be written'
+
+    def test_source_not_gdal_refused_before_reading(self, engine, monkeypatch):
+        job = self._job(None, provider='wms')
+        job._computed = False
+        monkeypatch.setattr(job, '_raw_geometry', lambda is_canceled: pytest.fail("read for nothing"))
+        assert job.clip_refusal and job._apply_clip(object()) is None and job.message == job.clip_refusal
 
     def test_canceled_selection_is_not_read(self, engine):
         job = source_jobs.RasterSourceJob.__new__(source_jobs.RasterSourceJob)

@@ -171,7 +171,7 @@ class TestExpressionSurfaceNoData:
         monkeypatch.setattr(overlay, "QgsRectangle", lambda extent: extent)
         monkeypatch.setattr(overlay, "QgsCoordinateReferenceSystem", lambda crs: crs)
         monkeypatch.setattr(overlay, "raster_reference", lambda layer: "ortho")
-        monkeypatch.setattr(overlay, "read_band_array", read)
+        monkeypatch.setattr(sys.modules[f"{_PKG}.adapters.qgis.coverage_layers.raster_adapter"], "read_band_array", read)
         monkeypatch.setattr(overlay, "selection_virtual_layer", lambda layer, selection: types.SimpleNamespace(
             dataProvider=lambda: providers["virtual"]))
         selection = RasterSelection(mode=RasterSelectionMode.EXPRESSION,

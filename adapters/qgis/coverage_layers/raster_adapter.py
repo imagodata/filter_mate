@@ -12,6 +12,7 @@ a source geometry.
 """
 import logging
 import math
+import re
 import sys
 import warnings
 from urllib.parse import quote
@@ -306,20 +307,26 @@ def derived_array(array, derivative: RasterDerivative, extent: QgsRectangle, kin
         kind: :func:`crs_kind` of the layer CRS (degrees and Web Mercator cells are converted to metres);
             True / False are read as geographic / projected.
     """
-    import math
     if not derivative.is_terrain:
         return array
+    height, width = array.shape
+    return derive(array, derivative, *grid_ground_size(extent, width, height, kind))
+
+
+def grid_ground_size(extent: QgsRectangle, width: int, height: int, kind) -> Tuple[float, float]:
+    """Ground size ``(x, y)`` of the cells of a ``width`` x ``height`` grid over ``extent`` (see :func:`derived_array`).
+
+    Degrees and Web Mercator metres are converted at the latitude of the centre of ``extent``.
+    """
     if isinstance(kind, bool):
         kind = 'geographic' if kind else 'projected'
-    height, width = array.shape
     centre = (extent.yMinimum() + extent.yMaximum()) / 2.0
     if kind == 'mercator':  # northing -> latitude
         latitude = math.degrees(2.0 * math.atan(math.exp(centre / 6378137.0)) - math.pi / 2.0)
     else:
         latitude = centre if kind == 'geographic' else 0.0
-    size_x, size_y = ground_cell_size(extent.width() / width, extent.height() / height,
-                                      kind == 'geographic', latitude, mercator=kind == 'mercator')
-    return derive(array, derivative, size_x, size_y)
+    return ground_cell_size(extent.width() / width, extent.height() / height,
+                            kind == 'geographic', latitude, mercator=kind == 'mercator')
 
 
 _PICKED_DERIVATIVES = (RasterDerivative.SLOPE_DEGREES, RasterDerivative.SLOPE_PERCENT, RasterDerivative.ASPECT,
@@ -433,6 +440,31 @@ def selection_mask(array, selection: RasterSelection):
     raise ValueError("expression selections are evaluated through a virtual raster")
 
 
+def referenced_bands(expression: str, reference: str) -> List[int]:
+    """Band numbers ``expression`` reads from the layer named ``reference`` (``"ortho@3"`` -> 3), sorted."""
+    pattern = '"' + re.escape(reference) + r'@(\d+)"'
+    return sorted({int(number) for number in re.findall(pattern, expression or '')})
+
+
+def expression_mask(virtual_provider: QgsRasterDataProvider, provider: QgsRasterDataProvider, bands,
+                    extent: QgsRectangle, width: int, height: int):
+    """``(kept, valid)`` masks of a raster calculator expression over ``extent``, read on a ``width`` x ``height`` grid.
+
+    ``virtual_provider`` is the virtual raster of :func:`selection_virtual_layer`
+    (1 where the expression holds). It has no NoData: a NoData pixel of a band
+    still gives 0 or 1 (``"ortho@3" != 5`` keeps the NoData edge of an
+    orthophoto, QGIS 3.44 and 4.2). ``valid`` is therefore False where one of
+    ``bands`` (the ones the expression reads, :func:`referenced_bands`) of
+    ``provider`` has NoData, and such a pixel is never kept.
+    """
+    import numpy as np
+    array = read_band_array(virtual_provider, 1, extent, width, height)
+    valid = ~np.isnan(array)
+    for band in bands:
+        valid &= ~np.isnan(read_band_array(provider, band, extent, width, height))
+    return valid & (array != 0), valid
+
+
 @dataclass
 class SelectionGeometryResult:
     geometry: object
@@ -441,10 +473,242 @@ class SelectionGeometryResult:
     cell_size: float
     truncated: bool = False  # object detection: an object went on past the largest window read
     objects: int = 0  # object detection: number of objects found under the clicks
+    grid: Tuple[int, int] = (0, 0)  # (width, height) of the grid read
+    tiles: int = 0
+    coarse: bool = False  # the grid is coarser than the raster (over max_pixels)
+    canceled: bool = False
+    decimation: int = 1  # pixels per cell side (1: native resolution)
+    smoothing: int = 0  # largest majority radius (cells) a tile needed to fit the vertex budget
+    blocks: int = 0  # largest block side (cells) a tile was read on to fit the vertex budget
+    vertices: int = 0
 
 
 # Below this many selected pixels the selection is polygonized without sieve.
 SIEVE_MIN_KEPT_PIXELS = 10000
+# The source geometry of a selection is read at the native resolution up to this
+# many pixels; beyond, every 2nd, 4th... pixel (a power of two, like the overviews)
+# until the grid fits (logged, and told to the user). 100 million pixels: 6 km2 of
+# 25 cm orthophoto pixel for pixel, 25 km2 on cells of 50 cm (a 2 m x 2 m object
+# is 16 cells). Measured (QGIS 4.2, 2026-10-18): a dense, speckled selection of 400
+# million pixels took several minutes; a quarter of that here.
+SOURCE_MAX_PIXELS = 100000000
+# A smaller limit is raised to this (a config value of 0 or 10 would be no grid at all).
+SOURCE_MIN_PIXELS = 10000
+# Vertices of the source geometry. It is stored (history, project) and every
+# target goes through it: a GDAL cutline, a PDAL crop, prepared GEOS predicates.
+# About 20 bytes of WKT per vertex: 4 MB at most. Under it, a selection is drawn
+# pixel for pixel; a tile over its share (by area) is smoothed (see _fit_tile).
+SOURCE_MAX_VERTICES = 200000
+# Side of the tiles the source geometry is read by: about 4 million cells (32 MB
+# per float64 band array, a few arrays at a time), few enough tiles for the union.
+SOURCE_TILE_SIZE = 2048
+# Majority radii (cells) tried, in order, on a tile with too many vertices (then coarser blocks).
+_SMOOTHING_RADII = (1, 2, 4, 8, 16)
+# Tolerances (cells) of the topology preserving simplification of a geometry still over the budget.
+_SIMPLIFY_TOLERANCES = (1.0, 2.0, 4.0, 8.0)
+
+
+def source_max_pixels(value) -> int:
+    """``CROSS_FILTER.raster_source_max_pixels`` read from a config or API value.
+
+    ``4e8``, ``"400 000 000"`` and ``400_000_000`` are read; nothing, 0 or an
+    unreadable value is the default, a value below :data:`SOURCE_MIN_PIXELS` is raised to it.
+    """
+    if isinstance(value, dict):
+        value = value.get('value')
+    if isinstance(value, str):
+        value = value.replace(' ', '').replace(' ', '').replace('_', '')
+    try:
+        number = int(float(value)) if not isinstance(value, bool) and value is not None else 0
+    except (TypeError, ValueError, OverflowError):
+        number = 0
+    if number <= 0:
+        return SOURCE_MAX_PIXELS
+    return max(SOURCE_MIN_PIXELS, number)
+
+
+def _decimation(width: int, height: int, max_pixels: int) -> int:
+    """Smallest power of two ``k`` whose grid of ``k`` x ``k`` pixel cells holds ``max_pixels`` cells at most."""
+    k = 1
+    while max_pixels and math.ceil(width / k) * math.ceil(height / k) > max_pixels:
+        k *= 2
+    return k
+
+
+def gdal_cell_reader(source: str, provider: Optional[QgsRasterDataProvider] = None):
+    """``read(band, col, row, cols, rows, k)``: cells of ``k`` x ``k`` pixels of a GDAL file, NaN for NoData.
+
+    Over the pixel limit, the QGIS provider resamples a window to the size asked
+    for on its own and takes a pixel up to 3 pixels off the cell, differently
+    for a tile and for the whole raster (measured on QGIS 3.44 and 4.2, with
+    overviews or not). Here a cell is one pixel of the overview whose factor
+    divides ``k``, indexed in that overview (GDAL alone maps a window to an
+    overview of ``ceil(width / f)`` pixels by its scale, which drifts), or of
+    the band itself: the same pixels from any tile. Opened in the thread that
+    reads; None when ``source`` does not open. ``provider`` gives the user NoData ranges.
+    """
+    from osgeo import gdal
+    try:
+        dataset = gdal.OpenEx(source, gdal.OF_RASTER | gdal.OF_READONLY)
+        plain = gdal.OpenEx(source, gdal.OF_RASTER | gdal.OF_READONLY, open_options=['OVERVIEW_LEVEL=NONE'])
+    except RuntimeError as exc:  # gdal.UseExceptions() set by another plugin
+        logger.debug(f"[FM5] '{source}' not opened by GDAL: {exc}")
+        return None
+    if dataset is None or plain is None:
+        return None
+
+    def cells_band(band: int, k: int):
+        """``(gdal band, factor)``: the overview of the largest factor dividing ``k``, else the band (no overview)."""
+        base = dataset.GetRasterBand(band)
+        best, factor = plain.GetRasterBand(band), 1
+        for index in range(base.GetOverviewCount()):
+            overview = base.GetOverview(index)
+            ratio = base.XSize / float(overview.XSize) if overview is not None and overview.XSize else 0.0
+            f = int(round(ratio))
+            if f > factor and abs(ratio - f) < 0.5 and k % f == 0:
+                best, factor = overview, f
+        return best, factor
+
+    def read(band: int, col: int, row: int, cols: int, rows: int, k: int):
+        import numpy as np
+        source_band, factor = cells_band(band, k)
+        step = k // factor
+        array = source_band.ReadAsArray(col * step, row * step, cols * step, rows * step, buf_xsize=cols,
+                                        buf_ysize=rows, resample_alg=gdal.GRIORA_NearestNeighbour)
+        if array is None:
+            raise RuntimeError(f"GDAL could not read band {band} of '{source}'")
+        array = array.astype('float64')
+        nodata = dataset.GetRasterBand(band).GetNoDataValue()
+        if nodata is not None and (provider is None or provider.useSourceNoDataValue(band)):
+            array[array == nodata] = np.nan
+        if provider is not None:
+            for user_range in provider.userNoDataValues(band) or []:
+                array[(array >= user_range.min()) & (array <= user_range.max())] = np.nan
+        return array
+
+    read.datasets = (dataset, plain)  # open as long as the reader lives
+    return read
+
+
+def _tiles(width: int, height: int, size: int):
+    """``(row, col, rows, cols)`` of the tiles covering a ``width`` x ``height`` grid, row by row."""
+    size = max(1, int(size))
+    for row in range(0, height, size):
+        for col in range(0, width, size):
+            yield row, col, min(size, height - row), min(size, width - col)
+
+
+def mask_corners(mask) -> int:
+    """Vertices GDAL Polygonize draws for ``mask`` (4-connected patches): its corners.
+
+    A lattice point is a corner when 1 or 3 of its 4 cells are set, two corners
+    (one per patch) when 2 diagonal ones are; ring closing points are not counted.
+    """
+    import numpy as np
+    grid = np.pad(mask != 0, 1).astype(np.int8)
+    a, b, c, d = grid[:-1, :-1], grid[:-1, 1:], grid[1:, :-1], grid[1:, 1:]
+    total = a + b + c + d
+    return int(np.count_nonzero((total == 1) | (total == 3)) + 2 * np.count_nonzero((total == 2) & (a == d)))
+
+
+def _box_count(mask, radius: int, outside: int):
+    """Set cells in the ``(2 radius + 1)`` square around each cell; ``outside`` is the value beyond the grid."""
+    import numpy as np
+    size = 2 * radius + 1
+    padded = np.pad(mask.astype(np.int32), radius, constant_values=outside)
+    sums = np.pad(padded.cumsum(0).cumsum(1), ((1, 0), (1, 0)))
+    return sums[size:, size:] - sums[:-size, size:] - sums[size:, :-size] + sums[:-size, :-size]
+
+
+def majority(mask, radius: int):
+    """Cells set in at least half of the ``(2 radius + 1)`` square around them, plus the patches far from those.
+
+    A dense, speckled selection becomes the areas where it dominates, about as
+    large as it was; a set cell more than ``2 radius`` cells away from such an
+    area (an isolated pool, a sparse speckle) is kept as it is.
+    """
+    import numpy as np
+    inside = _box_count(np.ones(mask.shape, dtype=bool), radius, 0)
+    dominant = 2 * _box_count(mask, radius, 0) >= inside
+    near = _box_count(dominant, 2 * radius, 0) > 0
+    return dominant | (mask & ~near)
+
+
+def dense_blocks(mask, factor: int):
+    """``mask`` on blocks of ``factor`` x ``factor`` cells: its densest blocks, as many as hold its set cells.
+
+    The surface is kept by construction (to half a block): a speckle of one
+    cell in two keeps about the blocks where it is more than half (a majority),
+    a sparser one its densest blocks. A plain majority of the blocks loses most
+    of a sparse speckle (83 % of one cell in three, measured) and keeps too much
+    of an even one on blocks of 2 x 2 (+37 %: 11 blocks of 16 hold 2 cells or more).
+    Ties go to the block met first, row by row. Blocks start on multiples of
+    ``factor`` from the corner of ``mask``; a block cut by the side counts its own cells.
+    """
+    import numpy as np
+    rows, cols = mask.shape
+    pad = ((0, -rows % factor), (0, -cols % factor))
+    shape = ((rows + pad[0][1]) // factor, factor, (cols + pad[1][1]) // factor, factor)
+    kept = np.pad(mask != 0, pad).reshape(shape).sum(axis=(1, 3)).ravel()
+    cells = np.pad(np.ones(mask.shape, dtype=bool), pad).reshape(shape).sum(axis=(1, 3)).ravel()
+    order = np.argsort(-kept / cells, kind='stable')  # densest first, ties in block order
+    filled = np.cumsum(cells[order])
+    target = int(kept.sum())
+    count = int(np.searchsorted(filled, target))  # blocks before reaching the surface
+    if count < order.size and filled[count] - target < target - (filled[count - 1] if count else 0):
+        count += 1  # the block that reaches it comes closer than stopping short
+    blocks = np.zeros(kept.size, dtype=bool)
+    blocks[order[:count]] = True
+    blocks = blocks.reshape(shape[0], shape[2])
+    return np.repeat(np.repeat(blocks, factor, axis=0), factor, axis=1)[:rows, :cols]
+
+
+def _fit_tile(window, core, sieve_pixels: int, allowance: float, max_factor: int):
+    """``(mask, kind, size)``: the core of ``window`` sieved, smoothed by the least that fits ``allowance`` vertices.
+
+    The tile keeps its pixels when they fit. Otherwise it is a dense, speckled
+    selection (vegetation, a noisy slope), first smoothed by a growing
+    :func:`majority` (``kind`` "majority", ``size`` its radius: the areas where
+    it dominates, an isolated object stays as it is). When that is not enough
+    (a speckle on every scale), the tile is read on coarser blocks by
+    :func:`dense_blocks` (``kind`` "blocks", ``size`` 2, 4, 8... cells up to
+    ``max_factor``, the tile side, so that blocks never straddle two tiles):
+    the surface is kept, an isolated object in a sparse block may go.
+    The steps lose vertices in that order: the least one that fits is found by
+    bisection, the strongest kept when none fits. ``kind`` is '' when the pixels fit.
+    """
+    from .geometry_tools import sieve_mask
+    steps = [('', 0)] + [('majority', radius) for radius in _SMOOTHING_RADII]
+    factor = 2
+    while factor <= max_factor:
+        steps.append(('blocks', factor))
+        factor *= 2
+    tried = {}
+
+    def fits(index):
+        if index not in tried:
+            kind, size = steps[index]
+            if kind == 'blocks':
+                mask = dense_blocks(window[core], size)  # blocks of at least 4 cells: nothing to sieve
+            else:
+                mask = majority(window, size) if kind else window
+                if sieve_pixels > 1:
+                    mask = sieve_mask(mask, sieve_pixels)
+                mask = mask[core]
+            tried[index] = (mask, mask_corners(mask) <= allowance)
+        return tried[index][1]
+
+    low, high = 0, len(steps) - 1
+    if not fits(low):
+        low += 1
+        while low < high:
+            middle = (low + high) // 2
+            if fits(middle):
+                high = middle
+            else:
+                low = middle + 1
+        fits(low)
+    return (tried[low][0],) + steps[low]
 
 
 def _selection_mask_over(provider: QgsRasterDataProvider, selection: RasterSelection, extent: QgsRectangle,
@@ -466,34 +730,168 @@ def _selection_mask_over(provider: QgsRasterDataProvider, selection: RasterSelec
 
 
 def selection_geometry(provider: QgsRasterDataProvider, selection: RasterSelection, extent: QgsRectangle,
-                       native_width: int, native_height: int, crs_wkt: str, max_pixels: int = 4000000,
-                       sieve_pixels: int = 4, provider_for=None) -> SelectionGeometryResult:
-    """Polygons of the pixels kept by ``selection`` (call from a task with a cloned provider).
+                       native_width: int, native_height: int, crs_wkt: str, max_pixels: int = SOURCE_MAX_PIXELS,
+                       sieve_pixels: int = 4, nodata_provider: Optional[QgsRasterDataProvider] = None,
+                       nodata_bands=(), is_canceled=None, progress=None, tile_size: int = SOURCE_TILE_SIZE,
+                       max_vertices: int = SOURCE_MAX_VERTICES, provider_for=None,
+                       cell_reader=None) -> SelectionGeometryResult:
+    """Polygons of the pixels kept by ``selection`` (call from a task with cloned providers).
+
+    The raster is read tile by tile at its native resolution, or every ``k``
+    pixels beyond ``max_pixels`` (``k`` a power of two, like the overviews; the
+    last ``k - 1`` pixels of a side are left out). Over the limit, a band of a
+    GDAL file is read through ``cell_reader`` (:func:`gdal_cell_reader`), the
+    same pixels from a tile or the whole raster; an expression goes through its
+    virtual raster, which QGIS resamples by window: a cell may then take a pixel
+    of its neighbour near a tile edge. Each tile
+    is polygonized in cell coordinates, where the edges two tiles share are the
+    same integers, and the union is moved to the map at the end. A tile is
+    read with a margin: a slope needs the neighbours of its edge pixels, the
+    sieve and the smoothing the patches crossing its edge.
+
+    The geometry holds about ``max_vertices`` vertices at most: a tile over its
+    share (by area) is smoothed (:func:`_fit_tile`), and a geometry still over
+    the budget is simplified, keeping its patches.
 
     For an EXPRESSION selection, pass the provider of the virtual raster built by
-    :func:`selection_virtual_layer` (its band 1 is 1 where selected). A selection
-    with seeds keeps the objects under them (:func:`object_geometry`, ``provider_for``).
+    :func:`selection_virtual_layer` (its band 1 is 1 where selected), and the
+    provider of the raster it reads as ``nodata_provider`` with the bands the
+    expression reads (:func:`expression_mask`): their NoData pixels are dropped.
+    A selection with seeds keeps the objects under them (:func:`object_geometry`,
+    ``provider_for``), read in windows around the clicks.
+
+    Args:
+        is_canceled: Callable checked between tiles; a canceled read returns an
+            empty geometry with ``canceled`` set.
+        progress: Callable receiving the progress in percent.
     """
-    from .geometry_tools import mask_to_geometry
+    from .geometry_tools import make_valid, merge_tile_polygons, pixel_to_map, polygonize_mask
     if selection.seeds:
         return object_geometry(provider, selection, extent, native_width, native_height, crs_wkt,
                                provider_for=provider_for)
-    width, height = _grid_for(extent, native_width, native_height, max_pixels)
-    mask = _selection_mask_over(provider, selection, extent, width, height, crs_wkt)
-    cell_x = extent.width() / width
-    cell_y = extent.height() / height
-    geotransform = (extent.xMinimum(), cell_x, 0.0, extent.yMaximum(), 0.0, -cell_y)
-    kept = int(mask.sum())
+    native_x, native_y = extent.width() / native_width, extent.height() / native_height
+    k = _decimation(native_width, native_height, max_pixels)
+    # Whole cells only: a window running past the raster is resampled by QGIS to fit, off
+    # the cells (measured). Over the limit, the last k - 1 pixels of a side are left out.
+    width, height = max(1, native_width // k), max(1, native_height // k)
+    cell_x, cell_y = native_x * k, native_y * k
+    coarse = k > 1
+    if coarse:
+        logger.info(f"⏱ [FM5] raster selection: {native_width} x {native_height} pixels, over the limit of "
+                    f"{max_pixels}: read every {k} pixels, cells of {max(cell_x, cell_y):g} map units "
+                    f"(CROSS_FILTER.raster_source_max_pixels)")
+        # Each cell already stands for several pixels: only lone cells are speckle.
+        sieve_pixels = min(sieve_pixels, 2)
+    expression = selection.mode is RasterSelectionMode.EXPRESSION
+    ground = None
+    if not expression and selection.derivative.is_terrain:
+        ground = grid_ground_size(QgsRectangle(extent.xMinimum(), extent.yMaximum() - height * cell_y,
+                                               extent.xMinimum() + width * cell_x, extent.yMaximum()),
+                                  width, height, crs_kind(QgsCoordinateReferenceSystem.fromWkt(crs_wkt)))
+    sieving = bool(sieve_pixels and sieve_pixels > 1)
+    # Cells within the sieve size and three times the largest smoothing radius of
+    # a tile must be right (majority, then its neighbourhood); the outer ring of a derivative is not.
+    margin = (int(sieve_pixels) if sieving else 0) + 1 + 3 * _SMOOTHING_RADII[-1]
+    tiles = list(_tiles(width, height, tile_size))
+    # Blocks of the coarser reading start on multiples of their side: never across two tiles.
+    block_limit = int(tile_size) & -int(tile_size)
+    # (inner, edge) polygons with the sieve and without; the latter while they may be the result.
+    sieved, plain, keep_plain = ([], []), ([], []), True
+    kept, smoothing, blocks = 0, 0, 0
+    for number, (row, col, rows, cols) in enumerate(tiles):
+        if is_canceled is not None and is_canceled():
+            return SelectionGeometryResult(QgsGeometry(), kept, width * height, max(cell_x, cell_y), grid=(width, height),
+                                           tiles=len(tiles), coarse=coarse, canceled=True, decimation=k)
+        top, left = max(0, row - margin), max(0, col - margin)
+        bottom, right = min(height, row + rows + margin), min(width, col + cols + margin)
+        window = QgsRectangle(extent.xMinimum() + left * cell_x, extent.yMaximum() - bottom * cell_y,
+                              extent.xMinimum() + right * cell_x, extent.yMaximum() - top * cell_y)
+        if expression:
+            mask, _valid = expression_mask(provider, nodata_provider, nodata_bands if nodata_provider is not None else (),
+                                           window, right - left, bottom - top)
+        else:
+            if coarse and cell_reader is not None:
+                array = cell_reader(selection.band, left, top, right - left, bottom - top, k)
+            else:
+                array = read_band_array(provider, selection.band, window, right - left, bottom - top)
+            if ground is not None:
+                array = derive(array, selection.derivative, *ground)
+            mask = selection_mask(array, selection)
+        if mask.any():
+            core = (slice(row - top, row - top + rows), slice(col - left, col - left + cols))
+            kept += int(mask[core].sum())
+            allowance = max_vertices * (rows * cols) / float(width * height)
+            # Cell coordinates: the edges two tiles share are the same integers.
+            cells = (float(col), 1.0, 0.0, float(row), 0.0, 1.0)
+            # Edges shared with another tile (not the border of the raster).
+            shared = (col if col > 0 else None, col + cols if col + cols < width else None,
+                      row if row > 0 else None, row + rows if row + rows < height else None)
+            if sieving:
+                fitted, kind, size = _fit_tile(mask, core, sieve_pixels, allowance, block_limit)
+                smoothing = max(smoothing, size if kind == 'majority' else 0)
+                blocks = max(blocks, size if kind == 'blocks' else 0)
+                _sort_tile_polygons(polygonize_mask(fitted, cells), shared, sieved)
+            if keep_plain:
+                fitted, plain_kind, plain_size = _fit_tile(mask, core, 0, allowance, block_limit)
+                _sort_tile_polygons(polygonize_mask(fitted, cells), shared, plain)
+                # Both conditions only grow: the unsieved polygons can no longer be the result.
+                if sieving and kept >= SIEVE_MIN_KEPT_PIXELS and (sieved[0] or sieved[1]):
+                    keep_plain, plain = False, ([], [])
+                else:
+                    smoothing = max(smoothing, plain_size if plain_kind == 'majority' else 0)
+                    blocks = max(blocks, plain_size if plain_kind == 'blocks' else 0)
+        if progress is not None:
+            progress(85.0 * (number + 1) / len(tiles))
     # The sieve removes the speckle of a large selection, which would make
     # countless polygons. A small one (a rare class, a narrow range) is kept as
-    # it is; on a subsampled grid each cell already stands for several pixels:
-    # only lone cells go. The sieve never empties a selection (mask_to_geometry).
-    if kept < SIEVE_MIN_KEPT_PIXELS:
-        sieve_pixels = 0
-    elif width < native_width or height < native_height:
-        sieve_pixels = min(sieve_pixels, 2)
-    geometry = mask_to_geometry(mask, geotransform, crs_wkt, sieve_pixels=sieve_pixels, simplify_tolerance=min(cell_x, cell_y) * 0.5)
-    return SelectionGeometryResult(geometry, kept, int(mask.size), max(cell_x, cell_y))
+    # it is, and the sieve never empties a selection.
+    geometry = merge_tile_polygons(*(plain if keep_plain else sieved))
+    geometry = _within_budget(geometry, max_vertices)
+    if progress is not None:
+        progress(95.0)
+    geometry = make_valid(pixel_to_map(geometry, (extent.xMinimum(), cell_x, 0.0, extent.yMaximum(), 0.0, -cell_y)))
+    if progress is not None:
+        progress(100.0)
+    vertices = geometry.constGet().nCoordinates() if not geometry.isEmpty() else 0
+    return SelectionGeometryResult(geometry, kept, width * height, max(cell_x, cell_y), grid=(width, height),
+                                   tiles=len(tiles), coarse=coarse, decimation=k, smoothing=smoothing, blocks=blocks,
+                                   vertices=vertices)
+
+
+def _within_budget(geometry, max_vertices: int, cell: float = 1.0):
+    """``geometry`` simplified, keeping its patches, until it holds ``max_vertices`` vertices.
+
+    ``cell``: size of a cell in the units of ``geometry`` (1 in cell coordinates).
+
+    The tiles already fit their share: this only catches what the smoothing
+    cannot merge (many isolated patches). Deterministic; logged when it stays over.
+    """
+    from .geometry_tools import make_valid
+    if geometry.isEmpty() or geometry.constGet().nCoordinates() <= max_vertices:
+        return geometry
+    for tolerance in _SIMPLIFY_TOLERANCES:
+        simplified = geometry.simplify(tolerance * cell)  # topology preserving: no patch collapses
+        if simplified is not None and not simplified.isEmpty():
+            geometry = make_valid(simplified)
+        if geometry.constGet().nCoordinates() <= max_vertices:
+            return geometry
+    logger.info(f"⏱ [FM5] raster selection: {geometry.constGet().nCoordinates()} vertices left over the budget of "
+                f"{max_vertices} (isolated patches are kept)")
+    return geometry
+
+
+def _sort_tile_polygons(polygons, shared, into) -> None:
+    """Append ``polygons`` (cell coordinates) to ``into[1]`` when they touch a ``shared`` edge, ``into[0]`` otherwise.
+
+    ``shared``: ``(left, right, top, bottom)`` cell coordinate of each tile edge
+    shared with another tile, None for the border of the raster.
+    """
+    left, right, top, bottom = shared
+    for polygon in polygons:
+        box = polygon.boundingBox()
+        on_edge = (box.xMinimum() == left or box.xMaximum() == right
+                   or box.yMinimum() == top or box.yMaximum() == bottom)
+        into[1 if on_edge else 0].append(polygon)
 
 
 # --- object detection (pipette) --------------------------------------------
@@ -656,6 +1054,8 @@ def object_geometry(provider: QgsRasterDataProvider, selection: RasterSelection,
     if truncated:
         logger.info(f"[FM5] object detection: an object is larger than {2 * limit + 1} pixels, cut at the window read")
     geometry = union_geometries(geometries) if geometries else QgsGeometry()
+    # Bounded like the tiled selection (a patch running over a field has a long outline).
+    geometry = _within_budget(geometry, SOURCE_MAX_VERTICES, min(size_x, size_y))
     return SelectionGeometryResult(geometry, kept, total, max(size_x, size_y), truncated, len(geometries))
 
 

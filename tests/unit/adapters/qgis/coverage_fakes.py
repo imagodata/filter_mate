@@ -202,6 +202,15 @@ class FakeGeometry:
     def createGeometryEngine(geometry):
         return FakeEngine(geometry)
 
+    @staticmethod
+    def collectGeometry(geometries):
+        """Multipolygon of the parts of ``geometries`` (polygons or multipolygons), no union."""
+        result = ogr.Geometry(ogr.wkbMultiPolygon)
+        for geometry in geometries:
+            for part in (geometry.asGeometryCollection() if geometry.isMultipart() else [geometry]):
+                result.AddGeometry(part._g)
+        return FakeGeometry(result)
+
     def fromWkb(self, wkb):
         self._g = ogr.CreateGeometryFromWkb(wkb)
 
@@ -274,14 +283,43 @@ class FakeGeometry:
     def constGet(self):
         return self
 
+    def nCoordinates(self):
+        return _count_points(self._g) if self._g is not None else 0
+
     def clone(self):
         return FakeGeometry(self)
 
     def transform(self, transform):
-        pass
+        """A :class:`FakeTransform` moves the vertices; a coordinate transform is ignored."""
+        if isinstance(transform, FakeTransform) and self._g is not None:
+            _move_points(self._g, transform)
 
     def __repr__(self):
         return f"FakeGeometry({self.asWkt()[:60]!r})"
+
+
+class FakeTransform:
+    """QTransform(m11, m12, m21, m22, dx, dy): ``x' = m11 x + m21 y + dx``, ``y' = m12 x + m22 y + dy``."""
+
+    def __init__(self, m11, m12, m21, m22, dx, dy):
+        self.m = (m11, m12, m21, m22, dx, dy)
+
+    def map(self, x, y):
+        m11, m12, m21, m22, dx, dy = self.m
+        return m11 * x + m21 * y + dx, m12 * x + m22 * y + dy
+
+
+def _count_points(geometry):
+    return geometry.GetPointCount() + sum(_count_points(geometry.GetGeometryRef(index))
+                                          for index in range(geometry.GetGeometryCount()))
+
+
+def _move_points(geometry, transform):
+    for index in range(geometry.GetGeometryCount()):
+        _move_points(geometry.GetGeometryRef(index), transform)
+    for index in range(geometry.GetPointCount()):
+        x, y = transform.map(geometry.GetX(index), geometry.GetY(index))
+        geometry.SetPoint_2D(index, x, y)
 
 
 class FakeProject:
@@ -363,7 +401,7 @@ class FakeCrs:
 def install(monkeypatch, *modules):
     """Put the fakes in ``modules`` (and ``qgis.core`` for the names imported in functions)."""
     core = sys.modules['qgis.core']
-    for name, fake in (('QgsGeometry', FakeGeometry), ('QgsRectangle', FakeRectangle),
+    for name, fake in (('QgsGeometry', FakeGeometry), ('QgsRectangle', FakeRectangle), ('QTransform', FakeTransform),
                        ('QgsSpatialIndex', FakeSpatialIndex), ('QgsTask', FakeTask), ('QgsFeedback', FakeFeedback),
                        ('QgsRasterBlockFeedback', FakeFeedback)):
         monkeypatch.setattr(core, name, fake, raising=False)

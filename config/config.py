@@ -351,6 +351,14 @@ def _migrate_config(config_data, default_data):
             del auto_optimization[dead_key]
             dirty = True
 
+    # 8) CROSS_FILTER.raster_selection_max_pixels (a grid of 4 million cells over the whole
+    # raster) gave way to raster_source_max_pixels (pixels read at the native resolution) on
+    # 2026-10-18. Not the same quantity: the old value is dropped, never carried over.
+    cross_filter = _section(options, "CROSS_FILTER")
+    if "raster_selection_max_pixels" in cross_filter:
+        del cross_filter["raster_selection_max_pixels"]
+        dirty = True
+
     return dirty
 
 

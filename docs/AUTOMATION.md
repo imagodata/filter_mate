@@ -61,7 +61,7 @@ Notes: the buffer of `cross_filter_from_geometry` is in the units of the first t
 filter yet, `AND`, `OR` and `AND NOT` keep the new selection, like the vector engine; `filter_point_cloud` and point
 cloud source criteria refuse `AND NOT` without an existing filter (they would keep only the excluded points);
 `FILTER_SOURCE` is off by default (the dock masks a raster source, automation leaves it untouched unless asked);
-`MAX_PIXELS` and `RESOLUTION` left empty use the FilterMate settings (`CROSS_FILTER.raster_selection_max_pixels`,
+`MAX_PIXELS` and `RESOLUTION` left empty use the FilterMate settings (`CROSS_FILTER.raster_source_max_pixels`,
 `point_cloud_footprint_resolution`). The progress bar follows the targets and *Cancel* stops a cross filter between
 two steps, a point cloud filter or an export before the next layer (`error`: `canceled`); the raster / point cloud
 clips of `apply_favorite` and a point cloud being written cannot be interrupted.

@@ -3,12 +3,14 @@
 Geometry helpers shared by the coverage adapters.
 
 * :func:`mask_to_geometry` turns a boolean grid (pixels of a raster selection,
-  cells holding points of a point cloud selection) into one valid polygon.
+  cells holding points of a point cloud selection) into one valid polygon;
+  :func:`sieve_mask`, :func:`polygonize_mask`, :func:`merge_tile_polygons` and
+  :func:`pixel_to_map` are its steps, for a grid read tile by tile.
 * :func:`buffer_geometry` applies the FILTERING buffer settings.
 * :func:`transform_geometry` reprojects a geometry for a target layer.
 """
 import logging
-from typing import Optional, Sequence, Tuple
+from typing import List, Optional, Sequence, Tuple
 
 from qgis.core import (
     Qgis,
@@ -18,6 +20,7 @@ from qgis.core import (
     QgsGeometry,
     QgsRectangle,
 )
+from qgis.PyQt.QtGui import QTransform
 
 logger = logging.getLogger(__name__)
 
@@ -97,44 +100,54 @@ def extent_polygon(extent: QgsRectangle) -> QgsGeometry:
     return QgsGeometry.fromRect(extent)
 
 
-def mask_to_geometry(mask, geotransform: Tuple[float, float, float, float, float, float], crs_wkt: str,
-                     sieve_pixels: int = 0, simplify_tolerance: float = 0.0) -> QgsGeometry:
-    """Polygonize the true cells of a 2D grid.
+def sieve_mask(mask, sieve_pixels: int):
+    """``mask`` without its patches smaller than ``sieve_pixels`` cells (GDAL SieveFilter, 8-connected).
+
+    The holes of fewer cells are filled the same way. A cell keeps the value
+    the sieve of the whole grid gives it as long as the grid holds every cell
+    within ``sieve_pixels`` of it: a tile read with that margin is sieved as the
+    whole raster would be.
+    """
+    import numpy as np
+    from osgeo import gdal
+
+    grid = np.ascontiguousarray((mask != 0).astype('uint8'))
+    if not sieve_pixels or sieve_pixels <= 1 or not grid.any():
+        return grid != 0
+    rows, cols = grid.shape
+    mem = gdal.GetDriverByName('MEM').Create('', int(cols), int(rows), 1, gdal.GDT_Byte)
+    band = mem.GetRasterBand(1)
+    band.WriteArray(grid)
+    band.SetNoDataValue(0)
+    gdal.SieveFilter(band, None, band, int(sieve_pixels), 8)
+    return band.ReadAsArray() != 0
+
+
+def polygonize_mask(mask, geotransform: Tuple[float, float, float, float, float, float]) -> List[QgsGeometry]:
+    """Polygons of the true cells of a 2D grid, one per patch of 4-connected cells (GDAL Polygonize).
+
+    Two of them never share an edge (they would be one patch): they can be
+    collected without a union.
 
     Args:
         mask: 2D numpy array, non-zero where the cell is selected.
         geotransform: GDAL geotransform of the grid.
-        crs_wkt: CRS of the grid (WKT).
-        sieve_pixels: Remove selected patches smaller than this number of cells (0 = keep all).
-        simplify_tolerance: Douglas-Peucker tolerance of the result (0 = none).
-
-    Returns:
-        A valid (multi)polygon, empty when nothing is selected.
     """
     import numpy as np
-    from osgeo import gdal, ogr, osr
+    from osgeo import gdal, ogr
 
     grid = np.ascontiguousarray((mask != 0).astype('uint8'))
     if not grid.any():
-        return QgsGeometry()
+        return []
     rows, cols = grid.shape
     mem = gdal.GetDriverByName('MEM').Create('', int(cols), int(rows), 1, gdal.GDT_Byte)
     mem.SetGeoTransform(tuple(float(v) for v in geotransform))
-    if crs_wkt:
-        mem.SetProjection(crs_wkt)
     band = mem.GetRasterBand(1)
     band.WriteArray(grid)
     band.SetNoDataValue(0)
-    if sieve_pixels and sieve_pixels > 1:
-        gdal.SieveFilter(band, None, band, int(sieve_pixels), 8)
-        if not band.ReadAsArray().any():
-            band.WriteArray(grid)  # only small patches: the sieve never empties a selection
     driver = ogr.GetDriverByName('Memory') or ogr.GetDriverByName('MEM')
     vector = driver.CreateDataSource('fm5_mask')
-    srs = osr.SpatialReference()
-    if crs_wkt:
-        srs.ImportFromWkt(crs_wkt)
-    layer = vector.CreateLayer('mask', srs, ogr.wkbPolygon)
+    layer = vector.CreateLayer('mask', None, ogr.wkbPolygon)
     layer.CreateField(ogr.FieldDefn('v', ogr.OFTInteger))
     gdal.Polygonize(band, band, layer, 0, [], callback=None)
     geometries = []
@@ -146,7 +159,60 @@ def mask_to_geometry(mask, geotransform: Tuple[float, float, float, float, float
             geometry = QgsGeometry()
             geometry.fromWkb(bytes(ogr_geom.ExportToWkb()))
             geometries.append(geometry)
-    result = union_geometries(geometries)
+    return geometries
+
+
+def merge_tile_polygons(inner: Sequence[QgsGeometry], edge: Sequence[QgsGeometry]) -> QgsGeometry:
+    """One valid (multi)polygon from the polygons of tiles polygonized apart (:func:`polygonize_mask`).
+
+    ``edge`` are the polygons touching an edge their tile shares with another:
+    only they can continue across it, and only they go through the union. The
+    ``inner`` ones are apart from every other polygon already and are collected
+    as they are, which saves most of the union on a large selection.
+    """
+    merged = union_geometries(edge)
+    parts = list(inner)
+    if not merged.isEmpty():
+        parts.extend(merged.asGeometryCollection() if merged.isMultipart() else [merged])
+    if not parts:
+        return QgsGeometry()
+    if len(parts) == 1:
+        return make_valid(parts[0])
+    return make_valid(QgsGeometry.collectGeometry(parts))
+
+
+def pixel_to_map(geometry: QgsGeometry, geotransform: Tuple[float, float, float, float, float, float]) -> QgsGeometry:
+    """Copy of ``geometry``, drawn in (column, row) cell coordinates, moved to the map by ``geotransform`` (north up)."""
+    result = QgsGeometry(geometry)
+    if result.isEmpty():
+        return result
+    x_origin, size_x, _, y_origin, _, size_y = (float(v) for v in geotransform)
+    result.transform(QTransform(size_x, 0.0, 0.0, size_y, x_origin, y_origin))
+    return result
+
+
+def mask_to_geometry(mask, geotransform: Tuple[float, float, float, float, float, float], crs_wkt: str,
+                     sieve_pixels: int = 0, simplify_tolerance: float = 0.0) -> QgsGeometry:
+    """Polygonize the true cells of a 2D grid.
+
+    Args:
+        mask: 2D numpy array, non-zero where the cell is selected.
+        geotransform: GDAL geotransform of the grid.
+        crs_wkt: CRS of the grid (WKT), unused: the geometry carries none.
+        sieve_pixels: Remove selected patches smaller than this number of cells (0 = keep all).
+        simplify_tolerance: Douglas-Peucker tolerance of the result (0 = none).
+
+    Returns:
+        A valid (multi)polygon, empty when nothing is selected.
+    """
+    grid = mask != 0
+    if not grid.any():
+        return QgsGeometry()
+    if sieve_pixels and sieve_pixels > 1:
+        sieved = sieve_mask(grid, sieve_pixels)
+        if sieved.any():  # only small patches: the sieve never empties a selection
+            grid = sieved
+    result = union_geometries(polygonize_mask(grid, geotransform))
     if simplify_tolerance and simplify_tolerance > 0 and not result.isEmpty():
         simplified = result.simplify(float(simplify_tolerance))
         if simplified is not None and not simplified.isEmpty():

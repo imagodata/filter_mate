@@ -472,7 +472,7 @@ class TestDefaultConfigRasterAndCrossFilterSections:
     def test_cross_filter_options(self, default_config):
         section = default_config["APP"]["OPTIONS"]["CROSS_FILTER"]
         assert section["point_cloud_clip"]["value"] in section["point_cloud_clip"]["choices"]
-        assert section["raster_selection_max_pixels"]["value"] > 0
+        assert section["raster_source_max_pixels"]["value"] >= 100000000
         assert section["point_cloud_footprint_resolution"]["value"] > 0
         assert section["cache_max_gb"]["value"] > 0
         assert section["pdal_path"]["value"] == ""
@@ -641,3 +641,40 @@ class TestDeadAutoOptimizationSwitches:
         assert not [key for key in self.DEAD if key in migrated]
         assert migrated["centroid_threshold_distant"]["value"] == 123
         assert config_helpers._migrate_config(user, defaults) is False  # idempotent
+
+
+class TestRasterSourceMaxPixelsRenamed:
+    """raster_selection_max_pixels (4 million cells over the whole raster) became raster_source_max_pixels
+    when the source geometry of a raster selection went tile by tile at the native resolution (2026-10-18)."""
+
+    def _old_config(self, value):
+        user = json.loads(CONFIG_DEFAULT_PATH.read_text(encoding="utf-8"))
+        section = user["APP"]["OPTIONS"]["CROSS_FILTER"]
+        del section["raster_source_max_pixels"]
+        section["raster_selection_max_pixels"] = {"value": value, "description": "old"}
+        return user
+
+    def test_the_former_default_gives_way_to_the_new_one(self, config_helpers):
+        defaults = json.loads(CONFIG_DEFAULT_PATH.read_text(encoding="utf-8"))
+        user = self._old_config(4000000)
+        assert config_helpers._migrate_config(user, defaults) is True
+        section = user["APP"]["OPTIONS"]["CROSS_FILTER"]
+        assert "raster_selection_max_pixels" not in section
+        assert section["raster_source_max_pixels"]["value"] == 100000000
+        assert config_helpers._migrate_config(user, defaults) is False  # idempotent
+
+    @pytest.mark.parametrize("value", [16000000, "16000000", "lots"])
+    def test_the_old_value_is_never_carried_over(self, config_helpers, value):
+        """A grid of cells over the whole raster is not a count of pixels read at the native resolution."""
+        defaults = json.loads(CONFIG_DEFAULT_PATH.read_text(encoding="utf-8"))
+        user = self._old_config(value)
+        config_helpers._migrate_config(user, defaults)
+        assert user["APP"]["OPTIONS"]["CROSS_FILTER"]["raster_source_max_pixels"]["value"] == 100000000
+
+    def test_a_new_value_already_set_is_kept(self, config_helpers):
+        defaults = json.loads(CONFIG_DEFAULT_PATH.read_text(encoding="utf-8"))
+        user = self._old_config(16000000)
+        user["APP"]["OPTIONS"]["CROSS_FILTER"]["raster_source_max_pixels"] = {"value": 50000000, "description": "x"}
+        config_helpers._migrate_config(user, defaults)
+        section = user["APP"]["OPTIONS"]["CROSS_FILTER"]
+        assert section["raster_source_max_pixels"]["value"] == 50000000 and "raster_selection_max_pixels" not in section
