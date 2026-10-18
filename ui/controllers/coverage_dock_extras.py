@@ -55,6 +55,9 @@ ICON_3D = '<path d="M12 2l9 5v10l-9 5-9-5V7z"/><path d="M12 12l9-5M12 12L3 7M12 
 # Value pipette of a point cloud: the pipette with a small scale beside it.
 ICON_VALUE_PIPETTE = ('<path d="M20.5 3.5a2.1 2.1 0 0 0-3 0L14 7l-1.5-1.5-1.5 1.5 1.5 1.5L4 16v4h4l7.5-7.5L17 14l1.5-1.5L17 11l3.5-3.5a2.1 2.1 0 0 0 0-3z"/>'
                       '<path d="M3 3v8M3 3h2M3 5.5h2M3 8h2M3 10.5h2"/>')
+# Similar objects: two blobs alike.
+ICON_SIMILAR = ('<path d="M4 9c0-2.5 2-4 4.5-4S13 6.5 13 9s-2 4.5-4.5 4.5S4 11.5 4 9z"/>'
+                '<path d="M11 16c0-2 1.7-3.5 3.8-3.5S19 14 19 16s-1.8 3.5-4.2 3.5S11 18 11 16z"/>')
 # Zone of a point cloud: a dashed rectangle drawn on the map.
 ICON_PC_ZONE = '<rect x="3" y="5" width="18" height="14" rx="1" stroke-dasharray="2.5 2"/><path d="M8 19V5"/><path d="M3 10h18"/>'
 # More tools: three dots.
@@ -201,7 +204,8 @@ RAIL_TOOLS = {
     # Seven buttons a rail, raster and point cloud alike (vector keeps its six): the shared ones
     # (zoom, preview, reset, plus Identify on a point cloud) and the tools of the groups.
     'raster': ('pushButton_checkable_exploring_raster_pipette', 'pushButton_checkable_exploring_raster_detector',
-               'pushButton_checkable_exploring_raster_link', 'pushButton_exploring_raster_more'),
+               'pushButton_checkable_exploring_raster_similar', 'pushButton_checkable_exploring_raster_link',
+               'pushButton_exploring_raster_more'),
     # 2026-10-18: Identify is the class pipette (CLASSES); the value pipette and the zone are the tools of
     # ATTRIBUTES; the elevation profile and the 3D view are in the "more" menu.
     'point_cloud': ('pushButton_checkable_exploring_point_cloud_value_pipette',
@@ -369,6 +373,11 @@ class CoverageDockExtras(QObject):
                      "of the panel). Ctrl+click adds another one"),
              self._on_pipette_toggled),
             ('pushButton_checkable_exploring_raster_detector', True, self._detector_tip, self._on_detector_toggled),
+            ('pushButton_checkable_exploring_raster_similar', True,
+             self.tr("Similar objects: click an object and every object of the raster like it is selected (the "
+                     "patches of such pixels whose area is within the ratios of the panel). Ctrl+click adds another "
+                     "reference object"),
+             self._on_similar_toggled),
             ('pushButton_checkable_exploring_raster_hover', True,
              self.tr("Value under the cursor: follow the pixel value (or the slope, aspect... the range applies to) "
                      "while moving over the map"),
@@ -435,6 +444,7 @@ class CoverageDockExtras(QObject):
         bodies = {
             'pushButton_checkable_exploring_raster_pipette': ICON_PIPETTE,
             'pushButton_checkable_exploring_raster_detector': ICON_DETECTOR,
+            'pushButton_checkable_exploring_raster_similar': ICON_SIMILAR,
             'pushButton_checkable_exploring_raster_hover': ICON_HOVER,
             'pushButton_checkable_exploring_raster_zone': ICON_ZONE,
             'pushButton_checkable_exploring_raster_link': ICON_LINK_STYLE,
@@ -546,6 +556,7 @@ class CoverageDockExtras(QObject):
     def leave(self) -> None:
         """Stop the map interactions of the outgoing layer (hover, rectangle tool)."""
         for name in ('pushButton_checkable_exploring_raster_pipette', 'pushButton_checkable_exploring_raster_detector',
+                     'pushButton_checkable_exploring_raster_similar',
                      'pushButton_checkable_exploring_raster_hover', 'pushButton_checkable_exploring_raster_zone',
                      'pushButton_checkable_exploring_raster_link', 'pushButton_checkable_exploring_point_cloud_pipette',
                      'pushButton_checkable_exploring_point_cloud_value_pipette',
@@ -1032,6 +1043,15 @@ class CoverageDockExtras(QObject):
     def _on_detector_toggled(self, checked: bool) -> None:
         self._controller._on_color_pick_toggled(checked, 'object')
 
+    def _on_similar_toggled(self, checked: bool) -> None:
+        self._controller._on_color_pick_toggled(checked, 'similar_objects')
+
+    PIPETTE_BUTTONS = {
+        'similar': 'pushButton_checkable_exploring_raster_pipette',
+        'object': 'pushButton_checkable_exploring_raster_detector',
+        'similar_objects': 'pushButton_checkable_exploring_raster_similar',
+    }
+
     def set_pipette_checked(self, checked: bool, target: str = 'similar') -> None:
         """The pixel picker went on or left the map: the pipette or the detector button follows, the other one is up.
 
@@ -1039,9 +1059,8 @@ class CoverageDockExtras(QObject):
             checked: Whether the tool is on the map.
             target: ``'similar'`` (the pipette button) or ``'object'`` (the detector button).
         """
-        wanted = ('pushButton_checkable_exploring_raster_detector' if target == 'object'
-                  else 'pushButton_checkable_exploring_raster_pipette')
-        for name in ('pushButton_checkable_exploring_raster_pipette', 'pushButton_checkable_exploring_raster_detector'):
+        wanted = self.PIPETTE_BUTTONS.get(target, self.PIPETTE_BUTTONS['similar'])
+        for name in self.PIPETTE_BUTTONS.values():
             button = self._tools.get(name)
             if button is None:
                 continue

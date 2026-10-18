@@ -103,6 +103,74 @@ def _detect(seeds, **kwargs):
                                           **kwargs)
 
 
+class TestSimilarObjects:
+    """2026-10-18: every patch of the raster whose area is like the clicked objects' (similar objects mode)."""
+
+    def test_area_bounds_follow_the_clicked_objects(self):
+        assert raster_adapter.similar_area_bounds([100.0, 400.0], (0.5, 2.0)) == (50.0, 800.0)
+        assert raster_adapter.similar_area_bounds([100.0], (2.0, 0.5)) == (50.0, 200.0)
+        assert raster_adapter.similar_area_bounds([], (0.5, 2.0)) is None
+        assert raster_adapter.similar_area_bounds([0.0, None], (0.5, 2.0)) is None
+        assert raster_adapter.similar_area_bounds([100.0], ()) is None
+
+    def test_parts_of_a_geometry(self):
+        if fk.ogr is None:
+            pytest.skip("OGR fakes")
+        multi = fk.FakeGeometry.fromWkt("MULTIPOLYGON(((0 0, 1 0, 1 1, 0 1, 0 0)), ((5 5, 7 5, 7 7, 5 7, 5 5)))")
+        parts = raster_adapter.geometry_parts(multi)
+        assert len(parts) == 2 and sorted(round(p.area()) for p in parts) == [1, 4]
+        single = fk.FakeGeometry.fromWkt("POLYGON((0 0, 2 0, 2 2, 0 2, 0 0))")
+        assert len(raster_adapter.geometry_parts(single)) == 1
+        assert raster_adapter.geometry_parts(None) == []
+
+    def test_patches_within_the_bounds_are_kept(self, monkeypatch):
+        if fk.ogr is None:
+            pytest.skip("OGR fakes")
+        clicked = fk.FakeGeometry.fromWkt("POLYGON((0 0, 10 0, 10 10, 0 10, 0 0))")  # 100 m²
+        patches = fk.FakeGeometry.fromWkt(
+            "MULTIPOLYGON(((0 0, 10 0, 10 10, 0 10, 0 0)), ((20 20, 28 20, 28 28, 20 28, 20 20)), "
+            "((40 40, 41 40, 41 41, 40 41, 40 40)), ((60 60, 90 60, 90 90, 60 90, 60 60)))")  # 100, 64, 1, 900 m²
+        calls = []
+        monkeypatch.setattr(raster_adapter, "object_geometry",
+                            lambda *a, **k: raster_adapter.SelectionGeometryResult(clicked, 100, 10000, 1.0, False, 1))
+        monkeypatch.setattr(raster_adapter, "selection_geometry", lambda provider, plain, *a, **k: calls.append(plain)
+                            or raster_adapter.SelectionGeometryResult(patches, 1065, 10000, 1.0, grid=(100, 100)))
+        monkeypatch.setattr(raster_adapter, "QgsGeometry", fk.FakeGeometry)
+        monkeypatch.setattr(geometry_tools, "union_geometries", lambda parts: fk.FakeGeometry.fromWkt(
+            "MULTIPOLYGON(" + ", ".join("((" + ", ".join(f"{x} {y}" for x, y in p.exterior_coords()) + "))" for p in parts) + ")")
+                            if hasattr(parts[0], "exterior_coords") else parts[0])
+        selection = RasterSelection(mode=RasterSelectionMode.CLASSES, classes=frozenset({1}), seeds=((5.0, 5.0),),
+                                    similar=(0.5, 2.0))
+        result = raster_adapter.similar_objects_geometry(None, selection, fk.FakeRectangle(0, 0, 100, 100), 100, 100, "",
+                                                         max_pixels=4000000)
+        assert result.objects == 2  # 100 and 64 m²: not the 1 m² speck, not the 900 m² field
+        assert result.kept_pixels == 164 and result.total_pixels == 10000
+        plain = calls[0]
+        assert plain.seeds == () and plain.similar == () and plain.classes == frozenset({1})
+
+    def test_no_clicked_object_gives_nothing(self, monkeypatch):
+        monkeypatch.setattr(raster_adapter, "object_geometry",
+                            lambda *a, **k: raster_adapter.SelectionGeometryResult(_Shape(), 0, 10000, 1.0, False, 0))
+        monkeypatch.setattr(raster_adapter, "geometry_parts", lambda geometry: [])
+        monkeypatch.setattr(raster_adapter, "QgsGeometry", _Shape)
+        selection = RasterSelection(mode=RasterSelectionMode.CLASSES, classes=frozenset({1}), seeds=((5.0, 5.0),),
+                                    similar=(0.5, 2.0))
+        result = raster_adapter.similar_objects_geometry(None, selection, fk.FakeRectangle(0, 0, 100, 100), 100, 100, "")
+        assert result.objects == 0 and result.kept_pixels == 0
+
+    def test_selection_geometry_routes_similar_selections(self, monkeypatch):
+        seen = []
+        monkeypatch.setattr(raster_adapter, "similar_objects_geometry", lambda *a, **k: seen.append(k) or "similar")
+        monkeypatch.setattr(raster_adapter, "object_geometry", lambda *a, **k: "object")
+        selection = RasterSelection(mode=RasterSelectionMode.CLASSES, classes=frozenset({1}), seeds=((5.0, 5.0),),
+                                    similar=(0.5, 2.0))
+        assert raster_adapter.selection_geometry(None, selection, fk.FakeRectangle(0, 0, 100, 100), 100, 100, "",
+                                                 max_pixels=123) == "similar"
+        assert seen[0]["max_pixels"] == 123 and seen[0]["patch_provider"] is None
+        plain = RasterSelection(mode=RasterSelectionMode.CLASSES, classes=frozenset({1}), seeds=((5.0, 5.0),))
+        assert raster_adapter.selection_geometry(None, plain, fk.FakeRectangle(0, 0, 100, 100), 100, 100, "") == "object"
+
+
 class TestObjectGeometry:
     def test_window_grows_until_the_object_fits(self, scene):
         mask, windows, regions = scene

@@ -285,6 +285,11 @@ class RasterSelection:
             one after the other, stay two objects instead of one patch of both
             colours. The criterion of this selection is then their union (what
             the whole raster would keep). Empty: every seed grows in this criterion.
+        similar: ``(low, high)`` area ratios of the "similar objects" mode: every
+            patch of kept pixels of the raster whose area is between ``low`` times
+            the smallest clicked object and ``high`` times the largest one is
+            selected (all the pools like this one). Needs seeds. Empty: the
+            clicked objects only (object detection) or every kept pixel.
     """
 
     band: int = 1
@@ -296,8 +301,12 @@ class RasterSelection:
     derivative: RasterDerivative = RasterDerivative.VALUE
     seeds: Tuple[Tuple[float, float], ...] = ()
     objects: Tuple["RasterSelection", ...] = ()
+    similar: Tuple[float, float] = ()
 
     def __post_init__(self):
+        object.__setattr__(self, "similar", _similar_from(self.similar))
+        if self.similar and not (self.seeds or self.objects):
+            raise ValueError("similar objects need a clicked object (a seed)")
         if not isinstance(self.derivative, RasterDerivative):
             object.__setattr__(self, "derivative", _derivative_from(self.derivative))
         object.__setattr__(self, "seeds", _seeds_from(self.seeds))
@@ -380,7 +389,10 @@ class RasterSelection:
             text = f"band {self.band} classes " + ", ".join(_fmt(c) for c in sorted(self.classes))
         else:
             text = self.expression.strip()
-        if self.seeds:
+        if self.seeds and self.similar:
+            text += (f" · objects like the one(s) under {len(self.seeds)} click(s), "
+                     f"×{_fmt(self.similar[0])} to ×{_fmt(self.similar[1])} in area")
+        elif self.seeds:
             text += f" · object(s) under {len(self.seeds)} click(s)"
         return text
 
@@ -398,6 +410,8 @@ class RasterSelection:
             data["seeds"] = [list(seed) for seed in self.seeds]
         if self.objects:
             data["objects"] = [item.to_dict() for item in self.objects]
+        if self.similar:
+            data["similar"] = list(self.similar)
         return data
 
     @classmethod
@@ -412,6 +426,7 @@ class RasterSelection:
             derivative=_derivative_from(data.get("derivative")),
             seeds=data.get("seeds") or (),
             objects=tuple(cls.from_dict(item) for item in data.get("objects") or ()),
+            similar=tuple(data.get("similar") or ()),
         )
 
 
@@ -420,6 +435,23 @@ def _fmt(value) -> str:
     if isinstance(value, float) and value.is_integer():
         return str(int(value))
     return repr(value) if isinstance(value, float) else str(value)
+
+
+def _similar_from(value) -> Tuple[float, float]:
+    """``(low, high)`` area ratios, ordered, both above zero; ``()`` for anything else.
+
+    Raises:
+        ValueError: For a malformed pair.
+    """
+    if not value:
+        return ()
+    try:
+        low, high = (float(item) for item in value)
+    except (TypeError, ValueError) as exc:
+        raise ValueError(f"similar objects ratios must be a (low, high) pair, got {value!r}") from exc
+    if not (low > 0 and high > 0) or low != low or high != high:
+        raise ValueError(f"similar objects ratios must be above zero, got {value!r}")
+    return (min(low, high), max(low, high))
 
 
 def _seeds_from(value) -> Tuple[Tuple[float, float], ...]:

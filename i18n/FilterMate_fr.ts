@@ -367,6 +367,10 @@
         <source>Radius</source>
         <translation>Rayon</translation>
     </message>
+    <message>
+        <source>Similar objects: click an object and every object of the raster like it is selected (the patches of such pixels whose area is within the ratios of the panel). Ctrl+click adds another reference object</source>
+        <translation>Objets similaires : cliquez un objet et tous les objets du raster qui lui ressemblent sont sélectionnés (les taches de tels pixels dont la surface est dans les rapports du panneau). Ctrl+clic ajoute un autre objet de référence</translation>
+    </message>
 </context>
 <context>
     <name>CoverageModeController</name>
@@ -5469,6 +5473,30 @@ Objet cliqué : seulement la tache de ces pixels où tombe le clic (une piscine,
     <message>
         <source>A slope, aspect... reads one band as a DTM: choose a band in BANDS first</source>
         <translation>Une pente, une exposition... lit une bande comme un MNT : choisissez d'abord une bande dans BANDES</translation>
+    </message>
+    <message>
+        <source>Similar objects</source>
+        <translation>Objets similaires</translation>
+    </message>
+    <message>
+        <source>Every object of the raster like the clicked one: the patches of such pixels whose area is within the ratios below (the similar objects tool of the rail); Ctrl+click adds another reference object</source>
+        <translation>Tous les objets du raster semblables à celui cliqué : les taches de tels pixels dont la surface est dans les rapports ci-dessous (l'outil objets similaires du rail) ; Ctrl+clic ajoute un autre objet de référence</translation>
+    </message>
+    <message>
+        <source>Area ×</source>
+        <translation>Surface ×</translation>
+    </message>
+    <message>
+        <source>to ×</source>
+        <translation>à ×</translation>
+    </message>
+    <message>
+        <source>Smallest similar object, as a share of the smallest clicked one</source>
+        <translation>Plus petit objet similaire, en part du plus petit objet cliqué</translation>
+    </message>
+    <message>
+        <source>Largest similar object, as a multiple of the largest clicked one</source>
+        <translation>Plus grand objet similaire, en multiple du plus grand objet cliqué</translation>
     </message>
 </context>
 <context>

@@ -114,8 +114,13 @@ class TestTools:
         # the "more" menu (seven buttons, like the point cloud rail).
         assert extras.tools_for("raster") == ["pushButton_checkable_exploring_raster_pipette",
                                               "pushButton_checkable_exploring_raster_detector",
+                                              "pushButton_checkable_exploring_raster_similar",
                                               "pushButton_checkable_exploring_raster_link",
                                               "pushButton_exploring_raster_more"]
+
+    def test_the_three_pipette_targets_have_a_button(self):
+        assert set(extras.CoverageDockExtras.PIPETTE_BUTTONS) == {"similar", "object", "similar_objects"}
+        assert extras.ICON_SIMILAR.strip().startswith("<")
 
     def test_point_cloud_rail_adds_the_value_pipette_the_zone_and_more(self):
         # 2026-10-18: Identify is the class pipette (CLASSES); the value pipette and the zone are the tools
@@ -124,10 +129,12 @@ class TestTools:
                                                    "pushButton_checkable_exploring_point_cloud_zone",
                                                    "pushButton_exploring_point_cloud_more"]
 
-    def test_the_rails_have_the_same_size(self):
+    def test_the_rails_have_about_the_same_size(self):
         shared_raster = 3  # zoom, preview, reset (Identify hidden)
         shared_point_cloud = 4  # identify (class pipette), zoom, preview, reset
-        assert shared_raster + len(extras.tools_for("raster")) == shared_point_cloud + len(extras.tools_for("point_cloud")) == 7
+        raster = shared_raster + len(extras.tools_for("raster"))
+        point_cloud = shared_point_cloud + len(extras.tools_for("point_cloud"))
+        assert raster == 8 and point_cloud == 7  # the similar objects tool of the raster is the one more
 
     def test_detector_has_its_own_icon(self):
         assert extras.ICON_DETECTOR.strip().startswith("<") and extras.ICON_DETECTOR != extras.ICON_PIPETTE

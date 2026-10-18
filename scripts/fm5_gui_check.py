@@ -472,6 +472,36 @@ def s_pipette_object():
           ctrl._extras._tools['pushButton_checkable_exploring_raster_pipette'].isChecked() and not detector.isChecked())
 
 
+def s_similar_objects():
+    """Similar objects: the big pool clicked, every pool of the raster like it is selected (not the roof, not the field)."""
+    ctrl = controller()
+    panel = ctrl._raster_panel
+    ext = layer('mnt').extent()
+    cell = (ext.width() / 100) * (ext.height() / 100)
+    panel._tolerance_spin.setValue(12.0)
+    panel._similar_low_spin.setValue(0.2)  # the small pool is a quarter of the big one
+    panel._similar_high_spin.setValue(2.0)
+    similar = ctrl._extras._tools['pushButton_checkable_exploring_raster_similar']
+    similar.setChecked(True)
+    check('similar: the button sets the target and the pipette group',
+          panel.pick_target() == 'similar_objects' and panel.active_mode().value == 'pipette', panel.pick_target())
+    ctrl._on_pixel_picked(_cell_point(ext, 30, 30), False)  # the big pool
+    selection = panel.selection()
+    check('similar: the selection carries the ratios and the seed',
+          selection is not None and selection.similar == (0.2, 2.0) and len(selection.seeds) == 1, str(selection))
+    band = getattr(ctrl._object_outline, '_band', None)
+    area = band.asGeometry().area() if band is not None else 0.0
+    detected = panel.detected_objects()
+    check('similar: both pools are outlined, not the roof nor the field', detected is not None and detected[0] == 2
+          and abs(area / cell - 500) < 2, f"{detected}, {area / cell:.1f} cells")
+    panel._similar_low_spin.setValue(0.5)  # the small pool drops out
+    check('similar: the ratios narrow the selection', panel.detected_objects() is not None
+          and panel.detected_objects()[0] == 1, str(panel.detected_objects()))
+    panel._target_buttons['similar'].setChecked(True)
+    check('similar: back to similar pixels, the outline goes', not ctrl._object_outline.visible and not panel.selection().seeds)
+    ctrl._extras._tools['pushButton_checkable_exploring_raster_pipette'].setChecked(False)
+
+
 def s_object_filter():
     ctrl = controller()
     panel = ctrl._raster_panel
@@ -823,7 +853,7 @@ STEPS = [
     (s_centroid_registry, 800), (s_centroid_registry_check, 500), (s_centroid_setup, 1500), (s_centroid_popup, 1500), (s_centroid_filter, 9000), (s_centroid_check, 1000), (s_centroid_unfilter, 4000), (s_centroid_unfilter_check, 1000),
     (s_raster_source, 3000), (s_raster_mode, 2500), (s_raster_preview, 1500), (s_raster_preview_check, 1000),
     (s_raster_filter, 8000), (s_raster_check, 1000), (s_raster_unfilter, 3000), (s_raster_unfilter_check, 1000),
-    (s_pipette_ortho, 3500), (s_pipette_ortho_check, 1500), (s_pipette_object, 1500),
+    (s_pipette_ortho, 3500), (s_pipette_ortho_check, 1500), (s_pipette_object, 1500), (s_similar_objects, 1500),
     (s_object_filter, 8000), (s_object_check, 1000), (s_object_unfilter, 3000), (s_object_unfilter_check, 1000),
     (s_pipette_ortho_shot, 1500), (s_pipette_dem, 3000), (s_pipette_dem_check, 1000),
     (s_pipette_classes, 3000), (s_pipette_classes_check, 1000),
