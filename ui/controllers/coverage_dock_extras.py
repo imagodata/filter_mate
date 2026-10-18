@@ -38,6 +38,8 @@ STRIP_LAYOUT = 'verticalLayout_main_content'
 ZONE_SAMPLE_SIZE = 250000
 TOOL_RAIL_ANCHOR = 'pushButton_checkable_exploring_linking_widgets'
 VECTOR_ONLY_BUTTONS = ('pushButton_checkable_exploring_tracking', 'pushButton_checkable_exploring_linking_widgets')
+# 2026-10-18: no pixel picker on a raster (the pipette reads the bands); Identify stays for a point cloud (class pipette).
+RASTER_HIDDEN_BUTTONS = ('pushButton_exploring_identify',)
 LAYER_CARD_NAME = 'label_exploring_coverage_layer'
 # Stroke icons of the mockup (24 x 24 view box).
 ICON_HOVER = ('<path d="M3 8V4h4M17 4h4v4M21 16v4h-4M7 20H3v-4"/><circle cx="11.5" cy="11.5" r="3.5"/>'
@@ -430,7 +432,7 @@ class CoverageDockExtras(QObject):
             self.leave()
         self._layer_id = layer_id
         self._update_card(layer, kind_value)
-        self._hide_vector_buttons()
+        self._hide_vector_buttons(RASTER_HIDDEN_BUTTONS if kind_value == 'raster' else ())
         visible = set(tools_for(kind_value))
         for name, button in self._tools.items():
             button.setVisible(name in visible)
@@ -751,9 +753,16 @@ class CoverageDockExtras(QObject):
             elif manager is not None and button.property('icon_name'):
                 button.setIcon(manager.get_icon(button.property('icon_name')))  # the vector icon
 
-    def _hide_vector_buttons(self) -> None:
+    def _hide_vector_buttons(self, extra: Sequence[str] = ()) -> None:
+        """Hide the vector-only buttons (and ``extra`` ones); the others hidden before come back."""
         dw = self.dockwidget
-        for name in VECTOR_ONLY_BUTTONS:
+        wanted = set(VECTOR_ONLY_BUTTONS) | set(extra)
+        for name in list(self._hidden_vector_buttons):
+            if name not in wanted:  # hidden for the previous kind (Identify of a raster), shown again
+                button = getattr(dw, name, None)
+                if button is not None:
+                    button.setVisible(self._hidden_vector_buttons.pop(name))
+        for name in wanted:
             button = getattr(dw, name, None)
             if button is None:
                 continue

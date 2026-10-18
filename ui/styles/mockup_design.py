@@ -245,8 +245,7 @@ def register_fonts() -> bool:
 # a button not listed keeps its vector icon.
 KIND_BUTTON_ICONS: Dict[str, Dict[str, str]] = {
     'raster': {
-        'pushButton_exploring_identify': 'pixel_picker',
-        'pushButton_checkable_exploring_selecting': 'preview',
+        'pushButton_checkable_exploring_selecting': 'preview',  # Identify is hidden on a raster (2026-10-18)
     },
     'point_cloud': {
         'pushButton_exploring_identify': 'class_pipette',  # 2026-10-18: Identify is the class pipette

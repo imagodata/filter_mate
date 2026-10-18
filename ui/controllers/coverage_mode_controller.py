@@ -829,9 +829,7 @@ class CoverageModeController(BaseController):
         self._call(self._coverage_spin, 'setVisible', True)
         tips = {
             LayerKind.RASTER: {
-                'pushButton_exploring_identify': self.tr("Pixel picker: click on the map to read the value of every band, "
-                                                         "and the slope, aspect... when the range applies to one "
-                                                         "(Ctrl+click extends the range)"),
+                'pushButton_exploring_identify': self.tr("Not used for raster layers: the pipette reads the bands"),
                 'pushButton_exploring_zoom': self.tr("Zoom to the selected pixels (to the layer when nothing is selected)"),
                 'pushButton_checkable_exploring_selecting': self.tr("Preview: hide the pixels outside the selection "
                                                                     "(a white veil for a slope, aspect...)"),
@@ -853,10 +851,11 @@ class CoverageModeController(BaseController):
         for name, tip in tips.items():
             button = getattr(dw, name, None)
             self._call(button, 'setToolTip', tip)
-            if name in ('pushButton_checkable_exploring_tracking', 'pushButton_checkable_exploring_linking_widgets'):
-                self._call(button, 'setEnabled', False)
-            else:
-                self._call(button, 'setEnabled', True)
+            # 2026-10-18: the pixel picker left the raster rail (the pipette reads the bands); the Identify
+            # button is hidden with tracking and linking on a raster, and is the class pipette on a point cloud.
+            unused = name in ('pushButton_checkable_exploring_tracking', 'pushButton_checkable_exploring_linking_widgets') or (
+                name == 'pushButton_exploring_identify' and kind is LayerKind.RASTER)
+            self._call(button, 'setEnabled', not unused)
         if not keep_preview:
             self._set_selecting_checked(False)  # no preview on a layer just shown
 
@@ -1459,7 +1458,7 @@ class CoverageModeController(BaseController):
         try:
             if action == 'identify':
                 if self._kind is LayerKind.RASTER:
-                    self._toggle_pixel_tool()
+                    pass  # 2026-10-18: no pixel picker on a raster any more, the pipette reads the bands
                 else:
                     self._toggle_class_tool()  # 2026-10-18: the Identify button is the class pipette
             elif action == 'zoom':
@@ -1614,16 +1613,13 @@ class CoverageModeController(BaseController):
         self._on_color_pick_toggled(wanted)
 
     def _show_picker_state(self, active: bool) -> None:
-        """Pipette button held down and pixel group open while the picker is on the map."""
+        """The picker tool went on or left the map: the pipette / detector buttons and the BANDS block follow."""
         if not active and self._color_pick:
             self._color_pick = False  # the picker was dropped (another tool, the rail button): the pipette goes off
             self._extras_call('set_pipette_checked', False)
             if self._raster_panel is not None:
                 self._raster_panel.show_pipette_active(False)
         try:
-            button = getattr(self.dockwidget, 'pushButton_exploring_identify', None)
-            if button is not None:
-                button.setDown(bool(active) and not self._color_pick)  # the pipette has its own button (I2)
             if self._raster_panel is not None and hasattr(self._raster_panel, 'show_picker_active'):
                 self._raster_panel.show_picker_active(bool(active))
         except RuntimeError:
