@@ -101,6 +101,9 @@ class RasterSummary:
     bands: List[RasterBandInfo] = field(default_factory=list)
     classes: List[Tuple[float, str, str]] = field(default_factory=list)  # (value, label, color hex)
     renderer_type: str = ''
+    # Bands the renderer draws in each colour, ``{"R": 1, "G": 2, "B": 3}`` for a multiband
+    # colour renderer, ``{"gray": n}`` for a single band one: the default colour roles of the panel.
+    renderer_bands: Dict[str, int] = field(default_factory=dict)
 
     @property
     def is_categorical(self) -> bool:
@@ -125,6 +128,27 @@ def _renderer_classes(layer: QgsRasterLayer) -> List[Tuple[float, str, str]]:
     except Exception as exc:
         logger.debug(f"[FM5] paletted classes unreadable: {exc}")
     return classes
+
+
+def renderer_bands(layer: QgsRasterLayer) -> Dict[str, int]:
+    """Bands the renderer draws: ``{"R", "G", "B"}`` of a multiband colour renderer, ``{"gray"}`` of a grey one.
+
+    2026-10-18: the roles of the bands of an orthophoto (which one is red, which one is the
+    near infrared) were guessed from their count and the user had to correct an IRC image
+    by hand; the renderer already knows them.
+    """
+    renderer = layer.renderer()
+    if renderer is None:
+        return {}
+    try:
+        if renderer.type() == 'multibandcolor':
+            bands = {'R': int(renderer.redBand()), 'G': int(renderer.greenBand()), 'B': int(renderer.blueBand())}
+            return {role: band for role, band in bands.items() if band >= 1}
+        if renderer.type() == 'singlebandgray':
+            return {'gray': int(renderer.grayBand())}
+    except Exception as exc:
+        logger.debug(f"[FM5] renderer bands unreadable: {exc}")
+    return {}
 
 
 def read_raster_summary(layer: QgsRasterLayer) -> RasterSummary:
@@ -154,6 +178,7 @@ def read_raster_summary(layer: QgsRasterLayer) -> RasterSummary:
         bands=bands,
         classes=_renderer_classes(layer),
         renderer_type=layer.renderer().type() if layer.renderer() is not None else '',
+        renderer_bands=renderer_bands(layer),
     )
 
 

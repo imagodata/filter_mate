@@ -386,11 +386,14 @@ def s_pipette_ortho_check():
     ext = layer('mnt').extent()
     button = ctrl._extras._tools['pushButton_checkable_exploring_raster_pipette']
     check('pipette: a rail button, visible on a raster', button.isVisible() and not button.icon().isNull())
-    check('pipette: one PIPETTE group holds tolerance, bands and presets', all(
-          w.parent() is panel._pipette_group for w in (panel._tolerance_spin, panel._layout_combo, panel._spectral_combo)))
+    check('pipette: one PIPETTE group holds the target and the tolerance', all(
+          w.parent() is panel._pipette_group for w in (panel._tolerance_spin, *panel._target_buttons.values())))
     check('pipette: its group is exclusive like the others', panel._pipette_group.isCheckable()
           and panel._pipette_group in panel._mode_groups.values())
-    check('pipette: bands layout and presets usable on a 3-band image', panel._spectral_combo.isEnabled() and panel._layout_combo.isEnabled())
+    check('bands: three roles and the layout shortcuts on a 3-band image',
+          panel._shortcuts_widget.isVisibleTo(panel) and len(panel.band_roles()) == 3, str(panel.band_roles()))
+    check('bands: the detector is a second rail button of the PIPETTE group',
+          ctrl._extras._tools['pushButton_checkable_exploring_raster_detector'].isVisible())
     button.setChecked(True)
     check('pipette: the tool makes its group the active one', panel.active_mode().value == 'pipette'
           and panel._pipette_group.isChecked() and not panel._range_group.isChecked() and not panel._expression_group.isChecked())
@@ -399,17 +402,22 @@ def s_pipette_ortho_check():
     selection = panel.selection()
     check('pipette: an image gives a similar-colour selection', selection is not None and selection.mode.value == 'expression'
           and 'abs("ortho@1" - 20)' in selection.expression, (selection.expression if selection else '')[:90])
-    check('pipette: the expression group is left alone', panel._expression_edit.text() == '', panel._expression_edit.text()[:60])
+    check('pipette: the expression group is left alone', panel._expression_edit.toPlainText() == '',
+          panel._expression_edit.toPlainText()[:60])
     check('pipette: both pools are selected, nothing else', _kept(selection) == 500, str(_kept(selection)))
     ctrl._on_pixel_picked(_cell_point(ext, 70, 70), True)  # Ctrl+click: the roof is added
     check('pipette: Ctrl+click adds the reds (pools + roof + strip)', _kept(panel.selection()) == 1000, str(_kept(panel.selection())))
     panel._tolerance_spin.setValue(100.0)  # the whole observed range of each band: the green field too
     check('pipette: the tolerance widens the selection', _kept(panel.selection()) > 800, str(_kept(panel.selection())))
     panel._tolerance_spin.setValue(12.0)
-    panel._layout_combo.setCurrentIndex(panel._layout_combo.findData('irc'))
-    check('pipette: IRC layout offers the infrared presets', panel._spectral_combo.count() == 4, str(panel._spectral_combo.count()))
-    panel._spectral_combo.activated.emit(1)
-    check('pipette: a spectral preset is the pipette selection', panel.active_mode().value == 'pipette'
+    import sys as _sys
+    raster_module = _sys.modules[type(panel).__module__]
+    panel._on_layout_shortcut('irc')
+    presets = raster_module.spectral_presets_for(panel.band_roles())
+    check('bands: the IRC shortcut offers the infrared indexes', presets == ['ndvi_vegetation', 'ndvi_bare', 'ndwi_water'],
+          str(presets))
+    panel._insert_spectral('ndvi_vegetation')
+    check('expression: a spectral index is an expression selection', panel.active_mode().value == 'expression'
           and '"ortho@1" - "ortho@2"' in panel.selection().expression, panel.selection().expression)
 
 
@@ -420,11 +428,12 @@ def s_pipette_object():
     ext = layer('mnt').extent()
     cell = (ext.width() / 100) * (ext.height() / 100)
     panel._tolerance_spin.setValue(12.0)
-    combo = panel._target_combo
-    check('object: the PIPETTE group offers object detection', combo.parent() is panel._pipette_group
-          and combo.findData('object') >= 0)
-    ctrl._extras._tools['pushButton_checkable_exploring_raster_pipette'].setChecked(True)
-    combo.setCurrentIndex(combo.findData('object'))
+    detector = ctrl._extras._tools['pushButton_checkable_exploring_raster_detector']
+    check('object: the PIPETTE group offers object detection', panel._target_buttons['object'].parent() is panel._pipette_group)
+    detector.setChecked(True)
+    check('object: the detector button sets the object target and the pipette group',
+          panel.pick_target() == 'object' and panel.active_mode().value == 'pipette'
+          and not ctrl._extras._tools['pushButton_checkable_exploring_raster_pipette'].isChecked())
     ctrl._on_pixel_picked(_cell_point(ext, 30, 30), False)  # the big pool
     selection = panel.selection()
     check('object: the click is a seed of the selection', selection is not None and len(selection.seeds) == 1,
@@ -433,36 +442,41 @@ def s_pipette_object():
     area = drawn.area() if drawn is not None else 0.0
     check('object: the clicked pool is outlined, not the other one', drawn is not None and abs(area / cell - 400) < 1,
           f"{area / cell:.1f} cells")
-    check('object: the panel tells one object and its area', '1 object' in panel._sample_label.text(),
-          panel._sample_label.text())
+    detected = panel.detected_objects()
+    check('object: the panel tells one object and its area', detected is not None and detected[0] == 1 and (detected[1] or 0) > 0,
+          str(detected))
     check('object: the strip ratio is the object', panel.kept_ratio() is not None
           and abs(panel.kept_ratio() - 400 / 10000) < 1e-6, str(panel.kept_ratio()))
     ctrl._on_pixel_picked(_cell_point(ext, 25, 75), True)  # Ctrl+click: the second pool
     drawn = ctrl._object_outline.geometry()
     area = drawn.area() if drawn is not None else 0.0
-    check('object: Ctrl+click adds the second pool', abs(area / cell - 500) < 1 and '2 object' in panel._sample_label.text(),
-          f"{area / cell:.1f} cells, {panel._sample_label.text()}")
+    detected = panel.detected_objects()
+    check('object: Ctrl+click adds the second pool', abs(area / cell - 500) < 1 and detected is not None and detected[0] == 2,
+          f"{area / cell:.1f} cells, {detected}")
     ctrl._on_pixel_picked(_cell_point(ext, 30, 30), False)  # the pool again...
     ctrl._on_pixel_picked(_cell_point(ext, 70, 70), True)  # ... and Ctrl+click on the red roof, far from it
     drawn = ctrl._object_outline.geometry()
     area = drawn.area() if drawn is not None else 0.0
+    detected = panel.detected_objects()
     check('object: each object keeps its colour (the pool does not run into the red strip)',
-          abs(area / cell - 800) < 1 and '2 object' in panel._sample_label.text(),
-          f"{area / cell:.1f} cells, {panel._sample_label.text()}")
+          abs(area / cell - 800) < 1 and detected is not None and detected[0] == 2, f"{area / cell:.1f} cells, {detected}")
     ctrl._on_pixel_picked(_cell_point(ext, 35, 35), True)  # a second click in the same pool
-    check('object: a second click in an object adds nothing', '2 object' in panel._sample_label.text()
-          and abs(panel.kept_ratio() - 800 / 10000) < 1e-6, f"{panel._sample_label.text()} {panel.kept_ratio()}")
+    detected = panel.detected_objects()
+    check('object: a second click in an object adds nothing', detected is not None and detected[0] == 2
+          and abs(panel.kept_ratio() - 800 / 10000) < 1e-6, f"{detected} {panel.kept_ratio()}")
     ctrl._on_pixel_picked(_cell_point(ext, 30, 30), False)
-    combo.setCurrentIndex(combo.findData('similar'))
+    panel._target_buttons['similar'].setChecked(True)  # the segmented control of the group: the rail follows (R4)
     check('object: back to similar pixels, the outline goes', not ctrl._object_outline.visible
           and not panel.selection().seeds)
+    check('object: the pipette button is down, the detector up',
+          ctrl._extras._tools['pushButton_checkable_exploring_raster_pipette'].isChecked() and not detector.isChecked())
 
 
 def s_object_filter():
     ctrl = controller()
     panel = ctrl._raster_panel
     STATE['ortho_source'] = layer('ortho').source()
-    panel._target_combo.setCurrentIndex(panel._target_combo.findData('object'))
+    ctrl._extras._tools['pushButton_checkable_exploring_raster_detector'].setChecked(True)
     ctrl._on_pixel_picked(_cell_point(layer('mnt').extent(), 30, 30), False)  # the big pool only
     set_targets(['parcelle', 'batiment'])
     set_predicates(['Intersect'])
@@ -488,7 +502,7 @@ def s_object_unfilter_check():
     check('object: unfilter gives the ortho back', layer('ortho').source() == STATE.get('ortho_source'),
           layer('ortho').source()[-60:])
     panel = controller()._raster_panel
-    panel._target_combo.setCurrentIndex(panel._target_combo.findData('similar'))
+    panel._target_buttons['similar'].setChecked(True)
 
 
 def s_pipette_ortho_shot():
@@ -510,7 +524,8 @@ def s_pipette_dem_check():
     ctrl = controller()
     panel = ctrl._raster_panel
     ext = layer('mnt').extent()
-    check('pipette: bands layout and presets greyed out on a single band', not panel._spectral_combo.isEnabled() and not panel._layout_combo.isEnabled())
+    check('bands: no role nor layout shortcut on a single band', not panel._shortcuts_widget.isVisibleTo(panel)
+          and panel.band_roles() == {})
     button = ctrl._extras._tools['pushButton_checkable_exploring_raster_pipette']
     panel._tolerance_spin.setValue(5.0)
     button.setChecked(True)
@@ -592,22 +607,24 @@ def s_terrain_mode():
     check('terrain: raster mode active', ctrl.active_layer is not None and ctrl.active_layer.name() == 'mnt')
     combo = panel._derivative_combo
     names = [combo.itemData(i) for i in range(combo.count())]
-    check('terrain: "Compute on" lists every quantity', names == ['value', 'slope_degrees', 'slope_percent',
+    check('terrain: "Quantity" lists every quantity', names == ['value', 'slope_degrees', 'slope_percent',
                                                                   'aspect', 'hillshade', 'roughness'], str(names))
     check('terrain: starts on the pixel value', panel.current_derivative().value == 'value')
     combo.setCurrentIndex(combo.findData('slope_degrees'))  # the user's gesture: the controller sends the histogram
     bounds = panel._data_bounds()
     check('terrain: slope histogram is in degrees (0-90)', bounds == (0.0, 90.0), str(bounds))
-    check('terrain: slope presets offered', panel._presets_combo.count() == 5 and panel._presets_combo.isVisibleTo(panel),
-          str([panel._presets_combo.itemText(i) for i in range(panel._presets_combo.count())]))
-    panel._presets_combo.activated.emit(2)  # "Gentle (5-15 deg)"
-    panel._presets_combo.activated.emit(1)  # "Flat (< 5 deg)"
+    actions = panel._presets_button.menu().actions()
+    check('terrain: slope thresholds offered', len(actions) == 4 and panel._presets_button.isVisibleTo(panel),
+          str([a.text() for a in actions]))
+    actions[1].trigger()  # "Gentle (5-15 deg)"
+    actions[0].trigger()  # "Flat (< 5 deg)"
     selection = panel.selection()
     check('terrain: preset becomes a slope selection',
           selection is not None and selection.derivative.value == 'slope_degrees' and selection.maximum == 5.0
           and selection.minimum is None, str(selection))
-    check('terrain: preview button stays available, expression button off',
-          dock().pushButton_checkable_exploring_selecting.isEnabled() and not panel._use_range_button.isEnabled())
+    check('terrain: preview button stays available, the range entry of the Insert menu off',
+          dock().pushButton_checkable_exploring_selecting.isEnabled()
+          and not panel._insert_button.menu().actions()[-1].isEnabled())
     panel._set_range(None, 15.0)
     panel._emit_now()
     set_targets(['parcelle', 'batiment'])
@@ -737,15 +754,14 @@ def s_pc_undo_check():
 
 def s_pc_quick_check():
     panel = controller()._pc_panel
-    combo = panel._quick_combo
-    texts = [combo.itemText(i) for i in range(combo.count())]
-    check('LiDAR classes: quick selection combo', texts[0].startswith('Quick') and 'Invert the selection' in texts, str(texts))
-    combo.activated.emit(1)  # Ground
+    texts = [a.text() for a in panel._quick_button.menu().actions() if a.text()]
+    check('LiDAR classes: selection menu', 'Ground' in texts and 'Invert the selection' in texts, str(texts))
+    panel._on_quick_selection(('preset', 'Ground'))
     check('LiDAR classes: "Ground" checks class 2', panel._checked_codes() == [2], str(panel._checked_codes()))
     check('LiDAR classes: summary line', panel._class_summary_label.text().startswith('1 / '), panel._class_summary_label.text())
-    combo.activated.emit(combo.count() - 1)  # invert
+    panel._on_quick_selection(('invert', None))
     check('LiDAR classes: invert', 2 not in panel._checked_codes() and len(panel._checked_codes()) >= 1, str(panel._checked_codes()))
-    combo.activated.emit(combo.count() - 2)  # none
+    panel._on_quick_selection(('none', None))
     check('LiDAR classes: none', panel._checked_codes() == [])
 
 

@@ -11,8 +11,10 @@ Environment variables: ``FM5_ORTHO`` (an RGB GeoTIFF), ``FM5_TILE`` (a COPC tile
 Classification), ``FM5_OUT`` (log). Every check logs PASS / FAIL in ``fm5_tool_sync.log``.
 
 Raster: checking or expanding PIPETTE puts the pipette on the map, another group takes it
-off, the pipette button off leaves the group alone. Point cloud: CLASSES puts the class
-pipette on, ATTRIBUTES / EXPRESSION take it off, the class pipette on makes CLASSES active.
+off, the pipette button off leaves the group alone; the detector button is the same tool with
+the object target (R4, 2026-10-18). Point cloud: CLASSES puts the class pipette on (the
+Identify button, since 2026-10-18), ATTRIBUTES / EXPRESSION take it off, the class pipette on
+makes CLASSES active.
 Selecting a layer never puts a tool on the map by itself.
 """
 import os
@@ -68,7 +70,12 @@ def button(name):
 
 
 PIPETTE = 'pushButton_checkable_exploring_raster_pipette'
-CLASS_PIPETTE = 'pushButton_checkable_exploring_point_cloud_pipette'
+DETECTOR = 'pushButton_checkable_exploring_raster_detector'
+
+
+def class_pipette_button():
+    """The class pipette of a point cloud is the Identify button of the dock (held down while on the map)."""
+    return dock().pushButton_exploring_identify
 
 
 def pipette_on():
@@ -83,12 +90,19 @@ def pipette_off():
 
 def class_pipette_on():
     ctrl = controller()
-    return button(CLASS_PIPETTE).isChecked() and ctrl._class_tool is not None and map_tool() is ctrl._class_tool
+    return class_pipette_button().isDown() and ctrl._class_tool is not None and map_tool() is ctrl._class_tool
 
 
 def class_pipette_off():
     ctrl = controller()
-    return not button(CLASS_PIPETTE).isChecked() and (ctrl._class_tool is None or map_tool() is not ctrl._class_tool)
+    return not class_pipette_button().isDown() and (ctrl._class_tool is None or map_tool() is not ctrl._class_tool)
+
+
+def detector_on():
+    ctrl = controller()
+    panel = ctrl._raster_panel
+    return (button(DETECTOR).isChecked() and not button(PIPETTE).isChecked() and panel.pick_target() == 'object'
+            and ctrl._pixel_tool is not None and map_tool() is ctrl._pixel_tool)
 
 
 # --- steps ----------------------------------------------------------------
@@ -128,6 +142,17 @@ def s_raster_check():
     check('raster: VALUE RANGE checked takes the pipette off', pipette_off() and panel.active_mode().value == 'range',
           tool_name())
     check('raster: the previous map tool comes back', tool_name() != 'PixelPickerTool', tool_name())
+    button(DETECTOR).setChecked(True)
+    check('raster: the detector button puts the picker on with the object target and PIPETTE active',
+          detector_on() and panel.active_mode().value == 'pipette', tool_name())
+    button(PIPETTE).setChecked(True)
+    check('raster: the pipette button takes the similar target, the detector goes up',
+          pipette_on() and not button(DETECTOR).isChecked() and panel.pick_target() == 'similar', tool_name())
+    panel._target_buttons['object'].setChecked(True)  # the segmented control of the group
+    check('raster: the group target moves the rail (R4)', detector_on(), tool_name())
+    panel._range_group.setChecked(True)
+    check('raster: VALUE RANGE takes the detector off too', pipette_off() and not button(DETECTOR).isChecked(), tool_name())
+    panel._target_buttons['similar'].setChecked(True)
     panel._pipette_group.setCollapsed(False)  # expanding a group makes it the active one
     check('raster: PIPETTE expanded puts the pipette on', pipette_on() and panel.active_mode().value == 'pipette', tool_name())
     panel._expression_group.setChecked(True)
@@ -156,7 +181,8 @@ def s_point_cloud_check():
     panel = controller()._pc_panel
     check('point cloud: the pipette left with the raster', pipette_off(), tool_name())
     check('point cloud: selecting the layer puts no tool on the map', class_pipette_off(), tool_name())
-    check('point cloud: the class pipette is usable', button(CLASS_PIPETTE).isEnabled() and not panel._classes_group.isHidden())
+    check('point cloud: the class pipette (Identify) is usable', class_pipette_button().isEnabled()
+          and not panel._classes_group.isHidden())
     panel._ranges_group.setChecked(True)
     check('point cloud: ATTRIBUTES checked, no class pipette', class_pipette_off() and panel._ranges_group.isChecked(),
           tool_name())
@@ -171,12 +197,14 @@ def s_point_cloud_check():
           tool_name())
     panel._ranges_group.setChecked(True)
     check('point cloud: ATTRIBUTES checked takes the class pipette off', class_pipette_off(), tool_name())
-    button(CLASS_PIPETTE).setChecked(True)
-    check('point cloud: the class pipette button makes CLASSES active',
+    controller().handle_exploring_action('identify')
+    check('point cloud: the Identify button makes CLASSES active',
           class_pipette_on() and panel._classes_group.isChecked() and not panel._ranges_group.isChecked(), tool_name())
-    button(CLASS_PIPETTE).setChecked(False)
-    check('point cloud: the class pipette button off leaves CLASSES active',
+    controller().handle_exploring_action('identify')
+    check('point cloud: Identify again takes the class pipette off and leaves CLASSES active',
           class_pipette_off() and panel._classes_group.isChecked(), tool_name())
+    controller().handle_exploring_action('identify')
+    check('point cloud: the class pipette is on before leaving the layer', class_pipette_on(), tool_name())
 
 
 def s_back_to_raster():
@@ -185,6 +213,26 @@ def s_back_to_raster():
 
 def s_back_to_raster_check():
     check('raster again: no tool put on the map by the layer change', pipette_off() and class_pipette_off(), tool_name())
+    button(PIPETTE).setChecked(True)
+    check('raster again: the pipette is on before leaving the layer', pipette_on(), tool_name())
+
+
+def s_point_cloud_again():
+    dock().comboBox_filtering_current_layer.setLayer(layer('lhd'))
+
+
+def s_point_cloud_again_check():
+    check('point cloud again: the class pipette comes back with the layer (R3)', class_pipette_on(), tool_name())
+    controller().handle_exploring_action('identify')
+
+
+def s_raster_last():
+    dock().comboBox_filtering_current_layer.setLayer(layer('ortho'))
+
+
+def s_raster_last_check():
+    check('raster last: the pipette comes back with the layer (R3)', pipette_on(), tool_name())
+    button(PIPETTE).setChecked(False)
 
 
 def s_finish():
@@ -198,6 +246,7 @@ def s_finish():
 STEPS = [
     (s_setup, 1500), (s_open_plugin, 6000), (s_raster, 3000), (s_raster_check, 1500),
     (s_point_cloud, 4000), (s_point_cloud_check, 1500), (s_back_to_raster, 3000), (s_back_to_raster_check, 500),
+    (s_point_cloud_again, 3000), (s_point_cloud_again_check, 500), (s_raster_last, 3000), (s_raster_last_check, 500),
     (s_finish, 500),
 ]
 

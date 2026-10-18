@@ -108,15 +108,19 @@ class TestPointCloudCard:
 
 
 class TestTools:
-    def test_raster_rail_adds_the_pipette_and_the_style_link(self):
-        # Picker, zoom, preview and reset are the shared buttons; the pipette is a selection tool like the picker.
-        # Hover and statistics are off the rail.
+    def test_raster_rail_adds_the_pipette_the_detector_and_the_style_link(self):
+        # Picker, zoom, preview and reset are the shared buttons; the pipette and the object detector are the
+        # two tools of the PIPETTE group (2026-10-18). Hover and statistics are off the rail.
         assert extras.tools_for("raster") == ["pushButton_checkable_exploring_raster_pipette",
+                                              "pushButton_checkable_exploring_raster_detector",
                                               "pushButton_checkable_exploring_raster_link"]
 
-    def test_point_cloud_rail_adds_the_class_pipette(self):
-        # The elevation profile and the 3D view are the standard QGIS tools: not on the rail.
-        assert extras.tools_for("point_cloud") == ["pushButton_checkable_exploring_point_cloud_pipette"]
+    def test_point_cloud_rail_adds_nothing_the_identify_button_is_the_class_pipette(self):
+        # 2026-10-18: the class pipette took the place of the Identify button; profile and 3D are QGIS tools.
+        assert extras.tools_for("point_cloud") == []
+
+    def test_detector_has_its_own_icon(self):
+        assert extras.ICON_DETECTOR.strip().startswith("<") and extras.ICON_DETECTOR != extras.ICON_PIPETTE
 
     def test_vector_has_no_extra_tool(self):
         assert extras.tools_for("vector") == []

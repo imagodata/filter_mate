@@ -12,8 +12,16 @@ FILTERING.
 
 ATTRIBUTES is a list of chained conditions on the attributes of the layer
 (``Z between 10 and 50 OR Intensity >= 300``; AND binds tighter than OR),
-plus the height above a DTM computed with PDAL, always ANDed with the rest.
-The return shortcuts (first, last, single) insert the matching condition.
+with a "Returns" row (any, first, last, single) that keeps one return
+condition. HEIGHT / DTM is its own group, not exclusive: the height above a
+DTM computed with PDAL is always ANDed with the rest, whatever the active
+group, and the group says it is a PDAL computation.
+
+CLASSES lists the classes present in the layer first, each with a weight bar
+proportional to its points, and the classes absent from it in a folded list;
+the class pipette of the rail (the Identify button) checks the class clicked
+on the map. The point counts and the current filter go to the selection strip
+under EXPLORING, not to the panel (2026-10-18 audit).
 
 The panel only reads a ``PointCloudLayerSummary`` (and the DTM layer combo);
 the state handling - criteria and expression building, presets, migration of
@@ -25,16 +33,18 @@ from contextlib import contextmanager
 from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple
 
 try:
-    from qgis.PyQt.QtCore import Qt, QTimer, pyqtSignal
+    from qgis.PyQt.QtCore import QRect, Qt, QTimer, pyqtSignal
     from qgis.PyQt.QtGui import QColor, QIcon, QPixmap
     from qgis.PyQt.QtWidgets import (
         QCheckBox, QComboBox, QDoubleSpinBox, QGridLayout, QGroupBox, QHBoxLayout, QLabel,
-        QListWidget, QListWidgetItem, QMenu, QPlainTextEdit, QPushButton, QSizePolicy, QVBoxLayout, QWidget,
+        QListWidget, QListWidgetItem, QMenu, QPlainTextEdit, QPushButton, QSizePolicy, QStyledItemDelegate,
+        QToolButton, QVBoxLayout, QWidget,
     )
     QT_AVAILABLE = True
 except ImportError:
     QT_AVAILABLE = False
     QWidget = object
+    QStyledItemDelegate = object
 
     def pyqtSignal(*_args):
         """Placeholder signal when Qt is unavailable."""
@@ -59,6 +69,12 @@ from ....core.domain.point_cloud_support import (
     ASPRS_CLASS_NAMES, CLASS_PRESETS, NOISE_CLASSES, asprs_class_label,
 )
 from .histogram_widget import normalize_range, spin_bounds
+
+try:
+    from ...styles.mockup_design import SPACING as _SPACING
+    GAP = int(_SPACING['fm_gap'])
+except Exception:  # the design module is not importable (tests without the ui package)
+    GAP = 6
 
 Bound = Optional[float]
 
@@ -95,6 +111,7 @@ CLASS_COLORS: Dict[int, str] = {
 }
 DEFAULT_CLASS_COLOR = "#9e9e9e"
 CLASS_COUNT_ROLE = 0x0101  # Qt.UserRole + 1: points of the class, -1 when unknown
+RETURN_ANY = "any"  # the "Returns" row: no return condition
 
 
 # ---------------------------------------------------------------------------
@@ -153,6 +170,24 @@ def preset_codes(name: str, present_codes: Iterable[int]) -> Tuple[int, ...]:
         return tuple(code for code in present if code not in NOISE_CLASSES)
     wanted = set(CLASS_PRESETS.get(name, ()))
     return tuple(code for code in present if code in wanted)
+
+
+def split_classes(classes: Iterable[Tuple[int, int]]) -> Tuple[List[Tuple[int, int]], List[Tuple[int, int]]]:
+    """``(present, absent)`` classes of a layer: a class counted 0 is absent, an uncounted one (-1) is present.
+
+    The present classes keep their order; the absent ones are folded away by the panel.
+    """
+    present, absent = [], []
+    for code, count in classes:
+        (absent if int(count) == 0 else present).append((int(code), int(count)))
+    return present, absent
+
+
+def weight_share(count: int, maximum: int) -> float:
+    """Length (0-1) of the weight bar of a class against the most populated one; 0 without counts."""
+    if count is None or maximum is None or int(count) <= 0 or int(maximum) <= 0:
+        return 0.0
+    return min(1.0, int(count) / int(maximum))
 
 
 def inverted_codes(present_codes: Iterable[int], checked_codes: Iterable[int]) -> Tuple[int, ...]:
@@ -370,9 +405,13 @@ def generated_expression(state: Any) -> str:
 
 
 def hag_from_state(state: Any, available: bool = True) -> Optional[Tuple[str, float]]:
-    """``(DTM layer id, minimum height)`` when the height filter is usable and on, else None."""
+    """``(DTM layer id, minimum height)`` when the height filter is usable and on, else None.
+
+    2026-10-18: HEIGHT / DTM is its own group, ANDed whatever the active group; it no
+    longer needs ATTRIBUTES to be the active one.
+    """
     parsed = parse_point_cloud_state(state)
-    if not (available and parsed["ranges_enabled"] and parsed["hag_enabled"] and parsed["hag_layer_id"]):
+    if not (available and parsed["hag_enabled"] and parsed["hag_layer_id"]):
         return None
     return parsed["hag_layer_id"], parsed["hag_min"]
 
@@ -382,7 +421,7 @@ def build_point_cloud_expression(state: Any, hag_available: bool = True) -> str:
 
     The typed expression when the EXPRESSION group is checked, else the
     criteria of the other groups; ``HeightAboveGround >= x`` is ANDed in
-    both cases when the height filter is on (an OR chain is parenthesised first).
+    both cases when the HEIGHT / DTM group is on (an OR chain is parenthesised first).
     """
     parsed = parse_point_cloud_state(state)
     if parsed["expression_enabled"]:
@@ -446,6 +485,34 @@ def _make_spin(parent: Any, decimals: int, tip: str) -> Any:
     # The size hint covers the widest bound (±1e9): far too wide for a 440 px dock.
     spin.setMinimumWidth(SPIN_MIN_WIDTH)
     return spin
+
+
+class ClassWeightDelegate(QStyledItemDelegate):
+    """Draws, under the text of a class item, a bar as long as its share of the most populated class."""
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.maximum = 0
+
+    def paint(self, painter, option, index):  # noqa: N802 - Qt override
+        count = index.data(CLASS_COUNT_ROLE)
+        try:
+            share = weight_share(int(count), self.maximum)
+        except (TypeError, ValueError):
+            share = 0.0
+        if share > 0:
+            rect = option.rect
+            left = rect.left() + 44  # after the check box and the swatch
+            width = int((rect.width() - 48) * share)
+            if width > 1:
+                painter.save()
+                colour = QColor(option.palette.highlight().color())
+                colour.setAlpha(70 if index.data(Qt.ItemDataRole.CheckStateRole) == Qt.CheckState.Checked else 32)
+                painter.setPen(Qt.PenStyle.NoPen)
+                painter.setBrush(colour)
+                painter.drawRoundedRect(QRect(left, rect.top() + 3, width, rect.height() - 6), 3, 3)
+                painter.restore()
+        super().paint(painter, option, index)
 
 
 def _make_combo(parent: Any, minimum_width: int, tip: str) -> Any:
@@ -719,29 +786,37 @@ class PointCloudExploringPanel(QWidget):
         group.setCheckable(True)
         group.setChecked(checked)
         layout = QVBoxLayout(group)
-        layout.setContentsMargins(4, 4, 4, 4)
-        layout.setSpacing(4)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(GAP)
         return group
+
+    @staticmethod
+    def _menu_button(parent: Any, text: str, tip: str, object_name: str) -> Any:
+        button = QToolButton(parent)
+        button.setObjectName(object_name)
+        button.setText(text)
+        button.setToolTip(tip)
+        button.setAccessibleName(tip)
+        button.setPopupMode(QToolButton.ToolButtonPopupMode.InstantPopup)
+        button.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonTextOnly)
+        button.setMenu(QMenu(button))
+        return button
 
     def _build_ui(self) -> None:
         layout = QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
-        layout.setSpacing(4)
+        layout.setSpacing(GAP)
         layout.addWidget(self._build_classes_group())
         layout.addWidget(self._build_ranges_group())
+        layout.addWidget(self._build_hag_group())
         layout.addWidget(self._build_expression_group())
 
         self._apply_tiles_check = QCheckBox(self.tr("Apply to the other tiles of the dataset"), self)
         self._apply_tiles_check.toggled.connect(self.applyToTilesToggled.emit)
         layout.addWidget(self._apply_tiles_check)
-        self._counts_label = QLabel("", self)
-        self._counts_label.setVisible(False)
-        layout.addWidget(self._counts_label)
-        self._current_filter_label = QLabel("", self)
-        self._current_filter_label.setWordWrap(True)
-        layout.addWidget(self._current_filter_label)
+        self._counts = (None, None)
+        self._current_subset = ""
         layout.addStretch()
-        self.set_current_subset("")
         self._setup_exclusive_groups()  # last: criteria() reads widgets built above
 
     def _build_classes_group(self) -> Any:
@@ -757,30 +832,63 @@ class PointCloudExploringPanel(QWidget):
             "Water": self.tr("Water"),
             WITHOUT_NOISE_PRESET: self.tr("Without noise"),
         }
-        # One compact combo (a button grid made the dock wider than 440 px): the usual selections
-        # of the raster "Usual thresholds" combo, for classes.
-        self._quick_combo = _make_combo(self._classes_group, COMBO_MIN_WIDTH, self.tr("Quick class selection"))
-        self._quick_combo.setObjectName("comboBox_point_cloud_class_quick_selection")
-        self._quick_combo.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
-        self._quick_combo.addItem(self.tr("Quick selection…"), None)
+        # One menu button (a button grid made the dock wider than 440 px), the same widget as the
+        # "Thresholds" and "Insert" menus of the raster panel.
+        head = QHBoxLayout()
+        head.setSpacing(GAP)
+        self._class_summary_label = QLabel("", self._classes_group)
+        self._class_summary_label.setObjectName("label_point_cloud_class_summary")
+        head.addWidget(self._class_summary_label, 1)
+        self._quick_button = self._menu_button(self._classes_group, self.tr("Selection ▾"),
+                                               self.tr("Quick class selection"),
+                                               "toolButton_point_cloud_class_quick_selection")
+        menu = self._quick_button.menu()
+        self._preset_actions: Dict[str, Any] = {}
         for name in (*CLASS_PRESETS, WITHOUT_NOISE_PRESET):
-            self._quick_combo.addItem(preset_titles.get(name, name), ("preset", name))
-        self._quick_combo.addItem(self.tr("All classes"), ("all", None))
-        self._quick_combo.addItem(self.tr("No class"), ("none", None))
-        self._quick_combo.addItem(self.tr("Invert the selection"), ("invert", None))
-        self._quick_combo.activated.connect(self._on_quick_selection)
-        group_layout.addWidget(self._quick_combo)
+            action = menu.addAction(preset_titles.get(name, name))
+            action.triggered.connect(lambda _checked=False, n=name: self._on_quick_selection(("preset", n)))
+            self._preset_actions[name] = action
+        menu.addSeparator()
+        for label, data in ((self.tr("All classes"), ("all", None)), (self.tr("No class"), ("none", None)),
+                            (self.tr("Invert the selection"), ("invert", None))):
+            action = menu.addAction(label)
+            action.triggered.connect(lambda _checked=False, d=data: self._on_quick_selection(d))
+        head.addWidget(self._quick_button)
+        group_layout.addLayout(head)
 
         self._classes_list = QListWidget(self._classes_group)
-        self._classes_list.setMaximumHeight(300)  # the whole ASPRS list, as in the mockup
+        self._classes_list.setObjectName("listWidget_point_cloud_classes")
+        self._classes_list.setMaximumHeight(240)
         self._classes_list.setAccessibleName(self.tr("Point classes"))
         self._classes_list.itemChanged.connect(self._changed)
         self._classes_list.itemChanged.connect(self._update_class_summary)
+        self._weight_delegate = ClassWeightDelegate(self._classes_list)
+        self._classes_list.setItemDelegate(self._weight_delegate)
         group_layout.addWidget(self._classes_list)
-        self._class_summary_label = QLabel("", self._classes_group)
-        self._class_summary_label.setObjectName("label_point_cloud_class_summary")
-        group_layout.addWidget(self._class_summary_label)
+        # Classes absent from the layer (counted 0): folded, so the list shows what the tile holds.
+        self._absent_button = QToolButton(self._classes_group)
+        self._absent_button.setObjectName("toolButton_point_cloud_absent_classes")
+        self._absent_button.setCheckable(True)
+        self._absent_button.setAutoRaise(True)
+        self._absent_button.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonTextBesideIcon)
+        self._absent_button.setArrowType(Qt.ArrowType.RightArrow)
+        self._absent_button.setToolTip(self.tr("Classes of the standard that hold no point of this layer"))
+        self._absent_button.toggled.connect(self._on_absent_toggled)
+        self._absent_button.setVisible(False)
+        group_layout.addWidget(self._absent_button)
+        self._absent_list = QListWidget(self._classes_group)
+        self._absent_list.setObjectName("listWidget_point_cloud_absent_classes")
+        self._absent_list.setMaximumHeight(160)
+        self._absent_list.setAccessibleName(self.tr("Classes absent from the layer"))
+        self._absent_list.itemChanged.connect(self._changed)
+        self._absent_list.itemChanged.connect(self._update_class_summary)
+        self._absent_list.setVisible(False)
+        group_layout.addWidget(self._absent_list)
         return self._classes_group
+
+    def _on_absent_toggled(self, checked: bool) -> None:
+        self._absent_list.setVisible(bool(checked) and self._absent_list.count() > 0)
+        self._absent_button.setArrowType(Qt.ArrowType.DownArrow if checked else Qt.ArrowType.RightArrow)
 
     def _build_ranges_group(self) -> Any:
         self._ranges_group = self._make_group(self.tr("ATTRIBUTES"), "mGroupBox_point_cloud_ranges", checked=False)
@@ -800,41 +908,61 @@ class PointCloudExploringPanel(QWidget):
         actions_widget.setObjectName("widget_point_cloud_condition_actions")
         actions = QHBoxLayout(actions_widget)
         actions.setContentsMargins(0, 0, 0, 0)
-        actions.setSpacing(4)
+        actions.setSpacing(GAP)
         self._add_condition_button = QPushButton(self.tr("+ Condition"), actions_widget)
         self._add_condition_button.setObjectName("pushButton_point_cloud_add_condition")
         self._add_condition_button.setToolTip(self.tr("Add a condition on an attribute of the layer"))
         self._add_condition_button.clicked.connect(self._on_add_condition)
-        # Return shortcuts in a menu: three more buttons would not fit a narrow dock.
-        self._return_button = QPushButton(self.tr("Returns"), actions_widget)
-        self._return_button.setObjectName("pushButton_point_cloud_return_presets")
-        self._return_button.setToolTip(self.tr("Keep the first, last or single returns of the laser pulses"))
-        menu = QMenu(self._return_button)
-        titles = {
+        actions.addWidget(self._add_condition_button)
+        actions.addStretch()
+        group.layout().addWidget(actions_widget)
+
+        # The returns: one choice, not a condition inserted in the list (its row is kept in step).
+        returns_widget = QWidget(group)
+        returns_widget.setObjectName("widget_point_cloud_returns")
+        returns = QHBoxLayout(returns_widget)
+        returns.setContentsMargins(0, 0, 0, 0)
+        returns.setSpacing(GAP)
+        returns.addWidget(QLabel(self.tr("Returns"), returns_widget))
+        self._return_combo = _make_combo(returns_widget, COMBO_MIN_WIDTH,
+                                         self.tr("Keep every return, or the first, last or single returns of the laser pulses"))
+        self._return_combo.setObjectName("comboBox_point_cloud_returns")
+        self._return_combo.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
+        self._return_titles = {
+            RETURN_ANY: self.tr("Any return"),
             RETURN_FIRST: self.tr("First return (ReturnNumber = 1)"),
             RETURN_LAST: self.tr("Last return (ReturnNumber = NumberOfReturns)"),
             RETURN_SINGLE: self.tr("Single return (NumberOfReturns = 1)"),
         }
-        self._return_actions: Dict[str, Any] = {}
-        for key in RETURN_PRESETS:
-            action = menu.addAction(titles[key])
-            action.triggered.connect(lambda _checked=False, k=key: self._apply_return_preset(k))
-            self._return_actions[key] = action
-        self._return_button.setMenu(menu)
-        actions.addWidget(self._add_condition_button)
-        actions.addWidget(self._return_button)
-        actions.addStretch()
-        group.layout().addWidget(actions_widget)
+        self._fill_return_combo(tuple(RETURN_PRESETS))
+        self._return_combo.activated.connect(self._on_return_combo)
+        returns.addWidget(self._return_combo, 1)
+        self._returns_widget = returns_widget
+        group.layout().addWidget(returns_widget)
+        return group
 
-        # Height above the DTM: computed with PDAL, always ANDed with the conditions.
+    def _build_hag_group(self) -> Any:
+        """HEIGHT / DTM: its own group, checkable, not exclusive (always ANDed), computed with PDAL."""
+        group = self._make_group(self.tr("HEIGHT / DTM"), "mGroupBox_point_cloud_height", checked=False)
+        self._hag_group = group
+        self._hag_check = group  # the group check box is the switch (isChecked / toggled, as the box before)
+        group.toggled.connect(self._on_hag_toggled)
         grid = QGridLayout()
-        grid.setSpacing(4)
-        self._hag_check = QCheckBox(self.tr("Height above DTM ≥"), group)
-        self._hag_check.toggled.connect(self._changed)
+        grid.setSpacing(GAP)
+        note = QLabel(self.tr("Always combined (AND) with the active group"), group)
+        note.setObjectName("label_point_cloud_height_note")
+        note.setEnabled(False)
+        badge = QLabel(self.tr("PDAL · derived cloud"), group)
+        badge.setObjectName("label_point_cloud_height_badge")
+        badge.setToolTip(self.tr("The height is computed by PDAL into a derived point cloud, in a background task"))
+        badge.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
+        badge.setEnabled(False)
+        self._hag_badge = badge
         self._hag_spin = QDoubleSpinBox(group)
         self._hag_spin.setDecimals(2)
         self._hag_spin.setRange(0.0, 10000.0)
         self._hag_spin.setValue(DEFAULT_HAG_MIN)
+        self._hag_spin.setPrefix("≥ ")
         self._hag_spin.setSuffix(" m")
         self._hag_spin.setKeyboardTracking(False)
         self._hag_spin.valueChanged.connect(self._changed)
@@ -853,16 +981,52 @@ class PointCloudExploringPanel(QWidget):
         self._hag_layer_combo.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
         self._hag_layer_combo.setMinimumWidth(SPIN_MIN_WIDTH)
         self._hag_spin.setMinimumWidth(SPIN_MIN_WIDTH)
-        # Own row: the long check box label would widen the first column of the grid.
-        grid.addWidget(self._hag_check, 0, 0, 1, 2)
+        grid.addWidget(note, 0, 0)
+        grid.addWidget(badge, 0, 1)
         grid.addWidget(self._hag_spin, 1, 0)
         grid.addWidget(self._hag_layer_combo, 1, 1)
         grid.setColumnStretch(0, 1)
         grid.setColumnStretch(1, 2)
         self._hag_tooltip = self.tr("Keep the points at least this high above the terrain model")
-        self._hag_check.setToolTip(self._hag_tooltip)
+        group.setToolTip(self._hag_tooltip)
         group.layout().addLayout(grid)
+        if hasattr(group, 'setCollapsed'):
+            group.setCollapsed(True)
         return group
+
+    def _on_hag_toggled(self, checked: bool) -> None:
+        if hasattr(self._hag_group, 'setCollapsed'):
+            self._hag_group.setCollapsed(not checked)
+        self._changed()
+
+    def _fill_return_combo(self, presets: Sequence[str]) -> None:
+        with _signals_blocked(self._return_combo):
+            self._return_combo.clear()
+            self._return_combo.addItem(self._return_titles[RETURN_ANY], RETURN_ANY)
+            for key in presets:
+                self._return_combo.addItem(self._return_titles[key], key)
+
+    def _on_return_combo(self, index: int) -> None:
+        key = self._return_combo.itemData(index)
+        if key in RETURN_PRESETS:
+            self._apply_return_preset(key)
+            return
+        for row in list(self._condition_rows):
+            if return_preset_of(row.condition()) is not None:
+                self._drop_row(row)
+        self._update_first_row()
+        self._changed()
+
+    def _sync_return_combo(self) -> None:
+        """The combo says which return condition the list holds (none: any return)."""
+        current = RETURN_ANY
+        for row in self._condition_rows:
+            key = return_preset_of(row.condition())
+            if key is not None:
+                current = key
+                break
+        with _signals_blocked(self._return_combo):
+            self._return_combo.setCurrentIndex(max(0, self._return_combo.findData(current)))
 
     def _catalog(self) -> None:  # pragma: no cover - never called
         """Literal tr() calls of the attribute labels of the registry, for pylupdate.
@@ -927,9 +1091,8 @@ class PointCloudExploringPanel(QWidget):
         self._condition_bounds = {name: value for name, value in bounds if value is not None}
         self._add_condition_button.setEnabled(bool(names))
         presets = return_presets_available(attributes)
-        for key, action in self._return_actions.items():
-            action.setVisible(key in presets)
-        self._return_button.setVisible(bool(presets))
+        self._fill_return_combo(presets)
+        self._returns_widget.setVisible(bool(presets))
 
         if saved is not None:
             self.restore_state(saved)
@@ -964,32 +1127,26 @@ class PointCloudExploringPanel(QWidget):
         self._refresh_generated_expression()
 
     def set_point_counts(self, kept: Optional[int], total: Optional[int]) -> None:
-        """Show ``Kept points: 9.8 M / 38.4 M (25.5 %)``; hidden without a kept count.
-
-        With :meth:`set_counts_inline` False the counts only go to the selection strip
-        under EXPLORING (``summaryChanged``), as in the FilterMate 5 mockup.
-        """
+        """Remember the kept / total point counts; the selection strip under EXPLORING shows them (``summaryChanged``)."""
         self._counts = (kept, total)
-        text = format_point_counts(kept, total)
-        self._counts_label.setText(self.tr("Kept points: {0}").format(text) if text else "")
-        self._counts_label.setVisible(bool(text) and getattr(self, '_counts_inline', True))
         self.summaryChanged.emit()
 
     def point_counts(self) -> Tuple[Optional[int], Optional[int]]:
-        """Last ``(kept, total)`` point counts shown."""
+        """Last ``(kept, total)`` point counts."""
         return getattr(self, '_counts', (None, None))
 
     def set_counts_inline(self, inline: bool) -> None:
-        """Whether the panel shows the counts itself (False: the selection strip does)."""
+        """Kept for the callers of FilterMate 5.0: the panel never shows the counts itself any more."""
         self._counts_inline = bool(inline)
-        if not inline:
-            self._counts_label.setVisible(False)
 
     def set_current_subset(self, text: str) -> None:
-        """Show the subset string currently applied to the layer."""
-        text = text or ""
-        self._current_filter_label.setText(self.tr("Current filter: {0}").format(text or self.tr("none")))
-        self._current_filter_label.setToolTip(text)
+        """Remember the subset string currently applied to the layer (shown by the strip tooltip)."""
+        self._current_subset = (text or "").strip()
+        self.summaryChanged.emit()
+
+    def current_subset(self) -> str:
+        """Subset string currently applied to the layer, ``""`` when none."""
+        return getattr(self, '_current_subset', "")
 
     def reset(self) -> None:
         """Back to the defaults (no class, no condition, no height, no expression). Does not emit."""
@@ -1019,7 +1176,7 @@ class PointCloudExploringPanel(QWidget):
         parsed = parse_point_cloud_state(state)
         wanted = set(parsed["classes"])
         widgets = (self._classes_group, self._ranges_group, self._expression_group, self._classes_list,
-                   self._hag_check, self._hag_spin, self._hag_layer_combo, self._apply_tiles_check)
+                   self._absent_list, self._hag_group, self._hag_spin, self._hag_layer_combo, self._apply_tiles_check)
         with _signals_blocked(*widgets):
             self._classes_group.setChecked(parsed["classes_enabled"])
             self._ranges_group.setChecked(parsed["ranges_enabled"])
@@ -1027,7 +1184,9 @@ class PointCloudExploringPanel(QWidget):
                 checked = int(item.data(Qt.ItemDataRole.UserRole)) in wanted
                 item.setCheckState(Qt.CheckState.Checked if checked else Qt.CheckState.Unchecked)
             self._update_class_summary()
-            self._hag_check.setChecked(parsed["hag_enabled"])
+            self._hag_group.setChecked(parsed["hag_enabled"])
+            if hasattr(self._hag_group, 'setCollapsed'):
+                self._hag_group.setCollapsed(not parsed["hag_enabled"])
             self._hag_spin.setValue(parsed["hag_min"])
             self._restore_hag_layer(parsed["hag_layer_id"])
             self._apply_tiles_check.setChecked(parsed["apply_to_tiles"])
@@ -1047,7 +1206,7 @@ class PointCloudExploringPanel(QWidget):
         a group activated meanwhile came back one band high with its contents hidden.
         """
         super().showEvent(event)
-        for group in self._exclusive_groups():
+        for group in (*self._exclusive_groups(), self._hag_group):
             if hasattr(group, 'setCollapsed') and group.isVisible():
                 group.setCollapsed(group.isCollapsed())  # unchanged state: no collapsedStateChanged
 
@@ -1127,6 +1286,8 @@ class PointCloudExploringPanel(QWidget):
 
     def _changed(self, *_args) -> None:
         self._refresh_generated_expression()
+        if hasattr(self, '_return_combo'):
+            self._sync_return_combo()
         self._debounce.start()
 
     # === Classes ===
@@ -1136,28 +1297,33 @@ class PointCloudExploringPanel(QWidget):
         if not classes:
             # Unknown classes: offer the standard ASPRS codes without counts.
             classes = tuple((code, -1) for code in sorted(ASPRS_CLASS_NAMES))
-        with _signals_blocked(self._classes_list):
-            self._classes_list.clear()
-            for code, count in classes:
-                item = QListWidgetItem(class_item_label(code, count))
-                pixmap = QPixmap(12, 12)
-                pixmap.fill(QColor(class_color(code)))
-                item.setIcon(QIcon(pixmap))
-                item.setFlags(Qt.ItemFlag.ItemIsUserCheckable | Qt.ItemFlag.ItemIsEnabled)
-                item.setCheckState(Qt.CheckState.Unchecked)
-                item.setData(Qt.ItemDataRole.UserRole, int(code))
-                item.setData(CLASS_COUNT_ROLE, int(count))
-                self._classes_list.addItem(item)
-        present = self._present_codes()
-        model = self._quick_combo.model()
-        for index in range(self._quick_combo.count()):
-            data = self._quick_combo.itemData(index)
-            if data is not None and data[0] == "preset":
-                model.item(index).setEnabled(bool(preset_codes(data[1], present)))
+        present, absent = split_classes(classes)
+        self._weight_delegate.maximum = max((count for _code, count in present), default=0)
+        for widget, entries in ((self._classes_list, present), (self._absent_list, absent)):
+            with _signals_blocked(widget):
+                widget.clear()
+                for code, count in entries:
+                    item = QListWidgetItem(class_item_label(code, count))
+                    pixmap = QPixmap(12, 12)
+                    pixmap.fill(QColor(class_color(code)))
+                    item.setIcon(QIcon(pixmap))
+                    item.setFlags(Qt.ItemFlag.ItemIsUserCheckable | Qt.ItemFlag.ItemIsEnabled)
+                    item.setCheckState(Qt.CheckState.Unchecked)
+                    item.setData(Qt.ItemDataRole.UserRole, int(code))
+                    item.setData(CLASS_COUNT_ROLE, int(count))
+                    widget.addItem(item)
+        self._absent_button.setText(self.tr("Other classes, absent from the layer ({0})").format(len(absent)))
+        self._absent_button.setVisible(bool(absent))
+        self._absent_list.setVisible(bool(absent) and self._absent_button.isChecked())
+        codes = self._present_codes()
+        for name, action in self._preset_actions.items():
+            action.setEnabled(bool(preset_codes(name, codes)))
         self._update_class_summary()
 
     def _class_items(self) -> List[Any]:
-        items = (self._classes_list.item(index) for index in range(self._classes_list.count()))
+        items = []
+        for widget in (self._classes_list, self._absent_list):
+            items.extend(widget.item(index) for index in range(widget.count()))
         return [item for item in items if item is not None]
 
     def _present_codes(self) -> List[int]:
@@ -1169,7 +1335,7 @@ class PointCloudExploringPanel(QWidget):
 
     def _check_codes(self, codes: Iterable[int]) -> None:
         wanted = set(codes)
-        with _signals_blocked(self._classes_list):
+        with _signals_blocked(self._classes_list, self._absent_list):
             for item in self._class_items():
                 checked = int(item.data(Qt.ItemDataRole.UserRole)) in wanted
                 item.setCheckState(Qt.CheckState.Checked if checked else Qt.CheckState.Unchecked)
@@ -1196,9 +1362,7 @@ class PointCloudExploringPanel(QWidget):
     def _apply_preset(self, name: str) -> None:
         self._check_codes(preset_codes(name, self._present_codes()))
 
-    def _on_quick_selection(self, index: int) -> None:
-        data = self._quick_combo.itemData(index)
-        self._quick_combo.setCurrentIndex(0)  # a one-shot action, the combo stays on its title
+    def _on_quick_selection(self, data: Any) -> None:
         if data is None:
             return
         action, name = data
@@ -1297,7 +1461,7 @@ class PointCloudExploringPanel(QWidget):
             self._changed()
 
     def _apply_return_preset(self, key: str) -> None:
-        """Insert a return shortcut; it replaces the one already there (one return choice, as before)."""
+        """Keep the return condition of ``key``; it replaces the one already there (one return choice)."""
         for row in self._condition_rows:
             if return_preset_of(row.condition()) is not None:
                 row.set_condition(return_preset_condition(key, row.join()))

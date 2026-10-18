@@ -48,7 +48,6 @@ SOURCES = \
     ../ui/widgets/json_view/datatypes.py \
     ../ui/widgets/json_view/model.py \
     ../ui/widgets/json_view/searchable_view.py \
-    ../ui/widgets/point_cloud_filter_widget.py \
     ../ui/widgets/coverage_panels/histogram_widget.py \
     ../ui/widgets/coverage_panels/raster_exploring_panel.py \
     ../ui/widgets/coverage_panels/point_cloud_exploring_panel.py

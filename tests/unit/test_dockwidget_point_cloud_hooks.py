@@ -214,9 +214,9 @@ def test_translation_project_lists_the_new_sources():
     sources = _PRO.read_text(encoding="utf-8")
     assert "../ui/controllers/coverage_mode_controller.py" in sources
     assert "../ui/widgets/coverage_panels/raster_exploring_panel.py" in sources
-    assert "../ui/widgets/point_cloud_filter_widget.py" in sources
+    assert "../ui/widgets/point_cloud_filter_widget.py" not in sources  # legacy widget removed on 2026-10-18
     for line in sources.splitlines():
         if line.strip().endswith("searchable_view.py \\") or line.strip().endswith("integration.py \\"):
             continue
     assert (_ROOT / "ui" / "controllers" / "coverage_mode_controller.py").exists()
-    assert (_ROOT / "ui" / "widgets" / "point_cloud_filter_widget.py").exists()
+    assert not (_ROOT / "ui" / "widgets" / "point_cloud_filter_widget.py").exists()

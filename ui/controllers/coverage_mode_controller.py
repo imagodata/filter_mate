@@ -551,13 +551,24 @@ class CoverageModeController(BaseController):
         layer = self._active_layer
         if layer is None:
             return
+        # R3 (2026-10-18): the tool on the map leaves with the layer and comes back with it.
+        pipette_on, target = self._color_pick and self._tool_on_map(self._pixel_tool), None
+        if pipette_on and self._raster_panel is not None and hasattr(self._raster_panel, 'pick_target'):
+            target = self._raster_panel.pick_target()
+        class_pipette_on = self._tool_on_map(self._class_tool)
         self._deactivate_pixel_tool()
         self._deactivate_class_tool()
         # QGIS remembers the last tool before Pan / Zoom and gives it back: a picker of the outgoing
         # layer must not come back on the next one (the raster picker reading a point cloud).
         self._drop_map_tools()
         try:
-            self._panel_states[layer.id()] = self._current_panel().state() if self._current_panel() is not None else {}
+            state = self._current_panel().state() if self._current_panel() is not None else {}
+            if state:
+                state['pipette_on'] = bool(pipette_on)
+                if target is not None:
+                    state['pipette_target'] = target
+                state['class_pipette_on'] = bool(class_pipette_on)
+            self._panel_states[layer.id()] = state
         except Exception as exc:
             logger.debug(f"[FM5] panel state not saved: {exc}")
         self._stop_preview(layer)
@@ -829,7 +840,9 @@ class CoverageModeController(BaseController):
                 'pushButton_exploring_reset_layer_properties': self.tr("Reset the raster selection"),
             },
             LayerKind.POINT_CLOUD: {
-                'pushButton_exploring_identify': self.tr("Identify points on the map"),
+                'pushButton_exploring_identify': self.tr(
+                    "Class pipette: click the map and the class of the points drawn there is checked. "
+                    "Ctrl+click adds another one"),
                 'pushButton_exploring_zoom': self.tr("Zoom to the layer"),
                 'pushButton_checkable_exploring_selecting': self.tr("Live preview: show only the points kept by the selection"),
                 'pushButton_checkable_exploring_tracking': self.tr("Not used for point cloud layers"),
@@ -886,8 +899,32 @@ class CoverageModeController(BaseController):
                 if self._kind is LayerKind.RASTER and state.get('preview'):
                     # The preview box comes back checked: so do the button and the mask on the map.
                     self._on_raster_preview_toggled(True)
+                self._restore_tool(state)
             except Exception as exc:
                 logger.debug(f"[FM5] panel state not restored: {exc}")
+
+    def _restore_tool(self, state: Any) -> None:
+        """R3: the pipette / detector or the class pipette that was on the map when the layer was left comes back."""
+        from ...core.domain.layer_kind import LayerKind
+        if not isinstance(state, dict):
+            return
+        if self._kind is LayerKind.RASTER and state.get('pipette_on'):
+            target = state.get('pipette_target') or 'similar'
+            self._on_color_pick_toggled(True, target)
+        elif self._kind is LayerKind.POINT_CLOUD and state.get('class_pipette_on'):
+            self._on_class_pick_toggled(True)
+
+    def _tool_on_map(self, tool: Any) -> bool:
+        """Whether ``tool`` is the current map tool of the canvas."""
+        if tool is None:
+            return False
+        iface = self._iface()
+        if iface is None:
+            return False
+        try:
+            return iface.mapCanvas().mapTool() is tool
+        except RuntimeError:
+            return False
 
     def _sync_layer_combo(self, layer: Any) -> None:
         combo = getattr(self.dockwidget, 'comboBox_filtering_current_layer', None)
@@ -1254,6 +1291,7 @@ class CoverageModeController(BaseController):
         # The objects found, not the parts of their union: two touching objects are still two.
         self._call(panel, 'show_detected_objects', result.objects, area, result.truncated)
         self._update_kept_ratio()  # read now: a ratio asked before (a layer coming back) found none
+        self._extras_call('schedule_strip')
         iface = self._iface()
         canvas = iface.mapCanvas() if iface is not None else None
         if canvas is None:
@@ -1423,7 +1461,7 @@ class CoverageModeController(BaseController):
                 if self._kind is LayerKind.RASTER:
                     self._toggle_pixel_tool()
                 else:
-                    self._identify_point_cloud()
+                    self._toggle_class_tool()  # 2026-10-18: the Identify button is the class pipette
             elif action == 'zoom':
                 if self._kind is LayerKind.RASTER:
                     self._zoom_to_selection(layer)  # mockup: zoom on the extent of the selected range
@@ -1511,7 +1549,12 @@ class CoverageModeController(BaseController):
         canvas.setExtent(extent)
         canvas.refresh()
 
+    def _toggle_class_tool(self) -> None:
+        """The Identify button of a point cloud: the class pipette goes on the map, or leaves it."""
+        self._on_class_pick_toggled(not self._tool_on_map(self._class_tool))
+
     def _identify_point_cloud(self) -> None:
+        """QGIS identify tool on the point cloud (kept for the automation API; the rail uses the class pipette)."""
         iface = self._iface()
         if iface is None:
             return
@@ -1538,11 +1581,22 @@ class CoverageModeController(BaseController):
         self._previous_map_tool = canvas.mapTool()
         canvas.setMapTool(self._pixel_tool)
 
-    def _on_color_pick_toggled(self, enabled: bool) -> None:
-        """The colour pipette of the panel: the pixel picker goes on the map (or leaves it) with it."""
+    def _on_color_pick_toggled(self, enabled: bool, target: Optional[str] = None) -> None:
+        """The pipette or the object detector of the rail: the pixel picker goes on the map (or leaves it) with it.
+
+        Args:
+            enabled: Whether the tool goes on the map.
+            target: ``'similar'`` (the pipette) or ``'object'`` (the detector); None keeps the target of the panel.
+        """
+        panel = self._raster_panel
+        if target is not None and panel is not None and hasattr(panel, 'set_pick_target'):
+            panel.set_pick_target(target)
+        if target is None and panel is not None and hasattr(panel, 'pick_target'):
+            target = panel.pick_target()
         self._color_pick = bool(enabled)
-        if self._raster_panel is not None:
-            self._raster_panel.show_pipette_active(self._color_pick)
+        self._extras_call('set_pipette_checked', self._color_pick, target or 'similar')
+        if panel is not None:
+            panel.show_pipette_active(self._color_pick)
         iface = self._iface()
         if iface is None:
             return
@@ -1557,7 +1611,6 @@ class CoverageModeController(BaseController):
         wanted = mode == 'pipette'
         if wanted == self._color_pick:
             return
-        self._extras_call('set_pipette_checked', wanted)
         self._on_color_pick_toggled(wanted)
 
     def _show_picker_state(self, active: bool) -> None:

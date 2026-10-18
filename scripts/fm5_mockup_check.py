@@ -250,6 +250,9 @@ def s_raster_check():
     check('raster: pipette tool visible with its icon', pipette is not None and pipette.isVisible() and not pipette.icon().isNull())
     link = tool('pushButton_checkable_exploring_raster_link')
     check('raster: style link on the rail, its icon drawn', link is not None and link.isVisible() and not link.icon().isNull())
+    detector = tool('pushButton_checkable_exploring_raster_detector')
+    check('raster: object detector on the rail, its icon drawn',
+          detector is not None and detector.isVisible() and not detector.icon().isNull())
     check('raster: no other extra tool on the rail (hover, statistics) nor the point cloud ones',
           all(tool(n) is None or not tool(n).isVisible() for n in (
               'pushButton_checkable_exploring_raster_hover', 'pushButton_checkable_exploring_raster_zone',
@@ -277,13 +280,13 @@ def s_picker_check():
     panel = c._raster_panel
     tool = c._pixel_tool
     check('picker: pipette button held down while active', d.pushButton_exploring_identify.isDown())
-    check('picker: pixel group open', not panel._pixel_group.isCollapsed())
+    check('picker: bands group open', not panel._bands_group.isCollapsed())
     check('picker: picked point marked on the map', tool._marker is not None and tool._marker.isVisible())
-    history = panel._pixel_history_label.text()
-    check('picker: last picks as a two-column table', '<table' in history and history.count('<tr>') >= 3, history[:80])
-    check('picker: value and coordinates on one line',
-          abs(panel._pixel_value_label.mapTo(d, panel._pixel_value_label.rect().bottomLeft()).y()
-              - panel._pixel_coordinates_label.mapTo(d, panel._pixel_coordinates_label.rect().bottomLeft()).y()) <= 4)
+    history = panel._pixel_coordinates_label.toolTip()
+    check('picker: last picks as a two-column table (tooltip of the click)', '<table' in history and history.count('<tr>') >= 3,
+          history[:80])
+    check('picker: the band rows show the values', panel._band_rows[1]['value'].text() not in ('', '–'),
+          panel._band_rows[1]['value'].text())
     iface.actionPan().trigger()
     check('picker: marker and held button cleared with another map tool', tool._marker is None and not d.pushButton_exploring_identify.isDown())
 
@@ -416,8 +419,7 @@ def s_pc_pipette_check():
     if others:
         panel.select_class(others[0], extend=True)
         check('pc pipette: Ctrl+click adds a class', panel._checked_codes() == sorted(picked + others[:1]), str(panel._checked_codes()))
-    pipette = tool('pushButton_checkable_exploring_point_cloud_pipette')
-    pipette.setChecked(False)
+    c._on_class_pick_toggled(False)
     check('pc pipette: off gives the map back to pan', canvas.mapTool() is STATE['pan'], type(canvas.mapTool()).__name__)
     pipette.setChecked(True)
     iface.actionPan().trigger()
@@ -441,8 +443,9 @@ def s_pc_check():
     check('pc: layer card', card is not None and 'points' in card.text(), card.text() if card else '')
     hint = d.findChild(QLabel, 'label_filtering_source_geometry')
     check('pc: no source geometry line', hint is None or not hint.isVisible())
-    pipette = tool('pushButton_checkable_exploring_point_cloud_pipette')
-    check('pc: class pipette on the rail, its icon drawn', pipette is not None and pipette.isVisible() and not pipette.icon().isNull())
+    check('pc: the Identify button is the class pipette (enabled, with its tooltip)',
+          d.pushButton_exploring_identify.isEnabled() and 'pipette' in d.pushButton_exploring_identify.toolTip().lower(),
+          d.pushButton_exploring_identify.toolTip()[:60])
     check('pc: no other extra tool on the rail (profile and 3D are the QGIS ones, no raster tool)',
           all(tool(n) is None or not tool(n).isVisible() for n in (
               'pushButton_exploring_point_cloud_profile', 'pushButton_exploring_point_cloud_3d',
@@ -506,8 +509,9 @@ def s_pc_conditions():
           pc._expression_edit.toPlainText())
     check('pc conditions: join combo hidden on the first row only',
           z_row._join_combo.isHidden() and not i_row._join_combo.isHidden())
-    if pc._return_button.isVisible():
-        pc._return_actions['last'].trigger()
+    if pc._returns_widget.isVisible():
+        pc._return_combo.setCurrentIndex(pc._return_combo.findData('last'))
+        pc._return_combo.activated.emit(pc._return_combo.currentIndex())
         last = expected[:-1] + ' AND ReturnNumber = NumberOfReturns)'
         check('pc conditions: last return shortcut joins the last group', pc.expression() == last, pc.expression())
     lhd = layer('lhd')
