@@ -766,8 +766,8 @@ def selection_geometry(provider: QgsRasterDataProvider, selection: RasterSelecti
         progress: Callable receiving the progress in percent.
         opening: Radius of the opening of :func:`patch_cores` on each tile (the
             similar objects: the patches are cut at their pixel-wide bridges, as
-            the clicked objects are, and their holes are filled; a coarse read
-            only fills the holes); 0: the pixels as they are.
+            the clicked objects are; nothing on a coarse read); 0: the pixels as
+            they are.
     """
     from .geometry_tools import make_valid, merge_tile_polygons, patch_cores, pixel_to_map, polygonize_mask
     if selection.seeds and selection.similar:
@@ -827,10 +827,11 @@ def selection_geometry(provider: QgsRasterDataProvider, selection: RasterSelecti
             if ground is not None:
                 array = derive(array, selection.derivative, *ground)
             mask = selection_mask(array, selection)
-        if opening > 0 and mask.any():
-            # The margin holds the neighbours the cores read; a hole cut by the window edge is not one.
-            # A coarse cell stands for k x k pixels: a cell-wide bridge is no pixel-wide one, nothing is cut.
-            mask = fill_holes(mask if coarse else patch_cores(mask, opening))
+        if opening > 0 and not coarse and mask.any():
+            # The margin holds the neighbours the cores read. A coarse cell stands for k x k pixels:
+            # a cell-wide bridge is no pixel-wide one, nothing is cut. The holes stay: filled tile by
+            # tile, a hole on a tile edge would be half filled and a courtyard wider than a tile never.
+            mask = patch_cores(mask, opening)
         if mask.any():
             core = (slice(row - top, row - top + rows), slice(col - left, col - left + cols))
             kept += int(mask[core].sum())
@@ -971,12 +972,14 @@ def object_region(mask, seed, opening: int = OBJECT_OPENING, reconstruct: bool =
     """Patch of ``mask`` under ``seed`` (``(row, col)``), without the pixel-wide bridges that leave it.
 
     The patch is followed on the cores of the patches (:func:`patch_cores`,
-    ``opening`` the radius of its opening; 0: on ``mask`` itself), then, with
-    ``reconstruct``, the cells taken from its outline are given back: the cells of
-    ``mask`` next to it that belong to no core. A pool and the lawn touching it by a
-    line of pixels of its colour stay two objects, the pool keeping its full size
-    (its corners too); the first pixel of the line stays with it, never the lawn.
-    A patch too thin to have a core (a path, a fence) is followed on ``mask`` itself.
+    ``opening`` the radius of its opening; 0: on ``mask`` itself) from the seed or,
+    when the cores leave it out (a corner of the pool), from the nearest core of
+    its patch (:func:`_core_seed`), then, with ``reconstruct``, the cells taken
+    from its outline are given back: the cells of ``mask`` next to it that belong
+    to no core. A pool and the lawn touching it by a line of pixels of its colour
+    stay two objects, the pool keeping its full size (its corners too); the first
+    pixel of the line stays with it, never the lawn. A patch too thin to have a
+    core (a path, a fence) is followed on ``mask`` itself.
     """
     import numpy as np
     from .geometry_tools import dilate_mask, patch_cores
@@ -984,12 +987,43 @@ def object_region(mask, seed, opening: int = OBJECT_OPENING, reconstruct: bool =
     if opening <= 0:
         return flood_fill(mask, [seed])
     cores = patch_cores(mask, opening)
-    region = flood_fill(cores, [seed])
-    if not region.any():
+    start = _core_seed(mask, cores, seed)
+    if start is None:
         return flood_fill(mask, [seed])
+    region = flood_fill(cores, [start])
     if reconstruct:
         region = region | (dilate_mask(region) & mask & ~cores)
     return region
+
+
+# A click on a cell the cores leave out (a corner, the ring of a diagonal edge) starts from the nearest
+# core of its patch within this many cells: the diagonal neighbour of a corner is two steps away.
+CORE_SEED_RADIUS = 2
+
+
+def _core_seed(mask, cores, seed, radius: int = CORE_SEED_RADIUS):
+    """``seed`` when it is a core, else the nearest core of its patch within ``radius`` cells; None without one.
+
+    The patch is followed on ``mask`` in the square of ``radius`` around the seed only
+    (a leak through a bridge is what the cores avoid). A seed off the grid or on a dropped
+    cell, or a patch too thin to have a core nearby (a path), gives None.
+    """
+    import numpy as np
+    row, col = int(seed[0]), int(seed[1])
+    rows, cols = mask.shape
+    if not (0 <= row < rows and 0 <= col < cols) or not mask[row, col]:
+        return None
+    if cores[row, col]:
+        return (row, col)
+    row0, col0 = max(0, row - radius), max(0, col - radius)
+    window = (slice(row0, row + radius + 1), slice(col0, col + radius + 1))
+    local = flood_fill(mask[window], [(row - row0, col - col0)]) & cores[window]
+    candidates = np.argwhere(local)
+    if not candidates.size:
+        return None
+    distances = np.abs(candidates[:, 0] - (row - row0)) + np.abs(candidates[:, 1] - (col - col0))
+    best = candidates[int(np.argmin(distances))]
+    return (int(best[0]) + row0, int(best[1]) + col0)
 
 
 def _object_window(extent: QgsRectangle, native_width: int, native_height: int, x: float, y: float, half: int):
@@ -1041,7 +1075,7 @@ def object_parts(selection: RasterSelection) -> List[Tuple[RasterSelection, Tupl
 def object_geometry(provider: QgsRasterDataProvider, selection: RasterSelection, extent: QgsRectangle,
                     native_width: int, native_height: int, crs_wkt: str, start: int = OBJECT_WINDOW_START,
                     limit: int = OBJECT_WINDOW_MAX, provider_for=None, opening: int = OBJECT_OPENING,
-                    reconstruct: bool = True) -> SelectionGeometryResult:
+                    reconstruct: bool = True, fill: bool = True, simplify: bool = True) -> SelectionGeometryResult:
     """Outline of the objects under the seeds of ``selection``: the patch of kept pixels each click falls in.
 
     Read at the native resolution in a window around each click, grown while
@@ -1058,6 +1092,10 @@ def object_geometry(provider: QgsRasterDataProvider, selection: RasterSelection,
         opening: Radius of the opening cutting the bridges (0: none).
         reconstruct: Give the object back the outline cells the opening took
             (False: the opened patch, as the similar objects are measured).
+        fill: Fill the holes of the objects (False: as the similar objects are
+            measured, whose holes stay).
+        simplify: Simplify the outline by half a pixel (False: the staircase of
+            the pixels, as the similar objects are measured).
     """
     import numpy as np
     from .geometry_tools import mask_to_geometry, union_geometries
@@ -1091,9 +1129,11 @@ def object_geometry(provider: QgsRasterDataProvider, selection: RasterSelection,
                 half = min(limit, half * OBJECT_WINDOW_GROWTH)
                 continue
             truncated = truncated or touches
-            region = fill_holes(region)
+            if fill:
+                region = fill_holes(region)
             geotransform = (extent.xMinimum() + col0 * size_x, size_x, 0.0, extent.yMaximum() - row0 * size_y, 0.0, -size_y)
-            geometry = mask_to_geometry(region, geotransform, crs_wkt, simplify_tolerance=min(size_x, size_y) * 0.5)
+            geometry = mask_to_geometry(region, geotransform, crs_wkt,
+                                        simplify_tolerance=min(size_x, size_y) * 0.5 if simplify else 0.0)
             if geometry is not None and not geometry.isEmpty():
                 geometries.append(geometry)
                 kept += int(np.count_nonzero(region))
@@ -1162,20 +1202,22 @@ def similar_objects_geometry(provider: QgsRasterDataProvider, selection: RasterS
     The clicked objects are read first (:func:`object_geometry`, native resolution): their areas
     give the bounds, and their compactness too when ``selection.shape`` asks for the shape. The
     whole raster is then polygonized with the criterion of the selection (:func:`selection_geometry`,
-    ``patch_provider``: the virtual raster of an expression), opened and its holes filled as the
-    clicked objects were, and the patches within the bounds are kept. ``objects`` counts them;
-    ``kept_pixels`` is estimated from their area and the cell size.
+    ``patch_provider``: the virtual raster of an expression), its patches cut at their pixel-wide
+    bridges as the clicked objects were, and the patches within the bounds are kept. ``objects``
+    counts them; ``kept_pixels`` is estimated from their area and the cell size.
 
     The clicked objects are measured as the patches are: at the native resolution, without
     their corners and the ring of their diagonal edges (:func:`patch_cores`) on both sides
     alike; over ``max_pixels`` the patches are read on coarse cells and keep their outline,
-    so the clicked objects keep theirs.
+    so the clicked objects keep theirs. Holes stay and outlines keep the staircase of the
+    pixels on both sides (a courtyard, an inner ring, count in the area and the perimeter).
     """
     from dataclasses import replace
     from .geometry_tools import compactness, union_geometries
     coarse = _decimation(native_width, native_height, max_pixels) > 1
     reference = object_geometry(provider, selection, extent, native_width, native_height, crs_wkt,
-                                provider_for=provider_for, opening=OBJECT_OPENING, reconstruct=coarse)
+                                provider_for=provider_for, opening=OBJECT_OPENING, reconstruct=coarse,
+                                fill=False, simplify=False)
     clicked = geometry_parts(reference.geometry)
     bounds = similar_area_bounds([part.area() for part in clicked], selection.similar)
     if bounds is None:

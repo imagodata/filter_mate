@@ -1636,6 +1636,11 @@ class RasterExploringPanel(QWidget):
             self._pipette_selection = RasterSelection.from_dict(data) if data else None
         except (ValueError, TypeError):
             self._pipette_selection = None
+        selection = self._pipette_selection
+        if selection is not None and selection.similar and selection.shape != parsed["pipette_shape"]:
+            # A state saved before the shape: the selection follows the box (checked by default).
+            from dataclasses import replace
+            self._pipette_selection = replace(selection, shape=parsed["pipette_shape"])
         self._pipette_on = parsed["pipette_on"]
         self._apply_band()
         self._set_range(parsed["minimum"], parsed["maximum"])

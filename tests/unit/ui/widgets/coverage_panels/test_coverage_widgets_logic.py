@@ -352,6 +352,9 @@ class TestObjectDetectionState:
         assert raster.parse_raster_state({"pipette_similar": "x"})["pipette_similar"] == raster.DEFAULT_SIMILAR_RATIO
         assert raster.parse_raster_state({})["pipette_shape"] is True  # a state before the shape: on
         assert raster.parse_raster_state({"pipette_shape": False})["pipette_shape"] is False
+        # The saved selection itself knows no shape: the panel gives it the one of the box when restoring.
+        assert "shape" not in raster.parse_raster_state({"pipette_selection": {
+            "mode": "classes", "classes": [3], "seeds": [[10, 20]], "similar": [0.5, 2.0]}})["pipette_selection"]
 
     def test_similar_selection_from_the_state(self):
         selection = raster.build_raster_selection({"mode": "pipette", "pipette_selection": {

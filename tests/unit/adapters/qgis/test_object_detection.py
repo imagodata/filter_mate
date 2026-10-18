@@ -180,6 +180,30 @@ class TestObjectRegion:
         assert region[3, 6] and not region[3, 7:10].any()  # the first pixel of the line stays with the pool
         assert int(region.sum()) == 26
 
+    def test_a_click_on_a_corner_starts_from_the_nearest_core(self):
+        # The corner (1, 1) is no core: the object is the pool all the same, not the whole mask.
+        mask = self._scene()
+        region = raster_adapter.object_region(mask, (1, 1))
+        assert int(region.sum()) == 26 and not region[1:6, 10:14].any()
+        assert raster_adapter._core_seed(mask, geometry_tools.patch_cores(mask), (1, 1)) in ((1, 2), (2, 1))  # an edge cell
+        assert raster_adapter._core_seed(mask, geometry_tools.patch_cores(mask), (3, 3)) == (3, 3)
+        # The ring of a diagonal edge: its inner neighbour.
+        diamond = np.zeros((9, 9), dtype=bool)
+        for row in range(9):
+            for col in range(9):
+                diamond[row, col] = abs(row - 4) + abs(col - 4) <= 4
+        cores = geometry_tools.patch_cores(diamond)
+        assert not cores[0, 4] and raster_adapter._core_seed(diamond, cores, (0, 4)) == (1, 4)
+        assert int(raster_adapter.object_region(diamond, (0, 4)).sum()) == int(diamond.sum())
+
+    def test_a_corner_next_to_another_patch_stays_in_its_own(self):
+        # The nearest core must be of the clicked patch: a lawn one cell away across a gap is not it.
+        mask = np.zeros((8, 8), dtype=bool)
+        mask[1:4, 1:4] = True  # a 3 x 3 patch: its corners are no cores
+        mask[1:7, 5:8] = True  # another patch, two cells from its corner
+        assert raster_adapter._core_seed(mask, geometry_tools.patch_cores(mask), (3, 3)) in ((2, 3), (3, 2))
+        assert int(raster_adapter.object_region(mask, (3, 3)).sum()) == 9
+
     def test_without_the_opening_the_pool_leaks(self):
         mask = self._scene()
         assert int(raster_adapter.object_region(mask, (3, 3), opening=0).sum()) == int(mask.sum())
@@ -312,6 +336,7 @@ class TestSimilarObjects:
         with_shape = raster_adapter.similar_objects_geometry(None, RasterSelection(shape=True, **kwargs), extent, 100, 100, "")
         assert with_shape.objects == 2 and with_shape.kept_pixels == 181
         assert seen["reconstruct"] is False and seen["opening"] == raster_adapter.OBJECT_OPENING
+        assert seen["fill"] is False and seen["simplify"] is False  # measured as the patches are
         without = raster_adapter.similar_objects_geometry(None, RasterSelection(**kwargs), extent, 100, 100, "")
         assert without.objects == 3
         # Read on coarse cells (over the pixel limit), the patches keep their outline: the clicked objects too.
