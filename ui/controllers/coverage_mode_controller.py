@@ -19,6 +19,7 @@ Replaces ``PointCloudUIController`` (FilterMate 4.10 experimental panel, which
 lived in FILTERING and disabled EXPLORING).
 """
 import logging
+from collections import OrderedDict
 from typing import Any, Dict, List, Optional, Tuple, TYPE_CHECKING
 
 from .base_controller import BaseController
@@ -45,6 +46,10 @@ EXPLORING_BUTTONS = (
 COVERAGE_SPIN_NAME = 'mQgsSpinBox_filtering_coverage_min'
 MAX_SOURCE_FEATURES = 100000
 HISTOGRAM_CACHE_SIZE = 32
+# Grids of the preview veil (an expression read, a slope computed): the last few, switching layers re-reads none.
+SURFACE_CACHE_SIZE = 4
+# An expression not read yet is read once the input settles (a read takes about half a second).
+EXPRESSION_READ_DELAY_MS = 400
 
 
 def _kind_of(layer: Any):
@@ -74,6 +79,11 @@ def _same_layer(first: Any, second: Any) -> bool:
         return first.id() == second.id()
     except (RuntimeError, AttributeError):
         return False
+
+
+def _is_expression(selection: Any) -> bool:
+    """A raster calculator expression selection: a colour of the pipette, a spectral preset, a typed one."""
+    return getattr(getattr(selection, 'mode', None), 'value', '') == 'expression'
 
 
 def _option(key: str, default):
@@ -121,8 +131,11 @@ class CoverageModeController(BaseController):
         self._preview_base_subset: Optional[str] = None
         self._preview_active = False
         self._color_pick = False  # the pipette: a click on the map picks a colour to select
-        self._mask_overlay = None  # veil of a terrain derivative preview (canvas item)
-        self._preview_surface = None
+        self._mask_overlay = None  # veil of a terrain derivative or expression preview (canvas item)
+        # (source, layer name, expression) or (source, band, derivative) -> grid of the veil, None when unreadable
+        self._surfaces: 'OrderedDict[tuple, Any]' = OrderedDict()
+        self._expression_timer: Any = None  # reads an expression once the input settles
+        self._crs_notice: Any = None  # (surface, canvas CRS) already told it does not fit the map
         self._histogram_cache: Dict[Tuple[str, int, str], Tuple[list, float, float]] = {}
         self._stats_watched: set = set()  # point cloud layer ids whose statistics signal is connected
         # layer id -> (layer, slot) of those connections: disconnected at teardown (2026-10-17)
@@ -215,6 +228,7 @@ class CoverageModeController(BaseController):
         self._linked_redo.clear()
         self._panel_states.clear()
         self._histogram_cache.clear()
+        self._surfaces.clear()
         self._stats_watched.clear()  # the same ids come back with new layers when the project is opened again
         self._stats_slots.clear()  # their layers are gone
         self._schedule_cache_tidy()
@@ -304,6 +318,12 @@ class CoverageModeController(BaseController):
     def teardown(self) -> None:
         self._torn_down = True
         self.deactivate()
+        if self._expression_timer is not None:
+            try:
+                self._expression_timer.stop()
+            except RuntimeError:
+                pass  # deleted with the dock
+        self._surfaces.clear()
         if self._extras is not None:
             self._extras_call('teardown')
             self._extras = None
@@ -979,6 +999,12 @@ class CoverageModeController(BaseController):
         if panel is None or layer is None:
             return
         selection = panel.selection()
+        if selection is not None and _is_expression(selection):
+            # A colour of the pipette, a spectral preset: no histogram tells, the expression is read, for
+            # the preview only (half a second on this thread) and once the input settles.
+            surface = self._selection_surface(layer, selection, read=False) if self._preview_wanted() else None
+            panel.set_kept_ratio(surface.kept_ratio if surface is not None else None)
+            return
         cached = self._histogram_cache.get(self._histogram_key(layer, panel.current_band(), panel.current_derivative()))
         if selection is None or cached is None or not cached[0]:
             panel.set_kept_ratio(None)
@@ -987,10 +1013,6 @@ class CoverageModeController(BaseController):
         total = float(sum(counts)) or 1.0
         width = (maximum - minimum) / len(counts) if counts else 1.0
         kept = 0
-        from ...core.domain.raster_filter_criteria import RasterSelectionMode
-        if selection.mode is RasterSelectionMode.EXPRESSION:
-            panel.set_kept_ratio(None)
-            return
         for index, count in enumerate(counts):
             centre = minimum + (index + 0.5) * width
             try:
@@ -1004,8 +1026,7 @@ class CoverageModeController(BaseController):
         self._update_kept_ratio()
         panel = self._raster_panel
         selection = panel.selection() if panel is not None else None
-        from ...core.domain.raster_filter_criteria import RasterSelectionMode
-        if selection is not None and selection.mode is RasterSelectionMode.EXPRESSION:
+        if selection is not None and _is_expression(selection):
             self._validate_raster_expression(selection.expression)
         if panel is not None and (panel.preview_enabled() or self._preview_active):
             self._apply_raster_preview()
@@ -1029,6 +1050,7 @@ class CoverageModeController(BaseController):
             self._apply_raster_preview()
         elif self._active_layer is not None:
             self._stop_preview(self._active_layer)
+            self._update_kept_ratio()  # an expression is no longer read: its share is unknown again
 
     def _apply_raster_preview(self) -> None:
         layer, panel = self._active_layer, self._raster_panel
@@ -1036,7 +1058,8 @@ class CoverageModeController(BaseController):
             return
         from ...adapters.qgis.coverage_layers.raster_adapter import apply_selection_preview, clear_selection_preview
         selection = panel.selection()
-        if selection is not None and selection.derivative.is_terrain:
+        if selection is not None and (selection.derivative.is_terrain or _is_expression(selection)):
+            # Neither a slope nor a colour (several bands) is a value of the band the renderer makes transparent.
             clear_selection_preview(layer)  # a value preview left from before the quantity changed
             self._show_derivative_preview(layer, selection)
             return
@@ -1046,27 +1069,105 @@ class CoverageModeController(BaseController):
         else:
             apply_selection_preview(layer, selection)
 
+    def _preview_wanted(self) -> bool:
+        panel = self._raster_panel
+        return panel is not None and bool(panel.preview_enabled() or self._preview_active)
+
+    def _surface_key(self, layer: Any, selection: Any) -> tuple:
+        source = self._histogram_key(layer, 0)[0]  # the original raster when the layer shows a derived one
+        if _is_expression(selection):
+            return source, layer.name(), selection.expression  # the name is the reference the expression reads
+        return source, selection.band, selection.derivative
+
+    def _selection_surface(self, layer: Any, selection: Any, read: bool = True) -> Any:
+        """Grid of the original raster that veils ``selection``: a terrain derivative, or the
+        pixels an expression keeps (colour pipette); None when unreadable.
+
+        The last :data:`SURFACE_CACHE_SIZE` grids are kept. ``read`` False: an expression
+        not read yet is not read now, a read is scheduled (:meth:`_read_expression`).
+        """
+        try:
+            key = self._surface_key(layer, selection)
+            if key in self._surfaces:
+                self._surfaces.move_to_end(key)
+                return self._surfaces[key]
+            if not read:
+                self._schedule_expression_read()
+                return None
+            from ...adapters.qgis.coverage_layers.preview_overlay import DerivativeSurface, ExpressionSurface
+            base = self._base_raster(layer)
+            if _is_expression(selection):
+                surface = ExpressionSurface(base, selection)
+            else:
+                surface = DerivativeSurface(base, selection.band, selection.derivative)
+        except RuntimeError as exc:
+            logger.debug(f"[FM5] selection not read for its preview, layer deleted: {exc}")
+            return None
+        except Exception as exc:
+            logger.warning(f"[FM5] selection not read for its preview: {exc}")
+            surface = None  # kept as such: not read again at each input change
+        self._surfaces[key] = surface
+        while len(self._surfaces) > SURFACE_CACHE_SIZE:
+            self._surfaces.popitem(last=False)
+        return surface
+
+    def _schedule_expression_read(self) -> None:
+        if self._expression_timer is None:
+            from qgis.PyQt.QtCore import QTimer
+            timer = QTimer(self)
+            timer.setSingleShot(True)
+            timer.setInterval(EXPRESSION_READ_DELAY_MS)
+            timer.timeout.connect(self._read_expression)
+            self._expression_timer = timer
+        self._expression_timer.start()  # restarted by each change: one read once the input settles
+
+    def _expression_pending(self) -> bool:
+        timer = self._expression_timer
+        return timer is not None and bool(timer.isActive())
+
+    def _read_expression(self) -> None:
+        """The input settled: read the expression of the panel, then show its share and its veil."""
+        layer, panel = self._active_layer, self._raster_panel
+        if getattr(self, '_torn_down', False) or layer is None or panel is None or not self._preview_wanted():
+            return
+        selection = panel.selection()
+        if selection is None or not _is_expression(selection):
+            return
+        self._selection_surface(layer, selection)
+        self._update_kept_ratio()
+        self._apply_raster_preview()
+
     def _show_derivative_preview(self, layer: Any, selection: Any) -> None:
-        """Veil the pixels a slope / aspect / ... selection drops (a canvas item, no layer is added)."""
+        """Veil the pixels a slope / aspect / ... or an expression selection drops (a canvas item, no layer is added)."""
         iface = self._iface()
         canvas = iface.mapCanvas() if iface is not None else None
         if canvas is None:
             return
         try:
-            from ...adapters.qgis.coverage_layers.preview_overlay import DerivativeSurface, MaskOverlay
-            base = self._base_raster(layer)
-            key = (base.source(), selection.band, selection.derivative)
-            if self._preview_surface is None or self._preview_surface.key != key:
-                self._preview_surface = DerivativeSurface(base, selection.band, selection.derivative)
-            surface = self._preview_surface
-            if surface.crs_authid != canvas.mapSettings().destinationCrs().authid():
+            from ...adapters.qgis.coverage_layers.preview_overlay import MaskOverlay, fits_canvas
+            expression = _is_expression(selection)
+            surface = self._selection_surface(layer, selection, read=not expression)
+            if surface is None and expression and self._expression_pending():
+                return  # the veil shown stays until the new expression is read
+            veil = surface.veil(selection) if surface is not None else None
+            if veil is None:
                 self._hide_derivative_preview()
-                iface.messageBar().pushInfo("FilterMate", self.tr(
-                    "The preview of a slope or aspect needs the map in the CRS of the raster ({0})").format(surface.crs_authid))
+                return
+            canvas_crs = canvas.mapSettings().destinationCrs()
+            if not fits_canvas(surface, canvas_crs):
+                self._hide_derivative_preview()
+                notice = (surface, canvas_crs.authid() or canvas_crs.toWkt())
+                if self._crs_notice is None or self._crs_notice[0] is not notice[0] or self._crs_notice[1] != notice[1]:
+                    self._crs_notice = notice  # told once, not at each input change
+                    crs = surface.crs_authid or surface.crs.description()
+                    message = (self.tr("The preview of a slope or aspect needs the map in the CRS of the raster ({0})")
+                               if selection.derivative.is_terrain else
+                               self.tr("The preview of a color or an expression needs the map in the CRS of the raster ({0})"))
+                    iface.messageBar().pushInfo("FilterMate", message.format(crs))
                 return
             if self._mask_overlay is None:
                 self._mask_overlay = MaskOverlay(canvas)
-            self._mask_overlay.show(surface.veil(selection), surface.extent)
+            self._mask_overlay.show(veil, surface.extent)
         except Exception as exc:
             logger.warning(f"[FM5] derivative preview failed: {exc}", exc_info=True)
 
@@ -1160,8 +1261,9 @@ class CoverageModeController(BaseController):
         change, on top of a filter just applied or an undo.
         """
         from ...core.domain.layer_kind import LayerKind
-        self._hide_derivative_preview()
-        self._preview_surface = None
+        self._hide_derivative_preview()  # its grids stay cached: the same layer comes back without a read
+        if self._expression_timer is not None:
+            self._expression_timer.stop()
         try:
             if self._kind is LayerKind.RASTER:
                 from ...adapters.qgis.coverage_layers.raster_adapter import clear_selection_preview

@@ -40,6 +40,7 @@ except ImportError:
     QgsCollapsibleGroupBox = None
 
 from ....core.domain.raster_filter_criteria import DERIVATIVE_BOUNDS, RasterDerivative, RasterSelection, RasterSelectionMode
+from ..selection_strip import percent_text
 from .histogram_widget import RangeHistogramWidget, normalize_range, spin_bounds
 
 if TYPE_CHECKING:
@@ -99,10 +100,10 @@ def coordinate_decimals(pixel_size: float) -> int:
 
 
 def format_percent(ratio: Optional[float]) -> str:
-    """Fraction in [0, 1] as ``"31.2 %"``; ``"–"`` when unknown."""
+    """Fraction in [0, 1] as ``"31.2 %"`` (``"0.012 %"`` for a few pixels); ``"–"`` when unknown."""
     if ratio is None:
         return "–"
-    return f"{float(ratio) * 100:.1f} %"
+    return percent_text(ratio)
 
 
 def format_zone_statistics(minimum: Bound, maximum: Bound, mean: Bound, count: Optional[int],
@@ -790,8 +791,8 @@ class RasterExploringPanel(QWidget):
         return self._mode
 
     def preview_enabled(self) -> bool:
-        """Whether the map preview is asked for a mode it supports (range or classes)."""
-        return self._preview_on and self._mode is not RasterSelectionMode.EXPRESSION
+        """Whether the map preview is asked (every mode has one: an expression or a colour is veiled)."""
+        return self._preview_on
 
     def set_preview_checked(self, checked: bool) -> None:
         """Follow the preview button of the EXPLORING rail (the only switch of the map preview). Does not emit."""
@@ -1314,8 +1315,12 @@ class RasterExploringPanel(QWidget):
             self._picks.append(pick)
         self._apply_picks()
 
-    def _apply_picks(self) -> None:
-        """Selection of the picks: a colour expression, the classes, or a range around the values."""
+    def _apply_picks(self, debounced: bool = False) -> None:
+        """Selection of the picks: a colour expression, the classes, or a range around the values.
+
+        Args:
+            debounced: Signal the change after the input settles (the tolerance spin box), not at once.
+        """
         band = self.current_band()
         if self._pick_kind == "color":
             bands = self._color_band_numbers()
@@ -1337,16 +1342,19 @@ class RasterExploringPanel(QWidget):
             low, high = normalize_range(min(self._picks) - tolerance, max(self._picks) + tolerance, low_bound, high_bound)
             selection = RasterSelection(band=band, mode=RasterSelectionMode.RANGE, derivative=self._derivative,
                                         minimum=low, maximum=high)
-        self._set_pipette_selection(selection)
+        self._set_pipette_selection(selection, debounced)
 
-    def _set_pipette_selection(self, selection: Optional[RasterSelection]) -> None:
+    def _set_pipette_selection(self, selection: Optional[RasterSelection], debounced: bool = False) -> None:
         self._pipette_selection = None if selection is None or selection.is_empty else selection
         self._show_pipette_result()
         if self._pipette_selection is None and self._picks:
             # A range over every value is no constraint (A7): say why nothing is selected.
             self._sample_label.setText(self.tr("The tolerance covers every value: lower it"))
         self._activate_mode(PIPETTE, emit=False)
-        self._emit_now()
+        if debounced:
+            self._schedule_selection_changed()
+        else:
+            self._emit_now()
 
     def _show_pipette_result(self) -> None:
         """One line under the tolerance: what the pipette selects (its expression as tooltip)."""
@@ -1374,8 +1382,9 @@ class RasterExploringPanel(QWidget):
         self._sample_label.setToolTip(selection.describe())
 
     def _on_tolerance_changed(self, _value: float) -> None:
+        # The selection follows at once, its signal once the wheel stops: each one may read the raster.
         if self._picks and self._pick_kind in ("color", "value"):
-            self._apply_picks()
+            self._apply_picks(debounced=True)
 
     # === Pixel value ===
 
