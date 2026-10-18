@@ -677,7 +677,10 @@ class _CollapsedBand(QObject if QObject is not None else object):
         try:
             if watched is self._arrow:
                 if event.type() == QEvent.Type.Paint:
-                    self._tint_arrow()  # QGIS sets its icon again on every setCollapsed, even unchanged
+                    try:
+                        self._tint_arrow()  # QGIS sets its icon again on every setCollapsed, even unchanged
+                    except Exception as exc:  # never an error box on every paint
+                        logger.debug(f"Collapse arrow not tinted: {exc}")
             elif event.type() in (QEvent.Type.Show, QEvent.Type.Resize):
                 self._schedule()
         except RuntimeError:

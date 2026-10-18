@@ -290,8 +290,35 @@ def icon_color(key: str, dark: bool) -> str:
     return palette['fm_danger'] if key in DANGER_ICONS else palette['fm_icon']
 
 
+def stylesheet_is_dark(widget: Any) -> Optional[bool]:
+    """Variant of the FilterMate stylesheet applied above ``widget``, None before any is applied.
+
+    Read from the radio glyph the stylesheet names (style_loader picks it with the token variant),
+    so it is the theme actually drawn, whatever the managers or the QGIS palette say.
+    """
+    owner = widget
+    while owner is not None:
+        try:
+            sheet = owner.styleSheet() if hasattr(owner, 'styleSheet') else ''
+        except RuntimeError:
+            return None
+        if sheet:
+            if 'radio_dot_dark.svg' in sheet:
+                return True
+            if 'radio_dot_white.svg' in sheet:
+                return False
+        owner = owner.parentWidget()
+    return None
+
+
 def plugin_is_dark(widget: Any) -> bool:
-    """Plugin theme of the dock holding ``widget`` (its icon manager), which may differ from QGIS'."""
+    """Plugin theme of the dock holding ``widget``, which may differ from QGIS'.
+
+    The applied stylesheet first, then the icon manager of the dock, then the widget palette.
+    """
+    applied = stylesheet_is_dark(widget)
+    if applied is not None:
+        return applied
     owner = widget
     while owner is not None and getattr(owner, '_icon_manager', None) is None:
         owner = owner.parentWidget()

@@ -2708,6 +2708,8 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         if self._button_styler:
             self._button_styler.setup()
 
+        self._refresh_config_view_theme()  # built before the stylesheet (setupUiCustom)
+
     def _install_legacy_child_dialog_filter(self):
         """
         Install child dialog filter for legacy code path.
@@ -2756,8 +2758,12 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         view = getattr(self, 'config_view', None)
         if view is None or not hasattr(view, 'refresh_theme_stylesheet'):
             return
-        manager = getattr(self, '_theme_manager', None)
-        view.refresh_theme_stylesheet(force_dark=bool(manager.is_dark_mode) if manager is not None else None)
+        try:
+            from .ui.styles.mockup_design import stylesheet_is_dark
+            # The applied stylesheet; None before it is applied (the view then reads the QGIS palette).
+            view.refresh_theme_stylesheet(force_dark=stylesheet_is_dark(self.dockWidgetContents))
+        except Exception as e:  # view deleted (plugin reload)
+            logger.debug(f"Config view theme not refreshed: {e}")
 
     def _refresh_icons_for_theme(self):
         """Refresh all button icons for the current theme."""

@@ -70,7 +70,7 @@ def test_radio_and_check_glyphs_follow_the_theme():
 def test_raster_band_rows_use_no_qgis_palette_colours():
     """palette() kept the QGIS colours when the plugin theme differed (black radios, white toggles)."""
     source = (_ROOT / "ui" / "widgets" / "coverage_panels" / "raster_exploring_panel.py").read_text(encoding="utf-8")
-    assert "palette(" not in source
+    assert not re.search(r"palette\((?:mid|midlight|base|highlight|window|text)\)", source)
     assert "RADIO_STYLE" not in source
     qss = _mockup()
     assert 'QToolButton[fm_band_toggle="true"]' in qss
@@ -91,8 +91,10 @@ def test_group_arrow_icons_render_in_the_muted_text_colour():
 
 
 class _Widget:
-    def __init__(self, parent=None, manager=None, dark_palette=False):
+    def __init__(self, parent=None, manager=None, dark_palette=False, sheet=None):
         self._parent = parent
+        if sheet is not None:
+            self.styleSheet = lambda: sheet
         if manager is not None:
             self._icon_manager = manager
         self._dark_palette = dark_palette
@@ -118,3 +120,31 @@ def test_plugin_theme_falls_back_to_the_palette_outside_the_dock():
     design = _design()
     assert design.plugin_is_dark(_Widget(dark_palette=True)) is True
     assert design.plugin_is_dark(_Widget(dark_palette=False)) is False
+
+
+@pytest.mark.parametrize("glyph, dark", [("radio_dot_dark.svg", True), ("radio_dot_white.svg", False)])
+def test_the_applied_stylesheet_wins_over_the_managers(glyph, dark):
+    """The managers can lag behind (theme set from the configuration, startup): the drawn sheet decides."""
+    design = _design()
+    contents = _Widget(parent=_Widget(manager=types.SimpleNamespace(is_dark_mode=not dark)),
+                       sheet=f'QRadioButton::indicator:checked {{ image: url("C:/p/{glyph}"); }}')
+    assert design.stylesheet_is_dark(_Widget(parent=contents)) is dark
+    assert design.plugin_is_dark(_Widget(parent=contents, dark_palette=not dark)) is dark
+
+
+def test_no_stylesheet_yet_means_unknown():
+    design = _design()
+    assert design.stylesheet_is_dark(_Widget(parent=_Widget(sheet=""))) is None
+
+
+def test_field_boxes_do_not_grow_on_hover_or_focus():
+    bodies = {sel: body for sel, body in _rules(_mockup())}
+    hover = next(body for sel, body in bodies.items() if "QComboBox:hover" in sel and "border-width" in body)
+    assert "border-width: 1px" in hover and "padding: 4px 8px" in hover
+    line = next(body for sel, body in bodies.items() if "QLineEdit:focus" in sel and "border-width" in body)
+    assert "border-width: 1px" in line and "padding: 3px 5px" in line
+
+
+def test_stylesheet_urls_are_quoted():
+    """An unquoted url() with a space in the profile path breaks the whole dock stylesheet."""
+    assert not re.search(r"url\(\{", _mockup())

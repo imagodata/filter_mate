@@ -295,6 +295,52 @@
 #dockWidgetContents QDoubleSpinBox:focus {
     border-color: {fm_accent};
 }
+/* default.qss widens the field borders on hover (2-3 px) and focus (3 px) with another padding and
+   the old accent background: the text moved by up to 3 px under the cursor. One 1 px border whose
+   colour alone changes (rules above), the padding of the idle field. */
+#dockWidgetContents QComboBox:hover,
+#dockWidgetContents QComboBox:focus,
+#dockWidgetContents QgsProjectionSelectionWidget:hover,
+#dockWidgetContents QgsProjectionSelectionWidget:focus {
+    border-width: 1px;
+    padding: 4px 8px;
+}
+#dockWidgetContents QLineEdit:hover,
+#dockWidgetContents QLineEdit:focus {
+    border-width: 1px;
+    padding: 3px 5px;
+}
+#dockWidgetContents QSpinBox:hover,
+#dockWidgetContents QSpinBox:focus,
+#dockWidgetContents QDoubleSpinBox:hover,
+#dockWidgetContents QDoubleSpinBox:focus {
+    border-width: 1px;
+    padding: 4px 8px;
+}
+#dockWidgetContents QComboBox:focus,
+#dockWidgetContents QLineEdit:focus,
+#dockWidgetContents QSpinBox:focus,
+#dockWidgetContents QDoubleSpinBox:focus {
+    background-color: {fm_field};
+}
+/* Composite fields: the outline belongs to the embedded combo box, never to the wrapper or its line edit. */
+#dockWidgetContents QgsFeaturePickerWidget:hover,
+#dockWidgetContents QgsFeaturePickerWidget:focus,
+#dockWidgetContents QgsFieldExpressionWidget:hover,
+#dockWidgetContents QgsFieldExpressionWidget:focus {
+    background-color: transparent;
+    border: none;
+    padding: 0px;
+}
+#dockWidgetContents QgsFeaturePickerWidget QLineEdit:hover,
+#dockWidgetContents QgsFeaturePickerWidget QLineEdit:focus,
+#dockWidgetContents QgsFieldExpressionWidget QLineEdit:hover,
+#dockWidgetContents QgsFieldExpressionWidget QLineEdit:focus,
+#dockWidgetContents QgsMapLayerComboBox QLineEdit:hover,
+#dockWidgetContents QgsMapLayerComboBox QLineEdit:focus {
+    background: transparent;
+    border: none;
+}
 #dockWidgetContents QComboBox:disabled,
 #dockWidgetContents QLineEdit:disabled,
 #dockWidgetContents QSpinBox:disabled,
@@ -309,9 +355,6 @@
     background: transparent;
     border: none;
 }
-/* Drop-down button: the field's own surface and the chevron of the spin boxes. Unstyled, the
-   native button took the QGIS palette: black on the light dock under Blend of Gray, grey on
-   the dark one. */
 /* Buttons inside the composite fields (previous / next feature, expression ε): the field surface.
    themed_controls.qss paints them with the QGIS-derived control surface (solid grey under
    Blend of Gray). */
@@ -330,6 +373,9 @@
     background-color: {fm_group};
     border-color: {fm_group_border};
 }
+/* Drop-down button: the field's own surface and the chevron of the spin boxes. Unstyled, the
+   native button took the QGIS palette: black on the light dock under Blend of Gray, grey on
+   the dark one. */
 #dockWidgetContents QComboBox::drop-down {
     subcontrol-origin: padding;
     subcontrol-position: top right;
@@ -338,7 +384,7 @@
     background: transparent;
 }
 #dockWidgetContents QComboBox::down-arrow {
-    image: url({spin_down_icon});
+    image: url("{spin_down_icon}");
     width: 10px;
     height: 10px;
 }
@@ -405,13 +451,13 @@
 #dockWidgetContents QGroupBox::indicator:checked {
     background-color: {fm_accent};
     border: 1px solid {fm_accent};
-    image: url({control_check_glyph});
+    image: url("{control_check_glyph}");
 }
 #dockWidgetContents QRadioButton::indicator:checked,
 #dockWidgetContents QRadioButton::indicator:checked:hover {
     background-color: {fm_accent};
     border: 1px solid {fm_accent};
-    image: url({control_radio_glyph});
+    image: url("{control_radio_glyph}");
 }
 #dockWidgetContents QCheckBox::indicator:indeterminate,
 #dockWidgetContents QListWidget::indicator:indeterminate {
@@ -421,13 +467,17 @@
 }
 #dockWidgetContents QCheckBox::indicator:disabled,
 #dockWidgetContents QRadioButton::indicator:disabled,
-#dockWidgetContents QgsCollapsibleGroupBox::indicator:disabled {
+#dockWidgetContents QListWidget::indicator:disabled,
+#dockWidgetContents QgsCollapsibleGroupBox::indicator:disabled,
+#dockWidgetContents QGroupBox::indicator:disabled {
     background-color: {fm_group};
     border: 1px solid {fm_group_border};
 }
 #dockWidgetContents QCheckBox::indicator:checked:disabled,
 #dockWidgetContents QRadioButton::indicator:checked:disabled,
-#dockWidgetContents QgsCollapsibleGroupBox::indicator:checked:disabled {
+#dockWidgetContents QListWidget::indicator:checked:disabled,
+#dockWidgetContents QgsCollapsibleGroupBox::indicator:checked:disabled,
+#dockWidgetContents QGroupBox::indicator:checked:disabled {
     background-color: {fm_text_disabled};
     border: 1px solid {fm_text_disabled};
 }
@@ -609,12 +659,12 @@
     border-radius: 3px;
 }
 #dockWidgetContents QAbstractSpinBox::up-arrow {
-    image: url({spin_up_icon});
+    image: url("{spin_up_icon}");
     width: 10px;
     height: 10px;
 }
 #dockWidgetContents QAbstractSpinBox::down-arrow {
-    image: url({spin_down_icon});
+    image: url("{spin_down_icon}");
     width: 10px;
     height: 10px;
 }
