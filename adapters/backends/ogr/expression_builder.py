@@ -495,7 +495,7 @@ class OGRExpressionBuilder(GeometricFilterPort):
 
             if source_capability(layer).requires_server_translation:
                 from ...qgis.server_filter_translation import dialect_for_layer
-                if dialect_for_layer(layer) in ('oapif', 'unsupported'):
+                if dialect_for_layer(layer) == 'unsupported':
                     self.last_error = translate(
                         'OGRExpressionBuilder',
                         '{0}: this provider cannot guarantee a complete server filter. '
@@ -514,20 +514,33 @@ class OGRExpressionBuilder(GeometricFilterPort):
                 self.log_error(self.last_error)
                 return False
 
-            self.log_info(f"📍 Applying OGR filter to {layer.name()}")
-            self.log_info(f"  - Source: {source_layer.name()} ({source_layer.featureCount()} features)")
-
-            # 2026-10-17: a web service without a real key cannot be filtered by a key list
-            # (QGIS feature ids mean nothing to the server): refused before any request.
             refusal = self._key_list_refusal(layer)
             if refusal:
                 self.last_error = refusal
-                self.log_error(refusal)
                 self.user_warnings.append(refusal)
                 return False
 
-            # Create feedback for cancellation
+            # Remote reads belong to the bounded worker path (lot B).
             self._feedback = CancellableFeedback()
+            if source_capability(source_layer).is_remote_service or source_capability(layer).is_remote_service:
+                self._feedback._is_cancelled_callback = (
+                    getattr(self.task_params.get('_parent_task'), 'isCanceled', None) if self.task_params else None)
+            if source_capability(source_layer).is_remote_service:
+                from .filter_executor import copy_remote_source
+                try:
+                    source_layer = copy_remote_source(source_layer, self.task_params, self._feedback)
+                except ValueError as exc:
+                    self.last_error = str(exc)
+                    self.user_warnings.append(self.last_error)
+                    return False
+            if source_capability(layer).is_remote_service:
+                from .filter_executor import apply_remote_spatial_filter
+                return apply_remote_spatial_filter(
+                    self, layer, source_layer, names, buffer_value, buffer_expression,
+                    use_centroids, old_subset, combine_operator)
+
+            self.log_info(f"📍 Applying OGR filter to {layer.name()}")
+            self.log_info(f"  - Source: {source_layer.name()} ({source_layer.featureCount()} features)")
 
             target = self._unfiltered_target(layer, old_subset, combine_operator)
             source_union = self._source_geometry(source_layer, buffer_value, buffer_expression)

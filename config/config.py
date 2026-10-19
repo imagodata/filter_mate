@@ -53,6 +53,10 @@ FALLBACK_CONFIG = {
             }
         },
         "OPTIONS": {
+            "REMOTE_MATERIALIZATION": {
+                "max_features": {"value": 20000},
+                "timeout_seconds": {"value": 90}
+            },
             "APP_SQLITE_PATH": {
                 "value": "",
                 "description": "Directory for SQLite databases"

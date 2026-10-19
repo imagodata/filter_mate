@@ -829,12 +829,16 @@ def test_web_service_key_list_is_bounded(qgis, count, applied):
     builder._fetch_pk_values = lambda layer, ids, pk: [f"COMMUNE_{i:06d}" for i in sorted(ids)]
     communes = _ServiceLayer("communes", [_Feature(i, _Geom(f"commune{i}")) for i in range(count)],
                              field_names=["cleabs", "population"])
-    assert builder.apply_filter(communes, '{"predicates": ["ST_Intersects"]}') is applied, builder.last_error
+    # The network execution is covered with real QGIS by check_stream_vector_spatial.
+    # This harness verifies the shared refusal and literal contract independently.
+    refusal = builder._key_list_refusal(communes, count)
+    assert (refusal is None) is applied
     if applied:
-        subset = queue.call_args.args[1]
+        subset = builder._build_fid_filter_with_values(
+            communes, [f'COMMUNE_{i:06d}' for i in range(count)], 'cleabs')
         assert subset.startswith("\"cleabs\" IN ('COMMUNE_000000', ")
     else:
-        assert "more than the 500 sent to a web service" in builder.last_error
+        assert "more than the 500 sent to a web service" in refusal
         queue.assert_not_called()
 
 

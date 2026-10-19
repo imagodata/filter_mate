@@ -155,7 +155,7 @@ class TestOGRApplyFilterQueueRouting:
         expression = '{"predicates": ["intersects"]}'
         result = builder.apply_filter(target, expression)
 
-        assert result is True
+        assert result is True, builder.last_error
         callback.assert_called_once_with(target, "1 = 0")
 
 

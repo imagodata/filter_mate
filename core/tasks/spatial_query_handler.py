@@ -225,10 +225,17 @@ class SpatialQueryHandler:
             has_combine_operator=self.task.has_combine_operator,
             param_other_layers_combine_operator=self.task.param_other_layers_combine_operator,
             verify_and_create_spatial_index=self.task._verify_and_create_spatial_index,
+            feedback=self.task,
+            task_parameters=getattr(self.task, 'task_parameters', {}),
         )
-        ogr_executor.execute_ogr_spatial_selection(
+        getattr(self, '_remote_ogr_filters', {}).pop(current_layer.id(), None)
+        key_filter = ogr_executor.execute_ogr_spatial_selection(
             layer, current_layer, param_old_subset, context
         )
+        if isinstance(key_filter, str):
+            filters = getattr(self, '_remote_ogr_filters', {})
+            filters[current_layer.id()] = (key_filter, context.primary_key_name)
+            self._remote_ogr_filters = filters
         logger.debug("execute_ogr_spatial_selection: delegated to ogr_executor")
 
     def build_ogr_filter_from_selection(self, current_layer, layer_props, param_distant_geom_expression):
@@ -250,6 +257,11 @@ class SpatialQueryHandler:
         if not OGR_EXECUTOR_AVAILABLE:
             raise ImportError("ogr_executor module not available - cannot build OGR filter from selection")
 
+        remote_filter = getattr(self, '_remote_ogr_filters', {}).pop(current_layer.id(), None)
+        if remote_filter is not None:
+            expression, key_name = remote_filter
+            properties = dict(layer_props, primary_key_name=key_name)
+            return ogr_executor.build_ogr_filter_from_keys(properties, expression, param_distant_geom_expression)
         return ogr_executor.build_ogr_filter_from_selection(
             layer=current_layer,
             layer_props=layer_props,

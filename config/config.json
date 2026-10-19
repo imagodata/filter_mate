@@ -295,6 +295,17 @@
       }
     },
     "OPTIONS": {
+      "REMOTE_MATERIALIZATION": {
+        "_display_name": "Remote materialization",
+        "max_features": {
+          "value": 20000,
+          "description": "Maximum remote rows copied for an exact local filter (one extra row detects truncation)"
+        },
+        "timeout_seconds": {
+          "value": 90,
+          "description": "Maximum remote read and local evaluation duration in seconds"
+        }
+      },
       "_display_name": "Performance",
       "DISCORD_INVITE": {
         "_hidden": true,

@@ -540,6 +540,9 @@ class FinishedHandler:
             return
         for stale in ('_ogr_source_union_cache', '_ogr_buffered_source_cache', '_spatialite_source_bbox_cache'):
             task_parameters.pop(stale, None)
+        section = task_parameters.get('task')
+        if isinstance(section, dict):
+            section.pop('_bounded_remote_source_features', None)
         task = task_parameters.get('_parent_task')
         store = getattr(task, '__dict__', None)
         if isinstance(store, dict):

@@ -95,3 +95,18 @@ def test_without_a_task_the_subset_is_set_in_place(sql_utils):
     layer = MagicMock()
     assert _adapter({}).apply_filter(layer, '"id" IN (1)') is True
     sql_utils.safe_set_subset_string.assert_called_once_with(layer, '"id" IN (1)')
+
+
+def test_remote_warnings_cross_the_real_legacy_adapter_boundary():
+    adapter = _adapter({})
+    adapter._legacy_backend.user_warnings = ['Partial result: feature limit reached.']
+    assert adapter.user_warnings is adapter._legacy_backend.user_warnings
+    adapter.user_warnings = []
+    assert adapter._legacy_backend.user_warnings == []
+
+
+def test_remote_outcome_is_visible_through_the_legacy_adapter():
+    adapter = _adapter({})
+    outcome = object()
+    adapter._legacy_backend.remote_materialization_outcome = outcome
+    assert adapter.remote_materialization_outcome is outcome

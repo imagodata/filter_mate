@@ -342,6 +342,40 @@ def prepare_geometries_by_provider(
         'spatialite_fallback_mode': False
     }
 
+    # Bound a service source before ANY backend prepares WKT. Otherwise the
+    # SpatiaLite callback can scan it before the later OGR guard runs.
+    from ...adapters.qgis.source_capability_probe import capability_for_layer
+    capability = capability_for_layer(source_layer)
+    bounded_features = None
+    if capability and capability.is_remote_service:
+        from ...adapters.backends.ogr.filter_executor import _remote_message
+        bounded = prepare_ogr_geom_callback()
+        if bounded is None:
+            raise ValueError(_remote_message('incomplete_source'))
+        result['ogr_source_geom'] = bounded
+        source_layer = bounded
+        bounded_features = task_parameters.get('task', {}).get('_bounded_remote_source_features')
+        if bounded_features is None:
+            bounded_features = getattr(bounded, '_filtermate_raw_features', None)
+        if bounded_features is None:
+            raise ValueError(_remote_message('incomplete_source'))
+
+    def prepare_scoped_wkt():
+        """Supply raw source coordinates only while the WKT callback runs."""
+        if bounded_features is None:
+            return prepare_spatialite_geom_callback()
+        section = task_parameters.setdefault('task', {})
+        missing = object()
+        original = section.get('features', missing)
+        section['features'] = bounded_features
+        try:
+            return prepare_spatialite_geom_callback()
+        finally:
+            if original is missing:
+                section.pop('features', None)
+            else:
+                section['features'] = original
+
     # CRITICAL FIX v2.7.3: Use SELECTED/FILTERED feature count, not total table count!
     task_features = task_parameters.get("task", {}).get("features", [])
     if task_features and len(task_features) > 0:
@@ -458,7 +492,7 @@ def prepare_geometries_by_provider(
 
         spatialite_success = False
         try:
-            spatialite_geom = prepare_spatialite_geom_callback()
+            spatialite_geom = prepare_scoped_wkt()
             if spatialite_geom is not None:
                 spatialite_success = True
                 result['spatialite_source_geom'] = spatialite_geom
@@ -567,7 +601,8 @@ def prepare_geometries_by_provider(
     if needs_ogr_geom:
         if logger:
             logger.info("Preparing OGR/Spatialite source geometry...")
-        result['ogr_source_geom'] = prepare_ogr_geom_callback()
+        if result['ogr_source_geom'] is None:
+            result['ogr_source_geom'] = prepare_ogr_geom_callback()
 
         # DIAGNOSTIC v2.4.11: Log status of all source geometries after preparation
         if logger:

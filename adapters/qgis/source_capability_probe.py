@@ -195,3 +195,21 @@ def feature_count_or_none(layer: Any) -> Optional[int]:
         return layer.featureCount()
     except (RuntimeError, AttributeError):
         return None
+
+
+_MAIN_NETWORK_MANAGER = None
+
+
+def capture_network_manager():
+    """Capture the main NAM independently of Processing, without network I/O."""
+    global _MAIN_NETWORK_MANAGER
+    from qgis.PyQt.QtCore import QCoreApplication, QThread
+    from qgis.core import QgsNetworkAccessManager
+    application = QCoreApplication.instance()
+    if application is not None and QThread.currentThread() == application.thread():
+        _MAIN_NETWORK_MANAGER = QgsNetworkAccessManager.instance()
+
+
+def main_network_manager():
+    """Return the owner-thread NAM captured before tasks were scheduled."""
+    return _MAIN_NETWORK_MANAGER

@@ -171,8 +171,22 @@ def dialect_for_layer(layer):
     return None
 
 
-def prepare_server_subset(layer, expression):
-    """Return validated provider input, or raise without modifying the layer."""
+def prepare_server_subset(layer, expression, *, rect=None, limits=None, feedback=None):
+    """Return validated provider input without modifying the layer.
+
+    An explicit rect opts a worker caller into a bounded local fallback.
+    Without one, PARTIAL/NONE retain the existing clear refusal. A partial
+    copy is refused here because this API cannot return a warning outcome.
+    """
+    if rect is not None:
+        from .remote_materializer import require_worker
+        from qgis.PyQt.QtCore import QThread
+        try:
+            require_worker()
+        except RuntimeError as exc:
+            raise ServerFilterError(str(exc)) from None
+        if layer.thread() != QThread.currentThread():
+            raise ServerFilterError(_tr('A server layer can only be modified on its owning thread.'))
     dialect = dialect_for_layer(layer)
     if dialect is None or not expression or not expression.strip():
         return expression
@@ -181,6 +195,33 @@ def prepare_server_subset(layer, expression):
     fields = provider.fields() if provider is not None else layer.fields()
     result = translate(expression, dialect, fields)
     if result.status != TranslationStatus.FULL:
+        if rect is not None:
+            from .remote_materializer import materialize_translation, unfiltered_snapshot
+            from ..backends.ogr.filter_executor import _remote_message
+            from ...core.filter.pk_formatter import QGIS_EXPRESSION, format_key_literal
+            from .source_capability_probe import stable_key_for_layer
+            if dialect not in ('wfs', 'arcgis'):
+                # These providers cannot accept a proven final key filter.
+                # Standalone materialization still exposes bounded OAPIF keys.
+                raise ServerFilterError(_remote_message('unverified_filter'))
+            outcome = materialize_translation(unfiltered_snapshot(layer), rect, result, limits, feedback)
+            if not outcome.complete:
+                raise ServerFilterError(_remote_message(outcome.reason))
+            key = stable_key_for_layer(layer, scan=False)
+            if not key.is_field:
+                raise ServerFilterError(_remote_message('no_stable_key'))
+            index = fields.indexFromName(key.name)
+            if index < 0:
+                raise ServerFilterError(_remote_message('no_stable_key'))
+            name = '"' + key.name.replace('"', '""') + '"'
+            subset = '{} IN ({})'.format(name, ', '.join(
+                format_key_literal(value, fields.at(index).isNumeric(), QGIS_EXPRESSION)
+                for value in outcome.keys
+            )) if outcome.keys else '1 = 0'
+            verified = translate(subset, dialect, fields)
+            if verified.status != TranslationStatus.FULL:
+                raise ServerFilterError(_remote_message('unverified_filter'))
+            return verified.subset_expression
         raise ServerFilterError(_tr(
             '{0}: the attribute filter cannot run entirely on the server. '
             'Unsupported part: {1}. {2} The previous filter is unchanged.'
