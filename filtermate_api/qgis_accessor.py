@@ -32,6 +32,7 @@ from .accessor import (
     CrossFilterResult,
     Favorite,
     FavoritesUnavailable,
+    FilterRejected,
     FilteredLayer,
     FilterStatus,
     HistoryStep,
@@ -408,13 +409,22 @@ class QGISFilterMateAccessor:
         # dispatcher; under the headless test harness this is a no-op
         # inline call. Refused (QGISBusy) while a FilterMate operation or
         # filter task runs: its own subsets would land over this one.
-        ok = run_on_main_thread(
-            _unless_busy,
-            self._public_api.apply_filter,
-            layer_name=layer_name,
-            filter_expr=expression,
-            source_plugin=source,
-        )
+        callback = self._public_api.apply_filter
+        # Older plugin adapters keep their bool contract. The strict method
+        # pairs a rejection with its reason on the same main-thread call.
+        if callable(getattr(type(self._public_api), 'apply_filter_strict', None)):
+            callback = self._public_api.apply_filter_strict
+        try:
+            ok = run_on_main_thread(
+                _unless_busy,
+                callback,
+                layer_name=layer_name,
+                filter_expr=expression,
+                source_plugin=source,
+            )
+        except ValueError as exc:
+            self._last_error = str(exc)
+            raise FilterRejected(str(exc)) from None
         if ok:
             self._last_applied_at = datetime.now(timezone.utc).isoformat()
             self._last_applied_layer = layer_name
@@ -537,7 +547,8 @@ class QGISFilterMateAccessor:
         """
         svc = self._app_attribute("history_manager")
         action = getattr(svc, direction, None) if svc is not None else None
-        entry = action() if action is not None else None
+        peek = getattr(svc, 'peek_' + direction) if callable(getattr(type(svc), 'peek_' + direction, None)) else None
+        entry = peek() if peek is not None else (action() if action is not None else None)
         if entry is None:
             return None
 
@@ -548,10 +559,25 @@ class QGISFilterMateAccessor:
             project = None
 
         previous_filters = getattr(entry, "previous_filters", ()) or ()
-        target_layer_name, target_expression, target_is_clear = self._reapply_previous_filters_inline(
-            project,
-            previous_filters,
-        )
+        if direction == 'redo':
+            layer_ids = getattr(entry, 'layer_ids', ())
+            if isinstance(layer_ids, (list, tuple)) and layer_ids:
+                metadata = getattr(entry, 'get_metadata_value', lambda key: {})('remote_layers') or {}
+                metadata = metadata if isinstance(metadata, dict) else {}
+                previous_filters = [(layer_id, (getattr(entry, 'expression', '') or '') if index == 0 else
+                                     (metadata.get(layer_id, {}).get('expression', '') if isinstance(metadata.get(layer_id), dict) else ''))
+                                    for index, layer_id in enumerate(layer_ids)]
+        try:
+            target_layer_name, target_expression, target_is_clear = self._reapply_previous_filters_inline(project, previous_filters)
+        except FilterRejected as exc:
+            if peek is None:
+                inverse = getattr(svc, 'redo' if direction == 'undo' else 'undo', None)
+                if callable(inverse):
+                    inverse()
+            self._last_error = str(exc)
+            raise
+        if peek is not None:
+            action()
 
         # If we couldn't reach any layer (no project / layer ids missing),
         # fall back to the entry's own metadata so the API still answers.
@@ -575,28 +601,39 @@ class QGISFilterMateAccessor:
         """Apply ``previous_filters`` to project layers — main-thread only.
 
         Returns ``(layer_name, expression, is_clear)`` for the *last*
-        layer successfully written, mirroring the original loop's
-        behaviour. Skips missing layers and individual write failures
-        silently because the API contract is "best-effort restoration"
-        (the history step is always reported even when the project no
-        longer carries every layer it referenced).
+        layer successfully written. Missing layers are skipped; provider
+        failures are reported and prevent committing the history move.
         """
         target_layer_name = ""
         target_expression = ""
         target_is_clear = True
+        failures = []
 
         for layer_id, prev_subset in previous_filters:
             layer = project.mapLayer(layer_id) if project is not None else None
             if layer is None:
                 continue
             try:
-                layer.setSubsetString(prev_subset or "")
-            except Exception:  # nosec B112 - skip layer whose subset string could not be restored, continue with others
+                provider = getattr(layer, 'providerType', lambda: None)()
+                capability = _plugin_module('core.domain.source_capability').classify_layer(layer) if isinstance(provider, str) else None
+                if capability is not None and capability.requires_server_translation:
+                    restored = _plugin_module('adapters.undo_redo_handler')._restore_history_subset(layer, prev_subset or '', failures)
+                else:  # QGIS-free accessor doubles / older in-memory clients
+                    restored = layer.setSubsetString(prev_subset or '')
+                if not restored:
+                    if not failures:
+                        from_message = _safe(lambda: layer.error().message(), '') or _safe(layer.name, layer_id)
+                        failures.append(from_message)
+                    continue
+            except ValueError as exc:
+                failures.append(str(exc))
                 continue
             target_layer_name = _safe(layer.name, layer_id)
             target_expression = prev_subset or ""
             target_is_clear = not target_expression
 
+        if failures:
+            raise FilterRejected('; '.join(failures))
         return target_layer_name, target_expression, target_is_clear
 
     @staticmethod

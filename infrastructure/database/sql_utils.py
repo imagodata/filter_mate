@@ -177,6 +177,28 @@ def safe_set_subset_string(layer, subset_expression: str) -> bool:
         logger.warning("safe_set_subset_string: layer is None")
         return False
 
+    # Server predicates must be checked before the legacy sanitizer can
+    # remove an unsupported fragment or a display expression.
+    try:
+        from ...core.domain.source_capability import classify_layer
+    except ImportError:
+        from core.domain.source_capability import classify_layer
+    capability = classify_layer(layer)
+    if capability.requires_server_translation:
+        from ...adapters.qgis.server_filter_translation import (
+            ServerFilterError, apply_server_subset, remember_server_filter_error,
+        )
+        remember_server_filter_error(layer, '')
+        try:
+            with feature_picker_guard(layer):
+                return apply_server_subset(layer, subset_expression)
+        except ServerFilterError as exc:
+            remember_server_filter_error(layer, str(exc))
+            logger.warning('%s', exc)
+            from qgis.core import Qgis, QgsMessageLog
+            QgsMessageLog.logMessage(str(exc), 'FilterMate', Qgis.MessageLevel.Warning)
+            return False
+
     # PERF 2026-09-12: phase timings, logged when the whole call takes 250 ms
     # or more. A 16 s setSubsetString was measured on a PostgreSQL target and
     # nothing between "Applying subset" and the result said which phase it was.

@@ -95,7 +95,17 @@ class BatchFilterAlgorithm(QgsProcessingAlgorithm):
             if feedback.isCanceled():
                 break
 
-            if layer.setSubsetString(expression):
+            from ...adapters.qgis.server_filter_translation import (
+                ServerFilterError, prepare_server_subset,
+            )
+            from ...infrastructure.database.sql_utils import safe_set_subset_string
+            try:
+                prepare_server_subset(layer, expression)
+                success = safe_set_subset_string(layer, expression)
+            except ServerFilterError as exc:
+                success = False
+                feedback.pushWarning(str(exc))
+            if success:
                 filtered_count += 1
             else:
                 failed_count += 1

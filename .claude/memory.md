@@ -1,6 +1,18 @@
 # Project Memory
 _Auto-maintained by project agent_
 
+## [2026-10-19] Stream lot A: attribute dialects and asynchronous provider installation
+- Reuse `SourceCapability.requires_server_translation`; local providers keep their existing paths.
+- `core/filter/server_dialect.py` is pure: `ServerTranslation` has status, server expression, local residual, reason and provider subset. Split AND only; never partially apply an OR/NOT. `adapters/qgis/server_filter_translation.py` parses the real QGIS AST and validates WFS with `QgsOgcUtils`; the provider emits its negotiated OGC/FES version.
+- Until the bounded materializer is connected, PARTIAL/NONE raise a clear refusal before mutation or feature-ID fallback. OAPIF's complete translation verdict/queryables are not exposed in Python: refuse instead of assuming that `setSubsetString(True)` means CQL2 pushdown. SQL Server/ArcGIS text collation and WFS nullable negation are similarly refused when equivalence is unproven.
+- ArcGIS `setSubsetString()` synchronously downloads object IDs and returns True even for an HTTP-200 JSON error. `server_subset_job.py` therefore creates providers in a task, validates the ArcGIS JSON count response in that worker, then uses `readLayerXml(..., preloadedProvider)` on the main thread (available since QGIS 3.32). No live project layer is touched by a worker. A responsive event loop preserves existing bool callers' completed-result contract.
+- Worker creation requires ParallelCreateProvider, or the explicitly tested WFS/ArcGIS lifecycle on QGIS 3.44/4.2. Current native MSSQL/HANA metadata does not declare it; refuse application rather than assume database connection thread safety. QGIS 3.22 parses/translates but explicitly refuses asynchronous application. The 30-second deadline includes queue time; cancellation discards late results, although provider I/O may continue until its own timeout.
+- Preserve refresh/notify settings and local joins, clear stale feature selections, and reject auxiliary storage/remote joins. History commits only after a successful source restore; individual target failures remain explicit.
+- Serialize vector state with `writeXml`, not `writeLayerXml`: the latter can fetch a remote extent. Prepare both candidate and original providers for rollback. Cancel/timeout/deletion/source change must discard the prepared result; once local installation starts it reports its final result. Keep credentials in memory only; do not log provider exceptions/URIs.
+- Validate queued input without replacing it with native SQL. Re-parsing SQL as QGIS syntax corrupts backslashes. Undo/redo replays exact provider-accepted snapshots through `restore_server_subset`; user expressions/favorites/API never use this bypass.
+- Public WFS fields are now `nom_officiel`, `code_insee_du_departement`; the exact name L'Isle-Jourdain matches two communes. Use `code_insee = '32160'` to verify one commune. The old `$area` subset caused an unfiltered request; `left(...)` was sent as an unproven OGC function.
+- Lot B must consume the translation contract when it integrates bounded local residual evaluation. Do not treat a partial key list as a complete result. Lot F owns translations; new translation source strings are listed in the PR.
+
 ## [2026-10-16] Audit profond de la v5 → PR #114 – #118, #122, #148 – #150, CHANGELOG #154
 Décisions à connaître :
 - `ControllerRegistry` était « falsy » (`__len__` = 0) : `if not self._registry` empêchait tout enregistrement, donc aucun

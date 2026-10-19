@@ -34,6 +34,9 @@ def plugin_env(monkeypatch):
     """The FilterMate plugin loaded in this process, with its ENV_VARS."""
     def _install(**env_vars):
         module = types.SimpleNamespace(ENV_VARS=dict(env_vars))
+        # This fixture models an actually loaded plugin independently of the
+        # checkout folder name and of collection order in other test files.
+        monkeypatch.setitem(sys.modules, 'filter_mate.filtermate_api', types.ModuleType('filter_mate.filtermate_api'))
         monkeypatch.setitem(sys.modules, "filter_mate.config.config", module)
     monkeypatch.delitem(sys.modules, "filter_mate.config.config", raising=False)
     return _install
