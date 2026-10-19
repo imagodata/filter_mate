@@ -23,6 +23,13 @@
 # Project Memory
 _Auto-maintained by project agent_
 
+
+## [2026-10-19] Stream lot E — vector tile targets and remote point clouds
+- Vector tiles are target-only (`LayerKind.VECTOR_TILE`, `is_filter_target`); do not include them in `is_coverage`, which activates source panels. Route their target ids to the cross filter service.
+- Tile snapshots serialize the renderer and labeling XML only (never custom properties), including a numeric-key property backup for unnamed Mapbox properties which QGIS native XML drops. Even an unfiltered tile keeps that backup in its compressed project custom property (plain 6 MB XML/JSON makes QGIS project writing stall); the save hook must return before serializing a tile renderer to avoid re-entry. They keep a separate original style / added expression. The project persists both; portable favorites omit tile connection URIs. Strip the exact added rule envelope when rebasing manual color/label edits, so Unfilter preserves edits without making the filter permanent. Favorites replay the expression on the current style and enter history. Attribute Undo / Redo / Unfilter live in the target combo context menu, leaving the source layer current.
+- MVT features reach renderer expressions in the **map CRS**. Transform the stored selection to `@map_crs` at render time. Refuse >2,000 vertices / 1 MB across all style rules rather than approximate silently.
+- `pdal_cli.read_stages` bounds EPT / COPC on the reader; EPT polygon support is probed once on the worker, falling back to exact `filters.crop`. HTTP inputs require an extent and a known PDAL >=2.4. Never log the input URI from a PDAL error.
+- A remote source copy is opened on the worker and requires a Zone geometry. HAG takes that same zone. A bounded HAG snapshot carries `bounded_enrichment`: Unfilter restores the full pristine source (not the cropped enriched cache); only AND / AND NOT can narrow a bounded HAG. Keep this flag when taking snapshots or deriving another crop.
 ## [2026-10-19] Stream lot A: attribute dialects and asynchronous provider installation
 - Reuse `SourceCapability.requires_server_translation`; local providers keep their existing paths.
 - `core/filter/server_dialect.py` is pure: `ServerTranslation` has status, server expression, local residual, reason and provider subset. Split AND only; never partially apply an OR/NOT. `adapters/qgis/server_filter_translation.py` parses the real QGIS AST and validates WFS with `QgsOgcUtils`; the provider emits its negotiated OGC/FES version.

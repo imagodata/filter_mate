@@ -775,7 +775,7 @@ class TestHeightAboveGroundLayerSwitch:
         filter_state = ctrl_module._test_filter_state
 
         class Task:
-            def __init__(self, layer, dem):
+            def __init__(self, layer, dem, zone=None):
                 self.done = FakeSignal()
                 self.before = filter_state.LayerSnapshot(layer.id(), "point_cloud", source="/p1.laz")
                 self.after = filter_state.LayerSnapshot(layer.id(), "point_cloud", source="/p1_hag.copc.laz")

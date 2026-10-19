@@ -38,6 +38,11 @@ class LayerSnapshot:
             enriched file, which Unfilter keeps, and this is what unloading
             the plugin or saving the project goes back to.
         enriched_provider: Provider of ``enriched_source``.
+        renderer_xml: Complete portable tile style, including labeling.
+        original_renderer_xml: Tile style before the first FilterMate filter.
+        tile_filter: Display expression, kept apart from original style rules.
+        bounded_enrichment: HAG covers only its useful area; Unfilter must
+            restore the pristine cloud instead of keeping the enriched crop.
         selection: JSON of the :class:`RasterSelection` a raster source keeps
             (virtual raster), to rebuild it when the project is opened again.
     """
@@ -56,6 +61,10 @@ class LayerSnapshot:
     enriched_source: str = ""
     enriched_provider: str = ""
     selection: str = ""
+    renderer_xml: str = ""
+    original_renderer_xml: str = ""
+    tile_filter: str = ""
+    bounded_enrichment: bool = False
 
     def to_dict(self) -> dict:
         return asdict(self)
@@ -86,7 +95,8 @@ class LayerSnapshot:
 
     def same_state(self, other: "LayerSnapshot") -> bool:
         """True when restoring ``other`` would not change anything."""
-        return (self.source, self.provider, self.subset) == (other.source, other.provider, other.subset)
+        return (self.source, self.provider, self.subset, self.renderer_xml) == (
+            other.source, other.provider, other.subset, other.renderer_xml)
 
 
 _op_counter = itertools.count(1)

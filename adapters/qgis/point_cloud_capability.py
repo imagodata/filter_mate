@@ -228,6 +228,7 @@ def get_layer_kind(layer: Any) -> Any:
     from ...core.domain.layer_kind import LayerKind
     if layer is None:
         return LayerKind.OTHER
+    if any(base.__name__ == 'QgsVectorTileLayer' for base in type(layer).__mro__): return LayerKind.VECTOR_TILE
     try:
         from qgis.core import QgsVectorLayer
         if isinstance(QgsVectorLayer, type) and isinstance(layer, QgsVectorLayer):
