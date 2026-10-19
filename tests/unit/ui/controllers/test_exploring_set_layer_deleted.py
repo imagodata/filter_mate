@@ -43,7 +43,8 @@ class _DeletedLayer:
 def _controller(old_layer, valid):
     ctrl = types.SimpleNamespace(_current_layer=old_layer, _current_field="f",
                                  _dockwidget=MagicMock(), _populate_field_combo=MagicMock(),
-                                 _clear_field_combo=MagicMock(), _clear_features_list=MagicMock())
+                                 _clear_field_combo=MagicMock(), _clear_features_list=MagicMock(),
+                                 _cancel_remote_reads=MagicMock())
     ctrl.is_layer_valid = lambda layer: valid(layer)
     ctrl.set_layer = types.MethodType(_set_layer(), ctrl)
     return ctrl

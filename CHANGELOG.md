@@ -4,6 +4,8 @@ All notable changes to FilterMate will be documented in this file.
 
 ## [Unreleased]
 
+- Run service value lists, selection reads and zoom/filtered extents in cancellable snapshot tasks; reject stale generations and retain fast synchronous local reads.
+
 ### Added
 
 - **Vector tile filter targets (XYZ, ArcGIS, MBTiles, VTPK).** Basic renderer and labeling rules keep their original expressions while FilterMate applies attribute or spatial display filters. The filtering target list shows a tile badge; its context menu edits attributes and provides tile Undo / Redo / Unfilter. Snapshots, favorites and project reload retain the original style. Tile attributes depend on zoom and a feature split across tiles may be retained differently; oversized spatial expressions and unsupported renderers are refused.

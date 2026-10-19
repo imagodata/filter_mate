@@ -1040,6 +1040,7 @@ class TestDtmLayerCombo:
             package = types.ModuleType(_PKG + name)
             package.__path__ = [str(path)]
             monkeypatch.setitem(sys.modules, _PKG + name, package)
+        capability = f"{_PKG}.adapters.qgis.point_cloud_capability"
         core = sys.modules['qgis.core']
         values = types.SimpleNamespace(providerType=lambda: 'gdal', source=lambda: '/data/dtm.tif')
         cog = types.SimpleNamespace(providerType=lambda: 'gdal', source=lambda: '/vsicurl/https://example.org/dtm.tif')
@@ -1057,8 +1058,11 @@ class TestDtmLayerCombo:
             exceptedLayerList=lambda: list(exceptions),
             setExceptedLayerList=lambda items: exceptions.__init__(items),
         )
-        cloud._dtm_rasters_only(combo)
-        cloud._dtm_rasters_only(combo)
+        try:
+            cloud._dtm_rasters_only(combo)
+            cloud._dtm_rasters_only(combo)
+        finally:
+            sys.modules.pop(capability, None)
         assert exceptions == [existing, tiles, wms, wcs]
         assert values not in exceptions and cog not in exceptions
         assert 'gdal' not in providers
