@@ -651,6 +651,22 @@ def wait(task):
 
 def main():
     print("INFO QGIS " + Qgis.QGIS_VERSION, flush=True)
+    from filter_mate.adapters.qgis.server_filter_translation import ServerFilterError, prepare_server_subset
+    owner_layer = remote_memory()
+    try:
+        prepare_server_subset(owner_layer, 'abs("id") < 3', rect=QgsRectangle(0.5, 0, 3.5, 2))
+        check("attribute fallback refuses main-thread reads", False)
+    except ServerFilterError:
+        check("attribute fallback refuses main-thread reads", True)
+
+    def foreign_owner(task):
+        try:
+            prepare_server_subset(owner_layer, 'abs("id") < 3', rect=QgsRectangle(0.5, 0, 3.5, 2))
+            check("attribute fallback refuses a foreign-thread layer", False)
+        except ServerFilterError:
+            check("attribute fallback refuses a foreign-thread layer", True)
+
+    wait(QgsTask.fromFunction("attribute fallback ownership", foreign_owner))
     try:
         materialize(remote_memory(), QgsRectangle(0, 0, 2, 2), "", "")
         check("main thread refuses remote reads", False)
