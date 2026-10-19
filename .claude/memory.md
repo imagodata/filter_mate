@@ -782,3 +782,13 @@ Result: Que veux-tu faire dans cette session ?
   rendue certaine dans le smoke GUI (`s_undo_pick_race` : `singleShot(150)` de la touche, undo, `sleep`). Un choix
   fait pendant la tâche filtre est appliqué à la fin (`_combo_blocked_at`) ; une tâche échouée / annulée rouvre la
   fenêtre (`_filter_engine_task_terminated`, garde de génération pour annuler-relancer).
+- [2026-10-19] Filtre attributaire serveur par version QGIS (branche `claude/v5-stream-F-versions`) : politique pure
+  `core/filter/server_transfer_policy.transfer_mode(provider, QGIS_VERSION_INT, declares_parallel)` → `async` / `sync`
+  / `refuse`. WFS et ArcGIS en asynchrone dès 3.32 (API `readLayerXml(..., preloadedProvider)`), prouvé de 3.32.3 à la
+  nightly 4.3 par `tests/qgis_headless/check_stream_versions.py` (WFS) et `check_stream_vector_filters.py` (ArcGIS) ;
+  avant 3.32 : WFS en `setSubsetString` synchrone (aucune requête dans le setter, ~15–25 ms), ArcGIS refusé. Pièges
+  vérifiés : un WFS renvoie ses ExceptionReport en HTTP 200 et l'itérateur finit « proprement » sans erreur provider
+  (sonde = préprocesseur de réponse) ; `QgsBlockingNetworkRequest.get()` préfère le cache HTTP de QGIS (`PreferCache`),
+  une réponse sans en-tête de cache est resservie sans requête → `get(request, True)` pour un verdict serveur, et une
+  course « 10 ms » dans un test d'un job asynchrone peut perdre contre un worker servi par ce cache (agir avant la boucle).
+  Les images Docker 3.40 / 4.0 s'appellent `qgis/qgis:3.40` / `qgis/qgis:4.0` (pas `release-3_40`).

@@ -7,9 +7,47 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import parse_qs, urlsplit
 from xml.etree import ElementTree
 
+_COMPARISONS = {
+    "PropertyIsEqualTo": lambda left, right: left == right,
+    "PropertyIsNotEqualTo": lambda left, right: left != right,
+    "PropertyIsLessThan": lambda left, right: left < right,
+    "PropertyIsGreaterThan": lambda left, right: left > right,
+    "PropertyIsLessThanOrEqualTo": lambda left, right: left <= right,
+    "PropertyIsGreaterThanOrEqualTo": lambda left, right: left >= right,
+}
+
+
+def _matches(element, row):
+    """Evaluate the OGC comparisons on ``id``; the BBOX is applied separately."""
+    tag = element.tag.rsplit("}", 1)[-1]
+    children = list(element)
+    if tag in ("Filter", "And"):
+        return all(_matches(child, row) for child in children)
+    if tag == "Or":
+        return any(_matches(child, row) for child in children)
+    if tag == "Not":
+        return not _matches(children[0], row)
+    if tag == "BBOX":
+        return True
+    if tag in _COMPARISONS:
+        name = next(child.text for child in children if child.tag.endswith(("PropertyName", "ValueReference")))
+        literal = next(child.text for child in children if child.tag.endswith("Literal"))
+        if name.rsplit(":", 1)[-1] != "id":
+            raise ValueError(name)
+        return _COMPARISONS[tag](row, float(literal))
+    raise ValueError(tag)
+
 
 class VectorService:
-    def __init__(self):
+    """WFS 1.0 points 0..999 at (i, 1).
+
+    ``attribute_filters`` also evaluates OGC comparisons on ``id`` (lot A
+    filters), with the ArcGIS fixture's conventions: a literal 999 is
+    rejected by an HTTP-200 ServiceExceptionReport, a literal 777 answers
+    after ``slow`` seconds.
+    """
+
+    def __init__(self, attribute_filters=False, slow=0.5):
         self.requests = []
         self.fail = False
         self.exception_200 = False
@@ -56,8 +94,8 @@ class VectorService:
                       </xsd:sequence></xsd:extension></xsd:complexContent></xsd:complexType></xsd:schema>"""
                 elif operation == "getfeature":
                     bbox = query.get("bbox")
-                    if not bbox and query.get("filter"):
-                        root = ElementTree.fromstring(query["filter"])
+                    root = ElementTree.fromstring(query["filter"]) if query.get("filter") else None
+                    if not bbox and root is not None:
                         for element in root.iter():
                             if element.tag.endswith("coordinates"):
                                 bbox = ",".join(element.text.split())
@@ -71,14 +109,21 @@ class VectorService:
                         for i in range(1000)
                         if bounds is None or bounds[0] <= i <= bounds[2] and bounds[1] <= 1 <= bounds[3]
                     ]
+                    literals = set()
+                    if attribute_filters and root is not None:
+                        literals = {element.text for element in root.iter() if element.tag.endswith("Literal")}
+                        rows = [row for row in rows if _matches(root, row)]
                     limit = int(query.get("maxfeatures", "1000"))
                     rows = rows[:limit]
                     fixture.requests.append(
-                        {"bbox": bounds, "returned": len(rows), "hits": query.get("resulttype") == "hits"}
+                        {"bbox": bounds, "returned": len(rows), "hits": query.get("resulttype") == "hits",
+                         "filter": query.get("filter", "")}
                     )
                     if fixture.delay:
                         time.sleep(fixture.delay)
-                    if fixture.exception_200:
+                    if "777" in literals:
+                        time.sleep(slow)
+                    if fixture.exception_200 or "999" in literals:
                         body = "<ServiceExceptionReport><ServiceException>fixture rejection</ServiceException></ServiceExceptionReport>"
                     elif fixture.fail:
                         status, body = 500, "fixture network failure"

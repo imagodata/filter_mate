@@ -133,7 +133,9 @@ batch = algorithm.processAlgorithm({}, None, QgsProcessingFeedback())
 assert batch[algorithm.LAYERS_FILTERED] == 0
 print('PASS Processing reports a refused server filter as failed', flush=True)
 
-if Qgis.QGIS_VERSION_INT < 33200:
+from filter_mate.adapters.qgis import server_subset_job as job_module  # noqa: E402
+from filter_mate.core.filter.server_transfer_policy import ASYNC, PRELOADED_PROVIDER_MIN  # noqa: E402
+if Qgis.QGIS_VERSION_INT < PRELOADED_PROVIDER_MIN:
     from filter_mate.adapters.qgis.server_subset_job import ServerSubsetJob
     local = QgsVectorLayer('Point?field=id:integer', 'old QGIS fixture', 'memory')
     try:
@@ -143,9 +145,6 @@ if Qgis.QGIS_VERSION_INT < 33200:
         print('PASS old QGIS reports unsupported provider transfer without mutation', flush=True)
     else:
         failed.append('Old QGIS silently accepted a provider transfer')
-    print('SKIP async provider transfer: QGIS 3.32+ required', flush=True)
-    print('FAILURES', len(failed), flush=True)
-    raise SystemExit(bool(failed))
 
 # A real provider and a loopback HTTP service check what is sent on the wire.
 # No public service is needed by the automatic regression suite.
@@ -154,6 +153,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer  # noqa: E40
 from threading import Thread  # noqa: E402
 from urllib.parse import parse_qs, urlsplit  # noqa: E402
 queries = []
+rejected_wheres = set()  # where clauses the fixture starts rejecting mid-run
 
 
 class ArcGISFixture(BaseHTTPRequestHandler):
@@ -168,7 +168,8 @@ class ArcGISFixture(BaseHTTPRequestHandler):
             if '777' in where:
                 import time
                 time.sleep(0.15)
-            if '999' in where or parameters.get('returnCountOnly') == ['true'] and not where:
+            if '999' in where or any(clause in where for clause in rejected_wheres) or (
+                    parameters.get('returnCountOnly') == ['true'] and not where):
                 payload = {'error': {'code': 400, 'message': 'Fixture rejection'}}
             elif parameters.get('returnIdsOnly') == ['true']:
                 payload = {'objectIdFieldName': 'id', 'objectIds': [1]}
@@ -202,6 +203,23 @@ try:
     service = QgsVectorLayer("url='http://127.0.0.1:{}/FeatureServer/0'".format(server.server_port),
                              'loopback ArcGIS', 'arcgisfeatureserver')
     assert service.isValid()
+    if job_module.transfer_mode_for_layer(service) != ASYNC:
+        # Its setter fetches object IDs on the calling thread: no synchronous
+        # fallback, the layer keeps its filter and the user gets the reason.
+        from filter_mate.adapters.qgis.server_filter_translation import last_server_filter_error
+        before = service.subsetString()
+        queries.clear()
+        accepted = safe_set_subset_string(service, '"id" = 1')
+        message = last_server_filter_error(service)
+        ok = not accepted and service.subsetString() == before and not queries and message.startswith(
+            'loopback ArcGIS: ') and '3.32' in message
+        print('PASS' if ok else 'FAIL', 'ArcGIS refused clearly where its transfer is not proven', '' if ok else message,
+              flush=True)
+        if not ok:
+            failed.append('ArcGIS refusal')
+        print('SKIP ArcGIS provider transfer: not proven on QGIS {}'.format(Qgis.QGIS_VERSION), flush=True)
+        print('FAILURES', len(failed), flush=True)
+        raise SystemExit(bool(failed))
     identity = service.id()
     service.setCustomProperty('filtermate/test_preserve', 'keep')
     service.setOpacity(0.6)
@@ -260,6 +278,17 @@ try:
     assert not safe_set_subset_string(service, '"id" = 999')
     assert service.subsetString() == before
     print('PASS HTTP-200 ArcGIS error is a failure with no mutation', flush=True)
+    # The responses carry no cache headers, and QgsBlockingNetworkRequest
+    # prefers QGIS's HTTP cache: the verdict must still come from the server.
+    assert safe_set_subset_string(service, '"id" = 2') and safe_set_subset_string(service, '"id" = 1')
+    before = service.subsetString()
+    rejected_wheres.add('"id" = 2')
+    queries.clear()
+    assert not safe_set_subset_string(service, '"id" = 2')
+    assert service.subsetString() == before
+    assert any(query.get('returnCountOnly') == ['true'] for query in queries), queries
+    rejected_wheres.clear()
+    print('PASS ArcGIS verdict is fresh from the server, not a cached response', flush=True)
 
     from filter_mate.adapters.qgis.server_subset_job import ServerSubsetJob
     loop = QEventLoop()
@@ -322,9 +351,12 @@ try:
         app_module.show_warning = previous_warning
     assert len(warnings) == 2
     print('PASS new GUI filter/undo and REST operations are guarded while preparing', flush=True)
-    cleared = []
-    QTimer.singleShot(10, lambda: cleared.append(api.clear_filter('loopback ArcGIS')))
-    pending_loop.exec()
+    # Before the event loop runs: the job cannot have been installed yet.
+    # A 10 ms timer raced with the worker, which QGIS's HTTP cache (the
+    # blocking requests prefer it) can finish within a few milliseconds.
+    cleared = [api.clear_filter('loopback ArcGIS')]
+    if not pending_job.done:
+        pending_loop.exec()
     assert pending_job.done and not pending_job.success and cleared == [True]
     assert service.subsetString() == ''
     drain = QEventLoop()
@@ -343,9 +375,12 @@ try:
     deleted_job = ServerSubsetJob(deleted, '"id" = 777', timeout_ms=3000)
     deleted_job.finished.connect(deleted_loop.quit)
     deleted_job.start()
-    QTimer.singleShot(10, lambda: QgsProject.instance().removeMapLayer(deleted_id))
-    deleted_loop.exec()
-    assert deleted_job.done and not deleted_job.success
+    # The installation runs from the event loop: deleting now always
+    # precedes it, wherever the worker is (same race as the clear above).
+    QgsProject.instance().removeMapLayer(deleted_id)
+    if not deleted_job.done:
+        deleted_loop.exec()
+    assert deleted_job.done and not deleted_job.success, deleted_job.message
     assert QgsProject.instance().mapLayer(deleted_id) is None
     print('PASS layer deletion discards the prepared provider', flush=True)
 

@@ -241,10 +241,15 @@ def apply_server_subset(layer, expression, *, _trusted_restore=False):
     from qgis.PyQt.QtCore import QThread
     if isinstance(QgsVectorLayer, type) and isinstance(layer, QgsVectorLayer):
         if QThread.currentThread() == QgsApplication.instance().thread():
-            from .server_subset_job import apply_server_subset_wait, cancel_pending_server_subset
+            from .server_subset_job import (
+                SYNC, apply_server_subset_sync, apply_server_subset_wait, cancel_pending_server_subset,
+                transfer_mode_for_layer,
+            )
             cancel_pending_server_subset(layer)
             if subset == before and layer.isValid():
                 return True
+            if transfer_mode_for_layer(layer) == SYNC:
+                return apply_server_subset_sync(layer, subset)
             return apply_server_subset_wait(layer, expression, trusted_restore=_trusted_restore)
         if QThread.currentThread() != layer.thread():
             raise ServerFilterError(_tr('A server layer can only be modified on its owning thread.'))
