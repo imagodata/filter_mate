@@ -139,6 +139,14 @@ class AttributeFilterExecutor:
             logger.debug("TaskBridge: no expression - using legacy code")
             return None
 
+        from ...domain.source_capability import classify_layer
+        if classify_layer(self.layer).requires_server_translation:
+            from ....adapters.qgis.server_filter_translation import prepare_server_subset
+            # The bridge may evaluate the expression on an unbounded remote
+            # iterator and truncate its IDs. Use the validated legacy path.
+            prepare_server_subset(self.layer, expression)
+            return None
+
         # Check if expression is just a field name (no operators)
         # 2026-10-17: isField() alone (the root node is a column reference).
         # The extra "'IN' in expression.upper()" test let "importance" pass.
@@ -229,6 +237,12 @@ class AttributeFilterExecutor:
         # "origine" or "ordre" through, and ( old ) AND ( "importance" )
         # reached the provider (PostgreSQL: argument of AND must be boolean).
         qgs_expr = QgsExpression(expression)
+        from ...domain.source_capability import classify_layer
+        if classify_layer(self.layer).requires_server_translation:
+            from ....adapters.qgis.server_filter_translation import prepare_server_subset
+            # A refusal raises before the source executor's ID-list fallback.
+            prepare_server_subset(self.layer, expression)
+            return expression, False
         if qgs_expr.isField():
             logger.debug(
                 f"Rejecting expression '{expression}' - "

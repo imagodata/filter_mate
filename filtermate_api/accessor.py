@@ -36,6 +36,10 @@ class FavoritesUnavailable(RuntimeError):
     """
 
 
+class FilterRejected(ValueError):
+    """An existing layer refused an attribute filter without applying it."""
+
+
 @dataclass(frozen=True)
 class LayerSummary:
     """Lightweight projection of a QGIS layer for API consumers.

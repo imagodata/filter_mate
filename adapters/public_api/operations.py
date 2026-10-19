@@ -195,6 +195,9 @@ def busy_reason() -> str:
     """
     if _RUNNING:
         return f"FilterMate is already running {_RUNNING[0]}: try again when it ends"
+    from ...core.filter.server_filter_state import server_filter_pending
+    if server_filter_pending():
+        return BACKGROUND_BUSY
     return BACKGROUND_BUSY if _background_tasks_running() else ""
 
 

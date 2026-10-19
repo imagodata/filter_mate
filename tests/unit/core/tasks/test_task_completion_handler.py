@@ -57,7 +57,7 @@ from core.tasks.task_completion_handler import (
 
 
 @pytest.fixture(autouse=True)
-def _stub_qgis_symbols_on_module():
+def _stub_qgis_symbols_on_module(monkeypatch):
     """Re-pin QgsMessageLog/Qgis on the module before each test.
 
     Sibling test suites swap entries in `sys.modules['qgis.core']` for
@@ -71,6 +71,15 @@ def _stub_qgis_symbols_on_module():
     qgs_obj = types.SimpleNamespace(
         MessageLevel=types.SimpleNamespace(Info=0, Warning=1, Critical=2)
     )
+    # This suite isolates local provider work; real remote count/error guards
+    # run in check_stream_vector_filters.py with the actual adapter modules.
+    root = _tch.__package__.split('.')[0]
+    probe = types.ModuleType(root + '.adapters.qgis.source_capability_probe')
+    probe.feature_count_or_none = lambda layer: layer.featureCount()
+    errors = types.ModuleType(root + '.adapters.qgis.server_filter_translation')
+    errors.last_server_filter_error = lambda layer: ''
+    monkeypatch.setitem(sys.modules, probe.__name__, probe)
+    monkeypatch.setitem(sys.modules, errors.__name__, errors)
     with patch.object(_tch, "QgsMessageLog", qgs_log), \
          patch.object(_tch, "Qgis", qgs_obj):
         yield

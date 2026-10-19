@@ -51,6 +51,32 @@ except ImportError:
 logger = get_logger(__name__)
 
 
+def _restore_history_subset(layer, expression, errors=None):
+    """Replay provider-accepted native syntax exactly, without QGIS parsing."""
+    from ..core.domain.source_capability import classify_layer
+    capability = classify_layer(layer)
+    try:
+        if capability.requires_server_translation:
+            from .qgis.server_filter_translation import restore_server_subset
+            return restore_server_subset(layer, expression)
+        result = safe_set_subset_string(layer, expression)
+        if not result:
+            raise ValueError(QCoreApplication.translate('UndoRedoHandler', 'The provider rejected the saved filter.'))
+        return True
+    except ValueError as exc:
+        message = QCoreApplication.translate('UndoRedoHandler', 'Could not restore the filter: {0}').format(str(exc))
+        logger.warning('%s', message)
+        if errors is not None:
+            errors.append(message)
+        try:
+            from qgis.utils import iface
+            if iface is not None:
+                iface.messageBar().pushWarning('FilterMate', message)
+        except (ImportError, AttributeError):
+            pass
+        return False
+
+
 def _history_count(layer) -> int:
     """Feature count recorded in the history; -1 for a web service / network database (2026-10-17).
 
@@ -321,7 +347,7 @@ class UndoRedoHandler:
         which doesn't exist in the PROJECT_LAYERS structure.
         """
         logger.info("Performing global undo (multi-layer entry)")
-        history_entry = self._history_manager.undo()
+        history_entry = self._history_manager.peek_undo()
 
         if not history_entry:
             logger.info("No global undo history available")
@@ -340,6 +366,7 @@ class UndoRedoHandler:
 
         # Restore previous filters for all affected layers
         restored_layers = []
+        source_ok, failed = True, False
         for layer_id, previous_filter in history_entry.previous_filters:
 
             # v4.1.4: FIXED - Use QgsProject.mapLayer() to get the layer object
@@ -347,7 +374,10 @@ class UndoRedoHandler:
             layer = project.mapLayer(layer_id)
 
             if layer:
-                safe_set_subset_string(layer, previous_filter)
+                if not _restore_history_subset(layer, previous_filter):
+                    failed = True
+                    source_ok = source_ok and layer_id != source_layer.id()
+                    continue
                 # Update project_layers tracking if layer_id exists there
                 if layer_id in project_layers:
                     project_layers[layer_id]["infos"]["is_already_subset"] = bool(previous_filter)
@@ -361,8 +391,10 @@ class UndoRedoHandler:
         # Refresh all affected layers
         self._refresh_affected_layers(source_layer, restored_layers)
 
+        if source_ok:
+            self._history_manager.undo()
         logger.info(f"Global undo completed - restored {len(restored_layers)} layers")
-        return True
+        return source_ok and not failed
 
     def _perform_filtered_undo(
         self,
@@ -385,7 +417,7 @@ class UndoRedoHandler:
         """
         logger.info(f"Performing filtered undo for {len(layers_to_filter)} selected layers")
 
-        history_entry = self._history_manager.undo()
+        history_entry = self._history_manager.peek_undo()
 
         if not history_entry:
             logger.info("No filtered undo history available")
@@ -405,6 +437,7 @@ class UndoRedoHandler:
         # Restore previous filters ONLY for allowed layers
         restored_layers = []
         skipped_layers = []
+        source_ok, failed = True, False
 
         for layer_id, previous_filter in history_entry.previous_filters:
             if layer_id not in allowed_layer_ids:
@@ -414,7 +447,10 @@ class UndoRedoHandler:
             layer = project.mapLayer(layer_id)
 
             if layer:
-                safe_set_subset_string(layer, previous_filter)
+                if not _restore_history_subset(layer, previous_filter):
+                    failed = True
+                    source_ok = source_ok and layer_id != source_layer.id()
+                    continue
 
                 # Update project_layers tracking if layer_id exists there
                 if layer_id in project_layers:
@@ -429,8 +465,10 @@ class UndoRedoHandler:
         # Refresh all affected layers
         self._refresh_affected_layers(source_layer, restored_layers)
 
+        if source_ok:
+            self._history_manager.undo()
         logger.info(f"Filtered undo completed - restored {len(restored_layers)} layers, skipped {len(skipped_layers)}")
-        return True
+        return source_ok and not failed
 
     def _perform_global_redo(
         self,
@@ -442,7 +480,7 @@ class UndoRedoHandler:
         v4.1.4: Fixed - use QgsProject.mapLayer() instead of project_layers["layer"]
         """
         logger.info("Performing global redo")
-        history_entry = self._history_manager.redo()
+        history_entry = self._history_manager.peek_redo()
 
         if not history_entry:
             logger.info("No global redo history available")
@@ -458,6 +496,7 @@ class UndoRedoHandler:
 
         # Apply the filter expression to all affected layers
         restored_layers = []
+        source_ok, failed = True, False
         for layer_id in history_entry.layer_ids:
             # v4.1.4: FIXED - Use QgsProject.mapLayer() to get the layer object
             layer = project.mapLayer(layer_id)
@@ -472,7 +511,10 @@ class UndoRedoHandler:
                     layer_info = remote_layers_info.get(layer_id, {})
                     expression = layer_info.get('expression', '') if isinstance(layer_info, dict) else ''
 
-                safe_set_subset_string(layer, expression)
+                if not _restore_history_subset(layer, expression):
+                    failed = True
+                    source_ok = source_ok and layer_id != source_layer.id()
+                    continue
 
                 # Update project_layers tracking if layer_id exists there
                 if layer_id in project_layers:
@@ -487,8 +529,10 @@ class UndoRedoHandler:
         # Refresh all affected layers
         self._refresh_affected_layers(source_layer, restored_layers)
 
+        if source_ok:
+            self._history_manager.redo()
         logger.info(f"Global redo completed - restored {len(restored_layers)} layers")
-        return True
+        return source_ok and not failed
 
     def _perform_layer_undo(
         self,
@@ -502,7 +546,7 @@ class UndoRedoHandler:
         logger.info("Performing source layer undo only")
 
         # Pop the entry (caller already verified it exists)
-        previous_state = self._history_manager.undo()
+        previous_state = self._history_manager.peek_undo()
         if not previous_state:
             return False
 
@@ -513,13 +557,19 @@ class UndoRedoHandler:
                 previous_expression = expr
                 break
 
-        safe_set_subset_string(source_layer, previous_expression)
+        if not _restore_history_subset(source_layer, previous_expression):
+            return False
+        self._history_manager.undo()
 
         project_layers[source_layer.id()]["infos"]["is_already_subset"] = bool(previous_expression)
         logger.info(f"Undo source layer to: {previous_state.description}")
 
         # Refresh
-        self._refresh_layers(source_layer)
+        from ..core.domain.source_capability import classify_layer
+        if classify_layer(source_layer).requires_server_translation:
+            self._refresh_affected_layers(source_layer, [])
+        else:
+            self._refresh_layers(source_layer)
         return True
 
     def _perform_layer_redo(
@@ -534,7 +584,7 @@ class UndoRedoHandler:
         logger.info("Performing source layer redo only")
 
         # Pop the entry (caller already verified it exists)
-        next_state = self._history_manager.redo()
+        next_state = self._history_manager.peek_redo()
         if not next_state:
             return False
 
@@ -542,12 +592,18 @@ class UndoRedoHandler:
         # For single-layer entry, this is simply next_state.expression
         expression = next_state.expression
 
-        safe_set_subset_string(source_layer, expression)
+        if not _restore_history_subset(source_layer, expression):
+            return False
+        self._history_manager.redo()
         project_layers[source_layer.id()]["infos"]["is_already_subset"] = bool(expression)
         logger.info(f"Redo source layer to: {next_state.description}")
 
         # Refresh
-        self._refresh_layers(source_layer)
+        from ..core.domain.source_capability import classify_layer
+        if classify_layer(source_layer).requires_server_translation:
+            self._refresh_affected_layers(source_layer, [])
+        else:
+            self._refresh_layers(source_layer)
         return True
 
     def _restore_remote_layers(
@@ -573,7 +629,8 @@ class UndoRedoHandler:
                 logger.warning(f"Skipping remote layer '{remote_layer.name()}' (invalid or missing source)")
                 continue
 
-            safe_set_subset_string(remote_layer, expression)
+            if not _restore_history_subset(remote_layer, expression):
+                continue
             project_layers[remote_id]["infos"]["is_already_subset"] = bool(expression)
             expr_preview = expression[:60] if expression else 'no filter'
             logger.info(f"Restored remote layer {remote_layer.name()}: {expr_preview}")
@@ -587,11 +644,14 @@ class UndoRedoHandler:
         remote_layers: List
     ) -> None:
         """Refresh all affected layers and canvas."""
-        source_layer.updateExtents()
+        from ..core.domain.source_capability import classify_layer
+        if not classify_layer(source_layer).requires_server_translation:
+            source_layer.updateExtents()
         source_layer.triggerRepaint()
 
         for remote_layer in remote_layers:
-            remote_layer.updateExtents()
+            if not classify_layer(remote_layer).requires_server_translation:
+                remote_layer.updateExtents()
             remote_layer.triggerRepaint()
 
         iface = self._get_iface()
