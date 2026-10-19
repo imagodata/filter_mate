@@ -14,7 +14,7 @@ class UnsafeExpressionError(ValueError):
 class SnapshotQueryTask(QgsTask):
     """Run a read against an independent snapshot, never against the live layer."""
 
-    REQUEST_TIMEOUT_MS = 5000
+    REQUEST_TIMEOUT_MS = 30000
 
     def __init__(self, description, layer, compute, deliver):
         super().__init__(description, QgsTask.Flag.CanCancel)

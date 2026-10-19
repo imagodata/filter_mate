@@ -5171,6 +5171,14 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
 
     def cancel_async_expression_evaluation(self):
         """v4.0 S18: Cancel pending async expression evaluation."""
+        self._pending_remote_filter = None
+        controller = getattr(self, '_exploring_ctrl', None)
+        slot = getattr(controller, '_selection_query', None) if controller is not None else None
+        if slot is not None:
+            slot.cancel()
+        remote = getattr(self, '_remote_expression_query', None)
+        if remote is not None:
+            remote.cancel()
         if self._pending_async_evaluation: self._pending_async_evaluation.cancel(); self._pending_async_evaluation = None; self._set_expression_loading_state(False)
         if self._expression_manager and self.current_layer: self._expression_manager.cancel(self.current_layer.id())
 
@@ -6968,6 +6976,37 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             else:
                 self._exploring_cache.invalidate(layer_id, groupbox_type)
 
+    def _defer_remote_filter(self, slot):
+        """Resume a requested filter after its current selection read, if still current."""
+        token = object()
+        self._pending_remote_filter = token
+        layer = self.current_layer
+        controller = self._exploring_ctrl
+        revision = controller._remote_ui_revision()
+        signature = controller._remote_selection_pending
+        generation = slot.generation
+        task = slot.task
+
+        def resume():
+            try:
+                cached = controller._remote_selection_result
+                if (getattr(self, '_pending_remote_filter', None) is not token
+                        or self.current_layer is not layer or not slot.accepts(generation)
+                        or controller._remote_ui_revision() != revision
+                        or cached is None or cached[0] != signature):
+                    return
+                self._pending_remote_filter = None
+                self.launchTaskEvent(False, 'filter')
+            except RuntimeError:
+                return  # The dock or its layer was deleted while the callback was queued.
+
+        def completed():
+            if task.error is None and slot.accepts(generation):
+                # Let all task delivery/cleanup slots finish before re-entering the launcher.
+                QTimer.singleShot(0, resume)
+
+        task.taskCompleted.connect(completed)
+
     def launchTaskEvent(self, state: str, task_name: str) -> None:
         """Emit signal to launch a FilterMate task.
 
@@ -6986,7 +7025,9 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         """
         if self._controller_integration and self._controller_integration.delegate_point_cloud_task(task_name):
             return
-        if task_name == 'filter' and self._exploring_ctrl:
+        if task_name != 'filter':
+            self._pending_remote_filter = None
+        if task_name == 'filter' and getattr(self, '_exploring_ctrl', None):
             from .adapters.qgis.source_capability_probe import counts_cheaply
             if self.current_layer is not None and not counts_cheaply(self.current_layer):
                 self._exploring_ctrl.get_current_features()
@@ -6994,8 +7035,7 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
                     return
             slot = getattr(self._exploring_ctrl, '_selection_query', None)
             if slot is not None and slot.task is not None:
-                from .infrastructure.feedback import show_warning
-                show_warning(self.tr("Selection"), self.tr("The selection is still loading. Please retry when loading finishes."))
+                self._defer_remote_filter(slot)
                 return
         # FIX 2026-01-17 v3 + 2026-01-22: Define user action tasks early (needed for recovery logic)
         user_action_tasks = ('undo', 'redo', 'unfilter', 'reset', 'export')

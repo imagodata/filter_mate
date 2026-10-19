@@ -433,6 +433,16 @@ class ExploringController(BaseController, LayerSelectionMixin):
                      getattr(dw, '_last_single_selection_fid', None))
         return mode, state
 
+    def _empty_remote_selection(self, expression, refused=False):
+        """Cancel a superseded read when the new expression needs no replacement task."""
+        slot = getattr(self, '_selection_query', None)
+        if slot is not None:
+            slot.cancel()
+        self._remote_selection_result = None
+        self._remote_selection_pending = None
+        self._remote_selection_refused = refused
+        return [], expression
+
     def _remote_features(self, input=None, custom_expression=None):
         """Return cached selection data or schedule its cancellable read."""
         from ...adapters.qgis.async_query import submit_query
@@ -454,7 +464,7 @@ class ExploringController(BaseController, LayerSelectionMixin):
             from ...infrastructure.utils import should_skip_expression_for_filtering
             skip, reason = should_skip_expression_for_filtering(expression)
             if skip:
-                return [], expression
+                return self._empty_remote_selection(expression)
             request.setFilterExpression(expression)
         elif isinstance(input, QgsFeature):
             request.setFilterFid(input.id())
@@ -463,8 +473,7 @@ class ExploringController(BaseController, LayerSelectionMixin):
             limit = capability_for_layer(layer).key_list_limit
             if limit is not None and len(values) > limit:
                 show_warning(dw.tr("Selection"), dw.tr("The service selection exceeds the key limit. Refine the selection."))
-                self._remote_selection_refused = True
-                return [], 'FALSE'
+                return self._empty_remote_selection('FALSE', refused=True)
             if key.is_field:
                 numeric = layer.fields().field(key.name).isNumeric()
                 literals = ', '.join(format_key_literal(value, numeric, QGIS_EXPRESSION) for value in values)
@@ -472,8 +481,7 @@ class ExploringController(BaseController, LayerSelectionMixin):
                 request.setFilterExpression(expression)
             else:
                 show_warning(dw.tr("Selection"), dw.tr("This service has no stable key for the selection."))
-                self._remote_selection_refused = True
-                return [], 'FALSE'
+                return self._empty_remote_selection('FALSE', refused=True)
         else:
             if dw.current_exploring_groupbox == 'custom_selection':
                 widget = dw.widgets.get('EXPLORING', {}).get('CUSTOM_SELECTION_EXPRESSION', {}).get('WIDGET')
@@ -482,7 +490,7 @@ class ExploringController(BaseController, LayerSelectionMixin):
                     from ...infrastructure.utils import should_skip_expression_for_filtering
                     skip, reason = should_skip_expression_for_filtering(candidate)
                     if skip:
-                        return [], candidate
+                        return self._empty_remote_selection(candidate)
             request = self._remote_zoom_request()
             # The zoom request omits attributes; selection results need the key and display values.
             request.setFlags(QgsFeatureRequest.Flag.NoFlags)
@@ -491,12 +499,8 @@ class ExploringController(BaseController, LayerSelectionMixin):
         filter_expression = request.filterExpression()
         from ...adapters.qgis.async_query import remote_expression_is_safe
         if filter_expression is not None and not remote_expression_is_safe(filter_expression.expression(), layer.fields()):
-            slot = getattr(self, '_selection_query', None)
-            if slot is not None:
-                slot.cancel()
             show_warning(dw.tr("Selection"), dw.tr("This expression cannot be evaluated safely for a service."))
-            self._remote_selection_refused = True
-            return [], 'FALSE'
+            return self._empty_remote_selection('FALSE', refused=True)
         signature = (layer.id(), layer.source(), layer.subsetString(), dw.current_exploring_groupbox,
                      filter_expression.expression() if filter_expression is not None else '',
                      request.filterFid(), tuple(sorted(request.filterFids())))

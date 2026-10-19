@@ -231,14 +231,14 @@ def test_request_uses_a_bounded_provider_timeout(module):
     task.source.getFeatures.return_value.__iter__.return_value = iter([])
     request = MagicMock()
     assert list(task.features(request)) == []
-    request.setTimeout.assert_called_once_with(5000)
+    request.setTimeout.assert_called_once_with(30000)
 
 
 def test_slow_fetch_is_an_error_instead_of_a_partial_success(module, monkeypatch):
     task = module.SnapshotQueryTask('read', MagicMock(), MagicMock(), MagicMock())
     task.source.getFeatures.return_value.__iter__.return_value = iter([1])
     from types import SimpleNamespace
-    monkeypatch.setattr(module, 'time', SimpleNamespace(monotonic=MagicMock(side_effect=[0, 5])))
+    monkeypatch.setattr(module, 'time', SimpleNamespace(monotonic=MagicMock(side_effect=[0, 30])))
     with pytest.raises(TimeoutError):
         list(task.features(MagicMock()))
     task.source.getFeatures.return_value.close.assert_called_once()
@@ -296,3 +296,23 @@ def test_replacing_a_pending_read_keeps_the_loading_lease(module):
     loading.assert_called_once_with(True)
     owner.query.cancel()
     assert [call.args[0] for call in loading.call_args_list] == [True, False]
+
+
+def test_clearing_an_expression_cancels_a_completed_but_undelivered_read(module):
+    import ast
+    from types import MethodType
+    owner, layer = _owner_layer()
+    callback = MagicMock()
+    task = module.submit_query(owner, '_selection_query', layer, 'old', lambda _: [1], callback)
+    assert task.run()
+    controller = PATH.parents[2] / 'ui/controllers/exploring_controller.py'
+    tree = ast.parse(controller.read_text(encoding='utf-8'))
+    cls = next(node for node in tree.body if isinstance(node, ast.ClassDef) and node.name == 'ExploringController')
+    node = next(node for node in cls.body if isinstance(node, ast.FunctionDef) and node.name == '_empty_remote_selection')
+    namespace = {}
+    exec(compile(ast.Module(body=[node], type_ignores=[]), str(controller), 'exec'), namespace)
+    empty = MethodType(namespace['_empty_remote_selection'], owner)
+    assert empty('name') == ([], 'name')
+    task.finished(True)
+    callback.assert_not_called()
+    task.feedback.cancel.assert_called_once()
