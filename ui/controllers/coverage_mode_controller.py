@@ -2879,10 +2879,11 @@ class CoverageModeController(BaseController):
     def _failure_text(self, failures) -> str:
         """``layer: reason`` for every failed target, cut to fit the message bar."""
         parts = []
+        failed = self.tr('failed')  # out of the f-string: pylupdate5 does not read inside one
         for outcome in failures:
             layer = self._map_layer(outcome.layer_id)
             name = self._layer_name(layer) if layer is not None else outcome.layer_id
-            parts.append(f"{name}: {outcome.message or self.tr('failed')}")
+            parts.append(f"{name}: {outcome.message or failed}")
         return '; '.join(parts)[:300]
 
     def _emptied_text(self, outcomes) -> str:
