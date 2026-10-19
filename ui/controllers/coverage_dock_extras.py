@@ -592,6 +592,10 @@ class CoverageDockExtras(QObject):
         self._guarded(self.ensure_strip)
         self.schedule_strip()  # deferred: the dock makes the layer current after this call
 
+    def _translator(self, text: str) -> str:
+        """``self.tr`` for the text helpers: a bare ``self.tr`` misleads pylupdate5 (context ``self.self``)."""
+        return self.tr(text)
+
     @staticmethod
     def _safe_id(layer: Any) -> Optional[str]:
         try:
@@ -733,7 +737,7 @@ class CoverageDockExtras(QObject):
         groupbox = getattr(dw, 'current_exploring_groupbox', '') or ''
         count, has_expression = self._vector_selection_count(layer_id, groupbox)
         return (self.tr("Selection → source geometry"),
-                vector_strip_value(groupbox, count, has_expression, self.tr),
+                vector_strip_value(groupbox, count, has_expression, self._translator),
                 self.tr("Source geometry: the features selected in EXPLORING"))
 
     def _vector_selection_count(self, layer_id: str, groupbox: str) -> Tuple[Optional[int], bool]:
@@ -770,7 +774,7 @@ class CoverageDockExtras(QObject):
             return None
         detected = panel.detected_objects() if hasattr(panel, 'detected_objects') else None
         return (self.tr("Selection → source geometry"),
-                raster_strip_value(panel.selection(), panel.kept_ratio(), self.tr, detected),
+                raster_strip_value(panel.selection(), panel.kept_ratio(), self._translator, detected),
                 self.tr("Source geometry: the selected pixels, vectorized"))
 
     def _point_cloud_strip(self) -> Optional[Tuple[str, str, str]]:
@@ -783,7 +787,7 @@ class CoverageDockExtras(QObject):
             total = panel.point_counts()[1]
         detected = panel.detected_objects() if hasattr(panel, 'detected_objects') else None
         value = point_cloud_strip_value(kept, total, panel.expression(), panel.hag_settings() is not None,
-                                        self.tr, detected)
+                                        self._translator, detected)
         current = panel.current_subset() if hasattr(panel, 'current_subset') else ''
         tooltip = self.tr("Source geometry: the footprint of the kept points")
         if current:
@@ -818,7 +822,7 @@ class CoverageDockExtras(QObject):
             count = layer.featureCount() if cheap else None
         except Exception:
             count = None
-        return vector_card_text(geometry, count, self.tr)
+        return vector_card_text(geometry, count, self._translator)
 
     def _raster_meta(self, layer: Any) -> str:
         from ...core.domain.source_capability import classify
@@ -827,13 +831,13 @@ class CoverageDockExtras(QObject):
         from ...adapters.qgis.coverage_layers.raster_adapter import read_raster_summary
         summary = read_raster_summary(layer)
         bands = [(info.data_type, info.nodata) for info in summary.bands]
-        return raster_card_text(bands, summary.pixel_size_x, summary.pixel_size_y, self._unit(layer), self.tr)
+        return raster_card_text(bands, summary.pixel_size_x, summary.pixel_size_y, self._unit(layer), self._translator)
 
     def _point_cloud_meta(self, layer: Any) -> str:
         from ...adapters.qgis.point_cloud_layer_adapter import read_point_cloud_summary
         from ..widgets.coverage_panels.point_cloud_exploring_panel import summary_bounds
         summary = read_point_cloud_summary(layer)
-        return point_cloud_card_text(summary.point_count, summary_bounds(summary, 'Z'), self.tr)
+        return point_cloud_card_text(summary.point_count, summary_bounds(summary, 'Z'), self._translator)
 
     @staticmethod
     def _unit(layer: Any) -> str:

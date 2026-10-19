@@ -9,12 +9,33 @@ SOURCES = \
     ../adapters/layer_refresh_manager.py \
     ../adapters/task_builder.py \
     ../adapters/undo_redo_handler.py \
+    ../adapters/backends/ogr/expression_builder.py \
+    ../adapters/backends/ogr/filter_executor.py \
+    ../adapters/public_api/operations.py \
+    ../adapters/qgis/async_query.py \
+    ../adapters/qgis/coverage_layers/favorites_bridge.py \
+    ../adapters/qgis/coverage_layers/hag_task.py \
+    ../adapters/qgis/coverage_layers/pdal_cli.py \
+    ../adapters/qgis/coverage_layers/raster_materialization.py \
+    ../adapters/qgis/coverage_layers/raster_statistics_task.py \
+    ../adapters/qgis/coverage_layers/raster_surface_task.py \
+    ../adapters/qgis/coverage_layers/rendered_raster.py \
+    ../adapters/qgis/coverage_layers/snapshots.py \
+    ../adapters/qgis/coverage_layers/source_jobs.py \
+    ../adapters/qgis/coverage_layers/target_appliers.py \
+    ../adapters/qgis/coverage_layers/vector_tile_filters.py \
+    ../adapters/qgis/coverage_layers/vector_tile_target.py \
+    ../adapters/qgis/remote_materializer.py \
+    ../adapters/qgis/server_filter_translation.py \
+    ../adapters/qgis/server_subset_job.py \
     ../core/services/app_initializer.py \
     ../core/services/datasource_manager.py \
     ../core/services/filter_application_service.py \
     ../core/services/layer_lifecycle_service.py \
     ../core/tasks/finished_handler.py \
     ../core/tasks/layer_management_task.py \
+    ../core/tasks/executors/attribute_filter_executor.py \
+    ../core/tasks/task_completion_handler.py \
     ../extensions/registry.py \
     ../extensions/favorites_sharing/extension.py \
     ../extensions/favorites_sharing/ui/publish_dialog.py \
@@ -50,7 +71,8 @@ SOURCES = \
     ../ui/widgets/json_view/searchable_view.py \
     ../ui/widgets/coverage_panels/histogram_widget.py \
     ../ui/widgets/coverage_panels/raster_exploring_panel.py \
-    ../ui/widgets/coverage_panels/point_cloud_exploring_panel.py
+    ../ui/widgets/coverage_panels/point_cloud_exploring_panel.py \
+    ../ui/controllers/exploring_controller.py
 
 TRANSLATIONS = \
     FilterMate_am.ts \
