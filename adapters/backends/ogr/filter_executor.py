@@ -1044,7 +1044,7 @@ def copy_remote_source(layer, params=None, feedback=None, selected_fids=None, ex
     if feedback is not None and feedback.isCanceled():
         raise ValueError(_remote_message('cancelled'))
     if not supports_materialization(layer):
-        raise ValueError(_remote_message('read_error'))
+        raise ValueError(_remote_message('unverified_filter'))
     if selected_fids is None:
         # Match determine_source_mode: a filtered source wins over a stale
         # highlighted selection, unless selection mode was explicitly chosen.

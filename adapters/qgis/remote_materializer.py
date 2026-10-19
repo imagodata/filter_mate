@@ -51,10 +51,19 @@ def mark_partial_result(layer, partial, expression):
     layer._filtermate_partial_subset = expression if partial else None
 
 
+def supports_reply_validation():
+    """Require the native reply observer lifecycle, excluding old backports."""
+    from qgis.core import Qgis, QgsNetworkAccessManager
+
+    return Qgis.QGIS_VERSION_INT >= 32600 and hasattr(QgsNetworkAccessManager, "setReplyPreprocessor")
+
+
 def supports_materialization(layer):
     """Whether this provider has an implemented bounded feature-read path."""
     provider = layer.dataProvider().name().lower()
-    return provider == "memory" or provider in _BBOX_PROVIDERS
+    if provider in _BBOX_PROVIDERS:
+        return supports_reply_validation()
+    return provider == "memory"
 
 
 capture_network_manager()
@@ -278,7 +287,6 @@ def read_bounded_features(source, request, limits, feedback, consume, key, sourc
     watcher.start()
     iterator = None
     network_failed = []
-    feature_response_seen = []
     provider_warnings = []
     network = QgsNetworkAccessManager.instance()
     uri = source_uri or (source.source() if hasattr(source, "source") else "")
@@ -321,70 +329,46 @@ def read_bounded_features(source, request, limits, feedback, consume, key, sourc
     # before the first byte. It catches Qt6 WFS errors even if the provider
     # has not yet delivered its queued error signal to its owning thread.
     preprocessor = None
-
-    def inspect_reply(request, reply):
-        if not belongs(request):
-            return
-
-        def error(code):
-            if code != QNetworkReply.NetworkError.NoError and not (
-                code == QNetworkReply.NetworkError.OperationCanceledError
-                and (closing.is_set() or time.monotonic() >= deadline)
-            ):
-                network_failed.append(True)
-
-        tail = [b""]
-
-        def inspect_body():
-            # Peek without consuming the provider's stream. ExceptionReport
-            # responses often use HTTP 200 and never emit errorOccurred.
-            try:
-                prefix = bytes(reply.peek(65536))
-            except RuntimeError:
-                # A downloader can destroy its reply during cancellation.
-                # Do not let a Python slot exception escape through Qt.
-                if not closing.is_set() and time.monotonic() < deadline:
-                    network_failed.append(True)
-                return
-            prefix = tail[0] + prefix
-            tail[0] = prefix[-256:]
-            if re.search(rb"<(?:\w+:)?FeatureCollection\b", prefix) or re.search(
-                rb'"(?:type"\s*:\s*"FeatureCollection|features"\s*:)', prefix
-            ):
-                feature_response_seen.append(True)
-            if re.search(rb"<(?:\w+:)?(?:ServiceExceptionReport|ExceptionReport)\b", prefix) or re.match(
-                rb'\s*\{\s*"error"\s*:', prefix
-            ):
-                network_failed.append(True)
-
-        reply.readyRead.connect(inspect_body, Qt.ConnectionType.DirectConnection)
-        if hasattr(reply, "errorOccurred"):
-            reply.errorOccurred.connect(error, Qt.ConnectionType.DirectConnection)
-        else:  # Qt < 5.15: errorOccurred was named error
-            reply.finished.connect(lambda: error(reply.error()), Qt.ConnectionType.DirectConnection)
-
-    legacy_preprocessor = None
-    legacy_managers = []
     if hasattr(QgsNetworkAccessManager, "setReplyPreprocessor"):
-        preprocessor = QgsNetworkAccessManager.setReplyPreprocessor(inspect_reply)
-    else:
-        # QGIS 3.22 has only a request preprocessor. It runs on the downloader
-        # thread, where requestCreated is safe to observe directly. The main
-        # NAM's copied finished signal deliberately contains no response body.
-        def prepare_request(request):
+
+        def inspect_reply(request, reply):
             if not belongs(request):
                 return
-            manager = QgsNetworkAccessManager.instance()
-            if any(existing is manager for existing, callback in legacy_managers):
-                return
 
-            def created(reply):
-                inspect_reply(reply.request(), reply)
+            tail = [b""]
 
-            manager.requestCreated.connect(created, Qt.ConnectionType.DirectConnection)
-            legacy_managers.append((manager, created))
+            def error(code):
+                if code != QNetworkReply.NetworkError.NoError and not (
+                    code == QNetworkReply.NetworkError.OperationCanceledError
+                    and (closing.is_set() or time.monotonic() >= deadline)
+                ):
+                    network_failed.append(True)
 
-        legacy_preprocessor = QgsNetworkAccessManager.setRequestPreprocessor(prepare_request)
+            def inspect_body():
+                # Peek without consuming the provider's stream. ExceptionReport
+                # responses often use HTTP 200 and never emit errorOccurred.
+                try:
+                    prefix = bytes(reply.peek(65536))
+                except RuntimeError:
+                    # A downloader can destroy its reply during cancellation.
+                    # Do not let a Python slot exception escape through Qt.
+                    if not closing.is_set() and time.monotonic() < deadline:
+                        network_failed.append(True)
+                    return
+                prefix = tail[0] + prefix
+                tail[0] = prefix[-256:]
+                if re.search(rb"<(?:\w+:)?(?:ServiceExceptionReport|ExceptionReport)\b", prefix) or re.match(
+                    rb'\s*\{\s*"error"\s*:', prefix
+                ):
+                    network_failed.append(True)
+
+            reply.readyRead.connect(inspect_body, Qt.ConnectionType.DirectConnection)
+            if hasattr(reply, "errorOccurred"):
+                reply.errorOccurred.connect(error, Qt.ConnectionType.DirectConnection)
+            else:  # Qt < 5.15: errorOccurred was named error
+                reply.finished.connect(lambda: error(reply.error()), Qt.ConnectionType.DirectConnection)
+
+        preprocessor = QgsNetworkAccessManager.setReplyPreprocessor(inspect_reply)
     message_log = QgsApplication.messageLog()
 
     def provider_message(message, tag, level):
@@ -430,12 +414,6 @@ def read_bounded_features(source, request, limits, feedback, consume, key, sourc
             return outcome
         if network_failed:
             return MaterializationOutcome(fetched=outcome.fetched, reason="read_error")
-        if (outcome.complete and not outcome.fetched and endpoint.hostname and not feature_response_seen
-                and provider is not None and provider.name().lower() in _BBOX_PROVIDERS):
-            # Older WFS providers can exhaust after a delayed protocol error.
-            # A genuine empty service result needs a feature response envelope;
-            # an unverified cached/error-empty iterator must not erase a filter.
-            return MaterializationOutcome(reason="read_error")
         if provider_warnings and outcome.reason not in ("feature_limit", "timeout"):
             return MaterializationOutcome(fetched=outcome.fetched, reason="read_error")
         if time.monotonic() >= deadline:
@@ -453,13 +431,6 @@ def read_bounded_features(source, request, limits, feedback, consume, key, sourc
             main_network.finished.disconnect(finished)
         if preprocessor is not None:
             QgsNetworkAccessManager.removeReplyPreprocessor(preprocessor)
-        if legacy_preprocessor is not None:
-            QgsNetworkAccessManager.removeRequestPreprocessor(legacy_preprocessor)
-        for manager, callback in legacy_managers:
-            try:
-                manager.requestCreated.disconnect(callback)
-            except RuntimeError:
-                pass  # the downloader and its NAM already finished
         message_log.messageReceived.disconnect(provider_message)
         if provider is not None:
             provider.raiseError.disconnect(provider_error)
@@ -508,6 +479,11 @@ def materialize(layer, rect, server_expression, local_expression, limits=None, f
     except ValueError:
         return MaterializationOutcome(reason="invalid_extent")
     snapshot = _snapshot(layer)
+    if snapshot.provider in _BBOX_PROVIDERS:
+        if not supports_reply_validation():
+            # The older provider can report a delayed HTTP-200 exception as
+            # complete exhaustion. Its copied NAM notification has no body.
+            return MaterializationOutcome(reason="unverified_filter")
     if not snapshot.key.is_field:
         return MaterializationOutcome(reason="no_stable_key")
     limits = limits or MaterializationLimits()

@@ -43,6 +43,7 @@ sys.modules["filter_mate"] = package
 from filter_mate.adapters.qgis.remote_materializer import (  # noqa: E402
     RemoteMaterializationTask,
     materialize,
+    supports_reply_validation,
 )
 from filter_mate.adapters.backends.ogr.expression_builder import OGRExpressionBuilder  # noqa: E402
 from filter_mate.adapters.backends.ogr.filter_executor import copy_remote_source  # noqa: E402
@@ -434,6 +435,12 @@ def local_http(task):
         layer = QgsVectorLayer(uri, "fixture", "WFS")
         check("local HTTP WFS layer valid", layer.isValid())
         fixture.requests.clear()
+        if not supports_reply_validation():
+            outcome = materialize(layer, QgsRectangle(0.5, 0, 3.5, 2), "", "")
+            check("older network API refuses unverified service reads",
+                  outcome.reason == "unverified_filter" and not outcome.keys and not fixture.requests, repr(outcome))
+            print("SKIP service protocol cases: reply observer lifecycle is unverified before QGIS 3.26", flush=True)
+            return
         outcome = materialize(layer, QgsRectangle(0.5, 0, 3.5, 2), "", '"id" % 2 = 1')
         reads = [request for request in fixture.requests if not request["hits"]]
         check(
