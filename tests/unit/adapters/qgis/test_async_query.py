@@ -325,3 +325,13 @@ def test_a_slow_successful_match_is_not_a_false_timeout(module, monkeypatch):
     monkeypatch.setattr(module, 'time', SimpleNamespace(monotonic=MagicMock(side_effect=[0, 45, 45.1])))
     assert list(task.features(MagicMock())) == [1]
     task.source.getFeatures.return_value.close.assert_called_once()
+
+
+def test_wfs_expression_allows_time_for_client_side_page_scans(module):
+    layer = MagicMock()
+    layer.providerType.return_value = 'WFS'
+    task = module.SnapshotQueryTask('read', layer, MagicMock(), MagicMock())
+    task.source.getFeatures.return_value.__iter__.return_value = iter([])
+    request = MagicMock()
+    assert list(task.features(request)) == []
+    request.setTimeout.assert_called_once_with(120000)

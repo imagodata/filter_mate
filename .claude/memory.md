@@ -11,7 +11,8 @@
 - Remote distinct values use a bounded, feedback-enabled feature iterator because `uniqueValues`
   has no feedback parameter. Scan/time budgets announce partial lists; unknown counts stay large.
 - Python feedback cannot guarantee immediate interruption of a blocked WFS fetch. Requests carry
-  a 30-second provider timeout (where supported); slow EOF fails explicitly rather than returning
+  a 30-second provider timeout, or 120 seconds for WFS client-side expression scans (where supported).
+  Slow EOF fails explicitly rather than returning
   potentially partial extents. A slow matching feature is valid: WFS can filter requests client-side.
   Never close a worker iterator from the GUI thread to force cancellation.
 - Remote empty/pending controller results must never enter the legacy synchronous feature fallback.

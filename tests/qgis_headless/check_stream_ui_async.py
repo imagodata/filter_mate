@@ -167,15 +167,20 @@ def exercise(dock, remote, local, field, expression):
     while getattr(getattr(controller, '_selection_query', None), 'task', None) is not None and time.monotonic() < until:
         drain(0.1)
     report(dock.current_exploring_groupbox == 'custom_selection', 'custom selection active before filtering')
-    from filter_mate.adapters.qgis.server_filter_translation import last_server_filter_error
+    from filter_mate.adapters.qgis.server_filter_translation import last_server_filter_error, remember_server_filter_error
+    remember_server_filter_error(remote, '')
+    PLUGIN.iface.messageBar().clearWidgets()
+
     def filter_error():
         error = last_server_filter_error(remote)
+        if remote.providerType() != 'OAPIF':
+            return error
         item = PLUGIN.iface.messageBar().currentItem()
         visible = item.text() if item is not None else ''
         return error or (visible if 'complete CQL2 translation verdict' in visible else '')
 
     measure('filter', lambda: dock.launchTaskEvent(False, 'filter'))
-    until = time.monotonic() + (90 if remote.providerType() == 'WFS' else 30)
+    until = time.monotonic() + (180 if remote.providerType() == 'WFS' else 30)
     while not remote.subsetString() and not filter_error() and time.monotonic() < until:
         drain(0.1)
     refused = filter_error()
@@ -190,7 +195,7 @@ def exercise(dock, remote, local, field, expression):
         if remote.providerType() == 'OAPIF' and os.environ.get('FM_STREAM_BASELINE') != '1':
             check_count(dock, remote, 15, 'service filter returns the exact matching features')
     measure('unfilter', lambda: dock.launchTaskEvent(False, 'unfilter'))
-    until = time.monotonic() + (90 if remote.providerType() == 'WFS' else 30)
+    until = time.monotonic() + (180 if remote.providerType() == 'WFS' else 30)
     while remote.subsetString() and time.monotonic() < until:
         drain(0.1)
     report(not remote.subsetString(), 'unfilter cleared the service subset')

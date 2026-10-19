@@ -15,9 +15,11 @@ class SnapshotQueryTask(QgsTask):
     """Run a read against an independent snapshot, never against the live layer."""
 
     REQUEST_TIMEOUT_MS = 30000
+    WFS_EXPRESSION_TIMEOUT_MS = 120000
 
     def __init__(self, description, layer, compute, deliver):
         super().__init__(description, QgsTask.Flag.CanCancel)
+        self._provider_key = layer.providerType().lower()
         fields = layer.fields()
         self._unsafe_virtual_fields = False
         for index in range(len(fields)):
@@ -44,7 +46,12 @@ class SnapshotQueryTask(QgsTask):
         if self.isCanceled():
             return
         request.setFeedback(self.feedback)
-        request.setTimeout(self.REQUEST_TIMEOUT_MS)
+        timeout = self.REQUEST_TIMEOUT_MS
+        if self._provider_key == 'wfs' and request.filterExpression() is not None:
+            # WFS request expressions can filter downloaded pages locally.
+            # The first matching feature may require scanning the whole source.
+            timeout = self.WFS_EXPRESSION_TIMEOUT_MS
+        request.setTimeout(timeout)
         started = time.monotonic()
         iterator = (self.source if source is None else source).getFeatures(request)
         try:
@@ -55,7 +62,7 @@ class SnapshotQueryTask(QgsTask):
                 # expression scan. Its latency alone is not a provider timeout.
                 yield feature
                 started = time.monotonic()
-            if not self.isCanceled() and time.monotonic() - started >= self.REQUEST_TIMEOUT_MS / 1000 * 0.9:
+            if not self.isCanceled() and time.monotonic() - started >= timeout / 1000 * 0.9:
                 raise TimeoutError('Feature fetch timed out')
         finally:
             iterator.close()
