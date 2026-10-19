@@ -305,8 +305,11 @@ def read_bounded_features(source, request, limits, feedback, consume, key, sourc
         if verb == "OPTIONS" or verb == b"OPTIONS":
             return False  # optional OAPIF capability discovery, not a feature read
         remote = urlsplit(request.url().toString())
-        if provider_key == "oapif" and remote.path.rstrip("/").endswith("/conformance"):
-            # QGIS may deliberately abort this HTTP-200 discovery response.
+        if provider_key == "oapif" and (
+            remote.path.rstrip("/") == endpoint.path.rstrip("/")
+            or remote.path.rstrip("/").endswith("/conformance")
+        ):
+            # QGIS may deliberately abort HTTP-200 landing/conformance discovery.
             # Clone validity validates metadata; feature replies remain observed.
             return False
         return bool(
