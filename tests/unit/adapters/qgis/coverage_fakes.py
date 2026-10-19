@@ -119,6 +119,14 @@ class FakeRectangle:
     def height(self):
         return self.y1 - self.y0
 
+    def intersect(self, other):
+        return FakeRectangle(max(self.x0, other.x0), max(self.y0, other.y0),
+                             min(self.x1, other.x1), min(self.y1, other.y1))
+
+    def __eq__(self, other):
+        return isinstance(other, FakeRectangle) and (self.x0, self.y0, self.x1, self.y1) == (
+            other.x0, other.y0, other.x1, other.y1)
+
     def center(self):
         return FakePoint((self.x0 + self.x1) / 2, (self.y0 + self.y1) / 2)
 

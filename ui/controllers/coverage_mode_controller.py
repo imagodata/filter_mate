@@ -1026,6 +1026,11 @@ class CoverageModeController(BaseController):
         if populate is not None:
             try:
                 populate(layer)
+                from qgis.core import QgsProject
+                from ...adapters.qgis.coverage_layers.vector_tile_filters import append_targets
+                widget = dw.widgets['FILTERING']['LAYERS_TO_FILTER']['WIDGET']
+                selected = dw.PROJECT_LAYERS.get(layer.id(), {}).get('filtering', {}).get('layers_to_filter', [])
+                append_targets(widget, QgsProject.instance(), selected)
                 return
             except Exception as exc:
                 logger.debug(f"[FM5] layers to filter not repopulated by the dock: {exc}")
@@ -3000,7 +3005,7 @@ class CoverageModeController(BaseController):
         """Split target ids into (vector ids, coverage ids)."""
         vector_ids, coverage_ids = [], []
         for layer_id in layer_ids or []:
-            if self.is_coverage(self._map_layer(layer_id)):
+            if getattr(_kind_of(self._map_layer(layer_id)), 'is_filter_target', False):
                 coverage_ids.append(layer_id)
             else:
                 vector_ids.append(layer_id)
@@ -3223,7 +3228,7 @@ class CoverageModeController(BaseController):
         if dem is None:
             show_warning(self.tr("Choose the DTM raster used for the height above ground"))
             return
-        task = HeightAboveGroundTask(layer, dem)
+        task = HeightAboveGroundTask(layer, dem, zone=self._zone_geometry())
 
         def finished(ok, message):
             if getattr(self, '_torn_down', False):
@@ -3234,6 +3239,8 @@ class CoverageModeController(BaseController):
             if not ok:
                 show_warning(self.tr("Height above ground not computed: {0}").format(message))
                 return
+            if message:
+                show_info(message)
             if task.after is not None:
                 from ...core.domain.filter_state import CrossOperation
                 self.service.history.push(CrossOperation(layer.id(), ((task.before, task.after),), 'height above ground'))

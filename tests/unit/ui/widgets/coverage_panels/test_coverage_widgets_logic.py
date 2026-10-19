@@ -1033,6 +1033,13 @@ class TestDtmLayerCombo:
         assert "gdal" not in excluded and len(excluded) == len(set(excluded))
 
     def test_gdal_rendered_tiles_are_excluded_but_value_files_remain(self, monkeypatch):
+        # Keep the private package isolated, as in the other DTM combo test.
+        # Importing adapters/__init__ with a fake QgsProject breaks typing on 3.10.
+        for name, path in ((".adapters", _PROJECT_ROOT / "adapters"),
+                           (".adapters.qgis", _PROJECT_ROOT / "adapters" / "qgis")):
+            package = types.ModuleType(_PKG + name)
+            package.__path__ = [str(path)]
+            monkeypatch.setitem(sys.modules, _PKG + name, package)
         core = sys.modules['qgis.core']
         values = types.SimpleNamespace(providerType=lambda: 'gdal', source=lambda: '/data/dtm.tif')
         cog = types.SimpleNamespace(providerType=lambda: 'gdal', source=lambda: '/vsicurl/https://example.org/dtm.tif')

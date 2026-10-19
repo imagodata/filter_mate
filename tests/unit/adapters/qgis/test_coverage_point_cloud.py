@@ -287,8 +287,11 @@ class TestPdalClipStages:
         las = tmp_path / "cloud.laz"
         las.write_bytes(b"")
         _compute(engine.PointCloudTargetJob(FakeCloudLayer(str(las), 'pdal'), None), EAST)
-        reader, crop, _ = pipelines[0]
-        assert reader['type'] == 'readers.las' and 'polygon' not in reader and crop['type'] == 'filters.crop'
+        reader, bounds_crop, polygon_crop, writer = pipelines[0]
+        assert reader['type'] == 'readers.las' and 'polygon' not in reader
+        assert bounds_crop['type'] == 'filters.crop' and 'bounds' in bounds_crop
+        assert polygon_crop['type'] == 'filters.crop' and 'polygon' in polygon_crop
+        assert writer['type'] == 'writers.copc'
 
 
 class TestBboxEmptied:
@@ -693,3 +696,35 @@ class TestSelectionCheck:
 
     def test_nothing_to_check_without_subset(self, engine):
         assert footprint.selection_check('') is None
+
+
+class TestRemoteReadBudget:
+    def test_source_copy_is_opened_and_released_in_compute(self, engine, monkeypatch):
+        opened = []
+        cloud = FakeCloudLayer(source='https://example.test/cloud.copc.laz')
+        zone = fk.FakeGeometry.fromWkt('POLYGON((10 10,20 10,20 20,10 10))')
+        def open_copy(*args):
+            opened.append(args)
+            return FakeCloudLayer(source=cloud.source())
+        monkeypatch.setattr(footprint, 'open_point_cloud', open_copy)
+        job = source_jobs.PointCloudSourceJob(cloud, zone=zone)
+        assert opened == []
+        monkeypatch.setattr(job, '_footprint', lambda canceled: zone)
+        assert job._raw_geometry(lambda: False) is zone
+        assert len(opened) == 1 and job._layer is None
+
+    def test_remote_source_without_zone_is_refused_before_open(self, engine, monkeypatch):
+        opened = []
+        monkeypatch.setattr(footprint, 'open_point_cloud', lambda *args: opened.append(args))
+        job = source_jobs.PointCloudSourceJob(FakeCloudLayer(source='https://example.test/ept.json'))
+        job._raw_geometry(lambda: False)
+        assert 'zone' in job.message and opened == []
+
+    def test_remote_disjoint_never_starts_a_whole_cloud_pipeline(self, engine, pdal):
+        _source, pipelines = pdal
+        job = engine.PointCloudTargetJob(FakeCloudLayer(source='https://example.test/cloud.copc.laz'), None)
+        geometry = fk.FakeGeometry.fromWkt('POLYGON((10 10,20 10,20 20,10 10))')
+        request = domain.CrossFilterRequest('source', LayerKind.VECTOR, predicates=('Disjoint',))
+        job.compute(geometry, fk.FakeCrs('EPSG:2154'), None, request, lambda: False)
+        assert not job.outcome.success and 'whole remote cloud' in job.outcome.message
+        assert pipelines == []
