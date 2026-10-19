@@ -3920,16 +3920,24 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             # First try to use saved FID from canvas selection (authoritative source)
             saved_fid = getattr(self, '_last_single_selection_fid', None)
             saved_layer_id = getattr(self, '_last_single_selection_layer_id', None)
+            read_in_task = False
             if saved_fid is not None and self.current_layer and saved_layer_id == self.current_layer.id():
-                try:
-                    f = self.current_layer.getFeature(saved_fid)
-                    if not f or not f.isValid():
+                from .adapters.qgis.source_capability_probe import counts_cheaply
+                if not counts_cheaply(self.current_layer):
+                    # Never a service read on the GUI thread: the debounced pick reads it in a task.
+                    self._pending_feature_change_fid = saved_fid
+                    self._execute_debounced_feature_change()
+                    read_in_task = True
+                else:
+                    try:
+                        f = self.current_layer.getFeature(saved_fid)
+                        if not f or not f.isValid():
+                            f = None
+                            logger.debug(f"_configure_single_selection_groupbox: saved FID {saved_fid} not found, falling back to widget")
+                    except Exception:
                         f = None
-                        logger.debug(f"_configure_single_selection_groupbox: saved FID {saved_fid} not found, falling back to widget")
-                except Exception:
-                    f = None
             # Fallback to widget.feature() only if no saved FID
-            if f is None:
+            if f is None and not read_in_task:
                 f = picker.feature()
             if f and f.isValid(): self.exploring_features_changed(f)
 
@@ -5100,7 +5108,7 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         if fid is not None and self._is_layer_valid():
             from .adapters.qgis.source_capability_probe import counts_cheaply
             if not counts_cheaply(self.current_layer) and self._exploring_ctrl:
-                from .adapters.qgis.async_query import ImmediateRead, submit_query
+                from .adapters.qgis.async_query import read_now, submit_query
                 layer = self.current_layer
                 request = QgsFeatureRequest().setFilterFid(fid)
 
@@ -5110,7 +5118,9 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
 
                 mode = self._exploring_ctrl._read_mode(layer, request, self.tr("Selection"))
                 if mode == 'now':
-                    deliver(list(ImmediateRead(layer).features(request)))
+                    done, features = read_now(layer, lambda task: list(task.features(request)))
+                    if done:
+                        deliver(features)
                 elif mode == 'task':
                     submit_query(self, '_debounced_feature_query', layer, self.tr("Loading selected values…"),
                                  lambda task: list(task.features(request)), deliver,
@@ -5155,25 +5165,25 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
 
     def get_exploring_features_async(self, expression: str, on_complete=None, on_error=None, on_progress=None):
         """v3.1 Sprint 16: Async expression evaluation for large layers."""
-        from .adapters.qgis.source_capability_probe import capability_for_layer, counts_cheaply
+        from .adapters.qgis.source_capability_probe import counts_cheaply
         if self.current_layer is not None and not counts_cheaply(self.current_layer):
             from .adapters.qgis.async_query import read_refusal, refusal_message, submit_query
             layer = self.current_layer
             request = QgsFeatureRequest().setFilterExpression(expression)
             refusal = read_refusal(layer, request)
-            if refusal is None:
-                def deliver(features):
-                    if self.current_layer is layer and on_complete is not None:
-                        on_complete(features, expression, layer.id())
-
-                return submit_query(self, '_remote_expression_query', layer, self.tr("Loading selected values…"),
-                                    lambda task: list(task.features(request)), deliver,
-                                    self._set_expression_loading_state)
-            if capability_for_layer(layer).is_remote_service:
+            if refusal is not None:
+                # The evaluator below would run it in a worker too (and count on the GUI thread).
                 if on_error:
                     on_error(refusal_message(refusal), layer.id())
                 return None
-            # Another source (network database, remote file): the evaluator below, as before 5.1.
+
+            def deliver(features):
+                if self.current_layer is layer and on_complete is not None:
+                    on_complete(features, expression, layer.id())
+
+            return submit_query(self, '_remote_expression_query', layer, self.tr("Loading selected values…"),
+                                lambda task: list(task.features(request)), deliver,
+                                self._set_expression_loading_state)
         if not ASYNC_EXPRESSION_AVAILABLE or self._expression_manager is None:
             if on_error: on_error("Async evaluation not available", "")
             return None
@@ -7018,10 +7028,11 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
 
         The filter waits for the read of the selection it was clicked with,
         and follows a replacement read of that same selection. Any other end
-        of that read (cancelled by a data or layer change or from the task
-        manager, failed, superseded by another selection) leaves the filter
-        not launched: the user is told so instead of a silent no-op. A newer
-        task launch (another Filter, Unfilter...) clears it silently.
+        of that read (cancelled by a data or layer change, or from the task
+        manager where reads are listed, failed, superseded by another
+        selection) leaves the filter not launched: the user is told so
+        instead of a silent no-op. A newer task launch (another Filter,
+        Unfilter...) clears it silently.
         """
         token = object()
         self._pending_remote_filter = token
@@ -7082,6 +7093,9 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         if task_name == 'filter' and getattr(self, '_exploring_ctrl', None):
             from .adapters.qgis.source_capability_probe import counts_cheaply
             if self.current_layer is not None and not counts_cheaply(self.current_layer):
+                # Flags of this call only (get_current_features may return before the read).
+                self._exploring_ctrl._remote_selection_refused = False
+                self._exploring_ctrl._remote_selection_waiting = False
                 self._exploring_ctrl.get_current_features()
                 if getattr(self._exploring_ctrl, '_remote_selection_refused', False):
                     return
@@ -7444,7 +7458,9 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             saved_fid = getattr(self, '_last_single_selection_fid', None)
             saved_layer_id = getattr(self, '_last_single_selection_layer_id', None)
             f = None
-            if saved_fid is not None and self.current_layer and saved_layer_id == self.current_layer.id():
+            from .adapters.qgis.source_capability_probe import counts_cheaply
+            if (saved_fid is not None and self.current_layer and saved_layer_id == self.current_layer.id()
+                    and counts_cheaply(self.current_layer)):  # a tooltip never reads a service
                 try:
                     f = self.current_layer.getFeature(saved_fid)
                     if not f or not f.isValid():

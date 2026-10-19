@@ -316,6 +316,7 @@ class _Request:
     (_Request(subset=[], expression_columns={'#!allattributes!#'}), True),
     (_Request(subset=[], order_columns={'total'}), True),
     (_Request(subset=[0], expression_columns={'name'}), False),
+    (_Request(subset=[], expression_columns={'TOTAL'}), True),   # "TOTAL" resolves to total
 ])
 def test_only_a_request_that_evaluates_the_field_reads_it(module, request_, reads):
     import sys
@@ -348,6 +349,7 @@ def test_common_pure_functions_run_in_a_worker(module, monkeypatch, functions):
 @pytest.mark.parametrize('functions', [
     {'aggregate'}, {'get_feature'}, {'represent_value'}, {'overlay_intersects'}, {'eval'},
     {'layer_property'}, {'is_selected'}, {'ramp_color'}, {'sqlite_fetch_and_increment'}, {'my_python_function'},
+    {'file_name'}, {'file_path'}, {'base_file_name'}, {'file_suffix'},   # a text may name a project layer (3.30+)
 ])
 def test_functions_reaching_layers_or_the_project_are_refused(module, monkeypatch, functions):
     _expression(monkeypatch, module, functions=functions)
@@ -469,3 +471,23 @@ def test_wfs_expression_allows_time_for_client_side_page_scans(module):
     request = MagicMock()
     assert list(task.features(request)) == []
     request.setTimeout.assert_called_once_with(120000)
+
+
+def test_a_read_on_the_gui_thread_never_raises_into_its_slot(module, monkeypatch):
+    import sys
+    import types
+    qtcore = types.ModuleType('qgis.PyQt.QtCore')
+    qtcore.QCoreApplication = MagicMock()
+    qtcore.QCoreApplication.translate.side_effect = lambda context, text: text
+    monkeypatch.setitem(sys.modules, 'qgis.PyQt.QtCore', qtcore)
+    feedback = types.ModuleType('feedback')
+    feedback.show_warning = MagicMock()
+    monkeypatch.setattr(module, '__package__', 'filter_mate.adapters.qgis', raising=False)
+    monkeypatch.setitem(sys.modules, 'filter_mate.infrastructure.feedback', feedback)
+    layer = MagicMock()
+    layer.getFeatures.side_effect = RuntimeError('connection lost')
+    assert module.read_now(layer, lambda task: list(task.features(MagicMock()))) == (False, None)
+    assert feedback.show_warning.call_args.args == ('The service could not be read. Please retry.', 'Read failed')
+    layer.getFeatures.side_effect = None
+    layer.getFeatures.return_value = [1, 2]
+    assert module.read_now(layer, lambda task: list(task.features(MagicMock()))) == (True, [1, 2])

@@ -1678,12 +1678,12 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
         (network database, remote file) is then listed on the GUI thread, as
         before 5.1.
         """
-        from ...adapters.qgis.async_query import ImmediateRead, expression_refusal, submit_query
+        from ...adapters.qgis.async_query import SYNTAX, expression_refusal, read_now, submit_query
         from ...adapters.qgis.source_capability_probe import capability_for_layer
         capability = capability_for_layer(self.layer)
         service = capability is not None and capability.is_remote_service
         refusal = expression_refusal(expression, self.layer.fields()) if expression else None
-        if refusal is not None and service:
+        if refusal is not None and (service or refusal == SYNTAX):
             slot = getattr(self, '_population_query', None)
             if slot is not None:
                 slot.cancel()
@@ -1798,7 +1798,9 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
             slot = getattr(self, '_population_query', None)
             if slot is not None:
                 slot.cancel()
-            deliver(compute(ImmediateRead(layer)))
+            done, result = read_now(layer, compute)
+            if done:
+                deliver(result)
             return None
         return submit_query(self, '_population_query', layer, self.tr("Loading values…"),
                             compute, deliver, self._population_loading)
@@ -1941,7 +1943,7 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
 
     def _recover_remote_rows(self, identifier, values, expression, numeric):
         """Recover checked rows outside the page without blocking the GUI."""
-        from ...adapters.qgis.async_query import ImmediateRead, expression_refusal, read_refusal, submit_query
+        from ...adapters.qgis.async_query import expression_refusal, read_now, read_refusal, submit_query
         from ...adapters.qgis.source_capability_probe import capability_for_layer
         layer = self.layer
         list_widget = self.list_widgets[layer.id()]
@@ -1957,7 +1959,8 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
             if attributes is not None:
                 probe.setSubsetOfAttributes(attributes, fields)
             refusal = read_refusal(layer, probe)
-        if refusal is not None and capability_for_layer(layer).is_remote_service:
+        capability = capability_for_layer(layer)
+        if refusal is not None and capability is not None and capability.is_remote_service:
             return  # The population refused this display with a message.
         immediate = refusal is not None
         expr, context = self._make_display_evaluator(expression, worker=not immediate)
@@ -1993,7 +1996,9 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
             list_widget.setTotalFeaturesListCount(list_widget.count())
 
         if immediate:
-            deliver(compute(ImmediateRead(layer)))
+            done, rows = read_now(layer, compute)
+            if done:
+                deliver(rows)
             return
         submit_query(self, '_lookup_query', layer, self.tr("Loading selected values…"), compute, deliver)
 

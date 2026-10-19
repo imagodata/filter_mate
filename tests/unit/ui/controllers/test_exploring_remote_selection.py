@@ -16,8 +16,9 @@ import pytest
 
 _MODULE = Path(__file__).resolve().parents[4] / "ui" / "controllers" / "exploring_controller.py"
 _METHODS = ('_read_mode', '_remote_single_fid', '_remote_ui_revision', '_empty_remote_selection',
-            '_remote_selection_plan', '_remote_features', '_remote_zoom_request', '_zoom_canvas_to',
-            '_queue_remote_zoom', 'identify_remote_selection', '_invalidate_remote_selection_cache')
+            '_remote_selection_plan', '_remote_row_key', '_remote_features', '_remote_zoom_request',
+            '_zoom_canvas_to', '_queue_remote_zoom', 'identify_remote_selection',
+            '_invalidate_remote_selection_cache')
 
 
 class Request:
@@ -79,7 +80,7 @@ class Feature:
         return self._key
 
 
-def _fake_modules(monkeypatch, service=True, key_field=True, limit=500, in_list_max=None):
+def _fake_modules(monkeypatch, service=True, key_field=True, limit=500, in_list_max=None, row_key=None):
     async_query = types.ModuleType('filter_mate.adapters.qgis.async_query')
     async_query.submit_query = MagicMock()
     async_query.collect_extent = MagicMock(return_value='extent')
@@ -94,6 +95,17 @@ def _fake_modules(monkeypatch, service=True, key_field=True, limit=500, in_list_
             return iter(self.layer.read(request))
 
     async_query.ImmediateRead = ImmediateRead
+    async_query.SYNTAX = 'syntax'
+
+    def read_now(layer, compute):
+        try:
+            return True, compute(ImmediateRead(layer))
+        except Exception:
+            async_query.read_failures.append(layer)
+            return False, None
+
+    async_query.read_failures = []
+    async_query.read_now = read_now
     probe = types.ModuleType('filter_mate.adapters.qgis.source_capability_probe')
     probe.capability_for_layer = lambda layer: SimpleNamespace(
         is_remote_service=service, key_list_limit=limit if service else None, in_list_max=in_list_max)
@@ -130,8 +142,10 @@ def _controller_class(warning):
 
 
 class Layer:
-    def __init__(self, features=()):
+    def __init__(self, features=(), field_names=('gml_id', 'name'), subset=''):
         self.features = list(features)
+        self.field_names = list(field_names)
+        self.subset = subset
         self.reads = []
         self.provider_extent = MagicMock(isNull=MagicMock(return_value=False), isEmpty=MagicMock(return_value=False))
         for name in ('dataChanged', 'geometryChanged', 'willBeDeleted'):
@@ -144,13 +158,15 @@ class Layer:
         return 'source'
 
     def subsetString(self):
-        return ''
+        return self.subset
 
     def crs(self):
         return 'EPSG:4326'
 
     def fields(self):
-        return MagicMock(field=MagicMock(return_value=MagicMock(isNumeric=MagicMock(return_value=True))))
+        names = self.field_names
+        return MagicMock(field=MagicMock(return_value=MagicMock(isNumeric=MagicMock(return_value=True))),
+                         indexOf=MagicMock(side_effect=lambda name: names.index(name) if name in names else -1))
 
     def selectedFeatureIds(self):
         return []
@@ -164,15 +180,19 @@ class Layer:
 
 
 def _setup(monkeypatch, mode='custom_selection', custom='', checked=(), picker_fid=None, saved_fid=None,
-           **capability):
+           row_key=None, field_names=('gml_id', 'name'), subset='', **capability):
     fakes = _fake_modules(monkeypatch, **capability)
     warning = MagicMock()
     cls, namespace = _controller_class(warning)
-    layer = Layer([Feature(1), Feature(2)])
+    layer = Layer([Feature(1), Feature(2)], field_names=field_names, subset=subset)
     picker_feature = Feature(picker_fid) if picker_fid is not None else MagicMock(isValid=MagicMock(return_value=False))
+    if row_key is None:
+        row_key = 'gml_id' if capability.get('key_field', True) else '$id'
+    rows = MagicMock(getIdentifierFieldName=MagicMock(return_value=row_key))
     widgets = {'EXPLORING': {
         'CUSTOM_SELECTION_EXPRESSION': {'WIDGET': MagicMock(expression=MagicMock(return_value=custom))},
-        'MULTIPLE_SELECTION_FEATURES': {'WIDGET': MagicMock(checkedItems=MagicMock(return_value=list(checked)))},
+        'MULTIPLE_SELECTION_FEATURES': {'WIDGET': MagicMock(checkedItems=MagicMock(return_value=list(checked)),
+                                                            list_widgets={'layer': rows})},
         'SINGLE_SELECTION_FEATURES': {'WIDGET': MagicMock(feature=MagicMock(return_value=picker_feature))},
     }}
     canvas = MagicMock()
@@ -354,3 +374,60 @@ def test_identify_waits_for_a_pending_read_without_a_false_warning(monkeypatch):
     assert not env.warning.called
     env.canvas.flashGeometries.assert_not_called()
     task.taskCompleted.connect.assert_called_once()
+
+
+# --- review of this lot: findings fixed ---------------------------------------------------------------
+
+def test_rows_keyed_by_an_older_registered_key_filter_on_that_key(monkeypatch):
+    """The checked values are values of the list's identifier, not of a recomputed key."""
+    env = _setup(monkeypatch, mode='multiple_selection', checked=[('n', 'A1'), ('m', 'B2')], service=False,
+                 key_field=False, row_key='code', field_names=('code', 'name'))
+    assert env.controller._remote_features() == ([], '"code" IN (A1, B2)')
+    assert env.controller._remote_selection_refused is False
+
+
+def test_a_service_list_keyed_by_another_field_than_its_stable_key_refuses_the_filter(monkeypatch):
+    env = _setup(monkeypatch, mode='multiple_selection', checked=[('n', 1), ('m', 2)], row_key='population',
+                 field_names=('gml_id', 'population'))
+    assert env.controller._remote_features() == ([], '')
+    assert env.controller._remote_selection_refused is True
+    assert 'stable key' in env.warning.call_args.args[0]
+    env.submit.assert_not_called()
+
+
+def test_a_syntax_error_is_refused_without_reading_even_off_a_service(monkeypatch):
+    env = _setup(monkeypatch, custom='"name" = ', service=False)
+    env.async_query.read_refusal.return_value = 'syntax'
+    assert env.controller._remote_features() == ([], '')
+    assert env.controller._remote_selection_refused is True
+    assert env.layer.reads == [] and not env.submit.called
+    assert env.warning.call_args.args[0] == 'refused: syntax'
+
+
+def test_a_failed_read_on_the_gui_thread_refuses_instead_of_raising(monkeypatch):
+    env = _setup(monkeypatch, custom='aggregate(\'x\', \'sum\', "v") > 1', service=False)
+    env.async_query.read_refusal.return_value = 'unsafe'
+    env.layer.read = MagicMock(side_effect=RuntimeError('connection lost'))
+    assert env.controller._remote_features() == ([], '')
+    assert env.controller._remote_selection_refused is True
+    assert env.async_query.read_failures == [env.layer]
+
+
+@pytest.mark.parametrize('service,subset', [(True, '"id" > 3'), (False, '')])
+def test_zoom_without_selection_reads_in_a_task_unless_an_unfiltered_service(monkeypatch, service, subset):
+    """A filtered service's provider extent is the whole service; a database computes its extent with a query."""
+    env = _setup(monkeypatch, custom='', service=service, subset=subset)
+    env.layer.dataProvider = MagicMock(side_effect=AssertionError('extent read on the GUI thread'))
+    assert env.controller._queue_remote_zoom(env.controller._remote_zoom_request()) is True
+    env.submit.assert_called_once()
+    env.canvas.zoomToFeatureExtent.assert_not_called()
+
+
+def test_an_untransformable_zoom_extent_does_not_raise(monkeypatch):
+    env = _setup(monkeypatch, custom='')
+    env.canvas.mapSettings.return_value.destinationCrs.return_value = 'EPSG:2154'
+    transform = MagicMock()
+    transform.return_value.transformBoundingBox.side_effect = RuntimeError('QgsCsException')
+    monkeypatch.setitem(env.controller._zoom_canvas_to.__func__.__globals__, 'QgsCoordinateTransform', transform)
+    assert env.controller._queue_remote_zoom(env.controller._remote_zoom_request()) is True
+    env.canvas.zoomToFeatureExtent.assert_not_called()

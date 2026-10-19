@@ -295,7 +295,9 @@ def queue_union_zoom(layers, canvas, expected_token=None, grow_by=0):
 # file functions (aggregate, get_feature, overlay_*, represent_value, eval,
 # layer_property, is_selected, ramp_color...) may dereference live GUI QObjects
 # from a worker, even if the expression context itself has been copied; a name
-# unknown here (a newer or a Python function) is refused.
+# unknown here (a newer or a Python function) is refused. Not file_name /
+# file_path / base_file_name / file_suffix either: since QGIS 3.30 a text
+# argument may name a layer, looked up in the project on the main thread.
 _SAFE_FUNCTIONS = frozenset((
     # Conditionals
     'coalesce', 'if', 'nullif', 'try', 'regexp_match',
@@ -333,8 +335,6 @@ _SAFE_FUNCTIONS = frozenset((
     'color_cmyk', 'color_cmyka', 'color_cmykf', 'color_grayscale_average', 'color_hsl', 'color_hsla',
     'color_hslf', 'color_hsv', 'color_hsva', 'color_hsvf', 'color_mix', 'color_mix_rgb', 'color_part',
     'color_rgb', 'color_rgba', 'color_rgbf', 'create_ramp', 'darker', 'lighter', 'set_color_part',
-    # File names as text (not file_exists / file_size / exif: disk reads)
-    'base_file_name', 'file_name', 'file_path', 'file_suffix',
     # The evaluated feature
     '$id', '$currentfeature', 'attribute', 'attributes', 'feature_id', 'uuid',
     # Geometry (not overlay_*: other layers; not exif_geotag / magnetic_*: files and models)
@@ -424,12 +424,16 @@ def unsafe_virtual_fields(layer):
             unsafe.add(name)
         else:
             referenced[name] = set(QgsExpression(expression).referencedColumns())
+    # Field references resolve case-insensitively (QgsFields.lookupField): "VF" reads vf.
+    lowered = {name.lower() for name in unsafe}
     grown = True
     while grown:
         grown = False
         for name, columns in referenced.items():
-            if name not in unsafe and unsafe and (unsafe & columns or _ALL_ATTRIBUTES in columns):
+            if name not in unsafe and unsafe and (lowered & {column.lower() for column in columns}
+                                                  or _ALL_ATTRIBUTES in columns):
                 unsafe.add(name)
+                lowered.add(name.lower())
                 grown = True
     return unsafe
 
@@ -460,7 +464,9 @@ def request_reads_fields(request, names, fields):
     if expression is not None:
         columns |= set(expression.referencedColumns())
     columns |= set(request.orderBy().usedAttributes())
-    return _ALL_ATTRIBUTES in columns or bool(columns & set(names))
+    # Field references resolve case-insensitively (QgsFields.lookupField): "VF" reads vf.
+    return _ALL_ATTRIBUTES in columns or bool({column.lower() for column in columns}
+                                              & {name.lower() for name in names})
 
 
 def read_refusal(layer, request):
@@ -474,6 +480,23 @@ def read_refusal(layer, request):
     if request_reads_fields(request, unsafe_virtual_fields(layer), fields):
         return VIRTUAL_FIELD
     return None
+
+
+def read_now(layer, compute):
+    """Run ``compute`` with an ImmediateRead of ``layer``: ``(True, result)``, ``(False, None)`` on error.
+
+    The error is logged and shown (read failed), as a task's error is: a read
+    on the GUI thread never raises into the Qt slot that asked for it.
+    """
+    try:
+        return True, compute(ImmediateRead(layer))
+    except Exception as exc:
+        from qgis.PyQt.QtCore import QCoreApplication
+        from ...infrastructure.feedback import show_warning
+        logger.warning("Read on the GUI thread failed (%s): %s", type(exc).__name__, exc)
+        show_warning(QCoreApplication.translate('FilterMate', 'The service could not be read. Please retry.'),
+                     QCoreApplication.translate('FilterMate', 'Read failed'))
+        return False, None
 
 
 class ImmediateRead:

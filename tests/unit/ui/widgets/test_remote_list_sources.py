@@ -69,7 +69,7 @@ def _method(name):
 
 @pytest.fixture
 def widget(monkeypatch):
-    def make(service, refusal=None, rows=1500):
+    def make(service, refusal=None, rows=1500, expression_refusal=None):
         async_query = types.ModuleType('filter_mate.adapters.qgis.async_query')
         async_query.submit_query = MagicMock()
         async_query.expression_refusal = lambda expression, fields: None
@@ -78,6 +78,10 @@ def widget(monkeypatch):
         async_query.ImmediateRead = lambda layer: SimpleNamespace(
             features=lambda request: iter(range(rows if request.limit is None else min(rows, request.limit))),
             isCanceled=lambda: False)
+        async_query.SYNTAX = 'syntax'
+        async_query.read_now = lambda layer, compute: (True, compute(async_query.ImmediateRead(layer)))
+        if expression_refusal is not None:
+            async_query.expression_refusal = lambda expression, fields: expression_refusal
         probe = types.ModuleType('filter_mate.adapters.qgis.source_capability_probe')
         probe.capability_for_layer = lambda layer: SimpleNamespace(
             is_remote_service=service, key_list_limit=500 if service else None)
@@ -158,3 +162,11 @@ def test_list_reads_only_the_row_fields():
     state = SimpleNamespace(layer=MagicMock(fields=MagicMock(return_value=fields)))
     assert method(state, 'name', 'id') == ['id', 'name']
     assert method(state, '', None) == []
+
+
+def test_an_invalid_display_expression_is_refused_on_any_source(widget):
+    env = widget(service=False, expression_refusal='syntax')
+    env.state._populate('"name" ||')
+    env.submit.assert_not_called()
+    env.state._apply_population.assert_not_called()
+    assert env.warning.call_args.args[0] == 'refused: syntax'
