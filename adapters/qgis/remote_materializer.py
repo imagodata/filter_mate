@@ -233,6 +233,10 @@ def _local_predicate(expression, fields):
         return expression
     if not expression:
         return lambda feature: True
+    from .async_query import remote_expression_is_safe
+
+    if not remote_expression_is_safe(expression, fields):
+        raise ValueError("Local expression requires an external context")
     # Let QGIS perform its own three-valued boolean conversion. Python's
     # bool('0') / bool('false') would silently select the wrong rows.
     parsed = QgsExpression("({}) AND TRUE".format(expression))

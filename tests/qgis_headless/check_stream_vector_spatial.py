@@ -201,6 +201,9 @@ def automatic(task):
     check("cancelled read has no keys", outcome.reason == "cancelled" and not outcome.keys, repr(outcome))
     outcome = materialize(layer, rect, "", "missing_function(1)")
     check("invalid local expression refused", outcome.reason == "invalid_expression", repr(outcome))
+    outcome = materialize(layer, rect, "", "eval('1')")
+    check("local residual cannot escape its bounded feature context",
+          outcome.reason == "invalid_expression" and not outcome.fetched, repr(outcome))
     outcome = materialize(remote_memory(502), QgsRectangle(-1, 0, 600, 2), "", "")
     check("more than 500 keys refuses entire result", outcome.reason == "key_limit" and not outcome.keys, repr(outcome))
     try:
