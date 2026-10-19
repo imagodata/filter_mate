@@ -180,7 +180,12 @@ class ExpressionFacadeHandler:
         executor = self.task._get_attribute_executor()
 
         # FIX 2026-01-18: AttributeFilterExecutor.process_qgis_expression only accepts expression
-        result = executor.process_qgis_expression(expression=expression)
+        from ..filter.server_dialect import ServerFilterError
+        try:
+            result = executor.process_qgis_expression(expression=expression)
+        except ServerFilterError as exc:
+            self.task.message = str(exc)
+            raise
 
         # Update task state if field expression detected
         if result[1] and isinstance(result[1], tuple) and result[1][0]:

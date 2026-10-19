@@ -87,7 +87,7 @@ class FilterMatePublicAPI(QObject, IFilterMatePublicAPI, metaclass=_common_metac
         logger.info("FilterMatePublicAPI initialized")
 
     def apply_filter(self, layer_name: str, filter_expr: str,
-                     source_plugin: str = "external") -> bool:
+                     source_plugin: str = "external", *, _raise_on_rejection: bool = False) -> bool:
         """
         Apply a filter expression to a named layer.
 
@@ -117,7 +117,7 @@ class FilterMatePublicAPI(QObject, IFilterMatePublicAPI, metaclass=_common_metac
                 self.error_occurred.emit(operation, msg)
                 return False
 
-            if not layer.isValid():
+            if not layer.isValid() and not self._is_server_filter_layer(layer):
                 msg = f"Layer is not valid: {layer_name!r}"
                 logger.warning(f"PublicAPI: {msg}")
                 self.error_occurred.emit(operation, msg)
@@ -137,16 +137,36 @@ class FilterMatePublicAPI(QObject, IFilterMatePublicAPI, metaclass=_common_metac
                     f"setSubsetString failed for layer {layer_name!r}. "
                     f"Check expression syntax."
                 )
+                try:
+                    from ..qgis.server_filter_translation import last_server_filter_error
+                    msg = last_server_filter_error(layer) or msg
+                except ImportError:  # lightweight local-provider test adapters
+                    pass
                 logger.warning(f"PublicAPI: {msg}")
                 self.error_occurred.emit(operation, msg)
+                if _raise_on_rejection:
+                    raise ValueError(msg)
 
             return success
 
+        except ValueError as e:
+            if _raise_on_rejection:
+                raise
+            self.error_occurred.emit(operation, str(e))
+            return False
         except Exception as e:
             msg = f"Unexpected error: {e}"
             logger.error(f"PublicAPI: {operation} - {msg}", exc_info=True)
             self.error_occurred.emit(operation, msg)
             return False
+
+    def apply_filter_strict(self, layer_name: str, filter_expr: str, source_plugin: str = 'external') -> bool:
+        """Same application path, with a typed refusal for REST/MCP callers.
+
+        A missing layer still returns False (HTTP 404); a rejected expression
+        raises ValueError with its actual reason (HTTP 400).
+        """
+        return self.apply_filter(layer_name, filter_expr, source_plugin, _raise_on_rejection=True)
 
     def get_active_filters(self) -> Dict[str, str]:
         """
@@ -196,13 +216,13 @@ class FilterMatePublicAPI(QObject, IFilterMatePublicAPI, metaclass=_common_metac
                 self.error_occurred.emit(operation, msg)
                 return False
 
-            if not layer.isValid():
+            if not layer.isValid() and not self._is_server_filter_layer(layer):
                 msg = f"Layer is not valid: {layer_name!r}"
                 logger.warning(f"PublicAPI: {msg}")
                 self.error_occurred.emit(operation, msg)
                 return False
 
-            success = layer.setSubsetString("")
+            success = self._safe_set_subset(layer, '') if self._is_server_filter_layer(layer) else layer.setSubsetString('')
             if success:
                 logger.info(f"PublicAPI: Filter cleared on {layer_name!r}")
                 self.filter_cleared.emit(layer_name, "external")
@@ -234,18 +254,19 @@ class FilterMatePublicAPI(QObject, IFilterMatePublicAPI, metaclass=_common_metac
             for layer in project.mapLayers().values():
                 if not isinstance(layer, QgsVectorLayer):
                     continue
-                if not layer.isValid():
+                if not layer.isValid() and not self._is_server_filter_layer(layer):
                     continue
                 subset = layer.subsetString()
-                if subset and subset.strip():
+                if subset and subset.strip() or self._is_server_filter_layer(layer):
                     layer_name = layer.name()
-                    success = layer.setSubsetString("")
+                    success = self._safe_set_subset(layer, '') if self._is_server_filter_layer(layer) else layer.setSubsetString('')
                     if success:
-                        cleared_count += 1
-                        self.filter_cleared.emit(layer_name, "external")
-                        logger.debug(
-                            f"PublicAPI: Cleared filter on {layer_name!r}"
-                        )
+                        if subset and subset.strip():
+                            cleared_count += 1
+                            self.filter_cleared.emit(layer_name, "external")
+                            logger.debug(
+                                f"PublicAPI: Cleared filter on {layer_name!r}"
+                            )
                     else:
                         logger.warning(
                             f"PublicAPI: Failed to clear filter on "
@@ -442,6 +463,15 @@ class FilterMatePublicAPI(QObject, IFilterMatePublicAPI, metaclass=_common_metac
                 return layer
         return None
 
+    @staticmethod
+    def _is_server_filter_layer(layer) -> bool:
+        """Use the shared source classifier before clearing a remote subset."""
+        provider, source = layer.providerType(), layer.source()
+        if not isinstance(provider, str) or not isinstance(source, str):
+            return False
+        from ...core.domain.source_capability import classify
+        return classify(provider, source).requires_server_translation
+
     def _safe_set_subset(self, layer, expression: str) -> bool:
         """
         Apply subset string with enhanced error handling.
@@ -461,6 +491,8 @@ class FilterMatePublicAPI(QObject, IFilterMatePublicAPI, metaclass=_common_metac
             from ...infrastructure.database.sql_utils import safe_set_subset_string
             return safe_set_subset_string(layer, expression)
         except ImportError:
+            if self._is_server_filter_layer(layer):
+                return False  # Missing validation must never send a raw server predicate.
             logger.debug(
                 "PublicAPI: safe_set_subset_string not available, "
                 "using native setSubsetString"

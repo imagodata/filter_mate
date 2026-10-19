@@ -77,11 +77,14 @@ def _extract():
     assert len(methods) == len(_METHODS)
     tasks = types.ModuleType(_PKG + ".core.tasks")
     tasks.FilterEngineTask = _Task
-    for name in ("", ".core"):
+    for name in ("", ".core", ".core.filter"):
         package = types.ModuleType(_PKG + name)
         package.__path__ = []
         sys.modules.setdefault(_PKG + name, package)
     sys.modules[_PKG + ".core.tasks"] = tasks
+    state = types.ModuleType(_PKG + '.core.filter.server_filter_state')
+    state.server_filter_pending = lambda: False
+    sys.modules[state.__name__] = state
     namespace = {"__package__": _PKG, "__name__": _PKG + ".filter_mate_app", "logger": MagicMock(),
                  "iface": MagicMock(), "QCoreApplication": MagicMock(), "perf_mark_start": lambda name: None,
                  "QgsApplication": MagicMock(), "QgsProject": _Project,

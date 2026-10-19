@@ -62,7 +62,6 @@ from .infrastructure.utils import (
     POSTGRESQL_AVAILABLE,
     is_layer_source_available,
 )
-from .infrastructure.database.sql_utils import safe_set_subset_string
 from .infrastructure.perf_timer import perf_mark_start, perf_mark_end, perf_elapsed_ms
 from .infrastructure.field_utils import cleanup_corrupted_layer_filters
 from .infrastructure.utils.type_utils import return_typed_value
@@ -1291,6 +1290,10 @@ class FilterMateApp:
 
     def _execute_filter_task(self, task_name: str, task_parameters: dict):
         """Execute filter/unfilter/reset/export task (callback for TaskOrchestrator)."""
+        from .core.filter.server_filter_state import server_filter_pending
+        if server_filter_pending():
+            show_warning(QCoreApplication.translate('FilterMateApp', 'A server filter is being prepared. Wait for it to finish before starting another operation.'))
+            return
         if task_name in ('filter', 'unfilter', 'reset', 'export'):
             try:
                 from .adapters.public_api.operations import _RUNNING as api_running
@@ -2613,6 +2616,10 @@ class FilterMateApp:
 
     def _handle_undo_redo(self, is_undo: bool):
         """Handle undo/redo operation (delegates to UndoRedoHandler, with legacy fallback)."""
+        from .core.filter.server_filter_state import server_filter_pending
+        if server_filter_pending():
+            show_warning(QCoreApplication.translate('FilterMateApp', 'A server filter is being prepared. Wait for it to finish before starting another operation.'))
+            return
         action_name = "undo" if is_undo else "redo"
         logger.debug(f"_handle_undo_redo: is_undo={is_undo}")
 
@@ -2651,8 +2658,8 @@ class FilterMateApp:
             # Try UndoRedoHandler first (v4.0 hexagonal architecture)
             if self._undo_redo_handler:
                 handler_method = self._undo_redo_handler.handle_undo if is_undo else self._undo_redo_handler.handle_redo
-                result = handler_method(source_layer=source_layer, layers_to_filter=layers_to_filter, use_global=button_is_checked, dockwidget=self.dockwidget)
-                if result: self.update_undo_redo_buttons()
+                handler_method(source_layer=source_layer, layers_to_filter=layers_to_filter, use_global=button_is_checked, dockwidget=self.dockwidget)
+                self.update_undo_redo_buttons()
             else:
                 # LEGACY FALLBACK: Direct history_manager access (v2.x behavior)
                 logger.warning(f"UndoRedoHandler unavailable - using legacy {action_name}")
@@ -2669,6 +2676,7 @@ class FilterMateApp:
         Extracted from before_migration/filter_mate_app.py v2.9.29 for stability.
         """
         action_name = "undo" if is_undo else "redo"
+        from .adapters.undo_redo_handler import _restore_history_subset
         has_remote_layers = bool(layers_to_filter)
         use_global = button_is_checked and has_remote_layers
 
@@ -2679,7 +2687,13 @@ class FilterMateApp:
 
             if global_state:
                 # Apply state to source layer
-                safe_set_subset_string(source_layer, global_state.source_expression)
+                if not _restore_history_subset(source_layer, global_state.source_expression):
+                    if is_undo:
+                        self.history_manager.redo_global()
+                    else:
+                        self.history_manager.undo_global()
+                    self.update_undo_redo_buttons()
+                    return
                 self.PROJECT_LAYERS[source_layer.id()]["infos"]["is_already_subset"] = bool(global_state.source_expression)
                 logger.info(f"FilterMate: Restored source layer: {global_state.source_expression[:60] if global_state.source_expression else 'no filter'}")
 
@@ -2697,7 +2711,8 @@ class FilterMateApp:
                         if not is_layer_source_available(remote_layer):
                             logger.warning(f"Global {action_name}: skipping remote layer '{remote_layer.name()}' (invalid or missing source)")
                             continue
-                        safe_set_subset_string(remote_layer, expression)
+                        if not _restore_history_subset(remote_layer, expression):
+                            continue
                         self.PROJECT_LAYERS[remote_id]["infos"]["is_already_subset"] = bool(expression)
                         logger.info(f"FilterMate: Restored remote layer {remote_layer.name()}: {expression[:60] if expression else 'no filter'}")
                         restored_count += 1
@@ -2726,7 +2741,13 @@ class FilterMateApp:
             if history and can_action:
                 state = history.undo() if is_undo else history.redo()
                 if state:
-                    safe_set_subset_string(source_layer, state.expression)
+                    if not _restore_history_subset(source_layer, state.expression):
+                        if is_undo:
+                            history.redo()
+                        else:
+                            history.undo()
+                        self.update_undo_redo_buttons()
+                        return
                     self.PROJECT_LAYERS[source_layer.id()]["infos"]["is_already_subset"] = bool(state.expression)
                     logger.info(f"FilterMate: {action_name.capitalize()} source layer to: {state.description}")
                     self._refresh_layers_and_canvas(source_layer)
