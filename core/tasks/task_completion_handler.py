@@ -333,7 +333,8 @@ def apply_pending_subset_requests(
                 if layer.providerType() == QGIS_PROVIDER_POSTGRES:
                     feature_count = -1
                 else:
-                    feature_count = layer.featureCount()
+                    from ...adapters.qgis.source_capability_probe import feature_count_or_none
+                    feature_count = feature_count_or_none(layer)
                 if feature_count is not None and feature_count >= 0 and feature_count < MAX_FEATURES_FOR_UPDATE_EXTENTS:
                     try:
                         layer.updateExtents()
@@ -387,7 +388,8 @@ def apply_pending_subset_requests(
                     if layer.providerType() == QGIS_PROVIDER_POSTGRES:
                         feature_count = -1
                     else:
-                        feature_count = layer.featureCount()
+                        from ...adapters.qgis.source_capability_probe import feature_count_or_none
+                        feature_count = feature_count_or_none(layer)
                     count_ms = (_perf_time.perf_counter() - count_started) * 1000.0
                     phase_details = f", set {set_ms:.0f} ms, count {count_ms:.0f} ms"
                     # Update extents for smaller layers
@@ -437,6 +439,8 @@ def apply_pending_subset_requests(
                     error_msg = 'Unknown error'
                     if layer.error():
                         error_msg = layer.error().message()
+                    from ...adapters.qgis.server_filter_translation import last_server_filter_error
+                    error_msg = last_server_filter_error(layer) or error_msg
                     logger.warning(f"  ✗ Failed to apply filter to {layer.name()}")
                     logger.warning(f"    → Error: {error_msg}")
                     logger.warning(f"    → Expression ({len(expression_str)} chars): {expression_str[:200]}...")

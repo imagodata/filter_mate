@@ -66,13 +66,25 @@ def _restore_qgis_stubs(snapshot):
 
 
 @pytest.fixture(autouse=True)
-def _qgis_isolation():
+def _qgis_isolation(monkeypatch):
     """Restore the global qgis mocks after each test so sibling test
     modules don't see our partial stubs."""
     snapshot = {
         "qgis": sys.modules.get("qgis"),
         "qgis.core": sys.modules.get("qgis.core"),
     }
+    from filtermate_api import qgis_accessor
+    original_module = qgis_accessor._plugin_module
+
+    def plugin_module(name):
+        if name == 'core.domain.source_capability':
+            # These accessor doubles model local layers. Actual remote
+            # classification/application is covered by check_stream_A.py.
+            return types.SimpleNamespace(classify_layer=lambda layer:
+                                         types.SimpleNamespace(requires_server_translation=False))
+        return original_module(name)
+
+    monkeypatch.setattr(qgis_accessor, '_plugin_module', plugin_module)
     yield
     _restore_qgis_stubs(snapshot)
 
