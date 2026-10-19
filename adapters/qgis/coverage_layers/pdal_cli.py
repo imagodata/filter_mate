@@ -184,7 +184,7 @@ def reader_for(path: str) -> str:
         return 'readers.ept'
     if lower.endswith(('.las', '.laz')):
         return 'readers.las'
-    raise ValueError('no PDAL reader for this point cloud format')
+    raise ValueError(_message('No PDAL reader for this point cloud format'))
 
 
 def is_remote_source(source: str) -> bool:

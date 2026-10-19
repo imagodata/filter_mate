@@ -343,7 +343,7 @@ def _install_attribute_menu(widget, project):
                 return
             after = apply_filter(layer, expression)
             from ....core.domain.filter_state import CrossOperation
-            service.history.push(CrossOperation(layer.id(), ((before, after),), 'Vector tile attribute filter'))
+            service.history.push(CrossOperation(layer.id(), ((before, after),), tr('Vector tile attribute filter')))
             registry().record(after, layer)
         except ValueError as exc:
             QMessageBox.warning(widget, tr('Vector tile filter'), str(exc))
