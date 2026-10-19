@@ -124,6 +124,26 @@ def _read_style(xml, restore_properties=True):
     return renderer, labeling, root.attribute('labelsEnabled') == '1'
 
 
+def without_property_backup(xml):
+    """Strip only the backup, retaining native properties to detect user edits."""
+    root = ET.fromstring(xml)
+    for element in list(root.findall('numeric-properties')):
+        root.remove(element)
+    return ET.canonicalize(ET.tostring(root, encoding='unicode'))
+
+
+def is_native_reload(current, saved):
+    """Recognize native property loss without discarding changed property values."""
+    if without_property_backup(current) != native_style_xml(saved):
+        return False
+
+    def properties(xml):
+        return {(p.get('style'), p.get('path'), p.get('key')): ET.canonicalize(ET.tostring(p, encoding='unicode'))
+                for p in ET.fromstring(xml).findall('numeric-properties/property')}
+    old = properties(saved)
+    return all(old.get(key) == value for key, value in properties(current).items())
+
+
 def native_style_xml(xml):
     """QGIS native round trip, without the property repair (reload comparison)."""
     return _serialize_style(*_read_style(xml, restore_properties=False), include_properties=False)

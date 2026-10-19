@@ -76,3 +76,22 @@ def test_unfilter_of_bounded_hag_recovers_full_cloud():
     base = snapshots.base_snapshot(state)
     assert base.source == 'https://example.test/full.copc.laz'
     assert not base.derived and not base.bounded_enrichment
+
+
+def test_large_tile_project_backup_is_compact_and_lossless():
+    snapshots, Snapshot = _snapshots()
+
+    class Layer:
+        value = None
+        def setCustomProperty(self, key, value): self.value = value
+        def customProperty(self, key): return self.value
+
+    layer = Layer()
+    xml = '<renderer>' + '<rule filter="TRUE"/>' * 10000 + '</renderer>'
+    state = Snapshot('tile', 'vector_tile', renderer_xml=xml, original_renderer_xml=xml)
+    snapshots.DerivedSourceRegistry().record(state, layer)
+    assert len(layer.value) < len(xml) // 10
+    restored = snapshots._snapshot_of(snapshots._stored_state(layer))
+    assert restored == state
+    layer.value = 'zlib:invalid!'
+    assert snapshots._stored_state(layer) is None

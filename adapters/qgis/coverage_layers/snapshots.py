@@ -23,12 +23,14 @@ Limits, QGIS giving no hook there:
   session, the copy is recognized and registered (``layersAdded``); a
   ``.qlr`` opened after the session ended points at a removed file.
 """
+import base64
 import dataclasses
 import functools
 import json
 import logging
 import re
 import weakref
+import zlib
 from typing import Callable, Dict, List, Optional, Tuple
 
 from qgis.core import QgsDataProvider, QgsMapLayer, QgsProject, QgsProviderRegistry
@@ -114,7 +116,12 @@ class DerivedSourceRegistry:
                     state = snapshot.to_dict()
                     if snapshot.layer_id in self._alpha:
                         state[_ALPHA_KEY] = self._alpha[snapshot.layer_id]
-                    layer.setCustomProperty(DERIVED_PROPERTY, json.dumps(state))
+                    raw = json.dumps(state)
+                    if snapshot.kind == 'vector_tile':
+                        # Large Mapbox styles otherwise produce multi-megabyte
+                        # escaped XML strings in a QGIS custom property.
+                        raw = 'zlib:' + base64.b64encode(zlib.compress(raw.encode('utf-8'))).decode('ascii')
+                    layer.setCustomProperty(DERIVED_PROPERTY, raw)
                 else:
                     layer.removeCustomProperty(DERIVED_PROPERTY)
             except RuntimeError:
@@ -165,10 +172,10 @@ class DerivedSourceRegistry:
             return None
         stored = _snapshot_of(_stored_state(layer))
         if stored is not None and stored.kind == 'vector_tile' and stored.renderer_xml:
-            from .vector_tile_filters import native_style_xml, restore_style, style_xml
+            from .vector_tile_filters import is_native_reload, restore_style, style_xml
             current = style_xml(layer)
             if current != stored.renderer_xml:
-                if native_style_xml(current) != native_style_xml(stored.renderer_xml):
+                if not is_native_reload(current, stored.renderer_xml):
                     layer.removeCustomProperty(DERIVED_PROPERTY)  # a user-loaded style is the new base
                     return None
                 restore_style(layer, stored.renderer_xml)  # repair QGIS's native property-name loss on reload
@@ -350,6 +357,10 @@ class DerivedSourceRegistry:
     def _put_back(self, layer, snapshot: LayerSnapshot) -> None:
         """Original source of a derived layer, without going back when it cannot be opened."""
         if snapshot.kind == 'vector_tile':
+            from .vector_tile_filters import style_xml
+            if style_xml(layer) != snapshot.renderer_xml:
+                self._drop(layer)
+                return
             restore_snapshot(layer, base_snapshot(snapshot), self)
             return
         subset = layer.subsetString() if _supports_subset(layer) else ''
@@ -382,8 +393,10 @@ def _stored_state(layer) -> Optional[dict]:
     if not raw:
         return None
     try:
+        if isinstance(raw, str) and raw.startswith('zlib:'):
+            raw = zlib.decompress(base64.b64decode(raw[5:], validate=True)).decode('utf-8')
         state = json.loads(raw)
-    except (TypeError, ValueError):
+    except (TypeError, ValueError, zlib.error):
         return None
     return state if isinstance(state, dict) else None
 
@@ -598,7 +611,8 @@ def restore_snapshot(layer: QgsMapLayer, snapshot: LayerSnapshot,
     if snapshot.kind != LayerKind.VECTOR.value and snapshot.source and (
             layer.source() != snapshot.source or layer.providerType() != snapshot.provider):
         if not swap_source(layer, snapshot.source, snapshot.provider, reg):
-            raise RuntimeError('the saved source could not be opened')
+            from .target_appliers import translate
+            raise RuntimeError(translate('LayerSnapshot', 'The saved source could not be opened'))
         changed = True
         if snapshot.kind == LayerKind.RASTER.value:
             # Back on the original source: the alpha band it had (the user's choice).
