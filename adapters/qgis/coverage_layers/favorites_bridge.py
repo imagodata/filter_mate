@@ -104,9 +104,11 @@ def apply(entries: List[Dict], service=None, project: Optional[QgsProject] = Non
             logger.warning(f"[FM5] favorite: '{layer.name()}' has a different layer kind")
             continue
         if kind is LayerKind.VECTOR_TILE:
-            import dataclasses
-            restore_snapshot(layer, dataclasses.replace(stored, layer_id=layer.id(), source=layer.source(),
-                                                        provider=layer.providerType()))
+            from .vector_tile_filters import apply_filter
+            from ....core.domain.filter_state import CrossOperation
+            before = take_snapshot(layer, kind)
+            after = apply_filter(layer, stored.tile_filter)
+            service.history.push(CrossOperation(layer.id(), ((before, after),), 'Vector tile favorite'))
             handled += 1
             if applied is not None:
                 applied.append(layer.id())

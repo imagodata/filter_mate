@@ -172,14 +172,19 @@ class DerivedSourceRegistry:
             return None
         stored = _snapshot_of(_stored_state(layer))
         if stored is not None and stored.kind == 'vector_tile' and stored.renderer_xml:
-            from .vector_tile_filters import is_native_reload, restore_style, style_xml
+            from .vector_tile_filters import edited_snapshot, is_native_reload, restore_style, style_xml, _read_style, _serialize_style
             current = style_xml(layer)
             if current != stored.renderer_xml:
-                if not is_native_reload(current, stored.renderer_xml):
-                    layer.removeCustomProperty(DERIVED_PROPERTY)  # a user-loaded style is the new base
-                    return None
-                restore_style(layer, stored.renderer_xml)  # repair QGIS's native property-name loss on reload
-            snapshot = dataclasses.replace(stored, layer_id=layer.id(), source=source, provider=layer.providerType())
+                if is_native_reload(current, stored.renderer_xml):
+                    restore_style(layer, stored.renderer_xml)  # repair native property-name loss on reload
+                else:
+                    stored = edited_snapshot(layer, stored)
+                    if stored is None:
+                        layer.removeCustomProperty(DERIVED_PROPERTY)
+                        return None
+            snapshot = dataclasses.replace(stored, layer_id=layer.id(), source=source, provider=layer.providerType(),
+                                           renderer_xml=style_xml(layer),
+                                           original_renderer_xml=_serialize_style(*_read_style(stored.original_renderer_xml)))
             self.record(snapshot, layer)
             return snapshot
         model = next((known for known in self._derived.values() if _same_source(known.source, source)), None)
@@ -357,11 +362,10 @@ class DerivedSourceRegistry:
     def _put_back(self, layer, snapshot: LayerSnapshot) -> None:
         """Original source of a derived layer, without going back when it cannot be opened."""
         if snapshot.kind == 'vector_tile':
-            from .vector_tile_filters import style_xml
-            if style_xml(layer) != snapshot.renderer_xml:
-                self._drop(layer)
+            current = take_snapshot(layer, LayerKind.VECTOR_TILE, self)
+            if not current.derived:
                 return
-            restore_snapshot(layer, base_snapshot(snapshot), self)
+            restore_snapshot(layer, base_snapshot(current), self)
             return
         subset = layer.subsetString() if _supports_subset(layer) else ''
         # A layer turning invalid keeps its style for the day its source is
@@ -605,7 +609,7 @@ def restore_snapshot(layer: QgsMapLayer, snapshot: LayerSnapshot,
         changed = style_xml(layer) != snapshot.renderer_xml
         if changed:
             restore_style(layer, snapshot.renderer_xml)
-        reg.record(snapshot, layer)
+        reg.record(dataclasses.replace(snapshot, renderer_xml=style_xml(layer)), layer)
         return changed
     changed = False
     if snapshot.kind != LayerKind.VECTOR.value and snapshot.source and (

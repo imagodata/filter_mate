@@ -253,6 +253,7 @@ def tile_checks():
     red = sum(image.pixelColor(x, y).red() > 200 and image.pixelColor(x, y).green() < 100
               for y in range(512) for x in range(512))
     check('spatial tile filter renders after map CRS change', red > 0, f'red_pixels={red}')
+    snapshots.restore_snapshot(layer, before)
     from qgis.core import QgsVectorTileBasicLabeling, QgsVectorTileBasicLabelingStyle, QgsPalLayerSettings
     labeling = QgsVectorTileBasicLabeling()
     label_style = QgsVectorTileBasicLabelingStyle()
@@ -285,8 +286,10 @@ def tile_checks():
     tile_id = layer.id()
     snapshots.registry().restore_all(project)
     check('unload restores original style', filters.style_xml(layer) == original)
+    snapshots.registry().uninstall()  # no adoption hooks during read: test late activation
     project.clear()
     check('project reloads', project.read(project_path))
+    snapshots.registry().install(project)
     layer = project.mapLayer(tile_id)
     check('reloaded filter is retained', layer.renderer().styles()[0].filterExpression().endswith('(FALSE\n)'))
     snapshots.registry().forget(layer.id())  # simulate plugin activation after project load
@@ -303,22 +306,49 @@ def tile_checks():
     user_style = filters.style_xml(layer)
     current = snapshots.take_snapshot(layer, LayerKind.VECTOR_TILE)
     snapshots.restore_snapshot(layer, snapshots.base_snapshot(current))
-    check('a user-edited tile style becomes the new base', filters.style_xml(layer) == user_style)
-    filters.apply_filter(layer, 'TRUE')
+    check('a user-edited tile rule remains while the label filter is removed',
+          layer.renderer().styles()[0].filterExpression() == 'FALSE'
+          and layer.labeling().styles()[0].filterExpression() == '')
+    filters.restore_style(layer, original)
+    snapshots.registry().forget(layer.id()); layer.removeCustomProperty(snapshots.DERIVED_PROPERTY)
+    filters.apply_filter(layer, '"kind" = \'keep\'')
     styles = layer.renderer().styles()
     properties = styles[0].symbol().dataDefinedProperties()
     properties.setProperty(9999, QgsProperty.fromExpression('3'))
     styles[0].symbol().setDataDefinedProperties(properties)
+    from qgis.PyQt.QtGui import QColor
+    styles[0].symbol().setColor(QColor('blue'))
     layer.renderer().setStyles(styles)
-    user_style = filters.style_xml(layer)
     snapshots.registry().forget(layer.id())
     current = snapshots.take_snapshot(layer, LayerKind.VECTOR_TILE)
-    check('edited unnamed symbol property becomes new base', current.original_renderer_xml == user_style)
-    filters.apply_filter(layer, 'TRUE')
-    styles = layer.renderer().styles(); styles[0].setFilterExpression('FALSE'); layer.renderer().setStyles(styles)
-    user_style = filters.style_xml(layer)
+    base_renderer, _, _ = filters._read_style(current.original_renderer_xml)
+    base_styles = base_renderer.styles()
+    check('edited unnamed symbol property retained without making filter permanent',
+          base_styles[0].symbol().dataDefinedProperties().property(9999).expressionString() == '3'
+          and 'keep' not in base_styles[0].filterExpression())
+    snapshots.restore_snapshot(layer, snapshots.base_snapshot(current))
+    edited_base = filters.style_xml(layer)
+    filters.apply_filter(layer, '"kind" = \'keep\'')
+    label_setter = getattr(layer, 'setLabelsEnabled', None)
+    if label_setter is not None:
+        label_setter(False)
     snapshots.registry().restore_all(project)
-    check('unload preserves subsequent user style edits', filters.style_xml(layer) == user_style)
+    unloaded_styles = layer.renderer().styles()
+    check('unload removes filter while preserving user edits',
+          'keep' not in unloaded_styles[0].filterExpression()
+          and unloaded_styles[0].symbol().color() == QColor('blue'))
+    # Replaying a favorite preserves the destination style and enters history.
+    filters.restore_style(layer, edited_base)
+    snapshots.registry().forget(layer.id()); layer.removeCustomProperty(snapshots.DERIVED_PROPERTY)
+    entry = dict(favorite[0]); entry['layer_id'] = layer.id(); entry['layer_name'] = layer.name()
+    entry['tile_filter'] = '"kind" = \'keep\''
+    bridge = module('adapters.qgis.coverage_layers.favorites_bridge')
+    applied = bridge.apply([entry], service=service, project=project)
+    favorite_styles = layer.renderer().styles()
+    check('favorite applies expression to current style', applied == 1
+          and favorite_styles[0].symbol().color() == QColor('blue'))
+    check('favorite is undoable without replacing user style',
+          layer.id() in service.undo(layer.id()) and filters.style_xml(layer) == edited_base)
     project.clear(); combo.deleteLater()
 
 

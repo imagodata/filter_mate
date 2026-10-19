@@ -95,3 +95,12 @@ def test_large_tile_project_backup_is_compact_and_lossless():
     assert restored == state
     layer.value = 'zlib:invalid!'
     assert snapshots._stored_state(layer) is None
+
+
+def test_manual_symbology_edit_does_not_make_display_filter_permanent():
+    module = load()
+    original = '"kind" IS NOT NULL -- user rule'
+    added = '"kind" = \'keep\''
+    assert module.strip_filter(module.rule_expression(original, added), added) == original
+    assert module.strip_filter(added, added) == ''
+    assert module.strip_filter('user edited filter', added) == 'user edited filter'

@@ -105,13 +105,17 @@ def _read_style(xml, restore_properties=True):
         properties = root.firstChildElement('numeric-properties').elementsByTagName('property')
         for index in range(properties.count()):
             element = properties.at(index).toElement()
-            style_index = int(element.attribute('style'))
-            owner = owners[style_index][element.attribute('path')]
+            try:
+                style_index = int(element.attribute('style'))
+                owner = owners[style_index][element.attribute('path')]
+                property_key = int(element.attribute('key'))
+            except (IndexError, KeyError, ValueError) as exc:
+                raise ValueError(tr('The saved vector tile symbol property is invalid')) from exc
             prop = QgsProperty()
             if not prop.loadVariant(QgsXmlUtils.readVariant(element.firstChildElement())):
                 raise ValueError(tr('The saved vector tile symbol property is invalid'))
             collection = owner.dataDefinedProperties()
-            collection.setProperty(int(element.attribute('key')), prop)
+            collection.setProperty(property_key, prop)
             owner.setDataDefinedProperties(collection)
         renderer.setStyles(styles)
     element = root.firstChildElement('labeling')
@@ -171,6 +175,39 @@ def supported(layer):
         raise ValueError(tr('Vector tile filtering requires basic labeling'))
 
 
+def edited_snapshot(layer, known):
+    """Keep user symbology edits while separating any surviving display filter."""
+    if not known.tile_filter:
+        return None
+    renderer, labels, enabled = _read_style(style_xml(layer))
+    found = False
+    for owner in (renderer, labels):
+        if owner is None:
+            continue
+        styles = owner.styles()
+        for style in styles:
+            expression = style.filterExpression()
+            original = strip_filter(expression, known.tile_filter)
+            if original != expression:
+                found = True
+                style.setFilterExpression(original)
+        owner.setStyles(styles)
+    if not found:
+        return None  # a foreign style without our expression is the user's new base
+    return dataclasses.replace(known, renderer_xml=style_xml(layer),
+                               original_renderer_xml=_serialize_style(renderer, labels, enabled))
+
+
+def strip_filter(expression, added):
+    """Remove only the exact envelope appended by rule_expression."""
+    if expression == added:
+        return ''
+    suffix = '\n) AND (' + added + '\n)'
+    if expression.startswith('(') and expression.endswith(suffix):
+        return expression[1:-len(suffix)]
+    return expression
+
+
 def snapshot(layer, reg):
     from ....core.domain.filter_state import LayerSnapshot
     supported(layer)
@@ -179,11 +216,18 @@ def snapshot(layer, reg):
         known = reg._adopt(layer)  # plugin activated after the project was read
     xml = style_xml(layer)
     if known is not None and known.renderer_xml != xml:
-        # A user-loaded style becomes the new base; never overwrite it on Unfilter.
-        reg.forget(layer.id())
-        from .snapshots import DERIVED_PROPERTY
-        layer.removeCustomProperty(DERIVED_PROPERTY)
-        known = None
+        if is_native_reload(xml, known.renderer_xml):
+            restore_style(layer, known.renderer_xml)
+            xml = style_xml(layer)
+            known = dataclasses.replace(known, renderer_xml=xml)
+        else:
+            known = edited_snapshot(layer, known)
+        if known is None:
+            reg.forget(layer.id())
+            from .snapshots import DERIVED_PROPERTY
+            layer.removeCustomProperty(DERIVED_PROPERTY)
+        else:
+            reg.record(known, layer)
     return LayerSnapshot(layer.id(), 'vector_tile', source=layer.source(), provider=layer.providerType(),
                          renderer_xml=xml, original_renderer_xml=known.original_renderer_xml if known else xml,
                          tile_filter=known.tile_filter if known else '', derived=bool(known and known.derived))
