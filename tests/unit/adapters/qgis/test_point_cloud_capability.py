@@ -75,7 +75,7 @@ def _install_package() -> None:
     root.__path__ = [_PROJECT_ROOT]
     sys.modules[_PKG] = root
 
-    for sub in ("adapters", "adapters.qgis", "adapters.repositories", "config", "core", "core.domain"):
+    for sub in ("adapters", "adapters.qgis", "adapters.repositories", "adapters.public_api", "config", "core", "core.domain", "core.filter", "core.services"):
         full = f"{_PKG}.{sub}"
         mod = types.ModuleType(full)
         mod.__path__ = [os.path.join(_PROJECT_ROOT, *sub.split("."))]
@@ -379,17 +379,18 @@ class _FakeCombo:
 
 
 class TestExcludeNonAnalysisRasters:
-    def test_web_rasters_are_excluded(self):
+    def test_rendered_services_and_wcs_stay_in_dock(self):
         combo = _FakeCombo()
         cap.exclude_non_analysis_rasters(combo)
-        assert {"wms", "wcs", "arcgismapserver"} <= set(combo.excluded)
+        assert not {"wms", "wcs", "arcgismapserver"} & set(combo.excluded)
+        assert "grassraster" in combo.excluded
         assert not set(combo.excluded) & set(cap.ANALYSIS_RASTER_PROVIDERS)
 
     def test_existing_exclusions_are_kept_once(self):
         combo = _FakeCombo(excluded=["memory", "wms"])
         cap.exclude_non_analysis_rasters(combo)
         cap.exclude_non_analysis_rasters(combo)
-        assert combo.excluded[0] == "memory" and combo.excluded.count("wms") == 1
+        assert combo.excluded[0] == "memory" and "wms" not in combo.excluded
 
     def test_combo_without_the_api_is_left_alone(self):
         cap.exclude_non_analysis_rasters(object())  # no exception
@@ -399,6 +400,9 @@ class _FakeRasterLayer:
     def __init__(self, provider="gdal", source="/data/dem.tif"):
         self._provider = provider
         self._source = source
+
+    def id(self):
+        return str(id(self))
 
     def providerType(self):
         return self._provider
@@ -412,17 +416,17 @@ GDAL_WMS_XML = ('<GDAL_WMS><Service name="TMS"><ServerUrl>https://tile.openstree
 
 
 class TestIsNonAnalysisRaster:
-    """A basemap (WMS, XYZ, WCS) is a QgsRasterLayer FilterMate cannot read."""
+    """Rendered and unsupported rasters cannot be targets; WCS has values."""
 
     @pytest.fixture
     def core(self, env):
         env.set_core(types.SimpleNamespace(QgsVectorLayer=_FakeVectorLayer, QgsRasterLayer=_FakeRasterLayer))
 
-    @pytest.mark.parametrize("provider", ["wms", "wcs", "arcgismapserver", "grassraster"])
+    @pytest.mark.parametrize("provider", ["wms", "arcgismapserver", "grassraster"])
     def test_web_and_other_rasters(self, core, provider):
         assert cap.is_non_analysis_raster(_FakeRasterLayer(provider)) is True
 
-    @pytest.mark.parametrize("provider", ["gdal", "virtualraster", "postgresraster"])
+    @pytest.mark.parametrize("provider", ["gdal", "virtualraster", "postgresraster", "wcs"])
     def test_analysable_rasters(self, core, provider):
         assert cap.is_non_analysis_raster(_FakeRasterLayer(provider)) is False
 
@@ -431,7 +435,7 @@ class TestIsNonAnalysisRaster:
         """2026-10-17: provider 'gdal', but the pixels are a rendered image (TMS / WMS through GDAL)."""
         layer = _FakeRasterLayer("gdal", source)
         assert cap.is_non_analysis_raster(layer) is True
-        assert cap.is_raster_layer(layer) is False
+        assert cap.layer_kind_by_class(layer).value == "raster"
 
     @pytest.mark.parametrize("source", ["/vsicurl/https://example.org/dem.tif", "WCS:https://example.org/wcs"])
     def test_gdal_remote_values_stay_rasters_of_values(self, core, source):
@@ -518,3 +522,139 @@ class TestLayerRepositoryPointCloud:
         env.set_flag(True)
         monkeypatch.setitem(sys.modules, f"{_PKG}.adapters.qgis.point_cloud_capability", None)
         assert repo.get_all_point_cloud_layers() == []
+
+
+class TestStreamRasterClassification:
+    @pytest.fixture
+    def rasters(self, env):
+        env.set_core(types.SimpleNamespace(QgsVectorLayer=_FakeVectorLayer,
+                                          QgsRasterLayer=_FakeRasterLayer,
+                                          Qgis=types.SimpleNamespace(QGIS_VERSION_INT=34400)))
+        config_mod.ENV_VARS["CONFIG_DATA"] = {"APP": {"OPTIONS": {"RASTER": {"enabled": True}}}}
+
+    @pytest.mark.parametrize("provider,source,raw", [
+        ("wms", "type=wmts&url=https://example.org", False),
+        ("wms", "type=xyz&url=https://example.org/{z}/{x}/{y}.png", False),
+        ("arcgismapserver", "url=https://example.org/MapServer", False),
+        ("gdal", GDAL_WMS_XML, False),
+        ("gdal", "WMS:https://example.org", False),
+        ("wcs", "url=https://example.org/wcs", True),
+        ("gdal", "WCS:https://example.org", True),
+        ("gdal", "/vsicurl/https://example.org/dem.tif", True),
+        ("postgresraster", "dbname=test table=dem", True),
+    ])
+    def test_dock_and_public_kind_agree_but_rendered_never_targets(self, rasters, provider, source, raw):
+        layer = _FakeRasterLayer(provider, source)
+        assert cap.is_raster_layer(layer)
+        assert cap.get_layer_kind(layer).value == "raster"
+        assert cap.layer_kind_by_class(layer).value == "raster"
+        assert cap.is_coverage_layer(layer)
+        assert not cap.is_unsupported_raster(layer)
+        assert cap.is_non_analysis_raster(layer) is (not raw)
+
+    def test_public_kind_ignores_dock_flag(self, rasters):
+        config_mod.ENV_VARS["CONFIG_DATA"] = {}
+        layer = _FakeRasterLayer("wms")
+        assert cap.get_layer_kind(layer).value == "other"
+        assert cap.layer_kind_by_class(layer).value == "raster"
+
+    def test_classification_tracks_source_change(self, rasters):
+        layer = _FakeRasterLayer()
+        assert not cap.is_non_analysis_raster(layer)
+        layer._source = GDAL_WMS_XML
+        assert cap.is_non_analysis_raster(layer)
+        assert cap.is_raster_layer(layer)
+
+
+class TestStreamRasterTargets:
+    rasters = TestStreamRasterClassification.rasters
+    @pytest.mark.parametrize("provider,source,allowed", [
+        ("wms", "type=xyz&url=https://example.org", False),
+        ("arcgismapserver", "url=https://example.org", False),
+        ("gdal", GDAL_WMS_XML, False),
+        ("wcs", "url=https://example.org", True),
+        ("gdal", "/vsicurl/https://example.org/dem.tif", True),
+    ])
+    def test_automation_target_admission(self, rasters, provider, source, allowed):
+        # Processing, Python, REST and MCP all delegate target validation here.
+        operations = importlib.import_module(f"{_PKG}.adapters.public_api.operations")
+        layer = _FakeRasterLayer(provider, source)
+        layer.name = lambda: "raster"
+        project = _FakeProject([layer])
+        report = operations.OperationReport()
+        specs, kept = operations._project_targets([layer], project, None, report)
+        assert bool(specs) is allowed
+        assert kept == ([layer] if allowed else [])
+        if not allowed:
+            assert "cannot be a filter target" in report.skipped["raster"]
+
+    def test_dock_targets_reject_rendered_but_allow_as_source(self, rasters):
+        path = os.path.join(_PROJECT_ROOT, "ui", "managers", "combobox_population_manager.py")
+        tree = ast.parse(open(path, encoding="utf-8").read())
+        functions = [n for n in tree.body if isinstance(n, ast.FunctionDef)
+                     and n.name in ("_is_coverage_layer", "_is_coverage_target")]
+        namespace = {"__package__": f"{_PKG}.ui.managers"}
+        exec(compile(ast.Module(body=functions, type_ignores=[]), path, "exec"), namespace)
+        rendered = _FakeRasterLayer("gdal", GDAL_WMS_XML)
+        wcs = _FakeRasterLayer("wcs")
+        assert namespace["_is_coverage_layer"](rendered)
+        assert not namespace["_is_coverage_target"](rendered)
+        assert namespace["_is_coverage_target"](wcs)
+
+
+    @pytest.mark.parametrize("provider,source,allowed", [
+        ("wms", "url=https://example.org", False),
+        ("gdal", GDAL_WMS_XML, False),
+        ("wcs", "url=https://example.org", True),
+    ])
+    def test_stale_target_selection_is_guarded_before_job_creation(self, rasters, monkeypatch,
+                                                                 provider, source, allowed):
+        service_module = importlib.import_module(f"{_PKG}.core.services.cross_filter_service")
+        cross = importlib.import_module(f"{_PKG}.core.domain.cross_filter")
+        kind = cap.layer_kind_by_class(_FakeRasterLayer())
+        layer = _FakeRasterLayer(provider, source)
+        layer.name = lambda: "raster"
+        project = _FakeProject([layer])
+        monkeypatch.setattr(sys.modules["qgis.core"], "QgsProject", object, raising=False)
+        appliers = types.ModuleType(f"{_PKG}.adapters.qgis.coverage_layers.target_appliers")
+        appliers.make_job = MagicMock(return_value=object())
+        task_module = types.ModuleType(f"{_PKG}.adapters.qgis.coverage_layers.cross_filter_task")
+        task_module.CrossFilterTask = lambda desc, request, source, jobs, done: types.SimpleNamespace(jobs=jobs)
+        snapshots = types.ModuleType(f"{_PKG}.adapters.qgis.coverage_layers.snapshots")
+        snapshots.registry = lambda: types.SimpleNamespace(install=lambda project: None)
+        for module in (appliers, task_module, snapshots):
+            monkeypatch.setitem(sys.modules, module.__name__, module)
+        request = cross.CrossFilterRequest("source", kind, targets=(cross.TargetSpec(layer.id(), kind),))
+        task = service_module.CrossFilterService().build_task(
+            request, types.SimpleNamespace(layer_name="source"), project=project)
+        assert appliers.make_job.called is allowed
+        if not allowed:
+            assert not task.jobs[0].outcome.success
+            assert "cannot be a filter target" in task.jobs[0].outcome.message
+
+    def test_target_guard_reuses_capability_probe(self, rasters, monkeypatch):
+        probe = importlib.import_module(f"{_PKG}.adapters.qgis.source_capability_probe")
+        spy = MagicMock(return_value=types.SimpleNamespace(has_raw_values=False))
+        monkeypatch.setattr(probe, "capability_for_layer", spy)
+        layer = _FakeRasterLayer()
+        assert cap.is_non_analysis_raster(layer)
+        spy.assert_called_once_with(layer)
+
+
+    @pytest.mark.parametrize("provider,source", [
+        ("wms", "url=https://example.org"),
+        ("gdal", GDAL_WMS_XML),
+    ])
+    def test_automation_rejects_numeric_rendered_source_before_job_creation(self, rasters, monkeypatch,
+                                                                         provider, source):
+        operations = importlib.import_module(f"{_PKG}.adapters.public_api.operations")
+        jobs = types.ModuleType(f"{_PKG}.adapters.qgis.coverage_layers.source_jobs")
+        jobs.RasterSourceJob = MagicMock()
+        monkeypatch.setitem(sys.modules, jobs.__name__, jobs)
+        layer = _FakeRasterLayer(provider, source)
+        with pytest.raises(ValueError, match="local colour capture; numeric pixel selections are unavailable"):
+            operations._source_job(layer, cap.layer_kind_by_class(layer), operations.OperationReport(),
+                                   selected_only=False, raster_selection=types.SimpleNamespace(band=1),
+                                   point_cloud_criteria=None, source_operator=None, filter_source=True,
+                                   footprint_resolution=None, max_pixels=1000)
+        jobs.RasterSourceJob.assert_not_called()

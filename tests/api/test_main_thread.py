@@ -134,7 +134,7 @@ class TestAccessorRoutesThroughDispatcher:
         # Project with one resolvable layer and one missing layer.
         layer = MagicMock()
         layer.name.return_value = "Resolved"
-        layer.setSubsetString.return_value = None
+        layer.setSubsetString.return_value = True
 
         project = MagicMock()
         project.mapLayer.side_effect = lambda lid: layer if lid == "ok" else None
@@ -150,8 +150,9 @@ class TestAccessorRoutesThroughDispatcher:
         assert is_clear is False
         layer.setSubsetString.assert_called_once_with("field='value'")
 
-    def test_reapply_previous_filters_inline_swallows_setsubset_failure(self):
+    def test_reapply_previous_filters_inline_reports_partial_failure(self):
         from filtermate_api.qgis_accessor import QGISFilterMateAccessor
+        from filtermate_api.accessor import FilterRejected
 
         bad = MagicMock()
         bad.setSubsetString.side_effect = RuntimeError("locked")
@@ -161,14 +162,13 @@ class TestAccessorRoutesThroughDispatcher:
         project = MagicMock()
         project.mapLayer.side_effect = lambda lid: bad if lid == "bad" else good
 
-        result = QGISFilterMateAccessor._reapply_previous_filters_inline(
-            project,
-            [("bad", "fail-here"), ("good", "succeed-here")],
-        )
-        name, expr, _ = result
-        # The failing layer is skipped; the next one wins.
-        assert name == "Good"
-        assert expr == "succeed-here"
+        with pytest.raises(FilterRejected, match='locked'):
+            QGISFilterMateAccessor._reapply_previous_filters_inline(
+                project,
+                [("bad", "fail-here"), ("good", "succeed-here")],
+            )
+        # Other layers can restore, but the operation cannot claim success.
+        good.setSubsetString.assert_called_once_with('succeed-here')
 
     def test_reapply_previous_filters_inline_empty_list_returns_clear(self):
         from filtermate_api.qgis_accessor import QGISFilterMateAccessor

@@ -20,6 +20,40 @@ def _load():
 
 pdal_cli = _load()
 
+
+@pytest.mark.parametrize('source, reader', [
+    ('https://example.test/cloud.copc.laz?signature=secret#part', 'readers.copc'),
+    ('https://example.test/ept.json?token=secret', 'readers.ept'),
+])
+def test_signed_remote_reader(source, reader):
+    assert pdal_cli.reader_for(source) == reader
+
+
+@pytest.mark.parametrize('source', ['https://example.test/ept.json', 'https://example.test/a.copc.laz'])
+def test_remote_reads_require_bounds(fake_pdal, source):
+    with pytest.raises(ValueError, match='extent'):
+        pdal_cli.read_stages(source)
+
+
+def test_ept_bounds_are_on_reader_and_crop_is_exact(fake_pdal):
+    polygon = 'POLYGON((0 0,10 0,0 10,0 0))'
+    stages = pdal_cli.read_stages('https://example.test/ept.json', (0, 0, 10, 10), polygon)
+    assert stages[0]['bounds'] == '([0,10],[0,10])'
+    assert stages[-1].get('polygon') == polygon
+
+
+def test_old_remote_reader_refused_without_disclosing_url(fake_pdal):
+    fake_pdal['out'] = BANNER.format('2.3.0')
+    with pytest.raises(ValueError, match='2.4') as error:
+        pdal_cli.read_stages('https://example.test/ept.json?token=secret', (0, 0, 1, 1))
+    assert 'secret' not in str(error.value)
+
+
+@pytest.mark.parametrize('bounds', [(0, 0, float('nan'), 1), (1, 0, 0, 1), (0, 0, 0, 1)])
+def test_invalid_bounds_refused(fake_pdal, bounds):
+    with pytest.raises(ValueError, match='extent'):
+        pdal_cli.read_stages('https://example.test/ept.json', bounds)
+
 BANNER = "-" * 80 + "\npdal {} (git-version: Release)\n" + "-" * 80 + "\n"
 
 
@@ -39,6 +73,7 @@ def fake_pdal(monkeypatch):
 
     pdal_cli.reset_cache()
     monkeypatch.setattr(pdal_cli, 'find_pdal', lambda: state['exe'])
+    monkeypatch.setattr(pdal_cli, 'reader_has_polygon', lambda reader: False)
     monkeypatch.setattr(pdal_cli.subprocess, 'run', run)
     yield state
     pdal_cli.reset_cache()
@@ -152,3 +187,16 @@ class _Crs:
 ])
 def test_writer_srs(authid, expected):
     assert pdal_cli.srs_for(_Crs(authid)) == expected
+
+
+def test_arbiter_error_without_url_scheme_is_redacted(monkeypatch):
+    class FailedProcess:
+        returncode = 1
+        def communicate(self, timeout=None):
+            return '', "Could not read from 'example.test/ept.json?token=secret'"
+    monkeypatch.setattr(pdal_cli, 'find_pdal', lambda: '/opt/pdal/bin/pdal')
+    monkeypatch.setattr(pdal_cli.subprocess, 'Popen', lambda *args, **kw: FailedProcess())
+    ok, message = pdal_cli.run_pipeline([{'type': 'readers.ept',
+                                         'filename': 'https://example.test/ept.json?token=secret'}])
+    assert not ok
+    assert 'secret' not in message and 'example.test' not in message

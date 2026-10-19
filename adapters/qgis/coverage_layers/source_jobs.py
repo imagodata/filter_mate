@@ -23,6 +23,7 @@ from ....core.domain.layer_kind import LayerKind
 from ....core.domain.raster_filter_criteria import RasterSelection, RasterSelectionMode
 from .geometry_tools import WHOLE_SOURCE_METHODS, buffer_geometry, make_valid, transform_geometry, union_geometries
 from .snapshots import registry, swap_source, take_snapshot
+from .raster_materialization import _tr as raster_message
 
 logger = logging.getLogger(__name__)
 
@@ -126,11 +127,14 @@ class RasterSourceJob(SourceJob):
     kind = LayerKind.RASTER
     reports_progress = True
 
-    def __init__(self, layer, selection: RasterSelection, max_pixels=None, filter_source: bool = True) -> None:
+    def __init__(self, layer, selection: RasterSelection, max_pixels=None, filter_source: bool = True,
+                 analysis_source=None) -> None:
         """``max_pixels``: ``CROSS_FILTER.raster_source_max_pixels`` as read from the config or an API call
-        (see :func:`raster_adapter.source_max_pixels`), the default when None."""
+        (see :func:`raster_adapter.source_max_pixels`), the default when None.
+        ``analysis_source`` is a local (path, provider) rendered color capture
+        in layer CRS, used for geometry only; rendered service layers stay unchanged."""
         super().__init__(layer)
-        from .raster_adapter import raster_reference, referenced_bands, selection_virtual_layer, source_max_pixels
+        from .raster_adapter import source_max_pixels
         self.selection = selection
         self._max_pixels = source_max_pixels(max_pixels)
         self._filter_source = filter_source
@@ -141,30 +145,21 @@ class RasterSourceJob(SourceJob):
         self._nodata_provider = None
         self._nodata_bands: List[int] = []
         self._band_count = layer.bandCount()
-        if selection.mode is RasterSelectionMode.EXPRESSION:
-            self._virtual = selection_virtual_layer(layer, selection, self.before.base_source, self.before.base_provider)
-            provider = self._virtual.dataProvider() if self._virtual is not None else None
-            # The virtual raster has no NoData: the pixels without a value in a band the
-            # expression reads are dropped from the raster it reads (raster_adapter.expression_mask).
-            base = self._base_layer(layer)
-            self._nodata_bands = [band for band in referenced_bands(selection.expression, raster_reference(layer))
-                                  if band <= base.bandCount()]
-            if self._nodata_bands:
-                self._nodata_provider = base.dataProvider().clone()
-        else:
-            # Read the original pixels, not a previously masked derived source.
-            base = self._base_layer(layer)
-            provider = base.dataProvider() if base is not None else layer.dataProvider()
-        self._provider = provider.clone() if provider is not None else None
-        self._object_providers = {}  # expression -> cloned provider of its virtual raster (object detection)
-        if selection.seeds:
-            from .raster_adapter import object_virtual_layers
-            self._object_virtuals = object_virtual_layers(layer, selection, self.before.base_source, self.before.base_provider)
-            self._object_providers = {expression: virtual.dataProvider().clone()
-                                      for expression, virtual in self._object_virtuals.items() if virtual is not None}
-            if any(c.mode is not RasterSelectionMode.EXPRESSION for c in selection.objects):
-                base = self._base_layer(layer)
-                self._object_base = (base.dataProvider() if base is not None else layer.dataProvider()).clone()
+        from ....core.domain.source_capability import classify
+        from .raster_materialization import is_wcs, raster_reads_remotely
+        capability = classify(self.before.base_provider, self.before.base_source, is_raster=True)
+        self._rendered = not capability.has_raw_values
+        self._remote = raster_reads_remotely(self.before.base_provider, self.before.base_source)
+        self._analysis_source = analysis_source
+        self._read_source = self.before.base_source
+        self._read_provider = self.before.base_provider
+        self._is_wcs = is_wcs(self._read_provider, self._read_source)
+        self._capture_outputs = []
+        self._provider = None
+        self._object_providers = {}
+        self._deferred_provider = bool(analysis_source or self._remote)
+        if not self._deferred_provider:
+            self._prepare_provider(layer)
         self._derived_uri = ''
         self._nodata = None
         # The clip of the source itself, prepared in the task (prepare_apply), applied on the main thread.
@@ -174,16 +169,87 @@ class RasterSourceJob(SourceJob):
             from .target_appliers import RasterTargetJob
             self._clip_job = RasterTargetJob(layer, None)
 
+    def _prepare_provider(self, layer):
+        """Build expression/terrain providers in the worker for remote inputs."""
+        from .raster_adapter import raster_reference, referenced_bands, selection_virtual_layer
+        if self.selection.mode is RasterSelectionMode.EXPRESSION:
+            self._virtual = selection_virtual_layer(layer, self.selection, self._read_source, self._read_provider)
+            provider = self._virtual.dataProvider() if self._virtual is not None else None
+            # The virtual raster has no NoData: the pixels without a value in a band the
+            # expression reads are dropped from the raster it reads (raster_adapter.expression_mask).
+            base = self._base_layer(layer)
+            self._nodata_bands = [band for band in referenced_bands(self.selection.expression, raster_reference(layer))
+                                  if band <= base.bandCount()]
+            if self._nodata_bands:
+                self._nodata_provider = base.dataProvider().clone()
+        else:
+            # Read the original pixels, not a previously masked derived source.
+            base = self._base_layer(layer)
+            provider = base.dataProvider() if base is not None else layer.dataProvider()
+        self._provider = provider.clone() if provider is not None else None
+        self._object_providers = {}  # expression -> cloned provider of its virtual raster (object detection)
+        if self.selection.seeds:
+            from .raster_adapter import object_virtual_layers
+            self._object_virtuals = object_virtual_layers(layer, self.selection, self._read_source, self._read_provider)
+            self._object_providers = {expression: virtual.dataProvider().clone()
+                                      for expression, virtual in self._object_virtuals.items() if virtual is not None}
+            if any(c.mode is not RasterSelectionMode.EXPRESSION for c in self.selection.objects):
+                base = self._base_layer(layer)
+                self._object_base = (base.dataProvider() if base is not None else layer.dataProvider()).clone()
+
+    def _prepare_remote(self, is_canceled):
+        """Open private inputs and materialize WCS before any pixel selection."""
+        import threading
+        if threading.current_thread() is threading.main_thread():
+            raise RuntimeError(raster_message('remote raster selection must run in a worker thread'))
+        from qgis.core import QgsRasterLayer
+        from .raster_materialization import materialize_raster, raster_reads_remotely
+        if is_canceled():
+            raise RuntimeError(raster_message('raster selection canceled'))
+        if self._rendered and self._analysis_source is None:
+            raise RuntimeError(raster_message('rendered color selection requires a local rendered capture'))
+        source, provider = self._analysis_source or (self._read_source, self._read_provider)
+        if self._analysis_source and (provider != 'gdal' or raster_reads_remotely(provider, source)):
+            raise RuntimeError(raster_message('raster analysis requires a local GDAL capture'))
+        base = QgsRasterLayer(source, self.layer_name, provider)
+        if not base.isValid():
+            raise RuntimeError(raster_message('raster selection source could not be opened'))
+        native_size = base.width(), base.height()
+        if self._remote and not self._rendered and self._analysis_source is None:
+            source = materialize_raster(base, max_pixels=self._max_pixels, is_canceled=is_canceled)
+            self._capture_outputs.append(source)
+            provider = 'gdal'
+            base = QgsRasterLayer(source, self.layer_name, provider)
+            if not base.isValid():
+                raise RuntimeError(raster_message('local raster capture could not be opened'))
+        self._read_source, self._read_provider = source, provider
+        self._base_keepalive = base
+        self._extent = QgsRectangle(base.extent())
+        self._width, self._height = base.width(), base.height()
+        self._band_count = base.bandCount()
+        self._crs_wkt = base.crs().toWkt()
+        self.crs = QgsCoordinateReferenceSystem(base.crs())
+        self.details['capture_grid'] = '{}x{}'.format(self._width, self._height)
+        self.details['capture_resampled'] = (self._width, self._height) != native_size
+        if self._rendered:
+            self.details['rendered_colors'] = True
+        self.details['capture_cell_size'] = (self._extent.width() / max(1, self._width),
+                                             self._extent.height() / max(1, self._height))
+        self._prepare_provider(base)
+        self._deferred_provider = False
+
     def _base_layer(self, layer):
-        if not self.before.derived:
+        if self._read_source != self.before.base_source or not self.before.derived:
             return layer
         from qgis.core import QgsRasterLayer
-        base = QgsRasterLayer(self.before.base_source, f"{self.layer_name}_base", self.before.base_provider)
+        base = QgsRasterLayer(self._read_source, f"{self.layer_name}_base", self.before.base_provider)
         self._base_keepalive = base
         return base if base.isValid() else layer
 
     def _raw_geometry(self, is_canceled) -> QgsGeometry:
         from .raster_adapter import _decimation, gdal_cell_reader, selection_geometry
+        if getattr(self, '_deferred_provider', False):
+            self._prepare_remote(is_canceled)
         if self._provider is None:
             self.message = 'raster provider unavailable'
             return QgsGeometry()
@@ -191,10 +257,10 @@ class RasterSourceJob(SourceJob):
             self.message = 'canceled'
             return QgsGeometry()
         cell_reader = None
-        if (self.selection.mode is not RasterSelectionMode.EXPRESSION and self.before.base_provider == 'gdal'
+        if (self.selection.mode is not RasterSelectionMode.EXPRESSION and self._read_provider == 'gdal'
                 and _decimation(self._width, self._height, self._max_pixels) > 1):
             # Over the pixel limit: cells read by GDAL, alike from every tile.
-            cell_reader = gdal_cell_reader(self.before.base_source, self._provider)
+            cell_reader = gdal_cell_reader(self._read_source, self._provider)
         result = selection_geometry(self._provider, self.selection, self._extent, self._width, self._height,
                                     self._crs_wkt, max_pixels=self._max_pixels,
                                     nodata_provider=getattr(self, '_nodata_provider', None),
@@ -223,7 +289,7 @@ class RasterSourceJob(SourceJob):
     @property
     def clip_refusal(self) -> str:
         """Why the source cannot be masked by its selection ('' when it can, or is not masked)."""
-        if self.clips_source and self.before.base_provider != 'gdal':
+        if self.clips_source and self.before.base_provider != 'gdal' and not getattr(self, '_remote', False):
             return (f"the source cannot be masked: its provider ({self.before.base_provider}) is not a GDAL file; "
                     "its pixels are still used as the selection")
         return ''
@@ -231,7 +297,8 @@ class RasterSourceJob(SourceJob):
     @property
     def outputs(self) -> List[str]:
         """Cache files written for the clip of the source (settled once applied)."""
-        return list(self._clip_job.outputs) if getattr(self, '_clip_job', None) is not None else []
+        return (list(getattr(self, '_capture_outputs', ()))
+                + (list(self._clip_job.outputs) if getattr(self, '_clip_job', None) is not None else []))
 
     def prepare_apply(self, is_canceled) -> None:
         """Clip of the source by its selection, computed off the main thread (the task, after compute()).
@@ -244,6 +311,8 @@ class RasterSourceJob(SourceJob):
         if job is None or self._clip_prepared or self.raw_geometry.isEmpty() or is_canceled():
             return
         request = CrossFilterRequest(self.layer_id, LayerKind.RASTER, targets=(TargetSpec(self.layer_id, LayerKind.RASTER),))
+        if getattr(self, '_remote', False):
+            job._analysis_source = (self._read_source, self._read_provider)
         job.compute(self.raw_geometry, self.crs, QgsCoordinateTransformContext(), request, is_canceled)
         self._clip_prepared = True
 
@@ -257,10 +326,14 @@ class RasterSourceJob(SourceJob):
     @property
     def clips_source(self) -> bool:
         """Whether :meth:`apply` masks the source with the selection geometry (computed in the task when it runs)."""
-        return bool(self._filter_source and (self._band_count > 1 or self.selection.mode is RasterSelectionMode.EXPRESSION
-                                             or self.selection.derivative.is_terrain or self.selection.seeds))
+        return bool(self._filter_source and not getattr(self, '_rendered', False)
+                    and (getattr(self, '_remote', False) or self._band_count > 1
+                         or self.selection.mode is RasterSelectionMode.EXPRESSION
+                         or self.selection.derivative.is_terrain or self.selection.seeds))
 
     def apply(self, layer) -> Optional[LayerSnapshot]:
+        if getattr(self, '_rendered', False):
+            return None
         if not self._filter_source or (self.selection.mode is RasterSelectionMode.EXPRESSION and self._virtual is None):
             return None
         if self.clips_source:
@@ -347,6 +420,7 @@ class PointCloudSourceJob(SourceJob):
         self._zone = zone if zone is not None and not zone.isEmpty() else None
         self._layer = None
         self._error = ''
+        self._pending_remote = None
         if layer.providerType() == 'vpc':
             self._error = "a virtual point cloud (VPC) cannot be a source: its points are read tile by tile"
             return
@@ -354,6 +428,14 @@ class PointCloudSourceJob(SourceJob):
         # the live layer may change (preview, removal) while the task runs, and
         # it is never read from the task thread.
         from .point_cloud_footprint import index_ready, open_point_cloud
+        from .pdal_cli import is_remote_source
+        if is_remote_source(layer.source()):
+            if self._zone is None:
+                from .target_appliers import translate
+                self._error = translate('PointCloudSource', 'Draw a useful selection zone before reading a remote point cloud')
+                return
+            self._pending_remote = (layer.source(), f'{layer.name()}_footprint', layer.providerType(), layer.subsetString())
+            return  # opening a remote private layer can fetch its header: worker only
         copy = open_point_cloud(layer.source(), f"{layer.name()}_footprint", layer.providerType())
         subset = layer.subsetString()
         # Spelled in parentheses: QGIS caches the decoded blocks under the
@@ -369,10 +451,33 @@ class PointCloudSourceJob(SourceJob):
             self._layer = copy
 
     def _raw_geometry(self, is_canceled) -> QgsGeometry:
-        from .point_cloud_footprint import footprint_geometry, selection_check
+        if is_canceled():
+            self.message = 'canceled'
+            return QgsGeometry()
         if self._error:
             self.message = self._error
             return QgsGeometry()
+        if self._pending_remote is not None:
+            try:
+                from .point_cloud_footprint import index_ready, open_point_cloud
+                source, name, provider, subset = self._pending_remote
+                self._layer = open_point_cloud(source, name, provider)
+                self._subset = f'({subset}\n)' if subset else ''
+                if not self._layer.isValid() or not index_ready(self._layer):
+                    from .target_appliers import translate
+                    self.message = translate('PointCloudSource', 'The remote point cloud could not be read')
+                    return QgsGeometry()
+                if subset and not self._layer.setSubsetString(self._subset):
+                    from .target_appliers import translate
+                    self.message = translate('PointCloudSource', 'The remote point cloud rejected the selection')
+                    return QgsGeometry()
+                return self._footprint(is_canceled)
+            finally:
+                self._layer = None  # destroy the worker-owned layer on its creating thread
+        return self._footprint(is_canceled)
+
+    def _footprint(self, is_canceled):
+        from .point_cloud_footprint import footprint_geometry, selection_check
         try:
             result = footprint_geometry(self._layer, self._resolution, is_canceled=is_canceled,
                                         check=selection_check(self._subset),

@@ -142,76 +142,79 @@ def get_raster_layer_type() -> Optional[type]:
     return layer_type
 
 
-# Raster providers whose pixels can be read for analysis. Web services (WMS,
-# XYZ, WCS, ArcGIS) are rendered images or remote coverages: never sources or
-# targets, their statistics would be fetched over the network.
-ANALYSIS_RASTER_PROVIDERS = ('gdal', 'virtualraster', 'postgresraster')
-# The other raster providers, hidden from the current-layer combo box: a
-# basemap (OSM, orthophoto) in the list could be chosen and do nothing.
-NON_ANALYSIS_RASTER_PROVIDERS = ('wms', 'wcs', 'arcgismapserver', 'grassraster')
+# Value rasters may be analysed and filtered. Rendered services are available
+# for colour picking in the dock, but must never be filter targets.
+ANALYSIS_RASTER_PROVIDERS = ('gdal', 'virtualraster', 'postgresraster', 'wcs')
+NON_ANALYSIS_RASTER_PROVIDERS = ('wms', 'arcgismapserver', 'grassraster')
+RENDERED_RASTER_PROVIDERS = ('wms', 'arcgismapserver')
 
 
 def _renders_an_image(layer: Any) -> bool:
-    """A GDAL raster whose pixels are a rendered image: ``WMS:...`` / ``<GDAL_WMS>`` (WMS, TMS, XYZ tiles).
-
-    2026-10-17: the provider is 'gdal', so the provider list alone took these
-    basemaps for rasters of values (see core.domain.source_capability).
-    """
-    try:
-        from ...core.domain.source_capability import classify
-    except ImportError:
-        from core.domain.source_capability import classify
-    try:
-        return not classify(layer.providerType(), layer.source(), is_raster=True).has_raw_values
-    except (TypeError, RuntimeError, AttributeError):
-        return False
+    """Use the shared, cached capability probe without reading any pixels."""
+    from .source_capability_probe import capability_for_layer
+    capability = capability_for_layer(layer)
+    return capability is not None and not capability.has_raw_values
 
 
 def exclude_non_analysis_rasters(combo: Any) -> None:
-    """Hide web / non analysable rasters from a ``QgsMapLayerComboBox``.
+    """Hide unsupported providers, keeping value and rendered rasters in the dock.
 
-    The combo box filters (``RasterLayer``) admit every raster layer, while
-    FilterMate only handles :data:`ANALYSIS_RASTER_PROVIDERS`.
+    Remove obsolete service exclusions left by an earlier population pass.
+    Target lists independently reject rendered layers, including GDAL WMS.
     """
     try:
         excluded = list(combo.excludedProviders()) if hasattr(combo, 'excludedProviders') else []
-        merged = excluded + [key for key in NON_ANALYSIS_RASTER_PROVIDERS if key not in excluded]
+        admitted = ANALYSIS_RASTER_PROVIDERS + RENDERED_RASTER_PROVIDERS
+        merged = [key for key in excluded if key not in admitted]
+        merged.extend(key for key in NON_ANALYSIS_RASTER_PROVIDERS if key not in admitted and key not in merged)
         combo.setExcludedProviders(merged)
     except (AttributeError, TypeError, RuntimeError) as exc:
-        logger.debug(f"Web rasters not excluded from the layer combo box: {exc}")
+        logger.debug(f"Unsupported rasters not excluded from the layer combo box: {exc}")
 
 
-def is_non_analysis_raster(layer: Any) -> bool:
-    """True for a raster whose pixels FilterMate cannot read (WMS, XYZ, WCS basemap...).
-
-    ``isinstance(layer, get_filterable_layer_types())`` admits every ``QgsRasterLayer``
-    once rasters are on: callers registering layers drop these with this check.
-    """
+def _is_raster_instance(layer: Any) -> bool:
+    """Test the raster class regardless of the dock feature flag."""
     raster_type = _resolve_raster_class()
     if raster_type is None or layer is None:
         return False
     try:
         from qgis.core import QgsVectorLayer
-        if raster_type is QgsVectorLayer:  # mocked qgis.core: one class for both
-            return False
-        if not isinstance(layer, raster_type):
-            return False
-        return layer.providerType() not in ANALYSIS_RASTER_PROVIDERS or _renders_an_image(layer)
-    except (ImportError, TypeError, RuntimeError, AttributeError):
+        return raster_type is not QgsVectorLayer and isinstance(layer, raster_type)
+    except (ImportError, TypeError, RuntimeError):
+        return False
+
+
+def is_unsupported_raster(layer: Any) -> bool:
+    """True for a raster unavailable even for colour picking in the dock."""
+    if not _is_raster_instance(layer):
+        return False
+    try:
+        return layer.providerType().lower() not in ANALYSIS_RASTER_PROVIDERS + RENDERED_RASTER_PROVIDERS
+    except (TypeError, RuntimeError, AttributeError):
+        return False
+
+
+def is_non_analysis_raster(layer: Any) -> bool:
+    """True for an unsupported or rendered raster: never a filter target.
+
+    Unlike dock availability, this decision ignores feature flags. WCS has
+    raw values; GDAL WMS and tile services only have rendered colours.
+    """
+    if not _is_raster_instance(layer):
+        return False
+    try:
+        return layer.providerType().lower() not in ANALYSIS_RASTER_PROVIDERS or _renders_an_image(layer)
+    except (TypeError, RuntimeError, AttributeError):
         return False
 
 
 def is_raster_layer(layer: Any) -> bool:
-    """True when ``layer`` is an analysable ``QgsRasterLayer`` and raster filtering is usable."""
-    if layer is None:
-        return False
+    """True for an enabled raster, including rendered services for colour picking."""
     layer_type = get_raster_layer_type()
-    if layer_type is None:
+    if layer is None or layer_type is None:
         return False
     try:
-        if not isinstance(layer, layer_type):
-            return False
-        return layer.providerType() in ANALYSIS_RASTER_PROVIDERS and not _renders_an_image(layer)
+        return isinstance(layer, layer_type) and not is_unsupported_raster(layer)
     except (TypeError, RuntimeError, AttributeError):
         return False
 
@@ -225,6 +228,7 @@ def get_layer_kind(layer: Any) -> Any:
     from ...core.domain.layer_kind import LayerKind
     if layer is None:
         return LayerKind.OTHER
+    if any(base.__name__ == 'QgsVectorTileLayer' for base in type(layer).__mro__): return LayerKind.VECTOR_TILE
     try:
         from qgis.core import QgsVectorLayer
         if isinstance(QgsVectorLayer, type) and isinstance(layer, QgsVectorLayer):
@@ -241,7 +245,7 @@ def get_layer_kind(layer: Any) -> Any:
 def layer_kind_by_class(layer: Any) -> Any:
     """Kind from the layer class only, ignoring the dock options (Processing, REST API).
 
-    Web rasters (WMS, XYZ...) stay OTHER: their pixels cannot be analysed.
+    Rendered services are RASTER too; target admission checks their capability.
     """
     from ...core.domain.layer_kind import LayerKind
     try:
@@ -252,7 +256,7 @@ def layer_kind_by_class(layer: Any) -> Any:
         if isinstance(QgsVectorLayer, type) and isinstance(layer, QgsVectorLayer):
             return LayerKind.VECTOR
         if isinstance(QgsRasterLayer, type) and isinstance(layer, QgsRasterLayer):
-            return LayerKind.RASTER if layer.providerType() in ANALYSIS_RASTER_PROVIDERS else LayerKind.OTHER
+            return LayerKind.OTHER if is_unsupported_raster(layer) else LayerKind.RASTER
         point_cloud_type = _resolve_point_cloud_class()
         if point_cloud_type is not None and isinstance(layer, point_cloud_type):
             return LayerKind.POINT_CLOUD

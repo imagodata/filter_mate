@@ -128,8 +128,9 @@ def gdal_warp(destination: str, source: str, **options):
         manager = getattr(gdal, 'ExceptionMgr', None)
         if manager is not None:
             with manager(useExceptions=True):
-                return gdal.Warp(destination, source, **options)
-        dataset = gdal.Warp(destination, source, **options)
+                dataset = gdal.Warp(destination, source, **options)
+        else:
+            dataset = gdal.Warp(destination, source, **options)
         if dataset is None:
             raise RuntimeError(gdal.GetLastErrorMsg() or 'gdal.Warp failed')
         return dataset

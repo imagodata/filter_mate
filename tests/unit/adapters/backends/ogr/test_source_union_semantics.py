@@ -261,6 +261,12 @@ class _Registry:
 
 @pytest.fixture
 def qgis(monkeypatch):
+    # This fixture models geometry/selection only. The actual QGIS AST and
+    # dialect validation are exercised by check_stream_vector_filters.py.
+    translation = types.ModuleType('filter_mate.adapters.qgis.server_filter_translation')
+    translation.dialect_for_layer = lambda layer: 'wfs' if layer.providerType().lower() == 'wfs' else None
+    translation.prepare_server_subset = lambda layer, expression: expression
+    monkeypatch.setitem(sys.modules, translation.__name__, translation)
     state = types.SimpleNamespace(unions=[], engines=[], relations={}, union_result=_Geom("union", MULTILINE))
 
     def _union(geometries):

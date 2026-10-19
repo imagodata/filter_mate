@@ -47,6 +47,16 @@ NOT_IN_PROJECT = "not in the project: a filter on a temporary layer would be los
 NOT_FILTERABLE = "not a vector, raster or point cloud layer FilterMate can filter"
 
 
+def _tr(text: str) -> str:
+    """Translate automation diagnostics, with a plain-text fallback outside Qt."""
+    try:
+        from qgis.PyQt.QtCore import QCoreApplication
+        translated = QCoreApplication.translate('FilterMateOperations', text)
+        return translated if isinstance(translated, str) else text
+    except ImportError:
+        return text
+
+
 # --- layers --------------------------------------------------------------------
 
 def _project(project=None):
@@ -103,6 +113,11 @@ def _project_targets(layers: Iterable, project, exclude_id: Optional[str], repor
         if layer.id() in seen:
             continue
         kind = layer_kind(layer)
+        from ..qgis.point_cloud_capability import is_non_analysis_raster
+        if is_non_analysis_raster(layer):
+            report.skipped[_report_label(report, layer.name(), layer.id())] = _tr(
+                "rendered or unsupported raster: cannot be a filter target")
+            continue
         if kind is LayerKind.OTHER:
             report.skipped[_report_label(report, layer.name(), layer.id())] = NOT_FILTERABLE
             continue
@@ -156,10 +171,13 @@ _CONFLICTING_TASKS = frozenset({"FilterEngineTask", "CrossFilterTask", "Coverage
 
 
 def _background_tasks_running() -> bool:
-    """A dock task that changes or reads the filters still runs (see ``_CONFLICTING_TASKS``)."""
+    """A dock or automation task still changes or reads the filters."""
     try:
         from ...core.services.cross_filter_service import _finished, get_cross_filter_service
-        if any(not _finished(task) for task in get_cross_filter_service()._running):
+        services = [get_cross_filter_service()]
+        if _API_SERVICE is not None and _API_SERVICE is not services[0]:
+            services.append(_API_SERVICE)
+        if any(not _finished(task) for service in services for task in service._running):
             return True
         from qgis.core import QgsApplication
         tasks = list(QgsApplication.taskManager().activeTasks())
@@ -177,6 +195,9 @@ def busy_reason() -> str:
     """
     if _RUNNING:
         return f"FilterMate is already running {_RUNNING[0]}: try again when it ends"
+    from ...core.filter.server_filter_state import server_filter_pending
+    if server_filter_pending():
+        return BACKGROUND_BUSY
     return BACKGROUND_BUSY if _background_tasks_running() else ""
 
 
@@ -217,24 +238,83 @@ def _exclusive(tidy: bool = True):
     return decorate
 
 
-def _run_task(service, request, source_job, feedback=None):
-    """``service.run(request, source_job, synchronous=True)`` with ``feedback`` relayed.
+def _run_task(service, request, source_job, feedback=None, apply_results=None):
+    """Compute in one worker while Qt keeps serving events, then apply on main.
 
-    The task's progress goes to ``feedback``; a cancel request (Processing's
-    Cancel button) cancels the task, which checks it between its steps.
+    Automation waits for the result, but remote raster materialization must
+    never run on the caller's main thread. A dedicated single-worker executor
+    keeps the task alive until computation ends; only apply_results touches
+    project layers. Progress is queued explicitly so feedback runs on main.
     """
-    if feedback is None:
-        return service.run(request, source_job, synchronous=True)
+    from concurrent.futures import ThreadPoolExecutor
+    from queue import Empty, SimpleQueue
+    from qgis.PyQt.QtCore import QEventLoop, QTimer, Qt
+
     task = service.build_task(request, source_job)
-    task.progressChanged.connect(feedback.setProgress)
-    if feedback.isCanceled():
-        task.cancel()
-    feedback.canceled.connect(task.cancel)
+
+    def apply(result):
+        if apply_results is None:
+            task.apply_results(result)
+        else:
+            apply_results(task, result)
+
+    loop = QEventLoop()
+    timer = QTimer()
+    progress = SimpleQueue()
+    if feedback is not None:
+        # A direct connection only enqueues a number, never calls GUI code.
+        connection = getattr(Qt, 'ConnectionType', Qt).DirectConnection
+        task.progressChanged.connect(progress.put, connection)
+        feedback.canceled.connect(task.cancel)
+        if feedback.isCanceled():
+            task.cancel()
+
+    # This task is not submitted to QgsTaskManager, so its QGIS status stays
+    # Queued. Keep a service lease for unload cancellation until apply ends.
+    service._running.append(task)
     try:
-        result = task.run()
+        with ThreadPoolExecutor(max_workers=1, thread_name_prefix='FilterMateAPI') as executor:
+            future = executor.submit(task.run)
+
+            def poll():
+                if feedback is not None:
+                    while True:
+                        try:
+                            value = progress.get_nowait()
+                        except Empty:
+                            break
+                        feedback.setProgress(value)
+                    if feedback.isCanceled():
+                        task.cancel()
+                if future.done():
+                    loop.quit()
+
+            timer.timeout.connect(poll)
+            timer.start(10)
+            try:
+                # Re-enter if an unrelated event quits the nested loop early.
+                while not future.done():
+                    loop.exec()
+                poll()
+                result = future.result()
+            except BaseException:
+                task.cancel()
+                # Do not release worker-owned providers/files while run uses them.
+                try:
+                    future.result()
+                except BaseException:
+                    pass
+                apply(False)
+                raise
+            finally:
+                timer.stop()
+            apply(result and not task.isCanceled())
     finally:
-        _disconnect((feedback.canceled, task.cancel), (task.progressChanged, feedback.setProgress))
-    task.apply_results(result)
+        # cancel_all() and on_done may replace the list while Qt processes events.
+        # Remove only this lease, preserving any other tasks registered meanwhile.
+        service._running = [running for running in service._running if running is not task]
+        if feedback is not None:
+            _disconnect((feedback.canceled, task.cancel), (task.progressChanged, progress.put))
     return task
 
 
@@ -292,6 +372,9 @@ def _collect(task, project, report: OperationReport) -> OperationReport:
         if outcome.success:
             report.done[outcome.layer_id] = label
             per_layer[label] = {"kept": outcome.kept_count, "seconds": round(outcome.elapsed, 2)}
+            if outcome.details.get('capture_resampled'):
+                per_layer[label]['resampled'] = True
+                per_layer[label]['capture_grid'] = outcome.details.get('capture_grid')
         else:
             report.failed[label] = outcome.message or "failed"
     report.details["layers"] = per_layer
@@ -369,7 +452,7 @@ def cross_filter(source, targets: Sequence, predicates: Sequence[str] = ("Inters
         return report
     try:
         if not specs:
-            _source_only(layer, kind, source_job, report, service, in_project, feedback)
+            _source_only(layer, kind, source_job, report, service, in_project, feedback, project=project)
         else:
             request = CrossFilterRequest(source_layer_id=layer.id(), source_kind=kind, targets=tuple(specs),
                                          predicates=tuple(predicates) or ("Intersect",),
@@ -415,6 +498,11 @@ def _source_job(layer, kind: LayerKind, report: OperationReport, selected_only: 
             return None
         return source_jobs.VectorSourceJob(layer, features)
     if kind is LayerKind.RASTER:
+        from ..qgis.source_capability_probe import capability_for_layer
+        capability = capability_for_layer(layer)
+        if capability is not None and not capability.has_raw_values:
+            # Automation has no local rendered capture to supply to the job.
+            raise ValueError(_tr("rendered raster sources require a local colour capture; numeric pixel selections are unavailable"))
         if raster_selection is None:
             raise ValueError("a raster source needs a pixel selection (range, classes or expression)")
         if raster_selection.band > layer.bandCount():
@@ -447,12 +535,46 @@ def _source_job(layer, kind: LayerKind, report: OperationReport, selected_only: 
 
 
 def _source_only(layer, kind: LayerKind, source_job, report: OperationReport, service, in_project: bool,
-                 feedback=None) -> OperationReport:
+                 feedback=None, project=None) -> OperationReport:
     """No target: filter the source itself (raster mask, point cloud subset), undoable."""
     from ...core.domain.filter_state import CrossOperation
     if _canceled(feedback):
         source_job.release()
         report.error = "canceled"
+        return report
+    if in_project and kind is LayerKind.RASTER and getattr(source_job, 'clips_source', False):
+        from ...core.domain.cross_filter import CrossFilterRequest
+        request = CrossFilterRequest(source_layer_id=layer.id(), source_kind=kind, targets=())
+        project = _project(project)
+
+        def apply_source(task, result):
+            # CrossFilterTask's default application resolves the project singleton.
+            # Source-only operations must honor the explicitly supplied project.
+            from ..qgis.coverage_layers import cache
+            try:
+                if result and cache.is_closed():
+                    task.error = _tr("FilterMate was unloaded")
+                    result = False
+                current = project.mapLayer(layer.id())
+                after = source_job.apply(current) if result and current is not None else None
+                if after is not None:
+                    task.changes.append((source_job.before, after))
+                    service.history.push(CrossOperation(
+                        layer.id(), ((source_job.before, after),), f"{kind.value} selection"))
+            finally:
+                try:
+                    cache.settle(getattr(source_job, 'outputs', ()))
+                finally:
+                    source_job.release()
+
+        task = _run_task(service, request, source_job, feedback, apply_results=apply_source)
+        _collect(task, project, report)
+        if report.error:
+            return report
+        if report.details.get("source_filtered"):
+            report.done[layer.id()] = _report_label(report, layer.name(), layer.id())
+        else:
+            report.error = source_job.message or _tr("the source layer itself was not changed")
         return report
     after = source_job.apply(layer) if in_project else None
     source_job.release()

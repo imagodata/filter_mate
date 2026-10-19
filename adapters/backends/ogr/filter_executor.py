@@ -320,6 +320,17 @@ def apply_ogr_subset(
     Returns:
         bool: True if successful
     """
+    try:
+        from ....core.domain.source_capability import classify_layer
+    except ImportError:
+        from core.domain.source_capability import classify_layer
+    if classify_layer(layer).requires_server_translation:
+        from ...qgis.server_filter_translation import apply_server_subset, prepare_server_subset
+        prepare_server_subset(layer, subset_string)
+        if queue_subset_func:
+            queue_subset_func(layer, subset_string)
+            return True
+        return apply_server_subset(layer, subset_string)
     if queue_subset_func:
         # Thread-safe: queue for main thread application
         queue_subset_func(layer, subset_string)

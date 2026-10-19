@@ -155,6 +155,12 @@ class SourceCapability:
         """
         return not self.is_remote_service and self.provider_key not in NO_FEATURE_ID_SUBSET_PROVIDERS
 
+    @property
+    def requires_server_translation(self) -> bool:
+        """Whether an attribute predicate needs a validated server dialect."""
+        return self.is_remote_service or (
+            self.locality is Locality.DATABASE and self.network_cost is NetworkCost.HIGH)
+
 
 def _is_remote_path(text: str) -> bool:
     lower = text.strip().strip('"').strip("'").lower()

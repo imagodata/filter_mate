@@ -32,8 +32,8 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-def _is_coverage_target(layer) -> bool:
-    """FilterMate 5: raster and point cloud layers are valid targets (and sources)."""
+def _is_coverage_layer(layer) -> bool:
+    """FilterMate 5: raster and point cloud sources supported by the dock."""
     try:
         from ...adapters.qgis.point_cloud_capability import is_coverage_layer
     except ImportError:
@@ -42,6 +42,12 @@ def _is_coverage_target(layer) -> bool:
         return bool(is_coverage_layer(layer))
     except Exception:
         return False
+
+
+def _is_coverage_target(layer) -> bool:
+    """Only value rasters and point clouds can be filter targets."""
+    from ...adapters.qgis.point_cloud_capability import is_non_analysis_raster
+    return _is_coverage_layer(layer) and not is_non_analysis_raster(layer)
 
 
 class ComboboxPopulationManager:
@@ -388,7 +394,7 @@ class ComboboxPopulationManager:
                     layer_obj = project.mapLayer(layer_id)
                     if (
                         layer_obj
-                        and (isinstance(layer_obj, QgsVectorLayer) or _is_coverage_target(layer_obj))
+                        and (isinstance(layer_obj, QgsVectorLayer) or _is_coverage_layer(layer_obj))
                         and is_layer_source_available(
                             layer_obj, require_psycopg2=False
                         )
@@ -478,7 +484,7 @@ class ComboboxPopulationManager:
                     "populate_filtering_direct: PROJECT_LAYERS empty"
                 )
                 return False
-            if not layer or not (isinstance(layer, QgsVectorLayer) or _is_coverage_target(layer)):
+            if not layer or not (isinstance(layer, QgsVectorLayer) or _is_coverage_layer(layer)):
                 logger.warning(
                     "populate_filtering_direct: invalid layer"
                 )

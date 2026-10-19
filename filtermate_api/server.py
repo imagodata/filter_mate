@@ -26,7 +26,7 @@ from starlette.datastructures import Headers
 from starlette.types import ASGIApp, Receive, Scope, Send
 
 from . import __version__
-from .accessor import FilterMateAccessor, InMemoryAccessor
+from .accessor import FilterMateAccessor, FilterRejected, InMemoryAccessor
 from .auth import APIKeyMiddleware
 from .config import _LOOPBACK_HOSTS, APIConfig
 from .main_thread import QGISBusy
@@ -386,6 +386,10 @@ def create_app(
     async def _validation_error(request: Request, exc: RequestValidationError) -> JSONResponse:
         errors = [{key: error[key] for key in ("type", "loc", "msg") if key in error} for error in exc.errors()]
         return JSONResponse(status_code=422, content={"detail": jsonable_encoder(errors)})
+
+    @app.exception_handler(FilterRejected)
+    async def _filter_rejected(request: Request, exc: FilterRejected) -> JSONResponse:
+        return JSONResponse(status_code=status.HTTP_400_BAD_REQUEST, content={'detail': str(exc)})
 
     @app.exception_handler(QGISBusy)
     async def _qgis_busy(request: Request, exc: QGISBusy) -> JSONResponse:

@@ -3080,6 +3080,11 @@ class FilterEngineTask(QgsTask):
         """Restore source layer selection after filter/unfilter. Delegates to FeatureCollector."""
         if not self.source_layer or not is_valid_layer(self.source_layer):
             return
+        from ..domain.source_capability import classify_layer
+        if classify_layer(self.source_layer).requires_server_translation:
+            # Server provider replacement can renumber cache/positional FIDs.
+            # Reapplying them would select different features.
+            return
 
         collector = self._get_feature_collector()
         feature_fids = self.task_parameters.get("task", {}).get("feature_fids", [])

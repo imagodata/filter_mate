@@ -518,6 +518,10 @@ class FilteringController(BaseController, LayerSelectionMixin):
                 if not layer_obj:
                     skipped_reasons.append(f"{layer_name}: layer_obj is None (not in project)")
                     continue
+                from ...adapters.qgis.point_cloud_capability import is_non_analysis_raster
+                if is_non_analysis_raster(layer_obj):
+                    skipped_reasons.append(f"{layer_name}: rendered or unsupported raster")
+                    continue
                 if is_coverage_layer(layer_obj):
                     # FilterMate 5: raster / point cloud targets, clipped by the source geometry.
                     pass
@@ -572,7 +576,9 @@ class FilteringController(BaseController, LayerSelectionMixin):
                     item_index += 1
                     logger.info(f"✓ populate_layers_checkable_combobox: Added missing layer '{missing_layer.name()}'")
 
-            logger.info(f"✓ populate_layers_checkable_combobox: Added {item_index} layers (source layer '{layer.name()}' excluded)")
+            from ...adapters.qgis.coverage_layers.vector_tile_filters import append_targets
+            append_targets(layers_widget, project, layers_to_filter)
+            logger.info(f"✓ populate_layers_checkable_combobox: Added {layers_widget.count()} layers (source layer '{layer.name()}' excluded)")
             logger.info("=== populate_layers_checkable_combobox END ===")
             return True
 

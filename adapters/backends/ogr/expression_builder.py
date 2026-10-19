@@ -493,6 +493,17 @@ class OGRExpressionBuilder(GeometricFilterPort):
             # Get source layer
             source_layer = self.source_geom
 
+            if source_capability(layer).requires_server_translation:
+                from ...qgis.server_filter_translation import dialect_for_layer
+                if dialect_for_layer(layer) in ('oapif', 'unsupported'):
+                    self.last_error = translate(
+                        'OGRExpressionBuilder',
+                        '{0}: this provider cannot guarantee a complete server filter. '
+                        'Use a bounded local copy before filtering.'
+                    ).format(layer.name())
+                    self.user_warnings.append(self.last_error)
+                    return False
+
             if source_layer is None:
                 self.last_error = "No source layer available for OGR filter"
                 self.log_error(self.last_error)
@@ -615,6 +626,10 @@ class OGRExpressionBuilder(GeometricFilterPort):
                 key_filter = "1 = 1" if not selected_ids else f"NOT ({key_filter})"
             final_filter = self._combine_with_old_subset(old_subset, combine_operator, key_filter)
 
+            if source_capability(layer).requires_server_translation:
+                from ...qgis.server_filter_translation import prepare_server_subset
+                prepare_server_subset(layer, final_filter)
+
             # Apply filter
             self.log_info(f"  - Applying filter: {final_filter[:200]}..." if len(final_filter) > 200 else f"  - Applying filter: {final_filter}")
             # 2026-04-29 fix: route through subset queue when wired so
@@ -650,6 +665,7 @@ class OGRExpressionBuilder(GeometricFilterPort):
         except Exception as e:
             self.last_error = f"OGR apply_filter exception: {e}"
             self.log_error(self.last_error)
+            self.user_warnings.append(self.last_error)
             return False
 
     def _key_filter(self, layer, target, selected_ids: list) -> Optional[str]:

@@ -85,6 +85,9 @@ class Layer:
     def source(self):
         return self._source
 
+    def extent(self):
+        return fk.FakeRectangle(0, 0, 100, 100)
+
     def providerType(self):
         return 'copc'
 
@@ -99,6 +102,8 @@ class TestTask:
     @pytest.fixture
     def pipelines(self, monkeypatch, tmp_path):
         ran = []
+        monkeypatch.setattr(hag_task, "QgsRectangle", fk.FakeRectangle)
+        monkeypatch.setattr(hag_task, "QgsGeometry", fk.FakeGeometry)
         monkeypatch.setattr(pdal_cli, 'copc_unavailable_reason', lambda: '')
         monkeypatch.setattr(pdal_cli, 'run_pipeline', lambda stages, **kw: (ran.append(stages), (True, ''))[1])
         snapshots.registry()._derived.clear()
