@@ -54,6 +54,7 @@ QgsNetworkAccessManager.instance().requestAboutToBeCreated[QgsNetworkRequestPara
 )
 results = []
 fixture_layers = []
+fixture_builders = []
 settings = {"_processing_settings": {"transform_context": QgsCoordinateTransformContext()}}
 
 
@@ -138,6 +139,17 @@ def filter_keys(target, source, predicate="ST_Intersects", limits=None, **kwargs
     if limits:
         params["config_data"] = {"APP": {"OPTIONS": {"REMOTE_MATERIALIZATION": limits}}}
     builder = OGRExpressionBuilder(task_params=params)
+    original_log_error = builder.log_error
+
+    def diagnostic_error(message):
+        if "has been deleted" in str(message):
+            traceback.print_exc()
+        original_log_error(message)
+
+    builder.log_error = diagnostic_error
+    # Processing output layers belong to each builder's task cache. Keep their
+    # owners alive until this worker's comparisons finish, including on Qt6.
+    fixture_builders.append(builder)
     expression = builder.build_expression(layer_props={}, predicates={predicate: True}, source_geom=source, **kwargs)
     success = builder.apply_filter(target, expression)
     return success, queued, builder
@@ -434,6 +446,25 @@ def local_http(task):
             outcome.complete and outcome.keys == (1, 3) and sum(request["returned"] for request in reads) == 3,
             repr(outcome),
         )
+        from filter_mate.adapters.qgis.server_filter_translation import prepare_server_subset, translate
+        from filter_mate.adapters.qgis.remote_materializer import materialize_translation
+        from filter_mate.core.filter.server_dialect import TranslationStatus
+
+        expression = '"id" >= 1 AND abs("id") < 3'
+        translation = translate(expression, 'wfs', layer.fields())
+        outcome = materialize_translation(layer, QgsRectangle(0.5, 0, 3.5, 2), translation)
+        check("lot A PARTIAL executes bounded residual", translation.status == TranslationStatus.PARTIAL
+              and outcome.complete and outcome.keys == (1, 2), repr(outcome))
+        expression = 'abs("id") < 3'
+        translation = translate(expression, 'wfs', layer.fields())
+        outcome = materialize_translation(layer, QgsRectangle(0.5, 0, 3.5, 2), translation)
+        check("lot A NONE executes bounded local predicate", translation.status == TranslationStatus.NONE
+              and outcome.complete and outcome.keys == (1, 2), repr(outcome))
+        layer.setSubsetString('"id" > 4')
+        subset = prepare_server_subset(layer, expression, rect=QgsRectangle(0.5, 0, 3.5, 2))
+        layer.setSubsetString('')
+        check("lot A fallback returns a verified server key subset", translate(subset, 'wfs', layer.fields()).status
+              == TranslationStatus.FULL and '1, 2' in subset, subset)
         fixture.fail = True
         broken = QgsVectorLayer(uri + " restrictToRequestBBOX='1'", "broken", "WFS")
         outcome = materialize(broken, QgsRectangle(10, 0, 13, 2), "", "")

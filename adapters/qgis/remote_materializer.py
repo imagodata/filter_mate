@@ -336,7 +336,14 @@ def read_bounded_features(source, request, limits, feedback, consume, key, sourc
             def inspect_body():
                 # Peek without consuming the provider's stream. ExceptionReport
                 # responses often use HTTP 200 and never emit errorOccurred.
-                prefix = bytes(reply.peek(65536))
+                try:
+                    prefix = bytes(reply.peek(65536))
+                except RuntimeError:
+                    # A downloader can destroy its reply during cancellation.
+                    # Do not let a Python slot exception escape through Qt.
+                    if not closing.is_set() and time.monotonic() < deadline:
+                        network_failed.append(True)
+                    return
                 if re.search(rb"<(?:\w+:)?(?:ServiceExceptionReport|ExceptionReport)\b", prefix) or re.match(
                     rb'\s*\{\s*"error"\s*:', prefix
                 ):
@@ -414,6 +421,23 @@ def read_bounded_features(source, request, limits, feedback, consume, key, sourc
         message_log.messageReceived.disconnect(provider_message)
         if provider is not None:
             provider.raiseError.disconnect(provider_error)
+
+
+def materialize_translation(layer, rect, translation, limits=None, feedback=None):
+    """Connect lot A's FULL/PARTIAL/NONE verdict to one bounded worker read.
+
+    Args:
+        layer: Worker-owned service layer.
+        rect: Explicit useful extent in the layer CRS; never inferred globally.
+        translation: ServerTranslation from the QGIS AST adapter.
+        limits: Optional materialization budgets.
+        feedback: Optional cancellation source.
+
+    Returns:
+        MaterializationOutcome including any exact local residual predicate.
+    """
+    return materialize(layer, rect, translation.subset_expression,
+                       translation.local_expression, limits, feedback)
 
 
 def materialize(layer, rect, server_expression, local_expression, limits=None, feedback=None):

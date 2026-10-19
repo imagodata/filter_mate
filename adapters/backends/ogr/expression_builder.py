@@ -495,7 +495,7 @@ class OGRExpressionBuilder(GeometricFilterPort):
 
             if source_capability(layer).requires_server_translation:
                 from ...qgis.server_filter_translation import dialect_for_layer
-                if dialect_for_layer(layer) in ('oapif', 'unsupported'):
+                if dialect_for_layer(layer) == 'unsupported':
                     self.last_error = translate(
                         'OGRExpressionBuilder',
                         '{0}: this provider cannot guarantee a complete server filter. '

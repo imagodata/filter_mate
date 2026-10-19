@@ -1225,6 +1225,9 @@ def apply_remote_spatial_filter(builder, layer, source, names, buffer_value, buf
         # pushes an IN list down. Lot A supplies the FULL-translation guard.
         validator = builder.task_params.get('_remote_subset_validator') if builder.task_params else None
         try:
+            if validator is None:
+                from ...qgis.server_filter_translation import prepare_server_subset
+                validator = lambda target, expression: bool(prepare_server_subset(target, expression))
             verified = callable(validator) and validator(layer, final) is True
         except Exception:
             verified = False
