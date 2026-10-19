@@ -264,6 +264,7 @@ class SourceGeometryPreparer:
         get_buffer_distance_parameter_fn=None,
         ogr_executor=None,
         ogr_executor_available=False,
+        feedback=None,
     ):
         """Prepare OGR source geometry with reprojection/buffering.
 
@@ -312,6 +313,7 @@ class SourceGeometryPreparer:
             reproject_layer=reproject_layer_fn,
             convert_layer_to_centroids=convert_layer_to_centroids_fn,
             get_buffer_distance_parameter=get_buffer_distance_parameter_fn,
+            feedback=feedback,
         )
         result = ogr_executor.prepare_ogr_source_geom(context)
         logger.debug(f"prepare_ogr_source_geom: {result}")

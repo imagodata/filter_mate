@@ -130,6 +130,22 @@ class BaseLegacyAdapter(GeometricFilterBackend):
         """
         return False  # Conservative: use legacy by default
 
+    @property
+    def user_warnings(self):
+        """Expose the warnings consumed by FilterOrchestrator.finished()."""
+        return getattr(getattr(self, '_legacy_backend', None), 'user_warnings', [])
+
+    @user_warnings.setter
+    def user_warnings(self, warnings):
+        backend = getattr(self, '_legacy_backend', None)
+        if backend is not None:
+            backend.user_warnings = warnings
+
+    @property
+    def remote_materialization_outcome(self):
+        """Expose whether a remote key list was complete or partial."""
+        return getattr(getattr(self, '_legacy_backend', None), 'remote_materialization_outcome', None)
+
     def build_expression(
         self,
         layer_props: Dict,

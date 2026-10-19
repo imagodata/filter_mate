@@ -1,6 +1,17 @@
 # Project Memory
 _Auto-maintained by project agent_
 
+## [2026-10-19] Stream sources, lot B: bounded spatial reads and materialization
+- WFS `filterRect` alone does not guarantee a server BBOX: by default the provider can fill its cache from the entire service. A worker-owned URI copy must set `restrictToRequestBBOX=1`; impose `maxNumFeatures=max_features+1` as well as the feature-request limit.
+- `adapters/qgis/remote_materializer.py` exposes `materialize(layer, rect, server_expression, local_expression, limits, feedback)` and `RemoteMaterializationTask`. `core/domain/materialization.py` owns the pure budgets/outcome contract. No scratch layer is added to the project and no file is written.
+- Exact spatial keys come from the first bounded read. Only the request envelope is transformed to the target CRS; target geometries are transformed into the original source CRS for the exact predicate, matching OGR. Do not recover keys with a second WFS request by QGIS feature ids. Source copies require selected ids or an existing subset; incomplete sources are refused because missing source geometries change exact union predicates.
+- Keep raw bounded source features in `task['_bounded_remote_source_features']`, before reprojection/centroids. The WKT callback temporarily receives those raw features and restores `task['features']` in finally: never permanently replace the original selection features or reuse already projected coordinates for the WKT transform.
+- Lot A/F handoff: OAPIF spatial key application requires `_remote_subset_validator(layer, expression)` on builder task parameters, returning exactly True only for a proven FULL server translation. Without that proof, keys can be materialized but are not sent as a successful filter. The second merged lot must wire this guard as well as PARTIAL/NONE -> materialization. OAPIF inherited subsets are evaluated locally over raw BBOX rows so client filtering cannot hide a row cap; a source subset without a useful BBOX or captured/selected features is refused if server completeness is unverified.
+- A feature or time limit yields an explicitly partial result; cancellation, transport errors and more than 500 keys carry no usable result. Disjoint uses the bounded intersecting key complement only after a complete read. Mixed Disjoint with other predicates is refused for a remote target.
+- Qt6 can report an HTTP failure as an exhausted, valid feature iterator. Observe the actual reply's error signal using a temporary NAM reply preprocessor (QGIS >= 3.26); remove it in finally. Older versions use NAM/provider error notifications. Capture the main NAM before scheduling tasks.
+- Defaults in `APP.OPTIONS.REMOTE_MATERIALIZATION`: `max_features=20000`, `timeout_seconds=90`. A malformed option keeps the bounded defaults. The time budget is cooperative: a provider that ignores feedback can finish its current blocking request, but its late result cannot be labelled complete.
+- Dedicated real-QGIS check: `tests/qgis_headless/check_stream_vector_spatial.py` (local HTTP WFS fixture, all union predicates, buffers, reprojection, cancellation, partial/overflow/error refusals); public IGN checks are opt-in with `FM_STREAM_PUBLIC=1`.
+
 ## [2026-10-16] Audit profond de la v5 → PR #114 – #118, #122, #148 – #150, CHANGELOG #154
 Décisions à connaître :
 - `ControllerRegistry` était « falsy » (`__len__` = 0) : `if not self._registry` empêchait tout enregistrement, donc aucun

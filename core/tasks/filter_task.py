@@ -315,6 +315,11 @@ class FilterEngineTask(QgsTask):
             self.task_parameters['_processing_settings'] = capture_processing_settings()
         except Exception:  # nosec B110 - the workers then use a context without the settings
             pass
+        try:
+            from ...adapters.qgis.source_capability_probe import capture_network_manager
+            capture_network_manager()
+        except Exception:  # nosec B110 - provider error notifications remain available
+            pass
 
         # H1 (audit 2026-04-29): stamp the subset-change token NOW (main
         # thread, before run() is queued). FilterResultHandler reads this
@@ -1708,6 +1713,7 @@ class FilterEngineTask(QgsTask):
             get_buffer_distance_parameter_fn=self._get_buffer_distance_parameter,
             ogr_executor=ogr_executor,
             ogr_executor_available=OGR_EXECUTOR_AVAILABLE,
+            feedback=self,
         )
         self.ogr_source_geom = result
         return self.ogr_source_geom

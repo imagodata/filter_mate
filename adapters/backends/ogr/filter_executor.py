@@ -20,7 +20,7 @@ import logging
 import re
 import threading
 import time
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from typing import Any, Callable, Optional
 
 logger = logging.getLogger('FilterMate.Adapters.Backends.OGR.FilterExecutor')
@@ -136,11 +136,6 @@ def build_ogr_filter_from_selection(
     param_distant_primary_key_is_numeric = layer_props.get(
         "primary_key_is_numeric", True
     )
-    param_distant_schema = layer_props.get("layer_schema", "")
-    param_distant_table = layer_props["layer_name"]
-    param_distant_geometry_field = layer_props.get(
-        "layer_geometry_field", "geometry"
-    )
 
     # Get selected feature IDs if not provided
     if selected_fids is None:
@@ -173,18 +168,18 @@ def build_ogr_filter_from_selection(
     if len(features_ids) == 0:
         return None, None
 
-    # Build IN clause based on key type
-    if param_distant_primary_key_is_numeric:
-        param_expression = '"{pk}" IN ({ids})'.format(
-            pk=param_distant_primary_key_name,
-            ids=", ".join(features_ids)
-        )
-    else:
-        # Quote string values
-        param_expression = '"{pk}" IN ({ids})'.format(
-            pk=param_distant_primary_key_name,
-            ids="'" + "', '".join(features_ids) + "'"
-        )
+    param_expression = '"{pk}" IN ({ids})'.format(
+        pk=param_distant_primary_key_name,
+        ids=format_ogr_pk_values(features_ids, param_distant_primary_key_is_numeric))
+    return build_ogr_filter_from_keys(layer_props, param_expression, distant_geom_expression)
+
+
+def build_ogr_filter_from_keys(layer_props, param_expression, distant_geom_expression=None):
+    """Build the legacy query wrapper without re-reading remote keys by FID."""
+    param_distant_primary_key_name = layer_props['primary_key_name']
+    param_distant_schema = layer_props.get('layer_schema', '')
+    param_distant_table = layer_props['layer_name']
+    param_distant_geometry_field = layer_props.get('layer_geometry_field', 'geometry')
 
     # Build full SELECT expression for manage_layer_subset_strings
     geom_expr = distant_geom_expression or f'"{param_distant_geometry_field}"'
@@ -519,6 +514,7 @@ class OGRSourceContext:
     reproject_layer: Optional[Callable] = None
     convert_layer_to_centroids: Optional[Callable] = None
     get_buffer_distance_parameter: Optional[Callable] = None
+    feedback: Any = None
 
 
 def validate_task_features(
@@ -580,7 +576,9 @@ def validate_task_features(
 
 def recover_features_from_fids(
     layer: Any,
-    feature_fids: list
+    feature_fids: list,
+    task_parameters=None,
+    feedback=None,
 ) -> list:
     """
     Recover features using FIDs when QgsFeature objects are invalid.
@@ -597,7 +595,18 @@ def recover_features_from_fids(
     if not feature_fids or not layer:
         return []
 
+    remote = False
     try:
+        try:
+            from ...qgis.source_capability_probe import capability_for_layer
+            capability = capability_for_layer(layer)
+            remote = bool(capability and capability.is_remote_service)
+        except ImportError:
+            from core.domain.source_capability import classify_layer
+            remote = classify_layer(layer).is_remote_service
+        if remote:
+            copied = copy_remote_source(layer, task_parameters, feedback, selected_fids=feature_fids)
+            return list(copied.getFeatures())
         from qgis.core import QgsFeatureRequest
         request = QgsFeatureRequest().setFilterFids(feature_fids)
         recovered_features = list(layer.getFeatures(request))
@@ -605,6 +614,8 @@ def recover_features_from_fids(
             logger.debug(f"[OGR]   ✓ Recovered {len(recovered_features)} features using FIDs")
         return recovered_features
     except Exception as e:
+        if remote:
+            raise
         logger.error(f"[OGR]   ❌ FID recovery failed: {e}")
         return []
 
@@ -648,7 +659,7 @@ def determine_source_mode(
         feature_fids = context.task_parameters.get("task", {}).get("feature_fids", [])
         if not feature_fids:
             feature_fids = context.task_parameters.get("feature_fids", [])
-        valid_features = recover_features_from_fids(layer, feature_fids)
+        valid_features = recover_features_from_fids(layer, feature_fids, context.task_parameters, context.feedback)
 
     # Determine mode
     if valid_features and len(valid_features) > 0:
@@ -760,6 +771,35 @@ def prepare_ogr_source_geom(
 
     # Step 0: Determine mode and prepare layer
     mode, mode_data = determine_source_mode(context)
+
+    try:
+        from ...qgis.source_capability_probe import capability_for_layer
+        capability = capability_for_layer(layer)
+        remote_source = bool(capability and capability.is_remote_service)
+    except ImportError:  # unit harness without QGIS adapter packages
+        from core.domain.source_capability import classify_layer
+        remote_source = classify_layer(layer).is_remote_service
+    if remote_source:
+        from ...qgis.remote_materializer import is_partial_source
+        if is_partial_source(layer):
+            raise ValueError(_remote_message('incomplete_source'))
+        fids = None
+        if mode == 'TASK_PARAMS':
+            from ...qgis.remote_materializer import materialization_limits
+            if len(mode_data) > materialization_limits(context.task_parameters).max_features:
+                raise ValueError(_remote_message('incomplete_source'))
+            if all(hasattr(feature, 'geometry') and hasattr(feature, 'id') for feature in mode_data):
+                layer = _memory_source(layer, mode_data)
+            else:
+                raise ValueError(_remote_message('unverified_filter'))
+        elif mode not in ('SELECTION',):
+            fids = []
+        if mode != 'TASK_PARAMS':
+            layer = copy_remote_source(
+                layer, context.task_parameters, context.feedback, selected_fids=fids,
+                expression=mode_data if mode == 'EXPRESSION_FALLBACK' else None)
+        context.task_parameters.setdefault('task', {})['_bounded_remote_source_features'] = layer._filtermate_raw_features
+        mode = 'REMOTE_COPY'
 
     logger.debug(f"[OGR] === prepare_ogr_source_geom ({mode} MODE) ===")
     logger.info(f"[OGR]   Source layer: {layer.name()}")
@@ -933,13 +973,275 @@ class OGRSpatialSelectionContext:
     # Callback for spatial index verification
     verify_and_create_spatial_index: Optional[Callable] = None
 
+    # Remote work uses the same cancellation and configuration as the task.
+    feedback: Any = None
+    task_parameters: dict = field(default_factory=dict)
+    buffer_value: Any = None
+    buffer_expression: Optional[str] = None
+    use_centroids: bool = False
+    primary_key_name: Optional[str] = None
+
+
+def _remote_message(reason):
+    """Translated, credential-free explanation of an incomplete remote read."""
+    from qgis.PyQt.QtCore import QCoreApplication
+    messages = {
+        'feature_limit': QCoreApplication.translate(
+            'RemoteMaterializer', 'Partial result: the remote feature limit was reached.'),
+        'timeout': QCoreApplication.translate(
+            'RemoteMaterializer', 'Partial result: the remote time limit was reached.'),
+        'cancelled': QCoreApplication.translate(
+            'RemoteMaterializer', 'Remote filtering was cancelled; the previous filter is kept.'),
+        'key_limit': QCoreApplication.translate(
+            'RemoteMaterializer', 'More than 500 keys would be sent to the service; narrow the selection or use a local copy.'),
+        'no_stable_key': QCoreApplication.translate(
+            'RemoteMaterializer', 'The service has no stable key; use a local copy.'),
+        'unbounded_source': QCoreApplication.translate(
+            'RemoteMaterializer', 'Select or filter the remote source before spatial filtering.'),
+        'unverified_filter': QCoreApplication.translate(
+            'RemoteMaterializer', 'The service filter cannot be proved complete. Select source features or use a local copy.'),
+        'incomplete_source': QCoreApplication.translate(
+            'RemoteMaterializer', 'The remote source copy is incomplete; the previous filter is kept.'),
+        'partial_empty': QCoreApplication.translate(
+            'RemoteMaterializer', 'Partial result: no matching feature was confirmed before the limit; the previous filter is kept.'),
+        'disjoint_partial': QCoreApplication.translate(
+            'RemoteMaterializer', 'The intersecting remote copy is incomplete; a disjoint filter cannot be computed safely.'),
+        'mixed_disjoint': QCoreApplication.translate(
+            'RemoteMaterializer', 'Disjoint combined with another predicate requires a local copy of the remote target.'),
+        'invalid_geometry': QCoreApplication.translate(
+            'RemoteMaterializer', 'The remote spatial predicate could not be evaluated; the previous filter is kept.'),
+    }
+    return messages.get(reason, QCoreApplication.translate(
+        'RemoteMaterializer',
+        'The remote copy could not be read or filtered; the previous filter is kept.'))
+
+
+def copy_remote_source(layer, params=None, feedback=None, selected_fids=None, expression=None):
+    """Copy only selected or filtered remote source rows into a bounded scratch layer.
+
+    An incomplete source is refused: its missing geometries could change an
+    exact union predicate, in particular Contains, Within and Disjoint.
+    """
+    from qgis.core import QgsFeatureRequest
+    from ...qgis.remote_materializer import (
+        bounded_source_layer, materialization_limits, read_bounded_features, require_worker,
+        supports_materialization,
+        is_partial_source,
+    )
+    require_worker()
+    started = time.monotonic()
+    if feedback is not None and feedback.isCanceled():
+        raise ValueError(_remote_message('cancelled'))
+    if not supports_materialization(layer):
+        raise ValueError(_remote_message('read_error'))
+    if selected_fids is None:
+        # Match determine_source_mode: a filtered source wins over a stale
+        # highlighted selection, unless selection mode was explicitly chosen.
+        fids = [] if layer.subsetString() else list(layer.selectedFeatureIds())
+    else:
+        fids = list(selected_fids)
+    if not fids and not layer.subsetString():
+        raise ValueError(_remote_message('unbounded_source'))
+    if is_partial_source(layer):
+        raise ValueError(_remote_message('incomplete_source'))
+    request = QgsFeatureRequest()
+    if fids:
+        request.setFilterFids(fids)
+    if expression:
+        # The caller's expression remains an exact local check as well.
+        from ...qgis.remote_materializer import _local_predicate
+        matches = _local_predicate(expression, layer.fields())
+    else:
+        matches = lambda feature: True
+    features = []
+    received_fids = set()
+
+    def consume(feature):
+        received_fids.add(feature.id())
+        if matches(feature):
+            features.append(feature)
+        return False  # internal source copies never send their keys to a service
+
+    limits = materialization_limits(params)
+    try:
+        reader = layer if fids else bounded_source_layer(layer, limits)
+    except ValueError as exc:
+        reason = 'unverified_filter' if str(exc) == 'unverified_filter' else 'read_error'
+        raise ValueError(_remote_message(reason))
+    remaining = limits.timeout_seconds - (time.monotonic() - started)
+    if remaining <= 0:
+        raise ValueError(_remote_message('timeout') + ' ' + _remote_message('incomplete_source'))
+    limits = replace(limits, timeout_seconds=remaining)
+    outcome = read_bounded_features(reader, request, limits, feedback,
+                                    consume, lambda feature: feature.id(), source_uri=layer.source())
+    if not outcome.complete:
+        raise ValueError(_remote_message(outcome.reason) + ' ' + _remote_message('incomplete_source'))
+    if fids and received_fids != set(fids):
+        raise ValueError(_remote_message('incomplete_source'))
+    return _memory_source(layer, features)
+
+
+def _memory_source(layer, features):
+    """Copy already bounded source rows without a provider re-read."""
+    from qgis.core import QgsFeature, QgsVectorLayer, QgsWkbTypes
+    memory = QgsVectorLayer(QgsWkbTypes.displayString(layer.wkbType()), 'filtermate_remote_source', 'memory')
+    memory.setCrs(layer.crs())
+    provider = memory.dataProvider()
+    provider.addAttributes(list(layer.fields()))
+    memory.updateFields()
+    raw = tuple(QgsFeature(feature) for feature in features)
+    added, _ = provider.addFeatures([QgsFeature(feature) for feature in raw])
+    if not added:
+        raise ValueError(_remote_message('read_error'))
+    memory.updateExtents()
+    memory._filtermate_raw_features = raw
+    return memory
+
+
+def apply_remote_spatial_filter(builder, layer, source, names, buffer_value, buffer_expression,
+                                use_centroids, old_subset, combine_operator):
+    """Use a server BBOX and the existing exact OGR union predicate on copied rows.
+
+    The small bridge in expression_builder delegates here so its attribute
+    path remains owned by lot A. All result keys come from the first read;
+    there is no second, unbounded request by QGIS feature ids.
+    """
+    from qgis.core import QgsCoordinateTransform, QgsGeometry
+    from ...qgis.remote_materializer import materialize, materialization_limits, require_worker
+    require_worker()
+
+    def refuse(reason):
+        builder.last_error = _remote_message(reason)
+        builder.user_warnings.append(builder.last_error)
+        return False
+
+    refusal = builder._key_list_refusal(layer)
+    if refusal:
+        builder.last_error = refusal
+        builder.user_warnings.append(refusal)
+        return False
+    if 'disjoint' in names and names != ['disjoint']:
+        return refuse('mixed_disjoint')
+    union = builder._source_geometry(source, buffer_value, buffer_expression)
+    if union is None:
+        return refuse('invalid_geometry')
+    union = QgsGeometry(union)
+    if not union.isEmpty() and not union.isGeosValid():
+        return refuse('invalid_geometry')
+    rect = union.boundingBox()
+    target_transform = None
+    if source.crs() != layer.crs():
+        transform = QgsCoordinateTransform(source.crs(), layer.crs(), builder._transform_context())
+        rect = transform.transformBoundingBox(rect)
+        target_transform = QgsCoordinateTransform(layer.crs(), source.crs(), builder._transform_context())
+    complement = names == ['disjoint']
+    from ...qgis.source_capability_probe import capability_for_layer
+    capability = capability_for_layer(layer)
+    oapif = bool(capability and capability.provider_key == 'oapif')
+    if oapif and old_subset and combine_operator and combine_operator != 'AND':
+        return refuse('unverified_filter')
+    if oapif and not (old_subset and combine_operator == 'AND'):
+        from ...qgis.remote_materializer import unfiltered_snapshot
+        target = unfiltered_snapshot(layer)
+    else:
+        target = builder._unfiltered_target(layer, old_subset, combine_operator)
+    if target is layer and layer.subsetString() and not (
+            combine_operator == 'AND' and layer.subsetString() == old_subset):
+        return refuse('read_error')
+    if union.isEmpty():
+        keys = ()
+        outcome = None
+    else:
+        from .expression_builder import COVERED_BY_PATTERNS, COVERS_PATTERNS, _de9im_any
+        engine = QgsGeometry.createGeometryEngine(union.constGet())
+        engine.prepareGeometry()
+        tests = {
+            'intersects': engine.intersects,
+            'contains': engine.within,
+            'equals': engine.isEqual,
+            'touches': engine.touches,
+            'overlaps': engine.overlaps,
+            'within': engine.contains,
+            'crosses': engine.crosses,
+            'covers': lambda geometry: _de9im_any(engine.relate(geometry), COVERED_BY_PATTERNS),
+            'coveredby': lambda geometry: _de9im_any(engine.relate(geometry), COVERS_PATTERNS),
+        }
+        predicates = ['intersects'] if complement else names
+        if any(name not in tests for name in predicates):
+            return refuse('invalid_geometry')
+
+        def matches(feature):
+            if not feature.hasGeometry():
+                return False
+            geometry = feature.geometry()
+            if geometry.isNull() or geometry.isEmpty():
+                return False
+            if not geometry.isGeosValid():
+                raise ValueError('Invalid target geometry')
+            if target_transform is not None:
+                geometry.transform(target_transform)
+            if use_centroids:
+                geometry = geometry.pointOnSurface()
+                if geometry.isNull():
+                    raise ValueError('Point on surface failed')
+            return any(tests[name](geometry.constGet()) for name in predicates)
+
+        outcome = materialize(target, rect, '', matches,
+                              materialization_limits(builder.task_params), builder._feedback)
+        builder.remote_materialization_outcome = outcome
+        if not outcome.complete:
+            if outcome.reason not in ('feature_limit', 'timeout'):
+                return refuse(outcome.reason)
+            if complement:
+                return refuse('disjoint_partial')
+            if not outcome.keys:
+                builder.user_warnings.append(_remote_message(outcome.reason))
+                return refuse('partial_empty')
+            builder.user_warnings.append(_remote_message(outcome.reason))
+        keys = outcome.keys
+    builder.remote_materialization_outcome = outcome
+    refusal = builder._key_list_refusal(layer, len(keys))
+    if refusal:
+        builder.last_error = refusal
+        builder.user_warnings.append(refusal)
+        return False
+    key_filter = builder._build_fid_filter_with_values(layer, list(keys), builder._get_primary_key(layer)) if keys else '1 = 0'
+    if complement:
+        key_filter = '1 = 1' if not keys else 'NOT ({})'.format(key_filter)
+    final = key_filter if oapif else builder._combine_with_old_subset(old_subset, combine_operator, key_filter)
+    if oapif:
+        # A CQL2 capability label is not proof that this QGIS/server pair
+        # pushes an IN list down. Lot A supplies the FULL-translation guard.
+        validator = builder.task_params.get('_remote_subset_validator') if builder.task_params else None
+        try:
+            verified = callable(validator) and validator(layer, final) is True
+        except Exception:
+            verified = False
+        if not verified:
+            return refuse('unverified_filter')
+    parent = builder.task_params.get('_parent_task') if builder.task_params else None
+    if parent is not None and parent.isCanceled():
+        return refuse('cancelled')
+    from ...qgis.remote_materializer import mark_partial_result
+    partial = outcome is not None and not outcome.complete
+    callback = builder.task_params.get('_subset_queue_callback') if builder.task_params else None
+    if callback is not None:
+        callback(layer, final)
+        mark_partial_result(layer, partial, final)
+        return True
+    from ....infrastructure.database.sql_utils import safe_set_subset_string
+    success = safe_set_subset_string(layer, final)
+    if success:
+        mark_partial_result(layer, partial, final)
+    return success
+
 
 def execute_ogr_spatial_selection(
     layer: Any,
     current_layer: Any,
     param_old_subset: str,
     context: OGRSpatialSelectionContext
-) -> None:
+) -> Optional[str]:
     """
     Execute spatial selection using QGIS processing for OGR/non-PostgreSQL layers.
 
@@ -955,7 +1257,8 @@ def execute_ogr_spatial_selection(
         context: OGRSpatialSelectionContext with source geom and callbacks
 
     Returns:
-        None (modifies current_layer selection)
+        str: Bounded remote key filter, consumed directly by the handler.
+        None: Local processing selection remains available on current_layer.
 
     Raises:
         Exception: If source geometry is invalid or unavailable
@@ -964,6 +1267,41 @@ def execute_ogr_spatial_selection(
         QgsVectorLayer, QgsWkbTypes, QgsProcessingContext,
         QgsProcessingFeedback, QgsFeatureRequest
     )
+    from ...qgis.source_capability_probe import capability_for_layer
+    capability = capability_for_layer(current_layer)
+    if capability and capability.is_remote_service:
+        from .expression_builder import OGRExpressionBuilder
+        queued = []
+        params = dict(context.task_parameters)
+        params['_subset_queue_callback'] = lambda target, subset: queued.append(subset)
+        if context.feedback is not None:
+            params['_parent_task'] = context.feedback
+        builder = OGRExpressionBuilder(task_params=params)
+        numeric = ['intersects', 'contains', 'disjoint', 'equals', 'touches', 'overlaps', 'within', 'crosses']
+        predicates = {}
+        for key in context.current_predicates:
+            if str(key).isdigit() and 0 <= int(key) < len(numeric):
+                key = numeric[int(key)]
+            predicates[key] = True
+        expression = builder.build_expression(
+            layer_props={}, predicates=predicates, source_geom=context.ogr_source_geom,
+            buffer_value=context.buffer_value, buffer_expression=context.buffer_expression,
+            use_centroids=context.use_centroids)
+        operator = context.param_other_layers_combine_operator if context.has_combine_operator else None
+        if not builder.apply_filter(current_layer, expression, param_old_subset, operator):
+            raise ValueError(builder.last_error or _remote_message('read_error'))
+        if builder.user_warnings:
+            # This legacy entry point has no partial-result notification channel.
+            # Refuse instead of returning a partial filter without its warning.
+            raise ValueError(' '.join(builder.user_warnings))
+        context.primary_key_name = builder._get_primary_key(current_layer)
+        # The handler consumes the bounded key expression directly. No selection
+        # on the live layer and no second server request to recover its keys.
+        return queued[-1]
+    source_capability = capability_for_layer(context.ogr_source_geom)
+    if source_capability and source_capability.is_remote_service:
+        context = replace(context, ogr_source_geom=copy_remote_source(
+            context.ogr_source_geom, context.task_parameters, context.feedback))
     from qgis import processing
 
     # Import geometry validation from geometry_safety module
