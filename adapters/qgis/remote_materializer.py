@@ -8,6 +8,7 @@ a layer to the project or writes a scratch file.
 
 import math
 import re
+import sys
 import threading
 import time
 from dataclasses import dataclass, replace
@@ -51,11 +52,43 @@ def mark_partial_result(layer, partial, expression):
     layer._filtermate_partial_subset = expression if partial else None
 
 
-def supports_reply_validation():
-    """Require the native reply observer lifecycle, excluding old backports."""
+def reply_preprocessor_is_safe(qgis_version_int, python_version):
+    """Whether calling QgsNetworkAccessManager.setReplyPreprocessor cannot crash.
+
+    Until QGIS 3.36.0 its binding converts the returned id to a Python string
+    after releasing the GIL. Python 3.12 finds its object allocator through
+    the thread state, null at that point, so the registration itself
+    segfaults on any thread (QGIS 3.34.15 on Ubuntu 24.04). Older Pythons
+    use a global allocator there. QGIS 3.36.0 converts the id under the GIL.
+
+    Args:
+        qgis_version_int: Qgis.QGIS_VERSION_INT, e.g. 33415 for 3.34.15.
+        python_version: The running interpreter's sys.version_info.
+
+    Returns:
+        False when the registration would crash QGIS.
+    """
+    return qgis_version_int >= 33600 or tuple(python_version[:2]) < (3, 12)
+
+
+def reply_preprocessor_available():
+    """The reply observer exists and registering it cannot crash QGIS."""
     from qgis.core import Qgis, QgsNetworkAccessManager
 
-    return Qgis.QGIS_VERSION_INT >= 32600 and hasattr(QgsNetworkAccessManager, "setReplyPreprocessor")
+    return hasattr(QgsNetworkAccessManager, "setReplyPreprocessor") and reply_preprocessor_is_safe(
+        Qgis.QGIS_VERSION_INT, sys.version_info
+    )
+
+
+def supports_reply_validation():
+    """Require the native reply observer lifecycle, excluding old backports.
+
+    A build whose observer cannot be registered safely gets the same refusal
+    as a build without one: the service read is never attempted.
+    """
+    from qgis.core import Qgis
+
+    return Qgis.QGIS_VERSION_INT >= 32600 and reply_preprocessor_available()
 
 
 def supports_materialization(layer):
@@ -342,8 +375,10 @@ def read_bounded_features(source, request, limits, feedback, consume, key, sourc
     # Since QGIS 3.26 this callback runs on the actual downloader thread,
     # before the first byte. It catches Qt6 WFS errors even if the provider
     # has not yet delivered its queued error signal to its owning thread.
+    # Service callers refuse earlier when it is unavailable; a memory source
+    # needs no reply observer.
     preprocessor = None
-    if hasattr(QgsNetworkAccessManager, "setReplyPreprocessor"):
+    if reply_preprocessor_available():
 
         def inspect_reply(request, reply):
             if not belongs(request):

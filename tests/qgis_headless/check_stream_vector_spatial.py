@@ -43,6 +43,7 @@ sys.modules["filter_mate"] = package
 from filter_mate.adapters.qgis.remote_materializer import (  # noqa: E402
     RemoteMaterializationTask,
     materialize,
+    reply_preprocessor_is_safe,
     supports_reply_validation,
 )
 from filter_mate.adapters.backends.ogr.expression_builder import OGRExpressionBuilder  # noqa: E402
@@ -439,10 +440,22 @@ def local_http(task):
         check("local HTTP WFS layer valid", layer.isValid())
         fixture.requests.clear()
         if not supports_reply_validation():
+            # Refused before any reply observer registration, which segfaults
+            # on QGIS 3.26-3.35 under Python 3.12+.
             outcome = materialize(layer, QgsRectangle(0.5, 0, 3.5, 2), "", "")
             check("older network API refuses unverified service reads",
                   outcome.reason == "unverified_filter" and not outcome.keys and not fixture.requests, repr(outcome))
-            print("SKIP service protocol cases: reply observer lifecycle is unverified before QGIS 3.26", flush=True)
+            try:
+                copy_remote_source(layer)
+                check("older network API refuses a service source copy", False)
+            except ValueError as exc:
+                check("older network API refuses a service source copy",
+                      "cannot be proved complete" in str(exc) and not fixture.requests, str(exc))
+            if reply_preprocessor_is_safe(Qgis.QGIS_VERSION_INT, sys.version_info):
+                reason = "reply observer lifecycle is unverified before QGIS 3.26"
+            else:
+                reason = "registering the reply observer crashes QGIS < 3.36 under Python 3.12+"
+            print("SKIP service protocol cases: " + reason, flush=True)
             return
         outcome = materialize(layer, QgsRectangle(0.5, 0, 3.5, 2), "", '"id" % 2 = 1')
         reads = [request for request in fixture.requests if not request["hits"]]
