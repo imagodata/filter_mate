@@ -658,12 +658,14 @@ def _raster_layer_filter() -> Any:
         return None
 
 
-# Raster providers without a file PDAL could open (filters.hag_dem reads the DTM through GDAL).
-NON_FILE_RASTER_PROVIDERS = ('virtualraster', 'postgresraster')
+# Rendered images have no elevations. Virtual/PostGIS inputs also lack a file
+# PDAL can open directly. WCS stays excluded here until HAG materializes it
+# to a local file, even though value raster exploring supports it.
+NON_FILE_RASTER_PROVIDERS = ('wms', 'wcs', 'arcgismapserver', 'virtualraster', 'postgresraster')
 
 
 def _dtm_rasters_only(combo: Any) -> None:
-    """DTM list: hide the rasters PDAL cannot read (WMS / XYZ / WCS as in the layer lists, virtual, PostGIS)."""
+    """DTM list: PDAL-readable files only, excluding WCS and rendered services."""
     try:
         from ....adapters.qgis.point_cloud_capability import exclude_non_analysis_rasters
         exclude_non_analysis_rasters(combo)
@@ -673,6 +675,21 @@ def _dtm_rasters_only(combo: Any) -> None:
         excluded = list(combo.excludedProviders())
         combo.setExcludedProviders(excluded + [key for key in NON_FILE_RASTER_PROVIDERS if key not in excluded])
     except (AttributeError, TypeError, RuntimeError):
+        pass
+    try:
+        from qgis.core import QgsProject
+        from ....core.domain.source_capability import classify
+        excepted = list(combo.exceptedLayerList())
+        # A GDAL provider can wrap rendered tiles or WCS instead of a file.
+        # Classify its URI only: this picker must never read remote pixels.
+        for layer in QgsProject.instance().mapLayers().values():
+            if layer.providerType().lower() != 'gdal':
+                continue
+            capability = classify('gdal', layer.source(), is_raster=True)
+            if (not capability.has_raw_values or capability.is_remote_service) and layer not in excepted:
+                excepted.append(layer)
+        combo.setExceptedLayerList(excepted)
+    except (ImportError, AttributeError, TypeError, RuntimeError):
         pass
 
 
