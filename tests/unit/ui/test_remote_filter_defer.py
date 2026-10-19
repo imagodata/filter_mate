@@ -59,3 +59,24 @@ def test_stale_or_failed_selection_cannot_resume_filter(deferred, change):
         slot.task.error = RuntimeError('read failed')
     finish(timer, completed)
     dock.launchTaskEvent.assert_not_called()
+
+
+def test_new_filter_click_invalidates_an_already_queued_resume(deferred):
+    dock, _, _, timer, completed = deferred
+    completed()
+    tree = ast.parse(PATH.read_text())
+    launcher = next(node for node in ast.walk(tree)
+                    if isinstance(node, ast.FunctionDef) and node.name == 'launchTaskEvent')
+    # Execute the actual launcher prefix, stopping before its provider reads.
+    # The initial docstring and point-cloud delegation are part of that prefix.
+    stop = next(index for index, node in enumerate(launcher.body)
+                if isinstance(node, ast.Assign)
+                and any(isinstance(target, ast.Attribute)
+                        and target.attr == '_pending_remote_filter' for target in node.targets))
+    launcher.body = launcher.body[:stop + 1]
+    namespace = {}
+    exec(compile(ast.Module(body=[launcher], type_ignores=[]), str(PATH), 'exec'), namespace)
+    dock._controller_integration = None
+    MethodType(namespace['launchTaskEvent'], dock)(False, 'filter')
+    timer.singleShot.call_args.args[1]()
+    dock.launchTaskEvent.assert_not_called()

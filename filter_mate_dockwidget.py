@@ -7025,8 +7025,7 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         """
         if self._controller_integration and self._controller_integration.delegate_point_cloud_task(task_name):
             return
-        if task_name != 'filter':
-            self._pending_remote_filter = None
+        self._pending_remote_filter = None
         if task_name == 'filter' and getattr(self, '_exploring_ctrl', None):
             from .adapters.qgis.source_capability_probe import counts_cheaply
             if self.current_layer is not None and not counts_cheaply(self.current_layer):
