@@ -32,29 +32,70 @@
 <context>
     <name>AppInitializer</name>
     <message>
-        <location filename="../core/services/app_initializer.py" line="171"/>
+        <location filename="../core/services/app_initializer.py" line="175"/>
         <source>Cleared corrupted filters from {0} layer(s). Please re-apply your filters.</source>
         <translation>Odstranjeni poškodovani filtri iz {0} plasti. Prosimo, ponovno uporabite filtre.</translation>
     </message>
     <message>
-        <location filename="../core/services/app_initializer.py" line="240"/>
+        <location filename="../core/services/app_initializer.py" line="244"/>
         <source>Empty project detected. Add vector layers to activate the plugin.</source>
         <translation>Zaznan prazen projekt. Dodajte vektorske plasti za aktivacijo vtičnika.</translation>
     </message>
     <message>
-        <location filename="../core/services/app_initializer.py" line="307"/>
+        <location filename="../core/services/app_initializer.py" line="311"/>
         <source>Cannot access the FilterMate database. Check the project directory permissions.</source>
         <translation>Ni mogoče dostopati do baze podatkov FilterMate. Preverite dovoljenja mape projekta.</translation>
     </message>
     <message>
-        <location filename="../core/services/app_initializer.py" line="321"/>
+        <location filename="../core/services/app_initializer.py" line="325"/>
         <source>Error during database verification: {0}</source>
         <translation>Napaka pri preverjanju baze podatkov: {0}</translation>
     </message>
     <message>
-        <location filename="../core/services/app_initializer.py" line="601"/>
+        <location filename="../core/services/app_initializer.py" line="605"/>
         <source>Layer loading failed. Use F5 to force reload.</source>
         <translation>Nalaganje plasti ni uspelo. Uporabite F5 za prisilno ponovno nalaganje.</translation>
+    </message>
+</context>
+<context>
+    <name>AttributeFilterExecutor</name>
+    <message>
+        <location filename="../core/tasks/executors/attribute_filter_executor.py" line="379"/>
+        <source>{0}: this web service has no unique key field (declared key, id, gml_id, cleabs, objectid...), so the selected features cannot be listed for the server.</source>
+        <translation>{0}: ta spletna storitev nima edinstvenega ključnega polja (deklarirani ključ, id, gml_id, cleabs, objectid...), zato izbranih objektov ni mogoče našteti za strežnik.</translation>
+    </message>
+    <message>
+        <location filename="../core/tasks/executors/attribute_filter_executor.py" line="384"/>
+        <source>{0}: this layer has no unique key field and its feature ids cannot be listed in its filter (a virtual layer needs a unique id column, its uid).</source>
+        <translation>{0}: ta plast nima edinstvenega ključnega polja, ID-jev njenih objektov pa ni mogoče našteti v njenem filtru (navidezna plast potrebuje stolpec z edinstvenim ID-jem, uid).</translation>
+    </message>
+    <message>
+        <location filename="../core/tasks/executors/attribute_filter_executor.py" line="391"/>
+        <source>{0}: {1} selected features, more than the {2} sent to a web service. Narrow the selection or use an attribute filter.</source>
+        <translation>{0}: izbranih {1} objektov, več kot {2}, kolikor jih je mogoče poslati spletni storitvi. Zožite izbor ali uporabite atributni filter.</translation>
+    </message>
+</context>
+<context>
+    <name>BackendController</name>
+    <message>
+        <location filename="../ui/controllers/backend_controller.py" line="110"/>
+        <source>Remote file: every read goes over the network. FilterMate does not count its features on the main thread.</source>
+        <translation>Oddaljena datoteka: vsako branje poteka prek omrežja. FilterMate ne šteje njenih objektov v glavni niti.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/backend_controller.py" line="115"/>
+        <source>Remote service: the filter is sent to the server when it can translate it. FilterMate does not count its features on the main thread.</source>
+        <translation>Oddaljena storitev: filter se pošlje strežniku, kadar ga ta zna prevesti. FilterMate ne šteje njenih objektov v glavni niti.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/backend_controller.py" line="120"/>
+        <source>A filter by feature list is limited to {0} features.</source>
+        <translation>Filter po seznamu objektov je omejen na {0} objektov.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/backend_controller.py" line="123"/>
+        <source>Remote</source>
+        <translation>Oddaljeni</translation>
     </message>
 </context>
 <context>
@@ -93,12 +134,12 @@
 <context>
     <name>CentroidTargetsSync</name>
     <message>
-        <location filename="../ui/controllers/centroid_targets_sync.py" line="179"/>
+        <location filename="../ui/controllers/centroid_targets_sync.py" line="186"/>
         <source>Test the checked line and polygon targets by their centroids (point on surface): faster on large geometries. Each target has its own square in the list</source>
         <translation>Preizkusi označene linijske in poligonske cilje po njihovih centroidih (točka na površini): hitreje pri velikih geometrijah. Vsak cilj ima svoj kvadratek na seznamu</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/centroid_targets_sync.py" line="179"/>
+        <location filename="../ui/controllers/centroid_targets_sync.py" line="186"/>
         <source>Centroids apply to line and polygon targets: check one in the list of layers to filter</source>
         <translation>Centroidi veljajo za linijske in poligonske cilje: označite enega na seznamu slojev za filtriranje</translation>
     </message>
@@ -106,7 +147,7 @@
 <context>
     <name>ConfigController</name>
     <message>
-        <location filename="../ui/controllers/config_controller.py" line="379"/>
+        <location filename="../ui/controllers/config_controller.py" line="380"/>
         <source>Error cancelling changes: {0}</source>
         <translation>Napaka pri preklicu sprememb: {0}</translation>
     </message>
@@ -122,27 +163,27 @@
 <context>
     <name>CoverageDockExtras</name>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="247"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="303"/>
         <source>1 band</source>
         <translation>1 kanal</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="248"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="304"/>
         <source>{0} bands</source>
         <translation>Kanali: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="249"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="305"/>
         <source>{0} points</source>
         <translation>Točke: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="207"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="772"/>
         <source>Source geometry: the selected pixels, vectorized</source>
-        <translation type="obsolete">Izvorna geometrija: izbrane slikovne točke, vektorizirane</translation>
+        <translation>Izvorna geometrija: izbrane slikovne točke, vektorizirane</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="788"/>
         <source>Source geometry: the footprint of the kept points</source>
         <translation>Izvorna geometrija: obseg ohranjenih točk</translation>
     </message>
@@ -162,12 +203,12 @@
         <translation type="obsolete">Statistika pravokotnika: povlecite po karti za minimum, maksimum in povprečje trenutnega kanala</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="330"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="392"/>
         <source>Elevation profile: open the QGIS elevation profile of the map</source>
         <translation>Višinski profil: odpri višinski profil QGIS za karto</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="330"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="392"/>
         <source>3D view: open a new QGIS 3D map view</source>
         <translation>Pogled 3D: odpri nov pogled karte 3D v QGIS</translation>
     </message>
@@ -177,7 +218,7 @@
         <translation type="obsolete">ni objektov</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="254"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="310"/>
         <source>{0} feature(s)</source>
         <translation>Objekti: {0}</translation>
     </message>
@@ -187,140 +228,315 @@
         <translation type="obsolete">vse slikovne točke</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="259"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="315"/>
         <source>{0} class(es)</source>
         <translation>Razredi: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="256"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="312"/>
         <source>expression</source>
         <translation>izraz</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="250"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="306"/>
         <source>{0} features</source>
         <translation>Objekti: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="650"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="803"/>
         <source>Vector</source>
         <translation>Vektor</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="650"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="803"/>
         <source>Raster</source>
         <translation>Raster</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="650"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="803"/>
         <source>Point cloud</source>
         <translation>Oblak točk</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="347"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="791"/>
         <source>Kept points</source>
-        <translation type="obsolete">Ohranjene točke</translation>
+        <translation>Ohranjene točke</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="624"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="772"/>
         <source>Selection → source geometry</source>
         <translation>Izbor → izvorna geometrija</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="326"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="384"/>
         <source>Link the range to the style: the layer colours stretch over the selected range</source>
         <translation>Poveži obseg s slogom: barve sloja se raztegnejo čez izbrani obseg</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="327"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="385"/>
         <source>Class pipette: click the map and the class of the points drawn there is checked. Ctrl+click adds another one</source>
         <translation>Izbirnik razredov: kliknite na zemljevid in razred tam izrisanih točk bo označen. Ctrl+klik doda še enega</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="330"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="392"/>
         <source>Value under the cursor: follow the pixel value (or the slope, aspect... the range applies to) while moving over the map</source>
         <translation>Vrednost pod kazalcem: spremljaj vrednost slikovne pike (ali naklona, ekspozicije..., na katere se nanaša obseg) med premikanjem po zemljevidu</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="330"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="392"/>
         <source>Statistics of a rectangle: drag on the map to read the minimum, maximum and mean of the current band (or of the slope, aspect... the range applies to)</source>
         <translation>Statistika pravokotnika: povlecite po zemljevidu, da preberete najmanjšo, največjo in povprečno vrednost trenutnega kanala (ali naklona, ekspozicije..., na katere se nanaša obseg)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="445"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="569"/>
         <source>The style link follows pixel values: not available while the range applies to a slope, aspect, hillshade or roughness</source>
         <translation>Povezava s slogom sledi vrednostim slikovnih pik: ni na voljo, dokler se obseg nanaša na naklon, ekspozicijo, senčenje ali hrapavost</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="744"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="916"/>
         <source>Class pipette: this point cloud has no Classification attribute</source>
         <translation>Izbirnik razredov: ta oblak točk nima atributa Classification</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="910"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1522"/>
         <source>The style cannot follow the range: it needs a single band grey or pseudocolor style on the band of the panel</source>
         <translation>Slog ne more slediti obsegu: potrebuje enokanalni sivinski ali psevdobarvni slog na kanalu plošče</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="330"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="392"/>
         <source>Pipette: click the map and the pixels that look like the one you click are selected (a color on an image, a value on a DTM or an index, a class on a classified raster, with the tolerance of the panel). Ctrl+click adds another one</source>
         <translation>Izbirnik: kliknite na zemljevid in izbrane bodo slikovne pike, podobne tisti, na katero kliknete (barva na sliki, vrednost na DMR ali indeksu, razred na razvrščenem rastru, s toleranco plošče). Ctrl+klik doda še eno</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="255"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="311"/>
         <source>no feature selected</source>
         <translation>noben objekt ni izbran</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="257"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="313"/>
         <source>whole layer</source>
         <translation>cel sloj</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="258"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="314"/>
         <source>no constraint</source>
         <translation>brez omejitve</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="260"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="316"/>
         <source>raster expression</source>
         <translation>rastrski izraz</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="261"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="317"/>
         <source>all points</source>
         <translation>vse točke</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="318"/>
+        <source>{0} object(s)</source>
+        <translation>Objektov: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="319"/>
+        <source>shown as the whole class in their box</source>
+        <translation>prikazano kot cel razred v njihovem okvirju</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="388"/>
+        <source>Object detector: click the map and the patch of pixels that look like the one you click is selected (a pool, a roof, a field, with the tolerance of the panel), not every pixel of its colour. Ctrl+click adds another object</source>
+        <translation>Zaznavalnik objektov: kliknite zemljevid in izbere se skupek slikovnih točk, podobnih kliknjeni (bazen, streha, polje, s toleranco plošče), ne vse slikovne točke iste barve. Ctrl+klik doda še en objekt</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="392"/>
+        <source>Similar objects: click an object and every object of the raster like it is selected (the patches of such pixels whose area is within the ratios of the panel). Ctrl+click adds another reference object</source>
+        <translation>Podobni objekti: kliknite objekt in izbrani bodo vsi njemu podobni objekti rastra (skupki takih slikovnih točk, katerih površina je znotraj razmerij plošče). Ctrl+klik doda še en referenčni objekt</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="392"/>
+        <source>Object detector: click the map and the object under the click is selected (the cluster of points of its class: a building, a tree), not the whole class; or every object of the cloud like it (right-click the button for the target). Ctrl+click adds another object</source>
+        <translation>Zaznavalnik objektov: kliknite zemljevid in izbere se objekt pod klikom (gruča točk njegovega razreda: stavba, drevo), ne cel razred; ali vsi njemu podobni objekti oblaka (desni klik na gumb za izbiro cilja). Ctrl+klik doda še en objekt</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="392"/>
+        <source>Value pipette: click the map and a condition is written on the attribute chosen in ATTRIBUTES (Z, intensity...), around the value of the point there, with the tolerance of the panel. Ctrl+click adds another condition (OR)</source>
+        <translation>Izbirnik vrednosti: kliknite zemljevid in zapiše se pogoj na atributu, izbranem v ATRIBUTI (Z, intenzivnost...), okoli vrednosti točke na tistem mestu, s toleranco plošče. Ctrl+klik doda še en pogoj (OR)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="392"/>
+        <source>Zone: draw a rectangle, a polygon, a freehand shape or a circle on the map (right-click the button for the shape); its X / Y box goes to ATTRIBUTES, the shape itself cuts the targets</source>
+        <translation>Cona: na zemljevidu narišite pravokotnik, poligon, prosto roko ali krog (desni klik na gumb za izbiro oblike); njen okvir X / Y gre v ATRIBUTI, sama oblika odreže cilje</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="392"/>
+        <source>More tools: the value under the cursor, the statistics of a rectangle</source>
+        <translation>Več orodij: vrednost pod kazalko, statistika pravokotnika</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="392"/>
+        <source>Similar features: click a feature and every feature of the layer with the same value of the group&apos;s field (the display expression of the single / multiple selection) is selected. Ctrl+click adds another value</source>
+        <translation>Podobni objekti: kliknite objekt in izbrani bodo vsi objekti plasti z isto vrednostjo polja skupine (prikazni izraz enojnega / množičnega izbora). Ctrl+klik doda še eno vrednost</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="392"/>
+        <source>More tools: the QGIS selection tools (rectangle, polygon, freehand, radius), select by expression, invert or clear the selection, the attribute table of the selection</source>
+        <translation>Več orodij: izbirna orodja QGIS (pravokotnik, poligon, prosta roka, polmer), izbor po izrazu, obračanje ali počistitev izbora, atributna tabela izbora</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="392"/>
+        <source>More tools: the elevation profile and the 3D view of QGIS</source>
+        <translation>Več orodij: višinski profil in pogled 3D v QGIS</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="539"/>
+        <source>Only color selection is available: rendered colors depend on style and scale.</source>
+        <translation>Na voljo je samo izbor po barvi: upodobljene barve so odvisne od sloga in merila.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="567"/>
+        <source>The style link follows the VALUE RANGE group: make it the active one first</source>
+        <translation>Povezava sloga sledi skupini OBSEG VREDNOSTI: najprej jo naredite aktivno</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="790"/>
+        <source>Current filter: {0}</source>
+        <translation>Trenutni filter: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="826"/>
+        <source>Rendered colors depend on style and scale.</source>
+        <translation>Upodobljene barve so odvisne od sloga in merila.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="925"/>
+        <source>Object detector: this point cloud has no Classification attribute</source>
+        <translation>Zaznavalnik objektov: ta oblak točk nima atributa Classification</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="974"/>
+        <source>Object detector</source>
+        <translation>Zaznavalnik objektov</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="977"/>
+        <source>Clicked object</source>
+        <translation>Objekt pod klikom</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="977"/>
+        <source>Similar objects</source>
+        <translation>Podobni objekti</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1081"/>
+        <source>Zone shape</source>
+        <translation>Oblika cone</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1254"/>
+        <source>Rectangle</source>
+        <translation>Pravokotnik</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1254"/>
+        <source>Polygon</source>
+        <translation>Poligon</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1255"/>
+        <source>Freehand</source>
+        <translation>Prosta roka</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1255"/>
+        <source>Radius</source>
+        <translation>Polmer</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1130"/>
+        <source>The link follows the single and multiple selections: make one of them the active group first</source>
+        <translation>Povezava sledi enojnemu in množičnemu izboru: najprej naredite enega od njiju za aktivno skupino</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1253"/>
+        <source>Select on the map</source>
+        <translation>Izberi na zemljevidu</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1261"/>
+        <source>Select by expression…</source>
+        <translation>Izberi po izrazu…</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1261"/>
+        <source>Invert the selection</source>
+        <translation>Obrni izbor</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1261"/>
+        <source>Clear the selection</source>
+        <translation>Počisti izbor</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1268"/>
+        <source>Attribute table of the selection</source>
+        <translation>Atributna tabela izbora</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1307"/>
+        <source>Value under the cursor</source>
+        <translation>Vrednost pod kazalko</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1311"/>
+        <source>Statistics of a rectangle</source>
+        <translation>Statistika pravokotnika</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1327"/>
+        <source>Elevation profile</source>
+        <translation>Višinski profil</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1327"/>
+        <source>3D view</source>
+        <translation>Pogled 3D</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1684"/>
+        <source>This point cloud has no X / Y attribute to filter on</source>
+        <translation>Ta oblak točk nima atributa X / Y, po katerem bi lahko filtrirali</translation>
     </message>
 </context>
 <context>
     <name>CoverageModeController</name>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="294"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="365"/>
         <source>Restoring the filter of {0} raster / point cloud layer(s)…</source>
         <translation>Obnavljanje filtra za {0} rastrskih slojev / oblakov točk…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="582"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="747"/>
         <source>cov. ≥ </source>
         <translation>prekr. ≥ </translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="583"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="748"/>
         <source>Minimum share of a polygon target inside the source geometry (0 = any overlap). Used when the source is a raster or a point cloud.</source>
         <translation>Najmanjši delež ciljnega poligona znotraj izvorne geometrije (0 = kakršno koli prekrivanje). Uporablja se, kadar je vir raster ali oblak točk.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="698"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="863"/>
         <source>Raster</source>
         <translation>Raster</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="698"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="863"/>
         <source>Point cloud</source>
         <translation>Oblak točk</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="707"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="872"/>
         <source>{0} layer: selection in EXPLORING, relation in FILTERING</source>
         <translation>Sloj {0}: izbira v EXPLORING, relacija v FILTERING</translation>
     </message>
@@ -330,7 +546,7 @@
         <translation type="obsolete">Izbirnik slikovnih pik: kliknite na zemljevid, da preberete vrednost vsakega kanala (Ctrl+klik razširi obseg)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="734"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="918"/>
         <source>Zoom to the layer</source>
         <translation>Povečaj na sloj</translation>
     </message>
@@ -340,260 +556,390 @@
         <translation type="obsolete">Predogled: skrij slikovne pike zunaj izbora</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="729"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="911"/>
         <source>Not used for raster layers</source>
         <translation>Ni uporabljeno za rastrske sloje</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="730"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="912"/>
         <source>Reset the raster selection</source>
         <translation>Ponastavi rastrski izbor</translation>
     </message>
     <message>
         <location filename="../ui/controllers/coverage_mode_controller.py" line="733"/>
         <source>Identify points on the map</source>
-        <translation>Identificiraj točke na zemljevidu</translation>
+        <translation type="obsolete">Identificiraj točke na zemljevidu</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="735"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="919"/>
         <source>Live preview: show only the points kept by the selection</source>
         <translation>Predogled v živo: prikaži samo točke, ki jih izbor ohrani</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="737"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="921"/>
         <source>Not used for point cloud layers</source>
         <translation>Ni uporabljeno za sloje oblaka točk</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="738"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="922"/>
         <source>Reset the point cloud criteria</source>
         <translation>Ponastavi merila oblaka točk</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="951"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1390"/>
         <source>Invalid raster calculator expression</source>
         <translation>Neveljaven izraz rastrskega kalkulatorja</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1023"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1688"/>
         <source>PDAL was not found: the height above a DTM needs the pdal executable</source>
         <translation>PDAL ni bil najden: višina nad DMR zahteva izvršljivo datoteko pdal</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1991"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3147"/>
         <source>A FilterMate task is still running: wait for it to finish</source>
         <translation>Naloga FilterMate se še izvaja: počakajte, da se konča</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1556"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2629"/>
         <source>FilterMate task failed: {0}</source>
         <translation>Naloga FilterMate ni uspela: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1593"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2666"/>
         <source>Select pixels first: a value range, classes or a raster expression</source>
         <translation>Najprej izberite slikovne pike: obseg vrednosti, razrede ali rastrski izraz</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1602"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2679"/>
         <source>Raster filtered: {0}</source>
         <translation>Raster filtriran: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1620"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2713"/>
         <source>The point cloud expression was rejected: {0}</source>
         <translation>Izraz oblaka točk je bil zavrnjen: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1623"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2716"/>
         <source>Select points first: classes, attribute ranges or an expression</source>
         <translation>Najprej izberite točke: razrede, obsege atributov ali izraz</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1631"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2730"/>
         <source>Point cloud filtered: {0}</source>
         <translation>Oblak točk filtriran: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2094"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3252"/>
         <source>Filter not applied: {0}</source>
         <translation>Filter ni uporabljen: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1957"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3109"/>
         <source>canceled</source>
         <translation>preklicano</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1699"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2812"/>
         <source>{0} target(s) filtered</source>
         <translation>Filtriranih ciljev: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1701"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2820"/>
         <source>{0} failed: {1}</source>
         <translation>{0} ni uspelo: {1}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1710"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2833"/>
         <source>FilterMate: filtering from '{0}'…</source>
         <translation>FilterMate: filtriranje iz »{0}«…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1777"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2929"/>
         <source>Changed since, left as is: {0}</source>
         <translation>Vmes spremenjeno, pustimo kot je: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1783"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2935"/>
         <source>{0} layer(s) restored</source>
         <translation>Obnovljenih slojev: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1817"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2969"/>
         <source>&apos;{0}&apos; not exported: {1}</source>
         <translation>»{0}« ni izvožen: {1}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1831"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2983"/>
         <source>Exported: {0}</source>
         <translation>Izvoženo: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1833"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2985"/>
         <source>Export failed: {0}</source>
         <translation>Izvoz ni uspel: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1840"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2992"/>
         <source>Exporting {0} layer(s)…</source>
         <translation>Izvoz slojev: {0}…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1846"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2998"/>
         <source>Export folder</source>
         <translation>Mapa za izvoz</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1928"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3080"/>
         <source>Raster / point cloud targets skipped: no source feature selected in EXPLORING</source>
         <translation>Rastrski cilji / cilji oblakov točk preskočeni: v EXPLORING ni izbranega izvornega elementa</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1957"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3109"/>
         <source>Raster / point cloud targets not filtered: {0}</source>
         <translation>Rastrski cilji / cilji oblakov točk niso filtrirani: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1959"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3111"/>
         <source>{0} raster / point cloud target(s) filtered</source>
         <translation>Filtriranih rastrskih ciljev / ciljev oblakov točk: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2073"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3229"/>
         <source>Choose the DTM raster used for the height above ground</source>
         <translation>Izberite raster DMR, uporabljen za višino nad tlemi</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2084"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3240"/>
         <source>Height above ground not computed: {0}</source>
         <translation>Višina nad tlemi ni izračunana: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2103"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3261"/>
         <source>Computing the height above '{0}' with PDAL…</source>
         <translation>Računanje višine nad »{0}« s PDAL…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="271"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="342"/>
         <source>The FilterMate cache holds {0} GB, over its {1} GB limit: unfilter the raster / point cloud layers you no longer need</source>
         <translation>Predpomnilnik FilterMate zaseda {0} GB, kar presega njegovo omejitev {1} GB: odstranite filter z rastrskih slojev / slojev oblakov točk, ki jih ne potrebujete več</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1025"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1690"/>
         <source>PDAL {0} is too old: the height above a DTM needs PDAL 2.4 or later</source>
         <translation>PDAL {0} je prestar: višina nad DMR zahteva PDAL 2.4 ali novejši</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1028"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1693"/>
         <source>PDAL could not be run, the height above a DTM is unavailable: {0}</source>
         <translation>PDAL-a ni bilo mogoče zagnati, višina nad DMR ni na voljo: {0}</translation>
     </message>
     <message>
         <location filename="../ui/controllers/coverage_mode_controller.py" line="722"/>
         <source>Pixel picker: click on the map to read the value of every band, and the slope, aspect... when the range applies to one (Ctrl+click extends the range)</source>
-        <translation>Izbirnik slikovnih pik: kliknite na zemljevid, da preberete vrednost vsakega kanala ter naklon, ekspozicijo..., kadar se obseg nanaša nanje (Ctrl+klik razširi obseg)</translation>
+        <translation type="obsolete">Izbirnik slikovnih pik: kliknite na zemljevid, da preberete vrednost vsakega kanala ter naklon, ekspozicijo..., kadar se obseg nanaša nanje (Ctrl+klik razširi obseg)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="725"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="907"/>
         <source>Zoom to the selected pixels (to the layer when nothing is selected)</source>
         <translation>Povečaj na izbrane slikovne pike (na sloj, če ni nič izbrano)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="726"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="908"/>
         <source>Preview: hide the pixels outside the selection (a white veil for a slope, aspect...)</source>
         <translation>Predogled: skrij slikovne pike zunaj izbora (bela tančica za naklon, ekspozicijo...)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="996"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1569"/>
         <source>The preview of a slope or aspect needs the map in the CRS of the raster ({0})</source>
         <translation>Predogled naklona ali ekspozicije zahteva zemljevid v koordinatnem sistemu rastra ({0})</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1371"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2165"/>
         <source>only the points drawn on the map can be picked: turn the preview off to pick a class it hides</source>
         <translation>izbrati je mogoče samo točke, izrisane na zemljevidu: izklopite predogled, da izberete razred, ki ga skriva</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1373"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2236"/>
         <source>No classified point under the click</source>
         <translation>Pod klikom ni klasificirane točke</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1377"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2171"/>
         <source>Class {0} is already checked</source>
         <translation>Razred {0} je že označen</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1379"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2260"/>
         <source>Class {0} is not in the class list of the layer</source>
         <translation>Razreda {0} ni na seznamu razredov sloja</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="906"/>
+        <source>Not used for raster layers: the pipette reads the bands</source>
+        <translation>Ni uporabljeno za rastrske sloje: izbirnik bere kanale</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="915"/>
+        <source>Class pipette: click the map and the class of the points drawn there is checked. Ctrl+click adds another one</source>
+        <translation>Izbirnik razredov: kliknite zemljevid in označi se razred tam narisanih točk. Ctrl+klik doda še enega</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1070"/>
+        <source>Preview and statistics use a bounded local sample of the visible extent; filtering reads the source.</source>
+        <translation>Predogled in statistika uporabljata omejen lokalni vzorec vidnega obsega; filtriranje bere vir.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1211"/>
+        <source>Preparing a bounded color snapshot of the visible extent…</source>
+        <translation>Priprava omejenega posnetka barv vidnega obsega…</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1223"/>
+        <source>The color snapshot could not be prepared. Try a smaller visible extent.</source>
+        <translation>Posnetka barv ni bilo mogoče pripraviti. Poskusite z manjšim vidnim obsegom.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1227"/>
+        <source>Color selection applies to the captured visible extent.</source>
+        <translation>Izbor po barvi velja za zajeti vidni obseg.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1268"/>
+        <source>Raster sampling failed. Try a smaller visible extent.</source>
+        <translation>Vzorčenje rastra ni uspelo. Poskusite z manjšim vidnim obsegom.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1515"/>
+        <source>The sampled raster preview could not be calculated.</source>
+        <translation>Predogleda vzorčenega rastra ni bilo mogoče izračunati.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1569"/>
+        <source>The preview of a color or an expression needs the map in the CRS of the raster ({0})</source>
+        <translation>Predogled barve ali izraza zahteva zemljevid v KS rastra ({0})</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2189"/>
+        <source>No point drawn under the click</source>
+        <translation>Pod klikom ni narisane točke</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2191"/>
+        <source>This point has no {0}</source>
+        <translation>Ta točka nima {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2193"/>
+        <source>{0} cannot be used in a condition</source>
+        <translation>{0} ni mogoče uporabiti v pogoju</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2250"/>
+        <source>Object not read: {0}</source>
+        <translation>Objekt ni prebran: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2252"/>
+        <source>Too many points around the click: the object could not be read</source>
+        <translation>Preveč točk okoli klika: objekta ni bilo mogoče prebrati</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2254"/>
+        <source>No point of class {0} under the click: click on the object itself</source>
+        <translation>Pod klikom ni točke razreda {0}: kliknite na sam objekt</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2391"/>
+        <source>Similar objects not read: {0}</source>
+        <translation>Podobni objekti niso prebrani: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2394"/>
+        <source>No similar object within the area ratios: widen them</source>
+        <translation>Noben podoben objekt v mejah razmerij površin: razširite jih</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2462"/>
+        <source>Preparing a sample for the new visible extent. Click again when it is ready.</source>
+        <translation>Priprava vzorca za nov vidni obseg. Ponovno kliknite, ko bo pripravljen.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2469"/>
+        <source>The local raster sample is still being prepared. Retry when it is ready.</source>
+        <translation>Lokalni vzorec rastra se še pripravlja. Poskusite znova, ko bo pripravljen.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2673"/>
+        <source>Prepare a color snapshot before filtering this rendered layer.</source>
+        <translation>Pred filtriranjem te upodobljene plasti pripravite posnetek barv.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2815"/>
+        <source>{0} raster target(s) resampled to the configured pixel limit</source>
+        <translation>Rastrskih ciljev, ponovno vzorčenih na nastavljeno omejitev slikovnih točk: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2844"/>
+        <source>color selection limited to the captured extent; colors depend on style and scale</source>
+        <translation>izbor po barvi je omejen na zajeti obseg; barve so odvisne od sloga in merila</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2846"/>
+        <source>raster source resampled to {0} cells within the pixel limit</source>
+        <translation>izvorni raster ponovno vzorčen na {0} celic v okviru omejitve slikovnih točk</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2848"/>
+        <source>raster selection read every {0} pixels: over the pixel limit of the settings</source>
+        <translation>izbor rastra prebran na vsakih {0} slikovnih točk: nad omejitvijo slikovnih točk v nastavitvah</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2851"/>
+        <source>dense raster selection smoothed to keep its outline light</source>
+        <translation>gost izbor rastra zglajen, da ostane njegov obris lahek</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2897"/>
+        <source>{0} left empty, nothing matches the selection: {1}</source>
+        <translation>{0} izpraznjeno, nič ne ustreza izboru: {1}</translation>
     </message>
 </context>
 <context>
     <name>DatabaseManager</name>
     <message>
-        <location filename="../adapters/database_manager.py" line="194"/>
+        <location filename="../adapters/database_manager.py" line="234"/>
         <source>Database file does not exist: {0}</source>
         <translation>Datoteka baze podatkov ne obstaja: {0}</translation>
     </message>
     <message>
-        <location filename="../adapters/database_manager.py" line="201"/>
+        <location filename="../adapters/database_manager.py" line="241"/>
         <source>Failed to connect to database {0}: {1}</source>
         <translation>Povezava z bazo podatkov {0} ni uspela: {1}</translation>
     </message>
     <message>
-        <location filename="../adapters/database_manager.py" line="220"/>
+        <location filename="../adapters/database_manager.py" line="260"/>
         <source>Could not create database directory {0}: {1}</source>
         <translation>Ni mogoče ustvariti mape baze podatkov {0}: {1}</translation>
     </message>
     <message>
-        <location filename="../adapters/database_manager.py" line="274"/>
+        <location filename="../adapters/database_manager.py" line="314"/>
         <source>Failed to create database file {0}: {1}</source>
         <translation>Ustvarjanje datoteke baze podatkov {0} ni uspelo: {1}</translation>
     </message>
     <message>
-        <location filename="../adapters/database_manager.py" line="551"/>
+        <location filename="../adapters/database_manager.py" line="591"/>
         <source>Cannot initialize FilterMate database: connection failed</source>
         <translation>Ni mogoče inicializirati baze podatkov FilterMate: povezava ni uspela</translation>
     </message>
     <message>
-        <location filename="../adapters/database_manager.py" line="556"/>
+        <location filename="../adapters/database_manager.py" line="596"/>
         <source>Critical error connecting to database: {0}</source>
         <translation>Kritična napaka pri povezovanju z bazo podatkov: {0}</translation>
     </message>
     <message>
-        <location filename="../adapters/database_manager.py" line="602"/>
+        <location filename="../adapters/database_manager.py" line="651"/>
         <source>Error during database initialization: {0}</source>
         <translation>Napaka pri inicializaciji baze podatkov: {0}</translation>
     </message>
@@ -601,29 +947,37 @@
 <context>
     <name>DatasourceManager</name>
     <message>
-        <location filename="../core/services/datasource_manager.py" line="153"/>
+        <location filename="../core/services/datasource_manager.py" line="140"/>
         <source>Database file does not exist: {db_file_path}</source>
         <translation>Datoteka zbirke podatkov ne obstaja: {db_file_path}</translation>
     </message>
     <message>
-        <location filename="../core/services/datasource_manager.py" line="164"/>
+        <location filename="../core/services/datasource_manager.py" line="151"/>
         <source>Failed to connect to database {db_file_path}: {error}</source>
         <translation>Povezava z zbirko podatkov {db_file_path} ni uspela: {error}</translation>
     </message>
     <message>
-        <location filename="../core/services/datasource_manager.py" line="189"/>
+        <location filename="../core/services/datasource_manager.py" line="176"/>
         <source>QGIS processing module not available to create spatial index</source>
         <translation>Modul QGIS Processing ni na voljo za ustvarjanje prostorskega indeksa</translation>
     </message>
     <message>
-        <location filename="../core/services/datasource_manager.py" line="195"/>
+        <location filename="../core/services/datasource_manager.py" line="182"/>
         <source>Cannot create spatial index: layer invalid or source not found.</source>
         <translation>Prostorskega indeksa ni mogoče ustvariti: sloj ni veljaven ali vir ni najden.</translation>
     </message>
     <message>
-        <location filename="../core/services/datasource_manager.py" line="409"/>
+        <location filename="../core/services/datasource_manager.py" line="405"/>
         <source>PostgreSQL layers detected but psycopg2 is not installed. Using local Spatialite backend. For better performance with large datasets, install psycopg2.</source>
         <translation>Zaznani sloji PostgreSQL, vendar psycopg2 ni nameščen. Uporablja se lokalni Spatialite zaledje. Za boljšo zmogljivost z velikimi nabori podatkov namestite psycopg2.</translation>
+    </message>
+</context>
+<context>
+    <name>ExploringController</name>
+    <message>
+        <location filename="../ui/controllers/exploring_controller.py" line="2239"/>
+        <source>{0} features selected, more than the {1} a web service can be sent: narrow the selection or use an attribute filter.</source>
+        <translation>Izbranih {0} objektov, več kot {1}, kolikor jih je mogoče poslati spletni storitvi: zožite izbor ali uporabite atributni filter.</translation>
     </message>
 </context>
 <context>
@@ -685,17 +1039,17 @@
 <context>
     <name>ExtensionRegistry</name>
     <message>
-        <location filename="../extensions/registry.py" line="408"/>
+        <location filename="../extensions/registry.py" line="398"/>
         <source>install the QGIS plugin {0}</source>
         <translation>namestite vtičnik QGIS {0}</translation>
     </message>
     <message>
-        <location filename="../extensions/registry.py" line="412"/>
+        <location filename="../extensions/registry.py" line="402"/>
         <source>install {0}</source>
         <translation>namestite {0}</translation>
     </message>
     <message>
-        <location filename="../extensions/registry.py" line="413"/>
+        <location filename="../extensions/registry.py" line="403"/>
         <source>The {0} extension is off because {1} is missing: {2}, then restart QGIS.</source>
         <translation>Razširitev {0} je izklopljena, ker manjka {1}: {2}, nato znova zaženite QGIS.</translation>
     </message>
@@ -1452,67 +1806,67 @@ Kliknite kazalnik ★ in izberite 'Dodaj trenutni filter med priljubljene', da s
 <context>
     <name>FilterMate</name>
     <message>
-        <location filename="../filter_mate.py" line="234"/>
+        <location filename="../filter_mate.py" line="236"/>
         <source>&amp;FilterMate</source>
         <translation>&amp;FilterMate</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="361"/>
+        <location filename="../filter_mate.py" line="363"/>
         <source>FilterMate</source>
         <translation>FilterMate</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="361"/>
+        <location filename="../filter_mate.py" line="363"/>
         <source>Open FilterMate panel</source>
         <translation>Odpri ploščo FilterMate</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="370"/>
+        <location filename="../filter_mate.py" line="372"/>
         <source>Reset configuration and database</source>
         <translation>Ponastavi konfiguracijo in bazo podatkov</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="370"/>
+        <location filename="../filter_mate.py" line="372"/>
         <source>Reset the default configuration and delete the SQLite database</source>
         <translation>Ponastavi privzeto konfiguracijo in izbriši SQLite bazo podatkov</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1515"/>
+        <location filename="../filter_mate.py" line="1563"/>
         <source>Reset Configuration</source>
         <translation>Ponastavi konfiguracijo</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1541"/>
+        <location filename="../filter_mate.py" line="1589"/>
         <source>Configuration reset successfully.</source>
         <translation>Konfiguracija uspešno ponastavljena.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1546"/>
+        <location filename="../filter_mate.py" line="1594"/>
         <source>Default configuration file not found.</source>
         <translation>Privzeta konfiguracijska datoteka ni bila najdena.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1568"/>
+        <location filename="../filter_mate.py" line="1617"/>
         <source>Database deleted: {filename}</source>
         <translation>Baza podatkov izbrisana: {filename}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1592"/>
+        <location filename="../filter_mate.py" line="1641"/>
         <source>Restart required</source>
         <translation>Potreben ponovni zagon</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="477"/>
+        <location filename="../filter_mate.py" line="479"/>
         <source>Obsolete configuration detected</source>
         <translation>Zastarela konfiguracija zaznana</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="478"/>
+        <location filename="../filter_mate.py" line="480"/>
         <source>unknown version</source>
         <translation>neznana različica</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="479"/>
+        <location filename="../filter_mate.py" line="481"/>
         <source>An obsolete configuration ({}) has been detected.
 
 Do you want to reset to default settings?
@@ -1527,12 +1881,12 @@ Do you want to reset to default settings?
 • No: Keep current configuration (may cause issues)</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="486"/>
+        <location filename="../filter_mate.py" line="488"/>
         <source>Corrupted configuration detected</source>
         <translation>Poškodovana konfiguracija zaznana</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="487"/>
+        <location filename="../filter_mate.py" line="489"/>
         <source>The configuration file is corrupted and cannot be read.
 
 Do you want to reset to default settings?
@@ -1547,12 +1901,12 @@ Do you want to reset to default settings?
 • No: Cancel (the plugin may not work correctly)</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="494"/>
+        <location filename="../filter_mate.py" line="496"/>
         <source>Configuration reset</source>
         <translation>Ponastavitev konfiguracije</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="495"/>
+        <location filename="../filter_mate.py" line="497"/>
         <source>The configuration needs to be reset.
 
 Do you want to continue?</source>
@@ -1561,57 +1915,57 @@ Do you want to continue?</source>
 Do you want to continue?</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="543"/>
+        <location filename="../filter_mate.py" line="545"/>
         <source>Configuration not reset. Some features may not work correctly.</source>
         <translation>Konfiguracija ni bila ponastavljena. Nekatere funkcije morda ne bodo delovale pravilno.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="554"/>
+        <location filename="../filter_mate.py" line="556"/>
         <source>Configuration created with default values</source>
         <translation>Konfiguracija ustvarjena s privzetimi vrednostmi</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="557"/>
+        <location filename="../filter_mate.py" line="559"/>
         <source>Corrupted configuration reset. Default settings have been restored.</source>
         <translation>Poškodovana konfiguracija ponastavljena. Privzete nastavitve so bile obnovljene.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="560"/>
+        <location filename="../filter_mate.py" line="562"/>
         <source>Obsolete configuration reset. Default settings have been restored.</source>
         <translation>Zastarela konfiguracija ponastavljena. Privzete nastavitve so bile obnovljene.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="581"/>
+        <location filename="../filter_mate.py" line="583"/>
         <source>Configuration updated to latest version</source>
         <translation>Konfiguracija posodobljena na najnovejšo različico</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="578"/>
+        <location filename="../filter_mate.py" line="580"/>
         <source>Configuration updated: new settings available ({sections}). Access via Options menu.</source>
         <translation>Konfiguracija posodobljena: nove nastavitve na voljo ({sections}). Dostop prek menija Možnosti.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="572"/>
+        <location filename="../filter_mate.py" line="574"/>
         <source>Geometry Simplification</source>
         <translation>Poenostavitev geometrije</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="573"/>
+        <location filename="../filter_mate.py" line="575"/>
         <source>Optimization Thresholds</source>
         <translation>Pragovi optimizacije</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="600"/>
+        <location filename="../filter_mate.py" line="602"/>
         <source>Error during configuration migration: {}</source>
         <translation>Error during configuration migration: {}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="718"/>
+        <location filename="../filter_mate.py" line="735"/>
         <source>Geometry validation setting</source>
         <translation>Nastavitev preverjanja geometrije</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="720"/>
+        <location filename="../filter_mate.py" line="737"/>
         <source>The QGIS setting 'Invalid features filtering' is currently set to '{mode}'.
 
 FilterMate recommends disabling this setting (value 'Off') for the following reasons:
@@ -1638,17 +1992,17 @@ Do you want to disable this setting now?
 • No: Keep current setting</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="748"/>
+        <location filename="../filter_mate.py" line="765"/>
         <source>Invalid geometry filtering disabled successfully.</source>
         <translation>Filtriranje neveljavnih geometrij je uspešno onemogočeno.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="755"/>
+        <location filename="../filter_mate.py" line="772"/>
         <source>Invalid geometry filtering not modified. Some features may be excluded from exports.</source>
         <translation>Filtriranje neveljavnih geometrij ni bilo spremenjeno. Nekatere funkcije so lahko izključene iz izvoza.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1515"/>
+        <location filename="../filter_mate.py" line="1563"/>
         <source>Are you sure you want to reset to the default configuration?
 
 This will:
@@ -1665,7 +2019,7 @@ This will:
 QGIS must be restarted to apply the changes.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1592"/>
+        <location filename="../filter_mate.py" line="1641"/>
         <source>The configuration has been reset.
 
 Please restart QGIS to apply the changes.</source>
@@ -1674,17 +2028,17 @@ Please restart QGIS to apply the changes.</source>
 Please restart QGIS to apply the changes.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="409"/>
+        <location filename="../filter_mate.py" line="411"/>
         <source>Initialization error: {0}</source>
         <translation>Napaka pri inicializaciji: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="659"/>
+        <location filename="../filter_mate.py" line="667"/>
         <source>{count} referenced layer(s) not loaded ({layers_list}). Using fallback display.</source>
         <translation>{count} referenčnih plasti ni naloženih ({layers_list}). Uporablja se nadomestni prikaz.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1583"/>
+        <location filename="../filter_mate.py" line="1632"/>
         <source>Unable to delete {filename}: {e}</source>
         <translation>Ni mogoče izbrisati {filename}: {e}</translation>
     </message>
@@ -1694,189 +2048,209 @@ Please restart QGIS to apply the changes.</translation>
         <translation type="obsolete">Napaka pri ponastavitvi: {str(e)}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1635"/>
+        <location filename="../filter_mate.py" line="1684"/>
         <source>&lt;p style=&apos;font-size:13px;&apos;&gt;Thank you for using &lt;b&gt;FilterMate&lt;/b&gt;!&lt;br&gt;Join our Discord community to:&lt;/p&gt;&lt;ul style=&apos;margin-left:10px; font-size:12px;&apos;&gt;&lt;li&gt;Get help and support&lt;/li&gt;&lt;li&gt;Report bugs and issues&lt;/li&gt;&lt;li&gt;Suggest new features&lt;/li&gt;&lt;li&gt;Share tips with other users&lt;/li&gt;&lt;/ul&gt;</source>
         <translation>&lt;p style='font-size:13px;'&gt;Hvala, da uporabljate &lt;b&gt;FilterMate&lt;/b&gt;!&lt;br&gt;Pridružite se naši skupnosti Discord za:&lt;/p&gt;&lt;ul style='margin-left:10px; font-size:12px;'&gt;&lt;li&gt;Pomoč in podporo&lt;/li&gt;&lt;li&gt;Prijavo napak in težav&lt;/li&gt;&lt;li&gt;Predlaganje novih funkcij&lt;/li&gt;&lt;li&gt;Deljenje nasvetov z drugimi uporabniki&lt;/li&gt;&lt;/ul&gt;</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1651"/>
+        <location filename="../filter_mate.py" line="1700"/>
         <source>  Join us on Discord</source>
         <translation>  Pridružite se nam na Discord</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1671"/>
+        <location filename="../filter_mate.py" line="1720"/>
         <source>Don&apos;t show this again</source>
         <translation>Ne prikaži več</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1727"/>
+        <location filename="../filter_mate.py" line="1776"/>
         <source>Close</source>
         <translation>Zapri</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1794"/>
+        <location filename="../filter_mate.py" line="1843"/>
         <source>Error loading plugin: {0}. Check QGIS Python console for details.</source>
         <translation>Napaka pri nalaganju vtičnika: {0}. Preverite konzolo Python QGIS za podrobnosti.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7066"/>
+        <location filename="../filter_mate_dockwidget.py" line="7357"/>
         <source>Current layer: {0}</source>
         <translation>Trenutna plast: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7068"/>
+        <location filename="../filter_mate_dockwidget.py" line="7359"/>
         <source>No layer selected</source>
         <translation>Nobena plast ni izbrana</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7078"/>
+        <location filename="../filter_mate_dockwidget.py" line="7369"/>
         <source>Selected layers:
 {0}</source>
         <translation>Izbrane plasti:
 {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7078"/>
+        <location filename="../filter_mate_dockwidget.py" line="7369"/>
         <source>No layers selected</source>
         <translation>Nobena plast ni izbrana</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7098"/>
+        <location filename="../filter_mate_dockwidget.py" line="7389"/>
         <source>No expression defined</source>
         <translation>Izraz ni definiran</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7110"/>
+        <location filename="../filter_mate_dockwidget.py" line="7401"/>
         <source>Display expression: {0}</source>
         <translation>Prikazni izraz: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7125"/>
+        <location filename="../filter_mate_dockwidget.py" line="7416"/>
         <source>Feature ID: {0}
 First attribute: {1}</source>
         <translation>ID objekta: {0}
 Prvi atribut: {1}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1601"/>
+        <location filename="../filter_mate.py" line="1650"/>
         <source>The configuration could not be reset. Check that the plugin folder is writable, then try again. Details in filtermate.log.</source>
         <translation>Konfiguracije ni bilo mogoče ponastaviti. Preverite, ali je mapa vtičnika zapisljiva, in poskusite znova. Podrobnosti v filtermate.log.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1701"/>
+        <location filename="../filter_mate.py" line="1750"/>
         <source>What&apos;s new in FilterMate 5</source>
         <translation>Novosti v FilterMate 5</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1707"/>
+        <location filename="../filter_mate.py" line="1756"/>
         <source>&lt;p style=&apos;font-size:13px;&apos;&gt;&lt;b&gt;FilterMate now works with raster and point cloud layers.&lt;/b&gt;&lt;/p&gt;&lt;ul style=&apos;margin-left:10px; font-size:12px;&apos;&gt;&lt;li&gt;&lt;b&gt;EXPLORING&lt;/b&gt; adapts to the current layer: value range and classes of a raster, classes, elevation and attributes of a LiDAR point cloud.&lt;/li&gt;&lt;li&gt;&lt;b&gt;FILTERING&lt;/b&gt; relates that selection to layers of any kind, with the usual predicates and buffer: parcels within an elevation range, LiDAR points under buildings, a DTM clipped to a municipality.&lt;/li&gt;&lt;li&gt;&lt;b&gt;EXPORTING&lt;/b&gt; writes filtered rasters (GeoTIFF, COG) and point clouds (LAZ, COPC).&lt;/li&gt;&lt;li&gt;Processing algorithms and models, qgis_process, Python and REST APIs.&lt;/li&gt;&lt;/ul&gt;</source>
         <translation>&lt;p style='font-size:13px;'&gt;&lt;b&gt;FilterMate zdaj deluje z rastrskimi sloji in sloji oblakov točk.&lt;/b&gt;&lt;/p&gt;&lt;ul style='margin-left:10px; font-size:12px;'&gt;&lt;li&gt;&lt;b&gt;EXPLORING&lt;/b&gt; se prilagodi trenutnemu sloju: razpon vrednosti in razredi rastra, razredi, višina in atributi oblaka točk LiDAR.&lt;/li&gt;&lt;li&gt;&lt;b&gt;FILTERING&lt;/b&gt; poveže ta izbor s sloji katere koli vrste, z običajnimi predikati in vplivnim območjem: parcele v razponu nadmorske višine, točke LiDAR pod stavbami, DMR, obrezan na občino.&lt;/li&gt;&lt;li&gt;&lt;b&gt;EXPORTING&lt;/b&gt; zapiše filtrirane rastre (GeoTIFF, COG) in oblake točk (LAZ, COPC).&lt;/li&gt;&lt;li&gt;Algoritmi in modeli Processing, qgis_process, API-ji za Python in REST.&lt;/li&gt;&lt;/ul&gt;</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1723"/>
+        <location filename="../filter_mate.py" line="1772"/>
         <source>Open the user guide</source>
         <translation>Odpri uporabniški priročnik</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/async_query.py" line="207"/>
+        <source>This expression cannot be evaluated safely for a service.</source>
+        <translation>Tega izraza ni mogoče varno ovrednotiti za storitev.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/async_query.py" line="209"/>
+        <source>The service could not be read. Please retry.</source>
+        <translation>Storitve ni bilo mogoče prebrati. Poskusite znova.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/async_query.py" line="210"/>
+        <source>Read failed</source>
+        <translation>Branje ni uspelo</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/async_query.py" line="270"/>
+        <source>Loading filtered extent…</source>
+        <translation>Nalaganje filtriranega obsega…</translation>
     </message>
 </context>
 <context>
     <name>FilterMateApp</name>
     <message>
-        <location filename="../filter_mate_app.py" line="309"/>
+        <location filename="../filter_mate_app.py" line="306"/>
         <source>PostgreSQL layers detected ({0}) but psycopg2 is not installed.</source>
         <translation>Zaznane so plasti PostgreSQL ({0}), vendar psycopg2 ni nameščen.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="401"/>
+        <location filename="../filter_mate_app.py" line="406"/>
         <source>Cleared {0} caches</source>
         <translation>Počiščenih {0} predpomnilnikov</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="926"/>
+        <location filename="../filter_mate_app.py" line="912"/>
         <source>Failed to create dockwidget: {0}</source>
         <translation>Ustvarjanje sidrne plošče ni uspelo: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="936"/>
+        <location filename="../filter_mate_app.py" line="922"/>
         <source>Failed to display dockwidget: {0}</source>
         <translation>Prikaz sidrne plošče ni uspel: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1456"/>
+        <location filename="../filter_mate_app.py" line="1493"/>
         <source>Error executing {0}: {1}</source>
         <translation>Napaka pri izvajanju {0}: {1}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1468"/>
+        <location filename="../filter_mate_app.py" line="1505"/>
         <source>Plugin running in degraded mode (hexagonal services unavailable). Performance may be reduced.</source>
         <translation>Vtičnik deluje v omejenem načinu (heksagonalne storitve niso na voljo). Zmogljivost je lahko zmanjšana.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1761"/>
+        <location filename="../filter_mate_app.py" line="1854"/>
         <source>FilterMate ERROR</source>
         <translation>Napaka FilterMate</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1761"/>
+        <location filename="../filter_mate_app.py" line="1854"/>
         <source>Cannot execute {0}: widget initialization failed.</source>
         <translation>Ni mogoče izvesti {0}: inicializacija gradnika ni uspela.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2544"/>
+        <location filename="../filter_mate_app.py" line="2635"/>
         <source>Cannot {0}: layer invalid or source not found.</source>
         <translation>Ni mogoče {0}: plast je neveljavna ali vir ni najden.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2681"/>
+        <location filename="../filter_mate_app.py" line="2789"/>
         <source>All filters cleared - </source>
         <translation>Vsi filtri odstranjeni - </translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2682"/>
+        <location filename="../filter_mate_app.py" line="2790"/>
         <source>{0}{1} features visible in main layer</source>
         <translation>{0}{1} objektov vidnih v glavni plasti</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2694"/>
+        <location filename="../filter_mate_app.py" line="2802"/>
         <source>Error: result handler missing</source>
         <translation>Napaka: manjka upravljavec rezultatov</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2707"/>
+        <location filename="../filter_mate_app.py" line="2819"/>
         <source>Error during filtering: {0}</source>
         <translation>Napaka pri filtriranju: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2831"/>
+        <location filename="../filter_mate_app.py" line="2943"/>
         <source>Recovered {0} orphan favorite(s): {1}</source>
         <translation>Obnovljenih {0} osirotelih priljubljenih: {1}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2997"/>
+        <location filename="../filter_mate_app.py" line="3109"/>
         <source>Layer loading failed - click to retry</source>
         <translation>Nalaganje plasti ni uspelo - kliknite za ponovni poskus</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="3049"/>
+        <location filename="../filter_mate_app.py" line="3161"/>
         <source>{0} layer(s) loaded successfully</source>
         <translation>{0} plasti uspešno naloženih</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1983"/>
+        <location filename="../filter_mate_app.py" line="2092"/>
         <source>filter</source>
         <translation>filter</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1985"/>
+        <location filename="../filter_mate_app.py" line="2094"/>
         <source>unfilter</source>
         <translation>unfilter</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1988"/>
+        <location filename="../filter_mate_app.py" line="2097"/>
         <source>FilterMate – Edit Mode Detected</source>
         <translation>FilterMate – Edit Mode Detected</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1990"/>
+        <location filename="../filter_mate_app.py" line="2099"/>
         <source>The following layer(s) are currently in edit mode:
 {0}
 
@@ -1889,45 +2263,55 @@ QGIS cannot apply filters while a layer is being edited.
 What would you like to do?</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2000"/>
+        <location filename="../filter_mate_app.py" line="2109"/>
         <source>Save Changes &amp; {0}</source>
         <translation>Save Changes &amp; {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2007"/>
+        <location filename="../filter_mate_app.py" line="2116"/>
         <source>Discard Changes &amp; {0}</source>
         <translation>Discard Changes &amp; {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2014"/>
+        <location filename="../filter_mate_app.py" line="2123"/>
         <source>Cancel</source>
         <translation>Prekliči</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2038"/>
+        <location filename="../filter_mate_app.py" line="2147"/>
         <source>Could not save changes for layer &quot;{0}&quot;. Operation cancelled.</source>
         <translation>Could not save changes for layer &quot;{0}&quot;. Operation cancelled.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1298"/>
+        <location filename="../filter_mate_app.py" line="1323"/>
         <source>Pick a layer in the EXPLORING tab before running &apos;{0}&apos;.</source>
         <translation>Pred zagonom »{0}« izberite sloj v zavihku EXPLORING.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="853"/>
+        <location filename="../filter_mate_app.py" line="839"/>
         <source>{0} layer(s) stay filtered: {1}. Turn the option back on to unfilter them.</source>
         <translation>{0} sloj(ev) ostane filtriranih: {1}. Za odstranitev filtra znova vklopite možnost.</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_app.py" line="2621"/>
+        <source>A server filter is being prepared. Wait for it to finish before starting another operation.</source>
+        <translation>Pripravlja se strežniški filter. Počakajte, da se konča, preden začnete drugo operacijo.</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_app.py" line="1770"/>
+        <source>A FilterMate API operation is running. Wait for it to finish.</source>
+        <translation>Izvaja se operacija API-ja FilterMate. Počakajte, da se konča.</translation>
     </message>
 </context>
 <context>
     <name>FilterMateDockWidget</name>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="616"/>
+        <location filename="../filter_mate_dockwidget.py" line="621"/>
         <source>Initialization error: {}</source>
         <translation>Napaka pri inicializaciji: {}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1008"/>
+        <location filename="../filter_mate_dockwidget.py" line="1028"/>
         <source>UI configuration incomplete - check logs</source>
         <translation>Konfiguracija vmesnika ni popolna - preverite dnevnike</translation>
     </message>
@@ -1937,290 +2321,404 @@ What would you like to do?</translation>
         <translation type="obsolete">Napaka dimenzij vmesnika: {}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1468"/>
+        <location filename="../filter_mate_dockwidget.py" line="1488"/>
         <source>Favorites manager not available</source>
         <translation>Upravitelj priljubljenih ni na voljo</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1489"/>
+        <location filename="../filter_mate_dockwidget.py" line="1509"/>
         <source>★ {0} Favorites saved
 Click to apply or manage</source>
         <translation>★ {0} priljubljenih shranjenih
 Kliknite za uporabo ali upravljanje</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1492"/>
+        <location filename="../filter_mate_dockwidget.py" line="1512"/>
         <source>★ No favorites saved
 Click to add current filter</source>
         <translation>★ Ni shranjenih priljubljenih
 Kliknite za dodajanje trenutnega filtra</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1512"/>
+        <location filename="../filter_mate_dockwidget.py" line="1532"/>
         <source>Forced {0} backend for {1} layer(s)</source>
         <translation>Prisiljen zaledni sistem {0} za {1} plasti</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1598"/>
+        <location filename="../filter_mate_dockwidget.py" line="1638"/>
         <source>Backend controller not available</source>
         <translation>Krmilnik zalednega sistema ni na voljo</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1536"/>
+        <location filename="../filter_mate_dockwidget.py" line="1556"/>
         <source>PostgreSQL auto-cleanup enabled</source>
         <translation>Samodejno čiščenje PostgreSQL omogočeno</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1537"/>
+        <location filename="../filter_mate_dockwidget.py" line="1557"/>
         <source>PostgreSQL auto-cleanup disabled</source>
         <translation>Samodejno čiščenje PostgreSQL onemogočeno</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1543"/>
+        <location filename="../filter_mate_dockwidget.py" line="1563"/>
         <source>PostgreSQL session views cleaned up</source>
         <translation>Pogledi seje PostgreSQL počiščeni</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1543"/>
+        <location filename="../filter_mate_dockwidget.py" line="1563"/>
         <source>No views to clean or cleanup failed</source>
         <translation>Ni pogledov za čiščenje ali čiščenje ni uspelo</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1554"/>
+        <location filename="../filter_mate_dockwidget.py" line="1574"/>
         <source>No PostgreSQL connection available</source>
         <translation>Ni razpoložljive povezave PostgreSQL</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1560"/>
+        <location filename="../filter_mate_dockwidget.py" line="1600"/>
         <source>Schema has {0} view(s) from other sessions.
 Drop anyway?</source>
         <translation>Shema ima {0} pogledov iz drugih sej.
 Vseeno izbrisati?</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1561"/>
+        <location filename="../filter_mate_dockwidget.py" line="1601"/>
         <source>Other Sessions Active</source>
         <translation>Druge seje so aktivne</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1563"/>
+        <location filename="../filter_mate_dockwidget.py" line="1603"/>
         <source>Schema cleanup cancelled</source>
         <translation>Čiščenje sheme preklicano</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1568"/>
+        <location filename="../filter_mate_dockwidget.py" line="1608"/>
         <source>Schema &apos;{0}&apos; dropped successfully</source>
         <translation>Shema '{0}' uspešno izbrisana</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1570"/>
+        <location filename="../filter_mate_dockwidget.py" line="1610"/>
         <source>Schema cleanup failed</source>
         <translation>Čiščenje sheme ni uspelo</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1596"/>
+        <location filename="../filter_mate_dockwidget.py" line="1636"/>
         <source>PostgreSQL Session Info</source>
         <translation>Informacije o seji PostgreSQL</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="2719"/>
+        <location filename="../filter_mate_dockwidget.py" line="2753"/>
         <source>Theme adapted: {0}</source>
         <translation>Tema prilagojena: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="2719"/>
+        <location filename="../filter_mate_dockwidget.py" line="2753"/>
         <source>Dark mode</source>
         <translation>Temni način</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="2719"/>
+        <location filename="../filter_mate_dockwidget.py" line="2753"/>
         <source>Light mode</source>
         <translation>Svetli način</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="4057"/>
+        <location filename="../filter_mate_dockwidget.py" line="4102"/>
         <source>Selected features have no geometry.</source>
         <translation>Izbrani objekti nimajo geometrije.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="4076"/>
+        <location filename="../filter_mate_dockwidget.py" line="4121"/>
         <source>No feature selected. Select a feature from the dropdown list.</source>
         <translation>Noben objekt ni izbran. Izberite objekt iz spustnega seznama.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="5132"/>
+        <location filename="../filter_mate_dockwidget.py" line="5285"/>
         <source>The selected layer is invalid or its source cannot be found.</source>
         <translation>Izbrana plast je neveljavna ali njenega vira ni mogoče najti.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="5892"/>
+        <location filename="../filter_mate_dockwidget.py" line="6080"/>
         <source>Negative buffer (erosion): shrinks polygons inward</source>
         <translation>Negativni medpomnilnik (erozija): krči poligone navznoter</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="5895"/>
+        <location filename="../filter_mate_dockwidget.py" line="6083"/>
         <source>Buffer value in meters (positive=expand, negative=shrink polygons)</source>
         <translation>Vrednost medpomnilnika v metrih (pozitivno=razširi, negativno=skrči poligone)</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6396"/>
+        <location filename="../filter_mate_dockwidget.py" line="6585"/>
         <source>Plugin activated with {0} vector layer(s)</source>
         <translation>Vtičnik aktiviran z {0} vektorskimi plastmi</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6485"/>
+        <location filename="../filter_mate_dockwidget.py" line="6684"/>
         <source>Could not reload plugin automatically.</source>
         <translation>Vtičnika ni mogoče samodejno znova naložiti.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6490"/>
+        <location filename="../filter_mate_dockwidget.py" line="6689"/>
         <source>Error reloading plugin: {0}</source>
         <translation>Napaka pri ponovnem nalaganju vtičnika: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6562"/>
+        <location filename="../filter_mate_dockwidget.py" line="6764"/>
         <source>Layer properties reset to defaults</source>
         <translation>Lastnosti plasti ponastavljene na privzete</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6563"/>
+        <location filename="../filter_mate_dockwidget.py" line="6765"/>
         <source>Error resetting layer properties: {}</source>
         <translation>Napaka pri ponastavitvi lastnosti plasti: {}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="875"/>
+        <location filename="../filter_mate_dockwidget.py" line="895"/>
         <source>Filter</source>
         <translation>Filtriraj</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="876"/>
+        <location filename="../filter_mate_dockwidget.py" line="896"/>
         <source>Undo the last filter</source>
         <translation>Razveljavi zadnji filter</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="877"/>
+        <location filename="../filter_mate_dockwidget.py" line="897"/>
         <source>Redo the last filter</source>
         <translation>Ponovi zadnji filter</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="878"/>
+        <location filename="../filter_mate_dockwidget.py" line="898"/>
         <source>Remove the filters</source>
         <translation>Odstrani filtre</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="879"/>
+        <location filename="../filter_mate_dockwidget.py" line="899"/>
         <source>Export the layers</source>
         <translation>Izvozi sloje</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="880"/>
+        <location filename="../filter_mate_dockwidget.py" line="900"/>
         <source>About FilterMate</source>
         <translation>O FilterMate</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="881"/>
+        <location filename="../filter_mate_dockwidget.py" line="901"/>
         <source>QFieldCloud</source>
         <translation>QFieldCloud</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="882"/>
+        <location filename="../filter_mate_dockwidget.py" line="902"/>
         <source>Identify the selected features</source>
         <translation>Identificiraj izbrane elemente</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="883"/>
+        <location filename="../filter_mate_dockwidget.py" line="903"/>
         <source>Zoom to the selected features</source>
         <translation>Povečaj na izbrane elemente</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="884"/>
+        <location filename="../filter_mate_dockwidget.py" line="904"/>
         <source>Select the features on the map</source>
         <translation>Izberi elemente na zemljevidu</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="885"/>
+        <location filename="../filter_mate_dockwidget.py" line="905"/>
         <source>Follow the features on the map</source>
         <translation>Sledi elementom na zemljevidu</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget.py" line="886"/>
         <source>Link the three selection modes</source>
-        <translation>Poveži vse tri načine izbire</translation>
+        <translation type="obsolete">Poveži vse tri načine izbire</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="887"/>
+        <location filename="../filter_mate_dockwidget.py" line="907"/>
         <source>Reset the layer properties</source>
         <translation>Ponastavi lastnosti sloja</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="888"/>
+        <location filename="../filter_mate_dockwidget.py" line="908"/>
         <source>Follow the current layer</source>
         <translation>Sledi trenutnemu sloju</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="889"/>
+        <location filename="../filter_mate_dockwidget.py" line="909"/>
         <source>Layers to filter</source>
         <translation>Sloji za filtriranje</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="890"/>
+        <location filename="../filter_mate_dockwidget.py" line="910"/>
         <source>Combine with the existing filter</source>
         <translation>Združi z obstoječim filtrom</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="891"/>
+        <location filename="../filter_mate_dockwidget.py" line="911"/>
         <source>Geometric predicates</source>
         <translation>Geometrijski predikati</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="892"/>
+        <location filename="../filter_mate_dockwidget.py" line="912"/>
         <source>Buffer distance</source>
         <translation>Razdalja vmesnega pasu</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="893"/>
+        <location filename="../filter_mate_dockwidget.py" line="913"/>
         <source>Buffer type</source>
         <translation>Vrsta vmesnega pasu</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="894"/>
+        <location filename="../filter_mate_dockwidget.py" line="914"/>
         <source>Layers to export</source>
         <translation>Sloji za izvoz</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="895"/>
+        <location filename="../filter_mate_dockwidget.py" line="915"/>
         <source>Projection of the export</source>
         <translation>Projekcija izvoza</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="896"/>
+        <location filename="../filter_mate_dockwidget.py" line="916"/>
         <source>Export the styles</source>
         <translation>Izvozi sloge</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="897"/>
+        <location filename="../filter_mate_dockwidget.py" line="917"/>
         <source>Export format</source>
         <translation>Format izvoza</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="898"/>
+        <location filename="../filter_mate_dockwidget.py" line="918"/>
         <source>Output folder</source>
         <translation>Izhodna mapa</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="899"/>
+        <location filename="../filter_mate_dockwidget.py" line="919"/>
         <source>Zip the export</source>
         <translation>Stisni izvoz v zip</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1013"/>
+        <location filename="../filter_mate_dockwidget.py" line="1033"/>
         <source>The panel layout could not be applied; default sizes are used. Details in filtermate.log.</source>
         <translation>Postavitve plošče ni bilo mogoče uporabiti; uporabljene so privzete velikosti. Podrobnosti v filtermate.log.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6649"/>
+        <location filename="../filter_mate_dockwidget.py" line="6856"/>
         <source>Vector</source>
         <translation>Vektor</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="906"/>
+        <source>Link the single and multiple selections</source>
+        <translation>Poveži enojni in množični izbor</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="1586"/>
+        <source>Schema &apos;{0}&apos; and the following {1} temporary object(s) will be dropped:</source>
+        <translation>Shema '{0}' in naslednji začasni objekti ({1}) bodo izbrisani:</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="1589"/>
+        <source>... and {0} more</source>
+        <translation>... in še {0}</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="1591"/>
+        <source>Schema &apos;{0}&apos; is empty and will be dropped.</source>
+        <translation>Shema '{0}' je prazna in bo izbrisana.</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="1592"/>
+        <source>Drop FilterMate schema</source>
+        <translation>Izbriši shemo FilterMate</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="4224"/>
+        <source>Read failed</source>
+        <translation>Branje ni uspelo</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="4224"/>
+        <source>The service could not be read. Please retry.</source>
+        <translation>Storitve ni bilo mogoče prebrati. Poskusite znova.</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="4566"/>
+        <source>Loading filtered extent…</source>
+        <translation>Nalaganje filtriranega obsega…</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="5150"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="539"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="3408"/>
+        <source>Loading selected values…</source>
+        <translation>Nalaganje izbranih vrednosti…</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="5141"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="502"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="603"/>
+        <source>This expression cannot be evaluated safely for a service.</source>
+        <translation>Tega izraza ni mogoče varno ovrednotiti za storitev.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_controller.py" line="2472"/>
+        <source>Error evaluating expression: {0}</source>
+        <translation>Napaka pri vrednotenju izraza: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_controller.py" line="2471"/>
+        <source>Expression Evaluation</source>
+        <translation>Vrednotenje izraza</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_controller.py" line="411"/>
+        <source>Loading values…</source>
+        <translation>Nalaganje vrednosti…</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_controller.py" line="646"/>
+        <source>Loading zoom extent…</source>
+        <translation>Nalaganje obsega povečave…</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_controller.py" line="633"/>
+        <source>No feature with geometry matches the selection.</source>
+        <translation>Noben objekt z geometrijo ne ustreza izboru.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_controller.py" line="408"/>
+        <source>Only a limited set of values is shown. Refine the search to find other values.</source>
+        <translation>Prikazan je le omejen nabor vrednosti. Natančneje opredelite iskanje, da najdete druge vrednosti.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_controller.py" line="475"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="483"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="502"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="566"/>
+        <source>Selection</source>
+        <translation>Izbor</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_controller.py" line="475"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="566"/>
+        <source>The service selection exceeds the key limit. Refine the selection.</source>
+        <translation>Izbor storitve presega omejitev ključev. Natančneje opredelite izbor.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_controller.py" line="483"/>
+        <source>This service has no stable key for the selection.</source>
+        <translation>Ta storitev nima stabilnega ključa za izbor.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_controller.py" line="408"/>
+        <source>Values</source>
+        <translation>Vrednosti</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_controller.py" line="603"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="633"/>
+        <source>Zoom</source>
+        <translation>Povečaj</translation>
     </message>
 </context>
 <context>
@@ -2397,14 +2895,37 @@ Vseeno izbrisati?</translation>
     </message>
 </context>
 <context>
+    <name>FilterMateOperations</name>
+    <message>
+        <location filename="../adapters/public_api/operations.py" line="556"/>
+        <source>FilterMate was unloaded</source>
+        <translation>FilterMate je bil izklopljen</translation>
+    </message>
+    <message>
+        <location filename="../adapters/public_api/operations.py" line="118"/>
+        <source>rendered or unsupported raster: cannot be a filter target</source>
+        <translation>upodobljen ali nepodprt raster: ne more biti cilj filtra</translation>
+    </message>
+    <message>
+        <location filename="../adapters/public_api/operations.py" line="505"/>
+        <source>rendered raster sources require a local colour capture; numeric pixel selections are unavailable</source>
+        <translation>upodobljeni rastrski viri zahtevajo lokalni zajem barv; številčni izbor slikovnih točk ni na voljo</translation>
+    </message>
+    <message>
+        <location filename="../adapters/public_api/operations.py" line="577"/>
+        <source>the source layer itself was not changed</source>
+        <translation>sama izvorna plast ni bila spremenjena</translation>
+    </message>
+</context>
+<context>
     <name>FilterResultHandler</name>
     <message>
-        <location filename="../adapters/filter_result_handler.py" line="359"/>
+        <location filename="../adapters/filter_result_handler.py" line="347"/>
         <source>{count} features visible in main layer</source>
         <translation>{count} objektov vidnih v glavni plasti</translation>
     </message>
     <message>
-        <location filename="../adapters/filter_result_handler.py" line="352"/>
+        <location filename="../adapters/filter_result_handler.py" line="340"/>
         <source>All filters cleared - {count} features visible in main layer</source>
         <translation>Vsi filtri odstranjeni - {count} objektov vidnih v glavni plasti</translation>
     </message>
@@ -2412,54 +2933,82 @@ Vseeno izbrisati?</translation>
 <context>
     <name>FinishedHandler</name>
     <message>
-        <location filename="../core/tasks/finished_handler.py" line="353"/>
+        <location filename="../core/tasks/finished_handler.py" line="387"/>
         <source>Task failed</source>
         <translation>Naloga ni uspela</translation>
     </message>
     <message>
-        <location filename="../core/tasks/finished_handler.py" line="354"/>
+        <location filename="../core/tasks/finished_handler.py" line="388"/>
         <source>Filter failed for: {0}</source>
         <translation>Filter ni uspel za: {0}</translation>
     </message>
     <message>
-        <location filename="../core/tasks/finished_handler.py" line="358"/>
+        <location filename="../core/tasks/finished_handler.py" line="392"/>
         <source> (+{0} more)</source>
         <translation> (+še {0})</translation>
     </message>
     <message>
-        <location filename="../core/tasks/finished_handler.py" line="405"/>
+        <location filename="../core/tasks/finished_handler.py" line="439"/>
         <source>Layer(s) filtered</source>
         <translation>Plasti filtrirane</translation>
     </message>
     <message>
-        <location filename="../core/tasks/finished_handler.py" line="409"/>
+        <location filename="../core/tasks/finished_handler.py" line="443"/>
         <source>Layer(s) filtered to precedent state</source>
         <translation>Plasti filtrirane na prejšnje stanje</translation>
     </message>
     <message>
-        <location filename="../core/tasks/finished_handler.py" line="413"/>
+        <location filename="../core/tasks/finished_handler.py" line="447"/>
         <source>Layer(s) unfiltered</source>
         <translation>Filtri plasti odstranjeni</translation>
     </message>
     <message>
-        <location filename="../core/tasks/finished_handler.py" line="417"/>
+        <location filename="../core/tasks/finished_handler.py" line="451"/>
         <source>Filter task : {0}</source>
         <translation>Naloga filtriranja: {0}</translation>
     </message>
     <message>
-        <location filename="../core/tasks/finished_handler.py" line="438"/>
+        <location filename="../core/tasks/finished_handler.py" line="472"/>
         <source>Export task : {0}</source>
         <translation>Naloga izvoza: {0}</translation>
     </message>
     <message>
-        <location filename="../core/tasks/finished_handler.py" line="463"/>
+        <location filename="../core/tasks/finished_handler.py" line="497"/>
         <source>Exception: {0}</source>
         <translation>Izjema: {0}</translation>
     </message>
     <message>
-        <location filename="../core/tasks/finished_handler.py" line="489"/>
+        <location filename="../core/tasks/finished_handler.py" line="523"/>
         <source>Filter not applied, previous filter kept: {0}</source>
         <translation>Filter ni uporabljen, prejšnji filter je ohranjen: {0}</translation>
+    </message>
+    <message>
+        <location filename="../core/tasks/finished_handler.py" line="569"/>
+        <source>Layer(s) removed during the filter, left out: {0}</source>
+        <translation>Plasti, odstranjene med filtriranjem, izpuščene: {0}</translation>
+    </message>
+</context>
+<context>
+    <name>HeightAboveGround</name>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/hag_task.py" line="93"/>
+        <source>Draw a useful selection zone before computing height above ground remotely</source>
+        <translation>Pred oddaljenim izračunom višine nad tlemi narišite uporabno cono izbora</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/hag_task.py" line="117"/>
+        <source>The DTM and point cloud have no common useful extent</source>
+        <translation>DMR in oblak točk nimata skupnega uporabnega obsega</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/hag_task.py" line="124"/>
+        <source>The useful selection has no polygon area</source>
+        <translation>Uporabni izbor nima poligonske površine</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/hag_task.py" line="169"/>
+        <source>Height above ground covers the useful area only; Unfilter restores the original cloud</source>
+        <translation>Višina nad tlemi zajema le uporabno območje; Odstrani filter obnovi prvotni oblak</translation>
     </message>
 </context>
 <context>
@@ -2496,15 +3045,23 @@ Vseeno izbrisati?</translation>
 <context>
     <name>LayerLifecycleService</name>
     <message>
-        <location filename="../core/services/layer_lifecycle_service.py" line="264"/>
+        <location filename="../core/services/layer_lifecycle_service.py" line="262"/>
         <source>PostgreSQL layers detected ({0}) but psycopg2 is not installed. The plugin cannot use these layers. Install psycopg2 to enable PostgreSQL support.</source>
         <translation>Zaznane so plasti PostgreSQL ({0}), vendar psycopg2 ni nameščen. Vtičnik ne more uporabiti teh plasti. Namestite psycopg2 za omogočanje podpore PostgreSQL.</translation>
     </message>
 </context>
 <context>
+    <name>LayerSnapshot</name>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/snapshots.py" line="619"/>
+        <source>The saved source could not be opened</source>
+        <translation>Shranjenega vira ni bilo mogoče odpreti</translation>
+    </message>
+</context>
+<context>
     <name>LayersManagementEngineTask</name>
     <message>
-        <location filename="../core/tasks/layer_management_task.py" line="1049"/>
+        <location filename="../core/tasks/layer_management_task.py" line="1074"/>
         <source>PostgreSQL layer &apos;{0}&apos;: Corrupted data detected.
 
 This layer uses &apos;virtual_id&apos; which does not exist in PostgreSQL.
@@ -2521,14 +3078,52 @@ Rešitev: Odstranite to plast iz projekta FilterMate, nato jo znova dodajte.
 Prepričajte se, da ima tabela PostgreSQL definiran PRIMARY KEY.</translation>
     </message>
     <message>
-        <location filename="../core/tasks/layer_management_task.py" line="1075"/>
+        <location filename="../core/tasks/layer_management_task.py" line="1101"/>
         <source>Layer &apos;{0}&apos; has no PRIMARY KEY. Limited features: materialized views disabled. Recommendation: add a PRIMARY KEY for optimal performance.</source>
         <translation>Plast '{0}' nima PRIMARY KEY. Omejene funkcije: materializirani pogledi onemogočeni. Priporočilo: dodajte PRIMARY KEY za optimalno zmogljivost.</translation>
     </message>
     <message>
-        <location filename="../core/tasks/layer_management_task.py" line="2098"/>
+        <location filename="../core/tasks/layer_management_task.py" line="2203"/>
         <source>Exception: {0}</source>
         <translation>Izjema: {0}</translation>
+    </message>
+</context>
+<context>
+    <name>OGRExpressionBuilder</name>
+    <message>
+        <location filename="../adapters/backends/ogr/expression_builder.py" line="499"/>
+        <source>{0}: this provider cannot guarantee a complete server filter. Use a bounded local copy before filtering.</source>
+        <translation>{0}: ta ponudnik ne more zagotoviti popolnega strežniškega filtra. Pred filtriranjem uporabite omejeno lokalno kopijo.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/ogr/expression_builder.py" line="699"/>
+        <source>{0}: the key values of the selected features could not be read from the web service.</source>
+        <translation>{0}: vrednosti ključev izbranih objektov ni bilo mogoče prebrati iz spletne storitve.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/ogr/expression_builder.py" line="800"/>
+        <source>keeps its previous filter</source>
+        <translation>ohrani prejšnji filter</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/ogr/expression_builder.py" line="802"/>
+        <source>is left unfiltered</source>
+        <translation>ostane nefiltrirana</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/ogr/expression_builder.py" line="807"/>
+        <source>{0}: this web service has no unique key field (declared key, id, gml_id, cleabs, objectid...), so the selected features cannot be listed for the server. The layer {1}. An attribute filter, or a local copy of the layer, works.</source>
+        <translation>{0}: ta spletna storitev nima edinstvenega ključnega polja (deklarirani ključ, id, gml_id, cleabs, objectid...), zato izbranih objektov ni mogoče našteti za strežnik. Plast {1}. Rešitev je atributni filter ali lokalna kopija plasti.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/ogr/expression_builder.py" line="813"/>
+        <source>{0}: this layer has no unique key field and its feature ids cannot be listed in its filter (a virtual layer needs a unique id column, its uid). The layer {1}.</source>
+        <translation>{0}: ta plast nima edinstvenega ključnega polja, ID-jev njenih objektov pa ni mogoče našteti v njenem filtru (navidezna plast potrebuje stolpec z edinstvenim ID-jem, uid). Plast {1}.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/ogr/expression_builder.py" line="822"/>
+        <source>{0}: {1} features to list, more than the {2} sent to a web service. The layer {3}. Narrow the selection, use an attribute filter, or work on a local copy of the layer.</source>
+        <translation>{0}: {1} objektov za naštetje, več kot {2}, kolikor jih je mogoče poslati spletni storitvi. Plast {3}. Zožite izbor, uporabite atributni filter ali delajte na lokalni kopiji plasti.</translation>
     </message>
 </context>
 <context>
@@ -2667,67 +3262,67 @@ Prepričajte se, da ima tabela PostgreSQL definiran PRIMARY KEY.</translation>
 <context>
     <name>PointCloudConditionRow</name>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="500"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="797"/>
         <source>Link with the previous condition</source>
         <translation>Povezava s prejšnjim pogojem</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="502"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="799"/>
         <source>AND</source>
         <translation>IN</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="503"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="800"/>
         <source>OR</source>
         <translation>ALI</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="504"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="801"/>
         <source>Attribute</source>
         <translation>Atribut</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="507"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="804"/>
         <source>Comparison</source>
         <translation>Primerjava</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="510"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="807"/>
         <source>between</source>
         <translation>med</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="514"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="811"/>
         <source>Remove this condition</source>
         <translation>Odstrani ta pogoj</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="521"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="818"/>
         <source>Compare with a value or another attribute</source>
         <translation>Primerjaj z vrednostjo ali drugim atributom</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="524"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="821"/>
         <source>value</source>
         <translation>vrednost</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="525"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="822"/>
         <source>Value</source>
         <translation>Vrednost</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="528"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="825"/>
         <source>Highest value kept</source>
         <translation>Najvišja ohranjena vrednost</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="608"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="905"/>
         <source>Observed values: {0} to {1}</source>
         <translation>Opažene vrednosti: od {0} do {1}</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="608"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="905"/>
         <source>No statistics for this attribute</source>
         <translation>Ni statistike za ta atribut</translation>
     </message>
@@ -2735,42 +3330,42 @@ Prepričajte se, da ima tabela PostgreSQL definiran PRIMARY KEY.</translation>
 <context>
     <name>PointCloudExploringPanel</name>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="734"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1049"/>
         <source>Apply to the other tiles of the dataset</source>
         <translation>Uporabi za druge ploščice nabora podatkov</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="748"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1058"/>
         <source>CLASSES</source>
         <translation>RAZREDI</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="753"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1063"/>
         <source>Ground</source>
         <translation>Tla</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="754"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1064"/>
         <source>Vegetation</source>
         <translation>Vegetacija</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="755"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1065"/>
         <source>Buildings</source>
         <translation>Zgradbe</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="756"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1066"/>
         <source>Above ground</source>
         <translation>Nad tlemi</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="757"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1067"/>
         <source>Water</source>
         <translation>Voda</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="758"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1068"/>
         <source>Without noise</source>
         <translation>Brez šuma</translation>
     </message>
@@ -2790,7 +3385,7 @@ Prepričajte se, da ima tabela PostgreSQL definiran PRIMARY KEY.</translation>
         <translation type="obsolete">Nič</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="776"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1097"/>
         <source>Point classes</source>
         <translation>Razredi točk</translation>
     </message>
@@ -2815,7 +3410,7 @@ Prepričajte se, da ima tabela PostgreSQL definiran PRIMARY KEY.</translation>
         <translation type="obsolete">Najvišja ohranjena nadmorska višina</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="873"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1344"/>
         <source>Intensity</source>
         <translation>Intenziteta</translation>
     </message>
@@ -2842,30 +3437,30 @@ Prepričajte se, da ima tabela PostgreSQL definiran PRIMARY KEY.</translation>
     <message>
         <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="832"/>
         <source>Height above DTM ≥</source>
-        <translation>Višina nad DMR ≥</translation>
+        <translation type="obsolete">Višina nad DMR ≥</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="852"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1286"/>
         <source>Digital terrain model the height is measured from</source>
         <translation>Digitalni model reliefa, od katerega se meri višina</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="862"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1296"/>
         <source>Keep the points at least this high above the terrain model</source>
         <translation>Ohrani točke, ki so vsaj tako visoko nad modelom reliefa</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="896"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1371"/>
         <source>EXPRESSION</source>
         <translation>IZRAZ</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="900"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1375"/>
         <source>Point cloud expression</source>
         <translation>Izraz oblaka točk</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="901"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1376"/>
         <source>Check the group to edit the expression by hand</source>
         <translation>Označite skupino za ročno urejanje izraza</translation>
     </message>
@@ -2875,24 +3470,24 @@ Prepričajte se, da ima tabela PostgreSQL definiran PRIMARY KEY.</translation>
         <translation type="obsolete">Za ta sloj ni statistike višin</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="959"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1657"/>
         <source>Height above the terrain is unavailable</source>
         <translation>Višina nad terenom ni na voljo</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="974"/>
         <source>Kept points: {0}</source>
-        <translation>Ohranjene točke: {0}</translation>
+        <translation type="obsolete">Ohranjene točke: {0}</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="991"/>
         <source>Current filter: {0}</source>
-        <translation>Trenutni filter: {0}</translation>
+        <translation type="obsolete">Trenutni filter: {0}</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="991"/>
         <source>none</source>
-        <translation>brez</translation>
+        <translation type="obsolete">brez</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="874"/>
@@ -2915,169 +3510,279 @@ Prepričajte se, da ima tabela PostgreSQL definiran PRIMARY KEY.</translation>
         <translation type="obsolete">Edini</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="786"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1172"/>
         <source>ATTRIBUTES</source>
         <translation>ATRIBUTI</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="804"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1190"/>
         <source>+ Condition</source>
         <translation>+ Pogoj</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="806"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1192"/>
         <source>Add a condition on an attribute of the layer</source>
         <translation>Dodaj pogoj na atribut sloja</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="809"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1231"/>
         <source>Returns</source>
         <translation>Odboji</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="811"/>
         <source>Keep the first, last or single returns of the laser pulses</source>
-        <translation>Ohrani prve, zadnje ali enojne odboje laserskih impulzov</translation>
+        <translation type="obsolete">Ohrani prve, zadnje ali enojne odboje laserskih impulzov</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="814"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1238"/>
         <source>First return (ReturnNumber = 1)</source>
         <translation>Prvi odboj (ReturnNumber = 1)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="815"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1239"/>
         <source>Last return (ReturnNumber = NumberOfReturns)</source>
         <translation>Zadnji odboj (ReturnNumber = NumberOfReturns)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="816"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1240"/>
         <source>Single return (NumberOfReturns = 1)</source>
         <translation>Enojni odboj (NumberOfReturns = 1)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="874"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1345"/>
         <source>Return number</source>
         <translation>Številka odboja</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="875"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1346"/>
         <source>Number of returns</source>
         <translation>Število odbojev</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="876"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1347"/>
         <source>Classification</source>
         <translation>Klasifikacija</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="877"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1348"/>
         <source>Scan angle</source>
         <translation>Kot skeniranja</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="878"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1349"/>
         <source>User data</source>
         <translation>Uporabniški podatki</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="879"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1350"/>
         <source>Point source ID</source>
         <translation>ID vira točk</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="880"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1351"/>
         <source>GPS time</source>
         <translation>Čas GPS</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="881"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1352"/>
         <source>Red</source>
         <translation>Rdeča</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="882"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1353"/>
         <source>Green</source>
         <translation>Zelena</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="883"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1354"/>
         <source>Blue</source>
         <translation>Modra</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="884"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1355"/>
         <source>Infrared</source>
         <translation>Infrardeča</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="885"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1356"/>
         <source>Scan direction</source>
         <translation>Smer skeniranja</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="886"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1357"/>
         <source>Edge of flight line</source>
         <translation>Rob letalnega pasu</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="887"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1358"/>
         <source>Synthetic</source>
         <translation>Sintetičen</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="888"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1359"/>
         <source>Key point</source>
         <translation>Ključna točka</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="889"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1360"/>
         <source>Withheld</source>
         <translation>Zadržan</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="890"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1361"/>
         <source>Overlap</source>
         <translation>Prekrivanje</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="891"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1362"/>
         <source>Scanner channel</source>
         <translation>Kanal skenerja</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="892"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1363"/>
         <source>Classification flags</source>
         <translation>Zastavice klasifikacije</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="893"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1364"/>
         <source>Height above ground</source>
         <translation>Višina nad tlemi</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="762"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1077"/>
         <source>Quick class selection</source>
         <translation>Hitri izbor razredov</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="765"/>
         <source>Quick selection…</source>
-        <translation>Hitri izbor…</translation>
+        <translation type="obsolete">Hitri izbor…</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="768"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1087"/>
         <source>All classes</source>
         <translation>Vsi razredi</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="769"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1087"/>
         <source>No class</source>
         <translation>Noben razred</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="770"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1087"/>
         <source>Invert the selection</source>
         <translation>Obrni izbor</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1077"/>
+        <source>Selection ▾</source>
+        <translation>Izbor ▾</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1111"/>
+        <source>Classes of the standard that hold no point of this layer</source>
+        <translation>Razredi standarda brez točke v tej plasti</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1118"/>
+        <source>Classes absent from the layer</source>
+        <translation>Razredi, ki jih v plasti ni</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1142"/>
+        <source>Similar objects: area ×</source>
+        <translation>Podobni objekti: površina ×</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1145"/>
+        <source>Smallest similar object, as a share of the smallest clicked one</source>
+        <translation>Najmanjši podoben objekt kot delež najmanjšega kliknjenega</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1145"/>
+        <source>Largest similar object, as a multiple of the largest clicked one</source>
+        <translation>Največji podoben objekt kot večkratnik največjega kliknjenega</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1160"/>
+        <source>to ×</source>
+        <translation>do ×</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1204"/>
+        <source>Pipette on</source>
+        <translation>Izbirnik vključen</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1205"/>
+        <source>Attribute the value pipette of the rail reads under the click</source>
+        <translation>Atribut, ki ga izbirnik vrednosti iz vrstice bere pod klikom</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1220"/>
+        <source>Tolerance around the picked value, in % of the observed range of the attribute</source>
+        <translation>Toleranca okoli odvzete vrednosti, v % opaženega obsega atributa</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1232"/>
+        <source>Keep every return, or the first, last or single returns of the laser pulses</source>
+        <translation>Ohrani vse odboje ali prve, zadnje ali enojne odboje laserskih impulzov</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1237"/>
+        <source>Any return</source>
+        <translation>Kateri koli odboj</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1251"/>
+        <source>HEIGHT / DTM</source>
+        <translation>VIŠINA / DMR</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1257"/>
+        <source>Always combined (AND) with the active group</source>
+        <translation>Vedno združeno (AND) z aktivno skupino</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1261"/>
+        <source>PDAL · derived cloud</source>
+        <translation>PDAL · izpeljan oblak</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1263"/>
+        <source>The height is computed by PDAL into a derived point cloud, in a background task</source>
+        <translation>Višino izračuna PDAL v izpeljan oblak točk, v opravilu v ozadju</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1366"/>
+        <source>{0} object(s)</source>
+        <translation>Objektov: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1367"/>
+        <source>cut at the window read</source>
+        <translation>odrezano na prebrano okno</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1368"/>
+        <source>shown as the whole class in their box</source>
+        <translation>prikazano kot cel razred v njihovem okvirju</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1859"/>
+        <source>Other classes, absent from the layer ({0})</source>
+        <translation>Drugi razredi, ki jih v plasti ni ({0})</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1950"/>
+        <source>An object runs past the largest window read around the click and was cut there</source>
+        <translation>Objekt sega prek največjega okna, prebranega okoli klika, in je bil tam odrezan</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1952"/>
+        <source>Too many objects for the subset of the cloud: the preview and the filtered cloud keep every point of their class in the box around them; the targets are cut by the objects themselves</source>
+        <translation>Preveč objektov za podmnožico oblaka: predogled in filtrirani oblak ohranita vse točke svojega razreda v okvirju okoli njih; cilji so odrezani po samih objektih</translation>
     </message>
 </context>
 <context>
@@ -3085,62 +3790,131 @@ Prepričajte se, da ima tabela PostgreSQL definiran PRIMARY KEY.</translation>
     <message>
         <location filename="../ui/widgets/point_cloud_filter_widget.py" line="141"/>
         <source>Point cloud filter</source>
-        <translation>Filter oblaka točk</translation>
+        <translation type="obsolete">Filter oblaka točk</translation>
     </message>
     <message>
         <location filename="../ui/widgets/point_cloud_filter_widget.py" line="152"/>
         <source>Classification</source>
-        <translation>Klasifikacija</translation>
+        <translation type="obsolete">Klasifikacija</translation>
     </message>
     <message>
         <location filename="../ui/widgets/point_cloud_filter_widget.py" line="157"/>
         <source>All</source>
-        <translation>Vse</translation>
+        <translation type="obsolete">Vse</translation>
     </message>
     <message>
         <location filename="../ui/widgets/point_cloud_filter_widget.py" line="158"/>
         <source>None</source>
-        <translation>Nič</translation>
+        <translation type="obsolete">Nič</translation>
     </message>
     <message>
         <location filename="../ui/widgets/point_cloud_filter_widget.py" line="167"/>
         <source>Elevation (Z)</source>
-        <translation>Nadmorska višina (Z)</translation>
+        <translation type="obsolete">Nadmorska višina (Z)</translation>
     </message>
     <message>
         <location filename="../ui/widgets/point_cloud_filter_widget.py" line="169"/>
         <source>Intensity</source>
-        <translation>Intenziteta</translation>
+        <translation type="obsolete">Intenziteta</translation>
     </message>
     <message>
         <location filename="../ui/widgets/point_cloud_filter_widget.py" line="175"/>
         <source>Return number</source>
-        <translation>Številka odboja</translation>
+        <translation type="obsolete">Številka odboja</translation>
     </message>
     <message>
         <location filename="../ui/widgets/point_cloud_filter_widget.py" line="199"/>
         <source>Minimum</source>
-        <translation>Najmanj</translation>
+        <translation type="obsolete">Najmanj</translation>
     </message>
     <message>
         <location filename="../ui/widgets/point_cloud_filter_widget.py" line="200"/>
         <source>Maximum</source>
-        <translation>Največ</translation>
+        <translation type="obsolete">Največ</translation>
     </message>
     <message>
         <location filename="../ui/widgets/point_cloud_filter_widget.py" line="250"/>
         <source>Current filter: {0}</source>
-        <translation>Trenutni filter: {0}</translation>
+        <translation type="obsolete">Trenutni filter: {0}</translation>
     </message>
     <message>
         <location filename="../ui/widgets/point_cloud_filter_widget.py" line="250"/>
         <source>none</source>
-        <translation>brez</translation>
+        <translation type="obsolete">brez</translation>
     </message>
     <message>
         <location filename="../ui/widgets/point_cloud_filter_widget.py" line="329"/>
         <source>Any</source>
-        <translation>Kateri koli</translation>
+        <translation type="obsolete">Kateri koli</translation>
+    </message>
+</context>
+<context>
+    <name>PointCloudReader</name>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/pdal_cli.py" line="221"/>
+        <source>A useful extent is required for a remote point cloud</source>
+        <translation>Za oddaljeni oblak točk je potreben uporaben obseg</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/pdal_cli.py" line="187"/>
+        <source>No PDAL reader for this point cloud format</source>
+        <translation>Za ta format oblaka točk ni bralnika PDAL</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/pdal_cli.py" line="217"/>
+        <source>PDAL 2.4 or newer with a readable version is required for remote point clouds</source>
+        <translation>Za oddaljene oblake točk je potreben PDAL 2.4 ali novejši s berljivo različico</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/pdal_cli.py" line="219"/>
+        <source>Remote point clouds require EPT or COPC for bounded reads</source>
+        <translation>Oddaljeni oblaki točk za omejeno branje zahtevajo EPT ali COPC</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/pdal_cli.py" line="227"/>
+        <source>The useful extent must be finite and have positive area</source>
+        <translation>Uporabni obseg mora biti končen in imeti pozitivno površino</translation>
+    </message>
+</context>
+<context>
+    <name>PointCloudSource</name>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="435"/>
+        <source>Draw a useful selection zone before reading a remote point cloud</source>
+        <translation>Pred branjem oddaljenega oblaka točk narišite uporabno cono izbora</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="468"/>
+        <source>The remote point cloud could not be read</source>
+        <translation>Oddaljenega oblaka točk ni bilo mogoče prebrati</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="472"/>
+        <source>The remote point cloud rejected the selection</source>
+        <translation>Oddaljeni oblak točk je zavrnil izbor</translation>
+    </message>
+</context>
+<context>
+    <name>PointCloudTarget</name>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="605"/>
+        <source>A bounded height-above-ground cloud only supports AND or AND NOT; Unfilter first</source>
+        <translation>Omejen oblak višine nad tlemi podpira samo AND ali AND NOT; najprej odstranite filter</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="631"/>
+        <source>PDAL 2.4 or newer is required to clip a remote point cloud</source>
+        <translation>Za obrezovanje oddaljenega oblaka točk je potreben PDAL 2.4 ali novejši</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="682"/>
+        <source>Disjoint would read the whole remote cloud; choose an inside selection</source>
+        <translation>Disjoint bi prebral cel oddaljeni oblak; izberite izbor znotraj</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="689"/>
+        <source>The original remote point cloud could not be opened</source>
+        <translation>Prvotnega oddaljenega oblaka točk ni bilo mogoče odpreti</translation>
     </message>
 </context>
 <context>
@@ -3292,7 +4066,7 @@ Nadaljujem?</translation>
         <translation>Sloji za filtriranje</translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/batch_filter_algorithm.py" line="129"/>
+        <location filename="../processing/algorithms/batch_filter_algorithm.py" line="139"/>
         <location filename="../processing/algorithms/common.py" line="78"/>
         <source>FilterMate</source>
         <translation>FilterMate</translation>
@@ -3389,17 +4163,17 @@ Nadaljujem?</translation>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/batch_filter_algorithm.py" line="102"/>
+        <location filename="../processing/algorithms/batch_filter_algorithm.py" line="112"/>
         <source>Invalid expression for layer &apos;{0}&apos;, skipped.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/batch_filter_algorithm.py" line="125"/>
+        <location filename="../processing/algorithms/batch_filter_algorithm.py" line="135"/>
         <source>Filter several layers (batch)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/batch_filter_algorithm.py" line="137"/>
+        <location filename="../processing/algorithms/batch_filter_algorithm.py" line="147"/>
         <source>Applies the same filter expression to several vector layers in a single run.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3745,17 +4519,27 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/common.py" line="194"/>
+        <location filename="../processing/algorithms/common.py" line="191"/>
+        <source>Source raster was resampled for capture (grid: {0}).</source>
+        <translation>Izvorni raster je bil za zajem ponovno vzorčen (mreža: {0}).</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/common.py" line="198"/>
         <source> ({0:.1f} s)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/common.py" line="197"/>
+        <location filename="../processing/algorithms/common.py" line="201"/>
         <source>{0}: {1}{2}</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/common.py" line="199"/>
+        <location filename="../processing/algorithms/common.py" line="203"/>
+        <source>{0}: target raster was resampled for capture (grid: {1}).</source>
+        <translation>{0}: ciljni raster je bil za zajem ponovno vzorčen (mreža: {1}).</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/common.py" line="206"/>
         <source>{0}: failed — {1}</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4435,150 +5219,180 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
 <context>
     <name>QgsCheckableComboBoxFeaturesListPickerWidget</name>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="898"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="924"/>
         <source>Type to filter...</source>
         <translation>Vnesite za filtriranje...</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="907"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="933"/>
         <source>Select All</source>
         <translation>Izberi vse</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="909"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="935"/>
         <source>Select All (non subset)</source>
         <translation>Izberi vse (izven podmnožice)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="911"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="937"/>
         <source>Select All (subset)</source>
         <translation>Izberi vse (podmnožica)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="913"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="939"/>
         <source>De-select All</source>
         <translation>Odstrani izbor vsega</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="915"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="941"/>
         <source>De-select All (non subset)</source>
         <translation>Odstrani izbor vsega (izven podmnožice)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="917"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="943"/>
         <source>De-select All (subset)</source>
         <translation>Odstrani izbor vsega (podmnožica)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="1516"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="1599"/>
         <source>Showing the first {0} features sorted by display value. Type in the text filter to search the whole layer; &quot;Select All&quot; loads the full list.</source>
         <translation>Prikazanih je prvih {0} elementov, razvrščenih po prikazani vrednosti. Vnesite besedilo v filter za iskanje po celotnem sloju; »Izberi vse« naloži celoten seznam.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="1524"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="1607"/>
         <source>Showing {0} features of the layer, sorted by display value. Type in the text filter to search the whole layer; &quot;Select All&quot; loads the full list.</source>
         <translation>Prikazanih je {0} elementov sloja, razvrščenih po prikazani vrednosti. Vnesite besedilo v filter za iskanje po celotnem sloju; »Izberi vse« naloži celoten seznam.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="1531"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="1614"/>
         <source>Search results for &quot;{0}&quot; over the whole layer.</source>
         <translation>Rezultati iskanja »{0}« po celotnem sloju.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="1768"/>
+        <source>Loading values…</source>
+        <translation>Nalaganje vrednosti…</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="1683"/>
+        <source>Values</source>
+        <translation>Vrednosti</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="1683"/>
+        <source>This expression cannot be evaluated safely for a service.</source>
+        <translation>Tega izraza ni mogoče varno ovrednotiti za storitev.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="1748"/>
+        <source>Selection</source>
+        <translation>Izbor</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="1748"/>
+        <source>The remote list exceeds the safe selection limit. Select fewer features or filter the layer first.</source>
+        <translation>Oddaljeni seznam presega varno omejitev izbora. Izberite manj objektov ali najprej filtrirajte plast.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="1924"/>
+        <source>Loading selected values…</source>
+        <translation>Nalaganje izbranih vrednosti…</translation>
     </message>
 </context>
 <context>
     <name>QgsCheckableComboBoxLayer</name>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="337"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="339"/>
         <source>Select All</source>
         <translation>Izberi vse</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="339"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="341"/>
         <source>De-select All</source>
         <translation>Odstrani izbor vsega</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="341"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="347"/>
         <source>Select all layers by geometry type (Lines)</source>
         <translation>Izberi vse plasti po tipu geometrije (Črte)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="343"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="349"/>
         <source>De-Select all layers by geometry type (Lines)</source>
         <translation>Odstrani izbor vseh plasti po tipu geometrije (Črte)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="345"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="351"/>
         <source>Select all layers by geometry type (Points)</source>
         <translation>Izberi vse plasti po tipu geometrije (Točke)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="347"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="353"/>
         <source>De-Select all layers by geometry type (Points)</source>
         <translation>Odstrani izbor vseh plasti po tipu geometrije (Točke)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="349"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="355"/>
         <source>Select all layers by geometry type (Polygons)</source>
         <translation>Izberi vse plasti po tipu geometrije (Poligoni)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="351"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="357"/>
         <source>De-Select all layers by geometry type (Polygons)</source>
         <translation>Odstrani izbor vseh plasti po tipu geometrije (Poligoni)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="367"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="376"/>
         <source>Select all raster layers</source>
         <translation>Izberi vse rastrske sloje</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="369"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="378"/>
         <source>De-select all raster layers</source>
         <translation>Prekliči izbor vseh rastrskih slojev</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="371"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="380"/>
         <source>Select all point cloud layers</source>
         <translation>Izberi vse sloje oblaka točk</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="373"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="382"/>
         <source>De-select all point cloud layers</source>
         <translation>Prekliči izbor vseh slojev oblaka točk</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="409"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="418"/>
         <source>pixels in the zone</source>
         <translation>slikovnih točk v coni</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="409"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="418"/>
         <source>points in the zone</source>
         <translation>točk v coni</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="409"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="418"/>
         <source>features</source>
         <translation>objektov</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="415"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="424"/>
         <source>Raster target: the pixels outside the source geometry become NoData (those inside with Disjoint)</source>
         <translation>Rastrski cilj: slikovne točke zunaj izvorne geometrije postanejo NoData (tiste znotraj z Disjoint)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="417"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="426"/>
         <source>Point cloud target: the points outside the source geometry are removed (those inside with Disjoint)</source>
         <translation>Cilj oblaka točk: točke zunaj izvorne geometrije so odstranjene (tiste znotraj z Disjoint)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="419"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="428"/>
         <source>Vector target: the features that satisfy the geometric predicate are kept</source>
         <translation>Vektorski cilj: objekti, ki izpolnjujejo geometrijski predikat, so ohranjeni</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="499"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="515"/>
         <source>Click the square on the right to test this layer by its centroids</source>
         <translation>Kliknite kvadratek desno, da ta sloj preizkusite po njegovih centroidih</translation>
     </message>
@@ -4611,55 +5425,55 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="497"/>
         <source>Band</source>
-        <translation>Kanal</translation>
+        <translation type="obsolete">Kanal</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="500"/>
         <source>Band whose values are selected</source>
-        <translation>Kanal, katerega vrednosti so izbrane</translation>
+        <translation type="obsolete">Kanal, katerega vrednosti so izbrane</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="598"/>
         <source>PIXEL VALUE</source>
-        <translation>VREDNOST SLIKOVNE PIKE</translation>
+        <translation type="obsolete">VREDNOST SLIKOVNE PIKE</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="606"/>
         <source>Pixel value of the current band</source>
-        <translation>Vrednost slikovne pike trenutnega kanala</translation>
+        <translation type="obsolete">Vrednost slikovne pike trenutnega kanala</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="625"/>
         <source>Last {0} values picked</source>
-        <translation>Zadnjih {0} izbranih vrednosti</translation>
+        <translation type="obsolete">Zadnjih {0} izbranih vrednosti</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="638"/>
         <source>Click on the map with the pixel picker. Ctrl+click extends the range to the value.</source>
-        <translation>Kliknite na zemljevid z izbirnikom slikovnih pik. Ctrl+klik razširi obseg do vrednosti.</translation>
+        <translation type="obsolete">Kliknite na zemljevid z izbirnikom slikovnih pik. Ctrl+klik razširi obseg do vrednosti.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="651"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1821"/>
         <source>VALUE RANGE</source>
         <translation>OBSEG VREDNOSTI</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="660"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1255"/>
         <source>Min</source>
         <translation>Min</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="660"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1255"/>
         <source>Lowest value kept</source>
         <translation>Najnižja ohranjena vrednost</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="660"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1255"/>
         <source>Max</source>
         <translation>Maks</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="660"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1255"/>
         <source>Highest value kept</source>
         <translation>Najvišja ohranjena vrednost</translation>
     </message>
@@ -4671,60 +5485,60 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="688"/>
         <source>CLASSES</source>
-        <translation>RAZREDI</translation>
+        <translation type="obsolete">RAZREDI</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="692"/>
         <source>Raster classes</source>
-        <translation>Rastrski razredi</translation>
+        <translation type="obsolete">Rastrski razredi</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="696"/>
         <source>All</source>
-        <translation>Vse</translation>
+        <translation type="obsolete">Vse</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="697"/>
         <source>None</source>
-        <translation>Nič</translation>
+        <translation type="obsolete">Nič</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="707"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1275"/>
         <source>RASTER EXPRESSION</source>
         <translation>RASTRSKI IZRAZ</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="711"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1279"/>
         <source>Raster calculator expression; a pixel is kept where it is not 0</source>
         <translation>Izraz rastrskega kalkulatorja; slikovna pika se ohrani, kjer ni 0</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="712"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1280"/>
         <source>Raster expression</source>
         <translation>Rastrski izraz</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="721"/>
         <source>Use the range</source>
-        <translation>Uporabi obseg</translation>
+        <translation type="obsolete">Uporabi obseg</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="722"/>
         <source>Write the current value range as an expression</source>
-        <translation>Zapiši trenutni obseg vrednosti kot izraz</translation>
+        <translation type="obsolete">Zapiši trenutni obseg vrednosti kot izraz</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="812"/>
         <source>Selected pixels: {0}</source>
-        <translation>Izbrane slikovne pike: {0}</translation>
+        <translation type="obsolete">Izbrane slikovne pike: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1195"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1349"/>
         <source>Set a value range first</source>
         <translation>Najprej nastavite obseg vrednosti</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1381"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2219"/>
         <source>NoData</source>
         <translation>NoData</translation>
     </message>
@@ -4736,252 +5550,665 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="629"/>
         <source>Value of the current band under the cursor</source>
-        <translation>Vrednost trenutnega kanala pod kazalcem</translation>
+        <translation type="obsolete">Vrednost trenutnega kanala pod kazalcem</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="635"/>
         <source>Statistics of the current band in the last rectangle drawn on the map</source>
-        <translation>Statistika trenutnega kanala v zadnjem pravokotniku, narisanem na karti</translation>
+        <translation type="obsolete">Statistika trenutnega kanala v zadnjem pravokotniku, narisanem na karti</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="870"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1577"/>
         <source>Under the cursor: {0}  (X {1:.{3}f}  Y {2:.{3}f})</source>
         <translation>Pod kazalcem: {0}  (X {1:.{3}f}  Y {2:.{3}f})</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="880"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1587"/>
         <source>Zone: {0}</source>
         <translation>Območje: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="880"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1587"/>
         <source>no pixel</source>
         <translation>ni slikovne točke</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1405"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2234"/>
         <source>LAST PICKS</source>
         <translation>ZADNJE ODČITKI</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="509"/>
         <source>Compute on</source>
-        <translation>Izračunaj na</translation>
+        <translation type="obsolete">Izračunaj na</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="512"/>
         <source>Quantity the range applies to. Slope, aspect, hillshade and roughness read the band as a DTM.</source>
-        <translation>Količina, na katero se nanaša obseg. Naklon, ekspozicija, senčenje in hrapavost preberejo kanal kot DMR.</translation>
+        <translation type="obsolete">Količina, na katero se nanaša obseg. Naklon, ekspozicija, senčenje in hrapavost preberejo kanal kot DMR.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="516"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1233"/>
         <source>Pixel value</source>
         <translation>Vrednost slikovne pike</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="516"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1233"/>
         <source>Slope (degrees)</source>
         <translation>Naklon (stopinje)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="516"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1233"/>
         <source>Slope (%)</source>
         <translation>Naklon (%)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="516"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1233"/>
         <source>Aspect (degrees)</source>
         <translation>Ekspozicija (stopinje)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="516"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1233"/>
         <source>Hillshade (0-255)</source>
         <translation>Senčenje (0-255)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="516"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1233"/>
         <source>Roughness (TRI, mean difference)</source>
         <translation>Hrapavost (TRI, povprečna razlika)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="676"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1242"/>
         <source>Usual thresholds of the quantity</source>
         <translation>Običajni pragovi količine</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="677"/>
         <source>Usual thresholds</source>
-        <translation>Običajni pragovi</translation>
+        <translation type="obsolete">Običajni pragovi</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1102"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1931"/>
         <source>Flat</source>
         <translation>Raven</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1102"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1931"/>
         <source>Gentle</source>
         <translation>Blag</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1102"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1931"/>
         <source>Moderate</source>
         <translation>Zmeren</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1103"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1932"/>
         <source>Steep</source>
         <translation>Strm</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1103"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1932"/>
         <source>East</source>
         <translation>Vzhod</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1103"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1932"/>
         <source>South</source>
         <translation>Jug</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1104"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1933"/>
         <source>West</source>
         <translation>Zahod</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1104"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1933"/>
         <source>Shadow</source>
         <translation>Senca</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1104"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1933"/>
         <source>Lit</source>
         <translation>Osvetljeno</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1109"/>
         <source>Usual thresholds…</source>
-        <translation>Običajni pragovi…</translation>
+        <translation type="obsolete">Običajni pragovi…</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="551"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1041"/>
         <source>PIPETTE</source>
         <translation>IZBIRNIK</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="554"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1105"/>
         <source>Tolerance ±</source>
         <translation>Toleranca ±</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="561"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1112"/>
         <source>Tolerance around the picked color or value, in % of the value range</source>
         <translation>Toleranca okoli izbrane barve ali vrednosti, v % obsega vrednosti</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="562"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1113"/>
         <source>Pipette tolerance</source>
         <translation>Toleranca izbirnika</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="571"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1305"/>
         <source>Bands</source>
         <translation>Kanali</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1231"/>
         <source>What the bands of the image are: the presets and the pipette use them</source>
-        <translation>Kaj so kanali slike: uporabljajo jih prednastavitve in izbirnik</translation>
+        <translation type="obsolete">Kaj so kanali slike: uporabljajo jih prednastavitve in izbirnik</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="576"/>
         <source>Band layout</source>
-        <translation>Razporeditev kanalov</translation>
+        <translation type="obsolete">Razporeditev kanalov</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="577"/>
         <source>RGB (red, green, blue)</source>
-        <translation>RGB (rdeča, zelena, modra)</translation>
+        <translation type="obsolete">RGB (rdeča, zelena, modra)</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="577"/>
         <source>IRC (infrared, red, green)</source>
-        <translation>IRC (infrardeča, rdeča, zelena)</translation>
+        <translation type="obsolete">IRC (infrardeča, rdeča, zelena)</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="577"/>
         <source>RGB + infrared</source>
-        <translation>RGB + infrardeča</translation>
+        <translation type="obsolete">RGB + infrardeča</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1232"/>
         <source>Write the expression of a usual index (vegetation, water...)</source>
-        <translation>Napišite izraz običajnega indeksa (vegetacija, voda...)</translation>
+        <translation type="obsolete">Napišite izraz običajnega indeksa (vegetacija, voda...)</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="585"/>
         <source>Spectral presets</source>
-        <translation>Spektralne prednastavitve</translation>
+        <translation type="obsolete">Spektralne prednastavitve</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1228"/>
         <source>Needs an image of three bands or more (red, green, blue...)</source>
-        <translation>Potrebna je slika s tremi ali več kanali (rdeči, zeleni, modri...)</translation>
+        <translation type="obsolete">Potrebna je slika s tremi ali več kanali (rdeči, zeleni, modri...)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1235"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1324"/>
         <source>Vegetation (NDVI &gt; 0.3)</source>
         <translation>Vegetacija (NDVI &gt; 0.3)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1235"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1324"/>
         <source>No vegetation (NDVI &lt; 0.1)</source>
         <translation>Brez vegetacije (NDVI &lt; 0.1)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1236"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1325"/>
         <source>Water (NDWI &gt; 0.1)</source>
         <translation>Voda (NDWI &gt; 0.1)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1236"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1325"/>
         <source>Vegetation (excess green)</source>
         <translation>Vegetacija (presežek zelene)</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1239"/>
         <source>Spectral presets…</source>
-        <translation>Spektralne prednastavitve…</translation>
+        <translation type="obsolete">Spektralne prednastavitve…</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1299"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2039"/>
         <source>This pixel has no value (NoData): pick another one</source>
         <translation>Ta slikovna pika nima vrednosti (NoData): izberite drugo</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1338"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2124"/>
         <source>The tolerance covers every value: lower it</source>
         <translation>Toleranca zajema vse vrednosti: zmanjšajte jo</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1354"/>
         <source>Range {0} → {1}{2}</source>
-        <translation>Obseg {0} → {1}{2}</translation>
+        <translation type="obsolete">Obseg {0} → {1}{2}</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1356"/>
         <source>Class(es) {0}</source>
-        <translation>Razred(i) {0}</translation>
+        <translation type="obsolete">Razred(i) {0}</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1359"/>
         <source>{0} color(s), last: {1}</source>
-        <translation>Število barv: {0}, zadnja: {1}</translation>
+        <translation type="obsolete">Število barv: {0}, zadnja: {1}</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1363"/>
         <source>Expression</source>
-        <translation>Izraz</translation>
+        <translation type="obsolete">Izraz</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="778"/>
+        <source>BANDS</source>
+        <translation>KANALI</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="805"/>
+        <source>Value of the active band under the cursor</source>
+        <translation>Vrednost aktivnega kanala pod kazalko</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="811"/>
+        <source>Statistics of the active band in the last rectangle drawn on the map</source>
+        <translation>Statistika aktivnega kanala v zadnjem pravokotniku, narisanem na zemljevidu</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="858"/>
+        <source>Every band</source>
+        <translation>Vsi kanali</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="860"/>
+        <source>The value range applies to every colour band at once (a pixel is kept when each band is in the range); the histogram shows the first one</source>
+        <translation>Obseg vrednosti velja hkrati za vse barvne kanale (slikovna točka je ohranjena, ko je vsak kanal v obsegu); histogram prikazuje prvega</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="872"/>
+        <source>Active band: the one the range, the histogram and the picker read</source>
+        <translation>Aktivni kanal: tisti, ki ga berejo obseg, histogram in izbirnik</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="881"/>
+        <source>The pipette compares this band</source>
+        <translation>Izbirnik primerja ta kanal</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="991"/>
+        <source>Colour the band holds: the spectral indexes and the chips use it. Click to change it</source>
+        <translation>Barva kanala: uporabljajo jo spektralni indeksi in oznake. Kliknite za spremembo</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1001"/>
+        <source>Value at the last click of the pipette</source>
+        <translation>Vrednost ob zadnjem kliku izbirnika</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="928"/>
+        <source>No colour</source>
+        <translation>Brez barve</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="936"/>
+        <source>RGB</source>
+        <translation>RGB</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="936"/>
+        <source>Bands 1, 2, 3 are red, green, blue</source>
+        <translation>Kanali 1, 2, 3 so rdeča, zelena, modra</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="936"/>
+        <source>IRC</source>
+        <translation>CIR</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="936"/>
+        <source>Bands 1, 2, 3 are infrared, red, green (IGN infrared colour orthophoto)</source>
+        <translation>Kanali 1, 2, 3 so infrardeča, rdeča, zelena (barvni infrardeči ortofoto IGN)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="936"/>
+        <source>RGB + NIR</source>
+        <translation>RGB + NIR</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="936"/>
+        <source>Bands 1, 2, 3, 4 are red, green, blue, near infrared</source>
+        <translation>Kanali 1, 2, 3, 4 so rdeča, zelena, modra, bližnja infrardeča</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="939"/>
+        <source>Every band: {0}</source>
+        <translation>Vsi kanali: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="990"/>
+        <source> Roles guessed, to confirm.</source>
+        <translation> Vloge ugibane, za potrditev.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1019"/>
+        <source>R</source>
+        <translation>R</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1019"/>
+        <source>G</source>
+        <translation>G</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1019"/>
+        <source>B</source>
+        <translation>B</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1020"/>
+        <source>NIR</source>
+        <translation>NIR</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1023"/>
+        <source>Red</source>
+        <translation>Rdeča</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1023"/>
+        <source>Green</source>
+        <translation>Zelena</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1023"/>
+        <source>Blue</source>
+        <translation>Modra</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1024"/>
+        <source>Near infrared</source>
+        <translation>Bližnja infrardeča</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1030"/>
+        <source>roles guessed, to confirm</source>
+        <translation>vloge ugibane, za potrditev</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1045"/>
+        <source>Select</source>
+        <translation>Izberi</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1049"/>
+        <source>Similar pixels</source>
+        <translation>Podobne slikovne točke</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1049"/>
+        <source>Every pixel of the raster close to the picked colour or value (the pipette of the rail)</source>
+        <translation>Vse slikovne točke rastra, ki so blizu odvzeti barvi ali vrednosti (izbirnik iz vrstice)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1049"/>
+        <source>Clicked object</source>
+        <translation>Objekt pod klikom</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1049"/>
+        <source>Only the patch of such pixels the click falls in: a pool, a roof, a field (the object detector of the rail); Ctrl+click adds another object</source>
+        <translation>Samo skupek takih slikovnih točk, v katerega pade klik: bazen, streha, polje (zaznavalnik objektov iz vrstice); Ctrl+klik doda še en objekt</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1049"/>
+        <source>Similar objects</source>
+        <translation>Podobni objekti</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1049"/>
+        <source>Every object of the raster like the clicked one: the patches of such pixels whose area is within the ratios below (the similar objects tool of the rail); Ctrl+click adds another reference object</source>
+        <translation>Vsi objekti rastra, podobni kliknjenemu: skupki takih slikovnih točk, katerih površina je znotraj spodnjih razmerij (orodje podobnih objektov iz vrstice); Ctrl+klik doda še en referenčni objekt</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1073"/>
+        <source>Area ×</source>
+        <translation>Površina ×</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1076"/>
+        <source>Smallest similar object, as a share of the smallest clicked one</source>
+        <translation>Najmanjši podoben objekt kot delež najmanjšega kliknjenega</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1076"/>
+        <source>Largest similar object, as a multiple of the largest clicked one</source>
+        <translation>Največji podoben objekt kot večkratnik največjega kliknjenega</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1089"/>
+        <source>to ×</source>
+        <translation>do ×</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1092"/>
+        <source>same shape</source>
+        <translation>enaka oblika</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1095"/>
+        <source>Keep only the objects shaped like the clicked ones: their compactness (4π × area / perimeter², 1 for a disc) within the same ratios; off, a road of the area of a pool is a pool</source>
+        <translation>Ohrani samo objekte s podobno obliko kot kliknjeni: njihova kompaktnost (4π × površina / obseg², 1 za krog) v istih razmerjih; če je izklopljeno, je cesta s površino bazena bazen</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1146"/>
+        <source>Remove this pick</source>
+        <translation>Odstrani ta odvzem</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1225"/>
+        <source>Quantity</source>
+        <translation>Količina</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1956"/>
+        <source>Quantity the range applies to. Slope, aspect, hillshade and roughness read the active band as a DTM.</source>
+        <translation>Količina, za katero velja obseg. Naklon, ekspozicija, senčenje in hrapavost berejo aktivni kanal kot DMR.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1242"/>
+        <source>Thresholds ▾</source>
+        <translation>Pragovi ▾</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1288"/>
+        <source>Insert ▾</source>
+        <translation>Vstavi ▾</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1288"/>
+        <source>Insert a band reference, a usual spectral index or the current range</source>
+        <translation>Vstavi sklic na kanal, običajni spektralni indeks ali trenutni obseg</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1313"/>
+        <source>Spectral indexes</source>
+        <translation>Spektralni indeksi</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1318"/>
+        <source>Range</source>
+        <translation>Obseg</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1319"/>
+        <source>The current value range</source>
+        <translation>Trenutni obseg vrednosti</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1391"/>
+        <source>Rendered colors depend on style and scale.</source>
+        <translation>Upodobljene barve so odvisne od sloga in merila.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1391"/>
+        <source>Only color selection is available: numeric bands, indices, ranges, classes and derivatives are unavailable.</source>
+        <translation>Na voljo je samo izbor po barvi: številčni kanali, indeksi, obsegi, razredi in izpeljanke niso na voljo.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1817"/>
+        <source>VALUE RANGE — every band</source>
+        <translation>OBSEG VREDNOSTI — vsi kanali</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1819"/>
+        <source>VALUE RANGE — band {0}</source>
+        <translation>OBSEG VREDNOSTI — kanal {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1952"/>
+        <source>picks on: {0}</source>
+        <translation>vzorči iz: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1956"/>
+        <source>A slope, aspect... reads one band as a DTM: choose a band in BANDS first</source>
+        <translation>Naklon, ekspozicija... bere en kanal kot DMR: najprej izberite kanal v KANALI</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2159"/>
+        <source>The object could not be read</source>
+        <translation>Objekta ni bilo mogoče prebrati</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2161"/>
+        <source>No object under the click: raise the tolerance or click another pixel</source>
+        <translation>Pod klikom ni objekta: povečajte toleranco ali kliknite drugo slikovno točko</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2163"/>
+        <source>An object is larger than the window read and was cut: lower the tolerance</source>
+        <translation>Objekt je večji od prebranega okna in je bil odrezan: zmanjšajte toleranco</translation>
+    </message>
+</context>
+<context>
+    <name>RasterMaterialization</name>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/raster_materialization.py" line="121"/>
+        <source>bounded raster capture failed</source>
+        <translation>omejen zajem rastra ni uspel</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="224"/>
+        <source>local raster capture could not be opened</source>
+        <translation>lokalnega zajema rastra ni bilo mogoče odpreti</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="213"/>
+        <source>raster analysis requires a local GDAL capture</source>
+        <translation>analiza rastra zahteva lokalni zajem GDAL</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/raster_materialization.py" line="85"/>
+        <location filename="../adapters/qgis/coverage_layers/raster_materialization.py" line="119"/>
+        <source>raster capture canceled</source>
+        <translation>zajem rastra preklican</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/raster_materialization.py" line="101"/>
+        <source>raster capture destination must be in the session cache</source>
+        <translation>cilj zajema rastra mora biti v predpomnilniku seje</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/raster_materialization.py" line="105"/>
+        <source>raster capture provider could not be cloned</source>
+        <translation>ponudnika zajema rastra ni bilo mogoče klonirati</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/raster_materialization.py" line="38"/>
+        <source>raster capture requires a finite, non-empty extent</source>
+        <translation>zajem rastra zahteva končen, neprazen obseg</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/raster_materialization.py" line="41"/>
+        <source>raster capture requires a positive pixel limit</source>
+        <translation>zajem rastra zahteva pozitivno omejitev slikovnih točk</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/raster_materialization.py" line="46"/>
+        <source>raster capture requires a positive resolution</source>
+        <translation>zajem rastra zahteva pozitivno ločljivost</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/raster_materialization.py" line="87"/>
+        <source>raster capture source could not be opened</source>
+        <translation>vira zajema rastra ni bilo mogoče odpreti</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/raster_materialization.py" line="79"/>
+        <source>raster materialization must run in a worker thread</source>
+        <translation>materializacija rastra mora teči v delovni niti</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="208"/>
+        <source>raster selection canceled</source>
+        <translation>izbor rastra preklican</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="216"/>
+        <source>raster selection source could not be opened</source>
+        <translation>vira izbora rastra ni bilo mogoče odpreti</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="204"/>
+        <source>remote raster selection must run in a worker thread</source>
+        <translation>oddaljeni izbor rastra mora teči v delovni niti</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="210"/>
+        <source>rendered color selection requires a local rendered capture</source>
+        <translation>izbor po upodobljeni barvi zahteva lokalni upodobljeni zajem</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/raster_materialization.py" line="90"/>
+        <source>rendered rasters require a rendered color capture</source>
+        <translation>upodobljeni rastri zahtevajo zajem upodobljenih barv</translation>
+    </message>
+</context>
+<context>
+    <name>RasterStatisticsTask</name>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/raster_statistics_task.py" line="20"/>
+        <source>FilterMate: raster statistics</source>
+        <translation>FilterMate: statistika rastra</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/raster_statistics_task.py" line="64"/>
+        <source>Raster sample failed; retry with a smaller visible extent.</source>
+        <translation>Vzorčenje rastra ni uspelo; poskusite z manjšim vidnim obsegom.</translation>
+    </message>
+</context>
+<context>
+    <name>RasterSurfaceTask</name>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/raster_surface_task.py" line="11"/>
+        <source>FilterMate: raster preview</source>
+        <translation>FilterMate: predogled rastra</translation>
+    </message>
+</context>
+<context>
+    <name>RasterTargetJob</name>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="459"/>
+        <source>remote raster target must run in a worker thread</source>
+        <translation>oddaljeni rastrski cilj mora teči v delovni niti</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="470"/>
+        <source>local raster target could not be opened</source>
+        <translation>lokalnega rastrskega cilja ni bilo mogoče odpreti</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="480"/>
+        <source>Rendered color layers cannot be filter targets.</source>
+        <translation>Plasti upodobljenih barv ne morejo biti cilji filtra.</translation>
     </message>
 </context>
 <context>
@@ -5018,6 +6245,97 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
     </message>
 </context>
 <context>
+    <name>RemoteMaterializer</name>
+    <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1000"/>
+        <source>Partial result: the remote feature limit was reached.</source>
+        <translation>Delni rezultat: dosežena je oddaljena omejitev objektov.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1002"/>
+        <source>Partial result: the remote time limit was reached.</source>
+        <translation>Delni rezultat: dosežena je oddaljena časovna omejitev.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1004"/>
+        <source>Remote filtering was cancelled; the previous filter is kept.</source>
+        <translation>Oddaljeno filtriranje je bilo preklicano; prejšnji filter je ohranjen.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1006"/>
+        <source>More than 500 keys would be sent to the service; narrow the selection or use a local copy.</source>
+        <translation>Storitvi bi bilo poslanih več kot 500 ključev; zožite izbor ali uporabite lokalno kopijo.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1008"/>
+        <source>The service has no stable key; use a local copy.</source>
+        <translation>Storitev nima stabilnega ključa; uporabite lokalno kopijo.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1010"/>
+        <source>Select or filter the remote source before spatial filtering.</source>
+        <translation>Pred prostorskim filtriranjem izberite ali filtrirajte oddaljeni vir.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1012"/>
+        <source>The service filter cannot be proved complete. Select source features or use a local copy.</source>
+        <translation>Popolnosti filtra storitve ni mogoče dokazati. Izberite izvorne objekte ali uporabite lokalno kopijo.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1014"/>
+        <source>The remote source copy is incomplete; the previous filter is kept.</source>
+        <translation>Kopija oddaljenega vira je nepopolna; prejšnji filter je ohranjen.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1016"/>
+        <source>Partial result: no matching feature was confirmed before the limit; the previous filter is kept.</source>
+        <translation>Delni rezultat: pred omejitvijo ni bil potrjen noben ustrezen objekt; prejšnji filter je ohranjen.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1018"/>
+        <source>The intersecting remote copy is incomplete; a disjoint filter cannot be computed safely.</source>
+        <translation>Presečna oddaljena kopija je nepopolna; filtra disjoint ni mogoče varno izračunati.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1020"/>
+        <source>Disjoint combined with another predicate requires a local copy of the remote target.</source>
+        <translation>Disjoint v kombinaciji z drugim predikatom zahteva lokalno kopijo oddaljenega cilja.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1022"/>
+        <source>The remote spatial predicate could not be evaluated; the previous filter is kept.</source>
+        <translation>Oddaljenega prostorskega predikata ni bilo mogoče ovrednotiti; prejšnji filter je ohranjen.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1025"/>
+        <source>The remote copy could not be read or filtered; the previous filter is kept.</source>
+        <translation>Oddaljene kopije ni bilo mogoče prebrati ali filtrirati; prejšnji filter je ohranjen.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/remote_materializer.py" line="93"/>
+        <source>Remote materialization requires a background task.</source>
+        <translation>Oddaljena materializacija zahteva opravilo v ozadju.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/remote_materializer.py" line="566"/>
+        <source>Filtering a bounded remote copy</source>
+        <translation>Filtriranje omejene oddaljene kopije</translation>
+    </message>
+</context>
+<context>
+    <name>RenderedRasterTask</name>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/rendered_raster.py" line="88"/>
+        <source>FilterMate: rendered colour snapshot</source>
+        <translation>FilterMate: posnetek upodobljenih barv</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/rendered_raster.py" line="158"/>
+        <source>Rendered snapshot failed; retry with a smaller visible extent.</source>
+        <translation>Upodobljeni posnetek ni uspel; poskusite z manjšim vidnim obsegom.</translation>
+    </message>
+</context>
+<context>
     <name>SearchableJsonView</name>
     <message>
         <location filename="../ui/widgets/json_view/searchable_view.py" line="79"/>
@@ -5028,6 +6346,147 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <location filename="../ui/widgets/json_view/searchable_view.py" line="184"/>
         <source>No match</source>
         <translation>Ni zadetkov</translation>
+    </message>
+</context>
+<context>
+    <name>ServerFilterTranslation</name>
+    <message>
+        <location filename="../adapters/qgis/server_subset_job.py" line="242"/>
+        <source>A FilterMate task is still reading layers. Retry after it finishes.</source>
+        <translation>Naloga FilterMate še bere plasti. Poskusite znova po koncu.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/server_subset_job.py" line="255"/>
+        <source>A layer with auxiliary storage cannot safely replace its server provider. The previous filter is unchanged.</source>
+        <translation>Plast s pomožnim shranjevanjem ne more varno zamenjati svojega strežniškega ponudnika. Prejšnji filter ostaja nespremenjen.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/server_subset_job.py" line="260"/>
+        <source>A remote join cannot be rebuilt on the main thread. The previous filter is unchanged.</source>
+        <translation>Oddaljene združitve ni mogoče znova zgraditi v glavni niti. Prejšnji filter ostaja nespremenjen.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/server_subset_job.py" line="262"/>
+        <source>A server filter is already being prepared for this layer.</source>
+        <translation>Strežniški filter za to plast se že pripravlja.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/server_filter_translation.py" line="189"/>
+        <location filename="../adapters/qgis/server_filter_translation.py" line="250"/>
+        <source>A server layer can only be modified on its owning thread.</source>
+        <translation>Strežniško plast je mogoče spreminjati samo v niti, ki jo ima v lasti.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/server_subset_job.py" line="235"/>
+        <source>Asynchronous server filters require QGIS 3.32 or newer. The previous filter is unchanged.</source>
+        <translation>Asinhroni strežniški filtri zahtevajo QGIS 3.32 ali novejši. Prejšnji filter ostaja nespremenjen.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/server_subset_job.py" line="368"/>
+        <source>Could not install the prepared server filter.</source>
+        <translation>Pripravljenega strežniškega filtra ni bilo mogoče namestiti.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/server_subset_job.py" line="44"/>
+        <source>Could not preserve the layer state.</source>
+        <translation>Stanja plasti ni bilo mogoče ohraniti.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/server_subset_job.py" line="239"/>
+        <source>Finish editing the layer before applying a server filter.</source>
+        <translation>Pred uporabo strežniškega filtra dokončajte urejanje plasti.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/server_filter_translation.py" line="104"/>
+        <source>Invalid attribute expression.</source>
+        <translation>Neveljaven atributni izraz.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/server_subset_job.py" line="83"/>
+        <source>Preparing server attribute filter</source>
+        <translation>Priprava strežniškega atributnega filtra</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/server_filter_translation.py" line="140"/>
+        <source>QGIS cannot translate this predicate to an OGC filter.</source>
+        <translation>QGIS tega predikata ne more prevesti v filter OGC.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/server_subset_job.py" line="302"/>
+        <location filename="../adapters/qgis/server_subset_job.py" line="311"/>
+        <source>Server filter canceled or timed out. The previous filter is unchanged.</source>
+        <translation>Strežniški filter je bil preklican ali je potekel čas. Prejšnji filter ostaja nespremenjen.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/server_subset_job.py" line="348"/>
+        <source>Server filter installation failed and the previous provider could not be restored.</source>
+        <translation>Namestitev strežniškega filtra ni uspela, prejšnjega ponudnika pa ni bilo mogoče obnoviti.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/server_subset_job.py" line="340"/>
+        <source>Server filter installation failed. The previous provider was already invalid and could not be restored.</source>
+        <translation>Namestitev strežniškega filtra ni uspela. Prejšnji ponudnik je bil že neveljaven in ga ni bilo mogoče obnoviti.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/server_subset_job.py" line="355"/>
+        <source>Server filter installation failed. The previous provider was restored.</source>
+        <translation>Namestitev strežniškega filtra ni uspela. Prejšnji ponudnik je bil obnovljen.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/server_subset_job.py" line="33"/>
+        <source>Server filter installation is in progress. Retry after it finishes.</source>
+        <translation>Namestitev strežniškega filtra poteka. Poskusite znova po koncu.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/server_subset_job.py" line="207"/>
+        <location filename="../adapters/qgis/server_subset_job.py" line="237"/>
+        <source>Server filter installation must start on the layer thread.</source>
+        <translation>Namestitev strežniškega filtra se mora začeti v niti plasti.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/server_filter_translation.py" line="126"/>
+        <source>The expression is too complex to translate safely.</source>
+        <translation>Izraz je prezapleten za varen prevod.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/server_filter_translation.py" line="100"/>
+        <source>The expression is too large or contains ambiguous SQL backslash escapes.</source>
+        <translation>Izraz je prevelik ali vsebuje dvoumna ubežna zaporedja SQL z poševnico nazaj.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/server_subset_job.py" line="318"/>
+        <source>The layer changed while preparing its filter. The prepared result was discarded.</source>
+        <translation>Plast se je med pripravo svojega filtra spremenila. Pripravljeni rezultat je bil zavržen.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/server_subset_job.py" line="366"/>
+        <source>The layer is no longer available. The prepared filter was discarded.</source>
+        <translation>Plast ni več na voljo. Pripravljeni filter je bil zavržen.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/server_subset_job.py" line="311"/>
+        <source>The server rejected the filter or could not be reached. The previous filter is unchanged.</source>
+        <translation>Strežnik je filter zavrnil ali ni bil dosegljiv. Prejšnji filter ostaja nespremenjen.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/server_subset_job.py" line="253"/>
+        <source>This provider and QGIS version do not support verified worker creation. The previous filter is unchanged.</source>
+        <translation>Ta ponudnik in ta različica QGIS ne podpirata preverjenega ustvarjanja delovne niti. Prejšnji filter ostaja nespremenjen.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/server_filter_translation.py" line="225"/>
+        <source>{0}: the attribute filter cannot run entirely on the server. Unsupported part: {1}. {2} The previous filter is unchanged.</source>
+        <translation>{0}: atributnega filtra ni mogoče izvesti v celoti na strežniku. Nepodprt del: {1}. {2} Prejšnji filter ostaja nespremenjen.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/server_filter_translation.py" line="265"/>
+        <source>{0}: the provider rejected the attribute filter. The previous filter was restored.</source>
+        <translation>{0}: ponudnik je zavrnil atributni filter. Prejšnji filter je bil obnovljen.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/server_filter_translation.py" line="264"/>
+        <source>{0}: the provider rejected the filter and restoration failed.</source>
+        <translation>{0}: ponudnik je zavrnil filter in obnovitev ni uspela.</translation>
     </message>
 </context>
 <context>
@@ -5208,12 +6667,12 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
 <context>
     <name>SqlUtils</name>
     <message>
-        <location filename="../infrastructure/database/sql_utils.py" line="208"/>
+        <location filename="../infrastructure/database/sql_utils.py" line="266"/>
         <source>FilterMate - PostgreSQL Type Warning</source>
         <translation>FilterMate - Opozorilo o tipu PostgreSQL</translation>
     </message>
     <message>
-        <location filename="../infrastructure/database/sql_utils.py" line="212"/>
+        <location filename="../infrastructure/database/sql_utils.py" line="270"/>
         <source>Type mismatch in filter: {warning_detail}...</source>
         <translation>Neujemanje tipov v filtru: {warning_detail}...</translation>
     </message>
@@ -5232,29 +6691,37 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
     </message>
 </context>
 <context>
+    <name>TaskCompletionHandler</name>
+    <message>
+        <location filename="../core/tasks/task_completion_handler.py" line="519"/>
+        <source>The filter of {0} could not be applied; it keeps its previous filter.</source>
+        <translation>Filtra plasti {0} ni bilo mogoče uporabiti; ohrani prejšnji filter.</translation>
+    </message>
+</context>
+<context>
     <name>TaskCompletionMessenger</name>
     <message>
-        <location filename="../adapters/layer_refresh_manager.py" line="268"/>
+        <location filename="../adapters/layer_refresh_manager.py" line="280"/>
         <source>{count} features visible in main layer</source>
         <translation>{count} objektov vidnih v glavni plasti</translation>
     </message>
     <message>
-        <location filename="../adapters/layer_refresh_manager.py" line="261"/>
+        <location filename="../adapters/layer_refresh_manager.py" line="273"/>
         <source>All filters cleared - {count} features visible in main layer</source>
         <translation>Vsi filtri odstranjeni - {count} objektov vidnih v glavni plasti</translation>
     </message>
     <message>
-        <location filename="../adapters/layer_refresh_manager.py" line="291"/>
+        <location filename="../adapters/layer_refresh_manager.py" line="303"/>
         <source>Filter applied to &apos;{layer_name}&apos;: {count} features</source>
         <translation>Filter uporabljen na '{layer_name}': {count} objektov</translation>
     </message>
     <message>
-        <location filename="../adapters/layer_refresh_manager.py" line="296"/>
+        <location filename="../adapters/layer_refresh_manager.py" line="308"/>
         <source> ({expression_preview})</source>
         <translation> ({expression_preview})</translation>
     </message>
     <message>
-        <location filename="../adapters/layer_refresh_manager.py" line="312"/>
+        <location filename="../adapters/layer_refresh_manager.py" line="324"/>
         <source>Filter cleared for &apos;{layer_name}&apos;: {count} features visible</source>
         <translation>Filter odstranjen za '{layer_name}': {count} vidnih objektov</translation>
     </message>
@@ -5262,17 +6729,17 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
 <context>
     <name>TaskParameterBuilder</name>
     <message>
-        <location filename="../adapters/task_builder.py" line="926"/>
+        <location filename="../adapters/task_builder.py" line="936"/>
         <source>No entity selected! The selection widget lost the feature. Re-select an entity.</source>
         <translation>Noben objekt ni izbran! Gradnik za izbiro je izgubil objekt. Znova izberite objekt.</translation>
     </message>
     <message>
-        <location filename="../adapters/task_builder.py" line="1044"/>
+        <location filename="../adapters/task_builder.py" line="1054"/>
         <source>Selected layer is invalid or its source cannot be found. Operation cancelled.</source>
         <translation>Izbrana plast je neveljavna ali njen vir ni mogoče najti. Operacija preklicana.</translation>
     </message>
     <message>
-        <location filename="../adapters/task_builder.py" line="1059"/>
+        <location filename="../adapters/task_builder.py" line="1069"/>
         <source>Layer &apos;{0}&apos; is not yet initialized. Try selecting another layer then switch back to this one.</source>
         <translation>Plast '{0}' še ni inicializirana. Poskusite izbrati drugo plast in se nato vrnite na to.</translation>
     </message>
@@ -5280,14 +6747,24 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
 <context>
     <name>UndoRedoHandler</name>
     <message>
-        <location filename="../adapters/undo_redo_handler.py" line="187"/>
+        <location filename="../adapters/undo_redo_handler.py" line="227"/>
         <source>Cannot undo: layer invalid or source not found.</source>
         <translation>Razveljavitev ni mogoča: plast je neveljavna ali vir ni najden.</translation>
     </message>
     <message>
-        <location filename="../adapters/undo_redo_handler.py" line="264"/>
+        <location filename="../adapters/undo_redo_handler.py" line="304"/>
         <source>Cannot redo: layer invalid or source not found.</source>
         <translation>Ponovna izvedba ni mogoča: plast je neveljavna ali vir ni najden.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/undo_redo_handler.py" line="64"/>
+        <source>The provider rejected the saved filter.</source>
+        <translation>Ponudnik je zavrnil shranjeni filter.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/undo_redo_handler.py" line="67"/>
+        <source>Could not restore the filter: {0}</source>
+        <translation>Filtra ni bilo mogoče obnoviti: {0}</translation>
     </message>
 </context>
 <context>
@@ -5296,6 +6773,150 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <location filename="../ui/widgets/json_view/datatypes.py" line="572"/>
         <source>Explore ...</source>
         <translation>Razišči ...</translation>
+    </message>
+</context>
+<context>
+    <name>VectorTargetJob</name>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="261"/>
+        <source>{0}: no unique key field, its features cannot be listed in its filter (a web service, or a virtual layer without a unique id column).</source>
+        <translation>{0}: brez edinstvenega ključnega polja, njenih objektov ni mogoče našteti v filtru (spletna storitev ali navidezna plast brez stolpca z edinstvenim ID-jem).</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="362"/>
+        <source>{0} features to list, more than the {1} sent to a web service: narrow the source or use an attribute filter.</source>
+        <translation>{0} objektov za naštetje, več kot {1}, kolikor jih je mogoče poslati spletni storitvi: zožite vir ali uporabite atributni filter.</translation>
+    </message>
+</context>
+<context>
+    <name>VectorTileFilter</name>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/vector_tile_target.py" line="26"/>
+        <source>Minimum coverage is unavailable for clipped tile objects</source>
+        <translation>Najmanjša pokritost ni na voljo za odrezane objekte ploščic</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/vector_tile_target.py" line="29"/>
+        <source>Vector tile targets support Intersect and Disjoint only</source>
+        <translation>Cilji vektorskih ploščic podpirajo samo Intersect in Disjoint</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/vector_tile_target.py" line="32"/>
+        <source>Vector tile filtering requires a CRS authority code</source>
+        <translation>Filtriranje vektorskih ploščic zahteva kodo organa CRS</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/vector_tile_target.py" line="51"/>
+        <source>Vector tile display filter: attributes depend on zoom; objects split across tiles may differ</source>
+        <translation>Prikazovalni filter vektorskih ploščic: atributi so odvisni od povečave; objekti, razdeljeni med ploščice, se lahko razlikujejo</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/vector_tile_target.py" line="58"/>
+        <source>The vector tile style changed while the filter was running; try again</source>
+        <translation>Slog vektorskih ploščic se je med izvajanjem filtra spremenil; poskusite znova</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/vector_tile_filters.py" line="317"/>
+        <location filename="../adapters/qgis/coverage_layers/vector_tile_filters.py" line="340"/>
+        <source>Filter vector tile attributes</source>
+        <translation>Filtriraj atribute vektorskih ploščic</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/vector_tile_filters.py" line="248"/>
+        <source>Invalid vector tile filter expression</source>
+        <translation>Neveljaven izraz filtra vektorskih ploščic</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/vector_tile_filters.py" line="341"/>
+        <source>QGIS expression (attributes depend on zoom):</source>
+        <translation>Izraz QGIS (atributi so odvisni od povečave):</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/vector_tile_filters.py" line="318"/>
+        <source>Redo vector tile filter</source>
+        <translation>Ponovi filter vektorskih ploščic</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/vector_tile_filters.py" line="298"/>
+        <source>Target only. Attributes depend on zoom. Objects split across tiles may be filtered differently.</source>
+        <translation>Samo cilj. Atributi so odvisni od povečave. Objekti, razdeljeni med ploščice, so lahko filtrirani drugače.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/vector_tile_filters.py" line="99"/>
+        <source>The saved vector tile style is invalid</source>
+        <translation>Shranjeni slog vektorskih ploščic je neveljaven</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/vector_tile_filters.py" line="113"/>
+        <location filename="../adapters/qgis/coverage_layers/vector_tile_filters.py" line="116"/>
+        <source>The saved vector tile symbol property is invalid</source>
+        <translation>Shranjena lastnost simbola vektorskih ploščic je neveljavna</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/vector_tile_filters.py" line="39"/>
+        <source>The tile selection exceeds the expression budget (1 MB); use a smaller area</source>
+        <translation>Izbor ploščic presega omejitev izraza (1 MB); uporabite manjše območje</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/vector_tile_filters.py" line="36"/>
+        <source>The tile selection exceeds the vertex budget (2000); use a smaller area</source>
+        <translation>Izbor ploščic presega omejitev oglišč (2000); uporabite manjše območje</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/vector_tile_filters.py" line="257"/>
+        <source>The vector tile filter exceeds the expression budget (1 MB)</source>
+        <translation>Filter vektorskih ploščic presega omejitev izraza (1 MB)</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/vector_tile_filters.py" line="264"/>
+        <source>The vector tile filter exceeds the total style expression budget (1 MB); use a smaller area</source>
+        <translation>Filter vektorskih ploščic presega skupno omejitev izrazov sloga (1 MB); uporabite manjše območje</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/vector_tile_filters.py" line="317"/>
+        <source>Undo vector tile filter</source>
+        <translation>Razveljavi filter vektorskih ploščic</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/vector_tile_filters.py" line="318"/>
+        <source>Unfilter vector tiles</source>
+        <translation>Odstrani filter vektorskih ploščic</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/vector_tile_filters.py" line="346"/>
+        <source>Vector tile attribute filter</source>
+        <translation>Atributni filter vektorskih ploščic</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/favorites_bridge.py" line="111"/>
+        <source>Vector tile favorite</source>
+        <translation>Priljubljeni vektorskih ploščic</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/vector_tile_filters.py" line="349"/>
+        <source>Vector tile filter</source>
+        <translation>Filter vektorskih ploščic</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/vector_tile_filters.py" line="172"/>
+        <source>Vector tile filtering requires a basic renderer</source>
+        <translation>Filtriranje vektorskih ploščic zahteva osnovni upodabljalnik</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/vector_tile_filters.py" line="125"/>
+        <location filename="../adapters/qgis/coverage_layers/vector_tile_filters.py" line="175"/>
+        <source>Vector tile filtering requires basic labeling</source>
+        <translation>Filtriranje vektorskih ploščic zahteva osnovno označevanje</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/vector_tile_filters.py" line="353"/>
+        <source>Vector tile filters</source>
+        <translation>Filtri vektorskih ploščic</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/vector_tile_filters.py" line="294"/>
+        <source>Vector tiles</source>
+        <translation>Vektorske ploščice</translation>
     </message>
 </context>
 <context>
@@ -5309,19 +6930,19 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
 <context>
     <name>self.self</name>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="588"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="735"/>
         <source>Source geometry: the features selected in EXPLORING</source>
         <translation>Izvorna geometrija: objekti, izbrani v EXPLORING</translation>
     </message>
     <message>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="624"/>
         <source>Source geometry: the selected pixels, vectorized</source>
-        <translation>Izvorna geometrija: izbrane slikovne točke, vektorizirane</translation>
+        <translation type="obsolete">Izvorna geometrija: izbrane slikovne točke, vektorizirane</translation>
     </message>
     <message>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
         <source>Kept points</source>
-        <translation>Ohranjene točke</translation>
+        <translation type="obsolete">Ohranjene točke</translation>
     </message>
 </context>
 </TS>

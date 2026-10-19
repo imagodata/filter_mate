@@ -32,29 +32,70 @@
 <context>
     <name>AppInitializer</name>
     <message>
-        <location filename="../core/services/app_initializer.py" line="171"/>
+        <location filename="../core/services/app_initializer.py" line="175"/>
         <source>Cleared corrupted filters from {0} layer(s). Please re-apply your filters.</source>
         <translation>Usunięto uszkodzone filtry z {0} warstw(y). Proszę ponownie zastosować filtry.</translation>
     </message>
     <message>
-        <location filename="../core/services/app_initializer.py" line="240"/>
+        <location filename="../core/services/app_initializer.py" line="244"/>
         <source>Empty project detected. Add vector layers to activate the plugin.</source>
         <translation>Wykryto pusty projekt. Dodaj warstwy wektorowe, aby aktywować wtyczkę.</translation>
     </message>
     <message>
-        <location filename="../core/services/app_initializer.py" line="307"/>
+        <location filename="../core/services/app_initializer.py" line="311"/>
         <source>Cannot access the FilterMate database. Check the project directory permissions.</source>
         <translation>Nie można uzyskać dostępu do bazy danych FilterMate. Sprawdź uprawnienia katalogu projektu.</translation>
     </message>
     <message>
-        <location filename="../core/services/app_initializer.py" line="321"/>
+        <location filename="../core/services/app_initializer.py" line="325"/>
         <source>Error during database verification: {0}</source>
         <translation>Błąd podczas weryfikacji bazy danych: {0}</translation>
     </message>
     <message>
-        <location filename="../core/services/app_initializer.py" line="601"/>
+        <location filename="../core/services/app_initializer.py" line="605"/>
         <source>Layer loading failed. Use F5 to force reload.</source>
         <translation>Ładowanie warstwy nie powiodło się. Użyj F5, aby wymusić przeładowanie.</translation>
+    </message>
+</context>
+<context>
+    <name>AttributeFilterExecutor</name>
+    <message>
+        <location filename="../core/tasks/executors/attribute_filter_executor.py" line="379"/>
+        <source>{0}: this web service has no unique key field (declared key, id, gml_id, cleabs, objectid...), so the selected features cannot be listed for the server.</source>
+        <translation>{0}: ta usługa sieciowa nie ma unikalnego pola klucza (zadeklarowany klucz, id, gml_id, cleabs, objectid...), więc wybranych obiektów nie można wylistować dla serwera.</translation>
+    </message>
+    <message>
+        <location filename="../core/tasks/executors/attribute_filter_executor.py" line="384"/>
+        <source>{0}: this layer has no unique key field and its feature ids cannot be listed in its filter (a virtual layer needs a unique id column, its uid).</source>
+        <translation>{0}: ta warstwa nie ma unikalnego pola klucza, a identyfikatory jej obiektów nie mogą zostać wylistowane w jej filtrze (warstwa wirtualna wymaga unikalnej kolumny identyfikatora, uid).</translation>
+    </message>
+    <message>
+        <location filename="../core/tasks/executors/attribute_filter_executor.py" line="391"/>
+        <source>{0}: {1} selected features, more than the {2} sent to a web service. Narrow the selection or use an attribute filter.</source>
+        <translation>{0}: wybrano {1} obiektów, więcej niż {2} wysyłanych do usługi sieciowej. Zawęź wybór lub użyj filtra atrybutów.</translation>
+    </message>
+</context>
+<context>
+    <name>BackendController</name>
+    <message>
+        <location filename="../ui/controllers/backend_controller.py" line="110"/>
+        <source>Remote file: every read goes over the network. FilterMate does not count its features on the main thread.</source>
+        <translation>Plik zdalny: każdy odczyt odbywa się przez sieć. FilterMate nie zlicza jego obiektów w wątku głównym.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/backend_controller.py" line="115"/>
+        <source>Remote service: the filter is sent to the server when it can translate it. FilterMate does not count its features on the main thread.</source>
+        <translation>Usługa zdalna: filtr jest wysyłany do serwera, gdy ten potrafi go przetłumaczyć. FilterMate nie zlicza jej obiektów w wątku głównym.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/backend_controller.py" line="120"/>
+        <source>A filter by feature list is limited to {0} features.</source>
+        <translation>Filtr według listy obiektów jest ograniczony do {0} obiektów.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/backend_controller.py" line="123"/>
+        <source>Remote</source>
+        <translation>Zdalne</translation>
     </message>
 </context>
 <context>
@@ -93,12 +134,12 @@
 <context>
     <name>CentroidTargetsSync</name>
     <message>
-        <location filename="../ui/controllers/centroid_targets_sync.py" line="179"/>
+        <location filename="../ui/controllers/centroid_targets_sync.py" line="186"/>
         <source>Test the checked line and polygon targets by their centroids (point on surface): faster on large geometries. Each target has its own square in the list</source>
         <translation>Testuj zaznaczone cele liniowe i poligonowe po ich centroidach (punkt na powierzchni): szybciej dla dużych geometrii. Każdy cel ma własny kwadrat na liście</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/centroid_targets_sync.py" line="179"/>
+        <location filename="../ui/controllers/centroid_targets_sync.py" line="186"/>
         <source>Centroids apply to line and polygon targets: check one in the list of layers to filter</source>
         <translation>Centroidy dotyczą celów liniowych i poligonowych: zaznacz jeden na liście warstw do filtrowania</translation>
     </message>
@@ -106,7 +147,7 @@
 <context>
     <name>ConfigController</name>
     <message>
-        <location filename="../ui/controllers/config_controller.py" line="379"/>
+        <location filename="../ui/controllers/config_controller.py" line="380"/>
         <source>Error cancelling changes: {0}</source>
         <translation>Błąd podczas anulowania zmian: {0}</translation>
     </message>
@@ -122,27 +163,27 @@
 <context>
     <name>CoverageDockExtras</name>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="247"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="303"/>
         <source>1 band</source>
         <translation>1 kanał</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="248"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="304"/>
         <source>{0} bands</source>
         <translation>Kanały: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="249"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="305"/>
         <source>{0} points</source>
         <translation>Punkty: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="207"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="772"/>
         <source>Source geometry: the selected pixels, vectorized</source>
-        <translation type="obsolete">Geometria źródłowa: wybrane piksele po wektoryzacji</translation>
+        <translation>Geometria źródłowa: wybrane piksele po wektoryzacji</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="788"/>
         <source>Source geometry: the footprint of the kept points</source>
         <translation>Geometria źródłowa: zasięg zachowanych punktów</translation>
     </message>
@@ -162,12 +203,12 @@
         <translation type="obsolete">Statystyki prostokąta: przeciągnij na mapie, aby odczytać minimum, maksimum i średnią bieżącego kanału</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="330"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="392"/>
         <source>Elevation profile: open the QGIS elevation profile of the map</source>
         <translation>Profil wysokości: otwórz profil wysokości QGIS dla mapy</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="330"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="392"/>
         <source>3D view: open a new QGIS 3D map view</source>
         <translation>Widok 3D: otwórz nowy widok mapy 3D QGIS</translation>
     </message>
@@ -177,7 +218,7 @@
         <translation type="obsolete">brak obiektów</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="254"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="310"/>
         <source>{0} feature(s)</source>
         <translation>Obiekty: {0}</translation>
     </message>
@@ -187,140 +228,315 @@
         <translation type="obsolete">wszystkie piksele</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="259"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="315"/>
         <source>{0} class(es)</source>
         <translation>Klasy: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="256"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="312"/>
         <source>expression</source>
         <translation>wyrażenie</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="250"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="306"/>
         <source>{0} features</source>
         <translation>Obiekty: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="650"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="803"/>
         <source>Vector</source>
         <translation>Wektor</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="650"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="803"/>
         <source>Raster</source>
         <translation>Raster</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="650"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="803"/>
         <source>Point cloud</source>
         <translation>Chmura punktów</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="347"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="791"/>
         <source>Kept points</source>
-        <translation type="obsolete">Zachowane punkty</translation>
+        <translation>Zachowane punkty</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="624"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="772"/>
         <source>Selection → source geometry</source>
         <translation>Wybór → geometria źródłowa</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="326"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="384"/>
         <source>Link the range to the style: the layer colours stretch over the selected range</source>
         <translation>Powiąż zakres ze stylem: kolory warstwy rozciągają się na wybrany zakres</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="327"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="385"/>
         <source>Class pipette: click the map and the class of the points drawn there is checked. Ctrl+click adds another one</source>
         <translation>Próbnik klas: kliknij na mapie, a klasa narysowanych tam punktów zostanie zaznaczona. Ctrl+kliknięcie dodaje kolejną</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="330"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="392"/>
         <source>Value under the cursor: follow the pixel value (or the slope, aspect... the range applies to) while moving over the map</source>
         <translation>Wartość pod kursorem: śledź wartość piksela (lub nachylenia, ekspozycji..., do których stosuje się zakres) podczas poruszania się po mapie</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="330"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="392"/>
         <source>Statistics of a rectangle: drag on the map to read the minimum, maximum and mean of the current band (or of the slope, aspect... the range applies to)</source>
         <translation>Statystyki prostokąta: przeciągnij po mapie, aby odczytać minimum, maksimum i średnią bieżącego kanału (lub nachylenia, ekspozycji..., do których stosuje się zakres)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="445"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="569"/>
         <source>The style link follows pixel values: not available while the range applies to a slope, aspect, hillshade or roughness</source>
         <translation>Powiązanie ze stylem śledzi wartości pikseli: niedostępne, gdy zakres dotyczy nachylenia, ekspozycji, cieniowania lub chropowatości</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="744"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="916"/>
         <source>Class pipette: this point cloud has no Classification attribute</source>
         <translation>Próbnik klas: ta chmura punktów nie ma atrybutu Classification</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="910"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1522"/>
         <source>The style cannot follow the range: it needs a single band grey or pseudocolor style on the band of the panel</source>
         <translation>Styl nie może śledzić zakresu: wymaga stylu jednokanałowego szarego lub pseudokolorowego dla kanału panelu</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="330"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="392"/>
         <source>Pipette: click the map and the pixels that look like the one you click are selected (a color on an image, a value on a DTM or an index, a class on a classified raster, with the tolerance of the panel). Ctrl+click adds another one</source>
         <translation>Próbnik: kliknij na mapie, a piksele podobne do klikniętego zostaną zaznaczone (kolor na obrazie, wartość na NMT lub indeksie, klasa na rastrze sklasyfikowanym, z tolerancją panelu). Ctrl+kliknięcie dodaje kolejny</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="255"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="311"/>
         <source>no feature selected</source>
         <translation>nie wybrano obiektów</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="257"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="313"/>
         <source>whole layer</source>
         <translation>cała warstwa</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="258"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="314"/>
         <source>no constraint</source>
         <translation>brak ograniczenia</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="260"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="316"/>
         <source>raster expression</source>
         <translation>wyrażenie rastrowe</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="261"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="317"/>
         <source>all points</source>
         <translation>wszystkie punkty</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="318"/>
+        <source>{0} object(s)</source>
+        <translation>Obiekty: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="319"/>
+        <source>shown as the whole class in their box</source>
+        <translation>pokazane jako cała klasa w ich ramce</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="388"/>
+        <source>Object detector: click the map and the patch of pixels that look like the one you click is selected (a pool, a roof, a field, with the tolerance of the panel), not every pixel of its colour. Ctrl+click adds another object</source>
+        <translation>Detektor obiektów: kliknij mapę, a zostanie zaznaczony obszar pikseli podobnych do klikniętego (basen, dach, pole, z tolerancją panelu), a nie wszystkie piksele tego koloru. Ctrl+kliknięcie dodaje kolejny obiekt</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="392"/>
+        <source>Similar objects: click an object and every object of the raster like it is selected (the patches of such pixels whose area is within the ratios of the panel). Ctrl+click adds another reference object</source>
+        <translation>Podobne obiekty: kliknij obiekt, a zostaną zaznaczone wszystkie podobne obiekty rastra (obszary takich pikseli, których powierzchnia mieści się w zakresach panelu). Ctrl+kliknięcie dodaje kolejny obiekt odniesienia</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="392"/>
+        <source>Object detector: click the map and the object under the click is selected (the cluster of points of its class: a building, a tree), not the whole class; or every object of the cloud like it (right-click the button for the target). Ctrl+click adds another object</source>
+        <translation>Detektor obiektów: kliknij mapę, a zostanie wybrany obiekt pod kliknięciem (skupisko punktów jego klasy: budynek, drzewo), a nie cała klasa; lub każdy podobny obiekt chmury (prawy przycisk myszy na przycisku wybiera cel). Ctrl+kliknięcie dodaje kolejny obiekt</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="392"/>
+        <source>Value pipette: click the map and a condition is written on the attribute chosen in ATTRIBUTES (Z, intensity...), around the value of the point there, with the tolerance of the panel. Ctrl+click adds another condition (OR)</source>
+        <translation>Próbnik wartości: kliknij mapę, a zostanie zapisany warunek na atrybucie wybranym w ATRYBUTY (Z, intensywność...), wokół wartości punktu w tym miejscu, z tolerancją panelu. Ctrl+kliknięcie dodaje kolejny warunek (OR)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="392"/>
+        <source>Zone: draw a rectangle, a polygon, a freehand shape or a circle on the map (right-click the button for the shape); its X / Y box goes to ATTRIBUTES, the shape itself cuts the targets</source>
+        <translation>Strefa: narysuj na mapie prostokąt, wielokąt, kształt odręczny lub okrąg (prawy przycisk myszy na przycisku wybiera kształt); jej ramka X / Y trafia do ATRYBUTY, sam kształt przycina cele</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="392"/>
+        <source>More tools: the value under the cursor, the statistics of a rectangle</source>
+        <translation>Więcej narzędzi: wartość pod kursorem, statystyki prostokąta</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="392"/>
+        <source>Similar features: click a feature and every feature of the layer with the same value of the group&apos;s field (the display expression of the single / multiple selection) is selected. Ctrl+click adds another value</source>
+        <translation>Podobne obiekty: kliknij obiekt, a zostaną zaznaczone wszystkie obiekty warstwy o tej samej wartości pola grupy (wyrażenie wyświetlania wyboru pojedynczego / wielokrotnego). Ctrl+kliknięcie dodaje kolejną wartość</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="392"/>
+        <source>More tools: the QGIS selection tools (rectangle, polygon, freehand, radius), select by expression, invert or clear the selection, the attribute table of the selection</source>
+        <translation>Więcej narzędzi: narzędzia zaznaczania QGIS (prostokąt, wielokąt, odręcznie, promień), zaznaczanie według wyrażenia, odwracanie lub czyszczenie zaznaczenia, tabela atrybutów zaznaczenia</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="392"/>
+        <source>More tools: the elevation profile and the 3D view of QGIS</source>
+        <translation>Więcej narzędzi: profil wysokości i widok 3D QGIS</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="539"/>
+        <source>Only color selection is available: rendered colors depend on style and scale.</source>
+        <translation>Dostępny jest tylko wybór według koloru: wyrenderowane kolory zależą od stylu i skali.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="567"/>
+        <source>The style link follows the VALUE RANGE group: make it the active one first</source>
+        <translation>Powiązanie stylu podąża za grupą ZAKRES WARTOŚCI: najpierw uczyń ją aktywną</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="790"/>
+        <source>Current filter: {0}</source>
+        <translation>Bieżący filtr: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="826"/>
+        <source>Rendered colors depend on style and scale.</source>
+        <translation>Wyrenderowane kolory zależą od stylu i skali.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="925"/>
+        <source>Object detector: this point cloud has no Classification attribute</source>
+        <translation>Detektor obiektów: ta chmura punktów nie ma atrybutu Classification</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="974"/>
+        <source>Object detector</source>
+        <translation>Detektor obiektów</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="977"/>
+        <source>Clicked object</source>
+        <translation>Obiekt wskazany kliknięciem</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="977"/>
+        <source>Similar objects</source>
+        <translation>Podobne obiekty</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1081"/>
+        <source>Zone shape</source>
+        <translation>Kształt strefy</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1254"/>
+        <source>Rectangle</source>
+        <translation>Prostokąt</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1254"/>
+        <source>Polygon</source>
+        <translation>Wielokąt</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1255"/>
+        <source>Freehand</source>
+        <translation>Odręcznie</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1255"/>
+        <source>Radius</source>
+        <translation>Promień</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1130"/>
+        <source>The link follows the single and multiple selections: make one of them the active group first</source>
+        <translation>Powiązanie podąża za wyborem pojedynczym i wielokrotnym: najpierw uczyń jeden z nich aktywną grupą</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1253"/>
+        <source>Select on the map</source>
+        <translation>Zaznacz na mapie</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1261"/>
+        <source>Select by expression…</source>
+        <translation>Zaznacz według wyrażenia…</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1261"/>
+        <source>Invert the selection</source>
+        <translation>Odwróć zaznaczenie</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1261"/>
+        <source>Clear the selection</source>
+        <translation>Wyczyść zaznaczenie</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1268"/>
+        <source>Attribute table of the selection</source>
+        <translation>Tabela atrybutów zaznaczenia</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1307"/>
+        <source>Value under the cursor</source>
+        <translation>Wartość pod kursorem</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1311"/>
+        <source>Statistics of a rectangle</source>
+        <translation>Statystyki prostokąta</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1327"/>
+        <source>Elevation profile</source>
+        <translation>Profil wysokości</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1327"/>
+        <source>3D view</source>
+        <translation>Widok 3D</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1684"/>
+        <source>This point cloud has no X / Y attribute to filter on</source>
+        <translation>Ta chmura punktów nie ma atrybutu X / Y, według którego można filtrować</translation>
     </message>
 </context>
 <context>
     <name>CoverageModeController</name>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="294"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="365"/>
         <source>Restoring the filter of {0} raster / point cloud layer(s)…</source>
         <translation>Przywracanie filtra warstw rastrowych / chmur punktów: {0}…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="582"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="747"/>
         <source>cov. ≥ </source>
         <translation>pokr. ≥ </translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="583"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="748"/>
         <source>Minimum share of a polygon target inside the source geometry (0 = any overlap). Used when the source is a raster or a point cloud.</source>
         <translation>Minimalny udział celu poligonowego wewnątrz geometrii źródłowej (0 = dowolne nakładanie). Używane, gdy źródłem jest raster lub chmura punktów.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="698"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="863"/>
         <source>Raster</source>
         <translation>Raster</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="698"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="863"/>
         <source>Point cloud</source>
         <translation>Chmura punktów</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="707"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="872"/>
         <source>{0} layer: selection in EXPLORING, relation in FILTERING</source>
         <translation>Warstwa {0}: wybór w EXPLORING, relacja w FILTERING</translation>
     </message>
@@ -330,7 +546,7 @@
         <translation type="obsolete">Próbnik pikseli: kliknij na mapie, aby odczytać wartość każdego kanału (Ctrl+kliknięcie rozszerza zakres)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="734"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="918"/>
         <source>Zoom to the layer</source>
         <translation>Przybliż do warstwy</translation>
     </message>
@@ -340,260 +556,390 @@
         <translation type="obsolete">Podgląd: ukryj piksele spoza zaznaczenia</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="729"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="911"/>
         <source>Not used for raster layers</source>
         <translation>Nieużywane dla warstw rastrowych</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="730"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="912"/>
         <source>Reset the raster selection</source>
         <translation>Resetuj zaznaczenie rastra</translation>
     </message>
     <message>
         <location filename="../ui/controllers/coverage_mode_controller.py" line="733"/>
         <source>Identify points on the map</source>
-        <translation>Identyfikuj punkty na mapie</translation>
+        <translation type="obsolete">Identyfikuj punkty na mapie</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="735"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="919"/>
         <source>Live preview: show only the points kept by the selection</source>
         <translation>Podgląd na żywo: pokaż tylko punkty zachowane przez zaznaczenie</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="737"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="921"/>
         <source>Not used for point cloud layers</source>
         <translation>Nieużywane dla warstw chmur punktów</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="738"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="922"/>
         <source>Reset the point cloud criteria</source>
         <translation>Resetuj kryteria chmury punktów</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="951"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1390"/>
         <source>Invalid raster calculator expression</source>
         <translation>Nieprawidłowe wyrażenie kalkulatora rastrów</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1023"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1688"/>
         <source>PDAL was not found: the height above a DTM needs the pdal executable</source>
         <translation>Nie znaleziono PDAL: wysokość nad NMT wymaga pliku wykonywalnego pdal</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1991"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3147"/>
         <source>A FilterMate task is still running: wait for it to finish</source>
         <translation>Zadanie FilterMate jest nadal uruchomione: poczekaj na jego zakończenie</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1556"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2629"/>
         <source>FilterMate task failed: {0}</source>
         <translation>Zadanie FilterMate nie powiodło się: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1593"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2666"/>
         <source>Select pixels first: a value range, classes or a raster expression</source>
         <translation>Najpierw zaznacz piksele: zakres wartości, klasy lub wyrażenie rastrowe</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1602"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2679"/>
         <source>Raster filtered: {0}</source>
         <translation>Raster przefiltrowany: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1620"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2713"/>
         <source>The point cloud expression was rejected: {0}</source>
         <translation>Wyrażenie chmury punktów zostało odrzucone: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1623"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2716"/>
         <source>Select points first: classes, attribute ranges or an expression</source>
         <translation>Najpierw zaznacz punkty: klasy, zakresy atrybutów lub wyrażenie</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1631"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2730"/>
         <source>Point cloud filtered: {0}</source>
         <translation>Chmura punktów przefiltrowana: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2094"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3252"/>
         <source>Filter not applied: {0}</source>
         <translation>Filtr nie został zastosowany: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1957"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3109"/>
         <source>canceled</source>
         <translation>anulowano</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1699"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2812"/>
         <source>{0} target(s) filtered</source>
         <translation>Przefiltrowano cele: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1701"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2820"/>
         <source>{0} failed: {1}</source>
         <translation>{0} nie powiodło się: {1}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1710"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2833"/>
         <source>FilterMate: filtering from '{0}'…</source>
         <translation>FilterMate: filtrowanie z '{0}'…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1777"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2929"/>
         <source>Changed since, left as is: {0}</source>
         <translation>Zmieniono od tego czasu, pozostawiono bez zmian: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1783"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2935"/>
         <source>{0} layer(s) restored</source>
         <translation>Przywrócono warstwy: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1817"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2969"/>
         <source>&apos;{0}&apos; not exported: {1}</source>
         <translation>Nie wyeksportowano '{0}': {1}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1831"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2983"/>
         <source>Exported: {0}</source>
         <translation>Wyeksportowano: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1833"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2985"/>
         <source>Export failed: {0}</source>
         <translation>Eksport nie powiódł się: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1840"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2992"/>
         <source>Exporting {0} layer(s)…</source>
         <translation>Eksportowanie warstw: {0}…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1846"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2998"/>
         <source>Export folder</source>
         <translation>Folder eksportu</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1928"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3080"/>
         <source>Raster / point cloud targets skipped: no source feature selected in EXPLORING</source>
         <translation>Pominięto cele rastrowe / chmur punktów: nie wybrano obiektu źródłowego w EXPLORING</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1957"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3109"/>
         <source>Raster / point cloud targets not filtered: {0}</source>
         <translation>Nie przefiltrowano celów rastrowych / chmur punktów: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1959"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3111"/>
         <source>{0} raster / point cloud target(s) filtered</source>
         <translation>Przefiltrowano cele rastrowe / chmur punktów: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2073"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3229"/>
         <source>Choose the DTM raster used for the height above ground</source>
         <translation>Wybierz raster NMT używany do obliczenia wysokości nad terenem</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2084"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3240"/>
         <source>Height above ground not computed: {0}</source>
         <translation>Nie obliczono wysokości nad terenem: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2103"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3261"/>
         <source>Computing the height above '{0}' with PDAL…</source>
         <translation>Obliczanie wysokości nad '{0}' za pomocą PDAL…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="271"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="342"/>
         <source>The FilterMate cache holds {0} GB, over its {1} GB limit: unfilter the raster / point cloud layers you no longer need</source>
         <translation>Pamięć podręczna FilterMate zajmuje {0} GB, ponad limit {1} GB: usuń filtr z warstw rastrowych / chmur punktów, których już nie potrzebujesz</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1025"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1690"/>
         <source>PDAL {0} is too old: the height above a DTM needs PDAL 2.4 or later</source>
         <translation>PDAL {0} jest zbyt stary: wysokość nad NMT wymaga PDAL 2.4 lub nowszego</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1028"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1693"/>
         <source>PDAL could not be run, the height above a DTM is unavailable: {0}</source>
         <translation>Nie można uruchomić PDAL, wysokość nad NMT jest niedostępna: {0}</translation>
     </message>
     <message>
         <location filename="../ui/controllers/coverage_mode_controller.py" line="722"/>
         <source>Pixel picker: click on the map to read the value of every band, and the slope, aspect... when the range applies to one (Ctrl+click extends the range)</source>
-        <translation>Próbnik pikseli: kliknij na mapie, aby odczytać wartość każdego kanału oraz nachylenie, ekspozycję..., gdy zakres dotyczy jednej z tych wielkości (Ctrl+kliknięcie rozszerza zakres)</translation>
+        <translation type="obsolete">Próbnik pikseli: kliknij na mapie, aby odczytać wartość każdego kanału oraz nachylenie, ekspozycję..., gdy zakres dotyczy jednej z tych wielkości (Ctrl+kliknięcie rozszerza zakres)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="725"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="907"/>
         <source>Zoom to the selected pixels (to the layer when nothing is selected)</source>
         <translation>Przybliż do wybranych pikseli (do warstwy, gdy nic nie wybrano)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="726"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="908"/>
         <source>Preview: hide the pixels outside the selection (a white veil for a slope, aspect...)</source>
         <translation>Podgląd: ukryj piksele spoza zaznaczenia (biała zasłona dla nachylenia, ekspozycji...)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="996"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1569"/>
         <source>The preview of a slope or aspect needs the map in the CRS of the raster ({0})</source>
         <translation>Podgląd nachylenia lub ekspozycji wymaga mapy w układzie współrzędnych rastra ({0})</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1371"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2165"/>
         <source>only the points drawn on the map can be picked: turn the preview off to pick a class it hides</source>
         <translation>można wybrać tylko punkty narysowane na mapie: wyłącz podgląd, aby wybrać klasę, którą ukrywa</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1373"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2236"/>
         <source>No classified point under the click</source>
         <translation>Brak sklasyfikowanego punktu pod kliknięciem</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1377"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2171"/>
         <source>Class {0} is already checked</source>
         <translation>Klasa {0} jest już zaznaczona</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1379"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2260"/>
         <source>Class {0} is not in the class list of the layer</source>
         <translation>Klasy {0} nie ma na liście klas warstwy</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="906"/>
+        <source>Not used for raster layers: the pipette reads the bands</source>
+        <translation>Nieużywane dla warstw rastrowych: próbnik odczytuje kanały</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="915"/>
+        <source>Class pipette: click the map and the class of the points drawn there is checked. Ctrl+click adds another one</source>
+        <translation>Próbnik klas: kliknij mapę, a zostanie zaznaczona klasa narysowanych tam punktów. Ctrl+kliknięcie dodaje kolejną</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1070"/>
+        <source>Preview and statistics use a bounded local sample of the visible extent; filtering reads the source.</source>
+        <translation>Podgląd i statystyki używają ograniczonej lokalnej próbki widocznego zasięgu; filtrowanie odczytuje źródło.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1211"/>
+        <source>Preparing a bounded color snapshot of the visible extent…</source>
+        <translation>Przygotowywanie ograniczonego zrzutu kolorów widocznego zasięgu…</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1223"/>
+        <source>The color snapshot could not be prepared. Try a smaller visible extent.</source>
+        <translation>Nie udało się przygotować zrzutu kolorów. Spróbuj z mniejszym widocznym zasięgiem.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1227"/>
+        <source>Color selection applies to the captured visible extent.</source>
+        <translation>Wybór według koloru dotyczy przechwyconego widocznego zasięgu.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1268"/>
+        <source>Raster sampling failed. Try a smaller visible extent.</source>
+        <translation>Próbkowanie rastra nie powiodło się. Spróbuj z mniejszym widocznym zasięgiem.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1515"/>
+        <source>The sampled raster preview could not be calculated.</source>
+        <translation>Nie udało się obliczyć podglądu próbkowanego rastra.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1569"/>
+        <source>The preview of a color or an expression needs the map in the CRS of the raster ({0})</source>
+        <translation>Podgląd koloru lub wyrażenia wymaga mapy w układzie współrzędnych rastra ({0})</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2189"/>
+        <source>No point drawn under the click</source>
+        <translation>Brak narysowanego punktu pod kliknięciem</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2191"/>
+        <source>This point has no {0}</source>
+        <translation>Ten punkt nie ma {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2193"/>
+        <source>{0} cannot be used in a condition</source>
+        <translation>{0} nie może być użyte w warunku</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2250"/>
+        <source>Object not read: {0}</source>
+        <translation>Nie odczytano obiektu: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2252"/>
+        <source>Too many points around the click: the object could not be read</source>
+        <translation>Zbyt wiele punktów wokół kliknięcia: nie udało się odczytać obiektu</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2254"/>
+        <source>No point of class {0} under the click: click on the object itself</source>
+        <translation>Brak punktu klasy {0} pod kliknięciem: kliknij sam obiekt</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2391"/>
+        <source>Similar objects not read: {0}</source>
+        <translation>Nie odczytano podobnych obiektów: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2394"/>
+        <source>No similar object within the area ratios: widen them</source>
+        <translation>Brak podobnego obiektu w zadanych zakresach pól powierzchni: poszerz je</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2462"/>
+        <source>Preparing a sample for the new visible extent. Click again when it is ready.</source>
+        <translation>Przygotowywanie próbki dla nowego widocznego zasięgu. Kliknij ponownie, gdy będzie gotowa.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2469"/>
+        <source>The local raster sample is still being prepared. Retry when it is ready.</source>
+        <translation>Lokalna próbka rastra jest wciąż przygotowywana. Ponów, gdy będzie gotowa.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2673"/>
+        <source>Prepare a color snapshot before filtering this rendered layer.</source>
+        <translation>Przygotuj zrzut kolorów przed filtrowaniem tej warstwy renderowanej.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2815"/>
+        <source>{0} raster target(s) resampled to the configured pixel limit</source>
+        <translation>Cele rastrowe przepróbkowane do skonfigurowanego limitu pikseli: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2844"/>
+        <source>color selection limited to the captured extent; colors depend on style and scale</source>
+        <translation>wybór według koloru ograniczony do przechwyconego zasięgu; kolory zależą od stylu i skali</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2846"/>
+        <source>raster source resampled to {0} cells within the pixel limit</source>
+        <translation>źródło rastrowe przepróbkowane do {0} komórek w granicy pikseli</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2848"/>
+        <source>raster selection read every {0} pixels: over the pixel limit of the settings</source>
+        <translation>wybór rastra odczytany co {0} pikseli: powyżej limitu pikseli w ustawieniach</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2851"/>
+        <source>dense raster selection smoothed to keep its outline light</source>
+        <translation>gęsty wybór rastra wygładzony, aby zachować lekki obrys</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2897"/>
+        <source>{0} left empty, nothing matches the selection: {1}</source>
+        <translation>{0} puste, nic nie pasuje do wyboru: {1}</translation>
     </message>
 </context>
 <context>
     <name>DatabaseManager</name>
     <message>
-        <location filename="../adapters/database_manager.py" line="194"/>
+        <location filename="../adapters/database_manager.py" line="234"/>
         <source>Database file does not exist: {0}</source>
         <translation>Plik bazy danych nie istnieje: {0}</translation>
     </message>
     <message>
-        <location filename="../adapters/database_manager.py" line="201"/>
+        <location filename="../adapters/database_manager.py" line="241"/>
         <source>Failed to connect to database {0}: {1}</source>
         <translation>Nie udało się połączyć z bazą danych {0}: {1}</translation>
     </message>
     <message>
-        <location filename="../adapters/database_manager.py" line="220"/>
+        <location filename="../adapters/database_manager.py" line="260"/>
         <source>Could not create database directory {0}: {1}</source>
         <translation>Nie można utworzyć katalogu bazy danych {0}: {1}</translation>
     </message>
     <message>
-        <location filename="../adapters/database_manager.py" line="274"/>
+        <location filename="../adapters/database_manager.py" line="314"/>
         <source>Failed to create database file {0}: {1}</source>
         <translation>Nie udało się utworzyć pliku bazy danych {0}: {1}</translation>
     </message>
     <message>
-        <location filename="../adapters/database_manager.py" line="551"/>
+        <location filename="../adapters/database_manager.py" line="591"/>
         <source>Cannot initialize FilterMate database: connection failed</source>
         <translation>Nie można zainicjalizować bazy danych FilterMate: połączenie nie powiodło się</translation>
     </message>
     <message>
-        <location filename="../adapters/database_manager.py" line="556"/>
+        <location filename="../adapters/database_manager.py" line="596"/>
         <source>Critical error connecting to database: {0}</source>
         <translation>Błąd krytyczny podczas łączenia z bazą danych: {0}</translation>
     </message>
     <message>
-        <location filename="../adapters/database_manager.py" line="602"/>
+        <location filename="../adapters/database_manager.py" line="651"/>
         <source>Error during database initialization: {0}</source>
         <translation>Błąd podczas inicjalizacji bazy danych: {0}</translation>
     </message>
@@ -601,29 +947,37 @@
 <context>
     <name>DatasourceManager</name>
     <message>
-        <location filename="../core/services/datasource_manager.py" line="153"/>
+        <location filename="../core/services/datasource_manager.py" line="140"/>
         <source>Database file does not exist: {db_file_path}</source>
         <translation>Plik bazy danych nie istnieje: {db_file_path}</translation>
     </message>
     <message>
-        <location filename="../core/services/datasource_manager.py" line="164"/>
+        <location filename="../core/services/datasource_manager.py" line="151"/>
         <source>Failed to connect to database {db_file_path}: {error}</source>
         <translation>Nie udało się połączyć z bazą danych {db_file_path}: {error}</translation>
     </message>
     <message>
-        <location filename="../core/services/datasource_manager.py" line="189"/>
+        <location filename="../core/services/datasource_manager.py" line="176"/>
         <source>QGIS processing module not available to create spatial index</source>
         <translation>Moduł QGIS Processing niedostępny do utworzenia indeksu przestrzennego</translation>
     </message>
     <message>
-        <location filename="../core/services/datasource_manager.py" line="195"/>
+        <location filename="../core/services/datasource_manager.py" line="182"/>
         <source>Cannot create spatial index: layer invalid or source not found.</source>
         <translation>Nie można utworzyć indeksu przestrzennego: warstwa nieprawidłowa lub źródło nieznalezione.</translation>
     </message>
     <message>
-        <location filename="../core/services/datasource_manager.py" line="409"/>
+        <location filename="../core/services/datasource_manager.py" line="405"/>
         <source>PostgreSQL layers detected but psycopg2 is not installed. Using local Spatialite backend. For better performance with large datasets, install psycopg2.</source>
         <translation>Wykryto warstwy PostgreSQL, ale psycopg2 nie jest zainstalowane. Używany jest lokalny backend Spatialite. Aby uzyskać lepszą wydajność dla dużych zbiorów danych, zainstaluj psycopg2.</translation>
+    </message>
+</context>
+<context>
+    <name>ExploringController</name>
+    <message>
+        <location filename="../ui/controllers/exploring_controller.py" line="2239"/>
+        <source>{0} features selected, more than the {1} a web service can be sent: narrow the selection or use an attribute filter.</source>
+        <translation>Wybrano {0} obiektów, więcej niż {1} możliwych do wysłania do usługi sieciowej: zawęź wybór lub użyj filtra atrybutów.</translation>
     </message>
 </context>
 <context>
@@ -685,17 +1039,17 @@
 <context>
     <name>ExtensionRegistry</name>
     <message>
-        <location filename="../extensions/registry.py" line="408"/>
+        <location filename="../extensions/registry.py" line="398"/>
         <source>install the QGIS plugin {0}</source>
         <translation>zainstaluj wtyczkę QGIS {0}</translation>
     </message>
     <message>
-        <location filename="../extensions/registry.py" line="412"/>
+        <location filename="../extensions/registry.py" line="402"/>
         <source>install {0}</source>
         <translation>zainstaluj {0}</translation>
     </message>
     <message>
-        <location filename="../extensions/registry.py" line="413"/>
+        <location filename="../extensions/registry.py" line="403"/>
         <source>The {0} extension is off because {1} is missing: {2}, then restart QGIS.</source>
         <translation>Rozszerzenie {0} jest wyłączone, ponieważ brakuje {1}: {2}, a następnie uruchom ponownie QGIS.</translation>
     </message>
@@ -1452,127 +1806,127 @@ Kliknij wskaźnik ★ i wybierz 'Dodaj bieżący filtr do ulubionych', aby zapis
 <context>
     <name>FilterMate</name>
     <message>
-        <location filename="../filter_mate.py" line="234"/>
+        <location filename="../filter_mate.py" line="236"/>
         <source>&amp;FilterMate</source>
         <translation>&amp;FilterMate</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="361"/>
+        <location filename="../filter_mate.py" line="363"/>
         <source>FilterMate</source>
         <translation>FilterMate</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="361"/>
+        <location filename="../filter_mate.py" line="363"/>
         <source>Open FilterMate panel</source>
         <translation>Otwórz panel FilterMate</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="370"/>
+        <location filename="../filter_mate.py" line="372"/>
         <source>Reset configuration and database</source>
         <translation>Zresetuj konfigurację i bazę danych</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="370"/>
+        <location filename="../filter_mate.py" line="372"/>
         <source>Reset the default configuration and delete the SQLite database</source>
         <translation>Przywróć domyślną konfigurację i usuń bazę danych SQLite</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1515"/>
+        <location filename="../filter_mate.py" line="1563"/>
         <source>Reset Configuration</source>
         <translation>Zresetuj konfigurację</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1541"/>
+        <location filename="../filter_mate.py" line="1589"/>
         <source>Configuration reset successfully.</source>
         <translation>Konfiguracja została pomyślnie zresetowana.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1546"/>
+        <location filename="../filter_mate.py" line="1594"/>
         <source>Default configuration file not found.</source>
         <translation>Nie znaleziono domyślnego pliku konfiguracyjnego.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1568"/>
+        <location filename="../filter_mate.py" line="1617"/>
         <source>Database deleted: {filename}</source>
         <translation>Baza danych usunięta: {filename}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1592"/>
+        <location filename="../filter_mate.py" line="1641"/>
         <source>Restart required</source>
         <translation>Wymagane ponowne uruchomienie</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="477"/>
+        <location filename="../filter_mate.py" line="479"/>
         <source>Obsolete configuration detected</source>
         <translation>Wykryto przestarzałą konfigurację</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="478"/>
+        <location filename="../filter_mate.py" line="480"/>
         <source>unknown version</source>
         <translation>nieznana wersja</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="486"/>
+        <location filename="../filter_mate.py" line="488"/>
         <source>Corrupted configuration detected</source>
         <translation>Wykryto uszkodzoną konfigurację</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="543"/>
+        <location filename="../filter_mate.py" line="545"/>
         <source>Configuration not reset. Some features may not work correctly.</source>
         <translation>Konfiguracja nie została zresetowana. Niektóre funkcje mogą nie działać poprawnie.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="554"/>
+        <location filename="../filter_mate.py" line="556"/>
         <source>Configuration created with default values</source>
         <translation>Konfiguracja utworzona z wartościami domyślnymi</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="557"/>
+        <location filename="../filter_mate.py" line="559"/>
         <source>Corrupted configuration reset. Default settings have been restored.</source>
         <translation>Uszkodzona konfiguracja została zresetowana. Przywrócono ustawienia domyślne.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="560"/>
+        <location filename="../filter_mate.py" line="562"/>
         <source>Obsolete configuration reset. Default settings have been restored.</source>
         <translation>Przestarzała konfiguracja została zresetowana. Przywrócono ustawienia domyślne.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="581"/>
+        <location filename="../filter_mate.py" line="583"/>
         <source>Configuration updated to latest version</source>
         <translation>Konfiguracja zaktualizowana do najnowszej wersji</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="578"/>
+        <location filename="../filter_mate.py" line="580"/>
         <source>Configuration updated: new settings available ({sections}). Access via Options menu.</source>
         <translation>Konfiguracja zaktualizowana: nowe ustawienia dostępne ({sections}). Dostęp przez menu Opcje.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="572"/>
+        <location filename="../filter_mate.py" line="574"/>
         <source>Geometry Simplification</source>
         <translation>Uproszczenie geometrii</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="573"/>
+        <location filename="../filter_mate.py" line="575"/>
         <source>Optimization Thresholds</source>
         <translation>Progi optymalizacji</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="718"/>
+        <location filename="../filter_mate.py" line="735"/>
         <source>Geometry validation setting</source>
         <translation>Ustawienie walidacji geometrii</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="748"/>
+        <location filename="../filter_mate.py" line="765"/>
         <source>Invalid geometry filtering disabled successfully.</source>
         <translation>Filtrowanie nieprawidłowych geometrii zostało pomyślnie wyłączone.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="755"/>
+        <location filename="../filter_mate.py" line="772"/>
         <source>Invalid geometry filtering not modified. Some features may be excluded from exports.</source>
         <translation>Filtrowanie nieprawidłowych geometrii nie zostało zmienione. Niektóre obiekty mogą zostać wykluczone z eksportu.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="479"/>
+        <location filename="../filter_mate.py" line="481"/>
         <source>An obsolete configuration ({}) has been detected.
 
 Do you want to reset to default settings?
@@ -1587,7 +1941,7 @@ Czy chcesz przywrócić ustawienia domyślne?
 • Nie: Zachowaj bieżącą konfigurację (może powodować problemy)</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="487"/>
+        <location filename="../filter_mate.py" line="489"/>
         <source>The configuration file is corrupted and cannot be read.
 
 Do you want to reset to default settings?
@@ -1602,12 +1956,12 @@ Czy chcesz przywrócić ustawienia domyślne?
 • Nie: Anuluj (wtyczka może nie działać poprawnie)</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="494"/>
+        <location filename="../filter_mate.py" line="496"/>
         <source>Configuration reset</source>
         <translation>Resetowanie konfiguracji</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="495"/>
+        <location filename="../filter_mate.py" line="497"/>
         <source>The configuration needs to be reset.
 
 Do you want to continue?</source>
@@ -1616,12 +1970,12 @@ Do you want to continue?</source>
 Czy chcesz kontynuować?</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="600"/>
+        <location filename="../filter_mate.py" line="602"/>
         <source>Error during configuration migration: {}</source>
         <translation>Błąd podczas migracji konfiguracji: {}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="720"/>
+        <location filename="../filter_mate.py" line="737"/>
         <source>The QGIS setting 'Invalid features filtering' is currently set to '{mode}'.
 
 FilterMate recommends disabling this setting (value 'Off') for the following reasons:
@@ -1648,7 +2002,7 @@ Do you want to disable this setting now?
 • No: Keep current setting</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1515"/>
+        <location filename="../filter_mate.py" line="1563"/>
         <source>Are you sure you want to reset to the default configuration?
 
 This will:
@@ -1665,7 +2019,7 @@ To:
 QGIS musi zostać uruchomiony ponownie, aby zastosować zmiany.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1592"/>
+        <location filename="../filter_mate.py" line="1641"/>
         <source>The configuration has been reset.
 
 Please restart QGIS to apply the changes.</source>
@@ -1674,17 +2028,17 @@ Please restart QGIS to apply the changes.</source>
 Uruchom ponownie QGIS, aby zastosować zmiany.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="409"/>
+        <location filename="../filter_mate.py" line="411"/>
         <source>Initialization error: {0}</source>
         <translation>Błąd inicjalizacji: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="659"/>
+        <location filename="../filter_mate.py" line="667"/>
         <source>{count} referenced layer(s) not loaded ({layers_list}). Using fallback display.</source>
         <translation>{count} przywoływanych warstw nie załadowano ({layers_list}). Używany jest wyświetlacz zastępczy.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1583"/>
+        <location filename="../filter_mate.py" line="1632"/>
         <source>Unable to delete {filename}: {e}</source>
         <translation>Nie można usunąć {filename}: {e}</translation>
     </message>
@@ -1694,189 +2048,209 @@ Uruchom ponownie QGIS, aby zastosować zmiany.</translation>
         <translation type="obsolete">Błąd podczas resetowania: {str(e)}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1635"/>
+        <location filename="../filter_mate.py" line="1684"/>
         <source>&lt;p style=&apos;font-size:13px;&apos;&gt;Thank you for using &lt;b&gt;FilterMate&lt;/b&gt;!&lt;br&gt;Join our Discord community to:&lt;/p&gt;&lt;ul style=&apos;margin-left:10px; font-size:12px;&apos;&gt;&lt;li&gt;Get help and support&lt;/li&gt;&lt;li&gt;Report bugs and issues&lt;/li&gt;&lt;li&gt;Suggest new features&lt;/li&gt;&lt;li&gt;Share tips with other users&lt;/li&gt;&lt;/ul&gt;</source>
         <translation>&lt;p style='font-size:13px;'&gt;Dziękujemy za korzystanie z &lt;b&gt;FilterMate&lt;/b&gt;!&lt;br&gt;Dołącz do naszej społeczności Discord, aby:&lt;/p&gt;&lt;ul style='margin-left:10px; font-size:12px;'&gt;&lt;li&gt;Uzyskać pomoc i wsparcie&lt;/li&gt;&lt;li&gt;Zgłaszać błędy i problemy&lt;/li&gt;&lt;li&gt;Proponować nowe funkcje&lt;/li&gt;&lt;li&gt;Dzielić się wskazówkami z innymi użytkownikami&lt;/li&gt;&lt;/ul&gt;</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1651"/>
+        <location filename="../filter_mate.py" line="1700"/>
         <source>  Join us on Discord</source>
         <translation>  Dołącz do nas na Discord</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1671"/>
+        <location filename="../filter_mate.py" line="1720"/>
         <source>Don&apos;t show this again</source>
         <translation>Nie pokazuj ponownie</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1727"/>
+        <location filename="../filter_mate.py" line="1776"/>
         <source>Close</source>
         <translation>Zamknij</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1794"/>
+        <location filename="../filter_mate.py" line="1843"/>
         <source>Error loading plugin: {0}. Check QGIS Python console for details.</source>
         <translation>Błąd ładowania wtyczki: {0}. Sprawdź konsolę Python QGIS, aby uzyskać szczegóły.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7066"/>
+        <location filename="../filter_mate_dockwidget.py" line="7357"/>
         <source>Current layer: {0}</source>
         <translation>Bieżąca warstwa: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7068"/>
+        <location filename="../filter_mate_dockwidget.py" line="7359"/>
         <source>No layer selected</source>
         <translation>Nie wybrano warstwy</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7078"/>
+        <location filename="../filter_mate_dockwidget.py" line="7369"/>
         <source>Selected layers:
 {0}</source>
         <translation>Wybrane warstwy:
 {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7078"/>
+        <location filename="../filter_mate_dockwidget.py" line="7369"/>
         <source>No layers selected</source>
         <translation>Nie wybrano warstw</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7098"/>
+        <location filename="../filter_mate_dockwidget.py" line="7389"/>
         <source>No expression defined</source>
         <translation>Nie zdefiniowano wyrażenia</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7110"/>
+        <location filename="../filter_mate_dockwidget.py" line="7401"/>
         <source>Display expression: {0}</source>
         <translation>Wyrażenie wyświetlania: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7125"/>
+        <location filename="../filter_mate_dockwidget.py" line="7416"/>
         <source>Feature ID: {0}
 First attribute: {1}</source>
         <translation>ID obiektu: {0}
 Pierwszy atrybut: {1}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1601"/>
+        <location filename="../filter_mate.py" line="1650"/>
         <source>The configuration could not be reset. Check that the plugin folder is writable, then try again. Details in filtermate.log.</source>
         <translation>Nie można zresetować konfiguracji. Sprawdź, czy folder wtyczki jest zapisywalny, i spróbuj ponownie. Szczegóły w filtermate.log.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1701"/>
+        <location filename="../filter_mate.py" line="1750"/>
         <source>What&apos;s new in FilterMate 5</source>
         <translation>Nowości w FilterMate 5</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1707"/>
+        <location filename="../filter_mate.py" line="1756"/>
         <source>&lt;p style=&apos;font-size:13px;&apos;&gt;&lt;b&gt;FilterMate now works with raster and point cloud layers.&lt;/b&gt;&lt;/p&gt;&lt;ul style=&apos;margin-left:10px; font-size:12px;&apos;&gt;&lt;li&gt;&lt;b&gt;EXPLORING&lt;/b&gt; adapts to the current layer: value range and classes of a raster, classes, elevation and attributes of a LiDAR point cloud.&lt;/li&gt;&lt;li&gt;&lt;b&gt;FILTERING&lt;/b&gt; relates that selection to layers of any kind, with the usual predicates and buffer: parcels within an elevation range, LiDAR points under buildings, a DTM clipped to a municipality.&lt;/li&gt;&lt;li&gt;&lt;b&gt;EXPORTING&lt;/b&gt; writes filtered rasters (GeoTIFF, COG) and point clouds (LAZ, COPC).&lt;/li&gt;&lt;li&gt;Processing algorithms and models, qgis_process, Python and REST APIs.&lt;/li&gt;&lt;/ul&gt;</source>
         <translation>&lt;p style='font-size:13px;'&gt;&lt;b&gt;FilterMate obsługuje teraz warstwy rastrowe i chmury punktów.&lt;/b&gt;&lt;/p&gt;&lt;ul style='margin-left:10px; font-size:12px;'&gt;&lt;li&gt;&lt;b&gt;EXPLORING&lt;/b&gt; dostosowuje się do bieżącej warstwy: zakres wartości i klasy rastra, klasy, wysokość i atrybuty chmury punktów LiDAR.&lt;/li&gt;&lt;li&gt;&lt;b&gt;FILTERING&lt;/b&gt; wiąże ten wybór z warstwami dowolnego typu, za pomocą zwykłych predykatów i bufora: działki w zakresie wysokości, punkty LiDAR pod budynkami, NMT przycięty do gminy.&lt;/li&gt;&lt;li&gt;&lt;b&gt;EXPORTING&lt;/b&gt; zapisuje przefiltrowane rastry (GeoTIFF, COG) i chmury punktów (LAZ, COPC).&lt;/li&gt;&lt;li&gt;Algorytmy i modele Processing, qgis_process, API Python i REST.&lt;/li&gt;&lt;/ul&gt;</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1723"/>
+        <location filename="../filter_mate.py" line="1772"/>
         <source>Open the user guide</source>
         <translation>Otwórz podręcznik użytkownika</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/async_query.py" line="207"/>
+        <source>This expression cannot be evaluated safely for a service.</source>
+        <translation>Tego wyrażenia nie można bezpiecznie ocenić dla usługi.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/async_query.py" line="209"/>
+        <source>The service could not be read. Please retry.</source>
+        <translation>Nie udało się odczytać usługi. Spróbuj ponownie.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/async_query.py" line="210"/>
+        <source>Read failed</source>
+        <translation>Odczyt nie powiódł się</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/async_query.py" line="270"/>
+        <source>Loading filtered extent…</source>
+        <translation>Ładowanie przefiltrowanego zasięgu…</translation>
     </message>
 </context>
 <context>
     <name>FilterMateApp</name>
     <message>
-        <location filename="../filter_mate_app.py" line="309"/>
+        <location filename="../filter_mate_app.py" line="306"/>
         <source>PostgreSQL layers detected ({0}) but psycopg2 is not installed.</source>
         <translation>Wykryto warstwy PostgreSQL ({0}), ale psycopg2 nie jest zainstalowany.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="401"/>
+        <location filename="../filter_mate_app.py" line="406"/>
         <source>Cleared {0} caches</source>
         <translation>Wyczyszczono {0} pamięci podręcznych</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="926"/>
+        <location filename="../filter_mate_app.py" line="912"/>
         <source>Failed to create dockwidget: {0}</source>
         <translation>Nie udało się utworzyć panelu dokowanego: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="936"/>
+        <location filename="../filter_mate_app.py" line="922"/>
         <source>Failed to display dockwidget: {0}</source>
         <translation>Nie udało się wyświetlić panelu dokowanego: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1456"/>
+        <location filename="../filter_mate_app.py" line="1493"/>
         <source>Error executing {0}: {1}</source>
         <translation>Błąd wykonywania {0}: {1}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1468"/>
+        <location filename="../filter_mate_app.py" line="1505"/>
         <source>Plugin running in degraded mode (hexagonal services unavailable). Performance may be reduced.</source>
         <translation>Wtyczka działa w trybie awaryjnym (usługi hexagonalne niedostępne). Wydajność może być obniżona.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1761"/>
+        <location filename="../filter_mate_app.py" line="1854"/>
         <source>FilterMate ERROR</source>
         <translation>Błąd FilterMate</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1761"/>
+        <location filename="../filter_mate_app.py" line="1854"/>
         <source>Cannot execute {0}: widget initialization failed.</source>
         <translation>Nie można wykonać {0}: inicjalizacja widżetu nie powiodła się.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2544"/>
+        <location filename="../filter_mate_app.py" line="2635"/>
         <source>Cannot {0}: layer invalid or source not found.</source>
         <translation>Nie można {0}: warstwa nieprawidłowa lub nie znaleziono źródła.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2681"/>
+        <location filename="../filter_mate_app.py" line="2789"/>
         <source>All filters cleared - </source>
         <translation>Wszystkie filtry wyczyszczone - </translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2682"/>
+        <location filename="../filter_mate_app.py" line="2790"/>
         <source>{0}{1} features visible in main layer</source>
         <translation>{0}{1} obiektów widocznych w warstwie głównej</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2694"/>
+        <location filename="../filter_mate_app.py" line="2802"/>
         <source>Error: result handler missing</source>
         <translation>Błąd: brak procedury obsługi wyniku</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2707"/>
+        <location filename="../filter_mate_app.py" line="2819"/>
         <source>Error during filtering: {0}</source>
         <translation>Błąd podczas filtrowania: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2831"/>
+        <location filename="../filter_mate_app.py" line="2943"/>
         <source>Recovered {0} orphan favorite(s): {1}</source>
         <translation>Odzyskano {0} osieroconych ulubionych: {1}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2997"/>
+        <location filename="../filter_mate_app.py" line="3109"/>
         <source>Layer loading failed - click to retry</source>
         <translation>Ładowanie warstwy nie powiodło się - kliknij, aby ponowić</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="3049"/>
+        <location filename="../filter_mate_app.py" line="3161"/>
         <source>{0} layer(s) loaded successfully</source>
         <translation>{0} warstw(a) załadowanych pomyślnie</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1983"/>
+        <location filename="../filter_mate_app.py" line="2092"/>
         <source>filter</source>
         <translation>filter</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1985"/>
+        <location filename="../filter_mate_app.py" line="2094"/>
         <source>unfilter</source>
         <translation>unfilter</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1988"/>
+        <location filename="../filter_mate_app.py" line="2097"/>
         <source>FilterMate – Edit Mode Detected</source>
         <translation>FilterMate – Edit Mode Detected</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1990"/>
+        <location filename="../filter_mate_app.py" line="2099"/>
         <source>The following layer(s) are currently in edit mode:
 {0}
 
@@ -1889,45 +2263,55 @@ QGIS cannot apply filters while a layer is being edited.
 What would you like to do?</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2000"/>
+        <location filename="../filter_mate_app.py" line="2109"/>
         <source>Save Changes &amp; {0}</source>
         <translation>Save Changes &amp; {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2007"/>
+        <location filename="../filter_mate_app.py" line="2116"/>
         <source>Discard Changes &amp; {0}</source>
         <translation>Discard Changes &amp; {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2014"/>
+        <location filename="../filter_mate_app.py" line="2123"/>
         <source>Cancel</source>
         <translation>Anuluj</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2038"/>
+        <location filename="../filter_mate_app.py" line="2147"/>
         <source>Could not save changes for layer &quot;{0}&quot;. Operation cancelled.</source>
         <translation>Could not save changes for layer &quot;{0}&quot;. Operation cancelled.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1298"/>
+        <location filename="../filter_mate_app.py" line="1323"/>
         <source>Pick a layer in the EXPLORING tab before running &apos;{0}&apos;.</source>
         <translation>Wybierz warstwę na karcie EXPLORING przed uruchomieniem '{0}'.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="853"/>
+        <location filename="../filter_mate_app.py" line="839"/>
         <source>{0} layer(s) stay filtered: {1}. Turn the option back on to unfilter them.</source>
         <translation>{0} warstw(y) pozostaje przefiltrowanych: {1}. Włącz ponownie opcję, aby usunąć filtr.</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_app.py" line="2621"/>
+        <source>A server filter is being prepared. Wait for it to finish before starting another operation.</source>
+        <translation>Trwa przygotowywanie filtra serwera. Poczekaj na jego zakończenie, zanim rozpoczniesz kolejną operację.</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_app.py" line="1770"/>
+        <source>A FilterMate API operation is running. Wait for it to finish.</source>
+        <translation>Trwa operacja API FilterMate. Poczekaj na jej zakończenie.</translation>
     </message>
 </context>
 <context>
     <name>FilterMateDockWidget</name>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="616"/>
+        <location filename="../filter_mate_dockwidget.py" line="621"/>
         <source>Initialization error: {}</source>
         <translation>Błąd inicjalizacji: {}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1008"/>
+        <location filename="../filter_mate_dockwidget.py" line="1028"/>
         <source>UI configuration incomplete - check logs</source>
         <translation>Konfiguracja interfejsu niekompletna - sprawdź logi</translation>
     </message>
@@ -1937,290 +2321,404 @@ What would you like to do?</translation>
         <translation type="obsolete">Błąd wymiarów interfejsu: {}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1468"/>
+        <location filename="../filter_mate_dockwidget.py" line="1488"/>
         <source>Favorites manager not available</source>
         <translation>Menedżer ulubionych niedostępny</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1489"/>
+        <location filename="../filter_mate_dockwidget.py" line="1509"/>
         <source>★ {0} Favorites saved
 Click to apply or manage</source>
         <translation>★ {0} ulubionych zapisanych
 Kliknij, aby zastosować lub zarządzać</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1492"/>
+        <location filename="../filter_mate_dockwidget.py" line="1512"/>
         <source>★ No favorites saved
 Click to add current filter</source>
         <translation>★ Brak zapisanych ulubionych
 Kliknij, aby dodać bieżący filtr</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1512"/>
+        <location filename="../filter_mate_dockwidget.py" line="1532"/>
         <source>Forced {0} backend for {1} layer(s)</source>
         <translation>Wymuszono backend {0} dla {1} warstw(y)</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1598"/>
+        <location filename="../filter_mate_dockwidget.py" line="1638"/>
         <source>Backend controller not available</source>
         <translation>Kontroler backendu niedostępny</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1536"/>
+        <location filename="../filter_mate_dockwidget.py" line="1556"/>
         <source>PostgreSQL auto-cleanup enabled</source>
         <translation>Automatyczne czyszczenie PostgreSQL włączone</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1537"/>
+        <location filename="../filter_mate_dockwidget.py" line="1557"/>
         <source>PostgreSQL auto-cleanup disabled</source>
         <translation>Automatyczne czyszczenie PostgreSQL wyłączone</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1543"/>
+        <location filename="../filter_mate_dockwidget.py" line="1563"/>
         <source>PostgreSQL session views cleaned up</source>
         <translation>Widoki sesji PostgreSQL wyczyszczone</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1543"/>
+        <location filename="../filter_mate_dockwidget.py" line="1563"/>
         <source>No views to clean or cleanup failed</source>
         <translation>Brak widoków do wyczyszczenia lub czyszczenie nie powiodło się</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1554"/>
+        <location filename="../filter_mate_dockwidget.py" line="1574"/>
         <source>No PostgreSQL connection available</source>
         <translation>Brak dostępnego połączenia PostgreSQL</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1560"/>
+        <location filename="../filter_mate_dockwidget.py" line="1600"/>
         <source>Schema has {0} view(s) from other sessions.
 Drop anyway?</source>
         <translation>Schemat ma {0} widok(ów) z innych sesji.
 Usunąć mimo to?</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1561"/>
+        <location filename="../filter_mate_dockwidget.py" line="1601"/>
         <source>Other Sessions Active</source>
         <translation>Inne sesje aktywne</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1563"/>
+        <location filename="../filter_mate_dockwidget.py" line="1603"/>
         <source>Schema cleanup cancelled</source>
         <translation>Czyszczenie schematu anulowane</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1568"/>
+        <location filename="../filter_mate_dockwidget.py" line="1608"/>
         <source>Schema &apos;{0}&apos; dropped successfully</source>
         <translation>Schemat '{0}' pomyślnie usunięty</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1570"/>
+        <location filename="../filter_mate_dockwidget.py" line="1610"/>
         <source>Schema cleanup failed</source>
         <translation>Czyszczenie schematu nie powiodło się</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1596"/>
+        <location filename="../filter_mate_dockwidget.py" line="1636"/>
         <source>PostgreSQL Session Info</source>
         <translation>Info sesji PostgreSQL</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="2719"/>
+        <location filename="../filter_mate_dockwidget.py" line="2753"/>
         <source>Theme adapted: {0}</source>
         <translation>Motyw dostosowany: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="2719"/>
+        <location filename="../filter_mate_dockwidget.py" line="2753"/>
         <source>Dark mode</source>
         <translation>Tryb ciemny</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="2719"/>
+        <location filename="../filter_mate_dockwidget.py" line="2753"/>
         <source>Light mode</source>
         <translation>Tryb jasny</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="4057"/>
+        <location filename="../filter_mate_dockwidget.py" line="4102"/>
         <source>Selected features have no geometry.</source>
         <translation>Wybrane obiekty nie mają geometrii.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="4076"/>
+        <location filename="../filter_mate_dockwidget.py" line="4121"/>
         <source>No feature selected. Select a feature from the dropdown list.</source>
         <translation>Nie wybrano obiektu. Wybierz obiekt z listy rozwijanej.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="5132"/>
+        <location filename="../filter_mate_dockwidget.py" line="5285"/>
         <source>The selected layer is invalid or its source cannot be found.</source>
         <translation>Wybrana warstwa jest nieprawidłowa lub nie można znaleźć jej źródła.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="5892"/>
+        <location filename="../filter_mate_dockwidget.py" line="6080"/>
         <source>Negative buffer (erosion): shrinks polygons inward</source>
         <translation>Bufor ujemny (erozja): zmniejsza wielokąty do wewnątrz</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="5895"/>
+        <location filename="../filter_mate_dockwidget.py" line="6083"/>
         <source>Buffer value in meters (positive=expand, negative=shrink polygons)</source>
         <translation>Wartość bufora w metrach (dodatnia=rozszerz, ujemna=zmniejsz wielokąty)</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6396"/>
+        <location filename="../filter_mate_dockwidget.py" line="6585"/>
         <source>Plugin activated with {0} vector layer(s)</source>
         <translation>Wtyczka aktywowana z {0} warstwami wektorowymi</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6485"/>
+        <location filename="../filter_mate_dockwidget.py" line="6684"/>
         <source>Could not reload plugin automatically.</source>
         <translation>Nie można automatycznie przeładować wtyczki.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6490"/>
+        <location filename="../filter_mate_dockwidget.py" line="6689"/>
         <source>Error reloading plugin: {0}</source>
         <translation>Błąd podczas przeładowywania wtyczki: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6562"/>
+        <location filename="../filter_mate_dockwidget.py" line="6764"/>
         <source>Layer properties reset to defaults</source>
         <translation>Właściwości warstwy zresetowane do domyślnych</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6563"/>
+        <location filename="../filter_mate_dockwidget.py" line="6765"/>
         <source>Error resetting layer properties: {}</source>
         <translation>Błąd resetowania właściwości warstwy: {}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="875"/>
+        <location filename="../filter_mate_dockwidget.py" line="895"/>
         <source>Filter</source>
         <translation>Filtruj</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="876"/>
+        <location filename="../filter_mate_dockwidget.py" line="896"/>
         <source>Undo the last filter</source>
         <translation>Cofnij ostatni filtr</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="877"/>
+        <location filename="../filter_mate_dockwidget.py" line="897"/>
         <source>Redo the last filter</source>
         <translation>Ponów ostatni filtr</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="878"/>
+        <location filename="../filter_mate_dockwidget.py" line="898"/>
         <source>Remove the filters</source>
         <translation>Usuń filtry</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="879"/>
+        <location filename="../filter_mate_dockwidget.py" line="899"/>
         <source>Export the layers</source>
         <translation>Eksportuj warstwy</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="880"/>
+        <location filename="../filter_mate_dockwidget.py" line="900"/>
         <source>About FilterMate</source>
         <translation>O FilterMate</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="881"/>
+        <location filename="../filter_mate_dockwidget.py" line="901"/>
         <source>QFieldCloud</source>
         <translation>QFieldCloud</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="882"/>
+        <location filename="../filter_mate_dockwidget.py" line="902"/>
         <source>Identify the selected features</source>
         <translation>Identyfikuj wybrane obiekty</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="883"/>
+        <location filename="../filter_mate_dockwidget.py" line="903"/>
         <source>Zoom to the selected features</source>
         <translation>Przybliż do wybranych obiektów</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="884"/>
+        <location filename="../filter_mate_dockwidget.py" line="904"/>
         <source>Select the features on the map</source>
         <translation>Zaznacz obiekty na mapie</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="885"/>
+        <location filename="../filter_mate_dockwidget.py" line="905"/>
         <source>Follow the features on the map</source>
         <translation>Śledź obiekty na mapie</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget.py" line="886"/>
         <source>Link the three selection modes</source>
-        <translation>Połącz trzy tryby wyboru</translation>
+        <translation type="obsolete">Połącz trzy tryby wyboru</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="887"/>
+        <location filename="../filter_mate_dockwidget.py" line="907"/>
         <source>Reset the layer properties</source>
         <translation>Resetuj właściwości warstwy</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="888"/>
+        <location filename="../filter_mate_dockwidget.py" line="908"/>
         <source>Follow the current layer</source>
         <translation>Śledź bieżącą warstwę</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="889"/>
+        <location filename="../filter_mate_dockwidget.py" line="909"/>
         <source>Layers to filter</source>
         <translation>Warstwy do przefiltrowania</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="890"/>
+        <location filename="../filter_mate_dockwidget.py" line="910"/>
         <source>Combine with the existing filter</source>
         <translation>Połącz z istniejącym filtrem</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="891"/>
+        <location filename="../filter_mate_dockwidget.py" line="911"/>
         <source>Geometric predicates</source>
         <translation>Predykaty geometryczne</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="892"/>
+        <location filename="../filter_mate_dockwidget.py" line="912"/>
         <source>Buffer distance</source>
         <translation>Odległość bufora</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="893"/>
+        <location filename="../filter_mate_dockwidget.py" line="913"/>
         <source>Buffer type</source>
         <translation>Typ bufora</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="894"/>
+        <location filename="../filter_mate_dockwidget.py" line="914"/>
         <source>Layers to export</source>
         <translation>Warstwy do wyeksportowania</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="895"/>
+        <location filename="../filter_mate_dockwidget.py" line="915"/>
         <source>Projection of the export</source>
         <translation>Układ współrzędnych eksportu</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="896"/>
+        <location filename="../filter_mate_dockwidget.py" line="916"/>
         <source>Export the styles</source>
         <translation>Eksportuj style</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="897"/>
+        <location filename="../filter_mate_dockwidget.py" line="917"/>
         <source>Export format</source>
         <translation>Format eksportu</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="898"/>
+        <location filename="../filter_mate_dockwidget.py" line="918"/>
         <source>Output folder</source>
         <translation>Folder wyjściowy</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="899"/>
+        <location filename="../filter_mate_dockwidget.py" line="919"/>
         <source>Zip the export</source>
         <translation>Spakuj eksport do ZIP</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1013"/>
+        <location filename="../filter_mate_dockwidget.py" line="1033"/>
         <source>The panel layout could not be applied; default sizes are used. Details in filtermate.log.</source>
         <translation>Nie można zastosować układu panelu; używane są domyślne rozmiary. Szczegóły w filtermate.log.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6649"/>
+        <location filename="../filter_mate_dockwidget.py" line="6856"/>
         <source>Vector</source>
         <translation>Wektor</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="906"/>
+        <source>Link the single and multiple selections</source>
+        <translation>Połącz wybór pojedynczy i wielokrotny</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="1586"/>
+        <source>Schema &apos;{0}&apos; and the following {1} temporary object(s) will be dropped:</source>
+        <translation>Schemat '{0}' oraz następujące obiekty tymczasowe ({1}) zostaną usunięte:</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="1589"/>
+        <source>... and {0} more</source>
+        <translation>... i {0} więcej</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="1591"/>
+        <source>Schema &apos;{0}&apos; is empty and will be dropped.</source>
+        <translation>Schemat '{0}' jest pusty i zostanie usunięty.</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="1592"/>
+        <source>Drop FilterMate schema</source>
+        <translation>Usuń schemat FilterMate</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="4224"/>
+        <source>Read failed</source>
+        <translation>Odczyt nie powiódł się</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="4224"/>
+        <source>The service could not be read. Please retry.</source>
+        <translation>Nie udało się odczytać usługi. Spróbuj ponownie.</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="4566"/>
+        <source>Loading filtered extent…</source>
+        <translation>Ładowanie przefiltrowanego zasięgu…</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="5150"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="539"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="3408"/>
+        <source>Loading selected values…</source>
+        <translation>Ładowanie wybranych wartości…</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="5141"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="502"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="603"/>
+        <source>This expression cannot be evaluated safely for a service.</source>
+        <translation>Tego wyrażenia nie można bezpiecznie ocenić dla usługi.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_controller.py" line="2472"/>
+        <source>Error evaluating expression: {0}</source>
+        <translation>Błąd oceny wyrażenia: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_controller.py" line="2471"/>
+        <source>Expression Evaluation</source>
+        <translation>Ocena wyrażenia</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_controller.py" line="411"/>
+        <source>Loading values…</source>
+        <translation>Ładowanie wartości…</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_controller.py" line="646"/>
+        <source>Loading zoom extent…</source>
+        <translation>Ładowanie zasięgu powiększenia…</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_controller.py" line="633"/>
+        <source>No feature with geometry matches the selection.</source>
+        <translation>Żaden obiekt z geometrią nie pasuje do wyboru.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_controller.py" line="408"/>
+        <source>Only a limited set of values is shown. Refine the search to find other values.</source>
+        <translation>Wyświetlono tylko ograniczony zestaw wartości. Doprecyzuj wyszukiwanie, aby znaleźć inne wartości.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_controller.py" line="475"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="483"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="502"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="566"/>
+        <source>Selection</source>
+        <translation>Wybór</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_controller.py" line="475"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="566"/>
+        <source>The service selection exceeds the key limit. Refine the selection.</source>
+        <translation>Wybór usługi przekracza limit kluczy. Doprecyzuj wybór.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_controller.py" line="483"/>
+        <source>This service has no stable key for the selection.</source>
+        <translation>Ta usługa nie ma stabilnego klucza dla wyboru.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_controller.py" line="408"/>
+        <source>Values</source>
+        <translation>Wartości</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_controller.py" line="603"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="633"/>
+        <source>Zoom</source>
+        <translation>Przybliż</translation>
     </message>
 </context>
 <context>
@@ -2397,14 +2895,37 @@ Usunąć mimo to?</translation>
     </message>
 </context>
 <context>
+    <name>FilterMateOperations</name>
+    <message>
+        <location filename="../adapters/public_api/operations.py" line="556"/>
+        <source>FilterMate was unloaded</source>
+        <translation>FilterMate został wyłączony</translation>
+    </message>
+    <message>
+        <location filename="../adapters/public_api/operations.py" line="118"/>
+        <source>rendered or unsupported raster: cannot be a filter target</source>
+        <translation>raster renderowany lub nieobsługiwany: nie może być celem filtra</translation>
+    </message>
+    <message>
+        <location filename="../adapters/public_api/operations.py" line="505"/>
+        <source>rendered raster sources require a local colour capture; numeric pixel selections are unavailable</source>
+        <translation>renderowane źródła rastrowe wymagają lokalnego przechwycenia kolorów; numeryczny wybór pikseli jest niedostępny</translation>
+    </message>
+    <message>
+        <location filename="../adapters/public_api/operations.py" line="577"/>
+        <source>the source layer itself was not changed</source>
+        <translation>sama warstwa źródłowa nie została zmieniona</translation>
+    </message>
+</context>
+<context>
     <name>FilterResultHandler</name>
     <message>
-        <location filename="../adapters/filter_result_handler.py" line="359"/>
+        <location filename="../adapters/filter_result_handler.py" line="347"/>
         <source>{count} features visible in main layer</source>
         <translation>{count} obiektów widocznych w warstwie głównej</translation>
     </message>
     <message>
-        <location filename="../adapters/filter_result_handler.py" line="352"/>
+        <location filename="../adapters/filter_result_handler.py" line="340"/>
         <source>All filters cleared - {count} features visible in main layer</source>
         <translation>Wszystkie filtry wyczyszczone - {count} obiektów widocznych w warstwie głównej</translation>
     </message>
@@ -2412,54 +2933,82 @@ Usunąć mimo to?</translation>
 <context>
     <name>FinishedHandler</name>
     <message>
-        <location filename="../core/tasks/finished_handler.py" line="353"/>
+        <location filename="../core/tasks/finished_handler.py" line="387"/>
         <source>Task failed</source>
         <translation>Zadanie nie powiodło się</translation>
     </message>
     <message>
-        <location filename="../core/tasks/finished_handler.py" line="354"/>
+        <location filename="../core/tasks/finished_handler.py" line="388"/>
         <source>Filter failed for: {0}</source>
         <translation>Filtr nie powiódł się dla: {0}</translation>
     </message>
     <message>
-        <location filename="../core/tasks/finished_handler.py" line="358"/>
+        <location filename="../core/tasks/finished_handler.py" line="392"/>
         <source> (+{0} more)</source>
         <translation> (+{0} więcej)</translation>
     </message>
     <message>
-        <location filename="../core/tasks/finished_handler.py" line="405"/>
+        <location filename="../core/tasks/finished_handler.py" line="439"/>
         <source>Layer(s) filtered</source>
         <translation>Warstwy przefiltrowane</translation>
     </message>
     <message>
-        <location filename="../core/tasks/finished_handler.py" line="409"/>
+        <location filename="../core/tasks/finished_handler.py" line="443"/>
         <source>Layer(s) filtered to precedent state</source>
         <translation>Warstwy przefiltrowane do poprzedniego stanu</translation>
     </message>
     <message>
-        <location filename="../core/tasks/finished_handler.py" line="413"/>
+        <location filename="../core/tasks/finished_handler.py" line="447"/>
         <source>Layer(s) unfiltered</source>
         <translation>Warstwy odfiltrowane</translation>
     </message>
     <message>
-        <location filename="../core/tasks/finished_handler.py" line="417"/>
+        <location filename="../core/tasks/finished_handler.py" line="451"/>
         <source>Filter task : {0}</source>
         <translation>Zadanie filtrowania: {0}</translation>
     </message>
     <message>
-        <location filename="../core/tasks/finished_handler.py" line="438"/>
+        <location filename="../core/tasks/finished_handler.py" line="472"/>
         <source>Export task : {0}</source>
         <translation>Zadanie eksportu: {0}</translation>
     </message>
     <message>
-        <location filename="../core/tasks/finished_handler.py" line="463"/>
+        <location filename="../core/tasks/finished_handler.py" line="497"/>
         <source>Exception: {0}</source>
         <translation>Wyjątek: {0}</translation>
     </message>
     <message>
-        <location filename="../core/tasks/finished_handler.py" line="489"/>
+        <location filename="../core/tasks/finished_handler.py" line="523"/>
         <source>Filter not applied, previous filter kept: {0}</source>
         <translation>Filtr nie został zastosowany, zachowano poprzedni filtr: {0}</translation>
+    </message>
+    <message>
+        <location filename="../core/tasks/finished_handler.py" line="569"/>
+        <source>Layer(s) removed during the filter, left out: {0}</source>
+        <translation>Warstwy usunięte podczas filtrowania, pominięto: {0}</translation>
+    </message>
+</context>
+<context>
+    <name>HeightAboveGround</name>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/hag_task.py" line="93"/>
+        <source>Draw a useful selection zone before computing height above ground remotely</source>
+        <translation>Narysuj użyteczną strefę wyboru przed zdalnym obliczeniem wysokości nad terenem</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/hag_task.py" line="117"/>
+        <source>The DTM and point cloud have no common useful extent</source>
+        <translation>NMT i chmura punktów nie mają wspólnego użytecznego zasięgu</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/hag_task.py" line="124"/>
+        <source>The useful selection has no polygon area</source>
+        <translation>Użyteczny wybór nie ma powierzchni poligonowej</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/hag_task.py" line="169"/>
+        <source>Height above ground covers the useful area only; Unfilter restores the original cloud</source>
+        <translation>Wysokość nad terenem obejmuje tylko obszar użyteczny; Usuń filtr przywraca pierwotną chmurę</translation>
     </message>
 </context>
 <context>
@@ -2496,15 +3045,23 @@ Usunąć mimo to?</translation>
 <context>
     <name>LayerLifecycleService</name>
     <message>
-        <location filename="../core/services/layer_lifecycle_service.py" line="264"/>
+        <location filename="../core/services/layer_lifecycle_service.py" line="262"/>
         <source>PostgreSQL layers detected ({0}) but psycopg2 is not installed. The plugin cannot use these layers. Install psycopg2 to enable PostgreSQL support.</source>
         <translation>Wykryto warstwy PostgreSQL ({0}), ale psycopg2 nie jest zainstalowany. Wtyczka nie może używać tych warstw. Zainstaluj psycopg2, aby włączyć obsługę PostgreSQL.</translation>
     </message>
 </context>
 <context>
+    <name>LayerSnapshot</name>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/snapshots.py" line="619"/>
+        <source>The saved source could not be opened</source>
+        <translation>Nie udało się otworzyć zapisanego źródła</translation>
+    </message>
+</context>
+<context>
     <name>LayersManagementEngineTask</name>
     <message>
-        <location filename="../core/tasks/layer_management_task.py" line="1049"/>
+        <location filename="../core/tasks/layer_management_task.py" line="1074"/>
         <source>PostgreSQL layer &apos;{0}&apos;: Corrupted data detected.
 
 This layer uses &apos;virtual_id&apos; which does not exist in PostgreSQL.
@@ -2521,14 +3078,52 @@ Rozwiązanie: Usuń tę warstwę z projektu FilterMate, a następnie dodaj ją p
 Upewnij się, że tabela PostgreSQL ma zdefiniowany PRIMARY KEY.</translation>
     </message>
     <message>
-        <location filename="../core/tasks/layer_management_task.py" line="1075"/>
+        <location filename="../core/tasks/layer_management_task.py" line="1101"/>
         <source>Layer &apos;{0}&apos; has no PRIMARY KEY. Limited features: materialized views disabled. Recommendation: add a PRIMARY KEY for optimal performance.</source>
         <translation>Warstwa '{0}' nie ma PRIMARY KEY. Ograniczone funkcje: widoki zmaterializowane wyłączone. Zalecenie: dodaj PRIMARY KEY dla optymalnej wydajności.</translation>
     </message>
     <message>
-        <location filename="../core/tasks/layer_management_task.py" line="2098"/>
+        <location filename="../core/tasks/layer_management_task.py" line="2203"/>
         <source>Exception: {0}</source>
         <translation>Wyjątek: {0}</translation>
+    </message>
+</context>
+<context>
+    <name>OGRExpressionBuilder</name>
+    <message>
+        <location filename="../adapters/backends/ogr/expression_builder.py" line="499"/>
+        <source>{0}: this provider cannot guarantee a complete server filter. Use a bounded local copy before filtering.</source>
+        <translation>{0}: ten dostawca nie może zagwarantować kompletnego filtra serwera. Przed filtrowaniem użyj ograniczonej kopii lokalnej.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/ogr/expression_builder.py" line="699"/>
+        <source>{0}: the key values of the selected features could not be read from the web service.</source>
+        <translation>{0}: nie udało się odczytać wartości kluczy wybranych obiektów z usługi sieciowej.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/ogr/expression_builder.py" line="800"/>
+        <source>keeps its previous filter</source>
+        <translation>zachowuje poprzedni filtr</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/ogr/expression_builder.py" line="802"/>
+        <source>is left unfiltered</source>
+        <translation>pozostaje niefiltrowana</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/ogr/expression_builder.py" line="807"/>
+        <source>{0}: this web service has no unique key field (declared key, id, gml_id, cleabs, objectid...), so the selected features cannot be listed for the server. The layer {1}. An attribute filter, or a local copy of the layer, works.</source>
+        <translation>{0}: ta usługa sieciowa nie ma unikalnego pola klucza (zadeklarowany klucz, id, gml_id, cleabs, objectid...), więc wybranych obiektów nie można wylistować dla serwera. Warstwa {1}. Rozwiązaniem jest filtr atrybutów lub lokalna kopia warstwy.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/ogr/expression_builder.py" line="813"/>
+        <source>{0}: this layer has no unique key field and its feature ids cannot be listed in its filter (a virtual layer needs a unique id column, its uid). The layer {1}.</source>
+        <translation>{0}: ta warstwa nie ma unikalnego pola klucza, a identyfikatory jej obiektów nie mogą zostać wylistowane w jej filtrze (warstwa wirtualna wymaga unikalnej kolumny identyfikatora, uid). Warstwa {1}.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/ogr/expression_builder.py" line="822"/>
+        <source>{0}: {1} features to list, more than the {2} sent to a web service. The layer {3}. Narrow the selection, use an attribute filter, or work on a local copy of the layer.</source>
+        <translation>{0}: {1} obiektów do wylistowania, więcej niż {2} wysyłanych do usługi sieciowej. Warstwa {3}. Zawęź wybór, użyj filtra atrybutów lub pracuj na lokalnej kopii warstwy.</translation>
     </message>
 </context>
 <context>
@@ -2667,67 +3262,67 @@ Upewnij się, że tabela PostgreSQL ma zdefiniowany PRIMARY KEY.</translation>
 <context>
     <name>PointCloudConditionRow</name>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="500"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="797"/>
         <source>Link with the previous condition</source>
         <translation>Powiązanie z poprzednim warunkiem</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="502"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="799"/>
         <source>AND</source>
         <translation>I</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="503"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="800"/>
         <source>OR</source>
         <translation>LUB</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="504"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="801"/>
         <source>Attribute</source>
         <translation>Atrybut</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="507"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="804"/>
         <source>Comparison</source>
         <translation>Porównanie</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="510"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="807"/>
         <source>between</source>
         <translation>między</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="514"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="811"/>
         <source>Remove this condition</source>
         <translation>Usuń ten warunek</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="521"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="818"/>
         <source>Compare with a value or another attribute</source>
         <translation>Porównaj z wartością lub innym atrybutem</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="524"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="821"/>
         <source>value</source>
         <translation>wartość</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="525"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="822"/>
         <source>Value</source>
         <translation>Wartość</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="528"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="825"/>
         <source>Highest value kept</source>
         <translation>Najwyższa zachowana wartość</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="608"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="905"/>
         <source>Observed values: {0} to {1}</source>
         <translation>Zaobserwowane wartości: od {0} do {1}</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="608"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="905"/>
         <source>No statistics for this attribute</source>
         <translation>Brak statystyk dla tego atrybutu</translation>
     </message>
@@ -2735,42 +3330,42 @@ Upewnij się, że tabela PostgreSQL ma zdefiniowany PRIMARY KEY.</translation>
 <context>
     <name>PointCloudExploringPanel</name>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="734"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1049"/>
         <source>Apply to the other tiles of the dataset</source>
         <translation>Zastosuj do pozostałych kafli zbioru danych</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="748"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1058"/>
         <source>CLASSES</source>
         <translation>KLASY</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="753"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1063"/>
         <source>Ground</source>
         <translation>Grunt</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="754"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1064"/>
         <source>Vegetation</source>
         <translation>Roślinność</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="755"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1065"/>
         <source>Buildings</source>
         <translation>Budynki</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="756"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1066"/>
         <source>Above ground</source>
         <translation>Nad gruntem</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="757"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1067"/>
         <source>Water</source>
         <translation>Woda</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="758"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1068"/>
         <source>Without noise</source>
         <translation>Bez szumu</translation>
     </message>
@@ -2790,7 +3385,7 @@ Upewnij się, że tabela PostgreSQL ma zdefiniowany PRIMARY KEY.</translation>
         <translation type="obsolete">Brak</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="776"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1097"/>
         <source>Point classes</source>
         <translation>Klasy punktów</translation>
     </message>
@@ -2815,7 +3410,7 @@ Upewnij się, że tabela PostgreSQL ma zdefiniowany PRIMARY KEY.</translation>
         <translation type="obsolete">Najwyższa zachowana wysokość</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="873"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1344"/>
         <source>Intensity</source>
         <translation>Intensywność</translation>
     </message>
@@ -2842,30 +3437,30 @@ Upewnij się, że tabela PostgreSQL ma zdefiniowany PRIMARY KEY.</translation>
     <message>
         <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="832"/>
         <source>Height above DTM ≥</source>
-        <translation>Wysokość nad NMT ≥</translation>
+        <translation type="obsolete">Wysokość nad NMT ≥</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="852"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1286"/>
         <source>Digital terrain model the height is measured from</source>
         <translation>Numeryczny model terenu, względem którego mierzona jest wysokość</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="862"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1296"/>
         <source>Keep the points at least this high above the terrain model</source>
         <translation>Zachowaj punkty położone co najmniej tak wysoko nad modelem terenu</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="896"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1371"/>
         <source>EXPRESSION</source>
         <translation>WYRAŻENIE</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="900"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1375"/>
         <source>Point cloud expression</source>
         <translation>Wyrażenie chmury punktów</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="901"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1376"/>
         <source>Check the group to edit the expression by hand</source>
         <translation>Zaznacz grupę, aby edytować wyrażenie ręcznie</translation>
     </message>
@@ -2875,24 +3470,24 @@ Upewnij się, że tabela PostgreSQL ma zdefiniowany PRIMARY KEY.</translation>
         <translation type="obsolete">Brak statystyk wysokości dla tej warstwy</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="959"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1657"/>
         <source>Height above the terrain is unavailable</source>
         <translation>Wysokość nad terenem jest niedostępna</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="974"/>
         <source>Kept points: {0}</source>
-        <translation>Zachowane punkty: {0}</translation>
+        <translation type="obsolete">Zachowane punkty: {0}</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="991"/>
         <source>Current filter: {0}</source>
-        <translation>Bieżący filtr: {0}</translation>
+        <translation type="obsolete">Bieżący filtr: {0}</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="991"/>
         <source>none</source>
-        <translation>brak</translation>
+        <translation type="obsolete">brak</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="874"/>
@@ -2915,169 +3510,279 @@ Upewnij się, że tabela PostgreSQL ma zdefiniowany PRIMARY KEY.</translation>
         <translation type="obsolete">Pojedynczy</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="786"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1172"/>
         <source>ATTRIBUTES</source>
         <translation>ATRYBUTY</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="804"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1190"/>
         <source>+ Condition</source>
         <translation>+ Warunek</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="806"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1192"/>
         <source>Add a condition on an attribute of the layer</source>
         <translation>Dodaj warunek dla atrybutu warstwy</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="809"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1231"/>
         <source>Returns</source>
         <translation>Odbicia</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="811"/>
         <source>Keep the first, last or single returns of the laser pulses</source>
-        <translation>Zachowaj pierwsze, ostatnie lub pojedyncze odbicia impulsów lasera</translation>
+        <translation type="obsolete">Zachowaj pierwsze, ostatnie lub pojedyncze odbicia impulsów lasera</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="814"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1238"/>
         <source>First return (ReturnNumber = 1)</source>
         <translation>Pierwsze odbicie (ReturnNumber = 1)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="815"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1239"/>
         <source>Last return (ReturnNumber = NumberOfReturns)</source>
         <translation>Ostatnie odbicie (ReturnNumber = NumberOfReturns)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="816"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1240"/>
         <source>Single return (NumberOfReturns = 1)</source>
         <translation>Pojedyncze odbicie (NumberOfReturns = 1)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="874"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1345"/>
         <source>Return number</source>
         <translation>Numer powrotu</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="875"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1346"/>
         <source>Number of returns</source>
         <translation>Liczba odbić</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="876"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1347"/>
         <source>Classification</source>
         <translation>Klasyfikacja</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="877"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1348"/>
         <source>Scan angle</source>
         <translation>Kąt skanowania</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="878"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1349"/>
         <source>User data</source>
         <translation>Dane użytkownika</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="879"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1350"/>
         <source>Point source ID</source>
         <translation>ID źródła punktów</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="880"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1351"/>
         <source>GPS time</source>
         <translation>Czas GPS</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="881"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1352"/>
         <source>Red</source>
         <translation>Czerwony</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="882"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1353"/>
         <source>Green</source>
         <translation>Zielony</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="883"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1354"/>
         <source>Blue</source>
         <translation>Niebieski</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="884"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1355"/>
         <source>Infrared</source>
         <translation>Podczerwień</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="885"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1356"/>
         <source>Scan direction</source>
         <translation>Kierunek skanowania</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="886"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1357"/>
         <source>Edge of flight line</source>
         <translation>Krawędź szeregu</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="887"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1358"/>
         <source>Synthetic</source>
         <translation>Syntetyczny</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="888"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1359"/>
         <source>Key point</source>
         <translation>Punkt kluczowy</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="889"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1360"/>
         <source>Withheld</source>
         <translation>Wstrzymany</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="890"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1361"/>
         <source>Overlap</source>
         <translation>Nakładanie</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="891"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1362"/>
         <source>Scanner channel</source>
         <translation>Kanał skanera</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="892"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1363"/>
         <source>Classification flags</source>
         <translation>Flagi klasyfikacji</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="893"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1364"/>
         <source>Height above ground</source>
         <translation>Wysokość nad gruntem</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="762"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1077"/>
         <source>Quick class selection</source>
         <translation>Szybki wybór klas</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="765"/>
         <source>Quick selection…</source>
-        <translation>Szybki wybór…</translation>
+        <translation type="obsolete">Szybki wybór…</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="768"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1087"/>
         <source>All classes</source>
         <translation>Wszystkie klasy</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="769"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1087"/>
         <source>No class</source>
         <translation>Brak klas</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="770"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1087"/>
         <source>Invert the selection</source>
         <translation>Odwróć zaznaczenie</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1077"/>
+        <source>Selection ▾</source>
+        <translation>Wybór ▾</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1111"/>
+        <source>Classes of the standard that hold no point of this layer</source>
+        <translation>Klasy standardu bez żadnego punktu w tej warstwie</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1118"/>
+        <source>Classes absent from the layer</source>
+        <translation>Klasy nieobecne w warstwie</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1142"/>
+        <source>Similar objects: area ×</source>
+        <translation>Podobne obiekty: powierzchnia ×</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1145"/>
+        <source>Smallest similar object, as a share of the smallest clicked one</source>
+        <translation>Najmniejszy podobny obiekt, jako ułamek najmniejszego klikniętego</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1145"/>
+        <source>Largest similar object, as a multiple of the largest clicked one</source>
+        <translation>Największy podobny obiekt, jako wielokrotność największego klikniętego</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1160"/>
+        <source>to ×</source>
+        <translation>do ×</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1204"/>
+        <source>Pipette on</source>
+        <translation>Próbnik włączony</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1205"/>
+        <source>Attribute the value pipette of the rail reads under the click</source>
+        <translation>Atrybut odczytywany pod kliknięciem przez próbnik wartości z paska</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1220"/>
+        <source>Tolerance around the picked value, in % of the observed range of the attribute</source>
+        <translation>Tolerancja wokół pobranej wartości, w % obserwowanego zakresu atrybutu</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1232"/>
+        <source>Keep every return, or the first, last or single returns of the laser pulses</source>
+        <translation>Zachowaj wszystkie odbicia albo pierwsze, ostatnie lub pojedyncze odbicia impulsów lasera</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1237"/>
+        <source>Any return</source>
+        <translation>Dowolne odbicie</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1251"/>
+        <source>HEIGHT / DTM</source>
+        <translation>WYSOKOŚĆ / NMT</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1257"/>
+        <source>Always combined (AND) with the active group</source>
+        <translation>Zawsze łączony (AND) z aktywną grupą</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1261"/>
+        <source>PDAL · derived cloud</source>
+        <translation>PDAL · chmura pochodna</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1263"/>
+        <source>The height is computed by PDAL into a derived point cloud, in a background task</source>
+        <translation>Wysokość jest obliczana przez PDAL do pochodnej chmury punktów, w zadaniu w tle</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1366"/>
+        <source>{0} object(s)</source>
+        <translation>Obiekty: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1367"/>
+        <source>cut at the window read</source>
+        <translation>obcięte do odczytanego okna</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1368"/>
+        <source>shown as the whole class in their box</source>
+        <translation>pokazane jako cała klasa w ich ramce</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1859"/>
+        <source>Other classes, absent from the layer ({0})</source>
+        <translation>Inne klasy, nieobecne w warstwie ({0})</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1950"/>
+        <source>An object runs past the largest window read around the click and was cut there</source>
+        <translation>Obiekt wykracza poza największe okno odczytu wokół kliknięcia i został tam obcięty</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1952"/>
+        <source>Too many objects for the subset of the cloud: the preview and the filtered cloud keep every point of their class in the box around them; the targets are cut by the objects themselves</source>
+        <translation>Zbyt wiele obiektów dla podzbioru chmury: podgląd i przefiltrowana chmura zachowują każdy punkt swojej klasy w otaczającej ich ramce; cele są przycinane przez same obiekty</translation>
     </message>
 </context>
 <context>
@@ -3085,62 +3790,131 @@ Upewnij się, że tabela PostgreSQL ma zdefiniowany PRIMARY KEY.</translation>
     <message>
         <location filename="../ui/widgets/point_cloud_filter_widget.py" line="141"/>
         <source>Point cloud filter</source>
-        <translation>Filtr chmury punktów</translation>
+        <translation type="obsolete">Filtr chmury punktów</translation>
     </message>
     <message>
         <location filename="../ui/widgets/point_cloud_filter_widget.py" line="152"/>
         <source>Classification</source>
-        <translation>Klasyfikacja</translation>
+        <translation type="obsolete">Klasyfikacja</translation>
     </message>
     <message>
         <location filename="../ui/widgets/point_cloud_filter_widget.py" line="157"/>
         <source>All</source>
-        <translation>Wszystkie</translation>
+        <translation type="obsolete">Wszystkie</translation>
     </message>
     <message>
         <location filename="../ui/widgets/point_cloud_filter_widget.py" line="158"/>
         <source>None</source>
-        <translation>Brak</translation>
+        <translation type="obsolete">Brak</translation>
     </message>
     <message>
         <location filename="../ui/widgets/point_cloud_filter_widget.py" line="167"/>
         <source>Elevation (Z)</source>
-        <translation>Wysokość (Z)</translation>
+        <translation type="obsolete">Wysokość (Z)</translation>
     </message>
     <message>
         <location filename="../ui/widgets/point_cloud_filter_widget.py" line="169"/>
         <source>Intensity</source>
-        <translation>Intensywność</translation>
+        <translation type="obsolete">Intensywność</translation>
     </message>
     <message>
         <location filename="../ui/widgets/point_cloud_filter_widget.py" line="175"/>
         <source>Return number</source>
-        <translation>Numer powrotu</translation>
+        <translation type="obsolete">Numer powrotu</translation>
     </message>
     <message>
         <location filename="../ui/widgets/point_cloud_filter_widget.py" line="199"/>
         <source>Minimum</source>
-        <translation>Minimum</translation>
+        <translation type="obsolete">Minimum</translation>
     </message>
     <message>
         <location filename="../ui/widgets/point_cloud_filter_widget.py" line="200"/>
         <source>Maximum</source>
-        <translation>Maksimum</translation>
+        <translation type="obsolete">Maksimum</translation>
     </message>
     <message>
         <location filename="../ui/widgets/point_cloud_filter_widget.py" line="250"/>
         <source>Current filter: {0}</source>
-        <translation>Bieżący filtr: {0}</translation>
+        <translation type="obsolete">Bieżący filtr: {0}</translation>
     </message>
     <message>
         <location filename="../ui/widgets/point_cloud_filter_widget.py" line="250"/>
         <source>none</source>
-        <translation>brak</translation>
+        <translation type="obsolete">brak</translation>
     </message>
     <message>
         <location filename="../ui/widgets/point_cloud_filter_widget.py" line="329"/>
         <source>Any</source>
-        <translation>Dowolny</translation>
+        <translation type="obsolete">Dowolny</translation>
+    </message>
+</context>
+<context>
+    <name>PointCloudReader</name>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/pdal_cli.py" line="221"/>
+        <source>A useful extent is required for a remote point cloud</source>
+        <translation>Zdalna chmura punktów wymaga użytecznego zasięgu</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/pdal_cli.py" line="187"/>
+        <source>No PDAL reader for this point cloud format</source>
+        <translation>Brak czytnika PDAL dla tego formatu chmury punktów</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/pdal_cli.py" line="217"/>
+        <source>PDAL 2.4 or newer with a readable version is required for remote point clouds</source>
+        <translation>Zdalne chmury punktów wymagają PDAL 2.4 lub nowszego z możliwą do odczytania wersją</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/pdal_cli.py" line="219"/>
+        <source>Remote point clouds require EPT or COPC for bounded reads</source>
+        <translation>Zdalne chmury punktów wymagają EPT lub COPC do odczytów ograniczonych</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/pdal_cli.py" line="227"/>
+        <source>The useful extent must be finite and have positive area</source>
+        <translation>Użyteczny zasięg musi być skończony i mieć dodatnią powierzchnię</translation>
+    </message>
+</context>
+<context>
+    <name>PointCloudSource</name>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="435"/>
+        <source>Draw a useful selection zone before reading a remote point cloud</source>
+        <translation>Narysuj użyteczną strefę wyboru przed odczytem zdalnej chmury punktów</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="468"/>
+        <source>The remote point cloud could not be read</source>
+        <translation>Nie udało się odczytać zdalnej chmury punktów</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="472"/>
+        <source>The remote point cloud rejected the selection</source>
+        <translation>Zdalna chmura punktów odrzuciła wybór</translation>
+    </message>
+</context>
+<context>
+    <name>PointCloudTarget</name>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="605"/>
+        <source>A bounded height-above-ground cloud only supports AND or AND NOT; Unfilter first</source>
+        <translation>Ograniczona chmura wysokości nad terenem obsługuje tylko AND lub AND NOT; najpierw usuń filtr</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="631"/>
+        <source>PDAL 2.4 or newer is required to clip a remote point cloud</source>
+        <translation>Do przycięcia zdalnej chmury punktów wymagany jest PDAL 2.4 lub nowszy</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="682"/>
+        <source>Disjoint would read the whole remote cloud; choose an inside selection</source>
+        <translation>Disjoint odczytałby całą zdalną chmurę; wybierz relację „wewnątrz”</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="689"/>
+        <source>The original remote point cloud could not be opened</source>
+        <translation>Nie udało się otworzyć oryginalnej zdalnej chmury punktów</translation>
     </message>
 </context>
 <context>
@@ -3292,7 +4066,7 @@ Kontynuować?</translation>
         <translation>Warstwy do przefiltrowania</translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/batch_filter_algorithm.py" line="129"/>
+        <location filename="../processing/algorithms/batch_filter_algorithm.py" line="139"/>
         <location filename="../processing/algorithms/common.py" line="78"/>
         <source>FilterMate</source>
         <translation>FilterMate</translation>
@@ -3384,17 +4158,17 @@ Kontynuować?</translation>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/batch_filter_algorithm.py" line="102"/>
+        <location filename="../processing/algorithms/batch_filter_algorithm.py" line="112"/>
         <source>Invalid expression for layer &apos;{0}&apos;, skipped.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/batch_filter_algorithm.py" line="125"/>
+        <location filename="../processing/algorithms/batch_filter_algorithm.py" line="135"/>
         <source>Filter several layers (batch)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/batch_filter_algorithm.py" line="137"/>
+        <location filename="../processing/algorithms/batch_filter_algorithm.py" line="147"/>
         <source>Applies the same filter expression to several vector layers in a single run.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3745,17 +4519,27 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/common.py" line="194"/>
+        <location filename="../processing/algorithms/common.py" line="191"/>
+        <source>Source raster was resampled for capture (grid: {0}).</source>
+        <translation>Raster źródłowy został przepróbkowany na potrzeby przechwycenia (siatka: {0}).</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/common.py" line="198"/>
         <source> ({0:.1f} s)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/common.py" line="197"/>
+        <location filename="../processing/algorithms/common.py" line="201"/>
         <source>{0}: {1}{2}</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/common.py" line="199"/>
+        <location filename="../processing/algorithms/common.py" line="203"/>
+        <source>{0}: target raster was resampled for capture (grid: {1}).</source>
+        <translation>{0}: raster docelowy został przepróbkowany na potrzeby przechwycenia (siatka: {1}).</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/common.py" line="206"/>
         <source>{0}: failed — {1}</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4435,150 +5219,180 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
 <context>
     <name>QgsCheckableComboBoxFeaturesListPickerWidget</name>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="898"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="924"/>
         <source>Type to filter...</source>
         <translation>Wpisz, aby filtrować...</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="907"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="933"/>
         <source>Select All</source>
         <translation>Zaznacz wszystko</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="909"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="935"/>
         <source>Select All (non subset)</source>
         <translation>Zaznacz wszystko (poza podzbiorem)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="911"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="937"/>
         <source>Select All (subset)</source>
         <translation>Zaznacz wszystko (podzbiór)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="913"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="939"/>
         <source>De-select All</source>
         <translation>Odznacz wszystko</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="915"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="941"/>
         <source>De-select All (non subset)</source>
         <translation>Odznacz wszystko (poza podzbiorem)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="917"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="943"/>
         <source>De-select All (subset)</source>
         <translation>Odznacz wszystko (podzbiór)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="1516"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="1599"/>
         <source>Showing the first {0} features sorted by display value. Type in the text filter to search the whole layer; &quot;Select All&quot; loads the full list.</source>
         <translation>Wyświetlono pierwsze {0} obiektów posortowanych według wartości wyświetlanej. Wpisz tekst w filtrze, aby przeszukać całą warstwę; &quot;Zaznacz wszystko&quot; wczytuje pełną listę.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="1524"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="1607"/>
         <source>Showing {0} features of the layer, sorted by display value. Type in the text filter to search the whole layer; &quot;Select All&quot; loads the full list.</source>
         <translation>Wyświetlono {0} obiektów warstwy, posortowanych według wartości wyświetlanej. Wpisz tekst w filtrze, aby przeszukać całą warstwę; &quot;Zaznacz wszystko&quot; wczytuje pełną listę.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="1531"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="1614"/>
         <source>Search results for &quot;{0}&quot; over the whole layer.</source>
         <translation>Wyniki wyszukiwania dla &quot;{0}&quot; w całej warstwie.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="1768"/>
+        <source>Loading values…</source>
+        <translation>Ładowanie wartości…</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="1683"/>
+        <source>Values</source>
+        <translation>Wartości</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="1683"/>
+        <source>This expression cannot be evaluated safely for a service.</source>
+        <translation>Tego wyrażenia nie można bezpiecznie ocenić dla usługi.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="1748"/>
+        <source>Selection</source>
+        <translation>Wybór</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="1748"/>
+        <source>The remote list exceeds the safe selection limit. Select fewer features or filter the layer first.</source>
+        <translation>Zdalna lista przekracza bezpieczny limit wyboru. Wybierz mniej obiektów lub najpierw przefiltruj warstwę.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="1924"/>
+        <source>Loading selected values…</source>
+        <translation>Ładowanie wybranych wartości…</translation>
     </message>
 </context>
 <context>
     <name>QgsCheckableComboBoxLayer</name>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="337"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="339"/>
         <source>Select All</source>
         <translation>Zaznacz wszystko</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="339"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="341"/>
         <source>De-select All</source>
         <translation>Odznacz wszystko</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="341"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="347"/>
         <source>Select all layers by geometry type (Lines)</source>
         <translation>Zaznacz wszystkie warstwy wg typu geometrii (Linie)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="343"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="349"/>
         <source>De-Select all layers by geometry type (Lines)</source>
         <translation>Odznacz wszystkie warstwy wg typu geometrii (Linie)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="345"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="351"/>
         <source>Select all layers by geometry type (Points)</source>
         <translation>Zaznacz wszystkie warstwy wg typu geometrii (Punkty)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="347"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="353"/>
         <source>De-Select all layers by geometry type (Points)</source>
         <translation>Odznacz wszystkie warstwy wg typu geometrii (Punkty)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="349"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="355"/>
         <source>Select all layers by geometry type (Polygons)</source>
         <translation>Zaznacz wszystkie warstwy wg typu geometrii (Wielokąty)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="351"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="357"/>
         <source>De-Select all layers by geometry type (Polygons)</source>
         <translation>Odznacz wszystkie warstwy wg typu geometrii (Wielokąty)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="367"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="376"/>
         <source>Select all raster layers</source>
         <translation>Zaznacz wszystkie warstwy rastrowe</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="369"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="378"/>
         <source>De-select all raster layers</source>
         <translation>Odznacz wszystkie warstwy rastrowe</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="371"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="380"/>
         <source>Select all point cloud layers</source>
         <translation>Zaznacz wszystkie warstwy chmur punktów</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="373"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="382"/>
         <source>De-select all point cloud layers</source>
         <translation>Odznacz wszystkie warstwy chmur punktów</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="409"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="418"/>
         <source>pixels in the zone</source>
         <translation>pikseli w strefie</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="409"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="418"/>
         <source>points in the zone</source>
         <translation>punktów w strefie</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="409"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="418"/>
         <source>features</source>
         <translation>obiektów</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="415"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="424"/>
         <source>Raster target: the pixels outside the source geometry become NoData (those inside with Disjoint)</source>
         <translation>Cel rastrowy: piksele poza geometrią źródłową stają się NoData (te wewnątrz z Disjoint)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="417"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="426"/>
         <source>Point cloud target: the points outside the source geometry are removed (those inside with Disjoint)</source>
         <translation>Cel chmury punktów: punkty poza geometrią źródłową są usuwane (te wewnątrz z Disjoint)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="419"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="428"/>
         <source>Vector target: the features that satisfy the geometric predicate are kept</source>
         <translation>Cel wektorowy: obiekty spełniające predykat geometryczny są zachowywane</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="499"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="515"/>
         <source>Click the square on the right to test this layer by its centroids</source>
         <translation>Kliknij kwadrat po prawej, aby przetestować tę warstwę po centroidach</translation>
     </message>
@@ -4611,55 +5425,55 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="497"/>
         <source>Band</source>
-        <translation>Kanał</translation>
+        <translation type="obsolete">Kanał</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="500"/>
         <source>Band whose values are selected</source>
-        <translation>Kanał, którego wartości są wybierane</translation>
+        <translation type="obsolete">Kanał, którego wartości są wybierane</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="598"/>
         <source>PIXEL VALUE</source>
-        <translation>WARTOŚĆ PIKSELA</translation>
+        <translation type="obsolete">WARTOŚĆ PIKSELA</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="606"/>
         <source>Pixel value of the current band</source>
-        <translation>Wartość piksela bieżącego kanału</translation>
+        <translation type="obsolete">Wartość piksela bieżącego kanału</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="625"/>
         <source>Last {0} values picked</source>
-        <translation>Ostatnie {0} wybranych wartości</translation>
+        <translation type="obsolete">Ostatnie {0} wybranych wartości</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="638"/>
         <source>Click on the map with the pixel picker. Ctrl+click extends the range to the value.</source>
-        <translation>Kliknij na mapie próbnikiem pikseli. Ctrl+kliknięcie rozszerza zakres do tej wartości.</translation>
+        <translation type="obsolete">Kliknij na mapie próbnikiem pikseli. Ctrl+kliknięcie rozszerza zakres do tej wartości.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="651"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1821"/>
         <source>VALUE RANGE</source>
         <translation>ZAKRES WARTOŚCI</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="660"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1255"/>
         <source>Min</source>
         <translation>Min</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="660"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1255"/>
         <source>Lowest value kept</source>
         <translation>Najniższa zachowana wartość</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="660"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1255"/>
         <source>Max</source>
         <translation>Maks</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="660"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1255"/>
         <source>Highest value kept</source>
         <translation>Najwyższa zachowana wartość</translation>
     </message>
@@ -4671,60 +5485,60 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="688"/>
         <source>CLASSES</source>
-        <translation>KLASY</translation>
+        <translation type="obsolete">KLASY</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="692"/>
         <source>Raster classes</source>
-        <translation>Klasy rastra</translation>
+        <translation type="obsolete">Klasy rastra</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="696"/>
         <source>All</source>
-        <translation>Wszystkie</translation>
+        <translation type="obsolete">Wszystkie</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="697"/>
         <source>None</source>
-        <translation>Brak</translation>
+        <translation type="obsolete">Brak</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="707"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1275"/>
         <source>RASTER EXPRESSION</source>
         <translation>WYRAŻENIE RASTROWE</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="711"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1279"/>
         <source>Raster calculator expression; a pixel is kept where it is not 0</source>
         <translation>Wyrażenie kalkulatora rastrów; piksel jest zachowywany, gdy nie jest równy 0</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="712"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1280"/>
         <source>Raster expression</source>
         <translation>Wyrażenie rastrowe</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="721"/>
         <source>Use the range</source>
-        <translation>Użyj zakresu</translation>
+        <translation type="obsolete">Użyj zakresu</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="722"/>
         <source>Write the current value range as an expression</source>
-        <translation>Zapisz bieżący zakres wartości jako wyrażenie</translation>
+        <translation type="obsolete">Zapisz bieżący zakres wartości jako wyrażenie</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="812"/>
         <source>Selected pixels: {0}</source>
-        <translation>Zaznaczone piksele: {0}</translation>
+        <translation type="obsolete">Zaznaczone piksele: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1195"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1349"/>
         <source>Set a value range first</source>
         <translation>Najpierw ustaw zakres wartości</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1381"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2219"/>
         <source>NoData</source>
         <translation>NoData</translation>
     </message>
@@ -4736,252 +5550,665 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="629"/>
         <source>Value of the current band under the cursor</source>
-        <translation>Wartość bieżącego kanału pod kursorem</translation>
+        <translation type="obsolete">Wartość bieżącego kanału pod kursorem</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="635"/>
         <source>Statistics of the current band in the last rectangle drawn on the map</source>
-        <translation>Statystyki bieżącego kanału w ostatnim prostokącie narysowanym na mapie</translation>
+        <translation type="obsolete">Statystyki bieżącego kanału w ostatnim prostokącie narysowanym na mapie</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="870"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1577"/>
         <source>Under the cursor: {0}  (X {1:.{3}f}  Y {2:.{3}f})</source>
         <translation>Pod kursorem: {0}  (X {1:.{3}f}  Y {2:.{3}f})</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="880"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1587"/>
         <source>Zone: {0}</source>
         <translation>Strefa: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="880"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1587"/>
         <source>no pixel</source>
         <translation>brak piksela</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1405"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2234"/>
         <source>LAST PICKS</source>
         <translation>OSTATNIE ODCZYTY</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="509"/>
         <source>Compute on</source>
-        <translation>Oblicz dla</translation>
+        <translation type="obsolete">Oblicz dla</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="512"/>
         <source>Quantity the range applies to. Slope, aspect, hillshade and roughness read the band as a DTM.</source>
-        <translation>Wielkość, do której stosuje się zakres. Nachylenie, ekspozycja, cieniowanie i chropowatość odczytują kanał jako NMT.</translation>
+        <translation type="obsolete">Wielkość, do której stosuje się zakres. Nachylenie, ekspozycja, cieniowanie i chropowatość odczytują kanał jako NMT.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="516"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1233"/>
         <source>Pixel value</source>
         <translation>Wartość piksela</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="516"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1233"/>
         <source>Slope (degrees)</source>
         <translation>Nachylenie (stopnie)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="516"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1233"/>
         <source>Slope (%)</source>
         <translation>Nachylenie (%)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="516"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1233"/>
         <source>Aspect (degrees)</source>
         <translation>Ekspozycja (stopnie)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="516"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1233"/>
         <source>Hillshade (0-255)</source>
         <translation>Cieniowanie (0-255)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="516"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1233"/>
         <source>Roughness (TRI, mean difference)</source>
         <translation>Chropowatość (TRI, średnia różnica)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="676"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1242"/>
         <source>Usual thresholds of the quantity</source>
         <translation>Typowe progi wielkości</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="677"/>
         <source>Usual thresholds</source>
-        <translation>Typowe progi</translation>
+        <translation type="obsolete">Typowe progi</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1102"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1931"/>
         <source>Flat</source>
         <translation>Płaski</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1102"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1931"/>
         <source>Gentle</source>
         <translation>Łagodny</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1102"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1931"/>
         <source>Moderate</source>
         <translation>Umiarkowany</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1103"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1932"/>
         <source>Steep</source>
         <translation>Stromy</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1103"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1932"/>
         <source>East</source>
         <translation>Wschód</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1103"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1932"/>
         <source>South</source>
         <translation>Południe</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1104"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1933"/>
         <source>West</source>
         <translation>Zachód</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1104"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1933"/>
         <source>Shadow</source>
         <translation>Cień</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1104"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1933"/>
         <source>Lit</source>
         <translation>Oświetlone</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1109"/>
         <source>Usual thresholds…</source>
-        <translation>Typowe progi…</translation>
+        <translation type="obsolete">Typowe progi…</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="551"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1041"/>
         <source>PIPETTE</source>
         <translation>PRÓBNIK</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="554"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1105"/>
         <source>Tolerance ±</source>
         <translation>Tolerancja ±</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="561"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1112"/>
         <source>Tolerance around the picked color or value, in % of the value range</source>
         <translation>Tolerancja wokół wybranego koloru lub wartości, w % zakresu wartości</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="562"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1113"/>
         <source>Pipette tolerance</source>
         <translation>Tolerancja próbnika</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="571"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1305"/>
         <source>Bands</source>
         <translation>Kanały</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1231"/>
         <source>What the bands of the image are: the presets and the pipette use them</source>
-        <translation>Czym są kanały obrazu: korzystają z nich ustawienia wstępne i próbnik</translation>
+        <translation type="obsolete">Czym są kanały obrazu: korzystają z nich ustawienia wstępne i próbnik</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="576"/>
         <source>Band layout</source>
-        <translation>Układ kanałów</translation>
+        <translation type="obsolete">Układ kanałów</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="577"/>
         <source>RGB (red, green, blue)</source>
-        <translation>RGB (czerwony, zielony, niebieski)</translation>
+        <translation type="obsolete">RGB (czerwony, zielony, niebieski)</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="577"/>
         <source>IRC (infrared, red, green)</source>
-        <translation>IRC (podczerwień, czerwony, zielony)</translation>
+        <translation type="obsolete">IRC (podczerwień, czerwony, zielony)</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="577"/>
         <source>RGB + infrared</source>
-        <translation>RGB + podczerwień</translation>
+        <translation type="obsolete">RGB + podczerwień</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1232"/>
         <source>Write the expression of a usual index (vegetation, water...)</source>
-        <translation>Wpisz wyrażenie popularnego indeksu (roślinność, woda...)</translation>
+        <translation type="obsolete">Wpisz wyrażenie popularnego indeksu (roślinność, woda...)</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="585"/>
         <source>Spectral presets</source>
-        <translation>Spektralne ustawienia wstępne</translation>
+        <translation type="obsolete">Spektralne ustawienia wstępne</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1228"/>
         <source>Needs an image of three bands or more (red, green, blue...)</source>
-        <translation>Wymaga obrazu z trzema lub więcej kanałami (czerwony, zielony, niebieski...)</translation>
+        <translation type="obsolete">Wymaga obrazu z trzema lub więcej kanałami (czerwony, zielony, niebieski...)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1235"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1324"/>
         <source>Vegetation (NDVI &gt; 0.3)</source>
         <translation>Roślinność (NDVI &gt; 0.3)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1235"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1324"/>
         <source>No vegetation (NDVI &lt; 0.1)</source>
         <translation>Brak roślinności (NDVI &lt; 0.1)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1236"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1325"/>
         <source>Water (NDWI &gt; 0.1)</source>
         <translation>Woda (NDWI &gt; 0.1)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1236"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1325"/>
         <source>Vegetation (excess green)</source>
         <translation>Roślinność (nadmiar zieleni)</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1239"/>
         <source>Spectral presets…</source>
-        <translation>Spektralne ustawienia wstępne…</translation>
+        <translation type="obsolete">Spektralne ustawienia wstępne…</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1299"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2039"/>
         <source>This pixel has no value (NoData): pick another one</source>
         <translation>Ten piksel nie ma wartości (NoData): wybierz inny</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1338"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2124"/>
         <source>The tolerance covers every value: lower it</source>
         <translation>Tolerancja obejmuje wszystkie wartości: zmniejsz ją</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1354"/>
         <source>Range {0} → {1}{2}</source>
-        <translation>Zakres {0} → {1}{2}</translation>
+        <translation type="obsolete">Zakres {0} → {1}{2}</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1356"/>
         <source>Class(es) {0}</source>
-        <translation>Klasa/klasy {0}</translation>
+        <translation type="obsolete">Klasa/klasy {0}</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1359"/>
         <source>{0} color(s), last: {1}</source>
-        <translation>Kolory: {0}, ostatni: {1}</translation>
+        <translation type="obsolete">Kolory: {0}, ostatni: {1}</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1363"/>
         <source>Expression</source>
-        <translation>Wyrażenie</translation>
+        <translation type="obsolete">Wyrażenie</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="778"/>
+        <source>BANDS</source>
+        <translation>KANAŁY</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="805"/>
+        <source>Value of the active band under the cursor</source>
+        <translation>Wartość aktywnego kanału pod kursorem</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="811"/>
+        <source>Statistics of the active band in the last rectangle drawn on the map</source>
+        <translation>Statystyki aktywnego kanału w ostatnim prostokącie narysowanym na mapie</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="858"/>
+        <source>Every band</source>
+        <translation>Wszystkie kanały</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="860"/>
+        <source>The value range applies to every colour band at once (a pixel is kept when each band is in the range); the histogram shows the first one</source>
+        <translation>Zakres wartości dotyczy jednocześnie wszystkich kanałów barwnych (piksel jest zachowany, gdy każdy kanał mieści się w zakresie); histogram pokazuje pierwszy</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="872"/>
+        <source>Active band: the one the range, the histogram and the picker read</source>
+        <translation>Aktywny kanał: ten, który odczytują zakres, histogram i próbnik</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="881"/>
+        <source>The pipette compares this band</source>
+        <translation>Próbnik porównuje ten kanał</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="991"/>
+        <source>Colour the band holds: the spectral indexes and the chips use it. Click to change it</source>
+        <translation>Kolor przypisany kanałowi: używają go indeksy spektralne i znaczniki. Kliknij, aby go zmienić</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1001"/>
+        <source>Value at the last click of the pipette</source>
+        <translation>Wartość z ostatniego kliknięcia próbnika</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="928"/>
+        <source>No colour</source>
+        <translation>Brak koloru</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="936"/>
+        <source>RGB</source>
+        <translation>RGB</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="936"/>
+        <source>Bands 1, 2, 3 are red, green, blue</source>
+        <translation>Kanały 1, 2, 3 to czerwony, zielony, niebieski</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="936"/>
+        <source>IRC</source>
+        <translation>CIR</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="936"/>
+        <source>Bands 1, 2, 3 are infrared, red, green (IGN infrared colour orthophoto)</source>
+        <translation>Kanały 1, 2, 3 to podczerwień, czerwony, zielony (ortofotomapa w podczerwieni IGN)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="936"/>
+        <source>RGB + NIR</source>
+        <translation>RGB + NIR</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="936"/>
+        <source>Bands 1, 2, 3, 4 are red, green, blue, near infrared</source>
+        <translation>Kanały 1, 2, 3, 4 to czerwony, zielony, niebieski, bliska podczerwień</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="939"/>
+        <source>Every band: {0}</source>
+        <translation>Wszystkie kanały: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="990"/>
+        <source> Roles guessed, to confirm.</source>
+        <translation> Role odgadnięte, do potwierdzenia.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1019"/>
+        <source>R</source>
+        <translation>R</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1019"/>
+        <source>G</source>
+        <translation>G</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1019"/>
+        <source>B</source>
+        <translation>B</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1020"/>
+        <source>NIR</source>
+        <translation>NIR</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1023"/>
+        <source>Red</source>
+        <translation>Czerwony</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1023"/>
+        <source>Green</source>
+        <translation>Zielony</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1023"/>
+        <source>Blue</source>
+        <translation>Niebieski</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1024"/>
+        <source>Near infrared</source>
+        <translation>Bliska podczerwień</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1030"/>
+        <source>roles guessed, to confirm</source>
+        <translation>role odgadnięte, do potwierdzenia</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1045"/>
+        <source>Select</source>
+        <translation>Zaznacz</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1049"/>
+        <source>Similar pixels</source>
+        <translation>Podobne piksele</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1049"/>
+        <source>Every pixel of the raster close to the picked colour or value (the pipette of the rail)</source>
+        <translation>Wszystkie piksele rastra bliskie pobranemu kolorowi lub wartości (próbnik z paska)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1049"/>
+        <source>Clicked object</source>
+        <translation>Obiekt wskazany kliknięciem</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1049"/>
+        <source>Only the patch of such pixels the click falls in: a pool, a roof, a field (the object detector of the rail); Ctrl+click adds another object</source>
+        <translation>Tylko obszar takich pikseli, w który trafia kliknięcie: basen, dach, pole (detektor obiektów z paska); Ctrl+kliknięcie dodaje kolejny obiekt</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1049"/>
+        <source>Similar objects</source>
+        <translation>Podobne obiekty</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1049"/>
+        <source>Every object of the raster like the clicked one: the patches of such pixels whose area is within the ratios below (the similar objects tool of the rail); Ctrl+click adds another reference object</source>
+        <translation>Wszystkie obiekty rastra podobne do klikniętego: obszary takich pikseli, których powierzchnia mieści się w poniższych zakresach (narzędzie podobnych obiektów z paska); Ctrl+kliknięcie dodaje kolejny obiekt odniesienia</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1073"/>
+        <source>Area ×</source>
+        <translation>Powierzchnia ×</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1076"/>
+        <source>Smallest similar object, as a share of the smallest clicked one</source>
+        <translation>Najmniejszy podobny obiekt, jako ułamek najmniejszego klikniętego</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1076"/>
+        <source>Largest similar object, as a multiple of the largest clicked one</source>
+        <translation>Największy podobny obiekt, jako wielokrotność największego klikniętego</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1089"/>
+        <source>to ×</source>
+        <translation>do ×</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1092"/>
+        <source>same shape</source>
+        <translation>ten sam kształt</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1095"/>
+        <source>Keep only the objects shaped like the clicked ones: their compactness (4π × area / perimeter², 1 for a disc) within the same ratios; off, a road of the area of a pool is a pool</source>
+        <translation>Zachowaj tylko obiekty o kształcie takim jak kliknięte: ich zwartość (4π × powierzchnia / obwód², 1 dla koła) w tych samych zakresach; po wyłączeniu droga o powierzchni basenu jest basenem</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1146"/>
+        <source>Remove this pick</source>
+        <translation>Usuń to pobranie</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1225"/>
+        <source>Quantity</source>
+        <translation>Wielkość</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1956"/>
+        <source>Quantity the range applies to. Slope, aspect, hillshade and roughness read the active band as a DTM.</source>
+        <translation>Wielkość, do której odnosi się zakres. Nachylenie, ekspozycja, cieniowanie i szorstkość odczytują aktywny kanał jako NMT.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1242"/>
+        <source>Thresholds ▾</source>
+        <translation>Progi ▾</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1288"/>
+        <source>Insert ▾</source>
+        <translation>Wstaw ▾</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1288"/>
+        <source>Insert a band reference, a usual spectral index or the current range</source>
+        <translation>Wstaw odwołanie do kanału, typowy indeks spektralny lub bieżący zakres</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1313"/>
+        <source>Spectral indexes</source>
+        <translation>Indeksy spektralne</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1318"/>
+        <source>Range</source>
+        <translation>Zakres</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1319"/>
+        <source>The current value range</source>
+        <translation>Bieżący zakres wartości</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1391"/>
+        <source>Rendered colors depend on style and scale.</source>
+        <translation>Wyrenderowane kolory zależą od stylu i skali.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1391"/>
+        <source>Only color selection is available: numeric bands, indices, ranges, classes and derivatives are unavailable.</source>
+        <translation>Dostępny jest tylko wybór według koloru: pasma numeryczne, wskaźniki, zakresy, klasy i pochodne są niedostępne.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1817"/>
+        <source>VALUE RANGE — every band</source>
+        <translation>ZAKRES WARTOŚCI — wszystkie kanały</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1819"/>
+        <source>VALUE RANGE — band {0}</source>
+        <translation>ZAKRES WARTOŚCI — kanał {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1952"/>
+        <source>picks on: {0}</source>
+        <translation>pobiera z: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1956"/>
+        <source>A slope, aspect... reads one band as a DTM: choose a band in BANDS first</source>
+        <translation>Nachylenie, ekspozycja... odczytuje jeden kanał jako NMT: najpierw wybierz kanał w KANAŁY</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2159"/>
+        <source>The object could not be read</source>
+        <translation>Nie udało się odczytać obiektu</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2161"/>
+        <source>No object under the click: raise the tolerance or click another pixel</source>
+        <translation>Brak obiektu pod kliknięciem: zwiększ tolerancję lub kliknij inny piksel</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2163"/>
+        <source>An object is larger than the window read and was cut: lower the tolerance</source>
+        <translation>Obiekt jest większy niż odczytane okno i został obcięty: zmniejsz tolerancję</translation>
+    </message>
+</context>
+<context>
+    <name>RasterMaterialization</name>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/raster_materialization.py" line="121"/>
+        <source>bounded raster capture failed</source>
+        <translation>ograniczone przechwycenie rastra nie powiodło się</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="224"/>
+        <source>local raster capture could not be opened</source>
+        <translation>nie udało się otworzyć lokalnego przechwycenia rastra</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="213"/>
+        <source>raster analysis requires a local GDAL capture</source>
+        <translation>analiza rastra wymaga lokalnego przechwycenia GDAL</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/raster_materialization.py" line="85"/>
+        <location filename="../adapters/qgis/coverage_layers/raster_materialization.py" line="119"/>
+        <source>raster capture canceled</source>
+        <translation>przechwycenie rastra anulowano</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/raster_materialization.py" line="101"/>
+        <source>raster capture destination must be in the session cache</source>
+        <translation>miejsce docelowe przechwycenia rastra musi znajdować się w pamięci podręcznej sesji</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/raster_materialization.py" line="105"/>
+        <source>raster capture provider could not be cloned</source>
+        <translation>nie udało się sklonować dostawcy przechwycenia rastra</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/raster_materialization.py" line="38"/>
+        <source>raster capture requires a finite, non-empty extent</source>
+        <translation>przechwycenie rastra wymaga skończonego, niepustego zasięgu</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/raster_materialization.py" line="41"/>
+        <source>raster capture requires a positive pixel limit</source>
+        <translation>przechwycenie rastra wymaga dodatniego limitu pikseli</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/raster_materialization.py" line="46"/>
+        <source>raster capture requires a positive resolution</source>
+        <translation>przechwycenie rastra wymaga dodatniej rozdzielczości</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/raster_materialization.py" line="87"/>
+        <source>raster capture source could not be opened</source>
+        <translation>nie udało się otworzyć źródła przechwycenia rastra</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/raster_materialization.py" line="79"/>
+        <source>raster materialization must run in a worker thread</source>
+        <translation>materializacja rastra musi działać w wątku roboczym</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="208"/>
+        <source>raster selection canceled</source>
+        <translation>wybór rastra anulowano</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="216"/>
+        <source>raster selection source could not be opened</source>
+        <translation>nie udało się otworzyć źródła wyboru rastra</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="204"/>
+        <source>remote raster selection must run in a worker thread</source>
+        <translation>zdalny wybór rastra musi działać w wątku roboczym</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="210"/>
+        <source>rendered color selection requires a local rendered capture</source>
+        <translation>wybór według koloru renderowanego wymaga lokalnego przechwycenia renderowanego</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/raster_materialization.py" line="90"/>
+        <source>rendered rasters require a rendered color capture</source>
+        <translation>rastry renderowane wymagają przechwycenia kolorów renderowanych</translation>
+    </message>
+</context>
+<context>
+    <name>RasterStatisticsTask</name>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/raster_statistics_task.py" line="20"/>
+        <source>FilterMate: raster statistics</source>
+        <translation>FilterMate: statystyki rastra</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/raster_statistics_task.py" line="64"/>
+        <source>Raster sample failed; retry with a smaller visible extent.</source>
+        <translation>Próbkowanie rastra nie powiodło się; spróbuj ponownie z mniejszym widocznym zasięgiem.</translation>
+    </message>
+</context>
+<context>
+    <name>RasterSurfaceTask</name>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/raster_surface_task.py" line="11"/>
+        <source>FilterMate: raster preview</source>
+        <translation>FilterMate: podgląd rastra</translation>
+    </message>
+</context>
+<context>
+    <name>RasterTargetJob</name>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="459"/>
+        <source>remote raster target must run in a worker thread</source>
+        <translation>zdalny cel rastrowy musi działać w wątku roboczym</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="470"/>
+        <source>local raster target could not be opened</source>
+        <translation>nie udało się otworzyć lokalnego celu rastrowego</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="480"/>
+        <source>Rendered color layers cannot be filter targets.</source>
+        <translation>Warstwy kolorów renderowanych nie mogą być celami filtra.</translation>
     </message>
 </context>
 <context>
@@ -5018,6 +6245,97 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
     </message>
 </context>
 <context>
+    <name>RemoteMaterializer</name>
+    <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1000"/>
+        <source>Partial result: the remote feature limit was reached.</source>
+        <translation>Wynik częściowy: osiągnięto zdalny limit obiektów.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1002"/>
+        <source>Partial result: the remote time limit was reached.</source>
+        <translation>Wynik częściowy: osiągnięto zdalny limit czasu.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1004"/>
+        <source>Remote filtering was cancelled; the previous filter is kept.</source>
+        <translation>Filtrowanie zdalne anulowano; zachowano poprzedni filtr.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1006"/>
+        <source>More than 500 keys would be sent to the service; narrow the selection or use a local copy.</source>
+        <translation>Do usługi zostałoby wysłanych ponad 500 kluczy; zawęź wybór lub użyj kopii lokalnej.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1008"/>
+        <source>The service has no stable key; use a local copy.</source>
+        <translation>Usługa nie ma stabilnego klucza; użyj kopii lokalnej.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1010"/>
+        <source>Select or filter the remote source before spatial filtering.</source>
+        <translation>Wybierz lub przefiltruj zdalne źródło przed filtrowaniem przestrzennym.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1012"/>
+        <source>The service filter cannot be proved complete. Select source features or use a local copy.</source>
+        <translation>Nie można udowodnić kompletności filtra usługi. Wybierz obiekty źródłowe lub użyj kopii lokalnej.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1014"/>
+        <source>The remote source copy is incomplete; the previous filter is kept.</source>
+        <translation>Kopia zdalnego źródła jest niekompletna; zachowano poprzedni filtr.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1016"/>
+        <source>Partial result: no matching feature was confirmed before the limit; the previous filter is kept.</source>
+        <translation>Wynik częściowy: przed osiągnięciem limitu nie potwierdzono żadnego pasującego obiektu; zachowano poprzedni filtr.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1018"/>
+        <source>The intersecting remote copy is incomplete; a disjoint filter cannot be computed safely.</source>
+        <translation>Zdalna kopia przecinająca jest niekompletna; filtra disjoint nie można bezpiecznie obliczyć.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1020"/>
+        <source>Disjoint combined with another predicate requires a local copy of the remote target.</source>
+        <translation>Disjoint w połączeniu z innym predykatem wymaga lokalnej kopii zdalnego celu.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1022"/>
+        <source>The remote spatial predicate could not be evaluated; the previous filter is kept.</source>
+        <translation>Nie udało się ocenić zdalnego predykatu przestrzennego; zachowano poprzedni filtr.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1025"/>
+        <source>The remote copy could not be read or filtered; the previous filter is kept.</source>
+        <translation>Nie udało się odczytać lub przefiltrować zdalnej kopii; zachowano poprzedni filtr.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/remote_materializer.py" line="93"/>
+        <source>Remote materialization requires a background task.</source>
+        <translation>Zdalna materializacja wymaga zadania w tle.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/remote_materializer.py" line="566"/>
+        <source>Filtering a bounded remote copy</source>
+        <translation>Filtrowanie ograniczonej zdalnej kopii</translation>
+    </message>
+</context>
+<context>
+    <name>RenderedRasterTask</name>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/rendered_raster.py" line="88"/>
+        <source>FilterMate: rendered colour snapshot</source>
+        <translation>FilterMate: zrzut kolorów renderowanych</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/rendered_raster.py" line="158"/>
+        <source>Rendered snapshot failed; retry with a smaller visible extent.</source>
+        <translation>Zrzut renderowany nie powiódł się; spróbuj ponownie z mniejszym widocznym zasięgiem.</translation>
+    </message>
+</context>
+<context>
     <name>SearchableJsonView</name>
     <message>
         <location filename="../ui/widgets/json_view/searchable_view.py" line="79"/>
@@ -5028,6 +6346,147 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <location filename="../ui/widgets/json_view/searchable_view.py" line="184"/>
         <source>No match</source>
         <translation>Brak wyników</translation>
+    </message>
+</context>
+<context>
+    <name>ServerFilterTranslation</name>
+    <message>
+        <location filename="../adapters/qgis/server_subset_job.py" line="242"/>
+        <source>A FilterMate task is still reading layers. Retry after it finishes.</source>
+        <translation>Zadanie FilterMate wciąż odczytuje warstwy. Ponów po jego zakończeniu.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/server_subset_job.py" line="255"/>
+        <source>A layer with auxiliary storage cannot safely replace its server provider. The previous filter is unchanged.</source>
+        <translation>Warstwa z magazynem pomocniczym nie może bezpiecznie zastąpić swojego dostawcy serwerowego. Poprzedni filtr pozostaje bez zmian.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/server_subset_job.py" line="260"/>
+        <source>A remote join cannot be rebuilt on the main thread. The previous filter is unchanged.</source>
+        <translation>Złączenia zdalnego nie można odbudować w wątku głównym. Poprzedni filtr pozostaje bez zmian.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/server_subset_job.py" line="262"/>
+        <source>A server filter is already being prepared for this layer.</source>
+        <translation>Filtr serwera jest już przygotowywany dla tej warstwy.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/server_filter_translation.py" line="189"/>
+        <location filename="../adapters/qgis/server_filter_translation.py" line="250"/>
+        <source>A server layer can only be modified on its owning thread.</source>
+        <translation>Warstwę serwerową można modyfikować tylko w wątku, który jest jej właścicielem.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/server_subset_job.py" line="235"/>
+        <source>Asynchronous server filters require QGIS 3.32 or newer. The previous filter is unchanged.</source>
+        <translation>Asynchroniczne filtry serwera wymagają QGIS 3.32 lub nowszego. Poprzedni filtr pozostaje bez zmian.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/server_subset_job.py" line="368"/>
+        <source>Could not install the prepared server filter.</source>
+        <translation>Nie udało się zainstalować przygotowanego filtra serwera.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/server_subset_job.py" line="44"/>
+        <source>Could not preserve the layer state.</source>
+        <translation>Nie udało się zachować stanu warstwy.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/server_subset_job.py" line="239"/>
+        <source>Finish editing the layer before applying a server filter.</source>
+        <translation>Zakończ edycję warstwy przed zastosowaniem filtra serwera.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/server_filter_translation.py" line="104"/>
+        <source>Invalid attribute expression.</source>
+        <translation>Nieprawidłowe wyrażenie atrybutu.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/server_subset_job.py" line="83"/>
+        <source>Preparing server attribute filter</source>
+        <translation>Przygotowywanie serwerowego filtra atrybutów</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/server_filter_translation.py" line="140"/>
+        <source>QGIS cannot translate this predicate to an OGC filter.</source>
+        <translation>QGIS nie może przetłumaczyć tego predykatu na filtr OGC.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/server_subset_job.py" line="302"/>
+        <location filename="../adapters/qgis/server_subset_job.py" line="311"/>
+        <source>Server filter canceled or timed out. The previous filter is unchanged.</source>
+        <translation>Filtr serwera anulowano lub upłynął limit czasu. Poprzedni filtr pozostaje bez zmian.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/server_subset_job.py" line="348"/>
+        <source>Server filter installation failed and the previous provider could not be restored.</source>
+        <translation>Instalacja filtra serwera nie powiodła się, a poprzedniego dostawcy nie udało się przywrócić.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/server_subset_job.py" line="340"/>
+        <source>Server filter installation failed. The previous provider was already invalid and could not be restored.</source>
+        <translation>Instalacja filtra serwera nie powiodła się. Poprzedni dostawca był już nieprawidłowy i nie udało się go przywrócić.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/server_subset_job.py" line="355"/>
+        <source>Server filter installation failed. The previous provider was restored.</source>
+        <translation>Instalacja filtra serwera nie powiodła się. Poprzedni dostawca został przywrócony.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/server_subset_job.py" line="33"/>
+        <source>Server filter installation is in progress. Retry after it finishes.</source>
+        <translation>Trwa instalacja filtra serwera. Ponów po jej zakończeniu.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/server_subset_job.py" line="207"/>
+        <location filename="../adapters/qgis/server_subset_job.py" line="237"/>
+        <source>Server filter installation must start on the layer thread.</source>
+        <translation>Instalacja filtra serwera musi rozpocząć się w wątku warstwy.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/server_filter_translation.py" line="126"/>
+        <source>The expression is too complex to translate safely.</source>
+        <translation>Wyrażenie jest zbyt złożone, aby je bezpiecznie przetłumaczyć.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/server_filter_translation.py" line="100"/>
+        <source>The expression is too large or contains ambiguous SQL backslash escapes.</source>
+        <translation>Wyrażenie jest zbyt duże lub zawiera niejednoznaczne sekwencje ucieczki SQL z ukośnikiem odwrotnym.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/server_subset_job.py" line="318"/>
+        <source>The layer changed while preparing its filter. The prepared result was discarded.</source>
+        <translation>Warstwa zmieniła się podczas przygotowywania jej filtra. Przygotowany wynik odrzucono.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/server_subset_job.py" line="366"/>
+        <source>The layer is no longer available. The prepared filter was discarded.</source>
+        <translation>Warstwa nie jest już dostępna. Przygotowany filtr odrzucono.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/server_subset_job.py" line="311"/>
+        <source>The server rejected the filter or could not be reached. The previous filter is unchanged.</source>
+        <translation>Serwer odrzucił filtr lub był nieosiągalny. Poprzedni filtr pozostaje bez zmian.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/server_subset_job.py" line="253"/>
+        <source>This provider and QGIS version do not support verified worker creation. The previous filter is unchanged.</source>
+        <translation>Ten dostawca i ta wersja QGIS nie obsługują zweryfikowanego tworzenia wątku roboczego. Poprzedni filtr pozostaje bez zmian.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/server_filter_translation.py" line="225"/>
+        <source>{0}: the attribute filter cannot run entirely on the server. Unsupported part: {1}. {2} The previous filter is unchanged.</source>
+        <translation>{0}: filtr atrybutów nie może być wykonany w całości na serwerze. Nieobsługiwana część: {1}. {2} Poprzedni filtr pozostaje bez zmian.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/server_filter_translation.py" line="265"/>
+        <source>{0}: the provider rejected the attribute filter. The previous filter was restored.</source>
+        <translation>{0}: dostawca odrzucił filtr atrybutów. Poprzedni filtr przywrócono.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/server_filter_translation.py" line="264"/>
+        <source>{0}: the provider rejected the filter and restoration failed.</source>
+        <translation>{0}: dostawca odrzucił filtr, a przywrócenie nie powiodło się.</translation>
     </message>
 </context>
 <context>
@@ -5208,12 +6667,12 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
 <context>
     <name>SqlUtils</name>
     <message>
-        <location filename="../infrastructure/database/sql_utils.py" line="208"/>
+        <location filename="../infrastructure/database/sql_utils.py" line="266"/>
         <source>FilterMate - PostgreSQL Type Warning</source>
         <translation>FilterMate - Ostrzeżenie o typie PostgreSQL</translation>
     </message>
     <message>
-        <location filename="../infrastructure/database/sql_utils.py" line="212"/>
+        <location filename="../infrastructure/database/sql_utils.py" line="270"/>
         <source>Type mismatch in filter: {warning_detail}...</source>
         <translation>Niezgodność typów w filtrze: {warning_detail}...</translation>
     </message>
@@ -5232,29 +6691,37 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
     </message>
 </context>
 <context>
+    <name>TaskCompletionHandler</name>
+    <message>
+        <location filename="../core/tasks/task_completion_handler.py" line="519"/>
+        <source>The filter of {0} could not be applied; it keeps its previous filter.</source>
+        <translation>Nie udało się zastosować filtra warstwy {0}; zachowuje ona poprzedni filtr.</translation>
+    </message>
+</context>
+<context>
     <name>TaskCompletionMessenger</name>
     <message>
-        <location filename="../adapters/layer_refresh_manager.py" line="268"/>
+        <location filename="../adapters/layer_refresh_manager.py" line="280"/>
         <source>{count} features visible in main layer</source>
         <translation>{count} obiektów widocznych w warstwie głównej</translation>
     </message>
     <message>
-        <location filename="../adapters/layer_refresh_manager.py" line="261"/>
+        <location filename="../adapters/layer_refresh_manager.py" line="273"/>
         <source>All filters cleared - {count} features visible in main layer</source>
         <translation>Wszystkie filtry wyczyszczone - {count} obiektów widocznych w warstwie głównej</translation>
     </message>
     <message>
-        <location filename="../adapters/layer_refresh_manager.py" line="291"/>
+        <location filename="../adapters/layer_refresh_manager.py" line="303"/>
         <source>Filter applied to &apos;{layer_name}&apos;: {count} features</source>
         <translation>Filtr zastosowany do '{layer_name}': {count} obiektów</translation>
     </message>
     <message>
-        <location filename="../adapters/layer_refresh_manager.py" line="296"/>
+        <location filename="../adapters/layer_refresh_manager.py" line="308"/>
         <source> ({expression_preview})</source>
         <translation> ({expression_preview})</translation>
     </message>
     <message>
-        <location filename="../adapters/layer_refresh_manager.py" line="312"/>
+        <location filename="../adapters/layer_refresh_manager.py" line="324"/>
         <source>Filter cleared for &apos;{layer_name}&apos;: {count} features visible</source>
         <translation>Filtr wyczyszczony dla '{layer_name}': {count} widocznych obiektów</translation>
     </message>
@@ -5262,17 +6729,17 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
 <context>
     <name>TaskParameterBuilder</name>
     <message>
-        <location filename="../adapters/task_builder.py" line="926"/>
+        <location filename="../adapters/task_builder.py" line="936"/>
         <source>No entity selected! The selection widget lost the feature. Re-select an entity.</source>
         <translation>Nie wybrano obiektu! Widżet wyboru utracił obiekt. Wybierz ponownie obiekt.</translation>
     </message>
     <message>
-        <location filename="../adapters/task_builder.py" line="1044"/>
+        <location filename="../adapters/task_builder.py" line="1054"/>
         <source>Selected layer is invalid or its source cannot be found. Operation cancelled.</source>
         <translation>Wybrana warstwa jest nieprawidłowa lub nie można znaleźć jej źródła. Operacja anulowana.</translation>
     </message>
     <message>
-        <location filename="../adapters/task_builder.py" line="1059"/>
+        <location filename="../adapters/task_builder.py" line="1069"/>
         <source>Layer &apos;{0}&apos; is not yet initialized. Try selecting another layer then switch back to this one.</source>
         <translation>Warstwa '{0}' nie została jeszcze zainicjalizowana. Spróbuj wybrać inną warstwę, a następnie wróć do tej.</translation>
     </message>
@@ -5280,14 +6747,24 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
 <context>
     <name>UndoRedoHandler</name>
     <message>
-        <location filename="../adapters/undo_redo_handler.py" line="187"/>
+        <location filename="../adapters/undo_redo_handler.py" line="227"/>
         <source>Cannot undo: layer invalid or source not found.</source>
         <translation>Nie można cofnąć: warstwa nieprawidłowa lub nie znaleziono źródła.</translation>
     </message>
     <message>
-        <location filename="../adapters/undo_redo_handler.py" line="264"/>
+        <location filename="../adapters/undo_redo_handler.py" line="304"/>
         <source>Cannot redo: layer invalid or source not found.</source>
         <translation>Nie można ponowić: warstwa nieprawidłowa lub nie znaleziono źródła.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/undo_redo_handler.py" line="64"/>
+        <source>The provider rejected the saved filter.</source>
+        <translation>Dostawca odrzucił zapisany filtr.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/undo_redo_handler.py" line="67"/>
+        <source>Could not restore the filter: {0}</source>
+        <translation>Nie udało się przywrócić filtra: {0}</translation>
     </message>
 </context>
 <context>
@@ -5296,6 +6773,150 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <location filename="../ui/widgets/json_view/datatypes.py" line="572"/>
         <source>Explore ...</source>
         <translation>Przeglądaj ...</translation>
+    </message>
+</context>
+<context>
+    <name>VectorTargetJob</name>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="261"/>
+        <source>{0}: no unique key field, its features cannot be listed in its filter (a web service, or a virtual layer without a unique id column).</source>
+        <translation>{0}: brak unikalnego pola klucza, jej obiektów nie można wylistować w filtrze (usługa sieciowa lub warstwa wirtualna bez unikalnej kolumny identyfikatora).</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="362"/>
+        <source>{0} features to list, more than the {1} sent to a web service: narrow the source or use an attribute filter.</source>
+        <translation>{0} obiektów do wylistowania, więcej niż {1} wysyłanych do usługi sieciowej: zawęź źródło lub użyj filtra atrybutów.</translation>
+    </message>
+</context>
+<context>
+    <name>VectorTileFilter</name>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/vector_tile_target.py" line="26"/>
+        <source>Minimum coverage is unavailable for clipped tile objects</source>
+        <translation>Minimalne pokrycie jest niedostępne dla przyciętych obiektów kafli</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/vector_tile_target.py" line="29"/>
+        <source>Vector tile targets support Intersect and Disjoint only</source>
+        <translation>Cele kafli wektorowych obsługują tylko Intersect i Disjoint</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/vector_tile_target.py" line="32"/>
+        <source>Vector tile filtering requires a CRS authority code</source>
+        <translation>Filtrowanie kafli wektorowych wymaga kodu autorytetu CRS</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/vector_tile_target.py" line="51"/>
+        <source>Vector tile display filter: attributes depend on zoom; objects split across tiles may differ</source>
+        <translation>Filtr wyświetlania kafli wektorowych: atrybuty zależą od powiększenia; obiekty podzielone między kafle mogą się różnić</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/vector_tile_target.py" line="58"/>
+        <source>The vector tile style changed while the filter was running; try again</source>
+        <translation>Styl kafli wektorowych zmienił się podczas działania filtra; spróbuj ponownie</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/vector_tile_filters.py" line="317"/>
+        <location filename="../adapters/qgis/coverage_layers/vector_tile_filters.py" line="340"/>
+        <source>Filter vector tile attributes</source>
+        <translation>Filtruj atrybuty kafli wektorowych</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/vector_tile_filters.py" line="248"/>
+        <source>Invalid vector tile filter expression</source>
+        <translation>Nieprawidłowe wyrażenie filtra kafli wektorowych</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/vector_tile_filters.py" line="341"/>
+        <source>QGIS expression (attributes depend on zoom):</source>
+        <translation>Wyrażenie QGIS (atrybuty zależą od powiększenia):</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/vector_tile_filters.py" line="318"/>
+        <source>Redo vector tile filter</source>
+        <translation>Ponów filtr kafli wektorowych</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/vector_tile_filters.py" line="298"/>
+        <source>Target only. Attributes depend on zoom. Objects split across tiles may be filtered differently.</source>
+        <translation>Tylko cel. Atrybuty zależą od powiększenia. Obiekty podzielone między kafle mogą być filtrowane inaczej.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/vector_tile_filters.py" line="99"/>
+        <source>The saved vector tile style is invalid</source>
+        <translation>Zapisany styl kafli wektorowych jest nieprawidłowy</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/vector_tile_filters.py" line="113"/>
+        <location filename="../adapters/qgis/coverage_layers/vector_tile_filters.py" line="116"/>
+        <source>The saved vector tile symbol property is invalid</source>
+        <translation>Zapisana właściwość symbolu kafli wektorowych jest nieprawidłowa</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/vector_tile_filters.py" line="39"/>
+        <source>The tile selection exceeds the expression budget (1 MB); use a smaller area</source>
+        <translation>Wybór kafli przekracza limit wyrażenia (1 MB); użyj mniejszego obszaru</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/vector_tile_filters.py" line="36"/>
+        <source>The tile selection exceeds the vertex budget (2000); use a smaller area</source>
+        <translation>Wybór kafli przekracza limit wierzchołków (2000); użyj mniejszego obszaru</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/vector_tile_filters.py" line="257"/>
+        <source>The vector tile filter exceeds the expression budget (1 MB)</source>
+        <translation>Filtr kafli wektorowych przekracza limit wyrażenia (1 MB)</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/vector_tile_filters.py" line="264"/>
+        <source>The vector tile filter exceeds the total style expression budget (1 MB); use a smaller area</source>
+        <translation>Filtr kafli wektorowych przekracza całkowity limit wyrażeń stylu (1 MB); użyj mniejszego obszaru</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/vector_tile_filters.py" line="317"/>
+        <source>Undo vector tile filter</source>
+        <translation>Cofnij filtr kafli wektorowych</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/vector_tile_filters.py" line="318"/>
+        <source>Unfilter vector tiles</source>
+        <translation>Usuń filtr kafli wektorowych</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/vector_tile_filters.py" line="346"/>
+        <source>Vector tile attribute filter</source>
+        <translation>Filtr atrybutów kafli wektorowych</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/favorites_bridge.py" line="111"/>
+        <source>Vector tile favorite</source>
+        <translation>Ulubiony kafli wektorowych</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/vector_tile_filters.py" line="349"/>
+        <source>Vector tile filter</source>
+        <translation>Filtr kafli wektorowych</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/vector_tile_filters.py" line="172"/>
+        <source>Vector tile filtering requires a basic renderer</source>
+        <translation>Filtrowanie kafli wektorowych wymaga renderera podstawowego</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/vector_tile_filters.py" line="125"/>
+        <location filename="../adapters/qgis/coverage_layers/vector_tile_filters.py" line="175"/>
+        <source>Vector tile filtering requires basic labeling</source>
+        <translation>Filtrowanie kafli wektorowych wymaga etykietowania podstawowego</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/vector_tile_filters.py" line="353"/>
+        <source>Vector tile filters</source>
+        <translation>Filtry kafli wektorowych</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/vector_tile_filters.py" line="294"/>
+        <source>Vector tiles</source>
+        <translation>Kafle wektorowe</translation>
     </message>
 </context>
 <context>
@@ -5309,19 +6930,19 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
 <context>
     <name>self.self</name>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="588"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="735"/>
         <source>Source geometry: the features selected in EXPLORING</source>
         <translation>Geometria źródłowa: obiekty wybrane w EXPLORING</translation>
     </message>
     <message>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="624"/>
         <source>Source geometry: the selected pixels, vectorized</source>
-        <translation>Geometria źródłowa: wybrane piksele po wektoryzacji</translation>
+        <translation type="obsolete">Geometria źródłowa: wybrane piksele po wektoryzacji</translation>
     </message>
     <message>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
         <source>Kept points</source>
-        <translation>Zachowane punkty</translation>
+        <translation type="obsolete">Zachowane punkty</translation>
     </message>
 </context>
 </TS>

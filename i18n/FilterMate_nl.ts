@@ -32,29 +32,70 @@
 <context>
     <name>AppInitializer</name>
     <message>
-        <location filename="../core/services/app_initializer.py" line="171"/>
+        <location filename="../core/services/app_initializer.py" line="175"/>
         <source>Cleared corrupted filters from {0} layer(s). Please re-apply your filters.</source>
         <translation>Beschadigde filters van {0} la(a)g(en) gewist. Pas uw filters opnieuw toe.</translation>
     </message>
     <message>
-        <location filename="../core/services/app_initializer.py" line="240"/>
+        <location filename="../core/services/app_initializer.py" line="244"/>
         <source>Empty project detected. Add vector layers to activate the plugin.</source>
         <translation>Leeg project gedetecteerd. Voeg vectorlagen toe om de plugin te activeren.</translation>
     </message>
     <message>
-        <location filename="../core/services/app_initializer.py" line="307"/>
+        <location filename="../core/services/app_initializer.py" line="311"/>
         <source>Cannot access the FilterMate database. Check the project directory permissions.</source>
         <translation>Kan de FilterMate-database niet openen. Controleer de machtigingen van de projectmap.</translation>
     </message>
     <message>
-        <location filename="../core/services/app_initializer.py" line="321"/>
+        <location filename="../core/services/app_initializer.py" line="325"/>
         <source>Error during database verification: {0}</source>
         <translation>Fout bij databaseverificatie: {0}</translation>
     </message>
     <message>
-        <location filename="../core/services/app_initializer.py" line="601"/>
+        <location filename="../core/services/app_initializer.py" line="605"/>
         <source>Layer loading failed. Use F5 to force reload.</source>
         <translation>Laden van laag mislukt. Gebruik F5 om opnieuw te laden.</translation>
+    </message>
+</context>
+<context>
+    <name>AttributeFilterExecutor</name>
+    <message>
+        <location filename="../core/tasks/executors/attribute_filter_executor.py" line="379"/>
+        <source>{0}: this web service has no unique key field (declared key, id, gml_id, cleabs, objectid...), so the selected features cannot be listed for the server.</source>
+        <translation>{0}: deze webdienst heeft geen uniek sleutelveld (opgegeven sleutel, id, gml_id, cleabs, objectid...), dus de geselecteerde objecten kunnen niet voor de server worden opgesomd.</translation>
+    </message>
+    <message>
+        <location filename="../core/tasks/executors/attribute_filter_executor.py" line="384"/>
+        <source>{0}: this layer has no unique key field and its feature ids cannot be listed in its filter (a virtual layer needs a unique id column, its uid).</source>
+        <translation>{0}: deze laag heeft geen uniek sleutelveld en de objectidentificaties kunnen niet in het filter worden opgenomen (een virtuele laag heeft een unieke id-kolom nodig, de uid).</translation>
+    </message>
+    <message>
+        <location filename="../core/tasks/executors/attribute_filter_executor.py" line="391"/>
+        <source>{0}: {1} selected features, more than the {2} sent to a web service. Narrow the selection or use an attribute filter.</source>
+        <translation>{0}: {1} geselecteerde objecten, meer dan de {2} die naar een webdienst worden gestuurd. Beperk de selectie of gebruik een attribuutfilter.</translation>
+    </message>
+</context>
+<context>
+    <name>BackendController</name>
+    <message>
+        <location filename="../ui/controllers/backend_controller.py" line="110"/>
+        <source>Remote file: every read goes over the network. FilterMate does not count its features on the main thread.</source>
+        <translation>Extern bestand: elke leesbewerking verloopt via het netwerk. FilterMate telt de objecten ervan niet op de hoofdthread.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/backend_controller.py" line="115"/>
+        <source>Remote service: the filter is sent to the server when it can translate it. FilterMate does not count its features on the main thread.</source>
+        <translation>Externe dienst: het filter wordt naar de server gestuurd wanneer deze het kan omzetten. FilterMate telt de objecten ervan niet op de hoofdthread.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/backend_controller.py" line="120"/>
+        <source>A filter by feature list is limited to {0} features.</source>
+        <translation>Een filter op objectlijst is beperkt tot {0} objecten.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/backend_controller.py" line="123"/>
+        <source>Remote</source>
+        <translation>Extern</translation>
     </message>
 </context>
 <context>
@@ -93,12 +134,12 @@
 <context>
     <name>CentroidTargetsSync</name>
     <message>
-        <location filename="../ui/controllers/centroid_targets_sync.py" line="179"/>
+        <location filename="../ui/controllers/centroid_targets_sync.py" line="186"/>
         <source>Test the checked line and polygon targets by their centroids (point on surface): faster on large geometries. Each target has its own square in the list</source>
         <translation>De aangevinkte lijn- en polygoondoelen testen via hun centroïden (punt op oppervlak): sneller bij grote geometrieën. Elk doel heeft een eigen vierkantje in de lijst</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/centroid_targets_sync.py" line="179"/>
+        <location filename="../ui/controllers/centroid_targets_sync.py" line="186"/>
         <source>Centroids apply to line and polygon targets: check one in the list of layers to filter</source>
         <translation>Centroïden gelden voor lijn- en polygoondoelen: vink er een aan in de lijst met te filteren lagen</translation>
     </message>
@@ -106,7 +147,7 @@
 <context>
     <name>ConfigController</name>
     <message>
-        <location filename="../ui/controllers/config_controller.py" line="379"/>
+        <location filename="../ui/controllers/config_controller.py" line="380"/>
         <source>Error cancelling changes: {0}</source>
         <translation>Fout bij annuleren van wijzigingen: {0}</translation>
     </message>
@@ -122,27 +163,27 @@
 <context>
     <name>CoverageDockExtras</name>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="247"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="303"/>
         <source>1 band</source>
         <translation>1 band</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="248"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="304"/>
         <source>{0} bands</source>
         <translation>{0} banden</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="249"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="305"/>
         <source>{0} points</source>
         <translation>{0} punten</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="207"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="772"/>
         <source>Source geometry: the selected pixels, vectorized</source>
-        <translation type="obsolete">Brongeometrie: de geselecteerde pixels, gevectoriseerd</translation>
+        <translation>Brongeometrie: de geselecteerde pixels, gevectoriseerd</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="788"/>
         <source>Source geometry: the footprint of the kept points</source>
         <translation>Brongeometrie: de voetafdruk van de behouden punten</translation>
     </message>
@@ -162,12 +203,12 @@
         <translation type="obsolete">Statistieken van een rechthoek: sleep op de kaart om minimum, maximum en gemiddelde van de huidige band te lezen</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="330"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="392"/>
         <source>Elevation profile: open the QGIS elevation profile of the map</source>
         <translation>Hoogteprofiel: het QGIS-hoogteprofiel van de kaart openen</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="330"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="392"/>
         <source>3D view: open a new QGIS 3D map view</source>
         <translation>3D-weergave: een nieuwe QGIS 3D-kaartweergave openen</translation>
     </message>
@@ -177,7 +218,7 @@
         <translation type="obsolete">geen object</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="254"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="310"/>
         <source>{0} feature(s)</source>
         <translation>{0} object(en)</translation>
     </message>
@@ -187,140 +228,315 @@
         <translation type="obsolete">alle pixels</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="259"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="315"/>
         <source>{0} class(es)</source>
         <translation>{0} klasse(n)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="256"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="312"/>
         <source>expression</source>
         <translation>expressie</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="250"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="306"/>
         <source>{0} features</source>
         <translation>{0} objecten</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="650"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="803"/>
         <source>Vector</source>
         <translation>Vector</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="650"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="803"/>
         <source>Raster</source>
         <translation>Raster</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="650"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="803"/>
         <source>Point cloud</source>
         <translation>Puntenwolk</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="347"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="791"/>
         <source>Kept points</source>
-        <translation type="obsolete">Behouden punten</translation>
+        <translation>Behouden punten</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="624"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="772"/>
         <source>Selection → source geometry</source>
         <translation>Selectie → brongeometrie</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="326"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="384"/>
         <source>Link the range to the style: the layer colours stretch over the selected range</source>
         <translation>Bereik aan de stijl koppelen: de kleuren van de laag strekken zich uit over het gekozen bereik</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="327"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="385"/>
         <source>Class pipette: click the map and the class of the points drawn there is checked. Ctrl+click adds another one</source>
         <translation>Klassenpipet: klik op de kaart en de klasse van de daar getekende punten wordt aangevinkt. Ctrl+klik voegt er nog een toe</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="330"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="392"/>
         <source>Value under the cursor: follow the pixel value (or the slope, aspect... the range applies to) while moving over the map</source>
         <translation>Waarde onder de cursor: de pixelwaarde (of de helling, expositie... waarop het bereik van toepassing is) volgen tijdens het bewegen over de kaart</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="330"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="392"/>
         <source>Statistics of a rectangle: drag on the map to read the minimum, maximum and mean of the current band (or of the slope, aspect... the range applies to)</source>
         <translation>Statistieken van een rechthoek: sleep op de kaart om minimum, maximum en gemiddelde van de huidige band (of van de helling, expositie... waarop het bereik van toepassing is) te lezen</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="445"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="569"/>
         <source>The style link follows pixel values: not available while the range applies to a slope, aspect, hillshade or roughness</source>
         <translation>De stijlkoppeling volgt de pixelwaarden: niet beschikbaar zolang het bereik van toepassing is op een helling, expositie, reliëfschaduw of ruwheid</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="744"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="916"/>
         <source>Class pipette: this point cloud has no Classification attribute</source>
         <translation>Klassenpipet: deze puntenwolk heeft geen attribuut Classification</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="910"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1522"/>
         <source>The style cannot follow the range: it needs a single band grey or pseudocolor style on the band of the panel</source>
         <translation>De stijl kan het bereik niet volgen: er is een stijl met één band in grijs of pseudokleur nodig op de band van het paneel</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="330"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="392"/>
         <source>Pipette: click the map and the pixels that look like the one you click are selected (a color on an image, a value on a DTM or an index, a class on a classified raster, with the tolerance of the panel). Ctrl+click adds another one</source>
         <translation>Pipet: klik op de kaart en de pixels die lijken op de aangeklikte worden geselecteerd (een kleur op een afbeelding, een waarde op een DTM of een index, een klasse op een geclassificeerd raster, met de tolerantie van het paneel). Ctrl+klik voegt er nog een toe</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="255"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="311"/>
         <source>no feature selected</source>
         <translation>geen object geselecteerd</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="257"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="313"/>
         <source>whole layer</source>
         <translation>hele laag</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="258"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="314"/>
         <source>no constraint</source>
         <translation>geen beperking</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="260"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="316"/>
         <source>raster expression</source>
         <translation>rasterexpressie</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="261"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="317"/>
         <source>all points</source>
         <translation>alle punten</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="318"/>
+        <source>{0} object(s)</source>
+        <translation>{0} object(en)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="319"/>
+        <source>shown as the whole class in their box</source>
+        <translation>als de hele klasse in hun kader getoond</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="388"/>
+        <source>Object detector: click the map and the patch of pixels that look like the one you click is selected (a pool, a roof, a field, with the tolerance of the panel), not every pixel of its colour. Ctrl+click adds another object</source>
+        <translation>Objectdetector: klik op de kaart en de pixelvlek die lijkt op de aangeklikte pixel wordt geselecteerd (een zwembad, een dak, een veld, met de tolerantie van het paneel), niet elke pixel van die kleur. Ctrl+klik voegt een ander object toe</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="392"/>
+        <source>Similar objects: click an object and every object of the raster like it is selected (the patches of such pixels whose area is within the ratios of the panel). Ctrl+click adds another reference object</source>
+        <translation>Vergelijkbare objecten: klik op een object en elk vergelijkbaar object van het raster wordt geselecteerd (de pixelvlekken van dergelijke pixels waarvan de oppervlakte binnen de verhoudingen van het paneel valt). Ctrl+klik voegt een ander referentieobject toe</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="392"/>
+        <source>Object detector: click the map and the object under the click is selected (the cluster of points of its class: a building, a tree), not the whole class; or every object of the cloud like it (right-click the button for the target). Ctrl+click adds another object</source>
+        <translation>Objectdetector: klik op de kaart en het object onder de klik wordt geselecteerd (het cluster punten van zijn klasse: een gebouw, een boom), niet de hele klasse; of elk object van de puntenwolk dat erop lijkt (klik met de rechtermuisknop op de knop voor het doel). Ctrl+klik voegt een ander object toe</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="392"/>
+        <source>Value pipette: click the map and a condition is written on the attribute chosen in ATTRIBUTES (Z, intensity...), around the value of the point there, with the tolerance of the panel. Ctrl+click adds another condition (OR)</source>
+        <translation>Waardepipet: klik op de kaart en er wordt een voorwaarde geschreven op het attribuut dat in ATTRIBUTEN is gekozen (Z, intensiteit...), rond de waarde van het punt daar, met de tolerantie van het paneel. Ctrl+klik voegt een andere voorwaarde toe (OR)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="392"/>
+        <source>Zone: draw a rectangle, a polygon, a freehand shape or a circle on the map (right-click the button for the shape); its X / Y box goes to ATTRIBUTES, the shape itself cuts the targets</source>
+        <translation>Zone: teken een rechthoek, een polygoon, een vrije vorm of een cirkel op de kaart (klik met de rechtermuisknop op de knop voor de vorm); het X/Y-kader gaat naar ATTRIBUTEN, de vorm zelf knipt de doelen bij</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="392"/>
+        <source>More tools: the value under the cursor, the statistics of a rectangle</source>
+        <translation>Meer hulpmiddelen: de waarde onder de cursor, de statistieken van een rechthoek</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="392"/>
+        <source>Similar features: click a feature and every feature of the layer with the same value of the group&apos;s field (the display expression of the single / multiple selection) is selected. Ctrl+click adds another value</source>
+        <translation>Vergelijkbare objecten: klik op een object en elk object van de laag met dezelfde waarde van het groepsveld (de weergave-expressie van de enkele/meervoudige selectie) wordt geselecteerd. Ctrl+klik voegt een andere waarde toe</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="392"/>
+        <source>More tools: the QGIS selection tools (rectangle, polygon, freehand, radius), select by expression, invert or clear the selection, the attribute table of the selection</source>
+        <translation>Meer hulpmiddelen: de selectiehulpmiddelen van QGIS (rechthoek, polygoon, vrije hand, straal), selecteren op expressie, de selectie omkeren of wissen, de attributentabel van de selectie</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="392"/>
+        <source>More tools: the elevation profile and the 3D view of QGIS</source>
+        <translation>Meer hulpmiddelen: het hoogteprofiel en de 3D-weergave van QGIS</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="539"/>
+        <source>Only color selection is available: rendered colors depend on style and scale.</source>
+        <translation>Alleen kleurselectie is beschikbaar: weergegeven kleuren zijn afhankelijk van stijl en schaal.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="567"/>
+        <source>The style link follows the VALUE RANGE group: make it the active one first</source>
+        <translation>De stijlkoppeling volgt de groep WAARDEBEREIK: maak deze eerst actief</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="790"/>
+        <source>Current filter: {0}</source>
+        <translation>Huidig filter: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="826"/>
+        <source>Rendered colors depend on style and scale.</source>
+        <translation>Weergegeven kleuren zijn afhankelijk van stijl en schaal.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="925"/>
+        <source>Object detector: this point cloud has no Classification attribute</source>
+        <translation>Objectdetector: deze puntenwolk heeft geen attribuut Classification</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="974"/>
+        <source>Object detector</source>
+        <translation>Objectdetector</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="977"/>
+        <source>Clicked object</source>
+        <translation>Aangeklikt object</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="977"/>
+        <source>Similar objects</source>
+        <translation>Vergelijkbare objecten</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1081"/>
+        <source>Zone shape</source>
+        <translation>Vorm van de zone</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1254"/>
+        <source>Rectangle</source>
+        <translation>Rechthoek</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1254"/>
+        <source>Polygon</source>
+        <translation>Polygoon</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1255"/>
+        <source>Freehand</source>
+        <translation>Vrije hand</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1255"/>
+        <source>Radius</source>
+        <translation>Straal</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1130"/>
+        <source>The link follows the single and multiple selections: make one of them the active group first</source>
+        <translation>De koppeling volgt de enkele en meervoudige selectie: maak er eerst een van actief</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1253"/>
+        <source>Select on the map</source>
+        <translation>Op de kaart selecteren</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1261"/>
+        <source>Select by expression…</source>
+        <translation>Selecteren op expressie…</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1261"/>
+        <source>Invert the selection</source>
+        <translation>De selectie omkeren</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1261"/>
+        <source>Clear the selection</source>
+        <translation>De selectie wissen</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1268"/>
+        <source>Attribute table of the selection</source>
+        <translation>Attributentabel van de selectie</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1307"/>
+        <source>Value under the cursor</source>
+        <translation>Waarde onder de cursor</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1311"/>
+        <source>Statistics of a rectangle</source>
+        <translation>Statistieken van een rechthoek</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1327"/>
+        <source>Elevation profile</source>
+        <translation>Hoogteprofiel</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1327"/>
+        <source>3D view</source>
+        <translation>3D-weergave</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1684"/>
+        <source>This point cloud has no X / Y attribute to filter on</source>
+        <translation>Deze puntenwolk heeft geen X/Y-attribuut om op te filteren</translation>
     </message>
 </context>
 <context>
     <name>CoverageModeController</name>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="294"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="365"/>
         <source>Restoring the filter of {0} raster / point cloud layer(s)…</source>
         <translation>Filter van {0} raster-/puntenwolklaag/-lagen herstellen…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="582"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="747"/>
         <source>cov. ≥ </source>
         <translation>dekking ≥ </translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="583"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="748"/>
         <source>Minimum share of a polygon target inside the source geometry (0 = any overlap). Used when the source is a raster or a point cloud.</source>
         <translation>Minimaal aandeel van een polygoondoel binnen de brongeometrie (0 = elke overlapping). Wordt gebruikt wanneer de bron een raster of een puntenwolk is.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="698"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="863"/>
         <source>Raster</source>
         <translation>Raster</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="698"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="863"/>
         <source>Point cloud</source>
         <translation>Puntenwolk</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="707"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="872"/>
         <source>{0} layer: selection in EXPLORING, relation in FILTERING</source>
         <translation>{0}-laag: selectie in EXPLORING, relatie in FILTERING</translation>
     </message>
@@ -330,7 +546,7 @@
         <translation type="obsolete">Pixelkiezer: klik op de kaart om de waarde van elke band te lezen (Ctrl+klik breidt het bereik uit)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="734"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="918"/>
         <source>Zoom to the layer</source>
         <translation>Zoomen naar de laag</translation>
     </message>
@@ -340,260 +556,390 @@
         <translation type="obsolete">Voorbeeld: pixels buiten de selectie verbergen</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="729"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="911"/>
         <source>Not used for raster layers</source>
         <translation>Niet gebruikt voor rasterlagen</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="730"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="912"/>
         <source>Reset the raster selection</source>
         <translation>De rasterselectie herstellen</translation>
     </message>
     <message>
         <location filename="../ui/controllers/coverage_mode_controller.py" line="733"/>
         <source>Identify points on the map</source>
-        <translation>Punten op de kaart identificeren</translation>
+        <translation type="obsolete">Punten op de kaart identificeren</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="735"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="919"/>
         <source>Live preview: show only the points kept by the selection</source>
         <translation>Live voorbeeld: alleen de door de selectie behouden punten tonen</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="737"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="921"/>
         <source>Not used for point cloud layers</source>
         <translation>Niet gebruikt voor puntenwolklagen</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="738"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="922"/>
         <source>Reset the point cloud criteria</source>
         <translation>De puntenwolkcriteria herstellen</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="951"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1390"/>
         <source>Invalid raster calculator expression</source>
         <translation>Ongeldige uitdrukking voor de rasterberekening</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1023"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1688"/>
         <source>PDAL was not found: the height above a DTM needs the pdal executable</source>
         <translation>PDAL is niet gevonden: de hoogte boven een DTM vereist het uitvoerbare bestand pdal</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1991"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3147"/>
         <source>A FilterMate task is still running: wait for it to finish</source>
         <translation>Er wordt nog een FilterMate-taak uitgevoerd: wacht tot die klaar is</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1556"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2629"/>
         <source>FilterMate task failed: {0}</source>
         <translation>FilterMate-taak mislukt: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1593"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2666"/>
         <source>Select pixels first: a value range, classes or a raster expression</source>
         <translation>Selecteer eerst pixels: een waardebereik, klassen of een rasteruitdrukking</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1602"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2679"/>
         <source>Raster filtered: {0}</source>
         <translation>Raster gefilterd: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1620"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2713"/>
         <source>The point cloud expression was rejected: {0}</source>
         <translation>De puntenwolkuitdrukking is geweigerd: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1623"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2716"/>
         <source>Select points first: classes, attribute ranges or an expression</source>
         <translation>Selecteer eerst punten: klassen, attribuutbereiken of een uitdrukking</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1631"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2730"/>
         <source>Point cloud filtered: {0}</source>
         <translation>Puntenwolk gefilterd: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2094"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3252"/>
         <source>Filter not applied: {0}</source>
         <translation>Filter niet toegepast: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1957"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3109"/>
         <source>canceled</source>
         <translation>geannuleerd</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1699"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2812"/>
         <source>{0} target(s) filtered</source>
         <translation>{0} doel(en) gefilterd</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1701"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2820"/>
         <source>{0} failed: {1}</source>
         <translation>{0} mislukt: {1}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1710"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2833"/>
         <source>FilterMate: filtering from '{0}'…</source>
         <translation>FilterMate: filteren vanuit '{0}'…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1777"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2929"/>
         <source>Changed since, left as is: {0}</source>
         <translation>Sindsdien gewijzigd, ongemoeid gelaten: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1783"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2935"/>
         <source>{0} layer(s) restored</source>
         <translation>{0} laag/lagen hersteld</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1817"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2969"/>
         <source>&apos;{0}&apos; not exported: {1}</source>
         <translation>'{0}' niet geëxporteerd: {1}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1831"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2983"/>
         <source>Exported: {0}</source>
         <translation>Geëxporteerd: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1833"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2985"/>
         <source>Export failed: {0}</source>
         <translation>Exporteren mislukt: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1840"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2992"/>
         <source>Exporting {0} layer(s)…</source>
         <translation>{0} laag/lagen exporteren…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1846"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2998"/>
         <source>Export folder</source>
         <translation>Exportmap</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1928"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3080"/>
         <source>Raster / point cloud targets skipped: no source feature selected in EXPLORING</source>
         <translation>Raster-/puntenwolkdoelen overgeslagen: geen bronobject geselecteerd in EXPLORING</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1957"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3109"/>
         <source>Raster / point cloud targets not filtered: {0}</source>
         <translation>Raster-/puntenwolkdoelen niet gefilterd: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1959"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3111"/>
         <source>{0} raster / point cloud target(s) filtered</source>
         <translation>{0} raster-/puntenwolkdoel(en) gefilterd</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2073"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3229"/>
         <source>Choose the DTM raster used for the height above ground</source>
         <translation>Kies het DTM-raster dat voor de hoogte boven maaiveld wordt gebruikt</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2084"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3240"/>
         <source>Height above ground not computed: {0}</source>
         <translation>Hoogte boven maaiveld niet berekend: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2103"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3261"/>
         <source>Computing the height above '{0}' with PDAL…</source>
         <translation>Hoogte boven '{0}' berekenen met PDAL…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="271"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="342"/>
         <source>The FilterMate cache holds {0} GB, over its {1} GB limit: unfilter the raster / point cloud layers you no longer need</source>
         <translation>De cache van FilterMate neemt {0} GB in beslag, boven de limiet van {1} GB: verwijder het filter van de raster- / puntenwolklagen die u niet meer nodig hebt</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1025"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1690"/>
         <source>PDAL {0} is too old: the height above a DTM needs PDAL 2.4 or later</source>
         <translation>PDAL {0} is te oud: de hoogte boven een DTM vereist PDAL 2.4 of nieuwer</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1028"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1693"/>
         <source>PDAL could not be run, the height above a DTM is unavailable: {0}</source>
         <translation>PDAL kon niet worden uitgevoerd, de hoogte boven een DTM is niet beschikbaar: {0}</translation>
     </message>
     <message>
         <location filename="../ui/controllers/coverage_mode_controller.py" line="722"/>
         <source>Pixel picker: click on the map to read the value of every band, and the slope, aspect... when the range applies to one (Ctrl+click extends the range)</source>
-        <translation>Pixelkiezer: klik op de kaart om de waarde van elke band te lezen, en de helling, expositie... wanneer het bereik op een ervan van toepassing is (Ctrl+klik breidt het bereik uit)</translation>
+        <translation type="obsolete">Pixelkiezer: klik op de kaart om de waarde van elke band te lezen, en de helling, expositie... wanneer het bereik op een ervan van toepassing is (Ctrl+klik breidt het bereik uit)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="725"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="907"/>
         <source>Zoom to the selected pixels (to the layer when nothing is selected)</source>
         <translation>Zoomen naar de geselecteerde pixels (naar de laag als niets is geselecteerd)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="726"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="908"/>
         <source>Preview: hide the pixels outside the selection (a white veil for a slope, aspect...)</source>
         <translation>Voorbeeld: pixels buiten de selectie verbergen (een witte sluier voor een helling, expositie...)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="996"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1569"/>
         <source>The preview of a slope or aspect needs the map in the CRS of the raster ({0})</source>
         <translation>Het voorbeeld van een helling of expositie vereist de kaart in het CRS van het raster ({0})</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1371"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2165"/>
         <source>only the points drawn on the map can be picked: turn the preview off to pick a class it hides</source>
         <translation>alleen de op de kaart getekende punten kunnen worden gekozen: zet het voorbeeld uit om een klasse te kiezen die het verbergt</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1373"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2236"/>
         <source>No classified point under the click</source>
         <translation>Geen geclassificeerd punt onder de klik</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1377"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2171"/>
         <source>Class {0} is already checked</source>
         <translation>Klasse {0} is al aangevinkt</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1379"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2260"/>
         <source>Class {0} is not in the class list of the layer</source>
         <translation>Klasse {0} staat niet in de klassenlijst van de laag</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="906"/>
+        <source>Not used for raster layers: the pipette reads the bands</source>
+        <translation>Niet gebruikt voor rasterlagen: de pipet leest de banden</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="915"/>
+        <source>Class pipette: click the map and the class of the points drawn there is checked. Ctrl+click adds another one</source>
+        <translation>Klassenpipet: klik op de kaart en de klasse van de daar getekende punten wordt aangevinkt. Ctrl+klik voegt er nog een toe</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1070"/>
+        <source>Preview and statistics use a bounded local sample of the visible extent; filtering reads the source.</source>
+        <translation>Voorbeeld en statistieken gebruiken een begrensde lokale steekproef van het zichtbare extent; het filteren leest de bron.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1211"/>
+        <source>Preparing a bounded color snapshot of the visible extent…</source>
+        <translation>Een begrensde kleurmomentopname van het zichtbare extent wordt voorbereid…</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1223"/>
+        <source>The color snapshot could not be prepared. Try a smaller visible extent.</source>
+        <translation>De kleurmomentopname kon niet worden voorbereid. Probeer een kleiner zichtbaar extent.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1227"/>
+        <source>Color selection applies to the captured visible extent.</source>
+        <translation>De kleurselectie geldt voor het vastgelegde zichtbare extent.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1268"/>
+        <source>Raster sampling failed. Try a smaller visible extent.</source>
+        <translation>Rasterbemonstering mislukt. Probeer een kleiner zichtbaar extent.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1515"/>
+        <source>The sampled raster preview could not be calculated.</source>
+        <translation>Het voorbeeld van de rastersteekproef kon niet worden berekend.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1569"/>
+        <source>The preview of a color or an expression needs the map in the CRS of the raster ({0})</source>
+        <translation>Het voorbeeld van een kleur of een expressie vereist de kaart in het CRS van het raster ({0})</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2189"/>
+        <source>No point drawn under the click</source>
+        <translation>Geen punt getekend onder de klik</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2191"/>
+        <source>This point has no {0}</source>
+        <translation>Dit punt heeft geen {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2193"/>
+        <source>{0} cannot be used in a condition</source>
+        <translation>{0} kan niet in een voorwaarde worden gebruikt</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2250"/>
+        <source>Object not read: {0}</source>
+        <translation>Object niet gelezen: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2252"/>
+        <source>Too many points around the click: the object could not be read</source>
+        <translation>Te veel punten rond de klik: het object kon niet worden gelezen</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2254"/>
+        <source>No point of class {0} under the click: click on the object itself</source>
+        <translation>Geen punt van klasse {0} onder de klik: klik op het object zelf</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2391"/>
+        <source>Similar objects not read: {0}</source>
+        <translation>Vergelijkbare objecten niet gelezen: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2394"/>
+        <source>No similar object within the area ratios: widen them</source>
+        <translation>Geen vergelijkbaar object binnen de oppervlakteverhoudingen: vergroot ze</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2462"/>
+        <source>Preparing a sample for the new visible extent. Click again when it is ready.</source>
+        <translation>Er wordt een steekproef voor het nieuwe zichtbare extent voorbereid. Klik opnieuw wanneer deze klaar is.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2469"/>
+        <source>The local raster sample is still being prepared. Retry when it is ready.</source>
+        <translation>De lokale rastersteekproef wordt nog voorbereid. Probeer het opnieuw wanneer deze klaar is.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2673"/>
+        <source>Prepare a color snapshot before filtering this rendered layer.</source>
+        <translation>Maak een kleurmomentopname voordat u deze weergegeven laag filtert.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2815"/>
+        <source>{0} raster target(s) resampled to the configured pixel limit</source>
+        <translation>{0} rasterdoel(en) opnieuw bemonsterd tot de ingestelde pixellimiet</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2844"/>
+        <source>color selection limited to the captured extent; colors depend on style and scale</source>
+        <translation>kleurselectie beperkt tot het vastgelegde extent; kleuren zijn afhankelijk van stijl en schaal</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2846"/>
+        <source>raster source resampled to {0} cells within the pixel limit</source>
+        <translation>rasterbron opnieuw bemonsterd tot {0} cellen binnen de pixellimiet</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2848"/>
+        <source>raster selection read every {0} pixels: over the pixel limit of the settings</source>
+        <translation>rasterselectie gelezen om de {0} pixels: boven de pixellimiet van de instellingen</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2851"/>
+        <source>dense raster selection smoothed to keep its outline light</source>
+        <translation>dichte rasterselectie afgevlakt om de omtrek licht te houden</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2897"/>
+        <source>{0} left empty, nothing matches the selection: {1}</source>
+        <translation>{0} leeggemaakt, niets komt overeen met de selectie: {1}</translation>
     </message>
 </context>
 <context>
     <name>DatabaseManager</name>
     <message>
-        <location filename="../adapters/database_manager.py" line="194"/>
+        <location filename="../adapters/database_manager.py" line="234"/>
         <source>Database file does not exist: {0}</source>
         <translation>Databasebestand bestaat niet: {0}</translation>
     </message>
     <message>
-        <location filename="../adapters/database_manager.py" line="201"/>
+        <location filename="../adapters/database_manager.py" line="241"/>
         <source>Failed to connect to database {0}: {1}</source>
         <translation>Kan geen verbinding maken met database {0}: {1}</translation>
     </message>
     <message>
-        <location filename="../adapters/database_manager.py" line="220"/>
+        <location filename="../adapters/database_manager.py" line="260"/>
         <source>Could not create database directory {0}: {1}</source>
         <translation>Kan databasemap {0} niet aanmaken: {1}</translation>
     </message>
     <message>
-        <location filename="../adapters/database_manager.py" line="274"/>
+        <location filename="../adapters/database_manager.py" line="314"/>
         <source>Failed to create database file {0}: {1}</source>
         <translation>Kan databasebestand {0} niet aanmaken: {1}</translation>
     </message>
     <message>
-        <location filename="../adapters/database_manager.py" line="551"/>
+        <location filename="../adapters/database_manager.py" line="591"/>
         <source>Cannot initialize FilterMate database: connection failed</source>
         <translation>Kan FilterMate-database niet initialiseren: verbinding mislukt</translation>
     </message>
     <message>
-        <location filename="../adapters/database_manager.py" line="556"/>
+        <location filename="../adapters/database_manager.py" line="596"/>
         <source>Critical error connecting to database: {0}</source>
         <translation>Kritieke fout bij verbinding met database: {0}</translation>
     </message>
     <message>
-        <location filename="../adapters/database_manager.py" line="602"/>
+        <location filename="../adapters/database_manager.py" line="651"/>
         <source>Error during database initialization: {0}</source>
         <translation>Fout bij database-initialisatie: {0}</translation>
     </message>
@@ -601,29 +947,37 @@
 <context>
     <name>DatasourceManager</name>
     <message>
-        <location filename="../core/services/datasource_manager.py" line="153"/>
+        <location filename="../core/services/datasource_manager.py" line="140"/>
         <source>Database file does not exist: {db_file_path}</source>
         <translation>Databasebestand bestaat niet: {db_file_path}</translation>
     </message>
     <message>
-        <location filename="../core/services/datasource_manager.py" line="164"/>
+        <location filename="../core/services/datasource_manager.py" line="151"/>
         <source>Failed to connect to database {db_file_path}: {error}</source>
         <translation>Verbinden met database {db_file_path} mislukt: {error}</translation>
     </message>
     <message>
-        <location filename="../core/services/datasource_manager.py" line="189"/>
+        <location filename="../core/services/datasource_manager.py" line="176"/>
         <source>QGIS processing module not available to create spatial index</source>
         <translation>QGIS Processing-module niet beschikbaar om een ruimtelijke index te maken</translation>
     </message>
     <message>
-        <location filename="../core/services/datasource_manager.py" line="195"/>
+        <location filename="../core/services/datasource_manager.py" line="182"/>
         <source>Cannot create spatial index: layer invalid or source not found.</source>
         <translation>Kan geen ruimtelijke index maken: laag ongeldig of bron niet gevonden.</translation>
     </message>
     <message>
-        <location filename="../core/services/datasource_manager.py" line="409"/>
+        <location filename="../core/services/datasource_manager.py" line="405"/>
         <source>PostgreSQL layers detected but psycopg2 is not installed. Using local Spatialite backend. For better performance with large datasets, install psycopg2.</source>
         <translation>PostgreSQL-lagen gedetecteerd, maar psycopg2 is niet geïnstalleerd. De lokale Spatialite-backend wordt gebruikt. Installeer psycopg2 voor betere prestaties bij grote datasets.</translation>
+    </message>
+</context>
+<context>
+    <name>ExploringController</name>
+    <message>
+        <location filename="../ui/controllers/exploring_controller.py" line="2239"/>
+        <source>{0} features selected, more than the {1} a web service can be sent: narrow the selection or use an attribute filter.</source>
+        <translation>{0} objecten geselecteerd, meer dan de {1} die naar een webdienst kunnen worden gestuurd: beperk de selectie of gebruik een attribuutfilter.</translation>
     </message>
 </context>
 <context>
@@ -685,17 +1039,17 @@
 <context>
     <name>ExtensionRegistry</name>
     <message>
-        <location filename="../extensions/registry.py" line="408"/>
+        <location filename="../extensions/registry.py" line="398"/>
         <source>install the QGIS plugin {0}</source>
         <translation>installeer de QGIS-plug-in {0}</translation>
     </message>
     <message>
-        <location filename="../extensions/registry.py" line="412"/>
+        <location filename="../extensions/registry.py" line="402"/>
         <source>install {0}</source>
         <translation>installeer {0}</translation>
     </message>
     <message>
-        <location filename="../extensions/registry.py" line="413"/>
+        <location filename="../extensions/registry.py" line="403"/>
         <source>The {0} extension is off because {1} is missing: {2}, then restart QGIS.</source>
         <translation>De extensie {0} staat uit omdat {1} ontbreekt: {2} en start QGIS daarna opnieuw.</translation>
     </message>
@@ -1452,127 +1806,127 @@ Klik op de ★-indicator en selecteer 'Huidig filter toevoegen aan favorieten' o
 <context>
     <name>FilterMate</name>
     <message>
-        <location filename="../filter_mate.py" line="234"/>
+        <location filename="../filter_mate.py" line="236"/>
         <source>&amp;FilterMate</source>
         <translation>&amp;FilterMate</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="361"/>
+        <location filename="../filter_mate.py" line="363"/>
         <source>FilterMate</source>
         <translation>FilterMate</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="361"/>
+        <location filename="../filter_mate.py" line="363"/>
         <source>Open FilterMate panel</source>
         <translation>FilterMate-paneel openen</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="370"/>
+        <location filename="../filter_mate.py" line="372"/>
         <source>Reset configuration and database</source>
         <translation>Configuratie en database resetten</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="370"/>
+        <location filename="../filter_mate.py" line="372"/>
         <source>Reset the default configuration and delete the SQLite database</source>
         <translation>Standaardconfiguratie resetten en SQLite-database verwijderen</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1515"/>
+        <location filename="../filter_mate.py" line="1563"/>
         <source>Reset Configuration</source>
         <translation>Configuratie Resetten</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1541"/>
+        <location filename="../filter_mate.py" line="1589"/>
         <source>Configuration reset successfully.</source>
         <translation>Configuratie succesvol gereset.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1546"/>
+        <location filename="../filter_mate.py" line="1594"/>
         <source>Default configuration file not found.</source>
         <translation>Standaard configuratiebestand niet gevonden.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1568"/>
+        <location filename="../filter_mate.py" line="1617"/>
         <source>Database deleted: {filename}</source>
         <translation>Database verwijderd: {filename}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1592"/>
+        <location filename="../filter_mate.py" line="1641"/>
         <source>Restart required</source>
         <translation>Herstart vereist</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="477"/>
+        <location filename="../filter_mate.py" line="479"/>
         <source>Obsolete configuration detected</source>
         <translation>Verouderde configuratie gedetecteerd</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="478"/>
+        <location filename="../filter_mate.py" line="480"/>
         <source>unknown version</source>
         <translation>onbekende versie</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="486"/>
+        <location filename="../filter_mate.py" line="488"/>
         <source>Corrupted configuration detected</source>
         <translation>Beschadigde configuratie gedetecteerd</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="543"/>
+        <location filename="../filter_mate.py" line="545"/>
         <source>Configuration not reset. Some features may not work correctly.</source>
         <translation>Configuratie niet gereset. Sommige functies werken mogelijk niet correct.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="554"/>
+        <location filename="../filter_mate.py" line="556"/>
         <source>Configuration created with default values</source>
         <translation>Configuratie aangemaakt met standaardwaarden</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="557"/>
+        <location filename="../filter_mate.py" line="559"/>
         <source>Corrupted configuration reset. Default settings have been restored.</source>
         <translation>Beschadigde configuratie gereset. Standaardinstellingen zijn hersteld.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="560"/>
+        <location filename="../filter_mate.py" line="562"/>
         <source>Obsolete configuration reset. Default settings have been restored.</source>
         <translation>Verouderde configuratie gereset. Standaardinstellingen zijn hersteld.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="581"/>
+        <location filename="../filter_mate.py" line="583"/>
         <source>Configuration updated to latest version</source>
         <translation>Configuratie bijgewerkt naar nieuwste versie</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="578"/>
+        <location filename="../filter_mate.py" line="580"/>
         <source>Configuration updated: new settings available ({sections}). Access via Options menu.</source>
         <translation>Configuratie bijgewerkt: nieuwe instellingen beschikbaar ({sections}). Toegang via Opties menu.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="572"/>
+        <location filename="../filter_mate.py" line="574"/>
         <source>Geometry Simplification</source>
         <translation>Geometrie vereenvoudiging</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="573"/>
+        <location filename="../filter_mate.py" line="575"/>
         <source>Optimization Thresholds</source>
         <translation>Optimalisatie drempels</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="718"/>
+        <location filename="../filter_mate.py" line="735"/>
         <source>Geometry validation setting</source>
         <translation>Geometrie validatie instelling</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="748"/>
+        <location filename="../filter_mate.py" line="765"/>
         <source>Invalid geometry filtering disabled successfully.</source>
         <translation>Filteren van ongeldige geometrieën succesvol uitgeschakeld.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="755"/>
+        <location filename="../filter_mate.py" line="772"/>
         <source>Invalid geometry filtering not modified. Some features may be excluded from exports.</source>
         <translation>Filteren van ongeldige geometrieën niet gewijzigd. Sommige objecten kunnen worden uitgesloten van exports.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="479"/>
+        <location filename="../filter_mate.py" line="481"/>
         <source>An obsolete configuration ({}) has been detected.
 
 Do you want to reset to default settings?
@@ -1587,7 +1941,7 @@ Wilt u de standaardinstellingen herstellen?
 • Nee: Huidige configuratie behouden (kan problemen veroorzaken)</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="487"/>
+        <location filename="../filter_mate.py" line="489"/>
         <source>The configuration file is corrupted and cannot be read.
 
 Do you want to reset to default settings?
@@ -1602,12 +1956,12 @@ Wilt u de standaardinstellingen herstellen?
 • Nee: Annuleren (de plugin werkt mogelijk niet correct)</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="494"/>
+        <location filename="../filter_mate.py" line="496"/>
         <source>Configuration reset</source>
         <translation>Configuratie herstellen</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="495"/>
+        <location filename="../filter_mate.py" line="497"/>
         <source>The configuration needs to be reset.
 
 Do you want to continue?</source>
@@ -1616,12 +1970,12 @@ Do you want to continue?</source>
 Wilt u doorgaan?</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="600"/>
+        <location filename="../filter_mate.py" line="602"/>
         <source>Error during configuration migration: {}</source>
         <translation>Fout tijdens configuratiemigratie: {}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="720"/>
+        <location filename="../filter_mate.py" line="737"/>
         <source>The QGIS setting 'Invalid features filtering' is currently set to '{mode}'.
 
 FilterMate recommends disabling this setting (value 'Off') for the following reasons:
@@ -1648,7 +2002,7 @@ Do you want to disable this setting now?
 • No: Keep current setting</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1515"/>
+        <location filename="../filter_mate.py" line="1563"/>
         <source>Are you sure you want to reset to the default configuration?
 
 This will:
@@ -1665,7 +2019,7 @@ Dit zal:
 QGIS moet opnieuw worden opgestart om de wijzigingen toe te passen.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1592"/>
+        <location filename="../filter_mate.py" line="1641"/>
         <source>The configuration has been reset.
 
 Please restart QGIS to apply the changes.</source>
@@ -1674,17 +2028,17 @@ Please restart QGIS to apply the changes.</source>
 Start QGIS opnieuw op om de wijzigingen toe te passen.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="409"/>
+        <location filename="../filter_mate.py" line="411"/>
         <source>Initialization error: {0}</source>
         <translation>Initialisatiefout: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="659"/>
+        <location filename="../filter_mate.py" line="667"/>
         <source>{count} referenced layer(s) not loaded ({layers_list}). Using fallback display.</source>
         <translation>{count} gerefereerde la(a)g(en) niet geladen ({layers_list}). Terugvalweergave wordt gebruikt.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1583"/>
+        <location filename="../filter_mate.py" line="1632"/>
         <source>Unable to delete {filename}: {e}</source>
         <translation>Kan {filename} niet verwijderen: {e}</translation>
     </message>
@@ -1694,189 +2048,209 @@ Start QGIS opnieuw op om de wijzigingen toe te passen.</translation>
         <translation type="obsolete">Fout tijdens resetten: {str(e)}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1635"/>
+        <location filename="../filter_mate.py" line="1684"/>
         <source>&lt;p style=&apos;font-size:13px;&apos;&gt;Thank you for using &lt;b&gt;FilterMate&lt;/b&gt;!&lt;br&gt;Join our Discord community to:&lt;/p&gt;&lt;ul style=&apos;margin-left:10px; font-size:12px;&apos;&gt;&lt;li&gt;Get help and support&lt;/li&gt;&lt;li&gt;Report bugs and issues&lt;/li&gt;&lt;li&gt;Suggest new features&lt;/li&gt;&lt;li&gt;Share tips with other users&lt;/li&gt;&lt;/ul&gt;</source>
         <translation>&lt;p style='font-size:13px;'&gt;Bedankt voor het gebruik van &lt;b&gt;FilterMate&lt;/b&gt;!&lt;br&gt;Word lid van onze Discord-community om:&lt;/p&gt;&lt;ul style='margin-left:10px; font-size:12px;'&gt;&lt;li&gt;Hulp en ondersteuning te krijgen&lt;/li&gt;&lt;li&gt;Bugs en problemen te melden&lt;/li&gt;&lt;li&gt;Nieuwe functies voor te stellen&lt;/li&gt;&lt;li&gt;Tips te delen met andere gebruikers&lt;/li&gt;&lt;/ul&gt;</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1651"/>
+        <location filename="../filter_mate.py" line="1700"/>
         <source>  Join us on Discord</source>
         <translation>  Volg ons op Discord</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1671"/>
+        <location filename="../filter_mate.py" line="1720"/>
         <source>Don&apos;t show this again</source>
         <translation>Niet meer tonen</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1727"/>
+        <location filename="../filter_mate.py" line="1776"/>
         <source>Close</source>
         <translation>Sluiten</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1794"/>
+        <location filename="../filter_mate.py" line="1843"/>
         <source>Error loading plugin: {0}. Check QGIS Python console for details.</source>
         <translation>Fout bij laden van plugin: {0}. Controleer de QGIS Python-console voor details.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7066"/>
+        <location filename="../filter_mate_dockwidget.py" line="7357"/>
         <source>Current layer: {0}</source>
         <translation>Huidige laag: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7068"/>
+        <location filename="../filter_mate_dockwidget.py" line="7359"/>
         <source>No layer selected</source>
         <translation>Geen laag geselecteerd</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7078"/>
+        <location filename="../filter_mate_dockwidget.py" line="7369"/>
         <source>Selected layers:
 {0}</source>
         <translation>Geselecteerde lagen:
 {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7078"/>
+        <location filename="../filter_mate_dockwidget.py" line="7369"/>
         <source>No layers selected</source>
         <translation>Geen lagen geselecteerd</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7098"/>
+        <location filename="../filter_mate_dockwidget.py" line="7389"/>
         <source>No expression defined</source>
         <translation>Geen expressie gedefinieerd</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7110"/>
+        <location filename="../filter_mate_dockwidget.py" line="7401"/>
         <source>Display expression: {0}</source>
         <translation>Weergave-expressie: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7125"/>
+        <location filename="../filter_mate_dockwidget.py" line="7416"/>
         <source>Feature ID: {0}
 First attribute: {1}</source>
         <translation>Object-ID: {0}
 Eerste attribuut: {1}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1601"/>
+        <location filename="../filter_mate.py" line="1650"/>
         <source>The configuration could not be reset. Check that the plugin folder is writable, then try again. Details in filtermate.log.</source>
         <translation>De configuratie kon niet worden hersteld. Controleer of de pluginmap beschrijfbaar is en probeer het opnieuw. Details in filtermate.log.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1701"/>
+        <location filename="../filter_mate.py" line="1750"/>
         <source>What&apos;s new in FilterMate 5</source>
         <translation>Nieuw in FilterMate 5</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1707"/>
+        <location filename="../filter_mate.py" line="1756"/>
         <source>&lt;p style=&apos;font-size:13px;&apos;&gt;&lt;b&gt;FilterMate now works with raster and point cloud layers.&lt;/b&gt;&lt;/p&gt;&lt;ul style=&apos;margin-left:10px; font-size:12px;&apos;&gt;&lt;li&gt;&lt;b&gt;EXPLORING&lt;/b&gt; adapts to the current layer: value range and classes of a raster, classes, elevation and attributes of a LiDAR point cloud.&lt;/li&gt;&lt;li&gt;&lt;b&gt;FILTERING&lt;/b&gt; relates that selection to layers of any kind, with the usual predicates and buffer: parcels within an elevation range, LiDAR points under buildings, a DTM clipped to a municipality.&lt;/li&gt;&lt;li&gt;&lt;b&gt;EXPORTING&lt;/b&gt; writes filtered rasters (GeoTIFF, COG) and point clouds (LAZ, COPC).&lt;/li&gt;&lt;li&gt;Processing algorithms and models, qgis_process, Python and REST APIs.&lt;/li&gt;&lt;/ul&gt;</source>
         <translation>&lt;p style='font-size:13px;'&gt;&lt;b&gt;FilterMate werkt nu met raster- en puntenwolklagen.&lt;/b&gt;&lt;/p&gt;&lt;ul style='margin-left:10px; font-size:12px;'&gt;&lt;li&gt;&lt;b&gt;EXPLORING&lt;/b&gt; past zich aan de huidige laag aan: waardebereik en klassen van een raster, klassen, hoogte en attributen van een LiDAR-puntenwolk.&lt;/li&gt;&lt;li&gt;&lt;b&gt;FILTERING&lt;/b&gt; relateert die selectie aan lagen van elk type, met de gebruikelijke predicaten en buffer: percelen binnen een hoogtebereik, LiDAR-punten onder gebouwen, een DTM bijgesneden tot een gemeente.&lt;/li&gt;&lt;li&gt;&lt;b&gt;EXPORTING&lt;/b&gt; schrijft gefilterde rasters (GeoTIFF, COG) en puntenwolken (LAZ, COPC) weg.&lt;/li&gt;&lt;li&gt;Processing-algoritmen en -modellen, qgis_process, Python- en REST-API's.&lt;/li&gt;&lt;/ul&gt;</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1723"/>
+        <location filename="../filter_mate.py" line="1772"/>
         <source>Open the user guide</source>
         <translation>Gebruikershandleiding openen</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/async_query.py" line="207"/>
+        <source>This expression cannot be evaluated safely for a service.</source>
+        <translation>Deze expressie kan niet veilig voor een dienst worden geëvalueerd.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/async_query.py" line="209"/>
+        <source>The service could not be read. Please retry.</source>
+        <translation>De dienst kon niet worden gelezen. Probeer het opnieuw.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/async_query.py" line="210"/>
+        <source>Read failed</source>
+        <translation>Lezen mislukt</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/async_query.py" line="270"/>
+        <source>Loading filtered extent…</source>
+        <translation>Gefilterd extent laden…</translation>
     </message>
 </context>
 <context>
     <name>FilterMateApp</name>
     <message>
-        <location filename="../filter_mate_app.py" line="309"/>
+        <location filename="../filter_mate_app.py" line="306"/>
         <source>PostgreSQL layers detected ({0}) but psycopg2 is not installed.</source>
         <translation>PostgreSQL-lagen gedetecteerd ({0}) maar psycopg2 is niet geinstalleerd.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="401"/>
+        <location filename="../filter_mate_app.py" line="406"/>
         <source>Cleared {0} caches</source>
         <translation>{0} caches gewist</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="926"/>
+        <location filename="../filter_mate_app.py" line="912"/>
         <source>Failed to create dockwidget: {0}</source>
         <translation>Kan dockwidget niet aanmaken: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="936"/>
+        <location filename="../filter_mate_app.py" line="922"/>
         <source>Failed to display dockwidget: {0}</source>
         <translation>Kan dockwidget niet weergeven: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1456"/>
+        <location filename="../filter_mate_app.py" line="1493"/>
         <source>Error executing {0}: {1}</source>
         <translation>Fout bij uitvoeren van {0}: {1}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1468"/>
+        <location filename="../filter_mate_app.py" line="1505"/>
         <source>Plugin running in degraded mode (hexagonal services unavailable). Performance may be reduced.</source>
         <translation>Plugin draait in beperkte modus (hexagonale services niet beschikbaar). Prestaties kunnen verminderd zijn.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1761"/>
+        <location filename="../filter_mate_app.py" line="1854"/>
         <source>FilterMate ERROR</source>
         <translation>FilterMate FOUT</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1761"/>
+        <location filename="../filter_mate_app.py" line="1854"/>
         <source>Cannot execute {0}: widget initialization failed.</source>
         <translation>Kan {0} niet uitvoeren: widget-initialisatie mislukt.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2544"/>
+        <location filename="../filter_mate_app.py" line="2635"/>
         <source>Cannot {0}: layer invalid or source not found.</source>
         <translation>Kan {0} niet uitvoeren: laag ongeldig of bron niet gevonden.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2681"/>
+        <location filename="../filter_mate_app.py" line="2789"/>
         <source>All filters cleared - </source>
         <translation>Alle filters gewist - </translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2682"/>
+        <location filename="../filter_mate_app.py" line="2790"/>
         <source>{0}{1} features visible in main layer</source>
         <translation>{0}{1} objecten zichtbaar in hoofdlaag</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2694"/>
+        <location filename="../filter_mate_app.py" line="2802"/>
         <source>Error: result handler missing</source>
         <translation>Fout: resultaatverwerker ontbreekt</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2707"/>
+        <location filename="../filter_mate_app.py" line="2819"/>
         <source>Error during filtering: {0}</source>
         <translation>Fout tijdens filteren: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2831"/>
+        <location filename="../filter_mate_app.py" line="2943"/>
         <source>Recovered {0} orphan favorite(s): {1}</source>
         <translation>{0} verweesd(e) favoriet(en) hersteld: {1}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2997"/>
+        <location filename="../filter_mate_app.py" line="3109"/>
         <source>Layer loading failed - click to retry</source>
         <translation>Laden van laag mislukt - klik om opnieuw te proberen</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="3049"/>
+        <location filename="../filter_mate_app.py" line="3161"/>
         <source>{0} layer(s) loaded successfully</source>
         <translation>{0} la(a)g(en) succesvol geladen</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1983"/>
+        <location filename="../filter_mate_app.py" line="2092"/>
         <source>filter</source>
         <translation>filter</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1985"/>
+        <location filename="../filter_mate_app.py" line="2094"/>
         <source>unfilter</source>
         <translation>unfilter</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1988"/>
+        <location filename="../filter_mate_app.py" line="2097"/>
         <source>FilterMate – Edit Mode Detected</source>
         <translation>FilterMate – Edit Mode Detected</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1990"/>
+        <location filename="../filter_mate_app.py" line="2099"/>
         <source>The following layer(s) are currently in edit mode:
 {0}
 
@@ -1889,45 +2263,55 @@ QGIS cannot apply filters while a layer is being edited.
 What would you like to do?</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2000"/>
+        <location filename="../filter_mate_app.py" line="2109"/>
         <source>Save Changes &amp; {0}</source>
         <translation>Save Changes &amp; {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2007"/>
+        <location filename="../filter_mate_app.py" line="2116"/>
         <source>Discard Changes &amp; {0}</source>
         <translation>Discard Changes &amp; {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2014"/>
+        <location filename="../filter_mate_app.py" line="2123"/>
         <source>Cancel</source>
         <translation>Annuleren</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2038"/>
+        <location filename="../filter_mate_app.py" line="2147"/>
         <source>Could not save changes for layer &quot;{0}&quot;. Operation cancelled.</source>
         <translation>Could not save changes for layer &quot;{0}&quot;. Operation cancelled.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1298"/>
+        <location filename="../filter_mate_app.py" line="1323"/>
         <source>Pick a layer in the EXPLORING tab before running &apos;{0}&apos;.</source>
         <translation>Kies een laag in het tabblad EXPLORING voordat u '{0}' uitvoert.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="853"/>
+        <location filename="../filter_mate_app.py" line="839"/>
         <source>{0} layer(s) stay filtered: {1}. Turn the option back on to unfilter them.</source>
         <translation>{0} laag/lagen blijven gefilterd: {1}. Zet de optie weer aan om het filter op te heffen.</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_app.py" line="2621"/>
+        <source>A server filter is being prepared. Wait for it to finish before starting another operation.</source>
+        <translation>Er wordt een serverfilter voorbereid. Wacht tot het klaar is voordat u een andere bewerking start.</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_app.py" line="1770"/>
+        <source>A FilterMate API operation is running. Wait for it to finish.</source>
+        <translation>Er wordt een FilterMate-API-bewerking uitgevoerd. Wacht tot deze klaar is.</translation>
     </message>
 </context>
 <context>
     <name>FilterMateDockWidget</name>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="616"/>
+        <location filename="../filter_mate_dockwidget.py" line="621"/>
         <source>Initialization error: {}</source>
         <translation>Initialisatiefout: {}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1008"/>
+        <location filename="../filter_mate_dockwidget.py" line="1028"/>
         <source>UI configuration incomplete - check logs</source>
         <translation>UI-configuratie incompleet - controleer logs</translation>
     </message>
@@ -1937,290 +2321,404 @@ What would you like to do?</translation>
         <translation type="obsolete">UI-dimensiefout: {}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1468"/>
+        <location filename="../filter_mate_dockwidget.py" line="1488"/>
         <source>Favorites manager not available</source>
         <translation>Favoritenbeheerder niet beschikbaar</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1489"/>
+        <location filename="../filter_mate_dockwidget.py" line="1509"/>
         <source>★ {0} Favorites saved
 Click to apply or manage</source>
         <translation>★ {0} favorieten opgeslagen
 Klik om toe te passen of te beheren</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1492"/>
+        <location filename="../filter_mate_dockwidget.py" line="1512"/>
         <source>★ No favorites saved
 Click to add current filter</source>
         <translation>★ Geen favorieten opgeslagen
 Klik om huidig filter toe te voegen</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1512"/>
+        <location filename="../filter_mate_dockwidget.py" line="1532"/>
         <source>Forced {0} backend for {1} layer(s)</source>
         <translation>{0} backend geforceerd voor {1} la(a)g(en)</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1598"/>
+        <location filename="../filter_mate_dockwidget.py" line="1638"/>
         <source>Backend controller not available</source>
         <translation>Backend-controller niet beschikbaar</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1536"/>
+        <location filename="../filter_mate_dockwidget.py" line="1556"/>
         <source>PostgreSQL auto-cleanup enabled</source>
         <translation>PostgreSQL automatische opschoning ingeschakeld</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1537"/>
+        <location filename="../filter_mate_dockwidget.py" line="1557"/>
         <source>PostgreSQL auto-cleanup disabled</source>
         <translation>PostgreSQL automatische opschoning uitgeschakeld</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1543"/>
+        <location filename="../filter_mate_dockwidget.py" line="1563"/>
         <source>PostgreSQL session views cleaned up</source>
         <translation>PostgreSQL-sessieweergaven opgeschoond</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1543"/>
+        <location filename="../filter_mate_dockwidget.py" line="1563"/>
         <source>No views to clean or cleanup failed</source>
         <translation>Geen weergaven om op te schonen of opschoning mislukt</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1554"/>
+        <location filename="../filter_mate_dockwidget.py" line="1574"/>
         <source>No PostgreSQL connection available</source>
         <translation>Geen PostgreSQL-verbinding beschikbaar</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1560"/>
+        <location filename="../filter_mate_dockwidget.py" line="1600"/>
         <source>Schema has {0} view(s) from other sessions.
 Drop anyway?</source>
         <translation>Schema heeft {0} weergave(n) van andere sessies.
 Toch verwijderen?</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1561"/>
+        <location filename="../filter_mate_dockwidget.py" line="1601"/>
         <source>Other Sessions Active</source>
         <translation>Andere sessies actief</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1563"/>
+        <location filename="../filter_mate_dockwidget.py" line="1603"/>
         <source>Schema cleanup cancelled</source>
         <translation>Schema-opschoning geannuleerd</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1568"/>
+        <location filename="../filter_mate_dockwidget.py" line="1608"/>
         <source>Schema &apos;{0}&apos; dropped successfully</source>
         <translation>Schema '{0}' succesvol verwijderd</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1570"/>
+        <location filename="../filter_mate_dockwidget.py" line="1610"/>
         <source>Schema cleanup failed</source>
         <translation>Schema-opschoning mislukt</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1596"/>
+        <location filename="../filter_mate_dockwidget.py" line="1636"/>
         <source>PostgreSQL Session Info</source>
         <translation>PostgreSQL sessie-info</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="2719"/>
+        <location filename="../filter_mate_dockwidget.py" line="2753"/>
         <source>Theme adapted: {0}</source>
         <translation>Thema aangepast: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="2719"/>
+        <location filename="../filter_mate_dockwidget.py" line="2753"/>
         <source>Dark mode</source>
         <translation>Donkere modus</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="2719"/>
+        <location filename="../filter_mate_dockwidget.py" line="2753"/>
         <source>Light mode</source>
         <translation>Lichte modus</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="4057"/>
+        <location filename="../filter_mate_dockwidget.py" line="4102"/>
         <source>Selected features have no geometry.</source>
         <translation>Geselecteerde objecten hebben geen geometrie.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="4076"/>
+        <location filename="../filter_mate_dockwidget.py" line="4121"/>
         <source>No feature selected. Select a feature from the dropdown list.</source>
         <translation>Geen object geselecteerd. Selecteer een object uit de keuzelijst.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="5132"/>
+        <location filename="../filter_mate_dockwidget.py" line="5285"/>
         <source>The selected layer is invalid or its source cannot be found.</source>
         <translation>De geselecteerde laag is ongeldig of de bron kan niet worden gevonden.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="5892"/>
+        <location filename="../filter_mate_dockwidget.py" line="6080"/>
         <source>Negative buffer (erosion): shrinks polygons inward</source>
         <translation>Negatieve buffer (erosie): verkleint polygonen naar binnen</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="5895"/>
+        <location filename="../filter_mate_dockwidget.py" line="6083"/>
         <source>Buffer value in meters (positive=expand, negative=shrink polygons)</source>
         <translation>Bufferwaarde in meters (positief=uitbreiden, negatief=verkleinen polygonen)</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6396"/>
+        <location filename="../filter_mate_dockwidget.py" line="6585"/>
         <source>Plugin activated with {0} vector layer(s)</source>
         <translation>Plugin geactiveerd met {0} vectorla(a)g(en)</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6485"/>
+        <location filename="../filter_mate_dockwidget.py" line="6684"/>
         <source>Could not reload plugin automatically.</source>
         <translation>Kon plugin niet automatisch herladen.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6490"/>
+        <location filename="../filter_mate_dockwidget.py" line="6689"/>
         <source>Error reloading plugin: {0}</source>
         <translation>Fout bij herladen van plugin: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6562"/>
+        <location filename="../filter_mate_dockwidget.py" line="6764"/>
         <source>Layer properties reset to defaults</source>
         <translation>Laageigenschappen teruggezet naar standaard</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6563"/>
+        <location filename="../filter_mate_dockwidget.py" line="6765"/>
         <source>Error resetting layer properties: {}</source>
         <translation>Fout bij het resetten van laageigenschappen: {}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="875"/>
+        <location filename="../filter_mate_dockwidget.py" line="895"/>
         <source>Filter</source>
         <translation>Filteren</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="876"/>
+        <location filename="../filter_mate_dockwidget.py" line="896"/>
         <source>Undo the last filter</source>
         <translation>Het laatste filter ongedaan maken</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="877"/>
+        <location filename="../filter_mate_dockwidget.py" line="897"/>
         <source>Redo the last filter</source>
         <translation>Het laatste filter opnieuw toepassen</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="878"/>
+        <location filename="../filter_mate_dockwidget.py" line="898"/>
         <source>Remove the filters</source>
         <translation>De filters verwijderen</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="879"/>
+        <location filename="../filter_mate_dockwidget.py" line="899"/>
         <source>Export the layers</source>
         <translation>De lagen exporteren</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="880"/>
+        <location filename="../filter_mate_dockwidget.py" line="900"/>
         <source>About FilterMate</source>
         <translation>Over FilterMate</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="881"/>
+        <location filename="../filter_mate_dockwidget.py" line="901"/>
         <source>QFieldCloud</source>
         <translation>QFieldCloud</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="882"/>
+        <location filename="../filter_mate_dockwidget.py" line="902"/>
         <source>Identify the selected features</source>
         <translation>De geselecteerde objecten identificeren</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="883"/>
+        <location filename="../filter_mate_dockwidget.py" line="903"/>
         <source>Zoom to the selected features</source>
         <translation>Zoomen naar de geselecteerde objecten</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="884"/>
+        <location filename="../filter_mate_dockwidget.py" line="904"/>
         <source>Select the features on the map</source>
         <translation>De objecten op de kaart selecteren</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="885"/>
+        <location filename="../filter_mate_dockwidget.py" line="905"/>
         <source>Follow the features on the map</source>
         <translation>De objecten op de kaart volgen</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget.py" line="886"/>
         <source>Link the three selection modes</source>
-        <translation>De drie selectiemodi koppelen</translation>
+        <translation type="obsolete">De drie selectiemodi koppelen</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="887"/>
+        <location filename="../filter_mate_dockwidget.py" line="907"/>
         <source>Reset the layer properties</source>
         <translation>De laageigenschappen herstellen</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="888"/>
+        <location filename="../filter_mate_dockwidget.py" line="908"/>
         <source>Follow the current layer</source>
         <translation>De huidige laag volgen</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="889"/>
+        <location filename="../filter_mate_dockwidget.py" line="909"/>
         <source>Layers to filter</source>
         <translation>Te filteren lagen</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="890"/>
+        <location filename="../filter_mate_dockwidget.py" line="910"/>
         <source>Combine with the existing filter</source>
         <translation>Combineren met het bestaande filter</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="891"/>
+        <location filename="../filter_mate_dockwidget.py" line="911"/>
         <source>Geometric predicates</source>
         <translation>Geometrische predicaten</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="892"/>
+        <location filename="../filter_mate_dockwidget.py" line="912"/>
         <source>Buffer distance</source>
         <translation>Bufferafstand</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="893"/>
+        <location filename="../filter_mate_dockwidget.py" line="913"/>
         <source>Buffer type</source>
         <translation>Buffertype</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="894"/>
+        <location filename="../filter_mate_dockwidget.py" line="914"/>
         <source>Layers to export</source>
         <translation>Te exporteren lagen</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="895"/>
+        <location filename="../filter_mate_dockwidget.py" line="915"/>
         <source>Projection of the export</source>
         <translation>Projectie van de export</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="896"/>
+        <location filename="../filter_mate_dockwidget.py" line="916"/>
         <source>Export the styles</source>
         <translation>De stijlen exporteren</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="897"/>
+        <location filename="../filter_mate_dockwidget.py" line="917"/>
         <source>Export format</source>
         <translation>Exportformaat</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="898"/>
+        <location filename="../filter_mate_dockwidget.py" line="918"/>
         <source>Output folder</source>
         <translation>Uitvoermap</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="899"/>
+        <location filename="../filter_mate_dockwidget.py" line="919"/>
         <source>Zip the export</source>
         <translation>De export zippen</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1013"/>
+        <location filename="../filter_mate_dockwidget.py" line="1033"/>
         <source>The panel layout could not be applied; default sizes are used. Details in filtermate.log.</source>
         <translation>De paneelindeling kon niet worden toegepast; standaardafmetingen worden gebruikt. Details in filtermate.log.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6649"/>
+        <location filename="../filter_mate_dockwidget.py" line="6856"/>
         <source>Vector</source>
         <translation>Vector</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="906"/>
+        <source>Link the single and multiple selections</source>
+        <translation>De enkele en meervoudige selectie koppelen</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="1586"/>
+        <source>Schema &apos;{0}&apos; and the following {1} temporary object(s) will be dropped:</source>
+        <translation>Schema '{0}' en de volgende {1} tijdelijke object(en) worden verwijderd:</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="1589"/>
+        <source>... and {0} more</source>
+        <translation>... en nog {0}</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="1591"/>
+        <source>Schema &apos;{0}&apos; is empty and will be dropped.</source>
+        <translation>Schema '{0}' is leeg en wordt verwijderd.</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="1592"/>
+        <source>Drop FilterMate schema</source>
+        <translation>FilterMate-schema verwijderen</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="4224"/>
+        <source>Read failed</source>
+        <translation>Lezen mislukt</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="4224"/>
+        <source>The service could not be read. Please retry.</source>
+        <translation>De dienst kon niet worden gelezen. Probeer het opnieuw.</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="4566"/>
+        <source>Loading filtered extent…</source>
+        <translation>Gefilterd extent laden…</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="5150"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="539"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="3408"/>
+        <source>Loading selected values…</source>
+        <translation>Geselecteerde waarden laden…</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="5141"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="502"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="603"/>
+        <source>This expression cannot be evaluated safely for a service.</source>
+        <translation>Deze expressie kan niet veilig voor een dienst worden geëvalueerd.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_controller.py" line="2472"/>
+        <source>Error evaluating expression: {0}</source>
+        <translation>Fout bij het evalueren van de expressie: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_controller.py" line="2471"/>
+        <source>Expression Evaluation</source>
+        <translation>Expressie-evaluatie</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_controller.py" line="411"/>
+        <source>Loading values…</source>
+        <translation>Waarden laden…</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_controller.py" line="646"/>
+        <source>Loading zoom extent…</source>
+        <translation>Zoomextent laden…</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_controller.py" line="633"/>
+        <source>No feature with geometry matches the selection.</source>
+        <translation>Geen object met geometrie komt overeen met de selectie.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_controller.py" line="408"/>
+        <source>Only a limited set of values is shown. Refine the search to find other values.</source>
+        <translation>Slechts een beperkte set waarden wordt getoond. Verfijn de zoekopdracht om andere waarden te vinden.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_controller.py" line="475"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="483"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="502"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="566"/>
+        <source>Selection</source>
+        <translation>Selectie</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_controller.py" line="475"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="566"/>
+        <source>The service selection exceeds the key limit. Refine the selection.</source>
+        <translation>De dienstselectie overschrijdt de sleutellimiet. Verfijn de selectie.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_controller.py" line="483"/>
+        <source>This service has no stable key for the selection.</source>
+        <translation>Deze dienst heeft geen stabiele sleutel voor de selectie.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_controller.py" line="408"/>
+        <source>Values</source>
+        <translation>Waarden</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_controller.py" line="603"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="633"/>
+        <source>Zoom</source>
+        <translation>Zoom</translation>
     </message>
 </context>
 <context>
@@ -2397,14 +2895,37 @@ Toch verwijderen?</translation>
     </message>
 </context>
 <context>
+    <name>FilterMateOperations</name>
+    <message>
+        <location filename="../adapters/public_api/operations.py" line="556"/>
+        <source>FilterMate was unloaded</source>
+        <translation>FilterMate is verwijderd uit het geheugen</translation>
+    </message>
+    <message>
+        <location filename="../adapters/public_api/operations.py" line="118"/>
+        <source>rendered or unsupported raster: cannot be a filter target</source>
+        <translation>weergegeven of niet-ondersteund raster: kan geen filterdoel zijn</translation>
+    </message>
+    <message>
+        <location filename="../adapters/public_api/operations.py" line="505"/>
+        <source>rendered raster sources require a local colour capture; numeric pixel selections are unavailable</source>
+        <translation>weergegeven rasterbronnen vereisen een lokale kleurvastlegging; numerieke pixelselecties zijn niet beschikbaar</translation>
+    </message>
+    <message>
+        <location filename="../adapters/public_api/operations.py" line="577"/>
+        <source>the source layer itself was not changed</source>
+        <translation>de bronlaag zelf is niet gewijzigd</translation>
+    </message>
+</context>
+<context>
     <name>FilterResultHandler</name>
     <message>
-        <location filename="../adapters/filter_result_handler.py" line="359"/>
+        <location filename="../adapters/filter_result_handler.py" line="347"/>
         <source>{count} features visible in main layer</source>
         <translation>{count} objecten zichtbaar in hoofdlaag</translation>
     </message>
     <message>
-        <location filename="../adapters/filter_result_handler.py" line="352"/>
+        <location filename="../adapters/filter_result_handler.py" line="340"/>
         <source>All filters cleared - {count} features visible in main layer</source>
         <translation>Alle filters gewist - {count} objecten zichtbaar in hoofdlaag</translation>
     </message>
@@ -2412,54 +2933,82 @@ Toch verwijderen?</translation>
 <context>
     <name>FinishedHandler</name>
     <message>
-        <location filename="../core/tasks/finished_handler.py" line="353"/>
+        <location filename="../core/tasks/finished_handler.py" line="387"/>
         <source>Task failed</source>
         <translation>Taak mislukt</translation>
     </message>
     <message>
-        <location filename="../core/tasks/finished_handler.py" line="354"/>
+        <location filename="../core/tasks/finished_handler.py" line="388"/>
         <source>Filter failed for: {0}</source>
         <translation>Filter mislukt voor: {0}</translation>
     </message>
     <message>
-        <location filename="../core/tasks/finished_handler.py" line="358"/>
+        <location filename="../core/tasks/finished_handler.py" line="392"/>
         <source> (+{0} more)</source>
         <translation> (+{0} meer)</translation>
     </message>
     <message>
-        <location filename="../core/tasks/finished_handler.py" line="405"/>
+        <location filename="../core/tasks/finished_handler.py" line="439"/>
         <source>Layer(s) filtered</source>
         <translation>La(a)g(en) gefilterd</translation>
     </message>
     <message>
-        <location filename="../core/tasks/finished_handler.py" line="409"/>
+        <location filename="../core/tasks/finished_handler.py" line="443"/>
         <source>Layer(s) filtered to precedent state</source>
         <translation>La(a)g(en) gefilterd naar vorige staat</translation>
     </message>
     <message>
-        <location filename="../core/tasks/finished_handler.py" line="413"/>
+        <location filename="../core/tasks/finished_handler.py" line="447"/>
         <source>Layer(s) unfiltered</source>
         <translation>La(a)g(en) ongefilterd</translation>
     </message>
     <message>
-        <location filename="../core/tasks/finished_handler.py" line="417"/>
+        <location filename="../core/tasks/finished_handler.py" line="451"/>
         <source>Filter task : {0}</source>
         <translation>Filtertaak: {0}</translation>
     </message>
     <message>
-        <location filename="../core/tasks/finished_handler.py" line="438"/>
+        <location filename="../core/tasks/finished_handler.py" line="472"/>
         <source>Export task : {0}</source>
         <translation>Exporttaak: {0}</translation>
     </message>
     <message>
-        <location filename="../core/tasks/finished_handler.py" line="463"/>
+        <location filename="../core/tasks/finished_handler.py" line="497"/>
         <source>Exception: {0}</source>
         <translation>Uitzondering: {0}</translation>
     </message>
     <message>
-        <location filename="../core/tasks/finished_handler.py" line="489"/>
+        <location filename="../core/tasks/finished_handler.py" line="523"/>
         <source>Filter not applied, previous filter kept: {0}</source>
         <translation>Filter niet toegepast, vorige filter behouden: {0}</translation>
+    </message>
+    <message>
+        <location filename="../core/tasks/finished_handler.py" line="569"/>
+        <source>Layer(s) removed during the filter, left out: {0}</source>
+        <translation>Laag/lagen verwijderd tijdens het filteren, weggelaten: {0}</translation>
+    </message>
+</context>
+<context>
+    <name>HeightAboveGround</name>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/hag_task.py" line="93"/>
+        <source>Draw a useful selection zone before computing height above ground remotely</source>
+        <translation>Teken een bruikbare selectiezone voordat u de hoogte boven maaiveld op afstand berekent</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/hag_task.py" line="117"/>
+        <source>The DTM and point cloud have no common useful extent</source>
+        <translation>De DTM en de puntenwolk hebben geen gemeenschappelijk bruikbaar extent</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/hag_task.py" line="124"/>
+        <source>The useful selection has no polygon area</source>
+        <translation>De bruikbare selectie heeft geen polygoonoppervlak</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/hag_task.py" line="169"/>
+        <source>Height above ground covers the useful area only; Unfilter restores the original cloud</source>
+        <translation>De hoogte boven maaiveld dekt alleen het bruikbare gebied; Filter verwijderen herstelt de oorspronkelijke puntenwolk</translation>
     </message>
 </context>
 <context>
@@ -2496,15 +3045,23 @@ Toch verwijderen?</translation>
 <context>
     <name>LayerLifecycleService</name>
     <message>
-        <location filename="../core/services/layer_lifecycle_service.py" line="264"/>
+        <location filename="../core/services/layer_lifecycle_service.py" line="262"/>
         <source>PostgreSQL layers detected ({0}) but psycopg2 is not installed. The plugin cannot use these layers. Install psycopg2 to enable PostgreSQL support.</source>
         <translation>PostgreSQL-lagen gedetecteerd ({0}) maar psycopg2 is niet geinstalleerd. De plugin kan deze lagen niet gebruiken. Installeer psycopg2 om PostgreSQL-ondersteuning in te schakelen.</translation>
     </message>
 </context>
 <context>
+    <name>LayerSnapshot</name>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/snapshots.py" line="619"/>
+        <source>The saved source could not be opened</source>
+        <translation>De opgeslagen bron kon niet worden geopend</translation>
+    </message>
+</context>
+<context>
     <name>LayersManagementEngineTask</name>
     <message>
-        <location filename="../core/tasks/layer_management_task.py" line="1049"/>
+        <location filename="../core/tasks/layer_management_task.py" line="1074"/>
         <source>PostgreSQL layer &apos;{0}&apos;: Corrupted data detected.
 
 This layer uses &apos;virtual_id&apos; which does not exist in PostgreSQL.
@@ -2521,14 +3078,52 @@ Oplossing: Verwijder deze laag uit het FilterMate-project en voeg deze opnieuw t
 Zorg ervoor dat de PostgreSQL-tabel een PRIMARY KEY heeft.</translation>
     </message>
     <message>
-        <location filename="../core/tasks/layer_management_task.py" line="1075"/>
+        <location filename="../core/tasks/layer_management_task.py" line="1101"/>
         <source>Layer &apos;{0}&apos; has no PRIMARY KEY. Limited features: materialized views disabled. Recommendation: add a PRIMARY KEY for optimal performance.</source>
         <translation>Laag '{0}' heeft geen PRIMARY KEY. Beperkte functionaliteit: gematerialiseerde views uitgeschakeld. Aanbeveling: voeg een PRIMARY KEY toe voor optimale prestaties.</translation>
     </message>
     <message>
-        <location filename="../core/tasks/layer_management_task.py" line="2098"/>
+        <location filename="../core/tasks/layer_management_task.py" line="2203"/>
         <source>Exception: {0}</source>
         <translation>Uitzondering: {0}</translation>
+    </message>
+</context>
+<context>
+    <name>OGRExpressionBuilder</name>
+    <message>
+        <location filename="../adapters/backends/ogr/expression_builder.py" line="499"/>
+        <source>{0}: this provider cannot guarantee a complete server filter. Use a bounded local copy before filtering.</source>
+        <translation>{0}: deze provider kan geen volledig serverfilter garanderen. Gebruik een begrensde lokale kopie voordat u filtert.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/ogr/expression_builder.py" line="699"/>
+        <source>{0}: the key values of the selected features could not be read from the web service.</source>
+        <translation>{0}: de sleutelwaarden van de geselecteerde objecten konden niet van de webdienst worden gelezen.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/ogr/expression_builder.py" line="800"/>
+        <source>keeps its previous filter</source>
+        <translation>behoudt zijn vorige filter</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/ogr/expression_builder.py" line="802"/>
+        <source>is left unfiltered</source>
+        <translation>blijft ongefilterd</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/ogr/expression_builder.py" line="807"/>
+        <source>{0}: this web service has no unique key field (declared key, id, gml_id, cleabs, objectid...), so the selected features cannot be listed for the server. The layer {1}. An attribute filter, or a local copy of the layer, works.</source>
+        <translation>{0}: deze webdienst heeft geen uniek sleutelveld (opgegeven sleutel, id, gml_id, cleabs, objectid...), dus de geselecteerde objecten kunnen niet voor de server worden opgesomd. De laag {1}. Een attribuutfilter of een lokale kopie van de laag werkt wel.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/ogr/expression_builder.py" line="813"/>
+        <source>{0}: this layer has no unique key field and its feature ids cannot be listed in its filter (a virtual layer needs a unique id column, its uid). The layer {1}.</source>
+        <translation>{0}: deze laag heeft geen uniek sleutelveld en de objectidentificaties kunnen niet in het filter worden opgenomen (een virtuele laag heeft een unieke id-kolom nodig, de uid). De laag {1}.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/ogr/expression_builder.py" line="822"/>
+        <source>{0}: {1} features to list, more than the {2} sent to a web service. The layer {3}. Narrow the selection, use an attribute filter, or work on a local copy of the layer.</source>
+        <translation>{0}: {1} objecten om op te sommen, meer dan de {2} die naar een webdienst worden gestuurd. De laag {3}. Beperk de selectie, gebruik een attribuutfilter of werk met een lokale kopie van de laag.</translation>
     </message>
 </context>
 <context>
@@ -2667,67 +3262,67 @@ Zorg ervoor dat de PostgreSQL-tabel een PRIMARY KEY heeft.</translation>
 <context>
     <name>PointCloudConditionRow</name>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="500"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="797"/>
         <source>Link with the previous condition</source>
         <translation>Koppeling met de vorige voorwaarde</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="502"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="799"/>
         <source>AND</source>
         <translation>EN</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="503"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="800"/>
         <source>OR</source>
         <translation>OF</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="504"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="801"/>
         <source>Attribute</source>
         <translation>Attribuut</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="507"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="804"/>
         <source>Comparison</source>
         <translation>Vergelijking</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="510"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="807"/>
         <source>between</source>
         <translation>tussen</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="514"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="811"/>
         <source>Remove this condition</source>
         <translation>Deze voorwaarde verwijderen</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="521"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="818"/>
         <source>Compare with a value or another attribute</source>
         <translation>Vergelijken met een waarde of een ander attribuut</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="524"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="821"/>
         <source>value</source>
         <translation>waarde</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="525"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="822"/>
         <source>Value</source>
         <translation>Waarde</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="528"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="825"/>
         <source>Highest value kept</source>
         <translation>Hoogste behouden waarde</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="608"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="905"/>
         <source>Observed values: {0} to {1}</source>
         <translation>Waargenomen waarden: {0} tot {1}</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="608"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="905"/>
         <source>No statistics for this attribute</source>
         <translation>Geen statistieken voor dit attribuut</translation>
     </message>
@@ -2735,42 +3330,42 @@ Zorg ervoor dat de PostgreSQL-tabel een PRIMARY KEY heeft.</translation>
 <context>
     <name>PointCloudExploringPanel</name>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="734"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1049"/>
         <source>Apply to the other tiles of the dataset</source>
         <translation>Toepassen op de andere tegels van de dataset</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="748"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1058"/>
         <source>CLASSES</source>
         <translation>KLASSEN</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="753"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1063"/>
         <source>Ground</source>
         <translation>Maaiveld</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="754"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1064"/>
         <source>Vegetation</source>
         <translation>Vegetatie</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="755"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1065"/>
         <source>Buildings</source>
         <translation>Gebouwen</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="756"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1066"/>
         <source>Above ground</source>
         <translation>Boven maaiveld</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="757"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1067"/>
         <source>Water</source>
         <translation>Water</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="758"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1068"/>
         <source>Without noise</source>
         <translation>Zonder ruis</translation>
     </message>
@@ -2790,7 +3385,7 @@ Zorg ervoor dat de PostgreSQL-tabel een PRIMARY KEY heeft.</translation>
         <translation type="obsolete">Geen</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="776"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1097"/>
         <source>Point classes</source>
         <translation>Puntklassen</translation>
     </message>
@@ -2815,7 +3410,7 @@ Zorg ervoor dat de PostgreSQL-tabel een PRIMARY KEY heeft.</translation>
         <translation type="obsolete">Hoogste behouden hoogte</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="873"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1344"/>
         <source>Intensity</source>
         <translation>Intensiteit</translation>
     </message>
@@ -2842,30 +3437,30 @@ Zorg ervoor dat de PostgreSQL-tabel een PRIMARY KEY heeft.</translation>
     <message>
         <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="832"/>
         <source>Height above DTM ≥</source>
-        <translation>Hoogte boven DTM ≥</translation>
+        <translation type="obsolete">Hoogte boven DTM ≥</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="852"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1286"/>
         <source>Digital terrain model the height is measured from</source>
         <translation>Digitaal terreinmodel waartegen de hoogte wordt gemeten</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="862"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1296"/>
         <source>Keep the points at least this high above the terrain model</source>
         <translation>Punten behouden die minstens zo hoog boven het terreinmodel liggen</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="896"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1371"/>
         <source>EXPRESSION</source>
         <translation>UITDRUKKING</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="900"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1375"/>
         <source>Point cloud expression</source>
         <translation>Puntenwolkuitdrukking</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="901"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1376"/>
         <source>Check the group to edit the expression by hand</source>
         <translation>Vink de groep aan om de uitdrukking handmatig te bewerken</translation>
     </message>
@@ -2875,24 +3470,24 @@ Zorg ervoor dat de PostgreSQL-tabel een PRIMARY KEY heeft.</translation>
         <translation type="obsolete">Geen hoogtestatistieken voor deze laag</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="959"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1657"/>
         <source>Height above the terrain is unavailable</source>
         <translation>Hoogte boven het terrein is niet beschikbaar</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="974"/>
         <source>Kept points: {0}</source>
-        <translation>Behouden punten: {0}</translation>
+        <translation type="obsolete">Behouden punten: {0}</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="991"/>
         <source>Current filter: {0}</source>
-        <translation>Huidig filter: {0}</translation>
+        <translation type="obsolete">Huidig filter: {0}</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="991"/>
         <source>none</source>
-        <translation>geen</translation>
+        <translation type="obsolete">geen</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="874"/>
@@ -2915,169 +3510,279 @@ Zorg ervoor dat de PostgreSQL-tabel een PRIMARY KEY heeft.</translation>
         <translation type="obsolete">Enkele</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="786"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1172"/>
         <source>ATTRIBUTES</source>
         <translation>ATTRIBUTEN</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="804"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1190"/>
         <source>+ Condition</source>
         <translation>+ Voorwaarde</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="806"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1192"/>
         <source>Add a condition on an attribute of the layer</source>
         <translation>Een voorwaarde op een attribuut van de laag toevoegen</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="809"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1231"/>
         <source>Returns</source>
         <translation>Echo's</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="811"/>
         <source>Keep the first, last or single returns of the laser pulses</source>
-        <translation>De eerste, laatste of enkele echo's van de laserpulsen behouden</translation>
+        <translation type="obsolete">De eerste, laatste of enkele echo's van de laserpulsen behouden</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="814"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1238"/>
         <source>First return (ReturnNumber = 1)</source>
         <translation>Eerste echo (ReturnNumber = 1)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="815"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1239"/>
         <source>Last return (ReturnNumber = NumberOfReturns)</source>
         <translation>Laatste echo (ReturnNumber = NumberOfReturns)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="816"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1240"/>
         <source>Single return (NumberOfReturns = 1)</source>
         <translation>Enkele echo (NumberOfReturns = 1)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="874"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1345"/>
         <source>Return number</source>
         <translation>Returnummer</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="875"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1346"/>
         <source>Number of returns</source>
         <translation>Aantal echo's</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="876"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1347"/>
         <source>Classification</source>
         <translation>Classificatie</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="877"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1348"/>
         <source>Scan angle</source>
         <translation>Scanhoek</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="878"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1349"/>
         <source>User data</source>
         <translation>Gebruikersdata</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="879"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1350"/>
         <source>Point source ID</source>
         <translation>Puntbron-ID</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="880"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1351"/>
         <source>GPS time</source>
         <translation>GPS-tijd</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="881"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1352"/>
         <source>Red</source>
         <translation>Rood</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="882"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1353"/>
         <source>Green</source>
         <translation>Groen</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="883"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1354"/>
         <source>Blue</source>
         <translation>Blauw</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="884"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1355"/>
         <source>Infrared</source>
         <translation>Infrarood</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="885"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1356"/>
         <source>Scan direction</source>
         <translation>Scanrichting</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="886"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1357"/>
         <source>Edge of flight line</source>
         <translation>Rand van vluchtlijn</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="887"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1358"/>
         <source>Synthetic</source>
         <translation>Synthetisch</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="888"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1359"/>
         <source>Key point</source>
         <translation>Sleutelpunt</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="889"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1360"/>
         <source>Withheld</source>
         <translation>Achtergehouden</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="890"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1361"/>
         <source>Overlap</source>
         <translation>Overlap</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="891"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1362"/>
         <source>Scanner channel</source>
         <translation>Scannerkanaal</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="892"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1363"/>
         <source>Classification flags</source>
         <translation>Classificatievlaggen</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="893"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1364"/>
         <source>Height above ground</source>
         <translation>Hoogte boven maaiveld</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="762"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1077"/>
         <source>Quick class selection</source>
         <translation>Snelle klasseselectie</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="765"/>
         <source>Quick selection…</source>
-        <translation>Snelle selectie…</translation>
+        <translation type="obsolete">Snelle selectie…</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="768"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1087"/>
         <source>All classes</source>
         <translation>Alle klassen</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="769"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1087"/>
         <source>No class</source>
         <translation>Geen klasse</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="770"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1087"/>
         <source>Invert the selection</source>
         <translation>De selectie omkeren</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1077"/>
+        <source>Selection ▾</source>
+        <translation>Selectie ▾</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1111"/>
+        <source>Classes of the standard that hold no point of this layer</source>
+        <translation>Klassen van de standaard die geen punt van deze laag bevatten</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1118"/>
+        <source>Classes absent from the layer</source>
+        <translation>Klassen die in de laag ontbreken</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1142"/>
+        <source>Similar objects: area ×</source>
+        <translation>Vergelijkbare objecten: oppervlakte ×</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1145"/>
+        <source>Smallest similar object, as a share of the smallest clicked one</source>
+        <translation>Kleinste vergelijkbare object, als aandeel van het kleinste aangeklikte</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1145"/>
+        <source>Largest similar object, as a multiple of the largest clicked one</source>
+        <translation>Grootste vergelijkbare object, als veelvoud van het grootste aangeklikte</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1160"/>
+        <source>to ×</source>
+        <translation>tot ×</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1204"/>
+        <source>Pipette on</source>
+        <translation>Pipet op</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1205"/>
+        <source>Attribute the value pipette of the rail reads under the click</source>
+        <translation>Attribuut dat de waardepipet van de balk onder de klik leest</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1220"/>
+        <source>Tolerance around the picked value, in % of the observed range of the attribute</source>
+        <translation>Tolerantie rond de opgenomen waarde, in % van het waargenomen bereik van het attribuut</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1232"/>
+        <source>Keep every return, or the first, last or single returns of the laser pulses</source>
+        <translation>Alle returns behouden, of de eerste, laatste of enige returns van de laserpulsen</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1237"/>
+        <source>Any return</source>
+        <translation>Elke return</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1251"/>
+        <source>HEIGHT / DTM</source>
+        <translation>HOOGTE / DTM</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1257"/>
+        <source>Always combined (AND) with the active group</source>
+        <translation>Altijd gecombineerd (AND) met de actieve groep</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1261"/>
+        <source>PDAL · derived cloud</source>
+        <translation>PDAL · afgeleide wolk</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1263"/>
+        <source>The height is computed by PDAL into a derived point cloud, in a background task</source>
+        <translation>De hoogte wordt door PDAL berekend in een afgeleide puntenwolk, in een achtergrondtaak</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1366"/>
+        <source>{0} object(s)</source>
+        <translation>{0} object(en)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1367"/>
+        <source>cut at the window read</source>
+        <translation>afgekapt op het gelezen venster</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1368"/>
+        <source>shown as the whole class in their box</source>
+        <translation>als de hele klasse in hun kader getoond</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1859"/>
+        <source>Other classes, absent from the layer ({0})</source>
+        <translation>Andere klassen, afwezig in de laag ({0})</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1950"/>
+        <source>An object runs past the largest window read around the click and was cut there</source>
+        <translation>Een object loopt voorbij het grootste venster dat rond de klik is gelezen en is daar afgekapt</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1952"/>
+        <source>Too many objects for the subset of the cloud: the preview and the filtered cloud keep every point of their class in the box around them; the targets are cut by the objects themselves</source>
+        <translation>Te veel objecten voor de subset van de puntenwolk: het voorbeeld en de gefilterde puntenwolk behouden elk punt van hun klasse in het kader eromheen; de doelen worden door de objecten zelf afgekapt</translation>
     </message>
 </context>
 <context>
@@ -3085,62 +3790,131 @@ Zorg ervoor dat de PostgreSQL-tabel een PRIMARY KEY heeft.</translation>
     <message>
         <location filename="../ui/widgets/point_cloud_filter_widget.py" line="141"/>
         <source>Point cloud filter</source>
-        <translation>Puntenwolkfilter</translation>
+        <translation type="obsolete">Puntenwolkfilter</translation>
     </message>
     <message>
         <location filename="../ui/widgets/point_cloud_filter_widget.py" line="152"/>
         <source>Classification</source>
-        <translation>Classificatie</translation>
+        <translation type="obsolete">Classificatie</translation>
     </message>
     <message>
         <location filename="../ui/widgets/point_cloud_filter_widget.py" line="157"/>
         <source>All</source>
-        <translation>Alles</translation>
+        <translation type="obsolete">Alles</translation>
     </message>
     <message>
         <location filename="../ui/widgets/point_cloud_filter_widget.py" line="158"/>
         <source>None</source>
-        <translation>Geen</translation>
+        <translation type="obsolete">Geen</translation>
     </message>
     <message>
         <location filename="../ui/widgets/point_cloud_filter_widget.py" line="167"/>
         <source>Elevation (Z)</source>
-        <translation>Hoogte (Z)</translation>
+        <translation type="obsolete">Hoogte (Z)</translation>
     </message>
     <message>
         <location filename="../ui/widgets/point_cloud_filter_widget.py" line="169"/>
         <source>Intensity</source>
-        <translation>Intensiteit</translation>
+        <translation type="obsolete">Intensiteit</translation>
     </message>
     <message>
         <location filename="../ui/widgets/point_cloud_filter_widget.py" line="175"/>
         <source>Return number</source>
-        <translation>Returnummer</translation>
+        <translation type="obsolete">Returnummer</translation>
     </message>
     <message>
         <location filename="../ui/widgets/point_cloud_filter_widget.py" line="199"/>
         <source>Minimum</source>
-        <translation>Minimum</translation>
+        <translation type="obsolete">Minimum</translation>
     </message>
     <message>
         <location filename="../ui/widgets/point_cloud_filter_widget.py" line="200"/>
         <source>Maximum</source>
-        <translation>Maximum</translation>
+        <translation type="obsolete">Maximum</translation>
     </message>
     <message>
         <location filename="../ui/widgets/point_cloud_filter_widget.py" line="250"/>
         <source>Current filter: {0}</source>
-        <translation>Huidig filter: {0}</translation>
+        <translation type="obsolete">Huidig filter: {0}</translation>
     </message>
     <message>
         <location filename="../ui/widgets/point_cloud_filter_widget.py" line="250"/>
         <source>none</source>
-        <translation>geen</translation>
+        <translation type="obsolete">geen</translation>
     </message>
     <message>
         <location filename="../ui/widgets/point_cloud_filter_widget.py" line="329"/>
         <source>Any</source>
-        <translation>Elke</translation>
+        <translation type="obsolete">Elke</translation>
+    </message>
+</context>
+<context>
+    <name>PointCloudReader</name>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/pdal_cli.py" line="221"/>
+        <source>A useful extent is required for a remote point cloud</source>
+        <translation>Voor een externe puntenwolk is een bruikbaar extent vereist</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/pdal_cli.py" line="187"/>
+        <source>No PDAL reader for this point cloud format</source>
+        <translation>Geen PDAL-reader voor dit puntenwolkformaat</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/pdal_cli.py" line="217"/>
+        <source>PDAL 2.4 or newer with a readable version is required for remote point clouds</source>
+        <translation>Voor externe puntenwolken is PDAL 2.4 of nieuwer met een leesbare versie vereist</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/pdal_cli.py" line="219"/>
+        <source>Remote point clouds require EPT or COPC for bounded reads</source>
+        <translation>Externe puntenwolken vereisen EPT of COPC voor begrensde leesbewerkingen</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/pdal_cli.py" line="227"/>
+        <source>The useful extent must be finite and have positive area</source>
+        <translation>Het bruikbare extent moet eindig zijn en een positieve oppervlakte hebben</translation>
+    </message>
+</context>
+<context>
+    <name>PointCloudSource</name>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="435"/>
+        <source>Draw a useful selection zone before reading a remote point cloud</source>
+        <translation>Teken een bruikbare selectiezone voordat u een externe puntenwolk leest</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="468"/>
+        <source>The remote point cloud could not be read</source>
+        <translation>De externe puntenwolk kon niet worden gelezen</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="472"/>
+        <source>The remote point cloud rejected the selection</source>
+        <translation>De externe puntenwolk heeft de selectie geweigerd</translation>
+    </message>
+</context>
+<context>
+    <name>PointCloudTarget</name>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="605"/>
+        <source>A bounded height-above-ground cloud only supports AND or AND NOT; Unfilter first</source>
+        <translation>Een begrensde puntenwolk met hoogte boven maaiveld ondersteunt alleen AND of AND NOT; verwijder eerst het filter</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="631"/>
+        <source>PDAL 2.4 or newer is required to clip a remote point cloud</source>
+        <translation>PDAL 2.4 of nieuwer is vereist om een externe puntenwolk uit te knippen</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="682"/>
+        <source>Disjoint would read the whole remote cloud; choose an inside selection</source>
+        <translation>Disjoint zou de hele externe puntenwolk lezen; kies een selectie binnenin</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="689"/>
+        <source>The original remote point cloud could not be opened</source>
+        <translation>De oorspronkelijke externe puntenwolk kon niet worden geopend</translation>
     </message>
 </context>
 <context>
@@ -3292,7 +4066,7 @@ Doorgaan?</translation>
         <translation>Te filteren lagen</translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/batch_filter_algorithm.py" line="129"/>
+        <location filename="../processing/algorithms/batch_filter_algorithm.py" line="139"/>
         <location filename="../processing/algorithms/common.py" line="78"/>
         <source>FilterMate</source>
         <translation>FilterMate</translation>
@@ -3389,17 +4163,17 @@ Doorgaan?</translation>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/batch_filter_algorithm.py" line="102"/>
+        <location filename="../processing/algorithms/batch_filter_algorithm.py" line="112"/>
         <source>Invalid expression for layer &apos;{0}&apos;, skipped.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/batch_filter_algorithm.py" line="125"/>
+        <location filename="../processing/algorithms/batch_filter_algorithm.py" line="135"/>
         <source>Filter several layers (batch)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/batch_filter_algorithm.py" line="137"/>
+        <location filename="../processing/algorithms/batch_filter_algorithm.py" line="147"/>
         <source>Applies the same filter expression to several vector layers in a single run.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3745,17 +4519,27 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/common.py" line="194"/>
+        <location filename="../processing/algorithms/common.py" line="191"/>
+        <source>Source raster was resampled for capture (grid: {0}).</source>
+        <translation>Bronraster is voor de vastlegging opnieuw bemonsterd (raster: {0}).</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/common.py" line="198"/>
         <source> ({0:.1f} s)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/common.py" line="197"/>
+        <location filename="../processing/algorithms/common.py" line="201"/>
         <source>{0}: {1}{2}</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/common.py" line="199"/>
+        <location filename="../processing/algorithms/common.py" line="203"/>
+        <source>{0}: target raster was resampled for capture (grid: {1}).</source>
+        <translation>{0}: doelraster is voor de vastlegging opnieuw bemonsterd (raster: {1}).</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/common.py" line="206"/>
         <source>{0}: failed — {1}</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4435,150 +5219,180 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
 <context>
     <name>QgsCheckableComboBoxFeaturesListPickerWidget</name>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="898"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="924"/>
         <source>Type to filter...</source>
         <translation>Typ om te filteren...</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="907"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="933"/>
         <source>Select All</source>
         <translation>Alles selecteren</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="909"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="935"/>
         <source>Select All (non subset)</source>
         <translation>Alles selecteren (geen subset)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="911"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="937"/>
         <source>Select All (subset)</source>
         <translation>Alles selecteren (subset)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="913"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="939"/>
         <source>De-select All</source>
         <translation>Alles deselecteren</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="915"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="941"/>
         <source>De-select All (non subset)</source>
         <translation>Alles deselecteren (geen subset)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="917"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="943"/>
         <source>De-select All (subset)</source>
         <translation>Alles deselecteren (subset)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="1516"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="1599"/>
         <source>Showing the first {0} features sorted by display value. Type in the text filter to search the whole layer; &quot;Select All&quot; loads the full list.</source>
         <translation>De eerste {0} objecten worden getoond, gesorteerd op weergavewaarde. Typ in het tekstfilter om de hele laag te doorzoeken; &quot;Alles selecteren&quot; laadt de volledige lijst.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="1524"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="1607"/>
         <source>Showing {0} features of the layer, sorted by display value. Type in the text filter to search the whole layer; &quot;Select All&quot; loads the full list.</source>
         <translation>{0} objecten van de laag worden getoond, gesorteerd op weergavewaarde. Typ in het tekstfilter om de hele laag te doorzoeken; &quot;Alles selecteren&quot; laadt de volledige lijst.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="1531"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="1614"/>
         <source>Search results for &quot;{0}&quot; over the whole layer.</source>
         <translation>Zoekresultaten voor &quot;{0}&quot; in de hele laag.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="1768"/>
+        <source>Loading values…</source>
+        <translation>Waarden laden…</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="1683"/>
+        <source>Values</source>
+        <translation>Waarden</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="1683"/>
+        <source>This expression cannot be evaluated safely for a service.</source>
+        <translation>Deze expressie kan niet veilig voor een dienst worden geëvalueerd.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="1748"/>
+        <source>Selection</source>
+        <translation>Selectie</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="1748"/>
+        <source>The remote list exceeds the safe selection limit. Select fewer features or filter the layer first.</source>
+        <translation>De externe lijst overschrijdt de veilige selectielimiet. Selecteer minder objecten of filter eerst de laag.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="1924"/>
+        <source>Loading selected values…</source>
+        <translation>Geselecteerde waarden laden…</translation>
     </message>
 </context>
 <context>
     <name>QgsCheckableComboBoxLayer</name>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="337"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="339"/>
         <source>Select All</source>
         <translation>Alles selecteren</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="339"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="341"/>
         <source>De-select All</source>
         <translation>Alles deselecteren</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="341"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="347"/>
         <source>Select all layers by geometry type (Lines)</source>
         <translation>Alle lagen selecteren op geometrietype (Lijnen)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="343"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="349"/>
         <source>De-Select all layers by geometry type (Lines)</source>
         <translation>Alle lagen deselecteren op geometrietype (Lijnen)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="345"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="351"/>
         <source>Select all layers by geometry type (Points)</source>
         <translation>Alle lagen selecteren op geometrietype (Punten)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="347"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="353"/>
         <source>De-Select all layers by geometry type (Points)</source>
         <translation>Alle lagen deselecteren op geometrietype (Punten)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="349"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="355"/>
         <source>Select all layers by geometry type (Polygons)</source>
         <translation>Alle lagen selecteren op geometrietype (Polygonen)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="351"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="357"/>
         <source>De-Select all layers by geometry type (Polygons)</source>
         <translation>Alle lagen deselecteren op geometrietype (Polygonen)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="367"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="376"/>
         <source>Select all raster layers</source>
         <translation>Alle rasterlagen selecteren</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="369"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="378"/>
         <source>De-select all raster layers</source>
         <translation>Alle rasterlagen deselecteren</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="371"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="380"/>
         <source>Select all point cloud layers</source>
         <translation>Alle puntenwolklagen selecteren</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="373"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="382"/>
         <source>De-select all point cloud layers</source>
         <translation>Alle puntenwolklagen deselecteren</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="409"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="418"/>
         <source>pixels in the zone</source>
         <translation>pixels in de zone</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="409"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="418"/>
         <source>points in the zone</source>
         <translation>punten in de zone</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="409"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="418"/>
         <source>features</source>
         <translation>objecten</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="415"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="424"/>
         <source>Raster target: the pixels outside the source geometry become NoData (those inside with Disjoint)</source>
         <translation>Rasterdoel: de pixels buiten de brongeometrie worden NoData (die erbinnen met Disjoint)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="417"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="426"/>
         <source>Point cloud target: the points outside the source geometry are removed (those inside with Disjoint)</source>
         <translation>Puntenwolkdoel: de punten buiten de brongeometrie worden verwijderd (die erbinnen met Disjoint)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="419"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="428"/>
         <source>Vector target: the features that satisfy the geometric predicate are kept</source>
         <translation>Vectordoel: de objecten die aan het geometrische predicaat voldoen blijven behouden</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="499"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="515"/>
         <source>Click the square on the right to test this layer by its centroids</source>
         <translation>Klik op het vierkantje rechts om deze laag via zijn centroïden te testen</translation>
     </message>
@@ -4611,55 +5425,55 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="497"/>
         <source>Band</source>
-        <translation>Band</translation>
+        <translation type="obsolete">Band</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="500"/>
         <source>Band whose values are selected</source>
-        <translation>Band waarvan de waarden worden geselecteerd</translation>
+        <translation type="obsolete">Band waarvan de waarden worden geselecteerd</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="598"/>
         <source>PIXEL VALUE</source>
-        <translation>PIXELWAARDE</translation>
+        <translation type="obsolete">PIXELWAARDE</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="606"/>
         <source>Pixel value of the current band</source>
-        <translation>Pixelwaarde van de huidige band</translation>
+        <translation type="obsolete">Pixelwaarde van de huidige band</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="625"/>
         <source>Last {0} values picked</source>
-        <translation>Laatste {0} gekozen waarden</translation>
+        <translation type="obsolete">Laatste {0} gekozen waarden</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="638"/>
         <source>Click on the map with the pixel picker. Ctrl+click extends the range to the value.</source>
-        <translation>Klik op de kaart met de pixelkiezer. Ctrl+klik breidt het bereik uit tot de waarde.</translation>
+        <translation type="obsolete">Klik op de kaart met de pixelkiezer. Ctrl+klik breidt het bereik uit tot de waarde.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="651"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1821"/>
         <source>VALUE RANGE</source>
         <translation>WAARDEBEREIK</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="660"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1255"/>
         <source>Min</source>
         <translation>Min</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="660"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1255"/>
         <source>Lowest value kept</source>
         <translation>Laagste behouden waarde</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="660"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1255"/>
         <source>Max</source>
         <translation>Max</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="660"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1255"/>
         <source>Highest value kept</source>
         <translation>Hoogste behouden waarde</translation>
     </message>
@@ -4671,60 +5485,60 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="688"/>
         <source>CLASSES</source>
-        <translation>KLASSEN</translation>
+        <translation type="obsolete">KLASSEN</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="692"/>
         <source>Raster classes</source>
-        <translation>Rasterklassen</translation>
+        <translation type="obsolete">Rasterklassen</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="696"/>
         <source>All</source>
-        <translation>Alles</translation>
+        <translation type="obsolete">Alles</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="697"/>
         <source>None</source>
-        <translation>Geen</translation>
+        <translation type="obsolete">Geen</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="707"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1275"/>
         <source>RASTER EXPRESSION</source>
         <translation>RASTERUITDRUKKING</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="711"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1279"/>
         <source>Raster calculator expression; a pixel is kept where it is not 0</source>
         <translation>Uitdrukking van de rasterberekening; een pixel wordt behouden waar deze niet 0 is</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="712"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1280"/>
         <source>Raster expression</source>
         <translation>Rasteruitdrukking</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="721"/>
         <source>Use the range</source>
-        <translation>Het bereik gebruiken</translation>
+        <translation type="obsolete">Het bereik gebruiken</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="722"/>
         <source>Write the current value range as an expression</source>
-        <translation>Het huidige waardebereik als uitdrukking schrijven</translation>
+        <translation type="obsolete">Het huidige waardebereik als uitdrukking schrijven</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="812"/>
         <source>Selected pixels: {0}</source>
-        <translation>Geselecteerde pixels: {0}</translation>
+        <translation type="obsolete">Geselecteerde pixels: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1195"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1349"/>
         <source>Set a value range first</source>
         <translation>Stel eerst een waardebereik in</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1381"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2219"/>
         <source>NoData</source>
         <translation>NoData</translation>
     </message>
@@ -4736,252 +5550,665 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="629"/>
         <source>Value of the current band under the cursor</source>
-        <translation>Waarde van de huidige band onder de cursor</translation>
+        <translation type="obsolete">Waarde van de huidige band onder de cursor</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="635"/>
         <source>Statistics of the current band in the last rectangle drawn on the map</source>
-        <translation>Statistieken van de huidige band in de laatst getekende rechthoek op de kaart</translation>
+        <translation type="obsolete">Statistieken van de huidige band in de laatst getekende rechthoek op de kaart</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="870"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1577"/>
         <source>Under the cursor: {0}  (X {1:.{3}f}  Y {2:.{3}f})</source>
         <translation>Onder de cursor: {0}  (X {1:.{3}f}  Y {2:.{3}f})</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="880"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1587"/>
         <source>Zone: {0}</source>
         <translation>Zone: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="880"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1587"/>
         <source>no pixel</source>
         <translation>geen pixel</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1405"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2234"/>
         <source>LAST PICKS</source>
         <translation>LAATSTE METINGEN</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="509"/>
         <source>Compute on</source>
-        <translation>Berekenen op</translation>
+        <translation type="obsolete">Berekenen op</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="512"/>
         <source>Quantity the range applies to. Slope, aspect, hillshade and roughness read the band as a DTM.</source>
-        <translation>Grootheid waarop het bereik van toepassing is. Helling, expositie, reliëfschaduw en ruwheid lezen de band als een DTM.</translation>
+        <translation type="obsolete">Grootheid waarop het bereik van toepassing is. Helling, expositie, reliëfschaduw en ruwheid lezen de band als een DTM.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="516"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1233"/>
         <source>Pixel value</source>
         <translation>Pixelwaarde</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="516"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1233"/>
         <source>Slope (degrees)</source>
         <translation>Helling (graden)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="516"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1233"/>
         <source>Slope (%)</source>
         <translation>Helling (%)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="516"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1233"/>
         <source>Aspect (degrees)</source>
         <translation>Expositie (graden)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="516"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1233"/>
         <source>Hillshade (0-255)</source>
         <translation>Reliëfschaduw (0-255)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="516"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1233"/>
         <source>Roughness (TRI, mean difference)</source>
         <translation>Ruwheid (TRI, gemiddeld verschil)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="676"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1242"/>
         <source>Usual thresholds of the quantity</source>
         <translation>Gebruikelijke drempelwaarden van de grootheid</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="677"/>
         <source>Usual thresholds</source>
-        <translation>Gebruikelijke drempelwaarden</translation>
+        <translation type="obsolete">Gebruikelijke drempelwaarden</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1102"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1931"/>
         <source>Flat</source>
         <translation>Vlak</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1102"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1931"/>
         <source>Gentle</source>
         <translation>Zacht</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1102"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1931"/>
         <source>Moderate</source>
         <translation>Matig</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1103"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1932"/>
         <source>Steep</source>
         <translation>Steil</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1103"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1932"/>
         <source>East</source>
         <translation>Oost</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1103"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1932"/>
         <source>South</source>
         <translation>Zuid</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1104"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1933"/>
         <source>West</source>
         <translation>West</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1104"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1933"/>
         <source>Shadow</source>
         <translation>Schaduw</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1104"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1933"/>
         <source>Lit</source>
         <translation>Verlicht</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1109"/>
         <source>Usual thresholds…</source>
-        <translation>Gebruikelijke drempelwaarden…</translation>
+        <translation type="obsolete">Gebruikelijke drempelwaarden…</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="551"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1041"/>
         <source>PIPETTE</source>
         <translation>PIPET</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="554"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1105"/>
         <source>Tolerance ±</source>
         <translation>Tolerantie ±</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="561"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1112"/>
         <source>Tolerance around the picked color or value, in % of the value range</source>
         <translation>Tolerantie rond de gekozen kleur of waarde, in % van het waardebereik</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="562"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1113"/>
         <source>Pipette tolerance</source>
         <translation>Pipettolerantie</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="571"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1305"/>
         <source>Bands</source>
         <translation>Banden</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1231"/>
         <source>What the bands of the image are: the presets and the pipette use them</source>
-        <translation>Wat de banden van de afbeelding zijn: de voorinstellingen en de pipet gebruiken ze</translation>
+        <translation type="obsolete">Wat de banden van de afbeelding zijn: de voorinstellingen en de pipet gebruiken ze</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="576"/>
         <source>Band layout</source>
-        <translation>Bandindeling</translation>
+        <translation type="obsolete">Bandindeling</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="577"/>
         <source>RGB (red, green, blue)</source>
-        <translation>RGB (rood, groen, blauw)</translation>
+        <translation type="obsolete">RGB (rood, groen, blauw)</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="577"/>
         <source>IRC (infrared, red, green)</source>
-        <translation>IRC (infrarood, rood, groen)</translation>
+        <translation type="obsolete">IRC (infrarood, rood, groen)</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="577"/>
         <source>RGB + infrared</source>
-        <translation>RGB + infrarood</translation>
+        <translation type="obsolete">RGB + infrarood</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1232"/>
         <source>Write the expression of a usual index (vegetation, water...)</source>
-        <translation>De uitdrukking van een gangbare index schrijven (vegetatie, water...)</translation>
+        <translation type="obsolete">De uitdrukking van een gangbare index schrijven (vegetatie, water...)</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="585"/>
         <source>Spectral presets</source>
-        <translation>Spectrale voorinstellingen</translation>
+        <translation type="obsolete">Spectrale voorinstellingen</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1228"/>
         <source>Needs an image of three bands or more (red, green, blue...)</source>
-        <translation>Vereist een afbeelding met drie of meer banden (rood, groen, blauw...)</translation>
+        <translation type="obsolete">Vereist een afbeelding met drie of meer banden (rood, groen, blauw...)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1235"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1324"/>
         <source>Vegetation (NDVI &gt; 0.3)</source>
         <translation>Vegetatie (NDVI &gt; 0.3)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1235"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1324"/>
         <source>No vegetation (NDVI &lt; 0.1)</source>
         <translation>Geen vegetatie (NDVI &lt; 0.1)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1236"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1325"/>
         <source>Water (NDWI &gt; 0.1)</source>
         <translation>Water (NDWI &gt; 0.1)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1236"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1325"/>
         <source>Vegetation (excess green)</source>
         <translation>Vegetatie (groenoverschot)</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1239"/>
         <source>Spectral presets…</source>
-        <translation>Spectrale voorinstellingen…</translation>
+        <translation type="obsolete">Spectrale voorinstellingen…</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1299"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2039"/>
         <source>This pixel has no value (NoData): pick another one</source>
         <translation>Deze pixel heeft geen waarde (NoData): kies een andere</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1338"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2124"/>
         <source>The tolerance covers every value: lower it</source>
         <translation>De tolerantie dekt elke waarde: verlaag haar</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1354"/>
         <source>Range {0} → {1}{2}</source>
-        <translation>Bereik {0} → {1}{2}</translation>
+        <translation type="obsolete">Bereik {0} → {1}{2}</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1356"/>
         <source>Class(es) {0}</source>
-        <translation>Klasse(n) {0}</translation>
+        <translation type="obsolete">Klasse(n) {0}</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1359"/>
         <source>{0} color(s), last: {1}</source>
-        <translation>{0} kleur(en), laatste: {1}</translation>
+        <translation type="obsolete">{0} kleur(en), laatste: {1}</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1363"/>
         <source>Expression</source>
-        <translation>Expressie</translation>
+        <translation type="obsolete">Expressie</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="778"/>
+        <source>BANDS</source>
+        <translation>BANDEN</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="805"/>
+        <source>Value of the active band under the cursor</source>
+        <translation>Waarde van de actieve band onder de cursor</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="811"/>
+        <source>Statistics of the active band in the last rectangle drawn on the map</source>
+        <translation>Statistieken van de actieve band in de laatste rechthoek die op de kaart is getekend</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="858"/>
+        <source>Every band</source>
+        <translation>Elke band</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="860"/>
+        <source>The value range applies to every colour band at once (a pixel is kept when each band is in the range); the histogram shows the first one</source>
+        <translation>Het waardebereik geldt voor alle kleurbanden tegelijk (een pixel blijft behouden wanneer elke band binnen het bereik valt); het histogram toont de eerste</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="872"/>
+        <source>Active band: the one the range, the histogram and the picker read</source>
+        <translation>Actieve band: de band die het bereik, het histogram en de picker lezen</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="881"/>
+        <source>The pipette compares this band</source>
+        <translation>De pipet vergelijkt deze band</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="991"/>
+        <source>Colour the band holds: the spectral indexes and the chips use it. Click to change it</source>
+        <translation>Kleur van de band: de spectrale indices en de chips gebruiken die. Klik om te wijzigen</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1001"/>
+        <source>Value at the last click of the pipette</source>
+        <translation>Waarde bij de laatste klik van de pipet</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="928"/>
+        <source>No colour</source>
+        <translation>Geen kleur</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="936"/>
+        <source>RGB</source>
+        <translation>RGB</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="936"/>
+        <source>Bands 1, 2, 3 are red, green, blue</source>
+        <translation>Banden 1, 2, 3 zijn rood, groen, blauw</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="936"/>
+        <source>IRC</source>
+        <translation>IRC</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="936"/>
+        <source>Bands 1, 2, 3 are infrared, red, green (IGN infrared colour orthophoto)</source>
+        <translation>Banden 1, 2, 3 zijn infrarood, rood, groen (IGN-infraroodkleurenorthofoto)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="936"/>
+        <source>RGB + NIR</source>
+        <translation>RGB + NIR</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="936"/>
+        <source>Bands 1, 2, 3, 4 are red, green, blue, near infrared</source>
+        <translation>Banden 1, 2, 3, 4 zijn rood, groen, blauw, nabij-infrarood</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="939"/>
+        <source>Every band: {0}</source>
+        <translation>Elke band: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="990"/>
+        <source> Roles guessed, to confirm.</source>
+        <translation> Rollen geraden, te bevestigen.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1019"/>
+        <source>R</source>
+        <translation>R</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1019"/>
+        <source>G</source>
+        <translation>G</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1019"/>
+        <source>B</source>
+        <translation>B</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1020"/>
+        <source>NIR</source>
+        <translation>NIR</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1023"/>
+        <source>Red</source>
+        <translation>Rood</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1023"/>
+        <source>Green</source>
+        <translation>Groen</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1023"/>
+        <source>Blue</source>
+        <translation>Blauw</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1024"/>
+        <source>Near infrared</source>
+        <translation>Nabij-infrarood</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1030"/>
+        <source>roles guessed, to confirm</source>
+        <translation>rollen geraden, te bevestigen</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1045"/>
+        <source>Select</source>
+        <translation>Selecteren</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1049"/>
+        <source>Similar pixels</source>
+        <translation>Vergelijkbare pixels</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1049"/>
+        <source>Every pixel of the raster close to the picked colour or value (the pipette of the rail)</source>
+        <translation>Elke pixel van het raster dicht bij de opgenomen kleur of waarde (de pipet van de balk)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1049"/>
+        <source>Clicked object</source>
+        <translation>Aangeklikt object</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1049"/>
+        <source>Only the patch of such pixels the click falls in: a pool, a roof, a field (the object detector of the rail); Ctrl+click adds another object</source>
+        <translation>Alleen de vlek van dergelijke pixels waarin de klik valt: een zwembad, een dak, een veld (de objectdetector van de balk); Ctrl+klik voegt een ander object toe</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1049"/>
+        <source>Similar objects</source>
+        <translation>Vergelijkbare objecten</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1049"/>
+        <source>Every object of the raster like the clicked one: the patches of such pixels whose area is within the ratios below (the similar objects tool of the rail); Ctrl+click adds another reference object</source>
+        <translation>Elk object van het raster dat lijkt op het aangeklikte: de vlekken van dergelijke pixels waarvan de oppervlakte binnen de onderstaande verhoudingen valt (het hulpmiddel voor vergelijkbare objecten van de balk); Ctrl+klik voegt een ander referentieobject toe</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1073"/>
+        <source>Area ×</source>
+        <translation>Oppervlakte ×</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1076"/>
+        <source>Smallest similar object, as a share of the smallest clicked one</source>
+        <translation>Kleinste vergelijkbare object, als aandeel van het kleinste aangeklikte</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1076"/>
+        <source>Largest similar object, as a multiple of the largest clicked one</source>
+        <translation>Grootste vergelijkbare object, als veelvoud van het grootste aangeklikte</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1089"/>
+        <source>to ×</source>
+        <translation>tot ×</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1092"/>
+        <source>same shape</source>
+        <translation>dezelfde vorm</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1095"/>
+        <source>Keep only the objects shaped like the clicked ones: their compactness (4π × area / perimeter², 1 for a disc) within the same ratios; off, a road of the area of a pool is a pool</source>
+        <translation>Houd alleen de objecten met dezelfde vorm als de aangeklikte: hun compactheid (4π × oppervlakte / omtrek², 1 voor een schijf) binnen dezelfde verhoudingen; uitgeschakeld is een weg met de oppervlakte van een zwembad een zwembad</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1146"/>
+        <source>Remove this pick</source>
+        <translation>Deze opname verwijderen</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1225"/>
+        <source>Quantity</source>
+        <translation>Grootheid</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1956"/>
+        <source>Quantity the range applies to. Slope, aspect, hillshade and roughness read the active band as a DTM.</source>
+        <translation>Grootheid waarop het bereik van toepassing is. Helling, expositie, schaduwreliëf en ruwheid lezen de actieve band als DTM.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1242"/>
+        <source>Thresholds ▾</source>
+        <translation>Drempels ▾</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1288"/>
+        <source>Insert ▾</source>
+        <translation>Invoegen ▾</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1288"/>
+        <source>Insert a band reference, a usual spectral index or the current range</source>
+        <translation>Een bandverwijzing, een gangbare spectrale index of het huidige bereik invoegen</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1313"/>
+        <source>Spectral indexes</source>
+        <translation>Spectrale indices</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1318"/>
+        <source>Range</source>
+        <translation>Bereik</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1319"/>
+        <source>The current value range</source>
+        <translation>Het huidige waardebereik</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1391"/>
+        <source>Rendered colors depend on style and scale.</source>
+        <translation>Weergegeven kleuren zijn afhankelijk van stijl en schaal.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1391"/>
+        <source>Only color selection is available: numeric bands, indices, ranges, classes and derivatives are unavailable.</source>
+        <translation>Alleen kleurselectie is beschikbaar: numerieke banden, indices, bereiken, klassen en afgeleide producten zijn niet beschikbaar.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1817"/>
+        <source>VALUE RANGE — every band</source>
+        <translation>WAARDEBEREIK — elke band</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1819"/>
+        <source>VALUE RANGE — band {0}</source>
+        <translation>WAARDEBEREIK — band {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1952"/>
+        <source>picks on: {0}</source>
+        <translation>neemt op van: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1956"/>
+        <source>A slope, aspect... reads one band as a DTM: choose a band in BANDS first</source>
+        <translation>Een helling, expositie... leest één band als DTM: kies eerst een band in BANDEN</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2159"/>
+        <source>The object could not be read</source>
+        <translation>Het object kon niet worden gelezen</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2161"/>
+        <source>No object under the click: raise the tolerance or click another pixel</source>
+        <translation>Geen object onder de klik: verhoog de tolerantie of klik op een andere pixel</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2163"/>
+        <source>An object is larger than the window read and was cut: lower the tolerance</source>
+        <translation>Een object is groter dan het gelezen venster en is afgekapt: verlaag de tolerantie</translation>
+    </message>
+</context>
+<context>
+    <name>RasterMaterialization</name>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/raster_materialization.py" line="121"/>
+        <source>bounded raster capture failed</source>
+        <translation>begrensde rastervastlegging mislukt</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="224"/>
+        <source>local raster capture could not be opened</source>
+        <translation>lokale rastervastlegging kon niet worden geopend</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="213"/>
+        <source>raster analysis requires a local GDAL capture</source>
+        <translation>rasteranalyse vereist een lokale GDAL-vastlegging</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/raster_materialization.py" line="85"/>
+        <location filename="../adapters/qgis/coverage_layers/raster_materialization.py" line="119"/>
+        <source>raster capture canceled</source>
+        <translation>rastervastlegging geannuleerd</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/raster_materialization.py" line="101"/>
+        <source>raster capture destination must be in the session cache</source>
+        <translation>bestemming van de rastervastlegging moet in de sessiecache liggen</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/raster_materialization.py" line="105"/>
+        <source>raster capture provider could not be cloned</source>
+        <translation>provider van de rastervastlegging kon niet worden gekloond</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/raster_materialization.py" line="38"/>
+        <source>raster capture requires a finite, non-empty extent</source>
+        <translation>rastervastlegging vereist een eindig, niet-leeg extent</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/raster_materialization.py" line="41"/>
+        <source>raster capture requires a positive pixel limit</source>
+        <translation>rastervastlegging vereist een positieve pixellimiet</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/raster_materialization.py" line="46"/>
+        <source>raster capture requires a positive resolution</source>
+        <translation>rastervastlegging vereist een positieve resolutie</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/raster_materialization.py" line="87"/>
+        <source>raster capture source could not be opened</source>
+        <translation>bron van de rastervastlegging kon niet worden geopend</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/raster_materialization.py" line="79"/>
+        <source>raster materialization must run in a worker thread</source>
+        <translation>rastermaterialisatie moet in een workerthread worden uitgevoerd</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="208"/>
+        <source>raster selection canceled</source>
+        <translation>rasterselectie geannuleerd</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="216"/>
+        <source>raster selection source could not be opened</source>
+        <translation>bron van de rasterselectie kon niet worden geopend</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="204"/>
+        <source>remote raster selection must run in a worker thread</source>
+        <translation>externe rasterselectie moet in een workerthread worden uitgevoerd</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="210"/>
+        <source>rendered color selection requires a local rendered capture</source>
+        <translation>selectie van weergegeven kleuren vereist een lokale vastlegging van de weergave</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/raster_materialization.py" line="90"/>
+        <source>rendered rasters require a rendered color capture</source>
+        <translation>weergegeven rasters vereisen een vastlegging van de weergegeven kleuren</translation>
+    </message>
+</context>
+<context>
+    <name>RasterStatisticsTask</name>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/raster_statistics_task.py" line="20"/>
+        <source>FilterMate: raster statistics</source>
+        <translation>FilterMate: rasterstatistieken</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/raster_statistics_task.py" line="64"/>
+        <source>Raster sample failed; retry with a smaller visible extent.</source>
+        <translation>Rastersteekproef mislukt; probeer het opnieuw met een kleiner zichtbaar extent.</translation>
+    </message>
+</context>
+<context>
+    <name>RasterSurfaceTask</name>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/raster_surface_task.py" line="11"/>
+        <source>FilterMate: raster preview</source>
+        <translation>FilterMate: rastervoorbeeld</translation>
+    </message>
+</context>
+<context>
+    <name>RasterTargetJob</name>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="459"/>
+        <source>remote raster target must run in a worker thread</source>
+        <translation>extern rasterdoel moet in een workerthread worden uitgevoerd</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="470"/>
+        <source>local raster target could not be opened</source>
+        <translation>lokaal rasterdoel kon niet worden geopend</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="480"/>
+        <source>Rendered color layers cannot be filter targets.</source>
+        <translation>Lagen met weergegeven kleuren kunnen geen filterdoelen zijn.</translation>
     </message>
 </context>
 <context>
@@ -5018,6 +6245,97 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
     </message>
 </context>
 <context>
+    <name>RemoteMaterializer</name>
+    <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1000"/>
+        <source>Partial result: the remote feature limit was reached.</source>
+        <translation>Gedeeltelijk resultaat: de limiet voor externe objecten is bereikt.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1002"/>
+        <source>Partial result: the remote time limit was reached.</source>
+        <translation>Gedeeltelijk resultaat: de tijdslimiet voor externe verwerking is bereikt.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1004"/>
+        <source>Remote filtering was cancelled; the previous filter is kept.</source>
+        <translation>Het externe filteren is geannuleerd; het vorige filter blijft behouden.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1006"/>
+        <source>More than 500 keys would be sent to the service; narrow the selection or use a local copy.</source>
+        <translation>Er zouden meer dan 500 sleutels naar de dienst worden gestuurd; beperk de selectie of gebruik een lokale kopie.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1008"/>
+        <source>The service has no stable key; use a local copy.</source>
+        <translation>De dienst heeft geen stabiele sleutel; gebruik een lokale kopie.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1010"/>
+        <source>Select or filter the remote source before spatial filtering.</source>
+        <translation>Selecteer of filter de externe bron voordat u ruimtelijk filtert.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1012"/>
+        <source>The service filter cannot be proved complete. Select source features or use a local copy.</source>
+        <translation>De volledigheid van het dienstfilter kan niet worden aangetoond. Selecteer bronobjecten of gebruik een lokale kopie.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1014"/>
+        <source>The remote source copy is incomplete; the previous filter is kept.</source>
+        <translation>De externe bronkopie is onvolledig; het vorige filter blijft behouden.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1016"/>
+        <source>Partial result: no matching feature was confirmed before the limit; the previous filter is kept.</source>
+        <translation>Gedeeltelijk resultaat: vóór de limiet is geen overeenkomend object bevestigd; het vorige filter blijft behouden.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1018"/>
+        <source>The intersecting remote copy is incomplete; a disjoint filter cannot be computed safely.</source>
+        <translation>De snijdende externe kopie is onvolledig; een disjoint-filter kan niet veilig worden berekend.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1020"/>
+        <source>Disjoint combined with another predicate requires a local copy of the remote target.</source>
+        <translation>Disjoint in combinatie met een ander predicaat vereist een lokale kopie van het externe doel.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1022"/>
+        <source>The remote spatial predicate could not be evaluated; the previous filter is kept.</source>
+        <translation>Het externe ruimtelijke predicaat kon niet worden geëvalueerd; het vorige filter blijft behouden.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1025"/>
+        <source>The remote copy could not be read or filtered; the previous filter is kept.</source>
+        <translation>De externe kopie kon niet worden gelezen of gefilterd; het vorige filter blijft behouden.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/remote_materializer.py" line="93"/>
+        <source>Remote materialization requires a background task.</source>
+        <translation>Externe materialisatie vereist een achtergrondtaak.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/remote_materializer.py" line="566"/>
+        <source>Filtering a bounded remote copy</source>
+        <translation>Een begrensde externe kopie filteren</translation>
+    </message>
+</context>
+<context>
+    <name>RenderedRasterTask</name>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/rendered_raster.py" line="88"/>
+        <source>FilterMate: rendered colour snapshot</source>
+        <translation>FilterMate: momentopname van weergegeven kleuren</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/rendered_raster.py" line="158"/>
+        <source>Rendered snapshot failed; retry with a smaller visible extent.</source>
+        <translation>Momentopname van de weergave mislukt; probeer het opnieuw met een kleiner zichtbaar extent.</translation>
+    </message>
+</context>
+<context>
     <name>SearchableJsonView</name>
     <message>
         <location filename="../ui/widgets/json_view/searchable_view.py" line="79"/>
@@ -5028,6 +6346,147 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <location filename="../ui/widgets/json_view/searchable_view.py" line="184"/>
         <source>No match</source>
         <translation>Geen resultaat</translation>
+    </message>
+</context>
+<context>
+    <name>ServerFilterTranslation</name>
+    <message>
+        <location filename="../adapters/qgis/server_subset_job.py" line="242"/>
+        <source>A FilterMate task is still reading layers. Retry after it finishes.</source>
+        <translation>Een FilterMate-taak leest nog lagen. Probeer het opnieuw zodra deze klaar is.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/server_subset_job.py" line="255"/>
+        <source>A layer with auxiliary storage cannot safely replace its server provider. The previous filter is unchanged.</source>
+        <translation>Een laag met aanvullende opslag kan zijn serverprovider niet veilig vervangen. Het vorige filter blijft ongewijzigd.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/server_subset_job.py" line="260"/>
+        <source>A remote join cannot be rebuilt on the main thread. The previous filter is unchanged.</source>
+        <translation>Een externe join kan niet op de hoofdthread worden herbouwd. Het vorige filter blijft ongewijzigd.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/server_subset_job.py" line="262"/>
+        <source>A server filter is already being prepared for this layer.</source>
+        <translation>Er wordt al een serverfilter voor deze laag voorbereid.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/server_filter_translation.py" line="189"/>
+        <location filename="../adapters/qgis/server_filter_translation.py" line="250"/>
+        <source>A server layer can only be modified on its owning thread.</source>
+        <translation>Een serverlaag kan alleen worden gewijzigd op de thread waarvan deze eigenaar is.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/server_subset_job.py" line="235"/>
+        <source>Asynchronous server filters require QGIS 3.32 or newer. The previous filter is unchanged.</source>
+        <translation>Asynchrone serverfilters vereisen QGIS 3.32 of nieuwer. Het vorige filter blijft ongewijzigd.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/server_subset_job.py" line="368"/>
+        <source>Could not install the prepared server filter.</source>
+        <translation>Het voorbereide serverfilter kon niet worden geïnstalleerd.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/server_subset_job.py" line="44"/>
+        <source>Could not preserve the layer state.</source>
+        <translation>De laagstatus kon niet worden bewaard.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/server_subset_job.py" line="239"/>
+        <source>Finish editing the layer before applying a server filter.</source>
+        <translation>Beëindig het bewerken van de laag voordat u een serverfilter toepast.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/server_filter_translation.py" line="104"/>
+        <source>Invalid attribute expression.</source>
+        <translation>Ongeldige attribuutexpressie.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/server_subset_job.py" line="83"/>
+        <source>Preparing server attribute filter</source>
+        <translation>Serverattribuutfilter voorbereiden</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/server_filter_translation.py" line="140"/>
+        <source>QGIS cannot translate this predicate to an OGC filter.</source>
+        <translation>QGIS kan dit predicaat niet naar een OGC-filter vertalen.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/server_subset_job.py" line="302"/>
+        <location filename="../adapters/qgis/server_subset_job.py" line="311"/>
+        <source>Server filter canceled or timed out. The previous filter is unchanged.</source>
+        <translation>Serverfilter geannuleerd of time-out. Het vorige filter blijft ongewijzigd.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/server_subset_job.py" line="348"/>
+        <source>Server filter installation failed and the previous provider could not be restored.</source>
+        <translation>Installatie van het serverfilter mislukt en de vorige provider kon niet worden hersteld.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/server_subset_job.py" line="340"/>
+        <source>Server filter installation failed. The previous provider was already invalid and could not be restored.</source>
+        <translation>Installatie van het serverfilter mislukt. De vorige provider was al ongeldig en kon niet worden hersteld.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/server_subset_job.py" line="355"/>
+        <source>Server filter installation failed. The previous provider was restored.</source>
+        <translation>Installatie van het serverfilter mislukt. De vorige provider is hersteld.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/server_subset_job.py" line="33"/>
+        <source>Server filter installation is in progress. Retry after it finishes.</source>
+        <translation>De installatie van het serverfilter is bezig. Probeer het opnieuw zodra deze klaar is.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/server_subset_job.py" line="207"/>
+        <location filename="../adapters/qgis/server_subset_job.py" line="237"/>
+        <source>Server filter installation must start on the layer thread.</source>
+        <translation>De installatie van het serverfilter moet op de laagthread beginnen.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/server_filter_translation.py" line="126"/>
+        <source>The expression is too complex to translate safely.</source>
+        <translation>De expressie is te complex om veilig te worden vertaald.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/server_filter_translation.py" line="100"/>
+        <source>The expression is too large or contains ambiguous SQL backslash escapes.</source>
+        <translation>De expressie is te groot of bevat dubbelzinnige SQL-backslash-escapes.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/server_subset_job.py" line="318"/>
+        <source>The layer changed while preparing its filter. The prepared result was discarded.</source>
+        <translation>De laag is gewijzigd tijdens het voorbereiden van het filter. Het voorbereide resultaat is verworpen.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/server_subset_job.py" line="366"/>
+        <source>The layer is no longer available. The prepared filter was discarded.</source>
+        <translation>De laag is niet meer beschikbaar. Het voorbereide filter is verworpen.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/server_subset_job.py" line="311"/>
+        <source>The server rejected the filter or could not be reached. The previous filter is unchanged.</source>
+        <translation>De server heeft het filter geweigerd of was niet bereikbaar. Het vorige filter blijft ongewijzigd.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/server_subset_job.py" line="253"/>
+        <source>This provider and QGIS version do not support verified worker creation. The previous filter is unchanged.</source>
+        <translation>Deze provider en QGIS-versie ondersteunen geen geverifieerde aanmaak van workers. Het vorige filter blijft ongewijzigd.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/server_filter_translation.py" line="225"/>
+        <source>{0}: the attribute filter cannot run entirely on the server. Unsupported part: {1}. {2} The previous filter is unchanged.</source>
+        <translation>{0}: het attribuutfilter kan niet volledig op de server worden uitgevoerd. Niet-ondersteund deel: {1}. {2} Het vorige filter blijft ongewijzigd.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/server_filter_translation.py" line="265"/>
+        <source>{0}: the provider rejected the attribute filter. The previous filter was restored.</source>
+        <translation>{0}: de provider heeft het attribuutfilter geweigerd. Het vorige filter is hersteld.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/server_filter_translation.py" line="264"/>
+        <source>{0}: the provider rejected the filter and restoration failed.</source>
+        <translation>{0}: de provider heeft het filter geweigerd en het herstel is mislukt.</translation>
     </message>
 </context>
 <context>
@@ -5208,12 +6667,12 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
 <context>
     <name>SqlUtils</name>
     <message>
-        <location filename="../infrastructure/database/sql_utils.py" line="208"/>
+        <location filename="../infrastructure/database/sql_utils.py" line="266"/>
         <source>FilterMate - PostgreSQL Type Warning</source>
         <translation>FilterMate - PostgreSQL typewaarschuwing</translation>
     </message>
     <message>
-        <location filename="../infrastructure/database/sql_utils.py" line="212"/>
+        <location filename="../infrastructure/database/sql_utils.py" line="270"/>
         <source>Type mismatch in filter: {warning_detail}...</source>
         <translation>Typefout in filter: {warning_detail}...</translation>
     </message>
@@ -5232,29 +6691,37 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
     </message>
 </context>
 <context>
+    <name>TaskCompletionHandler</name>
+    <message>
+        <location filename="../core/tasks/task_completion_handler.py" line="519"/>
+        <source>The filter of {0} could not be applied; it keeps its previous filter.</source>
+        <translation>Het filter van {0} kon niet worden toegepast; het behoudt zijn vorige filter.</translation>
+    </message>
+</context>
+<context>
     <name>TaskCompletionMessenger</name>
     <message>
-        <location filename="../adapters/layer_refresh_manager.py" line="268"/>
+        <location filename="../adapters/layer_refresh_manager.py" line="280"/>
         <source>{count} features visible in main layer</source>
         <translation>{count} objecten zichtbaar in hoofdlaag</translation>
     </message>
     <message>
-        <location filename="../adapters/layer_refresh_manager.py" line="261"/>
+        <location filename="../adapters/layer_refresh_manager.py" line="273"/>
         <source>All filters cleared - {count} features visible in main layer</source>
         <translation>Alle filters gewist - {count} objecten zichtbaar in hoofdlaag</translation>
     </message>
     <message>
-        <location filename="../adapters/layer_refresh_manager.py" line="291"/>
+        <location filename="../adapters/layer_refresh_manager.py" line="303"/>
         <source>Filter applied to &apos;{layer_name}&apos;: {count} features</source>
         <translation>Filter toegepast op '{layer_name}': {count} objecten</translation>
     </message>
     <message>
-        <location filename="../adapters/layer_refresh_manager.py" line="296"/>
+        <location filename="../adapters/layer_refresh_manager.py" line="308"/>
         <source> ({expression_preview})</source>
         <translation> ({expression_preview})</translation>
     </message>
     <message>
-        <location filename="../adapters/layer_refresh_manager.py" line="312"/>
+        <location filename="../adapters/layer_refresh_manager.py" line="324"/>
         <source>Filter cleared for &apos;{layer_name}&apos;: {count} features visible</source>
         <translation>Filter gewist voor '{layer_name}': {count} objecten zichtbaar</translation>
     </message>
@@ -5262,17 +6729,17 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
 <context>
     <name>TaskParameterBuilder</name>
     <message>
-        <location filename="../adapters/task_builder.py" line="926"/>
+        <location filename="../adapters/task_builder.py" line="936"/>
         <source>No entity selected! The selection widget lost the feature. Re-select an entity.</source>
         <translation>Geen object geselecteerd! De selectiewidget heeft het object verloren. Selecteer opnieuw een object.</translation>
     </message>
     <message>
-        <location filename="../adapters/task_builder.py" line="1044"/>
+        <location filename="../adapters/task_builder.py" line="1054"/>
         <source>Selected layer is invalid or its source cannot be found. Operation cancelled.</source>
         <translation>Geselecteerde laag is ongeldig of de bron kan niet worden gevonden. Bewerking geannuleerd.</translation>
     </message>
     <message>
-        <location filename="../adapters/task_builder.py" line="1059"/>
+        <location filename="../adapters/task_builder.py" line="1069"/>
         <source>Layer &apos;{0}&apos; is not yet initialized. Try selecting another layer then switch back to this one.</source>
         <translation>Laag '{0}' is nog niet geinitialiseerd. Probeer een andere laag te selecteren en schakel dan terug naar deze.</translation>
     </message>
@@ -5280,14 +6747,24 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
 <context>
     <name>UndoRedoHandler</name>
     <message>
-        <location filename="../adapters/undo_redo_handler.py" line="187"/>
+        <location filename="../adapters/undo_redo_handler.py" line="227"/>
         <source>Cannot undo: layer invalid or source not found.</source>
         <translation>Kan niet ongedaan maken: laag ongeldig of bron niet gevonden.</translation>
     </message>
     <message>
-        <location filename="../adapters/undo_redo_handler.py" line="264"/>
+        <location filename="../adapters/undo_redo_handler.py" line="304"/>
         <source>Cannot redo: layer invalid or source not found.</source>
         <translation>Kan niet opnieuw uitvoeren: laag ongeldig of bron niet gevonden.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/undo_redo_handler.py" line="64"/>
+        <source>The provider rejected the saved filter.</source>
+        <translation>De provider heeft het opgeslagen filter geweigerd.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/undo_redo_handler.py" line="67"/>
+        <source>Could not restore the filter: {0}</source>
+        <translation>Kon het filter niet herstellen: {0}</translation>
     </message>
 </context>
 <context>
@@ -5296,6 +6773,150 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <location filename="../ui/widgets/json_view/datatypes.py" line="572"/>
         <source>Explore ...</source>
         <translation>Verkennen...</translation>
+    </message>
+</context>
+<context>
+    <name>VectorTargetJob</name>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="261"/>
+        <source>{0}: no unique key field, its features cannot be listed in its filter (a web service, or a virtual layer without a unique id column).</source>
+        <translation>{0}: geen uniek sleutelveld, de objecten kunnen niet in het filter worden opgesomd (een webdienst of een virtuele laag zonder unieke id-kolom).</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="362"/>
+        <source>{0} features to list, more than the {1} sent to a web service: narrow the source or use an attribute filter.</source>
+        <translation>{0} objecten om op te sommen, meer dan de {1} die naar een webdienst worden gestuurd: beperk de bron of gebruik een attribuutfilter.</translation>
+    </message>
+</context>
+<context>
+    <name>VectorTileFilter</name>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/vector_tile_target.py" line="26"/>
+        <source>Minimum coverage is unavailable for clipped tile objects</source>
+        <translation>Minimale dekking is niet beschikbaar voor afgekapte tegelobjecten</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/vector_tile_target.py" line="29"/>
+        <source>Vector tile targets support Intersect and Disjoint only</source>
+        <translation>Vectortegeldoelen ondersteunen alleen Intersect en Disjoint</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/vector_tile_target.py" line="32"/>
+        <source>Vector tile filtering requires a CRS authority code</source>
+        <translation>Het filteren van vectortegels vereist een CRS-autoriteitscode</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/vector_tile_target.py" line="51"/>
+        <source>Vector tile display filter: attributes depend on zoom; objects split across tiles may differ</source>
+        <translation>Weergavefilter voor vectortegels: attributen zijn afhankelijk van de zoom; objecten verdeeld over tegels kunnen afwijken</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/vector_tile_target.py" line="58"/>
+        <source>The vector tile style changed while the filter was running; try again</source>
+        <translation>De vectortegelstijl is gewijzigd terwijl het filter liep; probeer het opnieuw</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/vector_tile_filters.py" line="317"/>
+        <location filename="../adapters/qgis/coverage_layers/vector_tile_filters.py" line="340"/>
+        <source>Filter vector tile attributes</source>
+        <translation>Attributen van vectortegels filteren</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/vector_tile_filters.py" line="248"/>
+        <source>Invalid vector tile filter expression</source>
+        <translation>Ongeldige filterexpressie voor vectortegels</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/vector_tile_filters.py" line="341"/>
+        <source>QGIS expression (attributes depend on zoom):</source>
+        <translation>QGIS-expressie (attributen zijn afhankelijk van de zoom):</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/vector_tile_filters.py" line="318"/>
+        <source>Redo vector tile filter</source>
+        <translation>Vectortegelfilter opnieuw toepassen</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/vector_tile_filters.py" line="298"/>
+        <source>Target only. Attributes depend on zoom. Objects split across tiles may be filtered differently.</source>
+        <translation>Alleen doel. Attributen zijn afhankelijk van de zoom. Objecten die over tegels zijn verdeeld, kunnen anders worden gefilterd.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/vector_tile_filters.py" line="99"/>
+        <source>The saved vector tile style is invalid</source>
+        <translation>De opgeslagen vectortegelstijl is ongeldig</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/vector_tile_filters.py" line="113"/>
+        <location filename="../adapters/qgis/coverage_layers/vector_tile_filters.py" line="116"/>
+        <source>The saved vector tile symbol property is invalid</source>
+        <translation>De opgeslagen symbooleigenschap van de vectortegels is ongeldig</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/vector_tile_filters.py" line="39"/>
+        <source>The tile selection exceeds the expression budget (1 MB); use a smaller area</source>
+        <translation>De tegelselectie overschrijdt het expressiebudget (1 MB); gebruik een kleiner gebied</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/vector_tile_filters.py" line="36"/>
+        <source>The tile selection exceeds the vertex budget (2000); use a smaller area</source>
+        <translation>De tegelselectie overschrijdt het hoekpuntenbudget (2000); gebruik een kleiner gebied</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/vector_tile_filters.py" line="257"/>
+        <source>The vector tile filter exceeds the expression budget (1 MB)</source>
+        <translation>Het vectortegelfilter overschrijdt het expressiebudget (1 MB)</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/vector_tile_filters.py" line="264"/>
+        <source>The vector tile filter exceeds the total style expression budget (1 MB); use a smaller area</source>
+        <translation>Het vectortegelfilter overschrijdt het totale stijlexpressiebudget (1 MB); gebruik een kleiner gebied</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/vector_tile_filters.py" line="317"/>
+        <source>Undo vector tile filter</source>
+        <translation>Vectortegelfilter ongedaan maken</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/vector_tile_filters.py" line="318"/>
+        <source>Unfilter vector tiles</source>
+        <translation>Filter van vectortegels verwijderen</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/vector_tile_filters.py" line="346"/>
+        <source>Vector tile attribute filter</source>
+        <translation>Attribuutfilter voor vectortegels</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/favorites_bridge.py" line="111"/>
+        <source>Vector tile favorite</source>
+        <translation>Favoriet voor vectortegels</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/vector_tile_filters.py" line="349"/>
+        <source>Vector tile filter</source>
+        <translation>Vectortegelfilter</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/vector_tile_filters.py" line="172"/>
+        <source>Vector tile filtering requires a basic renderer</source>
+        <translation>Het filteren van vectortegels vereist een eenvoudige renderer</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/vector_tile_filters.py" line="125"/>
+        <location filename="../adapters/qgis/coverage_layers/vector_tile_filters.py" line="175"/>
+        <source>Vector tile filtering requires basic labeling</source>
+        <translation>Het filteren van vectortegels vereist eenvoudige etikettering</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/vector_tile_filters.py" line="353"/>
+        <source>Vector tile filters</source>
+        <translation>Vectortegelfilters</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/vector_tile_filters.py" line="294"/>
+        <source>Vector tiles</source>
+        <translation>Vectortegels</translation>
     </message>
 </context>
 <context>
@@ -5309,19 +6930,19 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
 <context>
     <name>self.self</name>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="588"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="735"/>
         <source>Source geometry: the features selected in EXPLORING</source>
         <translation>Brongeometrie: de in EXPLORING geselecteerde objecten</translation>
     </message>
     <message>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="624"/>
         <source>Source geometry: the selected pixels, vectorized</source>
-        <translation>Brongeometrie: de geselecteerde pixels, gevectoriseerd</translation>
+        <translation type="obsolete">Brongeometrie: de geselecteerde pixels, gevectoriseerd</translation>
     </message>
     <message>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
         <source>Kept points</source>
-        <translation>Behouden punten</translation>
+        <translation type="obsolete">Behouden punten</translation>
     </message>
 </context>
 </TS>

@@ -32,29 +32,70 @@
 <context>
     <name>AppInitializer</name>
     <message>
-        <location filename="../core/services/app_initializer.py" line="171"/>
+        <location filename="../core/services/app_initializer.py" line="175"/>
         <source>Cleared corrupted filters from {0} layer(s). Please re-apply your filters.</source>
         <translation>Vioittuneet suodattimet poistettu {0} tasolta. Aseta suodattimet uudelleen.</translation>
     </message>
     <message>
-        <location filename="../core/services/app_initializer.py" line="240"/>
+        <location filename="../core/services/app_initializer.py" line="244"/>
         <source>Empty project detected. Add vector layers to activate the plugin.</source>
         <translation>Tyhja projekti havaittu. Lisaa vektoritasoja aktivoidaksesi laajennuksen.</translation>
     </message>
     <message>
-        <location filename="../core/services/app_initializer.py" line="307"/>
+        <location filename="../core/services/app_initializer.py" line="311"/>
         <source>Cannot access the FilterMate database. Check the project directory permissions.</source>
         <translation>FilterMate-tietokantaan ei paasta. Tarkista projektikansion kayttooikeudet.</translation>
     </message>
     <message>
-        <location filename="../core/services/app_initializer.py" line="321"/>
+        <location filename="../core/services/app_initializer.py" line="325"/>
         <source>Error during database verification: {0}</source>
         <translation>Virhe tietokannan tarkistuksessa: {0}</translation>
     </message>
     <message>
-        <location filename="../core/services/app_initializer.py" line="601"/>
+        <location filename="../core/services/app_initializer.py" line="605"/>
         <source>Layer loading failed. Use F5 to force reload.</source>
         <translation>Tason lataus epaonnistui. Kayta F5 pakottaaksesi uudelleenlatauksen.</translation>
+    </message>
+</context>
+<context>
+    <name>AttributeFilterExecutor</name>
+    <message>
+        <location filename="../core/tasks/executors/attribute_filter_executor.py" line="379"/>
+        <source>{0}: this web service has no unique key field (declared key, id, gml_id, cleabs, objectid...), so the selected features cannot be listed for the server.</source>
+        <translation>{0}: tällä verkkopalvelulla ei ole yksilöivää avainkenttää (määritelty avain, id, gml_id, cleabs, objectid...), joten valittuja kohteita ei voi luetella palvelimelle.</translation>
+    </message>
+    <message>
+        <location filename="../core/tasks/executors/attribute_filter_executor.py" line="384"/>
+        <source>{0}: this layer has no unique key field and its feature ids cannot be listed in its filter (a virtual layer needs a unique id column, its uid).</source>
+        <translation>{0}: tällä tasolla ei ole yksilöivää avainkenttää, eikä sen kohdetunnisteita voi luetella sen suodattimessa (virtuaalitaso tarvitsee yksilöivän tunnistesarakkeen, uid).</translation>
+    </message>
+    <message>
+        <location filename="../core/tasks/executors/attribute_filter_executor.py" line="391"/>
+        <source>{0}: {1} selected features, more than the {2} sent to a web service. Narrow the selection or use an attribute filter.</source>
+        <translation>{0}: {1} valittua kohdetta, enemmän kuin verkkopalveluun voidaan lähettää ({2}). Rajaa valintaa tai käytä attribuuttisuodatinta.</translation>
+    </message>
+</context>
+<context>
+    <name>BackendController</name>
+    <message>
+        <location filename="../ui/controllers/backend_controller.py" line="110"/>
+        <source>Remote file: every read goes over the network. FilterMate does not count its features on the main thread.</source>
+        <translation>Etätiedosto: jokainen lukeminen kulkee verkon yli. FilterMate ei laske sen kohteita pääsäikeessä.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/backend_controller.py" line="115"/>
+        <source>Remote service: the filter is sent to the server when it can translate it. FilterMate does not count its features on the main thread.</source>
+        <translation>Etäpalvelu: suodatin lähetetään palvelimelle, kun palvelin pystyy tulkitsemaan sen. FilterMate ei laske sen kohteita pääsäikeessä.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/backend_controller.py" line="120"/>
+        <source>A filter by feature list is limited to {0} features.</source>
+        <translation>Kohdeluetteloon perustuva suodatin on rajattu {0} kohteeseen.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/backend_controller.py" line="123"/>
+        <source>Remote</source>
+        <translation>Etä</translation>
     </message>
 </context>
 <context>
@@ -93,12 +134,12 @@
 <context>
     <name>CentroidTargetsSync</name>
     <message>
-        <location filename="../ui/controllers/centroid_targets_sync.py" line="179"/>
+        <location filename="../ui/controllers/centroid_targets_sync.py" line="186"/>
         <source>Test the checked line and polygon targets by their centroids (point on surface): faster on large geometries. Each target has its own square in the list</source>
         <translation>Testaa valitut viiva- ja polygonikohteet sentroideilla (piste pinnalla): nopeampi suurilla geometrioilla. Jokaisella kohteella on oma neliönsä luettelossa</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/centroid_targets_sync.py" line="179"/>
+        <location filename="../ui/controllers/centroid_targets_sync.py" line="186"/>
         <source>Centroids apply to line and polygon targets: check one in the list of layers to filter</source>
         <translation>Sentroidit koskevat viiva- ja polygonikohteita: valitse luettelosta suodatettava taso</translation>
     </message>
@@ -106,7 +147,7 @@
 <context>
     <name>ConfigController</name>
     <message>
-        <location filename="../ui/controllers/config_controller.py" line="379"/>
+        <location filename="../ui/controllers/config_controller.py" line="380"/>
         <source>Error cancelling changes: {0}</source>
         <translation>Virhe muutosten peruuttamisessa: {0}</translation>
     </message>
@@ -122,27 +163,27 @@
 <context>
     <name>CoverageDockExtras</name>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="247"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="303"/>
         <source>1 band</source>
         <translation>1 kanava</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="248"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="304"/>
         <source>{0} bands</source>
         <translation>{0} kanavaa</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="249"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="305"/>
         <source>{0} points</source>
         <translation>{0} pistettä</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="207"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="772"/>
         <source>Source geometry: the selected pixels, vectorized</source>
-        <translation type="obsolete">Lähdegeometria: valitut pikselit vektoroituina</translation>
+        <translation>Lähdegeometria: valitut pikselit vektoroituina</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="788"/>
         <source>Source geometry: the footprint of the kept points</source>
         <translation>Lähdegeometria: säilytettyjen pisteiden kattama alue</translation>
     </message>
@@ -162,12 +203,12 @@
         <translation type="obsolete">Suorakulmion tilastot: vedä kartalle lukeaksesi nykyisen kanavan minimin, maksimin ja keskiarvon</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="330"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="392"/>
         <source>Elevation profile: open the QGIS elevation profile of the map</source>
         <translation>Korkeusprofiili: avaa kartan QGIS-korkeusprofiili</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="330"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="392"/>
         <source>3D view: open a new QGIS 3D map view</source>
         <translation>3D-näkymä: avaa uusi QGIS 3D -karttanäkymä</translation>
     </message>
@@ -177,7 +218,7 @@
         <translation type="obsolete">ei kohteita</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="254"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="310"/>
         <source>{0} feature(s)</source>
         <translation>{0} kohdetta</translation>
     </message>
@@ -187,140 +228,315 @@
         <translation type="obsolete">kaikki pikselit</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="259"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="315"/>
         <source>{0} class(es)</source>
         <translation>{0} luokkaa</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="256"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="312"/>
         <source>expression</source>
         <translation>lauseke</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="250"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="306"/>
         <source>{0} features</source>
         <translation>{0} kohdetta</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="650"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="803"/>
         <source>Vector</source>
         <translation>Vektori</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="650"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="803"/>
         <source>Raster</source>
         <translation>Rasteri</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="650"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="803"/>
         <source>Point cloud</source>
         <translation>Pistepilvi</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="347"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="791"/>
         <source>Kept points</source>
-        <translation type="obsolete">Säilytetyt pisteet</translation>
+        <translation>Säilytetyt pisteet</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="624"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="772"/>
         <source>Selection → source geometry</source>
         <translation>Valinta → lähdegeometria</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="326"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="384"/>
         <source>Link the range to the style: the layer colours stretch over the selected range</source>
         <translation>Kytke väli tyyliin: tason värit venyvät valitulle välille</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="327"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="385"/>
         <source>Class pipette: click the map and the class of the points drawn there is checked. Ctrl+click adds another one</source>
         <translation>Luokkapipetti: napsauta karttaa, niin siinä näkyvien pisteiden luokka valitaan. Ctrl+napsautus lisää toisen</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="330"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="392"/>
         <source>Value under the cursor: follow the pixel value (or the slope, aspect... the range applies to) while moving over the map</source>
         <translation>Arvo kohdistimen alla: seuraa pikselin arvoa (tai kaltevuutta, rinteen suuntaa... johon väli kohdistuu) liikkuessasi kartalla</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="330"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="392"/>
         <source>Statistics of a rectangle: drag on the map to read the minimum, maximum and mean of the current band (or of the slope, aspect... the range applies to)</source>
         <translation>Suorakulmion tilastot: vedä kartalle lukeaksesi nykyisen kanavan (tai kaltevuuden, rinteen suunnan... johon väli kohdistuu) minimin, maksimin ja keskiarvon</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="445"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="569"/>
         <source>The style link follows pixel values: not available while the range applies to a slope, aspect, hillshade or roughness</source>
         <translation>Tyylilinkki seuraa pikselin arvoja: ei käytettävissä, kun väli kohdistuu kaltevuuteen, rinteen suuntaan, rinnevarjostukseen tai karkeuteen</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="744"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="916"/>
         <source>Class pipette: this point cloud has no Classification attribute</source>
         <translation>Luokkapipetti: tässä pistepilvessä ei ole Classification-attribuuttia</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="910"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1522"/>
         <source>The style cannot follow the range: it needs a single band grey or pseudocolor style on the band of the panel</source>
         <translation>Tyyli ei voi seurata väliä: se vaatii yksikanavaisen harmaasävy- tai pseudovärityylin paneelin kanavalle</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="330"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="392"/>
         <source>Pipette: click the map and the pixels that look like the one you click are selected (a color on an image, a value on a DTM or an index, a class on a classified raster, with the tolerance of the panel). Ctrl+click adds another one</source>
         <translation>Pipetti: napsauta karttaa, niin napsauttamaasi muistuttavat pikselit valitaan (väri kuvassa, arvo DTM:ssä tai indeksissä, luokka luokitellussa rasterissa, paneelin toleranssilla). Ctrl+napsautus lisää toisen</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="255"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="311"/>
         <source>no feature selected</source>
         <translation>ei valittua kohdetta</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="257"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="313"/>
         <source>whole layer</source>
         <translation>koko taso</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="258"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="314"/>
         <source>no constraint</source>
         <translation>ei rajoitusta</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="260"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="316"/>
         <source>raster expression</source>
         <translation>rasterilauseke</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="261"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="317"/>
         <source>all points</source>
         <translation>kaikki pisteet</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="318"/>
+        <source>{0} object(s)</source>
+        <translation>{0} objektia</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="319"/>
+        <source>shown as the whole class in their box</source>
+        <translation>näytetään kokonaisena luokkana laatikossaan</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="388"/>
+        <source>Object detector: click the map and the patch of pixels that look like the one you click is selected (a pool, a roof, a field, with the tolerance of the panel), not every pixel of its colour. Ctrl+click adds another object</source>
+        <translation>Objektintunnistin: napsauta karttaa, niin napsautusta muistuttavien pikselien ryhmä valitaan (uima-allas, katto, pelto, paneelin toleranssilla), ei kaikkia sen värisiä pikseleitä. Ctrl+napsautus lisää toisen objektin</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="392"/>
+        <source>Similar objects: click an object and every object of the raster like it is selected (the patches of such pixels whose area is within the ratios of the panel). Ctrl+click adds another reference object</source>
+        <translation>Samankaltaiset objektit: napsauta objektia, niin kaikki rasterin sen kaltaiset objektit valitaan (tällaisten pikselien ryhmät, joiden pinta-ala on paneelin suhteiden sisällä). Ctrl+napsautus lisää toisen vertailuobjektin</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="392"/>
+        <source>Object detector: click the map and the object under the click is selected (the cluster of points of its class: a building, a tree), not the whole class; or every object of the cloud like it (right-click the button for the target). Ctrl+click adds another object</source>
+        <translation>Objektintunnistin: napsauta karttaa, niin napsautuksen alla oleva objekti valitaan (sen luokan pisteparvi: rakennus, puu), ei koko luokkaa; tai kaikki sen kaltaiset pilven objektit (kohdevalinta painikkeen oikealla napsautuksella). Ctrl+napsautus lisää toisen objektin</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="392"/>
+        <source>Value pipette: click the map and a condition is written on the attribute chosen in ATTRIBUTES (Z, intensity...), around the value of the point there, with the tolerance of the panel. Ctrl+click adds another condition (OR)</source>
+        <translation>Arvopipetti: napsauta karttaa, niin ATTRIBUUTIT-kohdassa valitulle attribuutille (Z, intensiteetti...) kirjoitetaan ehto siinä olevan pisteen arvon ympärille paneelin toleranssilla. Ctrl+napsautus lisää toisen ehdon (OR)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="392"/>
+        <source>Zone: draw a rectangle, a polygon, a freehand shape or a circle on the map (right-click the button for the shape); its X / Y box goes to ATTRIBUTES, the shape itself cuts the targets</source>
+        <translation>Vyöhyke: piirrä kartalle suorakulmio, monikulmio, vapaa muoto tai ympyrä (muoto valitaan painikkeen oikealla napsautuksella); sen X / Y -laatikko siirtyy ATTRIBUUTIT-kohtaan, muoto itse rajaa kohteet</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="392"/>
+        <source>More tools: the value under the cursor, the statistics of a rectangle</source>
+        <translation>Lisää työkaluja: kohdistimen alla oleva arvo, suorakulmion tilastot</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="392"/>
+        <source>Similar features: click a feature and every feature of the layer with the same value of the group&apos;s field (the display expression of the single / multiple selection) is selected. Ctrl+click adds another value</source>
+        <translation>Samankaltaiset kohteet: napsauta kohdetta, niin kaikki tason kohteet, joilla on sama ryhmän kentän arvo (yksittäisen / usean valinnan näyttölauseke), valitaan. Ctrl+napsautus lisää toisen arvon</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="392"/>
+        <source>More tools: the QGIS selection tools (rectangle, polygon, freehand, radius), select by expression, invert or clear the selection, the attribute table of the selection</source>
+        <translation>Lisää työkaluja: QGISin valintatyökalut (suorakulmio, monikulmio, vapaa käsi, säde), valinta lausekkeella, valinnan käänteinen tai tyhjennys, valinnan attribuuttitaulukko</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="392"/>
+        <source>More tools: the elevation profile and the 3D view of QGIS</source>
+        <translation>Lisää työkaluja: QGISin korkeusprofiili ja 3D-näkymä</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="539"/>
+        <source>Only color selection is available: rendered colors depend on style and scale.</source>
+        <translation>Vain värivalinta on käytettävissä: esitetyt värit riippuvat tyylistä ja mittakaavasta.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="567"/>
+        <source>The style link follows the VALUE RANGE group: make it the active one first</source>
+        <translation>Tyylilinkki seuraa ARVOALUE-ryhmää: tee siitä ensin aktiivinen</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="790"/>
+        <source>Current filter: {0}</source>
+        <translation>Nykyinen suodatin: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="826"/>
+        <source>Rendered colors depend on style and scale.</source>
+        <translation>Esitetyt värit riippuvat tyylistä ja mittakaavasta.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="925"/>
+        <source>Object detector: this point cloud has no Classification attribute</source>
+        <translation>Objektintunnistin: tässä pistepilvessä ei ole Classification-attribuuttia</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="974"/>
+        <source>Object detector</source>
+        <translation>Objektintunnistin</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="977"/>
+        <source>Clicked object</source>
+        <translation>Napsautettu objekti</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="977"/>
+        <source>Similar objects</source>
+        <translation>Samankaltaiset objektit</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1081"/>
+        <source>Zone shape</source>
+        <translation>Vyöhykkeen muoto</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1254"/>
+        <source>Rectangle</source>
+        <translation>Suorakulmio</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1254"/>
+        <source>Polygon</source>
+        <translation>Monikulmio</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1255"/>
+        <source>Freehand</source>
+        <translation>Vapaa käsi</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1255"/>
+        <source>Radius</source>
+        <translation>Säde</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1130"/>
+        <source>The link follows the single and multiple selections: make one of them the active group first</source>
+        <translation>Linkki seuraa yksittäistä ja useaa valintaa: tee jommastakummasta ensin aktiivinen ryhmä</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1253"/>
+        <source>Select on the map</source>
+        <translation>Valitse kartalta</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1261"/>
+        <source>Select by expression…</source>
+        <translation>Valitse lausekkeella…</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1261"/>
+        <source>Invert the selection</source>
+        <translation>Käännä valinta</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1261"/>
+        <source>Clear the selection</source>
+        <translation>Tyhjennä valinta</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1268"/>
+        <source>Attribute table of the selection</source>
+        <translation>Valinnan attribuuttitaulukko</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1307"/>
+        <source>Value under the cursor</source>
+        <translation>Arvo kohdistimen alla</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1311"/>
+        <source>Statistics of a rectangle</source>
+        <translation>Suorakulmion tilastot</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1327"/>
+        <source>Elevation profile</source>
+        <translation>Korkeusprofiili</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1327"/>
+        <source>3D view</source>
+        <translation>3D-näkymä</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="1684"/>
+        <source>This point cloud has no X / Y attribute to filter on</source>
+        <translation>Tässä pistepilvessä ei ole X / Y -attribuuttia, jonka mukaan suodattaa</translation>
     </message>
 </context>
 <context>
     <name>CoverageModeController</name>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="294"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="365"/>
         <source>Restoring the filter of {0} raster / point cloud layer(s)…</source>
         <translation>Palautetaan {0} rasteri- / pistepilvitason suodatinta…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="582"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="747"/>
         <source>cov. ≥ </source>
         <translation>peitto ≥ </translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="583"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="748"/>
         <source>Minimum share of a polygon target inside the source geometry (0 = any overlap). Used when the source is a raster or a point cloud.</source>
         <translation>Monikulmiokohteen vähimmäisosuus lähdegeometrian sisällä (0 = mikä tahansa päällekkäisyys). Käytetään, kun lähde on rasteri tai pistepilvi.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="698"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="863"/>
         <source>Raster</source>
         <translation>Rasteri</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="698"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="863"/>
         <source>Point cloud</source>
         <translation>Pistepilvi</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="707"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="872"/>
         <source>{0} layer: selection in EXPLORING, relation in FILTERING</source>
         <translation>{0}-taso: valinta EXPLORING-välilehdessä, relaatio FILTERING-välilehdessä</translation>
     </message>
@@ -330,7 +546,7 @@
         <translation type="obsolete">Pikselinpoimija: napsauta karttaa lukeaksesi jokaisen kanavan arvon (Ctrl+napsautus laajentaa aluetta)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="734"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="918"/>
         <source>Zoom to the layer</source>
         <translation>Zoomaa tasoon</translation>
     </message>
@@ -340,260 +556,390 @@
         <translation type="obsolete">Esikatselu: piilota valinnan ulkopuoliset pikselit</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="729"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="911"/>
         <source>Not used for raster layers</source>
         <translation>Ei käytössä rasteritasoille</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="730"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="912"/>
         <source>Reset the raster selection</source>
         <translation>Nollaa rasterivalinta</translation>
     </message>
     <message>
         <location filename="../ui/controllers/coverage_mode_controller.py" line="733"/>
         <source>Identify points on the map</source>
-        <translation>Tunnista pisteet kartalta</translation>
+        <translation type="obsolete">Tunnista pisteet kartalta</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="735"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="919"/>
         <source>Live preview: show only the points kept by the selection</source>
         <translation>Reaaliaikainen esikatselu: näytä vain valinnan säilyttämät pisteet</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="737"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="921"/>
         <source>Not used for point cloud layers</source>
         <translation>Ei käytössä pistepilvitasoille</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="738"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="922"/>
         <source>Reset the point cloud criteria</source>
         <translation>Nollaa pistepilven ehdot</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="951"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1390"/>
         <source>Invalid raster calculator expression</source>
         <translation>Virheellinen rasterilaskimen lauseke</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1023"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1688"/>
         <source>PDAL was not found: the height above a DTM needs the pdal executable</source>
         <translation>PDAL:ia ei löytynyt: korkeus DTM:n yläpuolella vaatii pdal-suoritustiedoston</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1991"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3147"/>
         <source>A FilterMate task is still running: wait for it to finish</source>
         <translation>FilterMate-tehtävä on vielä käynnissä: odota sen päättymistä</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1556"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2629"/>
         <source>FilterMate task failed: {0}</source>
         <translation>FilterMate-tehtävä epäonnistui: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1593"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2666"/>
         <source>Select pixels first: a value range, classes or a raster expression</source>
         <translation>Valitse ensin pikselit: arvoalue, luokat tai rasterilauseke</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1602"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2679"/>
         <source>Raster filtered: {0}</source>
         <translation>Rasteri suodatettu: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1620"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2713"/>
         <source>The point cloud expression was rejected: {0}</source>
         <translation>Pistepilven lauseke hylättiin: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1623"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2716"/>
         <source>Select points first: classes, attribute ranges or an expression</source>
         <translation>Valitse ensin pisteet: luokat, attribuuttialueet tai lauseke</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1631"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2730"/>
         <source>Point cloud filtered: {0}</source>
         <translation>Pistepilvi suodatettu: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2094"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3252"/>
         <source>Filter not applied: {0}</source>
         <translation>Suodatinta ei otettu käyttöön: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1957"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3109"/>
         <source>canceled</source>
         <translation>peruutettu</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1699"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2812"/>
         <source>{0} target(s) filtered</source>
         <translation>{0} kohdetta suodatettu</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1701"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2820"/>
         <source>{0} failed: {1}</source>
         <translation>{0} epäonnistui: {1}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1710"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2833"/>
         <source>FilterMate: filtering from '{0}'…</source>
         <translation>FilterMate: suodatetaan kohteesta '{0}'…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1777"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2929"/>
         <source>Changed since, left as is: {0}</source>
         <translation>Muuttunut sen jälkeen, jätetty ennalleen: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1783"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2935"/>
         <source>{0} layer(s) restored</source>
         <translation>{0} tasoa palautettu</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1817"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2969"/>
         <source>&apos;{0}&apos; not exported: {1}</source>
         <translation>'{0}' ei viety: {1}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1831"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2983"/>
         <source>Exported: {0}</source>
         <translation>Viety: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1833"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2985"/>
         <source>Export failed: {0}</source>
         <translation>Vienti epäonnistui: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1840"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2992"/>
         <source>Exporting {0} layer(s)…</source>
         <translation>Viedään {0} tasoa…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1846"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2998"/>
         <source>Export folder</source>
         <translation>Vientikansio</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1928"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3080"/>
         <source>Raster / point cloud targets skipped: no source feature selected in EXPLORING</source>
         <translation>Rasteri- / pistepilvikohteet ohitettu: EXPLORING-välilehdessä ei ole valittua lähdekohdetta</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1957"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3109"/>
         <source>Raster / point cloud targets not filtered: {0}</source>
         <translation>Rasteri- / pistepilvikohteita ei suodatettu: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1959"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3111"/>
         <source>{0} raster / point cloud target(s) filtered</source>
         <translation>{0} rasteri- / pistepilvikohdetta suodatettu</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2073"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3229"/>
         <source>Choose the DTM raster used for the height above ground</source>
         <translation>Valitse maanpinnan yläpuolisen korkeuden laskentaan käytettävä DTM-rasteri</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2084"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3240"/>
         <source>Height above ground not computed: {0}</source>
         <translation>Maanpinnan yläpuolista korkeutta ei laskettu: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2103"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3261"/>
         <source>Computing the height above '{0}' with PDAL…</source>
         <translation>Lasketaan korkeutta tason '{0}' yläpuolella PDAL:lla…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="271"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="342"/>
         <source>The FilterMate cache holds {0} GB, over its {1} GB limit: unfilter the raster / point cloud layers you no longer need</source>
         <translation>FilterMaten välimuisti vie {0} Gt, mikä ylittää sen {1} Gt:n rajan: poista suodatus rasteri- / pistepilvitasoilta, joita et enää tarvitse</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1025"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1690"/>
         <source>PDAL {0} is too old: the height above a DTM needs PDAL 2.4 or later</source>
         <translation>PDAL {0} on liian vanha: korkeus DTM:n yläpuolella vaatii PDAL 2.4:n tai uudemman</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1028"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1693"/>
         <source>PDAL could not be run, the height above a DTM is unavailable: {0}</source>
         <translation>PDAL:ia ei voitu suorittaa, korkeus DTM:n yläpuolella ei ole käytettävissä: {0}</translation>
     </message>
     <message>
         <location filename="../ui/controllers/coverage_mode_controller.py" line="722"/>
         <source>Pixel picker: click on the map to read the value of every band, and the slope, aspect... when the range applies to one (Ctrl+click extends the range)</source>
-        <translation>Pikselinpoimija: napsauta karttaa lukeaksesi jokaisen kanavan arvon sekä kaltevuuden, rinteen suunnan... kun väli kohdistuu johonkin niistä (Ctrl+napsautus laajentaa väliä)</translation>
+        <translation type="obsolete">Pikselinpoimija: napsauta karttaa lukeaksesi jokaisen kanavan arvon sekä kaltevuuden, rinteen suunnan... kun väli kohdistuu johonkin niistä (Ctrl+napsautus laajentaa väliä)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="725"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="907"/>
         <source>Zoom to the selected pixels (to the layer when nothing is selected)</source>
         <translation>Zoomaa valittuihin pikseleihin (tasoon, kun mitään ei ole valittuna)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="726"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="908"/>
         <source>Preview: hide the pixels outside the selection (a white veil for a slope, aspect...)</source>
         <translation>Esikatselu: piilota valinnan ulkopuoliset pikselit (valkoinen harso kaltevuudelle, rinteen suunnalle...)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="996"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1569"/>
         <source>The preview of a slope or aspect needs the map in the CRS of the raster ({0})</source>
         <translation>Kaltevuuden tai rinteen suunnan esikatselu vaatii kartan rasterin koordinaattijärjestelmässä ({0})</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1371"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2165"/>
         <source>only the points drawn on the map can be picked: turn the preview off to pick a class it hides</source>
         <translation>vain kartalle piirretyt pisteet voidaan poimia: poista esikatselu käytöstä poimiaksesi sen piilottaman luokan</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1373"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2236"/>
         <source>No classified point under the click</source>
         <translation>Napsautuskohdassa ei ole luokiteltua pistettä</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1377"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2171"/>
         <source>Class {0} is already checked</source>
         <translation>Luokka {0} on jo valittu</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1379"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2260"/>
         <source>Class {0} is not in the class list of the layer</source>
         <translation>Luokkaa {0} ei ole tason luokkaluettelossa</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="906"/>
+        <source>Not used for raster layers: the pipette reads the bands</source>
+        <translation>Ei käytössä rastereille: pipetti lukee kanavat</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="915"/>
+        <source>Class pipette: click the map and the class of the points drawn there is checked. Ctrl+click adds another one</source>
+        <translation>Luokkapipetti: napsauta karttaa, niin siinä piirrettyjen pisteiden luokka valitaan. Ctrl+napsautus lisää toisen</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1070"/>
+        <source>Preview and statistics use a bounded local sample of the visible extent; filtering reads the source.</source>
+        <translation>Esikatselu ja tilastot käyttävät näkyvän alueen rajattua paikallista otosta; suodatus lukee lähteen.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1211"/>
+        <source>Preparing a bounded color snapshot of the visible extent…</source>
+        <translation>Valmistellaan näkyvästä alueesta rajattua värikuvaa…</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1223"/>
+        <source>The color snapshot could not be prepared. Try a smaller visible extent.</source>
+        <translation>Värikuvaa ei voitu valmistella. Kokeile pienempää näkyvää aluetta.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1227"/>
+        <source>Color selection applies to the captured visible extent.</source>
+        <translation>Värivalinta koskee tallennettua näkyvää aluetta.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1268"/>
+        <source>Raster sampling failed. Try a smaller visible extent.</source>
+        <translation>Rasterin otanta epäonnistui. Kokeile pienempää näkyvää aluetta.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1515"/>
+        <source>The sampled raster preview could not be calculated.</source>
+        <translation>Otokseen perustuvaa rasterin esikatselua ei voitu laskea.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1569"/>
+        <source>The preview of a color or an expression needs the map in the CRS of the raster ({0})</source>
+        <translation>Värin tai lausekkeen esikatselu vaatii kartan rasterin CRS:ssä ({0})</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2189"/>
+        <source>No point drawn under the click</source>
+        <translation>Napsautuksen alla ei ole piirrettyä pistettä</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2191"/>
+        <source>This point has no {0}</source>
+        <translation>Tällä pisteellä ei ole kenttää {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2193"/>
+        <source>{0} cannot be used in a condition</source>
+        <translation>{0} ei voi käyttää ehdossa</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2250"/>
+        <source>Object not read: {0}</source>
+        <translation>Objektia ei luettu: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2252"/>
+        <source>Too many points around the click: the object could not be read</source>
+        <translation>Napsautuksen ympärillä on liian monta pistettä: objektia ei voitu lukea</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2254"/>
+        <source>No point of class {0} under the click: click on the object itself</source>
+        <translation>Napsautuksen kohdalla ei ole luokan {0} pistettä: napsauta itse objektia</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2391"/>
+        <source>Similar objects not read: {0}</source>
+        <translation>Samankaltaisia objekteja ei luettu: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2394"/>
+        <source>No similar object within the area ratios: widen them</source>
+        <translation>Pinta-alasuhteiden sisällä ei ole samankaltaista objektia: laajenna niitä</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2462"/>
+        <source>Preparing a sample for the new visible extent. Click again when it is ready.</source>
+        <translation>Valmistellaan otosta uudelle näkyvälle alueelle. Napsauta uudelleen, kun se on valmis.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2469"/>
+        <source>The local raster sample is still being prepared. Retry when it is ready.</source>
+        <translation>Paikallista rasterin otosta valmistellaan vielä. Yritä uudelleen, kun se on valmis.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2673"/>
+        <source>Prepare a color snapshot before filtering this rendered layer.</source>
+        <translation>Valmistele värikuva ennen tämän esitetyn tason suodattamista.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2815"/>
+        <source>{0} raster target(s) resampled to the configured pixel limit</source>
+        <translation>{0} rasterikohdetta uudelleenotettu määritettyyn pikselirajaan</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2844"/>
+        <source>color selection limited to the captured extent; colors depend on style and scale</source>
+        <translation>värivalinta rajattu tallennettuun alueeseen; värit riippuvat tyylistä ja mittakaavasta</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2846"/>
+        <source>raster source resampled to {0} cells within the pixel limit</source>
+        <translation>rasterilähde uudelleenotettu {0} soluun pikselirajan puitteissa</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2848"/>
+        <source>raster selection read every {0} pixels: over the pixel limit of the settings</source>
+        <translation>rasterivalinta luettu {0} pikselin välein: ylittää asetusten pikselirajan</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2851"/>
+        <source>dense raster selection smoothed to keep its outline light</source>
+        <translation>tiheä rasterivalinta tasoitettu ääriviivan pitämiseksi kevyenä</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2897"/>
+        <source>{0} left empty, nothing matches the selection: {1}</source>
+        <translation>{0} tyhjennetty, mikään ei vastaa valintaa: {1}</translation>
     </message>
 </context>
 <context>
     <name>DatabaseManager</name>
     <message>
-        <location filename="../adapters/database_manager.py" line="194"/>
+        <location filename="../adapters/database_manager.py" line="234"/>
         <source>Database file does not exist: {0}</source>
         <translation>Tietokantatiedostoa ei ole olemassa: {0}</translation>
     </message>
     <message>
-        <location filename="../adapters/database_manager.py" line="201"/>
+        <location filename="../adapters/database_manager.py" line="241"/>
         <source>Failed to connect to database {0}: {1}</source>
         <translation>Yhteys tietokantaan {0} epaonnistui: {1}</translation>
     </message>
     <message>
-        <location filename="../adapters/database_manager.py" line="220"/>
+        <location filename="../adapters/database_manager.py" line="260"/>
         <source>Could not create database directory {0}: {1}</source>
         <translation>Tietokantahakemiston {0} luonti epaonnistui: {1}</translation>
     </message>
     <message>
-        <location filename="../adapters/database_manager.py" line="274"/>
+        <location filename="../adapters/database_manager.py" line="314"/>
         <source>Failed to create database file {0}: {1}</source>
         <translation>Tietokantatiedoston {0} luonti epaonnistui: {1}</translation>
     </message>
     <message>
-        <location filename="../adapters/database_manager.py" line="551"/>
+        <location filename="../adapters/database_manager.py" line="591"/>
         <source>Cannot initialize FilterMate database: connection failed</source>
         <translation>FilterMate-tietokantaa ei voi alustaa: yhteys epaonnistui</translation>
     </message>
     <message>
-        <location filename="../adapters/database_manager.py" line="556"/>
+        <location filename="../adapters/database_manager.py" line="596"/>
         <source>Critical error connecting to database: {0}</source>
         <translation>Kriittinen virhe yhdistettaessa tietokantaan: {0}</translation>
     </message>
     <message>
-        <location filename="../adapters/database_manager.py" line="602"/>
+        <location filename="../adapters/database_manager.py" line="651"/>
         <source>Error during database initialization: {0}</source>
         <translation>Virhe tietokannan alustuksessa: {0}</translation>
     </message>
@@ -601,29 +947,37 @@
 <context>
     <name>DatasourceManager</name>
     <message>
-        <location filename="../core/services/datasource_manager.py" line="153"/>
+        <location filename="../core/services/datasource_manager.py" line="140"/>
         <source>Database file does not exist: {db_file_path}</source>
         <translation>Tietokantatiedostoa ei ole olemassa: {db_file_path}</translation>
     </message>
     <message>
-        <location filename="../core/services/datasource_manager.py" line="164"/>
+        <location filename="../core/services/datasource_manager.py" line="151"/>
         <source>Failed to connect to database {db_file_path}: {error}</source>
         <translation>Tietokantaan {db_file_path} yhdistäminen epäonnistui: {error}</translation>
     </message>
     <message>
-        <location filename="../core/services/datasource_manager.py" line="189"/>
+        <location filename="../core/services/datasource_manager.py" line="176"/>
         <source>QGIS processing module not available to create spatial index</source>
         <translation>QGIS Processing -moduuli ei ole käytettävissä tilaindeksin luomiseen</translation>
     </message>
     <message>
-        <location filename="../core/services/datasource_manager.py" line="195"/>
+        <location filename="../core/services/datasource_manager.py" line="182"/>
         <source>Cannot create spatial index: layer invalid or source not found.</source>
         <translation>Tilaindeksiä ei voida luoda: taso on virheellinen tai lähdettä ei löydy.</translation>
     </message>
     <message>
-        <location filename="../core/services/datasource_manager.py" line="409"/>
+        <location filename="../core/services/datasource_manager.py" line="405"/>
         <source>PostgreSQL layers detected but psycopg2 is not installed. Using local Spatialite backend. For better performance with large datasets, install psycopg2.</source>
         <translation>PostgreSQL-tasoja havaittu, mutta psycopg2 ei ole asennettu. Käytetään paikallista Spatialite-taustaa. Paremman suorituskyvyn saamiseksi suurille tietoaineistoille asenna psycopg2.</translation>
+    </message>
+</context>
+<context>
+    <name>ExploringController</name>
+    <message>
+        <location filename="../ui/controllers/exploring_controller.py" line="2239"/>
+        <source>{0} features selected, more than the {1} a web service can be sent: narrow the selection or use an attribute filter.</source>
+        <translation>{0} kohdetta valittu, enemmän kuin verkkopalveluun voidaan lähettää ({1}): rajaa valintaa tai käytä attribuuttisuodatinta.</translation>
     </message>
 </context>
 <context>
@@ -685,17 +1039,17 @@
 <context>
     <name>ExtensionRegistry</name>
     <message>
-        <location filename="../extensions/registry.py" line="408"/>
+        <location filename="../extensions/registry.py" line="398"/>
         <source>install the QGIS plugin {0}</source>
         <translation>asenna QGIS-lisäosa {0}</translation>
     </message>
     <message>
-        <location filename="../extensions/registry.py" line="412"/>
+        <location filename="../extensions/registry.py" line="402"/>
         <source>install {0}</source>
         <translation>asenna {0}</translation>
     </message>
     <message>
-        <location filename="../extensions/registry.py" line="413"/>
+        <location filename="../extensions/registry.py" line="403"/>
         <source>The {0} extension is off because {1} is missing: {2}, then restart QGIS.</source>
         <translation>Laajennus {0} on pois käytöstä, koska {1} puuttuu: {2} ja käynnistä QGIS uudelleen.</translation>
     </message>
@@ -1452,127 +1806,127 @@ Napsauta ★-ilmaisinta ja valitse 'Lisaa nykyinen suodatin suosikkeihin' tallen
 <context>
     <name>FilterMate</name>
     <message>
-        <location filename="../filter_mate.py" line="234"/>
+        <location filename="../filter_mate.py" line="236"/>
         <source>&amp;FilterMate</source>
         <translation>&amp;FilterMate</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="361"/>
+        <location filename="../filter_mate.py" line="363"/>
         <source>FilterMate</source>
         <translation>FilterMate</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="361"/>
+        <location filename="../filter_mate.py" line="363"/>
         <source>Open FilterMate panel</source>
         <translation>Avaa FilterMate-paneeli</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="370"/>
+        <location filename="../filter_mate.py" line="372"/>
         <source>Reset configuration and database</source>
         <translation>Palauta asetukset ja tietokanta</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="370"/>
+        <location filename="../filter_mate.py" line="372"/>
         <source>Reset the default configuration and delete the SQLite database</source>
         <translation>Palauta oletusasetukset ja poista SQLite-tietokanta</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1515"/>
+        <location filename="../filter_mate.py" line="1563"/>
         <source>Reset Configuration</source>
         <translation>Palauta asetukset</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1541"/>
+        <location filename="../filter_mate.py" line="1589"/>
         <source>Configuration reset successfully.</source>
         <translation>Asetukset palautettu onnistuneesti.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1546"/>
+        <location filename="../filter_mate.py" line="1594"/>
         <source>Default configuration file not found.</source>
         <translation>Oletusasetustiedostoa ei löydy.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1568"/>
+        <location filename="../filter_mate.py" line="1617"/>
         <source>Database deleted: {filename}</source>
         <translation>Tietokanta poistettu: {filename}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1592"/>
+        <location filename="../filter_mate.py" line="1641"/>
         <source>Restart required</source>
         <translation>Uudelleenkäynnistys vaaditaan</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="477"/>
+        <location filename="../filter_mate.py" line="479"/>
         <source>Obsolete configuration detected</source>
         <translation>Vanhentunut asetustiedosto havaittu</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="478"/>
+        <location filename="../filter_mate.py" line="480"/>
         <source>unknown version</source>
         <translation>tuntematon versio</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="486"/>
+        <location filename="../filter_mate.py" line="488"/>
         <source>Corrupted configuration detected</source>
         <translation>Vioittunut asetustiedosto havaittu</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="543"/>
+        <location filename="../filter_mate.py" line="545"/>
         <source>Configuration not reset. Some features may not work correctly.</source>
         <translation>Asetuksia ei nollattu. Jotkin toiminnot eivät ehkä toimi oikein.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="554"/>
+        <location filename="../filter_mate.py" line="556"/>
         <source>Configuration created with default values</source>
         <translation>Asetukset luotu oletusarvoilla</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="557"/>
+        <location filename="../filter_mate.py" line="559"/>
         <source>Corrupted configuration reset. Default settings have been restored.</source>
         <translation>Vioittunut asetustiedosto nollattu. Oletusasetukset on palautettu.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="560"/>
+        <location filename="../filter_mate.py" line="562"/>
         <source>Obsolete configuration reset. Default settings have been restored.</source>
         <translation>Vanhentunut asetustiedosto nollattu. Oletusasetukset on palautettu.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="581"/>
+        <location filename="../filter_mate.py" line="583"/>
         <source>Configuration updated to latest version</source>
         <translation>Asetukset päivitetty uusimpaan versioon</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="578"/>
+        <location filename="../filter_mate.py" line="580"/>
         <source>Configuration updated: new settings available ({sections}). Access via Options menu.</source>
         <translation>Asetukset päivitetty: uudet asetukset saatavilla ({sections}). Pääsy Asetukset-valikon kautta.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="572"/>
+        <location filename="../filter_mate.py" line="574"/>
         <source>Geometry Simplification</source>
         <translation>Geometrian yksinkertaistaminen</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="573"/>
+        <location filename="../filter_mate.py" line="575"/>
         <source>Optimization Thresholds</source>
         <translation>Optimointirajat</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="718"/>
+        <location filename="../filter_mate.py" line="735"/>
         <source>Geometry validation setting</source>
         <translation>Geometrian tarkistusasetus</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="748"/>
+        <location filename="../filter_mate.py" line="765"/>
         <source>Invalid geometry filtering disabled successfully.</source>
         <translation>Virheellisten geometrioiden suodatus poistettu käytöstä onnistuneesti.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="755"/>
+        <location filename="../filter_mate.py" line="772"/>
         <source>Invalid geometry filtering not modified. Some features may be excluded from exports.</source>
         <translation>Virheellisten geometrioiden suodatusta ei muutettu. Jotkin kohteet voivat jäädä pois viennistä.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="479"/>
+        <location filename="../filter_mate.py" line="481"/>
         <source>An obsolete configuration ({}) has been detected.
 
 Do you want to reset to default settings?
@@ -1587,7 +1941,7 @@ Haluatko palauttaa oletusasetukset?
 • Ei: Säilytä nykyinen konfiguraatio (voi aiheuttaa ongelmia)</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="487"/>
+        <location filename="../filter_mate.py" line="489"/>
         <source>The configuration file is corrupted and cannot be read.
 
 Do you want to reset to default settings?
@@ -1602,12 +1956,12 @@ Haluatko palauttaa oletusasetukset?
 • Ei: Peruuta (lisäosa ei ehkä toimi oikein)</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="494"/>
+        <location filename="../filter_mate.py" line="496"/>
         <source>Configuration reset</source>
         <translation>Konfiguraation palautus</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="495"/>
+        <location filename="../filter_mate.py" line="497"/>
         <source>The configuration needs to be reset.
 
 Do you want to continue?</source>
@@ -1616,12 +1970,12 @@ Do you want to continue?</source>
 Haluatko jatkaa?</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="600"/>
+        <location filename="../filter_mate.py" line="602"/>
         <source>Error during configuration migration: {}</source>
         <translation>Virhe konfiguraation siirrossa: {}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="720"/>
+        <location filename="../filter_mate.py" line="737"/>
         <source>The QGIS setting 'Invalid features filtering' is currently set to '{mode}'.
 
 FilterMate recommends disabling this setting (value 'Off') for the following reasons:
@@ -1648,7 +2002,7 @@ Do you want to disable this setting now?
 • No: Keep current setting</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1515"/>
+        <location filename="../filter_mate.py" line="1563"/>
         <source>Are you sure you want to reset to the default configuration?
 
 This will:
@@ -1665,7 +2019,7 @@ Tämä:
 QGIS on käynnistettävä uudelleen muutosten käyttöönottamiseksi.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1592"/>
+        <location filename="../filter_mate.py" line="1641"/>
         <source>The configuration has been reset.
 
 Please restart QGIS to apply the changes.</source>
@@ -1674,17 +2028,17 @@ Please restart QGIS to apply the changes.</source>
 Käynnistä QGIS uudelleen ottaaksesi muutokset käyttöön.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="409"/>
+        <location filename="../filter_mate.py" line="411"/>
         <source>Initialization error: {0}</source>
         <translation>Alustusvirhe: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="659"/>
+        <location filename="../filter_mate.py" line="667"/>
         <source>{count} referenced layer(s) not loaded ({layers_list}). Using fallback display.</source>
         <translation>{count} viitattua tasoa ei ladattu ({layers_list}). Kaytetaan varanakymaa.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1583"/>
+        <location filename="../filter_mate.py" line="1632"/>
         <source>Unable to delete {filename}: {e}</source>
         <translation>Tiedostoa {filename} ei voi poistaa: {e}</translation>
     </message>
@@ -1694,189 +2048,209 @@ Käynnistä QGIS uudelleen ottaaksesi muutokset käyttöön.</translation>
         <translation type="obsolete">Virhe nollauksen aikana: {str(e)}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1635"/>
+        <location filename="../filter_mate.py" line="1684"/>
         <source>&lt;p style=&apos;font-size:13px;&apos;&gt;Thank you for using &lt;b&gt;FilterMate&lt;/b&gt;!&lt;br&gt;Join our Discord community to:&lt;/p&gt;&lt;ul style=&apos;margin-left:10px; font-size:12px;&apos;&gt;&lt;li&gt;Get help and support&lt;/li&gt;&lt;li&gt;Report bugs and issues&lt;/li&gt;&lt;li&gt;Suggest new features&lt;/li&gt;&lt;li&gt;Share tips with other users&lt;/li&gt;&lt;/ul&gt;</source>
         <translation>&lt;p style='font-size:13px;'&gt;Kiitos &lt;b&gt;FilterMaten&lt;/b&gt; kaytosta!&lt;br&gt;Liity Discord-yhteisoomme:&lt;/p&gt;&lt;ul style='margin-left:10px; font-size:12px;'&gt;&lt;li&gt;Saa apua ja tukea&lt;/li&gt;&lt;li&gt;Ilmoita virheista ja ongelmista&lt;/li&gt;&lt;li&gt;Ehdota uusia ominaisuuksia&lt;/li&gt;&lt;li&gt;Jaa vinkkeja muiden kayttajien kanssa&lt;/li&gt;&lt;/ul&gt;</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1651"/>
+        <location filename="../filter_mate.py" line="1700"/>
         <source>  Join us on Discord</source>
         <translation>  Liity Discordiin</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1671"/>
+        <location filename="../filter_mate.py" line="1720"/>
         <source>Don&apos;t show this again</source>
         <translation>Ala nayta tata uudelleen</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1727"/>
+        <location filename="../filter_mate.py" line="1776"/>
         <source>Close</source>
         <translation>Sulje</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1794"/>
+        <location filename="../filter_mate.py" line="1843"/>
         <source>Error loading plugin: {0}. Check QGIS Python console for details.</source>
         <translation>Virhe laajennuksen latauksessa: {0}. Tarkista QGIS Python -konsoli lisatietoja varten.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7066"/>
+        <location filename="../filter_mate_dockwidget.py" line="7357"/>
         <source>Current layer: {0}</source>
         <translation>Nykyinen taso: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7068"/>
+        <location filename="../filter_mate_dockwidget.py" line="7359"/>
         <source>No layer selected</source>
         <translation>Tasoa ei ole valittu</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7078"/>
+        <location filename="../filter_mate_dockwidget.py" line="7369"/>
         <source>Selected layers:
 {0}</source>
         <translation>Valitut tasot:
 {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7078"/>
+        <location filename="../filter_mate_dockwidget.py" line="7369"/>
         <source>No layers selected</source>
         <translation>Tasoja ei ole valittu</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7098"/>
+        <location filename="../filter_mate_dockwidget.py" line="7389"/>
         <source>No expression defined</source>
         <translation>Lauseketta ei ole maaritetty</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7110"/>
+        <location filename="../filter_mate_dockwidget.py" line="7401"/>
         <source>Display expression: {0}</source>
         <translation>Nayttolauseke: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7125"/>
+        <location filename="../filter_mate_dockwidget.py" line="7416"/>
         <source>Feature ID: {0}
 First attribute: {1}</source>
         <translation>Kohteen tunnus: {0}
 Ensimmainen attribuutti: {1}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1601"/>
+        <location filename="../filter_mate.py" line="1650"/>
         <source>The configuration could not be reset. Check that the plugin folder is writable, then try again. Details in filtermate.log.</source>
         <translation>Asetuksia ei voitu nollata. Tarkista, että liitännäisen kansioon voi kirjoittaa, ja yritä uudelleen. Lisätietoja tiedostossa filtermate.log.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1701"/>
+        <location filename="../filter_mate.py" line="1750"/>
         <source>What&apos;s new in FilterMate 5</source>
         <translation>Uutta FilterMate 5:ssä</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1707"/>
+        <location filename="../filter_mate.py" line="1756"/>
         <source>&lt;p style=&apos;font-size:13px;&apos;&gt;&lt;b&gt;FilterMate now works with raster and point cloud layers.&lt;/b&gt;&lt;/p&gt;&lt;ul style=&apos;margin-left:10px; font-size:12px;&apos;&gt;&lt;li&gt;&lt;b&gt;EXPLORING&lt;/b&gt; adapts to the current layer: value range and classes of a raster, classes, elevation and attributes of a LiDAR point cloud.&lt;/li&gt;&lt;li&gt;&lt;b&gt;FILTERING&lt;/b&gt; relates that selection to layers of any kind, with the usual predicates and buffer: parcels within an elevation range, LiDAR points under buildings, a DTM clipped to a municipality.&lt;/li&gt;&lt;li&gt;&lt;b&gt;EXPORTING&lt;/b&gt; writes filtered rasters (GeoTIFF, COG) and point clouds (LAZ, COPC).&lt;/li&gt;&lt;li&gt;Processing algorithms and models, qgis_process, Python and REST APIs.&lt;/li&gt;&lt;/ul&gt;</source>
         <translation>&lt;p style='font-size:13px;'&gt;&lt;b&gt;FilterMate toimii nyt rasteri- ja pistepilvitasojen kanssa.&lt;/b&gt;&lt;/p&gt;&lt;ul style='margin-left:10px; font-size:12px;'&gt;&lt;li&gt;&lt;b&gt;EXPLORING&lt;/b&gt; mukautuu nykyiseen tasoon: rasterin arvoväli ja luokat, LiDAR-pistepilven luokat, korkeus ja ominaisuudet.&lt;/li&gt;&lt;li&gt;&lt;b&gt;FILTERING&lt;/b&gt; liittää valinnan minkä tahansa tyyppisiin tasoihin tavallisilla predikaateilla ja puskurilla: kiinteistöt korkeusvälillä, LiDAR-pisteet rakennusten alla, kunnan rajaan leikattu korkeusmalli.&lt;/li&gt;&lt;li&gt;&lt;b&gt;EXPORTING&lt;/b&gt; kirjoittaa suodatetut rasterit (GeoTIFF, COG) ja pistepilvet (LAZ, COPC).&lt;/li&gt;&lt;li&gt;Processing-algoritmit ja -mallit, qgis_process, Python- ja REST-rajapinnat.&lt;/li&gt;&lt;/ul&gt;</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1723"/>
+        <location filename="../filter_mate.py" line="1772"/>
         <source>Open the user guide</source>
         <translation>Avaa käyttöopas</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/async_query.py" line="207"/>
+        <source>This expression cannot be evaluated safely for a service.</source>
+        <translation>Tätä lauseketta ei voi arvioida turvallisesti palvelulle.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/async_query.py" line="209"/>
+        <source>The service could not be read. Please retry.</source>
+        <translation>Palvelua ei voitu lukea. Yritä uudelleen.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/async_query.py" line="210"/>
+        <source>Read failed</source>
+        <translation>Lukeminen epäonnistui</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/async_query.py" line="270"/>
+        <source>Loading filtered extent…</source>
+        <translation>Ladataan suodatettua aluetta…</translation>
     </message>
 </context>
 <context>
     <name>FilterMateApp</name>
     <message>
-        <location filename="../filter_mate_app.py" line="309"/>
+        <location filename="../filter_mate_app.py" line="306"/>
         <source>PostgreSQL layers detected ({0}) but psycopg2 is not installed.</source>
         <translation>PostgreSQL-tasoja havaittu ({0}), mutta psycopg2 ei ole asennettu.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="401"/>
+        <location filename="../filter_mate_app.py" line="406"/>
         <source>Cleared {0} caches</source>
         <translation>{0} vailimuistia tyhjennetty</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="926"/>
+        <location filename="../filter_mate_app.py" line="912"/>
         <source>Failed to create dockwidget: {0}</source>
         <translation>Dockwidgetin luonti epaonnistui: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="936"/>
+        <location filename="../filter_mate_app.py" line="922"/>
         <source>Failed to display dockwidget: {0}</source>
         <translation>Dockwidgetin nayttaminen epaonnistui: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1456"/>
+        <location filename="../filter_mate_app.py" line="1493"/>
         <source>Error executing {0}: {1}</source>
         <translation>Virhe suoritettaessa {0}: {1}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1468"/>
+        <location filename="../filter_mate_app.py" line="1505"/>
         <source>Plugin running in degraded mode (hexagonal services unavailable). Performance may be reduced.</source>
         <translation>Laajennus toimii rajoitetussa tilassa (heksagonaalipalvelut eivat ole kaytettavissa). Suorituskyky voi olla alentunut.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1761"/>
+        <location filename="../filter_mate_app.py" line="1854"/>
         <source>FilterMate ERROR</source>
         <translation>FilterMate VIRHE</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1761"/>
+        <location filename="../filter_mate_app.py" line="1854"/>
         <source>Cannot execute {0}: widget initialization failed.</source>
         <translation>Kohdetta {0} ei voi suorittaa: widgetin alustus epaonnistui.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2544"/>
+        <location filename="../filter_mate_app.py" line="2635"/>
         <source>Cannot {0}: layer invalid or source not found.</source>
         <translation>Toimintoa {0} ei voi suorittaa: taso virheellinen tai lahdetta ei loydy.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2681"/>
+        <location filename="../filter_mate_app.py" line="2789"/>
         <source>All filters cleared - </source>
         <translation>Kaikki suodattimet poistettu - </translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2682"/>
+        <location filename="../filter_mate_app.py" line="2790"/>
         <source>{0}{1} features visible in main layer</source>
         <translation>{0}{1} kohdetta nakyvissa paatasolla</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2694"/>
+        <location filename="../filter_mate_app.py" line="2802"/>
         <source>Error: result handler missing</source>
         <translation>Virhe: tuloskasittelija puuttuu</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2707"/>
+        <location filename="../filter_mate_app.py" line="2819"/>
         <source>Error during filtering: {0}</source>
         <translation>Virhe suodatuksen aikana: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2831"/>
+        <location filename="../filter_mate_app.py" line="2943"/>
         <source>Recovered {0} orphan favorite(s): {1}</source>
         <translation>{0} orpoa suosikkia palautettu: {1}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2997"/>
+        <location filename="../filter_mate_app.py" line="3109"/>
         <source>Layer loading failed - click to retry</source>
         <translation>Tason lataus epaonnistui - napsauta yrittaaksesi uudelleen</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="3049"/>
+        <location filename="../filter_mate_app.py" line="3161"/>
         <source>{0} layer(s) loaded successfully</source>
         <translation>{0} tasoa ladattu onnistuneesti</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1983"/>
+        <location filename="../filter_mate_app.py" line="2092"/>
         <source>filter</source>
         <translation>filter</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1985"/>
+        <location filename="../filter_mate_app.py" line="2094"/>
         <source>unfilter</source>
         <translation>unfilter</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1988"/>
+        <location filename="../filter_mate_app.py" line="2097"/>
         <source>FilterMate – Edit Mode Detected</source>
         <translation>FilterMate – Edit Mode Detected</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1990"/>
+        <location filename="../filter_mate_app.py" line="2099"/>
         <source>The following layer(s) are currently in edit mode:
 {0}
 
@@ -1889,45 +2263,55 @@ QGIS cannot apply filters while a layer is being edited.
 What would you like to do?</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2000"/>
+        <location filename="../filter_mate_app.py" line="2109"/>
         <source>Save Changes &amp; {0}</source>
         <translation>Save Changes &amp; {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2007"/>
+        <location filename="../filter_mate_app.py" line="2116"/>
         <source>Discard Changes &amp; {0}</source>
         <translation>Discard Changes &amp; {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2014"/>
+        <location filename="../filter_mate_app.py" line="2123"/>
         <source>Cancel</source>
         <translation>Peruuta</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2038"/>
+        <location filename="../filter_mate_app.py" line="2147"/>
         <source>Could not save changes for layer &quot;{0}&quot;. Operation cancelled.</source>
         <translation>Could not save changes for layer &quot;{0}&quot;. Operation cancelled.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1298"/>
+        <location filename="../filter_mate_app.py" line="1323"/>
         <source>Pick a layer in the EXPLORING tab before running &apos;{0}&apos;.</source>
         <translation>Valitse taso EXPLORING-välilehdessä ennen kuin suoritat toiminnon '{0}'.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="853"/>
+        <location filename="../filter_mate_app.py" line="839"/>
         <source>{0} layer(s) stay filtered: {1}. Turn the option back on to unfilter them.</source>
         <translation>{0} tasoa pysyy suodatettuna: {1}. Ota asetus uudelleen käyttöön poistaaksesi suodatuksen.</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_app.py" line="2621"/>
+        <source>A server filter is being prepared. Wait for it to finish before starting another operation.</source>
+        <translation>Palvelinsuodatinta valmistellaan. Odota sen valmistumista ennen uuden toiminnon aloittamista.</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_app.py" line="1770"/>
+        <source>A FilterMate API operation is running. Wait for it to finish.</source>
+        <translation>FilterMaten API-toiminto on käynnissä. Odota sen valmistumista.</translation>
     </message>
 </context>
 <context>
     <name>FilterMateDockWidget</name>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="616"/>
+        <location filename="../filter_mate_dockwidget.py" line="621"/>
         <source>Initialization error: {}</source>
         <translation>Alustusvirhe: {}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1008"/>
+        <location filename="../filter_mate_dockwidget.py" line="1028"/>
         <source>UI configuration incomplete - check logs</source>
         <translation>Kayttoliittymaasetukset puutteelliset - tarkista lokit</translation>
     </message>
@@ -1937,290 +2321,404 @@ What would you like to do?</translation>
         <translation type="obsolete">Kayttoliittyman mittavirhe: {}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1468"/>
+        <location filename="../filter_mate_dockwidget.py" line="1488"/>
         <source>Favorites manager not available</source>
         <translation>Suosikkien hallinta ei ole kaytettavissa</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1489"/>
+        <location filename="../filter_mate_dockwidget.py" line="1509"/>
         <source>★ {0} Favorites saved
 Click to apply or manage</source>
         <translation>★ {0} suosikkia tallennettu
 Napsauta kayttaaksesi tai hallitaksesi</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1492"/>
+        <location filename="../filter_mate_dockwidget.py" line="1512"/>
         <source>★ No favorites saved
 Click to add current filter</source>
         <translation>★ Ei tallennettuja suosikkeja
 Napsauta lisaataksesi nykyisen suodattimen</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1512"/>
+        <location filename="../filter_mate_dockwidget.py" line="1532"/>
         <source>Forced {0} backend for {1} layer(s)</source>
         <translation>{0} taustaohjelmisto pakotettu {1} tasolle</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1598"/>
+        <location filename="../filter_mate_dockwidget.py" line="1638"/>
         <source>Backend controller not available</source>
         <translation>Taustaohjelmiston ohjain ei ole kaytettavissa</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1536"/>
+        <location filename="../filter_mate_dockwidget.py" line="1556"/>
         <source>PostgreSQL auto-cleanup enabled</source>
         <translation>PostgreSQL automaattinen siivous kaytoessa</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1537"/>
+        <location filename="../filter_mate_dockwidget.py" line="1557"/>
         <source>PostgreSQL auto-cleanup disabled</source>
         <translation>PostgreSQL automaattinen siivous poissa kaytosta</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1543"/>
+        <location filename="../filter_mate_dockwidget.py" line="1563"/>
         <source>PostgreSQL session views cleaned up</source>
         <translation>PostgreSQL-istuntonakymat siivottu</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1543"/>
+        <location filename="../filter_mate_dockwidget.py" line="1563"/>
         <source>No views to clean or cleanup failed</source>
         <translation>Ei nakymia siivottavaksi tai siivous epaonnistui</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1554"/>
+        <location filename="../filter_mate_dockwidget.py" line="1574"/>
         <source>No PostgreSQL connection available</source>
         <translation>PostgreSQL-yhteytta ei ole kaytettavissa</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1560"/>
+        <location filename="../filter_mate_dockwidget.py" line="1600"/>
         <source>Schema has {0} view(s) from other sessions.
 Drop anyway?</source>
         <translation>Skeemassa on {0} nakymaa muista istunnoista.
 Poista silti?</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1561"/>
+        <location filename="../filter_mate_dockwidget.py" line="1601"/>
         <source>Other Sessions Active</source>
         <translation>Muita istuntoja aktiivisena</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1563"/>
+        <location filename="../filter_mate_dockwidget.py" line="1603"/>
         <source>Schema cleanup cancelled</source>
         <translation>Skeeman siivous peruutettu</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1568"/>
+        <location filename="../filter_mate_dockwidget.py" line="1608"/>
         <source>Schema &apos;{0}&apos; dropped successfully</source>
         <translation>Skeema '{0}' poistettu onnistuneesti</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1570"/>
+        <location filename="../filter_mate_dockwidget.py" line="1610"/>
         <source>Schema cleanup failed</source>
         <translation>Skeeman siivous epaonnistui</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1596"/>
+        <location filename="../filter_mate_dockwidget.py" line="1636"/>
         <source>PostgreSQL Session Info</source>
         <translation>PostgreSQL istuntotiedot</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="2719"/>
+        <location filename="../filter_mate_dockwidget.py" line="2753"/>
         <source>Theme adapted: {0}</source>
         <translation>Teema mukautettu: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="2719"/>
+        <location filename="../filter_mate_dockwidget.py" line="2753"/>
         <source>Dark mode</source>
         <translation>Tumma tila</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="2719"/>
+        <location filename="../filter_mate_dockwidget.py" line="2753"/>
         <source>Light mode</source>
         <translation>Vaalea tila</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="4057"/>
+        <location filename="../filter_mate_dockwidget.py" line="4102"/>
         <source>Selected features have no geometry.</source>
         <translation>Valituilla kohteilla ei ole geometriaa.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="4076"/>
+        <location filename="../filter_mate_dockwidget.py" line="4121"/>
         <source>No feature selected. Select a feature from the dropdown list.</source>
         <translation>Kohdetta ei ole valittu. Valitse kohde pudotusvalikosta.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="5132"/>
+        <location filename="../filter_mate_dockwidget.py" line="5285"/>
         <source>The selected layer is invalid or its source cannot be found.</source>
         <translation>Valittu taso on virheellinen tai sen lahdetta ei loydy.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="5892"/>
+        <location filename="../filter_mate_dockwidget.py" line="6080"/>
         <source>Negative buffer (erosion): shrinks polygons inward</source>
         <translation>Negatiivinen puskuri (eroosio): kutistaa monikulmioita sisaanpain</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="5895"/>
+        <location filename="../filter_mate_dockwidget.py" line="6083"/>
         <source>Buffer value in meters (positive=expand, negative=shrink polygons)</source>
         <translation>Puskuriarvo metrissa (positiivinen=laajenna, negatiivinen=kutista monikulmioita)</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6396"/>
+        <location filename="../filter_mate_dockwidget.py" line="6585"/>
         <source>Plugin activated with {0} vector layer(s)</source>
         <translation>Laajennus aktivoitu {0} vektoritasolla</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6485"/>
+        <location filename="../filter_mate_dockwidget.py" line="6684"/>
         <source>Could not reload plugin automatically.</source>
         <translation>Laajennusta ei voitu ladata uudelleen automaattisesti.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6490"/>
+        <location filename="../filter_mate_dockwidget.py" line="6689"/>
         <source>Error reloading plugin: {0}</source>
         <translation>Virhe laajennuksen uudelleenlatauksessa: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6562"/>
+        <location filename="../filter_mate_dockwidget.py" line="6764"/>
         <source>Layer properties reset to defaults</source>
         <translation>Tason ominaisuudet palautettu oletusarvoihin</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6563"/>
+        <location filename="../filter_mate_dockwidget.py" line="6765"/>
         <source>Error resetting layer properties: {}</source>
         <translation>Virhe tason ominaisuuksien nollauksessa: {}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="875"/>
+        <location filename="../filter_mate_dockwidget.py" line="895"/>
         <source>Filter</source>
         <translation>Suodata</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="876"/>
+        <location filename="../filter_mate_dockwidget.py" line="896"/>
         <source>Undo the last filter</source>
         <translation>Kumoa viimeisin suodatus</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="877"/>
+        <location filename="../filter_mate_dockwidget.py" line="897"/>
         <source>Redo the last filter</source>
         <translation>Tee viimeisin suodatus uudelleen</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="878"/>
+        <location filename="../filter_mate_dockwidget.py" line="898"/>
         <source>Remove the filters</source>
         <translation>Poista suodattimet</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="879"/>
+        <location filename="../filter_mate_dockwidget.py" line="899"/>
         <source>Export the layers</source>
         <translation>Vie tasot</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="880"/>
+        <location filename="../filter_mate_dockwidget.py" line="900"/>
         <source>About FilterMate</source>
         <translation>Tietoja FilterMatesta</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="881"/>
+        <location filename="../filter_mate_dockwidget.py" line="901"/>
         <source>QFieldCloud</source>
         <translation>QFieldCloud</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="882"/>
+        <location filename="../filter_mate_dockwidget.py" line="902"/>
         <source>Identify the selected features</source>
         <translation>Tunnista valitut kohteet</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="883"/>
+        <location filename="../filter_mate_dockwidget.py" line="903"/>
         <source>Zoom to the selected features</source>
         <translation>Zoomaa valittuihin kohteisiin</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="884"/>
+        <location filename="../filter_mate_dockwidget.py" line="904"/>
         <source>Select the features on the map</source>
         <translation>Valitse kohteet kartalta</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="885"/>
+        <location filename="../filter_mate_dockwidget.py" line="905"/>
         <source>Follow the features on the map</source>
         <translation>Seuraa kohteita kartalla</translation>
     </message>
     <message>
         <location filename="../filter_mate_dockwidget.py" line="886"/>
         <source>Link the three selection modes</source>
-        <translation>Yhdistä kolme valintatilaa</translation>
+        <translation type="obsolete">Yhdistä kolme valintatilaa</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="887"/>
+        <location filename="../filter_mate_dockwidget.py" line="907"/>
         <source>Reset the layer properties</source>
         <translation>Nollaa tason ominaisuudet</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="888"/>
+        <location filename="../filter_mate_dockwidget.py" line="908"/>
         <source>Follow the current layer</source>
         <translation>Seuraa nykyistä tasoa</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="889"/>
+        <location filename="../filter_mate_dockwidget.py" line="909"/>
         <source>Layers to filter</source>
         <translation>Suodatettavat tasot</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="890"/>
+        <location filename="../filter_mate_dockwidget.py" line="910"/>
         <source>Combine with the existing filter</source>
         <translation>Yhdistä olemassa olevaan suodattimeen</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="891"/>
+        <location filename="../filter_mate_dockwidget.py" line="911"/>
         <source>Geometric predicates</source>
         <translation>Geometriset predikaatit</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="892"/>
+        <location filename="../filter_mate_dockwidget.py" line="912"/>
         <source>Buffer distance</source>
         <translation>Puskurin etäisyys</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="893"/>
+        <location filename="../filter_mate_dockwidget.py" line="913"/>
         <source>Buffer type</source>
         <translation>Puskurin tyyppi</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="894"/>
+        <location filename="../filter_mate_dockwidget.py" line="914"/>
         <source>Layers to export</source>
         <translation>Vietävät tasot</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="895"/>
+        <location filename="../filter_mate_dockwidget.py" line="915"/>
         <source>Projection of the export</source>
         <translation>Viennin projektio</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="896"/>
+        <location filename="../filter_mate_dockwidget.py" line="916"/>
         <source>Export the styles</source>
         <translation>Vie tyylit</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="897"/>
+        <location filename="../filter_mate_dockwidget.py" line="917"/>
         <source>Export format</source>
         <translation>Vientimuoto</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="898"/>
+        <location filename="../filter_mate_dockwidget.py" line="918"/>
         <source>Output folder</source>
         <translation>Tulostekansio</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="899"/>
+        <location filename="../filter_mate_dockwidget.py" line="919"/>
         <source>Zip the export</source>
         <translation>Pakkaa vienti zip-tiedostoon</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="1013"/>
+        <location filename="../filter_mate_dockwidget.py" line="1033"/>
         <source>The panel layout could not be applied; default sizes are used. Details in filtermate.log.</source>
         <translation>Paneelin asettelua ei voitu ottaa käyttöön; käytetään oletuskokoja. Lisätietoja tiedostossa filtermate.log.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6649"/>
+        <location filename="../filter_mate_dockwidget.py" line="6856"/>
         <source>Vector</source>
         <translation>Vektori</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="906"/>
+        <source>Link the single and multiple selections</source>
+        <translation>Linkitä yksittäinen ja usea valinta</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="1586"/>
+        <source>Schema &apos;{0}&apos; and the following {1} temporary object(s) will be dropped:</source>
+        <translation>Skeema '{0}' ja seuraavat {1} väliaikaista objektia poistetaan:</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="1589"/>
+        <source>... and {0} more</source>
+        <translation>... ja {0} lisää</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="1591"/>
+        <source>Schema &apos;{0}&apos; is empty and will be dropped.</source>
+        <translation>Skeema '{0}' on tyhjä ja se poistetaan.</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="1592"/>
+        <source>Drop FilterMate schema</source>
+        <translation>Poista FilterMate-skeema</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="4224"/>
+        <source>Read failed</source>
+        <translation>Lukeminen epäonnistui</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="4224"/>
+        <source>The service could not be read. Please retry.</source>
+        <translation>Palvelua ei voitu lukea. Yritä uudelleen.</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="4566"/>
+        <source>Loading filtered extent…</source>
+        <translation>Ladataan suodatettua aluetta…</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="5150"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="539"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="3408"/>
+        <source>Loading selected values…</source>
+        <translation>Ladataan valittuja arvoja…</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="5141"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="502"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="603"/>
+        <source>This expression cannot be evaluated safely for a service.</source>
+        <translation>Tätä lauseketta ei voi arvioida turvallisesti palvelulle.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_controller.py" line="2472"/>
+        <source>Error evaluating expression: {0}</source>
+        <translation>Virhe lauseketta arvioitaessa: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_controller.py" line="2471"/>
+        <source>Expression Evaluation</source>
+        <translation>Lausekkeen arviointi</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_controller.py" line="411"/>
+        <source>Loading values…</source>
+        <translation>Ladataan arvoja…</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_controller.py" line="646"/>
+        <source>Loading zoom extent…</source>
+        <translation>Ladataan zoomausaluetta…</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_controller.py" line="633"/>
+        <source>No feature with geometry matches the selection.</source>
+        <translation>Mikään geometrialtaan varustettu kohde ei vastaa valintaa.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_controller.py" line="408"/>
+        <source>Only a limited set of values is shown. Refine the search to find other values.</source>
+        <translation>Vain rajattu joukko arvoja näytetään. Tarkenna hakua löytääksesi muut arvot.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_controller.py" line="475"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="483"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="502"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="566"/>
+        <source>Selection</source>
+        <translation>Valinta</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_controller.py" line="475"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="566"/>
+        <source>The service selection exceeds the key limit. Refine the selection.</source>
+        <translation>Palvelun valinta ylittää avainrajan. Tarkenna valintaa.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_controller.py" line="483"/>
+        <source>This service has no stable key for the selection.</source>
+        <translation>Tällä palvelulla ei ole valintaan sopivaa pysyvää avainta.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_controller.py" line="408"/>
+        <source>Values</source>
+        <translation>Arvot</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/exploring_controller.py" line="603"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="633"/>
+        <source>Zoom</source>
+        <translation>Zoomaus</translation>
     </message>
 </context>
 <context>
@@ -2397,14 +2895,37 @@ Poista silti?</translation>
     </message>
 </context>
 <context>
+    <name>FilterMateOperations</name>
+    <message>
+        <location filename="../adapters/public_api/operations.py" line="556"/>
+        <source>FilterMate was unloaded</source>
+        <translation>FilterMate on poistettu käytöstä</translation>
+    </message>
+    <message>
+        <location filename="../adapters/public_api/operations.py" line="118"/>
+        <source>rendered or unsupported raster: cannot be a filter target</source>
+        <translation>esitetty tai tuettu raster: ei voi olla suodatuksen kohde</translation>
+    </message>
+    <message>
+        <location filename="../adapters/public_api/operations.py" line="505"/>
+        <source>rendered raster sources require a local colour capture; numeric pixel selections are unavailable</source>
+        <translation>esitetyt rasterilähteet vaativat paikallisen värikuvan; numeeriset pikselivalinnat eivät ole käytettävissä</translation>
+    </message>
+    <message>
+        <location filename="../adapters/public_api/operations.py" line="577"/>
+        <source>the source layer itself was not changed</source>
+        <translation>lähdetasoa itseään ei muutettu</translation>
+    </message>
+</context>
+<context>
     <name>FilterResultHandler</name>
     <message>
-        <location filename="../adapters/filter_result_handler.py" line="359"/>
+        <location filename="../adapters/filter_result_handler.py" line="347"/>
         <source>{count} features visible in main layer</source>
         <translation>{count} kohdetta nakyvissa paatasolla</translation>
     </message>
     <message>
-        <location filename="../adapters/filter_result_handler.py" line="352"/>
+        <location filename="../adapters/filter_result_handler.py" line="340"/>
         <source>All filters cleared - {count} features visible in main layer</source>
         <translation>Kaikki suodattimet poistettu - {count} kohdetta nakyvissa paatasolla</translation>
     </message>
@@ -2412,54 +2933,82 @@ Poista silti?</translation>
 <context>
     <name>FinishedHandler</name>
     <message>
-        <location filename="../core/tasks/finished_handler.py" line="353"/>
+        <location filename="../core/tasks/finished_handler.py" line="387"/>
         <source>Task failed</source>
         <translation>Tehtava epaonnistui</translation>
     </message>
     <message>
-        <location filename="../core/tasks/finished_handler.py" line="354"/>
+        <location filename="../core/tasks/finished_handler.py" line="388"/>
         <source>Filter failed for: {0}</source>
         <translation>Suodatus epaonnistui kohteelle: {0}</translation>
     </message>
     <message>
-        <location filename="../core/tasks/finished_handler.py" line="358"/>
+        <location filename="../core/tasks/finished_handler.py" line="392"/>
         <source> (+{0} more)</source>
         <translation> (+{0} lisaa)</translation>
     </message>
     <message>
-        <location filename="../core/tasks/finished_handler.py" line="405"/>
+        <location filename="../core/tasks/finished_handler.py" line="439"/>
         <source>Layer(s) filtered</source>
         <translation>Taso(t) suodatettu</translation>
     </message>
     <message>
-        <location filename="../core/tasks/finished_handler.py" line="409"/>
+        <location filename="../core/tasks/finished_handler.py" line="443"/>
         <source>Layer(s) filtered to precedent state</source>
         <translation>Taso(t) suodatettu edelliseen tilaan</translation>
     </message>
     <message>
-        <location filename="../core/tasks/finished_handler.py" line="413"/>
+        <location filename="../core/tasks/finished_handler.py" line="447"/>
         <source>Layer(s) unfiltered</source>
         <translation>Taso(t) suodattamaton</translation>
     </message>
     <message>
-        <location filename="../core/tasks/finished_handler.py" line="417"/>
+        <location filename="../core/tasks/finished_handler.py" line="451"/>
         <source>Filter task : {0}</source>
         <translation>Suodatustehtava: {0}</translation>
     </message>
     <message>
-        <location filename="../core/tasks/finished_handler.py" line="438"/>
+        <location filename="../core/tasks/finished_handler.py" line="472"/>
         <source>Export task : {0}</source>
         <translation>Vientitehtava: {0}</translation>
     </message>
     <message>
-        <location filename="../core/tasks/finished_handler.py" line="463"/>
+        <location filename="../core/tasks/finished_handler.py" line="497"/>
         <source>Exception: {0}</source>
         <translation>Poikkeus: {0}</translation>
     </message>
     <message>
-        <location filename="../core/tasks/finished_handler.py" line="489"/>
+        <location filename="../core/tasks/finished_handler.py" line="523"/>
         <source>Filter not applied, previous filter kept: {0}</source>
         <translation>Suodatinta ei otettu käyttöön, edellinen suodatin säilytetty: {0}</translation>
+    </message>
+    <message>
+        <location filename="../core/tasks/finished_handler.py" line="569"/>
+        <source>Layer(s) removed during the filter, left out: {0}</source>
+        <translation>Taso(t) poistettiin suodatuksen aikana, jätetty pois: {0}</translation>
+    </message>
+</context>
+<context>
+    <name>HeightAboveGround</name>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/hag_task.py" line="93"/>
+        <source>Draw a useful selection zone before computing height above ground remotely</source>
+        <translation>Piirrä hyödyllinen valintavyöhyke ennen maanpinnan yläpuolisen korkeuden laskemista etänä</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/hag_task.py" line="117"/>
+        <source>The DTM and point cloud have no common useful extent</source>
+        <translation>DTM:llä ja pistepilvellä ei ole yhteistä hyödyllistä aluetta</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/hag_task.py" line="124"/>
+        <source>The useful selection has no polygon area</source>
+        <translation>Hyödyllisellä valinnalla ei ole monikulmion pinta-alaa</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/hag_task.py" line="169"/>
+        <source>Height above ground covers the useful area only; Unfilter restores the original cloud</source>
+        <translation>Maanpinnan yläpuolinen korkeus kattaa vain hyödyllisen alueen; Poista suodatus palauttaa alkuperäisen pilven</translation>
     </message>
 </context>
 <context>
@@ -2496,15 +3045,23 @@ Poista silti?</translation>
 <context>
     <name>LayerLifecycleService</name>
     <message>
-        <location filename="../core/services/layer_lifecycle_service.py" line="264"/>
+        <location filename="../core/services/layer_lifecycle_service.py" line="262"/>
         <source>PostgreSQL layers detected ({0}) but psycopg2 is not installed. The plugin cannot use these layers. Install psycopg2 to enable PostgreSQL support.</source>
         <translation>PostgreSQL-tasoja havaittu ({0}), mutta psycopg2 ei ole asennettu. Laajennus ei voi kayttaa naita tasoja. Asenna psycopg2 ottaaksesi PostgreSQL-tuen kayttoon.</translation>
     </message>
 </context>
 <context>
+    <name>LayerSnapshot</name>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/snapshots.py" line="619"/>
+        <source>The saved source could not be opened</source>
+        <translation>Tallennettua lähdettä ei voitu avata</translation>
+    </message>
+</context>
+<context>
     <name>LayersManagementEngineTask</name>
     <message>
-        <location filename="../core/tasks/layer_management_task.py" line="1049"/>
+        <location filename="../core/tasks/layer_management_task.py" line="1074"/>
         <source>PostgreSQL layer &apos;{0}&apos;: Corrupted data detected.
 
 This layer uses &apos;virtual_id&apos; which does not exist in PostgreSQL.
@@ -2521,14 +3078,52 @@ Ratkaisu: Poista tama taso FilterMate-projektista ja lisaa se uudelleen.
 Varmista, etta PostgreSQL-taululla on PRIMARY KEY maaritettyna.</translation>
     </message>
     <message>
-        <location filename="../core/tasks/layer_management_task.py" line="1075"/>
+        <location filename="../core/tasks/layer_management_task.py" line="1101"/>
         <source>Layer &apos;{0}&apos; has no PRIMARY KEY. Limited features: materialized views disabled. Recommendation: add a PRIMARY KEY for optimal performance.</source>
         <translation>Tasolla '{0}' ei ole PRIMARY KEY -avainta. Rajoitettu toiminnallisuus: materialisoidut nakymat poistettu kaytosta. Suositus: lisaa PRIMARY KEY optimaalisen suorituskyvyn varmistamiseksi.</translation>
     </message>
     <message>
-        <location filename="../core/tasks/layer_management_task.py" line="2098"/>
+        <location filename="../core/tasks/layer_management_task.py" line="2203"/>
         <source>Exception: {0}</source>
         <translation>Poikkeus: {0}</translation>
+    </message>
+</context>
+<context>
+    <name>OGRExpressionBuilder</name>
+    <message>
+        <location filename="../adapters/backends/ogr/expression_builder.py" line="499"/>
+        <source>{0}: this provider cannot guarantee a complete server filter. Use a bounded local copy before filtering.</source>
+        <translation>{0}: tämä tiedontuottaja ei voi taata täydellistä palvelinsuodatusta. Käytä rajattua paikallista kopiota ennen suodatusta.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/ogr/expression_builder.py" line="699"/>
+        <source>{0}: the key values of the selected features could not be read from the web service.</source>
+        <translation>{0}: valittujen kohteiden avainarvoja ei voitu lukea verkkopalvelusta.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/ogr/expression_builder.py" line="800"/>
+        <source>keeps its previous filter</source>
+        <translation>säilyttää aiemman suodattimensa</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/ogr/expression_builder.py" line="802"/>
+        <source>is left unfiltered</source>
+        <translation>jää suodattamatta</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/ogr/expression_builder.py" line="807"/>
+        <source>{0}: this web service has no unique key field (declared key, id, gml_id, cleabs, objectid...), so the selected features cannot be listed for the server. The layer {1}. An attribute filter, or a local copy of the layer, works.</source>
+        <translation>{0}: tällä verkkopalvelulla ei ole yksilöivää avainkenttää (määritelty avain, id, gml_id, cleabs, objectid...), joten valittuja kohteita ei voi luetella palvelimelle. Taso {1}. Attribuuttisuodatin tai tason paikallinen kopio toimii.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/ogr/expression_builder.py" line="813"/>
+        <source>{0}: this layer has no unique key field and its feature ids cannot be listed in its filter (a virtual layer needs a unique id column, its uid). The layer {1}.</source>
+        <translation>{0}: tällä tasolla ei ole yksilöivää avainkenttää, eikä sen kohdetunnisteita voi luetella sen suodattimessa (virtuaalitaso tarvitsee yksilöivän tunnistesarakkeen, uid). Taso {1}.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/ogr/expression_builder.py" line="822"/>
+        <source>{0}: {1} features to list, more than the {2} sent to a web service. The layer {3}. Narrow the selection, use an attribute filter, or work on a local copy of the layer.</source>
+        <translation>{0}: {1} lueteltavaa kohdetta, enemmän kuin verkkopalveluun voidaan lähettää ({2}). Taso {3}. Rajaa valintaa, käytä attribuuttisuodatinta tai työskentele tason paikallisella kopiolla.</translation>
     </message>
 </context>
 <context>
@@ -2667,67 +3262,67 @@ Varmista, etta PostgreSQL-taululla on PRIMARY KEY maaritettyna.</translation>
 <context>
     <name>PointCloudConditionRow</name>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="500"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="797"/>
         <source>Link with the previous condition</source>
         <translation>Linkitys edelliseen ehtoon</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="502"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="799"/>
         <source>AND</source>
         <translation>JA</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="503"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="800"/>
         <source>OR</source>
         <translation>TAI</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="504"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="801"/>
         <source>Attribute</source>
         <translation>Ominaisuus</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="507"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="804"/>
         <source>Comparison</source>
         <translation>Vertailu</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="510"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="807"/>
         <source>between</source>
         <translation>välillä</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="514"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="811"/>
         <source>Remove this condition</source>
         <translation>Poista tämä ehto</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="521"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="818"/>
         <source>Compare with a value or another attribute</source>
         <translation>Vertaa arvoon tai toiseen ominaisuuteen</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="524"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="821"/>
         <source>value</source>
         <translation>arvo</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="525"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="822"/>
         <source>Value</source>
         <translation>Arvo</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="528"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="825"/>
         <source>Highest value kept</source>
         <translation>Suurin säilytettävä arvo</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="608"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="905"/>
         <source>Observed values: {0} to {1}</source>
         <translation>Havaitut arvot: {0}–{1}</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="608"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="905"/>
         <source>No statistics for this attribute</source>
         <translation>Ei tilastoja tälle ominaisuudelle</translation>
     </message>
@@ -2735,42 +3330,42 @@ Varmista, etta PostgreSQL-taululla on PRIMARY KEY maaritettyna.</translation>
 <context>
     <name>PointCloudExploringPanel</name>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="734"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1049"/>
         <source>Apply to the other tiles of the dataset</source>
         <translation>Käytä aineiston muihin ruutuihin</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="748"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1058"/>
         <source>CLASSES</source>
         <translation>LUOKAT</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="753"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1063"/>
         <source>Ground</source>
         <translation>Maa</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="754"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1064"/>
         <source>Vegetation</source>
         <translation>Kasvillisuus</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="755"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1065"/>
         <source>Buildings</source>
         <translation>Rakennukset</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="756"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1066"/>
         <source>Above ground</source>
         <translation>Maanpinnan yläpuolella</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="757"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1067"/>
         <source>Water</source>
         <translation>Vesi</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="758"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1068"/>
         <source>Without noise</source>
         <translation>Ilman kohinaa</translation>
     </message>
@@ -2790,7 +3385,7 @@ Varmista, etta PostgreSQL-taululla on PRIMARY KEY maaritettyna.</translation>
         <translation type="obsolete">Ei mitään</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="776"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1097"/>
         <source>Point classes</source>
         <translation>Pisteluokat</translation>
     </message>
@@ -2815,7 +3410,7 @@ Varmista, etta PostgreSQL-taululla on PRIMARY KEY maaritettyna.</translation>
         <translation type="obsolete">Suurin säilytettävä korkeus</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="873"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1344"/>
         <source>Intensity</source>
         <translation>Intensiteetti</translation>
     </message>
@@ -2842,30 +3437,30 @@ Varmista, etta PostgreSQL-taululla on PRIMARY KEY maaritettyna.</translation>
     <message>
         <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="832"/>
         <source>Height above DTM ≥</source>
-        <translation>Korkeus DTM:n yläpuolella ≥</translation>
+        <translation type="obsolete">Korkeus DTM:n yläpuolella ≥</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="852"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1286"/>
         <source>Digital terrain model the height is measured from</source>
         <translation>Maastomalli, josta korkeus mitataan</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="862"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1296"/>
         <source>Keep the points at least this high above the terrain model</source>
         <translation>Säilytä pisteet, jotka ovat vähintään näin korkealla maastomallin yläpuolella</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="896"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1371"/>
         <source>EXPRESSION</source>
         <translation>LAUSEKE</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="900"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1375"/>
         <source>Point cloud expression</source>
         <translation>Pistepilven lauseke</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="901"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1376"/>
         <source>Check the group to edit the expression by hand</source>
         <translation>Valitse ryhmä muokataksesi lauseketta käsin</translation>
     </message>
@@ -2875,24 +3470,24 @@ Varmista, etta PostgreSQL-taululla on PRIMARY KEY maaritettyna.</translation>
         <translation type="obsolete">Tälle tasolle ei ole korkeustilastoja</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="959"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1657"/>
         <source>Height above the terrain is unavailable</source>
         <translation>Korkeus maanpinnan yläpuolella ei ole saatavilla</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="974"/>
         <source>Kept points: {0}</source>
-        <translation>Säilytetyt pisteet: {0}</translation>
+        <translation type="obsolete">Säilytetyt pisteet: {0}</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="991"/>
         <source>Current filter: {0}</source>
-        <translation>Nykyinen suodatin: {0}</translation>
+        <translation type="obsolete">Nykyinen suodatin: {0}</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="991"/>
         <source>none</source>
-        <translation>ei mitään</translation>
+        <translation type="obsolete">ei mitään</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="874"/>
@@ -2915,169 +3510,279 @@ Varmista, etta PostgreSQL-taululla on PRIMARY KEY maaritettyna.</translation>
         <translation type="obsolete">Yksittäinen</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="786"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1172"/>
         <source>ATTRIBUTES</source>
         <translation>OMINAISUUDET</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="804"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1190"/>
         <source>+ Condition</source>
         <translation>+ Ehto</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="806"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1192"/>
         <source>Add a condition on an attribute of the layer</source>
         <translation>Lisää ehto tason ominaisuudelle</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="809"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1231"/>
         <source>Returns</source>
         <translation>Paluut</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="811"/>
         <source>Keep the first, last or single returns of the laser pulses</source>
-        <translation>Säilytä laserpulssien ensimmäiset, viimeiset tai yksittäiset paluut</translation>
+        <translation type="obsolete">Säilytä laserpulssien ensimmäiset, viimeiset tai yksittäiset paluut</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="814"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1238"/>
         <source>First return (ReturnNumber = 1)</source>
         <translation>Ensimmäinen paluu (ReturnNumber = 1)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="815"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1239"/>
         <source>Last return (ReturnNumber = NumberOfReturns)</source>
         <translation>Viimeinen paluu (ReturnNumber = NumberOfReturns)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="816"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1240"/>
         <source>Single return (NumberOfReturns = 1)</source>
         <translation>Yksittäinen paluu (NumberOfReturns = 1)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="874"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1345"/>
         <source>Return number</source>
         <translation>Paluun numero</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="875"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1346"/>
         <source>Number of returns</source>
         <translation>Paluiden määrä</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="876"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1347"/>
         <source>Classification</source>
         <translation>Luokitus</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="877"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1348"/>
         <source>Scan angle</source>
         <translation>Keilauskulma</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="878"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1349"/>
         <source>User data</source>
         <translation>Käyttäjätiedot</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="879"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1350"/>
         <source>Point source ID</source>
         <translation>Pistelähteen tunnus</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="880"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1351"/>
         <source>GPS time</source>
         <translation>GPS-aika</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="881"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1352"/>
         <source>Red</source>
         <translation>Punainen</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="882"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1353"/>
         <source>Green</source>
         <translation>Vihreä</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="883"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1354"/>
         <source>Blue</source>
         <translation>Sininen</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="884"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1355"/>
         <source>Infrared</source>
         <translation>Infrapuna</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="885"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1356"/>
         <source>Scan direction</source>
         <translation>Keilaussuunta</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="886"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1357"/>
         <source>Edge of flight line</source>
         <translation>Lentolinjan reuna</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="887"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1358"/>
         <source>Synthetic</source>
         <translation>Synteettinen</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="888"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1359"/>
         <source>Key point</source>
         <translation>Avainpiste</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="889"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1360"/>
         <source>Withheld</source>
         <translation>Pidätetty</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="890"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1361"/>
         <source>Overlap</source>
         <translation>Päällekkäisyys</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="891"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1362"/>
         <source>Scanner channel</source>
         <translation>Skannerin kanava</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="892"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1363"/>
         <source>Classification flags</source>
         <translation>Luokitusliput</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="893"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1364"/>
         <source>Height above ground</source>
         <translation>Korkeus maanpinnasta</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="762"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1077"/>
         <source>Quick class selection</source>
         <translation>Nopea luokkavalinta</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="765"/>
         <source>Quick selection…</source>
-        <translation>Pikavalinta…</translation>
+        <translation type="obsolete">Pikavalinta…</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="768"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1087"/>
         <source>All classes</source>
         <translation>Kaikki luokat</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="769"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1087"/>
         <source>No class</source>
         <translation>Ei luokkaa</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="770"/>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1087"/>
         <source>Invert the selection</source>
         <translation>Käänteinen valinta</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1077"/>
+        <source>Selection ▾</source>
+        <translation>Valinta ▾</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1111"/>
+        <source>Classes of the standard that hold no point of this layer</source>
+        <translation>Standardin luokat, joihin ei kuulu yhtään tämän tason pistettä</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1118"/>
+        <source>Classes absent from the layer</source>
+        <translation>Tasosta puuttuvat luokat</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1142"/>
+        <source>Similar objects: area ×</source>
+        <translation>Samankaltaiset objektit: pinta-ala ×</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1145"/>
+        <source>Smallest similar object, as a share of the smallest clicked one</source>
+        <translation>Pienin samankaltainen objekti osuutena pienimmästä napsautetusta</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1145"/>
+        <source>Largest similar object, as a multiple of the largest clicked one</source>
+        <translation>Suurin samankaltainen objekti monikertana suurimmasta napsautetusta</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1160"/>
+        <source>to ×</source>
+        <translation>– ×</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1204"/>
+        <source>Pipette on</source>
+        <translation>Pipetti päällä</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1205"/>
+        <source>Attribute the value pipette of the rail reads under the click</source>
+        <translation>Attribuutti, jota sivupalkin arvopipetti lukee napsautuksen alla</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1220"/>
+        <source>Tolerance around the picked value, in % of the observed range of the attribute</source>
+        <translation>Poimitun arvon toleranssi, prosentteina attribuutin havaitusta arvoalueesta</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1232"/>
+        <source>Keep every return, or the first, last or single returns of the laser pulses</source>
+        <translation>Säilytä kaikki paluut tai laserpulssien ensimmäiset, viimeiset tai yksittäiset paluut</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1237"/>
+        <source>Any return</source>
+        <translation>Mikä tahansa paluu</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1251"/>
+        <source>HEIGHT / DTM</source>
+        <translation>KORKEUS / DTM</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1257"/>
+        <source>Always combined (AND) with the active group</source>
+        <translation>Yhdistetään aina (AND) aktiivisen ryhmän kanssa</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1261"/>
+        <source>PDAL · derived cloud</source>
+        <translation>PDAL · johdettu pilvi</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1263"/>
+        <source>The height is computed by PDAL into a derived point cloud, in a background task</source>
+        <translation>PDAL laskee korkeuden johdettuun pistepilveen taustatehtävässä</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1366"/>
+        <source>{0} object(s)</source>
+        <translation>{0} objektia</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1367"/>
+        <source>cut at the window read</source>
+        <translation>katkaistu luetun ikkunan kohdalta</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1368"/>
+        <source>shown as the whole class in their box</source>
+        <translation>näytetään kokonaisena luokkana laatikossaan</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1859"/>
+        <source>Other classes, absent from the layer ({0})</source>
+        <translation>Muut luokat, joita tasossa ei ole ({0})</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1950"/>
+        <source>An object runs past the largest window read around the click and was cut there</source>
+        <translation>Objekti ulottuu napsautuksen ympärillä luetun suurimman ikkunan yli ja katkaistiin siihen</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/point_cloud_exploring_panel.py" line="1952"/>
+        <source>Too many objects for the subset of the cloud: the preview and the filtered cloud keep every point of their class in the box around them; the targets are cut by the objects themselves</source>
+        <translation>Liian monta objektia pilven osajoukolle: esikatselu ja suodatettu pilvi säilyttävät luokkansa kaikki pisteet objektien ympäröimässä laatikossa; kohteet rajataan objektien omilla rajoilla</translation>
     </message>
 </context>
 <context>
@@ -3085,62 +3790,131 @@ Varmista, etta PostgreSQL-taululla on PRIMARY KEY maaritettyna.</translation>
     <message>
         <location filename="../ui/widgets/point_cloud_filter_widget.py" line="141"/>
         <source>Point cloud filter</source>
-        <translation>Pistepilven suodatin</translation>
+        <translation type="obsolete">Pistepilven suodatin</translation>
     </message>
     <message>
         <location filename="../ui/widgets/point_cloud_filter_widget.py" line="152"/>
         <source>Classification</source>
-        <translation>Luokitus</translation>
+        <translation type="obsolete">Luokitus</translation>
     </message>
     <message>
         <location filename="../ui/widgets/point_cloud_filter_widget.py" line="157"/>
         <source>All</source>
-        <translation>Kaikki</translation>
+        <translation type="obsolete">Kaikki</translation>
     </message>
     <message>
         <location filename="../ui/widgets/point_cloud_filter_widget.py" line="158"/>
         <source>None</source>
-        <translation>Ei mitään</translation>
+        <translation type="obsolete">Ei mitään</translation>
     </message>
     <message>
         <location filename="../ui/widgets/point_cloud_filter_widget.py" line="167"/>
         <source>Elevation (Z)</source>
-        <translation>Korkeus (Z)</translation>
+        <translation type="obsolete">Korkeus (Z)</translation>
     </message>
     <message>
         <location filename="../ui/widgets/point_cloud_filter_widget.py" line="169"/>
         <source>Intensity</source>
-        <translation>Intensiteetti</translation>
+        <translation type="obsolete">Intensiteetti</translation>
     </message>
     <message>
         <location filename="../ui/widgets/point_cloud_filter_widget.py" line="175"/>
         <source>Return number</source>
-        <translation>Paluun numero</translation>
+        <translation type="obsolete">Paluun numero</translation>
     </message>
     <message>
         <location filename="../ui/widgets/point_cloud_filter_widget.py" line="199"/>
         <source>Minimum</source>
-        <translation>Minimi</translation>
+        <translation type="obsolete">Minimi</translation>
     </message>
     <message>
         <location filename="../ui/widgets/point_cloud_filter_widget.py" line="200"/>
         <source>Maximum</source>
-        <translation>Maksimi</translation>
+        <translation type="obsolete">Maksimi</translation>
     </message>
     <message>
         <location filename="../ui/widgets/point_cloud_filter_widget.py" line="250"/>
         <source>Current filter: {0}</source>
-        <translation>Nykyinen suodatin: {0}</translation>
+        <translation type="obsolete">Nykyinen suodatin: {0}</translation>
     </message>
     <message>
         <location filename="../ui/widgets/point_cloud_filter_widget.py" line="250"/>
         <source>none</source>
-        <translation>ei mitään</translation>
+        <translation type="obsolete">ei mitään</translation>
     </message>
     <message>
         <location filename="../ui/widgets/point_cloud_filter_widget.py" line="329"/>
         <source>Any</source>
-        <translation>Mikä tahansa</translation>
+        <translation type="obsolete">Mikä tahansa</translation>
+    </message>
+</context>
+<context>
+    <name>PointCloudReader</name>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/pdal_cli.py" line="221"/>
+        <source>A useful extent is required for a remote point cloud</source>
+        <translation>Etäpistepilvi vaatii hyödyllisen alueen</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/pdal_cli.py" line="187"/>
+        <source>No PDAL reader for this point cloud format</source>
+        <translation>Tälle pistepilven muodolle ei ole PDAL-lukijaa</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/pdal_cli.py" line="217"/>
+        <source>PDAL 2.4 or newer with a readable version is required for remote point clouds</source>
+        <translation>Etäpistepilvet vaativat PDAL 2.4:n tai uudemman, jonka versio on luettavissa</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/pdal_cli.py" line="219"/>
+        <source>Remote point clouds require EPT or COPC for bounded reads</source>
+        <translation>Etäpistepilvet vaativat rajattuja lukuja varten EPT:n tai COPC:n</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/pdal_cli.py" line="227"/>
+        <source>The useful extent must be finite and have positive area</source>
+        <translation>Hyödyllisen alueen on oltava äärellinen ja sen pinta-alan positiivinen</translation>
+    </message>
+</context>
+<context>
+    <name>PointCloudSource</name>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="435"/>
+        <source>Draw a useful selection zone before reading a remote point cloud</source>
+        <translation>Piirrä hyödyllinen valintavyöhyke ennen etäpistepilven lukemista</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="468"/>
+        <source>The remote point cloud could not be read</source>
+        <translation>Etäpistepilveä ei voitu lukea</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="472"/>
+        <source>The remote point cloud rejected the selection</source>
+        <translation>Etäpistepilvi hylkäsi valinnan</translation>
+    </message>
+</context>
+<context>
+    <name>PointCloudTarget</name>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="605"/>
+        <source>A bounded height-above-ground cloud only supports AND or AND NOT; Unfilter first</source>
+        <translation>Rajattu maanpinnan yläpuolisen korkeuden pilvi tukee vain AND- tai AND NOT -operaattoria; poista ensin suodatus</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="631"/>
+        <source>PDAL 2.4 or newer is required to clip a remote point cloud</source>
+        <translation>Etäpistepilven leikkaaminen vaatii PDAL 2.4:n tai uudemman</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="682"/>
+        <source>Disjoint would read the whole remote cloud; choose an inside selection</source>
+        <translation>Disjoint lukisi koko etäpilven; valitse sisäpuolinen valinta</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="689"/>
+        <source>The original remote point cloud could not be opened</source>
+        <translation>Alkuperäistä etäpistepilveä ei voitu avata</translation>
     </message>
 </context>
 <context>
@@ -3292,7 +4066,7 @@ Jatketaanko?</translation>
         <translation>Suodatettavat tasot</translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/batch_filter_algorithm.py" line="129"/>
+        <location filename="../processing/algorithms/batch_filter_algorithm.py" line="139"/>
         <location filename="../processing/algorithms/common.py" line="78"/>
         <source>FilterMate</source>
         <translation>FilterMate</translation>
@@ -3389,17 +4163,17 @@ Jatketaanko?</translation>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/batch_filter_algorithm.py" line="102"/>
+        <location filename="../processing/algorithms/batch_filter_algorithm.py" line="112"/>
         <source>Invalid expression for layer &apos;{0}&apos;, skipped.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/batch_filter_algorithm.py" line="125"/>
+        <location filename="../processing/algorithms/batch_filter_algorithm.py" line="135"/>
         <source>Filter several layers (batch)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/batch_filter_algorithm.py" line="137"/>
+        <location filename="../processing/algorithms/batch_filter_algorithm.py" line="147"/>
         <source>Applies the same filter expression to several vector layers in a single run.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3745,17 +4519,27 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/common.py" line="194"/>
+        <location filename="../processing/algorithms/common.py" line="191"/>
+        <source>Source raster was resampled for capture (grid: {0}).</source>
+        <translation>Lähderasteri otettiin uudelleen kaappausta varten (ruudukko: {0}).</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/common.py" line="198"/>
         <source> ({0:.1f} s)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/common.py" line="197"/>
+        <location filename="../processing/algorithms/common.py" line="201"/>
         <source>{0}: {1}{2}</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/common.py" line="199"/>
+        <location filename="../processing/algorithms/common.py" line="203"/>
+        <source>{0}: target raster was resampled for capture (grid: {1}).</source>
+        <translation>{0}: kohderasteri otettiin uudelleen kaappausta varten (ruudukko: {1}).</translation>
+    </message>
+    <message>
+        <location filename="../processing/algorithms/common.py" line="206"/>
         <source>{0}: failed — {1}</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4435,150 +5219,180 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
 <context>
     <name>QgsCheckableComboBoxFeaturesListPickerWidget</name>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="898"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="924"/>
         <source>Type to filter...</source>
         <translation>Kirjoita suodattaaksesi...</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="907"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="933"/>
         <source>Select All</source>
         <translation>Valitse kaikki</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="909"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="935"/>
         <source>Select All (non subset)</source>
         <translation>Valitse kaikki (ei osajoukko)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="911"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="937"/>
         <source>Select All (subset)</source>
         <translation>Valitse kaikki (osajoukko)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="913"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="939"/>
         <source>De-select All</source>
         <translation>Poista kaikki valinnat</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="915"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="941"/>
         <source>De-select All (non subset)</source>
         <translation>Poista kaikki valinnat (ei osajoukko)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="917"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="943"/>
         <source>De-select All (subset)</source>
         <translation>Poista kaikki valinnat (osajoukko)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="1516"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="1599"/>
         <source>Showing the first {0} features sorted by display value. Type in the text filter to search the whole layer; &quot;Select All&quot; loads the full list.</source>
         <translation>Näytetään ensimmäiset {0} kohdetta näyttöarvon mukaan lajiteltuna. Hae koko tasolta kirjoittamalla tekstisuodattimeen; &quot;Valitse kaikki&quot; lataa koko luettelon.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="1524"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="1607"/>
         <source>Showing {0} features of the layer, sorted by display value. Type in the text filter to search the whole layer; &quot;Select All&quot; loads the full list.</source>
         <translation>Näytetään tason {0} kohdetta näyttöarvon mukaan lajiteltuna. Hae koko tasolta kirjoittamalla tekstisuodattimeen; &quot;Valitse kaikki&quot; lataa koko luettelon.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="1531"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="1614"/>
         <source>Search results for &quot;{0}&quot; over the whole layer.</source>
         <translation>Haun &quot;{0}&quot; tulokset koko tasolta.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="1768"/>
+        <source>Loading values…</source>
+        <translation>Ladataan arvoja…</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="1683"/>
+        <source>Values</source>
+        <translation>Arvot</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="1683"/>
+        <source>This expression cannot be evaluated safely for a service.</source>
+        <translation>Tätä lauseketta ei voi arvioida turvallisesti palvelulle.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="1748"/>
+        <source>Selection</source>
+        <translation>Valinta</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="1748"/>
+        <source>The remote list exceeds the safe selection limit. Select fewer features or filter the layer first.</source>
+        <translation>Etäluettelo ylittää turvallisen valintarajan. Valitse vähemmän kohteita tai suodata taso ensin.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/custom_widgets.py" line="1924"/>
+        <source>Loading selected values…</source>
+        <translation>Ladataan valittuja arvoja…</translation>
     </message>
 </context>
 <context>
     <name>QgsCheckableComboBoxLayer</name>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="337"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="339"/>
         <source>Select All</source>
         <translation>Valitse kaikki</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="339"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="341"/>
         <source>De-select All</source>
         <translation>Poista kaikki valinnat</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="341"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="347"/>
         <source>Select all layers by geometry type (Lines)</source>
         <translation>Valitse kaikki tasot geometriatyypin mukaan (Viivat)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="343"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="349"/>
         <source>De-Select all layers by geometry type (Lines)</source>
         <translation>Poista kaikkien tasojen valinta geometriatyypin mukaan (Viivat)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="345"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="351"/>
         <source>Select all layers by geometry type (Points)</source>
         <translation>Valitse kaikki tasot geometriatyypin mukaan (Pisteet)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="347"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="353"/>
         <source>De-Select all layers by geometry type (Points)</source>
         <translation>Poista kaikkien tasojen valinta geometriatyypin mukaan (Pisteet)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="349"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="355"/>
         <source>Select all layers by geometry type (Polygons)</source>
         <translation>Valitse kaikki tasot geometriatyypin mukaan (Monikulmiot)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="351"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="357"/>
         <source>De-Select all layers by geometry type (Polygons)</source>
         <translation>Poista kaikkien tasojen valinta geometriatyypin mukaan (Monikulmiot)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="367"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="376"/>
         <source>Select all raster layers</source>
         <translation>Valitse kaikki rasteritasot</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="369"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="378"/>
         <source>De-select all raster layers</source>
         <translation>Poista kaikkien rasteritasojen valinta</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="371"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="380"/>
         <source>Select all point cloud layers</source>
         <translation>Valitse kaikki pistepilvitasot</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="373"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="382"/>
         <source>De-select all point cloud layers</source>
         <translation>Poista kaikkien pistepilvitasojen valinta</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="409"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="418"/>
         <source>pixels in the zone</source>
         <translation>pikseliä alueella</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="409"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="418"/>
         <source>points in the zone</source>
         <translation>pistettä alueella</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="409"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="418"/>
         <source>features</source>
         <translation>kohdetta</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="415"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="424"/>
         <source>Raster target: the pixels outside the source geometry become NoData (those inside with Disjoint)</source>
         <translation>Rasterikohde: lähdegeometrian ulkopuoliset pikselit muuttuvat NoData-arvoksi (sisäpuoliset Disjointilla)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="417"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="426"/>
         <source>Point cloud target: the points outside the source geometry are removed (those inside with Disjoint)</source>
         <translation>Pistepilvikohde: lähdegeometrian ulkopuoliset pisteet poistetaan (sisäpuoliset Disjointilla)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="419"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="428"/>
         <source>Vector target: the features that satisfy the geometric predicate are kept</source>
         <translation>Vektorikohde: geometrisen predikaatin täyttävät kohteet säilytetään</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="499"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="515"/>
         <source>Click the square on the right to test this layer by its centroids</source>
         <translation>Napsauta oikealla olevaa neliötä testataksesi tämän tason sentroideilla</translation>
     </message>
@@ -4611,55 +5425,55 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="497"/>
         <source>Band</source>
-        <translation>Kanava</translation>
+        <translation type="obsolete">Kanava</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="500"/>
         <source>Band whose values are selected</source>
-        <translation>Kanava, jonka arvot valitaan</translation>
+        <translation type="obsolete">Kanava, jonka arvot valitaan</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="598"/>
         <source>PIXEL VALUE</source>
-        <translation>PIKSELIN ARVO</translation>
+        <translation type="obsolete">PIKSELIN ARVO</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="606"/>
         <source>Pixel value of the current band</source>
-        <translation>Nykyisen kanavan pikselin arvo</translation>
+        <translation type="obsolete">Nykyisen kanavan pikselin arvo</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="625"/>
         <source>Last {0} values picked</source>
-        <translation>Viimeiset {0} poimittua arvoa</translation>
+        <translation type="obsolete">Viimeiset {0} poimittua arvoa</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="638"/>
         <source>Click on the map with the pixel picker. Ctrl+click extends the range to the value.</source>
-        <translation>Napsauta karttaa pikselinpoimijalla. Ctrl+napsautus laajentaa alueen kyseiseen arvoon.</translation>
+        <translation type="obsolete">Napsauta karttaa pikselinpoimijalla. Ctrl+napsautus laajentaa alueen kyseiseen arvoon.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="651"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1821"/>
         <source>VALUE RANGE</source>
         <translation>ARVOALUE</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="660"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1255"/>
         <source>Min</source>
         <translation>Min</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="660"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1255"/>
         <source>Lowest value kept</source>
         <translation>Pienin säilytettävä arvo</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="660"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1255"/>
         <source>Max</source>
         <translation>Max</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="660"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1255"/>
         <source>Highest value kept</source>
         <translation>Suurin säilytettävä arvo</translation>
     </message>
@@ -4671,60 +5485,60 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="688"/>
         <source>CLASSES</source>
-        <translation>LUOKAT</translation>
+        <translation type="obsolete">LUOKAT</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="692"/>
         <source>Raster classes</source>
-        <translation>Rasteriluokat</translation>
+        <translation type="obsolete">Rasteriluokat</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="696"/>
         <source>All</source>
-        <translation>Kaikki</translation>
+        <translation type="obsolete">Kaikki</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="697"/>
         <source>None</source>
-        <translation>Ei mitään</translation>
+        <translation type="obsolete">Ei mitään</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="707"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1275"/>
         <source>RASTER EXPRESSION</source>
         <translation>RASTERILAUSEKE</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="711"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1279"/>
         <source>Raster calculator expression; a pixel is kept where it is not 0</source>
         <translation>Rasterilaskimen lauseke; pikseli säilytetään, kun se ei ole 0</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="712"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1280"/>
         <source>Raster expression</source>
         <translation>Rasterilauseke</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="721"/>
         <source>Use the range</source>
-        <translation>Käytä aluetta</translation>
+        <translation type="obsolete">Käytä aluetta</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="722"/>
         <source>Write the current value range as an expression</source>
-        <translation>Kirjoita nykyinen arvoalue lausekkeena</translation>
+        <translation type="obsolete">Kirjoita nykyinen arvoalue lausekkeena</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="812"/>
         <source>Selected pixels: {0}</source>
-        <translation>Valitut pikselit: {0}</translation>
+        <translation type="obsolete">Valitut pikselit: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1195"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1349"/>
         <source>Set a value range first</source>
         <translation>Aseta ensin arvoalue</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1381"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2219"/>
         <source>NoData</source>
         <translation>NoData</translation>
     </message>
@@ -4736,252 +5550,665 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="629"/>
         <source>Value of the current band under the cursor</source>
-        <translation>Nykyisen kanavan arvo kohdistimen alla</translation>
+        <translation type="obsolete">Nykyisen kanavan arvo kohdistimen alla</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="635"/>
         <source>Statistics of the current band in the last rectangle drawn on the map</source>
-        <translation>Nykyisen kanavan tilastot kartalle viimeksi piirretyssä suorakulmiossa</translation>
+        <translation type="obsolete">Nykyisen kanavan tilastot kartalle viimeksi piirretyssä suorakulmiossa</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="870"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1577"/>
         <source>Under the cursor: {0}  (X {1:.{3}f}  Y {2:.{3}f})</source>
         <translation>Kohdistimen alla: {0}  (X {1:.{3}f}  Y {2:.{3}f})</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="880"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1587"/>
         <source>Zone: {0}</source>
         <translation>Alue: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="880"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1587"/>
         <source>no pixel</source>
         <translation>ei pikseliä</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1405"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2234"/>
         <source>LAST PICKS</source>
         <translation>VIIMEISIMMÄT LUKEMAT</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="509"/>
         <source>Compute on</source>
-        <translation>Laske kohteesta</translation>
+        <translation type="obsolete">Laske kohteesta</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="512"/>
         <source>Quantity the range applies to. Slope, aspect, hillshade and roughness read the band as a DTM.</source>
-        <translation>Suure, johon väli kohdistuu. Kaltevuus, rinteen suunta, rinnevarjostus ja karkeus lukevat kanavan DTM:nä.</translation>
+        <translation type="obsolete">Suure, johon väli kohdistuu. Kaltevuus, rinteen suunta, rinnevarjostus ja karkeus lukevat kanavan DTM:nä.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="516"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1233"/>
         <source>Pixel value</source>
         <translation>Pikselin arvo</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="516"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1233"/>
         <source>Slope (degrees)</source>
         <translation>Kaltevuus (astetta)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="516"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1233"/>
         <source>Slope (%)</source>
         <translation>Kaltevuus (%)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="516"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1233"/>
         <source>Aspect (degrees)</source>
         <translation>Rinteen suunta (astetta)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="516"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1233"/>
         <source>Hillshade (0-255)</source>
         <translation>Rinnevarjostus (0-255)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="516"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1233"/>
         <source>Roughness (TRI, mean difference)</source>
         <translation>Karkeus (TRI, keskimääräinen erotus)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="676"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1242"/>
         <source>Usual thresholds of the quantity</source>
         <translation>Suureen tavanomaiset raja-arvot</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="677"/>
         <source>Usual thresholds</source>
-        <translation>Tavanomaiset raja-arvot</translation>
+        <translation type="obsolete">Tavanomaiset raja-arvot</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1102"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1931"/>
         <source>Flat</source>
         <translation>Tasainen</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1102"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1931"/>
         <source>Gentle</source>
         <translation>Loiva</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1102"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1931"/>
         <source>Moderate</source>
         <translation>Kohtalainen</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1103"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1932"/>
         <source>Steep</source>
         <translation>Jyrkkä</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1103"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1932"/>
         <source>East</source>
         <translation>Itä</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1103"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1932"/>
         <source>South</source>
         <translation>Etelä</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1104"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1933"/>
         <source>West</source>
         <translation>Länsi</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1104"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1933"/>
         <source>Shadow</source>
         <translation>Varjo</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1104"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1933"/>
         <source>Lit</source>
         <translation>Valaistu</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1109"/>
         <source>Usual thresholds…</source>
-        <translation>Tavanomaiset raja-arvot…</translation>
+        <translation type="obsolete">Tavanomaiset raja-arvot…</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="551"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1041"/>
         <source>PIPETTE</source>
         <translation>PIPETTI</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="554"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1105"/>
         <source>Tolerance ±</source>
         <translation>Toleranssi ±</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="561"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1112"/>
         <source>Tolerance around the picked color or value, in % of the value range</source>
         <translation>Toleranssi valitun värin tai arvon ympärillä, prosentteina arvoalueesta</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="562"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1113"/>
         <source>Pipette tolerance</source>
         <translation>Pipetin toleranssi</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="571"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1305"/>
         <source>Bands</source>
         <translation>Kanavat</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1231"/>
         <source>What the bands of the image are: the presets and the pipette use them</source>
-        <translation>Mitä kuvan kanavat ovat: esiasetukset ja pipetti käyttävät niitä</translation>
+        <translation type="obsolete">Mitä kuvan kanavat ovat: esiasetukset ja pipetti käyttävät niitä</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="576"/>
         <source>Band layout</source>
-        <translation>Kanavien asettelu</translation>
+        <translation type="obsolete">Kanavien asettelu</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="577"/>
         <source>RGB (red, green, blue)</source>
-        <translation>RGB (punainen, vihreä, sininen)</translation>
+        <translation type="obsolete">RGB (punainen, vihreä, sininen)</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="577"/>
         <source>IRC (infrared, red, green)</source>
-        <translation>IRC (infrapuna, punainen, vihreä)</translation>
+        <translation type="obsolete">IRC (infrapuna, punainen, vihreä)</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="577"/>
         <source>RGB + infrared</source>
-        <translation>RGB + infrapuna</translation>
+        <translation type="obsolete">RGB + infrapuna</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1232"/>
         <source>Write the expression of a usual index (vegetation, water...)</source>
-        <translation>Kirjoita tavallisen indeksin lauseke (kasvillisuus, vesi...)</translation>
+        <translation type="obsolete">Kirjoita tavallisen indeksin lauseke (kasvillisuus, vesi...)</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="585"/>
         <source>Spectral presets</source>
-        <translation>Spektriesiasetukset</translation>
+        <translation type="obsolete">Spektriesiasetukset</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1228"/>
         <source>Needs an image of three bands or more (red, green, blue...)</source>
-        <translation>Vaatii vähintään kolmen kanavan kuvan (punainen, vihreä, sininen...)</translation>
+        <translation type="obsolete">Vaatii vähintään kolmen kanavan kuvan (punainen, vihreä, sininen...)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1235"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1324"/>
         <source>Vegetation (NDVI &gt; 0.3)</source>
         <translation>Kasvillisuus (NDVI &gt; 0.3)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1235"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1324"/>
         <source>No vegetation (NDVI &lt; 0.1)</source>
         <translation>Ei kasvillisuutta (NDVI &lt; 0.1)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1236"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1325"/>
         <source>Water (NDWI &gt; 0.1)</source>
         <translation>Vesi (NDWI &gt; 0.1)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1236"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1325"/>
         <source>Vegetation (excess green)</source>
         <translation>Kasvillisuus (vihreän ylimäärä)</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1239"/>
         <source>Spectral presets…</source>
-        <translation>Spektriesiasetukset…</translation>
+        <translation type="obsolete">Spektriesiasetukset…</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1299"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2039"/>
         <source>This pixel has no value (NoData): pick another one</source>
         <translation>Tällä pikselillä ei ole arvoa (NoData): valitse toinen</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1338"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2124"/>
         <source>The tolerance covers every value: lower it</source>
         <translation>Toleranssi kattaa kaikki arvot: pienennä sitä</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1354"/>
         <source>Range {0} → {1}{2}</source>
-        <translation>Arvoalue {0} → {1}{2}</translation>
+        <translation type="obsolete">Arvoalue {0} → {1}{2}</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1356"/>
         <source>Class(es) {0}</source>
-        <translation>Luokat {0}</translation>
+        <translation type="obsolete">Luokat {0}</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1359"/>
         <source>{0} color(s), last: {1}</source>
-        <translation>{0} väriä, viimeisin: {1}</translation>
+        <translation type="obsolete">{0} väriä, viimeisin: {1}</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1363"/>
         <source>Expression</source>
-        <translation>Lauseke</translation>
+        <translation type="obsolete">Lauseke</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="778"/>
+        <source>BANDS</source>
+        <translation>KANAVAT</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="805"/>
+        <source>Value of the active band under the cursor</source>
+        <translation>Aktiivisen kanavan arvo kohdistimen alla</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="811"/>
+        <source>Statistics of the active band in the last rectangle drawn on the map</source>
+        <translation>Aktiivisen kanavan tilastot kartalle viimeksi piirretyssä suorakulmiossa</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="858"/>
+        <source>Every band</source>
+        <translation>Kaikki kanavat</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="860"/>
+        <source>The value range applies to every colour band at once (a pixel is kept when each band is in the range); the histogram shows the first one</source>
+        <translation>Arvoalue koskee kaikkia värikanavia samanaikaisesti (pikseli säilytetään, kun jokainen kanava on alueella); histogrammi näyttää ensimmäisen</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="872"/>
+        <source>Active band: the one the range, the histogram and the picker read</source>
+        <translation>Aktiivinen kanava: se, jota arvoalue, histogrammi ja poimija lukevat</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="881"/>
+        <source>The pipette compares this band</source>
+        <translation>Pipetti vertaa tätä kanavaa</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="991"/>
+        <source>Colour the band holds: the spectral indexes and the chips use it. Click to change it</source>
+        <translation>Kanavan väri: spektri-indeksit ja merkit käyttävät sitä. Vaihda napsauttamalla</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1001"/>
+        <source>Value at the last click of the pipette</source>
+        <translation>Arvo pipetin viimeisessä napsautuksessa</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="928"/>
+        <source>No colour</source>
+        <translation>Ei väriä</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="936"/>
+        <source>RGB</source>
+        <translation>RGB</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="936"/>
+        <source>Bands 1, 2, 3 are red, green, blue</source>
+        <translation>Kanavat 1, 2, 3 ovat punainen, vihreä, sininen</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="936"/>
+        <source>IRC</source>
+        <translation>IRC</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="936"/>
+        <source>Bands 1, 2, 3 are infrared, red, green (IGN infrared colour orthophoto)</source>
+        <translation>Kanavat 1, 2, 3 ovat infrapuna, punainen, vihreä (IGN:n infrapunavärinen ortokuva)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="936"/>
+        <source>RGB + NIR</source>
+        <translation>RGB + NIR</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="936"/>
+        <source>Bands 1, 2, 3, 4 are red, green, blue, near infrared</source>
+        <translation>Kanavat 1, 2, 3, 4 ovat punainen, vihreä, sininen, lähi-infrapuna</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="939"/>
+        <source>Every band: {0}</source>
+        <translation>Kaikki kanavat: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="990"/>
+        <source> Roles guessed, to confirm.</source>
+        <translation> Roolit arvattu, vahvista.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1019"/>
+        <source>R</source>
+        <translation>R</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1019"/>
+        <source>G</source>
+        <translation>G</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1019"/>
+        <source>B</source>
+        <translation>B</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1020"/>
+        <source>NIR</source>
+        <translation>NIR</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1023"/>
+        <source>Red</source>
+        <translation>Punainen</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1023"/>
+        <source>Green</source>
+        <translation>Vihreä</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1023"/>
+        <source>Blue</source>
+        <translation>Sininen</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1024"/>
+        <source>Near infrared</source>
+        <translation>Lähi-infrapuna</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1030"/>
+        <source>roles guessed, to confirm</source>
+        <translation>roolit arvattu, vahvista</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1045"/>
+        <source>Select</source>
+        <translation>Valitse</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1049"/>
+        <source>Similar pixels</source>
+        <translation>Samankaltaiset pikselit</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1049"/>
+        <source>Every pixel of the raster close to the picked colour or value (the pipette of the rail)</source>
+        <translation>Kaikki rasterin pikselit, jotka ovat lähellä poimittua väriä tai arvoa (sivupalkin pipetti)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1049"/>
+        <source>Clicked object</source>
+        <translation>Napsautettu objekti</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1049"/>
+        <source>Only the patch of such pixels the click falls in: a pool, a roof, a field (the object detector of the rail); Ctrl+click adds another object</source>
+        <translation>Vain sellaisten pikselien ryhmä, johon napsautus osuu: uima-allas, katto, pelto (sivupalkin objektintunnistin); Ctrl+napsautus lisää toisen objektin</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1049"/>
+        <source>Similar objects</source>
+        <translation>Samankaltaiset objektit</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1049"/>
+        <source>Every object of the raster like the clicked one: the patches of such pixels whose area is within the ratios below (the similar objects tool of the rail); Ctrl+click adds another reference object</source>
+        <translation>Kaikki rasterin napsautetun kaltaiset objektit: tällaisten pikselien ryhmät, joiden pinta-ala on alla olevien suhteiden sisällä (sivupalkin samankaltaisten objektien työkalu); Ctrl+napsautus lisää toisen vertailuobjektin</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1073"/>
+        <source>Area ×</source>
+        <translation>Pinta-ala ×</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1076"/>
+        <source>Smallest similar object, as a share of the smallest clicked one</source>
+        <translation>Pienin samankaltainen objekti osuutena pienimmästä napsautetusta</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1076"/>
+        <source>Largest similar object, as a multiple of the largest clicked one</source>
+        <translation>Suurin samankaltainen objekti monikertana suurimmasta napsautetusta</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1089"/>
+        <source>to ×</source>
+        <translation>– ×</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1092"/>
+        <source>same shape</source>
+        <translation>sama muoto</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1095"/>
+        <source>Keep only the objects shaped like the clicked ones: their compactness (4π × area / perimeter², 1 for a disc) within the same ratios; off, a road of the area of a pool is a pool</source>
+        <translation>Säilytä vain napsautettujen kaltaiset objektit: niiden kompaktius (4π × pinta-ala / piiri², 1 ympyrälle) samoissa suhteissa; ilman tätä uima-altaan kokoinen tie on uima-allas</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1146"/>
+        <source>Remove this pick</source>
+        <translation>Poista tämä poiminta</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1225"/>
+        <source>Quantity</source>
+        <translation>Suure</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1956"/>
+        <source>Quantity the range applies to. Slope, aspect, hillshade and roughness read the active band as a DTM.</source>
+        <translation>Suure, johon arvoalue sovelletaan. Kaltevuus, suunta, rinnevarjostus ja karkeus lukevat aktiivisen kanavan DTM:nä.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1242"/>
+        <source>Thresholds ▾</source>
+        <translation>Kynnysarvot ▾</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1288"/>
+        <source>Insert ▾</source>
+        <translation>Lisää ▾</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1288"/>
+        <source>Insert a band reference, a usual spectral index or the current range</source>
+        <translation>Lisää kanavaviite, yleinen spektri-indeksi tai nykyinen arvoalue</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1313"/>
+        <source>Spectral indexes</source>
+        <translation>Spektri-indeksit</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1318"/>
+        <source>Range</source>
+        <translation>Arvoalue</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1319"/>
+        <source>The current value range</source>
+        <translation>Nykyinen arvoalue</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1391"/>
+        <source>Rendered colors depend on style and scale.</source>
+        <translation>Esitetyt värit riippuvat tyylistä ja mittakaavasta.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1391"/>
+        <source>Only color selection is available: numeric bands, indices, ranges, classes and derivatives are unavailable.</source>
+        <translation>Vain värivalinta on käytettävissä: numeeriset kanavat, indeksit, alueet, luokat ja johdannaiset eivät ole käytettävissä.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1817"/>
+        <source>VALUE RANGE — every band</source>
+        <translation>ARVOALUE — kaikki kanavat</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1819"/>
+        <source>VALUE RANGE — band {0}</source>
+        <translation>ARVOALUE — kanava {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1952"/>
+        <source>picks on: {0}</source>
+        <translation>poimii: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1956"/>
+        <source>A slope, aspect... reads one band as a DTM: choose a band in BANDS first</source>
+        <translation>Kaltevuus, suunta... lukee yhden kanavan DTM:nä: valitse ensin kanava KANAVAT-kohdassa</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2159"/>
+        <source>The object could not be read</source>
+        <translation>Objektia ei voitu lukea</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2161"/>
+        <source>No object under the click: raise the tolerance or click another pixel</source>
+        <translation>Napsautuksen alla ei ole objektia: suurenna toleranssia tai napsauta toista pikseliä</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2163"/>
+        <source>An object is larger than the window read and was cut: lower the tolerance</source>
+        <translation>Objekti on luettua ikkunaa suurempi ja se katkaistiin: pienennä toleranssia</translation>
+    </message>
+</context>
+<context>
+    <name>RasterMaterialization</name>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/raster_materialization.py" line="121"/>
+        <source>bounded raster capture failed</source>
+        <translation>rajattu rasterikaappaus epäonnistui</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="224"/>
+        <source>local raster capture could not be opened</source>
+        <translation>paikallista rasterikaappausta ei voitu avata</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="213"/>
+        <source>raster analysis requires a local GDAL capture</source>
+        <translation>rasterianalyysi vaatii paikallisen GDAL-kaappauksen</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/raster_materialization.py" line="85"/>
+        <location filename="../adapters/qgis/coverage_layers/raster_materialization.py" line="119"/>
+        <source>raster capture canceled</source>
+        <translation>rasterikaappaus peruutettiin</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/raster_materialization.py" line="101"/>
+        <source>raster capture destination must be in the session cache</source>
+        <translation>rasterikaappauksen kohteen on oltava istuntovälimuistissa</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/raster_materialization.py" line="105"/>
+        <source>raster capture provider could not be cloned</source>
+        <translation>rasterikaappauksen tiedontuottajaa ei voitu kloonata</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/raster_materialization.py" line="38"/>
+        <source>raster capture requires a finite, non-empty extent</source>
+        <translation>rasterikaappaus vaatii äärellisen, ei-tyhjän alueen</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/raster_materialization.py" line="41"/>
+        <source>raster capture requires a positive pixel limit</source>
+        <translation>rasterikaappaus vaatii positiivisen pikselirajan</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/raster_materialization.py" line="46"/>
+        <source>raster capture requires a positive resolution</source>
+        <translation>rasterikaappaus vaatii positiivisen erottelukyvyn</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/raster_materialization.py" line="87"/>
+        <source>raster capture source could not be opened</source>
+        <translation>rasterikaappauksen lähdettä ei voitu avata</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/raster_materialization.py" line="79"/>
+        <source>raster materialization must run in a worker thread</source>
+        <translation>rasterin materialisointi on suoritettava työsäikeessä</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="208"/>
+        <source>raster selection canceled</source>
+        <translation>rasterivalinta peruutettiin</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="216"/>
+        <source>raster selection source could not be opened</source>
+        <translation>rasterivalinnan lähdettä ei voitu avata</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="204"/>
+        <source>remote raster selection must run in a worker thread</source>
+        <translation>etärasterin valinta on suoritettava työsäikeessä</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="210"/>
+        <source>rendered color selection requires a local rendered capture</source>
+        <translation>esitetty värivalinta vaatii paikallisen esitetyn kaappauksen</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/raster_materialization.py" line="90"/>
+        <source>rendered rasters require a rendered color capture</source>
+        <translation>esitetyt rasterit vaativat esitetyn värikaappauksen</translation>
+    </message>
+</context>
+<context>
+    <name>RasterStatisticsTask</name>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/raster_statistics_task.py" line="20"/>
+        <source>FilterMate: raster statistics</source>
+        <translation>FilterMate: rasteritilastot</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/raster_statistics_task.py" line="64"/>
+        <source>Raster sample failed; retry with a smaller visible extent.</source>
+        <translation>Rasterin otanta epäonnistui; yritä uudelleen pienemmällä näkyvällä alueella.</translation>
+    </message>
+</context>
+<context>
+    <name>RasterSurfaceTask</name>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/raster_surface_task.py" line="11"/>
+        <source>FilterMate: raster preview</source>
+        <translation>FilterMate: rasterin esikatselu</translation>
+    </message>
+</context>
+<context>
+    <name>RasterTargetJob</name>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="459"/>
+        <source>remote raster target must run in a worker thread</source>
+        <translation>etärasterikohde on suoritettava työsäikeessä</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="470"/>
+        <source>local raster target could not be opened</source>
+        <translation>paikallista rasterikohdetta ei voitu avata</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="480"/>
+        <source>Rendered color layers cannot be filter targets.</source>
+        <translation>Esitettyjä väritasoja ei voi käyttää suodatuksen kohteina.</translation>
     </message>
 </context>
 <context>
@@ -5018,6 +6245,97 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
     </message>
 </context>
 <context>
+    <name>RemoteMaterializer</name>
+    <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1000"/>
+        <source>Partial result: the remote feature limit was reached.</source>
+        <translation>Osittainen tulos: etäkohteiden raja saavutettiin.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1002"/>
+        <source>Partial result: the remote time limit was reached.</source>
+        <translation>Osittainen tulos: etäpalvelun aikaraja saavutettiin.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1004"/>
+        <source>Remote filtering was cancelled; the previous filter is kept.</source>
+        <translation>Etäsuodatus peruutettiin; aiempi suodatin säilytetään.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1006"/>
+        <source>More than 500 keys would be sent to the service; narrow the selection or use a local copy.</source>
+        <translation>Palvelulle lähetettäisiin yli 500 avainta; rajaa valintaa tai käytä paikallista kopiota.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1008"/>
+        <source>The service has no stable key; use a local copy.</source>
+        <translation>Palvelulla ei ole pysyvää avainta; käytä paikallista kopiota.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1010"/>
+        <source>Select or filter the remote source before spatial filtering.</source>
+        <translation>Valitse tai suodata etälähde ennen paikkatietosuodatusta.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1012"/>
+        <source>The service filter cannot be proved complete. Select source features or use a local copy.</source>
+        <translation>Palvelinsuodattimen täydellisyyttä ei voida osoittaa. Valitse lähdekohteita tai käytä paikallista kopiota.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1014"/>
+        <source>The remote source copy is incomplete; the previous filter is kept.</source>
+        <translation>Etälähteen kopio on vajaa; aiempi suodatin säilytetään.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1016"/>
+        <source>Partial result: no matching feature was confirmed before the limit; the previous filter is kept.</source>
+        <translation>Osittainen tulos: täsmäävää kohdetta ei varmistettu ennen rajaa; aiempi suodatin säilytetään.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1018"/>
+        <source>The intersecting remote copy is incomplete; a disjoint filter cannot be computed safely.</source>
+        <translation>Leikkaava etäkopio on vajaa; disjoint-suodatinta ei voida laskea turvallisesti.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1020"/>
+        <source>Disjoint combined with another predicate requires a local copy of the remote target.</source>
+        <translation>Disjoint yhdistettynä toiseen predikaattiin vaatii etäkohteen paikallisen kopion.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1022"/>
+        <source>The remote spatial predicate could not be evaluated; the previous filter is kept.</source>
+        <translation>Etäpaikkatietopredikaattia ei voitu arvioida; aiempi suodatin säilytetään.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/backends/ogr/filter_executor.py" line="1025"/>
+        <source>The remote copy could not be read or filtered; the previous filter is kept.</source>
+        <translation>Etäkopiota ei voitu lukea tai suodattaa; aiempi suodatin säilytetään.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/remote_materializer.py" line="93"/>
+        <source>Remote materialization requires a background task.</source>
+        <translation>Etämaterialisointi vaatii taustatehtävän.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/remote_materializer.py" line="566"/>
+        <source>Filtering a bounded remote copy</source>
+        <translation>Suodatetaan rajattua etäkopiota</translation>
+    </message>
+</context>
+<context>
+    <name>RenderedRasterTask</name>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/rendered_raster.py" line="88"/>
+        <source>FilterMate: rendered colour snapshot</source>
+        <translation>FilterMate: esitetty värikuva</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/rendered_raster.py" line="158"/>
+        <source>Rendered snapshot failed; retry with a smaller visible extent.</source>
+        <translation>Esitetyn kuvan luonti epäonnistui; yritä uudelleen pienemmällä näkyvällä alueella.</translation>
+    </message>
+</context>
+<context>
     <name>SearchableJsonView</name>
     <message>
         <location filename="../ui/widgets/json_view/searchable_view.py" line="79"/>
@@ -5028,6 +6346,147 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <location filename="../ui/widgets/json_view/searchable_view.py" line="184"/>
         <source>No match</source>
         <translation>Ei tuloksia</translation>
+    </message>
+</context>
+<context>
+    <name>ServerFilterTranslation</name>
+    <message>
+        <location filename="../adapters/qgis/server_subset_job.py" line="242"/>
+        <source>A FilterMate task is still reading layers. Retry after it finishes.</source>
+        <translation>FilterMate-tehtävä lukee vielä tasoja. Yritä uudelleen sen valmistuttua.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/server_subset_job.py" line="255"/>
+        <source>A layer with auxiliary storage cannot safely replace its server provider. The previous filter is unchanged.</source>
+        <translation>Apusäilytystä käyttävää tasoa ei voi turvallisesti vaihtaa palvelintiedontuottajan tilalle. Aiempi suodatin pysyy ennallaan.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/server_subset_job.py" line="260"/>
+        <source>A remote join cannot be rebuilt on the main thread. The previous filter is unchanged.</source>
+        <translation>Etäliitosta ei voi rakentaa uudelleen pääsäikeessä. Aiempi suodatin pysyy ennallaan.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/server_subset_job.py" line="262"/>
+        <source>A server filter is already being prepared for this layer.</source>
+        <translation>Tälle tasolle valmistellaan jo palvelinsuodatinta.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/server_filter_translation.py" line="189"/>
+        <location filename="../adapters/qgis/server_filter_translation.py" line="250"/>
+        <source>A server layer can only be modified on its owning thread.</source>
+        <translation>Palvelintasoa voi muokata vain sen omistavassa säikeessä.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/server_subset_job.py" line="235"/>
+        <source>Asynchronous server filters require QGIS 3.32 or newer. The previous filter is unchanged.</source>
+        <translation>Asynkroniset palvelinsuodattimet vaativat QGIS 3.32:n tai uudemman. Aiempi suodatin pysyy ennallaan.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/server_subset_job.py" line="368"/>
+        <source>Could not install the prepared server filter.</source>
+        <translation>Valmisteltua palvelinsuodatinta ei voitu asentaa.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/server_subset_job.py" line="44"/>
+        <source>Could not preserve the layer state.</source>
+        <translation>Tason tilaa ei voitu säilyttää.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/server_subset_job.py" line="239"/>
+        <source>Finish editing the layer before applying a server filter.</source>
+        <translation>Lopeta tason muokkaus ennen palvelinsuodattimen käyttöä.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/server_filter_translation.py" line="104"/>
+        <source>Invalid attribute expression.</source>
+        <translation>Virheellinen attribuuttilauseke.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/server_subset_job.py" line="83"/>
+        <source>Preparing server attribute filter</source>
+        <translation>Valmistellaan palvelimen attribuuttisuodatinta</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/server_filter_translation.py" line="140"/>
+        <source>QGIS cannot translate this predicate to an OGC filter.</source>
+        <translation>QGIS ei voi muuntaa tätä predikaattia OGC-suodattimeksi.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/server_subset_job.py" line="302"/>
+        <location filename="../adapters/qgis/server_subset_job.py" line="311"/>
+        <source>Server filter canceled or timed out. The previous filter is unchanged.</source>
+        <translation>Palvelinsuodatin peruutettiin tai aikakatkaistiin. Aiempi suodatin pysyy ennallaan.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/server_subset_job.py" line="348"/>
+        <source>Server filter installation failed and the previous provider could not be restored.</source>
+        <translation>Palvelinsuodattimen asennus epäonnistui, eikä aiempaa tiedontuottajaa voitu palauttaa.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/server_subset_job.py" line="340"/>
+        <source>Server filter installation failed. The previous provider was already invalid and could not be restored.</source>
+        <translation>Palvelinsuodattimen asennus epäonnistui. Aiempi tiedontuottaja oli jo virheellinen eikä sitä voitu palauttaa.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/server_subset_job.py" line="355"/>
+        <source>Server filter installation failed. The previous provider was restored.</source>
+        <translation>Palvelinsuodattimen asennus epäonnistui. Aiempi tiedontuottaja palautettiin.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/server_subset_job.py" line="33"/>
+        <source>Server filter installation is in progress. Retry after it finishes.</source>
+        <translation>Palvelinsuodattimen asennus on käynnissä. Yritä uudelleen sen valmistuttua.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/server_subset_job.py" line="207"/>
+        <location filename="../adapters/qgis/server_subset_job.py" line="237"/>
+        <source>Server filter installation must start on the layer thread.</source>
+        <translation>Palvelinsuodattimen asennuksen on alettava tason säikeessä.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/server_filter_translation.py" line="126"/>
+        <source>The expression is too complex to translate safely.</source>
+        <translation>Lauseke on liian monimutkainen muunnettavaksi turvallisesti.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/server_filter_translation.py" line="100"/>
+        <source>The expression is too large or contains ambiguous SQL backslash escapes.</source>
+        <translation>Lauseke on liian suuri tai sisältää monitulkintaisia SQL-kenoviivan escape-merkkejä.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/server_subset_job.py" line="318"/>
+        <source>The layer changed while preparing its filter. The prepared result was discarded.</source>
+        <translation>Taso muuttui suodattimen valmistelun aikana. Valmisteltu tulos hylättiin.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/server_subset_job.py" line="366"/>
+        <source>The layer is no longer available. The prepared filter was discarded.</source>
+        <translation>Taso ei ole enää käytettävissä. Valmisteltu suodatin hylättiin.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/server_subset_job.py" line="311"/>
+        <source>The server rejected the filter or could not be reached. The previous filter is unchanged.</source>
+        <translation>Palvelin hylkäsi suodattimen tai siihen ei saatu yhteyttä. Aiempi suodatin pysyy ennallaan.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/server_subset_job.py" line="253"/>
+        <source>This provider and QGIS version do not support verified worker creation. The previous filter is unchanged.</source>
+        <translation>Tämä tiedontuottaja ja QGIS-versio eivät tue varmennettua työprosessin luontia. Aiempi suodatin pysyy ennallaan.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/server_filter_translation.py" line="225"/>
+        <source>{0}: the attribute filter cannot run entirely on the server. Unsupported part: {1}. {2} The previous filter is unchanged.</source>
+        <translation>{0}: attribuuttisuodatinta ei voi suorittaa kokonaan palvelimella. Tukematon osa: {1}. {2} Aiempi suodatin pysyy ennallaan.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/server_filter_translation.py" line="265"/>
+        <source>{0}: the provider rejected the attribute filter. The previous filter was restored.</source>
+        <translation>{0}: tiedontuottaja hylkäsi attribuuttisuodattimen. Aiempi suodatin palautettiin.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/server_filter_translation.py" line="264"/>
+        <source>{0}: the provider rejected the filter and restoration failed.</source>
+        <translation>{0}: tiedontuottaja hylkäsi suodattimen eikä palautus onnistunut.</translation>
     </message>
 </context>
 <context>
@@ -5208,12 +6667,12 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
 <context>
     <name>SqlUtils</name>
     <message>
-        <location filename="../infrastructure/database/sql_utils.py" line="208"/>
+        <location filename="../infrastructure/database/sql_utils.py" line="266"/>
         <source>FilterMate - PostgreSQL Type Warning</source>
         <translation>FilterMate - PostgreSQL tyyppivaroitus</translation>
     </message>
     <message>
-        <location filename="../infrastructure/database/sql_utils.py" line="212"/>
+        <location filename="../infrastructure/database/sql_utils.py" line="270"/>
         <source>Type mismatch in filter: {warning_detail}...</source>
         <translation>Tyyppivirhe suodattimessa: {warning_detail}...</translation>
     </message>
@@ -5232,29 +6691,37 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
     </message>
 </context>
 <context>
+    <name>TaskCompletionHandler</name>
+    <message>
+        <location filename="../core/tasks/task_completion_handler.py" line="519"/>
+        <source>The filter of {0} could not be applied; it keeps its previous filter.</source>
+        <translation>Tason {0} suodatinta ei voitu ottaa käyttöön; se säilyttää aiemman suodattimensa.</translation>
+    </message>
+</context>
+<context>
     <name>TaskCompletionMessenger</name>
     <message>
-        <location filename="../adapters/layer_refresh_manager.py" line="268"/>
+        <location filename="../adapters/layer_refresh_manager.py" line="280"/>
         <source>{count} features visible in main layer</source>
         <translation>{count} kohdetta nakyvissa paatasolla</translation>
     </message>
     <message>
-        <location filename="../adapters/layer_refresh_manager.py" line="261"/>
+        <location filename="../adapters/layer_refresh_manager.py" line="273"/>
         <source>All filters cleared - {count} features visible in main layer</source>
         <translation>Kaikki suodattimet poistettu - {count} kohdetta nakyvissa paatasolla</translation>
     </message>
     <message>
-        <location filename="../adapters/layer_refresh_manager.py" line="291"/>
+        <location filename="../adapters/layer_refresh_manager.py" line="303"/>
         <source>Filter applied to &apos;{layer_name}&apos;: {count} features</source>
         <translation>Suodatin kaytetty tasolle '{layer_name}': {count} kohdetta</translation>
     </message>
     <message>
-        <location filename="../adapters/layer_refresh_manager.py" line="296"/>
+        <location filename="../adapters/layer_refresh_manager.py" line="308"/>
         <source> ({expression_preview})</source>
         <translation> ({expression_preview})</translation>
     </message>
     <message>
-        <location filename="../adapters/layer_refresh_manager.py" line="312"/>
+        <location filename="../adapters/layer_refresh_manager.py" line="324"/>
         <source>Filter cleared for &apos;{layer_name}&apos;: {count} features visible</source>
         <translation>Suodatin poistettu tasolta '{layer_name}': {count} kohdetta nakyvissa</translation>
     </message>
@@ -5262,17 +6729,17 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
 <context>
     <name>TaskParameterBuilder</name>
     <message>
-        <location filename="../adapters/task_builder.py" line="926"/>
+        <location filename="../adapters/task_builder.py" line="936"/>
         <source>No entity selected! The selection widget lost the feature. Re-select an entity.</source>
         <translation>Kohdetta ei ole valittu! Valintawidget menetti kohteen. Valitse kohde uudelleen.</translation>
     </message>
     <message>
-        <location filename="../adapters/task_builder.py" line="1044"/>
+        <location filename="../adapters/task_builder.py" line="1054"/>
         <source>Selected layer is invalid or its source cannot be found. Operation cancelled.</source>
         <translation>Valittu taso on virheellinen tai sen lahdetta ei loydy. Toiminto peruutettu.</translation>
     </message>
     <message>
-        <location filename="../adapters/task_builder.py" line="1059"/>
+        <location filename="../adapters/task_builder.py" line="1069"/>
         <source>Layer &apos;{0}&apos; is not yet initialized. Try selecting another layer then switch back to this one.</source>
         <translation>Tasoa '{0}' ei ole viela alustettu. Kokeile valita toinen taso ja vaihda sitten takaisin.</translation>
     </message>
@@ -5280,14 +6747,24 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
 <context>
     <name>UndoRedoHandler</name>
     <message>
-        <location filename="../adapters/undo_redo_handler.py" line="187"/>
+        <location filename="../adapters/undo_redo_handler.py" line="227"/>
         <source>Cannot undo: layer invalid or source not found.</source>
         <translation>Kumoaminen ei onnistu: taso virheellinen tai lahdetta ei loydy.</translation>
     </message>
     <message>
-        <location filename="../adapters/undo_redo_handler.py" line="264"/>
+        <location filename="../adapters/undo_redo_handler.py" line="304"/>
         <source>Cannot redo: layer invalid or source not found.</source>
         <translation>Uudelleenteko ei onnistu: taso virheellinen tai lahdetta ei loydy.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/undo_redo_handler.py" line="64"/>
+        <source>The provider rejected the saved filter.</source>
+        <translation>Tiedontuottaja hylkäsi tallennetun suodattimen.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/undo_redo_handler.py" line="67"/>
+        <source>Could not restore the filter: {0}</source>
+        <translation>Suodattimen palautus ei onnistunut: {0}</translation>
     </message>
 </context>
 <context>
@@ -5296,6 +6773,150 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <location filename="../ui/widgets/json_view/datatypes.py" line="572"/>
         <source>Explore ...</source>
         <translation>Selaa...</translation>
+    </message>
+</context>
+<context>
+    <name>VectorTargetJob</name>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="261"/>
+        <source>{0}: no unique key field, its features cannot be listed in its filter (a web service, or a virtual layer without a unique id column).</source>
+        <translation>{0}: ei yksilöivää avainkenttää, sen kohteita ei voi luetella sen suodattimessa (verkkopalvelu tai virtuaalitaso ilman yksilöivää tunnistesaraketta).</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="362"/>
+        <source>{0} features to list, more than the {1} sent to a web service: narrow the source or use an attribute filter.</source>
+        <translation>{0} lueteltavaa kohdetta, enemmän kuin verkkopalveluun voidaan lähettää ({1}): rajaa lähdettä tai käytä attribuuttisuodatinta.</translation>
+    </message>
+</context>
+<context>
+    <name>VectorTileFilter</name>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/vector_tile_target.py" line="26"/>
+        <source>Minimum coverage is unavailable for clipped tile objects</source>
+        <translation>Vähimmäispeittävyys ei ole käytettävissä leikatuille vektoriruutuobjekteille</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/vector_tile_target.py" line="29"/>
+        <source>Vector tile targets support Intersect and Disjoint only</source>
+        <translation>Vektoriruutukohteet tukevat vain Intersect- ja Disjoint-operaatioita</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/vector_tile_target.py" line="32"/>
+        <source>Vector tile filtering requires a CRS authority code</source>
+        <translation>Vektoriruutujen suodatus vaatii CRS-viranomaiskoodin</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/vector_tile_target.py" line="51"/>
+        <source>Vector tile display filter: attributes depend on zoom; objects split across tiles may differ</source>
+        <translation>Vektoriruutujen näyttösuodatin: attribuutit riippuvat zoomaustasosta; ruutujen yli jaetut objektit voivat poiketa</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/vector_tile_target.py" line="58"/>
+        <source>The vector tile style changed while the filter was running; try again</source>
+        <translation>Vektoriruutujen tyyli muuttui suodatuksen aikana; yritä uudelleen</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/vector_tile_filters.py" line="317"/>
+        <location filename="../adapters/qgis/coverage_layers/vector_tile_filters.py" line="340"/>
+        <source>Filter vector tile attributes</source>
+        <translation>Suodata vektoriruutujen attribuutit</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/vector_tile_filters.py" line="248"/>
+        <source>Invalid vector tile filter expression</source>
+        <translation>Virheellinen vektoriruutujen suodatinlauseke</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/vector_tile_filters.py" line="341"/>
+        <source>QGIS expression (attributes depend on zoom):</source>
+        <translation>QGIS-lauseke (attribuutit riippuvat zoomaustasosta):</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/vector_tile_filters.py" line="318"/>
+        <source>Redo vector tile filter</source>
+        <translation>Tee vektoriruutujen suodatus uudelleen</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/vector_tile_filters.py" line="298"/>
+        <source>Target only. Attributes depend on zoom. Objects split across tiles may be filtered differently.</source>
+        <translation>Vain kohde. Attribuutit riippuvat zoomaustasosta. Ruutujen yli jaetut objektit voidaan suodattaa eri tavoin.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/vector_tile_filters.py" line="99"/>
+        <source>The saved vector tile style is invalid</source>
+        <translation>Tallennettu vektoriruutujen tyyli on virheellinen</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/vector_tile_filters.py" line="113"/>
+        <location filename="../adapters/qgis/coverage_layers/vector_tile_filters.py" line="116"/>
+        <source>The saved vector tile symbol property is invalid</source>
+        <translation>Tallennettu vektoriruutujen symbolin ominaisuus on virheellinen</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/vector_tile_filters.py" line="39"/>
+        <source>The tile selection exceeds the expression budget (1 MB); use a smaller area</source>
+        <translation>Ruutuvalinta ylittää lausekebudjetin (1 Mt); käytä pienempää aluetta</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/vector_tile_filters.py" line="36"/>
+        <source>The tile selection exceeds the vertex budget (2000); use a smaller area</source>
+        <translation>Ruutuvalinta ylittää kärkipistebudjetin (2000); käytä pienempää aluetta</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/vector_tile_filters.py" line="257"/>
+        <source>The vector tile filter exceeds the expression budget (1 MB)</source>
+        <translation>Vektoriruutujen suodatin ylittää lausekebudjetin (1 Mt)</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/vector_tile_filters.py" line="264"/>
+        <source>The vector tile filter exceeds the total style expression budget (1 MB); use a smaller area</source>
+        <translation>Vektoriruutujen suodatin ylittää tyylilausekkeiden kokonaisbudjetin (1 Mt); käytä pienempää aluetta</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/vector_tile_filters.py" line="317"/>
+        <source>Undo vector tile filter</source>
+        <translation>Kumoa vektoriruutujen suodatus</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/vector_tile_filters.py" line="318"/>
+        <source>Unfilter vector tiles</source>
+        <translation>Poista vektoriruutujen suodatus</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/vector_tile_filters.py" line="346"/>
+        <source>Vector tile attribute filter</source>
+        <translation>Vektoriruutujen attribuuttisuodatin</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/favorites_bridge.py" line="111"/>
+        <source>Vector tile favorite</source>
+        <translation>Vektoriruutujen suosikki</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/vector_tile_filters.py" line="349"/>
+        <source>Vector tile filter</source>
+        <translation>Vektoriruutujen suodatin</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/vector_tile_filters.py" line="172"/>
+        <source>Vector tile filtering requires a basic renderer</source>
+        <translation>Vektoriruutujen suodatus vaatii perusrenderöijän</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/vector_tile_filters.py" line="125"/>
+        <location filename="../adapters/qgis/coverage_layers/vector_tile_filters.py" line="175"/>
+        <source>Vector tile filtering requires basic labeling</source>
+        <translation>Vektoriruutujen suodatus vaatii perustekstityksen</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/vector_tile_filters.py" line="353"/>
+        <source>Vector tile filters</source>
+        <translation>Vektoriruutujen suodattimet</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/vector_tile_filters.py" line="294"/>
+        <source>Vector tiles</source>
+        <translation>Vektoriruudut</translation>
     </message>
 </context>
 <context>
@@ -5309,19 +6930,19 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
 <context>
     <name>self.self</name>
     <message>
-        <location filename="../ui/controllers/coverage_dock_extras.py" line="588"/>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="735"/>
         <source>Source geometry: the features selected in EXPLORING</source>
         <translation>Lähdegeometria: EXPLORINGissa valitut kohteet</translation>
     </message>
     <message>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="624"/>
         <source>Source geometry: the selected pixels, vectorized</source>
-        <translation>Lähdegeometria: valitut pikselit vektoroituina</translation>
+        <translation type="obsolete">Lähdegeometria: valitut pikselit vektoroituina</translation>
     </message>
     <message>
         <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
         <source>Kept points</source>
-        <translation>Säilytetyt pisteet</translation>
+        <translation type="obsolete">Säilytetyt pisteet</translation>
     </message>
 </context>
 </TS>

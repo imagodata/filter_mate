@@ -2469,7 +2469,7 @@ class ExploringController(BaseController, LayerSelectionMixin):
                     """Handle async evaluation errors."""
                     show_warning(
                         self._dockwidget.tr("Expression Evaluation"),
-                        self._dockwidget.tr(f"Error evaluating expression: {error_msg}")
+                        self._dockwidget.tr("Error evaluating expression: {0}").format(error_msg)
                     )
 
                 # Start async evaluation
