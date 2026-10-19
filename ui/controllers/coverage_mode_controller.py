@@ -3159,6 +3159,11 @@ class CoverageModeController(BaseController):
         with_geometry = [f for f in (features or []) if isinstance(f, QgsFeature) and f.hasGeometry()]
         if with_geometry:
             return with_geometry
+        from ...adapters.qgis.source_capability_probe import counts_cheaply
+        if not counts_cheaply(source):
+            # A source that does not count cheaply (web service...) is read in a task by
+            # EXPLORING (the Filter waits for it): never again here, on the GUI thread.
+            return []
         ids = [f.id() if isinstance(f, QgsFeature) else f for f in (features or [])]
         request = None
         if ids and all(isinstance(i, int) for i in ids):

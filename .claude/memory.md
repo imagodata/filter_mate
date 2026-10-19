@@ -782,3 +782,12 @@ Result: Que veux-tu faire dans cette session ?
   rendue certaine dans le smoke GUI (`s_undo_pick_race` : `singleShot(150)` de la touche, undo, `sleep`). Un choix
   fait pendant la tâche filtre est appliqué à la fin (`_combo_blocked_at`) ; une tâche échouée / annulée rouvre la
   fenêtre (`_filter_engine_task_terminated`, garde de génération pour annuler-relancer).
+- [2026-10-19] Revue du lot C (#193, branche `claude/v5-stream-F-c-fixes`) : `_remote_selection_plan` est la seule
+  source des requêtes de sélection / zoom d'une source lue en tâche (custom vide ou non-filtre → rien à lire, zoom sur
+  `dataProvider().extent()` — pas `layer.extent()`, qui compte les entités après un changement de subset ; refus =
+  `(None, None)`, message affiché, `_remote_selection_refused`). Règles « service » (500 clés, clé stable, liste
+  blanche) seulement si `capability.is_remote_service` ; sinon (MSSQL, Oracle, /vsicurl/...) clés de 5.0 et lecture
+  sur le thread GUI (`ImmediateRead`) quand un worker ne peut pas évaluer l'expression (`read_refusal`). Un champ
+  virtuel n'est refusé que si la requête l'évalue (`request_reads_fields`). Le Filtre différé suit une lecture
+  remplacée par une signature identique (même fid ⇒ `setFilterFids([fid])` partout ; révision « single » = fid
+  désigné) et prévient sinon. `show_warning(message, title)` : l'ordre était inversé dans le lot C.

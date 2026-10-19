@@ -1671,16 +1671,25 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
         self.setToolTip(self.tr("Loading values…") if loading else '')
 
     def _populate_features_async(self, expression, preserve_checked=False, force_full=False, search_text=None):
-        """Read service rows in a cancellable snapshot task; keep local reads synchronous."""
-        from ...adapters.qgis.async_query import submit_query
+        """Read service rows in a cancellable snapshot task; keep local reads synchronous.
+
+        A display expression or virtual field a worker cannot evaluate is
+        refused on a web service; another source that cannot count cheaply
+        (network database, remote file) is then listed on the GUI thread, as
+        before 5.1.
+        """
+        from ...adapters.qgis.async_query import ImmediateRead, expression_refusal, submit_query
         from ...adapters.qgis.source_capability_probe import capability_for_layer
-        from ...adapters.qgis.async_query import remote_expression_is_safe
-        if not remote_expression_is_safe(expression, self.layer.fields()):
+        capability = capability_for_layer(self.layer)
+        service = capability is not None and capability.is_remote_service
+        refusal = expression_refusal(expression, self.layer.fields()) if expression else None
+        if refusal is not None and service:
             slot = getattr(self, '_population_query', None)
             if slot is not None:
                 slot.cancel()
+            from ...adapters.qgis.async_query import refusal_message
             from ...infrastructure.feedback import show_warning
-            show_warning(self.tr("Values"), self.tr("This expression cannot be evaluated safely for a service."))
+            show_warning(refusal_message(refusal), self.tr("Values"))
             return
         layer = self.layer
         layer_id = layer.id()
@@ -1695,18 +1704,35 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
         saved = self.getCheckedFeatureIds() if preserve_checked else []
         identifier = self._identifier_field_of_layer(list_widget.getIdentifierFieldName())
         numeric = self._identifier_is_numeric()
-        expr, context = self._make_display_evaluator(expression)
         search_text = (search_text or '').strip()
         limit = max(1, int(list_widget.getLimit() or feature_picker_limit() or 1000))
-        capability = capability_for_layer(layer)
         if force_full:
-            limit = capability.key_list_limit or limit
-        request = QgsFeatureRequest().setFlags(QgsFeatureRequest.Flag.NoGeometry)
-        if expr is not None and expr.needsGeometry():
-            request.setFlags(QgsFeatureRequest.Flag.NoFlags)
-        request.setLimit(limit + 1)
+            # "Select All" loads every row, but a web service never more keys than it can be sent.
+            limit = capability.key_list_limit if service else None
+        needs_geometry = bool(expression) and QgsExpression(expression).needsGeometry()
+        attributes = self._row_attributes(expression, identifier)
+        fields = layer.fields()
+        request = QgsFeatureRequest().setFlags(
+            QgsFeatureRequest.Flag.NoFlags if needs_geometry else QgsFeatureRequest.Flag.NoGeometry)
+        if attributes is not None:
+            request.setSubsetOfAttributes(attributes, fields)
+        if limit is not None:
+            request.setLimit(limit + 1)
         if search_text:
             request.setFilterExpression(self._search_expression(self._display_expression_sql(expression, list_widget), search_text))
+        if refusal is None:
+            from ...adapters.qgis.async_query import read_refusal
+            refusal = read_refusal(layer, request)
+            if refusal is not None and service:
+                slot = getattr(self, '_population_query', None)
+                if slot is not None:
+                    slot.cancel()
+                from ...adapters.qgis.async_query import refusal_message
+                from ...infrastructure.feedback import show_warning
+                show_warning(refusal_message(refusal), self.tr("Values"))
+                return
+        immediate = refusal is not None
+        expr, context = self._make_display_evaluator(expression, worker=not immediate)
         row_from_feature = type(self)._row_from_feature
         lookup_request = type(self)._build_identifier_lookup_request
         reverse = self._sort_order == 'DESC'
@@ -1718,18 +1744,20 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
             scanned = 0
             for feature in task.features(request):
                 scanned += 1
-                if scanned > limit:
+                if limit is not None and scanned > limit:
                     break
                 rows.append(row_from_feature(feature, identifier, expression, expr, context))
-            truncated = scanned > limit
+            truncated = limit is not None and scanned > limit
             loaded = {str(row[1]) for row in rows}
             missing = [fid for fid in saved if str(fid) not in loaded]
             for start in range(0, len(missing), 500):
                 if task.isCanceled():
                     break
                 recovery = lookup_request(identifier, missing[start:start + 500], numeric)
-                if expr is not None and expr.needsGeometry():
+                if needs_geometry:
                     recovery.setFlags(QgsFeatureRequest.Flag.NoFlags)
+                if attributes is not None:
+                    recovery.setSubsetOfAttributes(attributes, fields)
                 for feature in task.features(recovery):
                     rows.append(row_from_feature(feature, identifier, expression, expr, context))
             rows.sort(key=lambda row: row[0] or '', reverse=reverse)
@@ -1745,8 +1773,9 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
             rows, truncated, scanned = result
             if force_full and truncated:
                 from ...infrastructure.feedback import show_warning
-                show_warning(self.tr("Selection"), self.tr(
-                    "The remote list exceeds the safe selection limit. Select fewer features or filter the layer first."))
+                show_warning(self.tr(
+                    "The remote list exceeds the safe selection limit. Select fewer features or filter the layer first."),
+                    self.tr("Selection"))
                 return
             wanted = saved
             if getattr(self, '_selection_revision', 0) != revision:
@@ -1765,15 +1794,45 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
                 self._pending_select_all = None
                 self.select_all(pending)
 
+        if immediate:
+            slot = getattr(self, '_population_query', None)
+            if slot is not None:
+                slot.cancel()
+            deliver(compute(ImmediateRead(layer)))
+            return None
         return submit_query(self, '_population_query', layer, self.tr("Loading values…"),
                             compute, deliver, self._population_loading)
 
-    def _make_display_evaluator(self, expression):
-        """Return ``(expr, context)`` for the display expression; ``expr`` is None for a plain field."""
+    def _row_attributes(self, expression, identifier):
+        """Fields a list row reads (its identifier, its display expression), None for all of them.
+
+        A worker evaluates only the virtual fields a request reads: one a
+        worker cannot evaluate refuses the list only when it is displayed.
+        """
+        fields = self.layer.fields()
+        names = {identifier} if identifier else set()
+        if expression:
+            if fields.indexOf(expression) >= 0:
+                names.add(expression)
+            else:
+                parsed = QgsExpression(expression)
+                columns = set(parsed.referencedColumns())
+                if parsed.hasParserError() or '#!allattributes!#' in columns:
+                    return None
+                names |= columns
+        return sorted(names)
+
+    def _make_display_evaluator(self, expression, worker=True):
+        """Return ``(expr, context)`` for the display expression; ``expr`` is None for a plain field.
+
+        A layer read in a worker (no cheap count) gets a context of its fields
+        only: project and layer scopes reach live objects. ``worker=False``
+        (a read on the GUI thread) keeps them.
+        """
         expr = QgsExpression(expression) if expression and not QgsExpression(expression).isField() else None
         context = QgsExpressionContext()
         from ...adapters.qgis.source_capability_probe import counts_cheaply
-        if not counts_cheaply(self.layer):
+        if worker and not counts_cheaply(self.layer):
             fields = self.layer.fields()
             if expr is None and expression and fields.indexOf(expression) < 0:
                 expr = QgsExpression(expression)
@@ -1882,16 +1941,26 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
 
     def _recover_remote_rows(self, identifier, values, expression, numeric):
         """Recover checked rows outside the page without blocking the GUI."""
-        from ...adapters.qgis.async_query import submit_query
-        from ...adapters.qgis.async_query import remote_expression_is_safe
-        if not remote_expression_is_safe(expression, self.layer.fields()):
-            return
+        from ...adapters.qgis.async_query import ImmediateRead, expression_refusal, read_refusal, submit_query
+        from ...adapters.qgis.source_capability_probe import capability_for_layer
         layer = self.layer
         list_widget = self.list_widgets[layer.id()]
         identifier = self._identifier_field_of_layer(identifier)
         revision = getattr(self, '_selection_revision', 0)
         values = list(values)
-        expr, context = self._make_display_evaluator(expression)
+        needs_geometry = bool(expression) and QgsExpression(expression).needsGeometry()
+        attributes = self._row_attributes(expression, identifier)
+        fields = layer.fields()
+        refusal = expression_refusal(expression, fields) if expression else None
+        if refusal is None:
+            probe = QgsFeatureRequest()
+            if attributes is not None:
+                probe.setSubsetOfAttributes(attributes, fields)
+            refusal = read_refusal(layer, probe)
+        if refusal is not None and capability_for_layer(layer).is_remote_service:
+            return  # The population refused this display with a message.
+        immediate = refusal is not None
+        expr, context = self._make_display_evaluator(expression, worker=not immediate)
         build = type(self)._build_identifier_lookup_request
         row = type(self)._row_from_feature
 
@@ -1901,8 +1970,10 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
                 if task.isCanceled():
                     break
                 request = build(identifier, values[start:start + 500], numeric)
-                if expr is not None and expr.needsGeometry():
+                if needs_geometry:
                     request.setFlags(QgsFeatureRequest.Flag.NoFlags)
+                if attributes is not None:
+                    request.setSubsetOfAttributes(attributes, fields)
                 for feature in task.features(request):
                     rows.append(row(feature, identifier, expression, expr, context))
             return rows
@@ -1921,6 +1992,9 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
             list_widget.setFeaturesList(list(list_widget.getFeaturesList()) + added)
             list_widget.setTotalFeaturesListCount(list_widget.count())
 
+        if immediate:
+            deliver(compute(ImmediateRead(layer)))
+            return
         submit_query(self, '_lookup_query', layer, self.tr("Loading selected values…"), compute, deliver)
 
     def _add_row_item(self, list_widget, display_value, fid, checked):

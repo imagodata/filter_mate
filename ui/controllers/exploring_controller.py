@@ -14,10 +14,11 @@ try:
         QgsProject,
         QgsFeature,
         QgsFeatureRequest,
+        QgsGeometry,
         QgsRectangle,
         QgsExpression
     )
-    from qgis.PyQt.QtCore import pyqtSignal, QObject
+    from qgis.PyQt.QtCore import pyqtSignal, QObject, QTimer
     from qgis.PyQt.QtGui import QColor
     from qgis.utils import iface
     QGIS_AVAILABLE = True
@@ -36,10 +37,13 @@ from .selection_modes import group_for_count
 try:
     from ...infrastructure.feedback import show_warning
 except ImportError:
-    def show_warning(title, message):
-        """Fallback show_warning."""
+    def show_warning(message, title="FilterMate"):
+        """Fallback show_warning (infrastructure.feedback signature)."""
 
 logger = logging.getLogger(__name__)
+
+# _remote_zoom_request: nothing narrows the zoom, use the provider extent.
+WHOLE_LAYER = object()
 
 
 class ExploringController(BaseController, LayerSelectionMixin):
@@ -360,6 +364,8 @@ class ExploringController(BaseController, LayerSelectionMixin):
     def _cancel_remote_reads(self):
         """Invalidate deliveries on a layer switch or controller teardown."""
         self._remote_selection_result = None
+        self._remote_selection_pending = None
+        self._remote_selection_waiting = False
         binding = getattr(self, '_remote_cache_layer', None)
         if binding is not None:
             for signal_name in ('dataChanged', 'geometryChanged', 'willBeDeleted'):
@@ -382,9 +388,28 @@ class ExploringController(BaseController, LayerSelectionMixin):
         if setter is not None and (count == 1 if loading else count == 0):
             setter(count > 0)
 
+    def _read_mode(self, layer, request, title):
+        """How ``request`` is read: 'task' (worker), 'now' (GUI thread) or None (refused, shown).
+
+        A worker cannot evaluate an expression or virtual field that reaches
+        project objects (adapters.qgis.async_query.read_refusal). A web
+        service is then refused; another source that cannot count cheaply
+        (network database, remote file) is read the way it was before 5.1.
+        """
+        from ...adapters.qgis.async_query import read_refusal, refusal_message
+        from ...adapters.qgis.source_capability_probe import capability_for_layer
+        reason = read_refusal(layer, request)
+        if reason is None:
+            return 'task'
+        capability = capability_for_layer(layer)
+        if capability is not None and capability.is_remote_service:
+            show_warning(refusal_message(reason), title)
+            return None
+        return 'now'
+
     def _queue_unique_values(self):
         """Read a bounded set of values with provider cancellation."""
-        from ...adapters.qgis.async_query import submit_query
+        from ...adapters.qgis.async_query import ImmediateRead, submit_query
         from ..widgets.custom_widgets import feature_picker_limit
         layer, field = self._current_layer, self._current_field
         index = layer.fields().indexFromName(field)
@@ -405,18 +430,43 @@ class ExploringController(BaseController, LayerSelectionMixin):
             values, partial = result
             self._update_features_widget(values)
             if partial:
-                show_warning(self._dockwidget.tr("Values"), self._dockwidget.tr(
-                    "Only a limited set of values is shown. Refine the search to find other values."))
+                show_warning(self._dockwidget.tr(
+                    "Only a limited set of values is shown. Refine the search to find other values."),
+                    self._dockwidget.tr("Values"))
 
-        submit_query(self, '_values_query', layer, self._dockwidget.tr("Loading values…"),
-                     compute, deliver, self._remote_loading)
+        mode = self._read_mode(layer, request, self._dockwidget.tr("Values"))
+        if mode == 'now':
+            deliver(compute(ImmediateRead(layer)))
+        elif mode == 'task':
+            submit_query(self, '_values_query', layer, self._dockwidget.tr("Loading values…"),
+                         compute, deliver, self._remote_loading)
 
     def _invalidate_remote_selection_cache(self, *args):
         """A reload or edit invalidates an otherwise identical completed selection."""
         self._remote_selection_result = None
 
+    def _remote_single_fid(self, layer):
+        """Feature id the single selection designates: the saved canvas pick while selecting, else the picker's."""
+        dw = self._dockwidget
+        widget = dw.widgets.get('EXPLORING', {}).get('SINGLE_SELECTION_FEATURES', {}).get('WIDGET')
+        feature = widget.feature() if widget else None
+        fid = feature.id() if feature and feature.isValid() else None
+        saved = getattr(dw, '_last_single_selection_fid', None)
+        same_layer = layer is not None and getattr(dw, '_last_single_selection_layer_id', None) == layer.id()
+        props = dw.PROJECT_LAYERS.get(layer.id(), {}).get('exploring', {}) if layer is not None else {}
+        button = getattr(dw, 'pushButton_checkable_exploring_selecting', None)
+        selecting = props.get('is_selecting', False) or (button is not None and button.isChecked())
+        if same_layer and saved is not None and (selecting or fid is None):
+            fid = saved
+        return fid
+
     def _remote_ui_revision(self):
-        """Read only widget state to reject a response even before a debounce fires."""
+        """Read only widget state to reject a response even before a debounce fires.
+
+        The single selection is its designated feature id: the debounced pick
+        that saves the same id is no new selection (it would otherwise
+        replace an identical read and drop the filter waiting for it).
+        """
         dw = self._dockwidget
         widgets = dw.widgets.get('EXPLORING', {})
         mode = dw.current_exploring_groupbox
@@ -427,10 +477,7 @@ class ExploringController(BaseController, LayerSelectionMixin):
             widget = widgets.get('MULTIPLE_SELECTION_FEATURES', {}).get('WIDGET')
             state = tuple(item[1] for item in widget.checkedItems()) if widget else ()
         else:
-            widget = widgets.get('SINGLE_SELECTION_FEATURES', {}).get('WIDGET')
-            feature = widget.feature() if widget else None
-            state = (feature.id() if feature and feature.isValid() else None,
-                     getattr(dw, '_last_single_selection_fid', None))
+            state = self._remote_single_fid(self._current_layer or dw.current_layer)
         return mode, state
 
     def _empty_remote_selection(self, expression, refused=False):
@@ -440,13 +487,87 @@ class ExploringController(BaseController, LayerSelectionMixin):
             slot.cancel()
         self._remote_selection_result = None
         self._remote_selection_pending = None
+        self._remote_selection_waiting = False
         self._remote_selection_refused = refused
         return [], expression
 
+    def _remote_selection_plan(self, layer, input=None, custom_expression=None, zoom=False):
+        """The request of an EXPLORING selection, built from its input or the widgets, without reading.
+
+        Returns ``(request, expression)``:
+
+        - ``request`` None, ``expression`` a string: nothing to read. No feature
+          picked or checked, an empty custom expression or one that is no
+          filter (a field name...): as for a local layer, the source is not
+          filtered by it (TaskParameterBuilder.determine_skip_source_filter).
+        - both None: the selection is refused, the warning is shown.
+
+        A web service gets at most ``key_list_limit`` keys and needs a stable
+        key field (an id list means nothing to its server). Another source
+        keeps its key lists as before 5.1: no bound but the IN-list size of
+        its SQL (Oracle), feature ids (``$id``) without a key field. A zoom
+        request (``zoom``) reads geometry only and may use the feature ids
+        the rows are keyed by.
+        """
+        from ...adapters.qgis.source_capability_probe import capability_for_layer, stable_key_for_layer
+        from ...core.filter.pk_formatter import QGIS_EXPRESSION, format_key_literal
+        from ...infrastructure.utils import should_skip_expression_for_filtering
+        dw = self._dockwidget
+        request = QgsFeatureRequest()
+        if zoom:
+            request.setNoAttributes()
+        if input is None and custom_expression is None:
+            widgets = dw.widgets.get('EXPLORING', {})
+            mode = dw.current_exploring_groupbox
+            if mode == 'custom_selection':
+                widget = widgets.get('CUSTOM_SELECTION_EXPRESSION', {}).get('WIDGET')
+                custom_expression = widget.expression() if widget else ''
+            elif mode == 'multiple_selection':
+                widget = widgets.get('MULTIPLE_SELECTION_FEATURES', {}).get('WIDGET')
+                input = list(widget.checkedItems()) if widget else []
+            else:
+                fid = self._remote_single_fid(layer)
+                return (None, '') if fid is None else (request.setFilterFids([fid]), '')
+        if custom_expression is not None:
+            expression = custom_expression.strip()
+            if should_skip_expression_for_filtering(expression)[0]:
+                return None, expression
+            return request.setFilterExpression(expression), expression
+        if isinstance(input, QgsFeature):
+            # The same request as the picker's own: one read for a pick and a Filter click.
+            return request.setFilterFids([input.id()]), ''
+        values = [item[1] for item in input or [] if isinstance(item, (list, tuple)) and len(item) > 1]
+        if not values:
+            return None, ''
+        capability = capability_for_layer(layer)
+        service = capability is not None and capability.is_remote_service
+        limit = capability.key_list_limit if service else None
+        if limit is not None and len(values) > limit:
+            show_warning(dw.tr("The service selection exceeds the key limit. Refine the selection."),
+                         dw.tr("Selection"))
+            return None, None
+        key = stable_key_for_layer(layer, scan=False)
+        if key.is_field:
+            numeric = layer.fields().field(key.name).isNumeric()
+            literals = [format_key_literal(value, numeric, QGIS_EXPRESSION) for value in values]
+            chunk = (capability.in_list_max if capability is not None else None) or len(literals)
+            column = QgsExpression.quotedColumnRef(key.name)
+            lists = ['{} IN ({})'.format(column, ', '.join(literals[start:start + chunk]))
+                     for start in range(0, len(literals), chunk)]
+            expression = lists[0] if len(lists) == 1 else '(' + ' OR '.join(lists) + ')'
+            return request.setFilterExpression(expression), expression
+        if service and not zoom:
+            show_warning(dw.tr("This service has no stable key for the selection."), dw.tr("Selection"))
+            return None, None
+        # Rows keyed by feature id (custom_widgets: '$id' without a key field).
+        ids = [int(value) for value in values]
+        expression = '' if service else '$id IN ({})'.format(', '.join(str(fid) for fid in ids))
+        return request.setFilterFids(ids), expression
+
     def _remote_features(self, input=None, custom_expression=None):
         """Return cached selection data or schedule its cancellable read."""
-        from ...adapters.qgis.async_query import submit_query
-        from ...adapters.qgis.source_capability_probe import stable_key_for_layer, capability_for_layer
+        from ...adapters.qgis.async_query import ImmediateRead, submit_query
+        from ...adapters.qgis.source_capability_probe import stable_key_for_layer
         from ...core.filter.pk_formatter import QGIS_EXPRESSION, format_key_literal
         dw = self._dockwidget
         layer = dw.current_layer
@@ -457,50 +578,16 @@ class ExploringController(BaseController, LayerSelectionMixin):
             for signal_name in ('dataChanged', 'geometryChanged', 'willBeDeleted'):
                 getattr(layer, signal_name).connect(self._invalidate_remote_selection_cache)
         self._remote_selection_refused = False
-        key = stable_key_for_layer(layer, scan=False)
-        request = QgsFeatureRequest()
-        expression = custom_expression or ''
-        if expression:
-            from ...infrastructure.utils import should_skip_expression_for_filtering
-            skip, reason = should_skip_expression_for_filtering(expression)
-            if skip:
-                return self._empty_remote_selection(expression)
-            request.setFilterExpression(expression)
-        elif isinstance(input, QgsFeature):
-            request.setFilterFid(input.id())
-        elif input and isinstance(input, list):
-            values = [item[1] for item in input if isinstance(item, (list, tuple)) and len(item) > 1]
-            limit = capability_for_layer(layer).key_list_limit
-            if limit is not None and len(values) > limit:
-                show_warning(dw.tr("Selection"), dw.tr("The service selection exceeds the key limit. Refine the selection."))
-                return self._empty_remote_selection('FALSE', refused=True)
-            if key.is_field:
-                numeric = layer.fields().field(key.name).isNumeric()
-                literals = ', '.join(format_key_literal(value, numeric, QGIS_EXPRESSION) for value in values)
-                expression = '{} IN ({})'.format(QgsExpression.quotedColumnRef(key.name), literals) if values else 'FALSE'
-                request.setFilterExpression(expression)
-            else:
-                show_warning(dw.tr("Selection"), dw.tr("This service has no stable key for the selection."))
-                return self._empty_remote_selection('FALSE', refused=True)
-        else:
-            if dw.current_exploring_groupbox == 'custom_selection':
-                widget = dw.widgets.get('EXPLORING', {}).get('CUSTOM_SELECTION_EXPRESSION', {}).get('WIDGET')
-                candidate = widget.expression() if widget else ''
-                if candidate:
-                    from ...infrastructure.utils import should_skip_expression_for_filtering
-                    skip, reason = should_skip_expression_for_filtering(candidate)
-                    if skip:
-                        return self._empty_remote_selection(candidate)
-            request = self._remote_zoom_request()
-            # The zoom request omits attributes; selection results need the key and display values.
-            request.setFlags(QgsFeatureRequest.Flag.NoFlags)
-            filter_expression = request.filterExpression()
-            expression = filter_expression.expression() if filter_expression is not None else ''
+        self._remote_selection_waiting = False
+        request, expression = self._remote_selection_plan(layer, input, custom_expression)
+        if expression is None:
+            return self._empty_remote_selection('', refused=True)
+        if request is None:
+            return self._empty_remote_selection(expression)
+        mode = self._read_mode(layer, request, dw.tr("Selection"))
+        if mode is None:
+            return self._empty_remote_selection('', refused=True)
         filter_expression = request.filterExpression()
-        from ...adapters.qgis.async_query import remote_expression_is_safe
-        if filter_expression is not None and not remote_expression_is_safe(filter_expression.expression(), layer.fields()):
-            show_warning(dw.tr("Selection"), dw.tr("This expression cannot be evaluated safely for a service."))
-            return self._empty_remote_selection('FALSE', refused=True)
         signature = (layer.id(), layer.source(), layer.subsetString(), dw.current_exploring_groupbox,
                      filter_expression.expression() if filter_expression is not None else '',
                      request.filterFid(), tuple(sorted(request.filterFids())))
@@ -511,8 +598,9 @@ class ExploringController(BaseController, LayerSelectionMixin):
             return cached[1], cached[2]
         slot = getattr(self, '_selection_query', None)
         if slot is not None and slot.task is not None and getattr(self, '_remote_selection_pending', None) == signature:
+            self._remote_selection_waiting = True
             return [], expression
-        self._remote_selection_pending = signature
+        key = stable_key_for_layer(layer, scan=False)
         key_name = key.name if key.is_field else None
         numeric = layer.fields().field(key_name).isNumeric() if key_name else False
 
@@ -522,6 +610,12 @@ class ExploringController(BaseController, LayerSelectionMixin):
             if not result_expression and key_name and features:
                 literals = ', '.join(format_key_literal(feature[key_name], numeric, QGIS_EXPRESSION) for feature in features)
                 result_expression = '{} IN ({})'.format(QgsExpression.quotedColumnRef(key_name), literals)
+            return features, result_expression
+
+        if mode == 'now':
+            features, result_expression = compute(ImmediateRead(layer))
+            self._empty_remote_selection(result_expression)
+            self._remote_selection_result = (signature, features, result_expression)
             return features, result_expression
 
         def deliver(result):
@@ -536,78 +630,69 @@ class ExploringController(BaseController, LayerSelectionMixin):
             if props is not None:
                 self.handle_exploring_features_result(features, result_expression, props, True)
 
+        self._remote_selection_pending = signature
+        self._remote_selection_waiting = True
         submit_query(self, '_selection_query', layer, dw.tr("Loading selected values…"),
                      compute, deliver, self._remote_loading)
         return [], expression
 
     def _remote_zoom_request(self, features=None, expression=None):
-        """Build a geometry request from UI state, without reading the provider."""
+        """Geometry request of a zoom, built from UI state without reading the provider.
+
+        Returns None after a refusal (shown), WHOLE_LAYER when nothing narrows
+        the zoom (no selection, an empty custom expression or a field name):
+        the provider extent, as known, instead of reading every feature.
+        """
         layer = self._current_layer or self._dockwidget.current_layer
-        request = QgsFeatureRequest().setNoAttributes()
-        if expression:
-            return request.setFilterExpression(expression)
-        if features:
-            return request.setFilterFids([feature.id() for feature in features])
+        if features and not expression:
+            return QgsFeatureRequest().setNoAttributes().setFilterFids([feature.id() for feature in features])
+        request, selection = self._remote_selection_plan(layer, custom_expression=expression or None, zoom=True)
+        if selection is None:
+            return None
+        return WHOLE_LAYER if request is None else request
+
+    def _zoom_canvas_to(self, extent, crs, scale_factor):
+        """Zoom the canvas to ``extent`` (layer CRS), on the GUI thread."""
         dw = self._dockwidget
-        mode = dw.current_exploring_groupbox
-        widgets = dw.widgets.get('EXPLORING', {})
-        if mode == 'custom_selection':
-            widget = widgets.get('CUSTOM_SELECTION_EXPRESSION', {}).get('WIDGET')
-            if widget and widget.expression():
-                expr = QgsExpression(widget.expression())
-                if not expr.isField():
-                    request.setFilterExpression(widget.expression())
-        elif mode == 'multiple_selection':
-            widget = widgets.get('MULTIPLE_SELECTION_FEATURES', {}).get('WIDGET')
-            values = [item[1] for item in widget.checkedItems()] if widget else []
-            from ...adapters.qgis.source_capability_probe import stable_key_for_layer, capability_for_layer
-            limit = capability_for_layer(layer).key_list_limit
-            if limit is not None and len(values) > limit:
-                show_warning(dw.tr("Selection"), dw.tr("The service selection exceeds the key limit. Refine the selection."))
-                return request.setFilterExpression('FALSE')
-            key = stable_key_for_layer(layer, scan=False)
-            if key.is_field:
-                from ...core.filter.pk_formatter import QGIS_EXPRESSION, format_key_literal
-                numeric = layer.fields().field(key.name).isNumeric()
-                literals = ', '.join(format_key_literal(value, numeric, QGIS_EXPRESSION) for value in values)
-                request.setFilterExpression(
-                    '{} IN ({})'.format(QgsExpression.quotedColumnRef(key.name), literals) if values else 'FALSE')
-            else:
-                request.setFilterFids([])
-        else:
-            widget = widgets.get('SINGLE_SELECTION_FEATURES', {}).get('WIDGET')
-            feature = widget.feature() if widget else None
-            fid = feature.id() if feature and feature.isValid() else None
-            saved = getattr(dw, '_last_single_selection_fid', None)
-            same_layer = getattr(dw, '_last_single_selection_layer_id', None) == layer.id()
-            props = dw.PROJECT_LAYERS.get(layer.id(), {}).get('exploring', {})
-            button = getattr(dw, 'pushButton_checkable_exploring_selecting', None)
-            selecting = props.get('is_selecting', False) or (button is not None and button.isChecked())
-            if same_layer and saved is not None and (selecting or fid is None):
-                fid = saved
-            request.setFilterFids([fid] if fid is not None else [])
-        return request
+        canvas = dw.iface.mapCanvas()
+        target_crs = canvas.mapSettings().destinationCrs()
+        if crs != target_crs:
+            transform = QgsCoordinateTransform(crs, target_crs, QgsProject.instance())
+            extent = transform.transformBoundingBox(extent)
+        if extent.width() == 0 or extent.height() == 0:
+            extent.grow(canvas.mapUnitsPerPixel() * 25)
+        extent.scale(scale_factor)
+        canvas.zoomToFeatureExtent(extent)
+        canvas.refresh()
 
     def _queue_remote_zoom(self, request, scale_factor=1.1):
         """Compute extent in a worker, then transform and zoom on the GUI thread."""
-        from ...adapters.qgis.async_query import collect_extent, submit_query
-        from ...adapters.qgis.async_query import remote_expression_is_safe
+        from ...adapters.qgis.async_query import ImmediateRead, collect_extent, submit_query
         layer = self._current_layer or self._dockwidget.current_layer
         if layer is None:
             return False
-        filter_expression = request.filterExpression()
-        if filter_expression is not None and not remote_expression_is_safe(filter_expression.expression(), layer.fields()):
-            slot = getattr(self, '_zoom_query', None)
+        slot = getattr(self, '_zoom_query', None)
+        if request is None:
             if slot is not None:
                 slot.cancel()
-            show_warning(self._dockwidget.tr("Zoom"), self._dockwidget.tr(
-                "This expression cannot be evaluated safely for a service."))
             return False
-        layer = self._current_layer or self._dockwidget.current_layer
-        if layer is None:
-            return False
-        crs = layer.crs()
         dw = self._dockwidget
+        crs = layer.crs()
+        if request is WHOLE_LAYER:
+            # The provider's own extent (capabilities, metadata): no feature is read. Not
+            # layer.extent(): after a subset change it asks the provider for a feature count.
+            extent = QgsRectangle(layer.dataProvider().extent())
+            if not extent.isNull() and not extent.isEmpty():
+                if slot is not None:
+                    slot.cancel()
+                self._zoom_canvas_to(extent, crs, scale_factor)
+                return True
+            request = QgsFeatureRequest().setNoAttributes()
+        mode_read = self._read_mode(layer, request, dw.tr("Zoom"))
+        if mode_read is None:
+            if slot is not None:
+                slot.cancel()
+            return False
         mode = dw.current_exploring_groupbox
         custom = dw.widgets.get('EXPLORING', {}).get('CUSTOM_SELECTION_EXPRESSION', {}).get('WIDGET')
         expression = custom.expression() if custom and mode == 'custom_selection' else None
@@ -630,21 +715,59 @@ class ExploringController(BaseController, LayerSelectionMixin):
             if list(layer.selectedFeatureIds()) != selected:
                 return
             if extent is None:
-                show_warning(dw.tr("Zoom"), dw.tr("No feature with geometry matches the selection."))
+                show_warning(dw.tr("No feature with geometry matches the selection."), dw.tr("Zoom"))
                 return
-            canvas = dw.iface.mapCanvas()
-            target_crs = canvas.mapSettings().destinationCrs()
-            if crs != target_crs:
-                transform = QgsCoordinateTransform(crs, target_crs, QgsProject.instance())
-                extent = transform.transformBoundingBox(extent)
-            if extent.width() == 0 or extent.height() == 0:
-                extent.grow(canvas.mapUnitsPerPixel() * 25)
-            extent.scale(scale_factor)
-            canvas.zoomToFeatureExtent(extent)
-            canvas.refresh()
+            self._zoom_canvas_to(extent, crs, scale_factor)
 
+        if mode_read == 'now':
+            if slot is not None:
+                slot.cancel()
+            deliver(collect_extent(ImmediateRead(layer), request))
+            return True
         submit_query(self, '_zoom_query', layer, dw.tr("Loading zoom extent…"),
                      lambda task: collect_extent(task, request), deliver, self._remote_loading)
+        return True
+
+    def identify_remote_selection(self):
+        """Flash the EXPLORING selection of a service with the geometries already read.
+
+        QgsMapCanvas.flashFeatureIds would read the features again on the GUI
+        thread. A selection still loading is flashed when its read delivers.
+        """
+        dw = self._dockwidget
+        layer = dw.current_layer
+        token = object()
+        self._pending_identify = token
+        features, _ = self._remote_features()
+        if self._remote_selection_refused:
+            return False
+        slot = getattr(self, '_selection_query', None)
+        if self._remote_selection_waiting and slot is not None and slot.task is not None:
+            signature = self._remote_selection_pending
+
+            def settled():
+                def check():
+                    try:
+                        cached = self._remote_selection_result
+                        if (getattr(self, '_pending_identify', None) is token and dw.current_layer is layer
+                                and cached is not None and cached[0] == signature):
+                            self.identify_remote_selection()
+                    except RuntimeError:
+                        return
+                QTimer.singleShot(0, check)
+
+            slot.task.taskCompleted.connect(settled)
+            return True
+        self._pending_identify = None
+        geometries = [QgsGeometry(feature.geometry()) for feature in features
+                      if feature.hasGeometry() and not feature.geometry().isEmpty()]
+        if not geometries:
+            show_warning(dw.tr("Selected features have no geometry.") if features else
+                         dw.tr("No feature selected. Select a feature from the dropdown list."),
+                         "FilterMate - Identify")
+            return False
+        dw.iface.mapCanvas().flashGeometries(geometries, layer.crs(), QColor(235, 49, 42, 255),
+                                             QColor(237, 97, 62, 25), 6, 400)
         return True
 
     # === Spatial Navigation ===
@@ -2236,7 +2359,7 @@ class ExploringController(BaseController, LayerSelectionMixin):
                         if limit and len(pk_values_list) > limit:
                             from ...infrastructure.feedback import show_warning
                             from qgis.PyQt.QtCore import QCoreApplication
-                            show_warning("FilterMate", QCoreApplication.translate(
+                            show_warning(QCoreApplication.translate(
                                 "ExploringController",
                                 "{0} features selected, more than the {1} a web service can be sent: "
                                 "narrow the selection or use an attribute filter."
@@ -2435,10 +2558,12 @@ class ExploringController(BaseController, LayerSelectionMixin):
             from ...adapters.qgis.source_capability_probe import counts_cheaply
             if not counts_cheaply(self._dockwidget.current_layer):
                 cached_features, cached_expression = self._remote_features(input, custom_expression)
-                if cached_features:
-                    return self.handle_exploring_features_result(
-                        cached_features, cached_expression, layer_props, identify_by_primary_key_name)
-                return []
+                # A read in progress delivers itself; a refused selection leaves the current one
+                # untouched. A final result, even empty, is handled as for a local layer.
+                if self._remote_selection_waiting or self._remote_selection_refused:
+                    return []
+                return self.handle_exploring_features_result(
+                    cached_features, cached_expression, layer_props, identify_by_primary_key_name)
             features, expression = self.get_exploring_features(input, identify_by_primary_key_name, custom_expression)
 
             # PERFORMANCE (v2.5.10): Handle async evaluation for large layers with custom expressions
@@ -2468,8 +2593,8 @@ class ExploringController(BaseController, LayerSelectionMixin):
                 def _on_async_error(error_msg, layer_id):
                     """Handle async evaluation errors."""
                     show_warning(
-                        self._dockwidget.tr("Expression Evaluation"),
-                        self._dockwidget.tr(f"Error evaluating expression: {error_msg}")
+                        self._dockwidget.tr("Error evaluating expression: {0}").format(error_msg),
+                        self._dockwidget.tr("Expression Evaluation")
                     )
 
                 # Start async evaluation
@@ -3396,7 +3521,7 @@ class ExploringController(BaseController, LayerSelectionMixin):
                 from ...adapters.qgis.source_capability_probe import counts_cheaply
                 layer = self._dockwidget.current_layer
                 if not counts_cheaply(layer):
-                    from ...adapters.qgis.async_query import submit_query
+                    from ...adapters.qgis.async_query import ImmediateRead, submit_query
                     ids = list(layer.selectedFeatureIds())
                     request = QgsFeatureRequest().setFilterFids(ids)
 
@@ -3404,9 +3529,13 @@ class ExploringController(BaseController, LayerSelectionMixin):
                         if self._dockwidget.current_layer is layer and list(layer.selectedFeatureIds()) == ids:
                             self._sync_widgets_from_qgis_selection(features)
 
-                    submit_query(self, '_canvas_selection_query', layer,
-                                 self._dockwidget.tr("Loading selected values…"),
-                                 lambda task: list(task.features(request)), deliver, self._remote_loading)
+                    mode = self._read_mode(layer, request, self._dockwidget.tr("Selection"))
+                    if mode == 'now':
+                        deliver(list(ImmediateRead(layer).features(request)))
+                    elif mode == 'task':
+                        submit_query(self, '_canvas_selection_query', layer,
+                                     self._dockwidget.tr("Loading selected values…"),
+                                     lambda task: list(task.features(request)), deliver, self._remote_loading)
                     return
                 selected_features = layer.selectedFeatures()
             selected_count = len(selected_features)

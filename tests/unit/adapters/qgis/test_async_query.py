@@ -200,12 +200,7 @@ def test_iterator_closes_when_consumer_stops_after_first_row(module):
     (set(), {'layer'}, False),
 ])
 def test_remote_expression_never_dereferences_live_layers(module, monkeypatch, functions, variables, safe):
-    import sys
-    expression = MagicMock()
-    expression.hasParserError.return_value = False
-    expression.referencedFunctions.return_value = functions
-    expression.referencedVariables.return_value = variables
-    monkeypatch.setattr(sys.modules['qgis.core'], 'QgsExpression', MagicMock(return_value=expression))
+    _expression(monkeypatch, module, functions=functions, variables=variables)
     assert module.remote_expression_is_safe('expression') is safe
 
 
@@ -269,15 +264,154 @@ def test_complete_unique_values_do_not_report_a_partial_result(module):
 
 
 def test_virtual_project_expression_is_rejected_before_worker_reads(module, monkeypatch):
-    layer = MagicMock()
-    layer.fields.return_value.__len__.return_value = 1
-    layer.expressionField.return_value = "aggregate(@layer, 'count', id)"
-    monkeypatch.setattr(module, 'remote_expression_is_safe', lambda *args: False)
-    compute = MagicMock()
-    task = module.SnapshotQueryTask('read', layer, compute, MagicMock())
+    monkeypatch.setattr(module, 'unsafe_virtual_fields', lambda layer: {'total'})
+    monkeypatch.setattr(module, 'request_reads_fields', lambda request, names, fields: 'total' in names)
+    task = module.SnapshotQueryTask('read', MagicMock(), lambda task: list(task.features(MagicMock())), MagicMock())
     assert not task.run()
-    assert isinstance(task.error, module.UnsafeExpressionError)
-    compute.assert_not_called()
+    assert isinstance(task.error, module.UnsafeVirtualFieldError)
+    task.source.getFeatures.assert_not_called()
+
+
+def test_a_request_without_the_unsafe_virtual_field_is_read(module, monkeypatch):
+    # A zoom (setNoAttributes) does not evaluate the virtual field: it is no reason to refuse it.
+    monkeypatch.setattr(module, 'unsafe_virtual_fields', lambda layer: {'total'})
+    monkeypatch.setattr(module, 'request_reads_fields', lambda request, names, fields: False)
+    task = module.SnapshotQueryTask('read', MagicMock(), lambda task: list(task.features(MagicMock())), MagicMock())
+    task.source.getFeatures.return_value.__iter__.return_value = iter([1])
+    assert task.run()
+    assert task.result == [1]
+
+
+class _Request:
+    """A QgsFeatureRequest stand-in for the attribute rules of request_reads_fields."""
+
+    SUBSET = 2
+
+    def __init__(self, subset=None, expression_columns=(), order_columns=()):
+        self.subset = subset
+        self.expression_columns = expression_columns
+        self.order_columns = order_columns
+
+    def flags(self):
+        return self.SUBSET if self.subset is not None else 0
+
+    def subsetOfAttributes(self):
+        return list(self.subset or [])
+
+    def filterExpression(self):
+        if not self.expression_columns:
+            return None
+        return MagicMock(referencedColumns=MagicMock(return_value=set(self.expression_columns)))
+
+    def orderBy(self):
+        return MagicMock(usedAttributes=MagicMock(return_value=set(self.order_columns)))
+
+
+@pytest.mark.parametrize('request_, reads', [
+    (_Request(), True),                                    # all attributes
+    (_Request(subset=[]), False),                          # setNoAttributes()
+    (_Request(subset=[3]), True),                          # the field itself
+    (_Request(subset=[0]), False),                         # another field
+    (_Request(subset=[], expression_columns={'total'}), True),
+    (_Request(subset=[], expression_columns={'#!allattributes!#'}), True),
+    (_Request(subset=[], order_columns={'total'}), True),
+    (_Request(subset=[0], expression_columns={'name'}), False),
+])
+def test_only_a_request_that_evaluates_the_field_reads_it(module, request_, reads):
+    import sys
+    sys.modules['qgis.core'].QgsFeatureRequest = MagicMock()
+    sys.modules['qgis.core'].QgsFeatureRequest.Flag.SubsetOfAttributes = _Request.SUBSET
+    fields = MagicMock()
+    fields.lookupField.side_effect = lambda name: {'name': 0, 'total': 3}.get(name, -1)
+    assert module.request_reads_fields(request_, {'total'}, fields) is reads
+
+
+def _expression(monkeypatch, module, functions=(), variables=(), columns=(), parser_error=False):
+    import sys
+    expression = MagicMock()
+    expression.hasParserError.return_value = parser_error
+    expression.referencedFunctions.return_value = set(functions)
+    expression.referencedVariables.return_value = set(variables)
+    expression.referencedColumns.return_value = set(columns)
+    monkeypatch.setattr(sys.modules['qgis.core'], 'QgsExpression', MagicMock(return_value=expression))
+
+
+@pytest.mark.parametrize('functions', [
+    {'now'}, {'left'}, {'right'}, {'strpos'}, {'format_date'}, {'array_contains', 'string_to_array'},
+    {'to_date', 'age', 'year'}, {'regexp_matches'}, {'map_get', 'from_json'}, {'make_valid', 'buffer'},
+])
+def test_common_pure_functions_run_in_a_worker(module, monkeypatch, functions):
+    _expression(monkeypatch, module, functions=functions)
+    assert module.expression_refusal('expression') is None
+
+
+@pytest.mark.parametrize('functions', [
+    {'aggregate'}, {'get_feature'}, {'represent_value'}, {'overlay_intersects'}, {'eval'},
+    {'layer_property'}, {'is_selected'}, {'ramp_color'}, {'sqlite_fetch_and_increment'}, {'my_python_function'},
+])
+def test_functions_reaching_layers_or_the_project_are_refused(module, monkeypatch, functions):
+    _expression(monkeypatch, module, functions=functions)
+    assert module.expression_refusal('expression') == module.UNSAFE
+
+
+def test_a_syntax_error_is_not_reported_as_an_unsafe_expression(module, monkeypatch):
+    _expression(monkeypatch, module, parser_error=True)
+    assert module.expression_refusal('"name" = ') == module.SYNTAX
+    fields = MagicMock()
+    fields.indexOf.return_value = -1
+    fields.lookupField.return_value = -1
+    _expression(monkeypatch, module, columns={'nmae'})
+    assert module.expression_refusal('"nmae" = 1', fields) == module.SYNTAX
+
+
+def test_refusal_messages_name_what_is_refused(module, monkeypatch):
+    import sys
+    import types
+    qtcore = types.ModuleType('qgis.PyQt.QtCore')
+    qtcore.QCoreApplication = MagicMock()
+    qtcore.QCoreApplication.translate.side_effect = lambda context, text: text
+    monkeypatch.setitem(sys.modules, 'qgis.PyQt.QtCore', qtcore)
+    assert 'virtual field' in module.refusal_message(module.VIRTUAL_FIELD)
+    assert 'syntax' in module.refusal_message(module.SYNTAX)
+    assert 'expression' in module.refusal_message(module.UNSAFE)
+
+
+def test_a_virtual_field_using_an_unsafe_one_is_unsafe_too(module, monkeypatch):
+    import sys
+
+    def parse(text):
+        expression = MagicMock()
+        expression.hasParserError.return_value = False
+        expression.referencedVariables.return_value = set()
+        unsafe = 'aggregate' in text
+        expression.referencedFunctions.return_value = {'aggregate'} if unsafe else set()
+        expression.referencedColumns.return_value = set() if unsafe else {'total'}
+        return expression
+
+    monkeypatch.setattr(sys.modules['qgis.core'], 'QgsExpression', MagicMock(side_effect=parse))
+    layer = MagicMock()
+    names = ['id', 'total', 'share']
+    layer.fields.return_value.__len__.return_value = 3
+    layer.fields.return_value.at.side_effect = lambda index: MagicMock(name=names[index], **{'name.return_value': names[index]})
+    layer.fields.return_value.indexOf.return_value = -1
+    layer.fields.return_value.lookupField.return_value = 1
+    layer.expressionField.side_effect = lambda index: {1: "aggregate('x', 'sum', v)", 2: '"total" / 2'}.get(index, '')
+    assert module.unsafe_virtual_fields(layer) == {'total', 'share'}
+
+
+def test_reads_never_prompt_on_exit_nor_crowd_the_task_bar(module, monkeypatch):
+    import sys
+    flags = sys.modules['qgis.core'].QgsTask.Flag
+    monkeypatch.setattr(flags, 'CancelWithoutPrompt', 4, raising=False)
+    monkeypatch.setattr(flags, 'Hidden', 8, raising=False)
+    assert module._task_flags() == flags.CanCancel | 4 | 8
+
+
+def test_task_flags_on_a_qgis_without_hidden_tasks(module, monkeypatch):
+    import sys
+    flags = sys.modules['qgis.core'].QgsTask.Flag
+    assert not hasattr(flags, 'Hidden')
+    assert module._task_flags() == flags.CanCancel
 
 
 def test_delivery_error_is_recorded_without_escaping_the_qgis_callback(module):
