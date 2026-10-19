@@ -50,6 +50,9 @@ class FakeLayer:
     def source(self):
         return f"/data/{self._id}"
 
+    def providerType(self):
+        return 'gdal' if self.kind == 'raster' else 'memory'
+
     def subsetString(self):
         return self._subset
 
@@ -111,6 +114,10 @@ def ctrl_module(monkeypatch):
     monkeypatch.setitem(sys.modules, base.__name__, base)
     layer_kind = _load_real("core.domain.layer_kind", "core/domain/layer_kind.py")
     _load_real("core.domain.cross_filter", "core/domain/cross_filter.py")
+    source_capability = _load_real("core.domain.source_capability", "core/domain/source_capability.py")
+    probe = types.ModuleType(f"{_PKG}.adapters.qgis.source_capability_probe")
+    probe.capability_for_layer = lambda layer: source_capability.classify_layer(layer, is_raster=True)
+    monkeypatch.setitem(sys.modules, probe.__name__, probe)
     filter_state = _load_real("core.domain.filter_state", "core/domain/filter_state.py")
     capability = types.ModuleType(f"{_PKG}.adapters.qgis.point_cloud_capability")
     kinds = {"vector": layer_kind.LayerKind.VECTOR, "raster": layer_kind.LayerKind.RASTER,
@@ -2190,3 +2197,170 @@ class TestPointCloudObjectDetector:
         controller._pc_outline_wkt = "BOX 0 0 1 1"
         controller._show_point_cloud_objects()  # a late criteriaChanged of the point cloud panel
         assert reads.outlines == [] and controller._pc_outline_wkt == "BOX 0 0 1 1"
+
+
+@pytest.mark.unit
+class TestStreamRasterStatistics:
+    @pytest.mark.parametrize("provider,source", [
+        ("gdal", "/vsicurl/https://example.test/dem.tif"),
+        ("wcs", "url=https://example.test/wcs"),
+        ("postgresraster", "dbname=test table=dem"),
+    ])
+    def test_remote_statistics_never_read_on_ui_thread(self, ctrl_module, adapters, monkeypatch, provider, source):
+        layer = FakeLayer("remote", "raster")
+        layer.providerType = lambda: provider
+        layer.source = lambda: source
+        controller = ctrl_module.CoverageModeController(_dock())
+        controller._raster_panel = _value_panel()
+        requests = []
+        monkeypatch.setattr(controller, "_request_raster_statistics", lambda *args: requests.append(args))
+        monkeypatch.setattr(controller, "_base_raster", lambda *_: pytest.fail("remote pixels on UI thread"))
+        controller._refresh_histogram(layer, 1)
+        assert len(requests) == 1
+        assert not adapters.calls
+
+    @pytest.mark.parametrize("provider,source", [
+        ("wms", "type=xyz&url=https://example.test/{z}/{x}/{y}"),
+        ("arcgismapserver", "url=https://example.test/MapServer"),
+        ("gdal", "<GDAL_WMS><Service name=\"TMS\"/></GDAL_WMS>"),
+    ])
+    def test_rendered_images_never_have_value_histograms(self, ctrl_module, adapters, provider, source):
+        layer = FakeLayer("rendered", "raster")
+        layer.providerType = lambda: provider
+        layer.source = lambda: source
+        controller = ctrl_module.CoverageModeController(_dock())
+        controller._raster_panel = _value_panel()
+        controller._refresh_histogram(layer, 1)
+        assert not adapters.calls
+        controller._raster_panel.set_histogram.assert_not_called()
+
+    def test_superseded_result_is_ignored(self, ctrl_module):
+        controller = ctrl_module.CoverageModeController(_dock())
+        controller._raster_panel = _value_panel()
+        old = MagicMock()
+        controller._raster_stats_task = MagicMock()
+        controller._raster_statistics_ready(old, True)
+        assert controller._histogram_cache == {}
+        controller._raster_panel.set_histogram.assert_not_called()
+
+    def test_changed_source_result_is_ignored(self, ctrl_module, adapters):
+        layer = FakeLayer("remote", "raster")
+        layer.providerType = lambda: "gdal"
+        controller = ctrl_module.CoverageModeController(_dock())
+        controller._active_layer = layer
+        controller._raster_panel = _value_panel()
+        controller._raster_panel.current_band.return_value = 1
+        task = MagicMock(identity=("remote", "gdal", ("/old.tif", 1, "value")))
+        controller._raster_stats_task = task
+        controller._raster_statistics_ready(task, True)
+        assert controller._histogram_cache == {}
+        controller._raster_panel.set_histogram.assert_not_called()
+
+    def test_cancel_invalidates_before_canceling(self, ctrl_module):
+        controller = ctrl_module.CoverageModeController(_dock())
+        task = MagicMock()
+        task.cancel.side_effect = lambda: controller._raster_statistics_ready(task, False)
+        controller._raster_stats_task = task
+        controller._cancel_raster_statistics()
+        task.cancel.assert_called_once()
+        assert controller._raster_stats_task is None
+
+
+@pytest.mark.unit
+class TestStreamRasterSampleLifetime:
+    def test_retired_capture_stays_protected_until_worker_returns(self, ctrl_module, adapters, monkeypatch):
+        controller = ctrl_module.CoverageModeController(_dock())
+        module = types.ModuleType(f"{adapters.package.__name__}.cache")
+        settled = []
+        module.settle = lambda paths: settled.extend(paths)
+        monkeypatch.setitem(sys.modules, module.__name__, module)
+        adapters.package.cache = module
+        controller._raster_sample = (("r1", "gdal", "/vsicurl/a.tif"), "/cache/sample.tif", object())
+        task = types.SimpleNamespace()
+        controller._borrow_raster_sample(task, "/cache/sample.tif")
+        controller._release_raster_sample()
+        assert settled == []
+        controller._return_raster_sample(task)
+        assert settled == ["/cache/sample.tif"]
+        assert not controller._raster_sample_users
+        controller._return_raster_sample(task)
+        assert settled == ["/cache/sample.tif"]
+
+    def test_filtered_remote_source_keeps_remote_capability(self, ctrl_module, adapters):
+        layer = FakeLayer("r1", "raster")
+        layer.source = lambda: "/cache/filtered.tif"
+        adapters.snapshots.derived["r1"] = types.SimpleNamespace(
+            original_source="/vsicurl/https://example.test/source.tif", original_provider="gdal")
+        controller = ctrl_module.CoverageModeController(_dock())
+        assert controller._raster_needs_sample(layer)
+        assert controller._raster_identity(layer) == (
+            "r1", "gdal", "/vsicurl/https://example.test/source.tif")
+        with pytest.raises(RuntimeError, match="sample is not ready"):
+            controller._base_raster(layer)
+
+    def test_remote_derivative_surface_is_queued(self, ctrl_module, adapters, monkeypatch):
+        layer = FakeLayer("remote", "raster")
+        layer.source = lambda: "/vsicurl/https://example.test/source.tif"
+        controller = ctrl_module.CoverageModeController(_dock())
+        selection = types.SimpleNamespace(band=1, derivative="slope", mode=types.SimpleNamespace(value="range"))
+        requested = []
+        monkeypatch.setattr(controller, "_request_raster_surface", lambda *args: requested.append(args))
+        assert controller._selection_surface(layer, selection) is None
+        assert requested[0][:2] == (layer, selection)
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize("action", ["filter", "unfilter", "reset", "undo", "redo", "export"])
+def test_gui_actions_cannot_reenter_an_api_operation(ctrl_module, layers, monkeypatch, action):
+    layer = layers["r1"]
+    controller = ctrl_module.CoverageModeController(_dock(current_layer=layer))
+    controller._active_layer = layer
+    api_package = types.ModuleType(f"{_PKG}.adapters.public_api")
+    api_package.__path__ = []
+    operations = types.ModuleType(f"{api_package.__name__}.operations")
+    operations.busy_reason = lambda: "FilterMate is already running cross_filter"
+    monkeypatch.setitem(sys.modules, api_package.__name__, api_package)
+    monkeypatch.setitem(sys.modules, operations.__name__, operations)
+    run_filter = MagicMock()
+    run_unfilter = MagicMock()
+    export_layers = MagicMock(return_value=["r1"])
+    monkeypatch.setattr(controller, "_run_filter", run_filter)
+    monkeypatch.setattr(controller, "_run_unfilter", run_unfilter)
+    monkeypatch.setattr(controller, "_layers_checked_for_export", export_layers)
+    assert controller.handle_task(action) is True
+    run_filter.assert_not_called()
+    run_unfilter.assert_not_called()
+    export_layers.assert_not_called()  # no delegation to the vector exporter
+    assert not ctrl_module._test_service.calls
+    assert ctrl_module._test_feedback.messages[-1][0] == "warning"
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize("torn_down", [False, True])
+def test_rendered_filter_pins_capture_until_done(ctrl_module, adapters, layers, monkeypatch, torn_down):
+    controller = ctrl_module.CoverageModeController(_dock())
+    task = types.SimpleNamespace(error="canceled")
+    callbacks = []
+    def run(request, source_job, on_done=None):
+        callbacks.append(on_done)
+        return task
+    monkeypatch.setattr(controller.service, "run", run)
+    monkeypatch.setattr(controller, "_set_busy", lambda *_: None)
+    monkeypatch.setattr(controller, "_after_run", lambda *_: None)
+    monkeypatch.setattr(controller, "_map_layer", lambda *_: layers["r1"])
+    module = types.ModuleType(f"{adapters.package.__name__}.cache")
+    settled = []
+    module.settle = lambda paths: settled.extend(paths)
+    monkeypatch.setitem(sys.modules, module.__name__, module)
+    adapters.package.cache = module
+    path = "/cache/rendered_sample.tif"
+    controller._raster_sample = (("r1", "wms", "service"), path, object())
+    job = types.SimpleNamespace(layer_id="r1", layer_name="r1", kind=_kind(ctrl_module, "RASTER"),
+                               _analysis_source=(path, "gdal"))
+    controller._start_task(object(), job)
+    controller._release_raster_sample()
+    assert settled == []
+    controller._torn_down = torn_down
+    callbacks[0](task, False)
+    assert settled == [path]
+    assert not controller._raster_sample_users

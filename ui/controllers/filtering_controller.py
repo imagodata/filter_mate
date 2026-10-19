@@ -518,6 +518,10 @@ class FilteringController(BaseController, LayerSelectionMixin):
                 if not layer_obj:
                     skipped_reasons.append(f"{layer_name}: layer_obj is None (not in project)")
                     continue
+                from ...adapters.qgis.point_cloud_capability import is_non_analysis_raster
+                if is_non_analysis_raster(layer_obj):
+                    skipped_reasons.append(f"{layer_name}: rendered or unsupported raster")
+                    continue
                 if is_coverage_layer(layer_obj):
                     # FilterMate 5: raster / point cloud targets, clipped by the source geometry.
                     pass

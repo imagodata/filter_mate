@@ -149,6 +149,8 @@ class _Recorder(types.ModuleType):
 def load(monkeypatch):
     """``load(with_variant_output)`` -> (common, cross_filter_algorithm, layer_operations, operations recorder)."""
     def _load(with_variant_output=True):
+        monkeypatch.setattr(sys.modules["qgis.PyQt.QtCore"], "QCoreApplication",
+                            types.SimpleNamespace(translate=lambda context, text: text), raising=False)
         monkeypatch.setitem(sys.modules, "qgis.core", _qgis_core(with_variant_output))
         for name in [module for module in sys.modules if module.startswith(_PKG)]:
             monkeypatch.delitem(sys.modules, name)
@@ -169,10 +171,17 @@ def load(monkeypatch):
 
 
 class _Feedback:
-    def pushInfo(self, *args):
-        pass
+    def __init__(self):
+        self.info, self.warnings, self.errors = [], [], []
 
-    pushWarning = reportError = pushInfo
+    def pushInfo(self, message):
+        self.info.append(message)
+
+    def pushWarning(self, message):
+        self.warnings.append(message)
+
+    def reportError(self, message):
+        self.errors.append(message)
 
 
 class _Context:
@@ -281,3 +290,36 @@ class TestQgisProcessExit:
         sys.modules[f"{_PKG}.adapters.qgis.coverage_layers"].cache = cache
         provider._purge_cache_at_exit()
         assert purged == [True]
+
+
+class TestResamplingDisclosure:
+    @pytest.mark.parametrize("kind", ["raster", "vector", "geometry"])
+    def test_cross_filter_reports_target_capture_grid(self, load, monkeypatch, kind):
+        _, cross, _, recorder = load()
+        from fm_processing_test.core.domain.api_requests import OperationReport
+        report = OperationReport()
+        report.done["L1"] = "dem"
+        report.details["layers"] = {"dem": {"resampled": True, "capture_grid": "256x128"}}
+        operation = "cross_filter_by_geometry" if kind == "geometry" else "cross_filter"
+        monkeypatch.setattr(recorder, operation, lambda *args, **kwargs: report, raising=False)
+        classes = {"raster": (cross.CrossFilterFromRasterAlgorithm, {"SOURCE": "mnt", "MINIMUM": 1.0}),
+                   "vector": (cross.CrossFilterAlgorithm, {"SOURCE": _VectorSource(), "TARGETS": ["t"]}),
+                   "geometry": (cross.CrossFilterFromGeometryAlgorithm, {"GEOMETRY": _Geometry(), "TARGETS": ["t"]})}
+        _, feedback, result = _run(*classes[kind])
+        notices = [text for text in feedback.info if "resampled" in text]
+        assert len(notices) == 1 and "dem" in notices[0] and "256x128" in notices[0]
+        assert result["OUTPUT"] == ["L1"]
+
+    @pytest.mark.parametrize("resampled", [False, True])
+    def test_raster_source_discloses_only_actual_resampling(self, load, monkeypatch, resampled):
+        _, cross, _, recorder = load()
+        from fm_processing_test.core.domain.api_requests import OperationReport
+        report = OperationReport()
+        report.done["L1"] = "parcelle"
+        report.details["source"] = {"capture_resampled": resampled, "capture_grid": "128x64"}
+        monkeypatch.setattr(recorder, "cross_filter", lambda *args, **kwargs: report, raising=False)
+        _, feedback, _ = _run(cross.CrossFilterFromRasterAlgorithm, {"SOURCE": "mnt", "MINIMUM": 1.0})
+        notices = [text for text in feedback.info if "resampled" in text]
+        assert len(notices) == int(resampled)
+        if resampled:
+            assert "Source raster" in notices[0] and "128x64" in notices[0]

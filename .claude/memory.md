@@ -12,6 +12,13 @@ _Auto-maintained by project agent_
 - Validate queued input without replacing it with native SQL. Re-parsing SQL as QGIS syntax corrupts backslashes. Undo/redo replays exact provider-accepted snapshots through `restore_server_subset`; user expressions/favorites/API never use this bypass.
 - Public WFS fields are now `nom_officiel`, `code_insee_du_departement`; the exact name L'Isle-Jourdain matches two communes. Use `code_insee = '32160'` to verify one commune. The old `$area` subset caused an unfiltered request; `left(...)` was sent as an unproven OGC function.
 - Lot B must consume the translation contract when it integrates bounded local residual evaluation. Do not treat a partial key list as a complete result. Lot F owns translations; new translation source strings are listed in the PR.
+## [2026-10-19] Streaming rasters — lot D
+- Reuse source_capability / capability_for_layer: WCS contains raw values, WMS/WMTS/XYZ/MapServer contains rendered colors. Raster class membership alone never grants numeric analysis or target filtering.
+- Remote COG, WCS and postgresraster UI reads use bounded session TIFF captures made by worker-owned layers. Histograms and terrain/expression surfaces run in cancellable tasks; obsolete callbacks cannot repopulate a different layer/source. UI sample files remain protected while tasks borrow them.
+- Rendered services remain dock sources for color pipette cross filtering only: capture the visible extent, original layer CRS, detached renderer and bounded RGB grid. RasterSourceJob accepts analysis_source for geometry without changing the service source. Colors depend on style and scale; never treat original rendered bands as measured values.
+- WCS/raw remote source and target materialization uses the derived-session cache, preserves pristine source through snapshots and enforces pixel limits before export. Resampled grids are disclosed in source notes/API target reports. WCS is still excluded from the PDAL HAG DTM picker until that separate path can materialize it. No user data folders or QGIS system settings are changed.
+- Synchronous automation waits through a Qt event loop while a dedicated worker computes CrossFilterTask; result application and feedback stay on main. Register the task in the service while borrowed so unload can cancel it. GUI dispatch refuses API reentry, and Processing reports resampled source/target grids. Never run remote materialization inline from Processing/API/REST/MCP. Rendered cross-filter tasks also borrow their capture until completion, including after controller teardown.
+
 
 ## [2026-10-16] Audit profond de la v5 → PR #114 – #118, #122, #148 – #150, CHANGELOG #154
 Décisions à connaître :

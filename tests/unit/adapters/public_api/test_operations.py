@@ -148,7 +148,7 @@ class _Signal:
     def __init__(self):
         self.slots = []
 
-    def connect(self, slot):
+    def connect(self, slot, *connection_type):
         self.slots.append(slot)
 
     def disconnect(self, slot):
@@ -157,6 +157,48 @@ class _Signal:
     def emit(self, *args):
         for slot in list(self.slots):
             slot(*args)
+
+
+@pytest.fixture(autouse=True)
+def qt_wait_loop(monkeypatch):
+    import threading
+    import time
+
+    timers = []
+
+    class Loop:
+        def __init__(self):
+            self.stopped = False
+
+        def quit(self):
+            self.stopped = True
+
+        def exec(self):
+            self.stopped = False
+            deadline = time.monotonic() + 5
+            while not self.stopped:
+                assert time.monotonic() < deadline, "worker did not complete"
+                for timer in list(timers):
+                    timer.timeout.emit()
+                time.sleep(0.001)
+
+    class Timer:
+        def __init__(self):
+            self.timeout = _Signal()
+
+        def start(self, interval):
+            timers.append(self)
+
+        def stop(self):
+            if self in timers:
+                timers.remove(self)
+
+    qt = sys.modules["qgis.PyQt.QtCore"]
+    monkeypatch.setattr(qt, "QEventLoop", Loop, raising=False)
+    monkeypatch.setattr(qt, "QTimer", Timer, raising=False)
+    monkeypatch.setattr(qt, "Qt", types.SimpleNamespace(DirectConnection=1), raising=False)
+    yield types.SimpleNamespace(timers=timers, main_thread=threading.get_ident())
+    assert not timers, "poll timer leaked"
 
 
 class _Feedback:
@@ -240,7 +282,7 @@ class _CrossTask:
         # Like CrossFilterTask: each job's outcome comes from its compute step;
         # with result False nothing is applied, but computed jobs still say success.
         self.outcomes = [types.SimpleNamespace(layer_id=layer_id, success=index < self.steps, kept_count=1,
-                                               elapsed=0.0, message="")
+                                               elapsed=0.0, message="", details={})
                          for index, layer_id in enumerate(self.target_ids)]
 
 
@@ -248,6 +290,7 @@ class _Service:
     def __init__(self, task):
         self.task = task
         self.ran_synchronously = False
+        self._running = []
 
     def build_task(self, request, source_job):
         self.request = request
@@ -317,10 +360,11 @@ class TestFeedbackRelayed:
                                          service=_Service(task), feedback=feedback)
         assert task.steps == 0 and report.error == "canceled"
 
-    def test_without_feedback_the_service_runs_synchronously(self, vector_world):
+    def test_without_feedback_builds_task_instead_of_inline_service_run(self, vector_world):
         service = _Service(_CrossTask("S", ["T"]))
-        operations.cross_filter(vector_world.source, ["batiment"], project=vector_world.project, service=service)
-        assert service.ran_synchronously is True
+        report = operations.cross_filter(vector_world.source, ["batiment"], project=vector_world.project, service=service)
+        assert report.ok and service.task.steps == 3
+        assert service.ran_synchronously is False
 
     def test_point_cloud_filter_stops_before_the_next_layer(self, idle, monkeypatch):
         feedback = _Feedback()
@@ -335,7 +379,7 @@ class TestUnexpectedErrorsFlagged:
 
     def test_operation_error(self, vector_world):
         class _Failing(_Service):
-            def run(self, request, source_job, synchronous=False):
+            def build_task(self, request, source_job):
                 raise OSError("[Errno 13] Permission denied: '/home/u/.local/share/QGIS/cache/session_1/x.vrt'")
 
         report = operations.cross_filter(vector_world.source, ["batiment"], project=vector_world.project,
@@ -537,3 +581,296 @@ class TestExportReport:
         # 50 % of the first of two layers = 25 % of the export.
         assert 25.0 in feedback.progress
         assert feedback.canceled.slots == []
+
+
+class TestWorkerExecution:
+    @pytest.mark.parametrize("with_feedback", [False, True])
+    def test_compute_worker_apply_and_progress_main(self, qt_wait_loop, with_feedback):
+        import threading
+        threads = {}
+        feedback = _Feedback() if with_feedback else None
+        task = _CrossTask("S", ["T"])
+        original_run, original_apply = task.run, task.apply_results
+
+        def run():
+            threads["compute"] = threading.get_ident()
+            return original_run()
+
+        def apply(result):
+            threads["apply"] = threading.get_ident()
+            original_apply(result)
+
+        task.run, task.apply_results = run, apply
+        if feedback is not None:
+            def progress(value):
+                threads.setdefault("progress", []).append(threading.get_ident())
+                feedback.progress.append(value)
+            feedback.setProgress = progress
+        assert operations._run_task(_Service(task), None, None, feedback) is task
+        assert threads["compute"] != qt_wait_loop.main_thread
+        assert threads["apply"] == qt_wait_loop.main_thread
+        if feedback is not None:
+            assert threads["progress"] and set(threads["progress"]) == {qt_wait_loop.main_thread}
+            assert feedback.progress[-1] == 100.0
+            assert not feedback.canceled.slots and not task.progressChanged.slots
+
+    def test_main_event_loop_can_cancel_busy_worker(self, qt_wait_loop):
+        import threading
+        import time
+        started = threading.Event()
+        feedback = _Feedback()
+        task = _CrossTask("S", ["T"])
+        applied = []
+
+        def run():
+            started.set()
+            deadline = time.monotonic() + 3
+            while not task.isCanceled() and time.monotonic() < deadline:
+                time.sleep(0.001)
+            assert task.isCanceled(), "main event loop never canceled worker"
+            return False
+
+        original_progress = feedback.setProgress
+        def cancel_on_main(value):
+            assert threading.get_ident() == qt_wait_loop.main_thread
+            original_progress(value)
+            feedback.cancel()
+        feedback.setProgress = cancel_on_main
+        def computing():
+            task.progressChanged.emit(10)
+            return run()
+        task.run = computing
+        task.apply_results = lambda result: applied.append((result, threading.get_ident()))
+        operations._run_task(_Service(task), None, None, feedback)
+        assert started.is_set()
+        assert applied == [(False, qt_wait_loop.main_thread)]
+        assert not feedback.canceled.slots and not task.progressChanged.slots
+
+    def test_worker_exception_releases_results_once_on_main(self, qt_wait_loop):
+        import threading
+        task = _CrossTask("S", ["T"])
+        feedback = _Feedback()
+        applied = []
+        def broken():
+            raise RuntimeError("worker failure")
+        task.run = broken
+        task.apply_results = lambda result: applied.append((result, threading.get_ident()))
+        with pytest.raises(RuntimeError, match="worker failure"):
+            operations._run_task(_Service(task), None, None, feedback)
+        assert applied == [(False, qt_wait_loop.main_thread)]
+        assert not feedback.canceled.slots and not task.progressChanged.slots
+
+
+class TestCaptureDetails:
+    def test_resampled_target_metadata_survives_worker_and_collection(self, vector_world):
+        task = _CrossTask("S", ["T"])
+        original_apply = task.apply_results
+        def apply(result):
+            original_apply(result)
+            task.outcomes[0].details.update(capture_resampled=True, capture_grid="128x128")
+        task.apply_results = apply
+        report = operations.cross_filter(vector_world.source, ["batiment"], project=vector_world.project,
+                                         service=_Service(task))
+        assert report.ok
+        assert report.details["layers"]["batiment"]["resampled"] is True
+        assert report.details["layers"]["batiment"]["capture_grid"] == "128x128"
+
+
+class TestWorkerServiceLease:
+    @pytest.fixture(params=["dock", "api"])
+    def service(self, monkeypatch, request):
+        # Use the real service cancellation and status checks, with a task that
+        # stays Queued because the API computes it outside QgsTaskManager.
+        service = service_mod.CrossFilterService()
+        monkeypatch.setattr(service_mod, "_service", service if request.param == "dock"
+                            else service_mod.CrossFilterService())
+        monkeypatch.setattr(operations, "_API_SERVICE", service if request.param == "api" else None)
+        core = sys.modules["qgis.core"]
+        monkeypatch.setattr(core, "QgsTask", types.SimpleNamespace(
+            TaskStatus=types.SimpleNamespace(Complete=3, Terminated=4)), raising=False)
+        monkeypatch.setattr(core, "QgsApplication", types.SimpleNamespace(
+            taskManager=lambda: types.SimpleNamespace(activeTasks=lambda: [])), raising=False)
+        return service
+
+    def test_unload_cancels_worker_while_main_loop_reports_background_busy(self, service, qt_wait_loop,
+                                                                        monkeypatch):
+        import threading
+        import time
+        task = _CrossTask("S", ["T"])
+        task.status = lambda: 0
+        callbacks = []
+        task.on_done = lambda: callbacks.append("done")
+        feedback = _Feedback()
+        applied = []
+        monkeypatch.setattr(service, "build_task", lambda *args: task)
+        registered_after_unload = object()
+
+        def computing():
+            task.progressChanged.emit(10)
+            deadline = time.monotonic() + 3
+            while not task.isCanceled() and time.monotonic() < deadline:
+                time.sleep(0.001)
+            assert task.isCanceled(), "cancel_all did not reach the worker"
+            return False
+
+        def unload(value):
+            assert threading.get_ident() == qt_wait_loop.main_thread
+            assert service._running == [task]
+            assert operations._background_tasks_running()
+            assert operations.busy_reason() == operations.BACKGROUND_BUSY
+            service.cancel_all()
+            assert task.on_done is None
+            # Final cleanup must use the current list, not its old reference.
+            service._running.append(registered_after_unload)
+
+        def apply(result):
+            applied.append((result, threading.get_ident()))
+            if task.on_done is not None:
+                task.on_done()
+
+        task.run, task.apply_results = computing, apply
+        feedback.setProgress = unload
+        operations._run_task(service, None, None, feedback)
+        assert applied == [(False, qt_wait_loop.main_thread)]
+        assert callbacks == []
+        assert service._running == [registered_after_unload]
+        service._running.clear()
+        assert not operations._background_tasks_running()
+        assert not feedback.canceled.slots and not task.progressChanged.slots
+
+    @pytest.mark.parametrize("failure", [None, "compute", "apply"])
+    def test_service_lease_is_removed_on_success_or_exception(self, service, qt_wait_loop,
+                                                            monkeypatch, failure):
+        task = _CrossTask("S", ["T"])
+        task.status = lambda: 0
+        unrelated = object()
+        service._running.append(unrelated)
+        monkeypatch.setattr(service, "build_task", lambda *args: task)
+        applied = []
+        feedback = _Feedback()
+
+        def compute():
+            assert service._running == [unrelated, task]
+            if failure == "compute":
+                raise RuntimeError("compute failed")
+            return True
+
+        def apply(result):
+            assert task in service._running
+            applied.append(result)
+            if failure == "apply":
+                raise RuntimeError("apply failed")
+
+        task.run, task.apply_results = compute, apply
+        if failure:
+            with pytest.raises(RuntimeError, match=failure + " failed"):
+                operations._run_task(service, None, None, feedback)
+        else:
+            operations._run_task(service, None, None, feedback)
+        assert applied == [failure != "compute"]
+        assert service._running == [unrelated]
+        assert not feedback.canceled.slots and not task.progressChanged.slots
+        service._running.clear()
+
+
+class TestSourceOnlyProject:
+    def test_clipped_source_uses_explicit_project(self, qt_wait_loop, monkeypatch):
+        import threading
+        layer = _Layer("S", "raster")
+        project = _Project(layer)
+        after = types.SimpleNamespace(layer_id="S")
+        applied = []
+        def apply(current):
+            assert threading.get_ident() == qt_wait_loop.main_thread
+            assert current is layer
+            applied.append(True)
+            return after
+        job = types.SimpleNamespace(layer_id="S", kind=operations.LayerKind.RASTER,
+                                    clips_source=True, details={}, message="", before=object(),
+                                    apply=apply, release=MagicMock())
+        task = _CrossTask("S", [])
+        task.source_job = job
+        task.apply_results = MagicMock(side_effect=AssertionError("must not resolve singleton project"))
+        service = _Service(task)
+        service.history = MagicMock()
+        cache = types.ModuleType(f"{_PKG}.adapters.qgis.coverage_layers.cache")
+        cache.is_closed = lambda: False
+        cache.settle = MagicMock()
+        monkeypatch.setitem(sys.modules, cache.__name__, cache)
+        report = operations._source_only(layer, operations.LayerKind.RASTER, job,
+                                         operations.OperationReport(), service, True, project=project)
+        assert report.ok and report.done == {"S": "raster"}
+        assert applied == [True]
+        job.release.assert_called_once_with()
+        service.history.push.assert_called_once()
+        assert not service._running
+
+    def test_detached_source_is_released_without_compute_or_apply(self, monkeypatch):
+        job = types.SimpleNamespace(clips_source=True, release=MagicMock(), apply=MagicMock())
+        service = _Service(_CrossTask("S", []))
+        monkeypatch.setattr(service, "build_task", MagicMock())
+        report = operations._source_only(_Layer("S", "detached"), operations.LayerKind.RASTER, job,
+                                         operations.OperationReport(), service, False, project=_Project())
+        assert report.error and not report.done
+        job.release.assert_called_once_with()
+        job.apply.assert_not_called()
+        service.build_task.assert_not_called()
+
+
+class TestDiagnosticTranslation:
+    def test_new_diagnostics_use_operations_translation_context(self, monkeypatch):
+        translate = MagicMock(side_effect=lambda context, text: "translated: " + text)
+        monkeypatch.setattr(sys.modules["qgis.PyQt.QtCore"], "QCoreApplication",
+                            types.SimpleNamespace(translate=translate), raising=False)
+        message = "rendered or unsupported raster: cannot be a filter target"
+        assert operations._tr(message) == "translated: " + message
+        translate.assert_called_once_with("FilterMateOperations", message)
+
+
+class TestGuiReentry:
+    @pytest.mark.parametrize("method", ["manage_task", "_execute_filter_task"])
+    @pytest.mark.parametrize("task_name", ["filter", "unfilter", "reset", "export"])
+    def test_gui_launch_is_refused_during_api_nested_loop(self, qt_wait_loop, monkeypatch, method, task_name):
+        import ast
+        import threading
+        tree = ast.parse((_ROOT / "filter_mate_app.py").read_text())
+        app_class = next(node for node in tree.body if isinstance(node, ast.ClassDef)
+                         and node.name == "FilterMateApp")
+        function = next(node for node in app_class.body if isinstance(node, ast.FunctionDef) and node.name == method)
+        warnings = MagicMock()
+        namespace = {"__package__": _PKG, "logger": MagicMock(),
+                     "iface": types.SimpleNamespace(messageBar=lambda: warnings),
+                     "QCoreApplication": types.SimpleNamespace(translate=lambda context, text: text)}
+        exec(compile(ast.Module(body=[function], type_ignores=[]), str(_ROOT / "filter_mate_app.py"), "exec"), namespace)
+        # Any attempt to prepare a layer/task after the gate hits missing app
+        # attributes and fails the regression, before it can mutate a target.
+        gui_app = types.SimpleNamespace()
+        task = _CrossTask("S", ["T"])
+        release = threading.Event()
+        feedback = _Feedback()
+        monkeypatch.setattr(operations, "_background_tasks_running", lambda: False)
+
+        def compute():
+            task.progressChanged.emit(10)
+            assert release.wait(3), "nested main loop did not handle GUI launch"
+            return True
+
+        def gui_launch(value):
+            assert operations._RUNNING
+            assert not release.is_set()
+            assert threading.get_ident() == qt_wait_loop.main_thread
+            try:
+                arguments = (task_name, {}) if method == "_execute_filter_task" else (task_name,)
+                namespace[method](gui_app, *arguments)
+            finally:
+                release.set()
+        task.run = compute
+        feedback.setProgress = gui_launch
+
+        @operations._exclusive(tidy=False)
+        def api_operation():
+            return operations._run_task(_Service(task), None, None, feedback)
+
+        assert api_operation() is task
+        warnings.pushWarning.assert_called_once()
+        assert not operations._RUNNING

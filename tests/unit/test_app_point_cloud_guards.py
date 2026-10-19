@@ -95,7 +95,7 @@ class _PointCloud:
         return self._valid
 
 
-class _Basemap(_PointCloud):
+class _UnsupportedRaster(_PointCloud):
     """A raster of a filterable type whose pixels cannot be read (WMS / XYZ)."""
 
 
@@ -190,7 +190,7 @@ def _filter_usable_layers(filterable_types):
     namespace = _extract(
         ["_filter_usable_layers"],
         {"get_filterable_layer_types": lambda: filterable_types,
-         "is_non_analysis_raster": lambda layer: isinstance(layer, _Basemap),
+         "is_unsupported_raster": lambda layer: isinstance(layer, _UnsupportedRaster),
          "is_layer_source_available": lambda layer: True,
          "POSTGRESQL_AVAILABLE": False, "logger": MagicMock()},
     )
@@ -210,13 +210,12 @@ class TestFilterUsableLayersFallback:
 
         assert kept == [vector, cloud]
 
-    def test_basemap_raster_is_dropped(self):
-        """With rasters on, a WMS / XYZ basemap is a filterable type: adding one started an
-        add_layers task and rebuilt the panel for a layer the task then skipped."""
+    def test_unsupported_raster_is_dropped(self):
+        """Unsupported raster providers are excluded even when rasters are enabled."""
         app = _filter_usable_layers((_Vector, _PointCloud))
         vector = _Vector()
 
-        assert app._filter_usable_layers([vector, _Basemap("osm")]) == [vector]
+        assert app._filter_usable_layers([vector, _UnsupportedRaster("osm")]) == [vector]
 
     def test_point_cloud_is_dropped_when_the_capability_is_vector_only(self):
         app = _filter_usable_layers((_Vector,))
