@@ -152,7 +152,14 @@ def exercise(dock, remote, local, field, expression):
     controller._update_features_widget = original_update
     picker = dock.widgets['EXPLORING']['MULTIPLE_SELECTION_FEATURES']['WIDGET']
     measure('list values', lambda: picker.setDisplayExpression(field))
-    measure('search entity', lambda: picker._populate_features_sync(field, search_text='Place'))
+    if remote.providerType() == 'OAPIF':
+        rows = picker.list_widgets[remote.id()].getFeaturesList()
+        report(len(rows) == 25 and {row[1] for row in rows} == set(range(1, 26)),
+               'service list contains the expected values and stable keys')
+    text = 'Place' if remote.providerType() == 'OAPIF' else 'Paris'
+    measure('search entity', lambda: picker._populate_features_sync(field, search_text=text))
+    if remote.providerType() == 'OAPIF':
+        report(picker.list_widgets[remote.id()].count() == 25, 'service search returns the expected rows')
     measure('zoom expression', lambda: controller.zooming_to_features([], expression))
     # selectedFeatureIds itself reads only the in-memory selection.
     remote.selectByIds([1, 2])

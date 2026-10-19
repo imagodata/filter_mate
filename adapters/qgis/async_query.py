@@ -82,6 +82,9 @@ class SnapshotQueryTask(QgsTask):
                 self.deliver(self.result)
             elif self.error is not None:
                 logger.warning("Snapshot query failed (%s)", type(self.error).__name__)
+        except Exception as exc:
+            self.error = exc
+            logger.warning("Snapshot delivery failed (%s)", type(exc).__name__)
         finally:
             self.deliver = None
             self.compute = None

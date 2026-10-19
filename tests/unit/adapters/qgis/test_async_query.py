@@ -277,3 +277,11 @@ def test_virtual_project_expression_is_rejected_before_worker_reads(module, monk
     assert not task.run()
     assert isinstance(task.error, module.UnsafeExpressionError)
     compute.assert_not_called()
+
+
+def test_delivery_error_is_recorded_without_escaping_the_qgis_callback(module):
+    task = module.SnapshotQueryTask('read', MagicMock(), lambda _: [1], MagicMock(side_effect=ValueError('bad view')))
+    assert task.run()
+    task.finished(True)
+    assert isinstance(task.error, ValueError)
+    assert task.deliver is None and task.compute is None
