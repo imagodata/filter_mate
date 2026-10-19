@@ -234,9 +234,9 @@ def test_request_uses_a_bounded_provider_timeout(module):
     request.setTimeout.assert_called_once_with(30000)
 
 
-def test_slow_fetch_is_an_error_instead_of_a_partial_success(module, monkeypatch):
+def test_slow_eof_is_an_error_instead_of_a_partial_success(module, monkeypatch):
     task = module.SnapshotQueryTask('read', MagicMock(), MagicMock(), MagicMock())
-    task.source.getFeatures.return_value.__iter__.return_value = iter([1])
+    task.source.getFeatures.return_value.__iter__.return_value = iter([])
     from types import SimpleNamespace
     monkeypatch.setattr(module, 'time', SimpleNamespace(monotonic=MagicMock(side_effect=[0, 30])))
     with pytest.raises(TimeoutError):
@@ -316,3 +316,12 @@ def test_clearing_an_expression_cancels_a_completed_but_undelivered_read(module)
     task.finished(True)
     callback.assert_not_called()
     task.feedback.cancel.assert_called_once()
+
+
+def test_a_slow_successful_match_is_not_a_false_timeout(module, monkeypatch):
+    from types import SimpleNamespace
+    task = module.SnapshotQueryTask('read', MagicMock(), MagicMock(), MagicMock())
+    task.source.getFeatures.return_value.__iter__.return_value = iter([1])
+    monkeypatch.setattr(module, 'time', SimpleNamespace(monotonic=MagicMock(side_effect=[0, 45, 45.1])))
+    assert list(task.features(MagicMock())) == [1]
+    task.source.getFeatures.return_value.close.assert_called_once()

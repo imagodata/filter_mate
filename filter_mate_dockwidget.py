@@ -4144,6 +4144,13 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             Falls back to _fallback_get_current_features() if controller returns empty.
             Feature picker is the primary source for single_selection mode.
         """
+        from .adapters.qgis.source_capability_probe import counts_cheaply
+        if self.current_layer is not None and not counts_cheaply(self.current_layer):
+            if self._exploring_ctrl is None:
+                show_warning(self.tr("Read failed"), self.tr("The service could not be read. Please retry."))
+                return [], ''
+            return self._exploring_ctrl.get_current_features(use_cache)
+
         # DIAGNOSTIC 2026-01-16: ULTRA-DETAILED TRACE
         logger.info("=" * 80)
         logger.info("🔍 get_current_features() CALLED")
@@ -4211,6 +4218,12 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         if not self._is_layer_valid():
             logger.warning("   🔴 _fallback_get_current_features: Layer is INVALID!")
             return [], ''
+        from .adapters.qgis.source_capability_probe import counts_cheaply
+        if not counts_cheaply(self.current_layer):
+            if self._exploring_ctrl is None:
+                show_warning(self.tr("Read failed"), self.tr("The service could not be read. Please retry."))
+                return [], ''
+            return self._exploring_ctrl.get_current_features()
         try:
             from qgis.core import QgsFeatureRequest
             groupbox_type = self.current_exploring_groupbox

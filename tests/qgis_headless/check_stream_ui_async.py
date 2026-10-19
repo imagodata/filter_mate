@@ -86,7 +86,7 @@ def measure(name, action):
     print('HEARTBEAT {} max_gap={:.3f}s'.format(name, max_gap), flush=True)
     if os.environ.get('FM_STREAM_BASELINE') != '1':
         report(max_gap < GUI_EVENT_BUDGET, name + ' keeps GUI heartbeat within {:.1f}s'.format(GUI_EVENT_BUDGET))
-    STATE['phase'] = ''
+    # Keep auditing delayed callbacks until the next action starts.
 
 
 def verify_tasks(dock, layer):
@@ -167,13 +167,28 @@ def exercise(dock, remote, local, field, expression):
     while getattr(getattr(controller, '_selection_query', None), 'task', None) is not None and time.monotonic() < until:
         drain(0.1)
     report(dock.current_exploring_groupbox == 'custom_selection', 'custom selection active before filtering')
+    from filter_mate.adapters.qgis.server_filter_translation import last_server_filter_error
+    def filter_error():
+        error = last_server_filter_error(remote)
+        item = PLUGIN.iface.messageBar().currentItem()
+        visible = item.text() if item is not None else ''
+        return error or (visible if 'complete CQL2 translation verdict' in visible else '')
+
     measure('filter', lambda: dock.launchTaskEvent(False, 'filter'))
     until = time.monotonic() + (90 if remote.providerType() == 'WFS' else 30)
-    while not remote.subsetString() and time.monotonic() < until:
+    while not remote.subsetString() and not filter_error() and time.monotonic() < until:
         drain(0.1)
-    report(bool(remote.subsetString()), 'filter applied a service subset')
-    if remote.providerType() == 'OAPIF' and os.environ.get('FM_STREAM_BASELINE') != '1':
-        check_count(dock, remote, 15, 'service filter returns the exact matching features')
+    refused = filter_error()
+    if remote.providerType() == 'OAPIF' and refused:
+        # Lot A deliberately refuses unproven CQL2 translation. The UI must
+        # report that refusal and preserve the complete source, not fake a filter.
+        report('complete CQL2 translation verdict' in refused and not remote.subsetString(),
+               'unsupported OGC API filter is explicitly refused without mutation')
+        check_count(dock, remote, 25, 'refused service filter preserves all features')
+    else:
+        report(bool(remote.subsetString()), 'filter applied a service subset')
+        if remote.providerType() == 'OAPIF' and os.environ.get('FM_STREAM_BASELINE') != '1':
+            check_count(dock, remote, 15, 'service filter returns the exact matching features')
     measure('unfilter', lambda: dock.launchTaskEvent(False, 'unfilter'))
     until = time.monotonic() + (90 if remote.providerType() == 'WFS' else 30)
     while remote.subsetString() and time.monotonic() < until:
@@ -185,6 +200,7 @@ def exercise(dock, remote, local, field, expression):
     violations = [phase for phase, main in STATE['requests'][before:] if main]
     print('MAIN_THREAD_REQUESTS {}'.format(violations), flush=True)
     report(not violations or os.environ.get('FM_STREAM_BASELINE') == '1', 'no dock network request on main thread')
+    STATE['phase'] = ''
 
 
 def run():
@@ -202,6 +218,18 @@ def run():
         qgis.utils.plugin_paths.insert(0, plugins)
         qgis.utils.updateAvailablePlugins()
         report(qgis.utils.loadPlugin('filter_mate') and qgis.utils.startPlugin('filter_mate'), 'plugin starts')
+        if os.environ.get('FM_STREAM_BASELINE') != '1':
+            from filter_mate.adapters.qgis.async_query import SnapshotQueryTask
+            original_run = SnapshotQueryTask.run
+
+            def audited_run(task):
+                success = original_run(task)
+                if task.error is not None:
+                    print('TASK_FAILURE operation={} error={}'.format(
+                        task.compute.__qualname__, type(task.error).__name__), flush=True)
+                return success
+
+            SnapshotQueryTask.run = audited_run
         PLUGIN = qgis.utils.plugins['filter_mate']
         PLUGIN.run()
         until = time.monotonic() + 60
@@ -254,7 +282,7 @@ def run():
         if os.environ.get('FM_STREAM_PUBLIC') == '1':
             uri = ("url='https://data.geopf.fr/wfs/ows' version='2.0.0' "
                    "typename='ADMINEXPRESS-COG.LATEST:commune' srsname='EPSG:4326' "
-                   "pagingEnabled='true' pageSize='100'")
+                   "pagingEnabled='true' pageSize='1000'")
             remote = QgsVectorLayer(uri, 'communes', 'WFS')
             if not remote.isValid():
                 print('SKIP Geoplateforme WFS unavailable', flush=True)
@@ -272,4 +300,5 @@ def run():
 
 
 QTimer.singleShot(1000, run)
-QTimer.singleShot(180000, lambda: os._exit(2))
+QTimer.singleShot(600000 if os.environ.get('FM_STREAM_PUBLIC') == '1' else 180000,
+                  lambda: os._exit(2))

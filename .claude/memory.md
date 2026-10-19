@@ -11,8 +11,11 @@
 - Remote distinct values use a bounded, feedback-enabled feature iterator because `uniqueValues`
   has no feedback parameter. Scan/time budgets announce partial lists; unknown counts stay large.
 - Python feedback cannot guarantee immediate interruption of a blocked WFS fetch. Requests carry
-  a 30-second provider timeout (where supported); slow reads fail explicitly rather than returning
-  partial extents. Never close a worker iterator from the GUI thread to force cancellation.
+  a 30-second provider timeout (where supported); slow EOF fails explicitly rather than returning
+  potentially partial extents. A slow matching feature is valid: WFS can filter requests client-side.
+  Never close a worker iterator from the GUI thread to force cancellation.
+- Remote empty/pending controller results must never enter the legacy synchronous feature fallback.
+  A filter click can await its selection read; any newer click invalidates its deferred launch.
 - `tests/qgis_headless/check_stream_ui_async.py` uses an offline OGC API HTTP fixture and an optional
   Geoplateforme WFS. Observe the typed network signal and `originatingThreadId()`: its propagation
   to the main manager does not mean the request originated on the GUI thread. Calibrate the observer.

@@ -51,8 +51,8 @@ class SnapshotQueryTask(QgsTask):
             for feature in iterator:
                 if self.isCanceled():
                     return
-                if time.monotonic() - started >= self.REQUEST_TIMEOUT_MS / 1000 * 0.9:
-                    raise TimeoutError('Feature fetch timed out')
+                # A valid matching feature may arrive after a long client-side
+                # expression scan. Its latency alone is not a provider timeout.
                 yield feature
                 started = time.monotonic()
             if not self.isCanceled() and time.monotonic() - started >= self.REQUEST_TIMEOUT_MS / 1000 * 0.9:

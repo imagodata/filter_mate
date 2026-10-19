@@ -80,3 +80,30 @@ def test_new_filter_click_invalidates_an_already_queued_resume(deferred):
     MethodType(namespace['launchTaskEvent'], dock)(False, 'filter')
     timer.singleShot.call_args.args[1]()
     dock.launchTaskEvent.assert_not_called()
+
+
+@pytest.mark.parametrize('name', ['get_current_features', '_fallback_get_current_features'])
+@pytest.mark.parametrize('controller_available', [True, False])
+def test_empty_remote_selection_never_enters_legacy_synchronous_fallback(name, controller_available):
+    import builtins
+    tree = ast.parse(PATH.read_text())
+    node = next(node for node in ast.walk(tree)
+                if isinstance(node, ast.FunctionDef) and node.name == name)
+    original_import = builtins.__import__
+
+    def import_capability(module, globals=None, locals=None, fromlist=(), level=0):
+        if module.endswith('source_capability_probe'):
+            return SimpleNamespace(counts_cheaply=lambda layer: False)
+        return original_import(module, globals, locals, fromlist, level)
+
+    warning = MagicMock()
+    namespace = {'__builtins__': dict(vars(builtins), __import__=import_capability), 'show_warning': warning}
+    exec(compile(ast.Module(body=[node], type_ignores=[]), str(PATH), 'exec'), namespace)
+    controller = SimpleNamespace(get_current_features=MagicMock(return_value=([], 'pending expression')))
+    dock = SimpleNamespace(current_layer=object(), _exploring_ctrl=controller if controller_available else None,
+                           _is_layer_valid=lambda: True, tr=lambda text: text,
+                           _fallback_get_current_features=MagicMock(side_effect=AssertionError('GUI read')))
+    expected = ([], 'pending expression') if controller_available else ([], '')
+    assert MethodType(namespace[name], dock)() == expected
+    assert warning.called is not controller_available
+    dock._fallback_get_current_features.assert_not_called()
