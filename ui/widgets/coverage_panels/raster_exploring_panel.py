@@ -676,6 +676,8 @@ class RasterExploringPanel(QWidget):
         """
         super().__init__(parent)
         self._summary: Optional['RasterSummary'] = None
+        self._rendered_only = False
+        self._stream_notice_text = ""
         self._layer_id: Optional[str] = None
         self._reference = DEFAULT_REFERENCE
         self._mode = RasterSelectionMode.RANGE
@@ -749,6 +751,11 @@ class RasterExploringPanel(QWidget):
         layout = QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(GAP)
+        self._stream_notice = QLabel("", self)
+        self._stream_notice.setObjectName("label_raster_stream_notice")
+        self._stream_notice.setWordWrap(True)
+        self._stream_notice.hide()
+        layout.addWidget(self._stream_notice)
         layout.addWidget(self._build_bands_group())
         layout.addWidget(self._build_pipette_group())
         layout.addWidget(self._build_range_group())
@@ -1375,8 +1382,57 @@ class RasterExploringPanel(QWidget):
         else:
             self.reset()
 
+    def set_stream_notice(self, text: str) -> None:
+        """Show a translated sampling notice supplied by the controller."""
+        self._stream_notice_text = text or ""
+        self._refresh_stream_notice()
+
+    def _refresh_stream_notice(self) -> None:
+        text = (self.tr("Rendered colors depend on style and scale.") + " " + self.tr(
+            "Only color selection is available: numeric bands, indices, ranges, classes and derivatives are unavailable.")
+            if self._rendered_only else "")
+        text = " ".join(part for part in (text, self._stream_notice_text) if part)
+        self._stream_notice.setText(text)
+        self._stream_notice.setVisible(bool(text))
+
+    def set_rendered_only(self, enabled: bool) -> None:
+        """Restrict rendered services to RGB pipette selections on a local snapshot.
+
+        Does not emit; call after set_summary. Tolerance and Ctrl+click keep
+        producing regular RasterSelection expressions for cross filtering.
+        """
+        enabled = bool(enabled)
+        changed = self._rendered_only != enabled
+        self._rendered_only = enabled
+        for widget in (self._bands_group, self._range_group, self._expression_group):
+            widget.setVisible(not enabled)
+            widget.setEnabled(not enabled)
+        if changed:
+            self._pipette_selection, self._picks, self._pick_kind, self._seeds = None, [], "", []
+            self._rebuild_chips()
+        if enabled:
+            self._all_bands = False
+            self._active_band = 1
+            self._set_derivative(RasterDerivative.VALUE)
+            self._rendered_rgb_bands()
+            self._activate_mode(PIPETTE, emit=False)
+        elif changed:
+            self._band_spans = {}
+            self._default_bands()
+            self._rebuild_band_rows()
+            self._activate_mode(self._default_mode(), emit=False)
+        self._refresh_stream_notice()
+
+    def _rendered_rgb_bands(self) -> None:
+        self._roles = {1: ROLE_RED, 2: ROLE_GREEN, 3: ROLE_BLUE}
+        self._pipette_bands = [1, 2, 3]
+        self._band_spans = {1: 255.0, 2: 255.0, 3: 255.0}
+
     def _default_bands(self) -> None:
         """Roles from the renderer (or guessed), every colour band compared by the pipette, first band active."""
+        if self._rendered_only:
+            self._rendered_rgb_bands()
+            return
         names, alpha = self._band_names_and_alpha()
         renderer_bands = getattr(self._summary, "renderer_bands", None) if self._summary is not None else None
         self._roles, self._roles_guessed = default_roles(names, alpha, renderer_bands)
@@ -1632,6 +1688,11 @@ class RasterExploringPanel(QWidget):
             from dataclasses import replace
             self._pipette_selection = replace(selection, shape=parsed["pipette_shape"])
         self._pipette_on = parsed["pipette_on"]
+        if self._rendered_only:
+            self._rendered_rgb_bands()
+            self._all_bands = False
+            self._active_band = 1
+            self._set_derivative(RasterDerivative.VALUE)
         self._apply_band()
         self._set_range(parsed["minimum"], parsed["maximum"])
         with _signals_blocked(self._expression_edit):
@@ -1656,10 +1717,12 @@ class RasterExploringPanel(QWidget):
         return bool(self._summary is not None and self._summary.classes)
 
     def _default_mode(self) -> RasterSelectionMode:
-        return RasterSelectionMode.RANGE
+        return PIPETTE if self._rendered_only else RasterSelectionMode.RANGE
 
     def _activate_mode(self, mode: RasterSelectionMode, emit: bool = True) -> None:
         """Check the group of ``mode``, uncheck and collapse the others."""
+        if self._rendered_only:
+            mode = PIPETTE
         if mode not in self._mode_groups:
             mode = RasterSelectionMode.RANGE
         self._switching_mode = True

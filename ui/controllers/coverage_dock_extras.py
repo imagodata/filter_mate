@@ -526,6 +526,17 @@ class CoverageDockExtras(QObject):
             self._guarded(self._class_pipette_enabled, layer)
         if kind_value == 'raster':
             self._guarded(self._watch_panel)
+            from ...core.domain.source_capability import classify
+            rendered = not classify(layer.providerType(), layer.source(), is_raster=True).has_raw_values
+            for name in ('pushButton_checkable_exploring_raster_hover',
+                         'pushButton_checkable_exploring_raster_zone',
+                         'pushButton_exploring_raster_more'):
+                button = self._tools.get(name)
+                if button is not None:
+                    if hasattr(button, 'setEnabled'):
+                        button.setEnabled(not rendered)
+                    if rendered:
+                        button.setToolTip(self.tr("Only color selection is available: rendered colors depend on style and scale."))
         self._refresh_icons()
         self._guarded(self._set_kind_icons, kind_value)
         self._guarded(self.ensure_strip)
@@ -810,6 +821,9 @@ class CoverageDockExtras(QObject):
         return vector_card_text(geometry, count, self.tr)
 
     def _raster_meta(self, layer: Any) -> str:
+        from ...core.domain.source_capability import classify
+        if not classify(layer.providerType(), layer.source(), is_raster=True).has_raw_values:
+            return self.tr("Rendered colors depend on style and scale.")
         from ...adapters.qgis.coverage_layers.raster_adapter import read_raster_summary
         summary = read_raster_summary(layer)
         bands = [(info.data_type, info.nodata) for info in summary.bands]
@@ -1422,12 +1436,18 @@ class CoverageDockExtras(QObject):
         from ...adapters.qgis.coverage_layers.raster_adapter import identify_values
         layer_point = self._layer_point(point)
         try:
-            key = (layer.id(), layer.source())
+            key = (layer.id(), layer.source(), id(getattr(controller, '_raster_sample', None)))
             if self._hover_base_key != key:
                 # FilterMate derived source: the original raster is opened once, not every 60 ms;
                 # again when a filter / undo changed the source.
                 self._hover_base, self._hover_base_key = controller._base_raster(layer), key
-            values = identify_values(self._hover_base, layer_point)
+            from ...core.domain.source_capability import classify
+            base = self._hover_base
+            capability = classify(base.providerType(), base.source(), is_raster=True) if base is not None else None
+            if capability is None or capability.is_remote or capability.provider_key == 'postgresraster':
+                self._hover_base_key = None
+                return  # A bounded local capture is not ready yet.
+            values = identify_values(base, layer_point)
             derived = None
             if panel.current_derivative().is_terrain:
                 terrain = controller._terrain_at(self._hover_base, layer_point)
@@ -1609,6 +1629,14 @@ class CoverageDockExtras(QObject):
                 panel.set_zone_statistics(None, None)
                 return
             base = controller._base_raster(layer)
+            from ...core.domain.source_capability import classify
+            capability = classify(base.providerType(), base.source(), is_raster=True) if base is not None else None
+            if capability is None or capability.is_remote or capability.provider_key == 'postgresraster':
+                return
+            rect = rect.intersect(base.extent())
+            if rect.isEmpty():
+                panel.set_zone_statistics(None, None)
+                return
             band = panel.current_band()
             if panel.current_derivative().is_terrain:
                 from ...adapters.qgis.coverage_layers.raster_adapter import derivative_zone_statistics
@@ -1625,10 +1653,10 @@ class CoverageDockExtras(QObject):
         if stats.minimumValue > stats.maximumValue:
             panel.set_zone_statistics(None, None)
             return
-        width = layer.width() or 0
-        height = layer.height() or 0
-        size_x = layer.extent().width() / width if width else 0.0
-        size_y = layer.extent().height() / height if height else 0.0
+        width = base.width() or 0
+        height = base.height() or 0
+        size_x = base.extent().width() / width if width else 0.0
+        size_y = base.extent().height() / height if height else 0.0
         pixels = zone_pixel_estimate(rect.width(), rect.height(), size_x, size_y)
         count = int(stats.elementCount) if pixels is not None and pixels <= ZONE_SAMPLE_SIZE else None
         panel.set_zone_statistics(float(stats.minimumValue), float(stats.maximumValue), float(stats.mean), count)

@@ -33,6 +33,8 @@ posix_only = pytest.mark.skipif(os.name == "nt", reason="POSIX modes, links and 
 def plugin_env(monkeypatch):
     """The FilterMate plugin loaded in this process, with its ENV_VARS."""
     def _install(**env_vars):
+        # Discovery requires the loaded plugin API, not only its config module.
+        monkeypatch.setitem(sys.modules, "filter_mate.filtermate_api", types.ModuleType("filter_mate.filtermate_api"))
         module = types.SimpleNamespace(ENV_VARS=dict(env_vars))
         monkeypatch.setitem(sys.modules, "filter_mate.config.config", module)
     monkeypatch.delitem(sys.modules, "filter_mate.config.config", raising=False)

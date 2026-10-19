@@ -172,3 +172,12 @@ def test_cleanup_failure_never_masks_the_result(monkeypatch, raster, tmp_path):
 def test_polygonal_wkt(wkt, expected):
     result = warp.polygonal_wkt(wkt)
     assert (result.split(' ')[0] if result else None) == expected
+
+
+def test_null_warp_is_failure_even_with_exception_manager(monkeypatch):
+    """A canceled/failed GDAL call must never look like a successful derived file."""
+    from contextlib import nullcontext
+    monkeypatch.setattr(gdal, 'ExceptionMgr', lambda **kwargs: nullcontext(), raising=False)
+    monkeypatch.setattr(gdal, 'Warp', lambda *args, **kwargs: None)
+    with pytest.raises(RuntimeError, match='gdal.Warp failed'):
+        warp.gdal_warp('unused.vrt', 'unused.tif', format='VRT')

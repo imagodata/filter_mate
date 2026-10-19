@@ -32,7 +32,7 @@ except ImportError:
 try:
     from .adapters.qgis.point_cloud_capability import (
         get_filterable_layer_types, get_current_layer_combo_filters, exclude_non_analysis_rasters,
-        is_non_analysis_raster)
+        is_unsupported_raster)
 except ImportError:
     def get_filterable_layer_types():
         """Vector-only fallback when the point cloud capability module is unavailable."""
@@ -46,7 +46,7 @@ except ImportError:
         """No provider exclusion when the point cloud capability module is unavailable."""
         return None
 
-    def is_non_analysis_raster(_layer):
+    def is_unsupported_raster(_layer):
         """Vector only when the point cloud capability module is unavailable: no raster to exclude."""
         return False
 from qgis.utils import iface
@@ -256,10 +256,10 @@ class FilterMateApp:
         """Return only valid vector layers with available sources."""
         service = self._get_layer_lifecycle_service()
         if service: return service.filter_usable_layers(layers, POSTGRESQL_AVAILABLE)
-        # Fallback: minimal validation (no basemap: a WMS / XYZ raster cannot be read)
+        # Fallback: admit supported rasters, including rendered colour sources.
         filterable_types = get_filterable_layer_types() or (QgsVectorLayer,)
         return [layer_item for layer_item in layers if isinstance(layer_item, filterable_types)
-                and not is_non_analysis_raster(layer_item) and layer_item.isValid() and is_layer_source_available(layer_item)]
+                and not is_unsupported_raster(layer_item) and layer_item.isValid() and is_layer_source_available(layer_item)]
 
     def _on_layers_added(self, layers):
         """Signal handler for layersAdded: accumulate layers and process as single batch."""
@@ -1291,6 +1291,16 @@ class FilterMateApp:
 
     def _execute_filter_task(self, task_name: str, task_parameters: dict):
         """Execute filter/unfilter/reset/export task (callback for TaskOrchestrator)."""
+        if task_name in ('filter', 'unfilter', 'reset', 'export'):
+            try:
+                from .adapters.public_api.operations import _RUNNING as api_running
+            except ImportError:
+                api_running = ()
+            if api_running:
+                iface.messageBar().pushWarning(
+                    "FilterMate", QCoreApplication.translate(
+                        "FilterMateApp", "A FilterMate API operation is running. Wait for it to finish."))
+                return
         from .core.tasks import FilterEngineTask
 
         logger.info(f"⚙️ _execute_filter_task CALLED: task_name={task_name}")
@@ -1748,6 +1758,16 @@ class FilterMateApp:
         """
         if getattr(self, '_unloading', False):
             return
+        if task_name in ('filter', 'unfilter', 'reset', 'export'):
+            try:
+                from .adapters.public_api.operations import _RUNNING as api_running
+            except ImportError:
+                api_running = ()
+            if api_running:
+                iface.messageBar().pushWarning(
+                    "FilterMate", QCoreApplication.translate(
+                        "FilterMateApp", "A FilterMate API operation is running. Wait for it to finish."))
+                return
         if task_name == 'remove_all_layers':
             self._handle_remove_all_layers()
             return

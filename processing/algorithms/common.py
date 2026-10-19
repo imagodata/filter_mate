@@ -186,6 +186,10 @@ class FilterMateAlgorithm(QgsProcessingAlgorithm):
         if report.error:
             raise QgsProcessingException(report.error)
         verb = verb or self.tr("filtered")
+        source = report.details.get("source") or {}
+        if source.get("capture_resampled"):
+            feedback.pushInfo(self.tr("Source raster was resampled for capture (grid: {0}).").format(
+                source.get("capture_grid", "?")))
         layers = report.details.get("layers", {})
         for layer_id, name in report.done.items():
             info = layers.get(name) or {}
@@ -195,6 +199,9 @@ class FilterMateAlgorithm(QgsProcessingAlgorithm):
             if name in report.outputs:
                 suffix = " → " + report.outputs[name]
             feedback.pushInfo(self.tr("{0}: {1}{2}").format(name, verb, suffix))
+            if info.get("resampled"):
+                feedback.pushInfo(self.tr("{0}: target raster was resampled for capture (grid: {1}).").format(
+                    name, info.get("capture_grid", "?")))
         for name, message in report.failed.items():
             feedback.reportError(self.tr("{0}: failed — {1}").format(name, message))
         return {
