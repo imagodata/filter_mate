@@ -100,6 +100,15 @@ if args.verify and args.service == 'wfs':
     rows = list(layer.getFeatures(QgsFeatureRequest().setLimit(2)))
     assert len(rows) == 1 and rows[0]['code_insee'] == '32160'
     print('PASS WFS L\'Isle-Jourdain (32160): exactly one commune', flush=True)
+    from filter_mate.adapters.qgis.server_filter_translation import restore_server_subset, ServerFilterError
+    before = layer.subsetString()
+    try:
+        restore_server_subset(layer, '"field_absent_on_server" = 1')
+    except ServerFilterError:
+        assert layer.subsetString() == before
+        print('PASS WFS server rejection preserves previous provider', flush=True)
+    else:
+        raise AssertionError('WFS rejected predicate silently installed')
 if args.verify and args.service == 'arcgis':
     assert safe_set_subset_string(layer, '"OBJECTID" = 1')
     rows = list(layer.getFeatures(QgsFeatureRequest().setLimit(2)))

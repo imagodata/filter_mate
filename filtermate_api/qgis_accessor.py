@@ -623,9 +623,9 @@ class QGISFilterMateAccessor:
                 if not restored:
                     if not failures:
                         from_message = _safe(lambda: layer.error().message(), '') or _safe(layer.name, layer_id)
-                        failures.append(from_message)
+                        failures.append(from_message if isinstance(from_message, str) else layer_id)
                     continue
-            except ValueError as exc:
+            except (ValueError, RuntimeError) as exc:
                 failures.append(str(exc))
                 continue
             target_layer_name = _safe(layer.name, layer_id)
