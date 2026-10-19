@@ -446,6 +446,8 @@ def local_http(task):
             outcome.complete and outcome.keys == (1, 3) and sum(request["returned"] for request in reads) == 3,
             repr(outcome),
         )
+        empty = materialize(layer, QgsRectangle(2000, 0, 2001, 2), "", "")
+        check("verified empty HTTP feature collection stays complete", empty.complete and not empty.keys, repr(empty))
         from filter_mate.adapters.qgis.server_filter_translation import prepare_server_subset, translate
         from filter_mate.adapters.qgis.remote_materializer import materialize_translation
         from filter_mate.core.filter.server_dialect import TranslationStatus
@@ -477,11 +479,12 @@ def local_http(task):
         fixture.exception_200 = True
         outcome = materialize(layer, QgsRectangle(0.5, 0, 3.5, 2), "", "")
         check("HTTP 200 ExceptionReport refused", outcome.reason == "read_error", repr(outcome))
-        success, queued, builder = filter_keys(layer, source_polygon())
+        attempts = [filter_keys(layer, source_polygon()) for unused in range(10)]
+        success, queued, builder = attempts[-1]
         check(
             "ExceptionReport never applies an empty subset",
-            not success and not queued,
-            str((success, queued, builder.user_warnings)),
+            all(not accepted and not subsets for accepted, subsets, unused in attempts),
+            str([(accepted, subsets) for accepted, subsets, unused in attempts]),
         )
         fixture.exception_200 = False
         success, queued, builder = filter_keys(layer, source_polygon(), limits={"max_features": 1})
