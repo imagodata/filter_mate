@@ -511,3 +511,18 @@ class TestGrowBy:
         monkeypatch.setattr(auto_zoom_mod, "_read_global_auto_zoom_flag", lambda: True)
         auto_zoom_mod.auto_zoom_to_filtered([layer], iface_obj=iface_obj)
         assert grown == []
+
+
+def test_remote_union_never_snapshots_non_vector_layers(monkeypatch, fake_iface):
+    """A mixed favorite must not feed a raster into QgsVectorLayerFeatureSource."""
+    from types import SimpleNamespace
+    probe_name = f'{_PKG}.adapters.qgis.source_capability_probe'
+    query_name = f'{_PKG}.adapters.qgis.async_query'
+    queue = MagicMock()
+    monkeypatch.setitem(sys.modules, probe_name, SimpleNamespace(counts_cheaply=lambda layer: False))
+    monkeypatch.setitem(sys.modules, query_name, SimpleNamespace(queue_union_zoom=queue))
+    vector = SimpleNamespace(id=lambda: 'vector', getFeatures=lambda request: iter(()))
+    raster = SimpleNamespace(id=lambda: 'raster')
+    iface, canvas = fake_iface
+    assert auto_zoom_mod.auto_zoom_to_filtered([vector, raster], iface_obj=iface)
+    assert queue.call_args.args[0] == [vector]

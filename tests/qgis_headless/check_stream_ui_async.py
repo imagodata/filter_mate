@@ -13,7 +13,8 @@ import tempfile
 import time
 import traceback
 
-from qgis.core import QgsApplication, QgsNetworkAccessManager, QgsNetworkRequestParameters, QgsProject, QgsVectorLayer
+from qgis.core import (QgsApplication, QgsFeature, QgsGeometry, QgsNetworkAccessManager,
+                       QgsNetworkRequestParameters, QgsPointXY, QgsProject, QgsVectorLayer)
 from qgis.PyQt.QtCore import QSettings, QThread, QTimer, Qt
 from qgis.PyQt.QtNetwork import QNetworkAccessManager, QNetworkRequest
 from qgis.PyQt.QtCore import QUrl
@@ -219,9 +220,26 @@ def run():
         QgsNetworkAccessManager.instance().requestAboutToBeCreated[QgsNetworkRequestParameters].connect(
             request_created, Qt.ConnectionType.DirectConnection)
         local = QgsVectorLayer('Point?crs=EPSG:4326&field=id:integer&field=name:string', 'local', 'memory')
+        features = []
+        for index in range(1, 26):
+            feature = QgsFeature(local.fields())
+            feature.setAttributes([index, 'Local {}'.format(index)])
+            feature.setGeometry(QgsGeometry.fromPointXY(QgsPointXY(index, index)))
+            features.append(feature)
+        local.dataProvider().addFeatures(features)
+        local.updateExtents()
         QgsProject.instance().addMapLayer(local)
+        until = time.monotonic() + 20
+        while (local.id() not in dock.PROJECT_LAYERS or dock.current_layer is not local) and time.monotonic() < until:
+            drain(0.1)
         drain(2)
         report(dock is not None, 'dock opens')
+        # Warm native row/font layout on the local path before measuring HTTP reads.
+        # This also checks that the inexpensive path is still synchronous.
+        local_picker = dock.widgets['EXPLORING']['MULTIPLE_SELECTION_FEATURES']['WIDGET']
+        local_picker.setDisplayExpression('name')
+        report(local_picker.list_widgets[local.id()].count() == 25, 'local list remains synchronous')
+        drain(1)
         sys.path.insert(0, '/src/tests/qgis_headless')
         from stream_fixture import FeatureService
         service = FeatureService()

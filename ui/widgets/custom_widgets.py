@@ -1746,7 +1746,7 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
             if force_full and truncated:
                 from ...infrastructure.feedback import show_warning
                 show_warning(self.tr("Selection"), self.tr(
-                    "The service selection exceeds the key limit. Refine the search before selecting all."))
+                    "The remote list exceeds the safe selection limit. Select fewer features or filter the layer first."))
                 return
             wanted = saved
             if getattr(self, '_selection_revision', 0) != revision:

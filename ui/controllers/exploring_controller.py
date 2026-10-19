@@ -379,7 +379,7 @@ class ExploringController(BaseController, LayerSelectionMixin):
         count = getattr(self, '_remote_loading_count', 0)
         count = count + 1 if loading else max(0, count - 1)
         self._remote_loading_count = count
-        if setter is not None:
+        if setter is not None and (count == 1 if loading else count == 0):
             setter(count > 0)
 
     def _queue_unique_values(self):

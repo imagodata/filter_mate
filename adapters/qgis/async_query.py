@@ -112,20 +112,20 @@ class QuerySlot:
         self.task = None
         self.loading = None
 
-    def cancel(self, *args):
+    def cancel(self, *args, reset_loading=True):
         self.generation += 1
         if self.task is not None:
             self.task.cancel()
             self.task = None
-        if self.loading is not None:
+        if self.loading is not None and reset_loading:
             try:
                 self.loading(False)
             except RuntimeError:
                 pass
             self.loading = None
 
-    def replace(self, task):
-        self.cancel()
+    def replace(self, task, keep_loading=False):
+        self.cancel(reset_loading=not keep_loading)
         self.task = task
         return self.generation
 
@@ -163,7 +163,10 @@ def submit_query(owner, attribute, layer, description, compute, deliver, loading
     task = SnapshotQueryTask(description, layer, compute, complete)
     dependent_layers = list(dependencies) if dependencies is not None else [layer]
     task.setDependentLayers(dependent_layers)
-    generation = slot.replace(task)
+    # Replacing the same UI read keeps its loading lease. Re-polishing the
+    # widget twice per keystroke (idle -> busy) both flickers and blocks Qt.
+    keep_loading = loading is not None and slot.loading == loading
+    generation = slot.replace(task, keep_loading=keep_loading)
     slot.loading = loading
     connections = []
 
@@ -172,7 +175,8 @@ def submit_query(owner, attribute, layer, description, compute, deliver, loading
             slot.cancel()
 
     for dependent in dependent_layers:
-        for name in ('willBeDeleted', 'subsetStringChanged', 'dataChanged', 'geometryChanged'):
+        for name in ('willBeDeleted', 'subsetStringChanged', 'dataChanged', 'geometryChanged',
+                     'updatedFields', 'crsChanged', 'dataSourceChanged'):
             signal = getattr(dependent, name, None)
             if signal is not None:
                 signal.connect(invalidate)
@@ -200,7 +204,7 @@ def submit_query(owner, attribute, layer, description, compute, deliver, loading
 
     task.taskCompleted.connect(settled)
     task.taskTerminated.connect(settled)
-    if loading is not None:
+    if loading is not None and not keep_loading:
         loading(True)
     QgsApplication.taskManager().addTask(task)
     return task

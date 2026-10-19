@@ -209,12 +209,13 @@ def test_remote_expression_never_dereferences_live_layers(module, monkeypatch, f
     assert module.remote_expression_is_safe('expression') is safe
 
 
-def test_secondary_layer_data_change_cancels_union_query(module):
+@pytest.mark.parametrize('signal_name', ['dataChanged', 'crsChanged', 'updatedFields', 'dataSourceChanged'])
+def test_secondary_layer_data_change_cancels_union_query(module, signal_name):
     owner, first = _owner_layer()
     second = MagicMock()
     task = module.submit_query(owner, 'query', first, 'union', lambda _: None, MagicMock(),
                                dependencies=[first, second])
-    second.dataChanged.connect.call_args.args[0]()
+    getattr(second, signal_name).connect.call_args.args[0]()
     assert task.isCanceled()
 
 
@@ -285,3 +286,13 @@ def test_delivery_error_is_recorded_without_escaping_the_qgis_callback(module):
     task.finished(True)
     assert isinstance(task.error, ValueError)
     assert task.deliver is None and task.compute is None
+
+
+def test_replacing_a_pending_read_keeps_the_loading_lease(module):
+    owner, layer = _owner_layer()
+    loading = MagicMock()
+    module.submit_query(owner, 'query', layer, 'read', lambda _: [1], MagicMock(), loading)
+    module.submit_query(owner, 'query', layer, 'read', lambda _: [2], MagicMock(), loading)
+    loading.assert_called_once_with(True)
+    owner.query.cancel()
+    assert [call.args[0] for call in loading.call_args_list] == [True, False]
