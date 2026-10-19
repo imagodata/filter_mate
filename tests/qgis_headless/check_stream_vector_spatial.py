@@ -457,7 +457,8 @@ def local_http(task):
             repr(outcome),
         )
         empty = materialize(layer, QgsRectangle(2000, 0, 2001, 2), "", "")
-        check("verified empty HTTP feature collection stays complete", empty.complete and not empty.keys, repr(empty))
+        check("empty remote iterator refuses without erasing a filter",
+              not empty.complete and not empty.keys and empty.reason == "unverified_filter", repr(empty))
         from filter_mate.adapters.qgis.server_filter_translation import prepare_server_subset, translate
         from filter_mate.adapters.qgis.remote_materializer import materialize_translation
         from filter_mate.core.filter.server_dialect import TranslationStatus
@@ -541,9 +542,10 @@ def local_http(task):
             str(builder.user_warnings),
         )
         fixture.mode = "oapif500"
-        outcome = materialize(layer, QgsRectangle(0.5, 0, 3.5, 2), "", "")
+        outcome = materialize(layer, QgsRectangle(0.5, 0, 3.5, 2), "", "",
+                              MaterializationLimits(timeout_seconds=3))
         check("OGC API descendant URL HTTP error refused", outcome.reason == "read_error", repr(outcome))
-        success, queued, _ = filter_keys(layer, source_polygon())
+        success, queued, _ = filter_keys(layer, source_polygon(), limits={"timeout_seconds": 3})
         check("OGC API error never applies an empty subset", not success and not queued)
 
 

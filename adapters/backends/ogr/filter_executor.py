@@ -1074,17 +1074,15 @@ def copy_remote_source(layer, params=None, feedback=None, selected_fids=None, ex
         return False  # internal source copies never send their keys to a service
 
     limits = materialization_limits(params)
-    try:
-        reader = layer if fids else bounded_source_layer(layer, limits)
-    except ValueError as exc:
-        reason = 'unverified_filter' if str(exc) == 'unverified_filter' else 'read_error'
-        raise ValueError(_remote_message(reason))
+    reader = layer if fids else None
+    source_factory = None if fids else lambda: bounded_source_layer(layer, limits)
     remaining = limits.timeout_seconds - (time.monotonic() - started)
     if remaining <= 0:
         raise ValueError(_remote_message('timeout') + ' ' + _remote_message('incomplete_source'))
     limits = replace(limits, timeout_seconds=remaining)
     outcome = read_bounded_features(reader, request, limits, feedback,
-                                    consume, lambda feature: feature.id(), source_uri=layer.source())
+                                    consume, lambda feature: feature.id(), source_uri=layer.source(),
+                                    source_factory=source_factory, provider_key=layer.dataProvider().name().lower())
     if not outcome.complete:
         raise ValueError(_remote_message(outcome.reason) + ' ' + _remote_message('incomplete_source'))
     if fids and received_fids != set(fids):

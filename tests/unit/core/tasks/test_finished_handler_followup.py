@@ -69,6 +69,10 @@ def test_refused_filters_reach_the_message_bar():
 def test_task_caches_are_released():
     task = types.SimpleNamespace(_filtermate_task_caches={"ogr_source_geometry": {"k": "union"}})
     params = {"_parent_task": task, "_ogr_source_union_cache": {}, "_spatialite_source_bbox_cache": {}}
+    selected = ["original selection"]
+    params["task"] = {"features": selected, "_bounded_remote_source_features": ["raw copy"]}
     FinishedHandler._release_task_caches(params)
     assert not hasattr(task, "_filtermate_task_caches")
     assert "_ogr_source_union_cache" not in params and "_spatialite_source_bbox_cache" not in params
+    assert params["task"] == {"features": selected}
+    assert params["task"]["features"] is selected

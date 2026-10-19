@@ -255,12 +255,15 @@ def _local_predicate(expression, fields):
     return matches
 
 
-def read_bounded_features(source, request, limits, feedback, consume, key, source_uri=None):
+def read_bounded_features(source, request, limits, feedback, consume, key, source_uri=None,
+                          source_factory=None, provider_key=None):
     """Copy each provider feature before local evaluation, with cooperative I/O cancellation.
 
     A watchdog cancels the provider feedback during a blocking network read.
     Providers that do not honor QgsFeedback may finish their current request;
     the elapsed-time check still prevents a late result being called complete.
+    A source factory runs only after the transport observers are attached,
+    since provider construction and reloadData can already start downloads.
     """
     from qgis.core import Qgis, QgsApplication, QgsDataSourceUri, QgsFeature, QgsFeedback, QgsNetworkAccessManager
     from qgis.PyQt.QtCore import Qt
@@ -302,6 +305,10 @@ def read_bounded_features(source, request, limits, feedback, consume, key, sourc
         if verb == "OPTIONS" or verb == b"OPTIONS":
             return False  # optional OAPIF capability discovery, not a feature read
         remote = urlsplit(request.url().toString())
+        if provider_key == "oapif" and remote.path.rstrip("/").endswith("/conformance"):
+            # QGIS may deliberately abort this HTTP-200 discovery response.
+            # Clone validity validates metadata; feature replies remain observed.
+            return False
         return bool(
             endpoint.hostname
             and remote.scheme == endpoint.scheme
@@ -352,6 +359,8 @@ def read_bounded_features(source, request, limits, feedback, consume, key, sourc
                 # Peek without consuming the provider's stream. ExceptionReport
                 # responses often use HTTP 200 and never emit errorOccurred.
                 try:
+                    if not reply.bytesAvailable():
+                        return
                     prefix = bytes(reply.peek(65536))
                 except RuntimeError:
                     # A downloader can destroy its reply during cancellation.
@@ -367,10 +376,12 @@ def read_bounded_features(source, request, limits, feedback, consume, key, sourc
                     network_failed.append(True)
 
             reply.readyRead.connect(inspect_body, Qt.ConnectionType.DirectConnection)
+            reply.finished.connect(inspect_body, Qt.ConnectionType.DirectConnection)
             if hasattr(reply, "errorOccurred"):
                 reply.errorOccurred.connect(error, Qt.ConnectionType.DirectConnection)
             else:  # Qt < 5.15: errorOccurred was named error
                 reply.finished.connect(lambda: error(reply.error()), Qt.ConnectionType.DirectConnection)
+            inspect_body()  # cached replies can have data before readyRead is connected
 
         preprocessor = QgsNetworkAccessManager.setReplyPreprocessor(inspect_reply)
     message_log = QgsApplication.messageLog()
@@ -385,15 +396,20 @@ def read_bounded_features(source, request, limits, feedback, consume, key, sourc
             provider_warnings.append(True)
 
     message_log.messageReceived.connect(provider_message, Qt.ConnectionType.DirectConnection)
-    provider = source.dataProvider() if hasattr(source, "dataProvider") else None
+    provider = None
+    provider_connected = False
 
     def provider_error(*args):
         if not closing.is_set():
             network_failed.append(True)
 
-    if provider is not None:
-        provider.raiseError.connect(provider_error, Qt.ConnectionType.DirectConnection)
     try:
+        if source_factory is not None:
+            source = source_factory()
+        provider = source.dataProvider() if hasattr(source, "dataProvider") else None
+        if provider is not None:
+            provider.raiseError.connect(provider_error, Qt.ConnectionType.DirectConnection)
+            provider_connected = True
         iterator = source.getFeatures(request)
         if not iterator.isValid():
             return MaterializationOutcome(reason="read_error")
@@ -418,11 +434,20 @@ def read_bounded_features(source, request, limits, feedback, consume, key, sourc
             return outcome
         if network_failed:
             return MaterializationOutcome(fetched=outcome.fetched, reason="read_error")
+        if (outcome.complete and not outcome.fetched and provider is not None
+                and provider.name().lower() in _BBOX_PROVIDERS):
+            # A QGIS service iterator can swallow an HTTP-200 protocol error
+            # and expose only clean exhaustion. No copied row means there is
+            # no independent evidence to distinguish that from a genuine zero.
+            return MaterializationOutcome(reason="unverified_filter")
         if provider_warnings and outcome.reason not in ("feature_limit", "timeout"):
             return MaterializationOutcome(fetched=outcome.fetched, reason="read_error")
         if time.monotonic() >= deadline:
             return MaterializationOutcome(outcome.keys, False, outcome.fetched, "timeout")
         return outcome
+    except ValueError as exc:
+        reason = str(exc) if str(exc) in ("unverified_filter", "invalid_expression") else "read_error"
+        return MaterializationOutcome(reason=reason)
     except Exception:
         return MaterializationOutcome(reason="read_error")
     finally:
@@ -436,7 +461,7 @@ def read_bounded_features(source, request, limits, feedback, consume, key, sourc
         if preprocessor is not None:
             QgsNetworkAccessManager.removeReplyPreprocessor(preprocessor)
         message_log.messageReceived.disconnect(provider_message)
-        if provider is not None:
+        if provider_connected:
             provider.raiseError.disconnect(provider_error)
 
 
@@ -508,24 +533,23 @@ def materialize(layer, rect, server_expression, local_expression, limits=None, f
             raise ValueError("Missing stable key")
         return value
 
-    try:
+    def create_source():
         source = _bbox_source(snapshot, limits, rect=rect)
-    except ValueError:
-        return MaterializationOutcome(reason="read_error")
-    if server_expression:
-        if hasattr(source, "setSubsetString"):
+        if server_expression and hasattr(source, "setSubsetString"):
             subset = (
                 "({}) AND ({})".format(snapshot.subset, server_expression) if snapshot.subset else server_expression
             )
             if not source.setSubsetString(subset) or not source.isValid():
-                return MaterializationOutcome(reason="invalid_expression")
-        else:
-            return MaterializationOutcome(reason="invalid_expression")
+                raise ValueError("invalid_expression")
+        elif server_expression:
+            raise ValueError("invalid_expression")
+        return source
     remaining = limits.timeout_seconds - (time.monotonic() - started)
     if remaining <= 0:
         return MaterializationOutcome(reason="timeout")
     return read_bounded_features(
-        source, request, replace(limits, timeout_seconds=remaining), feedback, matches, key, source_uri=snapshot.uri
+        None, request, replace(limits, timeout_seconds=remaining), feedback, matches, key,
+        source_uri=snapshot.uri, source_factory=create_source, provider_key=snapshot.provider
     )
 
 
