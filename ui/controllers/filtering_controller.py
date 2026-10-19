@@ -572,7 +572,9 @@ class FilteringController(BaseController, LayerSelectionMixin):
                     item_index += 1
                     logger.info(f"✓ populate_layers_checkable_combobox: Added missing layer '{missing_layer.name()}'")
 
-            logger.info(f"✓ populate_layers_checkable_combobox: Added {item_index} layers (source layer '{layer.name()}' excluded)")
+            from ...adapters.qgis.coverage_layers.vector_tile_filters import append_targets
+            append_targets(layers_widget, project, layers_to_filter)
+            logger.info(f"✓ populate_layers_checkable_combobox: Added {layers_widget.count()} layers (source layer '{layer.name()}' excluded)")
             logger.info("=== populate_layers_checkable_combobox END ===")
             return True
 

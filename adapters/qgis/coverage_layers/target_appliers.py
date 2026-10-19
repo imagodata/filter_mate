@@ -552,13 +552,21 @@ class PointCloudTargetJob(TargetJob):
         self._side = CoverageSide.INSIDE
         self._extent = QgsRectangle(layer.extent())
         self._unsupported = ''
+        if self.before.bounded_enrichment and (operator or '').upper() not in ('AND', 'AND NOT'):
+            self._unsupported = translate('PointCloudTarget',
+                                          'A bounded height-above-ground cloud only supports AND or AND NOT; Unfilter first')
+        self._pending_extent_source = None
         if self.before.derived:
             # Outside / empty areas are computed on the ORIGINAL extent: the
             # clip is applied to the original source, not to the derived one.
             from .point_cloud_footprint import open_point_cloud
-            base = open_point_cloud(self._base_source, f"{self.layer_name}_base", self._base_provider)
-            if base.isValid():
-                self._extent = QgsRectangle(base.extent())
+            from .pdal_cli import is_remote_source
+            if is_remote_source(self._base_source):
+                self._pending_extent_source = self._base_source
+            else:
+                base = open_point_cloud(self._base_source, f"{self.layer_name}_base", self._base_provider)
+                if base.isValid():
+                    self._extent = QgsRectangle(base.extent())
         self._extent.grow(1.0)  # header rounding: keep the points on the edge
         self._exporter = None
         if self._mode == 'exact':
@@ -570,14 +578,17 @@ class PointCloudTargetJob(TargetJob):
             from . import pdal_cli
             self._use_pdal = pdal_cli.supports_copc() and self._pdal_readable(self._base_source)
             if not self._use_pdal:
-                self._prepare_exporter()
+                if pdal_cli.is_remote_source(self._base_source):
+                    self._unsupported = translate('PointCloudTarget', 'PDAL 2.4 or newer is required to clip a remote point cloud')
+                else:
+                    self._prepare_exporter()
 
     @staticmethod
     def _pdal_readable(path: str) -> bool:
         from . import pdal_cli
         try:
             pdal_cli.reader_for(path)
-            return os.path.isfile(path) or path.lower().endswith('ept.json')
+            return os.path.isfile(path) or pdal_cli.is_remote_source(path) or path.lower().endswith('ept.json')
         except ValueError:
             return False
 
@@ -614,6 +625,23 @@ class PointCloudTargetJob(TargetJob):
         if side is CoverageSide.ALL:
             self.outcome.message = 'inside OR outside keeps every point: nothing to do'
             return
+        if self.before.bounded_enrichment and (self.operator or '').upper() not in ('AND', 'AND NOT'):
+            self.outcome.message = self._unsupported
+            return
+        from .pdal_cli import is_remote_source
+        if side is CoverageSide.OUTSIDE and is_remote_source(self._base_source):
+            self.outcome.message = translate('PointCloudTarget',
+                                            'Disjoint would read the whole remote cloud; choose an inside selection')
+            return
+        if self._pending_extent_source is not None:
+            from .point_cloud_footprint import open_point_cloud
+            base = open_point_cloud(self._pending_extent_source, f'{self.layer_name}_base', self._base_provider)
+            if not base.isValid():
+                self.outcome.message = translate('PointCloudTarget', 'The original remote point cloud could not be opened')
+                return
+            self._extent = QgsRectangle(base.extent())
+            self._extent.grow(1.0)
+            self._pending_extent_source = None
         geometry = self._target_geometry(source_geometry, source_crs, context)
         self._side = side
         if side is CoverageSide.INSIDE and not geometry.isEmpty() and not _has_area(geometry):
@@ -658,17 +686,15 @@ class PointCloudTargetJob(TargetJob):
         """Clip with ``polygon`` (WKT), nothing kept when None."""
         from . import pdal_cli
         path = self._new_path('.copc.laz')
-        reader = {"type": pdal_cli.reader_for(self._base_source), "filename": self._base_source}
-        stages = [reader]
+        area = QgsGeometry.fromWkt(polygon or self._geometry_wkt).boundingBox()
+        bounds = (area.xMinimum(), area.yMinimum(), area.xMaximum(), area.yMaximum())
+        try:
+            stages = pdal_cli.read_stages(self._base_source, bounds, polygon)
+        except ValueError as exc:
+            self.outcome.message = str(exc)
+            return
         if polygon is None:
             stages.append({"type": "filters.head", "count": 0})
-        elif reader["type"] == 'readers.copc':
-            # The COPC reader clips exactly and skips the octree nodes outside the
-            # polygon; a filters.crop after it tested every kept point again: 285 s
-            # instead of 148 s for a vegetation footprint of 42 000 vertices (25 M points).
-            reader["polygon"] = polygon
-        else:
-            stages.append({"type": "filters.crop", "polygon": polygon})
         stages.append({"type": "writers.copc", "filename": path, "forward": "all", "extra_dims": "all",
                        "a_srs": pdal_cli.srs_for(self.crs)})
         ok, message = pdal_cli.run_pipeline(stages, is_canceled=is_canceled)
@@ -732,7 +758,8 @@ class PointCloudTargetJob(TargetJob):
                               subset=layer.subsetString(), derived=True, original_source=self._base_source,
                               original_provider=self._base_provider, geometry_wkt=self._geometry_wkt,
                               side=self._side.value, enriched_source=self.before.enriched_source,
-                              enriched_provider=self.before.enriched_provider)
+                              enriched_provider=self.before.enriched_provider,
+                              bounded_enrichment=self.before.bounded_enrichment)
         registry().record(after, layer)
         layer.triggerRepaint()
         return after
@@ -750,6 +777,9 @@ def derived_point_count(layer) -> int:
 
 def make_job(layer, kind: LayerKind, operator: Optional[str], point_cloud_clip: str = 'exact') -> Optional[TargetJob]:
     """Build the job for a target layer (main thread)."""
+    if kind is LayerKind.VECTOR_TILE:
+        from .vector_tile_target import VectorTileTargetJob
+        return VectorTileTargetJob(layer, operator)
     if kind is LayerKind.VECTOR:
         return VectorTargetJob(layer, operator)
     if kind is LayerKind.RASTER:

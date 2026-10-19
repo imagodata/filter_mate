@@ -51,6 +51,10 @@ def _supports_subset(layer: QgsMapLayer) -> bool:
     return hasattr(layer, 'subsetString') and hasattr(layer, 'setSubsetString')
 
 
+def _redacted_source(source: str) -> str:
+    return re.sub(r'https?://[^\s\"<>]+', '[remote source]', source, flags=re.IGNORECASE)
+
+
 def _same_source(a: str, b: str) -> bool:
     """Same source, also for a file of the cache session spelled differently (link, separators)."""
     if a == b:
@@ -106,7 +110,7 @@ class DerivedSourceRegistry:
                 layer = None
         if layer is not None:
             try:
-                if snapshot.derived and (snapshot.geometry_wkt or snapshot.selection):
+                if (snapshot.derived and (snapshot.geometry_wkt or snapshot.selection)) or (snapshot.kind == 'vector_tile' and snapshot.renderer_xml):
                     state = snapshot.to_dict()
                     if snapshot.layer_id in self._alpha:
                         state[_ALPHA_KEY] = self._alpha[snapshot.layer_id]
@@ -159,7 +163,21 @@ class DerivedSourceRegistry:
         source = layer.source()
         if not source:
             return None
+        stored = _snapshot_of(_stored_state(layer))
+        if stored is not None and stored.kind == 'vector_tile' and stored.renderer_xml:
+            from .vector_tile_filters import native_style_xml, restore_style, style_xml
+            current = style_xml(layer)
+            if current != stored.renderer_xml:
+                if native_style_xml(current) != native_style_xml(stored.renderer_xml):
+                    layer.removeCustomProperty(DERIVED_PROPERTY)  # a user-loaded style is the new base
+                    return None
+                restore_style(layer, stored.renderer_xml)  # repair QGIS's native property-name loss on reload
+            snapshot = dataclasses.replace(stored, layer_id=layer.id(), source=source, provider=layer.providerType())
+            self.record(snapshot, layer)
+            return snapshot
         model = next((known for known in self._derived.values() if _same_source(known.source, source)), None)
+        if model is not None and model.kind == 'vector_tile':
+            return None  # tile layers sharing a URI can have independent styles
         alpha = self._alpha.get(model.layer_id) if model is not None else None
         if model is None and cache.in_session(source):
             state = _stored_state(layer)
@@ -233,6 +251,10 @@ class DerivedSourceRegistry:
         return not _same_source(current, snapshot.source) and not cache.in_session(current)
 
     def _on_write_map_layer(self, reference, layer, element, document) -> None:
+        if any(base.__name__ == 'QgsVectorTileLayer' for base in type(layer).__mro__):
+            # Both styles are already portable in the custom property. Never
+            # re-enter renderer serialization from QGIS's writeMapLayer hook.
+            return
         project = reference()
         try:
             snapshot = self._derived.get(layer.id()) or self._adopt(layer)
@@ -327,6 +349,9 @@ class DerivedSourceRegistry:
 
     def _put_back(self, layer, snapshot: LayerSnapshot) -> None:
         """Original source of a derived layer, without going back when it cannot be opened."""
+        if snapshot.kind == 'vector_tile':
+            restore_snapshot(layer, base_snapshot(snapshot), self)
+            return
         subset = layer.subsetString() if _supports_subset(layer) else ''
         # A layer turning invalid keeps its style for the day its source is
         # repaired (``<originalStyle>`` in the project): FilterMate's state
@@ -339,7 +364,7 @@ class DerivedSourceRegistry:
                             QgsDataProvider.ProviderOptions(), False)
         if not layer.isValid():
             logger.warning(f"[FM5] '{layer.name()}' put back on its original source, which cannot be opened: "
-                           f"{snapshot.pristine_source}")
+                           f"{_redacted_source(snapshot.pristine_source)}")
         else:
             if snapshot.kind == LayerKind.RASTER.value:
                 _restore_alpha_band(layer, alpha)
@@ -379,6 +404,8 @@ def portable_snapshot(snapshot: LayerSnapshot, original_source: str = '') -> Lay
     and gets the source before any FilterMate change as its original, or
     ``original_source`` (that source as written in a project).
     """
+    if snapshot.kind == 'vector_tile':
+        return dataclasses.replace(snapshot, source='', provider='', original_source='', original_provider='')
     if not snapshot.derived:
         return snapshot
     return dataclasses.replace(snapshot, source='', provider='',
@@ -439,7 +466,7 @@ def _project_source(project: QgsProject, source: str, provider: str, write: bool
             parts['path'] = convert(parts['path'])
             return providers.encodeUri(provider, parts)
     except Exception as exc:
-        logger.debug(f"[FM5] '{source}' not decoded by the '{provider}' provider: {exc}")
+        logger.debug(f"[FM5] '{_redacted_source(source)}' not decoded by the '{provider}' provider: {exc}")
     return convert(source)
 
 
@@ -511,6 +538,9 @@ def registry() -> DerivedSourceRegistry:
 def take_snapshot(layer: QgsMapLayer, kind: LayerKind, derived_registry: Optional[DerivedSourceRegistry] = None) -> LayerSnapshot:
     """Capture the current filter state of ``layer``."""
     reg = derived_registry or registry()
+    if kind is LayerKind.VECTOR_TILE:
+        from .vector_tile_filters import snapshot
+        return snapshot(layer, reg)
     subset = layer.subsetString() if _supports_subset(layer) else ''
     if kind is LayerKind.VECTOR:
         # A vector layer is only ever filtered through its subset; its source
@@ -523,7 +553,8 @@ def take_snapshot(layer: QgsMapLayer, kind: LayerKind, derived_registry: Optiona
                              subset=subset, derived=True, original_source=known.original_source,
                              original_provider=known.original_provider, geometry_wkt=known.geometry_wkt,
                              side=known.side, nodata=known.nodata, enriched_source=known.enriched_source,
-                             enriched_provider=known.enriched_provider, selection=known.selection)
+                             enriched_provider=known.enriched_provider, selection=known.selection,
+                             bounded_enrichment=known.bounded_enrichment)
     return LayerSnapshot(layer.id(), kind.value, source=layer.source(), provider=layer.providerType(), subset=subset)
 
 
@@ -534,6 +565,11 @@ def base_snapshot(snapshot: LayerSnapshot, subset: str = '') -> LayerSnapshot:
     file, in the session cache: that state is still derived, so the project
     is written, and unloading restores, the source it was enriched from.
     """
+    if snapshot.kind == 'vector_tile':
+        return dataclasses.replace(snapshot, derived=False, renderer_xml=snapshot.original_renderer_xml, tile_filter='')
+    if snapshot.bounded_enrichment:
+        return LayerSnapshot(snapshot.layer_id, snapshot.kind, source=snapshot.pristine_source,
+                             provider=snapshot.pristine_provider, subset=subset)
     if snapshot.derived and snapshot.enriched_source:
         return LayerSnapshot(snapshot.layer_id, snapshot.kind, source=snapshot.base_source,
                              provider=snapshot.base_provider, subset=subset, derived=True,
@@ -551,11 +587,18 @@ def restore_snapshot(layer: QgsMapLayer, snapshot: LayerSnapshot,
         True when something changed.
     """
     reg = derived_registry or registry()
+    if snapshot.kind == 'vector_tile':
+        from .vector_tile_filters import restore_style, style_xml
+        changed = style_xml(layer) != snapshot.renderer_xml
+        if changed:
+            restore_style(layer, snapshot.renderer_xml)
+        reg.record(snapshot, layer)
+        return changed
     changed = False
     if snapshot.kind != LayerKind.VECTOR.value and snapshot.source and (
             layer.source() != snapshot.source or layer.providerType() != snapshot.provider):
         if not swap_source(layer, snapshot.source, snapshot.provider, reg):
-            raise RuntimeError(f"source '{snapshot.source}' could not be opened")
+            raise RuntimeError('the saved source could not be opened')
         changed = True
         if snapshot.kind == LayerKind.RASTER.value:
             # Back on the original source: the alpha band it had (the user's choice).
@@ -592,7 +635,7 @@ def swap_source(layer, source: str, provider: str, derived_registry: Optional[De
     layer.setDataSource(source, layer.name(), provider, QgsDataProvider.ProviderOptions(), False)
     if layer.isValid():
         return True
-    logger.warning(f"[FM5] '{layer.name()}': '{source}' could not be opened, previous source restored")
+    logger.warning(f"[FM5] '{layer.name()}': '{_redacted_source(source)}' could not be opened, previous source restored")
     layer.setDataSource(previous_source, layer.name(), previous_provider, QgsDataProvider.ProviderOptions(), False)
     if previous_subset and not _set_subset(layer, previous_subset):
         logger.warning(f"[FM5] '{layer.name()}': its filter could not be put back: {previous_subset[:120]}")

@@ -13,7 +13,7 @@ import logging
 import time
 
 from qgis.PyQt.QtCore import pyqtSignal
-from qgis.core import QgsTask
+from qgis.core import QgsGeometry, QgsRectangle, QgsTask
 
 from ....core.domain.filter_state import LayerSnapshot
 from ....core.domain.layer_kind import LayerKind
@@ -75,7 +75,7 @@ class HeightAboveGroundTask(QgsTask):
 
     done = pyqtSignal(bool, str)
 
-    def __init__(self, layer, dem_layer) -> None:
+    def __init__(self, layer, dem_layer, zone=None) -> None:
         super().__init__(f"FilterMate: height above {dem_layer.name()}", QgsTask.Flag.CanCancel)
         self.layer_id = layer.id()
         self.layer_name = layer.name()
@@ -84,24 +84,51 @@ class HeightAboveGroundTask(QgsTask):
         self.dem_path = (dem_snapshot.original_source if dem_snapshot else dem_layer.source()).split('|')[0]
         self.crs = pdal_cli.srs_for(layer.crs())
         self.crs_error = crs_mismatch(layer.crs(), dem_layer.crs())
+        # Capture metadata only. The worker reads points inside the DTM and
+        # the current kept area, never the whole remote octree.
+        self.extent = QgsRectangle(layer.extent()).intersect(dem_layer.extent())
+        self.polygon = self.before.geometry_wkt
+        if pdal_cli.is_remote_source(self.before.base_source) and not self.polygon and (zone is None or zone.isEmpty()):
+            from .target_appliers import translate
+            self.crs_error = self.crs_error or translate('HeightAboveGround',
+                                                       'Draw a useful selection zone before computing height above ground remotely')
+        if zone is not None and not zone.isEmpty():
+            geometry = QgsGeometry(zone)
+            if self.polygon:
+                geometry = geometry.intersection(QgsGeometry.fromWkt(self.polygon))
+            self.polygon = geometry.asWkt()
+            self.extent = self.extent.intersect(geometry.boundingBox())
+        if self.polygon:
+            self.extent = self.extent.intersect(QgsGeometry.fromWkt(self.polygon).boundingBox())
+        self._bounded = bool(zone is not None or self.before.geometry_wkt or self.extent != layer.extent())
         self.output = ''
         self.message = ''
         self.after = None
 
     def run(self) -> bool:
+        from .target_appliers import translate
         started = time.perf_counter()
         # The panel gate may be stale: the pipeline ends with writers.copc.
         self.message = self.crs_error or pdal_cli.copc_unavailable_reason()
         if self.message:
             return False
         try:
-            reader = pdal_cli.reader_for(self.before.base_source)
+            if self.extent.isEmpty():
+                self.message = translate('HeightAboveGround', 'The DTM and point cloud have no common useful extent')
+                return False
+            bounds = (self.extent.xMinimum(), self.extent.yMinimum(), self.extent.xMaximum(), self.extent.yMaximum())
+            if self.polygon:
+                from .gdal_warp import polygonal_wkt
+                self.polygon = polygonal_wkt(self.polygon)
+                if not self.polygon:
+                    self.message = translate('HeightAboveGround', 'The useful selection has no polygon area')
+                    return False
+            stages = pdal_cli.read_stages(self.before.base_source, bounds, self.polygon or None)
         except ValueError as exc:
             self.message = str(exc)
             return False
         self.output = cache.new_path(f"{self.layer_name}_hag", '.copc.laz')
-        stages = [
-            {"type": reader, "filename": self.before.base_source},  # a clip is redone by the filter that follows
+        stages += [
             {"type": "filters.hag_dem", "raster": self.dem_path},
             {"type": "writers.copc", "filename": self.output, "forward": "all", "extra_dims": "all", "a_srs": self.crs},
         ]
@@ -133,7 +160,11 @@ class HeightAboveGroundTask(QgsTask):
                                    subset=layer.subsetString(), derived=True,
                                    original_source=self.output, original_provider='copc',
                                    enriched_source=self.before.pristine_source,
-                                   enriched_provider=self.before.pristine_provider)
+                                   enriched_provider=self.before.pristine_provider,
+                                   geometry_wkt=(self.polygon or QgsGeometry.fromRect(self.extent).asWkt()) if self._bounded else '',
+                                   bounded_enrichment=self._bounded)
         registry().record(self.after, layer)
         layer.triggerRepaint()
-        self.done.emit(True, '')
+        from .target_appliers import translate
+        self.done.emit(True, translate('HeightAboveGround',
+                                      'Height above ground covers the useful area only; Unfilter restores the original cloud') if self._bounded else '')

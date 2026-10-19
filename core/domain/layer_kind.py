@@ -16,6 +16,7 @@ class LayerKind(Enum):
     VECTOR = "vector"
     RASTER = "raster"
     POINT_CLOUD = "point_cloud"
+    VECTOR_TILE = "vector_tile"
     OTHER = "other"
 
     @property
@@ -28,6 +29,11 @@ class LayerKind(Enum):
         """True for raster and point cloud layers (no features, no subset of features)."""
         return self in (LayerKind.RASTER, LayerKind.POINT_CLOUD)
 
+    @property
+    def is_filter_target(self) -> bool:
+        """Kinds handled by the cross filter engine, including target-only tiles."""
+        return self.is_coverage or self is LayerKind.VECTOR_TILE
+
 
 def kind_label(kind: LayerKind) -> str:
     """Return the English display label of a kind (translated by the UI)."""
@@ -35,4 +41,5 @@ def kind_label(kind: LayerKind) -> str:
         LayerKind.VECTOR: "Vector",
         LayerKind.RASTER: "Raster",
         LayerKind.POINT_CLOUD: "Point cloud",
+        LayerKind.VECTOR_TILE: "Vector tiles",
     }.get(kind, "Other")

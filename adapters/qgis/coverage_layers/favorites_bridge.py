@@ -44,9 +44,12 @@ def capture(project: Optional[QgsProject] = None) -> List[Dict]:
     entries = []
     for layer in project.mapLayers().values():
         kind = _kind(layer)
-        if not getattr(kind, 'is_coverage', False):
+        if not getattr(kind, 'is_filter_target', False):
             continue
-        snapshot = take_snapshot(layer, kind)
+        try:
+            snapshot = take_snapshot(layer, kind)
+        except ValueError:
+            continue  # an unrelated unsupported tile renderer must not suppress other favorites
         if not snapshot.derived and not snapshot.subset:
             continue
         entry = portable_snapshot(snapshot).to_dict()
@@ -61,7 +64,7 @@ def _resolve(project: QgsProject, entry: Dict, kind_of=None):
     if layer is not None:
         return layer
     for candidate in project.mapLayersByName(entry.get('layer_name', '')):
-        if getattr(kind_of(candidate), 'is_coverage', False):
+        if getattr(kind_of(candidate), 'is_filter_target', False):
             return candidate
     return None
 
@@ -90,12 +93,23 @@ def apply(entries: List[Dict], service=None, project: Optional[QgsProject] = Non
             logger.warning(f"[FM5] favorite: layer '{entry.get('layer_name')}' not found")
             continue
         kind = kind_of(layer)
-        if not getattr(kind, 'is_coverage', False):
+        if not getattr(kind, 'is_filter_target', False):
             logger.warning(f"[FM5] favorite: '{layer.name()}' is not a raster / point cloud layer here")
             continue
         try:
             stored = LayerSnapshot.from_dict(entry)
         except TypeError:
+            continue
+        if stored.kind != kind.value:
+            logger.warning(f"[FM5] favorite: '{layer.name()}' has a different layer kind")
+            continue
+        if kind is LayerKind.VECTOR_TILE:
+            import dataclasses
+            restore_snapshot(layer, dataclasses.replace(stored, layer_id=layer.id(), source=layer.source(),
+                                                        provider=layer.providerType()))
+            handled += 1
+            if applied is not None:
+                applied.append(layer.id())
             continue
         current = take_snapshot(layer, kind)
         restore_snapshot(layer, base_snapshot(current, stored.subset if kind is LayerKind.POINT_CLOUD else ''))

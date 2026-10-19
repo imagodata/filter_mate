@@ -347,6 +347,7 @@ class PointCloudSourceJob(SourceJob):
         self._zone = zone if zone is not None and not zone.isEmpty() else None
         self._layer = None
         self._error = ''
+        self._pending_remote = None
         if layer.providerType() == 'vpc':
             self._error = "a virtual point cloud (VPC) cannot be a source: its points are read tile by tile"
             return
@@ -354,6 +355,14 @@ class PointCloudSourceJob(SourceJob):
         # the live layer may change (preview, removal) while the task runs, and
         # it is never read from the task thread.
         from .point_cloud_footprint import index_ready, open_point_cloud
+        from .pdal_cli import is_remote_source
+        if is_remote_source(layer.source()):
+            if self._zone is None:
+                from .target_appliers import translate
+                self._error = translate('PointCloudSource', 'Draw a useful selection zone before reading a remote point cloud')
+                return
+            self._pending_remote = (layer.source(), f'{layer.name()}_footprint', layer.providerType(), layer.subsetString())
+            return  # opening a remote private layer can fetch its header: worker only
         copy = open_point_cloud(layer.source(), f"{layer.name()}_footprint", layer.providerType())
         subset = layer.subsetString()
         # Spelled in parentheses: QGIS caches the decoded blocks under the
@@ -369,10 +378,33 @@ class PointCloudSourceJob(SourceJob):
             self._layer = copy
 
     def _raw_geometry(self, is_canceled) -> QgsGeometry:
-        from .point_cloud_footprint import footprint_geometry, selection_check
+        if is_canceled():
+            self.message = 'canceled'
+            return QgsGeometry()
         if self._error:
             self.message = self._error
             return QgsGeometry()
+        if self._pending_remote is not None:
+            try:
+                from .point_cloud_footprint import index_ready, open_point_cloud
+                source, name, provider, subset = self._pending_remote
+                self._layer = open_point_cloud(source, name, provider)
+                self._subset = f'({subset}\n)' if subset else ''
+                if not self._layer.isValid() or not index_ready(self._layer):
+                    from .target_appliers import translate
+                    self.message = translate('PointCloudSource', 'The remote point cloud could not be read')
+                    return QgsGeometry()
+                if subset and not self._layer.setSubsetString(self._subset):
+                    from .target_appliers import translate
+                    self.message = translate('PointCloudSource', 'The remote point cloud rejected the selection')
+                    return QgsGeometry()
+                return self._footprint(is_canceled)
+            finally:
+                self._layer = None  # destroy the worker-owned layer on its creating thread
+        return self._footprint(is_canceled)
+
+    def _footprint(self, is_canceled):
+        from .point_cloud_footprint import footprint_geometry, selection_check
         try:
             result = footprint_geometry(self._layer, self._resolution, is_canceled=is_canceled,
                                         check=selection_check(self._subset),

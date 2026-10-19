@@ -8,6 +8,7 @@ straight to COPC, height above a DTM (``filters.hag_dem``).
 """
 import json
 import logging
+import math
 import os
 import re
 import shutil
@@ -16,6 +17,7 @@ import sys
 import tempfile
 import threading
 from typing import Callable, List, Optional, Tuple
+from urllib.parse import urlsplit
 
 logger = logging.getLogger(__name__)
 
@@ -80,6 +82,7 @@ def reset_cache() -> None:
     global _cached, _version_cached
     _cached = None
     _version_cached = None
+    _polygon_options.clear()
 
 
 def is_available() -> bool:
@@ -94,6 +97,21 @@ VERSION_TIMEOUT = 5.0
 
 # (executable, version or None, error when it could not be run)
 _version_cached: Optional[Tuple[str, Optional[Tuple[int, int, int]], str]] = None
+_polygon_options = {}
+
+
+def reader_has_polygon(reader: str) -> bool:
+    """Probe installed EPT options once (worker only), including vendor builds."""
+    exe = find_pdal()
+    key = (exe, reader)
+    if key not in _polygon_options:
+        try:
+            result = subprocess.run([exe, '--options', reader], capture_output=True, text=True,
+                                    encoding='utf-8', errors='replace', timeout=VERSION_TIMEOUT, **_subprocess_kwargs())
+            _polygon_options[key] = result.returncode == 0 and bool(re.search(r'^\s+polygon\s*$', result.stdout, re.MULTILINE))
+        except (OSError, subprocess.SubprocessError, TypeError):
+            _polygon_options[key] = False
+    return _polygon_options[key]
 
 
 def _subprocess_kwargs() -> dict:
@@ -159,14 +177,65 @@ def supports_copc() -> bool:
 
 def reader_for(path: str) -> str:
     """PDAL reader type for a point cloud file."""
-    lower = (path or '').lower()
+    lower = urlsplit(path).path.lower() if is_remote_source(path) else (path or '').lower()
     if lower.endswith('.copc.laz'):
         return 'readers.copc'
     if lower.endswith('ept.json'):
         return 'readers.ept'
     if lower.endswith(('.las', '.laz')):
         return 'readers.las'
-    raise ValueError(f"no PDAL reader for {path}")
+    raise ValueError('no PDAL reader for this point cloud format')
+
+
+def is_remote_source(source: str) -> bool:
+    """Whether a point cloud URI uses HTTP, without opening it."""
+    return (source or '').lower().startswith(('https://', 'http://'))
+
+
+def _message(text: str) -> str:
+    try:
+        from qgis.PyQt.QtCore import QCoreApplication
+        result = QCoreApplication.translate('PointCloudReader', text)
+        return result if isinstance(result, str) else text
+    except ImportError:
+        return text
+
+
+def read_stages(source: str, bounds=None, polygon: Optional[str] = None) -> list:
+    """Build a bounded reader and an exact clip (worker thread).
+
+    Bounds are (xmin, ymin, xmax, ymax), in the cloud CRS. Remote inputs
+    require an explicit useful extent and PDAL 2.4+, never a whole download.
+    EPT polygon support is probed on the installed tool; older builds keep
+    filters.crop inside reader bounds. COPC accepts polygon since PDAL 2.4.
+    """
+    remote = is_remote_source(source)
+    reader_type = reader_for(source)
+    if remote:
+        found = version()
+        if found is None or found[:2] < COPC_MIN_VERSION:
+            raise ValueError(_message('PDAL 2.4 or newer with a readable version is required for remote point clouds'))
+        if reader_type not in ('readers.copc', 'readers.ept'):
+            raise ValueError(_message('Remote point clouds require EPT or COPC for bounded reads'))
+        if bounds is None:
+            raise ValueError(_message('A useful extent is required for a remote point cloud'))
+    reader = {'type': reader_type, 'filename': source}
+    stages = [reader]
+    if bounds is not None:
+        xmin, ymin, xmax, ymax = map(float, bounds)
+        if not all(math.isfinite(v) for v in (xmin, ymin, xmax, ymax)) or xmin >= xmax or ymin >= ymax:
+            raise ValueError(_message('The useful extent must be finite and have positive area'))
+        if reader_type in ('readers.copc', 'readers.ept'):
+            reader['bounds'] = f'([{xmin:.17g},{xmax:.17g}],[{ymin:.17g},{ymax:.17g}])'
+        else:
+            stages.append({'type': 'filters.crop',
+                           'bounds': f'([{xmin:.17g},{xmax:.17g}],[{ymin:.17g},{ymax:.17g}])'})
+    if polygon:
+        if reader_type == 'readers.copc' or (reader_type == 'readers.ept' and reader_has_polygon(reader_type)):
+            reader['polygon'] = polygon
+        else:
+            stages.append({'type': 'filters.crop', 'polygon': polygon})
+    return stages
 
 
 # Authorities PROJ resolves by code; any other CRS (USER:..., none) is written as WKT.
@@ -216,7 +285,18 @@ def run_pipeline(stages: list, timeout: float = 3600.0, is_canceled: Optional[Ca
                     process.communicate()
                     return False, "canceled" if elapsed <= timeout else "timeout"
         if process.returncode != 0:
-            return False, (err or out or f"pdal exit code {process.returncode}").strip()[:2000]
+            message = (err or out or f"pdal exit code {process.returncode}").strip()
+            # Driver errors can echo signed URLs. Never return credentials to a log.
+            message = re.sub(r'https?://[^\s\"<>]+', '[remote point cloud]', message)
+            for stage in stages:
+                source = stage.get('filename', '') if isinstance(stage, dict) else ''
+                if is_remote_source(source):
+                    host = urlsplit(source).hostname or ''
+                    if host:
+                        # Arbiter also emits URLs without their scheme, including query tokens.
+                        message = re.sub(r'(?:[^\s/\"<>]*@)?' + re.escape(host) + r'(?::\d+)?[^\s\"<>]*',
+                                         '[remote point cloud]', message, flags=re.IGNORECASE)
+            return False, message[:2000]
         return True, ""
     finally:
         try:
