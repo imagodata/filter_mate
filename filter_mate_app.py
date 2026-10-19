@@ -62,7 +62,6 @@ from .infrastructure.utils import (
     POSTGRESQL_AVAILABLE,
     is_layer_source_available,
 )
-from .infrastructure.database.sql_utils import safe_set_subset_string
 from .infrastructure.perf_timer import perf_mark_start, perf_mark_end, perf_elapsed_ms
 from .infrastructure.field_utils import cleanup_corrupted_layer_filters
 from .infrastructure.utils.type_utils import return_typed_value
