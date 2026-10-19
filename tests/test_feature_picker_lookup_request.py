@@ -8,11 +8,24 @@ widget class with ``ast`` so no QWidget is constructed.
 """
 
 import ast
+import builtins
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import MagicMock
 
 import pytest
+
+
+def widget_builtins(capability=None):
+    """Supply the capability dependency to methods extracted outside their package."""
+    capability = capability or SimpleNamespace(counts_cheaply=lambda layer: True)
+
+    def importing(name, globals=None, locals=None, fromlist=(), level=0):
+        if name.endswith('source_capability_probe'):
+            return capability
+        return builtins.__import__(name, globals, locals, fromlist, level)
+
+    return dict(vars(builtins), __import__=importing)
 
 
 class FakeRequest:
@@ -64,6 +77,7 @@ def helpers():
         return layer.rows
 
     namespace = {
+        '__builtins__': widget_builtins(),
         'QgsFeatureRequest': FakeRequest,
         'QgsExpression': FakeExpression,
         'safe_iterate_features': fake_iterate,
@@ -174,7 +188,7 @@ def test_rows_beyond_the_list_are_fetched_by_feature_id_without_a_key_field():
         requests.append(request)
         return [Feature(fid, f"commune {fid}") for fid in (request.fids or [])]
 
-    namespace = {'QgsFeatureRequest': FakeRequest, 'QgsExpression': FakeExpression,
+    namespace = {'__builtins__': widget_builtins(), 'QgsFeatureRequest': FakeRequest, 'QgsExpression': FakeExpression,
                  'safe_iterate_features': iterate, 'logger': MagicMock()}
     exec(compile(ast.Module(body=nodes, type_ignores=[]), str(path), 'exec'), namespace)
     namespace['QgsCheckableComboBoxFeaturesListPickerWidget'] = SimpleNamespace(_to_number=namespace['_to_number'])

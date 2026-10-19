@@ -4,6 +4,8 @@ All notable changes to FilterMate will be documented in this file.
 
 ## [Unreleased]
 
+- Run service value lists, selection reads and zoom/filtered extents in cancellable snapshot tasks; reject stale generations and retain fast synchronous local reads.
+
 ### Added
 
 - **Bounded spatial filtering of remote vectors.** WFS requests explicitly enable the provider's server BBOX mode, then test the exact OGR union predicate on copied features. Remote source copies require a selection or filter. In-memory materialization has configurable row and time budgets (20,000 / 90 seconds), cancellation, explicit partial outcomes and the existing 500-key refusal; incomplete disjoint complements are refused.

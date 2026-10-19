@@ -1073,7 +1073,7 @@ class ControllerIntegration:
         Returns:
             True if delegation succeeded, False otherwise
         """
-        if self._exploring_controller and features:
+        if self._exploring_controller and (features or expression):
             try:
                 # v3.1 STORY-2.3: Sync layer before zoom to ensure controller has correct layer
                 target_layer = layer
@@ -1083,6 +1083,10 @@ class ControllerIntegration:
                 if target_layer:
                     self._exploring_controller.set_layer(target_layer)
 
+                from ...adapters.qgis.source_capability_probe import counts_cheaply
+                if target_layer is not None and not counts_cheaply(target_layer):
+                    self._exploring_controller.zooming_to_features(features or [], expression)
+                    return True
                 return self._exploring_controller.zoom_to_features(features)
             except Exception as e:
                 logger.warning(f"delegate_zoom_to_features failed: {e}")

@@ -4144,6 +4144,13 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             Falls back to _fallback_get_current_features() if controller returns empty.
             Feature picker is the primary source for single_selection mode.
         """
+        from .adapters.qgis.source_capability_probe import counts_cheaply
+        if self.current_layer is not None and not counts_cheaply(self.current_layer):
+            if self._exploring_ctrl is None:
+                show_warning(self.tr("Read failed"), self.tr("The service could not be read. Please retry."))
+                return [], ''
+            return self._exploring_ctrl.get_current_features(use_cache)
+
         # DIAGNOSTIC 2026-01-16: ULTRA-DETAILED TRACE
         logger.info("=" * 80)
         logger.info("🔍 get_current_features() CALLED")
@@ -4211,6 +4218,12 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         if not self._is_layer_valid():
             logger.warning("   🔴 _fallback_get_current_features: Layer is INVALID!")
             return [], ''
+        from .adapters.qgis.source_capability_probe import counts_cheaply
+        if not counts_cheaply(self.current_layer):
+            if self._exploring_ctrl is None:
+                show_warning(self.tr("Read failed"), self.tr("The service could not be read. Please retry."))
+                return [], ''
+            return self._exploring_ctrl.get_current_features()
         try:
             from qgis.core import QgsFeatureRequest
             groupbox_type = self.current_exploring_groupbox
@@ -4423,6 +4436,12 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             logger.warning("ZOOM: Invalid layer")
             return
 
+        from .adapters.qgis.source_capability_probe import counts_cheaply
+        if not counts_cheaply(self.current_layer):
+            if self._exploring_ctrl:
+                self._exploring_ctrl.zooming_to_features(features or [], expression)
+            return
+
         layer_id = self.current_layer.id()
         groupbox_type = self.current_exploring_groupbox
 
@@ -4485,14 +4504,14 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             logger.warning("ZOOM: No features to zoom to")
 
     def get_filtered_layer_extent(self, layer):
-        """v3.1 Sprint 17: Calculate bounding box of filtered features with performance limit."""
+        """Return a local/cached extent; queue a cancellable read on a service cache miss."""
         if not layer: return None
         try:
             MAX_FEATURES = 10000
             # 2026-10-17: a web service / network database is neither counted nor
             # scanned on the main thread: its (provider) extent.
             from .adapters.qgis.source_capability_probe import counts_cheaply
-            if not counts_cheaply(layer): return layer.extent()
+            if not counts_cheaply(layer): return self._remote_filtered_extent(layer)
             layer.updateExtents()
             # PERF 2026-09-12: measured — asking the PostgreSQL provider for the
             # server-side filtered extent here (ST_Extent under an EXISTS subset)
@@ -4509,7 +4528,45 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
                     if count >= MAX_FEATURES: break
             return layer.extent() if extent.isEmpty() else extent
         except (RuntimeError, AttributeError, TypeError):
-            return layer.extent()  # Fallback to layer extent on error
+            from .adapters.qgis.source_capability_probe import counts_cheaply
+            return layer.extent() if counts_cheaply(layer) else None
+
+    def _remote_filtered_extent(self, layer):
+        """Return a cached extent or schedule its cancellable read; never query a service here."""
+        from .adapters.qgis.async_query import collect_extent, submit_query
+        key = (layer.id(), layer.source(), layer.subsetString())
+        cache = getattr(self, '_remote_extent_cache', None)
+        if cache is None:
+            cache = self._remote_extent_cache = {}
+        watched = getattr(self, '_remote_extent_watched', None)
+        if watched is None:
+            watched = self._remote_extent_watched = set()
+        if key[0] not in watched:
+            watched.add(key[0])
+            # Keep invalidation after task completion too: reloads and edits change an identical subset.
+            layer.dataChanged.connect(cache.clear)
+            layer.geometryChanged.connect(lambda *args: cache.clear())
+            layer.willBeDeleted.connect(lambda: (cache.clear(), watched.discard(key[0])))
+        if key in cache:
+            return QgsRectangle(cache[key])
+        name = '_extent_query_' + layer.id()
+        slot = getattr(self, name, None)
+        if slot is not None and slot.task is not None:
+            return None
+        request = QgsFeatureRequest().setNoAttributes()
+
+        def deliver(extent):
+            # Keep only the most recent subset of this layer.
+            for old in list(cache):
+                if old[0] == key[0]:
+                    del cache[old]
+            if extent is not None and self.current_layer is layer:
+                cache[key] = extent
+
+        submit_query(self, name, layer, self.tr("Loading filtered extent…"),
+                     lambda task: collect_extent(task, request), deliver,
+                     self._set_expression_loading_state)
+        return None
 
     def _compute_zoom_extent_for_mode(self):
         """v4.0 Sprint 18: Compute zoom extent - delegates to ExploringController."""
@@ -4523,6 +4580,10 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         """
         if not self._is_layer_valid():
             return
+
+        from .adapters.qgis.source_capability_probe import counts_cheaply
+        if not counts_cheaply(self.current_layer) and self._exploring_ctrl:
+            return self._exploring_ctrl.zooming_to_features(features or [], expression)
 
         if not features or len(features) == 0:
             logger.warning("zooming_to_features: No features provided")
@@ -4832,6 +4893,10 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             logger.debug(f"  Expression: '{expression}'")
             return [], expression
 
+        from .adapters.qgis.source_capability_probe import counts_cheaply
+        if not counts_cheaply(self.current_layer) and self._exploring_ctrl:
+            return self._exploring_ctrl._remote_features(custom_expression=expression)
+
         # Check cache first
         layer_id = self.current_layer.id()
         cached = self._get_cached_expression_result(layer_id, expression)
@@ -5018,6 +5083,17 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         fid = getattr(self, '_pending_feature_change_fid', None)
         self._pending_feature_change_fid = None
         if fid is not None and self._is_layer_valid():
+            from .adapters.qgis.source_capability_probe import counts_cheaply
+            if not counts_cheaply(self.current_layer) and self._exploring_ctrl:
+                from .adapters.qgis.async_query import submit_query
+                layer = self.current_layer
+                request = QgsFeatureRequest().setFilterFid(fid)
+                submit_query(self, '_debounced_feature_query', layer, self.tr("Loading selected values…"),
+                             lambda task: list(task.features(request)),
+                             lambda features: self.exploring_features_changed(features[0])
+                             if features and self.current_layer is layer else None,
+                             self._set_expression_loading_state)
+                return
             try:
                 feature = self.current_layer.getFeature(fid)
                 if feature.isValid():
@@ -5057,6 +5133,23 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
 
     def get_exploring_features_async(self, expression: str, on_complete=None, on_error=None, on_progress=None):
         """v3.1 Sprint 16: Async expression evaluation for large layers."""
+        from .adapters.qgis.source_capability_probe import counts_cheaply
+        if self.current_layer is not None and not counts_cheaply(self.current_layer):
+            from .adapters.qgis.async_query import submit_query, remote_expression_is_safe
+            if not remote_expression_is_safe(expression, self.current_layer.fields()):
+                if on_error:
+                    on_error(self.tr("This expression cannot be evaluated safely for a service."), self.current_layer.id())
+                return None
+            layer = self.current_layer
+            request = QgsFeatureRequest().setFilterExpression(expression)
+
+            def deliver(features):
+                if self.current_layer is layer and on_complete is not None:
+                    on_complete(features, expression, layer.id())
+
+            return submit_query(self, '_remote_expression_query', layer, self.tr("Loading selected values…"),
+                                lambda task: list(task.features(request)), deliver,
+                                self._set_expression_loading_state)
         if not ASYNC_EXPRESSION_AVAILABLE or self._expression_manager is None:
             if on_error: on_error("Async evaluation not available", "")
             return None
@@ -5091,6 +5184,14 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
 
     def cancel_async_expression_evaluation(self):
         """v4.0 S18: Cancel pending async expression evaluation."""
+        self._pending_remote_filter = None
+        controller = getattr(self, '_exploring_ctrl', None)
+        slot = getattr(controller, '_selection_query', None) if controller is not None else None
+        if slot is not None:
+            slot.cancel()
+        remote = getattr(self, '_remote_expression_query', None)
+        if remote is not None:
+            remote.cancel()
         if self._pending_async_evaluation: self._pending_async_evaluation.cancel(); self._pending_async_evaluation = None; self._set_expression_loading_state(False)
         if self._expression_manager and self.current_layer: self._expression_manager.cancel(self.current_layer.id())
 
@@ -6888,6 +6989,37 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             else:
                 self._exploring_cache.invalidate(layer_id, groupbox_type)
 
+    def _defer_remote_filter(self, slot):
+        """Resume a requested filter after its current selection read, if still current."""
+        token = object()
+        self._pending_remote_filter = token
+        layer = self.current_layer
+        controller = self._exploring_ctrl
+        revision = controller._remote_ui_revision()
+        signature = controller._remote_selection_pending
+        generation = slot.generation
+        task = slot.task
+
+        def resume():
+            try:
+                cached = controller._remote_selection_result
+                if (getattr(self, '_pending_remote_filter', None) is not token
+                        or self.current_layer is not layer or not slot.accepts(generation)
+                        or controller._remote_ui_revision() != revision
+                        or cached is None or cached[0] != signature):
+                    return
+                self._pending_remote_filter = None
+                self.launchTaskEvent(False, 'filter')
+            except RuntimeError:
+                return  # The dock or its layer was deleted while the callback was queued.
+
+        def completed():
+            if task.error is None and slot.accepts(generation):
+                # Let all task delivery/cleanup slots finish before re-entering the launcher.
+                QTimer.singleShot(0, resume)
+
+        task.taskCompleted.connect(completed)
+
     def launchTaskEvent(self, state: str, task_name: str) -> None:
         """Emit signal to launch a FilterMate task.
 
@@ -6906,6 +7038,17 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         """
         if self._controller_integration and self._controller_integration.delegate_point_cloud_task(task_name):
             return
+        self._pending_remote_filter = None
+        if task_name == 'filter' and getattr(self, '_exploring_ctrl', None):
+            from .adapters.qgis.source_capability_probe import counts_cheaply
+            if self.current_layer is not None and not counts_cheaply(self.current_layer):
+                self._exploring_ctrl.get_current_features()
+                if getattr(self._exploring_ctrl, '_remote_selection_refused', False):
+                    return
+            slot = getattr(self._exploring_ctrl, '_selection_query', None)
+            if slot is not None and slot.task is not None:
+                self._defer_remote_filter(slot)
+                return
         # FIX 2026-01-17 v3 + 2026-01-22: Define user action tasks early (needed for recovery logic)
         user_action_tasks = ('undo', 'redo', 'unfilter', 'reset', 'export')
         is_user_action = task_name in user_action_tasks
