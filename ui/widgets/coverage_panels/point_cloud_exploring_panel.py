@@ -982,6 +982,10 @@ class PointCloudExploringPanel(QWidget):
     # (the class list edited by hand): the controller reads them and calls set_detected_objects.
     objectsChanged = pyqtSignal()
 
+    def _translator(self, text: str) -> str:
+        """``self.tr`` for the text helpers: a bare ``self.tr`` misleads pylupdate5 (context ``self.self``)."""
+        return self.tr(text)
+
     def __init__(self, parent=None):
         """Build the panel.
 
@@ -1944,7 +1948,7 @@ class PointCloudExploringPanel(QWidget):
             truncated = detected["truncated"] if detected is not None else any(item["truncated"] for item in items)
             area = detected["area"] if detected is not None else None
             merged = boxes_merged(self._objects)
-            self._class_summary_label.setText(object_summary(count, area, truncated, self.tr, merged))
+            self._class_summary_label.setText(object_summary(count, area, truncated, self._translator, merged))
             tips = []
             if truncated:
                 tips.append(self.tr("An object runs past the largest window read around the click and was cut there"))

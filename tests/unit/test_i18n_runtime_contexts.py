@@ -105,11 +105,35 @@ def tree(tmp_path):
         """), encoding="utf-8")
     (pkg / "dock_user.py").write_text("def show(dw, self):\n    dw.tr('Dock text')\n    self._dockwidget.tr('Other')\n",
                                        encoding="utf-8")
+    (pkg / "forms.py").write_text(textwrap.dedent("""\
+        from qgis.PyQt.QtCore import QCoreApplication
+
+        _translate2 = QCoreApplication.translate
+
+
+        class App:
+            def setup(self):
+                def _tr(msg):
+                    return QCoreApplication.translate('AppCtx', msg)
+                self.label = _tr('Nested helper')
+
+            def _tr_dock(self, text):
+                return self.dockwidget.tr(text)
+
+            def menu(self, context):
+                self._tr_dock('Method helper')
+                _translate2('FeedbackCtx', 'Two arguments')
+                _translate2('ComboboxPopulationManager', 'Intersect')
+
+            def shadowed(self, context):
+                _tr = context.tr
+                return _tr('Not the helper')
+        """), encoding="utf-8")
     i18n = tmp_path / "i18n"
     i18n.mkdir()
     (i18n / "FilterMate.pro").write_text(
-        "SOURCES = \\\n    ../pkg/helper.py \\\n    ../pkg/user.py \\\n    ../pkg/dock_user.py\n\nTRANSLATIONS = \\\n"
-        "    FilterMate_fr.ts\n", encoding="utf-8")
+        "SOURCES = \\\n    ../pkg/helper.py \\\n    ../pkg/user.py \\\n    ../pkg/dock_user.py \\\n    ../pkg/forms.py\n\n"
+        "TRANSLATIONS = \\\n    FilterMate_fr.ts\n", encoding="utf-8")
     (i18n / "FilterMate_fr.ts").write_text(TS, encoding="utf-8")
     return tmp_path
 
@@ -147,6 +171,30 @@ def test_helper_strings_reach_their_runtime_context(tree):
     assert messages[("FilterMateDockWidget", "Dock text")][0] == "unfinished"
     assert messages[("FilterMateDockWidget", "Other")][0] == "unfinished"
     assert not any(context in ("dw", "self._dockwidget") for context, _ in messages)
+
+
+def test_nested_method_and_two_argument_helpers(tree):
+    """filter_mate_app task descriptions, backend_controller._tr, the feedback module's two-argument alias."""
+    strings = {(context, text) for context, text, _, _ in _script().collect(str(tree / "i18n" / "FilterMate.pro"))}
+    assert ("AppCtx", "Nested helper") in strings
+    assert ("FilterMateDockWidget", "Method helper") in strings
+    assert ("FeedbackCtx", "Two arguments") in strings
+    # predicate labels are matched as English text: never translated
+    assert not any(context == "ComboboxPopulationManager" for context, _ in strings)
+    # tr = context.tr rebinds the name: its strings belong to another context
+    assert not any(text == "Not the helper" for _, text in strings)
+
+
+def test_real_catalogs_translate_every_helper_string():
+    """Guard: pylupdate5 + lrelease without this script would drop these strings from the .qm files."""
+    module = _script()
+    root = Path(__file__).resolve().parents[2]
+    strings = {(context, text) for context, text, _, _ in module.collect(str(root / "i18n" / "FilterMate.pro"))}
+    assert len(strings) > 100
+    messages = _messages(root / "i18n" / "FilterMate_fr.ts")
+    missing = sorted(key for key in strings if messages.get(key, ("missing",))[0] is not None
+                     or not (messages[key][1] or "").strip())
+    assert not missing, f"run scripts/i18n_runtime_contexts.py after pylupdate5, then translate: {missing[:5]}"
 
 
 def test_second_run_changes_nothing(tree):
