@@ -176,6 +176,12 @@ class CoverageModeController(BaseController):
         self._expression_timer: Any = None  # reads an expression once the input settles
         self._crs_notice: Any = None  # (surface, canvas CRS) already told it does not fit the map
         self._histogram_cache: Dict[Tuple[str, int, str], Tuple[list, float, float]] = {}
+        self._raster_stats_task: Any = None
+        self._rendered_task: Any = None
+        self._raster_sample: Any = None  # (layer identity, protected session TIFF, local layer)
+        self._raster_surface_task: Any = None
+        self._raster_sample_users: Dict[str, int] = {}
+        self._retired_raster_samples: set = set()
         self._stats_watched: set = set()  # point cloud layer ids whose statistics signal is connected
         # layer id -> (layer, slot) of those connections: disconnected at teardown (2026-10-17)
         self._stats_slots: Dict[str, Tuple[Any, Any]] = {}
@@ -393,7 +399,7 @@ class CoverageModeController(BaseController):
             self.service.cancel_all()
         except Exception as exc:
             logger.debug(f"[FM5] running tasks not canceled: {exc}")
-        for task_name in ('_export_task', '_hag_task'):
+        for task_name in ('_export_task', '_hag_task', '_raster_stats_task', '_rendered_task', '_raster_surface_task'):
             task = getattr(self, task_name, None)
             setattr(self, task_name, None)
             if task is not None:
@@ -418,6 +424,7 @@ class CoverageModeController(BaseController):
         self._export_task = None
         self._hag_task = None
         self._base_keepalive = None
+        self._release_raster_sample()
         self._histogram_cache.clear()
 
     @property
@@ -586,6 +593,10 @@ class CoverageModeController(BaseController):
 
     def _leave_layer(self) -> None:
         """Save the panel input of the outgoing layer and drop its live previews."""
+        self._cancel_raster_statistics()
+        self._cancel_rendered_capture()
+        self._cancel_raster_surface()
+        self._release_raster_sample()
         layer = self._active_layer
         if layer is None:
             return
@@ -1050,7 +1061,18 @@ class CoverageModeController(BaseController):
             summary = read_raster_summary(layer)
             self._raster_panel.set_summary(summary)
             self._raster_panel.set_reference(raster_reference(layer))
-            self._raster_panel.set_band_spans(self._band_spans(layer, len(summary.bands)))
+            capability = self._raster_capability(layer)
+            self._raster_panel.set_rendered_only(not capability.has_raw_values)
+            if not capability.has_raw_values:
+                self._request_rendered_capture(layer)
+                return
+            if self._raster_needs_sample(layer):
+                self._raster_panel.set_stream_notice(self.tr(
+                    "Preview and statistics use a bounded local sample of the visible extent; filtering reads the source."))
+            else:
+                self._raster_panel.set_stream_notice('')
+            if capability.has_raw_values and not self._raster_needs_sample(layer):
+                self._raster_panel.set_band_spans(self._band_spans(layer, len(summary.bands)))
             self._refresh_histogram(layer, self._raster_panel.current_band())
         except Exception as exc:
             logger.warning(f"[FM5] raster panel not populated: {exc}", exc_info=True)
@@ -1071,11 +1093,17 @@ class CoverageModeController(BaseController):
         return spans
 
     def _refresh_histogram(self, layer: Any, band: int) -> None:
+        capability = self._raster_capability(layer)
+        if not capability.has_raw_values:
+            return
         from ...adapters.qgis.coverage_layers.raster_adapter import band_histogram, derivative_histogram
         derivative = self._raster_panel.current_derivative()
         key = self._histogram_key(layer, band, derivative)
         cached = self._histogram_cache.get(key)
         if cached is None:
+            if self._raster_needs_sample(layer):
+                self._request_raster_statistics(layer, band, derivative, key)
+                return
             if derivative.is_terrain:
                 cached = derivative_histogram(self._base_raster(layer), band, derivative, bins=64)
             else:
@@ -1088,8 +1116,201 @@ class CoverageModeController(BaseController):
         self._raster_panel.set_histogram(band, counts, minimum, maximum, derivative)
         self._update_kept_ratio()
 
+    @staticmethod
+    def _raster_capability(layer):
+        from ...adapters.qgis.source_capability_probe import capability_for_layer
+        from ...core.domain.source_capability import classify
+        try:
+            from ...adapters.qgis.coverage_layers.snapshots import registry
+            snapshot = registry().get(layer.id())
+        except ImportError:
+            snapshot = None
+        if snapshot is not None and snapshot.original_source:
+            return classify(getattr(snapshot, 'original_provider', '') or layer.providerType(),
+                            snapshot.original_source, is_raster=True)
+        return capability_for_layer(layer)
+
+    def _raster_needs_sample(self, layer):
+        capability = self._raster_capability(layer)
+        return capability.is_remote or capability.provider_key == 'postgresraster'
+
+    def _raster_identity(self, layer):
+        return layer.id(), self._raster_capability(layer).provider_key, self._histogram_key(layer, 0)[0]
+
+    def _release_raster_sample(self):
+        sample, self._raster_sample = self._raster_sample, None
+        if sample is not None:
+            if self._raster_sample_users.get(sample[1], 0):
+                self._retired_raster_samples.add(sample[1])
+            else:
+                from ...adapters.qgis.coverage_layers import cache
+                cache.settle([sample[1]])
+            for key in list(self._histogram_cache):
+                if key[0] == sample[0][2]:
+                    del self._histogram_cache[key]
+
+    def _borrow_raster_sample(self, task, path):
+        task.borrowed_sample = path
+        if path:
+            self._raster_sample_users[path] = self._raster_sample_users.get(path, 0) + 1
+
+    def _return_raster_sample(self, task):
+        path = getattr(task, 'borrowed_sample', '')
+        if not isinstance(path, str) or not path:
+            return
+        task.borrowed_sample = ''
+        count = self._raster_sample_users.get(path, 0) - 1
+        if count > 0:
+            self._raster_sample_users[path] = count
+        else:
+            self._raster_sample_users.pop(path, None)
+            if path in self._retired_raster_samples:
+                from ...adapters.qgis.coverage_layers import cache
+                self._retired_raster_samples.discard(path)
+                cache.settle([path])
+
+    def _local_raster_sample(self, layer):
+        sample = self._raster_sample
+        if sample is not None and sample[0] == self._raster_identity(layer):
+            return sample[2]
+        return None
+
+    def _accept_raster_sample(self, layer, path):
+        from qgis.core import QgsRasterLayer
+        sample = self._local_raster_sample(layer)
+        if sample is not None and sample.source() == path:
+            return True
+        sample = QgsRasterLayer(path, layer.name(), 'gdal')
+        if not sample.isValid():
+            return False
+        self._release_raster_sample()
+        self._raster_sample = self._raster_identity(layer), path, sample
+        return True
+
+    def _cancel_rendered_capture(self):
+        task, self._rendered_task = self._rendered_task, None
+        if task is not None:
+            task.cancel()
+
+    def _request_rendered_capture(self, layer):
+        if self._local_raster_sample(layer) is not None:
+            return
+        from qgis.core import QgsApplication
+        from ...adapters.qgis.coverage_layers.rendered_raster import RenderedRasterTask
+        identity = self._raster_identity(layer)
+        if self._rendered_task is not None and self._rendered_task.identity == identity:
+            return
+        self._cancel_rendered_capture()
+        iface = self._iface()
+        if iface is None:
+            return
+        task = RenderedRasterTask(identity[2], identity[1], layer.renderer().clone(),
+                                  iface.mapCanvas().mapSettings(), layer.crs(), self._rendered_capture_ready)
+        task.identity = identity
+        self._rendered_task = task
+        self._raster_panel.set_stream_notice(self.tr("Preparing a bounded color snapshot of the visible extent…"))
+        QgsApplication.taskManager().addTask(task)
+
+    def _rendered_capture_ready(self, task, ok):
+        if task is not self._rendered_task:
+            return False
+        self._rendered_task = None
+        layer = self._active_layer
+        if layer is None or self._raster_panel is None:
+            return False
+        if not ok or task.identity != self._raster_identity(layer):
+            if not ok:
+                _feedback()[1](self.tr("The color snapshot could not be prepared. Try a smaller visible extent."))
+            return False
+        if not self._accept_raster_sample(layer, task.path):
+            return False
+        self._raster_panel.set_stream_notice(self.tr("Color selection applies to the captured visible extent."))
+        self._update_kept_ratio()
+        if self._preview_wanted():
+            self._apply_raster_preview()
+        return True
+
+    def _cancel_raster_statistics(self):
+        task = self._raster_stats_task
+        self._raster_stats_task = None
+        if task is not None:
+            task.cancel()
+
+    def _request_raster_statistics(self, layer, band, derivative, key):
+        from qgis.core import QgsApplication
+        from ...adapters.qgis.coverage_layers.raster_statistics_task import RasterStatisticsTask
+        identity = (layer.id(), self._raster_capability(layer).provider_key, key)
+        pending = self._raster_stats_task
+        if pending is not None and pending.identity == identity:
+            return
+        self._cancel_raster_statistics()
+        task = RasterStatisticsTask(key[0], identity[1], band, derivative,
+                                    layer.bandCount(), self._raster_statistics_ready,
+                                    extent=self._raster_read_extent(layer),
+                                    max_pixels=self._raster_preview_pixel_limit(),
+                                    sample_source=self._local_raster_sample(layer).source()
+                                    if self._local_raster_sample(layer) is not None else '')
+        task.identity = identity
+        self._raster_stats_task = task
+        self._borrow_raster_sample(task, task.sample_source)
+        self._raster_panel.set_histogram(band, [], 0.0, 0.0, derivative)
+        self._raster_panel.set_kept_ratio(None)
+        QgsApplication.taskManager().addTask(task)
+
+    def _raster_statistics_ready(self, task, ok):
+        self._return_raster_sample(task)
+        if task is not self._raster_stats_task:
+            return False
+        self._raster_stats_task = None
+        layer, panel = self._active_layer, self._raster_panel
+        if not ok or layer is None or panel is None:
+            if not ok and panel is not None:
+                panel.set_stream_notice(self.tr("Raster sampling failed. Try a smaller visible extent."))
+            return False
+        try:
+            key = self._histogram_key(layer, panel.current_band(), panel.current_derivative())
+            if (layer.id(), self._raster_capability(layer).provider_key, key) != task.identity:
+                return False
+        except RuntimeError:
+            return False
+        if not self._accept_raster_sample(layer, task.sample_source):
+            return False
+        if task.histogram[0]:
+            self._histogram_cache[key] = task.histogram
+            while len(self._histogram_cache) > HISTOGRAM_CACHE_SIZE:
+                del self._histogram_cache[next(iter(self._histogram_cache))]
+        panel.set_band_spans(task.spans)
+        panel.set_histogram(task.band, *task.histogram, task.derivative)
+        self._update_kept_ratio()
+        if self._preview_wanted():
+            self._apply_raster_preview()
+        return True
+
+    @staticmethod
+    def _raster_preview_pixel_limit():
+        from ...adapters.qgis.coverage_layers.raster_adapter import source_max_pixels
+        return max(1, min(1000000, source_max_pixels(_option('raster_source_max_pixels', None))))
+
+    def _raster_read_extent(self, layer):
+        """Metadata only: view in layer CRS, intersected with the source."""
+        from qgis.core import QgsCoordinateTransform, QgsProject, QgsRectangle
+        extent = QgsRectangle(layer.extent())
+        iface = self._iface()
+        if iface is None:
+            return extent
+        canvas = iface.mapCanvas()
+        transform = QgsCoordinateTransform(canvas.mapSettings().destinationCrs(), layer.crs(), QgsProject.instance())
+        view = transform.transformBoundingBox(canvas.extent())
+        intersection = extent.intersect(view)
+        return extent if intersection.isEmpty() else intersection
+
     def _base_raster(self, layer: Any):
         """The original raster when the layer shows a FilterMate derived source."""
+        if self._raster_needs_sample(layer):
+            sample = self._local_raster_sample(layer)
+            if sample is None:
+                raise RuntimeError('Raster sample is not ready')
+            return sample
         from ...adapters.qgis.coverage_layers.snapshots import registry
         snapshot = registry().get(layer.id())
         if snapshot is None:
@@ -1209,6 +1430,9 @@ class CoverageModeController(BaseController):
 
     def _surface_key(self, layer: Any, selection: Any) -> tuple:
         source = self._histogram_key(layer, 0)[0]  # the original raster when the layer shows a derived one
+        if self._raster_needs_sample(layer):
+            sample = self._local_raster_sample(layer)
+            source = sample.source() if sample is not None else source
         if _is_expression(selection):
             return source, layer.name(), selection.expression  # the name is the reference the expression reads
         return source, selection.band, selection.derivative
@@ -1225,6 +1449,9 @@ class CoverageModeController(BaseController):
             if key in self._surfaces:
                 self._surfaces.move_to_end(key)
                 return self._surfaces[key]
+            if self._raster_needs_sample(layer):
+                self._request_raster_surface(layer, selection, key)
+                return None
             if not read:
                 self._schedule_expression_read()
                 return None
@@ -1244,6 +1471,51 @@ class CoverageModeController(BaseController):
         while len(self._surfaces) > SURFACE_CACHE_SIZE:
             self._surfaces.popitem(last=False)
         return surface
+
+    def _cancel_raster_surface(self):
+        task, self._raster_surface_task = self._raster_surface_task, None
+        if task is not None:
+            task.cancel()
+
+    def _request_raster_surface(self, layer, selection, key):
+        sample = self._local_raster_sample(layer)
+        if sample is None:
+            return
+        identity = self._raster_identity(layer), key, sample.source()
+        if self._raster_surface_task is not None and self._raster_surface_task.identity == identity:
+            return
+        self._cancel_raster_surface()
+        from qgis.core import QgsApplication
+        from ...adapters.qgis.coverage_layers.raster_surface_task import RasterSurfaceTask
+        task = RasterSurfaceTask(sample.source(), layer.name(), selection, self._raster_surface_ready)
+        task.identity = identity
+        self._borrow_raster_sample(task, sample.source())
+        self._raster_surface_task = task
+        QgsApplication.taskManager().addTask(task)
+
+    def _raster_surface_ready(self, task, ok):
+        self._return_raster_sample(task)
+        if task is not self._raster_surface_task:
+            return
+        self._raster_surface_task = None
+        layer, panel = self._active_layer, self._raster_panel
+        if layer is None or panel is None:
+            return
+        selection = panel.selection()
+        sample = self._local_raster_sample(layer)
+        if selection is None or sample is None:
+            return
+        key = self._surface_key(layer, selection)
+        if (self._raster_identity(layer), key, sample.source()) != task.identity:
+            return
+        self._surfaces[key] = task.surface if ok else None
+        while len(self._surfaces) > SURFACE_CACHE_SIZE:
+            self._surfaces.popitem(last=False)
+        if not ok:
+            panel.set_stream_notice(self.tr("The sampled raster preview could not be calculated."))
+        self._update_kept_ratio()
+        if self._preview_wanted():
+            self._apply_raster_preview()
 
     def _schedule_expression_read(self) -> None:
         if self._expression_timer is None:
@@ -1684,6 +1956,8 @@ class CoverageModeController(BaseController):
             target: ``'similar'`` (the pipette) or ``'object'`` (the detector); None keeps the target of the panel.
         """
         panel = self._raster_panel
+        if self._active_layer is not None and not self._raster_capability(self._active_layer).has_raw_values:
+            target = 'similar'
         if target is not None and panel is not None and hasattr(panel, 'set_pick_target'):
             panel.set_pick_target(target)
         if target is None and panel is not None and hasattr(panel, 'pick_target'):
@@ -2177,10 +2451,22 @@ class CoverageModeController(BaseController):
             layer_point = point
         try:
             base = self._base_raster(layer)
+            if self._raster_needs_sample(layer) and not base.extent().contains(layer_point):
+                self._cancel_raster_surface()
+                self._release_raster_sample()
+                self._raster_panel.reset()
+                if self._raster_capability(layer).has_raw_values:
+                    self._refresh_histogram(layer, self._raster_panel.current_band())
+                else:
+                    self._request_rendered_capture(layer)
+                self._push_info(self.tr("Preparing a sample for the new visible extent. Click again when it is ready."))
+                return
             values = identify_values(base, layer_point)
             terrain = self._terrain_at(base, layer_point)
         except RuntimeError as exc:
             logger.debug(f"[FM5] pixel not read, layer deleted: {exc}")
+            if self._raster_needs_sample(layer):
+                self._push_info(self.tr("The local raster sample is still being prepared. Retry when it is ready."))
             return
         # With the colour pipette Ctrl+click adds a colour: it does not extend the range.
         self._raster_panel.set_pixel_values(layer_point.x(), layer_point.y(), values, extend and not self._color_pick, terrain)
@@ -2307,6 +2593,15 @@ class CoverageModeController(BaseController):
         if task_name not in COVERAGE_TASKS:
             logger.warning(f"[FM5] unknown task '{task_name}' on a coverage layer, ignored")
             return True
+        try:
+            from ...adapters.public_api.operations import busy_reason
+            automation_busy = bool(busy_reason())
+        except ImportError:
+            automation_busy = False
+        if automation_busy:
+            _, show_warning = _feedback()
+            show_warning(self.tr("A FilterMate task is still running: wait for it to finish"))
+            return True
         if task_name == 'export':
             exporting = self._layers_checked_for_export()
             if exporting:
@@ -2372,7 +2667,15 @@ class CoverageModeController(BaseController):
                 return
             from ...adapters.qgis.coverage_layers.source_jobs import RasterSourceJob
             # Read and bounded by the job (raster_adapter.source_max_pixels): "4e8", 0, text...
-            source_job = RasterSourceJob(layer, selection, _option('raster_source_max_pixels', None))
+            if not self._raster_capability(layer).has_raw_values:
+                sample = self._local_raster_sample(layer)
+                if sample is None:
+                    show_warning(self.tr("Prepare a color snapshot before filtering this rendered layer."))
+                    return
+                source_job = RasterSourceJob(layer, selection, _option('raster_source_max_pixels', None),
+                                             analysis_source=(sample.source(), 'gdal'))
+            else:
+                source_job = RasterSourceJob(layer, selection, _option('raster_source_max_pixels', None))
             done_message = self.tr("Raster filtered: {0}").format(selection.describe())
             if not targets and not source_job.clips_source:
                 # A virtual raster of the band: nothing to read, done here.
@@ -2479,6 +2782,7 @@ class CoverageModeController(BaseController):
         self._set_busy(True)
 
         def done(task, result):
+            self._return_raster_sample(task)
             if getattr(self, '_torn_down', False):
                 return
             self._running_task = None
@@ -2506,6 +2810,9 @@ class CoverageModeController(BaseController):
                 return
             failures = [o for o in task.outcomes if not o.success]
             parts = [self.tr("{0} target(s) filtered").format(len(task.outcomes) - len(failures))] + notes
+            sampled_targets = [o for o in task.outcomes if o.success and o.details.get('capture_resampled')]
+            if sampled_targets:
+                parts.append(self.tr("{0} raster target(s) resampled to the configured pixel limit").format(len(sampled_targets)))
             emptied = self._emptied_text(task.outcomes)
             if emptied:
                 parts.append(emptied)
@@ -2515,6 +2822,10 @@ class CoverageModeController(BaseController):
 
         try:
             self._running_task = self.service.run(request, source_job, on_done=done)
+            analysis = getattr(source_job, '_analysis_source', None)
+            if self._running_task is not None and analysis and isinstance(analysis[0], str):
+                # Pin the rendered capture before the GUI can leave the layer.
+                self._borrow_raster_sample(self._running_task, analysis[0])
         except Exception:
             self._set_busy(False)
             self._rollback_source(source_job, self._map_layer(source_job.layer_id))
@@ -2529,6 +2840,10 @@ class CoverageModeController(BaseController):
         """What the user should know about how a raster selection was read (once per task)."""
         details = getattr(source_job, 'details', None) or {}
         notes = []
+        if details.get('rendered_colors'):
+            notes.append(self.tr("color selection limited to the captured extent; colors depend on style and scale"))
+        if details.get('capture_resampled'):
+            notes.append(self.tr("raster source resampled to {0} cells within the pixel limit").format(details['capture_grid']))
         if details.get('decimation'):
             notes.append(self.tr("raster selection read every {0} pixels: over the pixel limit of the settings").format(
                 details['decimation']))

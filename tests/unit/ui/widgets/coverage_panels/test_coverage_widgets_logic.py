@@ -1011,8 +1011,7 @@ class TestPixelHistory:
 
 
 class TestDtmLayerCombo:
-    """PDAL hag_dem reads a file through GDAL: the DTM list leaves out WMS / XYZ / WCS like the layer
-    lists, and the virtual / PostGIS rasters."""
+    """PDAL DTMs require readable files, excluding WCS and rendered rasters."""
 
     def test_rasters_pdal_cannot_read_are_excluded(self, monkeypatch):
         for name, path in ((".adapters", _PROJECT_ROOT / "adapters"),
@@ -1021,16 +1020,41 @@ class TestDtmLayerCombo:
             package.__path__ = [str(path)]  # the real modules, without running the package __init__
             monkeypatch.setitem(sys.modules, _PKG + name, package)
         capability = f"{_PKG}.adapters.qgis.point_cloud_capability"
-        excluded = ["ogr"]
+        excluded = ["ogr", "wcs"]  # DTM exclusions must survive general dock admission.
         combo = types.SimpleNamespace(excludedProviders=lambda: list(excluded),
                                       setExcludedProviders=lambda providers: excluded.__init__(providers))
         try:
             cloud._dtm_rasters_only(combo)
+            cloud._dtm_rasters_only(combo)  # Repeated population stays idempotent.
         finally:
             sys.modules.pop(capability, None)
         assert excluded[0] == "ogr"
         assert {"wms", "wcs", "arcgismapserver", "virtualraster", "postgresraster"} <= set(excluded)
         assert "gdal" not in excluded and len(excluded) == len(set(excluded))
+
+    def test_gdal_rendered_tiles_are_excluded_but_value_files_remain(self, monkeypatch):
+        core = sys.modules['qgis.core']
+        values = types.SimpleNamespace(providerType=lambda: 'gdal', source=lambda: '/data/dtm.tif')
+        cog = types.SimpleNamespace(providerType=lambda: 'gdal', source=lambda: '/vsicurl/https://example.org/dtm.tif')
+        tiles = types.SimpleNamespace(providerType=lambda: 'gdal', source=lambda: '<GDAL_WMS><Service name="TMS"/></GDAL_WMS>')
+        wms = types.SimpleNamespace(providerType=lambda: 'gdal', source=lambda: 'WMS:https://example.org/wms')
+        wcs = types.SimpleNamespace(providerType=lambda: 'gdal', source=lambda: 'WCS:https://example.org/wcs')
+        existing = object()
+        exceptions = [existing]
+        providers = []
+        project = types.SimpleNamespace(mapLayers=lambda: dict(enumerate([values, cog, tiles, wms, wcs])))
+        monkeypatch.setattr(core, 'QgsProject', types.SimpleNamespace(instance=lambda: project))
+        combo = types.SimpleNamespace(
+            excludedProviders=lambda: list(providers),
+            setExcludedProviders=lambda items: providers.__init__(items),
+            exceptedLayerList=lambda: list(exceptions),
+            setExceptedLayerList=lambda items: exceptions.__init__(items),
+        )
+        cloud._dtm_rasters_only(combo)
+        cloud._dtm_rasters_only(combo)
+        assert exceptions == [existing, tiles, wms, wcs]
+        assert values not in exceptions and cog not in exceptions
+        assert 'gdal' not in providers
 
     def test_the_dtm_combo_uses_it(self):
         import ast

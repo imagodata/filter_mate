@@ -419,7 +419,24 @@ class RasterTargetJob(TargetJob):
         super().__init__(layer, operator)
         self._base_source = self.before.base_source
         self._base_provider = self.before.base_provider
-        base = _base_raster_layer(self.before, layer)
+        from ....core.domain.source_capability import classify
+        from .raster_materialization import is_wcs, raster_reads_remotely
+        capability = classify(self._base_provider, self._base_source, is_raster=True)
+        self._rendered = not capability.has_raw_values
+        self._remote = raster_reads_remotely(self._base_provider, self._base_source)
+        self._is_wcs = is_wcs(self._base_provider, self._base_source)
+        self._analysis_source = None
+        self._input_source = self._base_source
+        self._extent = QgsRectangle(layer.extent())
+        self._nodata, self._float, self._pixel = [], True, 0.0
+        if not self._remote:
+            self._read_metadata(_base_raster_layer(self.before, layer))
+        self._derived_path = ''
+        self._geometry_wkt = ''
+        self._side = CoverageSide.INSIDE
+
+    def _read_metadata(self, base):
+        """Read remote metadata only after opening the worker's private layer."""
         self._extent = QgsRectangle(base.extent())
         provider = base.dataProvider()
         self._nodata = []
@@ -435,13 +452,34 @@ class RasterTargetJob(TargetJob):
                 self._pixel = self._extent.width() / base.width()
         except Exception as exc:
             logger.debug(f"[FM5] raster target metadata incomplete: {exc}")
-        self._derived_path = ''
-        self._geometry_wkt = ''
-        self._side = CoverageSide.INSIDE
+
+    def _prepare_input(self, is_canceled):
+        import threading
+        if threading.current_thread() is threading.main_thread():
+            raise RuntimeError(translate('RasterTargetJob', 'remote raster target must run in a worker thread'))
+        from qgis.core import QgsRasterLayer
+        from .raster_materialization import materialize_raster
+        source, provider = self._analysis_source or (self._base_source, self._base_provider)
+        base = QgsRasterLayer(source, 'FilterMate target capture', provider)
+        native_size = base.width(), base.height()
+        if self._analysis_source is None:
+            source = materialize_raster(base, is_canceled=is_canceled)
+            self.outputs.append(source)
+            base = QgsRasterLayer(source, 'FilterMate local target', 'gdal')
+        if not base.isValid():
+            raise RuntimeError(translate('RasterTargetJob', 'local raster target could not be opened'))
+        self._input_source = source
+        self._read_metadata(base)
+        self.outcome.details['capture_grid'] = '{}x{}'.format(base.width(), base.height())
+        self.outcome.details['capture_resampled'] = (base.width(), base.height()) != native_size
+        self.outcome.details['capture_cell_size'] = self._pixel
 
     def compute(self, source_geometry, source_crs, context, request, is_canceled) -> None:
         self._started = time.perf_counter()
-        if self._base_provider != 'gdal':
+        if self._rendered:
+            self.outcome.message = translate('RasterTargetJob', 'Rendered color layers cannot be filter targets.')
+            return
+        if self._base_provider not in ('gdal', 'postgresraster') and not self._is_wcs:
             self.outcome.message = f"raster provider '{self._base_provider}' cannot be clipped (GDAL files only)"
             return
         side = request.side
@@ -456,6 +494,11 @@ class RasterTargetJob(TargetJob):
             self.outcome.message = ("the layer is filtered by its own pixel selection, which cannot be combined: "
                                     "replace its filter or unfilter it first")
             return
+        if is_canceled():
+            self.outcome.message = 'canceled'
+            return
+        if self._remote or self._analysis_source is not None:
+            self._prepare_input(is_canceled)
         geometry = self._target_geometry(source_geometry, source_crs, context)
         if side is CoverageSide.INSIDE and not geometry.isEmpty() and not _has_area(geometry):
             self.outcome.message = NO_AREA
@@ -471,7 +514,12 @@ class RasterTargetJob(TargetJob):
         geometry = QgsGeometry.fromWkt(kept) if kept is not None else _nothing_kept(self._extent)
         self._geometry_wkt = geometry.asWkt()
         cutline = _simplified_for_cutline(geometry, self._pixel * 0.5)
-        path = self._new_path('.vrt')
+        if self._input_source != self._base_source:
+            # The VRT and its captured pixels share a cache key: history keeps both.
+            path = self._input_source + '.clip.vrt'
+            self.outputs.append(path)
+        else:
+            path = self._new_path('.vrt')
         options = dict(format='VRT', cutlineWKT=cutline.asWkt(), cropToCutline=False)
         if self.crs.isValid():
             # An empty cutlineSRS is an invalid SRS for GDAL >= 3.9: without a
@@ -484,7 +532,8 @@ class RasterTargetJob(TargetJob):
         else:
             # Integer raster without NoData: an alpha band, never a clipped value.
             options['dstAlpha'] = True
-        dataset = gdal_warp(path, self._base_source, **options)
+        options['callback'] = lambda *args: 0 if is_canceled() else 1
+        dataset = gdal_warp(path, self._input_source, **options)
         dataset = None  # noqa: F841 - flush the VRT
         if is_canceled():
             self.outcome.message = 'canceled'

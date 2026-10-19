@@ -35,6 +35,8 @@ def plugin_env(monkeypatch):
     # Discovery recognizes the loaded plugin API package, not a config stub alone.
     monkeypatch.setitem(sys.modules, "filter_mate.filtermate_api", types.ModuleType("filter_mate.filtermate_api"))
     def _install(**env_vars):
+        # Discovery requires the loaded plugin API, not only its config module.
+        monkeypatch.setitem(sys.modules, "filter_mate.filtermate_api", types.ModuleType("filter_mate.filtermate_api"))
         module = types.SimpleNamespace(ENV_VARS=dict(env_vars))
         monkeypatch.setitem(sys.modules, "filter_mate.config.config", module)
     monkeypatch.delitem(sys.modules, "filter_mate.config.config", raising=False)
