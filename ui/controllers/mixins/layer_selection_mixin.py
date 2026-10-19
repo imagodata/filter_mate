@@ -235,7 +235,7 @@ class LayerSelectionMixin:
         try:
             from ....adapters.qgis.source_capability_probe import feature_count_or_none
         except ImportError:
-            return layer.featureCount()
+            return -1  # Missing capability information is an unknown, potentially remote count.
         count = feature_count_or_none(layer)
         return -1 if count is None else count
 

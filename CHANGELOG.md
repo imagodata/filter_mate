@@ -4,6 +4,8 @@ All notable changes to FilterMate will be documented in this file.
 
 ## [Unreleased]
 
+- Run service value lists, selection reads and zoom/filtered extents in cancellable snapshot tasks; reject stale generations and retain fast synchronous local reads.
+
 ### Added
 
 - **Raster pipette with three targets.** *Similar pixels* of the whole raster (a colour on an orthophoto, a value, a class of a paletted raster, with a tolerance), the *clicked object* only (the connected patch under the click, holes filled: a pool, a roof, a field, outlined on the map in the selection colour, with its count and ground area) or *every object of the raster like the clicked one* (the patches whose area stays within chosen ratios of the clicked objects', × 0.5 to × 2 by default). Ctrl+click adds a pick, each keeping its own criterion. A colour selection now shows on the map and in the selection strip (kept share, two significant digits under 0.1 %). The CLASSES group is gone: a palette value is picked with the pipette and its label names the chip.

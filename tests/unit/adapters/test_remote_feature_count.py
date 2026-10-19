@@ -117,9 +117,12 @@ def test_async_expression_for_remote_and_uncounted_layers(provider, source, coun
 def test_filtered_extent_of_a_web_service_is_not_scanned():
     method = _dock_method("get_filtered_layer_extent")
     layer = _Layer(*WFS)
-    layer.extent = lambda: "provider extent"
+    layer.extent = lambda: (_ for _ in ()).throw(AssertionError("provider extent on the GUI thread"))
     layer.updateExtents = lambda: (_ for _ in ()).throw(AssertionError("updateExtents of a web service"))
-    assert method(None, layer) == "provider extent"
+    pending = []
+    dock = types.SimpleNamespace(_remote_filtered_extent=lambda current: pending.append(current))
+    assert method(dock, layer) is None
+    assert pending == [layer]
     assert layer.counted == 0
 
 

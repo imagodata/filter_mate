@@ -862,7 +862,7 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
     A widget for selecting multiple features from a layer with async loading.
 
     Restored from before_migration/modules/widgets.py with full functionality:
-    - Asynchronous population using QgsTask (PopulateListEngineTask)
+    - Cancellable service population using SnapshotQueryTask (local reads stay synchronous)
     - Live search/filter with debouncing (300ms)
     - Multi-select with checkboxes and font styling by state
     - Context menu (Select All, Deselect All, subset filtering)
@@ -1072,6 +1072,14 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
             preserve_checked: If True, preserve checked items during list rebuild.
                 FIX 2026-01-18 v8: Added to support QGIS sync.
         """
+        if self.layer is not layer:
+            for name in ('_population_query', '_lookup_query'):
+                slot = getattr(self, name, None)
+                if slot is not None:
+                    slot.cancel()
+            self._pending_select_all = None
+            if hasattr(self, '_requested_search'):
+                del self._requested_search
         try:
             if layer is not None:
                 # FIX 2026-01-19: Skip reconfiguration if SAME layer AND list is already populated
@@ -1465,6 +1473,10 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
         if not is_layer_valid(self.layer) or self.layer.id() not in self.list_widgets:
             return
 
+        from ...adapters.qgis.source_capability_probe import counts_cheaply
+        if not counts_cheaply(self.layer):
+            return self._populate_features_async(expression, preserve_checked, force_full, search_text)
+
         list_widget = self.list_widgets[self.layer.id()]
 
         # PERF 2026-09-13: skip a request identical to the one just completed
@@ -1574,6 +1586,12 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
         reverse = self._sort_order == 'DESC'
         features_data.sort(key=lambda x: (x[0] if x[0] is not None else ""), reverse=reverse)
 
+        self._apply_population(list_widget, features_data, truncated, scanned, search_text, server_sorted,
+                               fetch_limit, checked_fid_set, saved_checked_fids, signature, _t0, force_full)
+
+    def _apply_population(self, list_widget, features_data, truncated, scanned, search_text, server_sorted,
+                          fetch_limit, checked_fid_set, saved_checked_fids, signature, _t0, force_full):
+        """Render a completed list read on the GUI thread."""
         list_widget.setTruncated(truncated)
         list_widget.setSearchText(search_text)
         if truncated and server_sorted:
@@ -1647,10 +1665,120 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
         restored_count = len([fid for fid in saved_checked_fids if fid in checked_fid_set]) if saved_checked_fids else 0
         logger.debug(f"Populated {len(features_data)} features (restored {restored_count} checked), visible={list_widget.isVisible()}")
 
+    def _population_loading(self, loading):
+        """Show loading feedback without replacing the last successful list."""
+        self.setProperty('filtermateLoading', loading)
+        self.setToolTip(self.tr("Loading values…") if loading else '')
+
+    def _populate_features_async(self, expression, preserve_checked=False, force_full=False, search_text=None):
+        """Read service rows in a cancellable snapshot task; keep local reads synchronous."""
+        from ...adapters.qgis.async_query import submit_query
+        from ...adapters.qgis.source_capability_probe import capability_for_layer
+        from ...adapters.qgis.async_query import remote_expression_is_safe
+        if not remote_expression_is_safe(expression, self.layer.fields()):
+            slot = getattr(self, '_population_query', None)
+            if slot is not None:
+                slot.cancel()
+            from ...infrastructure.feedback import show_warning
+            show_warning(self.tr("Values"), self.tr("This expression cannot be evaluated safely for a service."))
+            return
+        layer = self.layer
+        layer_id = layer.id()
+        self._requested_search = (search_text or '').strip()
+        revision = getattr(self, '_selection_revision', 0)
+        if not force_full:
+            self._pending_select_all = None
+        lookup_slot = getattr(self, '_lookup_query', None)
+        if lookup_slot is not None:
+            lookup_slot.cancel()
+        list_widget = self.list_widgets[layer_id]
+        saved = self.getCheckedFeatureIds() if preserve_checked else []
+        identifier = self._identifier_field_of_layer(list_widget.getIdentifierFieldName())
+        numeric = self._identifier_is_numeric()
+        expr, context = self._make_display_evaluator(expression)
+        search_text = (search_text or '').strip()
+        limit = max(1, int(list_widget.getLimit() or feature_picker_limit() or 1000))
+        capability = capability_for_layer(layer)
+        if force_full:
+            limit = capability.key_list_limit or limit
+        request = QgsFeatureRequest().setFlags(QgsFeatureRequest.Flag.NoGeometry)
+        if expr is not None and expr.needsGeometry():
+            request.setFlags(QgsFeatureRequest.Flag.NoFlags)
+        request.setLimit(limit + 1)
+        if search_text:
+            request.setFilterExpression(self._search_expression(self._display_expression_sql(expression, list_widget), search_text))
+        row_from_feature = type(self)._row_from_feature
+        lookup_request = type(self)._build_identifier_lookup_request
+        reverse = self._sort_order == 'DESC'
+        signature = (layer_id, str(expression), layer.subsetString() or '', self._sort_order, bool(force_full), search_text)
+        started = time.perf_counter()
+
+        def compute(task):
+            rows = []
+            scanned = 0
+            for feature in task.features(request):
+                scanned += 1
+                if scanned > limit:
+                    break
+                rows.append(row_from_feature(feature, identifier, expression, expr, context))
+            truncated = scanned > limit
+            loaded = {str(row[1]) for row in rows}
+            missing = [fid for fid in saved if str(fid) not in loaded]
+            for start in range(0, len(missing), 500):
+                if task.isCanceled():
+                    break
+                recovery = lookup_request(identifier, missing[start:start + 500], numeric)
+                if expr is not None and expr.needsGeometry():
+                    recovery.setFlags(QgsFeatureRequest.Flag.NoFlags)
+                for feature in task.features(recovery):
+                    rows.append(row_from_feature(feature, identifier, expression, expr, context))
+            rows.sort(key=lambda row: row[0] or '', reverse=reverse)
+            return rows, truncated, scanned
+
+        def deliver(result):
+            if not is_layer_valid(self.layer) or self.layer is not layer:
+                return
+            if str(list_widget.getDisplayExpression()) != str(expression):
+                return
+            if getattr(self, '_requested_search', '') != search_text:
+                return
+            rows, truncated, scanned = result
+            if force_full and truncated:
+                from ...infrastructure.feedback import show_warning
+                show_warning(self.tr("Selection"), self.tr(
+                    "The service selection exceeds the key limit. Refine the search before selecting all."))
+                return
+            wanted = saved
+            if getattr(self, '_selection_revision', 0) != revision:
+                wanted = getattr(self, '_desired_checked_ids', self.getCheckedFeatureIds())
+            current_checked = set(wanted)
+            current_checked.update(str(fid) for fid in wanted)
+            list_widget.clear()
+            self._apply_population(list_widget, rows, truncated, scanned, search_text, False,
+                                   limit, current_checked, wanted, signature, started, force_full)
+            present = {str(row[1]) for row in rows}
+            missing = [fid for fid in wanted if str(fid) not in present]
+            if missing:
+                self._recover_remote_rows(identifier, missing, expression, numeric)
+            pending = getattr(self, '_pending_select_all', None)
+            if pending and force_full:
+                self._pending_select_all = None
+                self.select_all(pending)
+
+        return submit_query(self, '_population_query', layer, self.tr("Loading values…"),
+                            compute, deliver, self._population_loading)
+
     def _make_display_evaluator(self, expression):
         """Return ``(expr, context)`` for the display expression; ``expr`` is None for a plain field."""
         expr = QgsExpression(expression) if expression and not QgsExpression(expression).isField() else None
         context = QgsExpressionContext()
+        from ...adapters.qgis.source_capability_probe import counts_cheaply
+        if not counts_cheaply(self.layer):
+            fields = self.layer.fields()
+            if expr is None and expression and fields.indexOf(expression) < 0:
+                expr = QgsExpression(expression)
+            context.setFields(fields)
+            return expr, context
         context.appendScopes(QgsExpressionContextUtils.globalProjectLayerScopes(self.layer))
         return expr, context
 
@@ -1729,6 +1857,10 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
         2026-10-17: an identifier that is no field of the layer (the feature-id
         key '$id' / a legacy 'fid') looks the rows up by feature id.
         """
+        from ...adapters.qgis.source_capability_probe import counts_cheaply
+        if not counts_cheaply(self.layer):
+            self._recover_remote_rows(identifier_field, values, expression, identifier_numeric)
+            return []
         rows = []
         values = list(values)
         if not values:
@@ -1747,6 +1879,49 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
         except Exception as lookup_err:
             logger.debug(f"_fetch_rows_by_identifier failed: {lookup_err}")
         return rows
+
+    def _recover_remote_rows(self, identifier, values, expression, numeric):
+        """Recover checked rows outside the page without blocking the GUI."""
+        from ...adapters.qgis.async_query import submit_query
+        from ...adapters.qgis.async_query import remote_expression_is_safe
+        if not remote_expression_is_safe(expression, self.layer.fields()):
+            return
+        layer = self.layer
+        list_widget = self.list_widgets[layer.id()]
+        identifier = self._identifier_field_of_layer(identifier)
+        revision = getattr(self, '_selection_revision', 0)
+        values = list(values)
+        expr, context = self._make_display_evaluator(expression)
+        build = type(self)._build_identifier_lookup_request
+        row = type(self)._row_from_feature
+
+        def compute(task):
+            rows = []
+            for start in range(0, len(values), 500):
+                if task.isCanceled():
+                    break
+                request = build(identifier, values[start:start + 500], numeric)
+                if expr is not None and expr.needsGeometry():
+                    request.setFlags(QgsFeatureRequest.Flag.NoFlags)
+                for feature in task.features(request):
+                    rows.append(row(feature, identifier, expression, expr, context))
+            return rows
+
+        def deliver(rows):
+            if getattr(self, '_selection_revision', 0) != revision:
+                return
+            if self.layer is not layer or list_widget.getDisplayExpression() != expression:
+                return
+            present = {str(list_widget.item(i).data(3)) for i in range(list_widget.count())}
+            added = []
+            for display, fid in rows:
+                if str(fid) not in present:
+                    self._add_row_item(list_widget, display, fid, True)
+                    added.append((display, fid))
+            list_widget.setFeaturesList(list(list_widget.getFeaturesList()) + added)
+            list_widget.setTotalFeaturesListCount(list_widget.count())
+
+        submit_query(self, '_lookup_query', layer, self.tr("Loading selected values…"), compute, deliver)
 
     def _add_row_item(self, list_widget, display_value, fid, checked):
         """Append one checkable row to the list widget."""
@@ -1871,6 +2046,10 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
         non-filtered styling. A provider that silently rejects the request still
         yields False: that matches what the former full scan returned on error.
         """
+        from ...adapters.qgis.source_capability_probe import counts_cheaply
+        if not counts_cheaply(self.layer):
+            # Every visible row was read through the current subset in the population task.
+            return True
         try:
             request = self._build_identifier_lookup_request(
                 self._identifier_field_of_layer(identifier_field_name), [id_value], self._identifier_is_numeric())
@@ -1898,6 +2077,9 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
         Args:
             force_emit: If True, bypass sync protection (for explicit user actions like deselect_all)
         """
+        self._selection_revision = getattr(self, '_selection_revision', 0) + 1
+        self._pending_select_all = None
+        self._desired_checked_ids = self.getCheckedFeatureIds()
         import time
 
         # FIX 2026-01-18 v16: Debounce protection for rapid changes (except for forced emits)
@@ -2063,6 +2245,14 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
         pk_name = infos.get("primary_key_name")
         pk_is_numeric = infos.get("primary_key_is_numeric", True)
 
+        from ...adapters.qgis.source_capability_probe import counts_cheaply, stable_key_for_layer
+        if not counts_cheaply(self.layer):
+            key = stable_key_for_layer(self.layer, scan=False)
+            # $id is only an internal row handle when the service has no stable field;
+            # the source-filter path still refuses an unproven server key list.
+            pk_name = key.name if key.is_field else '$id'
+            pk_is_numeric = self.layer.fields().field(key.name).isNumeric() if key.is_field else True
+
         if pk_name is None:
             logger.warning("primary_key_name is None, attempting fallback")
 
@@ -2109,6 +2299,11 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
         # of every layer change).
         if list_widget.isTruncated() or list_widget.getSearchText():
             logger.info("select_all: loading the full feature list before selecting")
+            from ...adapters.qgis.source_capability_probe import counts_cheaply
+            if not counts_cheaply(self.layer):
+                self._pending_select_all = x
+                self._populate_features_async(list_widget.getDisplayExpression(), preserve_checked=True, force_full=True)
+                return
             self._populate_features_sync(list_widget.getDisplayExpression(), preserve_checked=True, force_full=True)
             list_widget = self.list_widgets[self.layer.id()]
         for i in range(list_widget.count()):
@@ -2128,6 +2323,10 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
         if not is_layer_valid(self.layer) or self.layer.id() not in self.list_widgets:
             return
 
+        self._pending_select_all = None
+        slot = getattr(self, '_lookup_query', None)
+        if slot is not None:
+            slot.cancel()
         list_widget = self.list_widgets[self.layer.id()]
         for i in range(list_widget.count()):
             item = list_widget.item(i)
@@ -2160,8 +2359,10 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
         # PERF 2026-09-12: when the list is truncated, the text filter searches
         # the whole layer server-side (rows beyond the limit would otherwise be
         # unreachable); clearing the text goes back to the first N rows.
-        wanted_search = self.filter_txt.strip() if list_widget.isTruncated() or list_widget.getSearchText() else ''
-        if wanted_search != list_widget.getSearchText():
+        wanted_search = self.filter_txt.strip() if (list_widget.isTruncated() or list_widget.getSearchText()
+                                                    or getattr(self, '_requested_search', '')) else ''
+        completed_or_pending = getattr(self, '_requested_search', list_widget.getSearchText())
+        if wanted_search != completed_or_pending:
             self._populate_features_sync(
                 list_widget.getDisplayExpression(), preserve_checked=True,
                 search_text=wanted_search or None)
@@ -2231,6 +2432,9 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
 
         list_widget = self.list_widgets[self.layer.id()]
 
+        self._selection_revision = getattr(self, '_selection_revision', 0) + 1
+        self._pending_select_all = None
+        self._desired_checked_ids = list(feature_ids)
         # Normalize feature IDs for comparison (handle both int and str types)
         normalized_fids = set()
         for fid in feature_ids:

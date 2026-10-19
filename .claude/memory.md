@@ -1,3 +1,22 @@
+## [2026-10-19] Stream lot C: cancellable service UI reads
+- Remote reads use `adapters/qgis/async_query.py`: independent layer feature sources, request feedback,
+  main-thread delivery and generation guards. Local cheap reads retain their synchronous paths.
+- Bind query invalidation to every participating layer, including union-zoom targets, and retain
+  invalidation for completed extent caches. A source/subset fingerprint alone cannot detect reloads.
+- Treat pending search text and checkbox revisions separately from the last completed page; late
+  population/recovery must not overwrite newer user input. Wait for full-list loading before Select All.
+- A copied expression context can still hold a live layer: remote worker expressions only use
+  feature-value/geometry functions from an allowlist and no context variables. Unsafe expressions
+  are refused explicitly; do not move arbitrary project expressions onto a worker.
+- Remote distinct values use a bounded, feedback-enabled feature iterator because `uniqueValues`
+  has no feedback parameter. Scan/time budgets announce partial lists; unknown counts stay large.
+- Python feedback cannot guarantee immediate interruption of a blocked WFS fetch. Requests carry
+  a 5-second provider timeout (where supported); slow reads fail explicitly rather than returning
+  partial extents. Never close a worker iterator from the GUI thread to force cancellation.
+- `tests/qgis_headless/check_stream_ui_async.py` uses an offline OGC API HTTP fixture and an optional
+  Geoplateforme WFS. Observe the typed network signal and `originatingThreadId()`: its propagation
+  to the main manager does not mean the request originated on the GUI thread. Calibrate the observer.
+
 # Project Memory
 _Auto-maintained by project agent_
 

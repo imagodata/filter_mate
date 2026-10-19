@@ -178,8 +178,8 @@ def auto_zoom_to_filtered(
             buffer of a spatial cascade when only the source layer is passed.
 
     Returns:
-        True when a zoom was performed, False when only a refresh was issued
-        or the call was skipped (token superseded, no canvas, no extents).
+        True when a zoom was performed or a remote extent read was queued.
+        False when only a refresh was issued or the call was skipped.
     """
     if expected_token is not None:
         with _token_lock:
@@ -200,6 +200,10 @@ def auto_zoom_to_filtered(
     if canvas is None:
         return False
 
+    previous = getattr(canvas, '_filtermate_union_zoom', None)
+    if previous is not None:
+        previous.cancel()
+
     valid_layers = [layer_item for layer_item in layers if layer_item is not None]
     if not valid_layers:
         canvas.refresh()
@@ -207,6 +211,20 @@ def auto_zoom_to_filtered(
 
     global_enabled = _read_global_auto_zoom_flag()
     project_layers = project_layers or {}
+
+    from .qgis.source_capability_probe import counts_cheaply
+    chosen = []
+    for layer in valid_layers:
+        try:
+            layer_id = layer.id()
+            if global_enabled or _is_tracking(layer_id, project_layers):
+                chosen.append(layer)
+        except (RuntimeError, AttributeError):
+            continue
+    if any(not counts_cheaply(layer) for layer in chosen):
+        from .qgis.async_query import queue_union_zoom
+        queue_union_zoom(chosen, canvas, expected_token, grow_by)
+        return True  # The cancellable zoom was scheduled.
 
     extents = []
     for layer in valid_layers:
