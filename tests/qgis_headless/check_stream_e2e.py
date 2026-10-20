@@ -326,8 +326,9 @@ def wfs_checks():
           'posed={} reference={} requests={} seconds={:.1f} (reference {:.1f}s) warnings={}'.format(
               len(posed), len(expected), len(REQUESTS) - before, seconds, ref_seconds, builder.user_warnings))
     metric(part='wfs_target_keys', keys=len(posed), reference=len(expected), seconds=round(seconds, 2))
-    applied = bool(queued) and safe_set_subset_string(target, queued[0])
-    served = in_worker(lambda: sorted(f['cleabs'] for f in target.getFeatures()))
+    # With retries (the public WFS sometimes exceeds the 30 s deadline); never read the unfiltered service.
+    applied = bool(queued) and set_server_filter(target, queued[0])
+    served = in_worker(lambda: sorted(f['cleabs'] for f in target.getFeatures())) if applied else []
     check('WFS target: keys applied to the layer, the service returns exactly them',
           applied and set(served) == expected, 'served={}'.format(len(served)))
     target.setSubsetString('')
