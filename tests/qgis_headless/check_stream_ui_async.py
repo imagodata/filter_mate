@@ -208,6 +208,194 @@ def exercise(dock, remote, local, field, expression):
     STATE['phase'] = ''
 
 
+def wait_until(predicate, seconds):
+    until = time.monotonic() + seconds
+    while not predicate() and time.monotonic() < until:
+        drain(0.05)
+    return predicate()
+
+
+def set_group(dock, name):
+    """Make ``name`` the EXPLORING group (a switch is skipped while another one is in progress)."""
+    seen = []
+    for _ in range(20):
+        if dock.current_exploring_groupbox == name:
+            return True
+        seen.append(dock.current_exploring_groupbox)
+        dock._restore_groupbox_ui_state(name)   # also the group stored for the layer (post-filter reloads)
+        dock.exploring_groupbox_changed(name)
+        drain(0.3)
+    print('GROUP {} not kept, seen {}'.format(name, seen), flush=True)
+    return dock.current_exploring_groupbox == name
+
+
+def bar_text():
+    """Titles and texts of the message bar, to find a warning whatever its argument order."""
+    return ' | '.join('{} {}'.format(item.title(), item.text()) for item in PLUGIN.iface.messageBar().items())
+
+
+def read_feature(dock, layer, key):
+    """The service feature whose "id" is ``key``, read in a task."""
+    from filter_mate.adapters.qgis.async_query import submit_query
+    from qgis.core import QgsFeatureRequest
+    result = []
+    request = QgsFeatureRequest().setFilterExpression('"id" = {}'.format(key))
+    submit_query(dock, '_stream_feature_query', layer, 'FilterMate: read a test feature',
+                 lambda task: list(task.features(request)), result.append)
+    wait_until(lambda: bool(result), 15)
+    return result[0][0] if result and result[0] else None
+
+
+def check_review_fixes(dock, remote, local, service):
+    """Review of lot C (#193): H1, H2, M1 and M11 on the offline OGC API service."""
+    from dataclasses import replace
+    from filter_mate.adapters.qgis import source_capability_probe as probe
+    from filter_mate.adapters.qgis.server_filter_translation import last_server_filter_error, remember_server_filter_error
+    from qgis.core import QgsRectangle
+    launches = []
+    dock.launchingTask.connect(launches.append)
+    bar = PLUGIN.iface.messageBar()
+    STATE['phase'] = 'review fixes'
+    dock.comboBox_filtering_current_layer.setLayer(remote)
+    wait_until(lambda: dock.current_layer is remote, 10)
+    controller = dock._exploring_ctrl
+    controller.set_layer(remote)
+    props = dock.PROJECT_LAYERS[remote.id()]
+    drain(1)
+
+    def idle(name, owner=None):
+        slot = getattr(controller if owner is None else owner, name, None)
+        return slot is None or slot.task is None
+
+    def quiet():
+        """No read of the selection, the canvas selection, the debounced pick or the lists still running."""
+        picker = dock.widgets['EXPLORING']['MULTIPLE_SELECTION_FEATURES']['WIDGET']
+        wait_until(lambda: all((idle('_selection_query'), idle('_canvas_selection_query'), idle('_zoom_query'),
+                                idle('_debounced_feature_query', dock), idle('_population_query', picker))), 20)
+        drain(0.5)
+
+    def launched_filter():
+        error = last_server_filter_error(remote) or ''
+        return bool(remote.subsetString()) or 'complete CQL2 translation verdict' in error + bar_text()
+
+    def settle_filter():
+        wait_until(lambda: not getattr(dock, '_filtering_in_progress', False), 30)
+        drain(1)
+        if remote.subsetString():
+            dock.launchTaskEvent(False, 'unfilter')
+            wait_until(lambda: not remote.subsetString(), 30)
+        remember_server_filter_error(remote, '')
+        bar.clearWidgets()
+        drain(0.5)
+
+    # H1: an empty custom selection is no selection: nothing read, the source is not filtered by it.
+    report(set_group(dock, 'custom_selection'), 'H1 custom selection active')
+    dock.widgets['EXPLORING']['CUSTOM_SELECTION_EXPRESSION']['WIDGET'].setExpression('')
+    drain(1.5)
+    wait_until(lambda: idle('_selection_query'), 15)
+    selection = dock.get_current_features()
+    report(selection == ([], '') and idle('_selection_query'),
+           'H1 empty custom selection is no selection and starts no read of the service')
+    canvas = PLUGIN.iface.mapCanvas()
+    canvas.setExtent(QgsRectangle(100, 100, 101, 101))
+    controller.zooming_to_features([])
+    report(idle('_zoom_query'), 'H1 zoom without filter starts no read of the service')
+    drain(1)
+    report(canvas.extent().contains(QgsRectangle(12, 12, 13, 13)), 'H1 zoom without filter shows the provider extent')
+    del launches[:]
+    bar.clearWidgets()
+    dock.launchTaskEvent(False, 'filter')
+    report(launches == ['filter'], 'H1 empty custom selection filters at once, as a local layer')
+    settle_filter()
+    expression = props['filtering'].get('current_filter_expression') or ''
+    report(' IN (' not in expression and not remote.subsetString(),
+           'H1 no key list of the whole service, source not filtered')
+
+    # H2: a refused multiple selection launches nothing and changes nothing.
+    key = next(key for key in probe._CACHE if key[0] == remote.id())
+    original = probe._CACHE[key]
+    probe._CACHE[key] = replace(original, key_list_limit=10)
+    picker = dock.widgets['EXPLORING']['MULTIPLE_SELECTION_FEATURES']['WIDGET']
+    try:
+        report(set_group(dock, 'multiple_selection'), 'H2 multiple selection active')
+        wait_until(lambda: remote.id() in picker.list_widgets and picker.list_widgets[remote.id()].count() == 25, 20)
+        picker.setCheckedFeatureIds(list(range(1, 16)), emit_signal=False)
+        drain(0.5)
+        first = read_feature(dock, remote, 1)
+        remote.selectByIds([first.id()] if first is not None else [])
+        selected = list(remote.selectedFeatureIds())
+        before = props['filtering'].get('current_filter_expression')
+        del launches[:]
+        bar.clearWidgets()
+        dock.launchTaskEvent(False, 'filter')
+        drain(2)
+        report(not launches and 'key limit' in bar_text(), 'H2 too many service keys: the filter is refused, not launched')
+        report(props['filtering'].get('current_filter_expression') == before != 'FALSE'
+               and list(remote.selectedFeatureIds()) == selected and len(picker.checkedItems()) == 15
+               and not remote.subsetString(), 'H2 refused selection leaves the selection and the source untouched')
+    finally:
+        probe._CACHE[key] = original
+        picker.deselect_all('De-select All')   # as the user: no later list delivery re-checks the 15 rows
+        remote.removeSelection()
+        settle_filter()
+
+    # M1: a debounced pick of the feature a Filter click is waiting for does not drop that filter.
+    quiet()
+    report(set_group(dock, 'single_selection'), 'M1 single selection active')
+    feature = read_feature(dock, remote, 5)
+    single = dock.widgets['EXPLORING']['SINGLE_SELECTION_FEATURES']['WIDGET']
+    single.setFeature(feature.id())
+
+    def picked():
+        return single.feature().isValid() and single.feature().id() == feature.id()
+
+    wait_until(picked, 15)
+    drain(1)  # the picker's own debounced pick
+    quiet()
+    service.delay = 1.0
+    try:
+        report(set_group(dock, 'single_selection') and picked(),
+               'M1 the single selection designates the picked feature')
+        quiet()
+        controller._invalidate_remote_selection_cache()
+        del launches[:]
+        bar.clearWidgets()
+        dock.launchTaskEvent(False, 'filter')
+        waiting = not launches and not idle('_selection_query')
+        dock.exploring_features_changed(feature)   # the 300 ms debounce delivers the same pick
+        launched = wait_until(lambda: bool(launches), 20)
+        print('M1 waiting={} launched={} group={} bar={!r}'.format(
+            waiting, launched, dock.current_exploring_groupbox, bar_text()[:300]), flush=True)
+        report(waiting and launched and 'not launched' not in bar_text(),
+               'M1 filter waiting for its pick survives the debounced pick of the same feature')
+        settle_filter()
+
+        # M11: a read cancelled under a waiting filter says the filter was not launched.
+        quiet()
+        report(set_group(dock, 'single_selection') and picked(),
+               'M11 the single selection designates the picked feature')
+        controller._invalidate_remote_selection_cache()
+        del launches[:]
+        dock.launchTaskEvent(False, 'filter')
+        waiting = not launches and not idle('_selection_query')
+        # dataChanged (an edit, a reload...) cancels the selection read. Emitted, not remote.reload():
+        # reloading an OGC API provider while a worker opens an iterator on it crashes QGIS 3.28.
+        remote.dataChanged.emit()
+        told = wait_until(lambda: 'not launched' in bar_text(), 10)
+        print('M11 waiting={} told={} launches={} bar={!r}'.format(waiting, told, launches, bar_text()[:300]),
+              flush=True)
+        report(waiting and told and not launches, 'M11 a cancelled selection read tells the filter was not launched')
+    finally:
+        service.delay = 0.15
+        settle_filter()
+    dock.launchingTask.disconnect(launches.append)
+    dock.comboBox_filtering_current_layer.setLayer(local)
+    drain(1)
+    violations = [phase for phase, main in STATE['requests'] if main and phase == 'review fixes']
+    report(not violations, 'review fixes make no network request on the main thread')
+    STATE['phase'] = ''
+
+
 def run():
     global PLUGIN
     try:
@@ -284,6 +472,8 @@ def run():
                 verify_tasks(dock, remote)
             exercise(dock, remote, local, 'name', '"id" > 10')
             report(service.reads > 0, 'offline HTTP fixture received feature reads')
+            if os.environ.get('FM_STREAM_BASELINE') != '1':
+                check_review_fixes(dock, remote, local, service)
         if os.environ.get('FM_STREAM_PUBLIC') == '1':
             uri = ("url='https://data.geopf.fr/wfs/ows' version='2.0.0' "
                    "typename='ADMINEXPRESS-COG.LATEST:commune' srsname='EPSG:4326' "
@@ -305,5 +495,5 @@ def run():
 
 
 QTimer.singleShot(1000, run)
-QTimer.singleShot(600000 if os.environ.get('FM_STREAM_PUBLIC') == '1' else 180000,
+QTimer.singleShot(900000 if os.environ.get('FM_STREAM_PUBLIC') == '1' else 480000,
                   lambda: os._exit(2))
