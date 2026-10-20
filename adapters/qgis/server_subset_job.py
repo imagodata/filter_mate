@@ -119,11 +119,13 @@ class _PrepareTask(QgsTask):
             self.failed = True
 
     def forget_responses(self):
-        """Drop this task's responses from QGIS's HTTP cache after a failure.
+        """Drop this task's responses from QGIS's HTTP cache after a refusal.
 
         Providers read through QgsBlockingNetworkRequest, which prefers the
         cache: a transient error kept there would refuse the same filter
-        again once the server has recovered. Main thread, after run().
+        again once the server has recovered. Main thread, after run(). Not
+        after a cancellation: it saw no verdict, and removing an entry that
+        another job is downloading leaves a truncated body in the cache.
         """
         cache = QgsNetworkAccessManager.instance().cache()
         if cache is not None:
@@ -327,7 +329,7 @@ class ServerSubsetJob(QObject):
         consumed = set()
         guards = ExitStack()
         try:
-            if not success:
+            if not success and not task.isCanceled():
                 task.forget_responses()
             if self.done:
                 return
@@ -467,7 +469,7 @@ def apply_server_subset_sync(layer, subset):
             provider = layer.dataProvider()
             if accepted and layer.isValid() and layer.subsetString().strip() == subset.strip() and not warnings and (
                     provider is None or len(provider.errors()) <= errors):
-                layer.removeSelection()  # a new WFS cache numbers its features again
+                layer.removeSelection()  # as the asynchronous path: ids can change (3.28+)
                 return True
         except Exception:  # nosec B110 - provider details may contain credentials
             pass

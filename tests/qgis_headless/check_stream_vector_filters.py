@@ -292,7 +292,10 @@ try:
     assert any(query.get('returnCountOnly') == ['true'] for query in queries), queries
     rejected_wheres.clear()
     print('PASS ArcGIS verdict is fresh from the server, not a cached response', flush=True)
-    rejected_wheres.add('"id" = 5')  # a transient error the first time this filter is seen
+    # A transient error the first time this filter is seen. Discriminating
+    # where the provider fetches object IDs while it is created (3.32 - 3.44):
+    # QGIS 4.x only sends the count, which bypasses the cache anyway.
+    rejected_wheres.add('"id" = 5')
     assert not safe_set_subset_string(service, '"id" = 5')
     rejected_wheres.clear()
     assert safe_set_subset_string(service, '"id" = 5') and '"id" = 5' in service.subsetString()

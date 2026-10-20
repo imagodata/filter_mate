@@ -39,10 +39,11 @@ _VERIFIED_WEB_PROVIDERS = ('wfs', 'arcgisfeatureserver')
 # iterator still reading the layer then corrupts the heap (3.22.16: 12
 # crashes in 27 runs with a map canvas downloading the layer, during its
 # render or just after it was canceled). 3.24.3, 3.26.1 and 3.28.15 never
-# crashed (12 of 12 loaded runs each), but on 3.24 and 3.26 the setter
-# waits for that download to end (0.5 - 1.1 s and 1.5 - 3.6 s with a
-# 1.5 s server delay); 3.28 does not wait (1 - 89 ms). Raise this to 32800
-# to avoid that wait at the cost of refusing WFS on 3.24 - 3.26.
+# crashed (12 of 12 loaded runs each), but on 3.24 and 3.26 the setter can
+# wait for that download to end, bounded by the running request (up to
+# 1.1 s and 3.6 s measured with a 1.5 s server delay); 3.28 does not wait
+# (1 - 89 ms). Raise this to 32800 to avoid that wait at the cost of
+# refusing WFS on 3.24 - 3.26.
 WFS_SETTER_SAFE_MIN = 32400
 
 

@@ -22,7 +22,7 @@ import types
 
 os.environ.setdefault('QT_QPA_PLATFORM', 'offscreen')
 from qgis.core import (  # noqa: E402
-    Qgis, QgsApplication, QgsNetworkAccessManager, QgsNetworkRequestParameters, QgsProject, QgsRectangle,
+    Qgis, QgsApplication, QgsNetworkAccessManager, QgsNetworkRequestParameters, QgsProject, QgsRectangle, QgsTask,
     QgsVectorLayer,
 )
 from qgis.PyQt.QtCore import QT_VERSION_STR, QEventLoop, QThread, QTimer  # noqa: E402
@@ -142,6 +142,34 @@ with VectorService(attribute_filters=True) as fixture:
     wait(200)
     assert safe_set_subset_string(layer, '') and layer.subsetString() == ''
 
+    # The dock applies a filter task's subsets in its finished(), while QGIS
+    # still lists the task (status Complete) among its active tasks.
+    from filter_mate.core.tasks.task_completion_handler import apply_pending_subset_requests  # noqa: E402
+    finished_loop = QEventLoop()
+
+    class FilterEngineTask(QgsTask):  # the class name the busy guards look for
+        def __init__(self):
+            super().__init__('FilterMate fixture filter', QgsTask.Flag.CanCancel)
+            self.applied = None
+
+        def run(self):
+            time.sleep(0.2)  # a real filter takes time; an instant run() hides the issue
+            return True
+
+        def finished(self, result):
+            try:
+                self.applied = apply_pending_subset_requests([(layer, '"id" = 7')], safe_set_subset_string)
+            finally:
+                QTimer.singleShot(0, finished_loop.quit)
+
+    dock_task = FilterEngineTask()
+    QgsApplication.taskManager().addTask(dock_task)
+    finished_loop.exec()
+    check('filter applied from a finishing dock filter task: {}'.format('applied' if expected else 'refused'),
+          dock_task.applied == (1 if expected else 0) and ('"id" = 7' in layer.subsetString()) == expected,
+          '{} {!r} {}'.format(dock_task.applied, layer.subsetString(), last_server_filter_error(layer)))
+    assert safe_set_subset_string(layer, '') and layer.subsetString() == ''
+
     if mode == REFUSE:
         fixture.requests.clear()
         accepted = safe_set_subset_string(layer, '"id" = 3')
@@ -246,7 +274,7 @@ with VectorService(attribute_filters=True) as fixture:
         job.start()
         if not job.done:
             loop.exec()
-        timed_out = job.done and not job.success
+        timed_out = job.done and not job.success and 'canceled or timed out' in job.message
         fixture.release.set()
         wait(1200)
         check('timeout discards the prepared provider without a late mutation',
@@ -259,7 +287,7 @@ with VectorService(attribute_filters=True) as fixture:
         QTimer.singleShot(0, job.cancel)
         if not job.done:
             loop.exec()
-        canceled = job.done and not job.success
+        canceled = job.done and not job.success and 'canceled or timed out' in job.message
         fixture.release.set()
         wait(1200)
         check('cancellation keeps the previous filter without a late mutation',
@@ -389,6 +417,16 @@ with VectorService(attribute_filters=True) as fixture:
         check('invalid layer after the setter restores the previous filter', not accepted and len(calls) == 2
               and layer.subsetString() == before and 'previous filter was restored' in last_server_filter_error(layer),
               repr(calls))
+        calls.clear()
+        layer.setSubsetString = lambda subset: calls.append(subset) or native_set(subset)
+        layer.isValid = lambda: False  # QGIS would only store the subset and return False
+        try:
+            accepted = safe_set_subset_string(layer, '"id" = 8')
+        finally:
+            layer.setSubsetString = native_set
+            layer.isValid = native_valid
+        check('invalid layer refused before the setter', not accepted and not calls and layer.subsetString() == before
+              and 'already invalid' in last_server_filter_error(layer), last_server_filter_error(layer))
         layer.isEditable = lambda: True
         try:
             accepted = safe_set_subset_string(layer, '"id" = 6')
