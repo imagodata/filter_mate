@@ -479,8 +479,12 @@ a.card:hover h4, .story-card:hover h4 { text-decoration: underline; }
     color: var(--on-ink); background: var(--ink);
 }
 .band .sheet-scrim { background: linear-gradient(0deg, rgba(22, 35, 43, 0.9) 0%, rgba(22, 35, 43, 0.45) 35%, rgba(22, 35, 43, 0) 65%); }
+.band-diagram > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: -2; }
 .band h1, .band h2 { margin: 0; color: var(--on-ink); max-width: 30ch; }
 .band h2 .num { color: var(--select); }
+.band-diagram h2 { display: flex; align-items: baseline; gap: .35em; font-size: clamp(1.6rem, 4vw, 2.3rem); }
+.band-diagram h2 .num { flex: 0 0 auto; min-width: 0; margin-right: 0; }
+.band-diagram .sheet-scrim { background: linear-gradient(0deg, rgba(22, 35, 43, .98) 5%, rgba(22, 35, 43, .6) 45%, rgba(22, 35, 43, .1) 100%); }
 .band .watch { position: absolute; top: 14px; right: 14px; background: rgba(22, 35, 43, 0.7); }
 .band .credit {
     top: 14px; left: 14px; right: auto; bottom: auto;
