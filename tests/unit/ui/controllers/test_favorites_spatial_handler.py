@@ -412,3 +412,35 @@ class TestExceptionSafety:
 def _dw(handler: Any) -> _FakeDockwidget:
     """Tiny accessor so tests don't reach into ``_controller`` directly."""
     return handler._controller.dockwidget
+
+
+class _ServiceLayer(_FakeLayer):
+    def providerType(self) -> str:
+        return "WFS"
+
+    def source(self) -> str:
+        return "url='https://example.org/wfs' typename='communes'"
+
+
+class TestServiceSourceLayer:
+    """Review of #193 (H3): a favorite's ids are never fetched from a web service on the GUI thread."""
+
+    def test_service_layer_ids_are_not_fetched_nor_kept(self):
+        layer = _ServiceLayer("L1", "communes", valid_features=[10, 20])
+        handler = FavoritesSpatialHandler(_FakeController(_FakeDockwidget(layer)))
+        favorite = _make_favorite(layer_id="L1", layer_name="communes",
+                                  spatial_config={"task_feature_ids": [10, 20]})
+
+        assert handler.restore_spatial_config(favorite) is True
+        layer.getFeature.assert_not_called()
+        layer.selectByIds.assert_not_called()
+        assert _dw(handler)._restored_task_features is None
+
+    def test_service_selection_is_not_captured_while_it_may_be_loading(self):
+        """M5: get_current_features of a service may return [] while its read runs: no fid capture at all."""
+        layer = _ServiceLayer("L1", "communes")
+        dock = _FakeDockwidget(layer)
+        dock.get_current_features = MagicMock(side_effect=AssertionError("service selection read"))
+        handler = FavoritesSpatialHandler(_FakeController(dock))
+        config = handler.capture_spatial_config() or {}
+        assert "task_feature_ids" not in config

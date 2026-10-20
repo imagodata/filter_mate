@@ -800,3 +800,17 @@ Result: Que veux-tu faire dans cette session ?
   Garde « tâche en cours » (`operations._background_tasks_running`) : QGIS liste encore une tâche (statut Complete)
   pendant son `finished()` → ignorer Complete / Terminated, sinon le dock refuse ses propres filtres serveur.
   Images Docker : `qgis/qgis:3.40`, `qgis/qgis:4.0` (pas `release-3_40`), `release-3_24/26/30` existent.
+- [2026-10-19] Revue du lot C (#193, branche `claude/v5-stream-F-c-fixes`) : `_remote_selection_plan` est la seule
+  source des requêtes de sélection / zoom d'une source lue en tâche (custom vide ou non-filtre → rien à lire, zoom sur
+  `dataProvider().extent()` — pas `layer.extent()`, qui compte les entités après un changement de subset ; refus =
+  `(None, None)`, message affiché, `_remote_selection_refused`). Règles « service » (500 clés, clé stable, liste
+  blanche) seulement si `capability.is_remote_service` ; sinon (MSSQL, Oracle, /vsicurl/...) clés de 5.0 et lecture
+  sur le thread GUI (`ImmediateRead`) quand un worker ne peut pas évaluer l'expression (`read_refusal`). Un champ
+  virtuel n'est refusé que si la requête l'évalue (`request_reads_fields`). Le Filtre différé suit une lecture
+  remplacée par une signature identique (même fid ⇒ `setFilterFids([fid])` partout ; révision « single » = fid
+  désigné) et prévient sinon. `show_warning(message, title)` : l'ordre était inversé dans le lot C.
+  Le refus « clé stable » d'un Filtre de service est dans `remote_filter_refused` (avant la lecture : clé de la
+  liste = clé stable, ou nom de confiance si le fournisseur ne déclare pas de clé ; après : aucune clé NULL), appelé
+  par launchTaskEvent et par TaskParameterBuilder.get_and_validate_features ; la lecture, le zoom et Identify d'une
+  telle sélection restent permis. Le choix enregistré d'un service est passé comme `QgsFeature(fields, fid)` valide,
+  jamais relu sur le thread GUI.
