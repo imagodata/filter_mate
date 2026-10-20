@@ -87,6 +87,7 @@ def _extract():
     sys.modules[state.__name__] = state
     namespace = {"__package__": _PKG, "__name__": _PKG + ".filter_mate_app", "logger": MagicMock(),
                  "iface": MagicMock(), "QCoreApplication": MagicMock(), "perf_mark_start": lambda name: None,
+                 "_api_operation_running": lambda: False,
                  "QgsApplication": MagicMock(), "QgsProject": _Project,
                  "sip": types.SimpleNamespace(isdeleted=lambda obj: getattr(obj, "deleted", False) is True)}
     exec(compile(ast.Module(body=methods, type_ignores=[]), str(_APP), "exec"), namespace)
