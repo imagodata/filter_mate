@@ -237,7 +237,7 @@ def clear_all(layers):
     for layer in tiles:
         unfilter_tiles(layer)
     for layer in others:
-        if layer.providerType() == 'wfs' and layer.subsetString():
+        if layer.providerType().lower() == 'wfs' and layer.subsetString():
             set_server_filter(layer, '')
     return report
 
@@ -620,11 +620,13 @@ def wcs_checks():
             if query.get('request', '').lower() == 'getcoverage' and 'bbox' in query:
                 box = [float(v) for v in query['bbox'].split(',')[:4]]
                 coverage_requests.append((box[2] - box[0], box[3] - box[1], query.get('width'), query.get('height')))
-        widest = max((w for w, h, _, _ in coverage_requests), default=0)
+        # tiny whole-extent requests (10 x 10 pixels) are metadata probes; the data requests are the larger ones
+        data = [r for r in coverage_requests if int(r[2] or 0) * int(r[3] or 0) > 400]
+        widest = max((w for w, h, _, _ in data), default=0)
         check('WCS target: GetCoverage requests are bounded by the zone, not the whole coverage',
-              bool(coverage_requests) and widest <= 4 * zone_rect.width() + 10 * pixel,
-              'requests={} widest_bbox={:.0f} zone_width={:.0f} coverage_width={:.0f} sample={}'.format(
-                  len(coverage_requests), widest, zone_rect.width(), full.width(), coverage_requests[:3]))
+              bool(data) and widest <= 4 * zone_rect.width() + 10 * pixel,
+              'requests={} data_requests={} widest_data_bbox={:.0f} zone_width={:.0f} coverage_width={:.0f} data_sample={}'.format(
+                  len(coverage_requests), len(data), widest, zone_rect.width(), full.width(), data[:3]))
         valid_capture = int((capture.GetRasterBand(1).GetMaskBand().ReadAsArray() != 0).sum()) if capture else -1
         print('INFO WCS capture grid_cells={} valid_cells={} zone_cells={:.0f} tif_bytes={}'.format(
             capture_cells, valid_capture, zone_cells, tif_bytes), flush=True)
