@@ -505,14 +505,15 @@ class ExploringController(BaseController, LayerSelectionMixin):
           filtered by it (TaskParameterBuilder.determine_skip_source_filter).
         - both None: the selection is refused, the warning is shown.
 
-        A web service gets at most ``key_list_limit`` keys and needs a stable
-        key field (an id list means nothing to its server). Another source
-        keeps its key lists as before 5.1: no bound but the IN-list size of
-        its SQL (Oracle), feature ids (``$id``) without a key field. A zoom
-        request (``zoom``) reads geometry only and may use the feature ids
-        the rows are keyed by.
+        Rows are read by the key of the list (``_remote_row_key``), or by
+        feature id without a key field. A web service gets at most
+        ``key_list_limit`` keys; its Filter also needs a stable key
+        (``remote_filter_refused``). Another source keeps its key lists as
+        before 5.1: no bound but the IN-list size of its SQL (Oracle),
+        ``$id IN (...)`` without a key field. A zoom request (``zoom``) reads
+        geometry only.
         """
-        from ...adapters.qgis.source_capability_probe import capability_for_layer, stable_key_for_layer
+        from ...adapters.qgis.source_capability_probe import capability_for_layer
         from ...core.filter.pk_formatter import QGIS_EXPRESSION, format_key_literal
         from ...infrastructure.utils import should_skip_expression_for_filtering
         dw = self._dockwidget
@@ -550,13 +551,6 @@ class ExploringController(BaseController, LayerSelectionMixin):
                          dw.tr("Selection"))
             return None, None
         name = self._remote_row_key(layer)
-        if service and not zoom:
-            # The server filter needs the stable key; a list keyed otherwise (feature ids, a
-            # key stored by an older project) could keep other features.
-            key = stable_key_for_layer(layer, scan=False)
-            if name is None or not key.is_field or key.name != name:
-                show_warning(dw.tr("This service has no stable key for the selection."), dw.tr("Selection"))
-                return None, None
         if name is not None:
             numeric = layer.fields().field(name).isNumeric()
             literals = [format_key_literal(value, numeric, QGIS_EXPRESSION) for value in values]
@@ -566,7 +560,8 @@ class ExploringController(BaseController, LayerSelectionMixin):
                      for start in range(0, len(literals), chunk)]
             expression = lists[0] if len(lists) == 1 else '(' + ' OR '.join(lists) + ')'
             return request.setFilterExpression(expression), expression
-        # Rows keyed by feature id (custom_widgets: '$id' without a key field).
+        # Rows keyed by feature id (custom_widgets: '$id' without a key field). On a service the
+        # read features give the key list of the filter (_remote_features), when it has a key.
         try:
             ids = [int(value) for value in values]
         except (TypeError, ValueError):
@@ -574,6 +569,37 @@ class ExploringController(BaseController, LayerSelectionMixin):
             return None, None
         expression = '' if service else '$id IN ({})'.format(', '.join(str(fid) for fid in ids))
         return request.setFilterFids(ids), expression
+
+    def remote_filter_refused(self):
+        """Whether the Filter of the current multiple selection of a service is refused (and said so).
+
+        Its server filter is a key list: the rows must be keyed by the stable
+        key or a name trusted as unique on a service (core.domain.stable_key),
+        or by feature ids when the service has a stable key (the list is then
+        built from the read features). A list keyed by another field (a key
+        stored by an older project) could keep other features. Reading,
+        zooming and identifying that selection stay possible.
+        """
+        from ...adapters.qgis.source_capability_probe import capability_for_layer, stable_key_for_layer
+        from ...core.domain.stable_key import key_candidates
+        dw = self._dockwidget
+        layer = dw.current_layer
+        if layer is None or dw.current_exploring_groupbox != 'multiple_selection':
+            return False
+        capability = capability_for_layer(layer)
+        widget = dw.widgets.get('EXPLORING', {}).get('MULTIPLE_SELECTION_FEATURES', {}).get('WIDGET')
+        if capability is None or not capability.is_remote_service or widget is None or not widget.checkedItems():
+            return False
+        name = self._remote_row_key(layer)
+        key = stable_key_for_layer(layer, scan=False)
+        if name is None:
+            keyed = key.is_field
+        else:
+            names = [field.name() for field in layer.fields()]
+            keyed = (key.is_field and name == key.name) or name in key_candidates(names, local=False)
+        if not keyed:
+            show_warning(dw.tr("This service has no stable key for the selection."), dw.tr("Selection"))
+        return not keyed
 
     def _remote_row_key(self, layer):
         """The field the multiple selection rows are keyed by, None for feature ids.

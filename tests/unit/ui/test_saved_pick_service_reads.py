@@ -2,7 +2,7 @@
 
 A group switch, a layer change and the picker tooltip reloaded the saved
 feature id with ``layer.getFeature``: a network request on the GUI thread
-for a service. The pick is now read by the debounced pick, in a task.
+for a service. Its picker's feature, already in memory, is used instead.
 """
 import ast
 import builtins
@@ -36,7 +36,7 @@ def _service_layer():
     return layer
 
 
-def test_layer_change_reads_the_saved_pick_of_a_service_in_a_task():
+def test_layer_change_uses_the_picker_feature_of_a_service():
     method = _method('ui/controllers/layer_sync_controller.py', '_restore_feature_selection_state')
     picker = MagicMock()
     dock = SimpleNamespace(current_layer=_service_layer(), current_exploring_groupbox='single_selection',
@@ -46,9 +46,9 @@ def test_layer_change_reads_the_saved_pick_of_a_service_in_a_task():
                            _execute_debounced_feature_change=MagicMock())
     controller = SimpleNamespace(dockwidget=dock)
     MethodType(method, controller)({'exploring': {'is_selecting': True}})
-    dock._execute_debounced_feature_change.assert_called_once_with()
-    assert dock._pending_feature_change_fid == 7
-    dock.exploring_features_changed.assert_not_called()   # delivered by the task
+    dock.current_layer.getFeature.assert_not_called()
+    dock._execute_debounced_feature_change.assert_not_called()
+    dock.exploring_features_changed.assert_called_once_with(picker.feature.return_value)
 
 
 def test_picker_tooltip_never_reads_a_service():
@@ -62,7 +62,7 @@ def test_picker_tooltip_never_reads_a_service():
     dock.current_layer.getFeature.assert_not_called()
 
 
-def test_single_group_switch_reads_the_saved_pick_of_a_service_in_a_task():
+def test_single_group_switch_uses_the_picker_feature_of_a_service():
     method = _method('filter_mate_dockwidget.py', '_configure_single_selection_groupbox')
     picker = MagicMock()
     dock = SimpleNamespace(
@@ -73,6 +73,6 @@ def test_single_group_switch_reads_the_saved_pick_of_a_service_in_a_task():
         _update_exploring_buttons_state=MagicMock(), _execute_debounced_feature_change=MagicMock(),
         _debounced_exploring_features_changed=MagicMock())
     MethodType(method, dock)()
-    dock._execute_debounced_feature_change.assert_called_once_with()
-    assert dock._pending_feature_change_fid == 7
-    dock.exploring_features_changed.assert_not_called()
+    dock.current_layer.getFeature.assert_not_called()
+    dock._execute_debounced_feature_change.assert_not_called()
+    dock.exploring_features_changed.assert_called_once_with(picker.feature.return_value)

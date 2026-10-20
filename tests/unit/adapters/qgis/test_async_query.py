@@ -317,13 +317,15 @@ class _Request:
     (_Request(subset=[], order_columns={'total'}), True),
     (_Request(subset=[0], expression_columns={'name'}), False),
     (_Request(subset=[], expression_columns={'TOTAL'}), True),   # "TOTAL" resolves to total
+    (_Request(subset=[], expression_columns={'Amount'}), True),  # so does its alias
 ])
 def test_only_a_request_that_evaluates_the_field_reads_it(module, request_, reads):
     import sys
     sys.modules['qgis.core'].QgsFeatureRequest = MagicMock()
     sys.modules['qgis.core'].QgsFeatureRequest.Flag.SubsetOfAttributes = _Request.SUBSET
     fields = MagicMock()
-    fields.lookupField.side_effect = lambda name: {'name': 0, 'total': 3}.get(name, -1)
+    # QgsFields.lookupField: exact name, then case-insensitive, then the alias ("Amount" is total's).
+    fields.lookupField.side_effect = lambda name: {'name': 0, 'total': 3, 'amount': 3}.get(name.lower(), -1)
     assert module.request_reads_fields(request_, {'total'}, fields) is reads
 
 

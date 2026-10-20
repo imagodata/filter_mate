@@ -1683,7 +1683,9 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
         capability = capability_for_layer(self.layer)
         service = capability is not None and capability.is_remote_service
         refusal = expression_refusal(expression, self.layer.fields()) if expression else None
-        if refusal is not None and (service or refusal == SYNTAX):
+        if refusal == SYNTAX:
+            refusal = None  # a broken display (a removed field) shows NULL rows, it reaches nothing live
+        if refusal is not None and service:
             slot = getattr(self, '_population_query', None)
             if slot is not None:
                 slot.cancel()
@@ -1943,7 +1945,7 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
 
     def _recover_remote_rows(self, identifier, values, expression, numeric):
         """Recover checked rows outside the page without blocking the GUI."""
-        from ...adapters.qgis.async_query import expression_refusal, read_now, read_refusal, submit_query
+        from ...adapters.qgis.async_query import SYNTAX, expression_refusal, read_now, read_refusal, submit_query
         from ...adapters.qgis.source_capability_probe import capability_for_layer
         layer = self.layer
         list_widget = self.list_widgets[layer.id()]
@@ -1954,6 +1956,8 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
         attributes = self._row_attributes(expression, identifier)
         fields = layer.fields()
         refusal = expression_refusal(expression, fields) if expression else None
+        if refusal == SYNTAX:
+            refusal = None  # as the population: NULL display, nothing live reached
         if refusal is None:
             probe = QgsFeatureRequest()
             if attributes is not None:

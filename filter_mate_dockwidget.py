@@ -3920,24 +3920,19 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             # First try to use saved FID from canvas selection (authoritative source)
             saved_fid = getattr(self, '_last_single_selection_fid', None)
             saved_layer_id = getattr(self, '_last_single_selection_layer_id', None)
-            read_in_task = False
-            if saved_fid is not None and self.current_layer and saved_layer_id == self.current_layer.id():
-                from .adapters.qgis.source_capability_probe import counts_cheaply
-                if not counts_cheaply(self.current_layer):
-                    # Never a service read on the GUI thread: the debounced pick reads it in a task.
-                    self._pending_feature_change_fid = saved_fid
-                    self._execute_debounced_feature_change()
-                    read_in_task = True
-                else:
-                    try:
-                        f = self.current_layer.getFeature(saved_fid)
-                        if not f or not f.isValid():
-                            f = None
-                            logger.debug(f"_configure_single_selection_groupbox: saved FID {saved_fid} not found, falling back to widget")
-                    except Exception:
+            from .adapters.qgis.source_capability_probe import counts_cheaply
+            # A web service is never read on the GUI thread: its picker's feature (in memory) is used.
+            if (saved_fid is not None and self.current_layer and saved_layer_id == self.current_layer.id()
+                    and counts_cheaply(self.current_layer)):
+                try:
+                    f = self.current_layer.getFeature(saved_fid)
+                    if not f or not f.isValid():
                         f = None
+                        logger.debug(f"_configure_single_selection_groupbox: saved FID {saved_fid} not found, falling back to widget")
+                except Exception:
+                    f = None
             # Fallback to widget.feature() only if no saved FID
-            if f is None and not read_in_task:
+            if f is None:
                 f = picker.feature()
             if f and f.isValid(): self.exploring_features_changed(f)
 
@@ -7097,7 +7092,8 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
                 self._exploring_ctrl._remote_selection_refused = False
                 self._exploring_ctrl._remote_selection_waiting = False
                 self._exploring_ctrl.get_current_features()
-                if getattr(self._exploring_ctrl, '_remote_selection_refused', False):
+                if (getattr(self._exploring_ctrl, '_remote_selection_refused', False)
+                        or self._exploring_ctrl.remote_filter_refused()):
                     return
                 slot = getattr(self._exploring_ctrl, '_selection_query', None)
                 if (getattr(self._exploring_ctrl, '_remote_selection_waiting', False)

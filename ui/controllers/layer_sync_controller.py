@@ -1207,24 +1207,19 @@ class LayerSyncController(BaseController):
                 current_layer = getattr(dw, 'current_layer', None)
 
                 # If is_selecting AND saved FID matches current layer, use it first
-                read_in_task = False
-                if is_selecting and saved_fid is not None and current_layer and saved_layer_id == current_layer.id():
-                    from ...adapters.qgis.source_capability_probe import counts_cheaply
-                    if not counts_cheaply(current_layer) and hasattr(dw, '_execute_debounced_feature_change'):
-                        # Never a service read on the GUI thread: the debounced pick reads it in a task.
-                        dw._pending_feature_change_fid = saved_fid
-                        dw._execute_debounced_feature_change()
-                        read_in_task = True
-                    else:
-                        try:
-                            feature = current_layer.getFeature(saved_fid)
-                            if not feature or not feature.isValid():
-                                feature = None
-                        except Exception:
+                from ...adapters.qgis.source_capability_probe import counts_cheaply
+                # A web service is never read on the GUI thread: its picker's feature (in memory) is used.
+                if (is_selecting and saved_fid is not None and current_layer and saved_layer_id == current_layer.id()
+                        and counts_cheaply(current_layer)):
+                    try:
+                        feature = current_layer.getFeature(saved_fid)
+                        if not feature or not feature.isValid():
                             feature = None
+                    except Exception:
+                        feature = None
 
                 # Fallback to picker.feature()
-                if feature is None and not read_in_task:
+                if feature is None:
                     feature = picker.feature()
 
                 if feature is not None and feature.isValid():

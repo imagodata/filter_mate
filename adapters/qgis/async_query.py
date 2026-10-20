@@ -424,16 +424,16 @@ def unsafe_virtual_fields(layer):
             unsafe.add(name)
         else:
             referenced[name] = set(QgsExpression(expression).referencedColumns())
-    # Field references resolve case-insensitively (QgsFields.lookupField): "VF" reads vf.
-    lowered = {name.lower() for name in unsafe}
+    # A reference reads the field QgsFields.lookupField resolves (exact name, then case, then alias).
+    unsafe_indexes = {fields.lookupField(name) for name in unsafe}
     grown = True
     while grown:
         grown = False
         for name, columns in referenced.items():
-            if name not in unsafe and unsafe and (lowered & {column.lower() for column in columns}
-                                                  or _ALL_ATTRIBUTES in columns):
+            if name not in unsafe and unsafe and (_ALL_ATTRIBUTES in columns or unsafe_indexes
+                                                  & {fields.lookupField(column) for column in columns}):
                 unsafe.add(name)
-                lowered.add(name.lower())
+                unsafe_indexes.add(fields.lookupField(name))
                 grown = True
     return unsafe
 
@@ -456,7 +456,7 @@ def request_reads_fields(request, names, fields):
     from qgis.core import QgsFeatureRequest
     if not _has_flag(request.flags(), QgsFeatureRequest.Flag.SubsetOfAttributes):
         return True
-    indexes = {fields.lookupField(name) for name in names}
+    indexes = {fields.lookupField(name) for name in names} - {-1}
     if indexes & set(request.subsetOfAttributes()):
         return True
     columns = set()
@@ -464,9 +464,8 @@ def request_reads_fields(request, names, fields):
     if expression is not None:
         columns |= set(expression.referencedColumns())
     columns |= set(request.orderBy().usedAttributes())
-    # Field references resolve case-insensitively (QgsFields.lookupField): "VF" reads vf.
-    return _ALL_ATTRIBUTES in columns or bool({column.lower() for column in columns}
-                                              & {name.lower() for name in names})
+    # A reference reads the field QgsFields.lookupField resolves (exact name, then case, then alias).
+    return _ALL_ATTRIBUTES in columns or bool(indexes & {fields.lookupField(column) for column in columns})
 
 
 def read_refusal(layer, request):

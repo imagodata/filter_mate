@@ -168,6 +168,7 @@ def test_service_filter_launch_waits_only_for_its_own_selection(refused, waiting
         controller._remote_selection_waiting = waiting
 
     controller.get_current_features = MagicMock(side_effect=read)
+    controller.remote_filter_refused = MagicMock(return_value=False)
     dock = SimpleNamespace(current_layer=object(), _exploring_ctrl=controller, _controller_integration=None,
                            _defer_remote_filter=MagicMock())
     assert MethodType(_launcher_prefix(), dock)(False, 'filter') == expected
@@ -178,7 +179,8 @@ def test_flags_of_an_earlier_read_neither_refuse_nor_defer_a_filter():
     """get_current_features may return before _remote_features (widgets not ready): no stale verdict."""
     slot = SimpleNamespace(task=_task())
     controller = SimpleNamespace(get_current_features=MagicMock(), _remote_selection_refused=True,
-                                 _remote_selection_waiting=True, _selection_query=slot)
+                                 _remote_selection_waiting=True, _selection_query=slot,
+                                 remote_filter_refused=MagicMock(return_value=False))
     dock = SimpleNamespace(current_layer=object(), _exploring_ctrl=controller, _controller_integration=None,
                            _defer_remote_filter=MagicMock())
     assert MethodType(_launcher_prefix(), dock)(False, 'filter') == 'proceeds'
@@ -259,3 +261,14 @@ def test_service_identify_flashes_through_the_controller_without_reading_the_lay
     MethodType(namespace['exploring_identify_clicked'], dock)()
     controller.identify_remote_selection.assert_called_once_with()
     dock.iface.mapCanvas.return_value.flashFeatureIds.assert_not_called()
+
+
+def test_a_service_filter_without_a_key_it_can_send_is_refused_at_launch():
+    """H2: refused (message in remote_filter_refused), no task, nothing deferred."""
+    slot = SimpleNamespace(task=_task())
+    controller = SimpleNamespace(get_current_features=MagicMock(), _selection_query=slot,
+                                 remote_filter_refused=MagicMock(return_value=True))
+    dock = SimpleNamespace(current_layer=object(), _exploring_ctrl=controller, _controller_integration=None,
+                           _defer_remote_filter=MagicMock())
+    assert MethodType(_launcher_prefix(), dock)(False, 'filter') is None
+    dock._defer_remote_filter.assert_not_called()

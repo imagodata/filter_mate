@@ -18,7 +18,7 @@ _MODULE = Path(__file__).resolve().parents[4] / "ui" / "controllers" / "explorin
 _METHODS = ('_read_mode', '_remote_single_fid', '_remote_ui_revision', '_empty_remote_selection',
             '_remote_selection_plan', '_remote_row_key', '_remote_features', '_remote_zoom_request',
             '_zoom_canvas_to', '_queue_remote_zoom', 'identify_remote_selection',
-            '_invalidate_remote_selection_cache')
+            '_invalidate_remote_selection_cache', 'remote_filter_refused')
 
 
 class Request:
@@ -118,7 +118,10 @@ def _fake_modules(monkeypatch, service=True, key_field=True, limit=500, in_list_
     utils = types.ModuleType('filter_mate.infrastructure.utils')
     utils.should_skip_expression_for_filtering = lambda expression: (
         not expression or not any(op in expression for op in ('=', '>', '<', ' IN ')), '')
-    for module in (async_query, probe, formatter, utils):
+    stable_key = types.ModuleType('filter_mate.core.domain.stable_key')
+    stable_key.key_candidates = lambda names, local=True: [name for name in names
+                                                           if name.lower() in ('gml_id', 'id', 'cleabs')]
+    for module in (async_query, probe, formatter, utils, stable_key):
         monkeypatch.setitem(sys.modules, module.__name__, module)
     return SimpleNamespace(async_query=async_query, probe=probe)
 
@@ -165,8 +168,10 @@ class Layer:
 
     def fields(self):
         names = self.field_names
-        return MagicMock(field=MagicMock(return_value=MagicMock(isNumeric=MagicMock(return_value=True))),
-                         indexOf=MagicMock(side_effect=lambda name: names.index(name) if name in names else -1))
+        fields = MagicMock(field=MagicMock(return_value=MagicMock(isNumeric=MagicMock(return_value=True))),
+                           indexOf=MagicMock(side_effect=lambda name: names.index(name) if name in names else -1))
+        fields.__iter__.side_effect = lambda: iter([MagicMock(**{'name.return_value': name}) for name in names])
+        return fields
 
     def selectedFeatureIds(self):
         return []
@@ -263,10 +268,23 @@ def test_too_many_service_keys_are_refused_without_reading(monkeypatch):
 
 def test_a_service_without_stable_key_refuses_a_multiple_selection_filter(monkeypatch):
     env = _setup(monkeypatch, mode='multiple_selection', checked=[('n', 4), ('m', 7)], key_field=False)
-    assert env.controller._remote_features() == ([], '')
-    assert env.controller._remote_selection_refused is True
-    env.submit.assert_not_called()
+    assert env.controller.remote_filter_refused() is True
     assert 'stable key' in env.warning.call_args.args[0]
+    env.warning.reset_mock()
+    # The selection itself stays readable (map selection, tracking zoom, identify).
+    assert env.controller._remote_features() == ([], '')
+    assert env.controller._remote_selection_refused is False
+    _submitted_request(env)
+    assert env.layer.reads[0].fids == [4, 7]
+    assert not env.warning.called
+
+
+def test_a_service_list_keyed_by_feature_id_filters_with_its_stable_key(monkeypatch):
+    env = _setup(monkeypatch, mode='multiple_selection', checked=[('n', 1), ('m', 2)], row_key='$id')
+    assert env.controller.remote_filter_refused() is False
+    env.controller._remote_features()
+    features, expression = _submitted_request(env)
+    assert expression == '"gml_id" IN (1, 2)'
 
 
 def test_a_refused_zoom_reads_nothing(monkeypatch):
@@ -389,10 +407,16 @@ def test_rows_keyed_by_an_older_registered_key_filter_on_that_key(monkeypatch):
 def test_a_service_list_keyed_by_another_field_than_its_stable_key_refuses_the_filter(monkeypatch):
     env = _setup(monkeypatch, mode='multiple_selection', checked=[('n', 1), ('m', 2)], row_key='population',
                  field_names=('gml_id', 'population'))
-    assert env.controller._remote_features() == ([], '')
-    assert env.controller._remote_selection_refused is True
+    assert env.controller.remote_filter_refused() is True
     assert 'stable key' in env.warning.call_args.args[0]
-    env.submit.assert_not_called()
+
+
+def test_a_service_list_keyed_by_a_trusted_key_name_keeps_its_filter(monkeypatch):
+    # An older project registered "id" while the stable key is now gml_id: both are trusted names.
+    env = _setup(monkeypatch, mode='multiple_selection', checked=[('n', 1), ('m', 2)], row_key='id',
+                 field_names=('gml_id', 'id'))
+    assert env.controller.remote_filter_refused() is False
+    assert env.controller._remote_features() == ([], '"id" IN (1, 2)')
 
 
 def test_a_syntax_error_is_refused_without_reading_even_off_a_service(monkeypatch):

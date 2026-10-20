@@ -164,9 +164,10 @@ def test_list_reads_only_the_row_fields():
     assert method(state, '', None) == []
 
 
-def test_an_invalid_display_expression_is_refused_on_any_source(widget):
-    env = widget(service=False, expression_refusal='syntax')
-    env.state._populate('"name" ||')
-    env.submit.assert_not_called()
-    env.state._apply_population.assert_not_called()
-    assert env.warning.call_args.args[0] == 'refused: syntax'
+@pytest.mark.parametrize('service', [True, False])
+def test_an_invalid_display_expression_is_listed_in_a_task(widget, service):
+    """A display naming a removed field reaches nothing live: NULL rows, as before 5.1, not a refusal."""
+    env = widget(service=service, expression_refusal='syntax')
+    env.state._populate('"removed_field"')
+    env.submit.assert_called_once()
+    env.warning.assert_not_called()
