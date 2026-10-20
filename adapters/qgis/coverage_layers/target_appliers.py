@@ -382,9 +382,14 @@ class VectorTargetJob(TargetJob):
             if outcome.reason not in ('feature_limit', 'timeout'):
                 self.outcome.message = _remote_message(outcome.reason)
                 return None
-            if complement or (self.operator or '').upper() == 'AND NOT':
-                # Missing keys would stay in a complement: (old) AND NOT (keys) keeps them.
+            if complement:
                 self.outcome.message = _remote_message('disjoint_partial')
+                return None
+            if (self.operator or '').upper() == 'AND NOT' and self.before.subset:
+                # (old) AND NOT (keys): the matching features never read would stay.
+                self.outcome.message = translate(
+                    'VectorTargetJob', '{0} AND NOT would keep the features not read; the previous filter is kept.'
+                ).format(_remote_message(outcome.reason))
                 return None
             if not outcome.keys:
                 self.outcome.message = _remote_message('partial_empty')

@@ -452,6 +452,19 @@ class TestUnfilterEnrichedCloud:
         else:
             assert (handled, applied, failed) == (1, [raster.id()], {})
 
+    def test_favorite_canceled_leaves_the_remaining_layers_as_they_are(self, env):
+        from fm_derived_sources_test.adapters.qgis.coverage_layers import favorites_bridge
+        raster = _raster(env)
+        previous = clip(raster, f"{env.session}/ortho_1a2b3c4d.vrt", LayerKind.RASTER).source
+        entry = dict(LayerSnapshot(raster.id(), "raster", source="/cache/x.vrt", provider="gdal", derived=True,
+                                   original_source=raster.source(), original_provider="gdal",
+                                   geometry_wkt="POLYGON((0 0,1 0,1 1,0 1,0 0))").to_dict(), layer_name="ortho")
+        failed = {}
+        handled = favorites_bridge.apply([entry], project=env.project, kind_of=lambda layer: LayerKind.RASTER,
+                                         run=lambda *args: pytest.fail("clipped after cancel"), failed=failed,
+                                         canceled=lambda: True)
+        assert (handled, failed, raster.source()) == (0, {raster.id(): "canceled"}, previous)
+
     def test_plain_layer_unfiltered_leaves_the_registry(self, env):
         raster = _raster(env)
         original = raster.source()

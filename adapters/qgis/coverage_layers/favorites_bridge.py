@@ -71,7 +71,7 @@ def _resolve(project: QgsProject, entry: Dict, kind_of=None):
 
 def apply(entries: List[Dict], service=None, project: Optional[QgsProject] = None, synchronous: bool = False,
           kind_of=None, applied: Optional[List[str]] = None, run=None,
-          failed: Optional[Dict[str, str]] = None) -> int:
+          failed: Optional[Dict[str, str]] = None, canceled=None) -> int:
     """Re-apply captured raster / point cloud states; returns the number of layers handled.
 
     Args:
@@ -85,6 +85,8 @@ def apply(entries: List[Dict], service=None, project: Optional[QgsProject] = Non
         failed: When given, receives ``{layer_id: reason}`` for the layers
             that could not be filtered again (an exception included); they are
             put back as they were and not counted as handled.
+        canceled: When given and true, the remaining layers are left as they
+            are (``failed``: "canceled"), never reset to their original source.
     """
     kind_of = kind_of or _kind
     from ....core.domain.cross_filter import CrossFilterRequest, TargetSpec
@@ -110,6 +112,10 @@ def apply(entries: List[Dict], service=None, project: Optional[QgsProject] = Non
             continue
         if stored.kind != kind.value:
             logger.warning(f"[FM5] favorite: '{layer.name()}' has a different layer kind")
+            continue
+        if canceled is not None and canceled():
+            if failed is not None:
+                failed[layer.id()] = 'canceled'
             continue
         if kind is LayerKind.VECTOR_TILE:
             from .vector_tile_filters import apply_filter, tr
@@ -154,6 +160,7 @@ def apply(entries: List[Dict], service=None, project: Optional[QgsProject] = Non
                 restore_snapshot(layer, current)
             except Exception as exc:
                 logger.warning(f"[FM5] favorite: '{layer.name()}' not put back: {exc}", exc_info=True)
+                reason = f"{reason}; its previous filter could not be put back"
             failed[layer.id()] = reason
             continue
         handled += 1

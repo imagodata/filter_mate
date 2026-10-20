@@ -1113,7 +1113,7 @@ def apply_favorite(name_or_id: str, service=None, project=None, feedback=None) -
 
         try:
             handled = favorites_bridge.apply(coverage, project=project, kind_of=layer_kind, applied=applied,
-                                             run=clip, failed=clip_failures)
+                                             run=clip, failed=clip_failures, canceled=lambda: _canceled(feedback))
         except Exception as exc:  # a stored source that no longer opens
             logger.warning(f"[FM5] favorite clips not applied: {exc}", exc_info=True)
             label = favorite.name or name_or_id

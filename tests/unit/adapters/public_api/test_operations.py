@@ -1042,4 +1042,4 @@ class TestFavoriteClips:
         monkeypatch.setattr(operations, "_run_task", lambda service, request, job, feedback=None: self._task(True))
         report = operations.apply_favorite("toulouse", service=MagicMock(), project=favorite_world.project)
         assert report.ok and report.done == {"DEM": "mnt_wcs"}
-        assert favorite_world.calls == [dict(synchronous=False, hooks=["failed", "run"])]
+        assert favorite_world.calls == [dict(synchronous=False, hooks=["canceled", "failed", "run"])]

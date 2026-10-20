@@ -527,7 +527,16 @@ class TestWebServiceBoundedRead:
         remote.forced = remote.Outcome((1,), False, 20001, 'feature_limit')
         job = engine.VectorTargetJob(_web_zones(subset='ids:1,4'), 'AND NOT')
         job.compute(_box(*EAST_HALF), fk.FakeCrs('EPSG:2154'), None, _request(operator='AND NOT'), lambda: False)
-        assert not job.outcome.success and job.outcome.message == "dock refusal: disjoint_partial"
+        assert not job.outcome.success
+        assert job.outcome.message == ("dock refusal: feature_limit AND NOT would keep the features not read; "
+                                       "the previous filter is kept.")
+
+    def test_and_not_without_a_previous_filter_lists_the_partial_keys(self, engine, remote):
+        """Without a previous filter AND NOT replaces it (combine_subset): incomplete, not wrong."""
+        remote.forced = remote.Outcome((1,), False, 20001, 'feature_limit')
+        job = engine.VectorTargetJob(_web_zones(), 'AND NOT')
+        assert _run(job, _box(*EAST_HALF), _request(operator='AND NOT')) == ['east_a']
+        assert job.outcome.details['partial']
 
     def test_invalid_target_geometry_is_refused_as_in_the_dock(self, engine, remote):
         layer = _web_zones()
