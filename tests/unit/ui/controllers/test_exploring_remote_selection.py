@@ -58,10 +58,13 @@ class Request:
         return self.fids or []
 
 
+_UNSET = object()
+
+
 class Feature:
-    def __init__(self, fid, key=None, geometry=True):
+    def __init__(self, fid, key=_UNSET, geometry=True):
         self._fid = fid
-        self._key = fid if key is None else key
+        self._key = fid if key is _UNSET else key
         self._geometry = MagicMock(isEmpty=MagicMock(return_value=False)) if geometry else None
 
     def id(self):
@@ -80,7 +83,8 @@ class Feature:
         return self._key
 
 
-def _fake_modules(monkeypatch, service=True, key_field=True, limit=500, in_list_max=None, row_key=None):
+def _fake_modules(monkeypatch, service=True, key_field=True, limit=500, in_list_max=None, row_key=None,
+                  key_origin='named'):
     async_query = types.ModuleType('filter_mate.adapters.qgis.async_query')
     async_query.submit_query = MagicMock()
     async_query.collect_extent = MagicMock(return_value='extent')
@@ -110,15 +114,17 @@ def _fake_modules(monkeypatch, service=True, key_field=True, limit=500, in_list_
     probe.capability_for_layer = lambda layer: SimpleNamespace(
         is_remote_service=service, key_list_limit=limit if service else None, in_list_max=in_list_max)
     probe.stable_key_for_layer = lambda layer, scan=True: SimpleNamespace(
-        name='gml_id' if key_field else '$id', is_field=key_field)
+        name='gml_id' if key_field else '$id', is_field=key_field, origin=key_origin if key_field else 'none')
     probe.counts_cheaply = lambda layer: False
     formatter = types.ModuleType('filter_mate.core.filter.pk_formatter')
     formatter.QGIS_EXPRESSION = 'qgis'
     formatter.format_key_literal = lambda value, numeric, dialect: str(value) if numeric else "'{}'".format(value)
+    formatter.is_null_value = lambda value: value is None
     utils = types.ModuleType('filter_mate.infrastructure.utils')
     utils.should_skip_expression_for_filtering = lambda expression: (
         not expression or not any(op in expression for op in ('=', '>', '<', ' IN ')), '')
     stable_key = types.ModuleType('filter_mate.core.domain.stable_key')
+    stable_key.NAMED = 'named'
     stable_key.key_candidates = lambda names, local=True: [name for name in names
                                                            if name.lower() in ('gml_id', 'id', 'cleabs')]
     for module in (async_query, probe, formatter, utils, stable_key):
@@ -279,12 +285,33 @@ def test_a_service_without_stable_key_refuses_a_multiple_selection_filter(monkey
     assert not env.warning.called
 
 
-def test_a_service_list_keyed_by_feature_id_filters_with_its_stable_key(monkeypatch):
+def test_a_service_list_keyed_by_feature_id_refuses_its_filter(monkeypatch):
+    # Even with a stable key: its values come from the read features, which may hold NULL keys.
     env = _setup(monkeypatch, mode='multiple_selection', checked=[('n', 1), ('m', 2)], row_key='$id')
+    assert env.controller.remote_filter_refused() is True
+
+
+def test_a_read_service_selection_with_a_null_key_refuses_its_filter(monkeypatch):
+    """"id" IN (NULL) keeps nothing: the Filter would empty the source and filter the targets on nothing."""
+    env = _setup(monkeypatch, mode='single_selection', saved_fid=1)
+    env.layer.features = [Feature(1, key=None)]
     assert env.controller.remote_filter_refused() is False
     env.controller._remote_features()
-    features, expression = _submitted_request(env)
-    assert expression == '"gml_id" IN (1, 2)'
+    env.submit.call_args.args[5](_submitted_request(env))   # the read delivers
+    assert env.controller.remote_filter_refused(read=True) is True
+    assert 'stable key' in env.warning.call_args.args[0]
+
+
+def test_a_single_selection_of_a_service_without_stable_key_refuses_its_filter(monkeypatch):
+    env = _setup(monkeypatch, mode='single_selection', saved_fid=1, key_field=False)
+    assert env.controller.remote_filter_refused() is True
+
+
+def test_a_declared_key_is_the_only_one_a_multiple_selection_may_send(monkeypatch):
+    # An ArcGIS layer declaring OBJECTID: a list keyed by a business "id" could keep other features.
+    env = _setup(monkeypatch, mode='multiple_selection', checked=[('n', 1)], row_key='id',
+                 field_names=('gml_id', 'id'), key_origin='declared')
+    assert env.controller.remote_filter_refused() is True
 
 
 def test_a_refused_zoom_reads_nothing(monkeypatch):

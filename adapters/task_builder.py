@@ -915,6 +915,12 @@ class TaskParameterBuilder:
         # Get features for filter operation
         logger.info("get_and_validate_features: Calling get_current_features()...")
         features, expression = dw.get_current_features()
+        # A web service selection whose keys cannot be sent (also for a filter replayed
+        # without launchTaskEvent): ExploringController.remote_filter_refused.
+        controller = getattr(dw, '_exploring_ctrl', None)
+        refused = getattr(controller, 'remote_filter_refused', None)
+        if callable(refused) and refused(read=True) is True:
+            raise ValueError("Web service selection without stable keys")
         logger.info(f"get_and_validate_features: Returned {len(features)} features, expression='{expression}'")
 
         # CRITICAL CHECK: Warn if no features and no expression

@@ -1725,7 +1725,8 @@ class QgsCheckableComboBoxFeaturesListPickerWidget(QWidget):
         if refusal is None:
             from ...adapters.qgis.async_query import read_refusal
             refusal = read_refusal(layer, request)
-            if refusal is not None and service:
+            # A search built on a broken display (a removed field) cannot match: said, not read.
+            if refusal is not None and (service or refusal == SYNTAX):
                 slot = getattr(self, '_population_query', None)
                 if slot is not None:
                     slot.cancel()

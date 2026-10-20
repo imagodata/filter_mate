@@ -1208,15 +1208,20 @@ class LayerSyncController(BaseController):
 
                 # If is_selecting AND saved FID matches current layer, use it first
                 from ...adapters.qgis.source_capability_probe import counts_cheaply
-                # A web service is never read on the GUI thread: its picker's feature (in memory) is used.
-                if (is_selecting and saved_fid is not None and current_layer and saved_layer_id == current_layer.id()
-                        and counts_cheaply(current_layer)):
-                    try:
-                        feature = current_layer.getFeature(saved_fid)
-                        if not feature or not feature.isValid():
+                if is_selecting and saved_fid is not None and current_layer and saved_layer_id == current_layer.id():
+                    if not counts_cheaply(current_layer):
+                        # Never read on the GUI thread: the saved id alone, exploring_features_changed
+                        # reads the feature in a task (ExploringController._remote_features).
+                        from qgis.core import QgsFeature
+                        feature = QgsFeature(current_layer.fields(), saved_fid)
+                        feature.setValid(True)
+                    else:
+                        try:
+                            feature = current_layer.getFeature(saved_fid)
+                            if not feature or not feature.isValid():
+                                feature = None
+                        except Exception:
                             feature = None
-                    except Exception:
-                        feature = None
 
                 # Fallback to picker.feature()
                 if feature is None:

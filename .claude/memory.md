@@ -791,3 +791,8 @@ Result: Que veux-tu faire dans cette session ?
   virtuel n'est refusé que si la requête l'évalue (`request_reads_fields`). Le Filtre différé suit une lecture
   remplacée par une signature identique (même fid ⇒ `setFilterFids([fid])` partout ; révision « single » = fid
   désigné) et prévient sinon. `show_warning(message, title)` : l'ordre était inversé dans le lot C.
+  Le refus « clé stable » d'un Filtre de service est dans `remote_filter_refused` (avant la lecture : clé de la
+  liste = clé stable, ou nom de confiance si le fournisseur ne déclare pas de clé ; après : aucune clé NULL), appelé
+  par launchTaskEvent et par TaskParameterBuilder.get_and_validate_features ; la lecture, le zoom et Identify d'une
+  telle sélection restent permis. Le choix enregistré d'un service est passé comme `QgsFeature(fields, fid)` valide,
+  jamais relu sur le thread GUI.

@@ -570,33 +570,59 @@ class ExploringController(BaseController, LayerSelectionMixin):
         expression = '' if service else '$id IN ({})'.format(', '.join(str(fid) for fid in ids))
         return request.setFilterFids(ids), expression
 
-    def remote_filter_refused(self):
-        """Whether the Filter of the current multiple selection of a service is refused (and said so).
+    def remote_filter_refused(self, read=False):
+        """Whether the Filter of the current selection of a web service is refused (and said so).
 
-        Its server filter is a key list: the rows must be keyed by the stable
-        key or a name trusted as unique on a service (core.domain.stable_key),
-        or by feature ids when the service has a stable key (the list is then
-        built from the read features). A list keyed by another field (a key
-        stored by an older project) could keep other features. Reading,
-        zooming and identifying that selection stay possible.
+        Its server filter is a list of stable keys:
+
+        - a multiple selection must be keyed by the stable key, or by a name
+          trusted as unique on a service when the provider declares no key
+          (core.domain.stable_key; an older project's registered "id");
+          rows keyed by feature ids or another field (a key stored by an
+          older project) could keep other features;
+        - a single selection needs a stable key field;
+        - ``read``: once the selection is read, none of its features may
+          have a NULL key (``"id" IN (NULL)`` keeps nothing).
+
+        Reading, zooming and identifying the selection stay possible. Called
+        by launchTaskEvent before the read and after it, and by the task
+        builder (a filter replayed without launchTaskEvent).
         """
         from ...adapters.qgis.source_capability_probe import capability_for_layer, stable_key_for_layer
-        from ...core.domain.stable_key import key_candidates
+        from ...core.domain.stable_key import NAMED, key_candidates
+        from ...core.filter.pk_formatter import is_null_value
         dw = self._dockwidget
         layer = dw.current_layer
-        if layer is None or dw.current_exploring_groupbox != 'multiple_selection':
+        mode = dw.current_exploring_groupbox
+        if layer is None or mode not in ('multiple_selection', 'single_selection'):
             return False
         capability = capability_for_layer(layer)
-        widget = dw.widgets.get('EXPLORING', {}).get('MULTIPLE_SELECTION_FEATURES', {}).get('WIDGET')
-        if capability is None or not capability.is_remote_service or widget is None or not widget.checkedItems():
+        if capability is None or not capability.is_remote_service:
             return False
-        name = self._remote_row_key(layer)
         key = stable_key_for_layer(layer, scan=False)
-        if name is None:
-            keyed = key.is_field
-        else:
+        if mode == 'multiple_selection':
+            widget = dw.widgets.get('EXPLORING', {}).get('MULTIPLE_SELECTION_FEATURES', {}).get('WIDGET')
+            if widget is None or not widget.checkedItems():
+                return False
+            name = self._remote_row_key(layer)
             names = [field.name() for field in layer.fields()]
-            keyed = (key.is_field and name == key.name) or name in key_candidates(names, local=False)
+            keyed = name is not None and key.is_field and (
+                name == key.name or (key.origin == NAMED and name in key_candidates(names, local=False)))
+        else:
+            if self._remote_single_fid(layer) is None:
+                return False
+            name = key.name
+            keyed = key.is_field
+        if keyed and read:
+            cached = getattr(self, '_remote_selection_result', None)
+            for feature in (cached[1] if cached is not None else []):
+                try:
+                    value = feature[name]
+                except (KeyError, IndexError):
+                    value = None
+                if is_null_value(value):
+                    keyed = False
+                    break
         if not keyed:
             show_warning(dw.tr("This service has no stable key for the selection."), dw.tr("Selection"))
         return not keyed

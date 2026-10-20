@@ -272,3 +272,45 @@ def test_a_service_filter_without_a_key_it_can_send_is_refused_at_launch():
                            _defer_remote_filter=MagicMock())
     assert MethodType(_launcher_prefix(), dock)(False, 'filter') is None
     dock._defer_remote_filter.assert_not_called()
+    controller.get_current_features.assert_not_called()   # refused before any read
+
+
+def test_a_service_filter_whose_read_selection_has_null_keys_is_refused_at_launch():
+    slot = SimpleNamespace(task=None)
+    controller = SimpleNamespace(get_current_features=MagicMock(), _selection_query=slot,
+                                 remote_filter_refused=MagicMock(side_effect=lambda read=False: read))
+    dock = SimpleNamespace(current_layer=object(), _exploring_ctrl=controller, _controller_integration=None,
+                           _defer_remote_filter=MagicMock())
+    assert MethodType(_launcher_prefix(), dock)(False, 'filter') is None
+    controller.get_current_features.assert_called_once_with()
+
+
+def test_a_filter_replayed_without_launch_rechecks_the_service_keys():
+    """The task builder (manage_task retries without launchTaskEvent) refuses the same selection."""
+    import sys
+    import types
+    path = Path(__file__).resolve().parents[3] / 'adapters' / 'task_builder.py'
+    tree = ast.parse(path.read_text())
+    node = next(node for node in ast.walk(tree)
+                if isinstance(node, ast.FunctionDef) and node.name == 'get_and_validate_features')
+    core = types.ModuleType('qgis.core')
+    core.QgsMessageLog, core.Qgis = MagicMock(), MagicMock()
+    utils = types.ModuleType('qgis.utils')
+    utils.iface = MagicMock()
+    saved = {name: sys.modules.get(name) for name in ('qgis.core', 'qgis.utils')}
+    sys.modules.update({'qgis.core': core, 'qgis.utils': utils})
+    try:
+        namespace = {'logger': MagicMock(), 'QCoreApplication': MagicMock()}
+        exec(compile(ast.Module(body=[node], type_ignores=[]), str(path), 'exec'), namespace)
+        controller = SimpleNamespace(remote_filter_refused=MagicMock(return_value=True))
+        dock = SimpleNamespace(get_current_features=lambda: ([MagicMock()], '"id" IN (NULL)'),
+                               _exploring_ctrl=controller, current_exploring_groupbox='single_selection')
+        with pytest.raises(ValueError):
+            MethodType(namespace['get_and_validate_features'], SimpleNamespace(_dockwidget=dock))('filter')
+        controller.remote_filter_refused.assert_called_once_with(read=True)
+    finally:
+        for name, module in saved.items():
+            if module is None:
+                sys.modules.pop(name, None)
+            else:
+                sys.modules[name] = module

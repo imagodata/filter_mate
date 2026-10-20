@@ -2,8 +2,31 @@
 
 A group switch, a layer change and the picker tooltip reloaded the saved
 feature id with ``layer.getFeature``: a network request on the GUI thread
-for a service. Its picker's feature, already in memory, is used instead.
+for a service. The saved id alone is handed over (exploring_features_changed
+reads the feature in a task); the tooltip uses the picker's feature.
 """
+import sys
+
+import pytest
+
+
+class _IdOnlyFeature:
+    def __init__(self, fields, fid):
+        self._fid, self._valid = fid, False
+
+    def id(self):
+        return self._fid
+
+    def setValid(self, valid):
+        self._valid = valid
+
+    def isValid(self):
+        return self._valid
+
+
+@pytest.fixture(autouse=True)
+def _id_only_feature(monkeypatch):
+    monkeypatch.setattr(sys.modules['qgis.core'], 'QgsFeature', _IdOnlyFeature, raising=False)
 import ast
 import builtins
 from pathlib import Path
@@ -36,7 +59,7 @@ def _service_layer():
     return layer
 
 
-def test_layer_change_uses_the_picker_feature_of_a_service():
+def test_layer_change_hands_the_saved_pick_of_a_service_over_unread():
     method = _method('ui/controllers/layer_sync_controller.py', '_restore_feature_selection_state')
     picker = MagicMock()
     dock = SimpleNamespace(current_layer=_service_layer(), current_exploring_groupbox='single_selection',
@@ -47,8 +70,8 @@ def test_layer_change_uses_the_picker_feature_of_a_service():
     controller = SimpleNamespace(dockwidget=dock)
     MethodType(method, controller)({'exploring': {'is_selecting': True}})
     dock.current_layer.getFeature.assert_not_called()
-    dock._execute_debounced_feature_change.assert_not_called()
-    dock.exploring_features_changed.assert_called_once_with(picker.feature.return_value)
+    (feature,), _ = dock.exploring_features_changed.call_args
+    assert feature.id() == 7 and feature.isValid()
 
 
 def test_picker_tooltip_never_reads_a_service():
@@ -62,7 +85,7 @@ def test_picker_tooltip_never_reads_a_service():
     dock.current_layer.getFeature.assert_not_called()
 
 
-def test_single_group_switch_uses_the_picker_feature_of_a_service():
+def test_single_group_switch_hands_the_saved_pick_of_a_service_over_unread():
     method = _method('filter_mate_dockwidget.py', '_configure_single_selection_groupbox')
     picker = MagicMock()
     dock = SimpleNamespace(
@@ -74,5 +97,5 @@ def test_single_group_switch_uses_the_picker_feature_of_a_service():
         _debounced_exploring_features_changed=MagicMock())
     MethodType(method, dock)()
     dock.current_layer.getFeature.assert_not_called()
-    dock._execute_debounced_feature_change.assert_not_called()
-    dock.exploring_features_changed.assert_called_once_with(picker.feature.return_value)
+    (feature,), _ = dock.exploring_features_changed.call_args
+    assert feature.id() == 7 and feature.isValid()
