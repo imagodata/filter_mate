@@ -269,7 +269,9 @@ def _check_relation(payload: _RelationBody) -> None:
 class CrossFilterRequestBody(_RelationBody):
     source_layer: str = Field(..., min_length=1, max_length=_MAX_NAME,
                               description="Source layer: id or name, vector, raster or point cloud")
-    selected_only: bool = Field(default=True, description="Vector source: use the selected features (all when none is selected)")
+    selected_only: bool = Field(default=True, description=(
+        "Vector source: use the selected features (all when none is selected; "
+        "a web service source must be selected or filtered, it is never read whole)"))
     raster_selection: Optional[RasterSelectionBody] = Field(
         default=None, description="Raster source (required): pixels kept")
     point_cloud_criteria: Optional[PointCloudCriteriaBody] = Field(

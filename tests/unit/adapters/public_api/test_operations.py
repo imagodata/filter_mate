@@ -755,7 +755,7 @@ class TestWorkerServiceLease:
         monkeypatch.setattr(core, "QgsTask", types.SimpleNamespace(
             TaskStatus=types.SimpleNamespace(Complete=3, Terminated=4)), raising=False)
         monkeypatch.setattr(core, "QgsApplication", types.SimpleNamespace(
-            taskManager=lambda: types.SimpleNamespace(activeTasks=lambda: [])), raising=False)
+            taskManager=lambda: types.SimpleNamespace(tasks=lambda: [], activeTasks=lambda: [])), raising=False)
         return service
 
     def test_unload_cancels_worker_while_main_loop_reports_background_busy(self, service, qt_wait_loop,

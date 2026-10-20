@@ -349,6 +349,7 @@ class VectorTargetJob(TargetJob):
         Returns the keys to list, or None when the target is refused
         (``outcome.message`` says why); a disjoint keeps the complement of the keys.
         """
+        from ....config.config import ENV_VARS
         from ...backends.ogr.filter_executor import _remote_message
         from ..remote_materializer import materialization_limits, materialize
         complement = 'disjoint' in methods
@@ -375,8 +376,9 @@ class VectorTargetJob(TargetJob):
                                             coverage)
             return matched
 
-        outcome = materialize(self._remote_target, geometry.boundingBox(), '', matches, materialization_limits(),
-                              self.feedback)
+        # The user's REMOTE_MATERIALIZATION budgets, as in the dock (they were the defaults).
+        outcome = materialize(self._remote_target, geometry.boundingBox(), '', matches,
+                              materialization_limits(ENV_VARS), self.feedback)
         self._remote_target = None  # the snapshot holds a feature source of the main thread's layer
         if not outcome.complete:
             if outcome.reason not in ('feature_limit', 'timeout'):

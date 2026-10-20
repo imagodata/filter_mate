@@ -104,15 +104,16 @@ def test_no_task_is_idle_for_both(dock_task):
 def test_server_filter_starts_are_the_only_tolerant_callers():
     """Both server filter starts (worker transfer and main-thread setter) run in the dock's finished()."""
     tolerant, strict = [], []
-    for path in sorted(_ROOT.rglob("*.py")):
-        relative = path.relative_to(_ROOT)
-        if relative.parts[0] in ("tests", "scripts", "website", "docs", ".claude") or "worktrees" in relative.parts:
-            continue
+    sources = sorted(_ROOT.glob("*.py"))
+    for folder in ("adapters", "core", "infrastructure", "ui", "filtermate_api"):
+        sources += sorted((_ROOT / folder).rglob("*.py"))
+    for path in sources:
+        relative = path.relative_to(_ROOT).as_posix()
         for node in ast.walk(ast.parse(path.read_text(encoding="utf-8"))):
             if isinstance(node, ast.Call) and getattr(node.func, "id", getattr(node.func, "attr", "")) \
                     == "_background_tasks_running":
                 allowed = any(keyword.arg == "allow_finishing" and getattr(keyword.value, "value", None) is True
                               for keyword in node.keywords)
-                (tolerant if allowed else strict).append((str(relative), node.lineno))
+                (tolerant if allowed else strict).append((relative, node.lineno))
     assert [name for name, _ in tolerant] == ["adapters/qgis/server_subset_job.py"] * 2
     assert all(name == "adapters/public_api/operations.py" for name, _ in strict), strict

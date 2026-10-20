@@ -133,9 +133,14 @@ class RemoteVectorSourceJob(VectorSourceJob):
 
     def __init__(self, layer, selected_only: bool = True) -> None:
         """Main thread: the refusals that need no read, and a snapshot the task reads (nothing fetched)."""
+        from ....config.config import ENV_VARS
         from ...backends.ogr.filter_executor import _remote_message
-        from ..remote_materializer import _snapshot, is_partial_source, supports_materialization
+        from ..remote_materializer import (
+            _snapshot, is_partial_source, materialization_limits, supports_materialization,
+        )
         super().__init__(layer, ())
+        if not layer.isValid():  # its provider is gone (service down when the project opened)
+            raise ValueError(_remote_message('read_error'))
         if not supports_materialization(layer):
             raise ValueError(_remote_message('unverified_filter'))
         # The selected features, as for a local source; else its filtered features.
@@ -145,14 +150,15 @@ class RemoteVectorSourceJob(VectorSourceJob):
         if is_partial_source(layer):
             raise ValueError(_remote_message('incomplete_source'))
         self._snapshot = _snapshot(layer)
+        self._limits = materialization_limits(ENV_VARS)  # the dock's budgets (APP.OPTIONS.REMOTE_MATERIALIZATION)
 
     def _raw_geometry(self, is_canceled) -> QgsGeometry:
         from types import SimpleNamespace
         from qgis.core import QgsFeatureRequest
         from ...backends.ogr.filter_executor import _remote_message
-        from ..remote_materializer import bounded_source_layer, materialization_limits, read_bounded_features
+        from ..remote_materializer import bounded_source_layer, read_bounded_features
         snapshot, self._snapshot = self._snapshot, None
-        limits = materialization_limits()
+        limits = self._limits
         request = QgsFeatureRequest()
         if self._fids:
             request.setFilterFids(self._fids)

@@ -466,6 +466,9 @@ def cross_filter(source, targets: Sequence, predicates: Sequence[str] = ("Inters
         coverage_min: Minimum share (%) of a polygon target inside the source geometry.
         operator: Combination with each target's previous filter, None to replace it.
         selected_only: Vector source: use the selected features (all when none is selected).
+            A web service source (WFS, OGC API, ArcGIS) must be selected or filtered:
+            it is never read whole; its rows are read within the remote budgets in the
+            worker, and an incomplete copy is refused.
         raster_selection: Raster source: :class:`RasterSelection` of the pixels kept (required).
         point_cloud_criteria: Point cloud source: :class:`PointCloudFilterCriteria` or an
             expression string applied to the source first; None = its current points.

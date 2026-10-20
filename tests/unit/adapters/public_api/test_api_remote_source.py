@@ -39,6 +39,7 @@ def _load():
 
 operations, source_jobs = _load()
 LayerKind = importlib.import_module(f"{_PKG}.core.domain.layer_kind").LayerKind
+config = importlib.import_module(f"{_PKG}.config.config")
 
 
 class _Geometry:
@@ -89,6 +90,9 @@ class _Layer:
     def subsetString(self):
         return self._subset
 
+    def isValid(self):
+        return True
+
     def selectedFeatureCount(self):
         return len(self._selected)
 
@@ -111,7 +115,7 @@ class _Remote:
         module._snapshot = lambda layer: SimpleNamespace(source="feature source", uri=layer.source(), provider="wfs")
         module.is_partial_source = lambda layer: layer.id() in self.partial
         module.supports_materialization = lambda layer: self.supported
-        module.materialization_limits = lambda params=None: "limits"
+        module.materialization_limits = lambda params=None: ("limits", params)
         module.bounded_source_layer = lambda snapshot, limits: "bounded clone"
         module.read_bounded_features = self.read
         return module
@@ -183,7 +187,9 @@ def test_filtered_source_is_read_bounded_in_the_task(remote):
     job = _source_job(layer)
     assert isinstance(job, source_jobs.RemoteVectorSourceJob) and not remote.reads
     geometry = _compute(job)
-    assert remote.reads == [("bounded clone", None, "limits", "wfs")]  # the filtered rows, capped by the provider
+    # The filtered rows, capped by the provider, within the user's budgets (as the dock).
+    assert remote.reads == [("bounded clone", None, ("limits", config.ENV_VARS), "wfs")]
+    assert remote.reads[0][2][1] is config.ENV_VARS
     assert geometry.name == "g1+g2+g3" and not job.message
     assert job.details["features"] == 3 and job._snapshot is None
 
@@ -192,7 +198,7 @@ def test_selected_features_are_read_by_id_from_the_snapshot(remote):
     remote.rows = [4, 9]
     job = _source_job(_Layer(subset='"code_dep" = \'31\'', selected=(4, 9)))
     assert _compute(job).name == "g4+g9"
-    assert remote.reads == [("feature source", [4, 9], "limits", "wfs")]
+    assert remote.reads == [("feature source", [4, 9], ("limits", config.ENV_VARS), "wfs")]
 
 
 def test_selection_ignored_when_not_selected_only(remote):
@@ -237,6 +243,15 @@ def test_a_partial_source_is_refused_on_the_main_thread(remote):
     remote.partial.add("communes")
     with pytest.raises(ValueError, match="dock: incomplete_source"):
         _source_job(_Layer(subset="x"))
+    assert not remote.reads
+
+
+def test_an_invalid_service_layer_is_refused_as_a_read_error(remote):
+    """Review: its missing provider raised AttributeError out of cross_filter (only ValueError is reported)."""
+    layer = _Layer(subset="x")
+    layer.isValid = lambda: False
+    with pytest.raises(ValueError, match="dock: read_error"):
+        _source_job(layer)
     assert not remote.reads
 
 
