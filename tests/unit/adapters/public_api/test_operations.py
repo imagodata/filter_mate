@@ -139,6 +139,18 @@ class TestDockTasksDetected:
         tasks.append(_Task("Rendering"))
         assert operations.busy_reason() == ""
 
+    @pytest.mark.parametrize("status, busy", [(1, True), (2, True), (3, False), (4, False)])
+    def test_a_finishing_task_applies_its_own_filters(self, tasks, monkeypatch, status, busy):
+        # QGIS lists a task in activeTasks() while its finished() runs on the
+        # main thread: the dock then applies the server subsets of that very
+        # task, which a busy guard must not refuse (2026-10-20).
+        monkeypatch.setattr(sys.modules["qgis.core"], "QgsTask", types.SimpleNamespace(
+            TaskStatus=types.SimpleNamespace(Complete=3, Terminated=4)), raising=False)
+        task = type("FilterEngineTask", (_Task,), {"status": lambda self: status})("Filtering data")
+        tasks.append(task)
+        assert operations._background_tasks_running() is busy
+        assert (operations.busy_reason() == operations.BACKGROUND_BUSY) is busy
+
 
 # ---------------------------------------------------------------------------
 # Stand-ins: signals, feedback, layers, project, cross filter task

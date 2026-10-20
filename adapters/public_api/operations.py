@@ -183,7 +183,17 @@ def _background_tasks_running() -> bool:
         tasks = list(QgsApplication.taskManager().activeTasks())
     except Exception:
         return False
-    return any(type(task).__name__ in _CONFLICTING_TASKS for task in tasks)
+
+    def finishing(task):
+        # QGIS still lists a task while its finished() runs on the main
+        # thread, where the dock applies that task's own (server) subsets.
+        try:
+            from qgis.core import QgsTask
+            return task.status() in (QgsTask.TaskStatus.Complete, QgsTask.TaskStatus.Terminated)
+        except Exception:
+            return False
+
+    return any(type(task).__name__ in _CONFLICTING_TASKS and not finishing(task) for task in tasks)
 
 
 def busy_reason() -> str:
