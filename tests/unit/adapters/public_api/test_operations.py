@@ -908,7 +908,7 @@ class TestGuiReentry:
         running = next(node for node in tree.body if isinstance(node, ast.FunctionDef)
                        and node.name == "_api_operation_running")
         warnings = MagicMock()
-        namespace = {"__package__": _PKG, "sys": sys, "logger": MagicMock(),
+        namespace = {"__package__": _PKG, "__name__": _PKG + ".filter_mate_app", "sys": sys, "logger": MagicMock(),
                      "iface": types.SimpleNamespace(messageBar=lambda: warnings),
                      "QCoreApplication": types.SimpleNamespace(translate=lambda context, text: text)}
         exec(compile(ast.Module(body=[running, function], type_ignores=[]), str(_ROOT / "filter_mate_app.py"), "exec"),

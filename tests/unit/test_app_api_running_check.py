@@ -69,13 +69,19 @@ class TestApiOperationRunning:
     def test_task_guards_never_import_the_api_module(self):
         """manage_task and _execute_filter_task (the Filter click) ask the helper, never the module."""
         tree = _tree()
+        helper = next(node for node in tree.body
+                      if isinstance(node, ast.FunctionDef) and node.name == "_api_operation_running")
+        inside_helper = {id(node) for node in ast.walk(helper)}
         for node in ast.walk(tree):
-            if isinstance(node, ast.ImportFrom):
-                imported = (node.module or "") + "." + ".".join(alias.name for alias in node.names)
-                assert "public_api.operations" not in imported, ast.unparse(node)
+            if isinstance(node, (ast.Import, ast.ImportFrom)):
+                imported = (getattr(node, "module", None) or "") + "." + ".".join(alias.name for alias in node.names)
+                assert "operations" not in imported.split(".") or "public_api" not in imported, ast.unparse(node)
+            elif isinstance(node, ast.Constant) and isinstance(node.value, str) and id(node) not in inside_helper:
+                assert "public_api.operations" not in node.value, node.value  # importlib / __import__ by name
         cls = next(node for node in tree.body if isinstance(node, ast.ClassDef) and node.name == "FilterMateApp")
         for name in ("manage_task", "_execute_filter_task"):
             method = next(node for node in cls.body if isinstance(node, ast.FunctionDef) and node.name == name)
-            calls = {call.func.id for call in ast.walk(method)
-                     if isinstance(call, ast.Call) and isinstance(call.func, ast.Name)}
-            assert "_api_operation_running" in calls, name
+            gates = [node for node in ast.walk(method) if isinstance(node, ast.If)
+                     and any(isinstance(call, ast.Call) and getattr(call.func, "id", None) == "_api_operation_running"
+                             for call in ast.walk(node.test))]
+            assert gates and all(isinstance(node.body[-1], ast.Return) for node in gates), name

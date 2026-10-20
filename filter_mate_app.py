@@ -193,11 +193,12 @@ CANVAS_FREEZE_WATCHDOG_MS = 600000
 def _api_operation_running():
     """Whether a FilterMate API operation (adapters.public_api.operations) is running.
 
-    Only the API loads that module: before, no operation can run. Importing it
-    here compiled about 1 100 lines on the GUI thread at the first Filter click
-    (2026-10-20: up to seconds on a loaded host).
+    An operation runs only from that module once loaded: while it is not, none
+    runs. Importing it here compiled about 1 100 lines on the GUI thread at the
+    first Filter click (2026-10-20: up to seconds on a loaded host).
     """
-    operations = sys.modules.get(__package__ + '.adapters.public_api.operations')
+    package = __name__.rpartition('.')[0]
+    operations = sys.modules.get(package + '.adapters.public_api.operations')
     return bool(getattr(operations, '_RUNNING', None))
 
 
