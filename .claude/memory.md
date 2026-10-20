@@ -1,67 +1,58 @@
-## [2026-10-19] Stream lot C: cancellable service UI reads
-- Remote reads use `adapters/qgis/async_query.py`: independent layer feature sources, request feedback,
-  main-thread delivery and generation guards. Local cheap reads retain their synchronous paths.
-- Bind query invalidation to every participating layer, including union-zoom targets, and retain
-  invalidation for completed extent caches. A source/subset fingerprint alone cannot detect reloads.
-- Treat pending search text and checkbox revisions separately from the last completed page; late
-  population/recovery must not overwrite newer user input. Wait for full-list loading before Select All.
-- A copied expression context can still hold a live layer: remote worker expressions only use
-  feature-value/geometry functions from an allowlist and no context variables. Unsafe expressions
-  are refused explicitly; do not move arbitrary project expressions onto a worker.
-- Remote distinct values use a bounded, feedback-enabled feature iterator because `uniqueValues`
-  has no feedback parameter. Scan/time budgets announce partial lists; unknown counts stay large.
-- Python feedback cannot guarantee immediate interruption of a blocked WFS fetch. Requests carry
-  a 30-second provider timeout, or 120 seconds for WFS client-side expression scans (where supported).
-  Slow EOF fails explicitly rather than returning
-  potentially partial extents. A slow matching feature is valid: WFS can filter requests client-side.
-  Never close a worker iterator from the GUI thread to force cancellation.
-- Remote empty/pending controller results must never enter the legacy synchronous feature fallback.
-  A filter click can await its selection read; any newer click invalidates its deferred launch.
-- `tests/qgis_headless/check_stream_ui_async.py` uses an offline OGC API HTTP fixture and an optional
-  Geoplateforme WFS. Observe the typed network signal and `originatingThreadId()`: its propagation
-  to the main manager does not mean the request originated on the GUI thread. Calibrate the observer.
-
 # Project Memory
 _Auto-maintained by project agent_
 
-## [2026-10-19] Stream sources, lot B: bounded spatial reads and materialization
-- WFS `filterRect` alone does not guarantee a server BBOX: by default the provider can fill its cache from the entire service. A worker-owned URI copy must set `restrictToRequestBBOX=1`; impose `maxNumFeatures=max_features+1` as well as the feature-request limit.
-- `adapters/qgis/remote_materializer.py` exposes `materialize(layer, rect, server_expression, local_expression, limits, feedback)` and `RemoteMaterializationTask`. `core/domain/materialization.py` owns the pure budgets/outcome contract. No scratch layer is added to the project and no file is written.
-- Exact spatial keys come from the first bounded read. Only the request envelope is transformed to the target CRS; target geometries are transformed into the original source CRS for the exact predicate, matching OGR. Do not recover keys with a second WFS request by QGIS feature ids. Source copies require selected ids or an existing subset; incomplete sources are refused because missing source geometries change exact union predicates.
-- Keep raw bounded source features in `task['_bounded_remote_source_features']`, before reprojection/centroids. The WKT callback temporarily receives those raw features and restores `task['features']` in finally: never permanently replace the original selection features or reuse already projected coordinates for the WKT transform.
-- Lot A integration: `materialize_translation` consumes FULL/PARTIAL/NONE and evaluates the local residual on the bounded copy. `prepare_server_subset(..., rect=...)` offers this worker-only fallback, then validates the resulting key list as FULL; partial copies are refused by that string-only API. Without an explicit useful extent the previous refusal remains. OAPIF spatial key application uses the lot A validator by default (an explicit `_remote_subset_validator` may provide stronger server-specific evidence); no FULL verdict means no successful filter. OAPIF inherited subsets are evaluated locally over raw BBOX rows so client filtering cannot hide a row cap; a source subset without a useful BBOX or captured/selected features is refused if server completeness is unverified.
-- A feature or time limit yields an explicitly partial result; cancellation, transport errors and more than 500 keys carry no usable result. Disjoint uses the bounded intersecting key complement only after a complete read. Mixed Disjoint with other predicates is refused for a remote target.
-- Qt6 can report an HTTP failure as an exhausted, valid feature iterator. Observe the actual reply's error signal using a temporary NAM reply preprocessor (QGIS >= 3.26); remove it in finally. Before QGIS 3.26 (including older backports exposing the method), service materialization refuses explicitly before its provider read: QGIS 3.22 can label an HTTP-200 ExceptionReport as a complete empty result. Do not use its requestCreated fallback: downloader NAM destruction cannot be observed safely from task cleanup. Local operations remain supported. Capture the main NAM before scheduling tasks.
-- [2026-10-20] Before QGIS 3.36.0 the `setReplyPreprocessor` / `setRequestPreprocessor` (and `QgsPathResolver.setPathPreprocessor` / `setPathWriter`) bindings allocate the returned id string without the GIL (checked in the 3.34.15 sip files; 3.36.0 fixed the NAM ones): the registration itself segfaults under Python 3.12+ (QGIS 3.34.15 on Ubuntu 24.04, every 3.26-3.35 binding) and aborts under Python's allocator debug hooks (`PYTHONDEVMODE`, `PYTHONMALLOC=*debug`, debug CPython). `reply_preprocessor_is_safe` / `reply_preprocessor_available` gate every registration; such builds refuse service reads like QGIS < 3.26. A static unit test allows no other registration. CI image that reproduces it: `qgis/qgis:3.34.15-noble` (`release-3_34` / `final-3_34_*` are Ubuntu 22.04, Python 3.10).
-- Residual string expressions reuse lot C's `remote_expression_is_safe`: no project variables, eval, aggregate or cross-layer read escapes the copied feature context. Internal exact geometry predicates remain trusted callables.
-- Observe transport before provider construction/reload with `read_bounded_features(source_factory=...)`. OAPIF intentionally aborts HTTP-200 landing-page and `/conformance` discovery responses; ignore those metadata probes while keeping feature replies observed. Any service iterator with zero copied rows refuses as unverified (QGIS can swallow a protocol error); zero local matches after examining rows remain valid. FinishedHandler drops the raw feature tuple at normal task completion.
-- Defaults in `APP.OPTIONS.REMOTE_MATERIALIZATION`: `max_features=20000`, `timeout_seconds=90`. A malformed option keeps the bounded defaults. The time budget is cooperative: a provider that ignores feedback can finish its current blocking request, but its late result cannot be labelled complete.
-- Dedicated real-QGIS check: `tests/qgis_headless/check_stream_vector_spatial.py` (local HTTP WFS fixture, all union predicates, buffers, reprojection, cancellation, partial/overflow/error refusals); public IGN checks are opt-in with `FM_STREAM_PUBLIC=1`.
-
-## [2026-10-19] Stream lot E — vector tile targets and remote point clouds
-- Vector tiles are target-only (`LayerKind.VECTOR_TILE`, `is_filter_target`); do not include them in `is_coverage`, which activates source panels. Route their target ids to the cross filter service.
-- Tile snapshots serialize the renderer and labeling XML only (never custom properties), including a numeric-key property backup for unnamed Mapbox properties which QGIS native XML drops. Even an unfiltered tile keeps that backup in its compressed project custom property (plain 6 MB XML/JSON makes QGIS project writing stall); the save hook must return before serializing a tile renderer to avoid re-entry. They keep a separate original style / added expression. The project persists both; portable favorites omit tile connection URIs. Strip the exact added rule envelope when rebasing manual color/label edits, so Unfilter preserves edits without making the filter permanent. Favorites replay the expression on the current style and enter history. Attribute Undo / Redo / Unfilter live in the target combo context menu, leaving the source layer current.
-- MVT features reach renderer expressions in the **map CRS**. Transform the stored selection to `@map_crs` at render time. Refuse >2,000 vertices / 1 MB across all style rules rather than approximate silently.
-- `pdal_cli.read_stages` bounds EPT / COPC on the reader; EPT polygon support is probed once on the worker, falling back to exact `filters.crop`. HTTP inputs require an extent and a known PDAL >=2.4. Never log the input URI from a PDAL error.
-- A remote source copy is opened on the worker and requires a Zone geometry. HAG takes that same zone. A bounded HAG snapshot carries `bounded_enrichment`: Unfilter restores the full pristine source (not the cropped enriched cache); only AND / AND NOT can narrow a bounded HAG. Keep this flag when taking snapshots or deriving another crop.
-## [2026-10-19] Stream lot A: attribute dialects and asynchronous provider installation
-- Reuse `SourceCapability.requires_server_translation`; local providers keep their existing paths.
-- `core/filter/server_dialect.py` is pure: `ServerTranslation` has status, server expression, local residual, reason and provider subset. Split AND only; never partially apply an OR/NOT. `adapters/qgis/server_filter_translation.py` parses the real QGIS AST and validates WFS with `QgsOgcUtils`; the provider emits its negotiated OGC/FES version.
-- Until the bounded materializer is connected, PARTIAL/NONE raise a clear refusal before mutation or feature-ID fallback. OAPIF's complete translation verdict/queryables are not exposed in Python: refuse instead of assuming that `setSubsetString(True)` means CQL2 pushdown. SQL Server/ArcGIS text collation and WFS nullable negation are similarly refused when equivalence is unproven.
-- ArcGIS `setSubsetString()` synchronously downloads object IDs and returns True even for an HTTP-200 JSON error. `server_subset_job.py` therefore creates providers in a task, validates the ArcGIS JSON count response in that worker, then uses `readLayerXml(..., preloadedProvider)` on the main thread (available since QGIS 3.32). No live project layer is touched by a worker. A responsive event loop preserves existing bool callers' completed-result contract.
-- Worker creation requires ParallelCreateProvider, or the explicitly tested WFS/ArcGIS lifecycle on QGIS 3.44/4.2. Current native MSSQL/HANA metadata does not declare it; refuse application rather than assume database connection thread safety. QGIS 3.22 parses/translates but explicitly refuses asynchronous application. The 30-second deadline includes queue time; cancellation discards late results, although provider I/O may continue until its own timeout.
-- Preserve refresh/notify settings and local joins, clear stale feature selections, and reject auxiliary storage/remote joins. History commits only after a successful source restore; individual target failures remain explicit.
-- Serialize vector state with `writeXml`, not `writeLayerXml`: the latter can fetch a remote extent. Prepare both candidate and original providers for rollback. Cancel/timeout/deletion/source change must discard the prepared result; once local installation starts it reports its final result. Keep credentials in memory only; do not log provider exceptions/URIs.
-- Validate queued input without replacing it with native SQL. Re-parsing SQL as QGIS syntax corrupts backslashes. Undo/redo replays exact provider-accepted snapshots through `restore_server_subset`; user expressions/favorites/API never use this bypass.
-- Public WFS fields are now `nom_officiel`, `code_insee_du_departement`; the exact name L'Isle-Jourdain matches two communes. Use `code_insee = '32160'` to verify one commune. The old `$area` subset caused an unfiltered request; `left(...)` was sent as an unproven OGC function.
-- Lot B must consume the translation contract when it integrates bounded local residual evaluation. Do not treat a partial key list as a complete result. Lot F owns translations; new translation source strings are listed in the PR.
-## [2026-10-19] Streaming rasters — lot D
-- Reuse source_capability / capability_for_layer: WCS contains raw values, WMS/WMTS/XYZ/MapServer contains rendered colors. Raster class membership alone never grants numeric analysis or target filtering.
-- Remote COG, WCS and postgresraster UI reads use bounded session TIFF captures made by worker-owned layers. Histograms and terrain/expression surfaces run in cancellable tasks; obsolete callbacks cannot repopulate a different layer/source. UI sample files remain protected while tasks borrow them.
-- Rendered services remain dock sources for color pipette cross filtering only: capture the visible extent, original layer CRS, detached renderer and bounded RGB grid. RasterSourceJob accepts analysis_source for geometry without changing the service source. Colors depend on style and scale; never treat original rendered bands as measured values.
-- WCS/raw remote source and target materialization uses the derived-session cache, preserves pristine source through snapshots and enforces pixel limits before export. Resampled grids are disclosed in source notes/API target reports. WCS is still excluded from the PDAL HAG DTM picker until that separate path can materialize it. No user data folders or QGIS system settings are changed.
-- Synchronous automation waits through a Qt event loop while a dedicated worker computes CrossFilterTask; result application and feedback stay on main. Register the task in the service while borrowed so unload can cancel it. GUI dispatch refuses API reentry, and Processing reports resampled source/target grids. Never run remote materialization inline from Processing/API/REST/MCP. Rendered cross-filter tasks also borrow their capture until completion, including after controller teardown.
-
+## [2026-10-20] Sources en flux (5.1) : lots A à F → PR #190 – #206, plan `docs/internal/plans/V5_STREAMING/`
+Décisions et pièges QGIS (le détail de chaque lot est dans sa PR) :
+- **Classement** : `core/domain/source_capability.py` (pur) + `adapters/qgis/source_capability_probe.py`. Une classe de
+  couche ne suffit jamais : WCS = valeurs, WMS / WMTS / XYZ / MapServer = couleurs rendues (pipette couleur seule,
+  jamais cible). Les règles propres aux services web (clé stable, 500 clés, liste blanche d'expressions) ne valent que
+  pour `is_remote_service` ; MSSQL / Oracle / fichiers distants gardent les listes de clés de 5.0, en asynchrone (#198).
+- **Filtres attributaires** : `server_dialect.py` (pur, FULL / PARTIAL / NONE, AND seulement) +
+  `server_filter_translation.py` (vrai AST, `QgsOgcUtils` pour WFS). OGC API refusé : Python n'expose pas de verdict CQL2
+  complet, `setSubsetString` True ne prouve rien. ArcGIS `setSubsetString` télécharge en synchrone et renvoie True sur
+  une erreur JSON HTTP 200 → provider préparé en tâche puis `readLayerXml(..., preloadedProvider)` (≥ 3.32).
+  `server_transfer_policy.transfer_mode` : async WFS / ArcGIS dès 3.32 sans borne haute ; WFS synchrone 3.24–3.31 ;
+  WFS refusé en 3.22 (son setter corrompt la mémoire si un rendu télécharge la couche : 12 plantages / 27). Délai
+  `APP.OPTIONS.SERVER_FILTER` : 60 s WFS / OGC API, 30 s ailleurs (#206). Sérialiser avec `writeXml`, pas
+  `writeLayerXml` (qui peut lire l'emprise distante). Annuler / rétablir rejoue l'instantané exact accepté par le provider.
+- **Filtres spatiaux / matérialisation** (`remote_materializer.py`) : `filterRect` seul ne garantit PAS un BBOX serveur
+  WFS (le provider peut remplir son cache avec tout le service) → copie d'URI avec `restrictToRequestBBOX=1` et
+  `maxNumFeatures=max+1`. Prédicat exact en local dans le SCR de la source. Plafond ou délai = résultat partiel, jamais
+  complet ; zéro ligne lue sur un service = refus (Qt6 peut avaler une erreur de protocole). AND NOT sur un résultat
+  partiel avec un filtre précédent = refus (dock et API, #200 / #206). L'API publique passe par ce même chemin (#200),
+  y compris pour une source (sélectionnée ou filtrée, lue bornée en tâche, #206).
+- **Piège Python 3.12** : avant QGIS 3.36, `setReplyPreprocessor` / `setRequestPreprocessor` (et
+  `QgsPathResolver.setPathPreprocessor` / `setPathWriter`) allouent sans le GIL → segfault à l'enregistrement sous
+  Python ≥ 3.12 (QGIS 3.34.15 noble) et abort avec `PYTHONDEVMODE`. `reply_preprocessor_available()` garde chaque
+  enregistrement ; ces builds refusent les lectures de service (#197). Image CI qui le reproduit : `qgis/qgis:3.34.15-noble`
+  (`release-3_34` est 3.34.5 / Python 3.10).
+- **Nettoyage** : dans un `finally` Qt, chaque étape (déconnexion de signal, fermeture d'itérateur, retrait
+  d'observateur) doit être indépendante : QGIS peut avoir détruit le provider du clone, et une exception dans `finally`
+  remplace le résultat (#205).
+- **Gardes de tâches** : `activeTasks()` perd une tâche Complete dès qu'une autre tâche est ajoutée alors que son
+  `finished()` tourne encore ; lire `tasks()`. `busy_reason()` est strict, seul le démarrage d'un filtre serveur tolère
+  une tâche FilterMate dans son `finished()` (#199, #206). Restent sur `activeTasks()` : `cross_filter_service`,
+  `filter_task._drop_deferred_views`, `filter_mate_app._cancel_conflicting_tasks`.
+- **Exploration asynchrone** (`async_query.py`) : `QuerySlot` par widget, jeton de génération, invalidation liée à toutes
+  les couches concernées. `uniqueValues` n'a pas de feedback → itérateur borné. Ne jamais fermer un itérateur de worker
+  depuis le thread GUI. Une expression évaluée en worker passe `remote_expression_is_safe` (pas de variables de projet,
+  `represent_value` ni agrégats ; un champ virtuel n'est refusé que s'il est réellement évalué).
+- **Rasters** : captures bornées dans le cache de session faites par des couches du worker ; ouvrir une source ou une
+  cible WCS en provider seul (`_ProviderLayer.open`), sinon `QgsRasterLayer` calcule des statistiques sur toute la
+  couverture. Exécuter les tâches de l'API dans un vrai `QThread` (le provider WCS utilise des minuteurs Qt).
+- **Tuiles vectorielles** : cibles seulement (`LayerKind.VECTOR_TILE`, hors `is_coverage`). Les entités MVT arrivent dans
+  le SCR de la carte ; refuser > 2 000 sommets / 1 Mo d'expressions. Sauvegarde compressée du style (QGIS perd les
+  propriétés Mapbox sans nom).
+- **Nuages distants** : `pdal_cli.read_stages` borne EPT / COPC au lecteur ; PDAL ≥ 2.4 et une emprise utile exigés ;
+  ne jamais journaliser l'URI d'entrée.
+- **i18n** : après `pylupdate5`, lancer `i18n_processing_context.py` puis `i18n_runtime_contexts.py` (helpers `_tr`,
+  `self._tr`, alias à deux arguments, `dw.tr` → `FilterMateDockWidget`) ; ne jamais passer `self.tr` nu en paramètre
+  (pylupdate5 range alors l'appel suivant sous `self.self`) ; les libellés de prédicats restent en anglais (comparés comme
+  texte). Les 34 catalogues doivent rester un point fixe du pipeline.
+- **CI / tests headless** : `check_stream_*.py` sur fixtures HTTP locales dans toutes les images ; public via
+  `FM_STREAM_PUBLIC=1` (`check_stream_e2e.py`). Le contrôle du dock chronomètre le battement GUI (2 s) : une machine
+  saturée le fait échouer quel que soit le code (gels hôte de 9–10 s mesurés) → une seconde tentative en CI ; masquer
+  `/usr/bin/c++filt` sur l'image nightly (build de débogage). Le WCS de la Géoplateforme n'existe plus.
 
 ## [2026-10-16] Audit profond de la v5 → PR #114 – #118, #122, #148 – #150, CHANGELOG #154
 Décisions à connaître :

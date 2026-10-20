@@ -596,7 +596,7 @@
         <translation>PDAL blev ikke fundet: højden over en DTM kræver den eksekverbare fil pdal</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3148"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3151"/>
         <source>A FilterMate task is still running: wait for it to finish</source>
         <translation>En FilterMate-opgave kører stadig: vent, til den er færdig</translation>
     </message>
@@ -631,12 +631,12 @@
         <translation>Punktsky filtreret: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3253"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3261"/>
         <source>Filter not applied: {0}</source>
         <translation>Filter ikke anvendt: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3110"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3113"/>
         <source>canceled</source>
         <translation>annulleret</translation>
     </message>
@@ -646,77 +646,77 @@
         <translation>{0} mål filtreret</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2820"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2823"/>
         <source>{0} failed: {1}</source>
         <translation>{0} mislykkedes: {1}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2833"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2836"/>
         <source>FilterMate: filtering from '{0}'…</source>
         <translation>FilterMate: filtrerer ud fra '{0}'…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2930"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2933"/>
         <source>Changed since, left as is: {0}</source>
         <translation>Ændret siden, lades uændret: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2936"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2939"/>
         <source>{0} layer(s) restored</source>
         <translation>{0} lag gendannet</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2970"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2973"/>
         <source>&apos;{0}&apos; not exported: {1}</source>
         <translation>'{0}' ikke eksporteret: {1}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2984"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2987"/>
         <source>Exported: {0}</source>
         <translation>Eksporteret: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2986"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2989"/>
         <source>Export failed: {0}</source>
         <translation>Eksport mislykkedes: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2993"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2996"/>
         <source>Exporting {0} layer(s)…</source>
         <translation>Eksporterer {0} lag…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2999"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3002"/>
         <source>Export folder</source>
         <translation>Eksportmappe</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3081"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3084"/>
         <source>Raster / point cloud targets skipped: no source feature selected in EXPLORING</source>
         <translation>Raster-/punktskymål sprunget over: intet kildeobjekt valgt i EXPLORING</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3110"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3113"/>
         <source>Raster / point cloud targets not filtered: {0}</source>
         <translation>Raster-/punktskymål ikke filtreret: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3112"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3115"/>
         <source>{0} raster / point cloud target(s) filtered</source>
         <translation>{0} raster-/punktskymål filtreret</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3230"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3238"/>
         <source>Choose the DTM raster used for the height above ground</source>
         <translation>Vælg det DTM-raster, der bruges til højden over terræn</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3241"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3249"/>
         <source>Height above ground not computed: {0}</source>
         <translation>Højden over terræn blev ikke beregnet: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3262"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3270"/>
         <source>Computing the height above '{0}' with PDAL…</source>
         <translation>Beregner højden over '{0}' med PDAL…</translation>
     </message>
@@ -881,32 +881,32 @@
         <translation>{0} rastermål resamplet til den konfigurerede pixelgrænse</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2844"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2847"/>
         <source>color selection limited to the captured extent; colors depend on style and scale</source>
         <translation>farvevalg begrænset til den registrerede udstrækning; farver afhænger af typografi og målestok</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2846"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2849"/>
         <source>raster source resampled to {0} cells within the pixel limit</source>
         <translation>rasterkilde resamplet til {0} celler inden for pixelgrænsen</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2848"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2851"/>
         <source>raster selection read every {0} pixels: over the pixel limit of the settings</source>
         <translation>rastermarkering læst for hver {0}. pixel: over pixelgrænsen i indstillingerne</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2851"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2854"/>
         <source>dense raster selection smoothed to keep its outline light</source>
         <translation>tæt rastermarkering udglattet for at holde konturen let</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2898"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2901"/>
         <source>{0} left empty, nothing matches the selection: {1}</source>
         <translation>{0} tømt, intet svarer til markeringen: {1}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2882"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2885"/>
         <source>failed</source>
         <translation>mislykkedes</translation>
     </message>
@@ -980,7 +980,7 @@
 <context>
     <name>ExploringController</name>
     <message>
-        <location filename="../ui/controllers/exploring_controller.py" line="2239"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="2481"/>
         <source>{0} features selected, more than the {1} a web service can be sent: narrow the selection or use an attribute filter.</source>
         <translation>{0} objekter valgt, flere end de {1}, der kan sendes til en webtjeneste: indsnævr markeringen, eller brug et attributfilter.</translation>
     </message>
@@ -2141,39 +2141,39 @@ Genstart QGIS for at anvende ændringerne.</translation>
         <translation>Fejl ved indlaesning af plugin: {0}. Kontroller QGIS Python-konsollen for detaljer.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7357"/>
+        <location filename="../filter_mate_dockwidget.py" line="7416"/>
         <source>Current layer: {0}</source>
         <translation>Aktuelt lag: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7359"/>
+        <location filename="../filter_mate_dockwidget.py" line="7418"/>
         <source>No layer selected</source>
         <translation>Intet lag valgt</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7369"/>
+        <location filename="../filter_mate_dockwidget.py" line="7428"/>
         <source>Selected layers:
 {0}</source>
         <translation>Valgte lag:
 {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7369"/>
+        <location filename="../filter_mate_dockwidget.py" line="7428"/>
         <source>No layers selected</source>
         <translation>Ingen lag valgt</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7389"/>
+        <location filename="../filter_mate_dockwidget.py" line="7448"/>
         <source>No expression defined</source>
         <translation>Intet udtryk defineret</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7401"/>
+        <location filename="../filter_mate_dockwidget.py" line="7460"/>
         <source>Display expression: {0}</source>
         <translation>Visningsudtryk: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7416"/>
+        <location filename="../filter_mate_dockwidget.py" line="7477"/>
         <source>Feature ID: {0}
 First attribute: {1}</source>
         <translation>Objekt-ID: {0}
@@ -2200,125 +2200,135 @@ Foerste attribut: {1}</translation>
         <translation>Åbn brugervejledningen</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/async_query.py" line="207"/>
+        <location filename="../adapters/qgis/async_query.py" line="409"/>
         <source>This expression cannot be evaluated safely for a service.</source>
         <translation>Dette udtryk kan ikke evalueres sikkert for en tjeneste.</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/async_query.py" line="209"/>
+        <location filename="../adapters/qgis/async_query.py" line="496"/>
         <source>The service could not be read. Please retry.</source>
         <translation>Tjenesten kunne ikke læses. Prøv igen.</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/async_query.py" line="210"/>
+        <location filename="../adapters/qgis/async_query.py" line="496"/>
         <source>Read failed</source>
         <translation>Læsning mislykkedes</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/async_query.py" line="270"/>
+        <location filename="../adapters/qgis/async_query.py" line="287"/>
         <source>Loading filtered extent…</source>
         <translation>Indlæser filtreret udstrækning…</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/async_query.py" line="404"/>
+        <source>The expression is not valid for this layer. Check its syntax and field names.</source>
+        <translation>Udtrykket er ikke gyldigt for dette lag. Kontroller dets syntaks og feltnavne.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/async_query.py" line="407"/>
+        <source>A virtual field of this layer cannot be evaluated safely for a service.</source>
+        <translation>Et virtuelt felt i dette lag kan ikke evalueres sikkert for en tjeneste.</translation>
     </message>
 </context>
 <context>
     <name>FilterMateApp</name>
     <message>
-        <location filename="../filter_mate_app.py" line="306"/>
+        <location filename="../filter_mate_app.py" line="319"/>
         <source>PostgreSQL layers detected ({0}) but psycopg2 is not installed.</source>
         <translation>PostgreSQL-lag registreret ({0}), men psycopg2 er ikke installeret.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="406"/>
+        <location filename="../filter_mate_app.py" line="419"/>
         <source>Cleared {0} caches</source>
         <translation>{0} caches ryddet</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="912"/>
+        <location filename="../filter_mate_app.py" line="925"/>
         <source>Failed to create dockwidget: {0}</source>
         <translation>Kunne ikke oprette dockwidget: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="922"/>
+        <location filename="../filter_mate_app.py" line="935"/>
         <source>Failed to display dockwidget: {0}</source>
         <translation>Kunne ikke vise dockwidget: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1493"/>
+        <location filename="../filter_mate_app.py" line="1501"/>
         <source>Error executing {0}: {1}</source>
         <translation>Fejl ved udfoerelse af {0}: {1}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1505"/>
+        <location filename="../filter_mate_app.py" line="1513"/>
         <source>Plugin running in degraded mode (hexagonal services unavailable). Performance may be reduced.</source>
         <translation>Plugin koerer i nedsat tilstand (hexagonale services utilgaengelige). Ydeevne kan vaere reduceret.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1854"/>
+        <location filename="../filter_mate_app.py" line="1857"/>
         <source>FilterMate ERROR</source>
         <translation>FilterMate FEJL</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1854"/>
+        <location filename="../filter_mate_app.py" line="1857"/>
         <source>Cannot execute {0}: widget initialization failed.</source>
         <translation>Kan ikke udfoere {0}: widget-initialisering mislykkedes.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2635"/>
+        <location filename="../filter_mate_app.py" line="2638"/>
         <source>Cannot {0}: layer invalid or source not found.</source>
         <translation>Kan ikke {0}: lag ugyldigt eller kilde ikke fundet.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2789"/>
+        <location filename="../filter_mate_app.py" line="2792"/>
         <source>All filters cleared - </source>
         <translation>Alle filtre ryddet - </translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2790"/>
+        <location filename="../filter_mate_app.py" line="2793"/>
         <source>{0}{1} features visible in main layer</source>
         <translation>{0}{1} objekter synlige i hovedlag</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2802"/>
+        <location filename="../filter_mate_app.py" line="2805"/>
         <source>Error: result handler missing</source>
         <translation>Fejl: resultatbehandler mangler</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2819"/>
+        <location filename="../filter_mate_app.py" line="2822"/>
         <source>Error during filtering: {0}</source>
         <translation>Fejl under filtrering: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2943"/>
+        <location filename="../filter_mate_app.py" line="2946"/>
         <source>Recovered {0} orphan favorite(s): {1}</source>
         <translation>{0} forladt(e) favorit(ter) gendannet: {1}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="3109"/>
+        <location filename="../filter_mate_app.py" line="3112"/>
         <source>Layer loading failed - click to retry</source>
         <translation>Indlaesning af lag mislykkedes - klik for at proeve igen</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="3161"/>
+        <location filename="../filter_mate_app.py" line="3164"/>
         <source>{0} layer(s) loaded successfully</source>
         <translation>{0} lag indlaest</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2092"/>
+        <location filename="../filter_mate_app.py" line="2095"/>
         <source>filter</source>
         <translation>filter</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2094"/>
+        <location filename="../filter_mate_app.py" line="2097"/>
         <source>unfilter</source>
         <translation>unfilter</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2097"/>
+        <location filename="../filter_mate_app.py" line="2100"/>
         <source>FilterMate – Edit Mode Detected</source>
         <translation>FilterMate – Edit Mode Detected</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2099"/>
+        <location filename="../filter_mate_app.py" line="2102"/>
         <source>The following layer(s) are currently in edit mode:
 {0}
 
@@ -2331,102 +2341,102 @@ QGIS cannot apply filters while a layer is being edited.
 What would you like to do?</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2109"/>
+        <location filename="../filter_mate_app.py" line="2112"/>
         <source>Save Changes &amp; {0}</source>
         <translation>Save Changes &amp; {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2116"/>
+        <location filename="../filter_mate_app.py" line="2119"/>
         <source>Discard Changes &amp; {0}</source>
         <translation>Discard Changes &amp; {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2123"/>
+        <location filename="../filter_mate_app.py" line="2126"/>
         <source>Cancel</source>
         <translation>Annuller</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2147"/>
+        <location filename="../filter_mate_app.py" line="2150"/>
         <source>Could not save changes for layer &quot;{0}&quot;. Operation cancelled.</source>
         <translation>Could not save changes for layer &quot;{0}&quot;. Operation cancelled.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1323"/>
+        <location filename="../filter_mate_app.py" line="1331"/>
         <source>Pick a layer in the EXPLORING tab before running &apos;{0}&apos;.</source>
         <translation>Vælg et lag i fanen EXPLORING, før '{0}' køres.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="839"/>
+        <location filename="../filter_mate_app.py" line="852"/>
         <source>{0} layer(s) stay filtered: {1}. Turn the option back on to unfilter them.</source>
         <translation>{0} lag forbliver filtreret: {1}. Slå indstillingen til igen for at fjerne filteret.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2621"/>
+        <location filename="../filter_mate_app.py" line="2624"/>
         <source>A server filter is being prepared. Wait for it to finish before starting another operation.</source>
         <translation>Et serverfilter forberedes. Vent, til det er færdigt, før du starter en anden handling.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1770"/>
+        <location filename="../filter_mate_app.py" line="1773"/>
         <source>A FilterMate API operation is running. Wait for it to finish.</source>
         <translation>En FilterMate API-handling kører. Vent, til den er færdig.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="445"/>
+        <location filename="../filter_mate_app.py" line="458"/>
         <source>Adding layers</source>
         <translation>Tilføjer lag</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="449"/>
+        <location filename="../filter_mate_app.py" line="462"/>
         <source>Existing project loaded</source>
         <translation>Eksisterende projekt indlæst</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="442"/>
+        <location filename="../filter_mate_app.py" line="455"/>
         <source>Exporting data</source>
         <translation>Eksporterer data</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="439"/>
+        <location filename="../filter_mate_app.py" line="452"/>
         <source>Filtering data</source>
         <translation>Filtrerer data</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="448"/>
+        <location filename="../filter_mate_app.py" line="461"/>
         <source>New project</source>
         <translation>Nyt projekt</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="444"/>
+        <location filename="../filter_mate_app.py" line="457"/>
         <source>Redo filter</source>
         <translation>Gentag filter</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="450"/>
+        <location filename="../filter_mate_app.py" line="463"/>
         <source>Reloading layers</source>
         <translation>Genindlæser lag</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="447"/>
+        <location filename="../filter_mate_app.py" line="460"/>
         <source>Removing all layers</source>
         <translation>Fjerner alle lag</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="446"/>
+        <location filename="../filter_mate_app.py" line="459"/>
         <source>Removing layers</source>
         <translation>Fjerner lag</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="441"/>
+        <location filename="../filter_mate_app.py" line="454"/>
         <source>Reseting data</source>
         <translation>Nulstiller data</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="443"/>
+        <location filename="../filter_mate_app.py" line="456"/>
         <source>Undo filter</source>
         <translation>Fortryd filter</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="440"/>
+        <location filename="../filter_mate_app.py" line="453"/>
         <source>Unfiltering data</source>
         <translation>Fjerner filter fra data</translation>
     </message>
@@ -2553,57 +2563,59 @@ Fjern alligevel?</translation>
         <translation>Lys tilstand</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="4102"/>
+        <location filename="../filter_mate_dockwidget.py" line="4116"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="884"/>
         <source>Selected features have no geometry.</source>
         <translation>Valgte objekter har ingen geometri.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="4121"/>
+        <location filename="../filter_mate_dockwidget.py" line="4135"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="885"/>
         <source>No feature selected. Select a feature from the dropdown list.</source>
         <translation>Intet objekt valgt. Vaelg et objekt fra rullelisten.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="5285"/>
+        <location filename="../filter_mate_dockwidget.py" line="5319"/>
         <source>The selected layer is invalid or its source cannot be found.</source>
         <translation>Det valgte lag er ugyldigt eller kilden kan ikke findes.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6080"/>
+        <location filename="../filter_mate_dockwidget.py" line="6114"/>
         <source>Negative buffer (erosion): shrinks polygons inward</source>
         <translation>Negativ buffer (erosion): formindsker polygoner indad</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6083"/>
+        <location filename="../filter_mate_dockwidget.py" line="6117"/>
         <source>Buffer value in meters (positive=expand, negative=shrink polygons)</source>
         <translation>Buffervaerdi i meter (positiv=udvidelse, negativ=formindskelse af polygoner)</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6585"/>
+        <location filename="../filter_mate_dockwidget.py" line="6619"/>
         <source>Plugin activated with {0} vector layer(s)</source>
         <translation>Plugin aktiveret med {0} vektorlag</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6684"/>
+        <location filename="../filter_mate_dockwidget.py" line="6718"/>
         <source>Could not reload plugin automatically.</source>
         <translation>Kunne ikke genindlaese plugin automatisk.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6689"/>
+        <location filename="../filter_mate_dockwidget.py" line="6723"/>
         <source>Error reloading plugin: {0}</source>
         <translation>Fejl ved genindlaesning af plugin: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6764"/>
+        <location filename="../filter_mate_dockwidget.py" line="6798"/>
         <source>Layer properties reset to defaults</source>
         <translation>Lagegenskaber nulstillet til standardvaerdier</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6765"/>
+        <location filename="../filter_mate_dockwidget.py" line="6799"/>
         <source>Error resetting layer properties: {}</source>
         <translation>Fejl ved nulstilling af lagegenskaber: {}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="895"/>
+        <location filename="../filter_mate_dockwidget.py" line="7062"/>
         <source>Filter</source>
         <translation>Filtrér</translation>
     </message>
@@ -2733,7 +2745,7 @@ Fjern alligevel?</translation>
         <translation>Panellayoutet kunne ikke anvendes; standardstørrelser bruges. Se detaljer i filtermate.log.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6856"/>
+        <location filename="../filter_mate_dockwidget.py" line="6890"/>
         <location filename="../ui/controllers/backend_controller.py" line="682"/>
         <source>Vector</source>
         <translation>Vektor</translation>
@@ -2764,91 +2776,92 @@ Fjern alligevel?</translation>
         <translation>Slet FilterMate-skema</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="4224"/>
+        <location filename="../filter_mate_dockwidget.py" line="4247"/>
         <source>Read failed</source>
         <translation>Læsning mislykkedes</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="4224"/>
+        <location filename="../filter_mate_dockwidget.py" line="4247"/>
         <source>The service could not be read. Please retry.</source>
         <translation>Tjenesten kunne ikke læses. Prøv igen.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="4566"/>
+        <location filename="../filter_mate_dockwidget.py" line="4589"/>
         <source>Loading filtered extent…</source>
         <translation>Indlæser filtreret udstrækning…</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="5150"/>
-        <location filename="../ui/controllers/exploring_controller.py" line="539"/>
-        <location filename="../ui/controllers/exploring_controller.py" line="3408"/>
+        <location filename="../filter_mate_dockwidget.py" line="5184"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="742"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="3658"/>
         <source>Loading selected values…</source>
         <translation>Indlæser valgte værdier…</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="5141"/>
-        <location filename="../ui/controllers/exploring_controller.py" line="502"/>
         <location filename="../ui/controllers/exploring_controller.py" line="603"/>
         <source>This expression cannot be evaluated safely for a service.</source>
-        <translation>Dette udtryk kan ikke evalueres sikkert for en tjeneste.</translation>
+        <translation type="obsolete">Dette udtryk kan ikke evalueres sikkert for en tjeneste.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/exploring_controller.py" line="2472"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="2715"/>
         <source>Error evaluating expression: {0}</source>
         <translation>Fejl ved evaluering af udtryk: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/exploring_controller.py" line="2471"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="2716"/>
         <source>Expression Evaluation</source>
         <translation>Evaluering af udtryk</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/exploring_controller.py" line="411"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="444"/>
         <source>Loading values…</source>
         <translation>Indlæser værdier…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/exploring_controller.py" line="646"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="846"/>
         <source>Loading zoom extent…</source>
         <translation>Indlæser zoomudstrækning…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/exploring_controller.py" line="633"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="835"/>
         <source>No feature with geometry matches the selection.</source>
         <translation>Intet objekt med geometri svarer til markeringen.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/exploring_controller.py" line="408"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="434"/>
         <source>Only a limited set of values is shown. Refine the search to find other values.</source>
         <translation>Kun et begrænset sæt værdier vises. Præciser søgningen for at finde andre værdier.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/exploring_controller.py" line="475"/>
-        <location filename="../ui/controllers/exploring_controller.py" line="483"/>
-        <location filename="../ui/controllers/exploring_controller.py" line="502"/>
-        <location filename="../ui/controllers/exploring_controller.py" line="566"/>
+        <location filename="../filter_mate_dockwidget.py" line="5119"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="551"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="568"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="636"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="691"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="3651"/>
         <source>Selection</source>
         <translation>Markering</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/exploring_controller.py" line="475"/>
-        <location filename="../ui/controllers/exploring_controller.py" line="566"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="550"/>
         <source>The service selection exceeds the key limit. Refine the selection.</source>
         <translation>Tjenestemarkeringen overskrider nøglegrænsen. Præciser markeringen.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/exploring_controller.py" line="483"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="568"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="636"/>
         <source>This service has no stable key for the selection.</source>
         <translation>Denne tjeneste har ingen stabil nøgle til markeringen.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/exploring_controller.py" line="408"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="436"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="438"/>
         <source>Values</source>
         <translation>Værdier</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/exploring_controller.py" line="603"/>
-        <location filename="../ui/controllers/exploring_controller.py" line="633"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="808"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="835"/>
         <source>Zoom</source>
         <translation>Zoom</translation>
     </message>
@@ -2977,6 +2990,11 @@ Fjern alligevel?</translation>
         <location filename="../ui/controllers/backend_controller.py" line="800"/>
         <source>📁 Current Project</source>
         <translation>📁 Aktuelt projekt</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="7062"/>
+        <source>The filter was not launched: its selection changed or could not be read. Click Filter again.</source>
+        <translation>Filteret blev ikke startet: dets markering er ændret eller kunne ikke læses. Klik på Filtrér igen.</translation>
     </message>
 </context>
 <context>
@@ -3155,22 +3173,22 @@ Fjern alligevel?</translation>
 <context>
     <name>FilterMateOperations</name>
     <message>
-        <location filename="../adapters/public_api/operations.py" line="556"/>
+        <location filename="../adapters/public_api/operations.py" line="633"/>
         <source>FilterMate was unloaded</source>
         <translation>FilterMate blev fjernet fra hukommelsen</translation>
     </message>
     <message>
-        <location filename="../adapters/public_api/operations.py" line="118"/>
+        <location filename="../adapters/public_api/operations.py" line="119"/>
         <source>rendered or unsupported raster: cannot be a filter target</source>
         <translation>gengivet eller ikke understøttet raster: kan ikke være et filtermål</translation>
     </message>
     <message>
-        <location filename="../adapters/public_api/operations.py" line="505"/>
+        <location filename="../adapters/public_api/operations.py" line="582"/>
         <source>rendered raster sources require a local colour capture; numeric pixel selections are unavailable</source>
         <translation>gengivne rasterkilder kræver en lokal farveoptagelse; numeriske pixelvalg er ikke tilgængelige</translation>
     </message>
     <message>
-        <location filename="../adapters/public_api/operations.py" line="577"/>
+        <location filename="../adapters/public_api/operations.py" line="654"/>
         <source>the source layer itself was not changed</source>
         <translation>selve kildelaget blev ikke ændret</translation>
     </message>
@@ -4137,17 +4155,17 @@ Soerg for at PostgreSQL-tabellen har en PRIMARY KEY defineret.</translation>
 <context>
     <name>PointCloudSource</name>
     <message>
-        <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="435"/>
+        <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="513"/>
         <source>Draw a useful selection zone before reading a remote point cloud</source>
         <translation>Tegn en anvendelig markeringszone, før en ekstern punktsky læses</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="468"/>
+        <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="546"/>
         <source>The remote point cloud could not be read</source>
         <translation>Den eksterne punktsky kunne ikke læses</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="472"/>
+        <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="550"/>
         <source>The remote point cloud rejected the selection</source>
         <translation>Den eksterne punktsky afviste markeringen</translation>
     </message>
@@ -4155,22 +4173,22 @@ Soerg for at PostgreSQL-tabellen har en PRIMARY KEY defineret.</translation>
 <context>
     <name>PointCloudTarget</name>
     <message>
-        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="605"/>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="811"/>
         <source>A bounded height-above-ground cloud only supports AND or AND NOT; Unfilter first</source>
         <translation>En afgrænset punktsky med højde over terræn understøtter kun AND eller AND NOT; fjern først filteret</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="631"/>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="837"/>
         <source>PDAL 2.4 or newer is required to clip a remote point cloud</source>
         <translation>PDAL 2.4 eller nyere kræves for at beskære en ekstern punktsky</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="682"/>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="888"/>
         <source>Disjoint would read the whole remote cloud; choose an inside selection</source>
         <translation>Disjoint ville læse hele den eksterne punktsky; vælg en markering indenfor</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="689"/>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="895"/>
         <source>The original remote point cloud could not be opened</source>
         <translation>Den oprindelige eksterne punktsky kunne ikke åbnes</translation>
     </message>
@@ -4797,7 +4815,7 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/common.py" line="206"/>
+        <location filename="../processing/algorithms/common.py" line="208"/>
         <source>{0}: failed — {1}</source>
         <translation type="unfinished"></translation>
     </message>
@@ -5527,32 +5545,32 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation>Søgeresultater for &quot;{0}&quot; i hele laget.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="1768"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="1808"/>
         <source>Loading values…</source>
         <translation>Indlæser værdier…</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="1683"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="1735"/>
         <source>Values</source>
         <translation>Værdier</translation>
     </message>
     <message>
         <location filename="../ui/widgets/custom_widgets.py" line="1683"/>
         <source>This expression cannot be evaluated safely for a service.</source>
-        <translation>Dette udtryk kan ikke evalueres sikkert for en tjeneste.</translation>
+        <translation type="obsolete">Dette udtryk kan ikke evalueres sikkert for en tjeneste.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="1748"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="1779"/>
         <source>Selection</source>
         <translation>Markering</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="1748"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="1779"/>
         <source>The remote list exceeds the safe selection limit. Select fewer features or filter the layer first.</source>
         <translation>Den eksterne liste overskrider den sikre markeringsgrænse. Vælg færre objekter, eller filtrer først laget.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="1924"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="2008"/>
         <source>Loading selected values…</source>
         <translation>Indlæser valgte værdier…</translation>
     </message>
@@ -6364,12 +6382,12 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation>afgrænset rasteroptagelse mislykkedes</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="224"/>
+        <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="302"/>
         <source>local raster capture could not be opened</source>
         <translation>lokal rasteroptagelse kunne ikke åbnes</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="213"/>
+        <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="284"/>
         <source>raster analysis requires a local GDAL capture</source>
         <translation>rasteranalyse kræver en lokal GDAL-optagelse</translation>
     </message>
@@ -6406,6 +6424,7 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
     </message>
     <message>
         <location filename="../adapters/qgis/coverage_layers/raster_materialization.py" line="87"/>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="646"/>
         <source>raster capture source could not be opened</source>
         <translation>rasteroptagelsens kilde kunne ikke åbnes</translation>
     </message>
@@ -6415,22 +6434,22 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation>rastermaterialisering skal køre i en arbejdstråd</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="208"/>
+        <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="279"/>
         <source>raster selection canceled</source>
         <translation>rastervalg annulleret</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="216"/>
+        <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="294"/>
         <source>raster selection source could not be opened</source>
         <translation>rastervalgets kilde kunne ikke åbnes</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="204"/>
+        <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="275"/>
         <source>remote raster selection must run in a worker thread</source>
         <translation>eksternt rastervalg skal køre i en arbejdstråd</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="210"/>
+        <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="281"/>
         <source>rendered color selection requires a local rendered capture</source>
         <translation>valg af gengivne farver kræver en lokal optagelse af gengivelsen</translation>
     </message>
@@ -6464,17 +6483,17 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
 <context>
     <name>RasterTargetJob</name>
     <message>
-        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="459"/>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="642"/>
         <source>remote raster target must run in a worker thread</source>
         <translation>eksternt rastermål skal køre i en arbejdstråd</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="470"/>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="671"/>
         <source>local raster target could not be opened</source>
         <translation>lokalt rastermål kunne ikke åbnes</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="480"/>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="681"/>
         <source>Rendered color layers cannot be filter targets.</source>
         <translation>Lag med gengivne farver kan ikke være filtermål.</translation>
     </message>
@@ -6580,12 +6599,12 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation>Den eksterne kopi kunne ikke læses eller filtreres; det tidligere filter beholdes.</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/remote_materializer.py" line="93"/>
+        <location filename="../adapters/qgis/remote_materializer.py" line="138"/>
         <source>Remote materialization requires a background task.</source>
         <translation>Ekstern materialisering kræver en baggrundsopgave.</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/remote_materializer.py" line="566"/>
+        <location filename="../adapters/qgis/remote_materializer.py" line="626"/>
         <source>Filtering a bounded remote copy</source>
         <translation>Filtrerer en afgrænset ekstern kopi</translation>
     </message>
@@ -6619,48 +6638,50 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
 <context>
     <name>ServerFilterTranslation</name>
     <message>
-        <location filename="../adapters/qgis/server_subset_job.py" line="242"/>
+        <location filename="../adapters/qgis/server_subset_job.py" line="285"/>
+        <location filename="../adapters/qgis/server_subset_job.py" line="460"/>
         <source>A FilterMate task is still reading layers. Retry after it finishes.</source>
         <translation>En FilterMate-opgave læser stadig lag. Prøv igen, når den er færdig.</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/server_subset_job.py" line="255"/>
+        <location filename="../adapters/qgis/server_subset_job.py" line="289"/>
         <source>A layer with auxiliary storage cannot safely replace its server provider. The previous filter is unchanged.</source>
         <translation>Et lag med hjælpelager kan ikke sikkert erstatte sin serverudbyder. Det tidligere filter er uændret.</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/server_subset_job.py" line="260"/>
+        <location filename="../adapters/qgis/server_subset_job.py" line="294"/>
         <source>A remote join cannot be rebuilt on the main thread. The previous filter is unchanged.</source>
         <translation>En ekstern join kan ikke genopbygges i hovedtråden. Det tidligere filter er uændret.</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/server_subset_job.py" line="262"/>
+        <location filename="../adapters/qgis/server_subset_job.py" line="296"/>
         <source>A server filter is already being prepared for this layer.</source>
         <translation>Et serverfilter forberedes allerede for dette lag.</translation>
     </message>
     <message>
         <location filename="../adapters/qgis/server_filter_translation.py" line="189"/>
-        <location filename="../adapters/qgis/server_filter_translation.py" line="250"/>
+        <location filename="../adapters/qgis/server_filter_translation.py" line="255"/>
         <source>A server layer can only be modified on its owning thread.</source>
         <translation>Et serverlag kan kun ændres i den tråd, der ejer det.</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/server_subset_job.py" line="235"/>
+        <location filename="../adapters/qgis/server_subset_job.py" line="278"/>
         <source>Asynchronous server filters require QGIS 3.32 or newer. The previous filter is unchanged.</source>
         <translation>Asynkrone serverfiltre kræver QGIS 3.32 eller nyere. Det tidligere filter er uændret.</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/server_subset_job.py" line="368"/>
+        <location filename="../adapters/qgis/server_subset_job.py" line="404"/>
         <source>Could not install the prepared server filter.</source>
         <translation>Det forberedte serverfilter kunne ikke installeres.</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/server_subset_job.py" line="44"/>
+        <location filename="../adapters/qgis/server_subset_job.py" line="67"/>
         <source>Could not preserve the layer state.</source>
         <translation>Lagets tilstand kunne ikke bevares.</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/server_subset_job.py" line="239"/>
+        <location filename="../adapters/qgis/server_subset_job.py" line="282"/>
+        <location filename="../adapters/qgis/server_subset_job.py" line="453"/>
         <source>Finish editing the layer before applying a server filter.</source>
         <translation>Afslut redigeringen af laget, før et serverfilter anvendes.</translation>
     </message>
@@ -6670,7 +6691,7 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation>Ugyldigt attributudtryk.</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/server_subset_job.py" line="83"/>
+        <location filename="../adapters/qgis/server_subset_job.py" line="106"/>
         <source>Preparing server attribute filter</source>
         <translation>Forbereder serverattributfilter</translation>
     </message>
@@ -6680,34 +6701,36 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation>QGIS kan ikke oversætte dette prædikat til et OGC-filter.</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/server_subset_job.py" line="302"/>
-        <location filename="../adapters/qgis/server_subset_job.py" line="311"/>
+        <location filename="../adapters/qgis/server_subset_job.py" line="336"/>
+        <location filename="../adapters/qgis/server_subset_job.py" line="347"/>
         <source>Server filter canceled or timed out. The previous filter is unchanged.</source>
         <translation>Serverfilter annulleret eller timeout. Det tidligere filter er uændret.</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/server_subset_job.py" line="348"/>
+        <location filename="../adapters/qgis/server_subset_job.py" line="384"/>
         <source>Server filter installation failed and the previous provider could not be restored.</source>
         <translation>Installationen af serverfilteret mislykkedes, og den tidligere udbyder kunne ikke gendannes.</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/server_subset_job.py" line="340"/>
+        <location filename="../adapters/qgis/server_subset_job.py" line="376"/>
+        <location filename="../adapters/qgis/server_subset_job.py" line="456"/>
         <source>Server filter installation failed. The previous provider was already invalid and could not be restored.</source>
         <translation>Installationen af serverfilteret mislykkedes. Den tidligere udbyder var allerede ugyldig og kunne ikke gendannes.</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/server_subset_job.py" line="355"/>
+        <location filename="../adapters/qgis/server_subset_job.py" line="391"/>
         <source>Server filter installation failed. The previous provider was restored.</source>
         <translation>Installationen af serverfilteret mislykkedes. Den tidligere udbyder blev gendannet.</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/server_subset_job.py" line="33"/>
+        <location filename="../adapters/qgis/server_subset_job.py" line="56"/>
         <source>Server filter installation is in progress. Retry after it finishes.</source>
         <translation>Installation af serverfilteret er i gang. Prøv igen, når den er færdig.</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/server_subset_job.py" line="207"/>
-        <location filename="../adapters/qgis/server_subset_job.py" line="237"/>
+        <location filename="../adapters/qgis/server_subset_job.py" line="249"/>
+        <location filename="../adapters/qgis/server_subset_job.py" line="280"/>
+        <location filename="../adapters/qgis/server_subset_job.py" line="451"/>
         <source>Server filter installation must start on the layer thread.</source>
         <translation>Installationen af serverfilteret skal starte i lagets tråd.</translation>
     </message>
@@ -6722,22 +6745,22 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation>Udtrykket er for stort eller indeholder tvetydige SQL-backslash-escapes.</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/server_subset_job.py" line="318"/>
+        <location filename="../adapters/qgis/server_subset_job.py" line="354"/>
         <source>The layer changed while preparing its filter. The prepared result was discarded.</source>
         <translation>Laget blev ændret, mens dets filter blev forberedt. Det forberedte resultat blev kasseret.</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/server_subset_job.py" line="366"/>
+        <location filename="../adapters/qgis/server_subset_job.py" line="402"/>
         <source>The layer is no longer available. The prepared filter was discarded.</source>
         <translation>Laget er ikke længere tilgængeligt. Det forberedte filter blev kasseret.</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/server_subset_job.py" line="311"/>
+        <location filename="../adapters/qgis/server_subset_job.py" line="347"/>
         <source>The server rejected the filter or could not be reached. The previous filter is unchanged.</source>
         <translation>Serveren afviste filteret eller kunne ikke nås. Det tidligere filter er uændret.</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/server_subset_job.py" line="253"/>
+        <location filename="../adapters/qgis/server_subset_job.py" line="287"/>
         <source>This provider and QGIS version do not support verified worker creation. The previous filter is unchanged.</source>
         <translation>Denne udbyder og QGIS-version understøtter ikke verificeret oprettelse af arbejdere. Det tidligere filter er uændret.</translation>
     </message>
@@ -6747,12 +6770,14 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation>{0}: attributfilteret kan ikke køre helt på serveren. Ikke understøttet del: {1}. {2} Det tidligere filter er uændret.</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/server_filter_translation.py" line="265"/>
+        <location filename="../adapters/qgis/server_filter_translation.py" line="270"/>
+        <location filename="../adapters/qgis/server_subset_job.py" line="494"/>
         <source>{0}: the provider rejected the attribute filter. The previous filter was restored.</source>
         <translation>{0}: udbyderen afviste attributfilteret. Det tidligere filter blev gendannet.</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/server_filter_translation.py" line="264"/>
+        <location filename="../adapters/qgis/server_filter_translation.py" line="269"/>
+        <location filename="../adapters/qgis/server_subset_job.py" line="493"/>
         <source>{0}: the provider rejected the filter and restoration failed.</source>
         <translation>{0}: udbyderen afviste filteret, og gendannelsen mislykkedes.</translation>
     </message>
@@ -6997,17 +7022,17 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
 <context>
     <name>TaskParameterBuilder</name>
     <message>
-        <location filename="../adapters/task_builder.py" line="936"/>
+        <location filename="../adapters/task_builder.py" line="942"/>
         <source>No entity selected! The selection widget lost the feature. Re-select an entity.</source>
         <translation>Intet objekt valgt! Valgwidgeten mistede objektet. Vaelg et objekt igen.</translation>
     </message>
     <message>
-        <location filename="../adapters/task_builder.py" line="1054"/>
+        <location filename="../adapters/task_builder.py" line="1060"/>
         <source>Selected layer is invalid or its source cannot be found. Operation cancelled.</source>
         <translation>Valgt lag er ugyldigt eller kilden kan ikke findes. Handling annulleret.</translation>
     </message>
     <message>
-        <location filename="../adapters/task_builder.py" line="1069"/>
+        <location filename="../adapters/task_builder.py" line="1075"/>
         <source>Layer &apos;{0}&apos; is not yet initialized. Try selecting another layer then switch back to this one.</source>
         <translation>Lag '{0}' er endnu ikke initialiseret. Proev at vaelge et andet lag og skift derefter tilbage til dette.</translation>
     </message>
@@ -7046,14 +7071,19 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
 <context>
     <name>VectorTargetJob</name>
     <message>
-        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="261"/>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="301"/>
         <source>{0}: no unique key field, its features cannot be listed in its filter (a web service, or a virtual layer without a unique id column).</source>
         <translation>{0}: intet entydigt nøglefelt, dets objekter kan ikke angives i dets filter (en webtjeneste eller et virtuelt lag uden entydig id-kolonne).</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="362"/>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="452"/>
         <source>{0} features to list, more than the {1} sent to a web service: narrow the source or use an attribute filter.</source>
         <translation>{0} objekter at angive, flere end de {1}, der sendes til en webtjeneste: indsnævr kilden, eller brug et attributfilter.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="392"/>
+        <source>{0} AND NOT would keep the features not read; the previous filter is kept.</source>
+        <translation>{0} AND NOT ville beholde de objekter, der ikke er læst; det tidligere filter beholdes.</translation>
     </message>
 </context>
 <context>
@@ -7156,7 +7186,7 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation>Attributfilter for vektorfliser</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/coverage_layers/favorites_bridge.py" line="111"/>
+        <location filename="../adapters/qgis/coverage_layers/favorites_bridge.py" line="131"/>
         <source>Vector tile favorite</source>
         <translation>Favorit for vektorfliser</translation>
     </message>

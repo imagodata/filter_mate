@@ -596,7 +596,7 @@
         <translation>PDAL не е намерен: височината над DTM изисква изпълним файл pdal</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3148"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3151"/>
         <source>A FilterMate task is still running: wait for it to finish</source>
         <translation>Задача на FilterMate все още се изпълнява: изчакайте да приключи</translation>
     </message>
@@ -631,12 +631,12 @@
         <translation>Облакът от точки е филтриран: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3253"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3261"/>
         <source>Filter not applied: {0}</source>
         <translation>Филтърът не е приложен: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3110"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3113"/>
         <source>canceled</source>
         <translation>отменено</translation>
     </message>
@@ -646,77 +646,77 @@
         <translation>Филтрирани цели: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2820"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2823"/>
         <source>{0} failed: {1}</source>
         <translation>{0} е неуспешно: {1}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2833"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2836"/>
         <source>FilterMate: filtering from '{0}'…</source>
         <translation>FilterMate: филтриране от '{0}'…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2930"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2933"/>
         <source>Changed since, left as is: {0}</source>
         <translation>Променено междувременно, оставено без промяна: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2936"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2939"/>
         <source>{0} layer(s) restored</source>
         <translation>Възстановени слоеве: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2970"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2973"/>
         <source>&apos;{0}&apos; not exported: {1}</source>
         <translation>'{0}' не е експортиран: {1}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2984"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2987"/>
         <source>Exported: {0}</source>
         <translation>Експортирано: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2986"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2989"/>
         <source>Export failed: {0}</source>
         <translation>Експортирането е неуспешно: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2993"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2996"/>
         <source>Exporting {0} layer(s)…</source>
         <translation>Експортиране на слоеве: {0}…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2999"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3002"/>
         <source>Export folder</source>
         <translation>Папка за експорт</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3081"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3084"/>
         <source>Raster / point cloud targets skipped: no source feature selected in EXPLORING</source>
         <translation>Растерните цели / целите с облак от точки са пропуснати: не е избран обект източник в EXPLORING</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3110"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3113"/>
         <source>Raster / point cloud targets not filtered: {0}</source>
         <translation>Растерните цели / целите с облак от точки не са филтрирани: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3112"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3115"/>
         <source>{0} raster / point cloud target(s) filtered</source>
         <translation>Филтрирани растерни цели / цели с облак от точки: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3230"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3238"/>
         <source>Choose the DTM raster used for the height above ground</source>
         <translation>Изберете DTM растера, използван за височината над земята</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3241"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3249"/>
         <source>Height above ground not computed: {0}</source>
         <translation>Височината над земята не е изчислена: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3262"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3270"/>
         <source>Computing the height above '{0}' with PDAL…</source>
         <translation>Изчисляване на височината над '{0}' с PDAL…</translation>
     </message>
@@ -881,32 +881,32 @@
         <translation>Растерни цели, предискретизирани до зададената граница на пиксели: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2844"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2847"/>
         <source>color selection limited to the captured extent; colors depend on style and scale</source>
         <translation>изборът по цвят е ограничен до заснетия обхват; цветовете зависят от стила и мащаба</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2846"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2849"/>
         <source>raster source resampled to {0} cells within the pixel limit</source>
         <translation>изходният растер е предискретизиран до {0} клетки в рамките на границата на пиксели</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2848"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2851"/>
         <source>raster selection read every {0} pixels: over the pixel limit of the settings</source>
         <translation>изборът по растер е прочетен през всеки {0} пиксела: над границата на пиксели от настройките</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2851"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2854"/>
         <source>dense raster selection smoothed to keep its outline light</source>
         <translation>плътният избор по растер е изгладен, за да остане контурът лек</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2898"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2901"/>
         <source>{0} left empty, nothing matches the selection: {1}</source>
         <translation>{0}: изпразнено, нищо не отговаря на избора: {1}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2882"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2885"/>
         <source>failed</source>
         <translation>неуспешно</translation>
     </message>
@@ -980,7 +980,7 @@
 <context>
     <name>ExploringController</name>
     <message>
-        <location filename="../ui/controllers/exploring_controller.py" line="2239"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="2481"/>
         <source>{0} features selected, more than the {1} a web service can be sent: narrow the selection or use an attribute filter.</source>
         <translation>Избрани са {0} обекта, повече от {1}, които могат да се изпратят към уеб услуга: стеснете избора или използвайте атрибутен филтър.</translation>
     </message>
@@ -2141,39 +2141,39 @@ Please restart QGIS to apply the changes.</source>
         <translation>Грешка при зареждане на добавката: {0}. Проверете конзолата на QGIS Python за подробности.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7357"/>
+        <location filename="../filter_mate_dockwidget.py" line="7416"/>
         <source>Current layer: {0}</source>
         <translation>Текущ слой: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7359"/>
+        <location filename="../filter_mate_dockwidget.py" line="7418"/>
         <source>No layer selected</source>
         <translation>Не е избран слой</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7369"/>
+        <location filename="../filter_mate_dockwidget.py" line="7428"/>
         <source>Selected layers:
 {0}</source>
         <translation>Избрани слоеве:
 {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7369"/>
+        <location filename="../filter_mate_dockwidget.py" line="7428"/>
         <source>No layers selected</source>
         <translation>Не са избрани слоеве</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7389"/>
+        <location filename="../filter_mate_dockwidget.py" line="7448"/>
         <source>No expression defined</source>
         <translation>Не е дефиниран израз</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7401"/>
+        <location filename="../filter_mate_dockwidget.py" line="7460"/>
         <source>Display expression: {0}</source>
         <translation>Израз за показване: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7416"/>
+        <location filename="../filter_mate_dockwidget.py" line="7477"/>
         <source>Feature ID: {0}
 First attribute: {1}</source>
         <translation>Идентификатор на обект: {0}
@@ -2200,125 +2200,135 @@ First attribute: {1}</source>
         <translation>Отваряне на ръководството за потребителя</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/async_query.py" line="207"/>
+        <location filename="../adapters/qgis/async_query.py" line="409"/>
         <source>This expression cannot be evaluated safely for a service.</source>
         <translation>Този израз не може да бъде оценен безопасно за услуга.</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/async_query.py" line="209"/>
+        <location filename="../adapters/qgis/async_query.py" line="496"/>
         <source>The service could not be read. Please retry.</source>
         <translation>Услугата не можа да бъде прочетена. Опитайте отново.</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/async_query.py" line="210"/>
+        <location filename="../adapters/qgis/async_query.py" line="496"/>
         <source>Read failed</source>
         <translation>Четенето е неуспешно</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/async_query.py" line="270"/>
+        <location filename="../adapters/qgis/async_query.py" line="287"/>
         <source>Loading filtered extent…</source>
         <translation>Зареждане на филтрирания обхват…</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/async_query.py" line="404"/>
+        <source>The expression is not valid for this layer. Check its syntax and field names.</source>
+        <translation>Изразът не е валиден за този слой. Проверете синтаксиса и имената на полетата.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/async_query.py" line="407"/>
+        <source>A virtual field of this layer cannot be evaluated safely for a service.</source>
+        <translation>Виртуално поле на този слой не може да бъде оценено безопасно за услуга.</translation>
     </message>
 </context>
 <context>
     <name>FilterMateApp</name>
     <message>
-        <location filename="../filter_mate_app.py" line="306"/>
+        <location filename="../filter_mate_app.py" line="319"/>
         <source>PostgreSQL layers detected ({0}) but psycopg2 is not installed.</source>
         <translation>Открити са PostgreSQL слоеве ({0}), но psycopg2 не е инсталиран.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="406"/>
+        <location filename="../filter_mate_app.py" line="419"/>
         <source>Cleared {0} caches</source>
         <translation>{0} кеша изчистени</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="912"/>
+        <location filename="../filter_mate_app.py" line="925"/>
         <source>Failed to create dockwidget: {0}</source>
         <translation>Неуспешно създаване на докинг панел: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="922"/>
+        <location filename="../filter_mate_app.py" line="935"/>
         <source>Failed to display dockwidget: {0}</source>
         <translation>Неуспешно показване на докинг панел: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1493"/>
+        <location filename="../filter_mate_app.py" line="1501"/>
         <source>Error executing {0}: {1}</source>
         <translation>Грешка при изпълнение на {0}: {1}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1505"/>
+        <location filename="../filter_mate_app.py" line="1513"/>
         <source>Plugin running in degraded mode (hexagonal services unavailable). Performance may be reduced.</source>
         <translation>Добавката работи в ограничен режим (хексагоналните услуги не са налични). Производителността може да бъде намалена.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1854"/>
+        <location filename="../filter_mate_app.py" line="1857"/>
         <source>FilterMate ERROR</source>
         <translation>FilterMate ГРЕШКА</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1854"/>
+        <location filename="../filter_mate_app.py" line="1857"/>
         <source>Cannot execute {0}: widget initialization failed.</source>
         <translation>Не може да се изпълни {0}: инициализацията на уиджета е неуспешна.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2635"/>
+        <location filename="../filter_mate_app.py" line="2638"/>
         <source>Cannot {0}: layer invalid or source not found.</source>
         <translation>Не може да се изпълни {0}: невалиден слой или източникът не е намерен.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2789"/>
+        <location filename="../filter_mate_app.py" line="2792"/>
         <source>All filters cleared - </source>
         <translation>Всички филтри изчистени - </translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2790"/>
+        <location filename="../filter_mate_app.py" line="2793"/>
         <source>{0}{1} features visible in main layer</source>
         <translation>{0}{1} обекта видими в основния слой</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2802"/>
+        <location filename="../filter_mate_app.py" line="2805"/>
         <source>Error: result handler missing</source>
         <translation>Грешка: липсва обработчик на резултата</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2819"/>
+        <location filename="../filter_mate_app.py" line="2822"/>
         <source>Error during filtering: {0}</source>
         <translation>Грешка по време на филтриране: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2943"/>
+        <location filename="../filter_mate_app.py" line="2946"/>
         <source>Recovered {0} orphan favorite(s): {1}</source>
         <translation>{0} осиротели любими възстановени: {1}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="3109"/>
+        <location filename="../filter_mate_app.py" line="3112"/>
         <source>Layer loading failed - click to retry</source>
         <translation>Зареждането на слоя е неуспешно - щракнете за повторен опит</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="3161"/>
+        <location filename="../filter_mate_app.py" line="3164"/>
         <source>{0} layer(s) loaded successfully</source>
         <translation>{0} слой(а) заредени успешно</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2092"/>
+        <location filename="../filter_mate_app.py" line="2095"/>
         <source>filter</source>
         <translation>filter</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2094"/>
+        <location filename="../filter_mate_app.py" line="2097"/>
         <source>unfilter</source>
         <translation>unfilter</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2097"/>
+        <location filename="../filter_mate_app.py" line="2100"/>
         <source>FilterMate – Edit Mode Detected</source>
         <translation>FilterMate – Edit Mode Detected</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2099"/>
+        <location filename="../filter_mate_app.py" line="2102"/>
         <source>The following layer(s) are currently in edit mode:
 {0}
 
@@ -2331,102 +2341,102 @@ QGIS cannot apply filters while a layer is being edited.
 What would you like to do?</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2109"/>
+        <location filename="../filter_mate_app.py" line="2112"/>
         <source>Save Changes &amp; {0}</source>
         <translation>Save Changes &amp; {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2116"/>
+        <location filename="../filter_mate_app.py" line="2119"/>
         <source>Discard Changes &amp; {0}</source>
         <translation>Discard Changes &amp; {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2123"/>
+        <location filename="../filter_mate_app.py" line="2126"/>
         <source>Cancel</source>
         <translation>Cancel</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2147"/>
+        <location filename="../filter_mate_app.py" line="2150"/>
         <source>Could not save changes for layer &quot;{0}&quot;. Operation cancelled.</source>
         <translation>Could not save changes for layer &quot;{0}&quot;. Operation cancelled.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1323"/>
+        <location filename="../filter_mate_app.py" line="1331"/>
         <source>Pick a layer in the EXPLORING tab before running &apos;{0}&apos;.</source>
         <translation>Изберете слой в раздела EXPLORING, преди да изпълните '{0}'.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="839"/>
+        <location filename="../filter_mate_app.py" line="852"/>
         <source>{0} layer(s) stay filtered: {1}. Turn the option back on to unfilter them.</source>
         <translation>{0} слой(а) остават филтрирани: {1}. Включете отново опцията, за да премахнете филтъра им.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2621"/>
+        <location filename="../filter_mate_app.py" line="2624"/>
         <source>A server filter is being prepared. Wait for it to finish before starting another operation.</source>
         <translation>Подготвя се сървърен филтър. Изчакайте да приключи, преди да започнете друга операция.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1770"/>
+        <location filename="../filter_mate_app.py" line="1773"/>
         <source>A FilterMate API operation is running. Wait for it to finish.</source>
         <translation>Изпълнява се операция на API на FilterMate. Изчакайте да приключи.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="445"/>
+        <location filename="../filter_mate_app.py" line="458"/>
         <source>Adding layers</source>
         <translation>Добавяне на слоеве</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="449"/>
+        <location filename="../filter_mate_app.py" line="462"/>
         <source>Existing project loaded</source>
         <translation>Съществуващият проект е зареден</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="442"/>
+        <location filename="../filter_mate_app.py" line="455"/>
         <source>Exporting data</source>
         <translation>Експортиране на данни</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="439"/>
+        <location filename="../filter_mate_app.py" line="452"/>
         <source>Filtering data</source>
         <translation>Филтриране на данни</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="448"/>
+        <location filename="../filter_mate_app.py" line="461"/>
         <source>New project</source>
         <translation>Нов проект</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="444"/>
+        <location filename="../filter_mate_app.py" line="457"/>
         <source>Redo filter</source>
         <translation>Повтаряне на филтъра</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="450"/>
+        <location filename="../filter_mate_app.py" line="463"/>
         <source>Reloading layers</source>
         <translation>Презареждане на слоеве</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="447"/>
+        <location filename="../filter_mate_app.py" line="460"/>
         <source>Removing all layers</source>
         <translation>Премахване на всички слоеве</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="446"/>
+        <location filename="../filter_mate_app.py" line="459"/>
         <source>Removing layers</source>
         <translation>Премахване на слоеве</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="441"/>
+        <location filename="../filter_mate_app.py" line="454"/>
         <source>Reseting data</source>
         <translation>Нулиране на данни</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="443"/>
+        <location filename="../filter_mate_app.py" line="456"/>
         <source>Undo filter</source>
         <translation>Отмяна на филтъра</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="440"/>
+        <location filename="../filter_mate_app.py" line="453"/>
         <source>Unfiltering data</source>
         <translation>Премахване на филтъра от данните</translation>
     </message>
@@ -2553,57 +2563,59 @@ Drop anyway?</source>
         <translation>Светъл режим</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="4102"/>
+        <location filename="../filter_mate_dockwidget.py" line="4116"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="884"/>
         <source>Selected features have no geometry.</source>
         <translation>Избраните обекти нямат геометрия.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="4121"/>
+        <location filename="../filter_mate_dockwidget.py" line="4135"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="885"/>
         <source>No feature selected. Select a feature from the dropdown list.</source>
         <translation>Не е избран обект. Изберете обект от падащия списък.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="5285"/>
+        <location filename="../filter_mate_dockwidget.py" line="5319"/>
         <source>The selected layer is invalid or its source cannot be found.</source>
         <translation>Избраният слой е невалиден или източникът му не може да бъде намерен.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6080"/>
+        <location filename="../filter_mate_dockwidget.py" line="6114"/>
         <source>Negative buffer (erosion): shrinks polygons inward</source>
         <translation>Отрицателен буфер (ерозия): свива полигоните навътре</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6083"/>
+        <location filename="../filter_mate_dockwidget.py" line="6117"/>
         <source>Buffer value in meters (positive=expand, negative=shrink polygons)</source>
         <translation>Стойност на буфера в метри (положителна=разширяване, отрицателна=свиване на полигони)</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6585"/>
+        <location filename="../filter_mate_dockwidget.py" line="6619"/>
         <source>Plugin activated with {0} vector layer(s)</source>
         <translation>Добавката е активирана с {0} векторен(ни) слой(а)</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6684"/>
+        <location filename="../filter_mate_dockwidget.py" line="6718"/>
         <source>Could not reload plugin automatically.</source>
         <translation>Не може да се презареди добавката автоматично.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6689"/>
+        <location filename="../filter_mate_dockwidget.py" line="6723"/>
         <source>Error reloading plugin: {0}</source>
         <translation>Грешка при презареждане на добавката: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6764"/>
+        <location filename="../filter_mate_dockwidget.py" line="6798"/>
         <source>Layer properties reset to defaults</source>
         <translation>Свойствата на слоя са възстановени по подразбиране</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6765"/>
+        <location filename="../filter_mate_dockwidget.py" line="6799"/>
         <source>Error resetting layer properties: {}</source>
         <translation>Грешка при възстановяване на свойствата на слоя: {}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="895"/>
+        <location filename="../filter_mate_dockwidget.py" line="7062"/>
         <source>Filter</source>
         <translation>Филтър</translation>
     </message>
@@ -2733,7 +2745,7 @@ Drop anyway?</source>
         <translation>Оформлението на панела не може да бъде приложено; използват се размерите по подразбиране. Подробности в filtermate.log.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6856"/>
+        <location filename="../filter_mate_dockwidget.py" line="6890"/>
         <location filename="../ui/controllers/backend_controller.py" line="682"/>
         <source>Vector</source>
         <translation>Вектор</translation>
@@ -2764,91 +2776,92 @@ Drop anyway?</source>
         <translation>Изтриване на схемата на FilterMate</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="4224"/>
+        <location filename="../filter_mate_dockwidget.py" line="4247"/>
         <source>Read failed</source>
         <translation>Четенето е неуспешно</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="4224"/>
+        <location filename="../filter_mate_dockwidget.py" line="4247"/>
         <source>The service could not be read. Please retry.</source>
         <translation>Услугата не можа да бъде прочетена. Опитайте отново.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="4566"/>
+        <location filename="../filter_mate_dockwidget.py" line="4589"/>
         <source>Loading filtered extent…</source>
         <translation>Зареждане на филтрирания обхват…</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="5150"/>
-        <location filename="../ui/controllers/exploring_controller.py" line="539"/>
-        <location filename="../ui/controllers/exploring_controller.py" line="3408"/>
+        <location filename="../filter_mate_dockwidget.py" line="5184"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="742"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="3658"/>
         <source>Loading selected values…</source>
         <translation>Зареждане на избраните стойности…</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="5141"/>
-        <location filename="../ui/controllers/exploring_controller.py" line="502"/>
         <location filename="../ui/controllers/exploring_controller.py" line="603"/>
         <source>This expression cannot be evaluated safely for a service.</source>
-        <translation>Този израз не може да бъде оценен безопасно за услуга.</translation>
+        <translation type="obsolete">Този израз не може да бъде оценен безопасно за услуга.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/exploring_controller.py" line="2472"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="2715"/>
         <source>Error evaluating expression: {0}</source>
         <translation>Грешка при оценяване на израза: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/exploring_controller.py" line="2471"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="2716"/>
         <source>Expression Evaluation</source>
         <translation>Оценяване на израз</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/exploring_controller.py" line="411"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="444"/>
         <source>Loading values…</source>
         <translation>Зареждане на стойности…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/exploring_controller.py" line="646"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="846"/>
         <source>Loading zoom extent…</source>
         <translation>Зареждане на обхвата за мащабиране…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/exploring_controller.py" line="633"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="835"/>
         <source>No feature with geometry matches the selection.</source>
         <translation>Нито един обект с геометрия не отговаря на избора.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/exploring_controller.py" line="408"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="434"/>
         <source>Only a limited set of values is shown. Refine the search to find other values.</source>
         <translation>Показва се само ограничен набор от стойности. Прецизирайте търсенето, за да намерите други стойности.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/exploring_controller.py" line="475"/>
-        <location filename="../ui/controllers/exploring_controller.py" line="483"/>
-        <location filename="../ui/controllers/exploring_controller.py" line="502"/>
-        <location filename="../ui/controllers/exploring_controller.py" line="566"/>
+        <location filename="../filter_mate_dockwidget.py" line="5119"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="551"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="568"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="636"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="691"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="3651"/>
         <source>Selection</source>
         <translation>Избор</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/exploring_controller.py" line="475"/>
-        <location filename="../ui/controllers/exploring_controller.py" line="566"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="550"/>
         <source>The service selection exceeds the key limit. Refine the selection.</source>
         <translation>Изборът в услугата надвишава ограничението за ключове. Прецизирайте избора.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/exploring_controller.py" line="483"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="568"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="636"/>
         <source>This service has no stable key for the selection.</source>
         <translation>Тази услуга няма стабилен ключ за избора.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/exploring_controller.py" line="408"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="436"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="438"/>
         <source>Values</source>
         <translation>Стойности</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/exploring_controller.py" line="603"/>
-        <location filename="../ui/controllers/exploring_controller.py" line="633"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="808"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="835"/>
         <source>Zoom</source>
         <translation>Мащаб</translation>
     </message>
@@ -2977,6 +2990,11 @@ Drop anyway?</source>
         <location filename="../ui/controllers/backend_controller.py" line="800"/>
         <source>📁 Current Project</source>
         <translation>📁 Текущ проект</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="7062"/>
+        <source>The filter was not launched: its selection changed or could not be read. Click Filter again.</source>
+        <translation>Филтърът не е стартиран: изборът му се промени или не можа да бъде прочетен. Щракнете отново върху „Филтър“.</translation>
     </message>
 </context>
 <context>
@@ -3155,22 +3173,22 @@ Drop anyway?</source>
 <context>
     <name>FilterMateOperations</name>
     <message>
-        <location filename="../adapters/public_api/operations.py" line="556"/>
+        <location filename="../adapters/public_api/operations.py" line="633"/>
         <source>FilterMate was unloaded</source>
         <translation>FilterMate е разтоварен</translation>
     </message>
     <message>
-        <location filename="../adapters/public_api/operations.py" line="118"/>
+        <location filename="../adapters/public_api/operations.py" line="119"/>
         <source>rendered or unsupported raster: cannot be a filter target</source>
         <translation>изобразен или неподдържан растер: не може да бъде цел на филтър</translation>
     </message>
     <message>
-        <location filename="../adapters/public_api/operations.py" line="505"/>
+        <location filename="../adapters/public_api/operations.py" line="582"/>
         <source>rendered raster sources require a local colour capture; numeric pixel selections are unavailable</source>
         <translation>изобразените растерни източници изискват локална снимка на цветовете; числовият избор на пиксели не е наличен</translation>
     </message>
     <message>
-        <location filename="../adapters/public_api/operations.py" line="577"/>
+        <location filename="../adapters/public_api/operations.py" line="654"/>
         <source>the source layer itself was not changed</source>
         <translation>самият изходен слой не е променен</translation>
     </message>
@@ -4137,17 +4155,17 @@ Make sure the PostgreSQL table has a PRIMARY KEY defined.</source>
 <context>
     <name>PointCloudSource</name>
     <message>
-        <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="435"/>
+        <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="513"/>
         <source>Draw a useful selection zone before reading a remote point cloud</source>
         <translation>Начертайте полезна зона за избор, преди да прочетете отдалечен облак от точки</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="468"/>
+        <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="546"/>
         <source>The remote point cloud could not be read</source>
         <translation>Отдалеченият облак от точки не можа да бъде прочетен</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="472"/>
+        <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="550"/>
         <source>The remote point cloud rejected the selection</source>
         <translation>Отдалеченият облак от точки отхвърли избора</translation>
     </message>
@@ -4155,22 +4173,22 @@ Make sure the PostgreSQL table has a PRIMARY KEY defined.</source>
 <context>
     <name>PointCloudTarget</name>
     <message>
-        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="605"/>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="811"/>
         <source>A bounded height-above-ground cloud only supports AND or AND NOT; Unfilter first</source>
         <translation>Ограничен облак за височина над земята поддържа само AND или AND NOT; първо премахнете филтъра</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="631"/>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="837"/>
         <source>PDAL 2.4 or newer is required to clip a remote point cloud</source>
         <translation>За изрязване на отдалечен облак от точки се изисква PDAL 2.4 или по-нов</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="682"/>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="888"/>
         <source>Disjoint would read the whole remote cloud; choose an inside selection</source>
         <translation>Disjoint би прочел целия отдалечен облак; изберете избор отвътре</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="689"/>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="895"/>
         <source>The original remote point cloud could not be opened</source>
         <translation>Първоначалният отдалечен облак от точки не можа да бъде отворен</translation>
     </message>
@@ -4797,7 +4815,7 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/common.py" line="206"/>
+        <location filename="../processing/algorithms/common.py" line="208"/>
         <source>{0}: failed — {1}</source>
         <translation type="unfinished"></translation>
     </message>
@@ -5527,32 +5545,32 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation>Резултати от търсенето на „{0}“ в целия слой.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="1768"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="1808"/>
         <source>Loading values…</source>
         <translation>Зареждане на стойности…</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="1683"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="1735"/>
         <source>Values</source>
         <translation>Стойности</translation>
     </message>
     <message>
         <location filename="../ui/widgets/custom_widgets.py" line="1683"/>
         <source>This expression cannot be evaluated safely for a service.</source>
-        <translation>Този израз не може да бъде оценен безопасно за услуга.</translation>
+        <translation type="obsolete">Този израз не може да бъде оценен безопасно за услуга.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="1748"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="1779"/>
         <source>Selection</source>
         <translation>Избор</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="1748"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="1779"/>
         <source>The remote list exceeds the safe selection limit. Select fewer features or filter the layer first.</source>
         <translation>Отдалеченият списък надвишава безопасното ограничение за избор. Изберете по-малко обекти или първо филтрирайте слоя.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="1924"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="2008"/>
         <source>Loading selected values…</source>
         <translation>Зареждане на избраните стойности…</translation>
     </message>
@@ -6364,12 +6382,12 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation>ограниченото заснемане на растер е неуспешно</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="224"/>
+        <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="302"/>
         <source>local raster capture could not be opened</source>
         <translation>локалното заснемане на растер не можа да бъде отворено</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="213"/>
+        <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="284"/>
         <source>raster analysis requires a local GDAL capture</source>
         <translation>анализът на растер изисква локално заснемане с GDAL</translation>
     </message>
@@ -6406,6 +6424,7 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
     </message>
     <message>
         <location filename="../adapters/qgis/coverage_layers/raster_materialization.py" line="87"/>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="646"/>
         <source>raster capture source could not be opened</source>
         <translation>източникът за заснемане на растер не можа да бъде отворен</translation>
     </message>
@@ -6415,22 +6434,22 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation>материализирането на растер трябва да се изпълнява в работна нишка</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="208"/>
+        <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="279"/>
         <source>raster selection canceled</source>
         <translation>изборът по растер е отменен</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="216"/>
+        <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="294"/>
         <source>raster selection source could not be opened</source>
         <translation>източникът за избор по растер не можа да бъде отворен</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="204"/>
+        <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="275"/>
         <source>remote raster selection must run in a worker thread</source>
         <translation>изборът по отдалечен растер трябва да се изпълнява в работна нишка</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="210"/>
+        <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="281"/>
         <source>rendered color selection requires a local rendered capture</source>
         <translation>изборът по изобразен цвят изисква локално заснемане на изобразеното</translation>
     </message>
@@ -6464,17 +6483,17 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
 <context>
     <name>RasterTargetJob</name>
     <message>
-        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="459"/>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="642"/>
         <source>remote raster target must run in a worker thread</source>
         <translation>отдалечената растерна цел трябва да се изпълнява в работна нишка</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="470"/>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="671"/>
         <source>local raster target could not be opened</source>
         <translation>локалната растерна цел не можа да бъде отворена</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="480"/>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="681"/>
         <source>Rendered color layers cannot be filter targets.</source>
         <translation>Слоеве с изобразени цветове не могат да бъдат цели на филтър.</translation>
     </message>
@@ -6580,12 +6599,12 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation>Отдалеченото копие не можа да бъде прочетено или филтрирано; предишният филтър е запазен.</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/remote_materializer.py" line="93"/>
+        <location filename="../adapters/qgis/remote_materializer.py" line="138"/>
         <source>Remote materialization requires a background task.</source>
         <translation>Материализирането на отдалечени данни изисква фонова задача.</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/remote_materializer.py" line="566"/>
+        <location filename="../adapters/qgis/remote_materializer.py" line="626"/>
         <source>Filtering a bounded remote copy</source>
         <translation>Филтриране на ограничено отдалечено копие</translation>
     </message>
@@ -6619,48 +6638,50 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
 <context>
     <name>ServerFilterTranslation</name>
     <message>
-        <location filename="../adapters/qgis/server_subset_job.py" line="242"/>
+        <location filename="../adapters/qgis/server_subset_job.py" line="285"/>
+        <location filename="../adapters/qgis/server_subset_job.py" line="460"/>
         <source>A FilterMate task is still reading layers. Retry after it finishes.</source>
         <translation>Задача на FilterMate все още чете слоеве. Опитайте отново, след като приключи.</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/server_subset_job.py" line="255"/>
+        <location filename="../adapters/qgis/server_subset_job.py" line="289"/>
         <source>A layer with auxiliary storage cannot safely replace its server provider. The previous filter is unchanged.</source>
         <translation>Слой с помощно хранилище не може безопасно да замени своя сървърен доставчик. Предишният филтър е непроменен.</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/server_subset_job.py" line="260"/>
+        <location filename="../adapters/qgis/server_subset_job.py" line="294"/>
         <source>A remote join cannot be rebuilt on the main thread. The previous filter is unchanged.</source>
         <translation>Отдалечено съединение не може да бъде възстановено в основната нишка. Предишният филтър е непроменен.</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/server_subset_job.py" line="262"/>
+        <location filename="../adapters/qgis/server_subset_job.py" line="296"/>
         <source>A server filter is already being prepared for this layer.</source>
         <translation>За този слой вече се подготвя сървърен филтър.</translation>
     </message>
     <message>
         <location filename="../adapters/qgis/server_filter_translation.py" line="189"/>
-        <location filename="../adapters/qgis/server_filter_translation.py" line="250"/>
+        <location filename="../adapters/qgis/server_filter_translation.py" line="255"/>
         <source>A server layer can only be modified on its owning thread.</source>
         <translation>Сървърен слой може да се променя само в собствената си нишка.</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/server_subset_job.py" line="235"/>
+        <location filename="../adapters/qgis/server_subset_job.py" line="278"/>
         <source>Asynchronous server filters require QGIS 3.32 or newer. The previous filter is unchanged.</source>
         <translation>Асинхронните сървърни филтри изискват QGIS 3.32 или по-нов. Предишният филтър е непроменен.</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/server_subset_job.py" line="368"/>
+        <location filename="../adapters/qgis/server_subset_job.py" line="404"/>
         <source>Could not install the prepared server filter.</source>
         <translation>Подготвеният сървърен филтър не можа да бъде инсталиран.</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/server_subset_job.py" line="44"/>
+        <location filename="../adapters/qgis/server_subset_job.py" line="67"/>
         <source>Could not preserve the layer state.</source>
         <translation>Състоянието на слоя не можа да бъде запазено.</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/server_subset_job.py" line="239"/>
+        <location filename="../adapters/qgis/server_subset_job.py" line="282"/>
+        <location filename="../adapters/qgis/server_subset_job.py" line="453"/>
         <source>Finish editing the layer before applying a server filter.</source>
         <translation>Завършете редактирането на слоя, преди да приложите сървърен филтър.</translation>
     </message>
@@ -6670,7 +6691,7 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation>Невалиден атрибутен израз.</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/server_subset_job.py" line="83"/>
+        <location filename="../adapters/qgis/server_subset_job.py" line="106"/>
         <source>Preparing server attribute filter</source>
         <translation>Подготовка на сървърен атрибутен филтър</translation>
     </message>
@@ -6680,34 +6701,36 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation>QGIS не може да преобразува този предикат във филтър OGC.</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/server_subset_job.py" line="302"/>
-        <location filename="../adapters/qgis/server_subset_job.py" line="311"/>
+        <location filename="../adapters/qgis/server_subset_job.py" line="336"/>
+        <location filename="../adapters/qgis/server_subset_job.py" line="347"/>
         <source>Server filter canceled or timed out. The previous filter is unchanged.</source>
         <translation>Сървърният филтър е отменен или времето му изтече. Предишният филтър е непроменен.</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/server_subset_job.py" line="348"/>
+        <location filename="../adapters/qgis/server_subset_job.py" line="384"/>
         <source>Server filter installation failed and the previous provider could not be restored.</source>
         <translation>Инсталирането на сървърния филтър е неуспешно и предишният доставчик не можа да бъде възстановен.</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/server_subset_job.py" line="340"/>
+        <location filename="../adapters/qgis/server_subset_job.py" line="376"/>
+        <location filename="../adapters/qgis/server_subset_job.py" line="456"/>
         <source>Server filter installation failed. The previous provider was already invalid and could not be restored.</source>
         <translation>Инсталирането на сървърния филтър е неуспешно. Предишният доставчик вече е бил невалиден и не можа да бъде възстановен.</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/server_subset_job.py" line="355"/>
+        <location filename="../adapters/qgis/server_subset_job.py" line="391"/>
         <source>Server filter installation failed. The previous provider was restored.</source>
         <translation>Инсталирането на сървърния филтър е неуспешно. Предишният доставчик е възстановен.</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/server_subset_job.py" line="33"/>
+        <location filename="../adapters/qgis/server_subset_job.py" line="56"/>
         <source>Server filter installation is in progress. Retry after it finishes.</source>
         <translation>Инсталирането на сървърния филтър е в ход. Опитайте отново, след като приключи.</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/server_subset_job.py" line="207"/>
-        <location filename="../adapters/qgis/server_subset_job.py" line="237"/>
+        <location filename="../adapters/qgis/server_subset_job.py" line="249"/>
+        <location filename="../adapters/qgis/server_subset_job.py" line="280"/>
+        <location filename="../adapters/qgis/server_subset_job.py" line="451"/>
         <source>Server filter installation must start on the layer thread.</source>
         <translation>Инсталирането на сървърния филтър трябва да започне в нишката на слоя.</translation>
     </message>
@@ -6722,22 +6745,22 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation>Изразът е твърде голям или съдържа двусмислени обратни наклонени черти на SQL.</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/server_subset_job.py" line="318"/>
+        <location filename="../adapters/qgis/server_subset_job.py" line="354"/>
         <source>The layer changed while preparing its filter. The prepared result was discarded.</source>
         <translation>Слоят се промени по време на подготовката на филтъра му. Подготвеният резултат е отхвърлен.</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/server_subset_job.py" line="366"/>
+        <location filename="../adapters/qgis/server_subset_job.py" line="402"/>
         <source>The layer is no longer available. The prepared filter was discarded.</source>
         <translation>Слоят вече не е наличен. Подготвеният филтър е отхвърлен.</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/server_subset_job.py" line="311"/>
+        <location filename="../adapters/qgis/server_subset_job.py" line="347"/>
         <source>The server rejected the filter or could not be reached. The previous filter is unchanged.</source>
         <translation>Сървърът отхвърли филтъра или е недостъпен. Предишният филтър е непроменен.</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/server_subset_job.py" line="253"/>
+        <location filename="../adapters/qgis/server_subset_job.py" line="287"/>
         <source>This provider and QGIS version do not support verified worker creation. The previous filter is unchanged.</source>
         <translation>Този доставчик и тази версия на QGIS не поддържат проверено създаване на работен процес. Предишният филтър е непроменен.</translation>
     </message>
@@ -6747,12 +6770,14 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation>{0}: атрибутният филтър не може да се изпълни изцяло на сървъра. Неподдържана част: {1}. {2} Предишният филтър е непроменен.</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/server_filter_translation.py" line="265"/>
+        <location filename="../adapters/qgis/server_filter_translation.py" line="270"/>
+        <location filename="../adapters/qgis/server_subset_job.py" line="494"/>
         <source>{0}: the provider rejected the attribute filter. The previous filter was restored.</source>
         <translation>{0}: доставчикът отхвърли атрибутния филтър. Предишният филтър е възстановен.</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/server_filter_translation.py" line="264"/>
+        <location filename="../adapters/qgis/server_filter_translation.py" line="269"/>
+        <location filename="../adapters/qgis/server_subset_job.py" line="493"/>
         <source>{0}: the provider rejected the filter and restoration failed.</source>
         <translation>{0}: доставчикът отхвърли филтъра и възстановяването е неуспешно.</translation>
     </message>
@@ -6997,17 +7022,17 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
 <context>
     <name>TaskParameterBuilder</name>
     <message>
-        <location filename="../adapters/task_builder.py" line="936"/>
+        <location filename="../adapters/task_builder.py" line="942"/>
         <source>No entity selected! The selection widget lost the feature. Re-select an entity.</source>
         <translation>Не е избран обект! Уиджетът за избор е загубил обекта. Изберете отново обект.</translation>
     </message>
     <message>
-        <location filename="../adapters/task_builder.py" line="1054"/>
+        <location filename="../adapters/task_builder.py" line="1060"/>
         <source>Selected layer is invalid or its source cannot be found. Operation cancelled.</source>
         <translation>Избраният слой е невалиден или източникът му не може да бъде намерен. Операцията е отменена.</translation>
     </message>
     <message>
-        <location filename="../adapters/task_builder.py" line="1069"/>
+        <location filename="../adapters/task_builder.py" line="1075"/>
         <source>Layer &apos;{0}&apos; is not yet initialized. Try selecting another layer then switch back to this one.</source>
         <translation>Слой '{0}' все още не е инициализиран. Опитайте да изберете друг слой и след това превключете обратно към този.</translation>
     </message>
@@ -7046,14 +7071,19 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
 <context>
     <name>VectorTargetJob</name>
     <message>
-        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="261"/>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="301"/>
         <source>{0}: no unique key field, its features cannot be listed in its filter (a web service, or a virtual layer without a unique id column).</source>
         <translation>{0}: няма уникално ключово поле, обектите му не могат да бъдат изброени във филтъра му (уеб услуга или виртуален слой без колона с уникален id).</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="362"/>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="452"/>
         <source>{0} features to list, more than the {1} sent to a web service: narrow the source or use an attribute filter.</source>
         <translation>{0} обекта за изброяване, повече от {1}, изпращани към уеб услуга: стеснете източника или използвайте атрибутен филтър.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="392"/>
+        <source>{0} AND NOT would keep the features not read; the previous filter is kept.</source>
+        <translation>{0} AND NOT би запазило непрочетените обекти; предишният филтър е запазен.</translation>
     </message>
 </context>
 <context>
@@ -7156,7 +7186,7 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation>Атрибутен филтър за векторни плочки</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/coverage_layers/favorites_bridge.py" line="111"/>
+        <location filename="../adapters/qgis/coverage_layers/favorites_bridge.py" line="131"/>
         <source>Vector tile favorite</source>
         <translation>Любим за векторни плочки</translation>
     </message>

@@ -596,7 +596,7 @@
         <translation>PDAL을 찾을 수 없습니다: DTM 위의 높이를 계산하려면 pdal 실행 파일이 필요합니다</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3148"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3151"/>
         <source>A FilterMate task is still running: wait for it to finish</source>
         <translation>FilterMate 작업이 아직 실행 중입니다. 완료될 때까지 기다리세요</translation>
     </message>
@@ -631,12 +631,12 @@
         <translation>포인트 클라우드 필터링 완료: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3253"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3261"/>
         <source>Filter not applied: {0}</source>
         <translation>필터가 적용되지 않았습니다: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3110"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3113"/>
         <source>canceled</source>
         <translation>취소됨</translation>
     </message>
@@ -646,77 +646,77 @@
         <translation>대상 {0}개 필터링됨</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2820"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2823"/>
         <source>{0} failed: {1}</source>
         <translation>{0} 실패: {1}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2833"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2836"/>
         <source>FilterMate: filtering from '{0}'…</source>
         <translation>FilterMate: '{0}'에서 필터링 중…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2930"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2933"/>
         <source>Changed since, left as is: {0}</source>
         <translation>이후에 변경되어 그대로 둠: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2936"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2939"/>
         <source>{0} layer(s) restored</source>
         <translation>레이어 {0}개 복원됨</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2970"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2973"/>
         <source>&apos;{0}&apos; not exported: {1}</source>
         <translation>'{0}'을(를) 내보내지 못했습니다: {1}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2984"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2987"/>
         <source>Exported: {0}</source>
         <translation>내보냄: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2986"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2989"/>
         <source>Export failed: {0}</source>
         <translation>내보내기 실패: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2993"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2996"/>
         <source>Exporting {0} layer(s)…</source>
         <translation>레이어 {0}개를 내보내는 중…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2999"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3002"/>
         <source>Export folder</source>
         <translation>내보내기 폴더</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3081"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3084"/>
         <source>Raster / point cloud targets skipped: no source feature selected in EXPLORING</source>
         <translation>래스터 / 포인트 클라우드 대상을 건너뜀: EXPLORING에서 선택된 소스 피처가 없습니다</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3110"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3113"/>
         <source>Raster / point cloud targets not filtered: {0}</source>
         <translation>래스터 / 포인트 클라우드 대상이 필터링되지 않음: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3112"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3115"/>
         <source>{0} raster / point cloud target(s) filtered</source>
         <translation>래스터 / 포인트 클라우드 대상 {0}개 필터링됨</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3230"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3238"/>
         <source>Choose the DTM raster used for the height above ground</source>
         <translation>지면 위 높이에 사용할 DTM 래스터를 선택하세요</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3241"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3249"/>
         <source>Height above ground not computed: {0}</source>
         <translation>지면 위 높이를 계산하지 못했습니다: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3262"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3270"/>
         <source>Computing the height above '{0}' with PDAL…</source>
         <translation>PDAL로 '{0}' 위의 높이를 계산하는 중…</translation>
     </message>
@@ -881,32 +881,32 @@
         <translation>래스터 대상 {0}개를 설정된 픽셀 제한으로 리샘플링했습니다</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2844"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2847"/>
         <source>color selection limited to the captured extent; colors depend on style and scale</source>
         <translation>색상 선택은 캡처된 범위로 제한됩니다. 색상은 스타일과 축척에 따라 달라집니다</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2846"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2849"/>
         <source>raster source resampled to {0} cells within the pixel limit</source>
         <translation>래스터 소스를 픽셀 제한 내의 {0}개 셀로 리샘플링했습니다</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2848"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2851"/>
         <source>raster selection read every {0} pixels: over the pixel limit of the settings</source>
         <translation>래스터 선택을 {0}픽셀마다 읽었습니다: 설정의 픽셀 제한을 초과합니다</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2851"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2854"/>
         <source>dense raster selection smoothed to keep its outline light</source>
         <translation>조밀한 래스터 선택을 윤곽을 가볍게 유지하도록 평활화했습니다</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2898"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2901"/>
         <source>{0} left empty, nothing matches the selection: {1}</source>
         <translation>{0}이(가) 비었습니다. 선택 항목과 일치하는 것이 없습니다: {1}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2882"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2885"/>
         <source>failed</source>
         <translation>실패</translation>
     </message>
@@ -980,7 +980,7 @@
 <context>
     <name>ExploringController</name>
     <message>
-        <location filename="../ui/controllers/exploring_controller.py" line="2239"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="2481"/>
         <source>{0} features selected, more than the {1} a web service can be sent: narrow the selection or use an attribute filter.</source>
         <translation>선택한 피처 {0}개가 웹 서비스로 보낼 수 있는 {1}개를 초과합니다: 선택 범위를 좁히거나 속성 필터를 사용하세요.</translation>
     </message>
@@ -2141,39 +2141,39 @@ Please restart QGIS to apply the changes.</source>
         <translation>플러그인 로드 오류: {0}. 자세한 내용은 QGIS Python 콘솔을 확인하세요.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7357"/>
+        <location filename="../filter_mate_dockwidget.py" line="7416"/>
         <source>Current layer: {0}</source>
         <translation>현재 레이어: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7359"/>
+        <location filename="../filter_mate_dockwidget.py" line="7418"/>
         <source>No layer selected</source>
         <translation>선택된 레이어 없음</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7369"/>
+        <location filename="../filter_mate_dockwidget.py" line="7428"/>
         <source>Selected layers:
 {0}</source>
         <translation>선택된 레이어:
 {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7369"/>
+        <location filename="../filter_mate_dockwidget.py" line="7428"/>
         <source>No layers selected</source>
         <translation>선택된 레이어 없음</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7389"/>
+        <location filename="../filter_mate_dockwidget.py" line="7448"/>
         <source>No expression defined</source>
         <translation>정의된 표현식 없음</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7401"/>
+        <location filename="../filter_mate_dockwidget.py" line="7460"/>
         <source>Display expression: {0}</source>
         <translation>표시 표현식: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7416"/>
+        <location filename="../filter_mate_dockwidget.py" line="7477"/>
         <source>Feature ID: {0}
 First attribute: {1}</source>
         <translation>객체 ID: {0}
@@ -2200,125 +2200,135 @@ First attribute: {1}</source>
         <translation>사용자 가이드 열기</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/async_query.py" line="207"/>
+        <location filename="../adapters/qgis/async_query.py" line="409"/>
         <source>This expression cannot be evaluated safely for a service.</source>
         <translation>이 표현식은 서비스에 대해 안전하게 평가할 수 없습니다.</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/async_query.py" line="209"/>
+        <location filename="../adapters/qgis/async_query.py" line="496"/>
         <source>The service could not be read. Please retry.</source>
         <translation>서비스를 읽을 수 없습니다. 다시 시도하세요.</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/async_query.py" line="210"/>
+        <location filename="../adapters/qgis/async_query.py" line="496"/>
         <source>Read failed</source>
         <translation>읽기 실패</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/async_query.py" line="270"/>
+        <location filename="../adapters/qgis/async_query.py" line="287"/>
         <source>Loading filtered extent…</source>
         <translation>필터링된 범위를 불러오는 중…</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/async_query.py" line="404"/>
+        <source>The expression is not valid for this layer. Check its syntax and field names.</source>
+        <translation>이 표현식은 이 레이어에 유효하지 않습니다. 구문과 필드 이름을 확인하세요.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/async_query.py" line="407"/>
+        <source>A virtual field of this layer cannot be evaluated safely for a service.</source>
+        <translation>이 레이어의 가상 필드는 서비스에 대해 안전하게 평가할 수 없습니다.</translation>
     </message>
 </context>
 <context>
     <name>FilterMateApp</name>
     <message>
-        <location filename="../filter_mate_app.py" line="306"/>
+        <location filename="../filter_mate_app.py" line="319"/>
         <source>PostgreSQL layers detected ({0}) but psycopg2 is not installed.</source>
         <translation>PostgreSQL 레이어 감지됨 ({0})이지만 psycopg2가 설치되지 않았습니다.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="406"/>
+        <location filename="../filter_mate_app.py" line="419"/>
         <source>Cleared {0} caches</source>
         <translation>{0}개 캐시 삭제됨</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="912"/>
+        <location filename="../filter_mate_app.py" line="925"/>
         <source>Failed to create dockwidget: {0}</source>
         <translation>도킹 위젯 생성 실패: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="922"/>
+        <location filename="../filter_mate_app.py" line="935"/>
         <source>Failed to display dockwidget: {0}</source>
         <translation>도킹 위젯 표시 실패: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1493"/>
+        <location filename="../filter_mate_app.py" line="1501"/>
         <source>Error executing {0}: {1}</source>
         <translation>{0} 실행 오류: {1}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1505"/>
+        <location filename="../filter_mate_app.py" line="1513"/>
         <source>Plugin running in degraded mode (hexagonal services unavailable). Performance may be reduced.</source>
         <translation>플러그인이 저하 모드로 실행 중입니다 (헥사고날 서비스 사용 불가). 성능이 저하될 수 있습니다.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1854"/>
+        <location filename="../filter_mate_app.py" line="1857"/>
         <source>FilterMate ERROR</source>
         <translation>FilterMate 오류</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1854"/>
+        <location filename="../filter_mate_app.py" line="1857"/>
         <source>Cannot execute {0}: widget initialization failed.</source>
         <translation>{0}을(를) 실행할 수 없음: 위젯 초기화 실패.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2635"/>
+        <location filename="../filter_mate_app.py" line="2638"/>
         <source>Cannot {0}: layer invalid or source not found.</source>
         <translation>{0}할 수 없음: 레이어가 유효하지 않거나 소스를 찾을 수 없습니다.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2789"/>
+        <location filename="../filter_mate_app.py" line="2792"/>
         <source>All filters cleared - </source>
         <translation>모든 필터 해제됨 - </translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2790"/>
+        <location filename="../filter_mate_app.py" line="2793"/>
         <source>{0}{1} features visible in main layer</source>
         <translation>메인 레이어에 {0}{1}개 객체 표시</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2802"/>
+        <location filename="../filter_mate_app.py" line="2805"/>
         <source>Error: result handler missing</source>
         <translation>오류: 결과 핸들러가 없습니다</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2819"/>
+        <location filename="../filter_mate_app.py" line="2822"/>
         <source>Error during filtering: {0}</source>
         <translation>필터링 중 오류: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2943"/>
+        <location filename="../filter_mate_app.py" line="2946"/>
         <source>Recovered {0} orphan favorite(s): {1}</source>
         <translation>{0}개의 고아 즐겨찾기 복구됨: {1}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="3109"/>
+        <location filename="../filter_mate_app.py" line="3112"/>
         <source>Layer loading failed - click to retry</source>
         <translation>레이어 로드 실패 - 재시도하려면 클릭</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="3161"/>
+        <location filename="../filter_mate_app.py" line="3164"/>
         <source>{0} layer(s) loaded successfully</source>
         <translation>{0}개 레이어가 성공적으로 로드됨</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2092"/>
+        <location filename="../filter_mate_app.py" line="2095"/>
         <source>filter</source>
         <translation>filter</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2094"/>
+        <location filename="../filter_mate_app.py" line="2097"/>
         <source>unfilter</source>
         <translation>unfilter</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2097"/>
+        <location filename="../filter_mate_app.py" line="2100"/>
         <source>FilterMate – Edit Mode Detected</source>
         <translation>FilterMate – Edit Mode Detected</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2099"/>
+        <location filename="../filter_mate_app.py" line="2102"/>
         <source>The following layer(s) are currently in edit mode:
 {0}
 
@@ -2331,102 +2341,102 @@ QGIS cannot apply filters while a layer is being edited.
 What would you like to do?</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2109"/>
+        <location filename="../filter_mate_app.py" line="2112"/>
         <source>Save Changes &amp; {0}</source>
         <translation>Save Changes &amp; {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2116"/>
+        <location filename="../filter_mate_app.py" line="2119"/>
         <source>Discard Changes &amp; {0}</source>
         <translation>Discard Changes &amp; {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2123"/>
+        <location filename="../filter_mate_app.py" line="2126"/>
         <source>Cancel</source>
         <translation>Cancel</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2147"/>
+        <location filename="../filter_mate_app.py" line="2150"/>
         <source>Could not save changes for layer &quot;{0}&quot;. Operation cancelled.</source>
         <translation>Could not save changes for layer &quot;{0}&quot;. Operation cancelled.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1323"/>
+        <location filename="../filter_mate_app.py" line="1331"/>
         <source>Pick a layer in the EXPLORING tab before running &apos;{0}&apos;.</source>
         <translation>'{0}'을(를) 실행하기 전에 EXPLORING 탭에서 레이어를 선택하세요.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="839"/>
+        <location filename="../filter_mate_app.py" line="852"/>
         <source>{0} layer(s) stay filtered: {1}. Turn the option back on to unfilter them.</source>
         <translation>{0}개 레이어가 필터링된 상태로 남아 있습니다: {1}. 필터를 해제하려면 옵션을 다시 켜십시오.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2621"/>
+        <location filename="../filter_mate_app.py" line="2624"/>
         <source>A server filter is being prepared. Wait for it to finish before starting another operation.</source>
         <translation>서버 필터를 준비하는 중입니다. 다른 작업을 시작하기 전에 완료될 때까지 기다리세요.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1770"/>
+        <location filename="../filter_mate_app.py" line="1773"/>
         <source>A FilterMate API operation is running. Wait for it to finish.</source>
         <translation>FilterMate API 작업이 실행 중입니다. 완료될 때까지 기다리세요.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="445"/>
+        <location filename="../filter_mate_app.py" line="458"/>
         <source>Adding layers</source>
         <translation>레이어 추가 중</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="449"/>
+        <location filename="../filter_mate_app.py" line="462"/>
         <source>Existing project loaded</source>
         <translation>기존 프로젝트를 불러왔습니다</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="442"/>
+        <location filename="../filter_mate_app.py" line="455"/>
         <source>Exporting data</source>
         <translation>데이터 내보내는 중</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="439"/>
+        <location filename="../filter_mate_app.py" line="452"/>
         <source>Filtering data</source>
         <translation>데이터 필터링 중</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="448"/>
+        <location filename="../filter_mate_app.py" line="461"/>
         <source>New project</source>
         <translation>새 프로젝트</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="444"/>
+        <location filename="../filter_mate_app.py" line="457"/>
         <source>Redo filter</source>
         <translation>필터 다시 실행</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="450"/>
+        <location filename="../filter_mate_app.py" line="463"/>
         <source>Reloading layers</source>
         <translation>레이어 다시 불러오는 중</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="447"/>
+        <location filename="../filter_mate_app.py" line="460"/>
         <source>Removing all layers</source>
         <translation>모든 레이어 제거 중</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="446"/>
+        <location filename="../filter_mate_app.py" line="459"/>
         <source>Removing layers</source>
         <translation>레이어 제거 중</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="441"/>
+        <location filename="../filter_mate_app.py" line="454"/>
         <source>Reseting data</source>
         <translation>데이터 초기화 중</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="443"/>
+        <location filename="../filter_mate_app.py" line="456"/>
         <source>Undo filter</source>
         <translation>필터 실행 취소</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="440"/>
+        <location filename="../filter_mate_app.py" line="453"/>
         <source>Unfiltering data</source>
         <translation>데이터 필터 해제 중</translation>
     </message>
@@ -2553,57 +2563,59 @@ Drop anyway?</source>
         <translation>라이트 모드</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="4102"/>
+        <location filename="../filter_mate_dockwidget.py" line="4116"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="884"/>
         <source>Selected features have no geometry.</source>
         <translation>선택된 객체에 도형이 없습니다.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="4121"/>
+        <location filename="../filter_mate_dockwidget.py" line="4135"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="885"/>
         <source>No feature selected. Select a feature from the dropdown list.</source>
         <translation>선택된 객체가 없습니다. 드롭다운 목록에서 객체를 선택하세요.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="5285"/>
+        <location filename="../filter_mate_dockwidget.py" line="5319"/>
         <source>The selected layer is invalid or its source cannot be found.</source>
         <translation>선택된 레이어가 유효하지 않거나 소스를 찾을 수 없습니다.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6080"/>
+        <location filename="../filter_mate_dockwidget.py" line="6114"/>
         <source>Negative buffer (erosion): shrinks polygons inward</source>
         <translation>음수 버퍼 (침식): 폴리곤을 안쪽으로 축소</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6083"/>
+        <location filename="../filter_mate_dockwidget.py" line="6117"/>
         <source>Buffer value in meters (positive=expand, negative=shrink polygons)</source>
         <translation>미터 단위 버퍼 값 (양수=확장, 음수=폴리곤 축소)</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6585"/>
+        <location filename="../filter_mate_dockwidget.py" line="6619"/>
         <source>Plugin activated with {0} vector layer(s)</source>
         <translation>{0}개의 벡터 레이어로 플러그인 활성화됨</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6684"/>
+        <location filename="../filter_mate_dockwidget.py" line="6718"/>
         <source>Could not reload plugin automatically.</source>
         <translation>플러그인을 자동으로 다시 불러올 수 없습니다.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6689"/>
+        <location filename="../filter_mate_dockwidget.py" line="6723"/>
         <source>Error reloading plugin: {0}</source>
         <translation>플러그인 다시 불러오기 오류: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6764"/>
+        <location filename="../filter_mate_dockwidget.py" line="6798"/>
         <source>Layer properties reset to defaults</source>
         <translation>레이어 속성이 기본값으로 초기화됨</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6765"/>
+        <location filename="../filter_mate_dockwidget.py" line="6799"/>
         <source>Error resetting layer properties: {}</source>
         <translation>레이어 속성 초기화 오류: {}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="895"/>
+        <location filename="../filter_mate_dockwidget.py" line="7062"/>
         <source>Filter</source>
         <translation>필터</translation>
     </message>
@@ -2733,7 +2745,7 @@ Drop anyway?</source>
         <translation>패널 레이아웃을 적용할 수 없어 기본 크기를 사용합니다. 자세한 내용은 filtermate.log를 참조하세요.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6856"/>
+        <location filename="../filter_mate_dockwidget.py" line="6890"/>
         <location filename="../ui/controllers/backend_controller.py" line="682"/>
         <source>Vector</source>
         <translation>벡터</translation>
@@ -2764,91 +2776,92 @@ Drop anyway?</source>
         <translation>FilterMate 스키마 삭제</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="4224"/>
+        <location filename="../filter_mate_dockwidget.py" line="4247"/>
         <source>Read failed</source>
         <translation>읽기 실패</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="4224"/>
+        <location filename="../filter_mate_dockwidget.py" line="4247"/>
         <source>The service could not be read. Please retry.</source>
         <translation>서비스를 읽을 수 없습니다. 다시 시도하세요.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="4566"/>
+        <location filename="../filter_mate_dockwidget.py" line="4589"/>
         <source>Loading filtered extent…</source>
         <translation>필터링된 범위를 불러오는 중…</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="5150"/>
-        <location filename="../ui/controllers/exploring_controller.py" line="539"/>
-        <location filename="../ui/controllers/exploring_controller.py" line="3408"/>
+        <location filename="../filter_mate_dockwidget.py" line="5184"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="742"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="3658"/>
         <source>Loading selected values…</source>
         <translation>선택한 값을 불러오는 중…</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="5141"/>
-        <location filename="../ui/controllers/exploring_controller.py" line="502"/>
         <location filename="../ui/controllers/exploring_controller.py" line="603"/>
         <source>This expression cannot be evaluated safely for a service.</source>
-        <translation>이 표현식은 서비스에 대해 안전하게 평가할 수 없습니다.</translation>
+        <translation type="obsolete">이 표현식은 서비스에 대해 안전하게 평가할 수 없습니다.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/exploring_controller.py" line="2472"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="2715"/>
         <source>Error evaluating expression: {0}</source>
         <translation>표현식 평가 오류: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/exploring_controller.py" line="2471"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="2716"/>
         <source>Expression Evaluation</source>
         <translation>표현식 평가</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/exploring_controller.py" line="411"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="444"/>
         <source>Loading values…</source>
         <translation>값을 불러오는 중…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/exploring_controller.py" line="646"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="846"/>
         <source>Loading zoom extent…</source>
         <translation>확대 범위를 불러오는 중…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/exploring_controller.py" line="633"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="835"/>
         <source>No feature with geometry matches the selection.</source>
         <translation>선택 항목과 일치하는 도형이 있는 피처가 없습니다.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/exploring_controller.py" line="408"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="434"/>
         <source>Only a limited set of values is shown. Refine the search to find other values.</source>
         <translation>제한된 값만 표시됩니다. 다른 값을 찾으려면 검색 조건을 좁히세요.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/exploring_controller.py" line="475"/>
-        <location filename="../ui/controllers/exploring_controller.py" line="483"/>
-        <location filename="../ui/controllers/exploring_controller.py" line="502"/>
-        <location filename="../ui/controllers/exploring_controller.py" line="566"/>
+        <location filename="../filter_mate_dockwidget.py" line="5119"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="551"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="568"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="636"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="691"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="3651"/>
         <source>Selection</source>
         <translation>선택</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/exploring_controller.py" line="475"/>
-        <location filename="../ui/controllers/exploring_controller.py" line="566"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="550"/>
         <source>The service selection exceeds the key limit. Refine the selection.</source>
         <translation>서비스 선택이 키 제한을 초과합니다. 선택 범위를 좁히세요.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/exploring_controller.py" line="483"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="568"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="636"/>
         <source>This service has no stable key for the selection.</source>
         <translation>이 서비스에는 선택에 사용할 안정적인 키가 없습니다.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/exploring_controller.py" line="408"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="436"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="438"/>
         <source>Values</source>
         <translation>값</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/exploring_controller.py" line="603"/>
-        <location filename="../ui/controllers/exploring_controller.py" line="633"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="808"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="835"/>
         <source>Zoom</source>
         <translation>확대/축소</translation>
     </message>
@@ -2977,6 +2990,11 @@ Drop anyway?</source>
         <location filename="../ui/controllers/backend_controller.py" line="800"/>
         <source>📁 Current Project</source>
         <translation>📁 현재 프로젝트</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="7062"/>
+        <source>The filter was not launched: its selection changed or could not be read. Click Filter again.</source>
+        <translation>필터가 시작되지 않았습니다: 선택이 변경되었거나 읽을 수 없습니다. '필터'를 다시 클릭하세요.</translation>
     </message>
 </context>
 <context>
@@ -3155,22 +3173,22 @@ Drop anyway?</source>
 <context>
     <name>FilterMateOperations</name>
     <message>
-        <location filename="../adapters/public_api/operations.py" line="556"/>
+        <location filename="../adapters/public_api/operations.py" line="633"/>
         <source>FilterMate was unloaded</source>
         <translation>FilterMate가 언로드되었습니다</translation>
     </message>
     <message>
-        <location filename="../adapters/public_api/operations.py" line="118"/>
+        <location filename="../adapters/public_api/operations.py" line="119"/>
         <source>rendered or unsupported raster: cannot be a filter target</source>
         <translation>렌더링되었거나 지원되지 않는 래스터: 필터 대상이 될 수 없습니다</translation>
     </message>
     <message>
-        <location filename="../adapters/public_api/operations.py" line="505"/>
+        <location filename="../adapters/public_api/operations.py" line="582"/>
         <source>rendered raster sources require a local colour capture; numeric pixel selections are unavailable</source>
         <translation>렌더링된 래스터 소스에는 로컬 색상 캡처가 필요합니다. 숫자 픽셀 선택은 사용할 수 없습니다</translation>
     </message>
     <message>
-        <location filename="../adapters/public_api/operations.py" line="577"/>
+        <location filename="../adapters/public_api/operations.py" line="654"/>
         <source>the source layer itself was not changed</source>
         <translation>소스 레이어 자체는 변경되지 않았습니다</translation>
     </message>
@@ -4137,17 +4155,17 @@ PostgreSQL 테이블에 PRIMARY KEY가 정의되어 있는지 확인하세요.</
 <context>
     <name>PointCloudSource</name>
     <message>
-        <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="435"/>
+        <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="513"/>
         <source>Draw a useful selection zone before reading a remote point cloud</source>
         <translation>원격 포인트 클라우드를 읽기 전에 유효 선택 영역을 그리세요</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="468"/>
+        <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="546"/>
         <source>The remote point cloud could not be read</source>
         <translation>원격 포인트 클라우드를 읽을 수 없습니다</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="472"/>
+        <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="550"/>
         <source>The remote point cloud rejected the selection</source>
         <translation>원격 포인트 클라우드가 선택을 거부했습니다</translation>
     </message>
@@ -4155,22 +4173,22 @@ PostgreSQL 테이블에 PRIMARY KEY가 정의되어 있는지 확인하세요.</
 <context>
     <name>PointCloudTarget</name>
     <message>
-        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="605"/>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="811"/>
         <source>A bounded height-above-ground cloud only supports AND or AND NOT; Unfilter first</source>
         <translation>범위가 제한된 지면 위 높이 클라우드는 AND 또는 AND NOT만 지원합니다. 먼저 필터를 해제하세요</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="631"/>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="837"/>
         <source>PDAL 2.4 or newer is required to clip a remote point cloud</source>
         <translation>원격 포인트 클라우드를 클립하려면 PDAL 2.4 이상이 필요합니다</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="682"/>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="888"/>
         <source>Disjoint would read the whole remote cloud; choose an inside selection</source>
         <translation>Disjoint는 원격 클라우드 전체를 읽게 됩니다. 내부 선택을 선택하세요</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="689"/>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="895"/>
         <source>The original remote point cloud could not be opened</source>
         <translation>원본 원격 포인트 클라우드를 열 수 없습니다</translation>
     </message>
@@ -4797,7 +4815,7 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/common.py" line="206"/>
+        <location filename="../processing/algorithms/common.py" line="208"/>
         <source>{0}: failed — {1}</source>
         <translation type="unfinished"></translation>
     </message>
@@ -5527,32 +5545,32 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation>레이어 전체에서 &quot;{0}&quot; 검색 결과.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="1768"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="1808"/>
         <source>Loading values…</source>
         <translation>값을 불러오는 중…</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="1683"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="1735"/>
         <source>Values</source>
         <translation>값</translation>
     </message>
     <message>
         <location filename="../ui/widgets/custom_widgets.py" line="1683"/>
         <source>This expression cannot be evaluated safely for a service.</source>
-        <translation>이 표현식은 서비스에 대해 안전하게 평가할 수 없습니다.</translation>
+        <translation type="obsolete">이 표현식은 서비스에 대해 안전하게 평가할 수 없습니다.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="1748"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="1779"/>
         <source>Selection</source>
         <translation>선택</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="1748"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="1779"/>
         <source>The remote list exceeds the safe selection limit. Select fewer features or filter the layer first.</source>
         <translation>원격 목록이 안전한 선택 제한을 초과합니다. 선택하는 피처를 줄이거나 먼저 레이어를 필터하세요.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="1924"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="2008"/>
         <source>Loading selected values…</source>
         <translation>선택한 값을 불러오는 중…</translation>
     </message>
@@ -6364,12 +6382,12 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation>범위가 제한된 래스터 캡처에 실패했습니다</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="224"/>
+        <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="302"/>
         <source>local raster capture could not be opened</source>
         <translation>로컬 래스터 캡처를 열 수 없습니다</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="213"/>
+        <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="284"/>
         <source>raster analysis requires a local GDAL capture</source>
         <translation>래스터 분석에는 로컬 GDAL 캡처가 필요합니다</translation>
     </message>
@@ -6406,6 +6424,7 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
     </message>
     <message>
         <location filename="../adapters/qgis/coverage_layers/raster_materialization.py" line="87"/>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="646"/>
         <source>raster capture source could not be opened</source>
         <translation>래스터 캡처 소스를 열 수 없습니다</translation>
     </message>
@@ -6415,22 +6434,22 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation>래스터 구체화는 작업자 스레드에서 실행되어야 합니다</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="208"/>
+        <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="279"/>
         <source>raster selection canceled</source>
         <translation>래스터 선택이 취소되었습니다</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="216"/>
+        <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="294"/>
         <source>raster selection source could not be opened</source>
         <translation>래스터 선택 소스를 열 수 없습니다</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="204"/>
+        <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="275"/>
         <source>remote raster selection must run in a worker thread</source>
         <translation>원격 래스터 선택은 작업자 스레드에서 실행되어야 합니다</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="210"/>
+        <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="281"/>
         <source>rendered color selection requires a local rendered capture</source>
         <translation>렌더링된 색상 선택에는 로컬 렌더링 캡처가 필요합니다</translation>
     </message>
@@ -6464,17 +6483,17 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
 <context>
     <name>RasterTargetJob</name>
     <message>
-        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="459"/>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="642"/>
         <source>remote raster target must run in a worker thread</source>
         <translation>원격 래스터 대상은 작업자 스레드에서 실행되어야 합니다</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="470"/>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="671"/>
         <source>local raster target could not be opened</source>
         <translation>로컬 래스터 대상을 열 수 없습니다</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="480"/>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="681"/>
         <source>Rendered color layers cannot be filter targets.</source>
         <translation>렌더링된 색상 레이어는 필터 대상이 될 수 없습니다.</translation>
     </message>
@@ -6580,12 +6599,12 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation>원격 복사본을 읽거나 필터할 수 없습니다. 이전 필터를 유지합니다.</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/remote_materializer.py" line="93"/>
+        <location filename="../adapters/qgis/remote_materializer.py" line="138"/>
         <source>Remote materialization requires a background task.</source>
         <translation>원격 구체화에는 백그라운드 작업이 필요합니다.</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/remote_materializer.py" line="566"/>
+        <location filename="../adapters/qgis/remote_materializer.py" line="626"/>
         <source>Filtering a bounded remote copy</source>
         <translation>범위가 제한된 원격 복사본 필터링</translation>
     </message>
@@ -6619,48 +6638,50 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
 <context>
     <name>ServerFilterTranslation</name>
     <message>
-        <location filename="../adapters/qgis/server_subset_job.py" line="242"/>
+        <location filename="../adapters/qgis/server_subset_job.py" line="285"/>
+        <location filename="../adapters/qgis/server_subset_job.py" line="460"/>
         <source>A FilterMate task is still reading layers. Retry after it finishes.</source>
         <translation>FilterMate 작업이 아직 레이어를 읽는 중입니다. 완료된 후 다시 시도하세요.</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/server_subset_job.py" line="255"/>
+        <location filename="../adapters/qgis/server_subset_job.py" line="289"/>
         <source>A layer with auxiliary storage cannot safely replace its server provider. The previous filter is unchanged.</source>
         <translation>보조 저장소가 있는 레이어는 서버 제공자를 안전하게 교체할 수 없습니다. 이전 필터는 변경되지 않았습니다.</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/server_subset_job.py" line="260"/>
+        <location filename="../adapters/qgis/server_subset_job.py" line="294"/>
         <source>A remote join cannot be rebuilt on the main thread. The previous filter is unchanged.</source>
         <translation>원격 조인은 메인 스레드에서 다시 만들 수 없습니다. 이전 필터는 변경되지 않았습니다.</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/server_subset_job.py" line="262"/>
+        <location filename="../adapters/qgis/server_subset_job.py" line="296"/>
         <source>A server filter is already being prepared for this layer.</source>
         <translation>이 레이어의 서버 필터를 이미 준비하는 중입니다.</translation>
     </message>
     <message>
         <location filename="../adapters/qgis/server_filter_translation.py" line="189"/>
-        <location filename="../adapters/qgis/server_filter_translation.py" line="250"/>
+        <location filename="../adapters/qgis/server_filter_translation.py" line="255"/>
         <source>A server layer can only be modified on its owning thread.</source>
         <translation>서버 레이어는 소유 스레드에서만 수정할 수 있습니다.</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/server_subset_job.py" line="235"/>
+        <location filename="../adapters/qgis/server_subset_job.py" line="278"/>
         <source>Asynchronous server filters require QGIS 3.32 or newer. The previous filter is unchanged.</source>
         <translation>비동기 서버 필터에는 QGIS 3.32 이상이 필요합니다. 이전 필터는 변경되지 않았습니다.</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/server_subset_job.py" line="368"/>
+        <location filename="../adapters/qgis/server_subset_job.py" line="404"/>
         <source>Could not install the prepared server filter.</source>
         <translation>준비된 서버 필터를 설치할 수 없습니다.</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/server_subset_job.py" line="44"/>
+        <location filename="../adapters/qgis/server_subset_job.py" line="67"/>
         <source>Could not preserve the layer state.</source>
         <translation>레이어 상태를 보존할 수 없습니다.</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/server_subset_job.py" line="239"/>
+        <location filename="../adapters/qgis/server_subset_job.py" line="282"/>
+        <location filename="../adapters/qgis/server_subset_job.py" line="453"/>
         <source>Finish editing the layer before applying a server filter.</source>
         <translation>서버 필터를 적용하기 전에 레이어 편집을 마치세요.</translation>
     </message>
@@ -6670,7 +6691,7 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation>속성 표현식이 올바르지 않습니다.</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/server_subset_job.py" line="83"/>
+        <location filename="../adapters/qgis/server_subset_job.py" line="106"/>
         <source>Preparing server attribute filter</source>
         <translation>서버 속성 필터 준비 중</translation>
     </message>
@@ -6680,34 +6701,36 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation>QGIS가 이 조건자를 OGC 필터로 변환할 수 없습니다.</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/server_subset_job.py" line="302"/>
-        <location filename="../adapters/qgis/server_subset_job.py" line="311"/>
+        <location filename="../adapters/qgis/server_subset_job.py" line="336"/>
+        <location filename="../adapters/qgis/server_subset_job.py" line="347"/>
         <source>Server filter canceled or timed out. The previous filter is unchanged.</source>
         <translation>서버 필터가 취소되었거나 시간이 초과되었습니다. 이전 필터는 변경되지 않았습니다.</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/server_subset_job.py" line="348"/>
+        <location filename="../adapters/qgis/server_subset_job.py" line="384"/>
         <source>Server filter installation failed and the previous provider could not be restored.</source>
         <translation>서버 필터 설치에 실패했으며 이전 제공자를 복원할 수 없습니다.</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/server_subset_job.py" line="340"/>
+        <location filename="../adapters/qgis/server_subset_job.py" line="376"/>
+        <location filename="../adapters/qgis/server_subset_job.py" line="456"/>
         <source>Server filter installation failed. The previous provider was already invalid and could not be restored.</source>
         <translation>서버 필터 설치에 실패했습니다. 이전 제공자가 이미 유효하지 않아 복원할 수 없습니다.</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/server_subset_job.py" line="355"/>
+        <location filename="../adapters/qgis/server_subset_job.py" line="391"/>
         <source>Server filter installation failed. The previous provider was restored.</source>
         <translation>서버 필터 설치에 실패했습니다. 이전 제공자를 복원했습니다.</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/server_subset_job.py" line="33"/>
+        <location filename="../adapters/qgis/server_subset_job.py" line="56"/>
         <source>Server filter installation is in progress. Retry after it finishes.</source>
         <translation>서버 필터를 설치하는 중입니다. 완료된 후 다시 시도하세요.</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/server_subset_job.py" line="207"/>
-        <location filename="../adapters/qgis/server_subset_job.py" line="237"/>
+        <location filename="../adapters/qgis/server_subset_job.py" line="249"/>
+        <location filename="../adapters/qgis/server_subset_job.py" line="280"/>
+        <location filename="../adapters/qgis/server_subset_job.py" line="451"/>
         <source>Server filter installation must start on the layer thread.</source>
         <translation>서버 필터 설치는 레이어 스레드에서 시작해야 합니다.</translation>
     </message>
@@ -6722,22 +6745,22 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation>표현식이 너무 크거나 모호한 SQL 백슬래시 이스케이프를 포함합니다.</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/server_subset_job.py" line="318"/>
+        <location filename="../adapters/qgis/server_subset_job.py" line="354"/>
         <source>The layer changed while preparing its filter. The prepared result was discarded.</source>
         <translation>필터를 준비하는 동안 레이어가 변경되었습니다. 준비된 결과는 폐기되었습니다.</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/server_subset_job.py" line="366"/>
+        <location filename="../adapters/qgis/server_subset_job.py" line="402"/>
         <source>The layer is no longer available. The prepared filter was discarded.</source>
         <translation>레이어를 더 이상 사용할 수 없습니다. 준비된 필터는 폐기되었습니다.</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/server_subset_job.py" line="311"/>
+        <location filename="../adapters/qgis/server_subset_job.py" line="347"/>
         <source>The server rejected the filter or could not be reached. The previous filter is unchanged.</source>
         <translation>서버가 필터를 거부했거나 서버에 연결할 수 없습니다. 이전 필터는 변경되지 않았습니다.</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/server_subset_job.py" line="253"/>
+        <location filename="../adapters/qgis/server_subset_job.py" line="287"/>
         <source>This provider and QGIS version do not support verified worker creation. The previous filter is unchanged.</source>
         <translation>이 제공자와 QGIS 버전은 검증된 작업자 생성을 지원하지 않습니다. 이전 필터는 변경되지 않았습니다.</translation>
     </message>
@@ -6747,12 +6770,14 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation>{0}: 속성 필터를 전적으로 서버에서 실행할 수 없습니다. 지원되지 않는 부분: {1}. {2} 이전 필터는 변경되지 않았습니다.</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/server_filter_translation.py" line="265"/>
+        <location filename="../adapters/qgis/server_filter_translation.py" line="270"/>
+        <location filename="../adapters/qgis/server_subset_job.py" line="494"/>
         <source>{0}: the provider rejected the attribute filter. The previous filter was restored.</source>
         <translation>{0}: 제공자가 속성 필터를 거부했습니다. 이전 필터를 복원했습니다.</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/server_filter_translation.py" line="264"/>
+        <location filename="../adapters/qgis/server_filter_translation.py" line="269"/>
+        <location filename="../adapters/qgis/server_subset_job.py" line="493"/>
         <source>{0}: the provider rejected the filter and restoration failed.</source>
         <translation>{0}: 제공자가 필터를 거부했으며 복원에도 실패했습니다.</translation>
     </message>
@@ -6997,17 +7022,17 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
 <context>
     <name>TaskParameterBuilder</name>
     <message>
-        <location filename="../adapters/task_builder.py" line="936"/>
+        <location filename="../adapters/task_builder.py" line="942"/>
         <source>No entity selected! The selection widget lost the feature. Re-select an entity.</source>
         <translation>선택된 항목이 없습니다! 선택 위젯이 객체를 잃었습니다. 항목을 다시 선택하세요.</translation>
     </message>
     <message>
-        <location filename="../adapters/task_builder.py" line="1054"/>
+        <location filename="../adapters/task_builder.py" line="1060"/>
         <source>Selected layer is invalid or its source cannot be found. Operation cancelled.</source>
         <translation>선택된 레이어가 유효하지 않거나 소스를 찾을 수 없습니다. 작업이 취소되었습니다.</translation>
     </message>
     <message>
-        <location filename="../adapters/task_builder.py" line="1069"/>
+        <location filename="../adapters/task_builder.py" line="1075"/>
         <source>Layer &apos;{0}&apos; is not yet initialized. Try selecting another layer then switch back to this one.</source>
         <translation>레이어 '{0}'이(가) 아직 초기화되지 않았습니다. 다른 레이어를 선택한 후 이 레이어로 다시 전환해 보세요.</translation>
     </message>
@@ -7046,14 +7071,19 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
 <context>
     <name>VectorTargetJob</name>
     <message>
-        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="261"/>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="301"/>
         <source>{0}: no unique key field, its features cannot be listed in its filter (a web service, or a virtual layer without a unique id column).</source>
         <translation>{0}: 고유 키 필드가 없어 필터에서 피처를 나열할 수 없습니다(웹 서비스 또는 고유 ID 열이 없는 가상 레이어).</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="362"/>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="452"/>
         <source>{0} features to list, more than the {1} sent to a web service: narrow the source or use an attribute filter.</source>
         <translation>나열할 피처 {0}개가 웹 서비스로 보낼 수 있는 {1}개를 초과합니다: 소스 범위를 좁히거나 속성 필터를 사용하세요.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="392"/>
+        <source>{0} AND NOT would keep the features not read; the previous filter is kept.</source>
+        <translation>{0}의 AND NOT은 읽지 않은 피처를 유지하게 됩니다. 이전 필터를 유지합니다.</translation>
     </message>
 </context>
 <context>
@@ -7156,7 +7186,7 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation>벡터 타일 속성 필터</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/coverage_layers/favorites_bridge.py" line="111"/>
+        <location filename="../adapters/qgis/coverage_layers/favorites_bridge.py" line="131"/>
         <source>Vector tile favorite</source>
         <translation>벡터 타일 즐겨찾기</translation>
     </message>

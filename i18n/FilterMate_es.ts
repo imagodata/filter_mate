@@ -596,7 +596,7 @@
         <translation>No se encontró PDAL: la altura sobre un MDT requiere el ejecutable pdal</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3148"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3151"/>
         <source>A FilterMate task is still running: wait for it to finish</source>
         <translation>Una tarea de FilterMate sigue en ejecución: espere a que termine</translation>
     </message>
@@ -631,12 +631,12 @@
         <translation>Nube de puntos filtrada: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3253"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3261"/>
         <source>Filter not applied: {0}</source>
         <translation>Filtro no aplicado: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3110"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3113"/>
         <source>canceled</source>
         <translation>cancelado</translation>
     </message>
@@ -646,77 +646,77 @@
         <translation>{0} objetivo(s) filtrado(s)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2820"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2823"/>
         <source>{0} failed: {1}</source>
         <translation>{0} falló: {1}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2833"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2836"/>
         <source>FilterMate: filtering from '{0}'…</source>
         <translation>FilterMate: filtrando desde '{0}'…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2930"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2933"/>
         <source>Changed since, left as is: {0}</source>
         <translation>Modificada desde entonces, se deja como está: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2936"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2939"/>
         <source>{0} layer(s) restored</source>
         <translation>{0} capa(s) restaurada(s)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2970"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2973"/>
         <source>&apos;{0}&apos; not exported: {1}</source>
         <translation>'{0}' no exportada: {1}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2984"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2987"/>
         <source>Exported: {0}</source>
         <translation>Exportado: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2986"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2989"/>
         <source>Export failed: {0}</source>
         <translation>Error de exportación: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2993"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2996"/>
         <source>Exporting {0} layer(s)…</source>
         <translation>Exportando {0} capa(s)…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2999"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3002"/>
         <source>Export folder</source>
         <translation>Carpeta de exportación</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3081"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3084"/>
         <source>Raster / point cloud targets skipped: no source feature selected in EXPLORING</source>
         <translation>Objetivos ráster / nube de puntos omitidos: ninguna entidad de origen seleccionada en EXPLORING</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3110"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3113"/>
         <source>Raster / point cloud targets not filtered: {0}</source>
         <translation>Objetivos ráster / nube de puntos no filtrados: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3112"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3115"/>
         <source>{0} raster / point cloud target(s) filtered</source>
         <translation>{0} objetivo(s) ráster / nube de puntos filtrado(s)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3230"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3238"/>
         <source>Choose the DTM raster used for the height above ground</source>
         <translation>Elija el ráster MDT utilizado para la altura sobre el suelo</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3241"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3249"/>
         <source>Height above ground not computed: {0}</source>
         <translation>Altura sobre el suelo no calculada: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3262"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3270"/>
         <source>Computing the height above '{0}' with PDAL…</source>
         <translation>Calculando la altura sobre '{0}' con PDAL…</translation>
     </message>
@@ -881,32 +881,32 @@
         <translation>{0} objetivo(s) ráster remuestreado(s) al límite de píxeles configurado</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2844"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2847"/>
         <source>color selection limited to the captured extent; colors depend on style and scale</source>
         <translation>selección por color limitada a la extensión capturada; los colores dependen del estilo y de la escala</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2846"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2849"/>
         <source>raster source resampled to {0} cells within the pixel limit</source>
         <translation>origen ráster remuestreado a {0} celdas dentro del límite de píxeles</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2848"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2851"/>
         <source>raster selection read every {0} pixels: over the pixel limit of the settings</source>
         <translation>selección ráster leída cada {0} píxeles: por encima del límite de píxeles de los ajustes</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2851"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2854"/>
         <source>dense raster selection smoothed to keep its outline light</source>
         <translation>selección ráster densa suavizada para mantener ligero su contorno</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2898"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2901"/>
         <source>{0} left empty, nothing matches the selection: {1}</source>
         <translation>{0} vaciada(s), nada coincide con la selección: {1}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2882"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2885"/>
         <source>failed</source>
         <translation>fallido</translation>
     </message>
@@ -980,7 +980,7 @@
 <context>
     <name>ExploringController</name>
     <message>
-        <location filename="../ui/controllers/exploring_controller.py" line="2239"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="2481"/>
         <source>{0} features selected, more than the {1} a web service can be sent: narrow the selection or use an attribute filter.</source>
         <translation>{0} entidades seleccionadas, más de las {1} que se pueden enviar a un servicio web: reduzca la selección o utilice un filtro por atributos.</translation>
     </message>
@@ -2141,39 +2141,39 @@ Reinicie QGIS para aplicar los cambios.</translation>
         <translation>Error al cargar el complemento: {0}. Consulte la consola Python de QGIS para más detalles.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7357"/>
+        <location filename="../filter_mate_dockwidget.py" line="7416"/>
         <source>Current layer: {0}</source>
         <translation>Capa actual: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7359"/>
+        <location filename="../filter_mate_dockwidget.py" line="7418"/>
         <source>No layer selected</source>
         <translation>Ninguna capa seleccionada</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7369"/>
+        <location filename="../filter_mate_dockwidget.py" line="7428"/>
         <source>Selected layers:
 {0}</source>
         <translation>Capas seleccionadas:
 {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7369"/>
+        <location filename="../filter_mate_dockwidget.py" line="7428"/>
         <source>No layers selected</source>
         <translation>Ninguna capa seleccionada</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7389"/>
+        <location filename="../filter_mate_dockwidget.py" line="7448"/>
         <source>No expression defined</source>
         <translation>Ninguna expresión definida</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7401"/>
+        <location filename="../filter_mate_dockwidget.py" line="7460"/>
         <source>Display expression: {0}</source>
         <translation>Expresión de visualización: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7416"/>
+        <location filename="../filter_mate_dockwidget.py" line="7477"/>
         <source>Feature ID: {0}
 First attribute: {1}</source>
         <translation>ID de entidad: {0}
@@ -2200,125 +2200,135 @@ Primer atributo: {1}</translation>
         <translation>Abrir la guía del usuario</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/async_query.py" line="207"/>
+        <location filename="../adapters/qgis/async_query.py" line="409"/>
         <source>This expression cannot be evaluated safely for a service.</source>
         <translation>Esta expresión no se puede evaluar de forma segura para un servicio.</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/async_query.py" line="209"/>
+        <location filename="../adapters/qgis/async_query.py" line="496"/>
         <source>The service could not be read. Please retry.</source>
         <translation>No se pudo leer el servicio. Inténtelo de nuevo.</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/async_query.py" line="210"/>
+        <location filename="../adapters/qgis/async_query.py" line="496"/>
         <source>Read failed</source>
         <translation>Error de lectura</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/async_query.py" line="270"/>
+        <location filename="../adapters/qgis/async_query.py" line="287"/>
         <source>Loading filtered extent…</source>
         <translation>Cargando la extensión filtrada…</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/async_query.py" line="404"/>
+        <source>The expression is not valid for this layer. Check its syntax and field names.</source>
+        <translation>La expresión no es válida para esta capa. Compruebe su sintaxis y los nombres de los campos.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/async_query.py" line="407"/>
+        <source>A virtual field of this layer cannot be evaluated safely for a service.</source>
+        <translation>Un campo virtual de esta capa no se puede evaluar de forma segura para un servicio.</translation>
     </message>
 </context>
 <context>
     <name>FilterMateApp</name>
     <message>
-        <location filename="../filter_mate_app.py" line="306"/>
+        <location filename="../filter_mate_app.py" line="319"/>
         <source>PostgreSQL layers detected ({0}) but psycopg2 is not installed.</source>
         <translation>Capas PostgreSQL detectadas ({0}), pero psycopg2 no está instalado.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="406"/>
+        <location filename="../filter_mate_app.py" line="419"/>
         <source>Cleared {0} caches</source>
         <translation>{0} cachés limpiadas</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="912"/>
+        <location filename="../filter_mate_app.py" line="925"/>
         <source>Failed to create dockwidget: {0}</source>
         <translation>Error al crear el panel acoplable: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="922"/>
+        <location filename="../filter_mate_app.py" line="935"/>
         <source>Failed to display dockwidget: {0}</source>
         <translation>Error al mostrar el panel acoplable: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1493"/>
+        <location filename="../filter_mate_app.py" line="1501"/>
         <source>Error executing {0}: {1}</source>
         <translation>Error al ejecutar {0}: {1}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1505"/>
+        <location filename="../filter_mate_app.py" line="1513"/>
         <source>Plugin running in degraded mode (hexagonal services unavailable). Performance may be reduced.</source>
         <translation>Complemento ejecutándose en modo degradado (servicios hexagonales no disponibles). El rendimiento puede verse reducido.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1854"/>
+        <location filename="../filter_mate_app.py" line="1857"/>
         <source>FilterMate ERROR</source>
         <translation>FilterMate ERROR</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1854"/>
+        <location filename="../filter_mate_app.py" line="1857"/>
         <source>Cannot execute {0}: widget initialization failed.</source>
         <translation>No se puede ejecutar {0}: error en la inicialización del widget.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2635"/>
+        <location filename="../filter_mate_app.py" line="2638"/>
         <source>Cannot {0}: layer invalid or source not found.</source>
         <translation>No se puede {0}: capa inválida o fuente no encontrada.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2789"/>
+        <location filename="../filter_mate_app.py" line="2792"/>
         <source>All filters cleared - </source>
         <translation>Todos los filtros eliminados – </translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2790"/>
+        <location filename="../filter_mate_app.py" line="2793"/>
         <source>{0}{1} features visible in main layer</source>
         <translation>{0}{1} entidades visibles en la capa principal</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2802"/>
+        <location filename="../filter_mate_app.py" line="2805"/>
         <source>Error: result handler missing</source>
         <translation>Error: manejador de resultados no encontrado</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2819"/>
+        <location filename="../filter_mate_app.py" line="2822"/>
         <source>Error during filtering: {0}</source>
         <translation>Error durante el filtrado: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2943"/>
+        <location filename="../filter_mate_app.py" line="2946"/>
         <source>Recovered {0} orphan favorite(s): {1}</source>
         <translation>{0} favorito(s) huérfano(s) recuperado(s): {1}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="3109"/>
+        <location filename="../filter_mate_app.py" line="3112"/>
         <source>Layer loading failed - click to retry</source>
         <translation>Error al cargar la capa – clic para reintentar</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="3161"/>
+        <location filename="../filter_mate_app.py" line="3164"/>
         <source>{0} layer(s) loaded successfully</source>
         <translation>{0} capa(s) cargada(s) correctamente</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2092"/>
+        <location filename="../filter_mate_app.py" line="2095"/>
         <source>filter</source>
         <translation>filtrar</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2094"/>
+        <location filename="../filter_mate_app.py" line="2097"/>
         <source>unfilter</source>
         <translation>desfiltrar</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2097"/>
+        <location filename="../filter_mate_app.py" line="2100"/>
         <source>FilterMate – Edit Mode Detected</source>
         <translation>FilterMate – Modo de edición detectado</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2099"/>
+        <location filename="../filter_mate_app.py" line="2102"/>
         <source>The following layer(s) are currently in edit mode:
 {0}
 
@@ -2331,102 +2341,102 @@ QGIS cannot apply filters while a layer is being edited.
 What would you like to do?</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2109"/>
+        <location filename="../filter_mate_app.py" line="2112"/>
         <source>Save Changes &amp; {0}</source>
         <translation>Guardar cambios y {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2116"/>
+        <location filename="../filter_mate_app.py" line="2119"/>
         <source>Discard Changes &amp; {0}</source>
         <translation>Descartar cambios y {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2123"/>
+        <location filename="../filter_mate_app.py" line="2126"/>
         <source>Cancel</source>
         <translation>Cancelar</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2147"/>
+        <location filename="../filter_mate_app.py" line="2150"/>
         <source>Could not save changes for layer &quot;{0}&quot;. Operation cancelled.</source>
         <translation>No se pudieron guardar los cambios de la capa &quot;{0}&quot;. Operación cancelada.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1323"/>
+        <location filename="../filter_mate_app.py" line="1331"/>
         <source>Pick a layer in the EXPLORING tab before running &apos;{0}&apos;.</source>
         <translation>Elija una capa en la pestaña EXPLORING antes de ejecutar '{0}'.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="839"/>
+        <location filename="../filter_mate_app.py" line="852"/>
         <source>{0} layer(s) stay filtered: {1}. Turn the option back on to unfilter them.</source>
         <translation>{0} capa(s) siguen filtradas: {1}. Vuelva a activar la opción para quitarles el filtro.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="2621"/>
+        <location filename="../filter_mate_app.py" line="2624"/>
         <source>A server filter is being prepared. Wait for it to finish before starting another operation.</source>
         <translation>Se está preparando un filtro de servidor. Espere a que termine antes de iniciar otra operación.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="1770"/>
+        <location filename="../filter_mate_app.py" line="1773"/>
         <source>A FilterMate API operation is running. Wait for it to finish.</source>
         <translation>Se está ejecutando una operación de la API de FilterMate. Espere a que termine.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="445"/>
+        <location filename="../filter_mate_app.py" line="458"/>
         <source>Adding layers</source>
         <translation>Añadiendo capas</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="449"/>
+        <location filename="../filter_mate_app.py" line="462"/>
         <source>Existing project loaded</source>
         <translation>Proyecto existente cargado</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="442"/>
+        <location filename="../filter_mate_app.py" line="455"/>
         <source>Exporting data</source>
         <translation>Exportando datos</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="439"/>
+        <location filename="../filter_mate_app.py" line="452"/>
         <source>Filtering data</source>
         <translation>Filtrando datos</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="448"/>
+        <location filename="../filter_mate_app.py" line="461"/>
         <source>New project</source>
         <translation>Nuevo proyecto</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="444"/>
+        <location filename="../filter_mate_app.py" line="457"/>
         <source>Redo filter</source>
         <translation>Rehacer filtro</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="450"/>
+        <location filename="../filter_mate_app.py" line="463"/>
         <source>Reloading layers</source>
         <translation>Recargando capas</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="447"/>
+        <location filename="../filter_mate_app.py" line="460"/>
         <source>Removing all layers</source>
         <translation>Quitando todas las capas</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="446"/>
+        <location filename="../filter_mate_app.py" line="459"/>
         <source>Removing layers</source>
         <translation>Quitando capas</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="441"/>
+        <location filename="../filter_mate_app.py" line="454"/>
         <source>Reseting data</source>
         <translation>Restableciendo datos</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="443"/>
+        <location filename="../filter_mate_app.py" line="456"/>
         <source>Undo filter</source>
         <translation>Deshacer filtro</translation>
     </message>
     <message>
-        <location filename="../filter_mate_app.py" line="440"/>
+        <location filename="../filter_mate_app.py" line="453"/>
         <source>Unfiltering data</source>
         <translation>Desfiltrando datos</translation>
     </message>
@@ -2553,57 +2563,59 @@ Drop anyway?</source>
         <translation>Modo claro</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="4102"/>
+        <location filename="../filter_mate_dockwidget.py" line="4116"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="884"/>
         <source>Selected features have no geometry.</source>
         <translation>Las entidades seleccionadas no tienen geometría.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="4121"/>
+        <location filename="../filter_mate_dockwidget.py" line="4135"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="885"/>
         <source>No feature selected. Select a feature from the dropdown list.</source>
         <translation>Ninguna entidad seleccionada. Seleccione una entidad de la lista desplegable.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="5285"/>
+        <location filename="../filter_mate_dockwidget.py" line="5319"/>
         <source>The selected layer is invalid or its source cannot be found.</source>
         <translation>La capa seleccionada es inválida o no se puede encontrar su fuente.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6080"/>
+        <location filename="../filter_mate_dockwidget.py" line="6114"/>
         <source>Negative buffer (erosion): shrinks polygons inward</source>
         <translation>Buffer negativo (erosión): contrae los polígonos hacia el interior</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6083"/>
+        <location filename="../filter_mate_dockwidget.py" line="6117"/>
         <source>Buffer value in meters (positive=expand, negative=shrink polygons)</source>
         <translation>Valor de buffer en metros (positivo=expandir, negativo=contraer polígonos)</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6585"/>
+        <location filename="../filter_mate_dockwidget.py" line="6619"/>
         <source>Plugin activated with {0} vector layer(s)</source>
         <translation>Complemento activado con {0} capa(s) vectorial(es)</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6684"/>
+        <location filename="../filter_mate_dockwidget.py" line="6718"/>
         <source>Could not reload plugin automatically.</source>
         <translation>No se pudo recargar el complemento automáticamente.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6689"/>
+        <location filename="../filter_mate_dockwidget.py" line="6723"/>
         <source>Error reloading plugin: {0}</source>
         <translation>Error al recargar el complemento: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6764"/>
+        <location filename="../filter_mate_dockwidget.py" line="6798"/>
         <source>Layer properties reset to defaults</source>
         <translation>Propiedades de la capa restablecidas a valores predeterminados</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6765"/>
+        <location filename="../filter_mate_dockwidget.py" line="6799"/>
         <source>Error resetting layer properties: {}</source>
         <translation>Error al restablecer las propiedades de la capa: {}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="895"/>
+        <location filename="../filter_mate_dockwidget.py" line="7062"/>
         <source>Filter</source>
         <translation>Filtrar</translation>
     </message>
@@ -2733,7 +2745,7 @@ Drop anyway?</source>
         <translation>No se pudo aplicar la disposición del panel; se usan los tamaños predeterminados. Detalles en filtermate.log.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6856"/>
+        <location filename="../filter_mate_dockwidget.py" line="6890"/>
         <location filename="../ui/controllers/backend_controller.py" line="682"/>
         <source>Vector</source>
         <translation>Vectorial</translation>
@@ -2764,91 +2776,92 @@ Drop anyway?</source>
         <translation>Eliminar el esquema de FilterMate</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="4224"/>
+        <location filename="../filter_mate_dockwidget.py" line="4247"/>
         <source>Read failed</source>
         <translation>Error de lectura</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="4224"/>
+        <location filename="../filter_mate_dockwidget.py" line="4247"/>
         <source>The service could not be read. Please retry.</source>
         <translation>No se pudo leer el servicio. Inténtelo de nuevo.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="4566"/>
+        <location filename="../filter_mate_dockwidget.py" line="4589"/>
         <source>Loading filtered extent…</source>
         <translation>Cargando la extensión filtrada…</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="5150"/>
-        <location filename="../ui/controllers/exploring_controller.py" line="539"/>
-        <location filename="../ui/controllers/exploring_controller.py" line="3408"/>
+        <location filename="../filter_mate_dockwidget.py" line="5184"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="742"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="3658"/>
         <source>Loading selected values…</source>
         <translation>Cargando los valores seleccionados…</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="5141"/>
-        <location filename="../ui/controllers/exploring_controller.py" line="502"/>
         <location filename="../ui/controllers/exploring_controller.py" line="603"/>
         <source>This expression cannot be evaluated safely for a service.</source>
-        <translation>Esta expresión no se puede evaluar de forma segura para un servicio.</translation>
+        <translation type="obsolete">Esta expresión no se puede evaluar de forma segura para un servicio.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/exploring_controller.py" line="2472"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="2715"/>
         <source>Error evaluating expression: {0}</source>
         <translation>Error al evaluar la expresión: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/exploring_controller.py" line="2471"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="2716"/>
         <source>Expression Evaluation</source>
         <translation>Evaluación de la expresión</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/exploring_controller.py" line="411"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="444"/>
         <source>Loading values…</source>
         <translation>Cargando valores…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/exploring_controller.py" line="646"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="846"/>
         <source>Loading zoom extent…</source>
         <translation>Cargando la extensión del zoom…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/exploring_controller.py" line="633"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="835"/>
         <source>No feature with geometry matches the selection.</source>
         <translation>Ninguna entidad con geometría coincide con la selección.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/exploring_controller.py" line="408"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="434"/>
         <source>Only a limited set of values is shown. Refine the search to find other values.</source>
         <translation>Solo se muestra un conjunto limitado de valores. Refine la búsqueda para encontrar otros valores.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/exploring_controller.py" line="475"/>
-        <location filename="../ui/controllers/exploring_controller.py" line="483"/>
-        <location filename="../ui/controllers/exploring_controller.py" line="502"/>
-        <location filename="../ui/controllers/exploring_controller.py" line="566"/>
+        <location filename="../filter_mate_dockwidget.py" line="5119"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="551"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="568"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="636"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="691"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="3651"/>
         <source>Selection</source>
         <translation>Selección</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/exploring_controller.py" line="475"/>
-        <location filename="../ui/controllers/exploring_controller.py" line="566"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="550"/>
         <source>The service selection exceeds the key limit. Refine the selection.</source>
         <translation>La selección del servicio supera el límite de claves. Refine la selección.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/exploring_controller.py" line="483"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="568"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="636"/>
         <source>This service has no stable key for the selection.</source>
         <translation>Este servicio no tiene una clave estable para la selección.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/exploring_controller.py" line="408"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="436"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="438"/>
         <source>Values</source>
         <translation>Valores</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/exploring_controller.py" line="603"/>
-        <location filename="../ui/controllers/exploring_controller.py" line="633"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="808"/>
+        <location filename="../ui/controllers/exploring_controller.py" line="835"/>
         <source>Zoom</source>
         <translation>Zoom</translation>
     </message>
@@ -2977,6 +2990,11 @@ Drop anyway?</source>
         <location filename="../ui/controllers/backend_controller.py" line="800"/>
         <source>📁 Current Project</source>
         <translation>📁 Proyecto actual</translation>
+    </message>
+    <message>
+        <location filename="../filter_mate_dockwidget.py" line="7062"/>
+        <source>The filter was not launched: its selection changed or could not be read. Click Filter again.</source>
+        <translation>El filtro no se inició: su selección cambió o no se pudo leer. Haga clic en Filtrar de nuevo.</translation>
     </message>
 </context>
 <context>
@@ -3155,22 +3173,22 @@ Drop anyway?</source>
 <context>
     <name>FilterMateOperations</name>
     <message>
-        <location filename="../adapters/public_api/operations.py" line="556"/>
+        <location filename="../adapters/public_api/operations.py" line="633"/>
         <source>FilterMate was unloaded</source>
         <translation>FilterMate se ha descargado</translation>
     </message>
     <message>
-        <location filename="../adapters/public_api/operations.py" line="118"/>
+        <location filename="../adapters/public_api/operations.py" line="119"/>
         <source>rendered or unsupported raster: cannot be a filter target</source>
         <translation>ráster renderizado o no compatible: no puede ser un objetivo del filtro</translation>
     </message>
     <message>
-        <location filename="../adapters/public_api/operations.py" line="505"/>
+        <location filename="../adapters/public_api/operations.py" line="582"/>
         <source>rendered raster sources require a local colour capture; numeric pixel selections are unavailable</source>
         <translation>las fuentes ráster renderizadas requieren una captura de color local; las selecciones numéricas de píxeles no están disponibles</translation>
     </message>
     <message>
-        <location filename="../adapters/public_api/operations.py" line="577"/>
+        <location filename="../adapters/public_api/operations.py" line="654"/>
         <source>the source layer itself was not changed</source>
         <translation>la propia capa de origen no se modificó</translation>
     </message>
@@ -4137,17 +4155,17 @@ Asegúrese de que la tabla PostgreSQL tenga un PRIMARY KEY definido.</translatio
 <context>
     <name>PointCloudSource</name>
     <message>
-        <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="435"/>
+        <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="513"/>
         <source>Draw a useful selection zone before reading a remote point cloud</source>
         <translation>Dibuje una zona de selección útil antes de leer una nube de puntos remota</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="468"/>
+        <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="546"/>
         <source>The remote point cloud could not be read</source>
         <translation>No se pudo leer la nube de puntos remota</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="472"/>
+        <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="550"/>
         <source>The remote point cloud rejected the selection</source>
         <translation>La nube de puntos remota rechazó la selección</translation>
     </message>
@@ -4155,22 +4173,22 @@ Asegúrese de que la tabla PostgreSQL tenga un PRIMARY KEY definido.</translatio
 <context>
     <name>PointCloudTarget</name>
     <message>
-        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="605"/>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="811"/>
         <source>A bounded height-above-ground cloud only supports AND or AND NOT; Unfilter first</source>
         <translation>Una nube acotada de altura sobre el suelo solo admite AND o AND NOT; Desfiltre primero</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="631"/>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="837"/>
         <source>PDAL 2.4 or newer is required to clip a remote point cloud</source>
         <translation>Se requiere PDAL 2.4 o superior para recortar una nube de puntos remota</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="682"/>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="888"/>
         <source>Disjoint would read the whole remote cloud; choose an inside selection</source>
         <translation>Disjoint leería toda la nube remota; elija una selección interior</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="689"/>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="895"/>
         <source>The original remote point cloud could not be opened</source>
         <translation>No se pudo abrir la nube de puntos remota original</translation>
     </message>
@@ -4797,7 +4815,7 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../processing/algorithms/common.py" line="206"/>
+        <location filename="../processing/algorithms/common.py" line="208"/>
         <source>{0}: failed — {1}</source>
         <translation type="unfinished"></translation>
     </message>
@@ -5527,32 +5545,32 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation>Resultados de la búsqueda de &quot;{0}&quot; en toda la capa.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="1768"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="1808"/>
         <source>Loading values…</source>
         <translation>Cargando valores…</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="1683"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="1735"/>
         <source>Values</source>
         <translation>Valores</translation>
     </message>
     <message>
         <location filename="../ui/widgets/custom_widgets.py" line="1683"/>
         <source>This expression cannot be evaluated safely for a service.</source>
-        <translation>Esta expresión no se puede evaluar de forma segura para un servicio.</translation>
+        <translation type="obsolete">Esta expresión no se puede evaluar de forma segura para un servicio.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="1748"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="1779"/>
         <source>Selection</source>
         <translation>Selección</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="1748"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="1779"/>
         <source>The remote list exceeds the safe selection limit. Select fewer features or filter the layer first.</source>
         <translation>La lista remota supera el límite de selección segura. Seleccione menos entidades o filtre primero la capa.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/custom_widgets.py" line="1924"/>
+        <location filename="../ui/widgets/custom_widgets.py" line="2008"/>
         <source>Loading selected values…</source>
         <translation>Cargando los valores seleccionados…</translation>
     </message>
@@ -6364,12 +6382,12 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation>falló la captura ráster acotada</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="224"/>
+        <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="302"/>
         <source>local raster capture could not be opened</source>
         <translation>no se pudo abrir la captura ráster local</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="213"/>
+        <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="284"/>
         <source>raster analysis requires a local GDAL capture</source>
         <translation>el análisis ráster requiere una captura GDAL local</translation>
     </message>
@@ -6406,6 +6424,7 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
     </message>
     <message>
         <location filename="../adapters/qgis/coverage_layers/raster_materialization.py" line="87"/>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="646"/>
         <source>raster capture source could not be opened</source>
         <translation>no se pudo abrir el origen de la captura ráster</translation>
     </message>
@@ -6415,22 +6434,22 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation>la materialización del ráster debe ejecutarse en un hilo de trabajo</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="208"/>
+        <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="279"/>
         <source>raster selection canceled</source>
         <translation>selección ráster cancelada</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="216"/>
+        <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="294"/>
         <source>raster selection source could not be opened</source>
         <translation>no se pudo abrir el origen de la selección ráster</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="204"/>
+        <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="275"/>
         <source>remote raster selection must run in a worker thread</source>
         <translation>la selección ráster remota debe ejecutarse en un hilo de trabajo</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="210"/>
+        <location filename="../adapters/qgis/coverage_layers/source_jobs.py" line="281"/>
         <source>rendered color selection requires a local rendered capture</source>
         <translation>la selección de color renderizado requiere una captura renderizada local</translation>
     </message>
@@ -6464,17 +6483,17 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
 <context>
     <name>RasterTargetJob</name>
     <message>
-        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="459"/>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="642"/>
         <source>remote raster target must run in a worker thread</source>
         <translation>el objetivo ráster remoto debe ejecutarse en un hilo de trabajo</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="470"/>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="671"/>
         <source>local raster target could not be opened</source>
         <translation>no se pudo abrir el objetivo ráster local</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="480"/>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="681"/>
         <source>Rendered color layers cannot be filter targets.</source>
         <translation>Las capas de color renderizado no pueden ser objetivos del filtro.</translation>
     </message>
@@ -6580,12 +6599,12 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation>No se pudo leer o filtrar la copia remota; se conserva el filtro anterior.</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/remote_materializer.py" line="93"/>
+        <location filename="../adapters/qgis/remote_materializer.py" line="138"/>
         <source>Remote materialization requires a background task.</source>
         <translation>La materialización remota requiere una tarea en segundo plano.</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/remote_materializer.py" line="566"/>
+        <location filename="../adapters/qgis/remote_materializer.py" line="626"/>
         <source>Filtering a bounded remote copy</source>
         <translation>Filtrando una copia remota acotada</translation>
     </message>
@@ -6619,48 +6638,50 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
 <context>
     <name>ServerFilterTranslation</name>
     <message>
-        <location filename="../adapters/qgis/server_subset_job.py" line="242"/>
+        <location filename="../adapters/qgis/server_subset_job.py" line="285"/>
+        <location filename="../adapters/qgis/server_subset_job.py" line="460"/>
         <source>A FilterMate task is still reading layers. Retry after it finishes.</source>
         <translation>Una tarea de FilterMate sigue leyendo capas. Vuelva a intentarlo cuando termine.</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/server_subset_job.py" line="255"/>
+        <location filename="../adapters/qgis/server_subset_job.py" line="289"/>
         <source>A layer with auxiliary storage cannot safely replace its server provider. The previous filter is unchanged.</source>
         <translation>Una capa con almacenamiento auxiliar no puede reemplazar de forma segura a su proveedor de servidor. El filtro anterior no ha cambiado.</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/server_subset_job.py" line="260"/>
+        <location filename="../adapters/qgis/server_subset_job.py" line="294"/>
         <source>A remote join cannot be rebuilt on the main thread. The previous filter is unchanged.</source>
         <translation>Una unión remota no se puede reconstruir en el hilo principal. El filtro anterior no ha cambiado.</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/server_subset_job.py" line="262"/>
+        <location filename="../adapters/qgis/server_subset_job.py" line="296"/>
         <source>A server filter is already being prepared for this layer.</source>
         <translation>Ya se está preparando un filtro de servidor para esta capa.</translation>
     </message>
     <message>
         <location filename="../adapters/qgis/server_filter_translation.py" line="189"/>
-        <location filename="../adapters/qgis/server_filter_translation.py" line="250"/>
+        <location filename="../adapters/qgis/server_filter_translation.py" line="255"/>
         <source>A server layer can only be modified on its owning thread.</source>
         <translation>Una capa de servidor solo se puede modificar en el hilo al que pertenece.</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/server_subset_job.py" line="235"/>
+        <location filename="../adapters/qgis/server_subset_job.py" line="278"/>
         <source>Asynchronous server filters require QGIS 3.32 or newer. The previous filter is unchanged.</source>
         <translation>Los filtros de servidor asíncronos requieren QGIS 3.32 o superior. El filtro anterior no ha cambiado.</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/server_subset_job.py" line="368"/>
+        <location filename="../adapters/qgis/server_subset_job.py" line="404"/>
         <source>Could not install the prepared server filter.</source>
         <translation>No se pudo instalar el filtro de servidor preparado.</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/server_subset_job.py" line="44"/>
+        <location filename="../adapters/qgis/server_subset_job.py" line="67"/>
         <source>Could not preserve the layer state.</source>
         <translation>No se pudo conservar el estado de la capa.</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/server_subset_job.py" line="239"/>
+        <location filename="../adapters/qgis/server_subset_job.py" line="282"/>
+        <location filename="../adapters/qgis/server_subset_job.py" line="453"/>
         <source>Finish editing the layer before applying a server filter.</source>
         <translation>Termine de editar la capa antes de aplicar un filtro de servidor.</translation>
     </message>
@@ -6670,7 +6691,7 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation>Expresión de atributos no válida.</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/server_subset_job.py" line="83"/>
+        <location filename="../adapters/qgis/server_subset_job.py" line="106"/>
         <source>Preparing server attribute filter</source>
         <translation>Preparando el filtro de atributos del servidor</translation>
     </message>
@@ -6680,34 +6701,36 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation>QGIS no puede traducir este predicado a un filtro OGC.</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/server_subset_job.py" line="302"/>
-        <location filename="../adapters/qgis/server_subset_job.py" line="311"/>
+        <location filename="../adapters/qgis/server_subset_job.py" line="336"/>
+        <location filename="../adapters/qgis/server_subset_job.py" line="347"/>
         <source>Server filter canceled or timed out. The previous filter is unchanged.</source>
         <translation>Filtro de servidor cancelado o con tiempo de espera agotado. El filtro anterior no ha cambiado.</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/server_subset_job.py" line="348"/>
+        <location filename="../adapters/qgis/server_subset_job.py" line="384"/>
         <source>Server filter installation failed and the previous provider could not be restored.</source>
         <translation>Falló la instalación del filtro de servidor y no se pudo restaurar el proveedor anterior.</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/server_subset_job.py" line="340"/>
+        <location filename="../adapters/qgis/server_subset_job.py" line="376"/>
+        <location filename="../adapters/qgis/server_subset_job.py" line="456"/>
         <source>Server filter installation failed. The previous provider was already invalid and could not be restored.</source>
         <translation>Falló la instalación del filtro de servidor. El proveedor anterior ya no era válido y no se pudo restaurar.</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/server_subset_job.py" line="355"/>
+        <location filename="../adapters/qgis/server_subset_job.py" line="391"/>
         <source>Server filter installation failed. The previous provider was restored.</source>
         <translation>Falló la instalación del filtro de servidor. Se restauró el proveedor anterior.</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/server_subset_job.py" line="33"/>
+        <location filename="../adapters/qgis/server_subset_job.py" line="56"/>
         <source>Server filter installation is in progress. Retry after it finishes.</source>
         <translation>La instalación del filtro de servidor está en curso. Vuelva a intentarlo cuando termine.</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/server_subset_job.py" line="207"/>
-        <location filename="../adapters/qgis/server_subset_job.py" line="237"/>
+        <location filename="../adapters/qgis/server_subset_job.py" line="249"/>
+        <location filename="../adapters/qgis/server_subset_job.py" line="280"/>
+        <location filename="../adapters/qgis/server_subset_job.py" line="451"/>
         <source>Server filter installation must start on the layer thread.</source>
         <translation>La instalación del filtro de servidor debe iniciarse en el hilo de la capa.</translation>
     </message>
@@ -6722,22 +6745,22 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation>La expresión es demasiado grande o contiene secuencias de escape SQL con barra invertida ambiguas.</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/server_subset_job.py" line="318"/>
+        <location filename="../adapters/qgis/server_subset_job.py" line="354"/>
         <source>The layer changed while preparing its filter. The prepared result was discarded.</source>
         <translation>La capa cambió mientras se preparaba su filtro. Se descartó el resultado preparado.</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/server_subset_job.py" line="366"/>
+        <location filename="../adapters/qgis/server_subset_job.py" line="402"/>
         <source>The layer is no longer available. The prepared filter was discarded.</source>
         <translation>La capa ya no está disponible. Se descartó el filtro preparado.</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/server_subset_job.py" line="311"/>
+        <location filename="../adapters/qgis/server_subset_job.py" line="347"/>
         <source>The server rejected the filter or could not be reached. The previous filter is unchanged.</source>
         <translation>El servidor rechazó el filtro o no se pudo contactar con él. El filtro anterior no ha cambiado.</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/server_subset_job.py" line="253"/>
+        <location filename="../adapters/qgis/server_subset_job.py" line="287"/>
         <source>This provider and QGIS version do not support verified worker creation. The previous filter is unchanged.</source>
         <translation>Este proveedor y esta versión de QGIS no admiten la creación verificada de procesos de trabajo. El filtro anterior no ha cambiado.</translation>
     </message>
@@ -6747,12 +6770,14 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation>{0}: el filtro de atributos no se puede ejecutar por completo en el servidor. Parte no admitida: {1}. {2} El filtro anterior no ha cambiado.</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/server_filter_translation.py" line="265"/>
+        <location filename="../adapters/qgis/server_filter_translation.py" line="270"/>
+        <location filename="../adapters/qgis/server_subset_job.py" line="494"/>
         <source>{0}: the provider rejected the attribute filter. The previous filter was restored.</source>
         <translation>{0}: el proveedor rechazó el filtro de atributos. Se restauró el filtro anterior.</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/server_filter_translation.py" line="264"/>
+        <location filename="../adapters/qgis/server_filter_translation.py" line="269"/>
+        <location filename="../adapters/qgis/server_subset_job.py" line="493"/>
         <source>{0}: the provider rejected the filter and restoration failed.</source>
         <translation>{0}: el proveedor rechazó el filtro y falló la restauración.</translation>
     </message>
@@ -6997,17 +7022,17 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
 <context>
     <name>TaskParameterBuilder</name>
     <message>
-        <location filename="../adapters/task_builder.py" line="936"/>
+        <location filename="../adapters/task_builder.py" line="942"/>
         <source>No entity selected! The selection widget lost the feature. Re-select an entity.</source>
         <translation>¡Ninguna entidad seleccionada! El widget de selección perdió la entidad. Vuelva a seleccionar una entidad.</translation>
     </message>
     <message>
-        <location filename="../adapters/task_builder.py" line="1054"/>
+        <location filename="../adapters/task_builder.py" line="1060"/>
         <source>Selected layer is invalid or its source cannot be found. Operation cancelled.</source>
         <translation>La capa seleccionada es inválida o no se puede encontrar su fuente. Operación cancelada.</translation>
     </message>
     <message>
-        <location filename="../adapters/task_builder.py" line="1069"/>
+        <location filename="../adapters/task_builder.py" line="1075"/>
         <source>Layer &apos;{0}&apos; is not yet initialized. Try selecting another layer then switch back to this one.</source>
         <translation>La capa '{0}' aún no está inicializada. Seleccione otra capa y luego vuelva a esta.</translation>
     </message>
@@ -7046,14 +7071,19 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
 <context>
     <name>VectorTargetJob</name>
     <message>
-        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="261"/>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="301"/>
         <source>{0}: no unique key field, its features cannot be listed in its filter (a web service, or a virtual layer without a unique id column).</source>
         <translation>{0}: sin campo de clave única, sus entidades no se pueden enumerar en su filtro (un servicio web, o una capa virtual sin columna de id única).</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="362"/>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="452"/>
         <source>{0} features to list, more than the {1} sent to a web service: narrow the source or use an attribute filter.</source>
         <translation>{0} entidades que enumerar, más de las {1} que se envían a un servicio web: reduzca el origen o utilice un filtro por atributos.</translation>
+    </message>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/target_appliers.py" line="392"/>
+        <source>{0} AND NOT would keep the features not read; the previous filter is kept.</source>
+        <translation>{0} AND NOT conservaría las entidades no leídas; se conserva el filtro anterior.</translation>
     </message>
 </context>
 <context>
@@ -7156,7 +7186,7 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation>Filtro de atributos de teselas vectoriales</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/coverage_layers/favorites_bridge.py" line="111"/>
+        <location filename="../adapters/qgis/coverage_layers/favorites_bridge.py" line="131"/>
         <source>Vector tile favorite</source>
         <translation>Favorito de teselas vectoriales</translation>
     </message>
