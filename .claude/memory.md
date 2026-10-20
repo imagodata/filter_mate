@@ -824,3 +824,13 @@ Result: Que veux-tu faire dans cette session ?
   une cellule de marge, un millionième de cellule en moins pour que le `ceil` de la capture ne rééchantillonne pas).
   `layer_kind_by_class` connaît VECTOR_TILE (cible seulement) ; un favori de l'API recoupe via `_run_task` et un échec
   de découpage va dans `report.failed`.
+- [2026-10-20] Clôture des sources en flux (branche `claude/v5-stream-F-last`) : `QgsTaskManager.activeTasks()`
+  perd une tâche Complete dès qu'une autre tâche est ajoutée (`processQueue`), alors que son `finished()` tourne
+  encore ; `tasks()` la liste jusqu'au retour de `finished()` (sondé en 3.22, 3.34, 3.44, 4.2). La garde
+  `operations._background_tasks_running` lit donc `tasks()`, stricte par défaut (`busy_reason`, l'API attend la fin
+  du `finished()` du dock) ; seuls les deux démarrages de filtre serveur (`server_subset_job`) passent
+  `allow_finishing=True`. Source vecteur d'un service dans l'API : `RemoteVectorSourceJob` (sélectionnée ou filtrée,
+  instantané `_snapshot` sur le thread principal, `read_bounded_features` dans le worker, copie incomplète refusée).
+  En dock, AND NOT avec un filtre précédent écrit (`_combine_with_old_subset`) refuse un résultat partiel, comme
+  l'API. Délai d'un filtre serveur : `APP.OPTIONS.SERVER_FILTER` (`wfs_timeout_seconds` 60 pour WFS / OAPIF,
+  `timeout_seconds` 30 sinon, 1 à 600 s, sinon défaut), lu via `ENV_VARS` (`server_subset_job.configured_timeout_ms`).

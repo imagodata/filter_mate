@@ -93,12 +93,17 @@ with VectorService(attribute_filters=True) as fixture:
     # 2026-10-20: 30 s was too short for the public Géoplateforme WFS; the
     # delay is configurable (APP.OPTIONS.SERVER_FILTER), 60 s for WFS.
     from filter_mate.config.config import ENV_VARS  # noqa: E402
-    delays = [job_module.ServerSubsetJob(layer, '"id" = 7').timer.interval()]
+
+    def delay():
+        job = job_module.ServerSubsetJob(layer, '"id" = 7')  # not started: no request
+        return job.timer.interval()
+
+    delays = [delay()]
     saved_config = ENV_VARS.get('CONFIG_DATA')
     try:
         for value in (45, 'x', 0):
             ENV_VARS['CONFIG_DATA'] = {'APP': {'OPTIONS': {'SERVER_FILTER': {'wfs_timeout_seconds': {'value': value}}}}}
-            delays.append(job_module.ServerSubsetJob(layer, '"id" = 7').timer.interval())
+            delays.append(delay())
     finally:
         ENV_VARS['CONFIG_DATA'] = saved_config
         if saved_config is None:

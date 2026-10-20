@@ -110,17 +110,21 @@ def main():
         def feature_requests():
             return [request for request in fixture.requests if not request["hits"]]
 
+        # Without lot B's reply validation (QGIS < 3.26, 3.26 - 3.35 under Python 3.12)
+        # every service read is refused first, as in the dock.
+        validated = remote_materializer.supports_reply_validation()
+        refusal = "Select or filter the remote source" if validated else "cannot be proved complete"
         fixture.requests.clear()
         report = run(source, target)
         check("unselected, unfiltered service source refused before any read",
-              "Select or filter the remote source" in (report.error or "") and not feature_requests()
+              refusal in (report.error or "") and not feature_requests()
               and not report.done and kept(target) == ["first", "none", "ten"],
               "{!r} {} rows".format(report.error, sum(request["returned"] for request in feature_requests())))
         report = run(source, target, selected_only=False)
-        check("whole-layer source refused too", "Select or filter" in (report.error or "")
+        check("whole-layer source refused too", refusal in (report.error or "")
               and not feature_requests(), repr(report.error))
 
-        if not remote_materializer.supports_reply_validation():
+        if not validated:
             source.setSubsetString('"id" < 3')
             report = run(source, target)
             check("older network API refuses a service source before any read",
