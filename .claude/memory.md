@@ -32,6 +32,7 @@ _Auto-maintained by project agent_
 - Lot A integration: `materialize_translation` consumes FULL/PARTIAL/NONE and evaluates the local residual on the bounded copy. `prepare_server_subset(..., rect=...)` offers this worker-only fallback, then validates the resulting key list as FULL; partial copies are refused by that string-only API. Without an explicit useful extent the previous refusal remains. OAPIF spatial key application uses the lot A validator by default (an explicit `_remote_subset_validator` may provide stronger server-specific evidence); no FULL verdict means no successful filter. OAPIF inherited subsets are evaluated locally over raw BBOX rows so client filtering cannot hide a row cap; a source subset without a useful BBOX or captured/selected features is refused if server completeness is unverified.
 - A feature or time limit yields an explicitly partial result; cancellation, transport errors and more than 500 keys carry no usable result. Disjoint uses the bounded intersecting key complement only after a complete read. Mixed Disjoint with other predicates is refused for a remote target.
 - Qt6 can report an HTTP failure as an exhausted, valid feature iterator. Observe the actual reply's error signal using a temporary NAM reply preprocessor (QGIS >= 3.26); remove it in finally. Before QGIS 3.26 (including older backports exposing the method), service materialization refuses explicitly before its provider read: QGIS 3.22 can label an HTTP-200 ExceptionReport as a complete empty result. Do not use its requestCreated fallback: downloader NAM destruction cannot be observed safely from task cleanup. Local operations remain supported. Capture the main NAM before scheduling tasks.
+- [2026-10-20] Before QGIS 3.36.0 the `setReplyPreprocessor` / `setRequestPreprocessor` (and `QgsPathResolver.setPathPreprocessor` / `setPathWriter`) bindings allocate the returned id string without the GIL (checked in the 3.34.15 sip files; 3.36.0 fixed the NAM ones): the registration itself segfaults under Python 3.12+ (QGIS 3.34.15 on Ubuntu 24.04, every 3.26-3.35 binding) and aborts under Python's allocator debug hooks (`PYTHONDEVMODE`, `PYTHONMALLOC=*debug`, debug CPython). `reply_preprocessor_is_safe` / `reply_preprocessor_available` gate every registration; such builds refuse service reads like QGIS < 3.26. A static unit test allows no other registration. CI image that reproduces it: `qgis/qgis:3.34.15-noble` (`release-3_34` / `final-3_34_*` are Ubuntu 22.04, Python 3.10).
 - Residual string expressions reuse lot C's `remote_expression_is_safe`: no project variables, eval, aggregate or cross-layer read escapes the copied feature context. Internal exact geometry predicates remain trusted callables.
 - Observe transport before provider construction/reload with `read_bounded_features(source_factory=...)`. OAPIF intentionally aborts HTTP-200 landing-page and `/conformance` discovery responses; ignore those metadata probes while keeping feature replies observed. Any service iterator with zero copied rows refuses as unverified (QGIS can swallow a protocol error); zero local matches after examining rows remain valid. FinishedHandler drops the raw feature tuple at normal task completion.
 - Defaults in `APP.OPTIONS.REMOTE_MATERIALIZATION`: `max_features=20000`, `timeout_seconds=90`. A malformed option keeps the bounded defaults. The time budget is cooperative: a provider that ignores feedback can finish its current blocking request, but its late result cannot be labelled complete.
@@ -782,11 +783,42 @@ Result: Que veux-tu faire dans cette session ?
   rendue certaine dans le smoke GUI (`s_undo_pick_race` : `singleShot(150)` de la touche, undo, `sleep`). Un choix
   fait pendant la tâche filtre est appliqué à la fin (`_combo_blocked_at`) ; une tâche échouée / annulée rouvre la
   fenêtre (`_filter_engine_task_terminated`, garde de génération pour annuler-relancer).
+- [2026-10-19] Filtre attributaire serveur par version QGIS (branche `claude/v5-stream-F-versions`) : politique pure
+  `core/filter/server_transfer_policy.transfer_mode(provider, QGIS_VERSION_INT, declares_parallel)` → `async` / `sync`
+  / `refuse`. WFS et ArcGIS en asynchrone dès 3.32 (API `readLayerXml(..., preloadedProvider)`), prouvé de 3.32.3 à la
+  nightly 4.3 par `tests/qgis_headless/check_stream_versions.py` (WFS) et `check_stream_vector_filters.py` (ArcGIS) ;
+  WFS en `setSubsetString` synchrone de 3.24 à 3.31 (aucune requête dans le setter ; 3.24 / 3.26 peuvent attendre la
+  fin d'un téléchargement en cours, jusqu'à plusieurs secondes), refusé en 3.22 (12 plantages sur 27 essais) : son setter WFS corrompt le tas si un rendu ou un itérateur lit la couche
+  (même après `stopRendering()`, annulation non bloquante) ; ArcGIS refusé avant 3.32. Pièges vérifiés :
+  `QgsNetworkAccessManager.setReplyPreprocessor` plante (segfault) dans l'image QGIS 3.34.15 même avec un callable vide,
+  et son vecteur global n'a pas de verrou → ne pas l'utiliser hors du matérialiseur de B (qui plante aussi en 3.34.15) ;
+  QGIS lit un `ows:ExceptionReport` WFS comme une erreur provider mais un `ServiceExceptionReport` WFS 1.0 comme un
+  résultat vide ; `QgsBlockingNetworkRequest.get()` préfère le cache HTTP de QGIS (`PreferCache`) : réponse sans
+  en-tête de cache resservie sans requête → `get(request, True)` pour un verdict serveur, et vider du cache les URL
+  d'une tâche échouée ; un test « `singleShot(10)` » contre un job asynchrone perd face à un worker servi par ce cache
+  → retenir la réponse du serveur de test (`threading.Event`) et agir dans la boucle avec `singleShot(0)`.
+  Garde « tâche en cours » (`operations._background_tasks_running`) : QGIS liste encore une tâche (statut Complete)
+  pendant son `finished()` → ignorer Complete / Terminated, sinon le dock refuse ses propres filtres serveur.
+  Images Docker : `qgis/qgis:3.40`, `qgis/qgis:4.0` (pas `release-3_40`), `release-3_24/26/30` existent.
+- [2026-10-19] Revue du lot C (#193, branche `claude/v5-stream-F-c-fixes`) : `_remote_selection_plan` est la seule
+  source des requêtes de sélection / zoom d'une source lue en tâche (custom vide ou non-filtre → rien à lire, zoom sur
+  `dataProvider().extent()` — pas `layer.extent()`, qui compte les entités après un changement de subset ; refus =
+  `(None, None)`, message affiché, `_remote_selection_refused`). Règles « service » (500 clés, clé stable, liste
+  blanche) seulement si `capability.is_remote_service` ; sinon (MSSQL, Oracle, /vsicurl/...) clés de 5.0 et lecture
+  sur le thread GUI (`ImmediateRead`) quand un worker ne peut pas évaluer l'expression (`read_refusal`). Un champ
+  virtuel n'est refusé que si la requête l'évalue (`request_reads_fields`). Le Filtre différé suit une lecture
+  remplacée par une signature identique (même fid ⇒ `setFilterFids([fid])` partout ; révision « single » = fid
+  désigné) et prévient sinon. `show_warning(message, title)` : l'ordre était inversé dans le lot C.
+  Le refus « clé stable » d'un Filtre de service est dans `remote_filter_refused` (avant la lecture : clé de la
+  liste = clé stable, ou nom de confiance si le fournisseur ne déclare pas de clé ; après : aucune clé NULL), appelé
+  par launchTaskEvent et par TaskParameterBuilder.get_and_validate_features ; la lecture, le zoom et Identify d'une
+  telle sélection restent permis. Le choix enregistré d'un service est passé comme `QgsFeature(fields, fid)` valide,
+  jamais relu sur le thread GUI.
 - [2026-10-20] API publique sur les sources en flux (branche `claude/v5-stream-F-api`) : `_run_task` calcule dans un
   `QThread` (jamais un thread Python : les providers WCS / WFS démarrent des minuteurs Qt dans le thread qui lit,
   « Timers can only be used with threads started with QThread » puis plantage natif en 3.44) et rend le bail
   `service._running` AVANT d'appliquer (sinon le filtre serveur WFS refuse : « A FilterMate task is still reading
-  layers »). Cible vecteur d'un service web dans `VectorTargetJob` : `remote_materializer.materialize` (BBOX serveur,
+  layers » ; la tâche de l'API n'est jamais dans le QgsTaskManager, son statut reste Queued, cf. #199 pour celles du dock). Cible vecteur d'un service web dans `VectorTargetJob` : `remote_materializer.materialize` (BBOX serveur,
   prédicat exact local, 500 clés) et les messages du dock (`filter_executor._remote_message`) ; Disjoint = NOT (clés
   qui intersectent). Cible raster distante capturée sur l'emprise gardée seulement (`_capture_window` : grille native,
   une cellule de marge, un millionième de cellule en moins pour que le `ceil` de la capture ne rééchantillonne pas).

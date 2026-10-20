@@ -242,8 +242,15 @@ class FavoritesSpatialHandler:
                     except (AttributeError, KeyError, RuntimeError) as e:
                         logger.debug(f"Could not capture custom_selection_expression: {e}")
 
-            # Capture task_features (selected feature IDs)
-            features, _ = dw.get_current_features()
+            # Capture task_features (selected feature IDs). Not for a source read in tasks
+            # (web service, network database): its selection may still be loading, and
+            # restore_spatial_config never fetches such ids on the GUI thread.
+            current_layer = getattr(dw, "current_layer", None)
+            read_in_tasks = False
+            if current_layer is not None:
+                from ...adapters.qgis.source_capability_probe import counts_cheaply
+                read_in_tasks = not counts_cheaply(current_layer)
+            features = [] if read_in_tasks else dw.get_current_features()[0]
             if features:
                 feature_ids = [f.id() for f in features if f.isValid()]
                 if feature_ids:
@@ -383,11 +390,20 @@ class FavoritesSpatialHandler:
 
                 source_layer = dw.current_layer
 
+                from ...adapters.qgis.source_capability_probe import counts_cheaply
                 # FIX 2026-04-21: only push IDs / fetch features when the
                 # current layer is the same one the favorite was captured
                 # against. Cross-layer apply must not corrupt another
                 # layer's selection with foreign FIDs.
-                if favorite_matches_current_layer(favorite, source_layer):
+                if not counts_cheaply(source_layer):
+                    # Fetching them one by one would read a web service / network database
+                    # on the GUI thread (and a service's feature ids last one session): the
+                    # selection comes from the EXPLORING widgets, read in a task.
+                    logger.info(
+                        f"  ↪ Skipping task_feature_ids on '{source_layer.name()}': "
+                        f"its features are not read on the GUI thread"
+                    )
+                elif favorite_matches_current_layer(favorite, source_layer):
                     # Push feature IDs into QGIS layer selection so the
                     # feature picker / multi-select widgets surface them.
                     try:

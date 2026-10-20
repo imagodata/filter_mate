@@ -184,12 +184,17 @@ def _background_tasks_running() -> bool:
         tasks = list(QgsApplication.taskManager().activeTasks())
     except Exception:
         return False
-    # A task whose finished() applies its results is still listed as active
-    # (QgsTaskManager updates the list after finished()), yet reads nothing any
-    # more: applying a WFS key list from there starts a server filter, which
-    # refused while its own task was "running". A nested loop of that apply is
-    # still kept out by server_filter_pending() (busy_reason).
-    return any(type(task).__name__ in _CONFLICTING_TASKS and not _finished(task) for task in tasks)
+
+    def finishing(task):
+        # QGIS still lists a task while its finished() runs on the main
+        # thread, where the dock applies that task's own (server) subsets.
+        try:
+            from qgis.core import QgsTask
+            return task.status() in (QgsTask.TaskStatus.Complete, QgsTask.TaskStatus.Terminated)
+        except Exception:
+            return False
+
+    return any(type(task).__name__ in _CONFLICTING_TASKS and not finishing(task) for task in tasks)
 
 
 def busy_reason() -> str:
