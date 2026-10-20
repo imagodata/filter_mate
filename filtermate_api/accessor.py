@@ -69,6 +69,9 @@ class CrossFilterResult:
     error: Optional[str] = None
     # Layers left out on purpose (not found, not filterable, the source itself), apart from ``failed``.
     skipped: Dict[str, str] = field(default_factory=dict)
+    # Layers filtered with a reservation, also in ``filtered``: a web service read up to its
+    # feature or time budget keeps exact features only, some may be missing (partial result).
+    warnings: Dict[str, str] = field(default_factory=dict)
 
 
 @dataclass(frozen=True)

@@ -246,7 +246,8 @@ def build_server(client: FilterMateClient) -> Any:
         area (outside with Disjoint). Filters apply in place to the project layers and replace the previous filter
         of each target unless operator is given. Not recorded in the undo history: revert with clear_filters.
 
-        Returns filtered (names of the layers filtered), failed ({layer: reason}) and skipped ({layer: reason}).
+        Returns filtered (names of the layers filtered), failed ({layer: reason}), skipped ({layer: reason}) and
+        warnings ({layer: reason}: filtered, but a web service read up to its budget, so features may be missing).
         A layer that is not found is reported in failed; a source that is not found is an error.
         """
         return await call("POST", "/filters/cross", _body(
@@ -276,7 +277,7 @@ def build_server(client: FilterMateClient) -> Any:
         Same effect and answer as cross_filter, with a geometry given inline instead of a source layer: the way to
         filter by an area when no source feature can be selected in QGIS. Replaces the previous filter of each
         target unless operator is given. Not in the undo history: revert with clear_filters.
-        Returns filtered, failed and skipped.
+        Returns filtered, failed, skipped and warnings.
         """
         return await call("POST", "/filters/geometry", _body(
             wkt=wkt, crs=crs, target_layers=target_layers, predicates=predicates, buffer=buffer,

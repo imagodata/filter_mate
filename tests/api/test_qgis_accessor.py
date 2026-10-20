@@ -612,3 +612,15 @@ class TestGeometryTypeNames:
         assert _geometry_type_name(2) == "Polygon"
         assert _geometry_type_name(None) == "Unknown"
         assert _geometry_type_name(-1) == "Unknown"
+
+
+class TestCrossResult:
+    def test_partial_web_service_target_is_a_warning(self):
+        """2026-10-20: a WFS target read up to its budget is filtered, the client is told so."""
+        report = types.SimpleNamespace(
+            error="", done_names=["communes"], failed={}, skipped={},
+            details={"layers": {"communes": {"kept": 9, "partial": "Partial result: the remote time limit was reached."},
+                                "points": {"kept": 3}}})
+        result = QGISFilterMateAccessor._cross_result(report)
+        assert result.filtered == ["communes"]
+        assert result.warnings == {"communes": "Partial result: the remote time limit was reached."}

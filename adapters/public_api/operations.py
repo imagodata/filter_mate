@@ -45,6 +45,7 @@ logger = logging.getLogger(__name__)
 
 NOT_IN_PROJECT = "not in the project: a filter on a temporary layer would be lost"
 NOT_FILTERABLE = "not a vector, raster or point cloud layer FilterMate can filter"
+TILES_TARGET_ONLY = "vector tiles are filter targets only, never a source"
 
 
 def _tr(text: str) -> str:
@@ -249,16 +250,17 @@ def _exclusive(tidy: bool = True):
 
 
 def _run_task(service, request, source_job, feedback=None, apply_results=None):
-    """Compute in one worker while Qt keeps serving events, then apply on main.
+    """Compute in one Qt worker thread while Qt keeps serving events, then apply on main.
 
     Automation waits for the result, but remote raster materialization must
-    never run on the caller's main thread. A dedicated single-worker executor
-    keeps the task alive until computation ends; only apply_results touches
-    project layers. Progress is queued explicitly so feedback runs on main.
+    never run on the caller's main thread. The worker is a QThread, like the
+    QgsTask threads of the dock: the WCS and WFS providers start Qt timers in
+    the thread that reads, which a plain Python thread has no event dispatcher
+    for (QGIS 3.44 then crashed in the WCS download). Only apply_results
+    touches project layers. Progress is queued explicitly so feedback runs on main.
     """
-    from concurrent.futures import ThreadPoolExecutor
     from queue import Empty, SimpleQueue
-    from qgis.PyQt.QtCore import QEventLoop, QTimer, Qt
+    from qgis.PyQt.QtCore import QEventLoop, QThread, QTimer, Qt
 
     task = service.build_task(request, source_job)
 
@@ -268,64 +270,102 @@ def _run_task(service, request, source_job, feedback=None, apply_results=None):
         else:
             apply_results(task, result)
 
+    outcome = {}
+
+    class Worker(QThread):
+        def run(self):
+            try:
+                outcome['result'] = task.run()
+            except BaseException as exc:  # re-raised on main, once applied
+                outcome['error'] = exc
+            finally:
+                outcome['done'] = True
+
+    def release_lease():
+        # cancel_all() and on_done may replace the list while Qt processes events.
+        # Remove only this lease, preserving any other tasks registered meanwhile.
+        service._running = [running for running in service._running if running is not task]
+
     loop = QEventLoop()
     timer = QTimer()
     progress = SimpleQueue()
+    links = []
     if feedback is not None:
         # A direct connection only enqueues a number, never calls GUI code.
         connection = getattr(Qt, 'ConnectionType', Qt).DirectConnection
         task.progressChanged.connect(progress.put, connection)
         feedback.canceled.connect(task.cancel)
+        links = [(task.progressChanged, progress.put), (feedback.canceled, task.cancel)]
         if feedback.isCanceled():
             task.cancel()
 
     # This task is not submitted to QgsTaskManager, so its QGIS status stays
-    # Queued. Keep a service lease for unload cancellation until apply ends.
+    # Queued. Keep a service lease for unload cancellation while it reads; it
+    # is released before apply, which may install a server filter that refuses
+    # to start while a FilterMate task still reads layers (see
+    # _background_tasks_running for the dock's tasks).
     service._running.append(task)
-    try:
-        with ThreadPoolExecutor(max_workers=1, thread_name_prefix='FilterMateAPI') as executor:
-            future = executor.submit(task.run)
+    worker = Worker()
 
-            def poll():
-                if feedback is not None:
-                    while True:
-                        try:
-                            value = progress.get_nowait()
-                        except Empty:
-                            break
-                        feedback.setProgress(value)
-                    if feedback.isCanceled():
-                        task.cancel()
-                if future.done():
-                    loop.quit()
-
-            timer.timeout.connect(poll)
-            timer.start(10)
-            try:
-                # Re-enter if an unrelated event quits the nested loop early.
-                while not future.done():
-                    loop.exec()
-                poll()
-                result = future.result()
-            except BaseException:
-                task.cancel()
-                # Do not release worker-owned providers/files while run uses them.
-                try:
-                    future.result()
-                except BaseException:
-                    pass
-                apply(False)
-                raise
-            finally:
-                timer.stop()
-            apply(result and not task.isCanceled())
-    finally:
-        # cancel_all() and on_done may replace the list while Qt processes events.
-        # Remove only this lease, preserving any other tasks registered meanwhile.
-        service._running = [running for running in service._running if running is not task]
+    def poll():
+        if outcome.get('done'):
+            loop.quit()  # first: a failing feedback below must not keep the nested loop running
         if feedback is not None:
-            _disconnect((feedback.canceled, task.cancel), (task.progressChanged, progress.put))
+            while True:
+                try:
+                    value = progress.get_nowait()
+                except Empty:
+                    break
+                feedback.setProgress(value)
+            if feedback.isCanceled():
+                task.cancel()
+
+    timer.timeout.connect(poll)
+    try:
+        try:
+            worker.start()
+            if not worker.isRunning() and not worker.isFinished():
+                raise RuntimeError("the FilterMate worker thread could not start")
+            timer.start(10)
+            # Re-enter if an unrelated event quits the nested loop early.
+            while not outcome.get('done'):
+                loop.exec()
+            poll()
+        except BaseException:
+            task.cancel()
+            # Do not release worker-owned providers/files while run uses them.
+            worker.wait()
+            release_lease()
+            apply(False)
+            raise
+        finally:
+            timer.stop()
+        worker.wait()
+        release_lease()
+        if links:
+            # Applying cannot be stopped half way: a Cancel now must not report applied targets as canceled.
+            _disconnect(links.pop())
+        if 'error' in outcome:
+            task.cancel()
+            apply(False)
+            raise outcome['error']
+        apply(outcome.get('result') and not task.isCanceled())
+    finally:
+        release_lease()
+        _disconnect(*links)
     return task
+
+
+def _task_failure(task, layer_id: str) -> str:
+    """Why ``task`` left ``layer_id`` unfiltered, "" when it filtered it."""
+    if task.error:
+        return task.error
+    if task.isCanceled():
+        return "canceled"
+    for outcome in task.outcomes:
+        if outcome.layer_id == layer_id:
+            return "" if outcome.success else (outcome.message or "failed")
+    return "layer not found"
 
 
 def _disconnect(*connections) -> None:
@@ -385,6 +425,9 @@ def _collect(task, project, report: OperationReport) -> OperationReport:
             if outcome.details.get('capture_resampled'):
                 per_layer[label]['resampled'] = True
                 per_layer[label]['capture_grid'] = outcome.details.get('capture_grid')
+            if outcome.details.get('partial'):
+                # A web service read up to its budget: the features kept are exact, some may be missing.
+                per_layer[label]['partial'] = outcome.message
         else:
             report.failed[label] = outcome.message or "failed"
     report.details["layers"] = per_layer
@@ -438,6 +481,9 @@ def cross_filter(source, targets: Sequence, predicates: Sequence[str] = ("Inters
     if kind is LayerKind.OTHER:
         report.error = f"'{_name(layer)}' is {NOT_FILTERABLE}"
         return report
+    if kind is LayerKind.VECTOR_TILE:
+        report.error = f"'{_name(layer)}': {TILES_TARGET_ONLY}"
+        return report
     specs, _ = _project_targets(targets, project, layer.id(), report)
     if targets and not specs:
         report.error = "no filterable target layer"
@@ -472,7 +518,7 @@ def cross_filter(source, targets: Sequence, predicates: Sequence[str] = ("Inters
     except Exception as exc:  # never leave the source criteria applied after a failure
         logger.warning(f"[FM5] cross filter from '{_name(layer)}' failed: {exc}", exc_info=True)
         report.error = _unexpected(report, exc)
-    if _canceled(feedback) and not report.error:
+    if _canceled(feedback) and not report.error and not report.done:  # applied targets stay reported
         report.error = "canceled"
     if report.error and kind is LayerKind.POINT_CLOUD:
         _restore_point_cloud_source(layer, source_job.before)
@@ -640,7 +686,7 @@ def cross_filter_by_geometry(geometry, crs, targets: Sequence, predicates: Seque
         report.error = _unexpected(report, exc)
         return report
     _collect(task, project, report)
-    if _canceled(feedback) and not report.error:
+    if _canceled(feedback) and not report.error and not report.done:  # applied targets stay reported
         report.error = "canceled"
     return report
 
@@ -837,7 +883,8 @@ def export_layers(layers: Sequence, folder: str, vector_format: str = "GPKG", ra
                 result = export_point_cloud(layer, path, point_cloud_format, crs)
                 ok, path, message = result.success, result.path, result.message
             else:
-                report.skipped[label] = NOT_FILTERABLE
+                report.skipped[label] = ("vector tiles are filtered for display only, not exported"
+                                         if kind is LayerKind.VECTOR_TILE else NOT_FILTERABLE)
                 continue
         except ValueError as exc:  # output file refused
             ok, path, message = False, '', str(exc)
@@ -1058,9 +1105,15 @@ def apply_favorite(name_or_id: str, service=None, project=None, feedback=None) -
     if coverage:
         _install_registry(project)
         applied: List[str] = []
+        clip_failures: Dict[str, str] = {}
+
+        def clip(clip_service, request, source_job) -> str:
+            # A worker like cross_filter's: a remote raster (WCS) refuses the main thread.
+            return _task_failure(_run_task(clip_service, request, source_job, feedback), request.targets[0].layer_id)
+
         try:
-            handled = favorites_bridge.apply(coverage, project=project, synchronous=True, kind_of=layer_kind,
-                                             applied=applied)
+            handled = favorites_bridge.apply(coverage, project=project, kind_of=layer_kind, applied=applied,
+                                             run=clip, failed=clip_failures, canceled=lambda: _canceled(feedback))
         except Exception as exc:  # a stored source that no longer opens
             logger.warning(f"[FM5] favorite clips not applied: {exc}", exc_info=True)
             label = favorite.name or name_or_id
@@ -1070,8 +1123,12 @@ def apply_favorite(name_or_id: str, service=None, project=None, feedback=None) -
             layer = project.mapLayer(layer_id)
             if layer is not None and layer_id not in report.done:
                 report.done[layer_id] = _report_label(report, layer.name(), layer_id)
-        if handled < len(coverage):
-            report.details["coverage_layers_missing"] = len(coverage) - handled
+        for layer_id, reason in clip_failures.items():
+            layer = project.mapLayer(layer_id)
+            report.failed[_report_label(report, _name(layer, layer_id) if layer is not None else layer_id,
+                                        layer_id)] = reason
+        if handled + len(clip_failures) < len(coverage):
+            report.details["coverage_layers_missing"] = len(coverage) - handled - len(clip_failures)
         report.details["coverage_layers"] = handled
     if report.done and service is not None:
         try:
@@ -1101,6 +1158,11 @@ def filter_state(project=None) -> List[Dict[str, Any]]:
             logger.debug(f"[FM5] layer snapshot not taken: {exc}")
             continue
         if not snapshot.subset and not snapshot.derived:
+            continue
+        if kind is LayerKind.VECTOR_TILE:
+            # A display filter laid in the style rules: no derived source.
+            rows.append({"id": layer.id(), "name": layer.name(), "kind": kind.value,
+                         "subset": snapshot.tile_filter, "derived": False, "source": ""})
             continue
         rows.append({"id": layer.id(), "name": layer.name(), "kind": kind.value, "subset": snapshot.subset,
                      "derived": bool(snapshot.derived), "source": layer.source() if snapshot.derived else ""})

@@ -294,7 +294,10 @@ class QGISFilterMateAccessor:
     @staticmethod
     def _cross_result(report) -> CrossFilterResult:
         error, failed = _client_messages(report)
-        return CrossFilterResult(filtered=report.done_names, failed=failed, skipped=dict(report.skipped), error=error)
+        warnings = {name: info["partial"] for name, info in (report.details.get("layers") or {}).items()
+                    if isinstance(info, dict) and info.get("partial")}
+        return CrossFilterResult(filtered=report.done_names, failed=failed, skipped=dict(report.skipped), error=error,
+                                 warnings=warnings)
 
     @staticmethod
     def _operation_result(report) -> OperationResult:

@@ -160,8 +160,12 @@ def main():
             def cell(band, x, y):
                 column = int((x - transform[0]) / transform[1])
                 row = int((y - transform[3]) / transform[5])
+                if not (0 <= column < dataset.RasterXSize and 0 <= row < dataset.RasterYSize):
+                    return None
                 return dataset.GetRasterBand(band).ReadAsArray(column, row, 1, 1)[0, 0]
-            assert cell(2, 640, 512) > 0 and cell(2, 1500, 1500) == 0
+            # 2026-10-20: a remote target is captured around the area kept only (one cell of margin):
+            # far outside the mask there is no pixel at all, just inside its edge the alpha masks.
+            assert cell(2, 640, 512) > 0 and cell(2, 1500, 1500) is None and cell(2, 1030, 1030) in (0, None)
             assert 76 <= cell(1, 640, 512) <= 84, 'raw values were not preserved'
             dataset = None
             print('PASS raw remote target with feedback preserves values and masks outside selection', flush=True)

@@ -202,6 +202,8 @@ class FilterMateAlgorithm(QgsProcessingAlgorithm):
             if info.get("resampled"):
                 feedback.pushInfo(self.tr("{0}: target raster was resampled for capture (grid: {1}).").format(
                     name, info.get("capture_grid", "?")))
+            if info.get("partial"):
+                feedback.pushWarning(f"{name}: {info['partial']}")  # already translated (RemoteMaterializer)
         for name, message in report.failed.items():
             feedback.reportError(self.tr("{0}: failed — {1}").format(name, message))
         return {
