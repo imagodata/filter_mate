@@ -108,10 +108,30 @@ with VectorService(attribute_filters=True) as fixture:
     canvas.refresh()
     wait(400)
     drawing = canvas.isDrawing()
+    from filter_mate.adapters.public_api.operations import _background_tasks_running  # noqa: E402
+    _background_tasks_running()  # one-time imports, not part of the measure
+    native_set = layer.setSubsetString
+    setter = []
+
+    def timed_set(subset):
+        started = time.perf_counter()
+        try:
+            return native_set(subset)
+        finally:
+            setter.append((time.perf_counter() - started) * 1000)
+
+    layer.setSubsetString = timed_set
     started = time.perf_counter()
-    accepted = safe_set_subset_string(layer, '"id" = 40')
-    print('CANVAS QGIS {} filter call while the canvas downloads the layer (server delay 1.5 s): {:.0f} ms'.format(
-        Qgis.QGIS_VERSION, (time.perf_counter() - started) * 1000), flush=True)
+    try:
+        accepted = safe_set_subset_string(layer, '"id" = 40')
+    finally:
+        layer.setSubsetString = native_set
+    elapsed = (time.perf_counter() - started) * 1000
+    print('CANVAS QGIS {} filter while the canvas downloads the layer (server delay 1.5 s): {}'.format(
+        Qgis.QGIS_VERSION, {
+            SYNC: 'main thread blocked {:.0f} ms, setter {:.0f} ms'.format(elapsed, sum(setter)),
+            ASYNC: 'installed after a responsive wait of {:.0f} ms'.format(elapsed),
+            REFUSE: 'refused in {:.0f} ms'.format(elapsed)}[mode]), flush=True)
     wait(2500)
     fixture.delay = 0
     expected = mode != REFUSE
