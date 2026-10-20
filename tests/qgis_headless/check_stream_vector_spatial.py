@@ -152,7 +152,8 @@ def rich_target(remote=False, lines=False):
     return layer
 
 
-def filter_keys(target, source, predicate="ST_Intersects", limits=None, **kwargs):
+def filter_keys(target, source, predicate="ST_Intersects", limits=None, old_subset=None, combine_operator=None,
+                **kwargs):
     queued = []
     params = dict(settings, _subset_queue_callback=lambda layer, subset: queued.append(subset))
     if limits:
@@ -170,7 +171,7 @@ def filter_keys(target, source, predicate="ST_Intersects", limits=None, **kwargs
     # owners alive until this worker's comparisons finish, including on Qt6.
     fixture_builders.append(builder)
     expression = builder.build_expression(layer_props={}, predicates={predicate: True}, source_geom=source, **kwargs)
-    success = builder.apply_filter(target, expression)
+    success = builder.apply_filter(target, expression, old_subset, combine_operator)
     return success, queued, builder
 
 
@@ -211,6 +212,21 @@ def automatic(task):
         check("partial-source provenance survives an attribute combination", True)
     success, queued, builder = filter_keys(layer, source_polygon(), "ST_Disjoint", {"max_features": 1})
     check("partial disjoint refused before applying", not success and not queued, str(builder.user_warnings))
+    # 2026-10-20: (old) AND NOT (partial keys) kept the matching rows never read.
+    success, queued, builder = filter_keys(layer, source_polygon(), limits={"max_features": 1},
+                                           old_subset='"label" = \'other\'', combine_operator="AND NOT")
+    check("partial AND NOT with a previous filter refused before applying",
+          not success and not queued and "AND NOT would keep the features not read" in str(builder.last_error),
+          str(queued) + str(builder.user_warnings))
+    success, queued, builder = filter_keys(layer, source_polygon(), limits={"max_features": 1},
+                                           combine_operator="AND NOT")
+    check("partial AND NOT without a previous filter lists the partial keys with its warning",
+          success and queued == ['"id" IN (1)']
+          and any("Partial result" in warning for warning in builder.user_warnings), str(queued))
+    success, queued, builder = filter_keys(layer, source_polygon(), old_subset='"label" = \'other\'',
+                                           combine_operator="AND NOT")
+    check("complete AND NOT keeps the previous filter minus every matching row",
+          success and queued == ['("label" = \'other\') AND NOT ("id" IN (1, 3))'], str(queued))
     success, queued, builder = filter_keys(layer, source_polygon(), "ST_Disjoint")
     check("disjoint uses bounded complement", success and queued == ['NOT ("id" IN (1, 3))'], str(queued))
     feedback = QgsFeedback()

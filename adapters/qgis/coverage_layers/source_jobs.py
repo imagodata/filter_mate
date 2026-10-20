@@ -121,6 +121,77 @@ class VectorSourceJob(SourceJob):
         return union_geometries(self._geometries)
 
 
+class RemoteVectorSourceJob(VectorSourceJob):
+    """Selected or filtered features of a web service source, read bounded in the task.
+
+    2026-10-20: the API read a WFS source whole, on the main thread. The
+    dock's rule applies (lot B, ``filter_executor.copy_remote_source``): the
+    source must be selected or filtered, its rows are copied in the task
+    within the remote materialization budgets, and an incomplete copy is
+    refused (its missing geometries would change every predicate).
+    """
+
+    def __init__(self, layer, selected_only: bool = True) -> None:
+        """Main thread: the refusals that need no read, and a snapshot the task reads (nothing fetched)."""
+        from ....config.config import ENV_VARS
+        from ...backends.ogr.filter_executor import _remote_message
+        from ..remote_materializer import (
+            _snapshot, is_partial_source, materialization_limits, supports_materialization,
+        )
+        super().__init__(layer, ())
+        if not layer.isValid():  # its provider is gone (service down when the project opened)
+            raise ValueError(_remote_message('read_error'))
+        if not supports_materialization(layer):
+            raise ValueError(_remote_message('unverified_filter'))
+        # The selected features, as for a local source; else its filtered features.
+        self._fids = list(layer.selectedFeatureIds()) if selected_only and layer.selectedFeatureCount() else []
+        if not self._fids and not layer.subsetString():
+            raise ValueError(_remote_message('unbounded_source'))
+        if is_partial_source(layer):
+            raise ValueError(_remote_message('incomplete_source'))
+        self._snapshot = _snapshot(layer)
+        self._limits = materialization_limits(ENV_VARS)  # the dock's budgets (APP.OPTIONS.REMOTE_MATERIALIZATION)
+
+    def _raw_geometry(self, is_canceled) -> QgsGeometry:
+        from types import SimpleNamespace
+        from qgis.core import QgsFeatureRequest
+        from ...backends.ogr.filter_executor import _remote_message
+        from ..remote_materializer import bounded_source_layer, read_bounded_features
+        snapshot, self._snapshot = self._snapshot, None
+        limits = self._limits
+        request = QgsFeatureRequest()
+        if self._fids:
+            request.setFilterFids(self._fids)
+        rows = []
+
+        def consume(feature):
+            rows.append(feature)
+            return False  # a source copy lists no key for a service
+
+        outcome = read_bounded_features(
+            snapshot.source if self._fids else None, request, limits, SimpleNamespace(isCanceled=is_canceled),
+            consume, lambda feature: feature.id(), source_uri=snapshot.uri,
+            source_factory=None if self._fids else (lambda: bounded_source_layer(snapshot, limits)),
+            provider_key=snapshot.provider)
+        if outcome.reason == 'cancelled' or is_canceled():
+            self.message = 'canceled'
+        elif not outcome.complete:
+            # A partial copy is never taken for the whole source.
+            self.message = _remote_message(outcome.reason) + ' ' + _remote_message('incomplete_source')
+        elif self._fids and {feature.id() for feature in rows} != set(self._fids):
+            self.message = _remote_message('incomplete_source')
+        if self.message:
+            return QgsGeometry()
+        self._geometries = [QgsGeometry(feature.geometry()) for feature in rows
+                            if feature.hasGeometry() and not feature.geometry().isEmpty()]
+        self.details['features'] = len(self._geometries)
+        return union_geometries(self._geometries)
+
+    def release(self) -> None:
+        self._snapshot = None
+        super().release()
+
+
 class RasterSourceJob(SourceJob):
     """Pixels kept by a :class:`RasterSelection` of a raster source."""
 
@@ -211,11 +282,18 @@ class RasterSourceJob(SourceJob):
         source, provider = self._analysis_source or (self._read_source, self._read_provider)
         if self._analysis_source and (provider != 'gdal' or raster_reads_remotely(provider, source)):
             raise RuntimeError(raster_message('raster analysis requires a local GDAL capture'))
-        base = QgsRasterLayer(source, self.layer_name, provider)
+        capture = self._remote and not self._rendered and self._analysis_source is None
+        if capture:
+            # 2026-10-20: the provider alone, as for a remote target (_ProviderLayer):
+            # a QgsRasterLayer read the whole coverage once more for its renderer.
+            from .target_appliers import _ProviderLayer
+            base = _ProviderLayer.open(provider, source, self.layer_name)
+        else:
+            base = QgsRasterLayer(source, self.layer_name, provider)
         if not base.isValid():
             raise RuntimeError(raster_message('raster selection source could not be opened'))
         native_size = base.width(), base.height()
-        if self._remote and not self._rendered and self._analysis_source is None:
+        if capture:
             source = materialize_raster(base, max_pixels=self._max_pixels, is_canceled=is_canceled)
             self._capture_outputs.append(source)
             provider = 'gdal'
