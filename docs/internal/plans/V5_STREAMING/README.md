@@ -9,16 +9,16 @@ Chaque `prompt-lot-X.md` est complet : il contient la mission du lot, puis les m
 tel quel dans une session Claude Code. Chaque session travaille dans son propre worktree (`.claude/worktrees/stream-<lot>`)
 et sur ses propres branches `claude/v5-stream-<lot>-…`.
 
-## État d'avancement (19/10/2026)
+## État d'avancement (20/10/2026 : terminé)
 
-| Lot | Étape de l'audit | Contenu | État |
+| Lot | Étape de l'audit | Contenu | PR |
 |---|---|---|---|
-| A | 3, filtres attributaires | Traduction contrôlée vers le serveur (filtre OGC pour WFS, SQL simple pour ArcGIS / MSSQL / Oracle / HANA) ; refus clair sinon ; provider préparé en tâche | fusionné, #192 |
-| B | 3, filtres spatiaux, et 4 | Emprise envoyée au serveur, prédicat exact en local, matérialisation bornée en tâche | en cours |
-| C | 5 | Valeurs, liste d'entités, zoom et emprise filtrée en tâche, annulables, jeton de génération | fusionné, #193 |
-| D | 6 | COG / postgresraster en tâche, WCS raster de valeurs, pipette couleur seule sur WMS / WMTS / XYZ | fusionné, #190 |
-| E | 7 | Tuiles vectorielles cibles (filtre dans les styles du renderer), EPT / COPC distants bornés | fusionné, #191 |
-| F | clôture | i18n, CI, essai bout en bout, CHANGELOG, documentation, mise à jour de l'audit | après B |
+| A | 3, filtres attributaires | Traduction contrôlée vers le serveur (filtre OGC pour WFS, SQL simple pour ArcGIS / MSSQL / Oracle / HANA) ; refus clair sinon ; provider préparé en tâche | #192 |
+| B | 3, filtres spatiaux, et 4 | Emprise envoyée au serveur, prédicat exact en local, matérialisation bornée en tâche | #195 |
+| C | 5 | Valeurs, liste d'entités, zoom et emprise filtrée en tâche, annulables, jeton de génération | #193 |
+| D | 6 | COG / postgresraster en tâche, WCS raster de valeurs, pipette couleur seule sur WMS / WMTS / XYZ | #190 |
+| E | 7 | Tuiles vectorielles cibles (filtre dans les styles du renderer), EPT / COPC distants bornés | #191 |
+| F | clôture | i18n 34 langues (#196) ; plantage QGIS 3.34.15 / Python 3.12 (#197) ; revue du lot C (#198) ; filtres serveur de 3.22 à nightly (#199) ; API publique sur les flux (#200, #201) ; gel du premier clic Filtre (#203) ; course du fournisseur détruit (#205) ; derniers défauts (#206) ; CI (#204) ; documentation | voir colonne |
 
 ## Répartition des fichiers
 
@@ -36,19 +36,22 @@ Fichiers partagés, en ajout seulement : `core/domain/source_capability.py`, `CH
 ## Raccords entre lots
 
 - **A ↔ B** : A expose `translate(...)` → `ServerTranslation` (`FULL` / `PARTIAL` / `NONE`) ; B expose la matérialisation
-  bornée. Le lot fusionné en second branche « `PARTIAL` / `NONE` → matérialisation ». A est fusionné : c'est à B de le faire.
+  bornée. Branché par #195 (`materialize_translation`).
 - **D ↔ E** : une ligne dans `get_layer_kind` pour les tuiles vectorielles. Fait (`LayerKind.VECTOR_TILE`).
 
-## Points relevés pour le lot F
+## Restes connus après le lot F
 
-- **Filtre attributaire WFS / ArcGIS refusé hors QGIS 3.44 et 4.2** (`adapters/qgis/server_subset_job.py`) : il est refusé
-  sous 3.32, et au-delà la liste blanche est figée sur `(344, 402)`. Or `qgisMinimumVersion=3.22`. Correction proposée,
-  à confirmer : vérifier le transfert asynchrone dans les images 3.34, 4.0 et nightly et l'autoriser là où il passe ;
-  sous 3.32, appliquer un filtre WFS entièrement traduisible de façon synchrone comme avant #192, et garder le refus
-  pour ArcGIS.
-- **Revue du lot C** : #193 a été relu sans `opus-reviewer` (indisponible dans la session). Refaire une revue adversariale.
-- **i18n** : environ 135 nouvelles chaînes pour A, C, D et E (listées dans chaque PR), plus celles de B. Les PR i18n
-  précédentes (#143, #144) traduisaient les 34 langues.
-- **OGC API Features** : toujours refusé côté serveur par A (aucun verdict CQL2 complet exposé par le provider) ;
-  à revoir une fois la matérialisation de B branchée.
-- **Plantage natif** observé une fois sur un WFS public pendant le lot C, non reproduit.
+- **Limite de 500 clés vers un service** : le cas « département → communes du WFS IGN » (748 clés) est refusé avec le
+  conseil d'une copie locale. Étude prévue : longueur de liste acceptée par la Géoplateforme, envoi en POST, prédicat
+  spatial OGC côté serveur.
+- **OGC API Features** : un filtre attributaire reste refusé côté serveur (le provider n'expose pas de verdict CQL2
+  complet) ; la matérialisation bornée couvre les filtres spatiaux et les entités sélectionnées.
+- **QGIS 3.22** : filtre WFS refusé (son setter corrompt la mémoire pendant un rendu) ; **3.24–3.31** : WFS synchrone
+  (gel borné par la requête en cours) ; **3.26–3.35 sous Python 3.12** : lectures de service refusées (#197).
+- **Gardes `activeTasks()`** encore utilisées ailleurs (`cross_filter_service`, `filter_task._drop_deferred_views`,
+  `filter_mate_app._cancel_conflicting_tasks`) : une tâche dans son `finished()` y est invisible.
+- **Jointure ou champ virtuel** sur une source service filtrée : refusés par le contrôle des champs de
+  `remote_materializer.py`.
+- **Dette i18n antérieure** : libellés des prédicats (anglais par conception), menus des favoris, `tr(f"…")` de
+  `filter_mate.py` et `postgres_info_dialog.py`, modules hors de `FilterMate.pro`.
+- Le WCS de la Géoplateforme n'existe plus : l'essai de bout en bout utilise le WCS de démonstration MapServer.
