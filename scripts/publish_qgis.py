@@ -4,9 +4,14 @@ import argparse
 import ast
 import base64
 import configparser
+import importlib.util
+import json
 import os
 from pathlib import Path
+import shutil
+import subprocess  # nosec B404 - argument lists, never a shell
 import sys
+import tempfile
 import xmlrpc.client
 import zipfile
 
@@ -76,7 +81,51 @@ def check_python_sources(archive):
     return problems
 
 
-def validate(path):
+def _scanner_command(module, uvx_args, tools_dir):
+    """argv prefix running a scanner: the installed module, else uvx, else pip into ``tools_dir``."""
+    if importlib.util.find_spec(module):
+        return [sys.executable, '-m', module], None
+    if shutil.which('uvx'):
+        return ['uvx'] + uvx_args, None
+    subprocess.run([sys.executable, '-m', 'pip', 'install', '--quiet', '--target', str(tools_dir), uvx_args[-1]],  # nosec B603 - fixed argv
+                   check=True, capture_output=True, timeout=300)
+    return [sys.executable, '-m', module], {**os.environ, 'PYTHONPATH': str(tools_dir)}
+
+
+def bandit_problems(report):
+    """Findings of a ``bandit -f json`` report as readable problems (B404, ``import subprocess``, is ignored
+    by the repository, which flags everything else whatever its severity)."""
+    return [f"Bandit {item['test_id']} {item['filename']}:{item['line_number']} {item['issue_text']}"
+            for item in report.get('results', []) if item.get('test_id') != 'B404']
+
+
+def secrets_problems(report):
+    """Findings of a ``detect-secrets scan`` report."""
+    return [f'detect-secrets {item.get("type")} {name}:{item.get("line_number")}'
+            for name, items in report.get('results', {}).items() for item in items]
+
+
+def check_security(archive):
+    """What plugins.qgis.org runs on an upload and blocks the version for, whatever the severity: Bandit and
+    detect-secrets on the unpacked archive. A ``# nosec Bxxx`` or ``# pragma: allowlist secret`` comment
+    with its reason is the way to accept a false positive."""
+    with tempfile.TemporaryDirectory() as work:
+        root = Path(work) / 'src'
+        archive.extractall(root)
+        tools = Path(work) / 'tools'
+        problems = []
+        bandit, env = _scanner_command('bandit', ['bandit'], tools)
+        run = subprocess.run(bandit + ['-r', PLUGIN_FOLDER, '-f', 'json', '-q'], cwd=root, env=env,  # nosec B603 - fixed argv
+                             capture_output=True, text=True, timeout=600)
+        problems += bandit_problems(json.loads(run.stdout or '{}'))
+        secrets, env = _scanner_command('detect_secrets', ['--from', 'detect-secrets', 'detect-secrets'], tools)
+        run = subprocess.run(secrets + ['scan', '--all-files', PLUGIN_FOLDER], cwd=root, env=env,  # nosec B603 - fixed argv
+                             capture_output=True, text=True, timeout=600)
+        problems += secrets_problems(json.loads(run.stdout or '{}'))
+    return problems
+
+
+def validate(path, security=False):
     path = Path(path)
     if path.stat().st_size > MAX_ARCHIVE_BYTES:
         raise ValueError(f'Archive larger than {MAX_ARCHIVE_BYTES // 2**20} MB')
@@ -98,6 +147,8 @@ def validate(path):
             raise ValueError('Missing classFactory entry point')
         archive.getinfo(f'{PLUGIN_FOLDER}/filter_mate.py')
         problems = check_archive_content(archive) + check_metadata(metadata, archive) + check_python_sources(archive)
+        if security:
+            problems += check_security(archive)
         if problems:
             shown = '\n  '.join(problems[:50])
             more = f'\n  ... and {len(problems) - 50} more' if len(problems) > 50 else ''
@@ -109,10 +160,12 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('archive', type=Path)
     parser.add_argument('--validate-only', action='store_true')
+    parser.add_argument('--skip-security-scan', action='store_true',
+                        help='do not run Bandit and detect-secrets (the repository runs them on every upload)')
     args = parser.parse_args()
-    version = validate(args.archive)
+    version = validate(args.archive, security=not args.skip_security_scan)
     print(f'Validated FilterMate {version}: ZIP structure, entry point, metadata keys, file types, size, '
-          'Python 3.8 syntax and Qt enums')
+          'Python 3.8 syntax and Qt enums' + ('' if args.skip_security_scan else ', Bandit and detect-secrets'))
     if args.validate_only:
         return
     username = os.environ.get('OSGEO_USERNAME', '')

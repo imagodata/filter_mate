@@ -106,7 +106,7 @@ def reader_has_polygon(reader: str) -> bool:
     key = (exe, reader)
     if key not in _polygon_options:
         try:
-            result = subprocess.run([exe, '--options', reader], capture_output=True, text=True,
+            result = subprocess.run([exe, '--options', reader], capture_output=True, text=True,  # nosec B603 - fixed argv, no shell
                                     encoding='utf-8', errors='replace', timeout=VERSION_TIMEOUT, **_subprocess_kwargs())
             _polygon_options[key] = result.returncode == 0 and bool(re.search(r'^\s+polygon\s*$', result.stdout, re.MULTILINE))
         except (OSError, subprocess.SubprocessError, TypeError):

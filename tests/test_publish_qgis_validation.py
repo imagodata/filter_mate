@@ -90,3 +90,24 @@ def test_python_310_syntax_is_refused(tmp_path):
     source = "match x:\n    case 1:\n        pass\n"
     with pytest.raises(ValueError, match="filter_mate/m.py"):
         publish_qgis.validate(_build(tmp_path, {"filter_mate/m.py": source}))
+
+
+def test_bandit_findings_are_problems_but_not_the_subprocess_import():
+    report = {"results": [
+        {"test_id": "B404", "filename": "filter_mate/a.py", "line_number": 1, "issue_text": "import subprocess"},
+        {"test_id": "B314", "filename": "filter_mate/b.py", "line_number": 8, "issue_text": "xml parse"}]}
+    assert publish_qgis.bandit_problems(report) == ["Bandit B314 filter_mate/b.py:8 xml parse"]
+    assert publish_qgis.bandit_problems({}) == []
+
+
+def test_detect_secrets_findings_are_problems():
+    report = {"results": {"filter_mate/c.py": [{"type": "Secret Keyword", "line_number": 3}]}}
+    assert publish_qgis.secrets_problems(report) == ["detect-secrets Secret Keyword filter_mate/c.py:3"]
+    assert publish_qgis.secrets_problems({"results": {}}) == []
+
+
+def test_security_findings_reject_the_archive(tmp_path, monkeypatch):
+    monkeypatch.setattr(publish_qgis, "check_security", lambda archive: ["Bandit B603 filter_mate/x.py:1 call"])
+    with pytest.raises(ValueError, match="Bandit B603"):
+        publish_qgis.validate(_build(tmp_path), security=True)
+    assert publish_qgis.validate(_build(tmp_path), security=False) == "5.0.0"
