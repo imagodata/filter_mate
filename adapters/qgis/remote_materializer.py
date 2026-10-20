@@ -413,6 +413,8 @@ def read_bounded_features(source, request, limits, feedback, consume, key, sourc
             # created at its address.
             held = [reply]
             held_wrappers.append(held)
+            if stop.is_set():
+                held[0] = None  # registered after the read ended and cleared its wrappers
 
             def unobserved():
                 # A reply this observer cannot read is never verified, unless the read has ended.
@@ -538,7 +540,7 @@ def read_bounded_features(source, request, limits, feedback, consume, key, sourc
         if network_failed:
             return MaterializationOutcome(fetched=outcome.fetched, reason="read_error")
         if (outcome.complete and not outcome.fetched and provider is not None
-                and (provider_key or provider.name().lower()) in _BBOX_PROVIDERS):
+                and (provider_key or provider.name()).lower() in _BBOX_PROVIDERS):
             # A QGIS service iterator can swallow an HTTP-200 protocol error
             # and expose only clean exhaustion. No copied row means there is
             # no independent evidence to distinguish that from a genuine zero.
@@ -595,10 +597,11 @@ def _on_live_reply(address, held, use, attempts=3):
     from qgis.PyQt.QtNetwork import QNetworkReply
 
     for attempt in range(attempts):
-        if held[0] is None:
-            held[0] = sip.wrapinstance(address, QNetworkReply)
+        live = held[0]
+        if live is None:
+            live = held[0] = sip.wrapinstance(address, QNetworkReply)
         try:
-            return use(held[0])
+            return use(live)
         except RuntimeError:
             held[0] = None
             if attempt + 1 == attempts:

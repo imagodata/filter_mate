@@ -328,7 +328,8 @@ _HEALTHY = b'{"type": "FeatureCollection", "features": [], "links": []}'
 _EXCEPTION = b'<?xml version="1.0"?><ows:ExceptionReport xmlns:ows="http://www.opengis.net/ows/1.1"/>'
 
 
-def _observed_read(monkeypatch, invalidate, body=_HEALTHY, code=0, qt_before_515=False, finish=True, late=False):
+def _observed_read(monkeypatch, invalidate, body=_HEALTHY, code=0, qt_before_515=False, finish=True, late=False,
+                   linger=False):
     """One OAPIF bounded read whose items reply has ``body`` and Qt error ``code``.
 
     ``invalidate`` is when PyQt drops the reply's wrapper: "never", "before" the observer
@@ -336,7 +337,9 @@ def _observed_read(monkeypatch, invalidate, body=_HEALTHY, code=0, qt_before_515
     it returned, "twice" (after, and the first wrapper built again too). "unobservable" and
     "always" drop every wrapper built for the reply from "unwrapped" or "after" on;
     "partial" fails the third connection step only. ``finish`` False aborts the reply
-    without finished(); ``late`` emits its signals once the iterator is closed.
+    without finished(); ``late`` emits its signals once the iterator is closed; ``linger``
+    emits readyRead again after the read has returned, and runs a preprocessor call that
+    was already under way for another reply.
     """
     module = _load()
     core = _qgis(monkeypatch, module, 33600, (3, 12, 3))
@@ -399,7 +402,14 @@ def _observed_read(monkeypatch, invalidate, body=_HEALTHY, code=0, qt_before_515
     outcome = module.read_bounded_features(
         source, MagicMock(), module.MaterializationLimits(), None, lambda feature: True, lambda feature: 1,
         source_uri="https://example.org/ogc", provider_key="oapif")
-    trace.retained_after_read = id(trace.reply) in fake_sip.wrappers
+    replies = [trace.reply]
+    if linger:
+        trace.reply.readyRead.emit()
+        replies.append(_Reply(body, code, trace.escaped))
+        fake_sip.replies[id(replies[-1])] = replies[-1]
+        core.QgsNetworkAccessManager.setReplyPreprocessor.call_args[0][0](
+            request, fake_sip.wrapinstance(id(replies[-1]), None))
+    trace.retained_after_read = any(id(reply) in fake_sip.wrappers for reply in replies)
     return outcome, trace
 
 
@@ -440,11 +450,13 @@ def test_a_reply_that_cannot_be_observed_is_never_verified(monkeypatch, invalida
     assert not trace.escaped and trace.retained_after_read is False
 
 
-def test_a_reply_aborted_without_finished_holds_no_wrapper_once_the_read_ends(monkeypatch):
+@pytest.mark.parametrize("linger", [False, True])
+def test_a_reply_aborted_without_finished_holds_no_wrapper_once_the_read_ends(monkeypatch, linger):
     """QGIS deletes an in-flight page at a feature limit, timeout or cancellation without finished()."""
-    outcome, trace = _observed_read(monkeypatch, "never", finish=False)
+    outcome, trace = _observed_read(monkeypatch, "never", finish=False, linger=linger)
 
     assert outcome.complete and trace.retained is True and trace.retained_after_read is False
+    assert not trace.escaped
 
 
 @pytest.mark.parametrize("qt_before_515", [False, True])
@@ -480,3 +492,4 @@ def test_a_provider_wrapper_invalidated_by_pyqt_does_not_fail_the_read(monkeypat
 
     assert outcome.complete and not outcome.fetched, outcome
     fresh.raiseError.connect.assert_called_once()
+    fresh.raiseError.disconnect.assert_called_once()
