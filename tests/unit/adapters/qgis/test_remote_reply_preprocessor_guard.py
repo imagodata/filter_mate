@@ -8,6 +8,7 @@ under any version. Those builds refuse service reads like a QGIS without
 the observer, and a memory read skips it.
 """
 import importlib
+import os
 import pathlib
 import re
 import sys
@@ -58,7 +59,7 @@ def test_allocator_debug_hooks_abort_on_the_unfixed_binding(qgis_version, python
     assert _load().reply_preprocessor_is_safe(qgis_version, python_version, debug_allocator=True) is safe
 
 
-def _qgis(monkeypatch, module, qgis_version, python_version, observer=True, dev_mode=False):
+def _qgis(monkeypatch, module, qgis_version, python_version, observer=True, dev_mode=False, debug_build=False):
     core = MagicMock()
     core.Qgis.QGIS_VERSION_INT = qgis_version
     if observer:
@@ -69,8 +70,10 @@ def _qgis(monkeypatch, module, qgis_version, python_version, observer=True, dev_
     monkeypatch.setitem(sys.modules, "qgis.core", core)
     monkeypatch.setitem(sys.modules, "qgis.PyQt.QtCore", MagicMock())
     monkeypatch.setitem(sys.modules, "qgis.PyQt.QtNetwork", MagicMock())
-    monkeypatch.setattr(module, "sys", types.SimpleNamespace(
-        version_info=python_version, flags=types.SimpleNamespace(dev_mode=dev_mode)))
+    fake_sys = types.SimpleNamespace(version_info=python_version, flags=types.SimpleNamespace(dev_mode=dev_mode))
+    if debug_build:
+        fake_sys.gettotalrefcount = lambda: 0
+    monkeypatch.setattr(module, "sys", fake_sys)
     monkeypatch.delenv("PYTHONMALLOC", raising=False)
     return core
 
@@ -98,6 +101,8 @@ def test_debug_hooks_from_development_mode_or_environment_refuse(monkeypatch):
     assert module.supports_reply_validation() is False
     monkeypatch.setenv("PYTHONMALLOC", "malloc")
     assert module.supports_reply_validation() is True
+    _qgis(monkeypatch, module, 33415, (3, 11, 2), debug_build=True)
+    assert module.supports_reply_validation() is False
 
 
 @pytest.mark.parametrize("qgis_version, python_version, registered", [
@@ -132,10 +137,16 @@ def test_bounded_read_registers_the_observer_only_when_safe(monkeypatch, qgis_ve
         manager.removeReplyPreprocessor.assert_not_called()
 
 
-@pytest.mark.parametrize("provider_key", ["wfs", "oapif", "arcgisfeatureserver"])
-def test_service_bounded_read_is_refused_before_any_request_without_the_observer(monkeypatch, provider_key):
+@pytest.mark.parametrize("provider_key, qgis_version, python_version", [
+    ("wfs", 33415, (3, 12, 3)),
+    ("oapif", 33415, (3, 12, 3)),
+    ("arcgisfeatureserver", 33415, (3, 12, 3)),
+    ("wfs", 32216, (3, 10, 6)),   # an old backport exposing the observer stays unverified
+])
+def test_service_bounded_read_is_refused_before_any_request_without_the_observer(monkeypatch, provider_key,
+                                                                                qgis_version, python_version):
     module = _load()
-    core = _qgis(monkeypatch, module, 33415, (3, 12, 3))
+    core = _qgis(monkeypatch, module, qgis_version, python_version)
     core.QgsNetworkAccessManager.setReplyPreprocessor.side_effect = AssertionError("segfault on this build")
     monkeypatch.setattr(module, "require_worker", lambda: None)
     source = MagicMock()
@@ -151,15 +162,21 @@ def test_service_bounded_read_is_refused_before_any_request_without_the_observer
 
 
 def test_no_other_qgis_callback_registration_with_an_unlocked_allocation():
-    """setRequestPreprocessor and QgsPathResolver's setters share the binding defect."""
+    """setRequestPreprocessor and QgsPathResolver's setters share the binding defect in QGIS 3.34."""
     excluded = {"tests", ".git", ".claude", "__pycache__", "_bmad", "_bmad-output", "website", "docs", "knowledge",
                 "dist", "build", "scripts"}
-    calls = {}
-    for path in sorted(_ROOT.rglob("*.py")):
-        name = path.relative_to(_ROOT).as_posix()
-        if excluded.intersection(name.split("/")):
-            continue
-        text = path.read_text(encoding="utf-8", errors="replace")
-        for match in re.finditer(r"\.(set(?:Reply|Request)Preprocessor|setPathPreprocessor|setPathWriter)\(", text):
-            calls.setdefault(match.group(1), []).append(name)
-    assert calls == {"setReplyPreprocessor": ["adapters/qgis/remote_materializer.py"]}
+    names = re.compile(r"\b(set(?:Reply|Request)Preprocessor|setPathPreprocessor|setPathWriter)\b")
+    mentions, registrations = {}, 0
+    for directory, subdirectories, files in os.walk(_ROOT):
+        subdirectories[:] = sorted(name for name in subdirectories if name not in excluded)
+        for file_name in files:
+            if not file_name.endswith(".py"):
+                continue
+            path = pathlib.Path(directory, file_name)
+            text = path.read_text(encoding="utf-8", errors="replace")
+            found = set(names.findall(text))
+            if found:
+                mentions[path.relative_to(_ROOT).as_posix()] = found
+                registrations += len(re.findall(r"\.setReplyPreprocessor\s*\(", text))
+    assert mentions == {"adapters/qgis/remote_materializer.py": {"setReplyPreprocessor"}}
+    assert registrations == 1
