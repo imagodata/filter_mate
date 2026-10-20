@@ -65,10 +65,13 @@ def main():
         app_tree = ast.parse((root / 'filter_mate_app.py').read_text())
         app_class = next(node for node in app_tree.body if isinstance(node, ast.ClassDef)
                          and node.name == 'FilterMateApp')
-        app_methods = [node for node in app_class.body if isinstance(node, ast.FunctionDef)
-                       and node.name in ('manage_task', '_execute_filter_task')]
+        app_methods = [node for node in app_tree.body if isinstance(node, ast.FunctionDef)
+                       and node.name == '_api_operation_running']
+        app_methods += [node for node in app_class.body if isinstance(node, ast.FunctionDef)
+                        and node.name in ('manage_task', '_execute_filter_task')]
         warnings, gui_errors = [], []
-        gui_namespace = {'__package__': 'filter_mate', 'QCoreApplication': QCoreApplication,
+        gui_namespace = {'__package__': 'filter_mate', '__name__': 'filter_mate.filter_mate_app', 'sys': sys,
+                         'QCoreApplication': QCoreApplication,
                          'logger': logging.getLogger('fm_automation'),
                          'iface': types.SimpleNamespace(messageBar=lambda: types.SimpleNamespace(
                              pushWarning=lambda *args: warnings.append(args)))}

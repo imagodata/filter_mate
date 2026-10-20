@@ -905,11 +905,14 @@ class TestGuiReentry:
         app_class = next(node for node in tree.body if isinstance(node, ast.ClassDef)
                          and node.name == "FilterMateApp")
         function = next(node for node in app_class.body if isinstance(node, ast.FunctionDef) and node.name == method)
+        running = next(node for node in tree.body if isinstance(node, ast.FunctionDef)
+                       and node.name == "_api_operation_running")
         warnings = MagicMock()
-        namespace = {"__package__": _PKG, "logger": MagicMock(),
+        namespace = {"__package__": _PKG, "__name__": _PKG + ".filter_mate_app", "sys": sys, "logger": MagicMock(),
                      "iface": types.SimpleNamespace(messageBar=lambda: warnings),
                      "QCoreApplication": types.SimpleNamespace(translate=lambda context, text: text)}
-        exec(compile(ast.Module(body=[function], type_ignores=[]), str(_ROOT / "filter_mate_app.py"), "exec"), namespace)
+        exec(compile(ast.Module(body=[running, function], type_ignores=[]), str(_ROOT / "filter_mate_app.py"), "exec"),
+             namespace)
         # Any attempt to prepare a layer/task after the gate hits missing app
         # attributes and fails the regression, before it can mutate a target.
         gui_app = types.SimpleNamespace()
