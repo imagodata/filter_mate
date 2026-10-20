@@ -74,7 +74,7 @@ class TestRules:
         assert modes.group_for_tool("raster", "pushButton_checkable_exploring_raster_detector") == "pipette"
         assert modes.group_for_tool("point_cloud", "pushButton_checkable_exploring_point_cloud_zone") == "ranges"
         assert modes.group_for_tool("point_cloud", "pushButton_exploring_identify") == "classes"
-        assert modes.group_for_tool("vector", "pushButton_checkable_exploring_vector_similar") == "single_selection"
+        assert modes.group_for_tool("vector", "pushButton_checkable_exploring_linking_widgets") == "single_selection"
         assert modes.group_for_tool("vector", "pushButton_exploring_zoom") is None
 
     @pytest.mark.parametrize("current, count, from_map, expected", [

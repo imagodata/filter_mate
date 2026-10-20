@@ -137,16 +137,14 @@ class TestTools:
         raster = shared_raster + len(extras.tools_for("raster"))
         point_cloud = shared_point_cloud + len(extras.tools_for("point_cloud"))
         vector = shared_vector + len(extras.tools_for("vector"))
-        assert raster == 8 and point_cloud == 8 and vector == 8
+        assert raster == 8 and point_cloud == 8 and vector == 7
 
     def test_detector_has_its_own_icon(self):
         assert extras.ICON_DETECTOR.strip().startswith("<") and extras.ICON_DETECTOR != extras.ICON_PIPETTE
 
-    def test_vector_rail_adds_the_similar_features_tool_and_more(self):
-        # 2026-10-18: the similar features tool (single / multiple selections) and the "more" menu
-        # (the QGIS selection tools and actions).
-        assert extras.tools_for("vector") == ["pushButton_checkable_exploring_vector_similar",
-                                              "pushButton_exploring_vector_more"]
+    def test_vector_rail_adds_the_more_menu(self):
+        # 2026-10-18: the "more" menu (the QGIS selection tools and actions).
+        assert extras.tools_for("vector") == ["pushButton_exploring_vector_more"]
 
     def test_the_vector_menu_runs_the_qgis_selection_tools(self):
         assert [key for key, _names in extras.VECTOR_SELECT_TOOLS] == ["rectangle", "polygon", "freehand", "radius"]
@@ -377,50 +375,30 @@ class FakeDockButton(FakeButton):
 
 
 class TestVectorToolsFollowTheGroup:
-    """R1 on the vector rail: Link and the similar features tool belong to the single / multiple selections."""
+    """R1 on the vector rail: Link belongs to the single / multiple selections."""
 
     def _dock(self, dock_extras):
         dock = dock_extras.dock
         dock.tr = lambda text, *_args: text  # the QObject stub of the tests has no translation
         link = FakeDockButton(tip="Link the single and multiple selections")
         dock.dockwidget.pushButton_checkable_exploring_linking_widgets = link
-        stopped = []
-        dock._stop_vector_similar_tool = lambda: stopped.append(True)
-        dock._start_vector_similar_tool = lambda: None
         dock.dockwidget.pushButton_checkable_exploring_selecting = FakeDockButton()
-        similar = FakeDockButton(dock._on_vector_similar_toggled)
-        dock._tools["pushButton_checkable_exploring_vector_similar"] = similar
-        return dock, link, similar, stopped
+        return dock, link
 
     def test_custom_selection_disables_link_and_keeps_its_check(self, dock_extras):
-        dock, link, similar, _stopped = self._dock(dock_extras)
+        dock, link = self._dock(dock_extras)
         link.checked = True
         dock.sync_vector_tools("custom_selection")
         assert not link.isEnabled() and link.isChecked()
         assert "single and multiple" in link.toolTip() and "active group" in link.toolTip()
-        assert not similar.isEnabled()
 
     def test_single_and_multiple_give_the_tools_back_with_their_tooltip(self, dock_extras):
-        dock, link, similar, _stopped = self._dock(dock_extras)
+        dock, link = self._dock(dock_extras)
         dock.sync_vector_tools("custom_selection")
         dock.sync_vector_tools("multiple_selection")
         assert link.isEnabled() and link.toolTip() == "Link the single and multiple selections"
-        assert similar.isEnabled()
         dock.sync_vector_tools("single_selection")
-        assert link.isEnabled() and similar.isEnabled()
-
-    def test_custom_selection_takes_the_similar_tool_off_the_map(self, dock_extras):
-        dock, _link, similar, stopped = self._dock(dock_extras)
-        similar.setChecked(True)
-        assert dock.dockwidget.pushButton_checkable_exploring_selecting.isChecked()  # R2: the mode goes on
-        dock.sync_vector_tools("custom_selection")
-        assert not similar.isChecked() and stopped == [True]
-
-    def test_qgis_dropping_the_tool_releases_the_button_only(self, dock_extras):
-        dock, _link, similar, stopped = self._dock(dock_extras)
-        similar.setChecked(True)
-        dock._on_vector_similar_tool_deactivated()
-        assert not similar.isChecked() and stopped == []  # R5: no stop (QGIS already took the tool)
+        assert link.isEnabled()
 
 
 class TestRangeLinkedToStyle:
