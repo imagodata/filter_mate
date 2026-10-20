@@ -834,3 +834,12 @@ Result: Que veux-tu faire dans cette session ?
   En dock, AND NOT avec un filtre précédent écrit (`_combine_with_old_subset`) refuse un résultat partiel, comme
   l'API. Délai d'un filtre serveur : `APP.OPTIONS.SERVER_FILTER` (`wfs_timeout_seconds` 60 pour WFS / OAPIF,
   `timeout_seconds` 30 sinon, 1 à 600 s, sinon défaut), lu via `ENV_VARS` (`server_subset_job.configured_timeout_ms`).
+- [2026-10-20] Enveloppes PyQt invalidées par adresse (branche `claude/v5-stream-F-oapif`) : PyQt5 5.15 et PyQt6 6.9
+  surveillent tout QObject créé par C++ dès qu'il est enveloppé (`PyQtMonitor`, thread principal) ; le `destroyed()`
+  d'un objet d'un worker y arrive en file d'attente et invalide l'enveloppe *alors* enregistrée à cette adresse. Un
+  objet créé à l'adresse d'un objet supprimé (réponse réseau, provider mémoire) perd ainsi son enveloppe en restant
+  vivant : `RuntimeError: wrapped C/C++ object ... has been deleted` ne prouve pas la destruction. sip oublie une
+  enveloppe invalidée : ré-envelopper l'adresse (`sip.wrapinstance`) ou redemander `layer.dataProvider()` rend un
+  objet utilisable. L'observateur de réponses de `read_bounded_features` garde l'adresse, l'enveloppe jusqu'au
+  `finished` seulement, et réessaie (`_on_live_reply`) ; un échec persistant reste un refus. Reste exposé :
+  `filter_executor._memory_source` (`provider.addFeatures`), et probablement le provider gardé par la lecture (#205).

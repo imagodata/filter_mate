@@ -13,6 +13,7 @@ import pathlib
 import re
 import sys
 import types
+import weakref
 from unittest.mock import MagicMock
 
 import pytest
@@ -211,3 +212,284 @@ def test_no_other_qgis_callback_registration_with_an_unlocked_allocation():
                 registrations += len(re.findall(r"\.setReplyPreprocessor\s*\(", text))
     assert mentions == {"adapters/qgis/remote_materializer.py": {"setReplyPreprocessor"}}
     assert registrations == 1
+
+
+# A reply's wrapper invalidated while the reply is alive (CI stable / latest, 2026-10-20).
+#
+# PyQt invalidates the wrapper of a C++-created QObject when that object's destroyed()
+# reaches its monitor: a queued call on the main thread, keyed by address. A worker-thread
+# reply created at the address of a deleted one is handed that reply's wrapper while it is
+# still referenced, or a fresh one, and the late notification then invalidates it while the
+# new reply is alive and emitting its signals.
+
+class _Signal:
+    """A Qt signal; an exception escaping a slot is recorded, as Qt would only report it."""
+
+    def __init__(self, escaped):
+        self.slots, self.escaped = [], escaped
+
+    def emit(self, *args):
+        for slot in list(self.slots):
+            try:
+                slot(*args)
+            except Exception as exc:
+                self.escaped.append(exc)
+
+
+class _Reply:
+    """The live C++ reply, holding an unread HTTP 200 body, or a Qt network error code."""
+
+    def __init__(self, body, code, escaped):
+        self.body, self.code = body, code
+        self.readyRead, self.finished, self.errorOccurred = _Signal(escaped), _Signal(escaped), _Signal(escaped)
+
+    def bytesAvailable(self):
+        return len(self.body)
+
+    def peek(self, size):
+        return self.body[:size]
+
+    def error(self):
+        return self.code
+
+
+class _BoundSignal:
+    def __init__(self, wrapper, signal):
+        self.wrapper, self.signal = wrapper, signal
+
+    def connect(self, slot, *args):
+        self.wrapper.check()
+        self.signal.slots.append(slot)
+        self.wrapper.sip.connected(self.wrapper)
+
+
+class _Wrapper:
+    """A sip wrapper, unusable once invalidated, even through an attribute fetched before."""
+
+    def __init__(self, fake_sip, reply):
+        self.sip, self.reply, self.valid = fake_sip, reply, True
+
+    def check(self):
+        if not self.valid:
+            raise RuntimeError("wrapped C/C++ object of type QNetworkReply has been deleted")
+
+    def __getattr__(self, name):
+        self.check()
+        target = getattr(self.reply, name)
+        if isinstance(target, _Signal):
+            return _BoundSignal(self, target)
+
+        def call(*args):
+            self.check()
+            return target(*args)
+        return call
+
+
+class _Sip:
+    """sip's map, which does not own its wrappers; an invalidated one is forgotten."""
+
+    def __init__(self):
+        self.replies = {}
+        self.wrappers = weakref.WeakValueDictionary()
+        self.pending = 0  # late notifications: each invalidates the next wrapper built
+        self.connections_left = None  # invalidate the wrapper in use after that many connections
+        self.unwrapped = None  # called once the observer has taken the address
+        self.built = 0
+
+    def invalidate(self, address):
+        wrapper = self.wrappers.pop(address, None)
+        if wrapper is not None:
+            wrapper.valid = False
+
+    def connected(self, wrapper):
+        if self.connections_left is not None:
+            self.connections_left -= 1
+            if not self.connections_left:
+                self.invalidate(id(wrapper.reply))
+
+    def unwrapinstance(self, wrapper):
+        wrapper.check()
+        if self.unwrapped is not None:
+            self.unwrapped(id(wrapper.reply))
+        return id(wrapper.reply)
+
+    def wrapinstance(self, address, unused_type):
+        wrapper = self.wrappers.get(address)
+        if wrapper is None:
+            wrapper = self.wrappers[address] = _Wrapper(self, self.replies[address])
+            self.built += 1
+            if self.pending:
+                self.pending -= 1
+                self.invalidate(address)
+        return wrapper
+
+
+_HEALTHY = b'{"type": "FeatureCollection", "features": [], "links": []}'
+_EXCEPTION = b'<?xml version="1.0"?><ows:ExceptionReport xmlns:ows="http://www.opengis.net/ows/1.1"/>'
+
+
+def _observed_read(monkeypatch, invalidate, body=_HEALTHY, code=0, qt_before_515=False, finish=True, late=False,
+                   linger=False):
+    """One OAPIF bounded read whose items reply has ``body`` and Qt error ``code``.
+
+    ``invalidate`` is when PyQt drops the reply's wrapper: "never", "before" the observer
+    runs, "unwrapped" once it has the address, "attach" after its first connection, "after"
+    it returned, "twice" (after, and the first wrapper built again too). "unobservable" and
+    "always" drop every wrapper built for the reply from "unwrapped" or "after" on;
+    "partial" fails the third connection step only. ``finish`` False aborts the reply
+    without finished(); ``late`` emits its signals once the iterator is closed; ``linger``
+    emits readyRead again after the read has returned, and runs a preprocessor call that
+    was already under way for another reply.
+    """
+    module = _load()
+    core = _qgis(monkeypatch, module, 33600, (3, 12, 3))
+    reply_class = types.SimpleNamespace(NetworkError=types.SimpleNamespace(NoError=0, OperationCanceledError=5))
+    if not qt_before_515:
+        reply_class.errorOccurred = "errorOccurred(QNetworkReply::NetworkError)"
+    sys.modules["qgis.PyQt.QtNetwork"].QNetworkReply = reply_class
+    fake_sip = _Sip()
+    pyqt = types.ModuleType("qgis.PyQt")
+    pyqt.sip = fake_sip
+    monkeypatch.setitem(sys.modules, "qgis.PyQt", pyqt)
+    monkeypatch.setattr(module, "require_worker", lambda: None)
+    monkeypatch.setattr(module, "main_network_manager", lambda: None)
+    request = MagicMock()
+    request.attribute.return_value = None
+    request.url.return_value.toString.return_value = "https://example.org/ogc/collections/points/items?limit=10"
+    trace = types.SimpleNamespace(escaped=[], retained=None, retained_after_read=None, reply=None, sip=fake_sip)
+
+    def signals():
+        if invalidate in ("after", "twice", "always"):
+            fake_sip.invalidate(id(trace.reply))
+            fake_sip.pending = {"twice": 1, "always": 1000}.get(invalidate, 0)
+        trace.reply.readyRead.emit()
+        if code:
+            trace.reply.errorOccurred.emit(code)
+        if finish:
+            trace.reply.finished.emit()
+        trace.retained = id(trace.reply) in fake_sip.wrappers
+
+    def features():
+        observer = core.QgsNetworkAccessManager.setReplyPreprocessor.call_args[0][0]
+        reply = trace.reply = _Reply(body, code, trace.escaped)
+        fake_sip.replies[id(reply)] = reply
+        wrapper = fake_sip.wrapinstance(id(reply), None)
+        if invalidate == "before":
+            fake_sip.invalidate(id(reply))
+        elif invalidate in ("unwrapped", "unobservable"):
+            fake_sip.unwrapped = fake_sip.invalidate
+            fake_sip.pending = 1000 if invalidate == "unobservable" else 0
+        elif invalidate in ("attach", "partial"):
+            fake_sip.connections_left = 1 if invalidate == "attach" else 2
+            fake_sip.pending = 3 if invalidate == "partial" else 0
+        try:
+            observer(request, wrapper)
+        except Exception as exc:  # the QGIS binding leaves it unhandled
+            trace.escaped.append(exc)
+        del wrapper  # the binding's reference ends with the call
+        if not late:
+            signals()
+        yield MagicMock()
+
+    iterator = MagicMock()
+    iterator.isValid.return_value = True
+    iterator.__iter__.side_effect = features
+    if late:
+        iterator.close.side_effect = lambda: trace.retained is None and signals()
+    source = MagicMock()
+    source.getFeatures.return_value = iterator
+    source.dataProvider.return_value.name.return_value = "oapif"
+    outcome = module.read_bounded_features(
+        source, MagicMock(), module.MaterializationLimits(), None, lambda feature: True, lambda feature: 1,
+        source_uri="https://example.org/ogc", provider_key="oapif")
+    replies = [trace.reply]
+    if linger:
+        trace.reply.readyRead.emit()
+        replies.append(_Reply(body, code, trace.escaped))
+        fake_sip.replies[id(replies[-1])] = replies[-1]
+        core.QgsNetworkAccessManager.setReplyPreprocessor.call_args[0][0](
+            request, fake_sip.wrapinstance(id(replies[-1]), None))
+    trace.retained_after_read = any(id(reply) in fake_sip.wrappers for reply in replies)
+    return outcome, trace
+
+
+def _attached_once(reply):
+    signals = (reply.readyRead, reply.finished, reply.errorOccurred)
+    return all(len(signal.slots) == len(set(signal.slots)) for signal in signals) and len(reply.readyRead.slots) == 1
+
+
+@pytest.mark.parametrize("qt_before_515", [False, True])
+@pytest.mark.parametrize("invalidate", ["never", "unwrapped", "attach", "after", "twice"])
+def test_a_healthy_reply_is_complete_when_pyqt_drops_its_wrapper(monkeypatch, invalidate, qt_before_515):
+    outcome, trace = _observed_read(monkeypatch, invalidate, qt_before_515=qt_before_515)
+
+    assert outcome.complete and outcome.keys == (1,), outcome
+    assert not trace.escaped and _attached_once(trace.reply)
+    # A wrapper still held once its reply finished would be handed to the next reply at its address.
+    assert trace.retained is False and trace.retained_after_read is False
+    if invalidate == "never":
+        assert trace.sip.built == 1  # one wrapper for the reply's life, not one per signal
+
+
+@pytest.mark.parametrize("qt_before_515", [False, True])
+@pytest.mark.parametrize("invalidate", ["never", "unwrapped", "attach", "after", "twice"])
+@pytest.mark.parametrize("body, code", [(_EXCEPTION, 0), (_HEALTHY, 3)], ids=["exception_report", "qt_error"])
+def test_errors_are_still_refused_when_pyqt_drops_the_wrapper(monkeypatch, invalidate, body, code, qt_before_515):
+    outcome, trace = _observed_read(monkeypatch, invalidate, body, code, qt_before_515)
+
+    assert outcome.reason == "read_error" and not outcome.complete and not outcome.keys, outcome
+    assert not trace.escaped and _attached_once(trace.reply)
+
+
+@pytest.mark.parametrize("qt_before_515", [False, True])
+@pytest.mark.parametrize("invalidate", ["before", "unobservable", "partial", "always"])
+def test_a_reply_that_cannot_be_observed_is_never_verified(monkeypatch, invalidate, qt_before_515):
+    outcome, trace = _observed_read(monkeypatch, invalidate, qt_before_515=qt_before_515)
+
+    assert outcome.reason == "read_error" and not outcome.complete and not outcome.keys, outcome
+    assert not trace.escaped and trace.retained_after_read is False
+
+
+@pytest.mark.parametrize("linger", [False, True])
+def test_a_reply_aborted_without_finished_holds_no_wrapper_once_the_read_ends(monkeypatch, linger):
+    """QGIS deletes an in-flight page at a feature limit, timeout or cancellation without finished()."""
+    outcome, trace = _observed_read(monkeypatch, "never", finish=False, linger=linger)
+
+    assert outcome.complete and trace.retained is True and trace.retained_after_read is False
+    assert not trace.escaped
+
+
+@pytest.mark.parametrize("qt_before_515", [False, True])
+@pytest.mark.parametrize("invalidate, code", [("always", 0), ("never", 5)], ids=["unobservable", "cancelled"])
+def test_a_reply_lost_after_the_read_ended_does_not_refuse_it(monkeypatch, invalidate, code, qt_before_515):
+    outcome, trace = _observed_read(monkeypatch, invalidate, code=code, qt_before_515=qt_before_515, late=True)
+
+    assert outcome.complete and outcome.keys == (1,), outcome
+    assert not trace.escaped and trace.retained_after_read is False
+
+
+def test_a_provider_wrapper_invalidated_by_pyqt_does_not_fail_the_read(monkeypatch):
+    """The provider of a worker-side copy loses its fresh wrapper like a reply can."""
+    module = _load()
+    _qgis(monkeypatch, module, 33600, (3, 12, 3))
+    monkeypatch.setattr(module, "require_worker", lambda: None)
+    monkeypatch.setattr(module, "main_network_manager", lambda: None)
+    deleted = RuntimeError("wrapped C/C++ object of type QgsVectorDataProvider has been deleted")
+    stale, fresh = MagicMock(), MagicMock()
+    stale.raiseError.connect.side_effect = deleted
+    stale.name.side_effect = deleted
+    fresh.name.side_effect = deleted  # invalidated again after its connection
+    iterator = MagicMock()
+    iterator.isValid.return_value = True
+    iterator.__iter__.return_value = iter([])
+    source = MagicMock()
+    source.getFeatures.return_value = iterator
+    source.dataProvider.side_effect = [stale, fresh]
+
+    outcome = module.read_bounded_features(
+        source, MagicMock(), module.MaterializationLimits(), None, lambda feature: True, lambda feature: 1,
+        source_uri="memory?", provider_key="memory")
+
+    assert outcome.complete and not outcome.fetched, outcome
+    fresh.raiseError.connect.assert_called_once()
+    fresh.raiseError.disconnect.assert_called_once()

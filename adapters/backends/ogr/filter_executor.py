@@ -1090,16 +1090,31 @@ def copy_remote_source(layer, params=None, feedback=None, selected_fids=None, ex
     return _memory_source(layer, features)
 
 
+def _provider_call(layer, method, *args):
+    """Call a provider method of a layer created in a worker thread.
+
+    PyQt invalidates the wrapper of a C++-created QObject from a destroyed() notification queued to
+    the main thread and keyed by address: a provider created where a deleted object lived can lose its
+    fresh wrapper while alive ("wrapped C/C++ object ... has been deleted", #207). sip checks the
+    wrapper before the call, so the method did not run; the layer hands a usable wrapper again.
+    """
+    for attempt in range(3):
+        try:
+            return getattr(layer.dataProvider(), method)(*args)
+        except RuntimeError:
+            if attempt == 2:
+                raise
+
+
 def _memory_source(layer, features):
     """Copy already bounded source rows without a provider re-read."""
     from qgis.core import QgsFeature, QgsVectorLayer, QgsWkbTypes
     memory = QgsVectorLayer(QgsWkbTypes.displayString(layer.wkbType()), 'filtermate_remote_source', 'memory')
     memory.setCrs(layer.crs())
-    provider = memory.dataProvider()
-    provider.addAttributes(list(layer.fields()))
+    _provider_call(memory, 'addAttributes', list(layer.fields()))
     memory.updateFields()
     raw = tuple(QgsFeature(feature) for feature in features)
-    added, _ = provider.addFeatures([QgsFeature(feature) for feature in raw])
+    added, _ = _provider_call(memory, 'addFeatures', [QgsFeature(feature) for feature in raw])
     if not added:
         raise ValueError(_remote_message('read_error'))
     memory.updateExtents()
