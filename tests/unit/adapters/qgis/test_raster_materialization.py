@@ -204,6 +204,59 @@ def test_service_source_capture_keeps_original_snapshot(monkeypatch, provider):
     assert job.before.base_source == source.source()
 
 
+@pytest.mark.parametrize('provider, uri', [('wcs', 'url=coverage'), ('postgresraster', 'PG:dbname=sample'),
+                                           ('gdal', '/vsicurl/https://example.invalid/raw.tif')])
+def test_service_source_opens_a_bare_provider_never_a_layer(monkeypatch, provider, uri):
+    """2026-10-20: a QgsRasterLayer computes its default renderer statistics when it opens:
+    one more read of the whole coverage (WCS: a GetCoverage of 586 x 427 cells over 1 240 km).
+    The source capture opens the provider alone, as the targets do (_ProviderLayer, #200)."""
+    fk.install(monkeypatch, source_jobs, appliers)
+    source = layer(provider, uri, width=586, height=427)
+    job = source_jobs.RasterSourceJob(source, selection_domain.RasterSelection())
+    captured = layer('gdal', '/cache/wcs.tif', 20, 10)
+    opened = []
+
+    def raster_layer(path, name, provider_key):
+        opened.append(provider_key)
+        return captured
+
+    monkeypatch.setattr(sys.modules['qgis.core'], 'QgsRasterLayer', raster_layer)
+    remote = Mock()
+    remote.isValid.return_value = True
+    remote.extent.return_value = Rect(0, 0, 100, 100)
+    remote.xSize.return_value, remote.ySize.return_value = 586, 427
+    registry = Mock()
+    registry.createProvider.return_value = remote
+    monkeypatch.setattr(sys.modules['qgis.core'], 'QgsProviderRegistry', SimpleNamespace(instance=lambda: registry))
+    bases = []
+
+    def materialize(base, **kwargs):
+        bases.append((base.dataProvider(), base.providerType(), base.source(), base.width(), base.height()))
+        return '/cache/wcs.tif'
+
+    monkeypatch.setattr(materialization, 'materialize_raster', materialize)
+    monkeypatch.setattr(job, '_prepare_provider', Mock())
+    worker(job._prepare_remote, lambda: False)
+    assert registry.createProvider.call_args.args[:2] == (provider, uri)
+    assert bases == [(remote, provider, uri, 586, 427)]
+    assert opened == ['gdal']  # the local capture only, never a layer over the remote source
+    assert job.details['capture_grid'] == '20x10' and job.details['capture_resampled']
+
+
+def test_service_source_provider_that_cannot_open_is_refused(monkeypatch):
+    fk.install(monkeypatch, source_jobs, appliers)
+    job = source_jobs.RasterSourceJob(layer('wcs'), selection_domain.RasterSelection())
+    broken = Mock()
+    broken.isValid.return_value = False
+    registry = Mock()
+    registry.createProvider.return_value = broken
+    monkeypatch.setattr(sys.modules['qgis.core'], 'QgsProviderRegistry', SimpleNamespace(instance=lambda: registry))
+    monkeypatch.setattr(sys.modules['qgis.core'], 'QgsRasterLayer', Mock(side_effect=AssertionError('layer opened')))
+    monkeypatch.setattr(materialization, 'materialize_raster', Mock(side_effect=AssertionError('captured')))
+    with pytest.raises(RuntimeError, match='could not be opened'):
+        worker(job._prepare_remote, lambda: False)
+
+
 def test_rendered_target_refuses_before_pixels(monkeypatch):
     fk.install(monkeypatch, appliers)
     source = layer('wms', 'url=tiles')

@@ -401,6 +401,7 @@ class _Remote:
     def __init__(self, outcome_class):
         self.Outcome = outcome_class
         self.reads, self.marked, self.forced = [], [], None
+        self.limit_params = []
 
     def _snapshot(self, layer):
         return ('filtered', layer)
@@ -409,6 +410,7 @@ class _Remote:
         return ('unfiltered', layer)
 
     def materialization_limits(self, params=None):
+        self.limit_params.append(params)
         return 'limits'
 
     def materialize(self, snapshot, rect, server_expression, matches, limits, feedback):
@@ -483,6 +485,13 @@ class TestWebServiceBoundedRead:
         assert job._expression == '"cleabs" IN (1, 2, 3)'
         job.apply(layer)
         assert remote.marked == [(False, '"cleabs" IN (1, 2, 3)')]
+
+    def test_budgets_are_the_users_as_in_the_dock(self, engine, remote):
+        """Review 2026-10-20: the API read with the defaults whatever REMOTE_MATERIALIZATION said."""
+        import importlib
+        config = importlib.import_module(f'{fk.PACKAGE}.config.config')
+        _run(engine.VectorTargetJob(_web_zones(), None), _box(*EAST_HALF), _request())
+        assert len(remote.limit_params) == 1 and remote.limit_params[0] is config.ENV_VARS
 
     def test_and_reads_through_the_previous_filter(self, engine, remote):
         job = engine.VectorTargetJob(_web_zones(subset='ids:1,4'), 'AND')

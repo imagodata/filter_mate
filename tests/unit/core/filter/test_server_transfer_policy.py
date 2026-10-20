@@ -2,7 +2,8 @@
 import pytest
 
 from core.filter.server_transfer_policy import (
-    ASYNC, PRELOADED_PROVIDER_MIN, REFUSE, SYNC, WFS_SETTER_SAFE_MIN, transfer_mode,
+    ASYNC, MAX_TIMEOUT_SECONDS, PRELOADED_PROVIDER_MIN, REFUSE, SYNC, WFS_SETTER_SAFE_MIN, server_filter_timeout_ms,
+    transfer_mode,
 )
 
 # 5.0.0 only allowed the 3.44 and 4.2 branches: 3.32, 3.34, 3.40, 4.0 and
@@ -59,3 +60,48 @@ def test_other_providers_keep_their_behaviour(provider, version):
     # Asynchronous only when the provider declares ParallelCreateProvider;
     # never a main-thread fallback (database connections, unproven CQL2).
     assert transfer_mode(provider, version, False) == REFUSE
+
+
+# --- server filter timeout (2026-10-20) ---------------------------------------
+# A fixed 30 s: the public Géoplateforme WFS sometimes answered later, the
+# filter was canceled and had to be retried.
+
+def _config(**values):
+    """APP.OPTIONS.SERVER_FILTER as config.default.json writes it."""
+    return {key: {'value': value, 'description': '...'} for key, value in values.items()}
+
+
+@pytest.mark.parametrize('provider', ['wfs', 'WFS', 'oapif', 'OAPIF'])
+def test_web_feature_services_wait_sixty_seconds_by_default(provider):
+    assert server_filter_timeout_ms(provider) == 60000
+    assert server_filter_timeout_ms(provider, {}) == 60000
+    assert server_filter_timeout_ms(provider, _config(timeout_seconds=5)) == 60000
+
+
+@pytest.mark.parametrize('provider', ['arcgisfeatureserver', 'mssql', 'oracle', 'hana', 'postgres', '', None])
+def test_other_providers_wait_thirty_seconds_by_default(provider):
+    assert server_filter_timeout_ms(provider) == 30000
+    assert server_filter_timeout_ms(provider, _config(wfs_timeout_seconds=5)) == 30000
+
+
+def test_both_delays_are_configurable():
+    params = _config(wfs_timeout_seconds=90, timeout_seconds=12.5)
+    assert server_filter_timeout_ms('WFS', params) == 90000
+    assert server_filter_timeout_ms('arcgisfeatureserver', params) == 12500
+    # A plain value (no {"value": ...} wrapper), as a hand-edited file may hold.
+    assert server_filter_timeout_ms('wfs', {'wfs_timeout_seconds': 120}) == 120000
+    assert server_filter_timeout_ms('wfs', _config(wfs_timeout_seconds=MAX_TIMEOUT_SECONDS)) == 600000
+    assert server_filter_timeout_ms('wfs', _config(wfs_timeout_seconds=1)) == 1000
+
+
+@pytest.mark.parametrize('value', [0, -5, 0.5, MAX_TIMEOUT_SECONDS + 1, 1e12, float('inf'), float('nan'),
+                                   True, False, '60', None, [60], {'nested': 1}])
+def test_a_malformed_value_keeps_the_bounded_default(value):
+    assert server_filter_timeout_ms('wfs', _config(wfs_timeout_seconds=value)) == 60000
+    assert server_filter_timeout_ms('arcgisfeatureserver', _config(timeout_seconds=value)) == 30000
+
+
+@pytest.mark.parametrize('section', [None, 'off', 42, [], {'wfs_timeout_seconds': {'description': 'no value'}}])
+def test_a_malformed_section_keeps_the_defaults(section):
+    assert server_filter_timeout_ms('wfs', section) == 60000
+    assert server_filter_timeout_ms('mssql', section) == 30000

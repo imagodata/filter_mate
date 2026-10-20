@@ -57,6 +57,10 @@ FALLBACK_CONFIG = {
                 "max_features": {"value": 20000},
                 "timeout_seconds": {"value": 90}
             },
+            "SERVER_FILTER": {
+                "wfs_timeout_seconds": {"value": 60},
+                "timeout_seconds": {"value": 30}
+            },
             "APP_SQLITE_PATH": {
                 "value": "",
                 "description": "Directory for SQLite databases"
