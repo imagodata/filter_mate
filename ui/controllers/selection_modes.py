@@ -22,10 +22,8 @@ VECTOR_GROUPS = ('single_selection', 'multiple_selection', 'custom_selection')
 # the preview, reset, the "Select" mode of a vector layer, which works in the three groups).
 GROUP_TOOLS: Dict[str, Dict[str, Tuple[str, ...]]] = {
     'vector': {
-        'single_selection': ('pushButton_checkable_exploring_linking_widgets',
-                             'pushButton_checkable_exploring_vector_similar'),
-        'multiple_selection': ('pushButton_checkable_exploring_linking_widgets',
-                               'pushButton_checkable_exploring_vector_similar'),
+        'single_selection': ('pushButton_checkable_exploring_linking_widgets',),
+        'multiple_selection': ('pushButton_checkable_exploring_linking_widgets',),
         'custom_selection': (),
     },
     'raster': {

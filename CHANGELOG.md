@@ -2,7 +2,9 @@
 
 All notable changes to FilterMate will be documented in this file.
 
-## [Unreleased]
+## [5.0.0] - 2026-10-20
+
+Final 5.0.0 build: everything merged on `main` since the first 5.0.0 build (tag of 2026-10-15, reproduced below) is part of this release: streaming sources, the raster pipette and BANDS block, point cloud and vector rails, hybrid targets, the MCP server, and the fixes listed here.
 
 ### Streaming sources: web services and remote files
 
@@ -38,7 +40,7 @@ every QGIS image of the CI against local HTTP fixtures, and against public servi
 - **BANDS block of the raster panel.** One row per band: active band, "pipette compares it" toggle, colour role (R, G, B, NIR, read from the multiband renderer or guessed and marked as such; RGB, IRC and RGB + NIR shortcuts), name, value at the last click. An "every band" row applies the value range to each colour band at once (ANDed). The spectral presets (NDVI vegetation, NDVI bare soil, NDWI water, ExG vegetation) moved to an Insert menu of the raster expression, with the band references and the current range.
 - **Raster source read tile by tile at the native resolution** (2048 px tiles, in the background task, cancellable), within a budget of 200,000 vertices shared by the snapshot, the undo stack, the project and the GDAL / PDAL cutlines (majority filter, then densest blocks, then topological simplification; an isolated object stays exact to the pixel). Above `CROSS_FILTER.raster_source_max_pixels` (default 100 M px, replaces `raster_selection_max_pixels`) whole power-of-2 cells are read from the GDAL overview. A 125 m² pool on 25 cm pixels kept 74 m² on the previous 4 M-cell grid. NoData pixels are excluded from an expression selection.
 - **Point cloud rail: value pipette and zone.** The value pipette writes `attribute between v − d and v + d` on the attribute chosen in the panel (tolerance in % of the observed range; Ctrl+click adds an OR condition). The zone tool draws the shapes of the QGIS selection tools (rectangle, polygon, freehand, radius): its X / Y box goes to the conditions and the shape itself cuts the footprint of the source, so a polygon or a circle applies exactly to the targets. "More" menus on the point cloud rail (zone shape, elevation profile, 3D view) and on the raster rail (value under the cursor, statistics of a rectangle); seven buttons on both rails.
-- **Vector rail: similar features and a "more" menu.** The similar features tool selects every feature with the clicked one's value of the group expression (Ctrl adds), switches the Select mode on and goes up when QGIS takes another tool. The "more" menu runs the QGIS selection tools (rectangle, polygon, freehand, radius), select by expression, invert, clear, and the attribute table of the selection. Eight buttons, like the raster rail; the Link label says what it links.
+- **Vector rail: a "more" menu.** It runs the QGIS selection tools (rectangle, polygon, freehand, radius), select by expression, invert, clear, and the attribute table of the selection. Seven buttons; the Link label says what it links.
 - **Selection modes synced across the three kinds** (`ui/controllers/selection_modes.py`, one rule table shared by the widgets and the map): a rail tool is available only with its group (R1), switching it on activates its group (R2), the active group and the map tool come back with the layer (R3), the rail and the group show the same sub-mode (R4), a tool QGIS drops releases its button while the group stays (R5). Several features from the widgets move single → multiple whether Select is on or not; the dock reset unchecks Select through its handler (map selection cleared, pan tool back).
 - **Layers to filter: select / de-select all vector layers** from the right-click menu (shared with EXPORTING), beside the entries for all raster and all point cloud layers.
 - **Emptied targets are reported.** `CrossFilterOutcome.emptied` is set by each target kind; the dock summaries name the layers left empty instead of counting them as filtered, a point cloud clip that keeps no point included (point count read from the derived file's header).
@@ -86,7 +88,7 @@ every QGIS image of the CI against local HTTP fixtures, and against public servi
 - **Translated combine operators**: NON / NICHT / NO gave `( old ) NOT ( new )` (syntax error) and translations such as EN, OF, I, LUB, OG, ELLER reached the SQL as is; they now map to AND / OR / AND NOT, an unknown value to AND.
 - **QGIS expressions converted to PostgreSQL / SpatiaLite**: `::numeric` is added only against a number (`"nature" <> 'Route'`, dates and `now()` failed), both columns of `"x" - "y" > 0` are cast; `length("nom")` stays the string length (only the length of a geometry becomes `ST_Length`); the layer's geometry column is used instead of `geometry`; `= 75` is not cast for a text column (`'2A'`); `ILIKE '%l''ariège%'` and `$area` work on SpatiaLite. In buffer expressions `"buffer_m"` no longer becomes `"ST_Buffer_m"` (nor `"area_ha"` `"ST_Area_ha"`).
 
-## [5.0.0] - 2026-10-15
+## [5.0.0 first build] - 2026-10-15
 
 FilterMate 5 filters raster and LiDAR point cloud layers as well as vector layers: EXPLORING selects on the current layer whatever its kind, FILTERING relates that selection to layers of any kind, EXPORTING writes each kind. Raster and point cloud support is on by default and can be switched off in the Configuration tab (`APP.OPTIONS.RASTER.enabled`, `APP.OPTIONS.POINT_CLOUD.enabled`). Requirements unchanged: QGIS 3.22 or later (point clouds from 3.26), Qt5 or Qt6; PDAL 2.4 or later is optional (height above a DTM, direct COPC writing). Every release is now tested in CI on QGIS 3.22, 3.28, 3.34, 3.44 and 4.2, with Processing and with the dock itself.
 

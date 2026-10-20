@@ -77,7 +77,6 @@ ACTION_DESELECT_ALL = ('mActionDeselectAll',)
 ACTION_OPEN_TABLE_SELECTED = ('mActionOpenTableSelected',)
 VECTOR_LINK_BUTTON = 'pushButton_checkable_exploring_linking_widgets'
 VECTOR_SELECT_BUTTON = 'pushButton_checkable_exploring_selecting'
-VECTOR_SIMILAR_BUTTON = 'pushButton_checkable_exploring_vector_similar'
 # The object detector of a point cloud (CLASSES, 2026-10-18): the object under a click, or the similar ones.
 PC_OBJECT_BUTTON = 'pushButton_checkable_exploring_point_cloud_object'
 ACTION_NEW_3D_VIEW = ('mActionNew3DMapCanvas', 'mActionNew3DMapView')
@@ -217,9 +216,8 @@ def card_html(name: str, kind_label: str, meta: str, color: str, square: bool) -
 RAIL_TOOLS = {
     # Seven buttons a rail, vector, raster and point cloud alike: the shared ones (zoom, preview, reset,
     # plus Identify on a vector or a point cloud) and the tools of the groups.
-    # 2026-10-18: the vector rail gets the similar features tool (single / multiple selections) and its
-    # "more" menu too (the QGIS selection tools and actions): eight buttons, like the raster rail.
-    'vector': (VECTOR_SIMILAR_BUTTON, 'pushButton_exploring_vector_more'),
+    # 2026-10-18: the vector rail gets a "more" menu (the QGIS selection tools and actions).
+    'vector': ('pushButton_exploring_vector_more',),
     'raster': ('pushButton_checkable_exploring_raster_pipette', 'pushButton_checkable_exploring_raster_detector',
                'pushButton_checkable_exploring_raster_similar', 'pushButton_checkable_exploring_raster_link',
                'pushButton_exploring_raster_more'),
@@ -272,8 +270,6 @@ class CoverageDockExtras(QObject):
         self._zone_previous_tool = None
         self._pc_zone_tool = None  # the shapes of the QGIS selection tools, on a point cloud
         self._pc_zone_previous_tool = None
-        self._vector_similar_tool = None  # similar features of a vector layer (2026-10-18)
-        self._vector_similar_previous_tool = None
         self._vector_link_tip = None  # the Link tooltip of the dock, given back after the custom selection
         self._pc_zone_shape = 'rectangle'
         self._pc_object_tip = None  # the detector tooltip, given back on a point cloud with classes
@@ -428,11 +424,6 @@ class CoverageDockExtras(QObject):
              self._on_pc_zone_toggled),
             ('pushButton_exploring_raster_more', False,
              self.tr("More tools: the value under the cursor, the statistics of a rectangle"), self._show_raster_more_menu),
-            (VECTOR_SIMILAR_BUTTON, True,
-             self.tr("Similar features: click a feature and every feature of the layer with the same value of the "
-                     "group's field (the display expression of the single / multiple selection) is selected. "
-                     "Ctrl+click adds another value"),
-             self._on_vector_similar_toggled),
             ('pushButton_exploring_vector_more', False,
              self.tr("More tools: the QGIS selection tools (rectangle, polygon, freehand, radius), select by "
                      "expression, invert or clear the selection, the attribute table of the selection"),
@@ -493,7 +484,6 @@ class CoverageDockExtras(QObject):
             'pushButton_exploring_raster_more': ICON_MORE,
             'pushButton_exploring_point_cloud_more': ICON_MORE,
             'pushButton_exploring_vector_more': ICON_MORE,
-            VECTOR_SIMILAR_BUTTON: ICON_SIMILAR,
             'pushButton_exploring_point_cloud_profile': ICON_PROFILE,
             'pushButton_exploring_point_cloud_3d': ICON_3D,
         }
@@ -622,14 +612,13 @@ class CoverageDockExtras(QObject):
                      'pushButton_checkable_exploring_raster_hover', 'pushButton_checkable_exploring_raster_zone',
                      'pushButton_checkable_exploring_raster_link', 'pushButton_checkable_exploring_point_cloud_pipette',
                      'pushButton_checkable_exploring_point_cloud_value_pipette', PC_OBJECT_BUTTON,
-                     'pushButton_checkable_exploring_point_cloud_zone', VECTOR_SIMILAR_BUTTON):
+                     'pushButton_checkable_exploring_point_cloud_zone'):
             button = self._tools.get(name)
             if button is not None:
                 self._guarded(self._uncheck, button)
         self._guarded(self._stop_hover)
         self._guarded(self._stop_zone_tool)
         self._guarded(self._stop_pc_zone_tool)
-        self._guarded(self._stop_vector_similar_tool)
         self._hover_base, self._hover_base_key = None, None
 
     @staticmethod
@@ -1117,8 +1106,7 @@ class CoverageDockExtras(QObject):
         """R1 on the vector rail: Link and the similar features tool belong to the single / multiple selections.
 
         Outside them (custom selection) Link is disabled, its checked state kept (the link is a
-        property of the layer that resumes with one of its groups), and the similar features tool
-        is taken off the map. "Select" is shared by the three groups (in the custom one it selects
+        property of the layer that resumes with one of its groups). "Select" is shared by the three groups (in the custom one it selects
         the features of the expression on the map).
         """
         from .selection_modes import tool_available
@@ -1133,119 +1121,6 @@ class CoverageDockExtras(QObject):
             else:
                 link.setToolTip(self.tr("The link follows the single and multiple selections: make one of them "
                                         "the active group first"))
-        similar = self._tools.get(VECTOR_SIMILAR_BUTTON)
-        if similar is not None:
-            available = tool_available('vector', groupbox, VECTOR_SIMILAR_BUTTON)
-            if not available and similar.isChecked():
-                similar.setChecked(False)  # runs the toggled slot: the tool leaves the map
-            similar.setEnabled(available)
-
-    # --- similar features ---
-
-    def _on_vector_similar_toggled(self, checked: bool) -> None:
-        if checked:
-            select = getattr(self.dockwidget, VECTOR_SELECT_BUTTON, None)
-            if select is not None and not select.isChecked():
-                select.setChecked(True)  # R2: the tool puts the "Select" mode on (its handler takes the rectangle tool)
-            self._start_vector_similar_tool()
-        else:
-            self._stop_vector_similar_tool()
-
-    def _current_vector_layer(self) -> Any:
-        layer = getattr(self.dockwidget, 'current_layer', None)
-        try:
-            return layer if layer is not None and hasattr(layer, 'selectByExpression') else None
-        except RuntimeError:
-            return None
-
-    def _start_vector_similar_tool(self) -> None:
-        canvas = self._canvas()
-        if canvas is None:
-            return
-        try:
-            from ..tools.similar_features_tool import SimilarFeaturesTool
-        except ImportError:
-            return
-        if self._vector_similar_tool is None:
-            self._vector_similar_tool = SimilarFeaturesTool(canvas, self._current_vector_layer)
-            self._vector_similar_tool.featureClicked.connect(self._on_similar_feature_clicked)
-            self._vector_similar_tool.deactivated.connect(self._on_vector_similar_tool_deactivated)
-        current = canvas.mapTool()
-        if current is self._vector_similar_tool:
-            return
-        self._vector_similar_previous_tool = current
-        canvas.setMapTool(self._vector_similar_tool)
-
-    def _stop_vector_similar_tool(self) -> None:
-        canvas = self._canvas()
-        tool = self._vector_similar_tool
-        if canvas is None or tool is None or canvas.mapTool() is not tool:
-            self._vector_similar_previous_tool = None
-            return
-        previous, self._vector_similar_previous_tool = self._vector_similar_previous_tool, None
-        try:
-            if previous is not None and previous is not tool:
-                canvas.setMapTool(previous)
-                return
-        except RuntimeError:
-            pass  # the previous tool was deleted (plugin unloaded)
-        canvas.unsetMapTool(tool)
-
-    def _on_vector_similar_tool_deactivated(self) -> None:
-        """R5: QGIS took another tool, the button goes up; the group stays."""
-        self._vector_similar_previous_tool = None
-        button = self._tools.get(VECTOR_SIMILAR_BUTTON)
-        if button is not None and button.isChecked():
-            button.blockSignals(True)
-            try:
-                button.setChecked(False)
-            finally:
-                button.blockSignals(False)
-
-    def _group_expression(self, layer: Any) -> str:
-        """The expression of the active group (single / multiple selection), else the layer's display expression."""
-        dw = self.dockwidget
-        groupbox = getattr(dw, 'current_exploring_groupbox', None) or 'single_selection'
-        key = 'multiple_selection_expression' if groupbox == 'multiple_selection' else 'single_selection_expression'
-        try:
-            props = dw.PROJECT_LAYERS.get(layer.id(), {}).get('exploring', {})
-            expression = (props.get(key) or props.get('single_selection_expression') or '').strip()
-        except (AttributeError, RuntimeError):
-            expression = ''
-        if not expression:
-            try:
-                expression = (layer.displayExpression() or '').strip()
-            except (AttributeError, RuntimeError):
-                expression = ''
-        if not expression:
-            try:
-                names = layer.fields().names()
-                expression = f'"{names[0]}"' if names else ''
-            except (AttributeError, RuntimeError, IndexError):
-                expression = ''
-        return expression
-
-    def _on_similar_feature_clicked(self, feature: Any, extend: bool) -> None:
-        """Every feature with the clicked one's value of the group expression is selected (Ctrl adds)."""
-        from ..tools.similar_features_tool import equality_expression, expression_value
-        layer = self._current_vector_layer()
-        if layer is None:
-            return
-        expression = self._group_expression(layer)
-        if not expression:
-            return
-        value = expression_value(layer, expression, feature)
-        where = equality_expression(expression, value)
-        if not where:
-            return
-        try:
-            from qgis.core import QgsVectorLayer
-            behaviors = getattr(QgsVectorLayer, 'SelectBehavior', QgsVectorLayer)
-            behavior = behaviors.AddToSelection if extend else behaviors.SetSelection
-            layer.selectByExpression(where, behavior)
-            logger.info(f"[FM5] similar features of '{layer.name()}': {where} -> {layer.selectedFeatureCount()}")
-        except Exception as exc:
-            logger.warning(f"[FM5] similar features not selected: {exc}")
 
     def _show_vector_more_menu(self, *_args) -> None:
         """The QGIS selection tools and actions, from the rail; a tool puts the "Select" mode on (R2)."""

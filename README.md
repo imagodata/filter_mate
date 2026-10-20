@@ -56,11 +56,13 @@ the original source back, and project files are always saved with the original s
 - ⚡ **Fast on large data.** Filters run as SQL on PostgreSQL / PostGIS, Spatialite and GeoPackage (spatial index used,
   no reload), with an OGR path for everything else. On a full BD TOPO department, the 37 layers of a GeoPackage are
   filtered by a commune in 2–3 s.
+- 🌐 **Web services and remote files** (WFS, OGC API Features, ArcGIS, WMS / WMTS / XYZ, WCS, vector tiles, remote COPC / EPT): filtered and explored with bounded, cancellable reads, never on the main thread, and with an explicit refusal rather than a silently partial result.
+- 🎯 **Pipettes on the map**: similar pixels, the clicked object or every similar object on a raster; a value condition on a point cloud attribute.
 - ↩️ **Undo / Redo** of every filter, per layer, and a global history.
 - ⭐ **Favorites**: save a filter with its layers and settings, replay it in a click, share it with a team through a git
   repository ([docs/favorites_sharing/USER_GUIDE.md](docs/favorites_sharing/USER_GUIDE.md)).
 - 🤖 **Automation**: nine Processing algorithms and four ready-made models, `qgis_process`, a Python API for scripts and
-  other plugins, an optional REST API ([docs/AUTOMATION.md](docs/AUTOMATION.md)).
+  other plugins, an optional REST API and an MCP server for AI assistants ([docs/AUTOMATION.md](docs/AUTOMATION.md)).
 - 🧩 **QGIS 3.22 to 4.x**, Qt5 and Qt6, 🌗 light and dark themes, 🌍 34 languages.
 
 ## 📥 Installation
