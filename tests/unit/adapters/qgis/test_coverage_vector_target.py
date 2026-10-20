@@ -3,6 +3,8 @@
 import importlib.util
 import pathlib
 import sys
+import types
+from unittest.mock import MagicMock
 
 import pytest
 
@@ -372,7 +374,7 @@ def _web_fields(layer):
 class TestWebServiceTargets:
     """2026-10-17: a web service is filtered by a real key, at most key_list_limit (500) of them."""
 
-    def test_no_key_is_refused_instead_of_writing_dollar_id(self, engine):
+    def test_no_key_is_refused_instead_of_writing_dollar_id(self, engine, remote):
         layer = _web_fields(_WebLayer(['nom', 'population'], {fid: _box(*box) for fid, (_, box) in ZONES.items()}))
         job = engine.VectorTargetJob(layer, None)
         job.compute(_box(*EAST_HALF), fk.FakeCrs('EPSG:2154'), None, _request(), lambda: False)
@@ -380,15 +382,156 @@ class TestWebServiceTargets:
         assert job._expression == ''
 
     @pytest.mark.parametrize("count, applied", [(500, True), (501, False)])
-    def test_key_list_is_bounded(self, engine, count, applied):
+    def test_key_list_is_bounded(self, engine, remote, count, applied):
         features = {fid: _box(600, 100, 650, 150) for fid in range(1, count + 1)}
         layer = _web_fields(_WebLayer(['cleabs', 'population'], features))
         job = engine.VectorTargetJob(layer, None)
         assert (job._pk, job._raw_pk) == ('cleabs', False)
-        job._source_fields = layer.fields  # the fake project has no layer
         job.compute(_box(*EAST_HALF), fk.FakeCrs('EPSG:2154'), None, _request(), lambda: False)
         assert job.outcome.success is applied
         if applied:
             assert job._expression.startswith('"cleabs" IN (1, 2')
         else:
-            assert "more than the 500 sent to a web service" in job.outcome.message
+            assert job.outcome.message == "dock refusal: key_limit"  # the dock's own message
+
+
+class _Remote:
+    """``remote_materializer`` stand-in: a server BBOX read, the exact predicate on the copies."""
+
+    def __init__(self, outcome_class):
+        self.Outcome = outcome_class
+        self.reads, self.marked, self.forced = [], [], None
+
+    def _snapshot(self, layer):
+        return ('filtered', layer)
+
+    def unfiltered_snapshot(self, layer):
+        return ('unfiltered', layer)
+
+    def materialization_limits(self, params=None):
+        return 'limits'
+
+    def materialize(self, snapshot, rect, server_expression, matches, limits, feedback):
+        mode, layer = snapshot
+        self.reads.append((mode, (rect.x0, rect.y0, rect.x1, rect.y1), server_expression, limits))
+        if self.forced is not None:
+            return self.forced
+        rows = layer.features if mode == 'unfiltered' else layer.visible()
+        keys = []
+        for fid, geometry in sorted(rows.items()):
+            if not geometry.boundingBox().intersects(rect):
+                continue  # the server answers the BBOX only
+            try:
+                matched = matches(FakeFeature(fid, fk.FakeGeometry(geometry)))
+            except Exception:
+                return self.Outcome(reason='read_error')  # as collect_materialization
+            if matched:
+                keys.append(fid)
+                if len(keys) > 500:
+                    return self.Outcome(reason='key_limit')
+        return self.Outcome(tuple(keys), True, len(rows))
+
+    def mark_partial_result(self, layer, partial, expression):
+        self.marked.append((partial, expression))
+
+
+@pytest.fixture
+def remote(monkeypatch):
+    """The lot B modules the web service targets call (materializer, the dock's messages)."""
+    stand_in = _Remote(fk.load('core.domain.materialization').MaterializationOutcome)
+    module = types.ModuleType(f'{fk.PACKAGE}.adapters.qgis.remote_materializer')
+    for name in ('_snapshot', 'unfiltered_snapshot', 'materialization_limits', 'materialize', 'mark_partial_result'):
+        setattr(module, name, getattr(stand_in, name))
+    monkeypatch.setitem(sys.modules, module.__name__, module)
+    for name in ('adapters.backends', 'adapters.backends.ogr'):
+        package = types.ModuleType(f'{fk.PACKAGE}.{name}')
+        package.__path__ = []
+        monkeypatch.setitem(sys.modules, package.__name__, package)
+    executor = types.ModuleType(f'{fk.PACKAGE}.adapters.backends.ogr.filter_executor')
+    executor._remote_message = lambda reason: f"dock refusal: {reason}"
+    monkeypatch.setitem(sys.modules, executor.__name__, executor)
+    monkeypatch.setattr(sys.modules[f'{fk.PACKAGE}.adapters.backends.ogr'], 'filter_executor', executor, raising=False)
+    # The key list reaches the provider as is (the server translation has its own tests).
+    for name in ('infrastructure', 'infrastructure.database'):
+        if f'{fk.PACKAGE}.{name}' not in sys.modules:
+            package = types.ModuleType(f'{fk.PACKAGE}.{name}')
+            package.__path__ = []
+            monkeypatch.setitem(sys.modules, package.__name__, package)
+    sql_utils = types.ModuleType(f'{fk.PACKAGE}.infrastructure.database.sql_utils')
+    sql_utils.safe_set_subset_string = lambda layer, subset: layer.setSubsetString(subset)
+    monkeypatch.setitem(sys.modules, sql_utils.__name__, sql_utils)
+    return stand_in
+
+
+def _web_zones(subset=''):
+    layer = _web_fields(_WebLayer(['cleabs', 'nom'], {fid: _box(*box) for fid, (_, box) in ZONES.items()}))
+    layer.provider.subset = subset
+    return layer
+
+
+class TestWebServiceBoundedRead:
+    """2026-10-20: the API read a WFS target through a filter rectangle alone, which the QGIS WFS
+    provider answers by downloading the whole service (35 000 communes). The dock's bounded read
+    (lot B, remote_materializer) is used instead: server BBOX, exact predicate on bounded copies."""
+
+    def test_reads_the_useful_bbox_through_the_materializer(self, engine, remote, monkeypatch):
+        monkeypatch.setattr(engine, 'QgsVectorLayer', MagicMock(side_effect=AssertionError("unbounded copy")))
+        layer = _web_zones(subset='ids:4')
+        job = engine.VectorTargetJob(layer, None)
+        assert _run(job, _box(*EAST_HALF), _request()) == ['east_a', 'east_b', 'straddle']
+        assert remote.reads == [('unfiltered', (500.0, 0.0, 1000.0, 1000.0), '', 'limits')]
+        assert job._expression == '"cleabs" IN (1, 2, 3)'
+        job.apply(layer)
+        assert remote.marked == [(False, '"cleabs" IN (1, 2, 3)')]
+
+    def test_and_reads_through_the_previous_filter(self, engine, remote):
+        job = engine.VectorTargetJob(_web_zones(subset='ids:1,4'), 'AND')
+        assert _run(job, _box(*EAST_HALF), _request(operator='AND')) == ['east_a']
+        assert remote.reads[0][0] == 'filtered'
+
+    def test_contain_tested_on_the_copies(self, engine, remote):
+        job = engine.VectorTargetJob(_web_zones(), None)
+        assert _run(job, _box(690, 390, 810, 510), _request('Are within')) == ['east_a']
+
+    def test_partial_result_applied_with_the_dock_warning(self, engine, remote):
+        remote.forced = remote.Outcome((1,), False, 20001, 'feature_limit')
+        layer = _web_zones()
+        job = engine.VectorTargetJob(layer, None)
+        assert _run(job, _box(*EAST_HALF), _request()) == ['east_a']
+        assert job.outcome.message == "dock refusal: feature_limit" and job.outcome.details['partial']
+        job.apply(layer)
+        assert remote.marked == [(True, '"cleabs" IN (1)')]
+
+    @pytest.mark.parametrize("outcome, predicates, reason", [
+        (((), False, 7, 'timeout'), ('Intersect',), 'partial_empty'),
+        (((), False, 0, 'read_error'), ('Intersect',), 'read_error'),
+        (((), False, 0, 'unverified_filter'), ('Intersect',), 'unverified_filter'),
+        (((2,), False, 9, 'timeout'), ('Disjoint',), 'disjoint_partial'),
+        (None, ('Disjoint', 'Intersect'), 'mixed_disjoint'),
+    ])
+    def test_refusals_of_the_dock(self, engine, remote, outcome, predicates, reason):
+        remote.forced = remote.Outcome(*outcome) if outcome else None
+        job = engine.VectorTargetJob(_web_zones(), None)
+        job.compute(_box(*EAST_HALF), fk.FakeCrs('EPSG:2154'), None, _request(*predicates), lambda: False)
+        assert not job.outcome.success and job.outcome.message == f"dock refusal: {reason}"
+
+    def test_disjoint_keeps_every_feature_but_the_intersecting_ones(self, engine, remote):
+        job = engine.VectorTargetJob(_web_zones(), None)
+        job.compute(_box(*EAST_HALF), fk.FakeCrs('EPSG:2154'), None, _request('Disjoint'), lambda: False)
+        assert job.outcome.success, job.outcome.message
+        assert job._expression == 'NOT ("cleabs" IN (1, 2, 3))'
+        assert remote.reads[0][1] == (500.0, 0.0, 1000.0, 1000.0)
+
+    def test_and_not_with_a_partial_result_is_refused(self, engine, remote):
+        """Review: (old) AND NOT (partial keys) would keep the matching features never read."""
+        remote.forced = remote.Outcome((1,), False, 20001, 'feature_limit')
+        job = engine.VectorTargetJob(_web_zones(subset='ids:1,4'), 'AND NOT')
+        job.compute(_box(*EAST_HALF), fk.FakeCrs('EPSG:2154'), None, _request(operator='AND NOT'), lambda: False)
+        assert not job.outcome.success and job.outcome.message == "dock refusal: disjoint_partial"
+
+    def test_invalid_target_geometry_is_refused_as_in_the_dock(self, engine, remote):
+        layer = _web_zones()
+        layer.features[6] = fk.FakeGeometry.fromWkt('POLYGON((600 100,650 150,650 100,600 150,600 100))')
+        job = engine.VectorTargetJob(layer, None)
+        job.compute(_box(*EAST_HALF), fk.FakeCrs('EPSG:2154'), None, _request('Disjoint'), lambda: False)
+        assert not job.outcome.success and job.outcome.message == "dock refusal: read_error"

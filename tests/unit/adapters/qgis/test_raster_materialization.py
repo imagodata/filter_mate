@@ -217,15 +217,35 @@ def test_rendered_target_refuses_before_pixels(monkeypatch):
 @pytest.mark.parametrize('provider', ['wcs', 'postgresraster', 'gdal'])
 def test_remote_target_warps_capture_and_records_pristine_service(monkeypatch, exports, provider):
     pytest.importorskip('osgeo.ogr')
-    fk.install(monkeypatch, appliers)
+    fk.install(monkeypatch, appliers, fk.load('geometry_tools'))
     source = layer(provider, '/vsicurl/https://example.invalid/raw.tif' if provider == 'gdal' else 'url=coverage')
     source.setDataSource.side_effect = lambda path, *args: source.source.configure_mock(return_value=path)
     job = appliers.RasterTargetJob(source, None)
     source.dataProvider.assert_not_called()
     captured = layer('gdal', 'local', 10, 10)
-    monkeypatch.setattr(sys.modules['qgis.core'], 'QgsRasterLayer', lambda *args: captured)
+    opened = []
+
+    def raster_layer(uri, name, provider_key):
+        opened.append(provider_key)  # a layer computes renderer statistics: a whole-coverage read for a service
+        return captured
+
+    monkeypatch.setattr(sys.modules['qgis.core'], 'QgsRasterLayer', raster_layer)
+    remote = Mock()
+    remote.isValid.return_value = True
+    remote.extent.return_value = Rect(0, 0, 100, 100)
+    remote.xSize.return_value, remote.ySize.return_value = 10, 10
+    registry = Mock()
+    registry.createProvider.return_value = remote
+    monkeypatch.setattr(sys.modules['qgis.core'], 'QgsProviderRegistry', SimpleNamespace(instance=lambda: registry))
     path = cache.new_path('coverage', '.tif')
-    monkeypatch.setattr(materialization, 'materialize_raster', lambda *args, **kwargs: path)
+    captures = []
+
+    def materialize(base, **kwargs):
+        assert base.dataProvider() is remote and base.providerType() == provider
+        captures.append(kwargs)
+        return path
+
+    monkeypatch.setattr(materialization, 'materialize_raster', materialize)
     calls = []
     monkeypatch.setattr(appliers, 'gdal_warp', lambda dest, src, **opts: calls.append((dest, src, opts)))
     cross = fk.load('core.domain.cross_filter')
@@ -234,6 +254,11 @@ def test_remote_target_warps_capture_and_records_pristine_service(monkeypatch, e
     request = cross.CrossFilterRequest('source', kinds.LayerKind.RASTER)
     worker(job.compute, geometry, source.crs(), None, request, lambda: False)
     assert job.outcome.success, job.outcome.message
+    # 2026-10-20: the capture covers the area kept (five cells of ten, one of margin), not the whole coverage.
+    area = captures[0]['extent']
+    assert (area.x0, area.y0, area.x1, area.y1) == pytest.approx((0, 0, 60, 100), abs=1e-4)
+    assert registry.createProvider.call_args.args[:2] == (provider, source.source())
+    assert opened == ['gdal']  # the local capture only, never a layer over the remote source
     assert calls[0][1] == path
     assert calls[0][0] == path + '.clip.vrt'
     assert calls[0][2]['callback']() == 1
@@ -259,3 +284,55 @@ def test_remote_source_refuses_main_thread_before_open(monkeypatch):
     with pytest.raises(RuntimeError, match='worker thread'):
         job._prepare_remote(lambda: False)
     opener.assert_not_called()
+
+
+class TestCaptureWindow:
+    """2026-10-20: a remote target was captured over its whole extent (1 240 km of WCS for a 25 km zone)."""
+
+    FULL = Rect(0, 0, 100, 100)  # a 10 x 10 grid of 10 m cells
+
+    @staticmethod
+    def _window(kept, width=10, height=10, full=None):
+        area, grid = appliers._capture_window(full or TestCaptureWindow.FULL, width, height, kept)
+        return (area.x0, area.y0, area.x1, area.y1), grid
+
+    def test_native_cells_around_the_kept_area_plus_one(self, monkeypatch):
+        fk.install(monkeypatch, appliers)
+        monkeypatch.setattr(appliers, 'QgsRectangle', Rect)
+        box, grid = self._window(fk.FakeGeometry.fromRect(Rect(23, 41, 37, 58)))
+        assert grid == (4, 4)  # columns 1-4, rows 3-6 from the top
+        assert box == pytest.approx((10, 30, 50, 70), abs=1e-4)
+
+    def test_clamped_to_the_extent(self, monkeypatch):
+        fk.install(monkeypatch, appliers)
+        monkeypatch.setattr(appliers, 'QgsRectangle', Rect)
+        box, grid = self._window(fk.FakeGeometry.fromRect(Rect(-50, 95, 5, 150)))
+        assert grid == (2, 2) and box == pytest.approx((0, 80, 20, 100), abs=1e-4)
+
+    @pytest.mark.parametrize('kept', [None, 'outside'])
+    def test_nothing_kept_reads_one_cell(self, monkeypatch, kept):
+        fk.install(monkeypatch, appliers)
+        monkeypatch.setattr(appliers, 'QgsRectangle', Rect)
+        geometry = fk.FakeGeometry.fromRect(Rect(500, 500, 510, 510)) if kept else None
+        box, grid = self._window(geometry)
+        assert grid == (1, 1) and box == pytest.approx((0, 90, 10, 100), abs=1e-4)
+
+    def test_capture_keeps_the_native_cell_count(self, exports, monkeypatch):
+        """materialize_raster's ceil() must not add a resampled row or column to the window."""
+        monkeypatch.setattr(appliers, 'QgsRectangle', Rect)
+        records, _ = exports
+        source = layer(width=1234, height=987)
+        full = Rect(1_000_000.0, 6_000_000.0, 1_000_000.0 + 1234 * 0.7, 6_000_000.0 + 987 * 0.7)
+        source.extent.return_value = full
+        kept = fk.FakeGeometry.fromRect(Rect(1_000_123.4, 6_000_100.1, 1_000_456.7, 6_000_400.2))
+        area, grid = appliers._capture_window(full, 1234, 987, kept)
+        worker(materialization.materialize_raster, source, extent=area, max_pixels=10**8)
+        assert records[-1][1:3] == grid
+
+    def test_parts_outside_the_extent_do_not_stretch_the_window(self, monkeypatch):
+        """Review: a stored "nothing kept" polygon (outside the extent) OR-combined with a zone."""
+        fk.install(monkeypatch, appliers)
+        monkeypatch.setattr(appliers, 'QgsRectangle', Rect)
+        kept = fk.FakeGeometry.fromWkt('MULTIPOLYGON(((-2 -2,-1 -2,-1 -1,-2 -1,-2 -2)),((63 63,67 63,67 67,63 67,63 63)))')
+        box, grid = self._window(kept)
+        assert grid == (3, 3) and box == pytest.approx((50, 50, 80, 80), abs=1e-4)

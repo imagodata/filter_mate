@@ -782,3 +782,13 @@ Result: Que veux-tu faire dans cette session ?
   rendue certaine dans le smoke GUI (`s_undo_pick_race` : `singleShot(150)` de la touche, undo, `sleep`). Un choix
   fait pendant la tâche filtre est appliqué à la fin (`_combo_blocked_at`) ; une tâche échouée / annulée rouvre la
   fenêtre (`_filter_engine_task_terminated`, garde de génération pour annuler-relancer).
+- [2026-10-20] API publique sur les sources en flux (branche `claude/v5-stream-F-api`) : `_run_task` calcule dans un
+  `QThread` (jamais un thread Python : les providers WCS / WFS démarrent des minuteurs Qt dans le thread qui lit,
+  « Timers can only be used with threads started with QThread » puis plantage natif en 3.44) et rend le bail
+  `service._running` AVANT d'appliquer (sinon le filtre serveur WFS refuse : « A FilterMate task is still reading
+  layers »). Cible vecteur d'un service web dans `VectorTargetJob` : `remote_materializer.materialize` (BBOX serveur,
+  prédicat exact local, 500 clés) et les messages du dock (`filter_executor._remote_message`) ; Disjoint = NOT (clés
+  qui intersectent). Cible raster distante capturée sur l'emprise gardée seulement (`_capture_window` : grille native,
+  une cellule de marge, un millionième de cellule en moins pour que le `ceil` de la capture ne rééchantillonne pas).
+  `layer_kind_by_class` connaît VECTOR_TILE (cible seulement) ; un favori de l'API recoupe via `_run_task` et un échec
+  de découpage va dans `report.failed`.

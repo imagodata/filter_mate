@@ -70,13 +70,21 @@ def _resolve(project: QgsProject, entry: Dict, kind_of=None):
 
 
 def apply(entries: List[Dict], service=None, project: Optional[QgsProject] = None, synchronous: bool = False,
-          kind_of=None, applied: Optional[List[str]] = None) -> int:
+          kind_of=None, applied: Optional[List[str]] = None, run=None,
+          failed: Optional[Dict[str, str]] = None) -> int:
     """Re-apply captured raster / point cloud states; returns the number of layers handled.
 
     Args:
         kind_of: Layer kind function; the default follows the dock options,
             automation passes the class-based kind (no dock, options off).
         applied: When given, receives the ids of the layers handled.
+        run: ``run(service, request, source_job) -> str`` clipping a layer
+            again and waiting for it, the reason of a failure or ""
+            (automation: a remote source is read in a worker, never on main).
+            Without it the clip is queued (``service.run``).
+        failed: When given, receives ``{layer_id: reason}`` for the layers
+            that could not be filtered again (an exception included); they are
+            put back as they were and not counted as handled.
     """
     kind_of = kind_of or _kind
     from ....core.domain.cross_filter import CrossFilterRequest, TargetSpec
@@ -106,22 +114,48 @@ def apply(entries: List[Dict], service=None, project: Optional[QgsProject] = Non
         if kind is LayerKind.VECTOR_TILE:
             from .vector_tile_filters import apply_filter, tr
             from ....core.domain.filter_state import CrossOperation
-            before = take_snapshot(layer, kind)
-            after = apply_filter(layer, stored.tile_filter)
+            try:
+                before = take_snapshot(layer, kind)
+                after = apply_filter(layer, stored.tile_filter)
+            except ValueError as exc:  # a style the tile filter cannot handle
+                if failed is None:
+                    raise
+                failed[layer.id()] = str(exc)
+                continue
             service.history.push(CrossOperation(layer.id(), ((before, after),), tr('Vector tile favorite')))
             handled += 1
             if applied is not None:
                 applied.append(layer.id())
             continue
         current = take_snapshot(layer, kind)
-        restore_snapshot(layer, base_snapshot(current, stored.subset if kind is LayerKind.POINT_CLOUD else ''))
-        if stored.derived and stored.selection and not stored.geometry_wkt:
-            from .source_jobs import apply_stored_selection
-            apply_stored_selection(layer, stored)
-        elif stored.derived and stored.geometry_wkt:
-            request = CrossFilterRequest(source_layer_id=layer.id(), source_kind=LayerKind.OTHER,
-                                         targets=(TargetSpec(layer.id(), kind),), predicates=('Intersect',))
-            service.run(request, FixedGeometrySourceJob(layer, stored.geometry_wkt), synchronous=synchronous)
+        reason = ''
+        try:
+            restore_snapshot(layer, base_snapshot(current, stored.subset if kind is LayerKind.POINT_CLOUD else ''))
+            if stored.derived and stored.selection and not stored.geometry_wkt:
+                from .source_jobs import apply_stored_selection
+                if apply_stored_selection(layer, stored) is None:
+                    reason = 'the stored raster selection could not be rebuilt'
+            elif stored.derived and stored.geometry_wkt:
+                request = CrossFilterRequest(source_layer_id=layer.id(), source_kind=LayerKind.OTHER,
+                                             targets=(TargetSpec(layer.id(), kind),), predicates=('Intersect',))
+                job = FixedGeometrySourceJob(layer, stored.geometry_wkt)
+                if run is None:
+                    service.run(request, job, synchronous=synchronous)
+                else:
+                    reason = run(service, request, job)
+        except Exception as exc:  # a stored source that no longer opens
+            if failed is None:
+                raise
+            logger.warning(f"[FM5] favorite: '{layer.name()}' not filtered again: {exc}", exc_info=True)
+            reason = str(exc) or type(exc).__name__
+        if reason and failed is not None:
+            # A failure leaves the layer as it was, never on its unfiltered source.
+            try:
+                restore_snapshot(layer, current)
+            except Exception as exc:
+                logger.warning(f"[FM5] favorite: '{layer.name()}' not put back: {exc}", exc_info=True)
+            failed[layer.id()] = reason
+            continue
         handled += 1
         if applied is not None:
             applied.append(layer.id())

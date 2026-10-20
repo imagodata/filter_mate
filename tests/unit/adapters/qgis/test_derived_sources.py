@@ -425,6 +425,33 @@ class TestUnfilterEnrichedCloud:
         assert cloud.subsetString() == "Classification = 2" and "_hag_" in cloud.source()
         assert env.reg.get(cloud.id()).pristine_source == pristine
 
+    @pytest.mark.parametrize("reason", ["", "remote raster target must run in a worker thread"])
+    def test_favorite_clip_run_by_the_caller_reports_its_failure(self, env, reason):
+        """2026-10-20: automation clips in its worker; a failed clip is a failure, never "handled"."""
+        from fm_derived_sources_test.adapters.qgis.coverage_layers import favorites_bridge
+        raster = _raster(env)
+        raster.crs = lambda: None  # read by the clip's source job
+        entry = dict(LayerSnapshot(raster.id(), "raster", source="/cache/x.vrt", provider="gdal", derived=True,
+                                   original_source=raster.source(), original_provider="gdal",
+                                   geometry_wkt="POLYGON((0 0,1 0,1 1,0 1,0 0))").to_dict(), layer_name="ortho")
+        service = types.SimpleNamespace(run=lambda *args, **kwargs: pytest.fail("queued instead of run"))
+        runs, applied, failed = [], [], {}
+        previous = clip(raster, f"{env.session}/ortho_1a2b3c4d.vrt", LayerKind.RASTER).source
+
+        def run(clip_service, request, job):
+            runs.append((clip_service, request.targets[0].layer_id, job._wkt, raster.source()))
+            return reason
+
+        handled = favorites_bridge.apply([entry], service=service, project=env.project,
+                                         kind_of=lambda layer: LayerKind.RASTER, applied=applied, run=run, failed=failed)
+        # The clip starts from the original source.
+        assert runs == [(service, raster.id(), entry["geometry_wkt"], entry["original_source"])]
+        if reason:
+            assert (handled, applied, failed) == (0, [], {raster.id(): reason})
+            assert raster.source() == previous  # a failed clip leaves the layer as it was
+        else:
+            assert (handled, applied, failed) == (1, [raster.id()], {})
+
     def test_plain_layer_unfiltered_leaves_the_registry(self, env):
         raster = _raster(env)
         original = raster.source()

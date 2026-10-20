@@ -2813,12 +2813,15 @@ class CoverageModeController(BaseController):
             sampled_targets = [o for o in task.outcomes if o.success and o.details.get('capture_resampled')]
             if sampled_targets:
                 parts.append(self.tr("{0} raster target(s) resampled to the configured pixel limit").format(len(sampled_targets)))
+            # A web service target read up to its budget: applied, its message (already translated) says so.
+            partial = sorted({o.message for o in task.outcomes if o.success and o.details.get('partial') and o.message})
+            parts.extend(partial)
             emptied = self._emptied_text(task.outcomes)
             if emptied:
                 parts.append(emptied)
             if failures:
                 parts.append(self.tr("{0} failed: {1}").format(len(failures), self._failure_text(failures)))
-            self._after_run(layer, task.outcomes, ' — '.join(parts), warning=bool(failures or emptied))
+            self._after_run(layer, task.outcomes, ' — '.join(parts), warning=bool(failures or emptied or partial))
 
         try:
             self._running_task = self.service.run(request, source_job, on_done=done)

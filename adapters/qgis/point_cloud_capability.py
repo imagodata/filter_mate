@@ -246,8 +246,11 @@ def layer_kind_by_class(layer: Any) -> Any:
     """Kind from the layer class only, ignoring the dock options (Processing, REST API).
 
     Rendered services are RASTER too; target admission checks their capability.
+    Vector tiles are VECTOR_TILE, as in :func:`get_layer_kind` (targets only).
     """
     from ...core.domain.layer_kind import LayerKind
+    if layer is not None and any(base.__name__ == 'QgsVectorTileLayer' for base in type(layer).__mro__):
+        return LayerKind.VECTOR_TILE
     try:
         from qgis.core import QgsRasterLayer, QgsVectorLayer
     except Exception:
