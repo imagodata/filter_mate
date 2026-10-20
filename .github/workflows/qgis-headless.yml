@@ -103,7 +103,7 @@ jobs:
           "$IMAGE" bash -c '
             if [ "$INSTALL_PDAL" = "true" ]; then bash /src/tests/qgis_headless/install_pdal.sh || exit 1; fi
             failed=""
-            for check in vector_filters versions vector_spatial raster raster_automation d_materialization tiles_pointclouds; do
+            for check in vector_filters versions vector_spatial api_sources raster raster_automation d_materialization tiles_pointclouds; do
               echo "::group::check_stream_$check"
               timeout 600 python3 /src/tests/qgis_headless/check_stream_$check.py || failed="$failed $check"
               echo "::endgroup::"
