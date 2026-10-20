@@ -173,6 +173,14 @@ def _ensure_favorites_mocks():
         sys.modules[exc_full] = exc_mod
         exc_spec.loader.exec_module(exc_mod)
 
+    # The spatial handler asks whether the current layer is read in tasks: these
+    # fake layers are local (a web service is covered by test_favorites_spatial_handler).
+    probe_name = f"{shim_root}.adapters.qgis.source_capability_probe"
+    if probe_name not in sys.modules:
+        probe_mod = types.ModuleType(probe_name)
+        probe_mod.counts_cheaply = lambda layer: True
+        sys.modules[probe_name] = probe_mod
+
 
 _ensure_favorites_mocks()
 

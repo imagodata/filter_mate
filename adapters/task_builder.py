@@ -915,6 +915,12 @@ class TaskParameterBuilder:
         # Get features for filter operation
         logger.info("get_and_validate_features: Calling get_current_features()...")
         features, expression = dw.get_current_features()
+        # A web service selection refused, still loading or whose keys cannot be sent (a filter
+        # replayed without launchTaskEvent): ExploringController.remote_filter_blocked.
+        controller = getattr(dw, '_exploring_ctrl', None)
+        blocked = getattr(controller, 'remote_filter_blocked', None)
+        if callable(blocked) and blocked() is True:
+            raise ValueError("Web service selection refused or still loading")
         logger.info(f"get_and_validate_features: Returned {len(features)} features, expression='{expression}'")
 
         # CRITICAL CHECK: Warn if no features and no expression
