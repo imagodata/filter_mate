@@ -56,7 +56,6 @@
         <li><a href="#s6"><span class="num">6</span>Hamlets far from paved roads</a></li>
         <li><a href="#s7"><span class="num">7</span>The team's query library</a></li>
         <li><a href="#s8"><span class="num">8</span>Objects modified since a date</a></li>
-        <li><a href="#estavar"><span class="num">⁂</span>Second ground: Estavar</a></li>
         <li><a href="#s9"><span class="num">9</span>Parcels on steep slopes</a></li>
         <li><a href="#s10"><span class="num">10</span>Building heights, measured by LiDAR</a></li>
         <li><a href="#s11"><span class="num">11</span>Roads to prune</a></li>
@@ -497,25 +496,6 @@ processing.run("filtermate:batch_filter", {
 })</code></pre>
 </section>
 
-<!-- 9 ------------------------------------------------------------------ -->
-<!-- ===== ESTAVAR ===== -->
-<section id="estavar">
-    <h2><span class="num">⁂</span>Second ground: raster and LiDAR in Estavar</h2>
-    <p>Stories 9 to 12 leave Haute-Garonne for one square kilometre of the village of <strong>Estavar</strong>, in Cerdagne (Pyrénées-Orientales), where FilterMate 5 works on raster and point cloud layers:</p>
-    <div class="table-wrap">
-    <table>
-        <thead><tr><th>Layer</th><th>Content</th><th>Source</th></tr></thead>
-        <tbody>
-            <tr><td><code>lhd</code></td><td>20,422,819 classified points (COPC)</td><td>LiDAR HD, tiles 0617_6152 and 0617_6153</td></tr>
-            <tr><td><code>mnt</code> · <code>pente</code></td><td>1 m DTM interpolated from the ground points; slope in % for the backdrop</td><td>PDAL, <code>gdaldem slope -p</code></td></tr>
-            <tr><td><code>batiment</code> · <code>troncon_de_route</code></td><td>668 buildings, 172 road segments</td><td>BD TOPO® (IGN WFS service)</td></tr>
-            <tr><td><code>parcelle</code></td><td>1,763 parcels of the commune</td><td>Etalab cadastre</td></tr>
-        </tbody>
-    </table>
-    </div>
-    <div class="callout"><strong>Reading the cloud.</strong> The footprint of a point selection is computed on a 2 m grid, at the matching level of detail of the cloud. Two runs can differ by a few features: the counts quoted are those of the recordings.</div>
-    <p>West of the window, across the border, lies Llívia, the Spanish enclave of Cerdagne: BD TOPO and LiDAR HD cover it, the French cadastre does not. <code>scripts/site_videos.sh data</code> rebuilds these files.</p>
-</section>
 <!-- 9 ------------------------------------------------------------------ -->
 <section id="s9">
     <div class="band">
