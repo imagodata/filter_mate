@@ -311,6 +311,7 @@ def read_bounded_features(source, request, limits, feedback, consume, key, sourc
     since provider construction and reloadData can already start downloads.
     """
     from qgis.core import Qgis, QgsApplication, QgsDataSourceUri, QgsFeature, QgsFeedback, QgsNetworkAccessManager
+    from qgis.PyQt import sip
     from qgis.PyQt.QtCore import Qt
     from qgis.PyQt.QtNetwork import QNetworkReply, QNetworkRequest
 
@@ -397,10 +398,35 @@ def read_bounded_features(source, request, limits, feedback, consume, key, sourc
     if reply_preprocessor_available():
 
         def inspect_reply(request, reply):
+            # The address first: PyQt can invalidate this wrapper at any time (_on_live_reply).
+            try:
+                address = sip.unwrapinstance(reply)
+            except RuntimeError:
+                address = None
             if not belongs(request):
                 return
 
             tail = [b""]
+            # The wrapper in use, dropped when the reply finishes: kept longer, it would
+            # outlive the reply and sip would hand it to the next reply at its address.
+            held = [reply]
+
+            def unobserved():
+                # A reply this observer cannot read is never verified, unless the read has ended.
+                # Do not let a Python slot exception escape through Qt.
+                if not closing.is_set() and time.monotonic() < deadline:
+                    logger.debug("bounded read: a service reply could not be observed")
+                    network_failed.append(True)
+
+            if address is None:
+                unobserved()
+                return
+
+            def on_reply(use):
+                return _on_live_reply(address, held, use)
+
+            def release():
+                held[0] = None
 
             def error(code):
                 if code != QNetworkReply.NetworkError.NoError and not (
@@ -409,18 +435,23 @@ def read_bounded_features(source, request, limits, feedback, consume, key, sourc
                 ):
                     network_failed.append(True)
 
+            def finished_error():
+                try:
+                    code = on_reply(lambda live: live.error())
+                except RuntimeError:
+                    unobserved()
+                    return
+                error(code)
+
             def inspect_body():
                 # Peek without consuming the provider's stream. ExceptionReport
                 # responses often use HTTP 200 and never emit errorOccurred.
                 try:
-                    if not reply.bytesAvailable():
-                        return
-                    prefix = bytes(reply.peek(65536))
+                    prefix = on_reply(lambda live: bytes(live.peek(65536)) if live.bytesAvailable() else b"")
                 except RuntimeError:
-                    # A downloader can destroy its reply during cancellation.
-                    # Do not let a Python slot exception escape through Qt.
-                    if not closing.is_set() and time.monotonic() < deadline:
-                        network_failed.append(True)
+                    unobserved()
+                    return
+                if not prefix:
                     return
                 prefix = tail[0] + prefix
                 tail[0] = prefix[-256:]
@@ -429,12 +460,19 @@ def read_bounded_features(source, request, limits, feedback, consume, key, sourc
                 ):
                     network_failed.append(True)
 
-            reply.readyRead.connect(inspect_body, Qt.ConnectionType.DirectConnection)
-            reply.finished.connect(inspect_body, Qt.ConnectionType.DirectConnection)
-            if hasattr(reply, "errorOccurred"):
-                reply.errorOccurred.connect(error, Qt.ConnectionType.DirectConnection)
-            else:  # Qt < 5.15: errorOccurred was named error
-                reply.finished.connect(lambda: error(reply.error()), Qt.ConnectionType.DirectConnection)
+            # One step per connection: a retried step never connects a slot twice.
+            try:
+                on_reply(lambda live: live.readyRead.connect(inspect_body, Qt.ConnectionType.DirectConnection))
+                on_reply(lambda live: live.finished.connect(inspect_body, Qt.ConnectionType.DirectConnection))
+                if hasattr(QNetworkReply, "errorOccurred"):
+                    on_reply(lambda live: live.errorOccurred.connect(error, Qt.ConnectionType.DirectConnection))
+                else:  # Qt < 5.15: errorOccurred was named error
+                    on_reply(lambda live: live.finished.connect(finished_error, Qt.ConnectionType.DirectConnection))
+                on_reply(lambda live: live.finished.connect(release, Qt.ConnectionType.DirectConnection))  # last
+            except RuntimeError:
+                release()
+                unobserved()
+                return
             inspect_body()  # cached replies can have data before readyRead is connected
 
         preprocessor = QgsNetworkAccessManager.setReplyPreprocessor(inspect_reply)
@@ -518,6 +556,41 @@ def read_bounded_features(source, request, limits, feedback, consume, key, sourc
         _release(lambda: message_log.messageReceived.disconnect(provider_message))
         if provider_connected:
             _release(lambda: provider.raiseError.disconnect(provider_error))
+
+
+def _on_live_reply(address, held, use, attempts=3):
+    """Apply ``use`` to the QNetworkReply at ``address``, alive while this runs.
+
+    PyQt invalidates the wrapper of a C++-created QObject when the object's
+    destroyed() reaches the main thread, queued and keyed by address. A
+    worker-thread reply created where a deleted one lived can receive that
+    reply's wrapper, or a fresh one, and the late notification invalidates
+    it while the new reply is still emitting its signals (CI stable / latest,
+    2026-10-20). sip forgets an invalidated wrapper, so wrapping the address
+    again reaches the same live reply. Call only from the reply's own signal
+    or from the preprocessor call that received it.
+
+    Args:
+        address: The reply's C++ address (sip.unwrapinstance).
+        held: One-item list caching the wrapper in use, or None to wrap again.
+        use: Callable receiving a usable wrapper.
+
+    Raises:
+        RuntimeError: Each fresh wrapper was invalidated as well.
+    """
+    from qgis.PyQt import sip
+    from qgis.PyQt.QtNetwork import QNetworkReply
+
+    for attempt in range(attempts):
+        if held[0] is None:
+            held[0] = sip.wrapinstance(address, QNetworkReply)
+        try:
+            return use(held[0])
+        except RuntimeError:
+            held[0] = None
+            if attempt + 1 == attempts:
+                raise
+            logger.debug("bounded read: PyQt invalidated a live reply's wrapper; wrapping it again")
 
 
 def _release(step):
