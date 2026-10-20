@@ -137,6 +137,37 @@ def test_bounded_read_registers_the_observer_only_when_safe(monkeypatch, qgis_ve
         manager.removeReplyPreprocessor.assert_not_called()
 
 
+@pytest.mark.parametrize("dead", ["provider", "network", "message_log", "preprocessor"])
+def test_bounded_read_keeps_its_outcome_when_cleanup_meets_a_deleted_object(monkeypatch, dead):
+    """CI ltr-noble, 2026-10-20: QGIS deleted the clone's provider before the read's cleanup, and
+    ``provider.raiseError.disconnect`` raised RuntimeError from ``finally``, replacing the outcome."""
+    module = _load()
+    core = _qgis(monkeypatch, module, 33600, (3, 12, 3))
+    monkeypatch.setattr(module, "require_worker", lambda: None)
+    monkeypatch.setattr(module, "main_network_manager", lambda: None)
+    deleted = RuntimeError("wrapped C/C++ object has been deleted")
+    iterator = MagicMock()
+    iterator.isValid.return_value = True
+    iterator.__iter__.return_value = iter([])
+    source = MagicMock()
+    source.getFeatures.return_value = iterator
+    source.dataProvider.return_value.name.return_value = "memory"
+    if dead == "provider":
+        source.dataProvider.return_value.raiseError.disconnect.side_effect = deleted
+    elif dead == "network":
+        core.QgsNetworkAccessManager.instance.return_value.finished.disconnect.side_effect = deleted
+    elif dead == "message_log":
+        core.QgsApplication.messageLog.return_value.messageReceived.disconnect.side_effect = deleted
+    else:
+        core.QgsNetworkAccessManager.removeReplyPreprocessor.side_effect = KeyError("{observer-id}")
+
+    outcome = module.read_bounded_features(
+        source, MagicMock(), module.MaterializationLimits(), None, lambda feature: True, lambda feature: 1,
+        source_uri="memory?", provider_key="memory")
+
+    assert outcome.complete and not outcome.fetched, outcome
+
+
 @pytest.mark.parametrize("provider_key, qgis_version, python_version", [
     ("wfs", 33415, (3, 12, 3)),
     ("oapif", 33415, (3, 12, 3)),

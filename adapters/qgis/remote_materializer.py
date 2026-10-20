@@ -6,6 +6,7 @@ the owner thread when a caller needs a standalone task. Neither path adds
 a layer to the project or writes a scratch file.
 """
 
+import logging
 import math
 import os
 import re
@@ -25,6 +26,8 @@ from ...core.domain.materialization import (
 from ...core.filter.pk_formatter import is_null_value
 from ...core.optimization.config_provider import get_app_option_value
 from .source_capability_probe import capture_network_manager, main_network_manager, stable_key_for_layer
+
+logger = logging.getLogger(__name__)
 
 _BBOX_PROVIDERS = frozenset(("wfs", "oapif", "arcgisfeatureserver"))
 _PARTIAL_LAYERS = set()
@@ -502,18 +505,27 @@ def read_bounded_features(source, request, limits, feedback, consume, key, sourc
     except Exception:
         return MaterializationOutcome(reason="read_error")
     finally:
+        # Each step on its own: QGIS may already have deleted the clone's provider (CI ltr-noble,
+        # 2026-10-20), and an exception raised here would replace the outcome returned above.
         stop.set()
         watcher.join(timeout=0.1)
-        if iterator is not None:
-            iterator.close()
-        network.finished.disconnect(finished)
+        _release(lambda: iterator.close() if iterator is not None else None)
+        _release(lambda: network.finished.disconnect(finished))
         if main_network is not None:
-            main_network.finished.disconnect(finished)
+            _release(lambda: main_network.finished.disconnect(finished))
         if preprocessor is not None:
-            QgsNetworkAccessManager.removeReplyPreprocessor(preprocessor)
-        message_log.messageReceived.disconnect(provider_message)
+            _release(lambda: QgsNetworkAccessManager.removeReplyPreprocessor(preprocessor))
+        _release(lambda: message_log.messageReceived.disconnect(provider_message))
         if provider_connected:
-            provider.raiseError.disconnect(provider_error)
+            _release(lambda: provider.raiseError.disconnect(provider_error))
+
+
+def _release(step):
+    """One cleanup step of a bounded read; a deleted Qt object or an unknown id is already released."""
+    try:
+        step()
+    except (RuntimeError, TypeError, KeyError) as exc:
+        logger.debug(f"bounded read cleanup: {exc}")
 
 
 def materialize_translation(layer, rect, translation, limits=None, feedback=None):
