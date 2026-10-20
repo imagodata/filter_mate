@@ -61,7 +61,6 @@
         <li><a href="#s10"><span class="num">10</span>La hauteur du bâti, mesurée par le LiDAR</a></li>
         <li><a href="#s11"><span class="num">11</span>Les routes à élaguer</a></li>
         <li><a href="#s12"><span class="num">12</span>Le lot de relevé autour de l’église</a></li>
-        <li><a href="#completer"><span class="num">⁂</span>Les données des quatre recettes illustrées</a></li>
         <li><a href="#s13"><span class="num">13</span>La végétation sur une orthophoto RVB</a></li>
         <li><a href="#s14"><span class="num">14</span>Les points LiDAR sous les toits</a></li>
         <li><a href="#s15"><span class="num">15</span>Le MNT au droit des points sol</a></li>
@@ -644,24 +643,6 @@ processing.run("filtermate:batch_filter", {
     <h3>Résultat</h3>
     <p>Un ZIP de 1,1 Mo : le MNT (GeoTIFF, 45 Ko) et le nuage (LAZ, 1,0 Mo) de l’église et de ses abords.</p>
 </section>
-<!-- ===== COMPLÉTER LES NEUF COMBINAISONS ===== -->
-<section id="completer">
-    <h2><span class="num">⁂</span>Les données des quatre recettes illustrées</h2>
-    <p>Les cas 13 à 16 complètent le tableau « <a href="index.fr.html#directions">Neuf combinaisons. Un seul panneau.</a> ». Leurs schémas expliquent le passage de la source au résultat. Les réglages sont à reproduire sur vos propres données ; les surfaces et les effectifs dépendront du jeu chargé.</p>
-    <div class="table-wrap">
-    <table>
-        <thead><tr><th>Cas</th><th>Couches à préparer sur une même zone</th><th>À vérifier</th></tr></thead>
-        <tbody>
-            <tr><td><a href="#s13">13 · Raster → raster</a></td><td>Une orthophoto infrarouge couleur <code>ortho_irc</code> et une orthophoto couleur <code>ortho_rvb</code></td><td>Des fichiers raster locaux avec une bande proche infrarouge dans la source ; des prises de vue de même date facilitent la comparaison.</td></tr>
-            <tr><td><a href="#s14">14 · Raster → LiDAR</a></td><td>Une orthophoto <code>ortho_rvb</code> et un nuage classé <code>lhd</code></td><td>Des toitures bien visibles et un recouvrement entre l’image et le nuage.</td></tr>
-            <tr><td><a href="#s15">15 · LiDAR → raster</a></td><td>Un nuage classé <code>lhd</code> et un modèle de terrain <code>mnt</code></td><td>La classe 2 (sol) présente dans le nuage ; le MNT est un raster existant.</td></tr>
-            <tr><td><a href="#s16">16 · LiDAR → LiDAR</a></td><td>Deux couches distinctes <code>lhd_reseau</code> et <code>lhd_vegetation</code>, éventuellement chargées depuis le même fichier COPC</td><td>Des points de câble classés 13 ou 14 et de la végétation haute classée 5.</td></tr>
-        </tbody>
-    </table>
-    </div>
-    <p>Chargez les fichiers dans QGIS, avec leur système de coordonnées correctement renseigné. Pour le tampon de 10 m du cas 16, utilisez un nuage dans un SCR métrique, par exemple Lambert-93 en France métropolitaine. PDAL permet le découpage exact des nuages en COPC.</p>
-</section>
-
 <!-- 13 ------------------------------------------------------------------ -->
 <section id="s13">
     <div class="band band-diagram">
@@ -761,7 +742,7 @@ processing.run("filtermate:batch_filter", {
     </div>
     <dl class="recipe"><div><dt>Source</dt><dd><code>lhd_reseau</code></dd></div><div><dt>Sélection</dt><dd>Classes 13 et 14</dd></div><div><dt>Cible</dt><dd><code>lhd_vegetation</code>, classe 5</dd></div><div><dt>Relation</dt><dd>Intersect, tampon 10 m</dd></div><div><dt>Résultat attendu</dt><dd>Végétation du corridor</dd></div></dl>
     <ol class="steps">
-        <li><strong>Préparer deux couches.</strong> Chargez le nuage deux fois dans QGIS, ou dupliquez sa couche. Nommez les couches <em>lhd_reseau</em> et <em>lhd_vegetation</em>. Vérifiez la présence des classes <strong>13 – Wire – guard</strong> ou <strong>14 – Wire – conductor</strong>, et de la classe <strong>5 – High vegetation</strong>.</li>
+        <li><strong>Préparer deux couches.</strong> Chargez le nuage deux fois dans QGIS, ou dupliquez sa couche. Nommez les couches <em>lhd_reseau</em> et <em>lhd_vegetation</em>. Utilisez un SCR métrique pour le tampon de 10 m, par exemple Lambert-93 en France métropolitaine. Vérifiez la présence des classes <strong>13 – Wire – guard</strong> ou <strong>14 – Wire – conductor</strong>, et de la classe <strong>5 – High vegetation</strong>.</li>
         <li><strong>Préparer la végétation cible.</strong> Laissez « appliquer aux autres dalles du jeu » désactivé sur les deux couches pour conserver leurs sélections indépendantes. Choisissez <em>lhd_vegetation</em> comme couche courante. Dans CLASSES, ne cochez que la classe 5. Décochez <strong>Layers to filter</strong> et cliquez sur <strong>Filter</strong> pour appliquer la sélection à cette couche seule.</li>
         <li><strong>Choisir les câbles.</strong> Passez sur <em>lhd_reseau</em>. Dans CLASSES, ne cochez que les classes 13 et 14 présentes. Le bouton de sélection permet de contrôler les points qui formeront l’empreinte source.</li>
         <li><strong>Découper le corridor.</strong> Dans FILTERING, cochez <em>lhd_vegetation</em>, choisissez <strong>Intersect</strong> et réglez <strong>Buffer</strong> sur <strong>10 m</strong>. Cliquez sur <strong>Filter</strong> : le découpage conserve le filtre de classe déjà appliqué à la cible. Masquez la source pour examiner le résultat, puis exportez la cible en LAZ ou COPC.</li>
@@ -783,7 +764,7 @@ processing.run("filtermate:batch_filter", {
         <li><strong>Chargez les couches</strong> nommées dans chaque histoire. Les styles embarqués dans le GeoPackage cachent les bâtiments au-delà du 1:25 000 : désactivez la visibilité dépendante de l'échelle dans les propriétés de la couche, ou appliquez vos propres styles.</li>
         <li><strong>Remplacez les noms de communes</strong> par les vôtres. Les champs utilisés (<code>nom_officiel</code>, <code>importance</code>, <code>persistance</code>, <code>usage_1</code>, <code>nature</code>, <code>insee_commune</code>, <code>date_modification</code>) sont ceux de la BD TOPO 3.x, identiques dans tous les départements.</li>
         <li><strong>Pour reproduire les captures des cas 1 à 8</strong>, le script <code>scripts/recipe_screenshots.py</code> du dépôt pilote QGIS d'un bout à l'autre de chaque histoire, vérifie les effectifs et enregistre une image par étape. Les enregistrements des cas 9 à 12 sont préparés par <code>scripts/site_videos.py</code>.</li>
-        <li><strong>Pour les recettes illustrées 13 à 16</strong>, préparez les couches du <a href="#completer">tableau des données</a>, puis suivez les réglages indiqués. Les schémas représentent les résultats attendus ; ces recettes n’ont pas de comptages mesurés ni d’enregistrements QGIS associés.</li>
+        <li><strong>Pour les recettes illustrées 13 à 16</strong>, chargez les couches nommées dans chaque recette et suivez les réglages indiqués. Les schémas représentent les résultats attendus ; les surfaces et les effectifs dépendront de vos données.</li>
     </ol>
     <div class="callout">
         <strong>Vérification.</strong> Les effectifs des histoires 1 à 8 ont été mesurés avec FilterMate 5.0, dont le moteur garde la géométrie source exacte. Ceux des histoires 2, 3 et 4 ont en outre été recalculés indépendamment avec GEOS (PyQGIS, sans FilterMate) : les nombres sont identiques. Les versions précédentes de cette page, mesurées avec une source simplifiée jusqu’à 100 m, en différaient (histoire 4 : 1 112 tronçons au lieu de 747).

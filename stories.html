@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FilterMate Use Cases — Twelve business questions turned into QGIS filters</title>
-    <meta name="description" content="Twelve FilterMate use cases, step by step: eight on the complete BD TOPO of a French department (commune dossier, road proximity, watercourses, crossings, vegetation, remote hamlets, favorites, Processing) and four on rasters and LiDAR point clouds (slope, building heights, road pruning, survey package). QGIS screenshots at every step and counted results.">
+    <title>FilterMate Use Cases — Sixteen business questions turned into QGIS filters</title>
+    <meta name="description" content="Sixteen FilterMate use cases, step by step: twelve QGIS recordings and four illustrated recipes covering all nine vector, raster and LiDAR combinations. Commune dossiers, NDVI, rooftops, ground points and vegetation near power lines: needs, settings and results.">
     <meta name="keywords" content="QGIS, plugin, FilterMate, use cases, tutorial, spatial filter, BD TOPO, GeoPackage, buffer, predicate, favorites, Processing">
     <meta property="og:title" content="FilterMate Use Cases">
-    <meta property="og:description" content="Twelve business questions, twelve filters: FilterMate 5 step by step on vectors, rasters and LiDAR point clouds.">
+    <meta property="og:description" content="Sixteen business questions, sixteen filters: all nine FilterMate 5 combinations, step by step on vectors, rasters and LiDAR point clouds.">
     <meta property="og:type" content="article">
     <meta property="og:url" content="https://imagodata.github.io/filter_mate/stories.html">
     <link rel="alternate" hreflang="en" href="https://imagodata.github.io/filter_mate/stories.html">
@@ -61,7 +61,11 @@
         <li><a href="#s10"><span class="num">10</span>Building heights, measured by LiDAR</a></li>
         <li><a href="#s11"><span class="num">11</span>Roads to prune</a></li>
         <li><a href="#s12"><span class="num">12</span>The survey package around the church</a></li>
-        <li><a href="#replay"><span class="num">13</span>Replaying these stories at home</a></li>
+        <li><a href="#s13"><span class="num">13</span>Vegetation on an RGB orthophoto</a></li>
+        <li><a href="#s14"><span class="num">14</span>LiDAR points beneath rooftops</a></li>
+        <li><a href="#s15"><span class="num">15</span>The DTM beneath ground points</a></li>
+        <li><a href="#s16"><span class="num">16</span>Vegetation near power lines</a></li>
+        <li><a href="#replay"><span class="num">17</span>Replaying these stories at home</a></li>
     </ol>
 </aside>
 
@@ -73,14 +77,14 @@
     <div class="band band-hero">
         <video class="sheet-video" muted loop playsinline preload="none" poster="video/hero.webp" data-src="video/hero.mp4" aria-hidden="true"></video>
         <div class="sheet-scrim"></div>
-        <h1>Twelve business questions, twelve filters</h1>
-        <button class="watch" type="button" data-watch aria-label="Watch the video: Twelve business questions, twelve filters"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Watch</button>
+        <h1>Sixteen business questions, sixteen filters</h1>
+        <button class="watch" type="button" data-watch aria-label="Watch the use cases overview"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Watch</button>
         <p class="credit">BD TOPO® 3.5 © IGN, Haute-Garonne.</p>
     </div>
     <p class="lead">
         Each story starts with a question asked in a technical department, a local authority or a consultancy, then translates it into
-        FilterMate settings, step by step, on the complete BD TOPO of a French department. The screenshots show the whole QGIS window
-        so you can compare with your own screen, and every result comes with its numbers.
+        FilterMate settings, step by step. The first twelve stories show QGIS recordings and counted results, in Haute-Garonne
+        and then Estavar. Four illustrated recipes complete all nine combinations of layer types, with settings and expected results.
     </p>
     <div class="cards story-index">
         <a class="card story-card" href="#s1"><span class="story-card-media"><img src="video/export.webp" alt="Saint-Gaudens filtered and ready to export" loading="lazy" width="1280" height="720"><b aria-hidden="true">01</b></span><div class="story-card-copy"><span class="badge">Consultancy</span><h4>The commune dossier in three minutes</h4><p>Scope 12 department-wide layers to one commune and deliver a styled GeoPackage.</p><span class="story-outcome">12 layers · <strong>12,380 buildings</strong></span></div></a>
@@ -95,6 +99,10 @@
         <a class="card story-card" href="#s10"><span class="story-card-media"><img src="video/heights.webp" alt="Building heights" loading="lazy" width="1280" height="720"><b aria-hidden="true">10</b></span><div class="story-card-copy"><span class="badge">Permits</span><h4>Building heights</h4><p>Building class and height above the DTM, computed by PDAL.</p><span class="story-outcome"><strong>57 buildings</strong> above 9 m</span></div></a>
         <a class="card story-card" href="#s11"><span class="story-card-media"><img src="video/pruning.webp" alt="Roads to prune" loading="lazy" width="1280" height="720"><b aria-hidden="true">11</b></span><div class="story-card-copy"><span class="badge">Roads</span><h4>Roads to prune</h4><p>High vegetation taller than 8 m, within 3 m of the roads.</p><span class="story-outcome"><strong>91 segments</strong> out of 172</span></div></a>
         <a class="card story-card" href="#s12"><span class="story-card-media"><img src="video/survey.webp" alt="The survey package around the church" loading="lazy" width="1280" height="720"><b aria-hidden="true">12</b></span><div class="story-card-copy"><span class="badge">Heritage</span><h4>The survey package around the church</h4><p>A vector clips a DTM and a cloud, then everything goes into a ZIP.</p><span class="story-outcome">GeoTIFF + LAZ · <strong>ZIP</strong></span></div></a>
+        <a class="card story-card" href="#s13"><span class="story-card-media"><img src="img/combinations/ndvi-en.svg" alt="Schematic: a vegetation mask from a colour infrared orthophoto retains the corresponding pixels in an RGB orthophoto" loading="lazy" width="1280" height="720"><b aria-hidden="true">13</b></span><div class="story-card-copy"><span class="badge">Parks</span><h4>Vegetation on an RGB orthophoto</h4><p>The NDVI from an infrared image becomes a mask for another image.</p><span class="story-outcome">Raster → raster · <strong>NDVI &gt; 0.3</strong></span></div></a>
+        <a class="card story-card" href="#s14"><span class="story-card-media"><img src="img/combinations/roofs-en.svg" alt="Schematic: rooftops picked on an orthophoto clip the LiDAR point cloud" loading="lazy" width="1280" height="720"><b aria-hidden="true">14</b></span><div class="story-card-copy"><span class="badge">Buildings</span><h4>LiDAR points beneath rooftops</h4><p>An object picked on the orthophoto isolates the points beneath its footprint.</p><span class="story-outcome">Raster → LiDAR · <strong>object pipette</strong></span></div></a>
+        <a class="card story-card" href="#s15"><span class="story-card-media"><img src="img/combinations/ground-en.svg" alt="Schematic: the footprint of ground-class points restricts the DTM pixels" loading="lazy" width="1280" height="720"><b aria-hidden="true">15</b></span><div class="story-card-copy"><span class="badge">Surveying</span><h4>The DTM beneath ground points</h4><p>Ground-class points define where to retain the raster elevations.</p><span class="story-outcome">LiDAR → raster · <strong>class 2</strong></span></div></a>
+        <a class="card story-card" href="#s16"><span class="story-card-media"><img src="img/combinations/wires-en.svg" alt="Plan-view schematic: a buffer around wire points retains nearby vegetation" loading="lazy" width="1280" height="720"><b aria-hidden="true">16</b></span><div class="story-card-copy"><span class="badge">Utilities</span><h4>Vegetation near power lines</h4><p>Wire points clip a second cloud already filtered to high vegetation.</p><span class="story-outcome">LiDAR → LiDAR · <strong>10 m buffer</strong></span></div></a>
     </div>
 </header>
 
@@ -634,14 +642,128 @@ processing.run("filtermate:batch_filter", {
     <h3>Result</h3>
     <p>A 1.1 MB ZIP: the DTM (GeoTIFF, 45 KB) and the cloud (LAZ, 1.0 MB) of the church and its surroundings.</p>
 </section>
+<!-- 13 ------------------------------------------------------------------ -->
+<section id="s13">
+    <div class="band band-diagram">
+        <img src="img/combinations/ndvi-en-cover.svg" alt="" loading="lazy" width="1280" height="640">
+        <div class="sheet-scrim"></div>
+        <h2><span class="num">13</span><span>Vegetation on an RGB orthophoto</span></h2>
+        <p class="credit">Raster → raster · schematic.</p>
+    </div>
+    <div class="story-brief">
+        <div><h4>The need</h4><p>The parks department is preparing a vegetation map. It has a colour infrared orthophoto to identify vegetation and wants to show those areas on the <strong>RGB orthophoto</strong>, which is easier for colleagues to read.</p></div>
+        <div><h4>The FilterMate translation</h4><p>The <strong>ortho_irc</strong> image is the source. In EXPLORING, the expression <strong>NDVI &gt; 0.3</strong> selects pixels. Their geometry clips the <strong>ortho_rvb</strong> target with Intersect: the target colours stay inside the mask and the other pixels become NoData.</p></div>
+    </div>
+    <dl class="recipe"><div><dt>Source</dt><dd><code>ortho_irc</code></dd></div><div><dt>Selection</dt><dd>NDVI &gt; 0.3</dd></div><div><dt>Target</dt><dd><code>ortho_rvb</code></dd></div><div><dt>Relation</dt><dd>Intersect, no buffer</dd></div><div><dt>Expected result</dt><dd>RGB orthophoto masked in a VRT</dd></div></dl>
+    <ol class="steps">
+        <li><strong>Identify the bands.</strong> Choose <em>ortho_irc</em> as the current layer. In EXPLORING, open a colour-role menu and choose <strong>IRC</strong> if bands 1, 2 and 3 are near infrared, red and green respectively. Adjust the roles if the file uses a different order.</li>
+        <li><strong>Select vegetation.</strong> Check <strong>RASTER EXPRESSION</strong>, then choose <strong>Insert → Vegetation (NDVI &gt; 0.3)</strong>. For a colour infrared image with NIR in band 1 and red in band 2, the expression is:
+            <pre><code>("ortho_irc@1" - "ortho_irc@2") / ("ortho_irc@1" + "ortho_irc@2") &gt; 0.3</code></pre>
+            Turn on the preview with the selection button and adjust the threshold by comparing the retained areas with the image.</li>
+        <li><strong>Link to the other image.</strong> In FILTERING, check <em>ortho_rvb</em> in <strong>Layers to filter</strong>, choose <strong>Intersect</strong> and turn off the buffer. For this first run, start with an unfiltered target and leave combination unchecked.</li>
+        <li><strong>Filter, then export.</strong> Hide the source to read the target alone. EXPORTING can write the result as GeoTIFF or COG; <strong>Undo</strong> restores the complete target orthophoto.</li>
+    </ol>
+    <figure>
+        <img src="img/combinations/ndvi-en.svg" alt="Source and result schematic: vegetation patches from the infrared image retain the RGB pixels at the same locations, with NoData elsewhere" loading="lazy" width="1280" height="720">
+        <figcaption>Schematic. The selection is computed from the infrared image; the result keeps the RGB image colours.</figcaption>
+    </figure>
+    <h3>Expected result</h3>
+    <p>An RGB layer clipped to the NDVI mask, with its style and identifier preserved. A threshold of 0.3 is a starting point to check against the season, shadows and image characteristics.</p>
+</section>
+
+<!-- 14 ------------------------------------------------------------------ -->
+<section id="s14">
+    <div class="band band-diagram">
+        <img src="img/combinations/roofs-en-cover.svg" alt="" loading="lazy" width="1280" height="640">
+        <div class="sheet-scrim"></div>
+        <h2><span class="num">14</span><span>LiDAR points beneath rooftops</span></h2>
+        <p class="credit">Raster → point cloud · schematic.</p>
+    </div>
+    <div class="story-brief">
+        <div><h4>The need</h4><p>A consultancy is preparing a survey of several rooftops visible on an orthophoto. It wants to extract the <strong>LiDAR points beneath their footprints</strong> without tracing each boundary in a vector layer.</p></div>
+        <div><h4>The FilterMate translation</h4><p>The source is the <strong>ortho_rvb</strong> raster. In <strong>Clicked object</strong> mode, the pipette follows connected pixels whose colours resemble the clicked pixel. The retained objects become the source geometry; Intersect clips the <strong>lhd</strong> cloud to this footprint.</p></div>
+    </div>
+    <dl class="recipe"><div><dt>Source</dt><dd><code>ortho_rvb</code></dd></div><div><dt>Selection</dt><dd>Pipette, clicked object</dd></div><div><dt>Target</dt><dd><code>lhd</code></dd></div><div><dt>Relation</dt><dd>Intersect, no buffer</dd></div><div><dt>Expected result</dt><dd>Cloud clipped beneath the objects</dd></div></dl>
+    <ol class="steps">
+        <li><strong>Find the rooftop.</strong> Choose <em>ortho_rvb</em> as the current layer and zoom to a roof whose colour stands out from its surroundings. Check the red, green and blue roles in EXPLORING.</li>
+        <li><strong>Detect the object.</strong> In the pipette, choose <strong>Clicked object</strong>, then click inside the roof. Adjust the tolerance while checking the outline on the map. <strong>Ctrl+click</strong> adds a sample for another part of the roof or another rooftop.</li>
+        <li><strong>Link to the cloud.</strong> In FILTERING, check <em>lhd</em> in <strong>Layers to filter</strong>. Choose <strong>Intersect</strong>, with no buffer. Start with an unfiltered target cloud to retain every return within the selected footprint.</li>
+        <li><strong>Filter and inspect.</strong> Hide the orthophoto to examine the points, then show it again to check their footprint. EXPORTING can deliver LAZ or COPC; <strong>Undo</strong> restores the complete cloud.</li>
+    </ol>
+    <figure>
+        <img src="img/combinations/roofs-en.svg" alt="Source and result schematic: yellow outlines around two rooftops detected on the orthophoto retain the LiDAR points beneath them" loading="lazy" width="1280" height="720">
+        <figcaption>Schematic. Objects detected on the image define a footprint in plan view within which points are retained.</figcaption>
+    </figure>
+    <h3>Expected result</h3>
+    <p>A derived cloud limited to the footprint of the retained pixels. This is a spatial filter: every return within that footprint may remain, including ground or vegetation points. To keep only building-class points, then apply <code>Classification = 6</code> to the resulting cloud.</p>
+    <div class="callout"><strong>Read the outline.</strong> A shadow or a change in material can split a rooftop into several objects. Check the selection on the image before clipping, especially when the orthophoto and LiDAR acquisition dates differ.</div>
+</section>
+
+<!-- 15 ------------------------------------------------------------------ -->
+<section id="s15">
+    <div class="band band-diagram">
+        <img src="img/combinations/ground-en-cover.svg" alt="" loading="lazy" width="1280" height="640">
+        <div class="sheet-scrim"></div>
+        <h2><span class="num">15</span><span>The DTM beneath ground points</span></h2>
+        <p class="credit">Point cloud → raster · schematic.</p>
+    </div>
+    <div class="story-brief">
+        <div><h4>The need</h4><p>A surveyor is preparing a terrain inspection. She has an interpolated DTM and the original classified cloud. She wants to restrict the raster to areas where <strong>ground points</strong> are present in the survey.</p></div>
+        <div><h4>The FilterMate translation</h4><p>The <strong>lhd</strong> cloud is the source. In EXPLORING, the <strong>Ground</strong> preset retains only class 2. The footprint of these points clips the <strong>mnt</strong> target raster with Intersect and no buffer.</p></div>
+    </div>
+    <dl class="recipe"><div><dt>Source</dt><dd><code>lhd</code></dd></div><div><dt>Selection</dt><dd><code>Classification = 2</code></dd></div><div><dt>Target</dt><dd><code>mnt</code></dd></div><div><dt>Relation</dt><dd>Intersect, no buffer</dd></div><div><dt>Expected result</dt><dd>DTM restricted to the ground footprint</dd></div></dl>
+    <ol class="steps">
+        <li><strong>Read the classification.</strong> Choose <em>lhd</em> as the current layer. In EXPLORING, open <strong>CLASSES</strong> and check that class <strong>2 – Ground</strong> contains points.</li>
+        <li><strong>Retain the ground.</strong> In the <strong>Selection</strong> menu, choose <strong>Ground</strong>. Check that only class 2 is selected, then use the selection button to preview the points on the map.</li>
+        <li><strong>Link to the DTM.</strong> Check <em>mnt</em> in <strong>Layers to filter</strong>, choose <strong>Intersect</strong> and turn off the buffer. Use an unfiltered target and leave combination unchecked.</li>
+        <li><strong>Filter, then read the raster.</strong> Hide the cloud to see the clipped DTM. EXPORTING writes the result as GeoTIFF or COG; <strong>Undo</strong> restores the complete DTM and the previous source state.</li>
+    </ol>
+    <figure>
+        <img src="img/combinations/ground-en.svg" alt="Source and result schematic: ground points retain the DTM within their footprint; areas without ground points become NoData" loading="lazy" width="1280" height="720">
+        <figcaption>Schematic. Ground points provide the mask; elevations come from the DTM already loaded.</figcaption>
+    </figure>
+    <h3>Expected result</h3>
+    <p>A DTM VRT whose pixels outside the ground-point footprint are NoData. Existing elevations are preserved: this operation clips the DTM without interpolating it again.</p>
+    <div class="callout"><strong>Footprint resolution.</strong> The mask is built on a grid, at 2 m by default. It describes the presence of ground points at that resolution, without measuring the DTM’s vertical accuracy.</div>
+</section>
+
+<!-- 16 ------------------------------------------------------------------ -->
+<section id="s16">
+    <div class="band band-diagram">
+        <img src="img/combinations/wires-en-cover.svg" alt="" loading="lazy" width="1280" height="640">
+        <div class="sheet-scrim"></div>
+        <h2><span class="num">16</span><span>Vegetation near power lines</span></h2>
+        <p class="credit">Point cloud → point cloud · schematic.</p>
+    </div>
+    <div class="story-brief">
+        <div><h4>The need</h4><p>A network operator is preparing visits to wooded areas. Using a survey with classified wire points, she wants to extract <strong>high vegetation near the lines</strong> to plan inspections.</p></div>
+        <div><h4>The FilterMate translation</h4><p>Two point cloud layers have separate roles: <strong>lhd_reseau</strong> provides the wire points (classes 13 and 14); <strong>lhd_vegetation</strong> is first filtered to class 5. A <strong>10 m</strong> buffer around the wire footprint then clips that target.</p></div>
+    </div>
+    <dl class="recipe"><div><dt>Source</dt><dd><code>lhd_reseau</code></dd></div><div><dt>Selection</dt><dd>Classes 13 and 14</dd></div><div><dt>Target</dt><dd><code>lhd_vegetation</code>, class 5</dd></div><div><dt>Relation</dt><dd>Intersect, 10 m buffer</dd></div><div><dt>Expected result</dt><dd>Vegetation within the corridor</dd></div></dl>
+    <ol class="steps">
+        <li><strong>Prepare two layers.</strong> Load the cloud twice in QGIS or duplicate its layer. Name them <em>lhd_reseau</em> and <em>lhd_vegetation</em>. Use a metric CRS for the 10 m buffer, such as Lambert-93 in mainland France. Check that classes <strong>13 – Wire – guard</strong> or <strong>14 – Wire – conductor</strong>, and class <strong>5 – High vegetation</strong>, are present.</li>
+        <li><strong>Prepare the vegetation target.</strong> Leave “apply to other tiles in the dataset” disabled on both layers to keep their selections independent. Choose <em>lhd_vegetation</em> as the current layer. In CLASSES, check only class 5. Uncheck <strong>Layers to filter</strong> and click <strong>Filter</strong> to apply the selection to this layer alone.</li>
+        <li><strong>Select the wires.</strong> Switch to <em>lhd_reseau</em>. In CLASSES, check only the available classes 13 and 14. Use the selection button to inspect the points that will form the source footprint.</li>
+        <li><strong>Clip the corridor.</strong> In FILTERING, check <em>lhd_vegetation</em>, choose <strong>Intersect</strong> and set <strong>Buffer</strong> to <strong>10 m</strong>. Click <strong>Filter</strong>: clipping preserves the class filter already applied to the target. Hide the source to examine the result, then export the target as LAZ or COPC.</li>
+    </ol>
+    <figure>
+        <img src="img/combinations/wires-en.svg" alt="Plan-view schematic: a yellow corridor around the wires retains only the high-vegetation points within its footprint" loading="lazy" width="1280" height="720">
+        <figcaption>Schematic. The class selects vegetation points; the buffer around the wires limits their footprint.</figcaption>
+    </figure>
+    <h3>Expected result</h3>
+    <p>A high-vegetation layer restricted to a corridor around the wire-point footprint. The distance is measured <strong>in plan view</strong>, from a footprint on a grid, to identify areas to inspect. The actual three-dimensional clearance between branches and conductors requires further point cloud analysis.</p>
+    <div class="callout"><strong>Classification required.</strong> Classes 13 and 14 are not present in every survey. Choose a dataset with classified wire points to reproduce this recipe.</div>
+</section>
+
 <section id="replay">
-    <h2><span class="num">13</span>Replaying these stories at home</h2>
+    <h2><span class="num">17</span>Replaying these stories at home</h2>
     <div class="callout demo-download"><strong>Start with a small project.</strong><p>The Toutens demo includes four layers, a QGIS project, a favorite and instructions in English and French. Its counts differ from the department-wide examples above.</p><a class="btn btn-primary" href="downloads/filtermate-toutens.zip" download>Download the demo (ZIP, 203 KB)</a></div>
     <ol class="steps">
         <li><strong>Download the BD TOPO</strong> of your department from the IGN Géoplateforme ("all themes", GeoPackage format, Lambert-93). The file ships with its spatial indexes: that is what makes the cascades fast.</li>
         <li><strong>Load the layers</strong> named in each story. The styles embedded in the GeoPackage hide buildings beyond 1:25,000: disable scale-dependent visibility in the layer properties, or apply your own styles.</li>
         <li><strong>Replace the commune names</strong> with yours. The fields used (<code>nom_officiel</code>, <code>importance</code>, <code>persistance</code>, <code>usage_1</code>, <code>nature</code>, <code>insee_commune</code>, <code>date_modification</code>) are those of BD TOPO 3.x, identical in every department.</li>
-        <li><strong>To reproduce the screenshots</strong>, the repository script <code>scripts/recipe_screenshots.py</code> drives QGIS from end to end of each story, checks the counts and saves one image per step.</li>
+        <li><strong>To reproduce the screenshots for cases 1 to 8</strong>, the repository script <code>scripts/recipe_screenshots.py</code> drives QGIS from end to end of each story, checks the counts and saves one image per step. Recordings for cases 9 to 12 are prepared by <code>scripts/site_videos.py</code>.</li>
+        <li><strong>For illustrated recipes 13 to 16</strong>, load the layers named in each recipe and follow the settings. The diagrams show expected results; areas and counts will depend on your data.</li>
     </ol>
     <div class="callout">
         <strong>Verification.</strong> The counts of stories 1 to 8 were measured with FilterMate 5.0, whose engine keeps the source geometry exact. Those of stories 2, 3 and 4 were also recomputed independently with GEOS (PyQGIS, without FilterMate): the numbers are identical. Earlier versions of this page, measured with a source simplified by up to 100 m, differed (story 4: 1,112 road segments instead of 747).

@@ -658,7 +658,7 @@ processing.run("filtermate:batch_filter", {
         The source (the current layer) and the targets can be of any kind. FILTERING keeps its form: layers to filter, combine operators (AND, OR, AND NOT, or a
         replacement when the combination is unchecked), geometric predicates, buffer and centroids. One setting is new: the <strong>minimum coverage</strong> (%) of
         polygons by the source geometry. <strong>Disjoint</strong>, already one of the eight predicates, keeps what lies outside the source geometry for every kind
-        of target. Each cell links to the use case that shows it; the others work the same way and are covered by the automated scenarios.
+        of target. Each cell links to a detailed use case with settings to reproduce.
     </p>
     <div class="table-wrap">
     <table class="matrix">
@@ -670,12 +670,12 @@ processing.run("filtermate:batch_filter", {
                 <td>Points inside the geometry, through a derived COPC. <a href="stories.html#s12">Use case 12</a>.</td></tr>
             <tr><th><strong>Raster</strong><br><small>the kept pixels vectorized: range, pipette, object, index, terrain derivative</small></th>
                 <td>Features kept, with a minimum coverage for polygons. <a href="stories.html#s9">Use case 9</a>.</td>
-                <td>Pixels of another raster under the kept pixels: an NDVI mask from a CIR orthophoto applied to the RGB one.</td>
-                <td>Points under the kept pixels: the LiDAR points of the roofs picked on an orthophoto.</td></tr>
+                <td>Pixels of another raster under the kept pixels: an NDVI mask from a CIR orthophoto applied to the RGB one. <a href="stories.html#s13">Use case 13</a>.</td>
+                <td>Points under the kept pixels: the LiDAR points of the roofs picked on an orthophoto. <a href="stories.html#s14">Use case 14</a>.</td></tr>
             <tr><th><strong>Point cloud</strong><br><small>the footprint of the kept points: classes, Z, intensity, returns, height above a DTM, zone</small></th>
                 <td>Features kept, with a minimum coverage. <a href="stories.html#s10">Use cases 10 and 11</a>.</td>
-                <td>Pixels under the kept points: a DTM restricted to the ground points.</td>
-                <td>Points of another cloud inside the footprint: high vegetation within 10 m of the power lines, tile by tile.</td></tr>
+                <td>Pixels under the kept points: a DTM restricted to the ground points. <a href="stories.html#s15">Use case 15</a>.</td>
+                <td>Points of another cloud inside the footprint: high vegetation within 10 m of the power lines. <a href="stories.html#s16">Use case 16</a>.</td></tr>
         </tbody>
     </table>
     </div>

@@ -120,7 +120,7 @@
 
 <section class="home-section directions" id="directions" aria-labelledby="directions-title">
     <div class="home-container">
-        <div class="section-heading"><p class="section-kicker">任意方向</p><h2 id="directions-title">九種組合，一個面板。</h2><p>任何類型的圖層都可以是篩選的來源或目標。每個格子說明篩選保留的內容；有顏色的格子連結到已記錄的應用案例。</p></div>
+        <div class="section-heading"><p class="section-kicker">任意方向</p><h2 id="directions-title">九種組合，一個面板。</h2><p>任何類型的圖層都可以是篩選的來源或目標。每個格子說明篩選保留的內容，並連結到包含可重現設定的詳細應用案例。</p></div>
         <div class="matrix-wrap">
         <table class="matrix-grid">
             <thead><tr><th scope="col"><span class="matrix-axis">來源 ↓ · 目標 →</span></th><th scope="col">向量</th><th scope="col">網格</th><th scope="col">點雲</th></tr></thead>
@@ -131,12 +131,12 @@
                     <td><a href="stories.html#s12" hreflang="en"><strong>點</strong><span>教堂周圍的點雲</span> <small lang="en">(EN)</small></a></td></tr>
                 <tr><th scope="row">網格<small>數值範圍、顏色、物件或指數</small></th>
                     <td><a href="stories.html#s9" hreflang="en"><strong>圖徵</strong><span>陡坡上的地塊</span> <small lang="en">(EN)</small></a></td>
-                    <td><div class="matrix-cell"><strong>像素</strong><span>套用到另一張正射影像的 NDVI 遮罩</span></div></td>
-                    <td><div class="matrix-cell"><strong>點</strong><span>在正射影像上點選的屋頂下方的 LiDAR 點</span></div></td></tr>
+                    <td><a href="stories.html#s13" hreflang="en"><strong>像素</strong><span>套用到另一張正射影像的 NDVI 遮罩</span> <small lang="en">(EN)</small></a></td>
+                    <td><a href="stories.html#s14" hreflang="en"><strong>點</strong><span>在正射影像上點選的屋頂下方的 LiDAR 點</span> <small lang="en">(EN)</small></a></td></tr>
                 <tr><th scope="row">點雲<small>類別、相對地形模型的高度</small></th>
                     <td><a href="stories.html#s10" hreflang="en"><strong>圖徵</strong><span>以 LiDAR 量測的建築高度</span> <small lang="en">(EN)</small></a></td>
-                    <td><div class="matrix-cell"><strong>像素</strong><span>僅限地面點的地形模型</span></div></td>
-                    <td><div class="matrix-cell"><strong>點</strong><span>電力線附近的高大植被</span></div></td></tr>
+                    <td><a href="stories.html#s15" hreflang="en"><strong>像素</strong><span>僅限地面點的地形模型</span> <small lang="en">(EN)</small></a></td>
+                    <td><a href="stories.html#s16" hreflang="en"><strong>點</strong><span>電力線附近的高大植被</span> <small lang="en">(EN)</small></a></td></tr>
             </tbody>
         </table>
         </div>
@@ -161,14 +161,14 @@
             </article>
             <article class="example-card">
                 <button class="example-media" type="button" data-watch data-video="video/bridges.mp4" data-poster="video/bridges.webp" aria-label="觀看交會位置偵測範例"><img src="video/bridges.webp" alt="Toulouse Métropole 的道路與水道交會位置" loading="lazy" width="1280" height="720"><span class="case-number" aria-hidden="true">03</span><span class="media-play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>觀看</span></button>
-                <div class="example-body"><p class="example-label">構造物 · Toulouse Métropole</p><h3>找出與常年水道的交會位置</h3><p>Cross 空間關係會排除僅沿著水道行經的道路。</p><p class="result"><strong>708</strong> 個路段及 <strong>364</strong> 個構造物</p><a href="stories.html#s4" hreflang="en">查看設定與結果 <span aria-hidden="true">→</span> <small lang="en">(EN)</small></a></div>
+                <div class="example-body"><p class="example-label">構造物 · Toulouse Métropole</p><h3>找出與常年水道的交會位置</h3><p>Cross 空間關係會排除僅沿著水道行經的道路。</p><p class="result"><strong>747</strong> 個路段及 <strong>364</strong> 個構造物</p><a href="stories.html#s4" hreflang="en">查看設定與結果 <span aria-hidden="true">→</span> <small lang="en">(EN)</small></a></div>
             </article>
             <article class="example-card">
                 <button class="example-media" type="button" data-watch data-video="video/hamlets.mp4" data-poster="video/hamlets.webp" aria-label="觀看偏遠聚落範例"><img src="video/hamlets.webp" alt="Aspet 距離鋪面道路超過 200 公尺的聚落" loading="lazy" width="1280" height="720"><span class="case-number" aria-hidden="true">04</span><span class="media-play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>觀看</span></button>
                 <div class="example-body"><p class="example-label">道路鄰近性 · Aspet</p><h3>遠離鋪面道路的聚落</h3><p>Disjoint 搭配 200 公尺環域，可找出環域外的圖徵。</p><p class="result"><strong>22</strong> 個距離超過 200 公尺的聚落</p><a href="stories.html#s6" hreflang="en">查看設定與結果 <span aria-hidden="true">→</span> <small lang="en">(EN)</small></a></div>
             </article>
         </div>
-        <a class="inline-cta" href="stories.html" hreflang="en">瀏覽全部十二個應用案例 <span aria-hidden="true">→</span> <small lang="en">(EN)</small></a>
+        <a class="inline-cta" href="stories.html" hreflang="en">瀏覽全部十六個應用案例 <span aria-hidden="true">→</span> <small lang="en">(EN)</small></a>
     </div>
 </section>
 

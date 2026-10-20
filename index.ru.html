@@ -120,7 +120,7 @@
 
 <section class="home-section directions" id="directions" aria-labelledby="directions-title">
     <div class="home-container">
-        <div class="section-heading"><p class="section-kicker">В любом направлении</p><h2 id="directions-title">Девять комбинаций. Одна панель.</h2><p>Слой любого типа может быть источником фильтра или его целью. Каждая ячейка показывает, что фильтр сохраняет; цветные ведут к описанному примеру.</p></div>
+        <div class="section-heading"><p class="section-kicker">В любом направлении</p><h2 id="directions-title">Девять комбинаций. Одна панель.</h2><p>Слой любого типа может быть источником фильтра или его целью. Каждая ячейка показывает, что фильтр сохраняет, и ведёт к подробному примеру с настройками для повторения.</p></div>
         <div class="matrix-wrap">
         <table class="matrix-grid">
             <thead><tr><th scope="col"><span class="matrix-axis">Источник ↓ · Цель →</span></th><th scope="col">Вектор</th><th scope="col">Растр</th><th scope="col">Облако точек</th></tr></thead>
@@ -131,12 +131,12 @@
                     <td><a href="stories.html#s12" hreflang="en"><strong>Точки</strong><span>Облако точек вокруг церкви</span> <small lang="en">(EN)</small></a></td></tr>
                 <tr><th scope="row">Растр<small>Диапазон значений, цвет, объект, индекс</small></th>
                     <td><a href="stories.html#s9" hreflang="en"><strong>Объекты</strong><span>Участки на крутых склонах</span> <small lang="en">(EN)</small></a></td>
-                    <td><div class="matrix-cell"><strong>Пиксели</strong><span>Маска NDVI, применённая к другому ортофотоплану</span></div></td>
-                    <td><div class="matrix-cell"><strong>Точки</strong><span>Точки LiDAR под крышами, выбранными на ортофотоплане</span></div></td></tr>
+                    <td><a href="stories.html#s13" hreflang="en"><strong>Пиксели</strong><span>Маска NDVI, применённая к другому ортофотоплану</span> <small lang="en">(EN)</small></a></td>
+                    <td><a href="stories.html#s14" hreflang="en"><strong>Точки</strong><span>Точки LiDAR под крышами, выбранными на ортофотоплане</span> <small lang="en">(EN)</small></a></td></tr>
                 <tr><th scope="row">Облако точек<small>Классы, высота над моделью рельефа</small></th>
                     <td><a href="stories.html#s10" hreflang="en"><strong>Объекты</strong><span>Высоты зданий, измеренные LiDAR</span> <small lang="en">(EN)</small></a></td>
-                    <td><div class="matrix-cell"><strong>Пиксели</strong><span>Модель рельефа, ограниченная точками земли</span></div></td>
-                    <td><div class="matrix-cell"><strong>Точки</strong><span>Высокая растительность у линий электропередачи</span></div></td></tr>
+                    <td><a href="stories.html#s15" hreflang="en"><strong>Пиксели</strong><span>Модель рельефа, ограниченная точками земли</span> <small lang="en">(EN)</small></a></td>
+                    <td><a href="stories.html#s16" hreflang="en"><strong>Точки</strong><span>Высокая растительность у линий электропередачи</span> <small lang="en">(EN)</small></a></td></tr>
             </tbody>
         </table>
         </div>
@@ -161,14 +161,14 @@
             </article>
             <article class="example-card">
                 <button class="example-media" type="button" data-watch data-video="video/bridges.mp4" data-poster="video/bridges.webp" aria-label="Посмотреть пример поиска пересечений"><img src="video/bridges.webp" alt="Пересечения дорог и водотоков в Toulouse Métropole" loading="lazy" width="1280" height="720"><span class="case-number" aria-hidden="true">03</span><span class="media-play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Смотреть</span></button>
-                <div class="example-body"><p class="example-label">Сооружения · Toulouse Métropole</p><h3>Найдите пересечения с постоянными водотоками</h3><p>Предикат Cross исключает дороги, которые лишь проходят вдоль воды.</p><p class="result"><strong>708</strong> дорожных сегментов и <strong>364</strong> сооружений</p><a href="stories.html#s4" hreflang="en">Настройки и результат <span aria-hidden="true">→</span> <small lang="en">(EN)</small></a></div>
+                <div class="example-body"><p class="example-label">Сооружения · Toulouse Métropole</p><h3>Найдите пересечения с постоянными водотоками</h3><p>Предикат Cross исключает дороги, которые лишь проходят вдоль воды.</p><p class="result"><strong>747</strong> дорожных сегментов и <strong>364</strong> сооружений</p><a href="stories.html#s4" hreflang="en">Настройки и результат <span aria-hidden="true">→</span> <small lang="en">(EN)</small></a></div>
             </article>
             <article class="example-card">
                 <button class="example-media" type="button" data-watch data-video="video/hamlets.mp4" data-poster="video/hamlets.webp" aria-label="Посмотреть пример удалённых поселений"><img src="video/hamlets.webp" alt="Поселения дальше 200 метров от дороги с покрытием в Aspet" loading="lazy" width="1280" height="720"><span class="case-number" aria-hidden="true">04</span><span class="media-play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Смотреть</span></button>
                 <div class="example-body"><p class="example-label">Близость к дорогам · Aspet</p><h3>Поселения вдали от дорог с покрытием</h3><p>Disjoint с буфером 200 м находит объекты за пределами буферной зоны.</p><p class="result"><strong>22</strong> поселения дальше 200 м</p><a href="stories.html#s6" hreflang="en">Настройки и результат <span aria-hidden="true">→</span> <small lang="en">(EN)</small></a></div>
             </article>
         </div>
-        <a class="inline-cta" href="stories.html" hreflang="en">Все двенадцать примеров использования <span aria-hidden="true">→</span> <small lang="en">(EN)</small></a>
+        <a class="inline-cta" href="stories.html" hreflang="en">Все шестнадцать примеров использования <span aria-hidden="true">→</span> <small lang="en">(EN)</small></a>
     </div>
 </section>
 
