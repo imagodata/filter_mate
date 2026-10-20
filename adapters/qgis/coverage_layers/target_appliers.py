@@ -90,6 +90,37 @@ def _nothing_kept(extent: QgsRectangle) -> QgsGeometry:
                                              extent.xMinimum() - 1, extent.yMinimum() - 1))
 
 
+def _capture_window(full: QgsRectangle, width: int, height: int, kept: Optional[QgsGeometry]):
+    """``(area, (columns, rows))``: the cells of a ``width`` x ``height`` grid over ``full`` to capture for ``kept``.
+
+    The bounding box of the parts of ``kept`` that meet ``full``, snapped
+    outwards to the native grid, one cell of margin (the cutline keeps the
+    cells whose centre is inside), inside ``full``. Nothing kept (None, or outside ``full``): one corner
+    cell, the clip masks it. The area stops a millionth of a cell short of
+    its last row and column, so that the capture's ``ceil`` gives exactly the
+    native cell count: no resampling within the pixel budget.
+    """
+    cell_x, cell_y = full.width() / width, full.height() / height
+    # Part by part: a stored "nothing kept" polygon lies outside the extent, and
+    # OR-combined with a zone it would stretch one box from a corner to the zone.
+    parts = [] if kept is None or kept.isEmpty() else (
+        kept.asGeometryCollection() if kept.isMultipart() else [kept])
+    boxes = [box for box in (part.boundingBox() for part in parts) if box.intersects(full)]
+    if not boxes:
+        first_col, last_col, first_row, last_row = 0, 1, 0, 1
+    else:
+        x_min, x_max = min(box.xMinimum() for box in boxes), max(box.xMaximum() for box in boxes)
+        y_min, y_max = min(box.yMinimum() for box in boxes), max(box.yMaximum() for box in boxes)
+        first_col = max(0, int(math.floor((x_min - full.xMinimum()) / cell_x)) - 1)
+        last_col = min(width, int(math.ceil((x_max - full.xMinimum()) / cell_x)) + 1)
+        first_row = max(0, int(math.floor((full.yMaximum() - y_max) / cell_y)) - 1)
+        last_row = min(height, int(math.ceil((full.yMaximum() - y_min) / cell_y)) + 1)
+    short = 1e-6
+    area = QgsRectangle(full.xMinimum() + first_col * cell_x, full.yMaximum() - (last_row - short) * cell_y,
+                        full.xMinimum() + (last_col - short) * cell_x, full.yMaximum() - first_row * cell_y)
+    return area, (last_col - first_col, last_row - first_row)
+
+
 def _has_area(geometry: QgsGeometry) -> bool:
     """True when ``geometry`` has a polygon part (pixels and points are kept inside areas only)."""
     return polygonal_wkt(geometry.asWkt()) is not None
@@ -191,7 +222,7 @@ class TargetJob:
     # Attributes holding QGIS objects owned by Python (layer copies, feature
     # sources, exporters): released once the task is over, never left for the
     # interpreter shutdown (QGIS 3.44 crashed on exit when they outlived it).
-    _QGIS_HANDLES = ('_source', '_unfiltered', '_base_layer', '_exporter', '_base_keepalive')
+    _QGIS_HANDLES = ('_source', '_unfiltered', '_base_layer', '_exporter', '_base_keepalive', '_remote_target')
     # QgsFeedback canceled with the task (set by CrossFilterTask), for the
     # QGIS calls that cannot poll ``is_canceled``.
     feedback = None
@@ -246,7 +277,19 @@ class VectorTargetJob(TargetJob):
     def __init__(self, layer: QgsVectorLayer, operator: Optional[str]) -> None:
         super().__init__(layer, operator)
         self._error = ''
-        if self.before.subset and (operator or '').upper() not in ('AND', 'AND NOT'):
+        # 2026-10-17: the key-list bounds of the source (core.domain.source_capability)
+        from ..source_capability_probe import capability_for_layer
+        self._capability = capability_for_layer(layer)
+        # 2026-10-20: a web service is read like the dock reads it (remote_materializer):
+        # the server gets the useful BBOX, the exact predicate runs on bounded copies.
+        # A filter rectangle alone downloaded the whole service (35 000 communes).
+        self._remote_target = None
+        self._partial = ''
+        whole_layer = bool(self.before.subset) and (operator or '').upper() not in ('AND', 'AND NOT')
+        if self._capability is not None and self._capability.is_remote_service:
+            self._remote_target = self._remote_snapshot(layer, whole_layer)
+            self._source = None
+        elif whole_layer:
             # Replace (no operator) and OR: the result does not depend on the
             # features the previous subset hides, they are tested too.
             self._source = self._unfiltered_source(layer)
@@ -254,9 +297,6 @@ class VectorTargetJob(TargetJob):
             self._source = QgsVectorLayerFeatureSource(layer)
         self._is_polygon = _is_polygon_layer(layer)
         self._pk, self._raw_pk = self._primary_key(layer)
-        # 2026-10-17: the key-list bounds of the source (core.domain.source_capability)
-        from ..source_capability_probe import capability_for_layer
-        self._capability = capability_for_layer(layer)
         if self._pk is None:
             self._error = translate(
                 "VectorTargetJob",
@@ -292,6 +332,72 @@ class VectorTargetJob(TargetJob):
         return QgsVectorLayerFeatureSource(unfiltered)
 
     @staticmethod
+    def _remote_snapshot(layer: QgsVectorLayer, whole_layer: bool):
+        """Frozen web service target for a bounded worker read (main thread, nothing fetched).
+
+        ``whole_layer``: its current subset is left out (replace, OR), as for a local target.
+        """
+        from ..remote_materializer import _snapshot, unfiltered_snapshot
+        from ...backends.ogr import filter_executor  # noqa: F401 - imported here, on the main thread, not by the worker
+        return unfiltered_snapshot(layer) if whole_layer else _snapshot(layer)
+
+    def _compute_remote(self, geometry, methods, parts, part_methods, coverage):
+        """Keys of a web service target, read inside the useful BBOX only.
+
+        The dock's bounded read (``filter_executor.apply_remote_spatial_filter``):
+        same budgets, same 500-key limit, same refusals and partial results.
+        Returns the keys to list, or None when the target is refused
+        (``outcome.message`` says why); a disjoint keeps the complement of the keys.
+        """
+        from ...backends.ogr.filter_executor import _remote_message
+        from ..remote_materializer import materialization_limits, materialize
+        complement = 'disjoint' in methods
+        if complement and (methods != ['disjoint'] or (parts is not None and part_methods)):
+            self.outcome.message = _remote_message('mixed_disjoint')
+            return None
+        if geometry.isEmpty():
+            return ()
+        tests = ['intersects'] if complement else methods
+        engine = prepared_engine(geometry) if tests else None
+
+        def matches(feature):
+            target_geometry = feature.geometry()
+            if target_geometry is None or target_geometry.isEmpty():
+                return False
+            if not target_geometry.isGeosValid():
+                # As the dock: refused (read_error), never silently left out of a complement.
+                raise ValueError('Invalid target geometry')
+            matched = engine is not None and target_matches(engine, target_geometry, tests)
+            if not matched and parts is not None and not complement:
+                matched = parts.matches(target_geometry, part_methods)
+            if matched and coverage > 0 and not complement:
+                matched = coverage_ratio_ok(target_geometry.area(), target_geometry.intersection(geometry).area(),
+                                            coverage)
+            return matched
+
+        outcome = materialize(self._remote_target, geometry.boundingBox(), '', matches, materialization_limits(),
+                              self.feedback)
+        self._remote_target = None  # the snapshot holds a feature source of the main thread's layer
+        if not outcome.complete:
+            if outcome.reason not in ('feature_limit', 'timeout'):
+                self.outcome.message = _remote_message(outcome.reason)
+                return None
+            if complement:
+                self.outcome.message = _remote_message('disjoint_partial')
+                return None
+            if (self.operator or '').upper() == 'AND NOT' and self.before.subset:
+                # (old) AND NOT (keys): the matching features never read would stay.
+                self.outcome.message = translate(
+                    'VectorTargetJob', '{0} AND NOT would keep the features not read; the previous filter is kept.'
+                ).format(_remote_message(outcome.reason))
+                return None
+            if not outcome.keys:
+                self.outcome.message = _remote_message('partial_empty')
+                return None
+            self._partial = _remote_message(outcome.reason)
+        return outcome.keys
+
+    @staticmethod
     def _primary_key(layer: QgsVectorLayer):
         """``(key, raw)``: the stable key of core.domain.stable_key, or the feature id (raw ``FID`` / ``$id``).
 
@@ -325,36 +431,18 @@ class VectorTargetJob(TargetJob):
         if self.source_parts is not None and part_methods:
             parts = SourceParts([self._target_geometry(part, source_crs, context) for part in self.source_parts])
             methods = whole_methods
-        needs_all = 'disjoint' in methods
-        feature_request = QgsFeatureRequest()
-        if not needs_all and not geometry.isEmpty():
-            feature_request.setFilterRect(geometry.boundingBox())
-        if self._raw_pk:
-            feature_request.setNoAttributes()
-        else:
-            feature_request.setSubsetOfAttributes([self._pk], self._source_fields())
-        kept: List = []
-        engine = prepared_engine(geometry) if methods and not geometry.isEmpty() else None
         coverage = float(request.coverage_min or 0.0) if self._is_polygon else 0.0
-        for feature in self._source.getFeatures(feature_request):
-            if is_canceled():
-                self.outcome.message = 'canceled'
+        complement = False
+        if self._remote_target is not None:
+            kept = self._compute_remote(geometry, methods, parts, part_methods, coverage)
+            if kept is None:
                 return
-            target_geometry = feature.geometry()
-            if target_geometry is None or target_geometry.isEmpty():
-                continue
-            if engine is None:
-                matched = methods == ['disjoint']
-            else:
-                matched = target_matches(engine, target_geometry, methods)
-            if not matched and parts is not None:
-                matched = parts.matches(target_geometry, part_methods)
-            if matched and coverage > 0 and 'disjoint' not in request.methods:
-                matched = coverage_ratio_ok(target_geometry.area(), target_geometry.intersection(geometry).area(), coverage)
-            if matched:
-                value = feature.id() if self._raw_pk else feature.attribute(self._pk)
-                if not is_null_value(value):  # a NULL key (None / null QVariant) matches nothing
-                    kept.append(value)
+            # Disjoint: the keys are those of the features that intersect (all inside the BBOX).
+            complement = 'disjoint' in methods
+        else:
+            kept = self._compute_local(geometry, methods, parts, part_methods, coverage, request, is_canceled)
+            if kept is None:
+                return
         capability = self._capability
         limit = capability.key_list_limit if capability is not None and capability.is_remote_service else None
         if limit and len(kept) > limit:
@@ -378,11 +466,52 @@ class VectorTargetJob(TargetJob):
         # subset is applied (an open GeoPackage reader made the count fail).
         # The unfiltered copy, a QObject of the main thread, goes in apply().
         self._source = None
-        self.outcome.kept_count = len(kept)
-        # OR / AND NOT nothing leave the previous subset as it was.
-        self.outcome.emptied = not kept and not _keeps_previous(self.before.subset, self.operator)
+        if complement:
+            # Every feature but the listed ones (the dock writes the same filter).
+            self._expression = f"NOT ({self._expression})" if kept else '1 = 1'
+        else:
+            self.outcome.kept_count = len(kept)
+            # OR / AND NOT nothing leave the previous subset as it was.
+            self.outcome.emptied = not kept and not _keeps_previous(self.before.subset, self.operator)
+        if self._partial:
+            # Kept features are exact, others may be missing: applied with a warning, as in the dock.
+            self.outcome.message = self._partial
+            self.outcome.details['partial'] = True
         self.outcome.success = True
         self.outcome.elapsed = time.perf_counter() - self._started
+
+    def _compute_local(self, geometry, methods, parts, part_methods, coverage, request, is_canceled):
+        """Keys of the features of a local (or database) target; None when canceled."""
+        needs_all = 'disjoint' in methods
+        feature_request = QgsFeatureRequest()
+        if not needs_all and not geometry.isEmpty():
+            feature_request.setFilterRect(geometry.boundingBox())
+        if self._raw_pk:
+            feature_request.setNoAttributes()
+        else:
+            feature_request.setSubsetOfAttributes([self._pk], self._source_fields())
+        kept: List = []
+        engine = prepared_engine(geometry) if methods and not geometry.isEmpty() else None
+        for feature in self._source.getFeatures(feature_request):
+            if is_canceled():
+                self.outcome.message = 'canceled'
+                return None
+            target_geometry = feature.geometry()
+            if target_geometry is None or target_geometry.isEmpty():
+                continue
+            if engine is None:
+                matched = methods == ['disjoint']
+            else:
+                matched = target_matches(engine, target_geometry, methods)
+            if not matched and parts is not None:
+                matched = parts.matches(target_geometry, part_methods)
+            if matched and coverage > 0 and 'disjoint' not in request.methods:
+                matched = coverage_ratio_ok(target_geometry.area(), target_geometry.intersection(geometry).area(), coverage)
+            if matched:
+                value = feature.id() if self._raw_pk else feature.attribute(self._pk)
+                if not is_null_value(value):  # a NULL key (None / null QVariant) matches nothing
+                    kept.append(value)
+        return kept
 
     def _source_fields(self):
         try:
@@ -404,11 +533,49 @@ class VectorTargetJob(TargetJob):
             self.outcome.success = False
             self.outcome.message = f"subset rejected by the provider: {subset[:200]}"
             return None
+        if self._capability is not None and self._capability.is_remote_service:
+            # Partial provenance, as the dock records it (the dock refuses such a layer as a source).
+            from ..remote_materializer import mark_partial_result
+            mark_partial_result(layer, bool(self._partial), subset)
         layer.triggerRepaint()
         return take_snapshot(layer, self.kind)
 
 
 # --- raster -----------------------------------------------------------------
+
+class _ProviderLayer:
+    """A raster provider with the few layer calls ``materialize_raster`` makes (worker only)."""
+
+    def __init__(self, provider, provider_key: str, source: str, name: str) -> None:
+        self._provider, self._key, self._source, self._name = provider, provider_key, source, name
+
+    def isValid(self) -> bool:
+        return self._provider is not None and self._provider.isValid()
+
+    def dataProvider(self):
+        return self._provider
+
+    def providerType(self) -> str:
+        return self._key
+
+    def source(self) -> str:
+        return self._source
+
+    def name(self) -> str:
+        return self._name
+
+    def extent(self):
+        return self._provider.extent()
+
+    def width(self) -> int:
+        return self._provider.xSize()
+
+    def height(self) -> int:
+        return self._provider.ySize()
+
+    def crs(self):
+        return self._provider.crs()
+
 
 class RasterTargetJob(TargetJob):
     """Set the pixels of a raster target outside (or inside) the source geometry to NoData."""
@@ -453,17 +620,42 @@ class RasterTargetJob(TargetJob):
         except Exception as exc:
             logger.debug(f"[FM5] raster target metadata incomplete: {exc}")
 
-    def _prepare_input(self, is_canceled):
+    def _open_remote(self):
+        """The original remote raster, opened in the worker: its full extent (``self._extent``) and grid."""
         import threading
         if threading.current_thread() is threading.main_thread():
             raise RuntimeError(translate('RasterTargetJob', 'remote raster target must run in a worker thread'))
+        from qgis.core import QgsDataProvider, QgsProviderRegistry
+        from .raster_materialization import _tr
+        # A bare provider, not a QgsRasterLayer: a layer computes the statistics of its
+        # default renderer when it opens, one more read of the whole coverage (WCS:
+        # a GetCoverage of 586 x 427 cells over 1 240 km).
+        provider = QgsProviderRegistry.instance().createProvider(
+            self._base_provider, self._base_source, QgsDataProvider.ProviderOptions())
+        base = _ProviderLayer(provider, self._base_provider, self._base_source, 'FilterMate target capture')
+        if not base.isValid() or base.width() < 1 or base.height() < 1:
+            raise RuntimeError(_tr('raster capture source could not be opened'))
+        # Not the layer's extent: a derived layer shows its previous capture only.
+        self._extent = QgsRectangle(base.extent())
+        return base
+
+    def _prepare_input(self, is_canceled, base=None, kept: Optional[QgsGeometry] = None):
+        """Local pixels to clip: the analysis capture, or a capture of ``base`` around ``kept``.
+
+        2026-10-20: a remote target is captured over the area the clip keeps
+        only (native grid, one cell of margin, the pixel budget still applies),
+        no longer over its whole extent (the WCS was read over 1 240 km for a
+        zone of 25 km).
+        """
         from qgis.core import QgsRasterLayer
         from .raster_materialization import materialize_raster
-        source, provider = self._analysis_source or (self._base_source, self._base_provider)
-        base = QgsRasterLayer(source, 'FilterMate target capture', provider)
-        native_size = base.width(), base.height()
-        if self._analysis_source is None:
-            source = materialize_raster(base, is_canceled=is_canceled)
+        if base is None:
+            source, provider = self._analysis_source
+            base = QgsRasterLayer(source, 'FilterMate target capture', provider)
+            native_size = base.width(), base.height()
+        else:
+            area, native_size = _capture_window(self._extent, base.width(), base.height(), kept)
+            source = materialize_raster(base, extent=area, is_canceled=is_canceled)
             self.outputs.append(source)
             base = QgsRasterLayer(source, 'FilterMate local target', 'gdal')
         if not base.isValid():
@@ -497,12 +689,15 @@ class RasterTargetJob(TargetJob):
         if is_canceled():
             self.outcome.message = 'canceled'
             return
-        if self._remote or self._analysis_source is not None:
+        if self._analysis_source is not None:
             self._prepare_input(is_canceled)
         geometry = self._target_geometry(source_geometry, source_crs, context)
         if side is CoverageSide.INSIDE and not geometry.isEmpty() and not _has_area(geometry):
             self.outcome.message = NO_AREA
             return
+        remote = None
+        if self._analysis_source is None and self._remote:
+            remote = self._open_remote()  # its full extent; captured below, once the kept area is known
         if side is CoverageSide.OUTSIDE:
             geometry = _checked(QgsGeometry.fromRect(self._extent).difference(geometry), 'difference')
         geometry = _combine_geometry(self.before.geometry_wkt if self.before.derived else '', self.before.side,
@@ -513,6 +708,8 @@ class RasterTargetJob(TargetJob):
         # Nothing kept: clip with a degenerate polygon far outside the extent.
         geometry = QgsGeometry.fromWkt(kept) if kept is not None else _nothing_kept(self._extent)
         self._geometry_wkt = geometry.asWkt()
+        if remote is not None:
+            self._prepare_input(is_canceled, remote, geometry if kept is not None else None)
         cutline = _simplified_for_cutline(geometry, self._pixel * 0.5)
         if self._input_source != self._base_source:
             # The VRT and its captured pixels share a cache key: history keeps both.

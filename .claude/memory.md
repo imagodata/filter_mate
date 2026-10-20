@@ -814,3 +814,13 @@ Result: Que veux-tu faire dans cette session ?
   par launchTaskEvent et par TaskParameterBuilder.get_and_validate_features ; la lecture, le zoom et Identify d'une
   telle sélection restent permis. Le choix enregistré d'un service est passé comme `QgsFeature(fields, fid)` valide,
   jamais relu sur le thread GUI.
+- [2026-10-20] API publique sur les sources en flux (branche `claude/v5-stream-F-api`) : `_run_task` calcule dans un
+  `QThread` (jamais un thread Python : les providers WCS / WFS démarrent des minuteurs Qt dans le thread qui lit,
+  « Timers can only be used with threads started with QThread » puis plantage natif en 3.44) et rend le bail
+  `service._running` AVANT d'appliquer (sinon le filtre serveur WFS refuse : « A FilterMate task is still reading
+  layers » ; la tâche de l'API n'est jamais dans le QgsTaskManager, son statut reste Queued, cf. #199 pour celles du dock). Cible vecteur d'un service web dans `VectorTargetJob` : `remote_materializer.materialize` (BBOX serveur,
+  prédicat exact local, 500 clés) et les messages du dock (`filter_executor._remote_message`) ; Disjoint = NOT (clés
+  qui intersectent). Cible raster distante capturée sur l'emprise gardée seulement (`_capture_window` : grille native,
+  une cellule de marge, un millionième de cellule en moins pour que le `ceil` de la capture ne rééchantillonne pas).
+  `layer_kind_by_class` connaît VECTOR_TILE (cible seulement) ; un favori de l'API recoupe via `_run_task` et un échec
+  de découpage va dans `report.failed`.
