@@ -66,6 +66,23 @@ def check(name, condition, detail=""):
     print("{} {} {}".format(status, name, detail), flush=True)
 
 
+def provider_call(layer, method, *args):
+    """Call a memory provider method from a worker thread.
+
+    PyQt invalidates a C++-created QObject's wrapper through a destroyed()
+    notification queued to the main thread and keyed by address: a provider
+    created where a deleted one lived can lose its fresh wrapper while alive
+    ("wrapped C/C++ object of type QgsVectorDataProvider has been deleted").
+    sip forgets an invalidated wrapper, so the layer hands a usable one again.
+    """
+    for attempt in range(3):
+        try:
+            return getattr(layer.dataProvider(), method)(*args)
+        except RuntimeError:
+            if attempt == 2:
+                raise
+
+
 def remote_memory(size=6):
     """Real QGIS memory provider classified as a service, with a stable id.
 
@@ -81,7 +98,7 @@ def remote_memory(size=6):
         feature.setAttributes([index, "L'Isle" if index == 1 else "other"])
         feature.setGeometry(QgsGeometry.fromWkt("POINT({} 1)".format(index)))
         rows.append(feature)
-    provider.addFeatures(rows)
+    provider_call(layer, "addFeatures", rows)
     layer.updateExtents()
     layer.providerType = lambda: "WFS"
     layer.source = lambda: "url=http://offline.test/wfs"
@@ -103,7 +120,7 @@ def source_polygon(crs="EPSG:4326"):
         )
         feature.setGeometry(geometry)
         layer.setCrs(QgsCoordinateReferenceSystem(crs))
-    layer.dataProvider().addFeatures([feature])
+    provider_call(layer, "addFeatures", [feature])
     layer.updateExtents()
     return layer
 
@@ -127,7 +144,7 @@ def rich_target(remote=False, lines=False):
         feature = QgsFeature(layer.fields())
         feature.setAttributes([index])
         feature.setGeometry(geometry)
-        provider.addFeatures([feature])
+        provider_call(layer, "addFeatures", [feature])
     layer.updateExtents()
     if remote:
         layer.providerType = lambda: "WFS"
@@ -287,7 +304,7 @@ def automatic(task):
             geometry = feature.geometry()
             geometry.transform(transform)
             feature.setGeometry(geometry)
-            output.dataProvider().addFeatures([feature])
+            provider_call(output, "addFeatures", [feature])
         output.updateExtents()
         return output
 
@@ -413,7 +430,7 @@ def automatic(task):
     huge = QgsVectorLayer("Polygon?crs=EPSG:4326", "large_window", "memory")
     feature = QgsFeature()
     feature.setGeometry(QgsGeometry.fromRect(QgsRectangle(-1, 0, 800, 2)))
-    huge.dataProvider().addFeatures([feature])
+    provider_call(huge, "addFeatures", [feature])
     remote_file = remote_memory(700)
     remote_file.providerType = lambda: "ogr"
     remote_file.source = lambda: "/vsicurl/http://offline.test/points.geojson"
@@ -586,7 +603,7 @@ def public(task):
             print("SKIP public IGN WFS: department unavailable", flush=True)
             return
         local = QgsVectorLayer("MultiPolygon?crs=EPSG:4326", "Haute-Garonne", "memory")
-        local.dataProvider().addFeatures(rows)
+        provider_call(local, "addFeatures", rows)
         local.updateExtents()
         target = QgsVectorLayer(base + " typename='ADMINEXPRESS-COG.LATEST:commune'", "communes", "WFS")
         for label, source, dest in [("target_service", local, target), ("source_service", department, local)]:
@@ -642,9 +659,9 @@ def public(task):
             print("SKIP public reference comparison: candidate copy incomplete", flush=True)
             return
         reference = QgsVectorLayer("MultiPolygon?crs=EPSG:4326", "complete_local_candidates", "memory")
-        reference.dataProvider().addAttributes(list(target.fields()))
+        provider_call(reference, "addAttributes", list(target.fields()))
         reference.updateFields()
-        reference.dataProvider().addFeatures(copies)
+        provider_call(reference, "addFeatures", copies)
         reference.updateExtents()
         comparison = OGRExpressionBuilder(task_params=settings)
         comparison._feedback = QgsFeedback()
@@ -658,7 +675,7 @@ def public(task):
         small = QgsVectorLayer("MultiPolygon?crs=EPSG:4326", "Toulouse", "memory")
         feature = QgsFeature()
         feature.setGeometry(geometry)
-        small.dataProvider().addFeatures([feature])
+        provider_call(small, "addFeatures", [feature])
         selected = comparison._select_against_union(reference, geometry, small.crs(), ["intersects"])
         expected = {feature["cleabs"] for feature in reference.getFeatures(QgsFeatureRequest().setFilterFids(selected))}
         success, queued, builder = filter_keys(target, small)
