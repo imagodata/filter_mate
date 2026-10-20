@@ -10,8 +10,8 @@
 [![License: GPL v3](https://img.shields.io/badge/license-GPLv3-blue)](LICENSE)
 
 Pick a layer, select what matters on it, and FilterMate filters every other layer of the project by its relation to
-that selection: buildings within 50 m of a road, parcels on a gentle slope, LiDAR points under the buildings, a DTM
-clipped to a commune. The filters stay on the project layers (no copies), can be undone, saved as favorites, exported,
+that selection: buildings near main roads, parcels on steep slopes, LiDAR points beneath rooftops, a DTM
+clipped around a church. The filters stay on the existing project layers, keep their styles, can be undone, saved as favorites, exported,
 and replayed from Processing or a script.
 
 <p align="center">
@@ -40,22 +40,22 @@ The panel has four sections, used top to bottom.
 | 📦 **EXPORTING** | Write the filtered layers as they are: vector formats, GeoTIFF / COG for rasters, LAZ / LAS / COPC / GPKG / CSV for point clouds, or a GeoPackage with an embedded QGIS project. |
 | 🔧 **CONFIGURATION** | Backends, theme, layer kinds, cache and other options, from the panel. |
 
-Every kind of layer can be the source or a target:
+**Nine combinations. One panel.** Every kind of layer can be the source or a target. Each cell links to a detailed use case:
 
 | Source ↓ / Target → | 🗺️ Vector | 🏔️ Raster | ☁️ Point cloud |
 |---|---|---|---|
-| 🗺️ **Vector** (features) | features kept by the predicates | pixels inside / outside, clipped VRT | points inside / outside, clipped COPC |
-| 🏔️ **Raster** (value range, classes…) | features over the selected pixels, with a minimum coverage | raster clipped to the selected area | points over the selected area |
-| ☁️ **Point cloud** (classes, ranges…) | features under the kept points | raster clipped to their footprint | the same criteria on every tile |
+| 🗺️ **Vector** (features) | [Buildings near main roads](https://imagodata.github.io/filter_mate/stories.html#s2) | [DTM around the church](https://imagodata.github.io/filter_mate/stories.html#s12) | [Point cloud around the church](https://imagodata.github.io/filter_mate/stories.html#s12) |
+| 🏔️ **Raster** (value range, classes…) | [Parcels on steep slopes](https://imagodata.github.io/filter_mate/stories.html#s9) | [NDVI mask on an RGB orthophoto](https://imagodata.github.io/filter_mate/stories.html#s13) | [LiDAR points beneath rooftops](https://imagodata.github.io/filter_mate/stories.html#s14) |
+| ☁️ **Point cloud** (classes, ranges…) | [Building heights measured by LiDAR](https://imagodata.github.io/filter_mate/stories.html#s10) | [DTM beneath ground points](https://imagodata.github.io/filter_mate/stories.html#s15) | [High vegetation near power lines](https://imagodata.github.io/filter_mate/stories.html#s16) |
 
 Filtered layers keep their id, style and place in the layer tree. Unfilter, Undo / Redo and unloading the plugin put
 the original source back, and project files are always saved with the original sources.
 
 ## ✨ Features
 
-- ⚡ **Fast on large data.** Filters run as SQL on PostgreSQL / PostGIS, Spatialite and GeoPackage (spatial index used,
-  no reload), with an OGR path for everything else. On a full BD TOPO department, the 37 layers of a GeoPackage are
-  filtered by a commune in 2–3 s.
+- ⚡ **Fast on large data.** Filters run as SQL on PostgreSQL / PostGIS, SpatiaLite and GeoPackage (spatial index used,
+  no reload), with an OGR path for everything else. In the [documented Saint-Gaudens run](https://imagodata.github.io/filter_mate/stories.html#s1),
+  12 layers from a 2.9 GB department-wide GeoPackage were filtered in under a second. Timings depend on the data, hardware and cache.
 - 🌐 **Web services and remote files** (WFS, OGC API Features, ArcGIS, WMS / WMTS / XYZ, WCS, vector tiles, remote COPC / EPT): filtered and explored with bounded, cancellable reads, never on the main thread, and with an explicit refusal rather than a silently partial result.
 - 🎯 **Pipettes on the map**: similar pixels, the clicked object or every similar object on a raster; a value condition on a point cloud attribute.
 - ↩️ **Undo / Redo** of every filter, per layer, and a global history.
@@ -100,7 +100,7 @@ The same operation is available as the `filtermate:cross_filter_from_raster` Pro
 | | |
 |---|---|
 | 📖 [User guide](https://imagodata.github.io/filter_mate/guide.html) · [Guide utilisateur](https://imagodata.github.io/filter_mate/guide.fr.html) | Step by step: first filter, exploring, predicates and buffers, rasters and point clouds, favorites, export, backends, configuration. |
-| 💡 [Use cases](https://imagodata.github.io/filter_mate/stories.html) · [Cas d'usage](https://imagodata.github.io/filter_mate/stories.fr.html) | Eight business questions answered on a full BD TOPO department. |
+| 💡 [Use cases](https://imagodata.github.io/filter_mate/stories.html) · [Cas d'usage](https://imagodata.github.io/filter_mate/stories.fr.html) | Sixteen business questions covering all nine combinations: twelve QGIS recordings and four illustrated recipes, in English and French. |
 | 🤖 [docs/AUTOMATION.md](docs/AUTOMATION.md) | Processing algorithms and models, `qgis_process`, Python API, REST API. |
 | ⭐ [docs/favorites_sharing/](docs/favorites_sharing/USER_GUIDE.md) | Sharing favorites through git repositories. |
 | 🏗️ [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) · [CONTRIBUTING.md](CONTRIBUTING.md) | Source tree, code rules, tests and releases, for contributors. |

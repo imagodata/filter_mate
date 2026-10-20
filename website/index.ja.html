@@ -120,7 +120,7 @@
 
 <section class="home-section directions" id="directions" aria-labelledby="directions-title">
     <div class="home-container">
-        <div class="section-heading"><p class="section-kicker">あらゆる方向</p><h2 id="directions-title">9 通りの組み合わせ、1 つのパネル。</h2><p>どの種類のレイヤーもフィルターのソースにもターゲットにもなります。各セルはフィルターが残すものを示し、色付きのセルは記録済みの活用例にリンクしています。</p></div>
+        <div class="section-heading"><p class="section-kicker">あらゆる方向</p><h2 id="directions-title">9 通りの組み合わせ、1 つのパネル。</h2><p>どの種類のレイヤーもフィルターのソースにもターゲットにもなります。各セルは残すものを示し、再現用の設定を含む詳しい活用例にリンクしています。</p></div>
         <div class="matrix-wrap">
         <table class="matrix-grid">
             <thead><tr><th scope="col"><span class="matrix-axis">ソース ↓ · ターゲット →</span></th><th scope="col">ベクター</th><th scope="col">ラスター</th><th scope="col">点群</th></tr></thead>
@@ -131,12 +131,12 @@
                     <td><a href="stories.html#s12" hreflang="en"><strong>点</strong><span>教会周辺の点群</span> <small lang="en">(EN)</small></a></td></tr>
                 <tr><th scope="row">ラスター<small>値の範囲、色、オブジェクト、指数</small></th>
                     <td><a href="stories.html#s9" hreflang="en"><strong>地物</strong><span>急斜面の区画</span> <small lang="en">(EN)</small></a></td>
-                    <td><div class="matrix-cell"><strong>ピクセル</strong><span>別のオルソ画像に適用した NDVI マスク</span></div></td>
-                    <td><div class="matrix-cell"><strong>点</strong><span>オルソ画像で選んだ屋根の下の LiDAR 点</span></div></td></tr>
+                    <td><a href="stories.html#s13" hreflang="en"><strong>ピクセル</strong><span>別のオルソ画像に適用した NDVI マスク</span> <small lang="en">(EN)</small></a></td>
+                    <td><a href="stories.html#s14" hreflang="en"><strong>点</strong><span>オルソ画像で選んだ屋根の下の LiDAR 点</span> <small lang="en">(EN)</small></a></td></tr>
                 <tr><th scope="row">点群<small>クラス、地形モデルからの高さ</small></th>
                     <td><a href="stories.html#s10" hreflang="en"><strong>地物</strong><span>LiDAR で測った建物の高さ</span> <small lang="en">(EN)</small></a></td>
-                    <td><div class="matrix-cell"><strong>ピクセル</strong><span>地面の点に限定した地形モデル</span></div></td>
-                    <td><div class="matrix-cell"><strong>点</strong><span>送電線付近の高い植生</span></div></td></tr>
+                    <td><a href="stories.html#s15" hreflang="en"><strong>ピクセル</strong><span>地面の点に限定した地形モデル</span> <small lang="en">(EN)</small></a></td>
+                    <td><a href="stories.html#s16" hreflang="en"><strong>点</strong><span>送電線付近の高い植生</span> <small lang="en">(EN)</small></a></td></tr>
             </tbody>
         </table>
         </div>
@@ -161,14 +161,14 @@
             </article>
             <article class="example-card">
                 <button class="example-media" type="button" data-watch data-video="video/bridges.mp4" data-poster="video/bridges.webp" aria-label="交差箇所の検出例を見る"><img src="video/bridges.webp" alt="Toulouse Métropole の道路と水路の交差箇所" loading="lazy" width="1280" height="720"><span class="case-number" aria-hidden="true">03</span><span class="media-play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>再生</span></button>
-                <div class="example-body"><p class="example-label">構造物 · Toulouse Métropole</p><h3>通年の水路との交差箇所を探す</h3><p>Cross 述語は、水路に沿って走るだけの道路を除外します。</p><p class="result"><strong>708</strong> 区間の道路と <strong>364</strong> 件の構造物</p><a href="stories.html#s4" hreflang="en">設定と結果を見る <span aria-hidden="true">→</span> <small lang="en">(EN)</small></a></div>
+                <div class="example-body"><p class="example-label">構造物 · Toulouse Métropole</p><h3>通年の水路との交差箇所を探す</h3><p>Cross 述語は、水路に沿って走るだけの道路を除外します。</p><p class="result"><strong>747</strong> 区間の道路と <strong>364</strong> 件の構造物</p><a href="stories.html#s4" hreflang="en">設定と結果を見る <span aria-hidden="true">→</span> <small lang="en">(EN)</small></a></div>
             </article>
             <article class="example-card">
                 <button class="example-media" type="button" data-watch data-video="video/hamlets.mp4" data-poster="video/hamlets.webp" aria-label="道路から離れた集落の例を見る"><img src="video/hamlets.webp" alt="Aspet の舗装道路から 200 m 以上離れた集落" loading="lazy" width="1280" height="720"><span class="case-number" aria-hidden="true">04</span><span class="media-play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>再生</span></button>
                 <div class="example-body"><p class="example-label">道路への近接性 · Aspet</p><h3>舗装道路から離れた集落</h3><p>Disjoint と 200 m のバッファを組み合わせ、バッファ外の地物を抽出します。</p><p class="result"><strong>22</strong> か所の集落が 200 m 超の範囲外</p><a href="stories.html#s6" hreflang="en">設定と結果を見る <span aria-hidden="true">→</span> <small lang="en">(EN)</small></a></div>
             </article>
         </div>
-        <a class="inline-cta" href="stories.html" hreflang="en">12 の活用例をすべて見る <span aria-hidden="true">→</span> <small lang="en">(EN)</small></a>
+        <a class="inline-cta" href="stories.html" hreflang="en">16 の活用例をすべて見る <span aria-hidden="true">→</span> <small lang="en">(EN)</small></a>
     </div>
 </section>
 

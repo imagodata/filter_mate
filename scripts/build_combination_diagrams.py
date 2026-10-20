@@ -1,4 +1,4 @@
-"""Build the schematic source/result maps of the four French combination recipes.
+"""Build the source/result diagrams of the French and English combination recipes.
 
 Run from any directory with Python's standard library. These SVG illustrations
 explain the filters; they are not QGIS captures or measured geographic data.
@@ -14,6 +14,36 @@ INK = '#16232b'
 GREEN = '#589632'
 YELLOW = '#ffd83d'
 RED = '#d64545'
+ENGLISH = {
+    'FILTERMATE 5  /  SCHÉMA DE PRINCIPE': 'FILTERMATE 5  /  SCHEMATIC',
+    'SOURCE → GÉOMÉTRIE → CIBLE': 'SOURCE → GEOMETRY → TARGET',
+    'La végétation sur l’orthophoto': 'Vegetation on an RGB orthophoto',
+    'SOURCE · ORTHOPHOTO IRC': 'SOURCE · COLOUR INFRARED ORTHOPHOTO',
+    'CIBLE · ORTHOPHOTO RVB': 'TARGET · RGB ORTHOPHOTO',
+    'NDVI > 0,3  ·  Intersect  ·  sans tampon': 'NDVI > 0.3  ·  Intersect  ·  no buffer',
+    'À droite : les couleurs RVB conservées ; le damier représente le NoData.':
+        'Right: the retained RGB colours; the checkerboard represents NoData.',
+    'Les points sous les toits sélectionnés': 'Points beneath the selected roofs',
+    'SOURCE · ORTHOPHOTO RVB': 'SOURCE · RGB ORTHOPHOTO',
+    'CIBLE · NUAGE LIDAR': 'TARGET · LIDAR POINT CLOUD',
+    'Pipette « objet cliqué »  ·  Intersect  ·  sans tampon':
+        'Pipette: clicked object  ·  Intersect  ·  no buffer',
+    'Contour jaune : objets sélectionnés ; points colorés : retours LiDAR conservés en plan.':
+        'Yellow outlines: selected objects; coloured dots: retained LiDAR returns in plan view.',
+    'Le MNT au droit des points sol': 'The DTM beneath ground points',
+    'SOURCE · LIDAR CLASSÉ': 'SOURCE · CLASSIFIED LIDAR',
+    'CIBLE · MODÈLE DE TERRAIN': 'TARGET · TERRAIN MODEL',
+    'Classe 2 « Ground »  ·  Intersect  ·  sans tampon': 'Class 2: Ground  ·  Intersect  ·  no buffer',
+    'Les altitudes du MNT sont conservées sous l’empreinte du sol ; ailleurs : NoData.':
+        'DTM elevations are retained within the ground footprint; elsewhere: NoData.',
+    'La végétation près des lignes électriques': 'Vegetation near power lines',
+    'SOURCE · POINTS DE CÂBLE': 'SOURCE · WIRE POINTS',
+    'CIBLE · POINTS DE VÉGÉTATION': 'TARGET · VEGETATION POINTS',
+    'Classes 13 / 14 → classe 5  ·  Intersect  ·  tampon 10 m':
+        'Classes 13 / 14 → class 5  ·  Intersect  ·  10 m buffer',
+    'Vue en plan : le corridor retient les arbres proches de l’empreinte des câbles.':
+        'Plan view: the corridor retains vegetation near the footprint of the wires.',
+}
 
 
 def rect(x, y, w, h, color, extra=''):
@@ -29,7 +59,15 @@ def label(x, y, text, size=22, color=PAPER, extra=''):
             f'{extra}>{escape(text)}</text>')
 
 
-def diagram(name, title, source, target, left, right, rule, legend):
+def write_diagram(name, title, source, target, left, right, rule, legend, language):
+    english = language == 'en'
+    if english:
+        name += '-en'
+        title, source, target, rule, legend = (ENGLISH[value] for value in (title, source, target, rule, legend))
+    kicker = 'FILTERMATE 5  /  SCHÉMA DE PRINCIPE'
+    footer = 'SOURCE → GÉOMÉTRIE → CIBLE'
+    if english:
+        kicker, footer = ENGLISH[kicker], ENGLISH[footer]
     definitions = [
         '<defs><pattern id="empty" width="16" height="16" patternUnits="userSpaceOnUse">',
         rect(0, 0, 16, 16, '#e7e9e1'), rect(0, 0, 8, 8, '#cfd3c8'),
@@ -44,7 +82,7 @@ def diagram(name, title, source, target, left, right, rule, legend):
         *definitions,
         '<g font-family="Barlow, Segoe UI, sans-serif">',
         rect(0, 0, 1280, 720, INK),
-        label(48, 48, 'FILTERMATE 5  /  SCHÉMA DE PRINCIPE', 18, '#a9b6bd', 'letter-spacing="2"'),
+        label(48, 48, kicker, 18, '#a9b6bd', 'letter-spacing="2"'),
         label(48, 100, title, 32, PAPER, 'font-weight="600"'),
         label(48, 153, source, 21), label(704, 153, target, 21),
         rect(48, 176, 528, 320, PAPER), rect(704, 176, 528, 320, 'url(#empty)'),
@@ -54,7 +92,7 @@ def diagram(name, title, source, target, left, right, rule, legend):
         f'stroke="{YELLOW}" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>',
         label(48, 548, rule, 24, YELLOW, 'font-weight="600"'),
         label(48, 588, legend, 20, '#a9b6bd'),
-        label(48, 664, 'SOURCE → GÉOMÉTRIE → CIBLE', 18, PAPER, 'letter-spacing="2"'),
+        label(48, 664, footer, 18, PAPER, 'letter-spacing="2"'),
         '</g></svg>\n',
     ]
     (OUT / f'{name}.svg').write_text('\n'.join(parts), encoding='utf-8')
@@ -62,7 +100,7 @@ def diagram(name, title, source, target, left, right, rule, legend):
     # below the maps so long headings remain readable on a narrow screen.
     cover = [
         '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 640" width="1280" height="640">',
-        f'<title>{escape(title + ' — schéma')}</title>', *definitions,
+        f'<title>{escape(title + (" — schematic" if english else " — schéma"))}</title>', *definitions,
         rect(0, 0, 1280, 640, INK),
         '<g transform="translate(48 80)" clip-path="url(#map)">', *left, '</g>',
         '<g transform="translate(704 80)" clip-path="url(#map)">', *right, '</g>',
@@ -71,6 +109,11 @@ def diagram(name, title, source, target, left, right, rule, legend):
         '</svg>\n',
     ]
     (OUT / f'{name}-cover.svg').write_text('\n'.join(cover), encoding='utf-8')
+
+
+def diagram(name, title, source, target, left, right, rule, legend):
+    for language in ('fr', 'en'):
+        write_diagram(name, title, source, target, left, right, rule, legend, language)
 
 
 def vegetation(x, y):
@@ -161,4 +204,4 @@ if __name__ == '__main__':
     OUT.mkdir(parents=True, exist_ok=True)
     for build in (ndvi, roofs, ground, wires):
         build()
-    print(f'Built 4 combination diagrams and covers in {OUT}')
+    print(f'Built combination diagrams and covers in French and English in {OUT}')

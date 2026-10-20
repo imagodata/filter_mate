@@ -2,6 +2,8 @@
 
 Standalone HTML sources of the images in `website/img/share/`, rendered with a headless browser at the page size set in each file's CSS:
 
+All nine cells represent documented source → target combinations, matching the home pages, the README and the sixteen use cases in English and French.
+
 | Source | Output | Size | Use |
 | --- | --- | --- | --- |
 | `directions.html` | `website/img/share/directions.png` | 1200 × 630 | `og:image` of the home pages and the roadmap (link previews) |

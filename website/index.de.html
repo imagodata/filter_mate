@@ -120,7 +120,7 @@
 
 <section class="home-section directions" id="directions" aria-labelledby="directions-title">
     <div class="home-container">
-        <div class="section-heading"><p class="section-kicker">In jede Richtung</p><h2 id="directions-title">Neun Kombinationen. Ein Panel.</h2><p>Jede Art von Ebene kann Quelle oder Ziel des Filters sein. Jede Zelle nennt, was der Filter behält; die farbigen führen zu einem dokumentierten Anwendungsfall.</p></div>
+        <div class="section-heading"><p class="section-kicker">In jede Richtung</p><h2 id="directions-title">Neun Kombinationen. Ein Panel.</h2><p>Jede Art von Ebene kann Quelle oder Ziel des Filters sein. Jede Zelle nennt, was der Filter behält, und führt zu einem ausführlichen Anwendungsfall mit Einstellungen zum Nachvollziehen.</p></div>
         <div class="matrix-wrap">
         <table class="matrix-grid">
             <thead><tr><th scope="col"><span class="matrix-axis">Quelle ↓ · Ziel →</span></th><th scope="col">Vektor</th><th scope="col">Raster</th><th scope="col">Punktwolke</th></tr></thead>
@@ -131,12 +131,12 @@
                     <td><a href="stories.html#s12" hreflang="en"><strong>Punkte</strong><span>Die Punktwolke rund um die Kirche</span> <small lang="en">(EN)</small></a></td></tr>
                 <tr><th scope="row">Raster<small>Ein Wertebereich, eine Farbe, ein Objekt, ein Index</small></th>
                     <td><a href="stories.html#s9" hreflang="en"><strong>Objekte</strong><span>Flurstücke in steiler Hanglage</span> <small lang="en">(EN)</small></a></td>
-                    <td><div class="matrix-cell"><strong>Pixel</strong><span>Eine NDVI-Maske auf ein anderes Orthofoto angewendet</span></div></td>
-                    <td><div class="matrix-cell"><strong>Punkte</strong><span>LiDAR-Punkte unter den auf einem Orthofoto gewählten Dächern</span></div></td></tr>
+                    <td><a href="stories.html#s13" hreflang="en"><strong>Pixel</strong><span>Eine NDVI-Maske auf ein anderes Orthofoto angewendet</span> <small lang="en">(EN)</small></a></td>
+                    <td><a href="stories.html#s14" hreflang="en"><strong>Punkte</strong><span>LiDAR-Punkte unter den auf einem Orthofoto gewählten Dächern</span> <small lang="en">(EN)</small></a></td></tr>
                 <tr><th scope="row">Punktwolke<small>Klassen, Höhe über einem Geländemodell</small></th>
                     <td><a href="stories.html#s10" hreflang="en"><strong>Objekte</strong><span>Gebäudehöhen, per LiDAR gemessen</span> <small lang="en">(EN)</small></a></td>
-                    <td><div class="matrix-cell"><strong>Pixel</strong><span>Ein Geländemodell, beschränkt auf die Bodenpunkte</span></div></td>
-                    <td><div class="matrix-cell"><strong>Punkte</strong><span>Hohe Vegetation nahe Stromleitungen</span></div></td></tr>
+                    <td><a href="stories.html#s15" hreflang="en"><strong>Pixel</strong><span>Ein Geländemodell, beschränkt auf die Bodenpunkte</span> <small lang="en">(EN)</small></a></td>
+                    <td><a href="stories.html#s16" hreflang="en"><strong>Punkte</strong><span>Hohe Vegetation nahe Stromleitungen</span> <small lang="en">(EN)</small></a></td></tr>
             </tbody>
         </table>
         </div>
@@ -161,14 +161,14 @@
             </article>
             <article class="example-card">
                 <button class="example-media" type="button" data-watch data-video="video/bridges.mp4" data-poster="video/bridges.webp" aria-label="Beispiel zur Kreuzungssuche ansehen"><img src="video/bridges.webp" alt="Kreuzungen von Straßen und Gewässern in Toulouse Métropole" loading="lazy" width="1280" height="720"><span class="case-number" aria-hidden="true">03</span><span class="media-play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Ansehen</span></button>
-                <div class="example-body"><p class="example-label">Bauwerke · Toulouse Métropole</p><h3>Kreuzungen mit ganzjährigen Gewässern finden</h3><p>Die räumliche Beziehung Cross schließt Straßen aus, die nur am Gewässer entlangführen.</p><p class="result"><strong>708</strong> Straßenabschnitte und <strong>364</strong> Bauwerke</p><a href="stories.html#s4" hreflang="en">Einstellungen und Ergebnis <span aria-hidden="true">→</span> <small lang="en">(EN)</small></a></div>
+                <div class="example-body"><p class="example-label">Bauwerke · Toulouse Métropole</p><h3>Kreuzungen mit ganzjährigen Gewässern finden</h3><p>Die räumliche Beziehung Cross schließt Straßen aus, die nur am Gewässer entlangführen.</p><p class="result"><strong>747</strong> Straßenabschnitte und <strong>364</strong> Bauwerke</p><a href="stories.html#s4" hreflang="en">Einstellungen und Ergebnis <span aria-hidden="true">→</span> <small lang="en">(EN)</small></a></div>
             </article>
             <article class="example-card">
                 <button class="example-media" type="button" data-watch data-video="video/hamlets.mp4" data-poster="video/hamlets.webp" aria-label="Beispiel zu abgelegenen Weilern ansehen"><img src="video/hamlets.webp" alt="Weiler in Aspet mit mehr als 200 Metern Abstand zu einer befestigten Straße" loading="lazy" width="1280" height="720"><span class="case-number" aria-hidden="true">04</span><span class="media-play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4l14 8-14 8z"/></svg>Ansehen</span></button>
                 <div class="example-body"><p class="example-label">Straßennähe · Aspet</p><h3>Weiler fernab befestigter Straßen</h3><p>Disjoint mit einem 200-m-Puffer findet Objekte außerhalb des Puffers.</p><p class="result"><strong>22</strong> Weiler jenseits von 200 m</p><a href="stories.html#s6" hreflang="en">Einstellungen und Ergebnis <span aria-hidden="true">→</span> <small lang="en">(EN)</small></a></div>
             </article>
         </div>
-        <a class="inline-cta" href="stories.html" hreflang="en">Alle zwölf Anwendungsfälle <span aria-hidden="true">→</span> <small lang="en">(EN)</small></a>
+        <a class="inline-cta" href="stories.html" hreflang="en">Alle sechzehn Anwendungsfälle <span aria-hidden="true">→</span> <small lang="en">(EN)</small></a>
     </div>
 </section>
 
