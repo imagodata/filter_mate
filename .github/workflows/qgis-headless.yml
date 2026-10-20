@@ -38,7 +38,8 @@ jobs:
         include:
           - image: release-3_22   # QGIS 3.22.16, GDAL 3.4.1, pdal 2.3 (no point clouds before 3.26)
           - image: release-3_28   # QGIS 3.28.15, GDAL 3.4.1, pdal 2.3
-          - image: release-3_34   # QGIS 3.34.5, GDAL 3.4.1, pdal 2.3
+          - image: 3.34.15-noble  # QGIS 3.34.15 on Ubuntu 24.04 with Python 3.12: QGIS < 3.36 bindings that allocate
+                                  # without the GIL segfault there (setReplyPreprocessor, #197); release-3_34 is 3.34.5 / Py 3.10
           - image: ltr-noble      # QGIS 3.44 on Ubuntu 24.04, GDAL 3.8.4
           - image: ltr            # QGIS 3.44 (Ubuntu 25.10)
           - image: ltr            # + pdal from conda-forge: the PDAL clipping code path
@@ -50,7 +51,7 @@ jobs:
     - uses: actions/checkout@v4
 
     - name: Free disk space
-      if: startsWith(matrix.image, 'release-')  # ~11 GB once extracted
+      if: startsWith(matrix.image, 'release-') || startsWith(matrix.image, '3.')  # ~11 GB once extracted
       run: |
         sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL
         df -h /
