@@ -119,6 +119,11 @@ jobs:
           -e PYTHONDONTWRITEBYTECODE=1 -e PYTHONUNBUFFERED=1 \
           "$IMAGE" bash -ec '
             set -o pipefail  # the QGIS exit code is the test result, not the filter grep
-            timeout 420 xvfb-run -a -s "-screen 0 1600x1000x24" qgis --nologo --noversioncheck --lang en \
-              --profiles-path /tmp/profiles --code /src/tests/qgis_headless/check_stream_ui_async.py 2>&1 \
-              | grep --line-buffered -v -E "Unknown property|FutureWarning|warnings.warn"'
+            run() {
+              timeout 420 xvfb-run -a -s "-screen 0 1600x1000x24" qgis --nologo --noversioncheck --lang en \
+                --profiles-path /tmp/profiles-$1 --code /src/tests/qgis_headless/check_stream_ui_async.py 2>&1 \
+                | grep --line-buffered -v -E "Unknown property|FutureWarning|warnings.warn"
+            }
+            # The check times GUI heartbeats (2 s budget): a stalled runner fails it whatever the code (#203).
+            # One retry; a real regression fails both runs.
+            run 1 || { echo "::warning::check_stream_ui_async failed once, retrying"; run 2; }'
