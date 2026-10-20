@@ -23,7 +23,9 @@ from qgis.PyQt.QtXml import QDomDocument
 
 from .server_filter_translation import ServerFilterError, _tr, prepare_server_subset
 from ...core.filter.server_filter_state import ACTIVE_SERVER_FILTERS
-from ...core.filter.server_transfer_policy import ASYNC, PRELOADED_PROVIDER_MIN, SYNC, transfer_mode  # noqa: F401
+from ...core.filter.server_transfer_policy import (  # noqa: F401
+    ASYNC, PRELOADED_PROVIDER_MIN, SYNC, server_filter_timeout_ms, transfer_mode,
+)
 from .source_capability_probe import capability_for_layer
 
 _ACTIVE = ACTIVE_SERVER_FILTERS
@@ -37,6 +39,13 @@ def transfer_mode_for_layer(layer):
         metadata = QgsProviderRegistry.instance().providerMetadata(layer.providerType())
         declares_parallel = metadata is not None and bool(metadata.providerCapabilities() & flag)
     return transfer_mode(layer.providerType(), Qgis.QGIS_VERSION_INT, declares_parallel)
+
+
+def configured_timeout_ms(layer):
+    """How long a server filter of ``layer`` may take: ``APP.OPTIONS.SERVER_FILTER`` (server_transfer_policy)."""
+    from ...config.config import ENV_VARS
+    from ...core.optimization.config_provider import get_app_options
+    return server_filter_timeout_ms(layer.providerType(), get_app_options(ENV_VARS).get('SERVER_FILTER'))
 
 
 def cancel_pending_server_subset(layer):
@@ -234,7 +243,7 @@ class ServerSubsetJob(QObject):
 
     finished = pyqtSignal(bool, str)
 
-    def __init__(self, layer, expression, timeout_ms=30000, *, trusted_restore=False):
+    def __init__(self, layer, expression, timeout_ms=None, *, trusted_restore=False):
         super().__init__()
         if QThread.currentThread() != layer.thread():
             raise ServerFilterError(_tr('Server filter installation must start on the layer thread.'))
@@ -259,7 +268,8 @@ class ServerSubsetJob(QObject):
         self.task = None
         self.timer = QTimer(self)
         self.timer.setSingleShot(True)
-        self.timer.setInterval(timeout_ms)
+        # None: the configured delay (60 s for WFS / OGC API, 30 s otherwise).
+        self.timer.setInterval(configured_timeout_ms(layer) if timeout_ms is None else timeout_ms)
         self.timer.timeout.connect(self.cancel)
 
     def start(self):
@@ -271,7 +281,7 @@ class ServerSubsetJob(QObject):
         if layer.isEditable():
             raise ServerFilterError(_tr('Finish editing the layer before applying a server filter.'))
         from ..public_api.operations import _background_tasks_running
-        if _background_tasks_running():
+        if _background_tasks_running(allow_finishing=True):
             raise ServerFilterError(_tr('A FilterMate task is still reading layers. Retry after it finishes.'))
         if transfer_mode_for_layer(layer) != ASYNC:
             raise ServerFilterError(_tr('This provider and QGIS version do not support verified worker creation. The previous filter is unchanged.'))
@@ -402,7 +412,7 @@ class ServerSubsetJob(QObject):
                 task.providers = []
 
 
-def apply_server_subset_wait(layer, subset, timeout_ms=30000, *, trusted_restore=False):
+def apply_server_subset_wait(layer, subset, timeout_ms=None, *, trusted_restore=False):
     """Compatibility bool API: await a worker with a responsive Qt event loop.
 
     New async consumers can use ServerSubsetJob directly. Existing task,
@@ -446,7 +456,7 @@ def apply_server_subset_sync(layer, subset):
         raise ServerFilterError('{}: {}'.format(name, _tr(
             'Server filter installation failed. The previous provider was already invalid and could not be restored.')))
     from ..public_api.operations import _background_tasks_running
-    if _background_tasks_running():
+    if _background_tasks_running(allow_finishing=True):
         raise ServerFilterError('{}: {}'.format(name, _tr('A FilterMate task is still reading layers. Retry after it finishes.')))
     from ...infrastructure.database.sql_utils import feature_picker_guard
     before = layer.subsetString()

@@ -1203,6 +1203,18 @@ def apply_remote_spatial_filter(builder, layer, source, names, buffer_value, buf
                 return refuse(outcome.reason)
             if complement:
                 return refuse('disjoint_partial')
+            if ((combine_operator or '').strip().upper() == 'AND NOT' and old_subset
+                    and not builder._is_geometric_filter(old_subset)):
+                # 2026-10-20: (old) AND NOT (partial keys) keeps the matching
+                # features never read. Same refusal as the API (VectorTargetJob).
+                # Without a previous filter written (_combine_with_old_subset),
+                # AND NOT replaces it, as combine_subset does: incomplete, not wrong.
+                from qgis.PyQt.QtCore import QCoreApplication
+                builder.last_error = QCoreApplication.translate(
+                    'VectorTargetJob', '{0} AND NOT would keep the features not read; the previous filter is kept.'
+                ).format(_remote_message(outcome.reason))
+                builder.user_warnings.append(builder.last_error)
+                return False
             if not outcome.keys:
                 builder.user_warnings.append(_remote_message(outcome.reason))
                 return refuse('partial_empty')

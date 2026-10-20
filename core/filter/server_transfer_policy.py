@@ -67,3 +67,42 @@ def transfer_mode(provider_key, qgis_version_int, declares_parallel):
         # the interface, so it has no such fallback.
         return SYNC
     return REFUSE
+
+
+# How long an ASYNC transfer may take before it is canceled, the previous
+# filter kept (ServerSubsetJob). 30 s was too short for the public
+# Géoplateforme WFS, which sometimes answered later (October 2026,
+# tests/qgis_headless/check_stream_e2e.py): WFS and OGC API Features wait
+# 60 s, the other providers 30 s. Configurable under
+# APP.OPTIONS.SERVER_FILTER, from 1 s to MAX_TIMEOUT_SECONDS; a malformed
+# or out-of-range value keeps the default.
+SERVER_FILTER_TIMEOUT_SECONDS = 30
+WEB_FEATURE_TIMEOUT_SECONDS = 60
+MAX_TIMEOUT_SECONDS = 600
+_WEB_FEATURE_PROVIDERS = ('wfs', 'oapif')
+
+
+def server_filter_timeout_ms(provider_key, section=None):
+    """Milliseconds a server filter of ``provider_key`` may take.
+
+    Args:
+        provider_key: ``layer.providerType()`` (any case).
+        section: ``APP.OPTIONS.SERVER_FILTER`` of the configuration, as
+            loaded (None when absent).
+
+    Returns:
+        int: its ``wfs_timeout_seconds`` (WFS, OGC API Features) or
+        ``timeout_seconds`` (other providers) in milliseconds; the default
+        when absent or malformed.
+    """
+    import math
+    if (provider_key or '').lower() in _WEB_FEATURE_PROVIDERS:
+        key, default = 'wfs_timeout_seconds', WEB_FEATURE_TIMEOUT_SECONDS
+    else:
+        key, default = 'timeout_seconds', SERVER_FILTER_TIMEOUT_SECONDS
+    entry = section.get(key) if isinstance(section, dict) else None
+    value = entry.get('value') if isinstance(entry, dict) else entry  # {"value": x, ...} or a plain x
+    if (isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value)
+            or not 1 <= value <= MAX_TIMEOUT_SECONDS):
+        value = default
+    return int(round(value * 1000))
