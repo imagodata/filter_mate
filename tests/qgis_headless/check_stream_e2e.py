@@ -752,7 +752,7 @@ def tiles_checks():
 # --- 5. project: undo / redo, favorite, .qgz ----------------------------------------
 
 def layer_state(layer, strict=True):
-    kind = get_layer_kind(layer)  # dock-side kind: the class-based ops.layer_kind does not see vector tiles
+    kind = get_layer_kind(layer)  # dock-side kind (ops.layer_kind gives the same for these layers)
     if kind is LayerKind.VECTOR_TILE:
         return ('tile', hashlib.sha1(tile_filters.style_xml(layer).encode()).hexdigest())
     if kind is LayerKind.RASTER:
