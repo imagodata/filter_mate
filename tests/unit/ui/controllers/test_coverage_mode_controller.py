@@ -536,6 +536,20 @@ class TestFailuresCacheAndTeardown:
         callbacks[0](types.SimpleNamespace(outcomes=self._outcomes(ctrl_module, ("v1", True, False)), error=""), True)
         assert ctrl_module._test_feedback.messages[-1] == ("info", "1 target(s) filtered")
 
+    def test_partial_web_service_target_is_a_warning(self, ctrl_module, layers, monkeypatch):
+        """2026-10-20: a WFS target read up to its budget is applied, with the bounded read's warning."""
+        controller = ctrl_module.CoverageModeController(_dock())
+        self._quiet(controller, monkeypatch)
+        callbacks = []
+        ctrl_module._test_service.run = lambda request, job, on_done=None: callbacks.append(on_done)
+        controller._start_task(object(), types.SimpleNamespace(layer_name="dem", layer_id="r1"))
+        outcomes = self._outcomes(ctrl_module, ("v1", True, False))
+        outcomes[0].message = "Partial result: the remote feature limit was reached."
+        outcomes[0].details["partial"] = True
+        callbacks[0](types.SimpleNamespace(outcomes=outcomes, error=""), True)
+        assert ctrl_module._test_feedback.messages[-1] == (
+            "warning", "1 target(s) filtered — Partial result: the remote feature limit was reached.")
+
     def test_failed_target_is_never_called_emptied(self, ctrl_module, layers):
         controller = ctrl_module.CoverageModeController(_dock())
         assert controller._emptied_text(self._outcomes(ctrl_module, ("r1", False, True), ("p1", True, False))) == ""

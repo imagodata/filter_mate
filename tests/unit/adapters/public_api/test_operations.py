@@ -93,11 +93,15 @@ class TestOneAtATime:
 
 
 class _Task:
-    def __init__(self, description):
+    def __init__(self, description, status=2):  # QgsTask.TaskStatus.Running
         self._description = description
+        self._status = status
 
     def description(self):
         return self._description
+
+    def status(self):
+        return self._status
 
 
 class TestDockTasksDetected:
@@ -111,6 +115,8 @@ class TestDockTasksDetected:
         qgis_core = sys.modules["qgis.core"]
         monkeypatch.setattr(qgis_core, "QgsApplication", MagicMock(taskManager=MagicMock(return_value=manager)),
                             raising=False)
+        monkeypatch.setattr(qgis_core, "QgsTask", types.SimpleNamespace(
+            TaskStatus=types.SimpleNamespace(Complete=3, Terminated=4)), raising=False)
         monkeypatch.setattr(service_mod, "_service", None)
         return active
 
@@ -138,6 +144,18 @@ class TestDockTasksDetected:
     def test_other_plugin_task_is_ignored(self, tasks):
         tasks.append(_Task("Rendering"))
         assert operations.busy_reason() == ""
+
+    @pytest.mark.parametrize("status, busy", [(1, True), (2, True), (3, False), (4, False)])
+    def test_a_finishing_task_applies_its_own_filters(self, tasks, monkeypatch, status, busy):
+        # QGIS lists a task in activeTasks() while its finished() runs on the
+        # main thread: the dock then applies the server subsets of that very
+        # task, which a busy guard must not refuse (2026-10-20).
+        monkeypatch.setattr(sys.modules["qgis.core"], "QgsTask", types.SimpleNamespace(
+            TaskStatus=types.SimpleNamespace(Complete=3, Terminated=4)), raising=False)
+        task = type("FilterEngineTask", (_Task,), {"status": lambda self: status})("Filtering data")
+        tasks.append(task)
+        assert operations._background_tasks_running() is busy
+        assert (operations.busy_reason() == operations.BACKGROUND_BUSY) is busy
 
 
 # ---------------------------------------------------------------------------
@@ -193,11 +211,35 @@ def qt_wait_loop(monkeypatch):
             if self in timers:
                 timers.remove(self)
 
+    qthreads = []
+
+    class Thread:
+        """QThread: ``run`` in a thread of its own, ``wait`` joins it."""
+
+        def start(self):
+            self._thread = threading.Thread(target=self._run)
+            self._thread.start()
+
+        def _run(self):
+            qthreads.append(threading.get_ident())
+            self.run()
+
+        def wait(self, *args):
+            self._thread.join()
+            return True
+
+        def isRunning(self):
+            return self._thread.is_alive()
+
+        def isFinished(self):
+            return not self._thread.is_alive()
+
     qt = sys.modules["qgis.PyQt.QtCore"]
     monkeypatch.setattr(qt, "QEventLoop", Loop, raising=False)
     monkeypatch.setattr(qt, "QTimer", Timer, raising=False)
+    monkeypatch.setattr(qt, "QThread", Thread, raising=False)
     monkeypatch.setattr(qt, "Qt", types.SimpleNamespace(DirectConnection=1), raising=False)
-    yield types.SimpleNamespace(timers=timers, main_thread=threading.get_ident())
+    yield types.SimpleNamespace(timers=timers, main_thread=threading.get_ident(), qthreads=qthreads)
     assert not timers, "poll timer leaked"
 
 
@@ -609,6 +651,10 @@ class TestWorkerExecution:
         assert operations._run_task(_Service(task), None, None, feedback) is task
         assert threads["compute"] != qt_wait_loop.main_thread
         assert threads["apply"] == qt_wait_loop.main_thread
+        # 2026-10-20: a QThread, not a Python thread: the WCS provider starts Qt
+        # timers in the reading thread ("Timers can only be used with threads
+        # started with QThread", then a native crash in QGIS 3.44).
+        assert qt_wait_loop.qthreads == [threads["compute"]]
         if feedback is not None:
             assert threads["progress"] and set(threads["progress"]) == {qt_wait_loop.main_thread}
             assert feedback.progress[-1] == 100.0
@@ -659,6 +705,25 @@ class TestWorkerExecution:
             operations._run_task(_Service(task), None, None, feedback)
         assert applied == [(False, qt_wait_loop.main_thread)]
         assert not feedback.canceled.slots and not task.progressChanged.slots
+
+
+class TestCancelWhileApplying:
+    def test_cancel_during_apply_keeps_the_applied_targets(self, vector_world):
+        """Review 2026-10-20: applying waits for server filters in nested loops; a Cancel there
+        cannot undo what is applied, the report must not say "canceled" with nothing done."""
+        feedback = _Feedback()
+        task = _CrossTask("S", ["T"])
+        original_apply = task.apply_results
+
+        def apply(result):
+            feedback.cancel()  # Processing's Cancel button, clicked while a WFS filter installs
+            original_apply(result)
+
+        task.apply_results = apply
+        report = operations.cross_filter(vector_world.source, ["batiment"], project=vector_world.project,
+                                         service=_Service(task), feedback=feedback)
+        assert not task.isCanceled()
+        assert report.done == {"T": "batiment"} and not report.error
 
 
 class TestCaptureDetails:
@@ -756,7 +821,10 @@ class TestWorkerServiceLease:
             return True
 
         def apply(result):
-            assert task in service._running
+            # 2026-10-20: no longer "reading" while its results are applied: applying
+            # a WFS key list starts a server filter, refused while a FilterMate task reads.
+            assert task not in service._running
+            assert not operations._background_tasks_running()
             applied.append(result)
             if failure == "apply":
                 raise RuntimeError("apply failed")
@@ -877,3 +945,104 @@ class TestGuiReentry:
         assert api_operation() is task
         warnings.pushWarning.assert_called_once()
         assert not operations._RUNNING
+
+
+class TestVectorTiles:
+    """2026-10-20: the class-based kind saw no vector tiles, the API skipped them as unfilterable."""
+
+    @pytest.fixture
+    def tiles(self, idle, monkeypatch):
+        tile_class = type("QgsVectorTileLayer", (_Layer,), {})
+        layers = types.SimpleNamespace(tiles=tile_class("V", "plan_ign"), zone=_Layer("Z", "zone"))
+        layers.project = _Project(layers.tiles, layers.zone)
+        layers.project.mapLayers = lambda: dict(layers.project.layers)
+        monkeypatch.setattr(operations, "_install_registry", lambda project: None)
+        return layers
+
+    def test_class_based_kind_of_a_tile_layer(self, tiles):
+        assert operations.layer_kind(tiles.tiles) is operations.LayerKind.VECTOR_TILE
+
+    def test_tiles_are_a_target(self, tiles):
+        report = operations.OperationReport()
+        specs, kept = operations._project_targets([tiles.tiles], tiles.project, "Z", report)
+        assert [(spec.layer_id, spec.kind) for spec in specs] == [("V", operations.LayerKind.VECTOR_TILE)]
+        assert kept == [tiles.tiles] and not report.skipped
+
+    def test_tiles_are_never_a_source(self, tiles, monkeypatch):
+        monkeypatch.setattr(operations, "_source_job", MagicMock(side_effect=AssertionError("tile source job")))
+        report = operations.cross_filter(tiles.tiles, [tiles.zone], project=tiles.project)
+        assert "filter targets only" in report.error and not report.done
+
+    def test_clear_filters_hands_tiles_to_the_service(self, tiles):
+        service = MagicMock()
+        service.unfilter.return_value = ["V"]
+        report = operations.clear_filters([tiles.tiles], project=tiles.project, service=service)
+        assert service.unfilter.call_args.args[2] == {"V": operations.LayerKind.VECTOR_TILE}
+        assert report.done == {"V": "plan_ign"}
+
+    def test_filter_state_lists_a_filtered_tile_layer(self, tiles, monkeypatch):
+        snapshots = types.ModuleType(f"{_PKG}.adapters.qgis.coverage_layers.snapshots")
+        snapshot = types.SimpleNamespace(subset="", derived=True, tile_filter="intersects($geometry, @zone)")
+        snapshots.take_snapshot = lambda layer, kind: (snapshot if kind is operations.LayerKind.VECTOR_TILE
+                                                       else types.SimpleNamespace(subset="", derived=False))
+        monkeypatch.setitem(sys.modules, snapshots.__name__, snapshots)
+        monkeypatch.setattr(sys.modules["qgis.core"], "QgsVectorLayer", type("QgsVectorLayer", (), {}), raising=False)
+        rows = operations.filter_state(project=tiles.project)
+        assert rows == [{"id": "V", "name": "plan_ign", "kind": "vector_tile",
+                         "subset": "intersects($geometry, @zone)", "derived": False, "source": ""}]
+
+
+class TestFavoriteClips:
+    """2026-10-20: a favorite's WCS clip ran on the main thread, failed, and was reported done."""
+
+    @pytest.fixture
+    def favorite_world(self, idle, monkeypatch):
+        dem = _Layer("DEM", "mnt_wcs")
+        project = _Project(dem)
+        project.mapLayers = lambda: dict(project.layers)
+        monkeypatch.setattr(operations, "_install_registry", lambda project: None)
+        signature = types.ModuleType(f"{_PKG}.core.domain.layer_signature")
+        signature.LayerSignature = types.SimpleNamespace(compute=lambda layer: layer.id())
+        monkeypatch.setitem(sys.modules, signature.__name__, signature)
+        favorite = types.SimpleNamespace(id="f1", name="toulouse", expression="", remote_layers={}, layer_id=None,
+                                         layer_name=None, spatial_config={"coverage_layers": [{"layer_id": "DEM"}]})
+        monkeypatch.setattr(operations, "find_favorite", lambda name, service, project: favorite)
+        bridge = types.ModuleType(f"{_PKG}.adapters.qgis.coverage_layers.favorites_bridge")
+        bridge.COVERAGE_KEY = "coverage_layers"
+        calls = []
+
+        def apply(entries, service=None, project=None, synchronous=False, kind_of=None, applied=None, **hooks):
+            # The real bridge: with ``run`` the clip is computed and waited for, without it queued and counted.
+            calls.append(dict(synchronous=synchronous, hooks=sorted(hooks)))
+            request = types.SimpleNamespace(targets=(types.SimpleNamespace(layer_id="DEM"),))
+            reason = hooks["run"]("bridge service", request, "clip job") if "run" in hooks else ""
+            if reason:
+                hooks["failed"]["DEM"] = reason
+                return 0
+            applied.append("DEM")
+            return 1
+
+        bridge.apply = apply
+        monkeypatch.setitem(sys.modules, bridge.__name__, bridge)
+        return types.SimpleNamespace(project=project, calls=calls)
+
+    @staticmethod
+    def _task(success, message=""):
+        return types.SimpleNamespace(error="", isCanceled=lambda: False, outcomes=[
+            types.SimpleNamespace(layer_id="DEM", success=success, message=message)])
+
+    def test_failed_clip_is_a_failure(self, favorite_world, monkeypatch):
+        ran = []
+        monkeypatch.setattr(operations, "_run_task", lambda service, request, job, feedback=None: (
+            ran.append((service, job)) or self._task(False, "remote raster target must run in a worker thread")))
+        report = operations.apply_favorite("toulouse", service=MagicMock(), project=favorite_world.project)
+        assert ran == [("bridge service", "clip job")]
+        assert "DEM" not in report.done
+        assert report.failed == {"mnt_wcs": "remote raster target must run in a worker thread"}
+        assert "coverage_layers_missing" not in report.details
+
+    def test_clip_runs_in_the_api_worker(self, favorite_world, monkeypatch):
+        monkeypatch.setattr(operations, "_run_task", lambda service, request, job, feedback=None: self._task(True))
+        report = operations.apply_favorite("toulouse", service=MagicMock(), project=favorite_world.project)
+        assert report.ok and report.done == {"DEM": "mnt_wcs"}
+        assert favorite_world.calls == [dict(synchronous=False, hooks=["canceled", "failed", "run"])]

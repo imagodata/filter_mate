@@ -199,7 +199,14 @@ class CrossFilterService:
             kind = kinds.get(layer_id, LayerKind.OTHER)
             if layer is None or kind is LayerKind.OTHER:
                 continue
-            before = take_snapshot(layer, kind)
+            try:
+                before = take_snapshot(layer, kind)
+            except ValueError as exc:
+                if kind is not LayerKind.VECTOR_TILE:
+                    raise
+                # A tile style FilterMate cannot filter: never filtered by it either.
+                logger.info(f"[FM5] '{layer.name()}' not cleared: {exc}")
+                continue
             original = base_snapshot(before)
             if original.same_state(before):
                 continue
