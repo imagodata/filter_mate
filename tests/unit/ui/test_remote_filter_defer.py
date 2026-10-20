@@ -302,12 +302,12 @@ def test_a_filter_replayed_without_launch_rechecks_the_service_keys():
     try:
         namespace = {'logger': MagicMock(), 'QCoreApplication': MagicMock()}
         exec(compile(ast.Module(body=[node], type_ignores=[]), str(path), 'exec'), namespace)
-        controller = SimpleNamespace(remote_filter_refused=MagicMock(return_value=True))
+        controller = SimpleNamespace(remote_filter_blocked=MagicMock(return_value=True))
         dock = SimpleNamespace(get_current_features=lambda: ([MagicMock()], '"id" IN (NULL)'),
                                _exploring_ctrl=controller, current_exploring_groupbox='single_selection')
         with pytest.raises(ValueError):
             MethodType(namespace['get_and_validate_features'], SimpleNamespace(_dockwidget=dock))('filter')
-        controller.remote_filter_refused.assert_called_once_with(read=True)
+        controller.remote_filter_blocked.assert_called_once_with()
     finally:
         for name, module in saved.items():
             if module is None:

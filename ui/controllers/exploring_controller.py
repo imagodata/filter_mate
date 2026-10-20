@@ -577,16 +577,17 @@ class ExploringController(BaseController, LayerSelectionMixin):
 
         - a multiple selection must be keyed by the stable key, or by a name
           trusted as unique on a service when the provider declares no key
-          (core.domain.stable_key; an older project's registered "id");
-          rows keyed by feature ids or another field (a key stored by an
-          older project) could keep other features;
+          (core.domain.stable_key; an older project's registered "id"), or
+          by feature ids when the service has a stable key (the list is then
+          built from the read features); a list keyed by another field (a
+          key stored by an older project) could keep other features; no
+          checked row may have a NULL key (the list shows it as text);
         - a single selection needs a stable key field;
         - ``read``: once the selection is read, none of its features may
           have a NULL key (``"id" IN (NULL)`` keeps nothing).
 
         Reading, zooming and identifying the selection stay possible. Called
-        by launchTaskEvent before the read and after it, and by the task
-        builder (a filter replayed without launchTaskEvent).
+        by launchTaskEvent before the read and after it (``read``).
         """
         from ...adapters.qgis.source_capability_probe import capability_for_layer, stable_key_for_layer
         from ...core.domain.stable_key import NAMED, key_candidates
@@ -600,18 +601,26 @@ class ExploringController(BaseController, LayerSelectionMixin):
         if capability is None or not capability.is_remote_service:
             return False
         key = stable_key_for_layer(layer, scan=False)
+        name = key.name
         if mode == 'multiple_selection':
             widget = dw.widgets.get('EXPLORING', {}).get('MULTIPLE_SELECTION_FEATURES', {}).get('WIDGET')
-            if widget is None or not widget.checkedItems():
+            checked = widget.checkedItems() if widget is not None else []
+            if not checked:
                 return False
-            name = self._remote_row_key(layer)
+            row_key = self._remote_row_key(layer)
             names = [field.name() for field in layer.fields()]
-            keyed = name is not None and key.is_field and (
-                name == key.name or (key.origin == NAMED and name in key_candidates(names, local=False)))
+            if row_key is None:
+                keyed = key.is_field
+            else:
+                name = row_key
+                keyed = key.is_field and (
+                    row_key == key.name or (key.origin == NAMED and row_key in key_candidates(names, local=False)))
+            # custom_widgets._row_from_feature lists a NULL key as text ('NULL', or 'None' with PyQt6).
+            keyed = keyed and not any(is_null_value(item[1]) or str(item[1]) in ('NULL', 'None')
+                                      for item in checked if len(item) > 1)
         else:
             if self._remote_single_fid(layer) is None:
                 return False
-            name = key.name
             keyed = key.is_field
         if keyed and read:
             cached = getattr(self, '_remote_selection_result', None)
@@ -626,6 +635,21 @@ class ExploringController(BaseController, LayerSelectionMixin):
         if not keyed:
             show_warning(dw.tr("This service has no stable key for the selection."), dw.tr("Selection"))
         return not keyed
+
+    def remote_filter_blocked(self):
+        """Whether a filter built outside launchTaskEvent must stop on this service selection.
+
+        The task builder runs after get_current_features (a filter replayed
+        by the application): the selection is refused, still loading (its
+        empty result would filter on every feature) or not sendable.
+        """
+        from ...adapters.qgis.source_capability_probe import counts_cheaply
+        layer = self._dockwidget.current_layer
+        if layer is None or counts_cheaply(layer):
+            return False
+        if getattr(self, '_remote_selection_refused', False) or getattr(self, '_remote_selection_waiting', False):
+            return True
+        return self.remote_filter_refused(read=True)
 
     def _remote_row_key(self, layer):
         """The field the multiple selection rows are keyed by, None for feature ids.

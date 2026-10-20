@@ -18,7 +18,7 @@ _MODULE = Path(__file__).resolve().parents[4] / "ui" / "controllers" / "explorin
 _METHODS = ('_read_mode', '_remote_single_fid', '_remote_ui_revision', '_empty_remote_selection',
             '_remote_selection_plan', '_remote_row_key', '_remote_features', '_remote_zoom_request',
             '_zoom_canvas_to', '_queue_remote_zoom', 'identify_remote_selection',
-            '_invalidate_remote_selection_cache', 'remote_filter_refused')
+            '_invalidate_remote_selection_cache', 'remote_filter_refused', 'remote_filter_blocked')
 
 
 class Request:
@@ -285,10 +285,36 @@ def test_a_service_without_stable_key_refuses_a_multiple_selection_filter(monkey
     assert not env.warning.called
 
 
-def test_a_service_list_keyed_by_feature_id_refuses_its_filter(monkeypatch):
-    # Even with a stable key: its values come from the read features, which may hold NULL keys.
+def test_a_service_list_keyed_by_feature_id_filters_with_its_stable_key(monkeypatch):
     env = _setup(monkeypatch, mode='multiple_selection', checked=[('n', 1), ('m', 2)], row_key='$id')
+    assert env.controller.remote_filter_refused() is False
+    env.controller._remote_features()
+    env.submit.call_args.args[5](_submitted_request(env))
+    assert env.controller._remote_selection_result[2] == '"gml_id" IN (1, 2)'
+    assert env.controller.remote_filter_refused(read=True) is False
+
+
+def test_a_service_list_keyed_by_feature_id_with_a_null_key_refuses_its_filter(monkeypatch):
+    env = _setup(monkeypatch, mode='multiple_selection', checked=[('n', 1), ('m', 2)], row_key='$id')
+    env.layer.features = [Feature(1), Feature(2, key=None)]
+    env.controller._remote_features()
+    env.submit.call_args.args[5](_submitted_request(env))
+    assert env.controller.remote_filter_refused(read=True) is True
+
+
+@pytest.mark.parametrize('null', [None, 'NULL', 'None'])
+def test_a_checked_row_with_a_null_key_refuses_the_filter_before_reading(monkeypatch, null):
+    # "gml_id" IN (NULL) keeps nothing: the list shows a NULL key as text.
+    env = _setup(monkeypatch, mode='multiple_selection', checked=[('n', 1), ('m', null)])
     assert env.controller.remote_filter_refused() is True
+    env.submit.assert_not_called()
+
+
+@pytest.mark.parametrize('flag', ['_remote_selection_refused', '_remote_selection_waiting'])
+def test_a_replayed_filter_stops_on_a_refused_or_loading_service_selection(monkeypatch, flag):
+    env = _setup(monkeypatch, custom='"id" > 1')
+    setattr(env.controller, flag, True)
+    assert env.controller.remote_filter_blocked() is True
 
 
 def test_a_read_service_selection_with_a_null_key_refuses_its_filter(monkeypatch):

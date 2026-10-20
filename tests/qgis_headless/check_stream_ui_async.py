@@ -378,7 +378,9 @@ def check_review_fixes(dock, remote, local, service):
         del launches[:]
         dock.launchTaskEvent(False, 'filter')
         waiting = not launches and not idle('_selection_query')
-        remote.reload()   # dataChanged cancels the selection read
+        # dataChanged (an edit, a reload...) cancels the selection read. Emitted, not remote.reload():
+        # reloading an OGC API provider while a worker opens an iterator on it crashes QGIS 3.28.
+        remote.dataChanged.emit()
         told = wait_until(lambda: 'not launched' in bar_text(), 10)
         print('M11 waiting={} told={} launches={} bar={!r}'.format(waiting, told, launches, bar_text()[:300]),
               flush=True)
