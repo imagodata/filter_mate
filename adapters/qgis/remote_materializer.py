@@ -7,6 +7,7 @@ a layer to the project or writes a scratch file.
 """
 
 import math
+import os
 import re
 import sys
 import threading
@@ -52,31 +53,39 @@ def mark_partial_result(layer, partial, expression):
     layer._filtermate_partial_subset = expression if partial else None
 
 
-def reply_preprocessor_is_safe(qgis_version_int, python_version):
-    """Whether calling QgsNetworkAccessManager.setReplyPreprocessor cannot crash.
+def reply_preprocessor_is_safe(qgis_version_int, python_version, debug_allocator=False):
+    """Whether calling QgsNetworkAccessManager.setReplyPreprocessor does not crash.
 
     Until QGIS 3.36.0 its binding converts the returned id to a Python string
     after releasing the GIL. Python 3.12 finds its object allocator through
     the thread state, null at that point, so the registration itself
-    segfaults on any thread (QGIS 3.34.15 on Ubuntu 24.04). Older Pythons
-    use a global allocator there. QGIS 3.36.0 converts the id under the GIL.
+    segfaults on any thread (QGIS 3.34.15 on Ubuntu 24.04). Python's
+    allocator debug hooks abort there under any version. Older Pythons only
+    race on their global allocator. QGIS 3.36.0 converts the id under the GIL.
 
     Args:
         qgis_version_int: Qgis.QGIS_VERSION_INT, e.g. 33415 for 3.34.15.
         python_version: The running interpreter's sys.version_info.
+        debug_allocator: Python's allocator debug hooks are installed.
 
     Returns:
-        False when the registration would crash QGIS.
+        False when the registration crashes QGIS.
     """
-    return qgis_version_int >= 33600 or tuple(python_version[:2]) < (3, 12)
+    if qgis_version_int >= 33600:
+        return True
+    return tuple(python_version[:2]) < (3, 12) and not debug_allocator
 
 
 def reply_preprocessor_available():
-    """The reply observer exists and registering it cannot crash QGIS."""
+    """The reply observer exists and registering it does not crash QGIS."""
     from qgis.core import Qgis, QgsNetworkAccessManager
 
+    # Development mode, PYTHONMALLOC=*debug and a debug CPython install the hooks.
+    debug_allocator = bool(
+        sys.flags.dev_mode or "debug" in os.environ.get("PYTHONMALLOC", "") or hasattr(sys, "gettotalrefcount")
+    )
     return hasattr(QgsNetworkAccessManager, "setReplyPreprocessor") and reply_preprocessor_is_safe(
-        Qgis.QGIS_VERSION_INT, sys.version_info
+        Qgis.QGIS_VERSION_INT, sys.version_info, debug_allocator
     )
 
 
@@ -303,6 +312,10 @@ def read_bounded_features(source, request, limits, feedback, consume, key, sourc
     from qgis.PyQt.QtNetwork import QNetworkReply, QNetworkRequest
 
     require_worker()
+    if provider_key in _BBOX_PROVIDERS and not supports_reply_validation():
+        # Without the reply observer an HTTP-200 exception reads as a clean
+        # exhaustion: never call such a service read complete.
+        return MaterializationOutcome(reason="unverified_filter")
     own_feedback = QgsFeedback()
     stop = threading.Event()
     closing = threading.Event()
@@ -375,8 +388,8 @@ def read_bounded_features(source, request, limits, feedback, consume, key, sourc
     # Since QGIS 3.26 this callback runs on the actual downloader thread,
     # before the first byte. It catches Qt6 WFS errors even if the provider
     # has not yet delivered its queued error signal to its owning thread.
-    # Service callers refuse earlier when it is unavailable; a memory source
-    # needs no reply observer.
+    # Service reads were refused above when it is unavailable; a memory
+    # source needs no reply observer.
     preprocessor = None
     if reply_preprocessor_available():
 
