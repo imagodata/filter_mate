@@ -10,6 +10,9 @@ name: QGIS headless
 #   docker run --rm -v "$PWD:/src:ro" -e FM_FIXTURES=/tmp/fm qgis/qgis:ltr bash -c \
 #     'python3 /src/tests/qgis_headless/make_fixtures.py /tmp/fm && xvfb-run -a qgis --nologo --noversioncheck \
 #      --profiles-path /tmp/profiles --code /src/tests/qgis_headless/run_gui_smoke.py'
+# The streaming sources checks (lots A to E) serve their own loopback HTTP fixtures:
+#   docker run --rm -v "$PWD:/src:ro" -e QT_QPA_PLATFORM=offscreen qgis/qgis:ltr \
+#     python3 /src/tests/qgis_headless/check_stream_vector_spatial.py   (FM_STREAM_PUBLIC=1: also the public services)
 
 on:
   push:
@@ -22,7 +25,7 @@ jobs:
   smoke:
     name: qgis/qgis:${{ matrix.image }}${{ matrix.pdal && ' + pdal' || '' }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45  # two smoke tests, PDAL installed twice on the + pdal entry
+    timeout-minutes: 60  # two smoke tests, the streaming checks, PDAL installed three times on the + pdal entry
     # The job found, and every entry now guards against (October 2026):
     #   - QGIS < 3.34.2 has QAction / QShortcut in QtWidgets only (tests/test_no_qtwidgets_relocated_symbols.py);
     #   - GDAL < 3.9 has no cutlineWKT / cutlineSRS (adapters/qgis/coverage_layers/gdal_warp.py);
@@ -35,7 +38,8 @@ jobs:
         include:
           - image: release-3_22   # QGIS 3.22.16, GDAL 3.4.1, pdal 2.3 (no point clouds before 3.26)
           - image: release-3_28   # QGIS 3.28.15, GDAL 3.4.1, pdal 2.3
-          - image: release-3_34   # QGIS 3.34.5, GDAL 3.4.1, pdal 2.3
+          - image: 3.34.15-noble  # QGIS 3.34.15 on Ubuntu 24.04 with Python 3.12: QGIS < 3.36 bindings that allocate
+                                  # without the GIL segfault there (setReplyPreprocessor, #197); release-3_34 is 3.34.5 / Py 3.10
           - image: ltr-noble      # QGIS 3.44 on Ubuntu 24.04, GDAL 3.8.4
           - image: ltr            # QGIS 3.44 (Ubuntu 25.10)
           - image: ltr            # + pdal from conda-forge: the PDAL clipping code path
@@ -47,7 +51,7 @@ jobs:
     - uses: actions/checkout@v4
 
     - name: Free disk space
-      if: startsWith(matrix.image, 'release-')  # ~11 GB once extracted
+      if: startsWith(matrix.image, 'release-') || startsWith(matrix.image, '3.')  # ~11 GB once extracted
       run: |
         sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL
         df -h /
@@ -84,3 +88,46 @@ jobs:
               --profiles-path /tmp/profiles --code /src/tests/qgis_headless/run_gui_smoke.py 2>&1 \
               | grep --line-buffered -v -E "Unknown property|FutureWarning|warnings.warn"
             timeout 120 xvfb-run -a python3 /src/tests/qgis_headless/run_combo_pick_check.py'
+
+    - name: Streaming sources checks (local HTTP fixtures, no public service)
+      if: ${{ !cancelled() }}
+      env:
+        IMAGE: qgis/qgis:${{ matrix.image }}
+        INSTALL_PDAL: ${{ matrix.pdal == true }}
+      run: |
+        # Lots A to E of docs/internal/plans/V5_STREAMING: WFS / OGC API / ArcGIS filters, bounded remote
+        # spatial filters, streaming rasters, vector tiles and remote point clouds. Each script serves its own
+        # loopback HTTP fixture; public services stay opt-in (FM_STREAM_PUBLIC=1), never in CI.
+        docker run --rm -v "$GITHUB_WORKSPACE:/src:ro" \
+          -e QT_QPA_PLATFORM=offscreen -e PYTHONDONTWRITEBYTECODE=1 -e PYTHONUNBUFFERED=1 -e INSTALL_PDAL \
+          "$IMAGE" bash -c '
+            if [ "$INSTALL_PDAL" = "true" ]; then bash /src/tests/qgis_headless/install_pdal.sh || exit 1; fi
+            failed=""
+            for check in vector_filters versions vector_spatial api_sources raster raster_automation d_materialization tiles_pointclouds; do
+              echo "::group::check_stream_$check"
+              timeout 600 python3 /src/tests/qgis_headless/check_stream_$check.py || failed="$failed $check"
+              echo "::endgroup::"
+            done
+            if [ -n "$failed" ]; then echo "::error::streaming checks failed:$failed"; exit 1; fi'
+
+    - name: Streaming dock check (service reads off the GUI thread, Xvfb)
+      if: ${{ !cancelled() }}
+      env:
+        IMAGE: qgis/qgis:${{ matrix.image }}
+      run: |
+        # The nightly image is a debug build that prints a demangled backtrace (c++filt) for every Qt
+        # warning: the dock's stylesheet warnings then cost seconds per action. Mask c++filt there.
+        extra=""
+        if [ "$IMAGE" = "qgis/qgis:latest" ]; then extra="-v /dev/null:/usr/bin/c++filt:ro"; fi
+        docker run --rm -v "$GITHUB_WORKSPACE:/src:ro" $extra \
+          -e PYTHONDONTWRITEBYTECODE=1 -e PYTHONUNBUFFERED=1 \
+          "$IMAGE" bash -ec '
+            set -o pipefail  # the QGIS exit code is the test result, not the filter grep
+            run() {
+              timeout 420 xvfb-run -a -s "-screen 0 1600x1000x24" qgis --nologo --noversioncheck --lang en \
+                --profiles-path /tmp/profiles-$1 --code /src/tests/qgis_headless/check_stream_ui_async.py 2>&1 \
+                | grep --line-buffered -v -E "Unknown property|FutureWarning|warnings.warn"
+            }
+            # The check times GUI heartbeats (2 s budget): a stalled runner fails it whatever the code (#203).
+            # One retry; a real regression fails both runs.
+            run 1 || { echo "::warning::check_stream_ui_async failed once, retrying"; run 2; }'
