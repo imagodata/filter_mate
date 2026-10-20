@@ -2,7 +2,9 @@
 
 All notable changes to FilterMate will be documented in this file.
 
-## [Unreleased]
+## [5.0.0] - 2026-10-20
+
+Final 5.0.0 build: everything merged on `main` since the first 5.0.0 build (tag of 2026-10-15, reproduced below) is part of this release: streaming sources, the raster pipette and BANDS block, point cloud and vector rails, hybrid targets, the MCP server, and the fixes listed here.
 
 ### Streaming sources: web services and remote files
 
@@ -86,7 +88,7 @@ every QGIS image of the CI against local HTTP fixtures, and against public servi
 - **Translated combine operators**: NON / NICHT / NO gave `( old ) NOT ( new )` (syntax error) and translations such as EN, OF, I, LUB, OG, ELLER reached the SQL as is; they now map to AND / OR / AND NOT, an unknown value to AND.
 - **QGIS expressions converted to PostgreSQL / SpatiaLite**: `::numeric` is added only against a number (`"nature" <> 'Route'`, dates and `now()` failed), both columns of `"x" - "y" > 0` are cast; `length("nom")` stays the string length (only the length of a geometry becomes `ST_Length`); the layer's geometry column is used instead of `geometry`; `= 75` is not cast for a text column (`'2A'`); `ILIKE '%l''ariège%'` and `$area` work on SpatiaLite. In buffer expressions `"buffer_m"` no longer becomes `"ST_Buffer_m"` (nor `"area_ha"` `"ST_Area_ha"`).
 
-## [5.0.0] - 2026-10-15
+## [5.0.0 first build] - 2026-10-15
 
 FilterMate 5 filters raster and LiDAR point cloud layers as well as vector layers: EXPLORING selects on the current layer whatever its kind, FILTERING relates that selection to layers of any kind, EXPORTING writes each kind. Raster and point cloud support is on by default and can be switched off in the Configuration tab (`APP.OPTIONS.RASTER.enabled`, `APP.OPTIONS.POINT_CLOUD.enabled`). Requirements unchanged: QGIS 3.22 or later (point clouds from 3.26), Qt5 or Qt6; PDAL 2.4 or later is optional (height above a DTM, direct COPC writing). Every release is now tested in CI on QGIS 3.22, 3.28, 3.34, 3.44 and 4.2, with Processing and with the dock itself.
 
