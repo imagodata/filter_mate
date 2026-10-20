@@ -674,7 +674,9 @@ def materialize(layer, rect, server_expression, local_expression, limits=None, f
         if snapshot.provider == "oapif" and snapshot.subset:
             subset_matches = _local_predicate(snapshot.subset, snapshot.fields)
             exact_matches = matches
-            matches = lambda feature: subset_matches(feature) and exact_matches(feature)
+
+            def matches(feature):
+                return subset_matches(feature) and exact_matches(feature)
             snapshot = unfiltered_snapshot(layer)
     except ValueError:
         return MaterializationOutcome(reason="invalid_expression")
