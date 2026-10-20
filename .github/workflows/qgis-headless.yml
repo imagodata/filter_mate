@@ -115,7 +115,11 @@ jobs:
       env:
         IMAGE: qgis/qgis:${{ matrix.image }}
       run: |
-        docker run --rm -v "$GITHUB_WORKSPACE:/src:ro" \
+        # The nightly image is a debug build that prints a demangled backtrace (c++filt) for every Qt
+        # warning: the dock's stylesheet warnings then cost seconds per action. Mask c++filt there.
+        extra=""
+        if [ "$IMAGE" = "qgis/qgis:latest" ]; then extra="-v /dev/null:/usr/bin/c++filt:ro"; fi
+        docker run --rm -v "$GITHUB_WORKSPACE:/src:ro" $extra \
           -e PYTHONDONTWRITEBYTECODE=1 -e PYTHONUNBUFFERED=1 \
           "$IMAGE" bash -ec '
             set -o pipefail  # the QGIS exit code is the test result, not the filter grep
