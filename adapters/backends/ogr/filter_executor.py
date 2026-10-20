@@ -1063,7 +1063,8 @@ def copy_remote_source(layer, params=None, feedback=None, selected_fids=None, ex
         from ...qgis.remote_materializer import _local_predicate
         matches = _local_predicate(expression, layer.fields())
     else:
-        matches = lambda feature: True
+        def matches(feature):
+            return True
     features = []
     received_fids = set()
 
@@ -1252,7 +1253,9 @@ def apply_remote_spatial_filter(builder, layer, source, names, buffer_value, buf
         try:
             if validator is None:
                 from ...qgis.server_filter_translation import prepare_server_subset
-                validator = lambda target, expression: bool(prepare_server_subset(target, expression))
+
+                def validator(target, expression):
+                    return bool(prepare_server_subset(target, expression))
             verified = callable(validator) and validator(layer, final) is True
         except Exception:
             verified = False

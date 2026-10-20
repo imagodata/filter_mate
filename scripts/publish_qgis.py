@@ -105,9 +105,21 @@ def secrets_problems(report):
             for name, items in report.get('results', {}).items() for item in items]
 
 
+# plugins.qgis.org runs flake8 on the archive without the repository's .flake8; these are the repository's own
+# ignores (.flake8), so what is left is what the site would report (E731, F401...).
+FLAKE8_ARGS = ['--isolated', '--max-line-length=200',
+               '--ignore=E701,E702,E704,E402,E117,E123,E125,E127,E128,W503,W504,F824,E241,E261',
+               '--per-file-ignores=__init__.py:F401 filter_mate.py:F403']
+
+
+def flake8_problems(output):
+    """Lines of a default-format flake8 report (``path:line:col: CODE message``) as problems."""
+    return [f'flake8 {line}' for line in output.splitlines() if line.strip()]
+
+
 def check_security(archive):
-    """What plugins.qgis.org runs on an upload and blocks the version for, whatever the severity: Bandit and
-    detect-secrets on the unpacked archive. A ``# nosec Bxxx`` or ``# pragma: allowlist secret`` comment
+    """What plugins.qgis.org runs on an upload and blocks the version for, whatever the severity: Bandit,
+    detect-secrets and flake8 on the unpacked archive. A ``# nosec Bxxx`` or ``# pragma: allowlist secret`` comment
     with its reason is the way to accept a false positive."""
     with tempfile.TemporaryDirectory() as work:
         root = Path(work) / 'src'
@@ -122,6 +134,10 @@ def check_security(archive):
         run = subprocess.run(secrets + ['scan', '--all-files', PLUGIN_FOLDER], cwd=root, env=env,  # nosec B603 - fixed argv
                              capture_output=True, text=True, timeout=600)
         problems += secrets_problems(json.loads(run.stdout or '{}'))
+        flake8, env = _scanner_command('flake8', ['flake8'], tools)
+        run = subprocess.run(flake8 + FLAKE8_ARGS + [PLUGIN_FOLDER], cwd=root, env=env,  # nosec B603 - fixed argv
+                             capture_output=True, text=True, timeout=600)
+        problems += flake8_problems(run.stdout)
     return problems
 
 
@@ -165,7 +181,7 @@ def main():
     args = parser.parse_args()
     version = validate(args.archive, security=not args.skip_security_scan)
     print(f'Validated FilterMate {version}: ZIP structure, entry point, metadata keys, file types, size, '
-          'Python 3.8 syntax and Qt enums' + ('' if args.skip_security_scan else ', Bandit and detect-secrets'))
+          'Python 3.8 syntax and Qt enums' + ('' if args.skip_security_scan else ', Bandit, detect-secrets and flake8'))
     if args.validate_only:
         return
     username = os.environ.get('OSGEO_USERNAME', '')

@@ -111,3 +111,9 @@ def test_security_findings_reject_the_archive(tmp_path, monkeypatch):
     with pytest.raises(ValueError, match="Bandit B603"):
         publish_qgis.validate(_build(tmp_path), security=True)
     assert publish_qgis.validate(_build(tmp_path), security=False) == "5.0.0"
+
+
+def test_flake8_findings_are_problems():
+    output = "filter_mate/a.py:3:5: E731 do not assign a lambda expression, use a def\n\n"
+    assert publish_qgis.flake8_problems(output) == ["flake8 filter_mate/a.py:3:5: E731 do not assign a lambda expression, use a def"]
+    assert publish_qgis.flake8_problems("") == []
