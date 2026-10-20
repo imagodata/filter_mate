@@ -228,7 +228,8 @@ def build_server(client: FilterMateClient) -> Any:
             "Polygon targets only: minimum share (%) of the target that must lie inside the source"))] = 0.0,
         operator: Annotated[Optional[Operator], Field(description=_OPERATOR_DOC)] = None,
         selected_only: Annotated[bool, Field(description=(
-            "Vector source: use the features currently selected in QGIS (all features when none is selected). "
+            "Vector source: use the features currently selected in QGIS (all features when none is selected; "
+            "a web service source such as WFS must be selected or already filtered, it is never read whole). "
             "You cannot change the QGIS selection with these tools: ask the user to select the features, "
             "or use geometry_filter with a WKT geometry."))] = True,
         raster_selection: Annotated[Optional[RasterSelection], Field(description=(

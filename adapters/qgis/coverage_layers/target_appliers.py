@@ -349,6 +349,7 @@ class VectorTargetJob(TargetJob):
         Returns the keys to list, or None when the target is refused
         (``outcome.message`` says why); a disjoint keeps the complement of the keys.
         """
+        from ....config.config import ENV_VARS
         from ...backends.ogr.filter_executor import _remote_message
         from ..remote_materializer import materialization_limits, materialize
         complement = 'disjoint' in methods
@@ -375,8 +376,9 @@ class VectorTargetJob(TargetJob):
                                             coverage)
             return matched
 
-        outcome = materialize(self._remote_target, geometry.boundingBox(), '', matches, materialization_limits(),
-                              self.feedback)
+        # The user's REMOTE_MATERIALIZATION budgets, as in the dock (they were the defaults).
+        outcome = materialize(self._remote_target, geometry.boundingBox(), '', matches,
+                              materialization_limits(ENV_VARS), self.feedback)
         self._remote_target = None  # the snapshot holds a feature source of the main thread's layer
         if not outcome.complete:
             if outcome.reason not in ('feature_limit', 'timeout'):
@@ -549,6 +551,19 @@ class _ProviderLayer:
     def __init__(self, provider, provider_key: str, source: str, name: str) -> None:
         self._provider, self._key, self._source, self._name = provider, provider_key, source, name
 
+    @classmethod
+    def open(cls, provider_key: str, source: str, name: str) -> '_ProviderLayer':
+        """``source`` as a bare provider, not a QgsRasterLayer.
+
+        A layer computes the statistics of its default renderer when it
+        opens: one more read of the whole coverage (WCS: a GetCoverage of
+        586 x 427 cells over 1 240 km).
+        """
+        from qgis.core import QgsDataProvider, QgsProviderRegistry
+        provider = QgsProviderRegistry.instance().createProvider(
+            provider_key, source, QgsDataProvider.ProviderOptions())
+        return cls(provider, provider_key, source, name)
+
     def isValid(self) -> bool:
         return self._provider is not None and self._provider.isValid()
 
@@ -625,14 +640,8 @@ class RasterTargetJob(TargetJob):
         import threading
         if threading.current_thread() is threading.main_thread():
             raise RuntimeError(translate('RasterTargetJob', 'remote raster target must run in a worker thread'))
-        from qgis.core import QgsDataProvider, QgsProviderRegistry
         from .raster_materialization import _tr
-        # A bare provider, not a QgsRasterLayer: a layer computes the statistics of its
-        # default renderer when it opens, one more read of the whole coverage (WCS:
-        # a GetCoverage of 586 x 427 cells over 1 240 km).
-        provider = QgsProviderRegistry.instance().createProvider(
-            self._base_provider, self._base_source, QgsDataProvider.ProviderOptions())
-        base = _ProviderLayer(provider, self._base_provider, self._base_source, 'FilterMate target capture')
+        base = _ProviderLayer.open(self._base_provider, self._base_source, 'FilterMate target capture')
         if not base.isValid() or base.width() < 1 or base.height() < 1:
             raise RuntimeError(_tr('raster capture source could not be opened'))
         # Not the layer's extent: a derived layer shows its previous capture only.
