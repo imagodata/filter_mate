@@ -291,6 +291,10 @@ class TestCaptureWindow:
 
     FULL = Rect(0, 0, 100, 100)  # a 10 x 10 grid of 10 m cells
 
+    @pytest.fixture(autouse=True)
+    def _ogr_geometries(self):
+        pytest.importorskip('osgeo.ogr')  # FakeGeometry is OGR backed (no GDAL in the CI test job)
+
     @staticmethod
     def _window(kept, width=10, height=10, full=None):
         area, grid = appliers._capture_window(full or TestCaptureWindow.FULL, width, height, kept)
