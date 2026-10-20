@@ -783,6 +783,23 @@ Result: Que veux-tu faire dans cette session ?
   rendue certaine dans le smoke GUI (`s_undo_pick_race` : `singleShot(150)` de la touche, undo, `sleep`). Un choix
   fait pendant la tâche filtre est appliqué à la fin (`_combo_blocked_at`) ; une tâche échouée / annulée rouvre la
   fenêtre (`_filter_engine_task_terminated`, garde de génération pour annuler-relancer).
+- [2026-10-19] Filtre attributaire serveur par version QGIS (branche `claude/v5-stream-F-versions`) : politique pure
+  `core/filter/server_transfer_policy.transfer_mode(provider, QGIS_VERSION_INT, declares_parallel)` → `async` / `sync`
+  / `refuse`. WFS et ArcGIS en asynchrone dès 3.32 (API `readLayerXml(..., preloadedProvider)`), prouvé de 3.32.3 à la
+  nightly 4.3 par `tests/qgis_headless/check_stream_versions.py` (WFS) et `check_stream_vector_filters.py` (ArcGIS) ;
+  WFS en `setSubsetString` synchrone de 3.24 à 3.31 (aucune requête dans le setter ; 3.24 / 3.26 peuvent attendre la
+  fin d'un téléchargement en cours, jusqu'à plusieurs secondes), refusé en 3.22 (12 plantages sur 27 essais) : son setter WFS corrompt le tas si un rendu ou un itérateur lit la couche
+  (même après `stopRendering()`, annulation non bloquante) ; ArcGIS refusé avant 3.32. Pièges vérifiés :
+  `QgsNetworkAccessManager.setReplyPreprocessor` plante (segfault) dans l'image QGIS 3.34.15 même avec un callable vide,
+  et son vecteur global n'a pas de verrou → ne pas l'utiliser hors du matérialiseur de B (qui plante aussi en 3.34.15) ;
+  QGIS lit un `ows:ExceptionReport` WFS comme une erreur provider mais un `ServiceExceptionReport` WFS 1.0 comme un
+  résultat vide ; `QgsBlockingNetworkRequest.get()` préfère le cache HTTP de QGIS (`PreferCache`) : réponse sans
+  en-tête de cache resservie sans requête → `get(request, True)` pour un verdict serveur, et vider du cache les URL
+  d'une tâche échouée ; un test « `singleShot(10)` » contre un job asynchrone perd face à un worker servi par ce cache
+  → retenir la réponse du serveur de test (`threading.Event`) et agir dans la boucle avec `singleShot(0)`.
+  Garde « tâche en cours » (`operations._background_tasks_running`) : QGIS liste encore une tâche (statut Complete)
+  pendant son `finished()` → ignorer Complete / Terminated, sinon le dock refuse ses propres filtres serveur.
+  Images Docker : `qgis/qgis:3.40`, `qgis/qgis:4.0` (pas `release-3_40`), `release-3_24/26/30` existent.
 - [2026-10-19] Revue du lot C (#193, branche `claude/v5-stream-F-c-fixes`) : `_remote_selection_plan` est la seule
   source des requêtes de sélection / zoom d'une source lue en tâche (custom vide ou non-filtre → rien à lire, zoom sur
   `dataProvider().extent()` — pas `layer.extent()`, qui compte les entités après un changement de subset ; refus =

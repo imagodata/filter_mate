@@ -4,6 +4,9 @@ QGIS's ArcGIS setSubsetString fetches object IDs synchronously. Moving only
 the expression compiler off the UI thread does not avoid that request.
 QGIS >= 3.32 can instead consume a preloaded provider in readLayerXml.
 The existing layer stays untouched until its replacement is ready.
+Where that transfer is not available (server_transfer_policy), a WFS
+filter is set on the main thread if the QGIS setter survives a concurrent
+read; anything else is refused.
 """
 import json
 import weakref
@@ -20,9 +23,20 @@ from qgis.PyQt.QtXml import QDomDocument
 
 from .server_filter_translation import ServerFilterError, _tr, prepare_server_subset
 from ...core.filter.server_filter_state import ACTIVE_SERVER_FILTERS
+from ...core.filter.server_transfer_policy import ASYNC, PRELOADED_PROVIDER_MIN, SYNC, transfer_mode  # noqa: F401
 from .source_capability_probe import capability_for_layer
 
 _ACTIVE = ACTIVE_SERVER_FILTERS
+
+
+def transfer_mode_for_layer(layer):
+    """ASYNC, SYNC or REFUSE for this layer's provider on the running QGIS."""
+    declares_parallel = False
+    flag = getattr(QgsProviderMetadata.ProviderCapability, 'ParallelCreateProvider', None)  # QGIS >= 3.32
+    if flag is not None:
+        metadata = QgsProviderRegistry.instance().providerMetadata(layer.providerType())
+        declares_parallel = metadata is not None and bool(metadata.providerCapabilities() & flag)
+    return transfer_mode(layer.providerType(), Qgis.QGIS_VERSION_INT, declares_parallel)
 
 
 def cancel_pending_server_subset(layer):
@@ -93,20 +107,39 @@ class _PrepareTask(QgsTask):
         self.extents = [None, None]
         self.backup_valid = False
         self.failed = False
+        self.urls = []
 
     def _reply(self, reply):
         """Notice transport errors; protocol bodies use explicit validation."""
         try:
+            self.urls.append(reply.request().url())
             if reply.error() != QNetworkReply.NetworkError.NoError:
                 self.failed = True
         except (AttributeError, RuntimeError):
             self.failed = True
+
+    def forget_responses(self):
+        """Drop this task's responses from QGIS's HTTP cache after a refusal.
+
+        Providers read through QgsBlockingNetworkRequest, which prefers the
+        cache: a transient error kept there would refuse the same filter
+        again once the server has recovered. Main thread, after run(). Not
+        after a cancellation: it saw no verdict, and removing an entry that
+        another job is downloading leaves a truncated body in the cache.
+        """
+        cache = QgsNetworkAccessManager.instance().cache()
+        if cache is not None:
+            for url in self.urls:
+                cache.remove(url)
 
     def _validate_arcgis(self):
         """Check the server's verdict, since AFS swallows object-ID errors.
 
         A bounded JSON count response is read only in this worker. Credentials
         and HTTP headers go through the same native QGIS auth machinery.
+        forceRefresh: QgsBlockingNetworkRequest otherwise prefers QGIS's HTTP
+        cache, which keeps a response without cache headers, so an earlier
+        answer could mask a rejection (or keep a transient error).
         """
         uri = QgsDataSourceUri(self.source)
         if uri.param('urlprefix'):
@@ -122,7 +155,7 @@ class _PrepareTask(QgsTask):
         uri.httpHeaders().updateNetworkRequest(request)
         blocking = QgsBlockingNetworkRequest()
         blocking.setAuthCfg(uri.authConfigId())
-        if blocking.get(request) != QgsBlockingNetworkRequest.ErrorCode.NoError:
+        if blocking.get(request, True) != QgsBlockingNetworkRequest.ErrorCode.NoError:
             return False
         payload = json.loads(bytes(blocking.reply().content()).decode('utf-8'))
         count = payload.get('count') if isinstance(payload, dict) else None
@@ -231,7 +264,7 @@ class ServerSubsetJob(QObject):
 
     def start(self):
         layer = self.layer_ref()
-        if Qgis.QGIS_VERSION_INT < 33200:
+        if Qgis.QGIS_VERSION_INT < PRELOADED_PROVIDER_MIN:
             raise ServerFilterError(_tr('Asynchronous server filters require QGIS 3.32 or newer. The previous filter is unchanged.'))
         if QThread.currentThread() != layer.thread() or layer.thread() != QgsApplication.instance().thread():
             raise ServerFilterError(_tr('Server filter installation must start on the layer thread.'))
@@ -240,16 +273,7 @@ class ServerSubsetJob(QObject):
         from ..public_api.operations import _background_tasks_running
         if _background_tasks_running():
             raise ServerFilterError(_tr('A FilterMate task is still reading layers. Retry after it finishes.'))
-        metadata = QgsProviderRegistry.instance().providerMetadata(layer.providerType())
-        flag = QgsProviderMetadata.ProviderCapability.ParallelCreateProvider
-        parallel = metadata is not None and bool(metadata.providerCapabilities() & flag)
-        # These web providers do not advertise ParallelCreateProvider, but
-        # their complete transfer lifecycle is verified by the headless HTTP
-        # fixture/public services on these QGIS branches. Database connections
-        # have thread-specific state: do not assume they support the pattern.
-        verified_web = layer.providerType().lower() in ('wfs', 'arcgisfeatureserver') and (
-            Qgis.QGIS_VERSION_INT // 100 in (344, 402))
-        if not parallel and not verified_web:
+        if transfer_mode_for_layer(layer) != ASYNC:
             raise ServerFilterError(_tr('This provider and QGIS version do not support verified worker creation. The previous filter is unchanged.'))
         if layer.auxiliaryLayer() is not None:
             raise ServerFilterError(_tr('A layer with auxiliary storage cannot safely replace its server provider. The previous filter is unchanged.'))
@@ -305,6 +329,8 @@ class ServerSubsetJob(QObject):
         consumed = set()
         guards = ExitStack()
         try:
+            if not success and not task.isCanceled():
+                task.forget_responses()
             if self.done:
                 return
             if not success:
@@ -395,3 +421,64 @@ def apply_server_subset_wait(layer, subset, timeout_ms=30000, *, trusted_restore
     if not job.success:
         raise ServerFilterError('{}: {}'.format(layer_name, job.message))
     return True
+
+
+def apply_server_subset_sync(layer, subset):
+    """Set a validated WFS subset on the main thread, as FilterMate 4 did.
+
+    For the SYNC transfer mode only: ``subset`` is already a FULL
+    translation, an empty string or an exact history snapshot. The WFS
+    setter sends no request (features download when read), so the freeze
+    is the setter itself. A False return, an invalid layer, an exception,
+    a new provider error or a WFS warning logged by the setter restores the
+    previous subset. A service rejecting the filter in its GetFeature
+    response is only seen when features are read: an empty layer, as
+    before 5.0.
+    """
+    name = layer.name()
+    main = QgsApplication.instance().thread()
+    if QThread.currentThread() != layer.thread() or layer.thread() != main:
+        raise ServerFilterError('{}: {}'.format(name, _tr('Server filter installation must start on the layer thread.')))
+    if layer.isEditable():
+        raise ServerFilterError('{}: {}'.format(name, _tr('Finish editing the layer before applying a server filter.')))
+    if not layer.isValid():
+        # QGIS only stores a subset for an invalid layer and returns False.
+        raise ServerFilterError('{}: {}'.format(name, _tr(
+            'Server filter installation failed. The previous provider was already invalid and could not be restored.')))
+    from ..public_api.operations import _background_tasks_running
+    if _background_tasks_running():
+        raise ServerFilterError('{}: {}'.format(name, _tr('A FilterMate task is still reading layers. Retry after it finishes.')))
+    from ...infrastructure.database.sql_utils import feature_picker_guard
+    before = layer.subsetString()
+    provider = layer.dataProvider()
+    errors = len(provider.errors()) if provider is not None else 0
+    warnings = []
+
+    def logged(message, tag, level):
+        # The setter logs on the main thread; downloads of other layers log
+        # on their own threads and say nothing about this filter.
+        if QThread.currentThread() == main and tag.lower() == 'wfs' and level in (
+                Qgis.MessageLevel.Warning, Qgis.MessageLevel.Critical):
+            warnings.append(True)
+
+    log = QgsApplication.messageLog()
+    with feature_picker_guard(layer):
+        log.messageReceived.connect(logged, Qt.ConnectionType.DirectConnection)
+        try:
+            accepted = layer.setSubsetString(subset)
+            provider = layer.dataProvider()
+            if accepted and layer.isValid() and layer.subsetString().strip() == subset.strip() and not warnings and (
+                    provider is None or len(provider.errors()) <= errors):
+                layer.removeSelection()  # as the asynchronous path: ids can change (3.28+)
+                return True
+        except Exception:  # nosec B110 - provider details may contain credentials
+            pass
+        finally:
+            log.messageReceived.disconnect(logged)
+        try:
+            if layer.subsetString() != before or not layer.isValid():
+                if not layer.setSubsetString(before) or not layer.isValid():
+                    raise ValueError('Restoration rejected')
+        except Exception:  # nosec B110 - report the failure without a source URI
+            raise ServerFilterError(_tr('{0}: the provider rejected the filter and restoration failed.').format(name)) from None
+    raise ServerFilterError(_tr('{0}: the provider rejected the attribute filter. The previous filter was restored.').format(name))
