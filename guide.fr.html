@@ -657,8 +657,7 @@ processing.run("filtermate:batch_filter", {
         La source (la couche courante) et les cibles peuvent être de n'importe quel type. FILTERING garde sa forme : couches à filtrer, opérateurs de combinaison
         (AND, OR, AND NOT, ou remplacement quand la combinaison est décochée), prédicats géométriques, tampon et centroïdes. Un réglage est nouveau : la
         <strong>couverture minimale</strong> (%) des polygones par la géométrie source. <strong>Disjoint</strong>, déjà l'un des huit prédicats, garde ce qui se trouve
-        à l'extérieur de la géométrie source, quel que soit le type de cible. Chaque case renvoie au cas d'usage qui la montre ; les autres fonctionnent de la même
-        façon et sont couvertes par les scénarios automatisés.
+        à l'extérieur de la géométrie source, quel que soit le type de cible. Chaque case renvoie à un cas d'usage détaillé avec les réglages à reproduire.
     </p>
     <div class="table-wrap">
     <table class="matrix">
@@ -670,12 +669,12 @@ processing.run("filtermate:batch_filter", {
                 <td>Points dans la géométrie, par un COPC dérivé. <a href="stories.fr.html#s12">Cas d'usage 12</a>.</td></tr>
             <tr><th><strong>Raster</strong><br><small>les pixels gardés, vectorisés : plage, pipette, objet, indice, dérivé de terrain</small></th>
                 <td>Entités gardées, avec une couverture minimale pour les polygones. <a href="stories.fr.html#s9">Cas d'usage 9</a>.</td>
-                <td>Pixels d'un autre raster sous les pixels gardés : un masque NDVI de l'ortho IRC appliqué à l'ortho RVB.</td>
-                <td>Points sous les pixels gardés : les points LiDAR des toits relevés sur une orthophoto.</td></tr>
+                <td>Pixels d'un autre raster sous les pixels gardés : un masque NDVI de l'ortho IRC appliqué à l'ortho RVB. <a href="stories.fr.html#s13">Cas d'usage 13</a>.</td>
+                <td>Points sous les pixels gardés : les points LiDAR des toits relevés sur une orthophoto. <a href="stories.fr.html#s14">Cas d'usage 14</a>.</td></tr>
             <tr><th><strong>Nuage de points</strong><br><small>l'emprise des points gardés : classes, Z, intensité, retours, hauteur au-dessus d'un MNT, zone</small></th>
                 <td>Entités gardées, avec une couverture minimale. <a href="stories.fr.html#s10">Cas d'usage 10 et 11</a>.</td>
-                <td>Pixels sous les points gardés : un MNT restreint aux points sol.</td>
-                <td>Points d'un autre nuage dans l'emprise : la végétation haute à moins de 10 m des lignes électriques, dalle par dalle.</td></tr>
+                <td>Pixels sous les points gardés : un MNT restreint aux points sol. <a href="stories.fr.html#s15">Cas d'usage 15</a>.</td>
+                <td>Points d'un autre nuage dans l'emprise : la végétation haute à moins de 10 m des lignes électriques. <a href="stories.fr.html#s16">Cas d'usage 16</a>.</td></tr>
         </tbody>
     </table>
     </div>
