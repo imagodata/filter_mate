@@ -120,7 +120,7 @@ class VectorService:
                     rows = rows[:limit]
                     fixture.requests.append(
                         {"bbox": bounds, "returned": len(rows), "hits": query.get("resulttype") == "hits",
-                         "filter": query.get("filter", "")}
+                         "filter": query.get("filter", ""), "maxfeatures": query.get("maxfeatures")}
                     )
                     if fixture.delay:
                         time.sleep(fixture.delay)

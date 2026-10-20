@@ -90,6 +90,22 @@ with VectorService(attribute_filters=True) as fixture:
         Qgis.QGIS_VERSION, Qgis.QGIS_VERSION_INT, QT_VERSION_STR, mode, arcgis), flush=True)
     check('transfer mode known', mode in (ASYNC, SYNC, REFUSE), mode)
 
+    # 2026-10-20: 30 s was too short for the public Géoplateforme WFS; the
+    # delay is configurable (APP.OPTIONS.SERVER_FILTER), 60 s for WFS.
+    from filter_mate.config.config import ENV_VARS  # noqa: E402
+    delays = [job_module.ServerSubsetJob(layer, '"id" = 7').timer.interval()]
+    saved_config = ENV_VARS.get('CONFIG_DATA')
+    try:
+        for value in (45, 'x', 0):
+            ENV_VARS['CONFIG_DATA'] = {'APP': {'OPTIONS': {'SERVER_FILTER': {'wfs_timeout_seconds': {'value': value}}}}}
+            delays.append(job_module.ServerSubsetJob(layer, '"id" = 7').timer.interval())
+    finally:
+        ENV_VARS['CONFIG_DATA'] = saved_config
+        if saved_config is None:
+            del ENV_VARS['CONFIG_DATA']
+    check('WFS server filter delay: 60 s by default, configurable, malformed value ignored',
+          delays == [60000, 45000, 60000, 60000], str(delays))
+
     fixture.requests.clear()
     accepted = safe_set_subset_string(layer, '"id" = 1 AND abs("id") < 3')
     check('PARTIAL predicate refused before any request', not accepted and layer.subsetString() == ''
@@ -158,7 +174,12 @@ with VectorService(attribute_filters=True) as fixture:
 
         def finished(self, result):
             try:
+                # 2026-10-20: an API call waits for the end of finished(); only the
+                # server filter of this task tolerates it (allow_finishing).
+                from filter_mate.adapters.public_api.operations import busy_reason
+                self.busy = busy_reason()
                 self.applied = apply_pending_subset_requests([(layer, '"id" = 7')], safe_set_subset_string)
+                self.busy_after = busy_reason()
             finally:
                 QTimer.singleShot(0, finished_loop.quit)
 
@@ -168,6 +189,10 @@ with VectorService(attribute_filters=True) as fixture:
     check('filter applied from a finishing dock filter task: {}'.format('applied' if expected else 'refused'),
           dock_task.applied == (1 if expected else 0) and ('"id" = 7' in layer.subsetString()) == expected,
           '{} {!r} {}'.format(dock_task.applied, layer.subsetString(), last_server_filter_error(layer)))
+    from filter_mate.adapters.public_api.operations import BACKGROUND_BUSY, busy_reason  # noqa: E402
+    check('API busy during the dock task finished(), free after it',
+          dock_task.busy == BACKGROUND_BUSY == dock_task.busy_after and not busy_reason(),
+          '{!r} {!r} {!r}'.format(dock_task.busy, dock_task.busy_after, busy_reason()))
     assert safe_set_subset_string(layer, '') and layer.subsetString() == ''
 
     if mode == REFUSE:

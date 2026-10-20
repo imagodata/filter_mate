@@ -171,8 +171,16 @@ BACKGROUND_BUSY = "a FilterMate filter is still running in the background: try a
 _CONFLICTING_TASKS = frozenset({"FilterEngineTask", "CrossFilterTask", "CoverageExportTask", "HeightAboveGroundTask"})
 
 
-def _background_tasks_running() -> bool:
-    """A dock or automation task still changes or reads the filters."""
+def _background_tasks_running(allow_finishing: bool = False) -> bool:
+    """A dock or automation task still changes or reads the filters.
+
+    Args:
+        allow_finishing: a dock task in its ``finished()`` does not count. Only
+            for the start of a server filter (server_subset_job): the dock
+            applies that task's own server subsets there. Everything else,
+            busy_reason() included, waits until ``finished()`` returns, so an
+            API call cannot start in the middle of it (2026-10-20).
+    """
     try:
         from ...core.services.cross_filter_service import _finished, get_cross_filter_service
         services = [get_cross_filter_service()]
@@ -181,7 +189,10 @@ def _background_tasks_running() -> bool:
         if any(not _finished(task) for service in services for task in service._running):
             return True
         from qgis.core import QgsApplication
-        tasks = list(QgsApplication.taskManager().activeTasks())
+        # Not activeTasks(): it drops a task in its finished() as soon as another
+        # task is queued (a server filter queues one), tasks() lists it until
+        # finished() returns (QGIS 3.22 - 4.2, 2026-10-20).
+        tasks = list(QgsApplication.taskManager().tasks())
     except Exception:
         return False
 
@@ -194,7 +205,8 @@ def _background_tasks_running() -> bool:
         except Exception:
             return False
 
-    return any(type(task).__name__ in _CONFLICTING_TASKS and not finishing(task) for task in tasks)
+    return any(type(task).__name__ in _CONFLICTING_TASKS and not (allow_finishing and finishing(task))
+               for task in tasks)
 
 
 def busy_reason() -> str:
@@ -547,6 +559,12 @@ def _source_job(layer, kind: LayerKind, report: OperationReport, selected_only: 
     """Source job for ``layer``; None (with ``report.error`` set) when there is nothing to relate."""
     from ..qgis.coverage_layers import source_jobs
     if kind is LayerKind.VECTOR:
+        from ..qgis.source_capability_probe import capability_for_layer
+        capability = capability_for_layer(layer)
+        if capability is not None and capability.is_remote_service:
+            # 2026-10-20: never the whole service on the main thread: selected or
+            # filtered, read bounded in the task, as the dock does (ValueError otherwise).
+            return source_jobs.RemoteVectorSourceJob(layer, selected_only)
         features = list(layer.getSelectedFeatures() if selected_only and layer.selectedFeatureCount()
                         else layer.getFeatures())
         if not features:

@@ -306,6 +306,17 @@
           "description": "Maximum remote read and local evaluation duration in seconds"
         }
       },
+      "SERVER_FILTER": {
+        "_display_name": "Server filters",
+        "wfs_timeout_seconds": {
+          "value": 60,
+          "description": "Maximum wait for a WFS or OGC API Features server filter, in seconds (1 to 600); the previous filter is kept after it"
+        },
+        "timeout_seconds": {
+          "value": 30,
+          "description": "Maximum wait for a server filter on other services (ArcGIS Feature Server, databases), in seconds (1 to 600); the previous filter is kept after it"
+        }
+      },
       "_display_name": "Performance",
       "DISCORD_INVITE": {
         "_hidden": true,
