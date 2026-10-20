@@ -345,6 +345,7 @@ def read_bounded_features(source, request, limits, feedback, consume, key, sourc
     iterator = None
     network_failed = []
     provider_warnings = []
+    held_wrappers = []  # the reply wrappers held by the observer, all dropped when the read ends
     network = QgsNetworkAccessManager.instance()
     uri = source_uri or (source.source() if hasattr(source, "source") else "")
     url = QgsDataSourceUri(uri).param("url") if uri else ""
@@ -407,9 +408,11 @@ def read_bounded_features(source, request, limits, feedback, consume, key, sourc
                 return
 
             tail = [b""]
-            # The wrapper in use, dropped when the reply finishes: kept longer, it would
-            # outlive the reply and sip would hand it to the next reply at its address.
+            # The wrapper in use, dropped when the reply finishes or the read ends: kept
+            # longer, it would outlive the reply and sip would hand it to the next reply
+            # created at its address.
             held = [reply]
+            held_wrappers.append(held)
 
             def unobserved():
                 # A reply this observer cannot read is never verified, unless the read has ended.
@@ -423,7 +426,8 @@ def read_bounded_features(source, request, limits, feedback, consume, key, sourc
                 return
 
             def on_reply(use):
-                return _on_live_reply(address, held, use)
+                # Once the read has ended, a reply aborted without finished() holds nothing.
+                return _on_live_reply(address, [None] if stop.is_set() else held, use)
 
             def release():
                 held[0] = None
@@ -470,7 +474,6 @@ def read_bounded_features(source, request, limits, feedback, consume, key, sourc
                     on_reply(lambda live: live.finished.connect(finished_error, Qt.ConnectionType.DirectConnection))
                 on_reply(lambda live: live.finished.connect(release, Qt.ConnectionType.DirectConnection))  # last
             except RuntimeError:
-                release()
                 unobserved()
                 return
             inspect_body()  # cached replies can have data before readyRead is connected
@@ -498,10 +501,18 @@ def read_bounded_features(source, request, limits, feedback, consume, key, sourc
     try:
         if source_factory is not None:
             source = source_factory()
-        provider = source.dataProvider() if hasattr(source, "dataProvider") else None
-        if provider is not None:
-            provider.raiseError.connect(provider_error, Qt.ConnectionType.DirectConnection)
-            provider_connected = True
+        for attempt in range(3):
+            provider = source.dataProvider() if hasattr(source, "dataProvider") else None
+            try:
+                if provider is not None:
+                    provider.raiseError.connect(provider_error, Qt.ConnectionType.DirectConnection)
+                    provider_connected = True
+                break
+            except RuntimeError:
+                # The provider's fresh wrapper, invalidated by PyQt as a reply's can be
+                # (_on_live_reply); the layer hands a usable one again.
+                if attempt == 2:
+                    raise
         iterator = source.getFeatures(request)
         if not iterator.isValid():
             return MaterializationOutcome(reason="read_error")
@@ -527,7 +538,7 @@ def read_bounded_features(source, request, limits, feedback, consume, key, sourc
         if network_failed:
             return MaterializationOutcome(fetched=outcome.fetched, reason="read_error")
         if (outcome.complete and not outcome.fetched and provider is not None
-                and provider.name().lower() in _BBOX_PROVIDERS):
+                and (provider_key or provider.name().lower()) in _BBOX_PROVIDERS):
             # A QGIS service iterator can swallow an HTTP-200 protocol error
             # and expose only clean exhaustion. No copied row means there is
             # no independent evidence to distinguish that from a genuine zero.
@@ -553,6 +564,8 @@ def read_bounded_features(source, request, limits, feedback, consume, key, sourc
             _release(lambda: main_network.finished.disconnect(finished))
         if preprocessor is not None:
             _release(lambda: QgsNetworkAccessManager.removeReplyPreprocessor(preprocessor))
+        for cell in held_wrappers:
+            cell[0] = None
         _release(lambda: message_log.messageReceived.disconnect(provider_message))
         if provider_connected:
             _release(lambda: provider.raiseError.disconnect(provider_error))
