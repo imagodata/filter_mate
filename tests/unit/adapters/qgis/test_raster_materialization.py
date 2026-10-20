@@ -286,6 +286,7 @@ def test_remote_source_refuses_main_thread_before_open(monkeypatch):
     opener.assert_not_called()
 
 
+@pytest.mark.skipif(fk.ogr is None, reason="the fake geometries need GDAL / OGR (osgeo)")
 class TestCaptureWindow:
     """2026-10-20: a remote target was captured over its whole extent (1 240 km of WCS for a 25 km zone)."""
 
