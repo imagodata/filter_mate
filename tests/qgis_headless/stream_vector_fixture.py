@@ -43,8 +43,9 @@ class VectorService:
 
     ``attribute_filters`` also evaluates OGC comparisons on ``id`` (lot A
     filters), with the ArcGIS fixture's conventions: a literal 999 is
-    rejected by an HTTP-200 ServiceExceptionReport, a literal 777 answers
-    after ``slow`` seconds.
+    rejected by an HTTP-200 OWS ExceptionReport (WFS 1.1 / 2.0 servers), a
+    literal 998 by a WFS 1.0 ServiceExceptionReport, a literal 777 answers
+    after ``slow`` seconds and while ``release`` is set.
     """
 
     def __init__(self, attribute_filters=False, slow=0.5):
@@ -52,6 +53,8 @@ class VectorService:
         self.fail = False
         self.exception_200 = False
         self.delay = 0
+        self.release = threading.Event()
+        self.release.set()
         fixture = self
 
         class Handler(BaseHTTPRequestHandler):
@@ -123,7 +126,21 @@ class VectorService:
                         time.sleep(fixture.delay)
                     if "777" in literals:
                         time.sleep(slow)
-                    if fixture.exception_200 or "999" in literals:
+                        fixture.release.wait(10)
+                    if "999" in literals:
+                        body = (
+                            '<?xml version="1.0" encoding="UTF-8"?><ows:ExceptionReport '
+                            'xmlns:ows="http://www.opengis.net/ows" version="1.0.0"><ows:Exception '
+                            'exceptionCode="InvalidParameterValue"><ows:ExceptionText>fixture rejection'
+                            "</ows:ExceptionText></ows:Exception></ows:ExceptionReport>"
+                        )
+                    elif "998" in literals:
+                        body = (
+                            '<?xml version="1.0" encoding="UTF-8"?><ServiceExceptionReport version="1.2.0" '
+                            'xmlns="http://www.opengis.net/ogc"><ServiceException code="InvalidParameterValue">'
+                            "fixture rejection</ServiceException></ServiceExceptionReport>"
+                        )
+                    elif fixture.exception_200:
                         body = "<ServiceExceptionReport><ServiceException>fixture rejection</ServiceException></ServiceExceptionReport>"
                     elif fixture.fail:
                         status, body = 500, "fixture network failure"

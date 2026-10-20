@@ -4,14 +4,13 @@ QGIS's ArcGIS setSubsetString fetches object IDs synchronously. Moving only
 the expression compiler off the UI thread does not avoid that request.
 QGIS >= 3.32 can instead consume a preloaded provider in readLayerXml.
 The existing layer stays untouched until its replacement is ready.
-Where that transfer is not proven (server_transfer_policy), a WFS filter
-is set on the main thread instead and other providers are refused.
+Where that transfer is not available (server_transfer_policy), a WFS
+filter is set on the main thread if the QGIS setter survives a concurrent
+read; anything else is refused.
 """
 import json
-import re
 import weakref
 from contextlib import ExitStack
-from urllib.parse import urlsplit
 
 from qgis.core import (
     Qgis, QgsApplication, QgsDataProvider, QgsFeatureRequest, QgsMapLayer, QgsNetworkAccessManager, QgsProviderMetadata, QgsVectorLayer,
@@ -28,8 +27,6 @@ from ...core.filter.server_transfer_policy import ASYNC, PRELOADED_PROVIDER_MIN,
 from .source_capability_probe import capability_for_layer
 
 _ACTIVE = ACTIVE_SERVER_FILTERS
-# A WFS service error often comes with HTTP 200 (same test as the remote materializer).
-_EXCEPTION_REPORT = re.compile(rb'<(?:\w+:)?(?:ServiceExceptionReport|ExceptionReport)\b')
 
 
 def transfer_mode_for_layer(layer):
@@ -110,14 +107,28 @@ class _PrepareTask(QgsTask):
         self.extents = [None, None]
         self.backup_valid = False
         self.failed = False
+        self.urls = []
 
     def _reply(self, reply):
         """Notice transport errors; protocol bodies use explicit validation."""
         try:
+            self.urls.append(reply.request().url())
             if reply.error() != QNetworkReply.NetworkError.NoError:
                 self.failed = True
         except (AttributeError, RuntimeError):
             self.failed = True
+
+    def forget_responses(self):
+        """Drop this task's responses from QGIS's HTTP cache after a failure.
+
+        Providers read through QgsBlockingNetworkRequest, which prefers the
+        cache: a transient error kept there would refuse the same filter
+        again once the server has recovered. Main thread, after run().
+        """
+        cache = QgsNetworkAccessManager.instance().cache()
+        if cache is not None:
+            for url in self.urls:
+                cache.remove(url)
 
     def _validate_arcgis(self):
         """Check the server's verdict, since AFS swallows object-ID errors.
@@ -147,66 +158,6 @@ class _PrepareTask(QgsTask):
         payload = json.loads(bytes(blocking.reply().content()).decode('utf-8'))
         count = payload.get('count') if isinstance(payload, dict) else None
         return isinstance(count, int) and not isinstance(count, bool) and count >= 0 and not payload.get('error')
-
-    def _probe_wfs(self, provider):
-        """Read at most two features; the server can reject them with HTTP 200.
-
-        The WFS iterator downloads on its own thread and ends cleanly on an
-        ExceptionReport, with no provider error. The reply preprocessor
-        (QGIS >= 3.26) sees each reply of the service endpoint before the
-        provider consumes it. A GetFeature URL advertised on another host
-        keeps only the transport and provider error checks.
-        """
-        uri = QgsDataSourceUri(self.source)
-        endpoint = urlsplit(uri.param('url') or self.source)
-        rejected = []
-        closing = []
-
-        def observe(request, reply):
-            remote = urlsplit(request.url().toString())
-            if (remote.scheme, remote.netloc) != (endpoint.scheme, endpoint.netloc) or not (
-                    remote.path == endpoint.path or remote.path.startswith(endpoint.path.rstrip('/') + '/')):
-                return
-            tail = [b'']
-
-            def inspect():
-                try:
-                    if not reply.bytesAvailable():
-                        return
-                    data = tail[0] + bytes(reply.peek(65536))
-                except RuntimeError:
-                    if not closing:  # a reply aborted by iterator.close() is not an error
-                        rejected.append(True)
-                    return
-                tail[0] = data[-256:]
-                if _EXCEPTION_REPORT.search(data):
-                    rejected.append(True)
-
-            def error(code):
-                # A canceled reply can be a render of the same service (the
-                # user pans) or our own close(). A probe that never answers
-                # is left to the provider's errors and the job's deadline.
-                if code not in (QNetworkReply.NetworkError.NoError, QNetworkReply.NetworkError.OperationCanceledError):
-                    rejected.append(True)
-
-            reply.readyRead.connect(inspect, Qt.ConnectionType.DirectConnection)
-            reply.finished.connect(inspect, Qt.ConnectionType.DirectConnection)
-            if hasattr(reply, 'errorOccurred'):
-                reply.errorOccurred.connect(error, Qt.ConnectionType.DirectConnection)
-            else:  # Qt < 5.15
-                reply.finished.connect(lambda: error(reply.error()), Qt.ConnectionType.DirectConnection)
-            inspect()  # a cached reply can hold data before readyRead is connected
-
-        preprocessor = QgsNetworkAccessManager.setReplyPreprocessor(observe)
-        try:
-            iterator = provider.getFeatures(QgsFeatureRequest().setLimit(2).setNoAttributes())
-            next(iterator, None)
-            closing.append(True)
-            iterator.close()
-            QCoreApplication.processEvents()  # this worker's error slots
-        finally:
-            QgsNetworkAccessManager.removeReplyPreprocessor(preprocessor)
-        return not rejected
 
     def run(self):
         manager = QgsNetworkAccessManager.instance()
@@ -238,7 +189,11 @@ class _PrepareTask(QgsTask):
                 if index == 1 and self.provider_key.lower() == 'arcgisfeatureserver' and not self._validate_arcgis():
                     return False
                 if index == 1 and valid and key == 'wfs':
-                    valid = self._probe_wfs(provider)
+                    request = QgsFeatureRequest().setLimit(2).setNoAttributes()
+                    iterator = provider.getFeatures(request)
+                    next(iterator, None)
+                    iterator.close()
+                    QCoreApplication.processEvents()  # this worker's error slots
                 valid = valid and not provider.hasErrors() and not self.failed
                 if not valid:
                     if index == 0 and self.job.allow_missing_backup:
@@ -372,6 +327,8 @@ class ServerSubsetJob(QObject):
         consumed = set()
         guards = ExitStack()
         try:
+            if not success:
+                task.forget_responses()
             if self.done:
                 return
             if not success:
@@ -477,38 +434,49 @@ def apply_server_subset_sync(layer, subset):
     before 5.0.
     """
     name = layer.name()
-    if QThread.currentThread() != layer.thread() or layer.thread() != QgsApplication.instance().thread():
+    main = QgsApplication.instance().thread()
+    if QThread.currentThread() != layer.thread() or layer.thread() != main:
         raise ServerFilterError('{}: {}'.format(name, _tr('Server filter installation must start on the layer thread.')))
     if layer.isEditable():
         raise ServerFilterError('{}: {}'.format(name, _tr('Finish editing the layer before applying a server filter.')))
+    if not layer.isValid():
+        # QGIS only stores a subset for an invalid layer and returns False.
+        raise ServerFilterError('{}: {}'.format(name, _tr(
+            'Server filter installation failed. The previous provider was already invalid and could not be restored.')))
     from ..public_api.operations import _background_tasks_running
     if _background_tasks_running():
         raise ServerFilterError('{}: {}'.format(name, _tr('A FilterMate task is still reading layers. Retry after it finishes.')))
+    from ...infrastructure.database.sql_utils import feature_picker_guard
     before = layer.subsetString()
     provider = layer.dataProvider()
     errors = len(provider.errors()) if provider is not None else 0
     warnings = []
 
     def logged(message, tag, level):
-        if tag.lower() == 'wfs' and level in (Qgis.MessageLevel.Warning, Qgis.MessageLevel.Critical):
+        # The setter logs on the main thread; downloads of other layers log
+        # on their own threads and say nothing about this filter.
+        if QThread.currentThread() == main and tag.lower() == 'wfs' and level in (
+                Qgis.MessageLevel.Warning, Qgis.MessageLevel.Critical):
             warnings.append(True)
 
     log = QgsApplication.messageLog()
-    log.messageReceived.connect(logged, Qt.ConnectionType.DirectConnection)
-    try:
-        accepted = layer.setSubsetString(subset)
-        provider = layer.dataProvider()
-        if accepted and layer.isValid() and layer.subsetString().strip() == subset.strip() and not warnings and (
-                provider is None or len(provider.errors()) <= errors):
-            return True
-    except Exception:  # nosec B110 - provider details may contain credentials
-        pass
-    finally:
-        log.messageReceived.disconnect(logged)
-    try:
-        if layer.subsetString() != before or not layer.isValid():
-            if not layer.setSubsetString(before) or not layer.isValid():
-                raise ValueError('Restoration rejected')
-    except Exception:  # nosec B110 - report the failure without a source URI
-        raise ServerFilterError(_tr('{0}: the provider rejected the filter and restoration failed.').format(name)) from None
+    with feature_picker_guard(layer):
+        log.messageReceived.connect(logged, Qt.ConnectionType.DirectConnection)
+        try:
+            accepted = layer.setSubsetString(subset)
+            provider = layer.dataProvider()
+            if accepted and layer.isValid() and layer.subsetString().strip() == subset.strip() and not warnings and (
+                    provider is None or len(provider.errors()) <= errors):
+                layer.removeSelection()  # a new WFS cache numbers its features again
+                return True
+        except Exception:  # nosec B110 - provider details may contain credentials
+            pass
+        finally:
+            log.messageReceived.disconnect(logged)
+        try:
+            if layer.subsetString() != before or not layer.isValid():
+                if not layer.setSubsetString(before) or not layer.isValid():
+                    raise ValueError('Restoration rejected')
+        except Exception:  # nosec B110 - report the failure without a source URI
+            raise ServerFilterError(_tr('{0}: the provider rejected the filter and restoration failed.').format(name)) from None
     raise ServerFilterError(_tr('{0}: the provider rejected the attribute filter. The previous filter was restored.').format(name))

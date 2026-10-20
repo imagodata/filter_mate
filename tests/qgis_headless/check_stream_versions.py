@@ -5,9 +5,12 @@ core/filter/server_transfer_policy allows the asynchronous transfer, its
 guarantees are checked: candidate and rollback providers prepared in a
 task, HTTP-200 ExceptionReport and HTTP 500 refused, timeout and
 cancellation without a late mutation, failed installation restored.
-Elsewhere (QGIS < 3.32) the synchronous WFS fallback is checked and its
-main-thread freeze is printed (FREEZE line). The ArcGIS Feature Server
-lifecycle is in check_stream_vector_filters.py.
+Before 3.32 the synchronous WFS fallback is checked and its main-thread
+freeze is printed (FREEZE line); where the policy refuses WFS (QGIS whose
+setter corrupts a running read) the refusal is checked and the freeze is
+still measured. Every mode filters once while a map canvas downloads the
+layer. The ArcGIS Feature Server lifecycle is in
+check_stream_vector_filters.py.
 """
 import os
 from pathlib import Path
@@ -19,7 +22,8 @@ import types
 
 os.environ.setdefault('QT_QPA_PLATFORM', 'offscreen')
 from qgis.core import (  # noqa: E402
-    Qgis, QgsApplication, QgsNetworkAccessManager, QgsNetworkRequestParameters, QgsProject, QgsVectorLayer,
+    Qgis, QgsApplication, QgsNetworkAccessManager, QgsNetworkRequestParameters, QgsProject, QgsRectangle,
+    QgsVectorLayer,
 )
 from qgis.PyQt.QtCore import QT_VERSION_STR, QEventLoop, QThread, QTimer  # noqa: E402
 from qgis.PyQt.QtNetwork import QNetworkAccessManager, QNetworkRequest  # noqa: E402
@@ -29,14 +33,15 @@ temporary = Path(tempfile.mkdtemp(prefix='fm-stream-versions-'))
 (temporary / 'filter_mate').symlink_to(root, target_is_directory=True)
 os.environ['FILTERMATE_LOG_DIR'] = str(temporary / 'logs')
 sys.path.insert(0, str(temporary))
-app = QgsApplication([], False)
+app = QgsApplication([], True)  # a real map canvas renders the layer
 app.initQgis()
+from qgis.gui import QgsMapCanvas  # noqa: E402
 
 from filter_mate.adapters.qgis import server_subset_job as job_module  # noqa: E402
 from filter_mate.adapters.qgis.server_filter_translation import (  # noqa: E402
-    ServerFilterError, last_server_filter_error, restore_server_subset,
+    ServerFilterError, last_server_filter_error, prepare_server_subset, restore_server_subset,
 )
-from filter_mate.core.filter.server_transfer_policy import ASYNC, SYNC  # noqa: E402
+from filter_mate.core.filter.server_transfer_policy import ASYNC, REFUSE, SYNC  # noqa: E402
 from filter_mate.infrastructure.database.sql_utils import safe_set_subset_string  # noqa: E402
 from stream_vector_fixture import VectorService  # noqa: E402
 
@@ -83,13 +88,59 @@ with VectorService(attribute_filters=True) as fixture:
     arcgis = job_module.transfer_mode_for_layer(types.SimpleNamespace(providerType=lambda: 'arcgisfeatureserver'))
     print('MODE QGIS {} ({}) Qt {} wfs={} arcgis={}'.format(
         Qgis.QGIS_VERSION, Qgis.QGIS_VERSION_INT, QT_VERSION_STR, mode, arcgis), flush=True)
-    check('WFS is never refused: asynchronous or synchronous', mode in (ASYNC, SYNC), mode)
+    check('transfer mode known', mode in (ASYNC, SYNC, REFUSE), mode)
 
     fixture.requests.clear()
     accepted = safe_set_subset_string(layer, '"id" = 1 AND abs("id") < 3')
     check('PARTIAL predicate refused before any request', not accepted and layer.subsetString() == ''
           and not fixture.requests and 'Unsupported part' in last_server_filter_error(layer),
           last_server_filter_error(layer))
+
+    # The QGIS 3.22 WFS setter corrupts the heap when a render still reads
+    # the layer: each mode must survive a filter while the canvas downloads.
+    canvas = QgsMapCanvas()
+    canvas.resize(400, 200)
+    canvas.show()
+    canvas.setDestinationCrs(layer.crs())
+    canvas.setLayers([layer])
+    canvas.setExtent(QgsRectangle(-1, 0, 1999, 2))
+    fixture.delay = 1.5
+    canvas.refresh()
+    wait(400)
+    drawing = canvas.isDrawing()
+    started = time.perf_counter()
+    accepted = safe_set_subset_string(layer, '"id" = 40')
+    print('CANVAS QGIS {} filter call while the canvas downloads the layer (server delay 1.5 s): {:.0f} ms'.format(
+        Qgis.QGIS_VERSION, (time.perf_counter() - started) * 1000), flush=True)
+    wait(2500)
+    fixture.delay = 0
+    expected = mode != REFUSE
+    check('filter while a map canvas downloads the layer: {}, no crash'.format(
+        'applied' if expected else 'refused'), drawing and accepted == expected
+        and ('"id" = 40' in layer.subsetString()) == expected, '{} {} {!r}'.format(drawing, accepted, layer.subsetString()))
+    canvas.setLayers([])
+    wait(200)
+    assert safe_set_subset_string(layer, '') and layer.subsetString() == ''
+
+    if mode == REFUSE:
+        fixture.requests.clear()
+        accepted = safe_set_subset_string(layer, '"id" = 3')
+        message = last_server_filter_error(layer)
+        check('WFS refused with a clear message, no request, no mutation', not accepted and layer.subsetString() == ''
+              and not fixture.requests and message.startswith('loopback WFS: ') and '3.32' in message, message)
+        # What the synchronous fallback would freeze here, measured with no
+        # concurrent read (the case that corrupts the heap on this QGIS).
+        freezes = []
+        for value in (2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 3):
+            subset = prepare_server_subset(layer, '"id" = {}'.format(value))
+            started = time.perf_counter()
+            job_module.apply_server_subset_sync(layer, subset)
+            freezes.append((time.perf_counter() - started) * 1000)
+        check('the synchronous setter itself works on the fixture', ids(layer) == [3], repr(layer.subsetString()))
+        print('FREEZE QGIS {} synchronous WFS setter, not used (refused): first call {:.1f} ms, then median {:.1f} ms, '
+              'max {:.1f} ms over {} filters'.format(Qgis.QGIS_VERSION, freezes[0], statistics.median(freezes[1:]),
+                                                      max(freezes[1:]), len(freezes) - 1), flush=True)
+        print('SKIP asynchronous and synchronous WFS transfer on QGIS {}'.format(Qgis.QGIS_VERSION), flush=True)
 
     if mode == ASYNC:
         prepared = []
@@ -148,8 +199,16 @@ with VectorService(attribute_filters=True) as fixture:
         before = layer.subsetString()
 
         accepted = safe_set_subset_string(layer, '"id" = 999')
-        check('HTTP-200 ExceptionReport refused, previous filter kept', not accepted and layer.subsetString() == before
-              and ids(layer) == [3] and 'rejected' in last_server_filter_error(layer), last_server_filter_error(layer))
+        check('HTTP-200 OWS ExceptionReport (WFS 1.1 / 2.0) refused, previous filter kept', not accepted
+              and layer.subsetString() == before and ids(layer) == [3] and 'rejected' in last_server_filter_error(layer),
+              last_server_filter_error(layer))
+        # QGIS's GML parser ends a WFS 1.0 ServiceExceptionReport as an empty
+        # collection, with no provider error: a known limit, reported only.
+        accepted = safe_set_subset_string(layer, '"id" = 998')
+        print('LIMIT HTTP-200 WFS 1.0 ServiceExceptionReport {} by QGIS'.format(
+            'accepted (empty layer)' if accepted else 'refused'), flush=True)
+        if accepted:
+            assert safe_set_subset_string(layer, '"id" = 3') and layer.subsetString() == before
         fixture.fail = True
         try:
             accepted = safe_set_subset_string(layer, '"id" = 4')
@@ -158,6 +217,9 @@ with VectorService(attribute_filters=True) as fixture:
         check('HTTP 500 refused, previous filter kept', not accepted and layer.subsetString() == before
               and ids(layer) == [3], last_server_filter_error(layer))
 
+        # fixture.release cleared: the server holds the 777 answer, so each
+        # step acts while the job is certainly still preparing.
+        fixture.release.clear()
         loop = QEventLoop()
         job = job_module.ServerSubsetJob(layer, '"id" = 777', timeout_ms=20)
         job.finished.connect(loop.quit)
@@ -165,26 +227,37 @@ with VectorService(attribute_filters=True) as fixture:
         if not job.done:
             loop.exec()
         timed_out = job.done and not job.success
+        fixture.release.set()
         wait(1200)
         check('timeout discards the prepared provider without a late mutation',
               timed_out and layer.subsetString() == before, job.message)
         loop = QEventLoop()
         job = job_module.ServerSubsetJob(layer, '"id" = 777', timeout_ms=10000)
         job.finished.connect(loop.quit)
+        fixture.release.clear()
         job.start()
-        QTimer.singleShot(50, job.cancel)
+        QTimer.singleShot(0, job.cancel)
         if not job.done:
             loop.exec()
         canceled = job.done and not job.success
+        fixture.release.set()
         wait(1200)
         check('cancellation keeps the previous filter without a late mutation',
               canceled and layer.subsetString() == before, job.message)
         loop = QEventLoop()
         job = job_module.ServerSubsetJob(layer, '"id" = 777', timeout_ms=10000)
         job.finished.connect(loop.quit)
+        fixture.release.clear()
         job.start()
         cleared = []
-        QTimer.singleShot(10, lambda: cleared.append(safe_set_subset_string(layer, '')))
+
+        def clear_then_release():
+            try:
+                cleared.append(safe_set_subset_string(layer, ''))
+            finally:
+                fixture.release.set()
+
+        QTimer.singleShot(0, clear_then_release)
         if not job.done:
             loop.exec()
         wait(1200)
@@ -308,6 +381,7 @@ with VectorService(attribute_filters=True) as fixture:
         check('the asynchronous job itself still refuses', '3.32' in message and '"id" = 6' in layer.subsetString(),
               message)
         print('SKIP asynchronous WFS transfer: not proven on QGIS {}'.format(Qgis.QGIS_VERSION), flush=True)
+    canvas.hide()
     QgsProject.instance().removeAllMapLayers()
 
 print('FAILURES', len(failed), flush=True)

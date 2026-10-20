@@ -150,10 +150,12 @@ if Qgis.QGIS_VERSION_INT < PRELOADED_PROVIDER_MIN:
 # No public service is needed by the automatic regression suite.
 import json  # noqa: E402
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer  # noqa: E402
-from threading import Thread  # noqa: E402
+from threading import Event, Thread  # noqa: E402
 from urllib.parse import parse_qs, urlsplit  # noqa: E402
 queries = []
 rejected_wheres = set()  # where clauses the fixture starts rejecting mid-run
+release = Event()  # cleared: the 777 answers wait, so a job cannot finish before a step acts
+release.set()
 
 
 class ArcGISFixture(BaseHTTPRequestHandler):
@@ -168,6 +170,7 @@ class ArcGISFixture(BaseHTTPRequestHandler):
             if '777' in where:
                 import time
                 time.sleep(0.15)
+                release.wait(10)
             if '999' in where or any(clause in where for clause in rejected_wheres) or (
                     parameters.get('returnCountOnly') == ['true'] and not where):
                 payload = {'error': {'code': 400, 'message': 'Fixture rejection'}}
@@ -289,6 +292,12 @@ try:
     assert any(query.get('returnCountOnly') == ['true'] for query in queries), queries
     rejected_wheres.clear()
     print('PASS ArcGIS verdict is fresh from the server, not a cached response', flush=True)
+    rejected_wheres.add('"id" = 5')  # a transient error the first time this filter is seen
+    assert not safe_set_subset_string(service, '"id" = 5')
+    rejected_wheres.clear()
+    assert safe_set_subset_string(service, '"id" = 5') and '"id" = 5' in service.subsetString()
+    assert safe_set_subset_string(service, '"id" = 1') and service.subsetString() == before
+    print('PASS a refused filter is not answered from the HTTP cache once the server recovers', flush=True)
 
     from filter_mate.adapters.qgis.server_subset_job import ServerSubsetJob
     loop = QEventLoop()
@@ -339,6 +348,7 @@ try:
     pending_loop = QEventLoop()
     pending_job = ServerSubsetJob(service, '"id" = 777', timeout_ms=5000)
     pending_job.finished.connect(pending_loop.quit)
+    release.clear()
     pending_job.start()
     assert busy_reason()
     warnings = []
@@ -351,10 +361,18 @@ try:
         app_module.show_warning = previous_warning
     assert len(warnings) == 2
     print('PASS new GUI filter/undo and REST operations are guarded while preparing', flush=True)
-    # Before the event loop runs: the job cannot have been installed yet.
-    # A 10 ms timer raced with the worker, which QGIS's HTTP cache (the
-    # blocking requests prefer it) can finish within a few milliseconds.
-    cleared = [api.clear_filter('loopback ArcGIS')]
+    # The clear comes from inside the job's event loop, like a REST call in
+    # the GUI, while the server holds the job's answer. A 10 ms timer used
+    # to race a worker that QGIS's HTTP cache served in a few milliseconds.
+    cleared = []
+
+    def clear_then_release():
+        try:
+            cleared.append(api.clear_filter('loopback ArcGIS'))
+        finally:
+            release.set()
+
+    QTimer.singleShot(0, clear_then_release)
     if not pending_job.done:
         pending_loop.exec()
     assert pending_job.done and not pending_job.success and cleared == [True]
@@ -374,10 +392,16 @@ try:
     deleted_loop = QEventLoop()
     deleted_job = ServerSubsetJob(deleted, '"id" = 777', timeout_ms=3000)
     deleted_job.finished.connect(deleted_loop.quit)
+    release.clear()
     deleted_job.start()
-    # The installation runs from the event loop: deleting now always
-    # precedes it, wherever the worker is (same race as the clear above).
-    QgsProject.instance().removeMapLayer(deleted_id)
+
+    def delete_then_release():  # same held answer as the clear above
+        try:
+            QgsProject.instance().removeMapLayer(deleted_id)
+        finally:
+            release.set()
+
+    QTimer.singleShot(0, delete_then_release)
     if not deleted_job.done:
         deleted_loop.exec()
     assert deleted_job.done and not deleted_job.success, deleted_job.message
@@ -403,6 +427,7 @@ try:
     assert history.undo_count == 1 and history.redo_count == 0 and service.subsetString() == before
     print('PASS failed server undo leaves the history position unchanged', flush=True)
 finally:
+    release.set()
     server.shutdown()
     server.server_close()
 print('SKIP public services: opt-in measure_stream_A.py', flush=True)
