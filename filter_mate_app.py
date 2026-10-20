@@ -14,6 +14,7 @@ FilterMate Application Orchestrator
 
 from qgis.PyQt.QtCore import Qt, QTimer, QCoreApplication
 from qgis.PyQt.QtWidgets import QMessageBox, QApplication
+import sys
 import weakref
 try:
     import sip
@@ -187,6 +188,18 @@ STABILITY_CONSTANTS = {
 # FilterMateApp._freeze_canvas_for_task); this watchdog thaws it if neither
 # taskCompleted nor taskTerminated ever fires.
 CANVAS_FREEZE_WATCHDOG_MS = 600000
+
+
+def _api_operation_running():
+    """Whether a FilterMate API operation (adapters.public_api.operations) is running.
+
+    An operation runs only from that module once loaded: while it is not, none
+    runs. Importing it here compiled about 1 100 lines on the GUI thread at the
+    first Filter click (2026-10-20: up to seconds on a loaded host).
+    """
+    package = __name__.rpartition('.')[0]
+    operations = sys.modules.get(package + '.adapters.public_api.operations')
+    return bool(getattr(operations, '_RUNNING', None))
 
 
 class FilterMateApp:
@@ -1294,16 +1307,11 @@ class FilterMateApp:
         if server_filter_pending():
             show_warning(QCoreApplication.translate('FilterMateApp', 'A server filter is being prepared. Wait for it to finish before starting another operation.'))
             return
-        if task_name in ('filter', 'unfilter', 'reset', 'export'):
-            try:
-                from .adapters.public_api.operations import _RUNNING as api_running
-            except ImportError:
-                api_running = ()
-            if api_running:
-                iface.messageBar().pushWarning(
-                    "FilterMate", QCoreApplication.translate(
-                        "FilterMateApp", "A FilterMate API operation is running. Wait for it to finish."))
-                return
+        if task_name in ('filter', 'unfilter', 'reset', 'export') and _api_operation_running():
+            iface.messageBar().pushWarning(
+                "FilterMate", QCoreApplication.translate(
+                    "FilterMateApp", "A FilterMate API operation is running. Wait for it to finish."))
+            return
         from .core.tasks import FilterEngineTask
 
         logger.info(f"⚙️ _execute_filter_task CALLED: task_name={task_name}")
@@ -1761,16 +1769,11 @@ class FilterMateApp:
         """
         if getattr(self, '_unloading', False):
             return
-        if task_name in ('filter', 'unfilter', 'reset', 'export'):
-            try:
-                from .adapters.public_api.operations import _RUNNING as api_running
-            except ImportError:
-                api_running = ()
-            if api_running:
-                iface.messageBar().pushWarning(
-                    "FilterMate", QCoreApplication.translate(
-                        "FilterMateApp", "A FilterMate API operation is running. Wait for it to finish."))
-                return
+        if task_name in ('filter', 'unfilter', 'reset', 'export') and _api_operation_running():
+            iface.messageBar().pushWarning(
+                "FilterMate", QCoreApplication.translate(
+                    "FilterMateApp", "A FilterMate API operation is running. Wait for it to finish."))
+            return
         if task_name == 'remove_all_layers':
             self._handle_remove_all_layers()
             return
