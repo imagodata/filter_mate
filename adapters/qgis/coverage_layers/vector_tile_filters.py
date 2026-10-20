@@ -5,7 +5,7 @@ Tiles are targets only. Filters operate on the attributes and clipped
 geometries present at the displayed zoom; they never query whole features.
 """
 import dataclasses
-import xml.etree.ElementTree as ET
+import xml.etree.ElementTree as ET  # nosec B405 - parses the style XML QGIS wrote, never external input
 
 MAX_VERTICES = 2000
 MAX_FILTER_BYTES = 1000000
@@ -130,7 +130,7 @@ def _read_style(xml, restore_properties=True):
 
 def without_property_backup(xml):
     """Strip only the backup, retaining native properties to detect user edits."""
-    root = ET.fromstring(xml)
+    root = ET.fromstring(xml)  # nosec B314 - the style XML QGIS wrote
     for element in list(root.findall('numeric-properties')):
         root.remove(element)
     return ET.canonicalize(ET.tostring(root, encoding='unicode'))
@@ -142,8 +142,9 @@ def is_native_reload(current, saved):
         return False
 
     def properties(xml):
+        root = ET.fromstring(xml)  # nosec B314 - the style XML QGIS wrote
         return {(p.get('style'), p.get('path'), p.get('key')): ET.canonicalize(ET.tostring(p, encoding='unicode'))
-                for p in ET.fromstring(xml).findall('numeric-properties/property')}
+                for p in root.findall('numeric-properties/property')}
     old = properties(saved)
     return all(old.get(key) == value for key, value in properties(current).items())
 
