@@ -6604,7 +6604,7 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation>Ekstern materialisering kræver en baggrundsopgave.</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/remote_materializer.py" line="626"/>
+        <location filename="../adapters/qgis/remote_materializer.py" line="715"/>
         <source>Filtering a bounded remote copy</source>
         <translation>Filtrerer en afgrænset ekstern kopi</translation>
     </message>

@@ -6728,7 +6728,7 @@ Objet cliqué : seulement la tache de ces pixels où tombe le clic (une piscine,
         <translation>La copie bornée d'une couche distante nécessite une tâche de fond.</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/remote_materializer.py" line="626"/>
+        <location filename="../adapters/qgis/remote_materializer.py" line="715"/>
         <source>Filtering a bounded remote copy</source>
         <translation>Filtrage d'une copie bornée de la couche distante</translation>
     </message>

@@ -6604,7 +6604,7 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation>远程实体化需要后台任务。</translation>
     </message>
     <message>
-        <location filename="../adapters/qgis/remote_materializer.py" line="626"/>
+        <location filename="../adapters/qgis/remote_materializer.py" line="715"/>
         <source>Filtering a bounded remote copy</source>
         <translation>正在过滤有范围限制的远程副本</translation>
     </message>
