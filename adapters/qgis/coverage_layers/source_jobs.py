@@ -199,13 +199,15 @@ class RasterSourceJob(SourceJob):
     reports_progress = True
 
     def __init__(self, layer, selection: RasterSelection, max_pixels=None, filter_source: bool = True,
-                 analysis_source=None) -> None:
+                 analysis_source=None, zone: Optional[QgsGeometry] = None) -> None:
         """``max_pixels``: ``CROSS_FILTER.raster_source_max_pixels`` as read from the config or an API call
         (see :func:`raster_adapter.source_max_pixels`), the default when None.
         ``analysis_source`` is a local (path, provider) rendered color capture
-        in layer CRS, used for geometry only; rendered service layers stay unchanged."""
+        in layer CRS, used for geometry only; rendered service layers stay unchanged.
+        ``zone``: polygon drawn with the Zone tool (layer CRS): only the pixels inside it are kept."""
         super().__init__(layer)
         from .raster_adapter import source_max_pixels
+        self._zone = zone if zone is not None and not zone.isEmpty() else None
         self.selection = selection
         self._max_pixels = source_max_pixels(max_pixels)
         self._filter_source = filter_source
@@ -356,6 +358,9 @@ class RasterSourceJob(SourceJob):
             self.details['smoothing'] = result.smoothing  # majority radius (cells) of the densest tile
         if result.blocks:
             self.details['blocks'] = result.blocks  # block side (cells) a dense tile was read on
+        if self._zone is not None and result.geometry is not None and not result.geometry.isEmpty():
+            self.details['zone'] = True
+            return result.geometry.intersection(self._zone)
         return result.geometry
 
     def _object_provider(self, criterion):

@@ -76,6 +76,12 @@ ACTION_DESELECT_ALL = ('mActionDeselectAll',)
 ACTION_OPEN_TABLE_SELECTED = ('mActionOpenTableSelected',)
 VECTOR_LINK_BUTTON = 'pushButton_checkable_exploring_linking_widgets'
 VECTOR_SELECT_BUTTON = 'pushButton_checkable_exploring_selecting'
+# The Zone buttons (shapes of the QGIS selection tools): one a layer kind, one map tool shared by the three.
+VECTOR_ZONE_BUTTON = 'pushButton_checkable_exploring_vector_zone'
+ZONE_BUTTONS = ('pushButton_checkable_exploring_raster_zone', 'pushButton_checkable_exploring_point_cloud_zone',
+                VECTOR_ZONE_BUTTON)
+# Rubber band colour of the shape, by layer kind (mockup kind colours).
+ZONE_COLORS = {'vector': '#6fb1f0', 'raster': '#f0b35a', 'point_cloud': '#4fd1b0'}
 # The object detector of a point cloud (CLASSES, 2026-10-18): the object under a click, or the similar ones.
 PC_OBJECT_BUTTON = 'pushButton_checkable_exploring_point_cloud_object'
 ACTION_NEW_3D_VIEW = ('mActionNew3DMapCanvas', 'mActionNew3DMapView')
@@ -216,7 +222,8 @@ RAIL_TOOLS = {
     # Seven buttons a rail, vector, raster and point cloud alike: the shared ones (zoom, preview, reset,
     # plus Identify on a vector or a point cloud) and the tools of the groups.
     # 2026-10-18: the vector rail gets a "more" menu (the QGIS selection tools and actions).
-    'vector': ('pushButton_exploring_vector_more',),
+    # 2026-10-21: the vector rail gets the Zone too: the shape drawn selects the features it touches.
+    'vector': (VECTOR_ZONE_BUTTON, 'pushButton_exploring_vector_more'),
     'raster': ('pushButton_checkable_exploring_raster_pipette', 'pushButton_checkable_exploring_raster_detector',
                'pushButton_checkable_exploring_raster_similar', 'pushButton_checkable_exploring_raster_link',
                'pushButton_exploring_raster_more'),
@@ -265,9 +272,7 @@ class CoverageDockExtras(QObject):
         self._hover_connected = False
         self._hover_point = None
         self._hover_timer = None
-        self._zone_tool = None
-        self._zone_previous_tool = None
-        self._pc_zone_tool = None  # the shapes of the QGIS selection tools, on a point cloud
+        self._pc_zone_tool = None  # the shapes of the QGIS selection tools: the one Zone tool of the three rails
         self._pc_zone_previous_tool = None
         self._vector_link_tip = None  # the Link tooltip of the dock, given back after the custom selection
         self._pc_zone_shape = 'rectangle'
@@ -401,8 +406,9 @@ class CoverageDockExtras(QObject):
                      "while moving over the map"),
              self._on_hover_toggled),
             ('pushButton_checkable_exploring_raster_zone', True,
-             self.tr("Statistics of a rectangle: drag on the map to read the minimum, maximum and mean of the current "
-                     "band (or of the slope, aspect... the range applies to)"),
+             self.tr("Zone: draw a rectangle, a polygon, a freehand shape or a circle on the map (right-click the "
+                     "button for the shape); only the pixels inside it are selected, and the minimum, maximum and "
+                     "mean of the current band (or of the slope, aspect... the range applies to) are read in its box"),
              self._on_zone_toggled),
             ('pushButton_checkable_exploring_raster_link', True, self._link_tip, self._on_link_toggled),
             ('pushButton_checkable_exploring_point_cloud_pipette', True, self._class_pipette_tip,
@@ -421,8 +427,12 @@ class CoverageDockExtras(QObject):
              self.tr("Zone: draw a rectangle, a polygon, a freehand shape or a circle on the map (right-click the "
                      "button for the shape); its X / Y box goes to ATTRIBUTES, the shape itself cuts the targets"),
              self._on_pc_zone_toggled),
+            (VECTOR_ZONE_BUTTON, True,
+             self.tr("Zone: draw a rectangle, a polygon, a freehand shape or a circle on the map (right-click the "
+                     "button for the shape) and the features it touches are selected"),
+             self._on_pc_zone_toggled),
             ('pushButton_exploring_raster_more', False,
-             self.tr("More tools: the value under the cursor, the statistics of a rectangle"), self._show_raster_more_menu),
+             self.tr("More tools: the value under the cursor, the zone"), self._show_raster_more_menu),
             ('pushButton_exploring_vector_more', False,
              self.tr("More tools: the QGIS selection tools (rectangle, polygon, freehand, radius), select by "
                      "expression, invert or clear the selection, the attribute table of the selection"),
@@ -455,11 +465,12 @@ class CoverageDockExtras(QObject):
                 button.clicked.connect(slot)
             layout.insertWidget(index + offset, button, 0, layout.itemAt(layout.indexOf(anchor)).alignment())
             self._tools[name] = button
-            if name in ('pushButton_checkable_exploring_point_cloud_zone', PC_OBJECT_BUTTON):
+            if name in ('pushButton_checkable_exploring_point_cloud_zone', VECTOR_ZONE_BUTTON, PC_OBJECT_BUTTON):
                 from qgis.PyQt.QtCore import Qt
                 button.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
                 button.customContextMenuRequested.connect(
-                    self._on_pc_object_context_menu if name == PC_OBJECT_BUTTON else self._on_pc_zone_context_menu)
+                    self._on_pc_object_context_menu if name == PC_OBJECT_BUTTON
+                    else lambda position, n=name: self._on_pc_zone_context_menu(position, n))
 
     def _refresh_icons(self) -> None:
         """Draw the tool icons in the text color of the current theme."""
@@ -480,6 +491,7 @@ class CoverageDockExtras(QObject):
             PC_OBJECT_BUTTON: ICON_DETECTOR,
             'pushButton_checkable_exploring_point_cloud_value_pipette': ICON_VALUE_PIPETTE,
             'pushButton_checkable_exploring_point_cloud_zone': ICON_PC_ZONE,
+            VECTOR_ZONE_BUTTON: ICON_PC_ZONE,
             'pushButton_exploring_raster_more': ICON_MORE,
             'pushButton_exploring_point_cloud_more': ICON_MORE,
             'pushButton_exploring_vector_more': ICON_MORE,
@@ -615,12 +627,11 @@ class CoverageDockExtras(QObject):
                      'pushButton_checkable_exploring_raster_hover', 'pushButton_checkable_exploring_raster_zone',
                      'pushButton_checkable_exploring_raster_link', 'pushButton_checkable_exploring_point_cloud_pipette',
                      'pushButton_checkable_exploring_point_cloud_value_pipette', PC_OBJECT_BUTTON,
-                     'pushButton_checkable_exploring_point_cloud_zone'):
+                     'pushButton_checkable_exploring_point_cloud_zone', VECTOR_ZONE_BUTTON):
             button = self._tools.get(name)
             if button is not None:
                 self._guarded(self._uncheck, button)
         self._guarded(self._stop_hover)
-        self._guarded(self._stop_zone_tool)
         self._guarded(self._stop_pc_zone_tool)
         self._hover_base, self._hover_base_key = None, None
 
@@ -986,28 +997,26 @@ class CoverageDockExtras(QObject):
         menu.exec(button.mapToGlobal(position))
 
     def zone_tool_on(self) -> bool:
-        """Whether a zone tool (the raster rectangle or the point cloud shape) is the current map tool."""
+        """Whether the Zone tool (the shapes of the QGIS selection tools) is the current map tool."""
         canvas = self._canvas()
         if canvas is None:
             return False
-        current = canvas.mapTool()
-        return bool((self._zone_tool is not None and current is self._zone_tool)
-                    or (self._pc_zone_tool is not None and current is self._pc_zone_tool))
+        return bool(self._pc_zone_tool is not None and canvas.mapTool() is self._pc_zone_tool)
 
     def stop_zone_tool(self) -> None:
-        """Take the zone tools off the map (their buttons follow)."""
-        self._stop_zone_tool()
+        """Take the Zone tool off the map (its buttons follow)."""
         self._stop_pc_zone_tool()
         self._sync_zone_buttons(False)
 
     # === Point cloud: zone (the shapes of the QGIS selection tools) ===
 
     def _on_pc_zone_toggled(self, checked: bool) -> None:
+        """Zone button of any rail (vector, raster, point cloud): the shared shape tool goes on the map, or leaves."""
         if checked:
             self._start_pc_zone_tool()
             self._sync_zone_buttons(True)
             panel = getattr(self._controller, '_pc_panel', None)
-            if panel is not None and hasattr(panel, 'show_zone_active'):
+            if self._strip_kind == 'point_cloud' and panel is not None and hasattr(panel, 'show_zone_active'):
                 panel.show_zone_active()  # R2: the tool makes ATTRIBUTES the active group
         else:
             self._stop_pc_zone_tool()
@@ -1021,12 +1030,14 @@ class CoverageDockExtras(QObject):
             from ..tools.zone_tools import ShapeZoneTool
         except ImportError:
             return
+        color = ZONE_COLORS.get(self._strip_kind, ZONE_COLORS['vector'])
         if self._pc_zone_tool is None:
-            self._pc_zone_tool = ShapeZoneTool(canvas, self._pc_zone_shape)
-            self._pc_zone_tool.zoneDrawn.connect(self._on_point_cloud_zone_drawn)
+            self._pc_zone_tool = ShapeZoneTool(canvas, self._pc_zone_shape, color)
+            self._pc_zone_tool.zoneDrawn.connect(self._on_zone_shape_drawn)
             self._pc_zone_tool.deactivated.connect(self._on_pc_zone_tool_deactivated)
         else:
             self._pc_zone_tool.set_shape(self._pc_zone_shape)
+            self._pc_zone_tool.set_color(color)
         current = canvas.mapTool()
         if current is self._pc_zone_tool:
             return
@@ -1034,6 +1045,8 @@ class CoverageDockExtras(QObject):
         if current is not None and current is getattr(controller, '_class_tool', None):
             # Take over the tool the picker would have restored: never restore the picker itself.
             current, controller._previous_class_map_tool = controller._previous_class_map_tool, None
+        elif current is not None and current is getattr(controller, '_pixel_tool', None):
+            current, controller._previous_map_tool = controller._previous_map_tool, None
         self._pc_zone_previous_tool = current
         canvas.setMapTool(self._pc_zone_tool)
 
@@ -1052,6 +1065,11 @@ class CoverageDockExtras(QObject):
         canvas.unsetMapTool(self._pc_zone_tool)
 
     def _on_pc_zone_tool_deactivated(self) -> None:
+        """Another map tool took over: the buttons follow, and that tool inherits ours."""
+        controller = self._controller
+        if getattr(controller, '_previous_map_tool', None) is self._pc_zone_tool:
+            # The raster pixel picker just remembered the zone tool: hand it the tool before ours.
+            controller._previous_map_tool = self._pc_zone_previous_tool
         self._pc_zone_previous_tool = None
         self._sync_zone_buttons(False)
 
@@ -1086,15 +1104,15 @@ class CoverageDockExtras(QObject):
             group.addAction(action)
         return menu
 
-    def _on_pc_zone_context_menu(self, position: Any) -> None:
-        button = self._tools.get('pushButton_checkable_exploring_point_cloud_zone')
+    def _on_pc_zone_context_menu(self, position: Any, name: str = 'pushButton_checkable_exploring_point_cloud_zone') -> None:
+        button = self._tools.get(name)
         if button is None:
             return
         menu = self._zone_shape_menu(button)
         menu.exec(button.mapToGlobal(position))
 
     def _sync_zone_buttons(self, checked: bool) -> None:
-        for name in ('pushButton_checkable_exploring_raster_zone', 'pushButton_checkable_exploring_point_cloud_zone'):
+        for name in ZONE_BUTTONS:
             button = self._tools.get(name)
             if button is not None and button.isChecked() != checked:
                 button.blockSignals(True)
@@ -1102,6 +1120,62 @@ class CoverageDockExtras(QObject):
                     button.setChecked(checked)
                 finally:
                     button.blockSignals(False)
+
+    def _on_zone_shape_drawn(self, geometry: Any) -> None:
+        """A shape drawn on the map: the vector layer selects it, the raster cuts its pixels, the cloud filters X / Y."""
+        if geometry is None or geometry.isEmpty():
+            return
+        if self._strip_kind == 'point_cloud':
+            self._on_point_cloud_zone_drawn(geometry)
+        elif self._strip_kind == 'raster':
+            self._on_raster_zone_drawn(geometry)
+        else:
+            self._on_vector_zone_drawn(geometry)
+
+    def _shape_in_layer_crs(self, geometry: Any, layer: Any) -> Any:
+        """The canvas shape in the CRS of ``layer`` (the shape itself when it cannot be reprojected)."""
+        try:
+            from qgis.core import QgsCoordinateTransform, QgsGeometry, QgsProject
+            shape = QgsGeometry(geometry)
+            transform = QgsCoordinateTransform(self._canvas().mapSettings().destinationCrs(), layer.crs(),
+                                               QgsProject.instance())
+            shape.transform(transform)
+            return shape
+        except Exception as exc:
+            logger.debug(f"[FM5] zone not reprojected to the layer CRS: {exc}")
+            return geometry
+
+    def _on_vector_zone_drawn(self, geometry: Any) -> None:
+        """Select the features of the vector layer the shape touches (the panel follows the selection, R2)."""
+        dw = self.dockwidget
+        layer = getattr(dw, 'current_layer', None)
+        if layer is None:
+            return
+        try:
+            from qgis.core import QgsFeatureRequest, QgsGeometry
+            shape = self._shape_in_layer_crs(geometry, layer)
+            engine = QgsGeometry.createGeometryEngine(shape.constGet())
+            engine.prepareGeometry()
+            request = QgsFeatureRequest().setFilterRect(shape.boundingBox()).setSubsetOfAttributes([])
+            ids = [feature.id() for feature in layer.getFeatures(request)
+                   if feature.hasGeometry() and engine.intersects(feature.geometry().constGet())]
+            select = getattr(dw, VECTOR_SELECT_BUTTON, None)
+            if select is not None and not select.isChecked():
+                select.setChecked(True)  # R2: the selection reaches the widgets; no map tool is forced
+            layer.selectByIds(ids)
+        except Exception as exc:
+            logger.warning(f"[FM5] features of the zone not selected: {exc}")
+
+    def _on_raster_zone_drawn(self, geometry: Any) -> None:
+        """The shape cuts the selected pixels (its box gives the statistics of the zone)."""
+        controller = self._controller
+        layer, panel = controller.active_layer, controller._raster_panel
+        if layer is None or panel is None:
+            return
+        shape = self._shape_in_layer_crs(geometry, layer)
+        if hasattr(panel, 'set_zone_shape'):
+            panel.set_zone_shape(shape.asWkt(6))
+        self._on_zone_drawn(geometry.boundingBox())
 
     # === Vector: the tools follow the group (R1) and the "more" menu ===
 
@@ -1158,8 +1232,8 @@ class CoverageDockExtras(QObject):
         Args:
             names: The action's object names (the first found is run).
             mode: Put the "Select" mode on first, so the selection made on the map reaches the
-                panel (R2: the tool makes its mode active). The mode's own handler puts the
-                rectangle tool on; the action run after it replaces that tool.
+                panel (R2: the tool makes its mode active); the action run after it puts its own
+                tool on the map.
         """
         dw = self.dockwidget
         action = self._main_window_action(names)
@@ -1190,10 +1264,15 @@ class CoverageDockExtras(QObject):
         hover.setCheckable(True)
         hover.setChecked(bool(self._hover_connected))
         hover.toggled.connect(self._on_hover_toggled)
-        zone = menu.addAction(self.tr("Statistics of a rectangle"))
+        zone = menu.addAction(self.tr("Zone"))
         zone.setCheckable(True)
         zone.setChecked(self.zone_tool_on())
         zone.toggled.connect(self._on_zone_toggled)
+        menu.addMenu(self._zone_shape_menu(menu))
+        panel = self._controller._raster_panel
+        clear = menu.addAction(self.tr("Clear the zone"))
+        clear.setEnabled(bool(panel is not None and hasattr(panel, 'zone_wkt') and panel.zone_wkt()))
+        clear.triggered.connect(lambda _checked=False: panel.clear_zone())
         self._popup(button, menu)
 
     def _show_point_cloud_more_menu(self, *_args) -> None:
@@ -1426,75 +1505,26 @@ class CoverageDockExtras(QObject):
     # === Raster: statistics of a rectangle ===
 
     def _on_zone_toggled(self, checked: bool) -> None:
-        if checked:
-            self._start_zone_tool()
-            self._sync_zone_buttons(True)
-            panel = getattr(self._controller, '_pc_panel', None)
-            kind = getattr(getattr(self._controller, 'active_kind', None), 'value', '')
-            if kind == 'point_cloud' and panel is not None and hasattr(panel, 'show_zone_active'):
-                panel.show_zone_active()  # R2: the tool makes ATTRIBUTES the active group
-        else:
-            self._stop_zone_tool()
-            self._sync_zone_buttons(False)
-
-    def _start_zone_tool(self) -> None:
-        canvas = self._canvas()
-        if canvas is None:
-            return
-        try:
-            from qgis.gui import QgsMapToolExtent
-        except ImportError:
-            return
-        if self._zone_tool is None:
-            self._zone_tool = QgsMapToolExtent(canvas)
-            self._zone_tool.extentChanged.connect(self._on_zone_drawn)
-            self._zone_tool.deactivated.connect(self._on_zone_tool_deactivated)
-        current = canvas.mapTool()
-        if current is self._zone_tool:
-            return
-        controller = self._controller
-        if current is not None and current is getattr(controller, '_pixel_tool', None):
-            # Take over the tool the pixel picker would have restored: never restore the picker itself.
-            current, controller._previous_map_tool = controller._previous_map_tool, None
-        self._zone_previous_tool = current
-        canvas.setMapTool(self._zone_tool)
-
-    def _stop_zone_tool(self) -> None:
-        canvas = self._canvas()
-        if canvas is None or self._zone_tool is None or canvas.mapTool() is not self._zone_tool:
-            self._zone_previous_tool = None
-            return
-        previous, self._zone_previous_tool = self._zone_previous_tool, None
-        try:
-            if previous is not None and previous is not self._zone_tool:
-                canvas.setMapTool(previous)
-                return
-        except RuntimeError:
-            pass  # the previous tool was deleted (plugin unloaded)
-        canvas.unsetMapTool(self._zone_tool)
+        """The raster Zone (menu of the rail): the shared Zone tool, its shape cuts the selected pixels."""
+        self._on_pc_zone_toggled(checked)
 
     def _release_zone_tool(self) -> None:
-        tool, self._zone_tool = self._zone_tool, None
+        tool, self._pc_zone_tool = self._pc_zone_tool, None
         if tool is None:
             return
         canvas = self._canvas()
-        if canvas is not None and canvas.mapTool() is tool:
-            canvas.unsetMapTool(tool)
-        for signal, slot in ((tool.extentChanged, self._on_zone_drawn), (tool.deactivated, self._on_zone_tool_deactivated)):
+        try:
+            if canvas is not None and canvas.mapTool() is tool:
+                canvas.unsetMapTool(tool)
+        except RuntimeError:
+            pass
+        for signal, slot in ((tool.zoneDrawn, self._on_zone_shape_drawn),
+                             (tool.deactivated, self._on_pc_zone_tool_deactivated)):
             try:
                 signal.disconnect(slot)
             except (TypeError, RuntimeError):
                 pass
         tool.deleteLater()
-
-    def _on_zone_tool_deactivated(self) -> None:
-        """Another map tool took over: the button follows, and that tool inherits ours."""
-        controller = self._controller
-        if getattr(controller, '_previous_map_tool', None) is self._zone_tool:
-            # The pixel picker just remembered the rectangle tool: hand it the tool before ours.
-            controller._previous_map_tool = self._zone_previous_tool
-        self._zone_previous_tool = None
-        self._sync_zone_buttons(False)
 
     def _on_zone_drawn(self, extent: Any) -> None:
         controller = self._controller

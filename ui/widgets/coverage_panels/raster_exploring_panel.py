@@ -888,10 +888,12 @@ class RasterExploringPanel(QWidget):
         self._hover_label.setToolTip(self.tr("Value of the active band under the cursor"))
         self._hover_label.setVisible(False)
         group_layout.addWidget(self._hover_label)
+        self._zone_wkt = ""  # the shape of the Zone tool (layer CRS): the selected pixels are cut by it
         self._zone_label = QLabel("", group)
         self._zone_label.setWordWrap(True)
         self._zone_label.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
-        self._zone_label.setToolTip(self.tr("Statistics of the active band in the last rectangle drawn on the map"))
+        self._zone_label.setToolTip(self.tr("Statistics of the active band in the box of the last zone drawn on the map; "
+                                            "only the pixels inside the zone are selected"))
         self._zone_label.setVisible(False)
         group_layout.addWidget(self._zone_label)
         return group
@@ -1791,6 +1793,20 @@ class RasterExploringPanel(QWidget):
         if hasattr(self._bands_group, 'setCollapsed'):
             self._bands_group.setCollapsed(False)
 
+    def set_zone_shape(self, wkt: str) -> None:
+        """Keep the shape drawn with the Zone tool (layer CRS, WKT): the selected pixels are cut by it."""
+        self._zone_wkt = str(wkt or "")
+
+    def zone_wkt(self) -> str:
+        """WKT (layer CRS) of the zone that cuts the selected pixels; ``""`` without one."""
+        return self._zone_wkt
+
+    def clear_zone(self) -> None:
+        """Forget the zone and its statistics: the selection covers the whole raster again."""
+        self._zone_wkt = ""
+        self._zone_label.setVisible(False)
+        self._zone_label.setText("")
+
     def reset(self) -> None:
         """Back to the defaults: first band, roles from the layer, no range, no pick, no expression. Does not emit."""
         self._debounce.stop()
@@ -1808,8 +1824,7 @@ class RasterExploringPanel(QWidget):
             self._similar_high_spin.setValue(DEFAULT_SIMILAR_RATIO[1])
             self._similar_shape_check.setChecked(True)
         self.set_hover_value(None, None)
-        self._zone_label.setVisible(False)
-        self._zone_label.setText("")
+        self.clear_zone()
         self._pipette_selection, self._picks, self._pick_kind, self._seeds = None, [], "", []
         self._detected = None
         self._sample_label.setText("")
@@ -2107,7 +2122,7 @@ class RasterExploringPanel(QWidget):
         self._apply_band()
         self._set_range(None, None)
         self._refresh_pixel_display()
-        self._zone_label.setVisible(False)
+        self.clear_zone()
         if not self._pipette_bands:
             self._sample_label.setText(self.tr("Choose at least one band in BANDS before using the pipette."))
         self.bandChanged.emit(self.current_band())
@@ -2181,7 +2196,7 @@ class RasterExploringPanel(QWidget):
         self._apply_band()
         self._set_range(None, None)  # the old bounds were in another unit
         self._refresh_pixel_display()
-        self._zone_label.setVisible(False)
+        self.clear_zone()
         self._fill_insert_menu()
         self.bandChanged.emit(self.current_band())  # the controller then sends the histogram
         self._emit_now()

@@ -2054,9 +2054,9 @@ class CoverageModeController(BaseController):
         canvas.setExtent(extent)
         canvas.refresh()
 
-    def _zone_geometry(self) -> Any:
-        """The shape drawn with the Zone tool on the point cloud (layer CRS), None without one."""
-        panel = self._pc_panel
+    def _zone_geometry(self, panel: Any = None) -> Any:
+        """The shape drawn with the Zone tool on the point cloud (or the raster ``panel``), layer CRS, None without one."""
+        panel = panel if panel is not None else self._pc_panel
         wkt = panel.zone_wkt() if panel is not None and hasattr(panel, 'zone_wkt') else ''
         if not wkt:
             return None
@@ -2836,9 +2836,11 @@ class CoverageModeController(BaseController):
                     show_warning(self.tr("Prepare a color snapshot before filtering this rendered layer."))
                     return
                 source_job = RasterSourceJob(layer, selection, _option('raster_source_max_pixels', None),
-                                             analysis_source=(sample.source(), 'gdal'))
+                                             analysis_source=(sample.source(), 'gdal'),
+                                             zone=self._zone_geometry(self._raster_panel))
             else:
-                source_job = RasterSourceJob(layer, selection, _option('raster_source_max_pixels', None))
+                source_job = RasterSourceJob(layer, selection, _option('raster_source_max_pixels', None),
+                                             zone=self._zone_geometry(self._raster_panel))
             done_message = self.tr("Raster filtered: {0}").format(selection.describe())
             if not targets and not source_job.clips_source:
                 # A virtual raster of the band: nothing to read, done here.

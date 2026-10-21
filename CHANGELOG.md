@@ -4,6 +4,12 @@ All notable changes to FilterMate will be documented in this file.
 
 ## [Unreleased]
 
+- **Zone on the vector rail.** A Zone button (rectangle, polygon, freehand or circle, right-click for the shape) selects the features it touches; the panel follows the selection.
+
+- **Raster zone cuts the selection.** The raster Zone (⋯ menu) now draws the same shapes and keeps only the selected pixels inside them, on top of the statistics of its box. "Clear the zone" brings the whole raster back.
+
+- **Select button no longer forces a tool.** On a vector layer the Select button only keeps the map selection and the widgets in sync: it no longer switches QGIS to the rectangle selection tool, nor to Pan when switched off.
+
 - **Exploring link icon.** The style link button of the raster Exploring rail uses the same zone icon as LiDAR (the vector link icon is unchanged).
 
 - **Target centroid glyph alignment.** The dot is centred inside its rectangle in the Layers to filter list on Qt5 and Qt6.

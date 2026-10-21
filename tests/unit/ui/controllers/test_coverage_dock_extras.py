@@ -130,6 +130,12 @@ class TestTools:
                                                    "pushButton_checkable_exploring_point_cloud_zone",
                                                    "pushButton_exploring_point_cloud_more"]
 
+    def test_vector_rail_adds_the_zone_and_more(self):
+        assert extras.tools_for("vector") == ["pushButton_checkable_exploring_vector_zone",
+                                              "pushButton_exploring_vector_more"]
+        assert extras.VECTOR_ZONE_BUTTON in extras.ZONE_BUTTONS
+        assert set(extras.ZONE_COLORS) == {"vector", "raster", "point_cloud"}
+
     def test_the_rails_have_about_the_same_size(self):
         shared_raster = 3  # zoom, preview, reset (Identify hidden)
         shared_point_cloud = 4  # identify (class pipette), zoom, preview, reset
@@ -137,14 +143,10 @@ class TestTools:
         raster = shared_raster + len(extras.tools_for("raster"))
         point_cloud = shared_point_cloud + len(extras.tools_for("point_cloud"))
         vector = shared_vector + len(extras.tools_for("vector"))
-        assert raster == 8 and point_cloud == 8 and vector == 7
+        assert raster == 8 and point_cloud == 8 and vector == 8
 
     def test_detector_has_its_own_icon(self):
         assert extras.ICON_DETECTOR.strip().startswith("<") and extras.ICON_DETECTOR != extras.ICON_PIPETTE
-
-    def test_vector_rail_adds_the_more_menu(self):
-        # 2026-10-18: the "more" menu (the QGIS selection tools and actions).
-        assert extras.tools_for("vector") == ["pushButton_exploring_vector_more"]
 
     def test_the_vector_menu_runs_the_qgis_selection_tools(self):
         assert [key for key, _names in extras.VECTOR_SELECT_TOOLS] == ["rectangle", "polygon", "freehand", "radius"]

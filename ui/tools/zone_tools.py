@@ -3,8 +3,9 @@
 Zone map tool: the shapes of the QGIS selection tools (rectangle, polygon, freehand, radius)
 drawn on the map, given back as one polygon geometry in the canvas CRS.
 
-Used by the Zone button of the point cloud rail (ATTRIBUTES): the bounding box of the
-shape becomes X / Y conditions, the shape itself the source geometry of the cross filter.
+Used by the Zone button of the three rails: on a point cloud (ATTRIBUTES) the bounding box of the
+shape becomes X / Y conditions and the shape itself the source geometry of the cross filter; on a
+raster the shape cuts the selected pixels; on a vector layer it selects the features it touches.
 """
 import math
 
@@ -27,7 +28,7 @@ SHAPE_FREEHAND = 'freehand'
 SHAPE_RADIUS = 'radius'
 SHAPES = (SHAPE_RECTANGLE, SHAPE_POLYGON, SHAPE_FREEHAND, SHAPE_RADIUS)
 RADIUS_SEGMENTS = 36
-FILL_COLOR = '#4fd1b0'  # the point cloud colour of the mockup
+FILL_COLOR = '#4fd1b0'  # the point cloud colour of the mockup (default, one colour a layer kind)
 
 
 def circle_points(center_x: float, center_y: float, radius: float, segments: int = RADIUS_SEGMENTS):
@@ -70,9 +71,10 @@ class ShapeZoneTool(QgsMapTool):
 
     zoneDrawn = pyqtSignal(object)
 
-    def __init__(self, canvas, shape: str = SHAPE_RECTANGLE) -> None:
+    def __init__(self, canvas, shape: str = SHAPE_RECTANGLE, color: str = FILL_COLOR) -> None:
         super().__init__(canvas)
         self._canvas = canvas
+        self._color = color
         self._shape = shape if shape in SHAPES else SHAPE_RECTANGLE
         self._points = []
         self._anchor = None
@@ -88,12 +90,22 @@ class ShapeZoneTool(QgsMapTool):
         self._shape = shape if shape in SHAPES else SHAPE_RECTANGLE
         self._reset()
 
+    def set_color(self, color: str) -> None:
+        """Colour of the rubber band (the layer kind the tool draws for); drawn again at the next shape."""
+        if color == self._color:
+            return
+        self._color = color
+        if self._band is not None:
+            self._band.reset(_polygon_type())
+            self._canvas.scene().removeItem(self._band)
+            self._band = None
+
     # --- rubber band ---
 
     def _rubber_band(self):
         if self._band is None:
             self._band = QgsRubberBand(self._canvas, _polygon_type())
-            colour = QColor(FILL_COLOR)
+            colour = QColor(self._color)
             self._band.setStrokeColor(colour)
             fill = QColor(colour)
             fill.setAlpha(60)
