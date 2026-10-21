@@ -4,6 +4,8 @@ All notable changes to FilterMate will be documented in this file.
 
 ## [Unreleased]
 
+- **Raster band display.** The BANDS block can display the active band in grey or one to three checked bands as a colour composite, including near infrared/red/green false colour. Band choices use checkboxes in place of pipette icons. Contrast statistics run in the background; the original layer style is restored on reset or layer change and retained when saving the project.
+
 ## [5.0.0] - 2026-10-21
 
 Final 5.0.0 build: everything merged on `main` since the first 5.0.0 build (tag of 2026-10-15, reproduced below) is part of this release: streaming sources, the raster pipette and BANDS block, point cloud and vector rails, hybrid targets, the MCP server, and the fixes listed here.

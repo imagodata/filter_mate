@@ -749,6 +749,7 @@ class RunningTask:
 def _value_panel():
     """Raster panel mock whose range applies to the pixel value (no terrain derivative)."""
     panel = MagicMock()
+    panel.display_bands.return_value = None
     panel.current_derivative.return_value = types.SimpleNamespace(is_terrain=False, value="value")
     return panel
 
@@ -791,6 +792,8 @@ def statistics_tasks(adapters, monkeypatch):
             self.materialize = kwargs.get('materialize', True)
             self.sample_source = kwargs.get('sample_source', '')
             self.histogram, self.spans, self.expression_error = ([], 0.0, 0.0), {}, ''
+            self.display_bands = tuple(kwargs.get('display_bands', ()))
+            self.ranges = {}
             self.cancel = MagicMock()
             created.append(self)
 
@@ -2375,6 +2378,36 @@ class TestPointCloudObjectDetector:
 
 @pytest.mark.unit
 class TestStreamRasterStatistics:
+    def test_band_display_reads_statistics_only_in_a_worker(self, ctrl_module, layers, adapters, statistics_tasks, monkeypatch):
+        controller = ctrl_module.CoverageModeController(_dock())
+        controller._active_layer = layers["r1"]
+        panel = controller._raster_panel = _value_panel()
+        panel.current_band.return_value = 1
+        panel.display_bands.return_value = (4, 1, 2)
+        layers["r1"].bandCount = lambda: 4
+        panel.current_quantity_expression.return_value = ''
+        panel.histogram_uses_expression.return_value = False
+        monkeypatch.setattr(controller, '_base_raster', lambda *_: pytest.fail('band display read pixels on the GUI thread'))
+        controller._on_raster_display_changed()
+        assert len(statistics_tasks) == 1 and statistics_tasks[0].display_bands == (4, 1, 2)
+        controller._on_raster_display_changed()
+        assert len(statistics_tasks) == 1, 'reuse a pending request for the same channels'
+        panel.display_bands.return_value = (3,)
+        controller._on_raster_display_changed()
+        assert len(statistics_tasks) == 2 and statistics_tasks[1].display_bands == (3,)
+        statistics_tasks[0].cancel.assert_called_once()
+
+    def test_invalid_or_empty_band_choices_restore_the_original_style(self, ctrl_module, layers, adapters):
+        controller = ctrl_module.CoverageModeController(_dock())
+        controller._active_layer = layers["r1"]
+        panel = controller._raster_panel = _value_panel()
+        panel.display_bands.return_value = ()
+        panel.preview_enabled.return_value = False
+        display = controller._raster_band_display = MagicMock()
+        controller._on_raster_display_changed()
+        display.restore.assert_called_once_with(layers["r1"])
+        assert controller._raster_stats_task is None and controller._raster_band_display is None
+
     @pytest.mark.parametrize("provider,source", [
         ("gdal", "/vsicurl/https://example.test/dem.tif"),
         ("wcs", "url=https://example.test/wcs"),

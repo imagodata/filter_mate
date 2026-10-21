@@ -47,6 +47,28 @@ RasterSelection = raster.RasterSelection
 RasterSelectionMode = raster.RasterSelectionMode
 
 
+class TestBandDisplay:
+    @pytest.mark.parametrize("bands,roles,expected", [
+        ([4], {4: "NIR"}, (4,)),
+        ([3, 1, 2], {1: "R", 2: "G", 3: "B"}, (1, 2, 3)),
+        ([1, 2, 4], {1: "R", 2: "G", 4: "NIR"}, (4, 1, 2)),
+        ([2, 3], {2: "G", 3: "B"}, (-1, 2, 3)),
+        ([5, 8], {}, (5, 8, -1)),
+        ([], {}, ()),
+        ([1, 2, 3, 4], {}, ()),
+    ])
+    def test_selected_band_channels(self, bands, roles, expected):
+        assert raster.display_channels(bands, roles) == expected
+
+    @pytest.mark.parametrize("mode", ["original", "active", "selected"])
+    def test_display_mode_is_preserved(self, mode):
+        assert raster.parse_raster_state({"band_display": mode})["band_display"] == mode
+
+    def test_old_or_invalid_states_keep_the_layer_style(self):
+        assert raster.parse_raster_state({})["band_display"] == "original"
+        assert raster.parse_raster_state({"band_display": "invalid"})["band_display"] == "original"
+
+
 # ---------------------------------------------------------------------------
 # Histogram: pixel <-> value
 # ---------------------------------------------------------------------------

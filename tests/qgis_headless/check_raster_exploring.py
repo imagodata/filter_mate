@@ -13,11 +13,14 @@ import traceback
 import types
 
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+os.environ.setdefault("FILTERMATE_LOG_DIR", tempfile.mkdtemp(prefix="fm_raster_logs_"))
 
 import numpy as np
 from osgeo import gdal, osr
-from qgis.core import Qgis, QgsApplication, QgsPointXY, QgsRasterLayer
-from qgis.PyQt.QtCore import QEvent, QEventLoop, QTimer, QTranslator, QT_VERSION_STR
+from qgis.core import Qgis, QgsApplication, QgsPointXY, QgsProject, QgsRasterLayer, QgsReadWriteContext
+from qgis.PyQt.QtCore import QEvent, QEventLoop, QSize, QTimer, QTranslator, QT_VERSION_STR
+from qgis.PyQt.QtWidgets import QCheckBox, QToolButton
+from qgis.PyQt.QtXml import QDomDocument
 
 ROOT = Path(__file__).resolve().parents[2]
 PACKAGE = "fm_raster_interactions"
@@ -166,6 +169,115 @@ def check_reset(layer):
     assert panel.similar_ratio() == ui.DEFAULT_SIMILAR_RATIO
     assert panel.similar_shape()
     panel.deleteLater()
+
+
+def check_band_display(layer):
+    """Drive the real controls, asynchronous statistics, map renderers and project save hook."""
+    controllers = importlib.import_module(PACKAGE + ".ui.controllers.coverage_mode_controller")
+    kinds = importlib.import_module(PACKAGE + ".core.domain.layer_kind")
+    controller = controllers.CoverageModeController(None)
+    panel = panel_for(layer)
+    controller._active_layer, controller._raster_panel = layer, panel
+    controller._kind = kinds.LayerKind.RASTER
+    panel.displayChanged.connect(controller._on_raster_display_changed)
+    original = adapter.renderer_bands(layer)
+    original_type = layer.renderer().type()
+    original_opacity = layer.renderer().opacity()
+    layer.renderer().setOpacity(0.6)
+    project = QgsProject.instance()
+    project.addMapLayer(layer, False)
+
+    def wait_for_display():
+        loop, timer = QEventLoop(), QTimer()
+        timer.setInterval(10)
+        timer.timeout.connect(lambda: loop.quit() if controller._raster_stats_task is None else None)
+        QTimer.singleShot(10000, loop.quit)
+        timer.start()
+        loop.exec()
+        timer.stop()
+        assert controller._raster_stats_task is None, "band statistics must finish asynchronously"
+
+    try:
+        assert panel.findChildren(QCheckBox), "the band choices must be checkboxes"
+        assert all(not button.objectName().startswith("toolButton_raster_band_pipette_")
+                   for button in panel.findChildren(QToolButton)), "per-band pipette icons must be removed"
+        panel._band_rows[4]["radio"].click()
+        panel._display_combo.setCurrentIndex(panel._display_combo.findData("active"))
+        wait_for_display()
+        assert layer.renderer().type() == "singlebandgray" and layer.renderer().grayBand() == 4
+        assert layer.renderer().opacity() == 0.6
+        image = layer.previewAsImage(QSize(32, 24))
+        colour = image.pixelColor(16, 12)
+        assert 0 < colour.red() < 255 and colour.red() == colour.green() == colour.blue()
+        panel._band_rows[3]["pipette"].click()  # select R, G, NIR: the false colour composite
+        panel._display_combo.setCurrentIndex(panel._display_combo.findData("selected"))
+        wait_for_display()
+        assert adapter.renderer_bands(layer) == {"R": 4, "G": 1, "B": 2}
+        saved = panel.state()
+        document = QDomDocument("band-display")
+        element = document.createElement("maplayer")
+        document.appendChild(element)
+        layer.writeLayerXml(element, document, QgsReadWriteContext())
+        project.writeMapLayer.emit(layer, element, document)
+        renderer_xml = element.firstChildElement("pipe").firstChildElement("rasterrenderer")
+        assert renderer_xml.attribute("type") == original_type, "saving must retain the original renderer"
+        assert float(renderer_xml.attribute("opacity")) == 0.6
+        panel._display_combo.setCurrentIndex(0)
+        assert adapter.renderer_bands(layer) == original and layer.renderer().opacity() == 0.6
+        panel.restore_state(saved)
+        controller._on_raster_display_changed()
+        assert adapter.renderer_bands(layer) == {"R": 4, "G": 1, "B": 2}
+        controller._leave_layer()
+        assert adapter.renderer_bands(layer) == original, "leaving the layer must restore its style"
+        controller._restore_panel_state(layer)
+        assert adapter.renderer_bands(layer) == {"R": 4, "G": 1, "B": 2}, "returning must restore the display choice"
+        for number in (1, 2, 4):
+            panel._band_rows[number]["pipette"].click()
+        assert panel.display_bands() == () and adapter.renderer_bands(layer) == original
+        empty = panel.state()
+        panel.restore_state(empty)
+        assert panel.pipette_bands() == [], "an empty choice must stay empty when restoring a layer"
+        panel.restore_state(saved)
+        controller._on_raster_display_changed()
+        controller.handle_exploring_action('reset')
+        assert panel.display_bands() is None and adapter.renderer_bands(layer) == original
+        output = os.environ.get("FILTERMATE_TEST_OUTPUT")
+        if output:
+            panel.restore_state(saved)
+            panel.resize(560, 850)
+            panel.show()
+            app.processEvents()
+            assert panel.grab().save(str(Path(output) / "raster-band-display.png"))
+    finally:
+        controller._cancel_raster_statistics()
+        controller._restore_raster_band_display(layer)
+        project.takeMapLayer(layer)
+        layer.renderer().setOpacity(original_opacity)
+        panel.deleteLater()
+
+
+def check_band_display_style_edits(layer):
+    display_module = importlib.import_module(PACKAGE + ".adapters.qgis.coverage_layers.band_display")
+    original = layer.renderer().clone()
+    display = display_module.RasterBandDisplay()
+    try:
+        layer.renderer().setAlphaBand(4)
+        layer.renderer().setOpacity(0.4)
+        assert display.apply(layer, (1,), {1: (7, 7)}), "a constant band must still be visible"
+        assert layer.renderer().alphaBand() == 4 and layer.renderer().opacity() == 0.4
+        assert not display.apply(layer, (5,), {5: (0, 255)}), "invalid bands must leave the renderer intact"
+        display.restore(layer)
+        assert layer.renderer().type() == original.type()
+        assert layer.renderer().alphaBand() == 4 and layer.renderer().opacity() == 0.4
+        assert display.apply(layer, (1,), {1: (1, 32)})
+        edited = layer.renderer().clone()
+        edited.setOpacity(0.7)
+        layer.setRenderer(edited)
+        display.restore(layer)
+        assert layer.renderer().type() == "singlebandgray" and layer.renderer().opacity() == 0.7, "keep an externally edited style"
+    finally:
+        display.restore(layer)
+        layer.setRenderer(original)
 
 
 def check_threshold_outside_sample(layer):
@@ -360,6 +472,8 @@ with tempfile.TemporaryDirectory(prefix="fm_raster_interactions_") as folder:
                         ("Ctrl+click keeps disjoint scalar samples", check_disjoint_picks),
                         ("rendered RGB selection after a custom quantity", check_rendered_after_quantity),
                         ("reset restores all object similarity defaults", check_reset),
+                        ("band display, colour composites, checkboxes and original style restoration", check_band_display),
+                        ("band display preserves alpha, opacity and externally edited styles", check_band_display_style_edits),
                         ("threshold display stays faithful outside the sampled histogram", check_threshold_outside_sample),
                         ("a pending formula edit cannot erase the next spectral preset", check_pending_formula_edit),
                         ("changing quantity discards picks made on the previous quantity", check_quantity_switch),

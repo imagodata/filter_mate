@@ -482,19 +482,6 @@
     border: 1px solid {fm_text_disabled};
 }
 
-/* Small toggles of the raster band rows (the band the pipette compares). */
-#dockWidgetContents QToolButton[fm_band_toggle="true"] {
-    background: transparent;
-    border: none;
-    border-radius: 3px;
-    padding: 0px;
-}
-#dockWidgetContents QToolButton[fm_band_toggle="true"]:hover {
-    background-color: {fm_hover};
-}
-#dockWidgetContents QToolButton[fm_band_toggle="true"]:checked {
-    background-color: {fm_active};
-}
 /* Band role chip without a role: dashed outline (a role paints the chip its colour). */
 #dockWidgetContents QToolButton[fm_band_chip="empty"] {
     background: transparent;

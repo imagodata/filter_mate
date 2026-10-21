@@ -283,6 +283,7 @@ class FakeButton:
 class FakePanel:
     def __init__(self):
         self.selectionChanged = FakeSignal()
+        self.displayChanged = FakeSignal()
         self.hover = []
 
     def selection(self):
@@ -293,6 +294,9 @@ class FakePanel:
 
     def current_band(self):
         return 1
+
+    def display_bands(self):
+        return None
 
     def current_derivative(self):
         return types.SimpleNamespace(is_terrain=False, value="value")

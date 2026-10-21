@@ -539,6 +539,7 @@ class CoverageDockExtras(QObject):
         panel = self._controller._raster_panel
         if panel is not None and getattr(self, '_watched_panel', None) is not panel:
             panel.selectionChanged.connect(self._sync_derivative_tools)
+            panel.displayChanged.connect(self._sync_derivative_tools)
             self._watched_panel = panel  # a panel rebuilt after a teardown is watched again
         self._sync_derivative_tools()
 
@@ -550,10 +551,13 @@ class CoverageDockExtras(QObject):
             return
         terrain = panel.current_derivative().is_terrain
         in_range = getattr(panel.active_mode(), 'value', '') == 'range'
-        if (terrain or not in_range) and button.isChecked():
+        band_display = panel.display_bands() is not None
+        if (terrain or not in_range or band_display) and button.isChecked():
             button.setChecked(False)  # runs the toggled slot: the style is given back
-        button.setEnabled(in_range and not terrain)
-        if not in_range:
+        button.setEnabled(in_range and not terrain and not band_display)
+        if band_display:
+            button.setToolTip(self.tr("To link the range to the style, choose Layer style in Map display"))
+        elif not in_range:
             button.setToolTip(self.tr("The style link follows the VALUE RANGE group: make it the active one first"))
         elif terrain:
             button.setToolTip(self.tr("The style link follows pixel values: not available while the range applies "

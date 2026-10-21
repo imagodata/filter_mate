@@ -507,6 +507,11 @@
         <source>This point cloud has no X / Y attribute to filter on</source>
         <translation>Tässä pistepilvessä ei ole X / Y -attribuuttia, jonka mukaan suodattaa</translation>
     </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="559"/>
+        <source>To link the range to the style, choose Layer style in Map display</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>CoverageModeController</name>
@@ -909,6 +914,21 @@
         <location filename="../ui/controllers/coverage_mode_controller.py" line="2885"/>
         <source>failed</source>
         <translation>epäonnistui</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1446"/>
+        <source>No valid pixels to display in the selected bands.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1440"/>
+        <source>Preparing band display…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1319"/>
+        <source>The selected bands could not be displayed.</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -6377,6 +6397,56 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2163"/>
         <source>An object is larger than the window read and was cut: lower the tolerance</source>
         <translation>Objekti on luettua ikkunaa suurempi ja se katkaistiin: pienennä toleranssia</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="860"/>
+        <source>Active band</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1083"/>
+        <source>Choose 1 to 3 bands for display.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="862"/>
+        <source>Display the active band in grey or the checked bands as a colour composite</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1085"/>
+        <source>Grey: band {0}</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="859"/>
+        <source>Layer style</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="855"/>
+        <source>Map display</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1087"/>
+        <source>R: {0} · G: {1} · B: {2}</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="954"/>
+        <source>Select band {0}</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="861"/>
+        <source>Selected bands</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="953"/>
+        <source>Use this band for the pipette and the selected bands display</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>

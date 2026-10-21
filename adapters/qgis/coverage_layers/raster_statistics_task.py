@@ -17,7 +17,7 @@ class RasterStatisticsTask(QgsTask):
 
     def __init__(self, source, provider, band, derivative, band_count, callback,
                  extent=None, max_pixels=1000000, resolution=None, sample_source='', expression='', layer_name='FilterMate statistics',
-                 materialize=True):
+                 materialize=True, display_bands=()):
         super().__init__(QCoreApplication.translate('RasterStatisticsTask', 'FilterMate: raster statistics'),
                          QgsTask.Flag.CanCancel)
         self.source = source
@@ -28,6 +28,8 @@ class RasterStatisticsTask(QgsTask):
         self.callback = callback
         self.histogram = ([], 0.0, 0.0)
         self.spans = {}
+        self.display_bands = tuple(display_bands)
+        self.ranges = {}
         self.extent = extent
         self.max_pixels = max_pixels
         self.resolution = resolution
@@ -57,10 +59,14 @@ class RasterStatisticsTask(QgsTask):
                 layer = QgsRasterLayer(self.sample_source, self.layer_name, 'gdal')
                 if not layer.isValid():
                     return False
-            for band in range(1, min(self.band_count, 4) + 1) if self.materialize else ():
+            range_bands = set(range(1, min(self.band_count, 4) + 1)) if self.materialize else set()
+            range_bands.update(band for band in self.display_bands if band > 0)
+            for band in sorted(range_bands):
                 if self.isCanceled():
                     return False
                 low, high, _ = band_range(layer, band)
+                if low is not None and high is not None:
+                    self.ranges[band] = (low, high)
                 if low is not None and high is not None and high > low:
                     self.spans[band] = high - low
             if self.isCanceled():

@@ -73,7 +73,7 @@ def test_raster_band_rows_use_no_qgis_palette_colours():
     assert not re.search(r"palette\((?:mid|midlight|base|highlight|window|text)\)", source)
     assert "RADIO_STYLE" not in source
     qss = _mockup()
-    assert 'QToolButton[fm_band_toggle="true"]' in qss
+    assert 'QCheckBox::indicator:checked' in qss
     assert 'QToolButton[fm_band_chip="empty"]' in qss
 
 
