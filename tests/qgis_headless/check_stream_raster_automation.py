@@ -7,6 +7,7 @@ docker run --rm --network none -v "$PWD:/src:ro" \
 Repeat with qgis/qgis:stable. Reuses the local byte-range COG fixture.
 """
 import ast
+import gc
 import logging
 import os
 from pathlib import Path
@@ -14,6 +15,7 @@ import sys
 import tempfile
 import threading
 import time
+import traceback
 import types
 
 os.environ.setdefault('QT_QPA_PLATFORM', 'offscreen')
@@ -29,6 +31,7 @@ from check_stream_raster import RangeServer, make_cog
 
 
 def main():
+    global app
     app = QgsApplication([], False)
     app.initQgis()
     main_thread = threading.get_ident()
@@ -252,4 +255,17 @@ def main():
 
 
 if __name__ == '__main__':
-    sys.exit(main())
+    try:
+        exit_status = main()
+    except Exception:
+        traceback.print_exc()
+        exit_status = 1
+    if 'app' in globals():
+        # Explicit projects are retained by completed tasks and their Qt
+        # callbacks. Release those cycles while providers are registered,
+        # after main's local layers are gone and before QgsApplication dies.
+        QgsProject.instance().clear()
+        app.processEvents()
+        gc.collect()
+        app.exitQgis()
+    sys.exit(exit_status)
