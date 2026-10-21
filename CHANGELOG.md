@@ -4,14 +4,16 @@ All notable changes to FilterMate will be documented in this file.
 
 ## [Unreleased]
 
+## [5.0.0] - 2026-10-21
+
+Final 5.0.0 build: everything merged on `main` since the first 5.0.0 build (tag of 2026-10-15, reproduced below) is part of this release: streaming sources, the raster pipette and BANDS block, point cloud and vector rails, hybrid targets, the MCP server, and the fixes listed here.
+
+### Export, task and database safety
+
 - Exports protect the original files of filtered and enriched layers, temporary input layers and files retained by undo history. Raster and point cloud writers use private staging folders. COPC export reports an unavailable PDAL writer and asks for LAZ instead of silently overwriting a different filename.
 - PostgreSQL pools separate users, TLS policies and credential changes, return each connection to its actual pool, and stop recovery attempts after a connection failure without holding the pool lock during network I/O.
 - Cross-filter tasks retain their explicit project and preserve filters or data sources changed while they ran. The dock's linked vector engine can still filter its own source after copying its selection. Internal task errors stay in local diagnostics, and Processing cancellation reaches synchronous point cloud exports.
 - CI runs REST/MCP contracts with both supported SDK major versions, installs API test dependencies before releases, and checks native export/task safety across the QGIS image matrix. The local Qt enum guard excludes development worktrees.
-
-## [5.0.0] - 2026-10-20
-
-Final 5.0.0 build: everything merged on `main` since the first 5.0.0 build (tag of 2026-10-15, reproduced below) is part of this release: streaming sources, the raster pipette and BANDS block, point cloud and vector rails, hybrid targets, the MCP server, and the fixes listed here.
 
 ### Streaming sources: web services and remote files
 
