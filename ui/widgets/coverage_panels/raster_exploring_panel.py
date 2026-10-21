@@ -60,7 +60,7 @@ except ImportError:
 
 from ....core.domain.raster_filter_criteria import DERIVATIVE_BOUNDS, RasterDerivative, RasterSelection, RasterSelectionMode
 from ..selection_strip import percent_text
-from .histogram_widget import RangeHistogramWidget, normalize_range, spin_bounds
+from .histogram_widget import RangeHistogramWidget, histogram_quantile, normalize_range, spin_bounds
 
 try:
     from ...styles.mockup_design import SPACING as _SPACING
@@ -262,6 +262,7 @@ PICK_OBJECT = "object"
 PICK_SIMILAR_OBJECTS = "similar_objects"  # every object of the raster like the clicked one (colour and size)
 PICK_TARGETS = (PICK_SIMILAR, PICK_OBJECT, PICK_SIMILAR_OBJECTS)
 DEFAULT_SIMILAR_RATIO = (0.5, 2.0)  # area of a similar object: half to twice the clicked one
+CUSTOM_QUANTITY = "custom_expression"
 # Words of a band name that say it is the near infrared one.
 _NIR_WORDS = ("nir", "infra", "pir", "near-ir", "near ir")
 
@@ -378,9 +379,29 @@ def spectral_expression(key: str, layout_or_roles: Any, reference: str) -> str:
     return ""
 
 
+def spectral_quantity(key: str, layout_or_roles: Any, reference: str) -> str:
+    """Numeric index of a spectral preset, before its threshold comparison."""
+    expression = spectral_expression(key, layout_or_roles, reference)
+    return expression.rsplit(" > ", 1)[0].rsplit(" < ", 1)[0]
+
+
+def quantity_range_formula(expression: str, low: Bound, high: Bound) -> str:
+    """Selection formula for thresholds on a numeric custom quantity."""
+    if not expression.strip() or (low is None and high is None):
+        return ""
+    if low is not None and high is not None and low > high:
+        low, high = high, low
+    parts = []
+    if low is not None:
+        parts.append(f"({expression.strip()}) >= {_number(low)}")
+    if high is not None:
+        parts.append(f"({expression.strip()}) <= {_number(high)}")
+    return "(" + " AND ".join(parts) + ")"
+
+
 def tolerance_value(percent: float, span: float) -> float:
     """Tolerance in band units: ``percent`` of the value range."""
-    return round(max(0.0, float(percent)) / 100.0 * float(span), 6)
+    return max(0.0, float(percent)) * max(0.0, float(span)) / 100.0
 
 
 def _number(value: float) -> str:
@@ -519,6 +540,11 @@ def _parse_bands(raw: Any) -> List[int]:
     return bands
 
 
+def _bounded_setting(raw: Any, default: float, low: float, high: float) -> float:
+    value = _optional_float(raw)
+    return min(high, max(low, default if value is None else value))
+
+
 def parse_raster_state(state: Any) -> Dict[str, Any]:
     """Normalise a saved panel state; missing or invalid entries get their default.
 
@@ -567,6 +593,8 @@ def parse_raster_state(state: Any) -> Dict[str, Any]:
         "expression": state.get("expression") if isinstance(state.get("expression"), str) else "",
         "preview": bool(state.get("preview", False)),
         "derivative": derivative,
+        "custom_quantity": bool(state.get("custom_quantity", False)),
+        "quantity_expression": state.get("quantity_expression", "") if isinstance(state.get("quantity_expression", ""), str) else "",
         "layout": layout,
         "roles": roles,
         "roles_chosen": bool(state.get("roles_chosen", False)) or bool(layout and not state.get("roles")),
@@ -578,6 +606,9 @@ def parse_raster_state(state: Any) -> Dict[str, Any]:
         "pipette_target": state.get("pipette_target") if state.get("pipette_target") in PICK_TARGETS else PICK_SIMILAR,
         "pipette_similar": _parse_ratio(state.get("pipette_similar")),
         "pipette_shape": bool(state.get("pipette_shape", True)),  # states before the shape: on, the default
+        "pipette_tolerance": _bounded_setting(state.get("pipette_tolerance"), DEFAULT_COLOR_TOLERANCE, 0.0, 100.0),
+        "pipette_opening": int(_bounded_setting(state.get("pipette_opening"), 1, 0, 4)),
+        "pipette_fill_holes": bool(state.get("pipette_fill_holes", True)),
         "pipette_on": bool(state.get("pipette_on", False)),
         # "Every band" mode of the range: the bounds apply to each of ``range_bands``, ANDed.
         "all_bands": bool(state.get("all_bands", False)),
@@ -599,7 +630,10 @@ def build_raster_selection(state: Any) -> Optional[RasterSelection]:
         except (ValueError, TypeError):
             return None
         return None if not parsed["pipette_selection"] or selection.is_empty else selection
-    if mode is RasterSelectionMode.RANGE and parsed["all_bands"] and len(parsed["range_bands"]) > 1:
+    if mode is RasterSelectionMode.RANGE and parsed["custom_quantity"]:
+        expression = quantity_range_formula(parsed["quantity_expression"], parsed["minimum"], parsed["maximum"])
+        selection = RasterSelection(band=parsed["band"], mode=RasterSelectionMode.EXPRESSION, expression=expression)
+    elif mode is RasterSelectionMode.RANGE and parsed["all_bands"] and len(parsed["range_bands"]) > 1:
         expression = all_bands_range_expression(parsed["range_bands"], parsed["minimum"], parsed["maximum"],
                                                 sanitize_reference(state.get("reference") or "") if isinstance(state, dict) else DEFAULT_REFERENCE)
         selection = RasterSelection(band=parsed["range_bands"][0], mode=RasterSelectionMode.EXPRESSION, expression=expression)
@@ -683,6 +717,7 @@ class RasterExploringPanel(QWidget):
         self._mode = RasterSelectionMode.RANGE
         self._preview_on = False  # the rail preview button is down
         self._derivative = RasterDerivative.VALUE
+        self._custom_quantity = False
         self._active_band = 1
         self._all_bands = False  # the range applies to every colour band at once (ANDed)
         self._roles: Dict[int, str] = {}  # band -> colour role
@@ -701,7 +736,7 @@ class RasterExploringPanel(QWidget):
         self._high: Bound = None
         self._decimals = FLOAT_DECIMALS
         self._coordinate_decimals = 2
-        self._histograms: Dict[Tuple[int, RasterDerivative], Tuple[List[int], float, float]] = {}
+        self._histograms: Dict[Tuple[int, Any], Tuple[List[int], float, float]] = {}
         self._last_pixel: Optional[Tuple[float, float, Dict[int, Optional[float]], Dict[RasterDerivative, Optional[float]]]] = None
         # (x, y, band value, band, text of the derivative picked with it or None)
         self._history: List[Tuple[float, float, Optional[float], int, Optional[str]]] = []
@@ -715,6 +750,10 @@ class RasterExploringPanel(QWidget):
         self._debounce.setSingleShot(True)
         self._debounce.setInterval(DEBOUNCE_MS)
         self._debounce.timeout.connect(self.selectionChanged.emit)
+        self._quantity_debounce = QTimer(self)
+        self._quantity_debounce.setSingleShot(True)
+        self._quantity_debounce.setInterval(DEBOUNCE_MS)
+        self._quantity_debounce.timeout.connect(self._on_quantity_expression_changed)
         self._build_ui()
         self._activate_mode(RasterSelectionMode.RANGE, emit=False)
 
@@ -1074,9 +1113,9 @@ class RasterExploringPanel(QWidget):
         self._similar_low_spin = QDoubleSpinBox(self._similar_widget)
         self._similar_high_spin = QDoubleSpinBox(self._similar_widget)
         for spin, value, tip in ((self._similar_low_spin, DEFAULT_SIMILAR_RATIO[0],
-                                  self.tr("Smallest similar object, as a share of the smallest clicked one")),
+                                  self.tr("Smallest similar object, as a share of each clicked reference")),
                                  (self._similar_high_spin, DEFAULT_SIMILAR_RATIO[1],
-                                  self.tr("Largest similar object, as a multiple of the largest clicked one"))):
+                                  self.tr("Largest similar object, as a multiple of each clicked reference"))):
             spin.setRange(0.01, 100.0)
             spin.setDecimals(2)
             spin.setSingleStep(0.25)
@@ -1100,6 +1139,29 @@ class RasterExploringPanel(QWidget):
         similar_row.addStretch(1)
         self._similar_widget.setVisible(False)
         group_layout.addWidget(self._similar_widget)
+        self._object_settings = QWidget(self._pipette_group)
+        self._object_settings.setObjectName("widget_raster_object_settings")
+        object_row = QHBoxLayout(self._object_settings)
+        object_row.setContentsMargins(0, 0, 0, 0)
+        object_row.setSpacing(GAP)
+        object_row.addWidget(QLabel(self.tr("Separation"), self._object_settings))
+        self._opening_combo = QComboBox(self._object_settings)
+        self._opening_combo.setObjectName("comboBox_raster_object_opening")
+        self._opening_combo.addItem(self.tr("Connected pixels"), 0)
+        for radius in range(1, 5):
+            self._opening_combo.addItem(self.tr("Bridge removal: {0} px").format(radius), radius)
+        self._opening_combo.setCurrentIndex(1)
+        self._opening_combo.setToolTip(self.tr("Separate objects joined by narrow bridges; higher values cut wider bridges"))
+        self._opening_combo.currentIndexChanged.connect(self._on_object_settings_changed)
+        object_row.addWidget(self._opening_combo, 1)
+        self._fill_holes_check = QCheckBox(self.tr("Fill holes"), self._object_settings)
+        self._fill_holes_check.setObjectName("checkBox_raster_object_fill_holes")
+        self._fill_holes_check.setChecked(True)
+        self._fill_holes_check.setToolTip(self.tr("Fill enclosed gaps in the clicked object; clear to preserve courtyards and inner rings"))
+        self._fill_holes_check.toggled.connect(self._on_object_settings_changed)
+        object_row.addWidget(self._fill_holes_check)
+        self._object_settings.setVisible(False)
+        group_layout.addWidget(self._object_settings)
         tolerance_row = QHBoxLayout()
         tolerance_row.setSpacing(GAP)
         tolerance_row.addWidget(QLabel(self.tr("Tolerance ±"), self._pipette_group))
@@ -1237,6 +1299,7 @@ class RasterExploringPanel(QWidget):
                                   (RasterDerivative.HILLSHADE, self.tr("Hillshade (0-255)")),
                                   (RasterDerivative.ROUGHNESS, self.tr("Roughness (TRI, mean difference)"))):
             self._derivative_combo.addItem(label, derivative.value)
+        self._derivative_combo.addItem(self.tr("Custom expression"), CUSTOM_QUANTITY)
         self._derivative_combo.currentIndexChanged.connect(self._on_derivative_index_changed)
         quantity_row.addWidget(self._derivative_combo, 1)
         self._presets_button = self._menu_button(self._range_group, self.tr("Thresholds ▾"),
@@ -1244,9 +1307,29 @@ class RasterExploringPanel(QWidget):
         quantity_row.addWidget(self._presets_button)
         group_layout.addLayout(quantity_row)
 
+        self._quantity_edit = QPlainTextEdit(self._range_group)
+        self._quantity_edit.setObjectName("plainTextEdit_raster_quantity_expression")
+        self._quantity_edit.setPlaceholderText(self.tr('Numeric raster formula, e.g. ("raster@4" - "raster@1") / ("raster@4" + "raster@1")'))
+        self._quantity_edit.setAccessibleName(self.tr("Custom derived value expression"))
+        self._quantity_edit.setToolTip(self.tr("A numeric raster calculator expression. The histogram and thresholds use its computed values."))
+        self._quantity_edit.setTabChangesFocus(True)
+        self._quantity_edit.setFixedHeight(self._quantity_edit.fontMetrics().lineSpacing() * 2 + 12)
+        self._quantity_edit.textChanged.connect(self._quantity_debounce.start)
+        self._quantity_edit.setVisible(False)
+        group_layout.addWidget(self._quantity_edit)
+        self._quantity_status = QLabel("", self._range_group)
+        self._quantity_status.setObjectName("label_raster_quantity_expression_status")
+        self._quantity_status.setWordWrap(True)
+        self._quantity_status.setVisible(False)
+        group_layout.addWidget(self._quantity_status)
+
         self._histogram = RangeHistogramWidget(self._range_group)
         self._histogram.rangeChanged.connect(self._on_histogram_range_changed)
         group_layout.addWidget(self._histogram)
+        self._histogram_status = QLabel("", self._range_group)
+        self._histogram_status.setObjectName("label_raster_histogram_status")
+        self._histogram_status.setWordWrap(True)
+        group_layout.addWidget(self._histogram_status)
 
         spins_row = QHBoxLayout()
         spins_row.setSpacing(GAP)
@@ -1283,12 +1366,22 @@ class RasterExploringPanel(QWidget):
         self._expression_edit.setFixedHeight(metrics.lineSpacing() * EXPRESSION_LINES + 12)
         self._expression_edit.textChanged.connect(self._schedule_selection_changed)
         group_layout.addWidget(self._expression_edit)
+        self._expression_histogram = RangeHistogramWidget(self._expression_group)
+        self._expression_histogram.setObjectName("widget_raster_expression_histogram")
+        self._expression_histogram.set_decimals(None)
+        self._expression_histogram.setToolTip(self.tr("Computed expression values. Drag the handles to use this expression as a derived value with thresholds."))
+        self._expression_histogram.rangeChanged.connect(self._on_expression_histogram_changed)
+        group_layout.addWidget(self._expression_histogram)
         buttons_row = QHBoxLayout()
         buttons_row.setSpacing(GAP)
         self._insert_button = self._menu_button(self._expression_group, self.tr("Insert ▾"),
                                                 self.tr("Insert a band reference, a usual spectral index or the current range"),
                                                 "toolButton_raster_insert")
         buttons_row.addWidget(self._insert_button)
+        self._as_quantity_button = QPushButton(self.tr("Use as derived value"), self._expression_group)
+        self._as_quantity_button.setObjectName("pushButton_raster_expression_as_quantity")
+        self._as_quantity_button.clicked.connect(self._use_expression_as_quantity)
+        buttons_row.addWidget(self._as_quantity_button)
         self._expression_status = QLabel("", self._expression_group)
         self._expression_status.setObjectName("label_raster_expression_status")
         self._expression_status.setWordWrap(True)
@@ -1340,7 +1433,9 @@ class RasterExploringPanel(QWidget):
         self._emit_now()
 
     def _use_range_as_expression(self) -> None:
-        if self._all_bands:
+        if self._custom_quantity:
+            formula = quantity_range_formula(self._quantity_edit.toPlainText(), self._low, self._high)
+        elif self._all_bands:
             formula = all_bands_range_expression(self._range_bands(), self._low, self._high, self._reference)
         else:
             formula = range_formula(self.current_band(), self._low, self._high, self._reference)
@@ -1351,6 +1446,42 @@ class RasterExploringPanel(QWidget):
         with _signals_blocked(self._expression_edit):
             self._expression_edit.setPlainText(formula)
         self.set_expression_status(True, "")
+        self._emit_now()
+
+    def _use_expression_as_quantity(self, _checked=False) -> None:
+        expression = self._expression_edit.toPlainText().strip()
+        if expression:
+            self._use_quantity(expression)
+
+    def _use_quantity(self, expression: str) -> None:
+        """Use a numeric expression for the range and request its histogram."""
+        self._quantity_debounce.stop()
+        self._all_bands = False
+        self._custom_quantity = True
+        with _signals_blocked(self._quantity_edit):
+            self._quantity_edit.setPlainText(expression)
+        self._set_derivative(RasterDerivative.VALUE)
+        self._forget_picks()
+        self._activate_mode(RasterSelectionMode.RANGE, emit=False)
+        self._apply_band()
+        self._set_range(None, None)
+        self.bandChanged.emit(self.current_band())
+        self.modeChosen.emit(RasterSelectionMode.RANGE.value)
+        self._emit_now()
+
+    def _on_quantity_expression_changed(self) -> None:
+        if not self._custom_quantity:
+            return
+        self._forget_picks()
+        self._set_range(None, None)
+        self._show_band_histogram()
+        self.bandChanged.emit(self.current_band())
+        self._emit_now()
+
+    def _on_expression_histogram_changed(self, _low: float, _high: float) -> None:
+        bounds = self._expression_histogram.range()
+        self._use_expression_as_quantity()
+        self._set_range(*bounds)
         self._emit_now()
 
     # === Public API ===
@@ -1411,6 +1542,8 @@ class RasterExploringPanel(QWidget):
             self._pipette_selection, self._picks, self._pick_kind, self._seeds = None, [], "", []
             self._rebuild_chips()
         if enabled:
+            self._quantity_debounce.stop()
+            self._custom_quantity = False
             self._all_bands = False
             self._active_band = 1
             self._set_derivative(RasterDerivative.VALUE)
@@ -1442,16 +1575,46 @@ class RasterExploringPanel(QWidget):
             self._active_band = numbers[0] if numbers else 1
 
     def set_histogram(self, band: int, counts: Sequence[int], minimum: float, maximum: float,
-                      derivative: RasterDerivative = RasterDerivative.VALUE) -> None:
+                      derivative: RasterDerivative = RasterDerivative.VALUE, expression: str = "") -> None:
         """Store the histogram of ``band`` for ``derivative``; shown at once when it is the current one.
 
         Does not emit ``selectionChanged``.
         """
-        self._histograms[(int(band), derivative)] = ([int(count) for count in counts or ()],
+        self._histograms[(int(band), expression or derivative)] = ([int(count) for count in counts or ()],
                                                      float(minimum), float(maximum))
-        if int(band) == self.current_band() and derivative is self._derivative:
+        if int(band) == self.current_band() and (expression or derivative) == self._histogram_quantity():
             self._show_band_histogram()
-            self._set_range(self._low, self._high)
+            if self._mode is not RasterSelectionMode.EXPRESSION:
+                self._set_range(self._low, self._high)
+
+    def set_histogram_pending(self) -> None:
+        """Say that the current histogram is computed away from the interface thread."""
+        message = self.tr("Computing histogram…")
+        self._histogram_status.setText(message)
+        if self._mode is RasterSelectionMode.EXPRESSION:
+            self._expression_status.setText(message)
+            self._expression_status.setStyleSheet("")
+
+    def current_quantity_expression(self) -> str:
+        """Numeric formula whose values the current histogram displays, or empty for a band/terrain."""
+        if self._mode is RasterSelectionMode.EXPRESSION:
+            return self._expression_edit.toPlainText().strip()
+        return self._quantity_edit.toPlainText().strip() if self._custom_quantity else ""
+
+    def histogram_uses_expression(self) -> bool:
+        return self._mode is RasterSelectionMode.EXPRESSION or self._custom_quantity
+
+    def clear_expression_histogram(self) -> None:
+        self.set_histogram(self.current_band(), [], 0.0, 0.0, expression=CUSTOM_QUANTITY)
+
+    def _histogram_quantity(self):
+        if self.histogram_uses_expression():
+            return self.current_quantity_expression() or CUSTOM_QUANTITY
+        return self.current_derivative()
+
+    def histogram_range(self) -> Optional[Tuple[Bound, Bound]]:
+        """Thresholds on the numeric custom histogram, for an estimated kept share."""
+        return (self._low, self._high) if self._mode is RasterSelectionMode.RANGE and self._custom_quantity else None
 
     def selection(self) -> Optional[RasterSelection]:
         """Selection of the active group, None when it keeps no constraint."""
@@ -1527,6 +1690,8 @@ class RasterExploringPanel(QWidget):
         self._expression_status.setText(message or "")
         color = _STATUS_OK_COLOR if ok else _STATUS_ERROR_COLOR
         self._expression_status.setStyleSheet(f"color: {color};" if message else "")
+        self._quantity_status.setText(message or "")
+        self._quantity_status.setStyleSheet(f"color: {color};" if message else "")
 
     def set_pixel_values(self, x: float, y: float, values: Dict[int, Optional[float]], extend: bool = False,
                          terrain: Optional[Dict[RasterDerivative, Optional[float]]] = None) -> None:
@@ -1547,13 +1712,15 @@ class RasterExploringPanel(QWidget):
         self._last_pixel = (float(x), float(y), values, terrain)
         band = self.current_band()
         shown = None
-        if self._derivative.is_terrain:
+        if self._custom_quantity:
+            shown = format_pixel_value(terrain.get("custom"), self._range_decimals(), self.tr("NoData"))
+        elif self._derivative.is_terrain:
             shown = format_derived_value(self._derivative, terrain.get(self._derivative), self.tr("NoData"))
         self._history = push_history(self._history, (float(x), float(y), values.get(band), band, shown))
         self._refresh_pixel_display()
         if hasattr(self._bands_group, 'setCollapsed'):
             self._bands_group.setCollapsed(False)
-        value = terrain.get(self._derivative) if self._derivative.is_terrain else values.get(band)
+        value = terrain.get("custom") if self._custom_quantity else terrain.get(self._derivative) if self._derivative.is_terrain else values.get(band)
         if extend and value is not None and self._mode is RasterSelectionMode.RANGE:
             self._set_range(*extend_range(self._low, self._high, value))
             self._emit_now()
@@ -1592,6 +1759,17 @@ class RasterExploringPanel(QWidget):
     def reset(self) -> None:
         """Back to the defaults: first band, roles from the layer, no range, no pick, no expression. Does not emit."""
         self._debounce.stop()
+        self._quantity_debounce.stop()
+        self._custom_quantity = False
+        with _signals_blocked(self._quantity_edit, self._tolerance_spin, self._opening_combo, self._fill_holes_check,
+                              self._similar_low_spin, self._similar_high_spin, self._similar_shape_check):
+            self._quantity_edit.clear()
+            self._tolerance_spin.setValue(DEFAULT_COLOR_TOLERANCE)
+            self._opening_combo.setCurrentIndex(1)
+            self._fill_holes_check.setChecked(True)
+            self._similar_low_spin.setValue(DEFAULT_SIMILAR_RATIO[0])
+            self._similar_high_spin.setValue(DEFAULT_SIMILAR_RATIO[1])
+            self._similar_shape_check.setChecked(True)
         self.set_hover_value(None, None)
         self._zone_label.setVisible(False)
         self._zone_label.setText("")
@@ -1631,6 +1809,8 @@ class RasterExploringPanel(QWidget):
             "expression": self._expression_edit.toPlainText(),
             "preview": self._preview_on,
             "derivative": self._derivative.value,
+            "custom_quantity": self._custom_quantity,
+            "quantity_expression": self._quantity_edit.toPlainText(),
             "layout": layout_from_roles(self._roles),
             "roles": {str(band): role for band, role in self._roles.items() if role},
             "roles_chosen": not self._roles_guessed,
@@ -1642,6 +1822,9 @@ class RasterExploringPanel(QWidget):
             "pipette_target": self._pick_target,
             "pipette_similar": list(self.similar_ratio()),
             "pipette_shape": self.similar_shape(),
+            "pipette_tolerance": self._tolerance_spin.value(),
+            "pipette_opening": self._opening_combo.currentData(),
+            "pipette_fill_holes": self._fill_holes_check.isChecked(),
             "pipette_on": self._pipette_on,
             "all_bands": self._all_bands,
             "range_bands": self._range_bands() if self._all_bands else [],
@@ -1655,7 +1838,11 @@ class RasterExploringPanel(QWidget):
         ``pipette_on`` and does it explicitly (:meth:`pipette_was_on`).
         """
         self._debounce.stop()
+        self._quantity_debounce.stop()
         parsed = parse_raster_state(state)
+        self._custom_quantity = parsed["custom_quantity"]
+        with _signals_blocked(self._quantity_edit):
+            self._quantity_edit.setPlainText(parsed["quantity_expression"])
         numbers = [int(info.number) for info in (self._summary.bands if self._summary is not None else [])]
         if parsed["band"] in numbers:
             self._active_band = parsed["band"]
@@ -1672,10 +1859,14 @@ class RasterExploringPanel(QWidget):
         self._pick_kind = parsed["pipette_kind"]
         self._picks = [tuple(pick) if self._pick_kind == "color" else pick for pick in parsed["pipette_picks"]]
         self._seeds = list(parsed["pipette_seeds"])
-        with _signals_blocked(self._similar_low_spin, self._similar_high_spin, self._similar_shape_check):
+        with _signals_blocked(self._similar_low_spin, self._similar_high_spin, self._similar_shape_check,
+                              self._tolerance_spin, self._opening_combo, self._fill_holes_check):
             self._similar_low_spin.setValue(parsed["pipette_similar"][0])
             self._similar_high_spin.setValue(parsed["pipette_similar"][1])
             self._similar_shape_check.setChecked(parsed["pipette_shape"])
+            self._tolerance_spin.setValue(parsed["pipette_tolerance"])
+            self._opening_combo.setCurrentIndex(self._opening_combo.findData(parsed["pipette_opening"]))
+            self._fill_holes_check.setChecked(parsed["pipette_fill_holes"])
         self._set_pick_target(parsed["pipette_target"])
         try:
             data = parsed["pipette_selection"]
@@ -1683,14 +1874,16 @@ class RasterExploringPanel(QWidget):
         except (ValueError, TypeError):
             self._pipette_selection = None
         selection = self._pipette_selection
-        if selection is not None and selection.similar and selection.shape != parsed["pipette_shape"]:
+        if selection is not None:
             # A state saved before the shape: the selection follows the box (checked by default).
             from dataclasses import replace
-            self._pipette_selection = replace(selection, shape=parsed["pipette_shape"])
+            self._pipette_selection = replace(selection, shape=parsed["pipette_shape"],
+                                              object_opening=parsed["pipette_opening"], fill_holes=parsed["pipette_fill_holes"])
         self._pipette_on = parsed["pipette_on"]
         if self._rendered_only:
             self._rendered_rgb_bands()
             self._all_bands = False
+            self._custom_quantity = False
             self._active_band = 1
             self._set_derivative(RasterDerivative.VALUE)
         self._apply_band()
@@ -1738,6 +1931,8 @@ class RasterExploringPanel(QWidget):
         changed = mode is not self._mode
         self._mode = mode
         self._update_mode_controls()
+        if changed:
+            self._show_band_histogram()
         if emit and changed:
             self._emit_now()
 
@@ -1766,8 +1961,6 @@ class RasterExploringPanel(QWidget):
     def _start_expression_from_previous(self, mode: RasterSelectionMode) -> None:
         """EXPRESSION made active by the user with an empty text: it starts from the selection that was active."""
         if mode is not RasterSelectionMode.EXPRESSION or mode is self._mode:
-            return
-        if self._expression_edit.toPlainText().strip():
             return
         formula = previous_group_formula(self.selection(), self._reference)
         if formula:
@@ -1821,19 +2014,36 @@ class RasterExploringPanel(QWidget):
             self._range_group.setTitle(self.tr("VALUE RANGE"))
 
     def _show_band_histogram(self) -> None:
-        counts, minimum, maximum = self._histograms.get((self.current_band(), self._derivative), ([], 0.0, 0.0))
+        counts, minimum, maximum = self._histograms.get((self.current_band(), self._histogram_quantity()), ([], 0.0, 0.0))
         self._histogram.set_histogram(counts, minimum, maximum)
-        low, high = spin_bounds(*self._data_bounds(), self._range_decimals())
+        if hasattr(self, "_expression_histogram"):
+            self._expression_histogram.set_histogram(counts, minimum, maximum)
+            self._expression_histogram.set_range(None, None)
+        if self.current_quantity_expression():
+            self._histogram.set_decimals(None)
+            if maximum > minimum:
+                decimals = min(12, max(FLOAT_DECIMALS, 3 - math.floor(math.log10(maximum - minimum))))
+                with _signals_blocked(self._min_spin, self._max_spin):
+                    self._min_spin.setDecimals(decimals)
+                    self._max_spin.setDecimals(decimals)
+        self._histogram_status.setText(
+            self.tr("No histogram available") if not counts else
+            self.tr("Constant value: {0}").format(f"{minimum:g}") if minimum == maximum else
+            self.tr("{0} sampled pixels · {1} to {2}").format(sum(counts), f"{minimum:g}", f"{maximum:g}"))
+        low, high = spin_bounds(*self._data_bounds(), self._range_decimals(), low=self._low, high=self._high)
         with _signals_blocked(self._min_spin, self._max_spin):
             for spin in (self._min_spin, self._max_spin):
                 spin.setRange(low, high)
+        self._fill_presets()
 
     def _range_decimals(self) -> int:
+        if self.current_quantity_expression():
+            return self._min_spin.decimals()
         return DERIVATIVE_DECIMALS if self._derivative.is_terrain else self._decimals
 
     def _data_bounds(self) -> Tuple[Bound, Bound]:
-        cached = self._histograms.get((self.current_band(), self._derivative))
-        if cached is None:
+        cached = self._histograms.get((self.current_band(), self._histogram_quantity()))
+        if cached is None or not cached[0]:
             return None, None
         return cached[1], cached[2]
 
@@ -1853,6 +2063,7 @@ class RasterExploringPanel(QWidget):
             if self._all_bands:
                 return
             self._all_bands = True
+            self._custom_quantity = False
             self._set_derivative(RasterDerivative.VALUE)  # a slope of every band at once has no meaning
         else:
             if number == self._active_band and not self._all_bands:
@@ -1872,8 +2083,11 @@ class RasterExploringPanel(QWidget):
         if checked:
             bands.append(number)
         self._pipette_bands = sorted(bands)
-        self._forget_picks(("color",))
+        had_picks = bool(self._picks)
+        self._forget_picks(("color", "value", "classes"))
         self._refresh_band_rows()
+        if had_picks and not self._picks:
+            self._emit_now()
 
     def _on_role_changed(self, number: int, role: str = ROLE_NONE) -> None:
         if number not in self._band_rows:
@@ -1889,6 +2103,7 @@ class RasterExploringPanel(QWidget):
         self._roles_guessed = False
         self._refresh_band_rows()
         self._fill_insert_menu()
+        self._fill_presets()
         self._forget_picks(("preset",))
 
     def _on_layout_shortcut(self, key: str) -> None:
@@ -1896,6 +2111,7 @@ class RasterExploringPanel(QWidget):
         self._roles_guessed = False
         self._refresh_band_rows()
         self._fill_insert_menu()
+        self._fill_presets()
         self._forget_picks(("preset",))
 
     # === Derivative ===
@@ -1903,9 +2119,11 @@ class RasterExploringPanel(QWidget):
     def _set_derivative(self, derivative: RasterDerivative) -> None:
         """Adopt ``derivative`` in the combo and everything that depends on it, without emitting."""
         self._derivative = derivative
-        index = self._derivative_combo.findData(derivative.value)
+        index = self._derivative_combo.findData(CUSTOM_QUANTITY if self._custom_quantity else derivative.value)
         with _signals_blocked(self._derivative_combo):
             self._derivative_combo.setCurrentIndex(max(0, index))
+        self._quantity_edit.setVisible(self._custom_quantity)
+        self._quantity_status.setVisible(self._custom_quantity)
         suffix = DERIVATIVE_SUFFIXES.get(derivative, "")
         for spin in (self._min_spin, self._max_spin):
             spin.setSuffix(suffix)
@@ -1913,12 +2131,14 @@ class RasterExploringPanel(QWidget):
         self._update_mode_controls()
 
     def _on_derivative_index_changed(self, _index: int) -> None:
+        self._quantity_debounce.stop()
+        self._custom_quantity = self._derivative_combo.currentData() == CUSTOM_QUANTITY
         try:
             derivative = RasterDerivative(self._derivative_combo.currentData())
         except ValueError:
             derivative = RasterDerivative.VALUE
         self._set_derivative(derivative)
-        self._forget_picks(("value",))
+        self._forget_picks()
         self._apply_band()
         self._set_range(None, None)  # the old bounds were in another unit
         self._refresh_pixel_display()
@@ -1938,7 +2158,41 @@ class RasterExploringPanel(QWidget):
         for key, low, high in presets:
             action = menu.addAction(format_preset(names[key], low, high, suffix))
             action.triggered.connect(lambda _checked=False, bounds=(low, high): self._on_preset_chosen(bounds))
-        self._presets_button.setVisible(bool(presets))
+        if presets:
+            menu.addSeparator()
+        menu.addSection(self.tr("Distribution (approximate)"))
+        cached = self._histograms.get((self.current_band(), self._histogram_quantity()))
+        for label, low, high in ((self.tr("Central 98% (P1–P99)"), 0.01, 0.99),
+                                 (self.tr("Central 90% (P5–P95)"), 0.05, 0.95),
+                                 (self.tr("Interquartile range (P25–P75)"), 0.25, 0.75),
+                                 (self.tr("Upper quartile (≥ P75)"), 0.75, None)):
+            action = menu.addAction(label)
+            action.setEnabled(bool(cached and sum(cached[0]) and cached[2] > cached[1]))
+            action.triggered.connect(lambda _checked=False, lo=low, hi=high: self._use_quantiles(lo, hi))
+        action = menu.addAction(self.tr("All values"))
+        action.triggered.connect(lambda _checked=False: self._on_preset_chosen((None, None)))
+        keys = spectral_presets_for(self._roles)
+        if keys:
+            menu.addSection(self.tr("Derived spectral values"))
+            for key in keys:
+                action = menu.addAction(self._spectral_names()[key])
+                action.triggered.connect(lambda _checked=False, k=key: self._use_spectral_quantity(k))
+        self._presets_button.setVisible(True)
+
+    def _use_quantiles(self, low: float, high: Bound) -> None:
+        cached = self._histograms.get((self.current_band(), self._histogram_quantity()))
+        if cached and cached[0]:
+            counts, minimum, maximum = cached
+            self._on_preset_chosen((histogram_quantile(counts, minimum, maximum, low),
+                                    histogram_quantile(counts, minimum, maximum, high) if high is not None else None))
+
+    def _use_spectral_quantity(self, key: str) -> None:
+        expression = spectral_quantity(key, self._roles, self._reference)
+        if not expression:
+            return
+        self._use_quantity(expression)
+        bounds = (None, 0.1) if key == "ndvi_bare" else (0.3, None) if key == "ndvi_vegetation" else (0.1, None)
+        self._on_preset_chosen(bounds)
 
     def _on_preset_chosen(self, bounds: Tuple[Bound, Bound]) -> None:
         self._set_range(*bounds)
@@ -1950,7 +2204,7 @@ class RasterExploringPanel(QWidget):
         terrain = self._derivative.is_terrain
         if hasattr(self, "_quantity_label") and self._last_pixel is None:
             self._quantity_label.setText(
-                self.tr("picks on: {0}").format(self._derivative_combo.currentText()) if terrain else "")
+                self.tr("picks on: {0}").format(self._derivative_combo.currentText()) if terrain or self._custom_quantity else "")
         if hasattr(self, "_derivative_combo"):
             self._derivative_combo.setEnabled(not self._all_bands)
             self._derivative_combo.setToolTip(
@@ -1967,9 +2221,16 @@ class RasterExploringPanel(QWidget):
             low, high = high, low
         self._low, self._high = normalize_range(low, high, *self._data_bounds())
         self._histogram.set_range(self._low, self._high)
+        limits = spin_bounds(*self._data_bounds(), self._range_decimals(), low=self._low, high=self._high)
         with _signals_blocked(self._min_spin, self._max_spin):
+            self._min_spin.setRange(*limits)
+            self._max_spin.setRange(*limits)
             self._min_spin.setValue(self._min_spin.minimum() if self._low is None else self._low)
             self._max_spin.setValue(self._max_spin.maximum() if self._high is None else self._high)
+        if self._custom_quantity and self._mode is RasterSelectionMode.RANGE and hasattr(self, "_expression_edit"):
+            formula = quantity_range_formula(self._quantity_edit.toPlainText(), self._low, self._high)
+            with _signals_blocked(self._expression_edit):
+                self._expression_edit.setPlainText(formula)
 
     def _on_histogram_range_changed(self, _low: float, _high: float) -> None:
         self._set_range(*self._histogram.range())
@@ -2023,13 +2284,17 @@ class RasterExploringPanel(QWidget):
             point: The clicked point (layer CRS): in object detection, the object grows from it.
         """
         bands = list(self._pipette_bands)
-        band = self.current_band()
-        if len(bands) >= 2 and not self._derivative.is_terrain:
+        band = bands[0] if len(bands) == 1 and not self._derivative.is_terrain and not self._custom_quantity else self.current_band()
+        if self._custom_quantity:
+            value = (terrain or {}).get("custom")
+            kind, pick, missing = "value", value, value is None
+        elif len(bands) >= 2 and not self._derivative.is_terrain:
             kind, pick = "color", tuple(values.get(number) for number in bands)
             missing = any(value is None for value in pick)
         elif self._has_classes() and not self._derivative.is_terrain:
             value = values.get(band)
-            kind, pick, missing = "classes", (None if value is None else int(round(value))), value is None
+            missing = value is None or not math.isfinite(value)
+            kind, pick = "classes", (None if missing else int(round(value)))
         else:
             value = (terrain or {}).get(self._derivative) if self._derivative.is_terrain else values.get(band)
             kind, pick, missing = "value", value, value is None
@@ -2078,28 +2343,48 @@ class RasterExploringPanel(QWidget):
             similar: Area ratios of the similar objects mode (empty otherwise).
             shape: The similar objects must be shaped like the clicked ones too.
         """
-        band = self.current_band()
+        bands = list(self._pipette_bands)
+        band = bands[0] if len(bands) == 1 and not self._derivative.is_terrain and not self._custom_quantity else self.current_band()
+        settings = dict(object_opening=int(self._opening_combo.currentData()), fill_holes=self._fill_holes_check.isChecked())
         if self._pick_kind == "color":
             bands = list(self._pipette_bands)
             tolerances = [tolerance_value(self._tolerance_spin.value(), self._value_span(number)) for number in bands]
             expression = color_similarity_expression(self._reference, bands, picks, tolerances)
             return RasterSelection(band=band, mode=RasterSelectionMode.EXPRESSION, expression=expression,
-                                   seeds=seeds, objects=objects, similar=similar, shape=shape)
+                                   seeds=seeds, objects=objects, similar=similar, shape=shape, **settings)
         if self._pick_kind == "classes":
             return RasterSelection(band=band, mode=RasterSelectionMode.CLASSES, classes=frozenset(picks),
-                                   seeds=seeds, objects=objects, similar=similar, shape=shape)
+                                   seeds=seeds, objects=objects, similar=similar, shape=shape, **settings)
         low_bound, high_bound = self._data_bounds()
+        if band != self.current_band():
+            cached = self._histograms.get((band, RasterDerivative.VALUE))
+            low_bound, high_bound = (cached[1], cached[2]) if cached else (None, None)
         known = low_bound is not None and high_bound is not None and high_bound > low_bound
         if known:
             span = high_bound - low_bound
+        elif self._custom_quantity:
+            span = 1.0
         elif self._derivative.is_terrain:
             span = DERIVATIVE_BOUNDS.get(self._derivative, (0.0, 100.0))[1]  # no histogram yet: the natural range
         else:
             span = self._value_span(band)
         tolerance = tolerance_value(self._tolerance_spin.value(), span)
+        if self._custom_quantity:
+            quantity = self._quantity_edit.toPlainText().strip()
+            expression = " OR ".join(f"(abs(({quantity}) - {_number(pick)}) <= {_number(tolerance)})" for pick in picks)
+            return RasterSelection(band=band, mode=RasterSelectionMode.EXPRESSION, expression=expression,
+                                   seeds=seeds, objects=objects, similar=similar, shape=shape, **settings)
+        if len(picks) > 1 and not self._derivative.is_terrain:
+            expression = color_similarity_expression(self._reference, [band], [(pick,) for pick in picks], tolerance)
+            return RasterSelection(band=band, mode=RasterSelectionMode.EXPRESSION, expression=expression,
+                                   seeds=seeds, objects=objects, similar=similar, shape=shape, **settings)
         low, high = normalize_range(min(picks) - tolerance, max(picks) + tolerance, low_bound, high_bound)
         return RasterSelection(band=band, mode=RasterSelectionMode.RANGE, derivative=self._derivative,
-                               minimum=low, maximum=high, seeds=seeds, objects=objects, similar=similar, shape=shape)
+                               minimum=low, maximum=high, seeds=seeds, objects=objects, similar=similar, shape=shape, **settings)
+
+    def _on_object_settings_changed(self, _value: Any) -> None:
+        if self._pick_target in (PICK_OBJECT, PICK_SIMILAR_OBJECTS) and self._picks:
+            self._apply_picks(debounced=True)
 
     def similar_ratio(self) -> Tuple[float, float]:
         """``(low, high)`` area ratios of the similar objects mode."""
@@ -2190,6 +2475,9 @@ class RasterExploringPanel(QWidget):
                 button.setChecked(True)
         if hasattr(self, "_similar_widget"):
             self._similar_widget.setVisible(target == PICK_SIMILAR_OBJECTS)
+        if hasattr(self, "_object_settings"):
+            self._object_settings.setVisible(target in (PICK_OBJECT, PICK_SIMILAR_OBJECTS))
+            self._fill_holes_check.setVisible(target == PICK_OBJECT)
         return changed
 
     def _on_target_button(self, target: str, checked: bool) -> None:
@@ -2219,6 +2507,9 @@ class RasterExploringPanel(QWidget):
         nodata = self.tr("NoData")
         parts = [f"X {x:.{digits}f} · Y {y:.{digits}f}"]
         for derivative, value in terrain.items():
+            if derivative == "custom":
+                parts.append(self.tr("Derived value: {0}").format(format_pixel_value(value, self._range_decimals(), nodata)))
+                continue
             name = self._derivative_combo.itemText(max(0, self._derivative_combo.findData(derivative.value)))
             parts.append(f"{name}: {format_derived_value(derivative, value, nodata)}")
         self._pixel_coordinates_label.setText("  ·  ".join(parts))
@@ -2234,7 +2525,10 @@ class RasterExploringPanel(QWidget):
         tooltip += history_html(rows, self.tr("LAST PICKS"))
         self._pixel_coordinates_label.setToolTip(tooltip)
         # The quantity a value pick reads, with its value at the last click, in the PIPETTE group.
-        if self._derivative.is_terrain:
+        if self._custom_quantity:
+            self._quantity_label.setText(self.tr("Derived value: {0}").format(
+                format_pixel_value(terrain.get("custom"), self._range_decimals(), nodata)))
+        elif self._derivative.is_terrain:
             name = self._derivative_combo.currentText()
             self._quantity_label.setText(f"{name}: {format_derived_value(self._derivative, terrain.get(self._derivative), nodata)}")
         else:

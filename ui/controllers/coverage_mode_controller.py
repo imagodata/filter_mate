@@ -1098,10 +1098,25 @@ class CoverageModeController(BaseController):
             return
         from ...adapters.qgis.coverage_layers.raster_adapter import band_histogram, derivative_histogram
         derivative = self._raster_panel.current_derivative()
-        key = self._histogram_key(layer, band, derivative)
+        expression = self._quantity_expression()
+        if not expression and self._uses_expression_histogram():
+            self._cancel_raster_statistics()
+            self._call(self._raster_panel, 'clear_expression_histogram')
+            self._raster_panel.set_expression_status(True, '')
+            self._raster_panel.set_kept_ratio(None)
+            return
+        key = self._histogram_key(layer, band, expression or derivative)
+        pending = self._raster_stats_task
+        identity = layer.id(), capability.provider_key, key
+        if pending is not None and pending.identity != identity:
+            self._cancel_raster_statistics()
+        if expression and not self._validate_raster_expression(expression):
+            self._raster_panel.set_histogram(band, [], 0.0, 0.0, derivative, expression=expression)
+            self._raster_panel.set_kept_ratio(None)
+            return
         cached = self._histogram_cache.get(key)
         if cached is None:
-            if self._raster_needs_sample(layer):
+            if self._raster_needs_sample(layer) or expression:
                 self._request_raster_statistics(layer, band, derivative, key)
                 return
             if derivative.is_terrain:
@@ -1113,8 +1128,21 @@ class CoverageModeController(BaseController):
             while len(self._histogram_cache) > HISTOGRAM_CACHE_SIZE:
                 del self._histogram_cache[next(iter(self._histogram_cache))]  # oldest first
         counts, minimum, maximum = cached
-        self._raster_panel.set_histogram(band, counts, minimum, maximum, derivative)
+        if expression:
+            self._raster_panel.set_histogram(band, counts, minimum, maximum, derivative, expression=expression)
+            self._validate_raster_expression(expression)
+        else:
+            self._raster_panel.set_histogram(band, counts, minimum, maximum, derivative)
         self._update_kept_ratio()
+
+    def _quantity_expression(self) -> str:
+        panel = self._raster_panel
+        value = panel.current_quantity_expression() if panel is not None and hasattr(panel, 'current_quantity_expression') else ''
+        return value.strip() if isinstance(value, str) else ''
+
+    def _uses_expression_histogram(self) -> bool:
+        panel = self._raster_panel
+        return panel is not None and hasattr(panel, 'histogram_uses_expression') and panel.histogram_uses_expression() is True
 
     @staticmethod
     def _raster_capability(layer):
@@ -1244,17 +1272,23 @@ class CoverageModeController(BaseController):
         if pending is not None and pending.identity == identity:
             return
         self._cancel_raster_statistics()
+        materialize = self._raster_needs_sample(layer)
+        sample = self._local_raster_sample(layer) if materialize else None
         task = RasterStatisticsTask(key[0], identity[1], band, derivative,
                                     layer.bandCount(), self._raster_statistics_ready,
-                                    extent=self._raster_read_extent(layer),
+                                    extent=self._raster_read_extent(layer) if materialize else None,
                                     max_pixels=self._raster_preview_pixel_limit(),
-                                    sample_source=self._local_raster_sample(layer).source()
-                                    if self._local_raster_sample(layer) is not None else '')
+                                    sample_source=sample.source() if sample is not None else '',
+                                    expression=self._quantity_expression(), layer_name=layer.name(), materialize=materialize)
         task.identity = identity
         self._raster_stats_task = task
         self._borrow_raster_sample(task, task.sample_source)
-        self._raster_panel.set_histogram(band, [], 0.0, 0.0, derivative)
+        if task.expression:
+            self._raster_panel.set_histogram(band, [], 0.0, 0.0, derivative, expression=task.expression)
+        else:
+            self._raster_panel.set_histogram(band, [], 0.0, 0.0, derivative)
         self._raster_panel.set_kept_ratio(None)
+        self._call(self._raster_panel, 'set_histogram_pending')
         QgsApplication.taskManager().addTask(task)
 
     def _raster_statistics_ready(self, task, ok):
@@ -1263,24 +1297,36 @@ class CoverageModeController(BaseController):
             return False
         self._raster_stats_task = None
         layer, panel = self._active_layer, self._raster_panel
-        if not ok or layer is None or panel is None:
-            if not ok and panel is not None:
-                panel.set_stream_notice(self.tr("Raster sampling failed. Try a smaller visible extent."))
+        if layer is None or panel is None:
             return False
         try:
-            key = self._histogram_key(layer, panel.current_band(), panel.current_derivative())
+            key = self._histogram_key(layer, panel.current_band(), self._quantity_expression() or panel.current_derivative())
             if (layer.id(), self._raster_capability(layer).provider_key, key) != task.identity:
                 return False
         except RuntimeError:
             return False
-        if not self._accept_raster_sample(layer, task.sample_source):
+        if not ok:
+            if task.expression:
+                message = (self.tr("Unknown raster layer or band in expression") if task.expression_error == 'bands' else
+                           self.tr("Invalid raster calculator expression") if task.expression_error == 'syntax' else
+                           self.tr("The raster histogram could not be calculated."))
+                panel.set_expression_status(False, message)
+            else:
+                panel.set_stream_notice(self.tr("Raster sampling failed. Try a smaller visible extent."))
             return False
-        if task.histogram[0]:
+        if task.materialize and not self._accept_raster_sample(layer, task.sample_source):
+            return False
+        if task.histogram[0] or task.expression:
             self._histogram_cache[key] = task.histogram
             while len(self._histogram_cache) > HISTOGRAM_CACHE_SIZE:
                 del self._histogram_cache[next(iter(self._histogram_cache))]
-        panel.set_band_spans(task.spans)
-        panel.set_histogram(task.band, *task.histogram, task.derivative)
+        if task.materialize:
+            panel.set_band_spans(task.spans)
+        if task.expression:
+            panel.set_histogram(task.band, *task.histogram, task.derivative, expression=task.expression)
+            self._validate_raster_expression(task.expression)
+        else:
+            panel.set_histogram(task.band, *task.histogram, task.derivative)
         self._update_kept_ratio()
         if self._preview_wanted():
             self._apply_raster_preview()
@@ -1329,7 +1375,8 @@ class CoverageModeController(BaseController):
         except Exception:
             snapshot = None
         source = snapshot.original_source if snapshot is not None and snapshot.original_source else layer.source()
-        return source, int(band), getattr(derivative, 'value', 'value')
+        quantity = derivative if isinstance(derivative, str) else getattr(derivative, 'value', 'value')
+        return source, int(band), quantity
 
     def _on_raster_band_changed(self, band: int) -> None:
         if self._active_layer is not None:
@@ -1347,6 +1394,21 @@ class CoverageModeController(BaseController):
             result = self._detected_result(layer, selection)
             total = getattr(result, 'total_pixels', 0)
             panel.set_kept_ratio(result.kept_pixels / total if result is not None and total else None)
+            return
+        quantity = self._quantity_expression()
+        bounds = panel.histogram_range() if hasattr(panel, 'histogram_range') else None
+        if selection is not None and quantity and isinstance(bounds, tuple) and len(bounds) == 2:
+            cached = self._histogram_cache.get(self._histogram_key(layer, panel.current_band(), quantity))
+            if cached is None or not sum(cached[0]):
+                panel.set_kept_ratio(None)
+                return
+            counts, minimum, maximum = cached
+            low, high = bounds
+            step = (maximum - minimum) / len(counts)
+            kept = sum(count for index, count in enumerate(counts)
+                       if (low is None or minimum + (index + 0.5) * step >= low)
+                       and (high is None or minimum + (index + 0.5) * step <= high))
+            panel.set_kept_ratio(kept / sum(counts))
             return
         if selection is not None and _is_expression(selection):
             # A colour of the pipette, a spectral preset: no histogram tells, the expression is read, for
@@ -1372,6 +1434,9 @@ class CoverageModeController(BaseController):
         panel.set_kept_ratio(kept / total)
 
     def _on_raster_selection_changed(self) -> None:
+        if self._active_layer is not None and (self._quantity_expression() or self._uses_expression_histogram()
+                                               or self._raster_stats_task is not None):
+            self._refresh_histogram(self._active_layer, self._raster_panel.current_band())
         self._show_detected_objects()
         self._update_kept_ratio()
         panel = self._raster_panel
@@ -1381,15 +1446,22 @@ class CoverageModeController(BaseController):
         if panel is not None and (panel.preview_enabled() or self._preview_active):
             self._apply_raster_preview()
 
-    def _validate_raster_expression(self, expression: str) -> None:
+    def _validate_raster_expression(self, expression: str) -> bool:
         try:
-            from qgis.analysis import QgsRasterCalcNode
-            error = ''
-            node = QgsRasterCalcNode.parseRasterCalcString(expression, error)
-            ok = node is not None
-            self._raster_panel.set_expression_status(ok, '' if ok else self.tr("Invalid raster calculator expression"))
+            from ...adapters.qgis.coverage_layers.raster_adapter import raster_expression_error, raster_reference
+            layer = self._active_layer
+            if layer is None:
+                return True
+            error = raster_expression_error(expression, raster_reference(layer), layer.bandCount())
+            message = (self.tr("Unknown raster layer or band in expression") if error == 'bands' else
+                       self.tr("Invalid raster calculator expression") if error else '')
+            self._raster_panel.set_expression_status(not error, message)
+            if not error and self._raster_stats_task is not None:
+                self._call(self._raster_panel, 'set_histogram_pending')
+            return not error
         except Exception as exc:
             logger.debug(f"[FM5] raster expression not validated: {exc}")
+            return True
 
     def _on_raster_preview_toggled(self, enabled: bool) -> None:
         # The rail preview button is the only switch: the panel only keeps its state.
@@ -1408,6 +1480,10 @@ class CoverageModeController(BaseController):
             return
         from ...adapters.qgis.coverage_layers.raster_adapter import apply_selection_preview, clear_selection_preview
         selection = panel.selection()
+        if _is_expression(selection) and not self._validate_raster_expression(selection.expression):
+            clear_selection_preview(layer)
+            self._hide_derivative_preview()
+            return
         if _detects_objects(selection):
             # Detected objects: their outline is the preview, a veil would show every pixel of their colour.
             clear_selection_preview(layer)
@@ -1446,21 +1522,20 @@ class CoverageModeController(BaseController):
         """
         try:
             key = self._surface_key(layer, selection)
+            pending = self._raster_surface_task
+            if pending is not None:
+                if pending.identity[1] != key:
+                    self._cancel_raster_surface()
+                elif key not in self._surfaces:
+                    return None
             if key in self._surfaces:
                 self._surfaces.move_to_end(key)
                 return self._surfaces[key]
-            if self._raster_needs_sample(layer):
-                self._request_raster_surface(layer, selection, key)
-                return None
-            if not read:
+            if not read and not self._raster_needs_sample(layer):
                 self._schedule_expression_read()
                 return None
-            from ...adapters.qgis.coverage_layers.preview_overlay import DerivativeSurface, ExpressionSurface
-            base = self._base_raster(layer)
-            if _is_expression(selection):
-                surface = ExpressionSurface(base, selection)
-            else:
-                surface = DerivativeSurface(base, selection.band, selection.derivative)
+            self._request_raster_surface(layer, selection, key)
+            return None
         except RuntimeError as exc:
             logger.debug(f"[FM5] selection not read for its preview, layer deleted: {exc}")
             return None
@@ -1478,18 +1553,21 @@ class CoverageModeController(BaseController):
             task.cancel()
 
     def _request_raster_surface(self, layer, selection, key):
-        sample = self._local_raster_sample(layer)
-        if sample is None:
+        sampled = self._raster_needs_sample(layer)
+        sample = self._local_raster_sample(layer) if sampled else None
+        if sampled and sample is None:
             return
-        identity = self._raster_identity(layer), key, sample.source()
+        source = sample.source() if sample is not None else self._histogram_key(layer, 0)[0]
+        provider = 'gdal' if sampled else self._raster_capability(layer).provider_key
+        identity = self._raster_identity(layer), key, source
         if self._raster_surface_task is not None and self._raster_surface_task.identity == identity:
             return
         self._cancel_raster_surface()
         from qgis.core import QgsApplication
         from ...adapters.qgis.coverage_layers.raster_surface_task import RasterSurfaceTask
-        task = RasterSurfaceTask(sample.source(), layer.name(), selection, self._raster_surface_ready)
+        task = RasterSurfaceTask(source, layer.name(), selection, self._raster_surface_ready, provider=provider)
         task.identity = identity
-        self._borrow_raster_sample(task, sample.source())
+        self._borrow_raster_sample(task, sample.source() if sample is not None else '')
         self._raster_surface_task = task
         QgsApplication.taskManager().addTask(task)
 
@@ -1502,17 +1580,19 @@ class CoverageModeController(BaseController):
         if layer is None or panel is None:
             return
         selection = panel.selection()
-        sample = self._local_raster_sample(layer)
-        if selection is None or sample is None:
+        sampled = self._raster_needs_sample(layer)
+        sample = self._local_raster_sample(layer) if sampled else None
+        if selection is None or (sampled and sample is None):
             return
         key = self._surface_key(layer, selection)
-        if (self._raster_identity(layer), key, sample.source()) != task.identity:
+        source = sample.source() if sample is not None else self._histogram_key(layer, 0)[0]
+        if (self._raster_identity(layer), key, source) != task.identity:
             return
         self._surfaces[key] = task.surface if ok else None
         while len(self._surfaces) > SURFACE_CACHE_SIZE:
             self._surfaces.popitem(last=False)
         if not ok:
-            panel.set_stream_notice(self.tr("The sampled raster preview could not be calculated."))
+            panel.set_stream_notice(self.tr("The raster preview could not be calculated."))
         self._update_kept_ratio()
         if self._preview_wanted():
             self._apply_raster_preview()
@@ -1529,7 +1609,7 @@ class CoverageModeController(BaseController):
 
     def _expression_pending(self) -> bool:
         timer = self._expression_timer
-        return timer is not None and bool(timer.isActive())
+        return self._raster_surface_task is not None or (timer is not None and bool(timer.isActive()))
 
     def _read_expression(self) -> None:
         """The input settled: read the expression of the panel, then show its share and its veil."""
@@ -2463,6 +2543,10 @@ class CoverageModeController(BaseController):
                 return
             values = identify_values(base, layer_point)
             terrain = self._terrain_at(base, layer_point)
+            quantity = self._quantity_expression()
+            if quantity:
+                from ...adapters.qgis.coverage_layers.raster_adapter import expression_value_at
+                terrain['custom'] = expression_value_at(base, quantity, layer_point)
         except RuntimeError as exc:
             logger.debug(f"[FM5] pixel not read, layer deleted: {exc}")
             if self._raster_needs_sample(layer):

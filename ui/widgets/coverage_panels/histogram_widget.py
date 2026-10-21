@@ -115,6 +115,22 @@ def bins_in_range(count: int, minimum: float, maximum: float, low: Bound, high: 
     return keep
 
 
+def histogram_quantile(counts: Sequence[int], minimum: float, maximum: float, fraction: float) -> Bound:
+    """Approximate a quantile by interpolating inside the occupied histogram bin."""
+    weights = [max(0, int(count)) for count in counts]
+    total = sum(weights)
+    if not total or not (math.isfinite(minimum) and math.isfinite(maximum)) or maximum < minimum:
+        return None
+    fraction = min(1.0, max(0.0, float(fraction)))
+    step = (maximum - minimum) / len(weights)
+    target, cumulative = fraction * total, 0
+    for index, count in enumerate(weights):
+        if count and target <= cumulative + count:
+            return minimum + (index + min(1.0, max(0.0, (target - cumulative) / count))) * step
+        cumulative += count
+    return maximum
+
+
 def clamp_range(low: Bound, high: Bound, minimum: float, maximum: float) -> Tuple[Bound, Bound]:
     """Clamp the set bounds to ``[minimum, maximum]`` and order them (low <= high)."""
     if maximum < minimum:
@@ -154,19 +170,21 @@ def snap(value: float, decimals: Optional[int], minimum: float, maximum: float) 
     return min(max(round(float(value), int(decimals)), float(minimum)), float(maximum))
 
 
-def spin_bounds(minimum: Bound, maximum: Bound, decimals: int) -> Tuple[float, float]:
+def spin_bounds(minimum: Bound, maximum: Bound, decimals: int,
+                low: Bound = None, high: Bound = None) -> Tuple[float, float]:
     """Spin box range covering the data, rounded outwards to ``decimals``.
 
     QDoubleSpinBox rounds its bounds to its decimals; rounding outwards keeps
     the exact data bounds inside the range so that the extreme spin values
     still mean "every pixel" once passed through :func:`normalize_range`.
+    Explicit selection bounds are included too: an approximate histogram
+    must never clamp the displayed threshold to a different effective value.
     """
     if minimum is None or maximum is None:
-        return -SPIN_BOX_LIMIT, SPIN_BOX_LIMIT
+        minimum, maximum = -SPIN_BOX_LIMIT, SPIN_BOX_LIMIT
+    values = [float(minimum), float(maximum)] + [float(value) for value in (low, high) if value is not None]
     factor = 10 ** max(0, int(decimals))
-    low = math.floor(float(minimum) * factor) / factor
-    high = math.ceil(float(maximum) * factor) / factor
-    return min(low, high), max(low, high)
+    return math.floor(min(values) * factor) / factor, math.ceil(max(values) * factor) / factor
 
 
 def nearest_handle(x: float, low_x: float, high_x: float) -> str:
@@ -326,7 +344,9 @@ class RangeHistogramWidget(QWidget):
             muted = palette.color(QPalette.ColorRole.Mid)
             if not self._counts or not self._has_extent():
                 painter.setPen(palette.color(QPalette.ColorRole.WindowText))
-                painter.drawText(rect, Qt.AlignmentFlag.AlignCenter, self.tr("No histogram"))
+                text = (self.tr("Constant value: {0}").format(f"{self._minimum:g}")
+                        if sum(self._counts) and self._minimum == self._maximum else self.tr("No histogram"))
+                painter.drawText(rect, Qt.AlignmentFlag.AlignCenter, text)
                 return
             sqrt_scale = needs_sqrt_scale(self._counts) if self._sqrt_scale is None else self._sqrt_scale
             heights = bar_heights(self._counts, rect.height(), sqrt_scale)

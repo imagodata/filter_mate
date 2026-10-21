@@ -779,6 +779,29 @@ def adapters(monkeypatch, ctrl_module):
     return types.SimpleNamespace(calls=calls, package=package, snapshots=snapshots, raster=raster)
 
 
+@pytest.fixture
+def statistics_tasks(adapters, monkeypatch):
+    module = types.ModuleType(f"{adapters.package.__name__}.raster_statistics_task")
+    created = []
+
+    class Task:
+        def __init__(self, source, provider, band, derivative, band_count, callback, **kwargs):
+            self.source, self.band, self.derivative, self.callback = source, band, derivative, callback
+            self.expression = kwargs.get('expression', '')
+            self.materialize = kwargs.get('materialize', True)
+            self.sample_source = kwargs.get('sample_source', '')
+            self.histogram, self.spans, self.expression_error = ([], 0.0, 0.0), {}, ''
+            self.cancel = MagicMock()
+            created.append(self)
+
+    module.RasterStatisticsTask = Task
+    monkeypatch.setitem(sys.modules, module.__name__, module)
+    adapters.raster.raster_reference = lambda layer: layer.name()
+    adapters.raster.raster_expression_error = lambda *args: ''
+    adapters.raster.source_max_pixels = lambda value: 100000000
+    return created
+
+
 @pytest.mark.unit
 class TestHeightAboveGroundLayerSwitch:
     """Constats 1 / 10: the HAG callback and its retry stay on the layer they were started for."""
@@ -1271,6 +1294,24 @@ def overlay(monkeypatch, adapters):
     module.MaskOverlay = MaskOverlay
     module.fits_canvas = lambda surface, crs: True
     monkeypatch.setitem(sys.modules, module.__name__, module)
+    tasks = types.ModuleType(f"{adapters.package.__name__}.raster_surface_task")
+
+    class Task:
+        def __init__(self, path, name, selection, callback, provider='gdal'):
+            self.path, self.selection, self.callback = path, selection, callback
+            self.surface = None
+            self.cancel = MagicMock()
+
+        def complete(self):
+            try:
+                self.surface = module.ExpressionSurface(types.SimpleNamespace(source=lambda: self.path), self.selection)
+                ok = True
+            except Exception:
+                ok = False
+            self.callback(self, ok)
+
+    tasks.RasterSurfaceTask = Task
+    monkeypatch.setitem(sys.modules, tasks.__name__, tasks)
     return module
 
 
@@ -1313,6 +1354,8 @@ class TestColorPipetteFeedback:
         """The debounce timer fires."""
         controller._expression_timer.stop()
         controller._read_expression()
+        if controller._raster_surface_task is not None:
+            controller._raster_surface_task.complete()
 
     def test_nothing_is_read_while_the_preview_is_off(self, ctrl_module, layers, adapters, overlay, monkeypatch):
         controller = self._controller(ctrl_module, layers, monkeypatch, preview=False)
@@ -1347,6 +1390,25 @@ class TestColorPipetteFeedback:
         controller._raster_panel.set_kept_ratio.assert_called_with(0.00012)
         assert len(overlay.read) == 1
 
+    def test_surface_waits_for_worker_and_superseded_results_are_ignored(self, ctrl_module, layers, adapters, overlay, monkeypatch):
+        controller = self._controller(ctrl_module, layers, monkeypatch)
+        first = _color_selection('"r1@1" > 10')
+        controller._raster_panel.selection.return_value = first
+        assert controller._selection_surface(layers["r1"], first) is None
+        old = controller._raster_surface_task
+        assert old is not None and overlay.read == []
+        assert controller._selection_surface(layers["r1"], first) is None
+        assert controller._raster_surface_task is old
+        second = _color_selection('"r1@1" > 20')
+        controller._raster_panel.selection.return_value = second
+        controller._selection_surface(layers["r1"], second)
+        current = controller._raster_surface_task
+        old.cancel.assert_called_once()
+        old.complete()
+        assert controller._surfaces == {}
+        current.complete()
+        assert list(controller._surfaces) == [("/data/r1", "r1", second.expression)]
+
     def test_grids_survive_a_layer_switch_and_stay_few(self, ctrl_module, layers, adapters, overlay, monkeypatch):
         controller = self._controller(ctrl_module, layers, monkeypatch)
         controller._on_raster_selection_changed()
@@ -1354,15 +1416,20 @@ class TestColorPipetteFeedback:
         controller._stop_preview(layers["r1"])  # leaving the layer, a filter
         assert len(controller._surfaces) == 1
         for index in range(ctrl_module.SURFACE_CACHE_SIZE + 2):
-            controller._selection_surface(layers["r1"], _color_selection(f'("r1@1" > {index})'))
+            selection = _color_selection(f'("r1@1" > {index})')
+            controller._raster_panel.selection.return_value = selection
+            controller._selection_surface(layers["r1"], selection)
+            controller._raster_surface_task.complete()
         assert len(controller._surfaces) == ctrl_module.SURFACE_CACHE_SIZE
         assert ("/data/r1", "r1", _color_selection().expression) not in controller._surfaces  # the oldest went
 
     def test_a_renamed_layer_is_read_again(self, ctrl_module, layers, adapters, overlay, monkeypatch):
         controller = self._controller(ctrl_module, layers, monkeypatch)
         controller._selection_surface(layers["r1"], _color_selection())
+        controller._raster_surface_task.complete()
         monkeypatch.setattr(layers["r1"], "name", lambda: "r1 renamed")  # its expressions read another reference
         controller._selection_surface(layers["r1"], _color_selection())
+        controller._raster_surface_task.complete()
         assert len(overlay.read) == 2
 
     def test_an_unreadable_expression_has_no_ratio_and_is_not_read_again(self, ctrl_module, layers, adapters,
@@ -1430,6 +1497,99 @@ class TestHistogramCache:
             controller._refresh_histogram(FakeLayer(f"r{index}", "raster"), 1)
         assert len(controller._histogram_cache) == ctrl_module.HISTOGRAM_CACHE_SIZE
         assert ("/data/r0", 1, "value") not in controller._histogram_cache
+
+    def _expression_controller(self, ctrl_module, layers, monkeypatch):
+        controller = ctrl_module.CoverageModeController(_dock())
+        controller._active_layer = layers["r1"]
+        layers["r1"].bandCount = lambda: 4
+        controller._raster_panel = _value_panel()
+        controller._raster_panel.current_band.return_value = 1
+        controller._raster_panel.selection.return_value = None
+        controller._raster_panel.preview_enabled.return_value = False
+        controller._raster_panel.current_quantity_expression.return_value = '"r1@1" / 100'
+        monkeypatch.setattr(controller, "_base_raster", lambda layer: pytest.fail("expression pixels read on GUI thread"))
+        monkeypatch.setattr(controller, "_accept_raster_sample", lambda *args: pytest.fail("local source must not become a managed capture"))
+        return controller
+
+    def test_custom_quantity_histograms_follow_formula_edits_and_reuse_cache(self, ctrl_module, layers, adapters, statistics_tasks, monkeypatch):
+        controller = self._expression_controller(ctrl_module, layers, monkeypatch)
+        controller._refresh_histogram(layers["r1"], 1)
+        controller._refresh_histogram(layers["r1"], 1)
+        assert len(statistics_tasks) == 1
+        first = statistics_tasks[0]
+        assert not first.materialize and not first.sample_source
+        first.histogram = ([2, 3], -1, 1)
+        assert first.callback(first, True)
+        controller._refresh_histogram(layers["r1"], 1)
+        assert len(statistics_tasks) == 1
+        controller._raster_panel.set_histogram.assert_called_with(1, [2, 3], -1, 1,
+                                                               controller._raster_panel.current_derivative(), expression='"r1@1" / 100')
+        controller._raster_panel.current_quantity_expression.return_value = '"r1@1" / 200'
+        controller._on_raster_selection_changed()
+        assert len(statistics_tasks) == 2
+        second = statistics_tasks[1]
+        second.histogram = ([2, 3], -1, 1)
+        assert second.callback(second, True)
+        assert ("/data/r1", 1, '"r1@1" / 200') in controller._histogram_cache
+
+    def test_cached_formula_cancels_a_superseded_read_and_ignores_its_error(self, ctrl_module, layers, statistics_tasks, monkeypatch):
+        controller = self._expression_controller(ctrl_module, layers, monkeypatch)
+        controller._histogram_cache[("/data/r1", 1, '"r1@1" / 200')] = ([3], 0, 1)
+        controller._refresh_histogram(layers["r1"], 1)
+        old = statistics_tasks[0]
+        controller._raster_panel.current_quantity_expression.return_value = '"r1@1" / 200'
+        controller._refresh_histogram(layers["r1"], 1)
+        old.cancel.assert_called_once()
+        controller._raster_panel.set_expression_status.reset_mock()
+        assert not old.callback(old, False)
+        controller._raster_panel.set_expression_status.assert_not_called()
+
+    def test_failure_for_a_formula_edited_before_debounce_is_ignored(self, ctrl_module, layers, statistics_tasks, monkeypatch):
+        controller = self._expression_controller(ctrl_module, layers, monkeypatch)
+        controller._refresh_histogram(layers["r1"], 1)
+        old = statistics_tasks[0]
+        controller._raster_panel.current_quantity_expression.return_value = '"r1@1" / 200'
+        controller._raster_panel.set_expression_status.reset_mock()
+        assert not old.callback(old, False)
+        controller._raster_panel.set_expression_status.assert_not_called()
+
+    def test_empty_formula_cancels_the_pending_read(self, ctrl_module, layers, statistics_tasks, monkeypatch):
+        controller = self._expression_controller(ctrl_module, layers, monkeypatch)
+        controller._refresh_histogram(layers["r1"], 1)
+        old = statistics_tasks[0]
+        controller._raster_panel.current_quantity_expression.return_value = ''
+        controller._raster_panel.histogram_uses_expression.return_value = True
+        controller._on_raster_selection_changed()
+        old.cancel.assert_called_once()
+        controller._raster_panel.clear_expression_histogram.assert_called_once()
+        assert len(statistics_tasks) == 1
+
+    def test_invalid_band_is_reported_without_starting_a_worker(self, ctrl_module, layers, adapters, statistics_tasks, monkeypatch):
+        controller = self._expression_controller(ctrl_module, layers, monkeypatch)
+        adapters.raster.raster_expression_error = lambda *args: 'bands'
+        controller._refresh_histogram(layers["r1"], 1)
+        assert statistics_tasks == []
+        controller._raster_panel.set_expression_status.assert_called_with(False, "Unknown raster layer or band in expression")
+
+    def test_valid_empty_result_is_cached(self, ctrl_module, layers, statistics_tasks, monkeypatch):
+        controller = self._expression_controller(ctrl_module, layers, monkeypatch)
+        controller._refresh_histogram(layers["r1"], 1)
+        task = statistics_tasks[0]
+        assert task.callback(task, True)
+        controller._refresh_histogram(layers["r1"], 1)
+        assert len(statistics_tasks) == 1
+
+    def test_custom_histogram_estimates_kept_share_without_preview(self, ctrl_module, layers):
+        controller = ctrl_module.CoverageModeController(_dock())
+        controller._active_layer = layers["r1"]
+        panel = controller._raster_panel = _value_panel()
+        panel.current_band.return_value = 1
+        panel.current_quantity_expression.return_value = '"r1@1" / 100'
+        panel.histogram_range.return_value = (0, None)
+        panel.selection.return_value = types.SimpleNamespace(mode=types.SimpleNamespace(value="expression"), seeds=())
+        controller._histogram_cache[("/data/r1", 1, '"r1@1" / 100')] = ([3, 1], -1, 1)
+        controller._update_kept_ratio()
+        panel.set_kept_ratio.assert_called_with(0.25)
 
 
 @pytest.mark.unit
@@ -2355,6 +2515,7 @@ def test_rendered_filter_pins_capture_until_done(ctrl_module, adapters, layers, 
     controller = ctrl_module.CoverageModeController(_dock())
     task = types.SimpleNamespace(error="canceled")
     callbacks = []
+
     def run(request, source_job, on_done=None):
         callbacks.append(on_done)
         return task

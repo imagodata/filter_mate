@@ -144,6 +144,9 @@ class _Part:
     def isMultipart(self):
         return False
 
+    def asWkb(self):
+        return str(id(self)).encode()
+
 
 class _Multi:
     """A multipolygon of :class:`_Part`."""
@@ -298,7 +301,7 @@ class TestSimilarObjects:
         monkeypatch.setattr(raster_adapter, "QgsGeometry", fk.FakeGeometry)
         monkeypatch.setattr(geometry_tools, "union_geometries", lambda parts: fk.FakeGeometry.fromWkt(
             "MULTIPOLYGON(" + ", ".join("((" + ", ".join(f"{x} {y}" for x, y in p.exterior_coords()) + "))" for p in parts) + ")")
-                            if hasattr(parts[0], "exterior_coords") else parts[0])
+            if hasattr(parts[0], "exterior_coords") else parts[0])
         selection = RasterSelection(mode=RasterSelectionMode.CLASSES, classes=frozenset({1}), seeds=((5.0, 5.0),),
                                     similar=(0.5, 2.0))
         result = raster_adapter.similar_objects_geometry(None, selection, fk.FakeRectangle(0, 0, 100, 100), 100, 100, "",
@@ -312,6 +315,57 @@ class TestSimilarObjects:
         assert raster_adapter.similar_shape_bounds([0.8, 0.6], (0.5, 2.0)) == (0.3, 1.0)
         assert raster_adapter.similar_shape_bounds([0.2], (0.5, 2.0)) == (0.1, 0.4)
         assert raster_adapter.similar_shape_bounds([], (0.5, 2.0)) is None
+
+    def test_area_and_shape_must_match_the_same_reference(self, monkeypatch):
+        references = _Multi([_Part(100, 40), _Part(900, 300)])  # small square, large narrow patch
+        candidates = [_Part(100, 40), _Part(900, 300), _Part(100, 100), _Part(400, 80)]
+        monkeypatch.setattr(raster_adapter, "object_geometry", lambda *a, **k:
+                            raster_adapter.SelectionGeometryResult(references, 1000, 10000, 1, objects=2))
+        monkeypatch.setattr(raster_adapter, "selection_geometry", lambda *a, **k:
+                            raster_adapter.SelectionGeometryResult(_Multi(candidates), 1500, 10000, 1))
+        monkeypatch.setattr(geometry_tools, "union_geometries", _Multi)
+        selection = RasterSelection(minimum=1, seeds=((1, 1), (2, 2)), similar=(0.8, 1.2), shape=True)
+        result = raster_adapter.similar_objects_geometry(None, selection, fk.FakeRectangle(0, 0, 100, 100), 100, 100, "")
+        assert result.objects == 2 and result.kept_pixels == 1000
+
+    @pytest.mark.parametrize("touching", [False, True])
+    def test_multiple_colours_keep_their_own_size_references(self, monkeypatch, touching):
+        pool = RasterSelection(mode=RasterSelectionMode.CLASSES, classes=frozenset({1}), seeds=((1, 1),))
+        roof = RasterSelection(mode=RasterSelectionMode.CLASSES, classes=frozenset({2}), seeds=((2, 2),))
+        reads = []
+
+        def reference(provider, selection, *a, **k):
+            area = 100 if selection.classes == pool.classes else 900
+            return raster_adapter.SelectionGeometryResult(_Part(area, 4 * area ** 0.5), area, 10000, 1)
+
+        def patches(provider, selection, *a, **k):
+            reads.append((provider, selection.classes, k["opening"]))
+            return raster_adapter.SelectionGeometryResult(_Multi([_Part(100, 40), _Part(900, 120)]), 1000, 10000, 1)
+
+        def union(geoms):
+            parts = [part for geom in geoms for part in raster_adapter.geometry_parts(geom)]
+            return _Part(sum(part.area() for part in parts), 160) if touching and len(parts) > 1 else _Multi(parts)
+
+        monkeypatch.setattr(raster_adapter, "object_geometry", reference)
+        monkeypatch.setattr(raster_adapter, "selection_geometry", patches)
+        monkeypatch.setattr(geometry_tools, "union_geometries", union)
+        selection = RasterSelection(mode=RasterSelectionMode.CLASSES, classes=frozenset({1, 2}),
+                                    objects=(pool, roof), similar=(0.8, 1.2), object_opening=3)
+        result = raster_adapter.similar_objects_geometry(None, selection, fk.FakeRectangle(0, 0, 100, 100), 100, 100, "",
+                                                         provider_for=lambda criterion: next(iter(criterion.classes)))
+        assert reads == [(1, pool.classes, 3), (2, roof.classes, 3)]
+        assert result.objects == 2 and result.kept_pixels == 1000
+
+    def test_rectangular_pixels_use_their_actual_area(self, monkeypatch):
+        part = _Part(100, 40)
+        monkeypatch.setattr(raster_adapter, "object_geometry", lambda *a, **k:
+                            raster_adapter.SelectionGeometryResult(part, 50, 10000, 2))
+        monkeypatch.setattr(raster_adapter, "selection_geometry", lambda *a, **k:
+                            raster_adapter.SelectionGeometryResult(part, 50, 10000, 2))
+        monkeypatch.setattr(geometry_tools, "union_geometries", _Multi)
+        selection = RasterSelection(minimum=1, seeds=((5, 5),), similar=(0.5, 2))
+        result = raster_adapter.similar_objects_geometry(None, selection, fk.FakeRectangle(0, 0, 200, 100), 100, 100, "")
+        assert result.kept_pixels == 50
 
     def test_the_shape_keeps_the_pools_and_drops_the_road(self, monkeypatch):
         clicked = _Part(100.0, 40.0)  # a square pool of 10 m: compactness 0.79
@@ -367,6 +421,14 @@ class TestSimilarObjects:
 
 
 class TestObjectGeometry:
+    def test_holes_can_be_preserved_and_separation_disabled(self, scene):
+        mask, _windows, regions = scene
+        mask[100:110, 100:110] = True
+        mask[105, 105] = False
+        selection = RasterSelection(minimum=1, seeds=((102.5, 897.5),), object_opening=0, fill_holes=False)
+        result = raster_adapter.object_geometry(None, selection, fk.FakeRectangle(0, 0, 1000, 1000), 1000, 1000, "")
+        assert result.kept_pixels == 99 and regions[-1][0].sum() == 99
+
     def test_window_grows_until_the_object_fits(self, scene):
         mask, windows, regions = scene
         mask[400:701, 450:461] = True  # a long, narrow object
@@ -473,3 +535,50 @@ class TestSelectionGeometryRoute:
         selection = RasterSelection(mode=RasterSelectionMode.CLASSES, classes=frozenset({1}), seeds=((1.0, 2.0),))
         assert raster_adapter.selection_geometry(None, selection, fk.FakeRectangle(0, 0, 10, 10), 10, 10, "") == "objects"
         assert calls
+
+
+class TestCustomStatisticsTask:
+    def test_worker_preserves_layer_name_for_formula_references(self, monkeypatch):
+        module = fk.load("raster_statistics_task")
+        names, formulas = [], []
+
+        def layer(source, name, provider):
+            names.append(name)
+            return type("LocalRaster", (), {"isValid": lambda self: True})()
+
+        monkeypatch.setattr(module, "QgsRasterLayer", layer)
+        monkeypatch.setattr(module, "raster_expression_error", lambda *a: '')
+        monkeypatch.setattr(module, "expression_histogram", lambda layer, expression, **kwargs:
+                            formulas.append(expression) or ([3, 1], -1, 1))
+        task = module.RasterStatisticsTask("remote", "wcs", 1, criteria.RasterDerivative.VALUE, 0, lambda *a: None,
+                                           sample_source="/tmp/local.tif", expression='"image_source@2" - "image_source@1"',
+                                           layer_name="image source")
+        assert task.run()
+        assert names == ["image source"]
+        assert formulas == ['"image_source@2" - "image_source@1"']
+        assert task.histogram == ([3, 1], -1, 1)
+
+    def test_local_expression_reads_original_source_without_owning_or_deleting_it(self, monkeypatch):
+        module = fk.load("raster_statistics_task")
+        opened, settled = [], []
+        monkeypatch.setattr(module, "QgsRasterLayer", lambda source, *args:
+                            opened.append(source) or type("Layer", (), {"isValid": lambda self: True})())
+        monkeypatch.setattr(module, "raster_expression_error", lambda *a: '')
+        monkeypatch.setattr(module, "materialize_raster", lambda *a: pytest.fail("local raster must not be captured"))
+        monkeypatch.setattr(module.cache, "settle", lambda paths: settled.extend(paths))
+        budgets = []
+        monkeypatch.setattr(module, "expression_histogram", lambda *a, **kwargs: budgets.append(kwargs["max_pixels"]) or ([5], 0, 1))
+        task = module.RasterStatisticsTask("/data/source.tif", "gdal", 1, criteria.RasterDerivative.VALUE, 4, lambda *a: False,
+                                           expression='"image@1" / 100', layer_name="image", materialize=False, max_pixels=32)
+        assert task.run()
+        task.finished(True)
+        assert opened == ["/data/source.tif"] and budgets == [32]
+        assert not task.owns_sample and not task.sample_source and settled == []
+
+    def test_invalid_expression_does_not_open_the_source(self, monkeypatch):
+        module = fk.load("raster_statistics_task")
+        monkeypatch.setattr(module, "raster_expression_error", lambda *a: 'bands')
+        monkeypatch.setattr(module, "QgsRasterLayer", lambda *a: pytest.fail("invalid formula must not read a provider"))
+        task = module.RasterStatisticsTask("remote", "wcs", 1, criteria.RasterDerivative.VALUE, 4, lambda *a: False,
+                                           expression='"image@99"', layer_name="image")
+        assert not task.run() and task.expression_error == 'bands'
