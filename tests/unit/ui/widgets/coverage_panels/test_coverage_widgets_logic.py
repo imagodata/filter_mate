@@ -48,6 +48,12 @@ RasterSelectionMode = raster.RasterSelectionMode
 
 
 class TestBandDisplay:
+    @pytest.mark.parametrize("mode", ["range", "pipette"])
+    def test_no_checked_band_cannot_build_a_selection(self, mode):
+        state = {"mode": mode, "band": 1, "minimum": 10, "pipette_bands": [],
+                 "pipette_selection": {"band": 1, "mode": "range", "minimum": 10}}
+        assert raster.build_raster_selection(state) is None
+
     @pytest.mark.parametrize("bands,roles,expected", [
         ([4], {4: "NIR"}, (4,)),
         ([3, 1, 2], {1: "R", 2: "G", 3: "B"}, (1, 2, 3)),

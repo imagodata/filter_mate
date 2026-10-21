@@ -5,8 +5,8 @@ Raster EXPLORING Panel.
 Shown in place of the vector exploring groups when the current layer is a
 raster. The panel is organised as the FilterMate 5 audit of 2026-10-18 asks:
 
-* **BANDS** (not checkable, on top): one row per band with the active band
-  (radio), whether the pipette compares the band (check box), its colour role
+* **BANDS** (not checkable, on top): one row per band with a selection check
+  box used by the pipette, the value range and the map display, its colour role
   (red, green, blue, near infrared), its name and type, and its value at the
   last click of the pixel picker. The roles are read from the renderer when it
   is a multiband colour one, guessed otherwise (and said so) until the user
@@ -203,7 +203,7 @@ def sanitize_reference(name: str) -> str:
     return "".join(char if char.isalnum() or char == "_" else "_" for char in (name or "")) or DEFAULT_REFERENCE
 
 
-ALL_BANDS = 0  # active band value of the "every band" mode
+ALL_BANDS = 0  # row of the select-all checkbox
 
 
 def all_bands_range_expression(bands: Sequence[int], low: Bound, high: Bound, reference: str) -> str:
@@ -650,6 +650,8 @@ def build_raster_selection(state: Any) -> Optional[RasterSelection]:
     """
     parsed = parse_raster_state(state)
     mode = parsed["mode"]
+    if mode in (PIPETTE, RasterSelectionMode.RANGE) and isinstance(state, dict) and "pipette_bands" in state and not parsed["pipette_bands"]:
+        return None
     if mode is PIPETTE:
         try:
             selection = RasterSelection.from_dict(parsed["pipette_selection"] or {})
@@ -746,8 +748,7 @@ class RasterExploringPanel(QWidget):
         self._preview_on = False  # the rail preview button is down
         self._derivative = RasterDerivative.VALUE
         self._custom_quantity = False
-        self._active_band = 1
-        self._all_bands = False  # the range applies to every colour band at once (ANDed)
+        self._all_bands = False  # the range applies to every checked band at once (ANDed)
         self._roles: Dict[int, str] = {}  # band -> colour role
         self._roles_guessed = False  # the roles were not read from the renderer nor chosen by the user
         self._pipette_bands: List[int] = []  # bands a picked colour is made of
@@ -857,9 +858,9 @@ class RasterExploringPanel(QWidget):
         self._display_combo = QComboBox(group)
         self._display_combo.setObjectName("comboBox_raster_band_display")
         self._display_combo.addItem(self.tr("Layer style"), "original")
-        self._display_combo.addItem(self.tr("Active band"), "active")
+        self._display_combo.addItem(self.tr("First checked band"), "active")
         self._display_combo.addItem(self.tr("Selected bands"), "selected")
-        self._display_combo.setToolTip(self.tr("Display the active band in grey or the checked bands as a colour composite"))
+        self._display_combo.setToolTip(self.tr("Display the first checked band in grey or the checked bands as a colour composite"))
         display_label.setBuddy(self._display_combo)
         display_row.addWidget(self._display_combo, 1)
         group_layout.addLayout(display_row)
@@ -869,8 +870,6 @@ class RasterExploringPanel(QWidget):
         self._display_note.hide()
         group_layout.addWidget(self._display_note)
         self._display_combo.currentIndexChanged.connect(self._on_display_changed)
-        self._active_group = QButtonGroup(self)
-        self._active_group.setExclusive(True)
         # Layout shortcuts (RGB, IRC, RGB + NIR) live in the menu of every colour chip: one action per chip.
         self._shortcut_buttons: Dict[str, List[Any]] = {"rgb": [], "irc": [], "rgbn": []}
 
@@ -901,15 +900,14 @@ class RasterExploringPanel(QWidget):
     ROLE_COLOURS = {ROLE_RED: "#d9443a", ROLE_GREEN: "#4caf50", ROLE_BLUE: "#2f7fd8", ROLE_NIR: "#8e24aa"}
     CHIP_HEIGHT = 16
     ROW_CONTROL = 18  # height of the small controls of a band row
-    # The radios, the checkboxes and the empty chips take the dock stylesheet (mockup.qss): the
+    # The checkboxes and the empty chips take the dock stylesheet (mockup.qss): the
     # 17 px indicator of every check box and radio, theme tokens instead of the QGIS palette (2026-10-18:
     # the inline QGIS palette styles kept the QGIS colours when the plugin theme differed from QGIS').
 
     def _rebuild_band_rows(self) -> None:
-        """One row per band: active (radio), selected (checkbox), colour chip, name, value.
+        """One row per band: selected (checkbox), colour chip, name, value.
 
-        A single band shows neither the active radio nor the selection checkbox; fewer than three
-        colour bands show no chip. The chip is a menu: the role of the band, then the layouts
+        Fewer than three colour bands show no chip. The chip is a menu: the role of the band, then the layouts
         that set every band at once.
         """
         for row in self._band_rows.values():
@@ -918,8 +916,6 @@ class RasterExploringPanel(QWidget):
                     self._bands_grid.removeWidget(widget)
                     widget.setParent(None)
                     widget.deleteLater()
-        for button in list(self._active_group.buttons()):
-            self._active_group.removeButton(button)
         self._band_rows = {}
         self._shortcut_buttons = {"rgb": [], "irc": [], "rgbn": []}
         bands = self._summary.bands if self._summary is not None else []
@@ -928,33 +924,23 @@ class RasterExploringPanel(QWidget):
         mono = QFontDatabase.systemFont(QFontDatabase.SystemFont.FixedFont)
         offset = 0
         if several:
-            # "Every band": the range applies to each colour band at once (the histogram shows the first one).
-            every = QRadioButton(self.tr("Every band"), self._bands_holder)
-            every.setObjectName("radioButton_raster_band_active_all")
-            every.setToolTip(self.tr("The value range applies to every colour band at once (a pixel is kept when "
-                                     "each band is in the range); the histogram shows the first one"))
+            every = QCheckBox(self.tr("Every band"), self._bands_holder)
+            every.setObjectName("checkBox_raster_band_all")
+            every.setTristate(True)
+            every.setToolTip(self.tr("Select or clear every band. The histogram shows the first checked band."))
             every.setFixedHeight(self.ROW_CONTROL + 2)
-            every.toggled.connect(lambda checked: self._on_active_band_toggled(ALL_BANDS, checked))
-            self._active_group.addButton(every, ALL_BANDS)
-            self._bands_grid.addWidget(every, 0, 0, 1, 4)
-            self._band_rows[ALL_BANDS] = {"radio": every}
+            every.clicked.connect(self._on_all_bands_clicked)
+            self._bands_grid.addWidget(every, 0, 0, 1, 3)
+            self._band_rows[ALL_BANDS] = {"checkbox": every}
             offset = 1
         for index, info in enumerate(bands, start=offset):
             number = int(info.number)
-            radio = QRadioButton(self._bands_holder)
-            radio.setObjectName(f"radioButton_raster_band_active_{number}")
-            radio.setToolTip(self.tr("Active band: the one the range, the histogram and the picker read"))
-            radio.toggled.connect(lambda checked, n=number: self._on_active_band_toggled(n, checked))
-            radio.setFixedSize(self.ROW_CONTROL, self.ROW_CONTROL)  # a narrower cell clipped the round indicator
-            radio.setVisible(several)
-            self._active_group.addButton(radio, number)
             pipette = QCheckBox(self._bands_holder)
             pipette.setObjectName(f"checkBox_raster_band_selected_{number}")
-            pipette.setToolTip(self.tr("Use this band for the pipette and the selected bands display"))
+            pipette.setToolTip(self.tr("Use this band for the pipette, value range and selected bands display"))
             pipette.setAccessibleName(self.tr("Select band {0}").format(number))
             pipette.setFixedSize(self.ROW_CONTROL, self.ROW_CONTROL)
             pipette.toggled.connect(lambda checked, n=number: self._on_pipette_band_toggled(n, checked))
-            pipette.setVisible(several)
             chip = self._menu_button(self._bands_holder, "—",
                                      self.tr("Colour the band holds: the spectral indexes and the chips use it. Click to change it"),
                                      f"toolButton_raster_band_role_{number}")
@@ -977,15 +963,14 @@ class RasterExploringPanel(QWidget):
             value.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
             value.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
             value.setToolTip(self.tr("Value at the last click of the pipette"))
-            widgets = {"radio": radio, "pipette": pipette, "chip": chip, "name": name, "kind": kind, "value": value}
-            self._bands_grid.addWidget(radio, index, 0, Qt.AlignmentFlag.AlignHCenter)
-            self._bands_grid.addWidget(pipette, index, 1, Qt.AlignmentFlag.AlignHCenter)
-            self._bands_grid.addWidget(chip, index, 2, Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter)
-            self._bands_grid.addWidget(name, index, 3)
-            self._bands_grid.addWidget(kind, index, 4)
-            self._bands_grid.addWidget(value, index, 5)
+            widgets = {"pipette": pipette, "chip": chip, "name": name, "kind": kind, "value": value}
+            self._bands_grid.addWidget(pipette, index, 0, Qt.AlignmentFlag.AlignHCenter)
+            self._bands_grid.addWidget(chip, index, 1, Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter)
+            self._bands_grid.addWidget(name, index, 2)
+            self._bands_grid.addWidget(kind, index, 3)
+            self._bands_grid.addWidget(value, index, 4)
             self._band_rows[number] = widgets
-        self._bands_grid.setColumnStretch(3, 1)
+        self._bands_grid.setColumnStretch(2, 1)
         self._refresh_band_rows()
         self._refresh_head()
 
@@ -1036,17 +1021,15 @@ class RasterExploringPanel(QWidget):
         nodata = self.tr("NoData")
         for number, row in self._band_rows.items():
             if number == ALL_BANDS:
-                with _signals_blocked(row["radio"]):
-                    row["radio"].setChecked(self._all_bands)
-                font = QFont(row["radio"].font())
-                font.setBold(self._all_bands)
-                row["radio"].setFont(font)
+                selected = set(self._pipette_bands)
+                state = (Qt.CheckState.Unchecked if not selected else Qt.CheckState.Checked
+                         if selected == set(self._selectable_bands()) else Qt.CheckState.PartiallyChecked)
+                with _signals_blocked(row["checkbox"]):
+                    row["checkbox"].setCheckState(state)
                 continue
             info = self._band_info(number)
-            active = number == self._active_band and not self._all_bands
             compared = number in self._pipette_bands
-            with _signals_blocked(row["radio"], row["pipette"]):
-                row["radio"].setChecked(active)
+            with _signals_blocked(row["pipette"]):
                 row["pipette"].setChecked(compared)
                 row["pipette"].setEnabled(not (info is not None and getattr(info, "is_alpha", False)))
             role = self._roles.get(number, ROLE_NONE)
@@ -1056,7 +1039,7 @@ class RasterExploringPanel(QWidget):
                                    + self.tr("Colour the band holds: the spectral indexes and the chips use it. Click to change it")
                                    + guessed)
             font = QFont(row["name"].font())
-            font.setBold(active)
+            font.setBold(compared and number == self.current_band())
             row["name"].setFont(font)
             row["name"].setEnabled(not (info is not None and getattr(info, "is_alpha", False)))
             decimals = decimals_for(info.data_type) if info is not None else FLOAT_DECIMALS
@@ -1072,7 +1055,7 @@ class RasterExploringPanel(QWidget):
         if self._rendered_only or mode == "original":
             return None
         if mode == "active":
-            return (self.current_band(),)
+            return (self.current_band(),) if self._pipette_bands else ()
         return display_channels(self._pipette_bands, self._roles)
 
     def _refresh_display_note(self) -> None:
@@ -1605,7 +1588,6 @@ class RasterExploringPanel(QWidget):
             self._quantity_debounce.stop()
             self._custom_quantity = False
             self._all_bands = False
-            self._active_band = 1
             self._set_derivative(RasterDerivative.VALUE)
             self._rendered_rgb_bands()
             self._activate_mode(PIPETTE, emit=False)
@@ -1630,9 +1612,6 @@ class RasterExploringPanel(QWidget):
         renderer_bands = getattr(self._summary, "renderer_bands", None) if self._summary is not None else None
         self._roles, self._roles_guessed = default_roles(names, alpha, renderer_bands)
         self._pipette_bands = color_bands(names, alpha)
-        numbers = [int(info.number) for info in (self._summary.bands if self._summary is not None else [])]
-        if self._active_band not in numbers:
-            self._active_band = numbers[0] if numbers else 1
 
     def set_histogram(self, band: int, counts: Sequence[int], minimum: float, maximum: float,
                       derivative: RasterDerivative = RasterDerivative.VALUE, expression: str = "") -> None:
@@ -1684,6 +1663,8 @@ class RasterExploringPanel(QWidget):
         """Show ``selection`` (band, mode and its values). Does not emit."""
         state = self.state()
         state.update(selection.to_dict())
+        if selection.mode in (RasterSelectionMode.RANGE, RasterSelectionMode.CLASSES):
+            state["pipette_bands"] = [selection.band]
         self.restore_state(state)
 
     def active_mode(self) -> RasterSelectionMode:
@@ -1706,22 +1687,16 @@ class RasterExploringPanel(QWidget):
         return self._derivative if self._mode in (RasterSelectionMode.RANGE, PIPETTE) else RasterDerivative.VALUE
 
     def current_band(self) -> int:
-        """1-based number of the active band (1 when no band is listed); the first colour band in "every band" mode."""
-        if self._all_bands:
-            bands = self._range_bands()
-            return bands[0] if bands else 1
-        return int(self._active_band) if self._active_band else 1
+        """First checked band; the fallback is only for metadata and empty histogram readouts."""
+        return self._pipette_bands[0] if self._pipette_bands else 1
 
     def all_bands(self) -> bool:
-        """Whether the value range applies to every colour band at once."""
+        """Whether the value range applies to several checked bands at once."""
         return self._all_bands
 
     def _range_bands(self) -> List[int]:
-        """Bands the range applies to in "every band" mode: the colour bands (no alpha), every band failing that."""
-        bands = self._colour_bands()
-        if not bands:
-            bands = [int(info.number) for info in (self._summary.bands if self._summary is not None else [])]
-        return bands
+        """The checked bands, shared with the pipette and the map display."""
+        return list(self._pipette_bands)
 
     def band_roles(self) -> Dict[int, str]:
         """Colour role of each band (``{1: "NIR", 2: "R", 3: "G"}``); empty for a single band raster."""
@@ -1838,7 +1813,6 @@ class RasterExploringPanel(QWidget):
         self._pipette_selection, self._picks, self._pick_kind, self._seeds = None, [], "", []
         self._detected = None
         self._sample_label.setText("")
-        self._active_band = 0
         self._all_bands = False
         self._default_bands()
         self._set_pick_target(PICK_SIMILAR)
@@ -1909,15 +1883,13 @@ class RasterExploringPanel(QWidget):
         with _signals_blocked(self._quantity_edit):
             self._quantity_edit.setPlainText(parsed["quantity_expression"])
         numbers = [int(info.number) for info in (self._summary.bands if self._summary is not None else [])]
-        if parsed["band"] in numbers:
-            self._active_band = parsed["band"]
-        self._all_bands = bool(parsed["all_bands"]) and len(numbers) > 1
         roles = {band: role for band, role in parsed["roles"].items() if not numbers or band in numbers}
         if roles:
             self._roles = roles
             self._roles_guessed = not parsed["roles_chosen"]
         if "pipette_bands" in state:
-            self._pipette_bands = [band for band in parsed["pipette_bands"] if not numbers or band in numbers]
+            self._pipette_bands = [band for band in parsed["pipette_bands"] if band in self._selectable_bands()]
+        self._pipette_bands.sort()
         self._set_derivative(parsed["derivative"])
         self._pick_kind = parsed["pipette_kind"]
         self._picks = [tuple(pick) if self._pick_kind == "color" else pick for pick in parsed["pipette_picks"]]
@@ -1937,6 +1909,9 @@ class RasterExploringPanel(QWidget):
         except (ValueError, TypeError):
             self._pipette_selection = None
         selection = self._pipette_selection
+        if not self._pipette_bands:
+            self._pipette_selection, self._picks, self._pick_kind, self._seeds = None, [], "", []
+            selection = None
         if selection is not None:
             # A state saved before the shape: the selection follows the box (checked by default).
             from dataclasses import replace
@@ -1947,7 +1922,6 @@ class RasterExploringPanel(QWidget):
             self._rendered_rgb_bands()
             self._all_bands = False
             self._custom_quantity = False
-            self._active_band = 1
             self._set_derivative(RasterDerivative.VALUE)
         self._apply_band()
         self._set_range(parsed["minimum"], parsed["maximum"])
@@ -2057,6 +2031,10 @@ class RasterExploringPanel(QWidget):
     def _colour_bands(self) -> List[int]:
         return color_bands(*self._band_names_and_alpha())
 
+    def _selectable_bands(self) -> List[int]:
+        return [int(info.number) for info in (self._summary.bands if self._summary is not None else [])
+                if not getattr(info, "is_alpha", False)]
+
     def _apply_band(self) -> None:
         """Adopt the decimals and the cached histogram of the active band."""
         info = self._band_info(self.current_band())
@@ -2070,7 +2048,7 @@ class RasterExploringPanel(QWidget):
         self._show_band_histogram()
         self._refresh_band_rows()
         if self._all_bands:
-            self._range_group.setTitle(self.tr("VALUE RANGE — every band"))
+            self._range_group.setTitle(self.tr("VALUE RANGE — selected bands"))
         elif len(self._band_rows) > 1:
             self._range_group.setTitle(self.tr("VALUE RANGE — band {0}").format(self.current_band()))
         else:
@@ -2119,40 +2097,33 @@ class RasterExploringPanel(QWidget):
         self._rebuild_chips()
         self._show_pipette_result()
 
-    def _on_active_band_toggled(self, number: int, checked: bool) -> None:
-        if not checked:
-            return
-        if number == ALL_BANDS:
-            if self._all_bands:
-                return
-            self._all_bands = True
-            self._custom_quantity = False
-            self._set_derivative(RasterDerivative.VALUE)  # a slope of every band at once has no meaning
-        else:
-            if number == self._active_band and not self._all_bands:
-                return
-            self._all_bands = False
-            self._active_band = number
-        self._forget_picks(("value", "classes"))
+    def _set_selected_bands(self, bands: Sequence[int]) -> None:
+        """Adopt the checkbox selection, invalidating samples and bounds read on other bands."""
+        self._quantity_debounce.stop()
+        self._custom_quantity = False
+        self._pipette_bands = sorted(set(bands))
+        self._forget_picks()
+        self._set_derivative(RasterDerivative.VALUE if len(self._pipette_bands) != 1 else self._derivative)
         self._apply_band()
         self._set_range(None, None)
         self._refresh_pixel_display()
-        self._zone_label.setVisible(False)  # its statistics were those of the previous band
+        self._zone_label.setVisible(False)
+        if not self._pipette_bands:
+            self._sample_label.setText(self.tr("Choose at least one band in BANDS before using the pipette."))
         self.bandChanged.emit(self.current_band())
         self.displayChanged.emit()
         self._emit_now()
 
     def _on_pipette_band_toggled(self, number: int, checked: bool) -> None:
+        if number not in self._selectable_bands():
+            return
         bands = [band for band in self._pipette_bands if band != number]
         if checked:
             bands.append(number)
-        self._pipette_bands = sorted(bands)
-        had_picks = bool(self._picks)
-        self._forget_picks(("color", "value", "classes"))
-        self._refresh_band_rows()
-        self.displayChanged.emit()
-        if had_picks and not self._picks:
-            self._emit_now()
+        self._set_selected_bands(bands)
+
+    def _on_all_bands_clicked(self, checked: bool) -> None:
+        self._set_selected_bands(self._selectable_bands() if checked else [])
 
     def _on_role_changed(self, number: int, role: str = ROLE_NONE) -> None:
         if number not in self._band_rows:
@@ -2186,6 +2157,7 @@ class RasterExploringPanel(QWidget):
     def _set_derivative(self, derivative: RasterDerivative) -> None:
         """Adopt ``derivative`` in the combo and everything that depends on it, without emitting."""
         self._derivative = derivative
+        self._all_bands = len(self._pipette_bands) > 1 and not self._custom_quantity and not derivative.is_terrain
         index = self._derivative_combo.findData(CUSTOM_QUANTITY if self._custom_quantity else derivative.value)
         with _signals_blocked(self._derivative_combo):
             self._derivative_combo.setCurrentIndex(max(0, index))
@@ -2351,6 +2323,9 @@ class RasterExploringPanel(QWidget):
             point: The clicked point (layer CRS): in object detection, the object grows from it.
         """
         bands = list(self._pipette_bands)
+        if not bands:
+            self._sample_label.setText(self.tr("Choose at least one band in BANDS before using the pipette."))
+            return
         band = bands[0] if len(bands) == 1 and not self._derivative.is_terrain and not self._custom_quantity else self.current_band()
         if self._custom_quantity:
             value = (terrain or {}).get("custom")

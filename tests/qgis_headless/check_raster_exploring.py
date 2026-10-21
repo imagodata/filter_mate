@@ -18,8 +18,8 @@ os.environ.setdefault("FILTERMATE_LOG_DIR", tempfile.mkdtemp(prefix="fm_raster_l
 import numpy as np
 from osgeo import gdal, osr
 from qgis.core import Qgis, QgsApplication, QgsPointXY, QgsProject, QgsRasterLayer, QgsReadWriteContext
-from qgis.PyQt.QtCore import QEvent, QEventLoop, QSize, QTimer, QTranslator, QT_VERSION_STR
-from qgis.PyQt.QtWidgets import QCheckBox, QToolButton
+from qgis.PyQt.QtCore import QEvent, QEventLoop, QSize, Qt, QTimer, QTranslator, QT_VERSION_STR
+from qgis.PyQt.QtWidgets import QCheckBox, QRadioButton, QToolButton
 from qgis.PyQt.QtXml import QDomDocument
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -150,6 +150,83 @@ def check_disjoint_picks(layer):
     panel.deleteLater()
 
 
+def check_pipette_checked_bands(layer):
+    """A real controller click must compare exactly the bands checked in the UI."""
+    controllers = importlib.import_module(PACKAGE + ".ui.controllers.coverage_mode_controller")
+    kinds = importlib.import_module(PACKAGE + ".core.domain.layer_kind")
+    panel = panel_for(layer)
+    controller = controllers.CoverageModeController(None)
+    controller._active_layer, controller._raster_panel = layer, panel
+    controller._kind = kinds.LayerKind.RASTER
+    try:
+        for number in (1, 3):
+            panel._band_rows[number]["pipette"].click()
+        assert panel.pipette_bands() == [2, 4] and panel.current_band() == 2
+        assert panel._band_rows[ui.ALL_BANDS]["checkbox"].checkState() == Qt.CheckState.PartiallyChecked
+        panel._tolerance_spin.setValue(0)
+        controller._on_color_pick_toggled(True, ui.PICK_SIMILAR)
+        controller._on_pixel_picked(QgsPointXY(0.5, 23.5), False)
+        selection = panel.selection()
+        assert selection is not None and selection.band == 2
+        assert '"Spectral_image@2"' in selection.expression and '"Spectral_image@4"' in selection.expression
+        assert '"Spectral_image@1"' not in selection.expression and '"Spectral_image@3"' not in selection.expression
+        mask = adapter.expression_array(layer, selection.expression)
+        assert np.count_nonzero(np.isfinite(mask) & (mask > 0)) == 24, "NoData in unchecked band 1 must not exclude a pixel"
+        controller._on_pixel_picked(QgsPointXY(2.5, 23.5), True)
+        assert " OR " in panel.selection().expression and len(panel._picks) == 2
+        for target in (ui.PICK_OBJECT, ui.PICK_SIMILAR_OBJECTS):
+            panel.set_pick_target(target)
+            controller._on_pixel_picked(QgsPointXY(0.5, 23.5), False)
+            criterion = panel.selection().objects[0].expression
+            assert '"Spectral_image@2"' in criterion and '"Spectral_image@4"' in criterion
+            assert '"Spectral_image@1"' not in criterion and '"Spectral_image@3"' not in criterion
+        panel._band_rows[2]["pipette"].click()
+        assert panel.pipette_bands() == [4] and panel.current_band() == 4
+        assert panel.selection() is None and not panel._picks, "a band change must discard samples read on the old selection"
+        controller._on_pixel_picked(QgsPointXY(2.5, 23.5), False)
+        assert panel.selection().band == 4 and panel.selection().minimum == panel.selection().maximum == 31, panel.selection()
+        panel._band_rows[4]["pipette"].click()
+        assert panel.pipette_bands() == [] and panel.selection() is None
+        controller._on_pixel_picked(QgsPointXY(0.5, 23.5), False)
+        assert not panel._picks and panel.selection() is None, "empty selection must never pick band 1 implicitly"
+        master = panel._band_rows[ui.ALL_BANDS]["checkbox"]
+        master.click()
+        assert panel.pipette_bands() == [1, 2, 3, 4] and master.checkState() == Qt.CheckState.Checked
+        master.click()
+        assert panel.pipette_bands() == [] and master.checkState() == Qt.CheckState.Unchecked
+        for number in (2, 4):
+            panel._band_rows[number]["pipette"].click()
+        panel._activate_mode(ui.RasterSelectionMode.RANGE, emit=False)
+        panel._set_range(12, 20)
+        assert '"Spectral_image@2"' in panel.selection().expression and '"Spectral_image@4"' in panel.selection().expression
+        assert '"Spectral_image@1"' not in panel.selection().expression and '"Spectral_image@3"' not in panel.selection().expression
+        saved = panel.state()
+        restored = panel_for(layer)
+        restored.restore_state(saved)
+        assert restored.pipette_bands() == [2, 4] and restored.current_band() == 2
+        assert restored.selection() == panel.selection()
+        restored.deleteLater()
+        panel.set_selection(ui.RasterSelection(band=4, mode=ui.RasterSelectionMode.RANGE, minimum=10, maximum=20))
+        assert panel.pipette_bands() == [4] and panel.selection().band == 4
+        panel._use_quantity('"Spectral_image@1" / 100')
+        panel._band_rows[2]["pipette"].click()
+        assert not panel._custom_quantity, "an explicit band choice must leave an unrelated custom quantity"
+        summary = adapter.read_raster_summary(layer)
+        summary.bands[-1].is_alpha = True
+        rgba = ui.RasterExploringPanel()
+        rgba.set_summary(summary)
+        assert rgba.pipette_bands() == [1, 2, 3] and not rgba._band_rows[4]["pipette"].isEnabled()
+        master = rgba._band_rows[ui.ALL_BANDS]["checkbox"]
+        master.click()
+        assert rgba.pipette_bands() == []
+        master.click()
+        assert rgba.pipette_bands() == [1, 2, 3], "select-all must exclude the alpha band"
+        rgba.deleteLater()
+    finally:
+        controller._deactivate_pixel_tool()
+        panel.deleteLater()
+
+
 def check_rendered_after_quantity(layer):
     panel = panel_for(layer)
     panel._use_quantity('"Spectral_image@2" / 100')
@@ -199,9 +276,12 @@ def check_band_display(layer):
 
     try:
         assert panel.findChildren(QCheckBox), "the band choices must be checkboxes"
+        assert not panel._bands_group.findChildren(QRadioButton), "band selection must have no radio buttons"
         assert all(not button.objectName().startswith("toolButton_raster_band_pipette_")
                    for button in panel.findChildren(QToolButton)), "per-band pipette icons must be removed"
-        panel._band_rows[4]["radio"].click()
+        for number in (1, 2, 3):
+            panel._band_rows[number]["pipette"].click()
+        assert panel.current_band() == 4 and panel.pipette_bands() == [4]
         panel._display_combo.setCurrentIndex(panel._display_combo.findData("active"))
         wait_for_display()
         assert layer.renderer().type() == "singlebandgray" and layer.renderer().grayBand() == 4
@@ -209,7 +289,8 @@ def check_band_display(layer):
         image = layer.previewAsImage(QSize(32, 24))
         colour = image.pixelColor(16, 12)
         assert 0 < colour.red() < 255 and colour.red() == colour.green() == colour.blue()
-        panel._band_rows[3]["pipette"].click()  # select R, G, NIR: the false colour composite
+        for number in (1, 2):
+            panel._band_rows[number]["pipette"].click()  # select R, G, NIR: the false colour composite
         panel._display_combo.setCurrentIndex(panel._display_combo.findData("selected"))
         wait_for_display()
         assert adapter.renderer_bands(layer) == {"R": 4, "G": 1, "B": 2}
@@ -470,6 +551,7 @@ with tempfile.TemporaryDirectory(prefix="fm_raster_interactions_") as folder:
     for name, check in (("numeric expressions, zero/NoData, histogram, presets and restoration", check_numeric_quantity),
                         ("expression histogram promotes its thresholds to a custom quantity", check_expression_histogram),
                         ("Ctrl+click keeps disjoint scalar samples", check_disjoint_picks),
+                        ("pipette and object tools compare only checked bands and reject an empty choice", check_pipette_checked_bands),
                         ("rendered RGB selection after a custom quantity", check_rendered_after_quantity),
                         ("reset restores all object similarity defaults", check_reset),
                         ("band display, colour composites, checkboxes and original style restoration", check_band_display),

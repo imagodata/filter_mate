@@ -6468,6 +6468,36 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <source>Use this band for the pipette and the selected bands display</source>
         <translation>Use this band for the pipette and the selected bands display</translation>
     </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2327"/>
+        <source>Choose at least one band in BANDS before using the pipette.</source>
+        <translation>Choose at least one band in BANDS before using the pipette.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="863"/>
+        <source>Display the first checked band in grey or the checked bands as a colour composite</source>
+        <translation>Display the first checked band in grey or the checked bands as a colour composite</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="861"/>
+        <source>First checked band</source>
+        <translation>First checked band</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="930"/>
+        <source>Select or clear every band. The histogram shows the first checked band.</source>
+        <translation>Select or clear every band. The histogram shows the first checked band.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="940"/>
+        <source>Use this band for the pipette, value range and selected bands display</source>
+        <translation>Use this band for the pipette, value range and selected bands display</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2051"/>
+        <source>VALUE RANGE — selected bands</source>
+        <translation>VALUE RANGE — selected bands</translation>
+    </message>
 </context>
 <context>
     <name>RasterMaterialization</name>
