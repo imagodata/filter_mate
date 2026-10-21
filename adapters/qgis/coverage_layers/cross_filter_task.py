@@ -21,19 +21,49 @@ class CrossFilterTask(QgsTask):
     """Apply one source selection to target layers of any kind."""
 
     def __init__(self, description: str, request, source_job, target_jobs: list,
-                 on_done: Optional[Callable] = None) -> None:
+                 on_done: Optional[Callable] = None, project=None) -> None:
         super().__init__(description, QgsTask.Flag.CanCancel)
         self.request = request
         self.source_job = source_job
         self.target_jobs = list(target_jobs)
         self.on_done = on_done
-        self.transform_context = QgsProject.instance().transformContext()
+        self.project = project if project is not None else QgsProject.instance()
+        self.transform_context = self.project.transformContext()
         self.error: str = ''
+        self.internal_error = False
+        self.source_conflict = False
         self.changes: List[Tuple[LayerSnapshot, LayerSnapshot]] = []
         self.outcomes = []
         self.elapsed = 0.0
         # Canceled with the task, for the QGIS calls that only take a feedback.
         self.feedback = QgsFeedback()
+        self._prepared_states = {}
+        from .snapshots import take_snapshot
+        for job in [self.source_job] + self.target_jobs:
+            layer_id, kind = getattr(job, 'layer_id', None), getattr(job, 'kind', None)
+            if not isinstance(layer_id, str) or kind is None:
+                continue
+            if job is self.source_job and not kind.is_coverage:
+                # Vector features / fixed geometries are already copied. The
+                # linked vector engine may filter its own source while this
+                # task runs; this read-only job never writes that layer back.
+                continue
+            layer = self.project.mapLayer(layer_id)
+            if layer is not None:
+                # Capture the actual prepared state: a point-cloud source's
+                # criteria may already differ from its history's before state.
+                self._prepared_states[id(job)] = (take_snapshot(layer, kind), layer.source(), layer.providerType())
+
+    def _unchanged(self, job, layer) -> bool:
+        from .snapshots import take_snapshot
+        expected = self._prepared_states.get(id(job))
+        if expected is None:
+            return True  # a source outside the project is read only
+        try:
+            snapshot, source, provider = expected
+            return (layer.source(), layer.providerType()) == (source, provider) and take_snapshot(layer, job.kind).same_state(snapshot)
+        except (RuntimeError, ValueError):
+            return False
 
     def cancel(self) -> None:
         self.feedback.cancel()
@@ -73,7 +103,9 @@ class CrossFilterTask(QgsTask):
                     job.compute(geometry, self.source_job.crs, self.transform_context, self.request, self.isCanceled)
                 except Exception as exc:  # one target must not stop the others
                     logger.warning(f"[FM5] target '{job.layer_name}' failed: {exc}", exc_info=True)
+                    job.outcome.success = False
                     job.outcome.message = str(exc)
+                    job.outcome.details['internal_error'] = True
                 self.setProgress(source_share + (100.0 - source_share) * (index + 1) / total)
             prepare = getattr(self.source_job, 'prepare_apply', None)
             if prepare is not None and not self.isCanceled():
@@ -83,6 +115,7 @@ class CrossFilterTask(QgsTask):
         except Exception as exc:
             logger.error(f"[FM5] cross filter failed: {exc}", exc_info=True)
             self.error = str(exc)
+            self.internal_error = True
             return False
         finally:
             self.elapsed = time.perf_counter() - started
@@ -93,13 +126,18 @@ class CrossFilterTask(QgsTask):
     def apply_results(self, result: bool) -> None:
         """Apply the computed results on the main thread (also used by synchronous runs)."""
         from . import cache
-        project = QgsProject.instance()
+        project = self.project
         if result and cache.is_closed():
             # The plugin unloaded while the task ran: its files are gone.
             result = False
             self.error = 'FilterMate was unloaded'
+        source_layer = project.mapLayer(self.source_job.layer_id)
+        if source_layer is not None and not self._unchanged(self.source_job, source_layer):
+            self.source_conflict = True
+            if result:
+                result = False
+                self.error = 'source changed while the filter was running: nothing was applied'
         if result:
-            source_layer = project.mapLayer(self.source_job.layer_id)
             if source_layer is not None:
                 try:
                     after = self.source_job.apply(source_layer)
@@ -114,6 +152,10 @@ class CrossFilterTask(QgsTask):
                     job.outcome.message = 'layer removed'
                 elif job.outcome.success:
                     try:
+                        if not self._unchanged(job, layer):
+                            job.outcome.success = False
+                            job.outcome.message = 'layer changed while the filter was running: its current filter was kept'
+                            continue
                         after = job.apply(layer)
                         if after is not None and not after.same_state(job.before):
                             self.changes.append((job.before, after))
@@ -121,6 +163,7 @@ class CrossFilterTask(QgsTask):
                         logger.warning(f"[FM5] target '{job.layer_name}' not applied: {exc}", exc_info=True)
                         job.outcome.success = False
                         job.outcome.message = str(exc)
+                        job.outcome.details['internal_error'] = True
                 logger.info(f"⏱ [FM5] target {job.kind.value} '{job.layer_name}': success={job.outcome.success} "
                             f"kept={job.outcome.kept_count} {job.outcome.elapsed:.2f}s {job.outcome.message}")
         self.outcomes = [job.outcome for job in self.target_jobs]

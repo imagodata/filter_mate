@@ -381,6 +381,11 @@ def _unfilter(env, layer, kind):
 # --- 1. Unfilter keeps a point cloud enriched with HeightAboveGround -------------
 
 class TestUnfilterEnrichedCloud:
+    def test_export_protection_keeps_the_pristine_enrichment_source_without_a_stored_selection(self, env):
+        cloud = _cloud(env)
+        pristine = cloud.source()
+        enrich(cloud, f"{env.session}/lidar_hag_1a2b3c4d.copc.laz")
+        assert pristine in service_mod.protected_sources()
 
     def test_enriched_cloud_stays_a_derived_source(self, env):
         cloud = _cloud(env)
@@ -769,7 +774,7 @@ def test_target_whose_job_cannot_be_built_is_reported(env, monkeypatch):
 
     appliers.make_job = make_job
     task_module = types.ModuleType(f"{_PKG}.adapters.qgis.coverage_layers.cross_filter_task")
-    task_module.CrossFilterTask = lambda description, request, source_job, jobs, done: types.SimpleNamespace(target_jobs=jobs)
+    task_module.CrossFilterTask = lambda description, request, source_job, jobs, done, project=None: types.SimpleNamespace(target_jobs=jobs)
     monkeypatch.setitem(sys.modules, appliers.__name__, appliers)
     monkeypatch.setitem(sys.modules, task_module.__name__, task_module)
     request = cross.CrossFilterRequest("zones", LayerKind.VECTOR, targets=(cross.TargetSpec("dem", LayerKind.RASTER),))

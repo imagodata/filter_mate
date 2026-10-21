@@ -3192,6 +3192,11 @@ Drop anyway?</source>
         <source>the source layer itself was not changed</source>
         <translation>源图层本身未被更改</translation>
     </message>
+    <message>
+        <location filename="../adapters/public_api/operations.py" line="643"/>
+        <source>source changed while the filter was running: nothing was applied</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>FilterResultHandler</name>

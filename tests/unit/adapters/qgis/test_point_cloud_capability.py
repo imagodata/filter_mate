@@ -619,7 +619,7 @@ class TestStreamRasterTargets:
         appliers = types.ModuleType(f"{_PKG}.adapters.qgis.coverage_layers.target_appliers")
         appliers.make_job = MagicMock(return_value=object())
         task_module = types.ModuleType(f"{_PKG}.adapters.qgis.coverage_layers.cross_filter_task")
-        task_module.CrossFilterTask = lambda desc, request, source, jobs, done: types.SimpleNamespace(jobs=jobs)
+        task_module.CrossFilterTask = lambda desc, request, source, jobs, done, project=None: types.SimpleNamespace(jobs=jobs)
         snapshots = types.ModuleType(f"{_PKG}.adapters.qgis.coverage_layers.snapshots")
         snapshots.registry = lambda: types.SimpleNamespace(install=lambda project: None)
         for module in (appliers, task_module, snapshots):

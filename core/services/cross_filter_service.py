@@ -95,12 +95,12 @@ class CrossFilterService:
             if on_done is not None:
                 on_done(task, result)
 
-        return CrossFilterTask(f"FilterMate: {source_job.layer_name}", request, source_job, jobs, _done)
+        return CrossFilterTask(f"FilterMate: {source_job.layer_name}", request, source_job, jobs, _done, project=project)
 
     def run(self, request: CrossFilterRequest, source_job, on_done: Optional[Callable] = None,
-            synchronous: bool = False):
+            synchronous: bool = False, project=None):
         """Start a cross filter. ``synchronous`` runs it inline (scripts, tests)."""
-        task = self.build_task(request, source_job, on_done=on_done)
+        task = self.build_task(request, source_job, project=project, on_done=on_done)
         if synchronous:
             result = task.run()
             task.apply_results(result)
@@ -312,6 +312,22 @@ def current_sources(project=None) -> set:
 def history_sources() -> set:
     """Sources kept by every undo / redo step of every service."""
     return {s for service in all_services() for op in service.history.operations() for s in _operation_sources(op)}
+
+
+def protected_sources() -> set:
+    """Files needed by history or registered derivations, including HAG enrichment.
+
+    Some enriched clouds have no stored selection/geometry property. Their
+    pristine source is still held by the registry and must not be overwritten.
+    """
+    from ...adapters.qgis.coverage_layers.snapshots import registry
+    reg = registry()
+    sources = history_sources()
+    for layer_id in reg.layer_ids():
+        snapshot = reg.get(layer_id)
+        if snapshot is not None:
+            sources.update(_snapshot_sources(snapshot))
+    return sources
 
 
 def referenced_sources(project=None) -> set:

@@ -1,0 +1,5 @@
+# Contract tests need their optional runtime dependencies in CI and releases.
+-r requirements-test.txt
+-r requirements-api.txt
+-r requirements-mcp.txt
+httpx>=0.27,<1

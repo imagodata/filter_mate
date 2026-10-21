@@ -335,8 +335,9 @@ class _Service:
         self.ran_synchronously = False
         self._running = []
 
-    def build_task(self, request, source_job):
+    def build_task(self, request, source_job, project=None):
         self.request = request
+        self.project = project
         return self.task
 
     def run(self, request, source_job, synchronous=False):
@@ -364,11 +365,13 @@ class TestFeedbackRelayed:
     def test_progress_reaches_the_feedback(self, vector_world):
         feedback = _Feedback()
         task = _CrossTask("S", ["T"])
+        service = _Service(task)
         report = operations.cross_filter(vector_world.source, ["batiment"], project=vector_world.project,
-                                         service=_Service(task), feedback=feedback)
+                                         service=service, feedback=feedback)
         assert report.ok and report.done == {"T": "batiment"}
         assert feedback.progress[-1] == pytest.approx(100.0)
         assert task.progressChanged.slots == [] and feedback.canceled.slots == []  # disconnected
+        assert service.project is vector_world.project
 
     def test_cancel_stops_the_task_and_reports_it(self, vector_world):
         feedback = _Feedback()
@@ -418,11 +421,34 @@ class TestFeedbackRelayed:
 
 
 class TestUnexpectedErrorsFlagged:
+    def test_internal_source_error_survives_collection_with_its_classification(self):
+        task = types.SimpleNamespace(error='/private/capture.tif failed', internal_error=True)
+        report = operations._collect(task, _Project(), operations.OperationReport())
+        assert report.details['internal_error'] and '/private/' in report.error
+
+    def test_internal_target_error_is_classified_separately_from_validation(self):
+        outcome = types.SimpleNamespace(layer_id='T', success=False, message='/private/target.gpkg failed',
+                                        details={'internal_error': True})
+        task = types.SimpleNamespace(error='', isCanceled=lambda: False, changes=[], outcomes=[outcome],
+                                     source_job=types.SimpleNamespace(layer_id='S', kind=operations.LayerKind.VECTOR, details={}))
+        report = operations._collect(task, _Project(_Layer('T', 'target')), operations.OperationReport())
+        assert report.details['internal_failures'] == ['target']
+
+    def test_source_conflict_prevents_point_cloud_rollback_over_newer_work(self, vector_world, monkeypatch):
+        monkeypatch.setattr(operations, 'layer_kind', lambda layer: operations.LayerKind.POINT_CLOUD)
+        task = _CrossTask('S', ['T'])
+        task.error, task.source_conflict = 'source changed while running', True
+        rollback = MagicMock()
+        monkeypatch.setattr(operations, '_restore_point_cloud_source', rollback)
+        report = operations.cross_filter(vector_world.source, ['batiment'], project=vector_world.project, service=_Service(task))
+        assert report.error and report.details['source_conflict']
+        rollback.assert_not_called()
+
     """Review 2026-10: kept for the local caller, flagged so REST hides them (paths, SQL)."""
 
     def test_operation_error(self, vector_world):
         class _Failing(_Service):
-            def build_task(self, request, source_job):
+            def build_task(self, request, source_job, project=None):
                 raise OSError("[Errno 13] Permission denied: '/home/u/.local/share/QGIS/cache/session_1/x.vrt'")
 
         report = operations.cross_filter(vector_world.source, ["batiment"], project=vector_world.project,
@@ -768,7 +794,7 @@ class TestWorkerServiceLease:
         task.on_done = lambda: callbacks.append("done")
         feedback = _Feedback()
         applied = []
-        monkeypatch.setattr(service, "build_task", lambda *args: task)
+        monkeypatch.setattr(service, "build_task", lambda *args, **kwargs: task)
         registered_after_unload = object()
 
         def computing():
@@ -811,7 +837,7 @@ class TestWorkerServiceLease:
         task.status = lambda: 0
         unrelated = object()
         service._running.append(unrelated)
-        monkeypatch.setattr(service, "build_task", lambda *args: task)
+        monkeypatch.setattr(service, "build_task", lambda *args, **kwargs: task)
         applied = []
         feedback = _Feedback()
 
@@ -859,6 +885,7 @@ class TestSourceOnlyProject:
                                     apply=apply, release=MagicMock())
         task = _CrossTask("S", [])
         task.source_job = job
+        task._unchanged = lambda source_job, current: True
         task.apply_results = MagicMock(side_effect=AssertionError("must not resolve singleton project"))
         service = _Service(task)
         service.history = MagicMock()
@@ -1030,11 +1057,11 @@ class TestFavoriteClips:
     @staticmethod
     def _task(success, message=""):
         return types.SimpleNamespace(error="", isCanceled=lambda: False, outcomes=[
-            types.SimpleNamespace(layer_id="DEM", success=success, message=message)])
+            types.SimpleNamespace(layer_id="DEM", success=success, message=message, details={})])
 
     def test_failed_clip_is_a_failure(self, favorite_world, monkeypatch):
         ran = []
-        monkeypatch.setattr(operations, "_run_task", lambda service, request, job, feedback=None: (
+        monkeypatch.setattr(operations, "_run_task", lambda service, request, job, feedback=None, project=None: (
             ran.append((service, job)) or self._task(False, "remote raster target must run in a worker thread")))
         report = operations.apply_favorite("toulouse", service=MagicMock(), project=favorite_world.project)
         assert ran == [("bridge service", "clip job")]
@@ -1043,7 +1070,7 @@ class TestFavoriteClips:
         assert "coverage_layers_missing" not in report.details
 
     def test_clip_runs_in_the_api_worker(self, favorite_world, monkeypatch):
-        monkeypatch.setattr(operations, "_run_task", lambda service, request, job, feedback=None: self._task(True))
+        monkeypatch.setattr(operations, "_run_task", lambda service, request, job, feedback=None, project=None: self._task(True))
         report = operations.apply_favorite("toulouse", service=MagicMock(), project=favorite_world.project)
         assert report.ok and report.done == {"DEM": "mnt_wcs"}
         assert favorite_world.calls == [dict(synchronous=False, hooks=["canceled", "failed", "run"])]

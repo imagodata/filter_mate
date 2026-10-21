@@ -178,6 +178,8 @@ class FakeCloud:
 
 @pytest.fixture
 def cloud_export(monkeypatch):
+    monkeypatch.setattr(sys.modules['qgis.core'], 'QgsProject',
+                        types.SimpleNamespace(instance=lambda: types.SimpleNamespace(mapLayers=lambda: {})), raising=False)
     monkeypatch.setattr(sys.modules['qgis.core'], 'QgsPointCloudLayerExporter', FakeExporter, raising=False)
     monkeypatch.setattr(footprint, 'qgis_reads_las', lambda: True)
     FakeExporter.made, FakeExporter.error = [], ''
@@ -185,6 +187,47 @@ def cloud_export(monkeypatch):
 
 
 class TestPointCloudExport:
+    def test_missing_copc_support_keeps_the_original_laz_and_writes_no_fallback(self, cloud_export, tmp_path, monkeypatch):
+        pdal = fk.load('pdal_cli')
+        monkeypatch.setattr(pdal, 'copc_unavailable_reason', lambda: 'pdal not found')
+        original = tmp_path / 'cloud.laz'
+        original.write_bytes(b'complete original cloud')
+        cloud = FakeCloud()
+        cloud.source = lambda: str(original)
+        result = exporters.PointCloudExportJob(cloud, str(tmp_path / 'cloud.copc.laz'), 'COPC').run()
+        assert not result.success and 'choose LAZ' in result.message
+        assert original.read_bytes() == b'complete original cloud'
+        assert sorted(os.listdir(tmp_path)) == ['cloud.laz']
+
+    def test_original_source_of_a_derived_cloud_is_refused_before_export(self, cloud_export, tmp_path):
+        import json
+        original = tmp_path / 'cloud.laz'
+        original.write_bytes(b'complete original cloud')
+        cloud = FakeCloud()
+        cloud.source = lambda: str(tmp_path / 'clip.copc.laz')
+        cloud.customProperty = lambda key: json.dumps({'original_source': str(original)})
+        with pytest.raises(ValueError, match='data source'):
+            exporters.PointCloudExportJob(cloud, str(original))
+        assert original.read_bytes() == b'complete original cloud' and not cloud_export.made
+
+    def test_existing_partial_name_is_never_used_as_staging(self, cloud_export, tmp_path):
+        old = tmp_path / 'cloud.partial.laz'
+        old.write_bytes(b'unrelated data')
+        result = exporters.PointCloudExportJob(FakeCloud(), str(tmp_path / 'cloud.laz')).run()
+        assert result.success and old.read_bytes() == b'unrelated data'
+        assert sorted(os.listdir(tmp_path)) == ['cloud.laz', 'cloud.partial.laz']
+
+    def test_synchronous_helper_relays_cancel_during_export(self, cloud_export, tmp_path, monkeypatch):
+        feedback = fk.FakeFeedback()
+        original_write = FakeExporter.doExport
+        def cancel_during_export(writer):
+            original_write(writer)
+            writer.feedback.cancel()
+        monkeypatch.setattr(FakeExporter, 'doExport', cancel_during_export)
+        result = exporters.export_point_cloud(FakeCloud(), str(tmp_path / 'cloud.laz'), feedback=feedback)
+        assert not result.success and result.message == 'canceled'
+        assert cloud_export.made[0].feedback is feedback and not os.listdir(tmp_path)
+
     @pytest.mark.parametrize("fmt, name", [('LAZ', 'cloud.laz'), ('GPKG', 'cloud.gpkg'), ('CSV', 'cloud.csv')])
     def test_complete_file_under_its_name_only(self, cloud_export, tmp_path, fmt, name):
         result = exporters.PointCloudExportJob(FakeCloud(), str(tmp_path / name), fmt).run()

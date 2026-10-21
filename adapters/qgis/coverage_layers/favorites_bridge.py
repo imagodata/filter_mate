@@ -146,7 +146,7 @@ def apply(entries: List[Dict], service=None, project: Optional[QgsProject] = Non
                                              targets=(TargetSpec(layer.id(), kind),), predicates=('Intersect',))
                 job = FixedGeometrySourceJob(layer, stored.geometry_wkt)
                 if run is None:
-                    service.run(request, job, synchronous=synchronous)
+                    service.run(request, job, synchronous=synchronous, project=project)
                 else:
                     reason = run(service, request, job)
         except Exception as exc:  # a stored source that no longer opens

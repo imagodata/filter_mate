@@ -12,9 +12,12 @@ Standard library only (no QGIS import): the parsing is testable on its own.
 """
 
 import logging
+import base64
+import json
 import os
 import re
-from typing import List, Optional
+import zlib
+from typing import Iterable, List, Optional, Tuple
 from urllib.parse import unquote, urlparse
 
 logger = logging.getLogger('FilterMate.Export')
@@ -126,17 +129,38 @@ class ProjectSources:
     at most, not once per layer of an export).
     """
 
-    def __init__(self, project) -> None:
+    def __init__(self, project, layers: Iterable = (), additional_sources: Iterable[Tuple[str, str]] = ()) -> None:
         self._entries = []  # (layer name, path, normalised key, real path)
         resolved = {}
+
+        def add(name, source):
+            for path in layer_source_file_paths(source):
+                if path not in resolved:
+                    resolved[path] = (_key(path), _resolved(path))
+                self._entries.append((name, path) + resolved[path])
+
         try:
-            for layer in project.mapLayers().values():
-                for path in layer_source_file_paths(layer.source()):
-                    if path not in resolved:
-                        resolved[path] = (_key(path), _resolved(path))
-                    self._entries.append((layer.name(), path) + resolved[path])
+            project_layers = list(project.mapLayers().values()) if project is not None else []
         except Exception as e:  # a project we cannot inspect must not block the export
             logger.debug(f"Could not list the files the project layers read from: {e}")
+            project_layers = []
+        for layer in project_layers + list(layers):
+            try:
+                add(layer.name(), layer.source())
+                # Derived layers read the cache now, but Unfilter / Undo and
+                # project reload still need their original files intact.
+                getter = getattr(layer, 'customProperty', None)
+                raw = getter('filtermate/derived') if getter is not None else None
+                if isinstance(raw, str) and raw.startswith('zlib:'):
+                    raw = zlib.decompress(base64.b64decode(raw[5:], validate=True)).decode('utf-8')
+                snapshot = json.loads(raw) if isinstance(raw, str) else raw
+                if isinstance(snapshot, dict):
+                    for key in ('source', 'original_source', 'enriched_source'):
+                        add(layer.name(), snapshot.get(key))
+            except (AttributeError, RuntimeError, TypeError, ValueError, zlib.error) as exc:
+                logger.debug("Could not inspect an export source: %s", exc)
+        for name, source in additional_sources:
+            add(name, source)
 
     def __len__(self) -> int:
         return len(self._entries)
