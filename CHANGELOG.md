@@ -4,7 +4,7 @@ All notable changes to FilterMate will be documented in this file.
 
 ## [Unreleased]
 
-- **Exploring link icon.** The third button from the bottom of the vector Exploring rail uses the same zone icon as LiDAR.
+- **Exploring link icon.** The style link button of the raster Exploring rail uses the same zone icon as LiDAR (the vector link icon is unchanged).
 
 - **Target centroid glyph alignment.** The dot is centred inside its rectangle in the Layers to filter list on Qt5 and Qt6.
 
