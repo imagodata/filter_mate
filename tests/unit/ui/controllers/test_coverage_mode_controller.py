@@ -460,6 +460,16 @@ class TestFilteringSettings:
         specs = controller._target_specs(["r1", "v2", "o1", "missing", "p1"], exclude_id="p1")
         assert [(s.layer_id, s.kind.value) for s in specs] == [("r1", "raster"), ("v2", "vector")]
 
+    def test_target_specs_carry_centroids_for_vector_targets_of_a_raster_source(self, ctrl_module, layers, monkeypatch):
+        dock = _dock(get_centroid_target_ids=lambda: ["v2", "r1"])
+        controller = ctrl_module.CoverageModeController(dock)
+        controller._active_layer = layers["r1"]
+        project = MagicMock()
+        project.mapLayer.side_effect = lambda layer_id: layers.get(layer_id)
+        monkeypatch.setattr(sys.modules["qgis.core"], "QgsProject", MagicMock(instance=MagicMock(return_value=project)), raising=False)
+        specs = controller._target_specs(["r1", "v2", "p1"])
+        assert [(s.layer_id, s.use_centroids) for s in specs] == [("r1", False), ("v2", True), ("p1", False)]
+
 
 @pytest.mark.unit
 class TestUndoRedoButtons:

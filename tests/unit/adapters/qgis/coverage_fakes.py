@@ -292,6 +292,9 @@ class FakeGeometry:
     def centroid(self):
         return FakeGeometry(self._g.Centroid())
 
+    def pointOnSurface(self):
+        return FakeGeometry(self._g.PointOnSurface())
+
     def asPoint(self):
         return FakePoint(self._g.GetX(), self._g.GetY())
 

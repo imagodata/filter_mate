@@ -200,12 +200,12 @@
     background-color: {fm_field};
     border: 1px solid {fm_field_border};
     border-radius: 6px;
-    /* 38 px square: 28 + 8 px left padding (the 20 px icon centred) + 2 px border. */
-    min-width: 28px;
-    max-width: 28px;
+    /* 38 px square: 20 px icon + 8 px padding on each side + 2 px border. */
+    min-width: 20px;
+    max-width: 20px;
     min-height: 36px;
     max-height: 36px;
-    padding: 0px 0px 0px 8px;
+    padding: 0px 8px;
     spacing: 0px;
     qproperty-iconSize: 20px 20px;
 }

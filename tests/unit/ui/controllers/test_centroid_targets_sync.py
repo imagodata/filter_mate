@@ -148,11 +148,32 @@ def test_targets_key_off_disables_the_button(monkeypatch):
     assert env.button.enabled is False and env.button.state == CheckState.Unchecked
 
 
-def test_raster_source_has_no_centroid_toggle(monkeypatch):
-    env = _env(monkeypatch, FakeCombo(["roads"], ["roads"], ["roads"]), vector=False)
+def test_nonvector_source_keeps_eligible_target_toggles(monkeypatch):
+    env = _env(monkeypatch, FakeCombo(["roads", "parcels"], ["roads", "parcels"]),
+               {"centroid_layers": ["roads"]}, vector=False)
     env.sync.apply_stored()
-    assert env.combo.cleared and env.button.enabled is False
-    assert env.sync.centroid_ids() == []
+    assert not env.combo.cleared and env.button.enabled
+    assert env.button.state == CheckState.PartiallyChecked
+    assert env.sync.centroid_ids() == ["roads"]
+    env.sync.set_all(True)
+    assert env.sync.centroid_ids() == ["roads", "parcels"]
+    assert env.dock.PROJECT_LAYERS["src"]["filtering"]["centroid_layers"] == ["roads", "parcels"]
+    assert env.saved == [], "nonvector settings must not emit the QgsVectorLayer-typed variable signal"
+    env.sync.set_all(False)
+    assert env.sync.centroid_ids() == [] and env.button.state == CheckState.Unchecked
+
+
+def test_nonvector_choices_are_restored_per_source(monkeypatch):
+    env = _env(monkeypatch, FakeCombo(["roads", "parcels"], ["roads", "parcels"]),
+               {"centroid_layers": ["roads"]}, vector=False)
+    env.sync.apply_stored()
+    env.dock.PROJECT_LAYERS["cloud"] = {"filtering": {"centroid_layers": ["parcels"]}}
+    env.dock.current_layer = types.SimpleNamespace(id=lambda: "cloud")
+    env.sync.apply_stored()
+    assert env.sync.centroid_ids() == ["parcels"]
+    env.dock.current_layer = types.SimpleNamespace(id=lambda: "src")
+    env.sync.apply_stored()
+    assert env.sync.centroid_ids() == ["roads"] and not env.combo.cleared
 
 
 def test_refresh_gives_the_signals_back_even_on_error(monkeypatch):
