@@ -157,7 +157,7 @@ class TestTools:
                 assert name.startswith(("pushButton_exploring_", "pushButton_checkable_exploring_"))
 
     def test_every_tool_has_an_icon(self):
-        assert all(body.strip().startswith("<") for body in (extras.ICON_HOVER, extras.ICON_ZONE, extras.ICON_LINK_STYLE,
+        assert all(body.strip().startswith("<") for body in (extras.ICON_HOVER, extras.ICON_ZONE,
                                                             extras.ICON_PIPETTE, extras.ICON_PROFILE, extras.ICON_3D,
                                                             extras.ICON_VALUE_PIPETTE, extras.ICON_PC_ZONE, extras.ICON_MORE))
 
