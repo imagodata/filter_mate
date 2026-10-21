@@ -128,6 +128,37 @@ def test_ctrl_click_keeps_separate_scalar_intervals(panel, raster):
     assert selection.expression == '(abs("img@2" - 20) <= 5) OR (abs("img@2" - 80) <= 5)'
 
 
+def test_pipette_ignores_unchecked_bands_and_their_nodata(panel, raster):
+    panel._custom_quantity = False
+    panel._pipette_bands = [2, 4]
+    panel._band_spans = {2: 100, 4: 200}
+    panel.set_color_sample({1: None, 2: 20, 3: float("nan"), 4: 80})
+    selection = panel._set_pipette_selection.call_args.args[0]
+    assert selection.expression == '(abs("img@2" - 20) <= 5 AND abs("img@4" - 80) <= 10)'
+    assert selection.band == 2
+
+
+@pytest.mark.parametrize("invalid", [None, float("nan"), float("inf")])
+def test_nodata_in_a_checked_band_preserves_the_previous_pick(panel, raster, invalid):
+    panel._custom_quantity = False
+    panel._pipette_bands = [2, 4]
+    panel._band_spans = {2: 100, 4: 200}
+    panel.set_color_sample({2: 20, 4: 80})
+    previous = list(panel._picks)
+    panel._set_pipette_selection.reset_mock()
+    panel.set_color_sample({2: 30, 4: invalid}, extend=True)
+    assert panel._picks == previous
+    panel._set_pipette_selection.assert_not_called()
+
+
+def test_pipette_never_falls_back_to_an_unchecked_band(panel):
+    panel._custom_quantity = False
+    panel._pipette_bands = []
+    panel.set_color_sample({1: 10, 2: 20})
+    assert panel._picks == []
+    panel._set_pipette_selection.assert_not_called()
+
+
 def test_histogram_drag_promotes_expression_to_custom_quantity(panel, raster):
     expression = '"img@2" / 100'
     panel._mode = raster.RasterSelectionMode.EXPRESSION

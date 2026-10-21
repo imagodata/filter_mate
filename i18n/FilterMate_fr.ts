@@ -6722,6 +6722,36 @@ Objet cliqué : seulement la tache de ces pixels où tombe le clic (une piscine,
         <source>Use this band for the pipette and the selected bands display</source>
         <translation>Utiliser cette bande pour la pipette et l’affichage des bandes cochées</translation>
     </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2327"/>
+        <source>Choose at least one band in BANDS before using the pipette.</source>
+        <translation>Cochez au moins une bande dans BANDES avant d’utiliser la pipette.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="863"/>
+        <source>Display the first checked band in grey or the checked bands as a colour composite</source>
+        <translation>Afficher la première bande cochée en gris ou les bandes cochées en composition colorée</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="861"/>
+        <source>First checked band</source>
+        <translation>Première bande cochée</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="930"/>
+        <source>Select or clear every band. The histogram shows the first checked band.</source>
+        <translation>Cocher ou décocher toutes les bandes. L’histogramme affiche la première bande cochée.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="940"/>
+        <source>Use this band for the pipette, value range and selected bands display</source>
+        <translation>Utiliser cette bande pour la pipette, la plage de valeurs et l’affichage des bandes cochées</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2051"/>
+        <source>VALUE RANGE — selected bands</source>
+        <translation>PLAGE DE VALEURS — bandes cochées</translation>
+    </message>
 </context>
 <context>
     <name>RasterMaterialization</name>
