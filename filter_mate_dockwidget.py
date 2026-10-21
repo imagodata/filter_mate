@@ -4946,9 +4946,7 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
 
     def exploring_deselect_features(self):
         """
-        v4.0 Sprint 18: Deselect all features and switch to pan tool.
-
-        FIX 2026-01-15: Switch to pan tool when IS_SELECTING is unchecked.
+        v4.0 Sprint 18: Deselect all features (the map tool is left unchanged).
         """
         if self._coverage_action('deselect'):
             return
@@ -4961,22 +4959,16 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             if not (self._controller_integration and self._controller_integration.delegate_exploring_clear_selection()):
                 self.current_layer.removeSelection()
 
-        # FIX 2026-01-15: Switch to pan tool when deselecting
-        try:
-            self.iface.actionPan().trigger()
-            logger.info("exploring_deselect_features: Switched to pan tool")
-        except Exception as e:
-            logger.warning(f"exploring_deselect_features: Failed to activate pan tool: {e}")
+        # 2026-10-21: the map tool is left as the user chose it (no pan tool forced).
 
         # Disable the active groupbox when IS_SELECTING is inactive
         self._sync_groupbox_state_with_selecting(False)
 
     def exploring_select_features(self):
         """
-        v4.0 Sprint 18: Activate QGIS selection tool and select features from active groupbox.
+        v4.0 Sprint 18: Select the features of the active groupbox on the layer (no map tool forced).
 
         FIX 2026-01-15:
-        - Activate selection tool on canvas
         - Synchronize canvas selection with current groupbox features
         - Enable the active groupbox for interaction
         - Update button states after selection
@@ -4988,14 +4980,13 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
 
         logger.info(f"🔍 exploring_select_features: START (groupbox={self.current_exploring_groupbox})")
 
-        # STEP 1: ALWAYS activate QGIS selection tool on canvas (CRITICAL)
-        # This must happen FIRST and ALWAYS, regardless of controller delegation
+        # STEP 1: make the layer the active one so the QGIS selection tools act on it.
+        # 2026-10-21: the rectangle selection tool is no longer forced on the canvas: IS_SELECTING only
+        # keeps the layer selection and the widgets in sync, the user picks the map tool.
         try:
-            self.iface.actionSelectRectangle().trigger()
             self.iface.setActiveLayer(self.current_layer)
-            logger.info(f"exploring_select_features: ✓ Selection tool activated for '{self.current_layer.name()}'")
         except Exception as e:
-            logger.warning(f"exploring_select_features: ✗ Failed to activate selection tool: {e}")
+            logger.warning(f"exploring_select_features: ✗ Failed to set the active layer: {e}")
 
         # STEP 2: Get features from active groupbox and select them on the layer
         features, _ = self.get_current_features()

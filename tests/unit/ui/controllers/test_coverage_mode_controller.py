@@ -1934,7 +1934,7 @@ class TestRasterSourceWithoutTarget:
         module.created = []
 
         class Job:
-            def __init__(self, layer, selection, max_pixels):
+            def __init__(self, layer, selection, max_pixels, zone=None, **_kwargs):
                 self.layer_id, self.layer_name, self.max_pixels = layer.id(), layer.id(), max_pixels
                 self.clips_source = selection.clips
                 self.clip_refusal = getattr(module, "refusal", "")

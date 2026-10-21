@@ -48,7 +48,8 @@ class TestTable:
     def test_vector_tools_match_the_rail(self):
         extras = _load("fm_extras_for_modes3", "ui/controllers/coverage_dock_extras.py")
         tied = {tool for tools in modes.GROUP_TOOLS["vector"].values() for tool in tools}
-        rail = set(extras.tools_for("vector")) - {"pushButton_exploring_vector_more"}
+        # The Zone is shared like the "Select" mode: it works in the three groups.
+        rail = set(extras.tools_for("vector")) - {"pushButton_exploring_vector_more", extras.VECTOR_ZONE_BUTTON}
         assert tied == rail | {extras.VECTOR_LINK_BUTTON}
 
 

@@ -693,7 +693,7 @@ class ConfigurationManager(QObject):
         exploring_tooltips = {
             "IDENTIFY": self.dockwidget.tr("Identify selected feature"),
             "ZOOM": self.dockwidget.tr("Zoom to selected feature"),
-            "IS_SELECTING": self.dockwidget.tr("Toggle feature selection on map"),
+            "IS_SELECTING": self.dockwidget.tr("Keep the map selection and the widgets in sync"),
             "IS_TRACKING": self.dockwidget.tr("Auto-zoom when feature changes"),
             "IS_LINKING": self.dockwidget.tr("Link exploring widgets together"),
             "RESET_ALL_LAYER_PROPERTIES": self.dockwidget.tr("Reset all layer exploring properties")
