@@ -296,6 +296,9 @@ class VectorTargetJob(TargetJob):
         else:
             self._source = QgsVectorLayerFeatureSource(layer)
         self._is_polygon = _is_polygon_layer(layer)
+        line_type = getattr(getattr(Qgis, 'GeometryType', None), 'Line', 1)
+        self._centroid_eligible = self._is_polygon or layer.geometryType() == line_type
+        self._use_centroids = False
         self._pk, self._raw_pk = self._primary_key(layer)
         if self._pk is None:
             self._error = translate(
@@ -368,6 +371,7 @@ class VectorTargetJob(TargetJob):
             if not target_geometry.isGeosValid():
                 # As the dock: refused (read_error), never silently left out of a complement.
                 raise ValueError('Invalid target geometry')
+            target_geometry = self._predicate_geometry(target_geometry)
             matched = engine is not None and target_matches(engine, target_geometry, tests)
             if not matched and parts is not None and not complement:
                 matched = parts.matches(target_geometry, part_methods)
@@ -423,6 +427,8 @@ class VectorTargetJob(TargetJob):
         if self._error:
             self.outcome.message = self._error
             return
+        self._use_centroids = self._centroid_eligible and any(
+            target.layer_id == self.layer_id and target.use_centroids for target in request.targets)
         geometry = self._target_geometry(source_geometry, source_crs, context)
         methods = request.methods
         # Intersects / disjoint are tested against the union of the source,
@@ -482,6 +488,15 @@ class VectorTargetJob(TargetJob):
         self.outcome.success = True
         self.outcome.elapsed = time.perf_counter() - self._started
 
+    def _predicate_geometry(self, geometry):
+        """The geometry used by the predicate; the original feature is retained in the target layer."""
+        if not self._use_centroids:
+            return geometry
+        point = geometry.pointOnSurface()
+        if point is None or point.isEmpty():
+            raise ValueError('Cannot compute the target point on surface')
+        return point
+
     def _compute_local(self, geometry, methods, parts, part_methods, coverage, request, is_canceled):
         """Keys of the features of a local (or database) target; None when canceled."""
         needs_all = 'disjoint' in methods
@@ -501,6 +516,7 @@ class VectorTargetJob(TargetJob):
             target_geometry = feature.geometry()
             if target_geometry is None or target_geometry.isEmpty():
                 continue
+            target_geometry = self._predicate_geometry(target_geometry)
             if engine is None:
                 matched = methods == ['disjoint']
             else:

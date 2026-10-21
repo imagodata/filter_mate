@@ -1008,6 +1008,89 @@ def ogr_target_centroids():
     check('OGR expression carries the per-target centroid choice', params.get('use_centroids') is True, str(params))
 
 
+def coverage_target_centroids():
+    """Target centroids remain available and effective with raster and point cloud sources."""
+    from qgis.core import QgsFeature
+    from qgis.PyQt.QtCore import Qt
+    from qgis.PyQt.QtGui import QIcon
+    from qgis.PyQt.QtWidgets import QCheckBox, QWidget
+    from filter_mate.adapters.qgis.coverage_layers.target_appliers import VectorTargetJob
+    from filter_mate.core.domain.cross_filter import CrossFilterRequest, TargetSpec
+    from filter_mate.core.domain.layer_kind import LayerKind
+    from filter_mate.ui.controllers.centroid_targets_sync import CentroidTargetsSync
+    from filter_mate.ui.controllers.coverage_mode_controller import CoverageModeController
+    from filter_mate.ui.widgets.custom_widgets import CENTROID_ROLE, QgsCheckableComboBoxLayer
+
+    target = QgsVectorLayer('Polygon?crs=EPSG:2154', 'coverage_centroid_targets', 'memory')
+    line = QgsVectorLayer('LineString?crs=EPSG:2154', 'coverage_centroid_lines', 'memory')
+    point = QgsVectorLayer('Point?crs=EPSG:2154', 'coverage_centroid_points', 'memory')
+    features = []
+    for wkt in ('POLYGON((8 0,40 0,40 2,8 2,8 0))', 'POLYGON((2 2,4 2,4 4,2 4,2 2))'):
+        feature = QgsFeature()
+        feature.setGeometry(QgsGeometry.fromWkt(wkt))
+        features.append(feature)
+    target.dataProvider().addFeatures(features)
+    project.addMapLayers([target, line, point])
+    ids = [feature.id() for feature in target.getFeatures()]
+    union = QgsGeometry.fromWkt('POLYGON((0 0,10 0,10 10,0 10,0 0))')
+    try:
+        for source_kind in (LayerKind.RASTER, LayerKind.POINT_CLOUD):
+            for use_centroids in (False, True):
+                target.setSubsetString('')
+                request = CrossFilterRequest('source', source_kind,
+                                             targets=(TargetSpec(target.id(), LayerKind.VECTOR, use_centroids),))
+                job = VectorTargetJob(target, None)
+                try:
+                    job.compute(union, target.crs(), project.transformContext(), request, lambda: False)
+                    check(f'{source_kind.value} source: centroid target job computes', job.outcome.success, job.outcome.message)
+                    job.apply(target)
+                    kept = [feature.id() for feature in target.getFeatures()]
+                    check(f'{source_kind.value} source: target centroids={use_centroids}',
+                          kept == ([ids[1]] if use_centroids else ids), str(kept))
+                    check('centroid filtering retains full polygon geometries',
+                          all(feature.geometry().type() == target.geometryType() for feature in target.getFeatures()))
+                finally:
+                    job.release()
+        sources = [info['dem']] + project.mapLayersByName('cloud')
+        for source in sources:
+            dock = QWidget()
+            dock.current_layer = source
+            dock.PROJECT_LAYERS = {source.id(): {'filtering': {'centroid_layers': [target.id()]}}}
+            combo = QgsCheckableComboBoxLayer(dock)
+            combo.set_target_hints(True)
+            for layer, geometry_type in ((target, 'Polygon'), (line, 'Line'), (point, 'Point'), (info['dem'], 'Raster')):
+                combo.addItem(QIcon(os.path.join(REPO, 'icon.png')), layer.name(),
+                              {'layer_id': layer.id(), 'layer_geometry_type': 'GeometryType.' + geometry_type})
+                combo.setItemCheckState(combo.count() - 1, Qt.CheckState.Checked)
+            dock.checkableComboBoxLayer_filtering_layers_to_filter = combo
+            dock.checkBox_filtering_use_centroids_distant_layers = QCheckBox(dock)
+            dock.pushButton_checkable_filtering_layers_to_filter = QCheckBox(dock)
+            dock.pushButton_checkable_filtering_layers_to_filter.setChecked(True)
+            sync = CentroidTargetsSync(dock)
+            sync.connect()
+            sync.apply_stored()
+            dock.get_centroid_target_ids = sync.centroid_ids
+            check(f'{source.name()} source: target centroid icons stay available',
+                  all(combo.model().item(row).data(CENTROID_ROLE) is not None for row in (0, 1))
+                  and all(combo.model().item(row).data(CENTROID_ROLE) is None for row in (2, 3)))
+            button = dock.checkBox_filtering_use_centroids_distant_layers
+            check(f'{source.name()} source: centroid button restores partial choice',
+                  button.isEnabled() and button.checkState() == Qt.CheckState.PartiallyChecked)
+            button.click()
+            check(f'{source.name()} source: centroid button sets vector targets',
+                  set(sync.centroid_ids()) == {target.id(), line.id()})
+            controller = CoverageModeController(dock)
+            specs = controller._target_specs([target.id(), line.id(), point.id(), info['dem'].id()])
+            check(f'{source.name()} source: worker receives per-target choices',
+                  {spec.layer_id for spec in specs if spec.use_centroids} == {target.id(), line.id()})
+            check(f'{source.name()} source: centroid choices are stored',
+                  set(dock.PROJECT_LAYERS[source.id()]['filtering']['centroid_layers']) == {target.id(), line.id()})
+            dock.deleteLater()
+            app.processEvents()
+    finally:
+        project.removeMapLayers([target.id(), line.id(), point.id()])
+
+
 def environment():
     from filter_mate.adapters.qgis.coverage_layers import pdal_cli
     exe = pdal_cli.find_pdal()
@@ -1045,7 +1128,7 @@ def main():
     for step in (plugin_starts_without_iface, provider_lists_algorithms, load_layers, raster_to_vector,
                  vector_to_raster, raster_alpha_band, point_clouds, remote_sources, subset_literals,
                  user_data_safety, user_data_safety_postgresql, user_data_safety_native_spatialite,
-                 user_data_safety_two_databases, compat_checks, ogr_target_centroids,
+                 user_data_safety_two_databases, compat_checks, ogr_target_centroids, coverage_target_centroids,
                  environment):
         if (step is not plugin_starts_without_iface
                 and QgsApplication.processingRegistry().providerById('filtermate') is None):

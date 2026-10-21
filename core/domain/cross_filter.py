@@ -186,10 +186,11 @@ def build_in_expression(field_name: Optional[str], values: Sequence, raw_field: 
 
 @dataclass(frozen=True)
 class TargetSpec:
-    """A layer to filter and its kind."""
+    """A layer to filter, its kind and whether to test vector features by their point on surface."""
 
     layer_id: str
     kind: LayerKind
+    use_centroids: bool = False
 
 
 @dataclass(frozen=True)

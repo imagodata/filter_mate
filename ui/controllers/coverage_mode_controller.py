@@ -2703,6 +2703,8 @@ class CoverageModeController(BaseController):
     def _target_specs(self, layer_ids, exclude_id: str = ''):
         from qgis.core import QgsProject
         from ...core.domain.cross_filter import TargetSpec
+        get_centroids = getattr(self.dockwidget, 'get_centroid_target_ids', None)
+        centroid_ids = set(get_centroids() or ()) if get_centroids is not None else set()
         specs = []
         for layer_id in layer_ids or []:
             if layer_id == exclude_id:
@@ -2710,7 +2712,7 @@ class CoverageModeController(BaseController):
             layer = QgsProject.instance().mapLayer(layer_id)
             kind = _kind_of(layer)
             if layer is not None and kind.value != 'other':
-                specs.append(TargetSpec(layer_id, kind))
+                specs.append(TargetSpec(layer_id, kind, use_centroids=kind.value == 'vector' and layer_id in centroid_ids))
         return specs
 
     def _build_request(self, source: Any, kind: Any, settings: dict, targets) -> Any:

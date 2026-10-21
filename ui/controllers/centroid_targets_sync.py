@@ -10,7 +10,9 @@ the list sums them up and sets them all:
 * partial: only some do;
 * unchecked: none does;
 * disabled: no line / polygon target is checked (points, rasters and point
-  clouds have no centroid to use), or the source is a raster / point cloud.
+  clouds have no centroid to use).
+
+Target centroids are available with vector, raster and point cloud sources.
 
 The choice is stored per source layer in ``filtering.centroid_layers``; the old
 global ``filtering.use_centroids_distant_layers`` flag follows the button (True
@@ -116,18 +118,15 @@ class CentroidTargetsSync(QObject):
         combo = self._widget(COMBO)
         if combo is None or not hasattr(combo, 'centroid_layer_ids'):
             return None
-        return combo.centroid_layer_ids() if self._source_is_vector() else []
+        return combo.centroid_layer_ids()
 
     def apply_stored(self) -> None:
         """The list of targets was filled: turn on the toggles stored for the source layer."""
         combo = self._widget(COMBO)
         if combo is None:
             return
-        if not self._source_is_vector():
-            combo.clear_centroid_toggles()  # a raster / point cloud source clips its targets, no centroid
-        else:
-            combo.set_centroid_layer_ids(initial_centroid_layers(self._source_filtering(),
-                                                                 combo.centroid_eligible_ids()))
+        combo.set_centroid_layer_ids(initial_centroid_layers(self._source_filtering(),
+                                                             combo.centroid_eligible_ids()))
         self.refresh()
 
     def set_all(self, enabled: bool) -> None:
@@ -154,13 +153,13 @@ class CentroidTargetsSync(QObject):
     def _store(self) -> None:
         """Save the toggles in the source layer properties (and the variables of a vector source)."""
         filtering, combo = self._source_filtering(), self._widget(COMBO)
-        if filtering is None or combo is None or not self._source_is_vector():
+        if filtering is None or combo is None:
             return
         filtering[CENTROID_LAYERS_KEY] = combo.centroid_layer_ids()
         filtering[LEGACY_FLAG_KEY] = global_centroid_state(
             combo.centroid_eligible_ids(checked_only=True), filtering[CENTROID_LAYERS_KEY]) is True
         setter = getattr(self._dw, 'setLayerVariableEvent', None)
-        if setter is not None:
+        if setter is not None and self._source_is_vector():
             try:
                 setter(self._dw.current_layer, [('filtering', CENTROID_LAYERS_KEY), ('filtering', LEGACY_FLAG_KEY)])
             except Exception as exc:
@@ -173,7 +172,7 @@ class CentroidTargetsSync(QObject):
             return
         targets = self._widget(TARGETS_KEY)
         listing = targets is None or targets.isChecked()
-        checked = combo.centroid_eligible_ids(checked_only=True) if listing and self._source_is_vector() else []
+        checked = combo.centroid_eligible_ids(checked_only=True) if listing else []
         state = global_centroid_state(checked, combo.centroid_layer_ids())
         self._refreshing = True
         blocked = button.blockSignals(True)

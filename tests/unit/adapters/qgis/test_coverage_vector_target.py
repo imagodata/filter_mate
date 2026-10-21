@@ -155,6 +155,8 @@ def engine(monkeypatch):
     fk.install(monkeypatch, appliers, geometry_tools, source_jobs, task_module)
     monkeypatch.setattr(appliers, 'QgsVectorLayer', FakeVectorLayer)
     monkeypatch.setattr(appliers, 'QgsVectorLayerFeatureSource', FakeFeatureSource)
+    monkeypatch.setattr(appliers, 'Qgis', types.SimpleNamespace(
+        GeometryType=types.SimpleNamespace(Point=0, Line=1, Polygon=2)))
     FakeVectorLayer.DATA.clear()
     return appliers
 
@@ -190,6 +192,20 @@ class TestPreviousSubset:
         layer = _zones(subset='ids:4')  # west_a only, from a previous filter
         job = engine.VectorTargetJob(layer, None)
         assert _run(job, _box(*EAST_HALF), _request()) == ['east_a', 'east_b', 'straddle']
+
+    @pytest.mark.parametrize("source_kind", [LayerKind.RASTER, LayerKind.POINT_CLOUD])
+    def test_centroid_choice_is_applied_for_coverage_sources(self, engine, source_kind):
+        layer = _zones()
+        request = domain.CrossFilterRequest('source', source_kind,
+                                            targets=(domain.TargetSpec(layer.id(), LayerKind.VECTOR, use_centroids=True),))
+        job = engine.VectorTargetJob(layer, None)
+        assert _run(job, _box(510, 0, 1000, 1000), request) == ['east_a', 'east_b']
+
+    def test_centroid_choice_is_specific_to_the_target(self, engine):
+        layer = _zones()
+        request = domain.CrossFilterRequest('source', LayerKind.RASTER,
+                                            targets=(domain.TargetSpec('another_target', LayerKind.VECTOR, use_centroids=True),))
+        assert _run(engine.VectorTargetJob(layer, None), _box(510, 0, 1000, 1000), request) == ['east_a', 'east_b', 'straddle']
 
     def test_replace_result_is_applied_alone(self, engine):
         layer = _zones(subset='ids:4')
@@ -475,6 +491,19 @@ class TestWebServiceBoundedRead:
     """2026-10-20: the API read a WFS target through a filter rectangle alone, which the QGIS WFS
     provider answers by downloading the whole service (35 000 communes). The dock's bounded read
     (lot B, remote_materializer) is used instead: server BBOX, exact predicate on bounded copies."""
+
+    @pytest.mark.parametrize("predicate,expression", [
+        ('Intersect', '"cleabs" IN (1, 2)'),
+        ('Disjoint', 'NOT ("cleabs" IN (1, 2))'),
+    ])
+    def test_centroids_are_tested_on_bounded_remote_copies(self, engine, remote, predicate, expression):
+        layer = _web_zones()
+        request = domain.CrossFilterRequest('source', LayerKind.RASTER, predicates=(predicate,),
+                                            targets=(domain.TargetSpec(layer.id(), LayerKind.VECTOR, use_centroids=True),))
+        job = engine.VectorTargetJob(layer, None)
+        job.compute(_box(510, 0, 1000, 1000), fk.FakeCrs('EPSG:2154'), None, request, lambda: False)
+        assert job.outcome.success and job._expression == expression
+        assert remote.reads[0][1] == (510.0, 0.0, 1000.0, 1000.0)
 
     def test_reads_the_useful_bbox_through_the_materializer(self, engine, remote, monkeypatch):
         monkeypatch.setattr(engine, 'QgsVectorLayer', MagicMock(side_effect=AssertionError("unbounded copy")))
