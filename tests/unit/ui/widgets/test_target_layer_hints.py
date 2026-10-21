@@ -99,7 +99,8 @@ def _paint_centroid_toggle():
         def __call__(self, *args, **kwargs):
             return Anything()
 
-    namespace = {"QPointF": QPointF, "QColor": Anything, "QBrush": Anything, "QtGui": Anything(), "Qt": Anything()}
+    namespace = {"QPointF": QPointF, "QRectF": lambda rect: rect,
+                 "QColor": Anything, "QBrush": Anything, "QtGui": Anything(), "Qt": Anything()}
     exec(compile(ast.Module(body=[node], type_ignores=[]), str(_MODULE), "exec"), namespace)
     return namespace["paint_centroid_toggle"], QPointF
 

@@ -35,6 +35,7 @@ from qgis.PyQt.QtCore import (
     QEvent,
     QPointF,
     QRect,
+    QRectF,
     QSize,
     Qt,
     QTimer,
@@ -185,7 +186,8 @@ class ItemDelegate(QStyledItemDelegate):
         pen.setWidthF(1.3)
         painter.setPen(pen)
         painter.setBrush(QBrush(Qt.BrushStyle.NoBrush))
-        inner = rect.adjusted(3, 3, -3, -3)
+        # QRect.center() truncates half pixels and shifts the dot towards the top left.
+        inner = QRectF(rect).adjusted(3, 3, -3, -3)
         painter.drawRect(inner)
         painter.setBrush(QBrush(glyph))
         # PyQt6 has no drawEllipse(QPoint, float, float): the centre must be a QPointF.

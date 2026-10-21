@@ -4,6 +4,10 @@ All notable changes to FilterMate will be documented in this file.
 
 ## [Unreleased]
 
+- **Exploring link icon.** The third button from the bottom of the vector Exploring rail uses the same zone icon as LiDAR.
+
+- **Target centroid glyph alignment.** The dot is centred inside its rectangle in the Layers to filter list on Qt5 and Qt6.
+
 - **Target centroids with any source.** Line and polygon target centroid controls remain available with raster and point cloud sources. Choices are stored per source and applied to local and bounded remote vector filtering.
 
 - **Centroid button alignment.** The source and target layer centroid icons are centred in their square buttons in both light and dark themes.

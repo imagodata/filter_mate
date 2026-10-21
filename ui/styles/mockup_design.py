@@ -128,7 +128,7 @@ ICON_BODIES: Dict[str, str] = {
     'select': '<rect x="3" y="3" width="13" height="11" stroke-dasharray="2.5 2"/><path d="M12 10l8 3.2-3.4 1.2L15.4 18z"/>',
     'track': '<path d="M3 8V4h4M17 4h4v4M21 16v4h-4M7 20H3v-4"/><circle cx="11.5" cy="11.5" r="3.5"/>'
              '<path d="M14 14l2.5 2.5"/>',
-    'link': '<rect x="3" y="7" width="11" height="11" rx="2"/><rect x="10" y="3" width="11" height="11" rx="2"/>',
+    'link': '<rect x="3" y="5" width="18" height="14" rx="1" stroke-dasharray="2.5 2"/><path d="M8 19V5"/><path d="M3 10h18"/>',
     'reset_props': '<circle cx="12" cy="12" r="8"/><path d="M6.5 6.5l11 11"/>',
     'source_layer': '<path d="M12 3l9 5-9 5-9-5z"/><path d="M3 13l9 5 9-5"/>',
     'layers': '<path d="M12 3l9 5-9 5-9-5z"/><path d="M3 12l9 5 9-5M3 16l9 5 9-5"/>',
