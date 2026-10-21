@@ -73,6 +73,18 @@ jobs:
             python3 /src/tests/qgis_headless/run_smoke.py /tmp/fm
             python3 /src/tests/qgis_headless/check_export_task_safety.py'
 
+    - name: Raster exploration (expressions, histograms and object selection)
+      if: ${{ !cancelled() && !matrix.pdal && (matrix.image == 'ltr' || matrix.image == 'stable') }}
+      env:
+        IMAGE: qgis/qgis:${{ matrix.image }}
+      run: |
+        docker run --rm --network none -v "$GITHUB_WORKSPACE:/src:ro" \
+          -e QT_QPA_PLATFORM=offscreen -e PYTHONDONTWRITEBYTECODE=1 -e PYTHONUNBUFFERED=1 \
+          -e FILTERMATE_TEST_TRANSLATION=/src/i18n/FilterMate_fr.qm \
+          "$IMAGE" bash -ec '
+            timeout 120 python3 /src/tests/qgis_headless/check_raster_exploring.py
+            timeout 120 python3 /src/tests/qgis_headless/check_rendered_raster.py'
+
     - name: Dock smoke test (QGIS GUI under Xvfb)
       if: ${{ !cancelled() }}  # also when the engine smoke test failed: the dock is a separate story
       env:

@@ -46,6 +46,55 @@ class TestMaskBounds:
         assert adapter.mask_bounds(np.zeros((3, 3), dtype=bool)) is None
 
 
+class TestNumericExpressions:
+    @pytest.mark.parametrize("width,height,budget", [(1, 10**9, 1000), (10**9, 1, 10), (1, 10**9, 1), (500, 500, 400)])
+    def test_sampling_grid_stays_within_budget_for_narrow_rasters(self, width, height, budget):
+        cols, rows = adapter._grid_for(None, width, height, budget)
+        assert cols >= 1 and rows >= 1 and cols * rows <= budget
+        assert cols <= width and rows <= height
+
+    def test_constant_band_has_a_histogram_instead_of_being_reported_missing(self, monkeypatch):
+        np = pytest.importorskip("numpy")
+        layer = types.SimpleNamespace(extent=lambda: None, width=lambda: 3, height=lambda: 1, dataProvider=lambda: None)
+        monkeypatch.setattr(adapter, "band_range", lambda *a: (7.0, 7.0, 7.0))
+        monkeypatch.setattr(adapter, "read_band_array", lambda *a: np.array([[7.0, np.nan, 7.0]]))
+        counts, low, high = adapter.band_histogram(layer, 1, bins=4)
+        assert counts == [2, 0, 0, 0] and (low, high) == (7.0, 7.0)
+
+    def test_histogram_keeps_zero_and_negative_values(self, monkeypatch):
+        np = pytest.importorskip("numpy")
+        monkeypatch.setattr(adapter, "expression_array", lambda *a: np.array([[-1, 0, 1, np.nan, np.inf]]))
+        counts, low, high = adapter.expression_histogram(None, '"img@1" / 100', bins=2)
+        assert sum(counts) == 3 and (low, high) == (-1.0, 1.0)
+
+    def test_constant_and_invalid_formula_histograms(self, monkeypatch):
+        np = pytest.importorskip("numpy")
+        monkeypatch.setattr(adapter, "expression_array", lambda *a: np.array([[0, 0]]))
+        counts, low, high = adapter.expression_histogram(None, "0", bins=4)
+        assert sum(counts) == 2 and low == high == 0
+        monkeypatch.setattr(adapter, "expression_array", lambda *a: None)
+        assert adapter.expression_histogram(None, "broken(") == ([], 0.0, 0.0)
+
+    def test_numeric_array_excludes_nodata_of_referenced_bands(self, monkeypatch):
+        np = pytest.importorskip("numpy")
+        source, calculated = object(), object()
+        layer = types.SimpleNamespace(dataProvider=lambda: source, extent=lambda: object(),
+                                      width=lambda: 3, height=lambda: 1, bandCount=lambda: 2)
+        virtual = types.SimpleNamespace(dataProvider=lambda: calculated)
+        monkeypatch.setattr(adapter, "selection_virtual_layer", lambda *a: virtual)
+        monkeypatch.setattr(adapter, "raster_reference", lambda layer: "img")
+        monkeypatch.setattr(adapter, "_grid_for", lambda *a: (3, 1))
+        monkeypatch.setattr(adapter, "read_band_array", lambda provider, *a:
+                            np.array([[0.0, 1, -1]]) if provider is calculated else np.array([[10, np.nan, 20]]))
+        array = adapter.expression_array(layer, '"img@2" / 10')
+        assert array[0, 0] == 0 and np.isnan(array[0, 1]) and array[0, 2] == -1
+
+    def test_identify_normalizes_nonfinite_values(self):
+        result = types.SimpleNamespace(isValid=lambda: True, results=lambda: {1: float("nan"), 2: float("inf"), 3: 0})
+        layer = types.SimpleNamespace(dataProvider=lambda: types.SimpleNamespace(identify=lambda *a: result))
+        assert adapter.identify_values(layer, None) == {1: None, 2: None, 3: 0.0}
+
+
 # ---------------------------------------------------------------------------
 # Live preview: transparent value ranges, matched the way QGIS matches them
 # ---------------------------------------------------------------------------

@@ -165,6 +165,26 @@ class TestSnapshotsAndHistory:
 
 
 class TestRasterSelection:
+    def test_segmentation_settings_survive_serialization(self):
+        selection = RasterSelection(minimum=0, seeds=((1, 2),), object_opening=3, fill_holes=False)
+        assert RasterSelection.from_dict(selection.to_dict()) == selection
+        legacy = RasterSelection.from_dict({"minimum": 0})
+        assert legacy.object_opening == 1 and legacy.fill_holes
+
+    @pytest.mark.parametrize("opening", [-1, 5, 1.5, True, "2", None])
+    def test_invalid_separation_is_rejected(self, opening):
+        with pytest.raises(ValueError, match="opening"):
+            RasterSelection(minimum=0, object_opening=opening)
+
+    def test_unbounded_seed_still_selects_a_spatial_object(self):
+        assert not RasterSelection(seeds=((1, 2),)).is_empty
+
+    @pytest.mark.parametrize("value", [float("nan"), float("inf"), -float("inf")])
+    def test_nonfinite_values_and_ratios_are_rejected(self, value):
+        assert not RasterSelection(minimum=0).keeps(value)
+        with pytest.raises(ValueError):
+            RasterSelection(minimum=0, seeds=((1, 2),), similar=(0.5, value))
+
     def test_seeds_are_points_in_order_without_duplicates(self):
         sel = RasterSelection(minimum=1, seeds=[[1, 2], (3.5, 4), (1.0, 2.0)])
         assert sel.seeds == ((1.0, 2.0), (3.5, 4.0))

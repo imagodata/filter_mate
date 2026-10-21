@@ -516,6 +516,21 @@
 <context>
     <name>CoverageModeController</name>
     <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1310"/>
+        <source>Unknown raster layer or band in expression</source>
+        <translation>Couche ou bande raster inconnue dans l’expression</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1312"/>
+        <source>The raster histogram could not be calculated.</source>
+        <translation>L’histogramme raster n’a pas pu être calculé.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1595"/>
+        <source>The raster preview could not be calculated.</source>
+        <translation>L’aperçu raster n’a pas pu être calculé.</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/coverage_mode_controller.py" line="365"/>
         <source>Restoring the filter of {0} raster / point cloud layer(s)…</source>
         <translation>Restauration du filtre de {0} couche(s) raster / nuage de points…</translation>
@@ -5728,6 +5743,11 @@ Seules les couches du projet sont filtrées. Le filtre est annulable depuis Filt
 <context>
     <name>RangeHistogramWidget</name>
     <message>
+        <location filename="../ui/widgets/coverage_panels/histogram_widget.py" line="345"/>
+        <source>Constant value: {0}</source>
+        <translation>Valeur constante : {0}</translation>
+    </message>
+    <message>
         <location filename="../ui/widgets/coverage_panels/histogram_widget.py" line="240"/>
         <source>Value range histogram</source>
         <translation>Histogramme de la plage de valeurs</translation>
@@ -5750,6 +5770,136 @@ Seules les couches du projet sont filtrées. Le filtre est annulable depuis Filt
 </context>
 <context>
     <name>RasterExploringPanel</name>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1592"/>
+        <source>Computing histogram…</source>
+        <translation>Calcul de l’histogramme…</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1314"/>
+        <source>A numeric raster calculator expression. The histogram and thresholds use its computed values.</source>
+        <translation>Expression numérique du calculateur raster. L’histogramme et les seuils utilisent les valeurs calculées.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2148"/>
+        <source>All values</source>
+        <translation>Toutes les valeurs</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1152"/>
+        <source>Bridge removal: {0} px</source>
+        <translation>Suppression des ponts : {0} px</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2142"/>
+        <source>Central 90% (P5–P95)</source>
+        <translation>90 % centraux (P5–P95)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2141"/>
+        <source>Central 98% (P1–P99)</source>
+        <translation>98 % centraux (P1–P99)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1372"/>
+        <source>Computed expression values. Drag the handles to use this expression as a derived value with thresholds.</source>
+        <translation>Valeurs calculées par l’expression. Déplacez les poignées pour utiliser cette expression comme valeur dérivée avec des seuils.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1150"/>
+        <source>Connected pixels</source>
+        <translation>Pixels connexes</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2008"/>
+        <source>Constant value: {0}</source>
+        <translation>Valeur constante : {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1313"/>
+        <source>Custom derived value expression</source>
+        <translation>Expression de la valeur dérivée personnalisée</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1302"/>
+        <source>Custom expression</source>
+        <translation>Expression personnalisée</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2152"/>
+        <source>Derived spectral values</source>
+        <translation>Valeurs spectrales dérivées</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2480"/>
+        <source>Derived value: {0}</source>
+        <translation>Valeur dérivée : {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2139"/>
+        <source>Distribution (approximate)</source>
+        <translation>Distribution (approximative)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1160"/>
+        <source>Fill enclosed gaps in the clicked object; clear to preserve courtyards and inner rings</source>
+        <translation>Combler les trous à l’intérieur de l’objet cliqué ; décocher pour conserver les cours et les anneaux intérieurs</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1157"/>
+        <source>Fill holes</source>
+        <translation>Combler les trous</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2143"/>
+        <source>Interquartile range (P25–P75)</source>
+        <translation>Intervalle interquartile (P25–P75)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1118"/>
+        <source>Largest similar object, as a multiple of each clicked reference</source>
+        <translation>Plus grand objet similaire, en multiple de chaque référence cliquée</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2007"/>
+        <source>No histogram available</source>
+        <translation>Aucun histogramme disponible</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1312"/>
+        <source>Numeric raster formula, e.g. (&quot;raster@4&quot; - &quot;raster@1&quot;) / (&quot;raster@4&quot; + &quot;raster@1&quot;)</source>
+        <translation>Formule raster numérique, par ex. (&quot;raster@4&quot; - &quot;raster@1&quot;) / (&quot;raster@4&quot; + &quot;raster@1&quot;)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1154"/>
+        <source>Separate objects joined by narrow bridges; higher values cut wider bridges</source>
+        <translation>Séparer les objets reliés par des ponts étroits ; augmenter la valeur pour couper des ponts plus larges</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1147"/>
+        <source>Separation</source>
+        <translation>Séparation</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1116"/>
+        <source>Smallest similar object, as a share of each clicked reference</source>
+        <translation>Plus petit objet similaire, en proportion de chaque référence cliquée</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2144"/>
+        <source>Upper quartile (≥ P75)</source>
+        <translation>Quartile supérieur (≥ P75)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1381"/>
+        <source>Use as derived value</source>
+        <translation>Utiliser comme valeur dérivée</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2009"/>
+        <source>{0} sampled pixels · {1} to {2}</source>
+        <translation>{0} pixels échantillonnés · de {1} à {2}</translation>
+    </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="497"/>
         <source>Band</source>

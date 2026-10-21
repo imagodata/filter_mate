@@ -223,8 +223,17 @@ def band_histogram(layer: QgsRasterLayer, band: int, bins: int = 64, minimum: Op
         low, high, _ = band_range(layer, band, sample_size)
         minimum = low if minimum is None else minimum
         maximum = high if maximum is None else maximum
-    if minimum is None or maximum is None or not maximum > minimum:
-        return [], minimum or 0.0, maximum or 0.0
+    if (minimum is None or maximum is None or not math.isfinite(minimum) or not math.isfinite(maximum)
+            or maximum < minimum):
+        return [], minimum if minimum is not None and math.isfinite(minimum) else 0.0, maximum if maximum is not None and math.isfinite(maximum) else 0.0
+    if maximum == minimum:
+        import numpy as np
+        extent = layer.extent()
+        width, height = _grid_for(extent, layer.width(), layer.height(), sample_size)
+        array = read_band_array(layer.dataProvider(), band, extent, width, height)
+        counts = [0] * max(1, int(bins))
+        counts[0] = int(np.count_nonzero(np.isfinite(array)))
+        return counts, float(minimum), float(maximum)
     try:
         histogram = layer.dataProvider().histogram(band, int(bins), float(minimum), float(maximum), layer.extent(), sample_size)
         counts = [int(v) for v in histogram.histogramVector]
@@ -247,7 +256,8 @@ def identify_values(layer: QgsRasterLayer, point: QgsPointXY) -> Dict[int, Optio
         return values
     for band, value in result.results().items():
         try:
-            values[int(band)] = None if value is None else float(value)
+            number = None if value is None else float(value)
+            values[int(band)] = number if number is not None and math.isfinite(number) else None
         except (TypeError, ValueError):
             values[int(band)] = None
     return values
@@ -257,9 +267,13 @@ def _grid_for(layer_extent: QgsRectangle, width: int, height: int, max_pixels: i
     """Grid size to read: native size, or a coarser one above ``max_pixels``."""
     width, height = max(1, int(width)), max(1, int(height))
     if max_pixels and width * height > max_pixels:
-        factor = math.sqrt((width * height) / float(max_pixels))
+        budget = max(1, int(max_pixels))
+        factor = math.sqrt((width * height) / float(budget))
         width = max(1, int(width / factor))
         height = max(1, int(height / factor))
+        # One side may have been rounded up to one cell on a very narrow raster.
+        width = min(width, budget)
+        height = min(height, max(1, budget // width))
     return width, height
 
 
@@ -426,7 +440,7 @@ def derivative_histogram(layer: QgsRasterLayer, band: int, derivative: RasterDer
 def selection_mask(array, selection: RasterSelection):
     """Boolean numpy mask of the pixels kept by a RANGE or CLASSES selection."""
     import numpy as np
-    valid = ~np.isnan(array)
+    valid = np.isfinite(array)
     if selection.mode is RasterSelectionMode.RANGE:
         keep = valid.copy()
         if selection.minimum is not None:
@@ -446,6 +460,22 @@ def referenced_bands(expression: str, reference: str) -> List[int]:
     return sorted({int(number) for number in re.findall(pattern, expression or '')})
 
 
+def raster_expression_error(expression: str, reference: str, band_count: int) -> str:
+    """Validate syntax and band references without reading raster pixels.
+
+    Return ``'syntax'`` or ``'bands'``, or an empty string for a valid formula.
+    A valid numeric formula may still produce no finite value (e.g. division
+    by zero); that is an empty histogram rather than a syntax error.
+    """
+    from qgis.analysis import QgsRasterCalcNode
+    if not expression.strip() or QgsRasterCalcNode.parseRasterCalcString(expression, '') is None:
+        return 'syntax'
+    references = re.findall(r'"([^"\n]+)@(\d+)"', expression)
+    if any(name != reference or not 1 <= int(band) <= band_count for name, band in references):
+        return 'bands'
+    return ''
+
+
 def expression_mask(virtual_provider: QgsRasterDataProvider, provider: QgsRasterDataProvider, bands,
                     extent: QgsRectangle, width: int, height: int):
     """``(kept, valid)`` masks of a raster calculator expression over ``extent``, read on a ``width`` x ``height`` grid.
@@ -459,10 +489,55 @@ def expression_mask(virtual_provider: QgsRasterDataProvider, provider: QgsRaster
     """
     import numpy as np
     array = read_band_array(virtual_provider, 1, extent, width, height)
-    valid = ~np.isnan(array)
+    valid = np.isfinite(array)
     for band in bands:
-        valid &= ~np.isnan(read_band_array(provider, band, extent, width, height))
+        valid &= np.isfinite(read_band_array(provider, band, extent, width, height))
     return valid & (array != 0), valid
+
+
+def expression_array(layer: QgsRasterLayer, expression: str, max_pixels: int = 1000000):
+    """Numeric values of a calculator formula, retaining zero and masking invalid source pixels.
+
+    Use a bounded grid, as for terrain histograms. This reads the formula itself,
+    before any range comparison, so a spectral index has its actual distribution.
+    """
+    import numpy as np
+    selection = RasterSelection(mode=RasterSelectionMode.EXPRESSION, expression=expression)
+    virtual = selection_virtual_layer(layer, selection)
+    if virtual is None:
+        return None
+    extent = layer.extent()
+    width, height = _grid_for(extent, layer.width(), layer.height(), max_pixels)
+    array = read_band_array(virtual.dataProvider(), 1, extent, width, height)
+    valid = np.isfinite(array)
+    for band in referenced_bands(expression, raster_reference(layer)):
+        if band > layer.bandCount():
+            return None
+        valid &= np.isfinite(read_band_array(layer.dataProvider(), band, extent, width, height))
+    return np.where(valid, array, np.nan)
+
+
+def expression_histogram(layer: QgsRasterLayer, expression: str, bins: int = 64,
+                         max_pixels: int = 1000000):
+    """Histogram of numeric expression results; empty for invalid formulas or only NoData."""
+    import numpy as np
+    array = expression_array(layer, expression, max_pixels)
+    values = array[np.isfinite(array)] if array is not None else np.array([])
+    if not values.size:
+        return [], 0.0, 0.0
+    counts, _edges = np.histogram(values, bins=max(1, int(bins)))
+    # A constant quantity stays constant: do not expose numpy's artificial ±0.5 bounds.
+    return counts.tolist(), float(values.min()), float(values.max())
+
+
+def expression_value_at(layer: QgsRasterLayer, expression: str, point: QgsPointXY) -> Optional[float]:
+    """Read a custom quantity under a pipette click, with the same NoData rule as its histogram."""
+    values = identify_values(layer, point)
+    bands = referenced_bands(expression, raster_reference(layer))
+    if any(values.get(band) is None for band in bands):
+        return None
+    virtual = selection_virtual_layer(layer, RasterSelection(mode=RasterSelectionMode.EXPRESSION, expression=expression))
+    return identify_values(virtual, point).get(1) if virtual is not None else None
 
 
 @dataclass
@@ -987,12 +1062,12 @@ def object_region(mask, seed, opening: int = OBJECT_OPENING, reconstruct: bool =
     if opening <= 0:
         return flood_fill(mask, [seed])
     cores = patch_cores(mask, opening)
-    start = _core_seed(mask, cores, seed)
+    start = _core_seed(mask, cores, seed, radius=max(CORE_SEED_RADIUS, 2 * opening))
     if start is None:
         return flood_fill(mask, [seed])
     region = flood_fill(cores, [start])
     if reconstruct:
-        region = region | (dilate_mask(region) & mask & ~cores)
+        region = region | (dilate_mask(region, opening) & mask & ~cores)
     return region
 
 
@@ -1074,8 +1149,8 @@ def object_parts(selection: RasterSelection) -> List[Tuple[RasterSelection, Tupl
 
 def object_geometry(provider: QgsRasterDataProvider, selection: RasterSelection, extent: QgsRectangle,
                     native_width: int, native_height: int, crs_wkt: str, start: int = OBJECT_WINDOW_START,
-                    limit: int = OBJECT_WINDOW_MAX, provider_for=None, opening: int = OBJECT_OPENING,
-                    reconstruct: bool = True, fill: bool = True, simplify: bool = True) -> SelectionGeometryResult:
+                    limit: int = OBJECT_WINDOW_MAX, provider_for=None, opening: Optional[int] = None,
+                    reconstruct: bool = True, fill: Optional[bool] = None, simplify: bool = True) -> SelectionGeometryResult:
     """Outline of the objects under the seeds of ``selection``: the patch of kept pixels each click falls in.
 
     Read at the native resolution in a window around each click, grown while
@@ -1099,6 +1174,8 @@ def object_geometry(provider: QgsRasterDataProvider, selection: RasterSelection,
     """
     import numpy as np
     from .geometry_tools import mask_to_geometry, union_geometries
+    opening = selection.object_opening if opening is None else opening
+    fill = selection.fill_holes if fill is None else fill
     total = int(native_width) * int(native_height)
     if native_width <= 0 or native_height <= 0 or extent.width() <= 0 or extent.height() <= 0:
         return SelectionGeometryResult(QgsGeometry(), 0, max(0, total), 0.0)
@@ -1214,29 +1291,74 @@ def similar_objects_geometry(provider: QgsRasterDataProvider, selection: RasterS
     """
     from dataclasses import replace
     from .geometry_tools import compactness, union_geometries
+    if selection.objects:
+        # A pool and a roof keep their own colour, area and shape criteria. Reading
+        # their union first would join touching colours and mix the reference sizes.
+        groups = {}
+        for criterion, seed in object_parts(selection):
+            plain = replace(criterion, seeds=(), similar=(), shape=False)
+            groups.setdefault(plain, []).append(seed)
+        results = []
+        for criterion, seeds in groups.items():
+            canceled = selection_kwargs.get("is_canceled")
+            if canceled is not None and canceled():
+                return SelectionGeometryResult(QgsGeometry(), 0, native_width * native_height, 0.0, canceled=True)
+            source = provider_for(criterion) if provider_for is not None else provider
+            if provider_for is not None and source is None:
+                continue
+            reference = replace(criterion, seeds=tuple(seeds), similar=selection.similar, shape=selection.shape,
+                                object_opening=selection.object_opening, fill_holes=selection.fill_holes)
+            kwargs = dict(selection_kwargs)
+            if criterion.mode is RasterSelectionMode.EXPRESSION:
+                bands = {int(band) for band in re.findall(r'"[^"\n]+@(\d+)"', criterion.expression)}
+                kwargs["nodata_bands"] = tuple(band for band in kwargs.get("nodata_bands", ()) if band in bands)
+            result = similar_objects_geometry(source, reference, extent, native_width, native_height, crs_wkt,
+                                              max_pixels=max_pixels, patch_provider=source, **kwargs)
+            if result.canceled:
+                return result
+            results.append(result)
+        if not results:
+            return SelectionGeometryResult(QgsGeometry(), 0, native_width * native_height, 0.0)
+        geometry = union_geometries([result.geometry for result in results])
+        parts = geometry_parts(geometry)
+        # Touching objects of different colours remain two references; identical
+        # patches found through overlapping tolerances count only once.
+        object_count = len({bytes(part.asWkb()) for result in results for part in geometry_parts(result.geometry)})
+        template = results[0]
+        pixel_area = (extent.width() / max(1, native_width) * extent.height() / max(1, native_height)
+                      * template.decimation ** 2)
+        return replace(template, geometry=geometry, objects=object_count,
+                       kept_pixels=int(round(sum(part.area() for part in parts) / pixel_area)) if pixel_area > 0 else 0,
+                       truncated=any(result.truncated for result in results), tiles=sum(result.tiles for result in results),
+                       smoothing=max(result.smoothing for result in results), blocks=max(result.blocks for result in results))
     coarse = _decimation(native_width, native_height, max_pixels) > 1
     reference = object_geometry(provider, selection, extent, native_width, native_height, crs_wkt,
-                                provider_for=provider_for, opening=OBJECT_OPENING, reconstruct=coarse,
+                                provider_for=provider_for, opening=selection.object_opening, reconstruct=coarse,
                                 fill=False, simplify=False)
     clicked = geometry_parts(reference.geometry)
     bounds = similar_area_bounds([part.area() for part in clicked], selection.similar)
     if bounds is None:
         return SelectionGeometryResult(QgsGeometry(), 0, reference.total_pixels, reference.cell_size, reference.truncated, 0)
-    shape = similar_shape_bounds([compactness(part) for part in clicked], selection.similar) if selection.shape else None
+    references = [(similar_area_bounds([part.area()], selection.similar),
+                   similar_shape_bounds([compactness(part)], selection.similar) if selection.shape else None)
+                  for part in clicked]
     plain = replace(selection, seeds=(), objects=(), similar=(), shape=False)
     patches = selection_geometry(patch_provider or provider, plain, extent, native_width, native_height, crs_wkt,
-                                 max_pixels=max_pixels, opening=OBJECT_OPENING, **selection_kwargs)
+                                 max_pixels=max_pixels, opening=selection.object_opening, **selection_kwargs)
     if patches.canceled:
         return patches
     parts = geometry_parts(patches.geometry)
-    kept_parts = [part for part in parts if bounds[0] <= part.area() <= bounds[1]
-                  and (shape is None or shape[0] <= compactness(part) <= shape[1])]
+    kept_parts = [part for part in parts if any(low <= part.area() <= high
+                  and (shape is None or shape[0] <= compactness(part) <= shape[1])
+                  for (low, high), shape in references)]
     geometry = union_geometries(kept_parts) if kept_parts else QgsGeometry()
     cell = float(patches.cell_size) if patches.cell_size else 0.0
-    kept = int(round(sum(part.area() for part in kept_parts) / (cell * cell))) if cell > 0 else 0
+    pixel_area = (extent.width() / max(1, native_width) * extent.height() / max(1, native_height)
+                  * patches.decimation ** 2)
+    kept = int(round(sum(part.area() for part in kept_parts) / pixel_area)) if cell > 0 and pixel_area > 0 else 0
     logger.info(f"[FM5] similar objects: {len(kept_parts)} of {len(parts)} patches within "
                 f"{bounds[0]:.1f}-{bounds[1]:.1f} map units²"
-                + (f" and a compactness of {shape[0]:.2f}-{shape[1]:.2f}" if shape is not None else "")
+                + (" and a matching compactness" if selection.shape else "")
                 + f" (clicked objects: {reference.objects})")
     return SelectionGeometryResult(geometry, kept, patches.total_pixels, patches.cell_size, reference.truncated,
                                    len(kept_parts), grid=patches.grid, tiles=patches.tiles, coarse=patches.coarse,
@@ -1279,8 +1401,8 @@ def layer_object_geometry(layer: QgsRasterLayer, selection: RasterSelection) -> 
     if selection.similar:
         from dataclasses import replace
         plain = replace(selection, seeds=(), objects=(), similar=(), shape=False)
-        virtual = selection_virtual_layer(layer, plain) if plain.mode is RasterSelectionMode.EXPRESSION else None
-        if plain.mode is RasterSelectionMode.EXPRESSION and virtual is None:
+        virtual = selection_virtual_layer(layer, plain) if plain.mode is RasterSelectionMode.EXPRESSION and not selection.objects else None
+        if plain.mode is RasterSelectionMode.EXPRESSION and not selection.objects and virtual is None:
             return SelectionGeometryResult(QgsGeometry(), 0, layer.width() * layer.height(), 0.0)
         return similar_objects_geometry(base, selection, layer.extent(), layer.width(), layer.height(),
                                         layer.crs().toWkt(), max_pixels=SIMILAR_LIVE_MAX_PIXELS,

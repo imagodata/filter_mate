@@ -370,6 +370,9 @@ class TestObjectDetectionState:
 
 
 class TestColorPipette:
+    def test_small_float_tolerance_is_not_rounded_to_zero(self):
+        assert raster.tolerance_value(5, 1e-8) == pytest.approx(5e-10, abs=1e-15)
+
     def test_one_color_within_a_tolerance(self):
         assert raster.color_similarity_expression("ortho", [1, 2, 3], [(12, 100, 180)], 30) == (
             '(abs("ortho@1" - 12) <= 30 AND abs("ortho@2" - 100) <= 30 AND abs("ortho@3" - 180) <= 30)')
@@ -390,6 +393,51 @@ class TestColorPipette:
         assert raster.color_bands(["Red", "Green", "Blue", "Alpha"]) == [1, 2, 3]
         assert raster.color_bands(["R", "G", "B", "N", "Alpha"]) == [1, 2, 3, 4]
         assert raster.color_bands(["Gray", "Alpha"]) == [1]
+
+
+class TestCustomQuantity:
+    def test_index_is_numeric_before_its_threshold(self):
+        assert raster.spectral_quantity("ndvi_vegetation", "rgbn", "img") == '("img@4" - "img@1") / ("img@4" + "img@1")'
+        assert raster.spectral_quantity("ndvi_bare", "rgbn", "img") == raster.spectral_quantity("ndvi_vegetation", "rgbn", "img")
+        assert raster.spectral_quantity("ndvi_vegetation", "rgb", "img") == ""
+
+    def test_custom_range_compiles_to_a_selection_expression(self):
+        state = {"mode": "range", "custom_quantity": True, "quantity_expression": '"img@2" / 100',
+                 "minimum": 0.25, "maximum": 0.75}
+        selection = raster.build_raster_selection(state)
+        assert selection.mode is RasterSelectionMode.EXPRESSION
+        assert selection.expression == '(("img@2" / 100) >= 0.25 AND ("img@2" / 100) <= 0.75)'
+        assert raster.build_raster_selection(dict(state, minimum=None, maximum=None)) is None
+        assert raster.build_raster_selection(dict(state, quantity_expression="")) is None
+
+    def test_zero_is_a_valid_threshold(self):
+        assert raster.quantity_range_formula('"img@2" - "img@1"', 0, None) == '(("img@2" - "img@1") >= 0)'
+
+    def test_old_states_and_invalid_values_get_defaults(self):
+        parsed = raster.parse_raster_state({"quantity_expression": [1], "pipette_tolerance": float("nan"), "pipette_opening": -3})
+        assert not parsed["custom_quantity"] and parsed["quantity_expression"] == ""
+        assert parsed["pipette_tolerance"] == raster.DEFAULT_COLOR_TOLERANCE
+        assert parsed["pipette_opening"] == 0 and parsed["pipette_fill_holes"]
+        saved = raster.parse_raster_state({"pipette_tolerance": 3.5, "pipette_opening": 3, "pipette_fill_holes": False})
+        assert (saved["pipette_tolerance"], saved["pipette_opening"], saved["pipette_fill_holes"]) == (3.5, 3, False)
+
+
+class TestHistogramQuantiles:
+    def test_spin_limits_include_thresholds_outside_a_sampled_histogram(self):
+        assert hist.spin_bounds(-1, 1, 3, low=-1.2345, high=2.3456) == (-1.235, 2.346)
+        assert hist.spin_bounds(7, 7, 0, low=8) == (7, 8)
+        assert hist.spin_bounds(None, None, 0, high=2e9) == (-1e9, 2e9)
+
+    def test_uniform_and_skewed_distributions(self):
+        assert hist.histogram_quantile([10, 10, 10, 10], 0, 100, 0.25) == 25
+        assert hist.histogram_quantile([0, 20, 0, 0], 0, 100, 0.5) == 37.5
+        assert hist.histogram_quantile([10], -1, 1, 0.5) == 0
+
+    def test_empty_constant_and_invalid_histograms(self):
+        assert hist.histogram_quantile([], 0, 1, 0.5) is None
+        assert hist.histogram_quantile([0, 0], 0, 1, 0.5) is None
+        assert hist.histogram_quantile([10], 7, 7, 0.5) == 7
+        assert hist.histogram_quantile([10], float("nan"), 1, 0.5) is None
 
 
 class TestDerivedValueText:

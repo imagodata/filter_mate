@@ -286,14 +286,18 @@ class RasterSelection:
             colours. The criterion of this selection is then their union (what
             the whole raster would keep). Empty: every seed grows in this criterion.
         similar: ``(low, high)`` area ratios of the "similar objects" mode: every
-            patch of kept pixels of the raster whose area is between ``low`` times
-            the smallest clicked object and ``high`` times the largest one is
-            selected (all the pools like this one). Needs seeds. Empty: the
+            patch whose colour and area match a clicked reference is selected,
+            with area between ``low`` and ``high`` times that reference's area
+            (all the pools like this one). Needs seeds. Empty: the
             clicked objects only (object detection) or every kept pixel.
         shape: In the similar objects mode, the patches must also have the shape of
             the clicked objects: a compactness (``4 π area / perimeter²``) between
-            ``low`` times the lowest clicked one and ``high`` times the highest. A
+            ``low`` and ``high`` times that same reference's compactness. A
             road of the colour and area of a pool is not a pool. False: area only.
+        object_opening: Radius in native pixels used to separate objects joined
+            by narrow bridges (0: keep connected pixels, 1 to 4: stronger separation).
+        fill_holes: Fill enclosed gaps when selecting a clicked object. Similar
+            objects always keep their holes so area and shape remain comparable.
     """
 
     band: int = 1
@@ -307,8 +311,13 @@ class RasterSelection:
     objects: Tuple["RasterSelection", ...] = ()
     similar: Tuple[float, float] = ()
     shape: bool = False
+    object_opening: int = 1
+    fill_holes: bool = True
 
     def __post_init__(self):
+        if isinstance(self.object_opening, bool) or self.object_opening not in range(5):
+            raise ValueError("object opening must be an integer from 0 to 4 pixels")
+        object.__setattr__(self, "object_opening", int(self.object_opening))
         object.__setattr__(self, "similar", _similar_from(self.similar))
         if self.similar and not (self.seeds or self.objects):
             raise ValueError("similar objects need a clicked object (a seed)")
@@ -335,7 +344,7 @@ class RasterSelection:
     def is_empty(self) -> bool:
         """True when the selection keeps no constraint at all."""
         if self.mode is RasterSelectionMode.RANGE:
-            return self.minimum is None and self.maximum is None
+            return self.minimum is None and self.maximum is None and not self.seeds
         if self.mode is RasterSelectionMode.CLASSES:
             return not self.classes
         return not (self.expression or "").strip()
@@ -346,6 +355,8 @@ class RasterSelection:
         Raises:
             ValueError: For EXPRESSION, which needs the raster calculator.
         """
+        if not math.isfinite(value):
+            return False
         if self.mode is RasterSelectionMode.RANGE:
             if self.minimum is not None and value < self.minimum:
                 return False
@@ -422,6 +433,10 @@ class RasterSelection:
             data["similar"] = list(self.similar)
         if self.shape:
             data["shape"] = True
+        if self.object_opening != 1:
+            data["object_opening"] = self.object_opening
+        if not self.fill_holes:
+            data["fill_holes"] = False
         return data
 
     @classmethod
@@ -438,6 +453,8 @@ class RasterSelection:
             objects=tuple(cls.from_dict(item) for item in data.get("objects") or ()),
             similar=tuple(data.get("similar") or ()),
             shape=bool(data.get("shape", False)),
+            object_opening=data.get("object_opening", 1),
+            fill_holes=bool(data.get("fill_holes", True)),
         )
 
 
@@ -460,7 +477,7 @@ def _similar_from(value) -> Tuple[float, float]:
         low, high = (float(item) for item in value)
     except (TypeError, ValueError) as exc:
         raise ValueError(f"similar objects ratios must be a (low, high) pair, got {value!r}") from exc
-    if not (low > 0 and high > 0) or low != low or high != high:
+    if not (math.isfinite(low) and math.isfinite(high) and low > 0 and high > 0):
         raise ValueError(f"similar objects ratios must be above zero, got {value!r}")
     return (min(low, high), max(low, high))
 
