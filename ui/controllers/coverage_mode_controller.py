@@ -177,6 +177,8 @@ class CoverageModeController(BaseController):
         self._crs_notice: Any = None  # (surface, canvas CRS) already told it does not fit the map
         self._histogram_cache: Dict[Tuple[str, int, str], Tuple[list, float, float]] = {}
         self._raster_stats_task: Any = None
+        self._raster_band_display: Any = None
+        self._raster_display_ranges: Dict[Tuple[str, int], tuple] = {}
         self._rendered_task: Any = None
         self._raster_sample: Any = None  # (layer identity, protected session TIFF, local layer)
         self._raster_surface_task: Any = None
@@ -273,6 +275,7 @@ class CoverageModeController(BaseController):
         self._linked_redo.clear()
         self._panel_states.clear()
         self._histogram_cache.clear()
+        self._raster_display_ranges.clear()
         self._surfaces.clear()
         self._detected = None
         self._pc_footprints.clear()
@@ -374,6 +377,7 @@ class CoverageModeController(BaseController):
             except RuntimeError:
                 pass  # deleted with the dock
         self._surfaces.clear()
+        self._raster_display_ranges.clear()
         self._hide_detected_objects()
         self._detected = None
         self._pc_footprints.clear()
@@ -622,6 +626,7 @@ class CoverageModeController(BaseController):
         except Exception as exc:
             logger.debug(f"[FM5] panel state not saved: {exc}")
         self._stop_preview(layer)
+        self._restore_raster_band_display(layer)
         self._hide_detected_objects()  # drawn again from the saved state when the layer comes back
         self._pc_reader = None  # the copy of the outgoing layer is not kept open
 
@@ -969,6 +974,7 @@ class CoverageModeController(BaseController):
                     except Exception as exc:
                         logger.debug(f"[FM5] histogram not refreshed after the restore: {exc}")
                     self._show_detected_objects()  # the outline left with the layer comes back with it
+                    self._on_raster_display_changed()
                 if self._kind is LayerKind.POINT_CLOUD:
                     if getattr(panel, 'objects_pending', lambda: False)():
                         self._refresh_point_cloud_objects()  # clicked objects never read (or a read failed)
@@ -1046,6 +1052,7 @@ class CoverageModeController(BaseController):
     def _connect_panels(self) -> None:
         raster, pc = self._raster_panel, self._pc_panel
         raster.bandChanged.connect(self._on_raster_band_changed)
+        raster.displayChanged.connect(self._on_raster_display_changed)
         raster.selectionChanged.connect(self._on_raster_selection_changed)
         pc.criteriaChanged.connect(self._on_point_cloud_criteria_changed)
         if hasattr(raster, 'modeChosen'):
@@ -1269,7 +1276,8 @@ class CoverageModeController(BaseController):
         from ...adapters.qgis.coverage_layers.raster_statistics_task import RasterStatisticsTask
         identity = (layer.id(), self._raster_capability(layer).provider_key, key)
         pending = self._raster_stats_task
-        if pending is not None and pending.identity == identity:
+        display_bands = self._raster_panel.display_bands() or ()
+        if pending is not None and pending.identity == identity and pending.display_bands == display_bands:
             return
         self._cancel_raster_statistics()
         materialize = self._raster_needs_sample(layer)
@@ -1279,7 +1287,8 @@ class CoverageModeController(BaseController):
                                     extent=self._raster_read_extent(layer) if materialize else None,
                                     max_pixels=self._raster_preview_pixel_limit(),
                                     sample_source=sample.source() if sample is not None else '',
-                                    expression=self._quantity_expression(), layer_name=layer.name(), materialize=materialize)
+                                    expression=self._quantity_expression(), layer_name=layer.name(), materialize=materialize,
+                                    display_bands=display_bands)
         task.identity = identity
         self._raster_stats_task = task
         self._borrow_raster_sample(task, task.sample_source)
@@ -1306,6 +1315,8 @@ class CoverageModeController(BaseController):
         except RuntimeError:
             return False
         if not ok:
+            if panel.display_bands():
+                panel.set_display_status(self.tr("The selected bands could not be displayed."))
             if task.expression:
                 message = (self.tr("Unknown raster layer or band in expression") if task.expression_error == 'bands' else
                            self.tr("Invalid raster calculator expression") if task.expression_error == 'syntax' else
@@ -1316,6 +1327,10 @@ class CoverageModeController(BaseController):
             return False
         if task.materialize and not self._accept_raster_sample(layer, task.sample_source):
             return False
+        for band, bounds in task.ranges.items():
+            self._raster_display_ranges[(key[0], band)] = bounds
+        while len(self._raster_display_ranges) > HISTOGRAM_CACHE_SIZE * 4:
+            del self._raster_display_ranges[next(iter(self._raster_display_ranges))]
         if task.histogram[0] or task.expression:
             self._histogram_cache[key] = task.histogram
             while len(self._histogram_cache) > HISTOGRAM_CACHE_SIZE:
@@ -1328,6 +1343,8 @@ class CoverageModeController(BaseController):
         else:
             panel.set_histogram(task.band, *task.histogram, task.derivative)
         self._update_kept_ratio()
+        if panel.display_bands():
+            self._on_raster_display_changed(request_statistics=False)
         if self._preview_wanted():
             self._apply_raster_preview()
         return True
@@ -1384,6 +1401,62 @@ class CoverageModeController(BaseController):
                 self._refresh_histogram(self._active_layer, band)
             except Exception as exc:
                 logger.debug(f"[FM5] histogram not refreshed: {exc}")
+
+    def _release_raster_range_link(self) -> None:
+        extras = self._extras
+        if extras is not None:
+            button = extras._tools.get('pushButton_checkable_exploring_raster_link')
+            if button is not None and button.isChecked():
+                button.setChecked(False)
+
+    def _restore_raster_band_display(self, layer: Any) -> None:
+        if self._raster_band_display is not None:
+            self._release_raster_range_link()
+            try:
+                self._raster_band_display.restore(layer)
+            except RuntimeError:
+                pass  # QGIS already deleted the layer
+            self._raster_band_display = None
+            self._extras_call('_sync_derivative_tools')
+
+    def _on_raster_display_changed(self, request_statistics: bool = True) -> None:
+        """Display chosen bands using sampled worker statistics and retain the layer style."""
+        layer, panel = self._active_layer, self._raster_panel
+        if layer is None or panel is None:
+            return
+        from ...adapters.qgis.coverage_layers.raster_adapter import clear_selection_preview
+        bands = panel.display_bands()
+        if not bands:
+            if self._raster_band_display is not None:
+                clear_selection_preview(layer)
+                self._restore_raster_band_display(layer)
+                if self._preview_wanted():
+                    self._apply_raster_preview()
+            return
+        source = self._histogram_key(layer, panel.current_band())[0]
+        ranges = {band: self._raster_display_ranges[(source, band)] for band in bands
+                  if (source, band) in self._raster_display_ranges}
+        if any(band > 0 and band not in ranges for band in bands):
+            if request_statistics:
+                panel.set_display_status(self.tr("Preparing band display…"))
+                quantity = self._quantity_expression() or panel.current_derivative()
+                self._request_raster_statistics(layer, panel.current_band(), panel.current_derivative(),
+                                                self._histogram_key(layer, panel.current_band(), quantity))
+            else:
+                self._restore_raster_band_display(layer)
+                panel.set_display_status(self.tr("No valid pixels to display in the selected bands."))
+            return
+        self._release_raster_range_link()
+        clear_selection_preview(layer)
+        from ...adapters.qgis.coverage_layers.band_display import RasterBandDisplay
+        if self._raster_band_display is None:
+            self._raster_band_display = RasterBandDisplay()
+        if self._raster_band_display.apply(layer, bands, ranges):
+            panel.set_display_status('')
+        else:
+            panel.set_display_status(self.tr("The selected bands could not be displayed."))
+        if self._preview_wanted():
+            self._apply_raster_preview()
 
     def _update_kept_ratio(self) -> None:
         panel, layer = self._raster_panel, self._active_layer
@@ -1489,7 +1562,9 @@ class CoverageModeController(BaseController):
             clear_selection_preview(layer)
             self._hide_derivative_preview()
             return
-        if selection is not None and (selection.derivative.is_terrain or _is_expression(selection)):
+        display_bands = panel.display_bands()
+        displayed_elsewhere = bool(display_bands and display_bands != (selection.band,)) if selection is not None else False
+        if selection is not None and (selection.derivative.is_terrain or _is_expression(selection) or displayed_elsewhere):
             # Neither a slope nor a colour (several bands) is a value of the band the renderer makes transparent.
             clear_selection_preview(layer)  # a value preview left from before the quantity changed
             self._show_derivative_preview(layer, selection)
@@ -1913,6 +1988,7 @@ class CoverageModeController(BaseController):
                 panel = self._current_panel()
                 if panel is not None:
                     panel.reset()  # does not emit: its outline goes here
+                self._restore_raster_band_display(layer)
                 self._hide_detected_objects()
                 self._sync_object_pick_mode()  # the target is back to the clicked object
                 self._panel_states.pop(layer.id(), None)
@@ -2535,6 +2611,7 @@ class CoverageModeController(BaseController):
                 self._cancel_raster_surface()
                 self._release_raster_sample()
                 self._raster_panel.reset()
+                self._restore_raster_band_display(layer)
                 if self._raster_capability(layer).has_raw_values:
                     self._refresh_histogram(layer, self._raster_panel.current_band())
                 else:
@@ -3006,6 +3083,7 @@ class CoverageModeController(BaseController):
             panel = self._current_panel()
             if panel is not None:
                 panel.reset()  # does not emit: its outline goes here
+            self._restore_raster_band_display(layer)
             self._hide_detected_objects()
             self._sync_object_pick_mode()
             self._panel_states.pop(layer.id(), None)

@@ -167,6 +167,9 @@ class RecordingPanel:
     def current_band(self):
         return 1
 
+    def display_bands(self):
+        return None
+
     def current_derivative(self):
         return self.derivative
 

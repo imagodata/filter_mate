@@ -512,6 +512,11 @@
         <source>Similar objects</source>
         <translation>Objets similaires</translation>
     </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="559"/>
+        <source>To link the range to the style, choose Layer style in Map display</source>
+        <translation>Pour lier la plage au style, choisissez « Style de la couche » dans « Affichage sur la carte »</translation>
+    </message>
 </context>
 <context>
     <name>CoverageModeController</name>
@@ -929,6 +934,21 @@
         <location filename="../ui/controllers/coverage_mode_controller.py" line="2885"/>
         <source>failed</source>
         <translation>échec</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1446"/>
+        <source>No valid pixels to display in the selected bands.</source>
+        <translation>Aucun pixel valide à afficher dans les bandes cochées.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1440"/>
+        <source>Preparing band display…</source>
+        <translation>Préparation de l’affichage des bandes…</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1319"/>
+        <source>The selected bands could not be displayed.</source>
+        <translation>Impossible d’afficher les bandes cochées.</translation>
     </message>
 </context>
 <context>
@@ -6651,6 +6671,56 @@ Objet cliqué : seulement la tache de ces pixels où tombe le clic (une piscine,
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1391"/>
         <source>Only color selection is available: numeric bands, indices, ranges, classes and derivatives are unavailable.</source>
         <translation>Seule la sélection par couleur est disponible : les bandes numériques, indices, plages, classes et dérivés sont indisponibles.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="860"/>
+        <source>Active band</source>
+        <translation>Bande active</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1083"/>
+        <source>Choose 1 to 3 bands for display.</source>
+        <translation>Cochez de 1 à 3 bandes pour les afficher.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="862"/>
+        <source>Display the active band in grey or the checked bands as a colour composite</source>
+        <translation>Afficher la bande active en gris ou les bandes cochées en composition colorée</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1085"/>
+        <source>Grey: band {0}</source>
+        <translation>Gris : bande {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="859"/>
+        <source>Layer style</source>
+        <translation>Style de la couche</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="855"/>
+        <source>Map display</source>
+        <translation>Affichage sur la carte</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1087"/>
+        <source>R: {0} · G: {1} · B: {2}</source>
+        <translation>R : {0} · V : {1} · B : {2}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="954"/>
+        <source>Select band {0}</source>
+        <translation>Sélectionner la bande {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="861"/>
+        <source>Selected bands</source>
+        <translation>Bandes cochées</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="953"/>
+        <source>Use this band for the pipette and the selected bands display</source>
+        <translation>Utiliser cette bande pour la pipette et l’affichage des bandes cochées</translation>
     </message>
 </context>
 <context>
