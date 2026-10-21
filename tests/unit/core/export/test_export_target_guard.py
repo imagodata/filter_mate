@@ -306,6 +306,40 @@ class TestSourcesAreWorkedOutOnce:
 
 
 class TestProjectSources:
+    @pytest.mark.parametrize('compressed', [False, True])
+    def test_original_and_enrichment_sources_of_a_derived_layer_are_protected(self, tmp_path, compressed):
+        import base64
+        import json
+        import zlib
+        from core.export.target_guard import ProjectSources
+        original, enriched = tmp_path / 'original.laz', tmp_path / 'enriched.copc.laz'
+        layer = _Layer('cloud', str(tmp_path / 'clip.copc.laz'))
+        raw = json.dumps({'original_source': str(enriched), 'enriched_source': str(original)})
+        if compressed:
+            raw = 'zlib:' + base64.b64encode(zlib.compress(raw.encode())).decode()
+        layer.customProperty = lambda key: raw
+        sources = ProjectSources(_Project([layer]))
+        assert sources.layer_using(str(original)) == 'cloud'
+        assert sources.layer_using(str(enriched)) == 'cloud'
+
+    def test_temporary_exported_layers_and_history_files_are_protected(self, tmp_path):
+        from core.export.target_guard import ProjectSources
+        temporary, held = tmp_path / 'temporary.tif', tmp_path / 'previous.tif'
+        sources = ProjectSources(_Project([]), layers=[_Layer('temporary', str(temporary))],
+                                 additional_sources=[('history', str(held))])
+        assert sources.layer_using(str(temporary)) == 'temporary'
+        assert sources.layer_using(str(held)) == 'history'
+
+    def test_one_removed_layer_does_not_hide_the_remaining_sources(self, tmp_path):
+        from core.export.target_guard import ProjectSources
+        removed = _Layer('removed', '')
+        def deleted():
+            raise RuntimeError('wrapped C++ object has been deleted')
+        removed.source = deleted
+        path = tmp_path / 'valid.tif'
+        sources = ProjectSources(_Project([removed, _Layer('valid', str(path))]))
+        assert sources.layer_using(str(path)) == 'valid'
+
     def test_an_unreadable_project_gives_no_source_and_no_error(self):
         from core.export.target_guard import ProjectSources
         assert ProjectSources(object()).layer_using("/tmp/x.gpkg") is None  # nosec B108

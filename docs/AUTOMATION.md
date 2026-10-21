@@ -130,6 +130,14 @@ message, never an exception; so does an operation refused while FilterMate is bu
 layers with the same name are reported as `name` and `name (layer id)`. Signals: `operation_completed(name, report)`,
 `error_occurred(operation, message)`, plus the 4.7 ones (`filter_applied`, `filter_cleared`).
 
+Exports refuse to overwrite files still needed by a project layer, its original source before filtering or
+enrichment, or an undo step. Raster and point cloud writers use private temporary files until the export completes;
+cancellation leaves the previous destination intact. COPC output requires a compatible PDAL executable: when it
+is unavailable the export fails with a message asking for LAZ, without writing a different filename automatically.
+
+The operations also honor an explicitly supplied `project`. A filter computed in the background is refused for
+layers whose source or filter changed while it was running, so newer changes stay intact.
+
 `raster_selection`: `band`, `mode` (`range`, `classes`, `expression`), `minimum`, `maximum`, `classes`,
 `expression`, `derivative`. `derivative` (range mode only) says what the bounds apply to when the band is a DTM:
 `value` (default), `slope_degrees`, `slope_percent`, `aspect`, `hillshade` (0-255), `roughness` (Wilson TRI, mean

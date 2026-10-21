@@ -261,7 +261,7 @@ def _exclusive(tidy: bool = True):
     return decorate
 
 
-def _run_task(service, request, source_job, feedback=None, apply_results=None):
+def _run_task(service, request, source_job, feedback=None, apply_results=None, project=None):
     """Compute in one Qt worker thread while Qt keeps serving events, then apply on main.
 
     Automation waits for the result, but remote raster materialization must
@@ -274,7 +274,7 @@ def _run_task(service, request, source_job, feedback=None, apply_results=None):
     from queue import Empty, SimpleQueue
     from qgis.PyQt.QtCore import QEventLoop, QThread, QTimer, Qt
 
-    task = service.build_task(request, source_job)
+    task = service.build_task(request, source_job, project=project)
 
     def apply(result):
         if apply_results is None:
@@ -415,8 +415,12 @@ def _install_registry(project) -> None:
 
 def _collect(task, project, report: OperationReport) -> OperationReport:
     """Copy the outcomes of a finished cross filter task into ``report``."""
+    if getattr(task, 'source_conflict', False):
+        report.details['source_conflict'] = True
     if task.error:
         report.error = task.error
+        if getattr(task, 'internal_error', False):
+            report.details['internal_error'] = True
         return report
     if task.isCanceled():
         # Targets computed before the cancel were not applied (apply_results(False)).
@@ -442,6 +446,8 @@ def _collect(task, project, report: OperationReport) -> OperationReport:
                 per_layer[label]['partial'] = outcome.message
         else:
             report.failed[label] = outcome.message or "failed"
+            if outcome.details.get('internal_error'):
+                report.details.setdefault('internal_failures', []).append(label)
     report.details["layers"] = per_layer
     report.details["source"] = dict(task.source_job.details)
     return report
@@ -529,13 +535,13 @@ def cross_filter(source, targets: Sequence, predicates: Sequence[str] = ("Inters
                                          predicates=tuple(predicates) or ("Intersect",),
                                          buffer_value=buffer, coverage_min=coverage_min,
                                          other_layers_combine_operator=operator)
-            _collect(_run_task(service, request, source_job, feedback), project, report)
+            _collect(_run_task(service, request, source_job, feedback, project=project), project, report)
     except Exception as exc:  # never leave the source criteria applied after a failure
         logger.warning(f"[FM5] cross filter from '{_name(layer)}' failed: {exc}", exc_info=True)
         report.error = _unexpected(report, exc)
     if _canceled(feedback) and not report.error and not report.done:  # applied targets stay reported
         report.error = "canceled"
-    if report.error and kind is LayerKind.POINT_CLOUD:
+    if report.error and kind is LayerKind.POINT_CLOUD and not report.details.get('source_conflict'):
         _restore_point_cloud_source(layer, source_job.before)
     return report
 
@@ -625,14 +631,18 @@ def _source_only(layer, kind: LayerKind, source_job, report: OperationReport, se
         project = _project(project)
 
         def apply_source(task, result):
-            # CrossFilterTask's default application resolves the project singleton.
-            # Source-only operations must honor the explicitly supplied project.
+            # Source-only selections keep their own history description, with
+            # the same state check as a task that also has targets.
             from ..qgis.coverage_layers import cache
             try:
                 if result and cache.is_closed():
                     task.error = _tr("FilterMate was unloaded")
                     result = False
                 current = project.mapLayer(layer.id())
+                if result and current is not None and not task._unchanged(source_job, current):
+                    task.error = _tr("source changed while the filter was running: nothing was applied")
+                    task.source_conflict = True
+                    result = False
                 after = source_job.apply(current) if result and current is not None else None
                 if after is not None:
                     task.changes.append((source_job.before, after))
@@ -644,7 +654,7 @@ def _source_only(layer, kind: LayerKind, source_job, report: OperationReport, se
                 finally:
                     source_job.release()
 
-        task = _run_task(service, request, source_job, feedback, apply_results=apply_source)
+        task = _run_task(service, request, source_job, feedback, apply_results=apply_source, project=project)
         _collect(task, project, report)
         if report.error:
             return report
@@ -698,7 +708,7 @@ def cross_filter_by_geometry(geometry, crs, targets: Sequence, predicates: Seque
         request = CrossFilterRequest(source_layer_id=anchor.id(), source_kind=LayerKind.OTHER, targets=tuple(specs),
                                      predicates=tuple(predicates) or ("Intersect",), buffer_value=buffer,
                                      coverage_min=coverage_min, other_layers_combine_operator=operator)
-        task = _run_task(service or _api_service(), request, FixedGeometrySourceJob(anchor, local.asWkt()), feedback)
+        task = _run_task(service or _api_service(), request, FixedGeometrySourceJob(anchor, local.asWkt()), feedback, project=project)
     except ValueError as exc:  # buffer / coverage
         report.error = str(exc)
         return report
@@ -871,8 +881,8 @@ def export_layers(layers: Sequence, folder: str, vector_format: str = "GPKG", ra
             continue
         resolved.append(layer)
     used: set = set()
-    from ...core.export.target_guard import ProjectSources
-    sources = ProjectSources(project)  # the files the project layers read from, once for the whole export
+    from ..qgis.coverage_layers.exporters import export_sources
+    sources = export_sources(resolved, project=project)
     total = max(1, len(resolved))
     for index, layer in enumerate(resolved):
         if feedback is not None and feedback.isCanceled():
@@ -901,7 +911,11 @@ def export_layers(layers: Sequence, folder: str, vector_format: str = "GPKG", ra
             elif kind is LayerKind.POINT_CLOUD:
                 path = _output_file(_unique_path(output_path(folder, name, POINT_CLOUD_FORMATS[point_cloud_format]),
                                                  used), sources)
-                result = export_point_cloud(layer, path, point_cloud_format, crs)
+                block, release = _child_feedback(feedback, index, total, QgsFeedback)
+                try:
+                    result = export_point_cloud(layer, path, point_cloud_format, crs, feedback=block)
+                finally:
+                    release()
                 ok, path, message = result.success, result.path, result.message
             else:
                 report.skipped[label] = ("vector tiles are filtered for display only, not exported"
@@ -1127,10 +1141,14 @@ def apply_favorite(name_or_id: str, service=None, project=None, feedback=None) -
         _install_registry(project)
         applied: List[str] = []
         clip_failures: Dict[str, str] = {}
+        internal_clip_failures = set()
 
         def clip(clip_service, request, source_job) -> str:
             # A worker like cross_filter's: a remote raster (WCS) refuses the main thread.
-            return _task_failure(_run_task(clip_service, request, source_job, feedback), request.targets[0].layer_id)
+            task = _run_task(clip_service, request, source_job, feedback, project=project)
+            if getattr(task, 'internal_error', False) or any(o.details.get('internal_error') for o in task.outcomes):
+                internal_clip_failures.add(request.targets[0].layer_id)
+            return _task_failure(task, request.targets[0].layer_id)
 
         try:
             handled = favorites_bridge.apply(coverage, project=project, kind_of=layer_kind, applied=applied,
@@ -1146,8 +1164,10 @@ def apply_favorite(name_or_id: str, service=None, project=None, feedback=None) -
                 report.done[layer_id] = _report_label(report, layer.name(), layer_id)
         for layer_id, reason in clip_failures.items():
             layer = project.mapLayer(layer_id)
-            report.failed[_report_label(report, _name(layer, layer_id) if layer is not None else layer_id,
-                                        layer_id)] = reason
+            label = _report_label(report, _name(layer, layer_id) if layer is not None else layer_id, layer_id)
+            report.failed[label] = reason
+            if layer_id in internal_clip_failures:
+                report.details.setdefault('internal_failures', []).append(label)
         if handled + len(clip_failures) < len(coverage):
             report.details["coverage_layers_missing"] = len(coverage) - handled - len(clip_failures)
         report.details["coverage_layers"] = handled

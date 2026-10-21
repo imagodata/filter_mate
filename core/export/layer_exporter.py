@@ -21,6 +21,7 @@ Original source: modules/tasks/filter_task.py lines 9551-10400 (~850 lines)
 import os
 import re
 import logging
+import sys
 from enum import Enum
 from dataclasses import dataclass
 from typing import Optional, List, Any
@@ -493,7 +494,12 @@ class LayerExporter:
             return None
         if self._project_sources is None:
             # Once per export, not once per layer: a batch asks for every target
-            self._project_sources = ProjectSources(self.project)
+            # A history can hold files only if its service was loaded. Keep
+            # standalone vector exports independent of coverage services.
+            history = sys.modules.get(__package__.rsplit('.', 1)[0] + '.services.cross_filter_service')
+            held = history.protected_sources() if history is not None else ()
+            self._project_sources = ProjectSources(
+                self.project, additional_sources=(('FilterMate state', source) for source in held))
         return self._project_sources.layer_using(output_path)
 
     def _refuse_project_source(self, output_path: str) -> Optional[ExportResult]:

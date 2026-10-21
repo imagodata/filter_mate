@@ -11,7 +11,7 @@ connections for each operation. Significantly improves performance for:
 Performance Benefits:
 - Connection reuse: ~50-100ms saved per query (connection overhead)
 - Reduced database load: fewer connection slots used
-- Thread-safe: one pool per datasource URI
+- Thread-safe: pools separated by endpoint, user, credentials and TLS policy
 
 Usage:
     from ...infrastructure.database.connection_pool import (        get_pool_manager,
@@ -49,6 +49,10 @@ Migration: Restored from before_migration for v4.0.4
 """
 
 import logging
+import hashlib
+import hmac
+import json
+import secrets
 import threading
 import time
 import atexit
@@ -65,6 +69,7 @@ from .pg_connect import pg_connect_with_fallback
 
 
 PG_CONNECT_TIMEOUT_SECONDS = 15  # PERF 2026-09-12: bound the TCP connect of pooled connections
+_POOL_IDENTITY_SECRET = secrets.token_bytes(32)
 
 
 @dataclass
@@ -155,6 +160,7 @@ class PostgreSQLConnectionPool:
         # Connection pool (queue for thread-safety)
         self._pool: Queue = Queue(maxsize=self.max_connections)
         self._active_connections: int = 0
+        self._pending_connections: int = 0
         self._lock = threading.RLock()
 
         # Connection tracking for health checks
@@ -195,6 +201,10 @@ class PostgreSQLConnectionPool:
 
     def _create_connection(self):
         """Create a new database connection."""
+        with self._lock:
+            if self._shutdown_event.is_set() or self._active_connections + self._pending_connections >= self.max_connections:
+                return None
+            self._pending_connections += 1
         try:
             connect_args = {
                 'host': self.host,
@@ -212,6 +222,9 @@ class PostgreSQLConnectionPool:
             conn = pg_connect_with_fallback(connect_args, f"pool {self._pool_key}")
 
             with self._lock:
+                if self._shutdown_event.is_set():
+                    conn.close()
+                    return None
                 self._active_connections += 1
                 self.stats.total_connections_created += 1
                 self.stats.peak_pool_size = max(
@@ -226,6 +239,9 @@ class PostgreSQLConnectionPool:
         except Exception as e:
             logger.error(f"Failed to create connection to {self._pool_key}: {e}")
             return None
+        finally:
+            with self._lock:
+                self._pending_connections -= 1
 
     def _start_health_check_thread(self):
         """Start background thread for periodic health checks.
@@ -302,15 +318,23 @@ class PostgreSQLConnectionPool:
             logger.debug(f"Health check: removed {removed_count} connections from {self._pool_key}")
 
         # Ensure minimum connections
-        with self._lock:
-            while self._active_connections < self.min_connections:
-                try:
-                    conn = self._create_connection()
-                    if conn:
-                        self._pool.put(conn)
-                        self.stats.current_pool_size += 1
-                except Exception:
+        for _ in range(self.min_connections):
+            if self._shutdown_event.is_set():
+                break
+            with self._lock:
+                if self._active_connections + self._pending_connections >= self.min_connections:
                     break
+            conn = self._create_connection()  # network I/O never holds the pool lock
+            if conn is None:
+                break  # unavailable: retry at the next health check, not forever
+            if self._shutdown_event.is_set():
+                self._close_connection(conn)
+                break
+            try:
+                self._pool.put_nowait(conn)
+                self.stats.current_pool_size += 1
+            except Exception:
+                self._close_connection(conn)
 
     def _is_connection_healthy(self, conn) -> bool:
         """Check if a connection is healthy."""
@@ -355,6 +379,8 @@ class PostgreSQLConnectionPool:
         start_time = time.time()
 
         while True:
+            if self._shutdown_event.is_set():
+                raise RuntimeError("PostgreSQL connection pool has been shut down")
             # Try to get from pool first
             try:
                 conn = self._pool.get_nowait()
@@ -376,11 +402,9 @@ class PostgreSQLConnectionPool:
                 pass
 
             # No connection in pool, try to create new one
-            with self._lock:
-                if self._active_connections < self.max_connections:
-                    conn = self._create_connection()
-                    if conn:
-                        return conn
+            conn = self._create_connection()
+            if conn is not None:
+                return conn
 
             # Pool is at max capacity, wait for release
             elapsed = time.time() - start_time
@@ -406,12 +430,15 @@ class PostgreSQLConnectionPool:
         """
         if conn is None:
             return
+        if self._shutdown_event.is_set():
+            self._close_connection(conn)
+            return
 
         try:
             # Check if connection is still usable
             if conn.closed:
                 with self._lock:
-                    self._active_connections -= 1
+                    self._active_connections = max(0, self._active_connections - 1)
                 return
 
             # Rollback any uncommitted transaction
@@ -529,7 +556,7 @@ class PostgreSQLPoolManager:
     """
     Global manager for PostgreSQL connection pools.
 
-    Maintains one pool per unique database connection (host:port/database).
+    Maintains one pool per connection identity (endpoint, user, credentials, TLS).
     Thread-safe singleton pattern ensures pools are shared across the application.
 
     Usage:
@@ -563,14 +590,20 @@ class PostgreSQLPoolManager:
             return
 
         self._pools: Dict[str, PostgreSQLConnectionPool] = {}
+        self._borrowed: Dict[int, Tuple[Any, PostgreSQLConnectionPool]] = {}
         self._pools_lock = threading.RLock()
         self._initialized = True
 
         logger.info("✓ PostgreSQL Pool Manager initialized")
 
-    def _get_pool_key(self, host: str, port: str, database: str) -> str:
-        """Generate unique key for pool identification."""
-        return f"{host}:{port}/{database}"
+    def _get_pool_key(self, host: str, port: str, database: str, user=None, password=None, sslmode=None) -> str:
+        """Identify the full connection policy without storing a password in keys or logs.
+
+        A process-local HMAC also distinguishes credential rotations, without
+        exposing a reusable, dictionary-guessable password digest.
+        """
+        identity = json.dumps([host, port, database, user, password, sslmode]).encode('utf-8')
+        return hmac.new(_POOL_IDENTITY_SECRET, identity, hashlib.sha256).hexdigest()
 
     def get_pool(
         self,
@@ -588,20 +621,19 @@ class PostgreSQLPoolManager:
             host: Database host
             port: Database port
             database: Database name
-            user: Username (required for new pools)
-            password: Password (required for new pools)
+            user: Username (required to select an identity)
+            password: Password, or None for libpq authentication
             sslmode: SSL mode (optional)
 
         Returns:
             PostgreSQLConnectionPool instance
         """
-        pool_key = self._get_pool_key(host, port, database)
+        if user is None:
+            raise ValueError(f"Credentials required to select a pool for {host}:{port}/{database}")
+        pool_key = self._get_pool_key(host, port, database, user, password, sslmode)
 
         with self._pools_lock:
             if pool_key not in self._pools:
-                if user is None:
-                    raise ValueError(f"Credentials required to create new pool for {pool_key}")
-
                 self._pools[pool_key] = PostgreSQLConnectionPool(
                     host=host,
                     port=port,
@@ -635,7 +667,10 @@ class PostgreSQLPoolManager:
             psycopg2 connection
         """
         pool = self.get_pool(host, port, database, user, password, sslmode)
-        return pool.get_connection(timeout)
+        conn = pool.get_connection(timeout)
+        with self._pools_lock:
+            self._borrowed[id(conn)] = (conn, pool)
+        return conn
 
     def release_connection(self, conn, host: str, port: str, database: str):
         """
@@ -645,18 +680,18 @@ class PostgreSQLPoolManager:
             conn: Connection to release
             host, port, database: Pool identification
         """
-        pool_key = self._get_pool_key(host, port, database)
-
         with self._pools_lock:
-            if pool_key in self._pools:
-                self._pools[pool_key].release_connection(conn)
-            else:
-                # No pool found, just close the connection
-                try:
-                    if conn and not conn.closed:
-                        conn.close()
-                except Exception:  # nosec B110 - best-effort connection close on release, ignore errors
-                    pass
+            borrowed = self._borrowed.pop(id(conn), None)
+        if borrowed is not None and borrowed[0] is conn:
+            borrowed[1].release_connection(conn)  # the exact owner, including after credential changes
+        else:
+            # Never guess an identity from the endpoint when returning an
+            # unknown connection: that could place it in another user's pool.
+            try:
+                if conn is not None and not conn.closed:
+                    conn.close()
+            except Exception:  # nosec B110 - best-effort close of an unowned connection
+                pass
 
     @contextmanager
     def connection(
@@ -719,26 +754,27 @@ class PostgreSQLPoolManager:
             yield conn
 
     def close_pool(self, host: str, port: str, database: str):
-        """Close a specific connection pool."""
-        pool_key = self._get_pool_key(host, port, database)
-
+        """Close every identity of a database endpoint."""
         with self._pools_lock:
-            if pool_key in self._pools:
-                self._pools[pool_key].shutdown()
-                del self._pools[pool_key]
-                logger.info(f"Closed pool: {pool_key}")
+            keys = [key for key, pool in self._pools.items()
+                    if (pool.host, pool.port, pool.database) == (host, port, database)]
+            pools = [self._pools.pop(key) for key in keys]
+        for pool in pools:
+            pool.shutdown()
+        if pools:
+            logger.info("Closed pools for %s:%s/%s", host, port, database)
 
     def close_all_pools(self):
         """Close all connection pools (call on plugin unload)."""
         with self._pools_lock:
-            for pool_key, pool in list(self._pools.items()):
-                try:
-                    pool.shutdown()
-                except Exception as e:
-                    logger.warning(f"Error closing pool {pool_key}: {e}")
-
+            pools = list(self._pools.values())
             self._pools.clear()
-            logger.info("✓ All connection pools closed")
+        for pool in pools:
+            try:
+                pool.shutdown()
+            except Exception as e:
+                logger.warning("Error closing pool %s: %s", pool._pool_key, e)
+        logger.info("✓ All connection pools closed")
 
     def get_all_stats(self) -> Dict[str, Dict]:
         """Get statistics for all pools."""

@@ -2792,7 +2792,8 @@ class CoverageModeController(BaseController):
                 # Nothing was applied: put back the point cloud selection subset
                 # set before the task, so the source is not left filtered
                 # without a history entry.
-                self._rollback_source(source_job, layer)
+                if not getattr(task, 'source_conflict', False):
+                    self._rollback_source(source_job, layer)
                 _, show_warning = _feedback()
                 show_warning(self.tr("Filter not applied: {0}").format(task.error or self.tr("canceled")))
                 self._after_run(layer, [], '')

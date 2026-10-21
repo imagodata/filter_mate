@@ -70,7 +70,8 @@ jobs:
             if [ "$INSTALL_PDAL" = "true" ]; then bash /src/tests/qgis_headless/install_pdal.sh; fi
             python3 --version
             python3 /src/tests/qgis_headless/make_fixtures.py /tmp/fm > /dev/null
-            python3 /src/tests/qgis_headless/run_smoke.py /tmp/fm'
+            python3 /src/tests/qgis_headless/run_smoke.py /tmp/fm
+            python3 /src/tests/qgis_headless/check_export_task_safety.py'
 
     - name: Dock smoke test (QGIS GUI under Xvfb)
       if: ${{ !cancelled() }}  # also when the engine smoke test failed: the dock is a separate story

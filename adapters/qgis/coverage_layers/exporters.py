@@ -12,7 +12,7 @@ Export raster and point cloud layers as they are currently filtered.
 """
 import logging
 import os
-import shutil
+import tempfile
 from dataclasses import dataclass
 
 
@@ -36,21 +36,27 @@ def output_path(folder: str, layer_name: str, extension: str) -> str:
     return os.path.join(folder, safe + extension)
 
 
-def partial_path(path: str, extension: str) -> str:
-    """Name a file is written under before it is renamed ``path``, with the same extension.
-
-    A failed or canceled export never leaves a truncated file under the
-    requested name (nor in a ZIP archiving the folder meanwhile).
-    """
-    if path.lower().endswith(extension.lower()):
-        return path[:-len(extension)] + '.partial' + extension
-    return path + '.partial' + extension
-
-
 def set_creation_options(writer, options) -> None:
     """GDAL creation options of a ``QgsRasterFileWriter``: ``setCreateOptions`` is deprecated since QGIS 3.44."""
     setter = getattr(writer, 'setCreationOptions', None) or writer.setCreateOptions
     setter(list(options))
+
+
+def export_sources(layers=(), project=None):
+    """Files needed by current layers and undo steps, captured on the main thread."""
+    from qgis.core import QgsProject
+    from ....core.export.target_guard import ProjectSources
+    from ....core.services.cross_filter_service import protected_sources
+    return ProjectSources(project if project is not None else QgsProject.instance(), layers=layers,
+                          additional_sources=(('FilterMate state', source) for source in protected_sources()))
+
+
+def _check_destination(path, sources) -> None:
+    if os.path.islink(path):
+        raise ValueError(f"not written: {path} is a symbolic link")
+    name = sources.layer_using(path)
+    if name is not None:
+        raise ValueError(f"not written: {path} is the data source of the layer '{name}'")
 
 
 class RasterExportJob:
@@ -64,6 +70,7 @@ class RasterExportJob:
         from qgis.core import QgsProject, QgsRasterPipe
         self.layer_name = layer.name()
         self.path = path
+        _check_destination(path, export_sources((layer,)))
         self.fmt = fmt if fmt in RASTER_FORMATS else 'GTiff'
         self.compress = compress
         self.layer_crs = layer.crs()
@@ -81,8 +88,12 @@ class RasterExportJob:
         if not self.pipe_ok:
             return ExportResult(False, path, 'raster pipe rejected the provider')
         os.makedirs(os.path.dirname(os.path.abspath(path)) or '.', exist_ok=True)
-        staging = path + '.staging.tif'
-        writer = QgsRasterFileWriter(staging)
+        with tempfile.TemporaryDirectory(prefix='.filtermate-export-', dir=os.path.dirname(os.path.abspath(path))) as folder:
+            return self._write(gdal, QgsRasterFileWriter, os.path.join(folder, 'staging.tif'), feedback)
+
+    def _write(self, gdal, writer_class, staging, feedback) -> ExportResult:
+        path = self.path
+        writer = writer_class(staging)
         writer.setOutputFormat('GTiff')
         set_creation_options(writer, [f'COMPRESS={self.compress}', 'TILED=YES', 'BIGTIFF=IF_SAFER'])
         error = writer.writeRaster(self.pipe, self.columns, self.rows, self.extent, self.layer_crs, self.context, feedback)
@@ -105,14 +116,14 @@ class RasterExportJob:
         try:
             current = staging
             if self.target_crs is not None:
-                warped = path + '.warped.tif'
+                warped = os.path.join(os.path.dirname(staging), 'warped.tif')
                 written.append(warped)
                 if gdal.Warp(warped, current, dstSRS=self.target_crs.toWkt(), creationOptions=[f'COMPRESS={self.compress}', 'TILED=YES']) is None:
                     raise RuntimeError(gdal.GetLastErrorMsg() or 'gdal.Warp failed')
                 _remove(current)
                 current = warped
             if self.fmt == 'COG':
-                cog = partial_path(path, '.tif')
+                cog = os.path.join(os.path.dirname(staging), 'output.tif')
                 written.append(cog)
                 if gdal.Translate(cog, current, format='COG', creationOptions=[f'COMPRESS={self.compress}']) is None:
                     raise RuntimeError(gdal.GetLastErrorMsg() or 'gdal.Translate failed')
@@ -209,6 +220,7 @@ class PointCloudExportJob:
         self.exporter = None
         self.source = None
         self.error = ''
+        self._temporary = None
         exporter_class = point_cloud_exporter_class()
         if exporter_class is None:
             self.error = exporter_unavailable_message()
@@ -226,6 +238,7 @@ class PointCloudExportJob:
         if not index_ready(layer):
             self.error = 'the point cloud has no index yet (LAS file being indexed): try again later'
             return
+        _check_destination(path, export_sources((layer,)))
         os.makedirs(os.path.dirname(os.path.abspath(path)) or '.', exist_ok=True)
         self.source = private_point_cloud(layer)
         exporter = exporter_class(self.source)
@@ -234,24 +247,58 @@ class PointCloudExportJob:
             exporter.setCrs(crs)
         formats = exporter_class.ExportFormat
         # Written under a partial name, renamed once complete.
-        self.target = partial_path(path, POINT_CLOUD_FORMATS[self.fmt])
+        self._temporary = tempfile.TemporaryDirectory(prefix='.filtermate-export-', dir=os.path.dirname(os.path.abspath(path)))
+        self.target = os.path.join(self._temporary.name, 'points' + POINT_CLOUD_FORMATS[self.fmt])
         if self.fmt in ('LAZ', 'LAS', 'COPC'):
             exporter.setFormat(formats.Las)
             if self.fmt == 'COPC':
-                self.target = path[:-len('.copc.laz')] + '.staging.laz' if path.lower().endswith('.copc.laz') else path + '.staging.laz'
+                self.target = os.path.join(self._temporary.name, 'staging.laz')
         elif self.fmt == 'GPKG':
             exporter.setFormat(formats.Gpkg)
             exporter.setLayerName(layer.name())
         else:
             exporter.setFormat(formats.Csv)
         exporter.setFileName(self.target)
-        exporter.prepareExport()
         self.exporter = exporter
+        try:
+            exporter.prepareExport()
+        except Exception:
+            self.release()
+            raise
 
     def run(self, feedback=None) -> ExportResult:
+        try:
+            return self._run(feedback)
+        finally:
+            self._cleanup_temporary()
+
+    def _cleanup_temporary(self) -> None:
+        temporary = getattr(self, '_temporary', None)
+        if temporary is not None:
+            try:
+                temporary.cleanup()
+            except OSError as exc:
+                # Windows can retain a writer handle until finished() closes
+                # the exporter on the main thread; release() retries there.
+                logger.debug("[FM5] export temporary files still open: %s", exc)
+            else:
+                self._temporary = None
+
+    def release(self) -> None:
+        """Close the writer before deleting only this job's temporary files."""
+        self.exporter = None
+        self.source = None
+        self._cleanup_temporary()
+
+    def _run(self, feedback=None) -> ExportResult:
         path = self.path
         if self.exporter is None:
             return ExportResult(False, path, self.error or 'exporter unavailable')
+        if self.fmt == 'COPC':
+            from . import pdal_cli
+            reason = pdal_cli.copc_unavailable_reason()
+            if reason:
+                return ExportResult(False, path, f'{reason}: choose LAZ to export without COPC support')
         if feedback is not None:
             try:
                 self.exporter.setFeedback(feedback)
@@ -267,20 +314,15 @@ class PointCloudExportJob:
             return ExportResult(False, path, error)
         if self.fmt == 'COPC':
             from . import pdal_cli
-            reason = pdal_cli.copc_unavailable_reason()
-            if reason:
-                fallback = self.target.replace('.staging.laz', '.laz')
-                shutil.move(self.target, fallback)
-                return ExportResult(True, fallback, f'{reason}: LAZ written instead of COPC')
-            copc = partial_path(path, '.copc.laz')
+            copc = os.path.join(os.path.dirname(self.target), 'output.copc.laz')
             ok, message = pdal_cli.run_pipeline([
                 {"type": "readers.las", "filename": self.target},
                 {"type": "writers.copc", "filename": copc, "forward": "all", "extra_dims": "all"},
             ], is_canceled=feedback.isCanceled if feedback is not None else None)
             _remove(self.target)
-            if not ok:
+            if not ok or (feedback is not None and feedback.isCanceled()):
                 _remove(copc)
-                return ExportResult(False, path, message)
+                return ExportResult(False, path, 'canceled' if feedback is not None and feedback.isCanceled() else message)
             return _rename(copc, path)
         return _rename(self.target, path)
 
@@ -295,9 +337,13 @@ def _rename(written: str, path: str) -> ExportResult:
     return ExportResult(True, path)
 
 
-def export_point_cloud(layer, path: str, fmt: str = 'LAZ', crs=None) -> ExportResult:
+def export_point_cloud(layer, path: str, fmt: str = 'LAZ', crs=None, feedback=None) -> ExportResult:
     """Synchronous point cloud export (scripts); the dock uses :class:`CoverageExportTask`."""
-    return PointCloudExportJob(layer, path, fmt, crs).run()
+    job = PointCloudExportJob(layer, path, fmt, crs)
+    try:
+        return job.run(feedback)
+    finally:
+        job.release()
 
 
 def make_export_task(jobs, on_done=None):
@@ -329,6 +375,9 @@ def make_export_task(jobs, on_done=None):
 
         def finished(self, result):
             for job in self.jobs:
+                release = getattr(job, 'release', None)
+                if release is not None:
+                    release()
                 for name in ('exporter', 'pipe', 'source'):
                     if hasattr(job, name):
                         setattr(job, name, None)

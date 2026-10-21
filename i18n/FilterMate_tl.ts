@@ -3192,6 +3192,11 @@ I-drop pa rin?</translation>
         <source>the source layer itself was not changed</source>
         <translation>hindi binago ang source layer mismo</translation>
     </message>
+    <message>
+        <location filename="../adapters/public_api/operations.py" line="643"/>
+        <source>source changed while the filter was running: nothing was applied</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>FilterResultHandler</name>

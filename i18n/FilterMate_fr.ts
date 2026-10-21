@@ -3192,6 +3192,11 @@ Supprimer quand même ?</translation>
         <source>the source layer itself was not changed</source>
         <translation>la couche source elle-même n'a pas été modifiée</translation>
     </message>
+    <message>
+        <location filename="../adapters/public_api/operations.py" line="643"/>
+        <source>source changed while the filter was running: nothing was applied</source>
+        <translation>La source a changé pendant le filtrage : aucune modification appliquée</translation>
+    </message>
 </context>
 <context>
     <name>FilterResultHandler</name>

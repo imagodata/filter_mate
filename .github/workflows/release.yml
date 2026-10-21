@@ -44,7 +44,8 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements-test.txt
+          pip install -r requirements-test-api.txt
+          python -c "import fastapi, httpx, mcp"
 
       - name: Run tests
         run: python -m pytest tests/ -v -o "addopts="

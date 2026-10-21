@@ -7,6 +7,7 @@ spellings altogether. This test fails on the spellings that check reports,
 so the CI catches them before an upload does.
 """
 import sys
+import os
 from pathlib import Path
 
 import pytest
@@ -20,14 +21,16 @@ import qt_enum_scan  # noqa: E402
 EXCLUDED_DIRS = {
     "tests", ".git", "__pycache__",
     "_bmad", "_bmad-output", "website", "docs", "knowledge", "dist", "build", "scripts",
+    ".claude", ".agents", ".codex", ".venv", "venv",
 }
 
 
 def _plugin_python_files():
-    for path in PLUGIN_ROOT.rglob("*.py"):
-        if any(part in EXCLUDED_DIRS for part in path.relative_to(PLUGIN_ROOT).parts):
-            continue
-        yield path
+    for folder, directories, files in os.walk(PLUGIN_ROOT):
+        directories[:] = [name for name in directories if name not in EXCLUDED_DIRS]
+        for name in files:
+            if name.endswith('.py'):
+                yield Path(folder) / name
 
 
 def _tmp_offences(source):
