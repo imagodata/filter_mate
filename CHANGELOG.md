@@ -2,7 +2,9 @@
 
 All notable changes to FilterMate will be documented in this file.
 
-## [Unreleased]
+## [5.0.1] - 2026-10-22
+
+Patch release on 5.0.0: the Zone on the vector and raster rails, checkbox band selection and band display, centroid controls for every source kind, and two dock fixes.
 
 - **Vector Zone button shown from the start.** The Exploring rail buttons were built when the first raster or point cloud was shown, so the vector Zone only appeared after switching to one; they are built with the first vector layer.
 
