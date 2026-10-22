@@ -94,6 +94,29 @@ class TestDockwidgetHooks:
             caught.update(name.id for name in ast.walk(handler.type) if isinstance(name, ast.Name))
         assert {"TypeError", "RuntimeError", "AttributeError"} <= caught
 
+    def test_a_layer_the_dock_does_not_list_never_becomes_the_current_layer(self):
+        from types import SimpleNamespace
+        from unittest.mock import MagicMock
+        func = _method(_DOCKWIDGET, "FilterMateDockWidget", "_validate_and_prepare_layer")
+
+        class FakeVector:
+            def id(self):
+                return "table"
+
+        namespace = {"QgsVectorLayer": FakeVector, "is_layer_source_available": lambda layer: True,
+                     "show_warning": MagicMock()}
+        exec(compile(ast.fix_missing_locations(ast.Module(body=[func], type_ignores=[])), str(_DOCKWIDGET), "exec"),
+             namespace)
+        previous = FakeVector()
+        dock = SimpleNamespace(_plugin_busy=False, PROJECT_LAYERS={"other": {}}, widgets_initialized=True,
+                               current_layer=previous, _disconnect_layer_selection_signal=MagicMock(),
+                               currentLayerChanged=MagicMock())
+        result = namespace["_validate_and_prepare_layer"](dock, FakeVector())
+        assert result == (False, None, None)
+        assert dock.current_layer is previous  # the widgets still show it
+        dock._disconnect_layer_selection_signal.assert_not_called()
+        dock.currentLayerChanged.emit.assert_not_called()
+
     def test_icon_map_knows_the_point_cloud_geometry_type(self):
         func = _method(_DOCKWIDGET, "FilterMateDockWidget", "icon_per_geometry_type")
         icon_map = next(node.value for node in ast.walk(func)

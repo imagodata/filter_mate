@@ -4,6 +4,10 @@ All notable changes to FilterMate will be documented in this file.
 
 ## [Unreleased]
 
+- **Vector Zone button shown from the start.** The Exploring rail buttons were built when the first raster or point cloud was shown, so the vector Zone only appeared after switching to one; they are built with the first vector layer.
+
+- **Legend link and tables without geometry.** Picking a layer the dock does not list (a table without geometry) in the layer tree made it the dock's current layer while the widgets still showed the previous one; the dock now stays on its layer.
+
 - **Zone on the vector rail.** A Zone button (rectangle, polygon, freehand or circle, right-click for the shape) selects the features it touches; the panel follows the selection.
 
 - **Raster zone cuts the selection.** The raster Zone (⋯ menu) now draws the same shapes and keeps only the selected pixels inside them, on top of the statistics of its box. "Clear the zone" brings the whole raster back.
