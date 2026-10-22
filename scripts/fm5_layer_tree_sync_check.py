@@ -168,6 +168,46 @@ def s_group_check():
           shown_name() == STATE['group_before'], f"{STATE['group_before']} -> {shown_name()}")
 
 
+# --- dock -> tree: the layer picked in the dock's combo box becomes the active layer of the tree -----
+
+def make_combo_pick(name):
+    def pick():
+        dock().comboBox_filtering_current_layer.setLayer(layer(name))
+
+    def verify():
+        current = tree().currentLayer()
+        active = iface.activeLayer()
+        check(f'dock -> tree: {name} picked in the combo is the current layer of the tree',
+              current is not None and current.name() == name, current.name() if current else None)
+        check(f'dock -> tree: {name} picked in the combo is the active layer of QGIS',
+              active is not None and active.name() == name, active.name() if active else None)
+        check(f'dock -> tree: {name} still shown by the dock', shown_name() == name, shown_name())
+    pick.__name__ = 's_combo_' + name
+    verify.__name__ = 's_combo_verify_' + name
+    return pick, verify
+
+
+def s_add_late():
+    project = QgsProject.instance()
+    gpkg = os.path.join(DATA, 'cerdagne.gpkg')
+    late_vector = QgsVectorLayer(gpkg + '|layername=parcelle', 'tardive_vecteur', 'ogr')
+    late_raster = QgsRasterLayer(os.path.join(DATA, 'classes_2m.tif'), 'tardive_raster', 'gdal')
+    project.addMapLayer(late_vector)
+    project.addMapLayer(late_raster)
+
+
+def make_late(name):
+    def pick():
+        tree().setCurrentLayer(layer(name))
+
+    def verify():
+        check(f'tree -> dock: {name}, added after the dock opened, is shown', shown_name() == name,
+              f'shown={shown_name()} combo={combo_name()}')
+    pick.__name__ = 's_late_' + name
+    verify.__name__ = 's_late_verify_' + name
+    return pick, verify
+
+
 def s_finish():
     failed = [name for name, ok in STATE['results'] if not ok]
     log(f"\n{len(STATE['results']) - len(failed)}/{len(STATE['results'])} checks passed")
@@ -180,6 +220,13 @@ STEPS = [(s_setup, 1500), (s_open_plugin, 7000), (s_first_vector_rail, 1000)]
 for _name in ORDER:
     _pick, _verify = make_pick(_name)
     STEPS += [(_pick, 2500), (_verify, 300)]
+for _name in ['ortho', 'lidar', 'routes', 'parcelle', 'mnt']:
+    _pick, _verify = make_combo_pick(_name)
+    STEPS += [(_pick, 2500), (_verify, 300)]
+STEPS += [(s_add_late, 4000)]
+for _name in ['tardive_vecteur', 'tardive_raster']:
+    _pick, _verify = make_late(_name)
+    STEPS += [(_pick, 3000), (_verify, 300)]
 STEPS += [(s_unsupported, 2000), (s_unsupported_check, 2000), (s_after_unsupported, 500),
           (s_group, 1500), (s_group_check, 500), (s_finish, 300)]
 
