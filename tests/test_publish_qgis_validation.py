@@ -20,7 +20,7 @@ name=FilterMate
 qgisMinimumVersion=3.22
 description=d
 about=a
-version=5.0.0
+version=5.0.1
 author=x
 email=x@example.org
 repository=https://example.org/r
@@ -48,7 +48,7 @@ pytestmark = pytest.mark.unit
 
 
 def test_a_clean_archive_is_accepted(tmp_path):
-    assert publish_qgis.validate(_build(tmp_path)) == "5.0.0"
+    assert publish_qgis.validate(_build(tmp_path)) == "5.0.1"
 
 
 @pytest.mark.parametrize("name", ["filter_mate/a.pyc", "filter_mate/x.log", "filter_mate/lib.so",
@@ -110,7 +110,7 @@ def test_security_findings_reject_the_archive(tmp_path, monkeypatch):
     monkeypatch.setattr(publish_qgis, "check_security", lambda archive: ["Bandit B603 filter_mate/x.py:1 call"])
     with pytest.raises(ValueError, match="Bandit B603"):
         publish_qgis.validate(_build(tmp_path), security=True)
-    assert publish_qgis.validate(_build(tmp_path), security=False) == "5.0.0"
+    assert publish_qgis.validate(_build(tmp_path), security=False) == "5.0.1"
 
 
 def test_flake8_findings_are_problems():
