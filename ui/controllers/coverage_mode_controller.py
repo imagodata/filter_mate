@@ -577,6 +577,7 @@ class CoverageModeController(BaseController):
         if not again:
             self._restore_panel_state(layer)
         self._sync_layer_combo(layer)
+        self._sync_legend_tree(layer)
         self._populate_filtering_targets(layer)
         self._load_coverage_min(layer)
         self._call(getattr(dw, 'currentLayerChanged', None), 'emit')
@@ -1024,6 +1025,28 @@ class CoverageModeController(BaseController):
                 combo.blockSignals(False)
         except Exception as exc:
             logger.debug(f"[FM5] layer combo not synchronized: {exc}")
+
+    def _sync_legend_tree(self, layer: Any) -> None:
+        """Legend link: the layer picked in the dock becomes the current (active) layer of the layer tree.
+
+        The vector chain does it in ``reconnect_layer_signals``; a raster / point cloud never goes through it,
+        so a layer picked in the combo box left the tree (and ``iface.activeLayer()``) on the previous one.
+        """
+        dw = self.dockwidget
+        try:
+            options = (getattr(dw, 'project_props', None) or {}).get('OPTIONS', {}).get('LAYERS', {})
+            if not options.get('LINK_LEGEND_LAYERS_AND_CURRENT_LAYER_FLAG', False):
+                return
+            view = dw.iface.layerTreeView()
+            if view is None or _same_layer(view.currentLayer(), layer):
+                return
+            dw.manageSignal(['QGIS', 'LAYER_TREE_VIEW'], 'disconnect')  # the tree must not pick the layer back
+            try:
+                view.setCurrentLayer(layer)
+            finally:
+                dw.manageSignal(['QGIS', 'LAYER_TREE_VIEW'], 'connect')
+        except Exception as exc:
+            logger.debug(f"[FM5] layer tree not synchronized: {exc}")
 
     def _populate_filtering_targets(self, layer: Any) -> None:
         dw = self.dockwidget

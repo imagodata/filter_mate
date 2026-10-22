@@ -6,6 +6,8 @@ All notable changes to FilterMate will be documented in this file.
 
 Patch release on 5.0.0: the Zone on the vector and raster rails, checkbox band selection and band display, centroid controls for every source kind, and two dock fixes.
 
+- **Legend link follows the dock for rasters and point clouds.** A raster or point cloud picked in the dock's layer combo box now becomes the current layer of the layer tree, and so the active layer of QGIS, as a vector layer already did.
+
 - **Vector Zone button shown from the start.** The Exploring rail buttons were built when the first raster or point cloud was shown, so the vector Zone only appeared after switching to one; they are built with the first vector layer.
 
 - **Legend link and tables without geometry.** Picking a layer the dock does not list (a table without geometry) in the layer tree made it the dock's current layer while the widgets still showed the previous one; the dock now stays on its layer.

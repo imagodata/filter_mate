@@ -2582,3 +2582,42 @@ def test_rendered_filter_pins_capture_until_done(ctrl_module, adapters, layers, 
     callbacks[0](task, False)
     assert settled == [path]
     assert not controller._raster_sample_users
+
+
+@pytest.mark.unit
+class TestLegendTreeFollowsTheDock:
+    """Legend link: a raster / point cloud picked in the dock becomes the current layer of the layer tree."""
+
+    @staticmethod
+    def _env(ctrl_module, link=True, tree_layer=None):
+        view = MagicMock()
+        view.currentLayer.return_value = tree_layer
+        dock = MagicMock()
+        dock.project_props = {"OPTIONS": {"LAYERS": {"LINK_LEGEND_LAYERS_AND_CURRENT_LAYER_FLAG": link}}}
+        dock.iface.layerTreeView.return_value = view
+        return ctrl_module.CoverageModeController(dock), dock, view
+
+    def test_the_tree_moves_to_the_layer_with_its_signal_off(self, ctrl_module):
+        controller, dock, view = self._env(ctrl_module, tree_layer=FakeLayer("v1"))
+        order = []
+        dock.manageSignal.side_effect = lambda path, action: order.append(action)
+        view.setCurrentLayer.side_effect = lambda layer: order.append("set")
+        controller._sync_legend_tree(FakeLayer("r1", "raster"))
+        assert order == ["disconnect", "set", "connect"]
+
+    def test_the_signal_comes_back_when_the_tree_refuses(self, ctrl_module):
+        controller, dock, view = self._env(ctrl_module, tree_layer=FakeLayer("v1"))
+        view.setCurrentLayer.side_effect = RuntimeError("view deleted")
+        controller._sync_legend_tree(FakeLayer("r1", "raster"))
+        assert [call.args[1] for call in dock.manageSignal.call_args_list] == ["disconnect", "connect"]
+
+    def test_nothing_without_the_legend_link(self, ctrl_module):
+        controller, dock, view = self._env(ctrl_module, link=False, tree_layer=FakeLayer("v1"))
+        controller._sync_legend_tree(FakeLayer("r1", "raster"))
+        view.setCurrentLayer.assert_not_called()
+
+    def test_nothing_when_the_tree_is_already_on_the_layer(self, ctrl_module):
+        controller, dock, view = self._env(ctrl_module, tree_layer=FakeLayer("r1", "raster"))
+        controller._sync_legend_tree(FakeLayer("r1", "raster"))
+        view.setCurrentLayer.assert_not_called()
+        dock.manageSignal.assert_not_called()
