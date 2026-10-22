@@ -5311,15 +5311,16 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
                 return (False, None, None)
         except (RuntimeError, AttributeError, OSError):
             return (False, None, None)  # Layer source check failed
+        if layer.id() not in self.PROJECT_LAYERS:
+            # 2026-10-22: a layer the dock does not list (a table without geometry...) picked in the
+            # layer tree became current_layer while the widgets still showed the previous layer.
+            return (False, None, None)
         if self.current_layer is not None:
             # every connection, whatever the flag says (2026-10-17)
             self._disconnect_layer_selection_signal(self.current_layer)
             self.current_layer_selection_connection = None
 
         self.current_layer = layer
-
-        if self.current_layer.id() not in self.PROJECT_LAYERS:
-            return (False, None, None)
 
         self.currentLayerChanged.emit()
         return (True, layer, self.PROJECT_LAYERS[self.current_layer.id()])

@@ -579,6 +579,10 @@ class CoverageDockExtras(QObject):
     def show_vector(self, layer: Any = None) -> None:
         """Vector layer: its card, no kind tool, vector buttons back (no card without a layer: it was removed)."""
         self._layer_id = None
+        if not self._tools:
+            # 2026-10-22: the rail buttons were built by the first raster / point cloud only, so the vector
+            # Zone was missing until one had been shown. Built here too (retried while the rail is not found).
+            self._guarded(self._build_tools)
         for step in (self.leave, self._hide_coverage_widgets, self._restore_vector_buttons):
             self._guarded(step)
         for name in tools_for('vector'):

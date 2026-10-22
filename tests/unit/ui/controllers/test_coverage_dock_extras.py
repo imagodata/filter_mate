@@ -458,6 +458,18 @@ class TestRangeLinkedToStyle:
         dock_extras.dock.show_vector(None)  # the raster shown was removed: no vector layer to describe yet
         assert shown == [False]
 
+    def test_vector_rail_buttons_are_built_without_a_raster_shown_first(self, dock_extras, monkeypatch):
+        dock = dock_extras.dock
+        dock._tools = {}
+        zone = types.SimpleNamespace(visible=False, setVisible=lambda visible: setattr(zone, "visible", visible))
+
+        def build():
+            dock._tools = {extras.VECTOR_ZONE_BUTTON: zone}
+
+        monkeypatch.setattr(dock, "_build_tools", build)
+        dock.show_vector(None)
+        assert zone.visible is True
+
     def test_closed_project_forgets_every_style(self, dock_extras):
         self._link_r1(dock_extras)
         dock_extras.dock.forget_layers(None)
