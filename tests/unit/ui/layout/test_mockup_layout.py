@@ -42,6 +42,36 @@ def test_rail_plan_all_hidden():
     assert layout.rail_plan([]) == []
 
 
+def _rail(*names):
+    return [names[index] for index in layout.rail_rank(list(names))]
+
+
+def test_rail_order_is_shared_by_the_three_layer_kinds():
+    zoom, eye, identify = 'pushButton_exploring_zoom', 'pushButton_checkable_exploring_selecting', 'pushButton_exploring_identify'
+    more, reset = 'pushButton_exploring_{}_more', 'pushButton_exploring_reset_layer_properties'
+    tool = 'pushButton_checkable_exploring_{}'
+    # layout order of the dock: the .ui buttons, then the kind tools inserted after the link button
+    vector = _rail(identify, zoom, eye, tool.format('tracking'), tool.format('linking_widgets'),
+                   tool.format('vector_zone'), more.format('vector'), reset)
+    assert vector == [zoom, eye, identify, tool.format('tracking'), tool.format('vector_zone'),
+                      tool.format('linking_widgets'), more.format('vector'), reset]
+    raster = _rail(zoom, eye, tool.format('raster_pipette'), tool.format('raster_detector'),
+                   tool.format('raster_similar'), tool.format('raster_link'), more.format('raster'), reset)
+    assert raster == [zoom, eye, tool.format('raster_pipette'), tool.format('raster_detector'),
+                      tool.format('raster_similar'), tool.format('raster_link'), more.format('raster'), reset]
+    cloud = _rail(identify, zoom, eye, tool.format('point_cloud_object'), tool.format('point_cloud_value_pipette'),
+                  tool.format('point_cloud_zone'), more.format('point_cloud'), reset)
+    assert cloud == [zoom, eye, identify, tool.format('point_cloud_object'), tool.format('point_cloud_value_pipette'),
+                     tool.format('point_cloud_zone'), more.format('point_cloud'), reset]
+
+
+def test_rail_order_keeps_an_unlisted_button_before_the_menus():
+    names = ['pushButton_exploring_reset_layer_properties', 'pushButton_new_tool', 'pushButton_exploring_zoom',
+             'pushButton_exploring_vector_more']
+    assert _rail(*names) == ['pushButton_exploring_zoom', 'pushButton_new_tool', 'pushButton_exploring_vector_more',
+                             'pushButton_exploring_reset_layer_properties']
+
+
 def test_rail_floor_is_the_buttons_plus_one_gap_around_each():
     # Eight 36 px tools (vector rail, 2026-10-18): 288 + 9 gaps of 6 = 342, the height under which they overlap.
     assert layout.rail_floor([36] * 8, 6) == 342

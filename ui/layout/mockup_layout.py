@@ -159,6 +159,47 @@ def rail_plan(visible) -> list:
     return plan
 
 
+# One order for the EXPLORING rail of the three layer kinds (2026-10-26), a kind showing only its own buttons:
+# the view of the selection first (zoom, then the eye: the map selection kept in sync on a vector layer, the
+# preview on a raster or a point cloud), then the tools clicked on the map, from the point to the area (pick,
+# object, similar objects, value pipette, zone), then the link, the "more" menu and the reset. Zoom and the eye
+# are always the first two buttons, the menu and the reset the last two, and the Identify button (class pipette
+# of a point cloud) is third on a vector layer and on a point cloud alike.
+RAIL_ORDER = (
+    'pushButton_exploring_zoom',
+    'pushButton_checkable_exploring_selecting',
+    'pushButton_exploring_identify',
+    'pushButton_checkable_exploring_tracking',
+    'pushButton_checkable_exploring_raster_pipette',
+    'pushButton_checkable_exploring_raster_detector',
+    'pushButton_checkable_exploring_point_cloud_object',
+    'pushButton_checkable_exploring_raster_similar',
+    'pushButton_checkable_exploring_point_cloud_value_pipette',
+    'pushButton_checkable_exploring_raster_hover',
+    'pushButton_checkable_exploring_raster_zone',
+    'pushButton_checkable_exploring_point_cloud_zone',
+    'pushButton_checkable_exploring_vector_zone',
+    'pushButton_checkable_exploring_linking_widgets',
+    'pushButton_checkable_exploring_raster_link',
+    'pushButton_exploring_vector_more',
+    'pushButton_exploring_raster_more',
+    'pushButton_exploring_point_cloud_more',
+    'pushButton_exploring_point_cloud_profile',
+    'pushButton_exploring_point_cloud_3d',
+    'pushButton_exploring_reset_layer_properties',
+)
+_RAIL_RANK = {name: rank for rank, name in enumerate(RAIL_ORDER)}
+
+
+def rail_rank(names) -> list:
+    """Indexes of ``names`` (rail buttons in layout order) sorted by :data:`RAIL_ORDER`.
+
+    A button not listed keeps its place relative to its neighbours, before the "more" menus.
+    """
+    unlisted = _RAIL_RANK['pushButton_exploring_vector_more'] - 0.5
+    return sorted(range(len(names)), key=lambda index: (_RAIL_RANK.get(names[index], unlisted), index))
+
+
 def rail_floor(button_heights, gap: int) -> int:
     """Height under which the rail buttons would overlap: the shown buttons plus one gap around each."""
     heights = [int(h) for h in button_heights]
@@ -231,6 +272,7 @@ class _RailSpreader(QObject if QObject is not None else object):
             layout = self._layout
             items = [layout.itemAt(i) for i in range(layout.count())]
             buttons = [(item.widget(), item.alignment()) for item in items if item.widget() is not None]
+            buttons = [buttons[index] for index in rail_rank([button.objectName() for button, _ in buttons])]
             visible = [not button.isHidden() for button, _ in buttons]
             state = tuple((id(button), shown) for (button, _), shown in zip(buttons, visible))
             if state == self._state:
