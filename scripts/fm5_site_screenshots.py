@@ -563,10 +563,15 @@ def s_raster_room():
     missing = histogram_hidden_by(area, group) + 8
     if missing > 0:
         STATE['room'] = (mw.size(), d.splitter_main.sizes())
-        mw.resize(mw.width(), mw.height() + missing)
         sizes = d.splitter_main.sizes()
-        sizes[0] += missing
+        # take the room from the FILTERING zone first (its rows are spread, the dock keeps the height of the other shots)
+        take = max(0, min(missing, sizes[1] - d.splitter_main.widget(1).minimumSizeHint().height()))
+        sizes[0], sizes[1] = sizes[0] + take, sizes[1] - take
+        if missing > take:  # not enough: the window grows by the rest
+            mw.resize(mw.width(), mw.height() + missing - take)
+            sizes[0] += missing - take
         d.splitter_main.setSizes(sizes)
+        print(f'   [room] missing={missing} taken from FILTERING={take} window grown={missing - take}', flush=True)
     since = time.time()
     return lambda: time.time() - since > 1.5
 
