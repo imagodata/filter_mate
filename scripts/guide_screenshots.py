@@ -138,6 +138,7 @@ def s_exploring_multiple_pick():
     fids = [247881, 110289, 110293, 113421]
     try:
         w.setCheckedFeatureIds(fids)
+        w.filter_le.setText('DE')  # named roads only: the unnamed ones sort first as empty rows
     except Exception:
         log(traceback.format_exc())
 
