@@ -7,7 +7,8 @@ Drives the dock in QGIS 4.2 with its GUI and saves PNGs into ``website/img/guide
 
 Images written (``fm5_<topic>.png``):
 
-* ``fm5_raster_exploring``     dock, raster as the current layer: band, pixel value, value range with histogram
+* ``fm5_vector_multiple``      dock, vector layer as the current layer: several features ticked in MULTIPLE SELECTION
+* ``fm5_raster_exploring``     dock, raster as the current layer: band, pixel value, value range with the whole histogram
 * ``fm5_pointcloud_exploring`` dock, point cloud as the current layer: classes (building), attribute ranges
 * ``fm5_filtering_targets``    dock, vector source with raster and point cloud layers in the targets list
 * ``fm5_vector_to_raster``     map canvas after a vector -> raster clip (clipped VRT)
@@ -55,12 +56,18 @@ import tempfile
 import time
 import traceback
 
-from qgis.core import Qgis, QgsApplication, QgsProject, QgsProviderRegistry, QgsRasterLayer, QgsVectorLayer
-from qgis.PyQt.QtCore import QSettings, Qt, QTimer
+from qgis.core import (Qgis, QgsApplication, QgsExpression, QgsExpressionContext, QgsExpressionContextUtils,
+                       QgsProject, QgsProviderRegistry, QgsRasterLayer, QgsVectorLayer)
+from qgis.PyQt.QtCore import QPoint, QSettings, Qt, QTimer
+from qgis.PyQt.QtWidgets import QScrollArea
 from qgis.utils import iface
 import qgis.utils
 
 STATE = {'results': [], 'python_errors': [], 'started': time.time(), 'rendered': False}
+if sys.stdout is None or sys.stderr is None:  # qgis-bin started with no console (start /min): log to a file instead
+    _log_dir = os.environ.get('FM5_SITE_OUT') or os.path.join(tempfile.gettempdir(), 'fm5')
+    os.makedirs(_log_dir, exist_ok=True)
+    sys.stdout = sys.stderr = open(os.path.join(_log_dir, 'fm5_site_screenshots.log'), 'w', encoding='utf-8')
 faulthandler.enable(all_threads=True)
 
 
@@ -95,7 +102,7 @@ project = QgsProject.instance()
 
 if REAL:
     # name of the layers in the project, as in fm5_gui_check.py
-    DS = {'vector': 'batiment', 'other_vector': 'parcelle', 'raster': 'mnt', 'cloud': 'lhd',
+    DS = {'vector': 'batiment', 'other_vector': 'parcelle', 'raster': 'mnt', 'cloud': 'lhd', 'multi': 'parcelle', 'multi_display': '"idu"',
           'raster_range': (1240.0, 1270.0), 'cloud_class': 6}
 else:
     FIXTURES = os.environ.get('FM_FIXTURES', '/tmp/fm')
@@ -105,7 +112,7 @@ else:
     except Exception as _exc:
         print(f"FAIL   fixtures not readable in {FIXTURES}: {_exc} (run make_fixtures.py first)", flush=True)
         os._exit(3)
-    DS = {'vector': 'zones', 'other_vector': None, 'raster': 'dem', 'cloud': 'cloud',
+    DS = {'vector': 'zones', 'other_vector': None, 'raster': 'dem', 'cloud': 'cloud', 'multi': 'zones', 'multi_display': '',
           'raster_range': tuple(M['east_range']), 'cloud_class': 6}
 
 
@@ -453,6 +460,56 @@ def s_after_undo():
     return settled()
 
 
+# -- vector layer, MULTIPLE SELECTION (first image of the README)
+def s_multi_source():
+    dock().comboBox_filtering_current_layer.setLayer(layer(DS['multi']))
+    return switched_to(DS['multi'], coverage_page=False)
+
+
+def labelled_features(source, picks):
+    """Ids of the features at the ``picks`` ranks of the picker list (sorted by label), among those with a label."""
+    context = QgsExpressionContext(QgsExpressionContextUtils.globalProjectLayerScopes(source))
+    expression = QgsExpression(source.displayExpression() or '')
+    found = []
+    for feature in source.getFeatures():
+        context.setFeature(feature)
+        label = str(expression.evaluate(context) or '').strip()
+        if label and label != 'NULL':
+            found.append((label, feature.id()))
+    found.sort()
+    return [found[rank][1] for rank in picks if rank < len(found)]
+
+
+def s_multi_select():
+    d = dock()
+    d.toolBox_tabTools.setCurrentIndex(0)
+    d.mGroupBox_exploring_multiple_selection.setChecked(True)
+    if DS['multi_display']:  # a readable label per row in the picker (the cadastre id, not the commune name)
+        layer(DS['multi']).setDisplayExpression(DS['multi_display'])
+        d.mFieldExpressionWidget_exploring_multiple_selection.setExpression(DS['multi_display'])
+    STATE['multi_ids'] = labelled_features(layer(DS['multi']), (0, 2, 3, 5, 6))  # ticked rows among unticked ones
+    check('features to tick', len(STATE['multi_ids']) >= 3, str(STATE['multi_ids']))
+    targets = [DS['raster']] + ([DS['cloud']] if has_point_clouds() else [])
+    set_targets(targets)
+    set_predicates(['Intersect'])
+    picker = d.checkableComboBoxFeaturesListPickerWidget_exploring_multiple_selection
+
+    since = time.time()
+
+    def ticked():  # the picker rebuilds its list asynchronously: tick again until it holds the layer
+        if time.time() - since < 3.0:  # let the new display expression rebuild the list first
+            return False
+        picker.setCheckedFeatureIds(STATE['multi_ids'])
+        return len(d.get_current_features()[0] or []) == len(STATE['multi_ids'])
+    return ticked
+
+
+def s_multi_shot():
+    save_dock('vector_multiple')
+    dock().mGroupBox_exploring_single_selection.setChecked(True)
+    return settled()
+
+
 # -- raster source (value range) -> vector targets
 def s_raster_source():
     dock().comboBox_filtering_current_layer.setLayer(layer(DS['raster']))
@@ -474,8 +531,57 @@ def s_raster_select():
     return targets_ready(targets)
 
 
+def s_raster_histogram():
+    panel = coverage()._raster_panel
+    since = time.time()
+    return lambda: bool(panel._histograms) and time.time() - since > 1.5  # the histogram arrives asynchronously
+
+
+def exploring_scroll_area(widget):
+    parent = widget.parentWidget()
+    while parent is not None and not isinstance(parent, QScrollArea):
+        parent = parent.parentWidget()
+    return parent
+
+
+def histogram_hidden_by(area, group):
+    """Pixels of ``group`` (the value range with its histogram) below the visible part of the scrolled EXPLORING page."""
+    top = group.mapTo(area.widget(), QPoint(0, 0)).y()
+    return top + group.height() - area.verticalScrollBar().value() - area.viewport().height()
+
+
+def s_raster_room():
+    """Make the EXPLORING zone as tall as the value range needs, so that the histogram is not cut by the splitter."""
+    d, mw = dock(), iface.mainWindow()
+    group = coverage()._raster_panel._range_group
+    area = exploring_scroll_area(group)
+    check('EXPLORING scroll area found', area is not None)
+    STATE['room'] = None
+    if area is None:
+        return None
+    area.verticalScrollBar().setValue(0)
+    missing = histogram_hidden_by(area, group) + 8
+    if missing > 0:
+        STATE['room'] = (mw.size(), d.splitter_main.sizes())
+        mw.resize(mw.width(), mw.height() + missing)
+        sizes = d.splitter_main.sizes()
+        sizes[0] += missing
+        d.splitter_main.setSizes(sizes)
+    since = time.time()
+    return lambda: time.time() - since > 1.5
+
+
 def s_raster_shot():
+    d = dock()
+    group = coverage()._raster_panel._range_group
+    area = exploring_scroll_area(group)
+    hidden = histogram_hidden_by(area, group) if area is not None else 1
+    check('raster: histogram fully visible', hidden <= 0, f'{hidden} px below the visible part')
     save_dock('raster_exploring')
+    if STATE.get('room'):  # back to the usual size for the map images that follow
+        size, sizes = STATE['room']
+        iface.mainWindow().resize(size)
+        d.splitter_main.setSizes(sizes)
     return refresh_canvas()
 
 
@@ -629,7 +735,8 @@ def s_finish():
 STEPS = [s_setup, s_open_plugin, s_dock_ready,
          s_vector_source, s_vector_select, s_shot_filtering, s_shot_vector_to_raster, s_save_vector_to_raster,
          s_after_undo,
-         s_raster_source, s_raster_select, s_raster_shot, s_raster_filter, s_raster_to_vector, s_raster_save,
+         s_multi_source, s_multi_select, s_multi_shot,
+         s_raster_source, s_raster_select, s_raster_histogram, s_raster_room, s_raster_shot, s_raster_filter, s_raster_to_vector, s_raster_save,
          s_raster_settled,
          s_cloud_source, s_cloud_select, s_cloud_shot, s_cloud_to_vector, s_cloud_save, s_cloud_settled,
          s_back_to_vector, s_export_tab, s_export_shot, s_config_tab, s_config_shot, s_finish]

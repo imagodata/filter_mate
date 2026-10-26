@@ -15,11 +15,13 @@ clipped around a church. The filters stay on the existing project layers, keep t
 and replayed from Processing or a script.
 
 <p align="center">
-  <img src="website/img/guide/fm5_raster_exploring.png" alt="FilterMate panel with a raster layer: band, value range and histogram, then the layers to filter" width="300">
+  <img src="website/img/guide/fm5_vector_multiple.png" alt="FilterMate panel with a vector layer: several features ticked in the multiple selection, then the layers to filter" width="260">
   &nbsp;
-  <img src="website/img/guide/fm5_pointcloud_exploring.png" alt="FilterMate panel with a LiDAR point cloud: classes and attribute ranges" width="300">
+  <img src="website/img/guide/fm5_raster_exploring.png" alt="FilterMate panel with a raster layer: band, value range and histogram, then the layers to filter" width="260">
+  &nbsp;
+  <img src="website/img/guide/fm5_pointcloud_exploring.png" alt="FilterMate panel with a LiDAR point cloud: classes and attribute ranges" width="260">
 </p>
-<p align="center"><em>The panel follows the current layer: a raster on the left, a LiDAR point cloud on the right.</em></p>
+<p align="center"><em>The panel follows the current layer: several vector features ticked, a raster with its histogram, a LiDAR point cloud.</em></p>
 
 🌐 [Website](https://imagodata.github.io/filter_mate) ·
 📖 [User guide](https://imagodata.github.io/filter_mate/guide.html) ·
