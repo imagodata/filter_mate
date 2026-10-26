@@ -8,7 +8,7 @@ Drives the dock in QGIS 4.2 with its GUI and saves PNGs into ``website/img/guide
 Images written (``fm5_<topic>.png``):
 
 * ``fm5_vector_multiple``      dock, vector layer as the current layer: several features ticked in MULTIPLE SELECTION
-* ``fm5_raster_exploring``     dock, raster as the current layer: band, pixel value, value range with the whole histogram
+* ``fm5_raster_exploring``     dock, raster as the current layer: band, pixel value, value range with the whole histogram (BANDS folded)
 * ``fm5_pointcloud_exploring`` dock, point cloud as the current layer: classes (building), attribute ranges
 * ``fm5_filtering_targets``    dock, vector source with raster and point cloud layers in the targets list
 * ``fm5_vector_to_raster``     map canvas after a vector -> raster clip (clipped VRT)
@@ -551,42 +551,48 @@ def histogram_hidden_by(area, group):
 
 
 def s_raster_room():
-    """Make the EXPLORING zone as tall as the value range needs, so that the histogram is not cut by the splitter."""
-    d, mw = dock(), iface.mainWindow()
+    """Room for the whole histogram in the EXPLORING height of the other shots: BANDS folded (one band, nothing to
+    read in it), then the page scrolled to the bottom of the value range (:func:`s_raster_scroll`)."""
     group = coverage()._raster_panel._range_group
     area = exploring_scroll_area(group)
     check('EXPLORING scroll area found', area is not None)
-    STATE['room'] = None
+    STATE['bands_folded'] = False
     if area is None:
         return None
     area.verticalScrollBar().setValue(0)
-    missing = histogram_hidden_by(area, group) + 8
-    if missing > 0:
-        STATE['room'] = (mw.size(), d.splitter_main.sizes())
-        sizes = d.splitter_main.sizes()
-        # take the room from the FILTERING zone first (its rows are spread, the dock keeps the height of the other shots)
-        take = max(0, min(missing, sizes[1] - d.splitter_main.widget(1).minimumSizeHint().height()))
-        sizes[0], sizes[1] = sizes[0] + take, sizes[1] - take
-        if missing > take:  # not enough: the window grows by the rest
-            mw.resize(mw.width(), mw.height() + missing - take)
-            sizes[0] += missing - take
-        d.splitter_main.setSizes(sizes)
-        print(f'   [room] missing={missing} taken from FILTERING={take} window grown={missing - take}', flush=True)
+    bands = coverage()._raster_panel._bands_group
+    if histogram_hidden_by(area, group) > 0 and hasattr(bands, 'setCollapsed') and not bands.isCollapsed():
+        bands.setCollapsed(True)
+        STATE['bands_folded'] = True
     since = time.time()
-    return lambda: time.time() - since > 1.5
+    return lambda: time.time() - since > 1.0
+
+
+def s_raster_scroll():
+    group = coverage()._raster_panel._range_group
+    area = exploring_scroll_area(group)
+    if area is None:
+        return None
+    bar = area.verticalScrollBar()
+    needed = bar.value() + histogram_hidden_by(area, group) + 8
+    if needed > 0:  # scroll past the whole card (BANDS on top) rather than cut it, when that is enough
+        bands = coverage()._raster_panel._bands_group.mapTo(area.widget(), QPoint(0, 0)).y() - 6
+        bar.setValue(min(bar.maximum(), max(needed, bands)))
+    print(f'   [room] BANDS folded={STATE["bands_folded"]} scrolled={bar.value()} px', flush=True)
+    since = time.time()
+    return lambda: time.time() - since > 0.5
 
 
 def s_raster_shot():
-    d = dock()
     group = coverage()._raster_panel._range_group
     area = exploring_scroll_area(group)
     hidden = histogram_hidden_by(area, group) if area is not None else 1
     check('raster: histogram fully visible', hidden <= 0, f'{hidden} px below the visible part')
     save_dock('raster_exploring')
-    if STATE.get('room'):  # back to the usual size for the map images that follow
-        size, sizes = STATE['room']
-        iface.mainWindow().resize(size)
-        d.splitter_main.setSizes(sizes)
+    if STATE.get('bands_folded'):  # back to the panel as the user left it
+        coverage()._raster_panel._bands_group.setCollapsed(False)
+    if area is not None:
+        area.verticalScrollBar().setValue(0)
     return refresh_canvas()
 
 
@@ -741,7 +747,8 @@ STEPS = [s_setup, s_open_plugin, s_dock_ready,
          s_vector_source, s_vector_select, s_shot_filtering, s_shot_vector_to_raster, s_save_vector_to_raster,
          s_after_undo,
          s_multi_source, s_multi_select, s_multi_shot,
-         s_raster_source, s_raster_select, s_raster_histogram, s_raster_room, s_raster_shot, s_raster_filter, s_raster_to_vector, s_raster_save,
+         s_raster_source, s_raster_select, s_raster_histogram, s_raster_room, s_raster_scroll, s_raster_shot,
+         s_raster_filter, s_raster_to_vector, s_raster_save,
          s_raster_settled,
          s_cloud_source, s_cloud_select, s_cloud_shot, s_cloud_to_vector, s_cloud_save, s_cloud_settled,
          s_back_to_vector, s_export_tab, s_export_shot, s_config_tab, s_config_shot, s_finish]
