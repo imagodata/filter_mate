@@ -243,15 +243,17 @@
     </p>
 
     <h3>The exploring rail</h3>
-    <p>The vertical buttons to the left of the selection boxes, from top to bottom:</p>
+    <p>The vertical buttons to the left of the selection boxes, from top to bottom. Rasters and point clouds keep the same frame: Zoom and the preview first, their own map tools next, then the link, More and Reset.</p>
     <div class="table-wrap">
     <table>
         <tr><th>Button</th><th>Effect</th></tr>
-        <tr><td><strong>Identify</strong></td><td>Identifies the selected feature on the map (same as the QGIS identify tool).</td></tr>
         <tr><td><strong>Zoom</strong></td><td>Zooms the map canvas to the selected feature(s).</td></tr>
         <tr><td><strong>Selecting</strong> (toggle)</td><td>Mirrors your FilterMate selection as a QGIS selection on the map, and the other way round: selecting on the canvas updates the Exploring boxes.</td></tr>
+        <tr><td><strong>Identify</strong></td><td>Identifies the selected feature on the map (same as the QGIS identify tool).</td></tr>
         <tr><td><strong>Tracking</strong> (toggle)</td><td>Auto-zooms every time the selected feature changes.</td></tr>
+        <tr><td><strong>Zone</strong> (toggle)</td><td>Draw a rectangle, polygon, freehand shape or circle on the map (right-click the button for the shape): the features it touches are selected.</td></tr>
         <tr><td><strong>Linking</strong> (toggle)</td><td>Keeps the three selection boxes in sync: switching mode carries the current features over.</td></tr>
+        <tr><td><strong>More</strong> (⋯)</td><td>The QGIS selection tools, select by expression, invert or clear the selection, the attribute table of the selection.</td></tr>
         <tr><td><strong>Reset</strong></td><td>Clears every exploring property stored for the layer (display expression, selection, mode).</td></tr>
     </table>
     </div>
