@@ -837,3 +837,10 @@ Result: Que veux-tu faire dans cette session ?
   rendue certaine dans le smoke GUI (`s_undo_pick_race` : `singleShot(150)` de la touche, undo, `sleep`). Un choix
   fait pendant la tâche filtre est appliqué à la fin (`_combo_blocked_at`) ; une tâche échouée / annulée rouvre la
   fenêtre (`_filter_engine_task_terminated`, garde de génération pour annuler-relancer).
+- [2026-10-26] Rail EXPLORING : un seul ordre pour vecteur / raster / nuage, `RAIL_ORDER` dans
+  `ui/layout/mockup_layout.py`, appliqué par `_RailSpreader.spread()` (les outils insérés par
+  `coverage_dock_extras` suivent). Tout nouveau bouton du rail s'y ajoute (tests `test_rail_order_*`).
+- [2026-10-26] CI QGIS headless : les images qgis/qgis sur Ubuntu 26.04 (resolute) bloquent QGIS avant Python sans
+  bus de session D-Bus → lancer l'interface sous `dbus-run-session -- xvfb-run …`. Une couleur de palette lue sans
+  groupe suit l'état actif / inactif de la fenêtre (histogramme gris quand QGIS n'a pas le focus) : prendre
+  `QPalette.ColorGroup.Active` pour une couleur de donnée.

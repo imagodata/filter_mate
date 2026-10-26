@@ -8,7 +8,7 @@ name: QGIS headless
 #   docker run --rm -v "$PWD:/src:ro" qgis/qgis:ltr bash -c \
 #     'python3 /src/tests/qgis_headless/make_fixtures.py /tmp/fm && python3 /src/tests/qgis_headless/run_smoke.py /tmp/fm'
 #   docker run --rm -v "$PWD:/src:ro" -e FM_FIXTURES=/tmp/fm qgis/qgis:ltr bash -c \
-#     'python3 /src/tests/qgis_headless/make_fixtures.py /tmp/fm && xvfb-run -a qgis --nologo --noversioncheck \
+#     'python3 /src/tests/qgis_headless/make_fixtures.py /tmp/fm && dbus-run-session -- xvfb-run -a qgis --nologo --noversioncheck \
 #      --profiles-path /tmp/profiles --code /src/tests/qgis_headless/run_gui_smoke.py'
 # The streaming sources checks (lots A to E) serve their own loopback HTTP fixtures:
 #   docker run --rm -v "$PWD:/src:ro" -e QT_QPA_PLATFORM=offscreen qgis/qgis:ltr \
@@ -97,7 +97,8 @@ jobs:
             set -o pipefail  # the QGIS exit code is the test result, not the filter grep
             if [ "$INSTALL_PDAL" = "true" ]; then bash /src/tests/qgis_headless/install_pdal.sh; fi
             python3 /src/tests/qgis_headless/make_fixtures.py /tmp/fm > /dev/null
-            timeout 900 xvfb-run -a -s "-screen 0 1600x1000x24" qgis --nologo --noversioncheck --lang en \
+            # Images on Ubuntu 26.04 (resolute, 2026-10): QGIS hangs before Python without a D-Bus session bus.
+            timeout 900 dbus-run-session -- xvfb-run -a -s "-screen 0 1600x1000x24" qgis --nologo --noversioncheck --lang en \
               --profiles-path /tmp/profiles --code /src/tests/qgis_headless/run_gui_smoke.py 2>&1 \
               | grep --line-buffered -v -E "Unknown property|FutureWarning|warnings.warn"
             timeout 120 xvfb-run -a python3 /src/tests/qgis_headless/run_combo_pick_check.py'
@@ -137,7 +138,7 @@ jobs:
           "$IMAGE" bash -ec '
             set -o pipefail  # the QGIS exit code is the test result, not the filter grep
             run() {
-              timeout 420 xvfb-run -a -s "-screen 0 1600x1000x24" qgis --nologo --noversioncheck --lang en \
+              timeout 420 dbus-run-session -- xvfb-run -a -s "-screen 0 1600x1000x24" qgis --nologo --noversioncheck --lang en \
                 --profiles-path /tmp/profiles-$1 --code /src/tests/qgis_headless/check_stream_ui_async.py 2>&1 \
                 | grep --line-buffered -v -E "Unknown property|FutureWarning|warnings.warn"
             }
