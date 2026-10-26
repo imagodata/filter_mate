@@ -340,7 +340,9 @@ class RangeHistogramWidget(QWidget):
             palette = self.palette()
             rect = self._plot_rect()
             painter.fillRect(rect, palette.color(QPalette.ColorRole.Base))
-            accent = self._accent if self._accent is not None else palette.color(QPalette.ColorRole.Highlight)
+            # the Active group: an inactive window (QGIS behind another one) greys the Highlight role on Windows
+            accent = self._accent if self._accent is not None else palette.color(
+                QPalette.ColorGroup.Active, QPalette.ColorRole.Highlight)
             muted = palette.color(QPalette.ColorRole.Mid)
             if not self._counts or not self._has_extent():
                 painter.setPen(palette.color(QPalette.ColorRole.WindowText))
