@@ -5,7 +5,7 @@ and history entries the existing undo/redo handler can restore.
 
 The service is loaded by path under a private synthetic package so the domain
 module (WP-A) is stubbed, never the real one: these tests do not depend on
-core.domain.point_cloud_filter_criteria.
+filtermate_core.domain.point_cloud_filter_criteria.
 """
 import importlib.util
 import pathlib
@@ -48,18 +48,19 @@ def _package(name):
 
 
 def _load_service_module():
-    for name in (_PKG, f"{_PKG}.core", f"{_PKG}.core.services", f"{_PKG}.core.domain"):
+    core = f"{_PKG}.filtermate_core"
+    for name in (_PKG, core, f"{core}.services", f"{core}.domain"):
         _package(name)
-    domain = types.ModuleType(f"{_PKG}.core.domain.point_cloud_filter_criteria")
+    domain = types.ModuleType(f"{core}.domain.point_cloud_filter_criteria")
     domain.PointCloudFilterResult = _Result
     domain.PointCloudFilterCriteria = _Criteria
     sys.modules[domain.__name__] = domain
 
-    name = f"{_PKG}.core.services.point_cloud_filter_service"
-    path = _PROJECT_ROOT / "core" / "services" / "point_cloud_filter_service.py"
+    name = f"{core}.services.point_cloud_filter_service"
+    path = _PROJECT_ROOT / "filtermate_core" / "services" / "point_cloud_filter_service.py"
     spec = importlib.util.spec_from_file_location(name, str(path))
     module = importlib.util.module_from_spec(spec)
-    module.__package__ = f"{_PKG}.core.services"
+    module.__package__ = f"{core}.services"
     sys.modules[name] = module
     spec.loader.exec_module(module)
     return module

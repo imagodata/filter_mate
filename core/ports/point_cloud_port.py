@@ -1,42 +1,39 @@
+# -*- coding: utf-8 -*-
+"""Compatibility shim: this module moved to ``filtermate_core.ports.point_cloud_port``.
+
+The name is aliased to the moved module so existing imports, ``isinstance``
+checks and ``mock.patch`` targets keep working; new code imports
+``filtermate_core`` directly. The moved module is looked up under this
+module's own package prefix (``filter_mate.`` in QGIS, nothing when the
+sub-packages are imported from the repository root) and, failing that, as the
+top-level ``filtermate_core`` next to this file, so loaders that register the
+file under another name (tests) get the same objects.
 """
-Point Cloud Ports.
+import importlib as _importlib
+import os as _os
+import sys as _sys
 
-Abstract interfaces for point cloud layer access and subset filtering.
-They mirror ``LayerRepositoryPort`` for ``QgsPointCloudLayer`` without
-touching the vector contract.
-
-This is a PURE PYTHON module with NO QGIS dependencies.
-"""
-from abc import ABC, abstractmethod
-from typing import Any, List, Optional, TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from ..domain.point_cloud_filter_criteria import PointCloudLayerSummary
+_OLD = 'core.ports.point_cloud_port'
+_NEW = 'filtermate_core.ports.point_cloud_port'
+_ROOT = _os.path.abspath(_os.path.join(_os.path.dirname(__file__), '..', '..'))
 
 
-class PointCloudRepositoryPort(ABC):
-    """Access to the point cloud layers of the current project."""
+def _load():
+    if __name__ == _OLD or __name__.endswith('.' + _OLD):
+        try:
+            return _importlib.import_module(__name__[:-len(_OLD)] + _NEW)
+        except ImportError:
+            pass  # not reachable under this prefix: use the top-level spelling
+    if _ROOT not in _sys.path:
+        _sys.path.append(_ROOT)
+    return _importlib.import_module(_NEW)
 
-    @abstractmethod
-    def get_point_cloud_layer(self, layer_id: str) -> Optional[Any]:
-        """Return the point cloud layer with ``layer_id``, None when absent or not a point cloud."""
 
-    @abstractmethod
-    def get_all_point_cloud_layers(self) -> List[Any]:
-        """Return every point cloud layer of the project."""
+_moved = _load()
+_sys.modules[__name__] = _moved
+__all__ = getattr(_moved, '__all__', [_n for _n in vars(_moved) if not _n.startswith('_')])
 
 
-class PointCloudFilterPort(ABC):
-    """Subset application and inspection for one point cloud layer."""
-
-    @abstractmethod
-    def apply_subset(self, layer: Any, subset_string: str) -> bool:
-        """Apply ``subset_string`` (empty clears the filter); True on success."""
-
-    @abstractmethod
-    def read_subset(self, layer: Any) -> str:
-        """Return the current subset string, ``""`` when none."""
-
-    @abstractmethod
-    def read_summary(self, layer: Any) -> 'PointCloudLayerSummary':
-        """Return the attributes, classes and ranges of the layer."""
+def __getattr__(name):
+    """Delegate to the moved module for loaders that keep this module object."""
+    return getattr(_moved, name)

@@ -1,108 +1,39 @@
-"""How a validated server attribute filter reaches its provider, per QGIS version.
+# -*- coding: utf-8 -*-
+"""Compatibility shim: this module moved to ``filtermate_core.filter.server_transfer_policy``.
 
-No QGIS imports: the adapter passes ``Qgis.QGIS_VERSION_INT`` and whether
-the provider metadata declares ``ParallelCreateProvider``.
-
-ASYNC: a QgsTask prepares the filtered provider and its rollback, the layer
-consumes the preloaded provider (``readLayerXml``, QGIS >= 3.32).
-SYNC: ``setSubsetString`` on the main thread, as FilterMate did before 5.0
-(WFS only, where the provider survives it).
-REFUSE: the previous filter is kept with a clear message.
+The name is aliased to the moved module so existing imports, ``isinstance``
+checks and ``mock.patch`` targets keep working; new code imports
+``filtermate_core`` directly. The moved module is looked up under this
+module's own package prefix (``filter_mate.`` in QGIS, nothing when the
+sub-packages are imported from the repository root) and, failing that, as the
+top-level ``filtermate_core`` next to this file, so loaders that register the
+file under another name (tests) get the same objects.
 """
+import importlib as _importlib
+import os as _os
+import sys as _sys
 
-ASYNC = 'async'
-SYNC = 'sync'
-REFUSE = 'refuse'
-
-# readLayerXml(..., preloadedProvider) and ParallelCreateProvider.
-PRELOADED_PROVIDER_MIN = 33200
-
-# WFS and ArcGIS Feature Server do not all declare ParallelCreateProvider.
-# Their transfer is allowed on every QGIS that has the API, because its
-# whole lifecycle passed on each version tested (October 2026, local HTTP
-# fixtures of tests/qgis_headless/check_stream_versions.py and
-# check_stream_vector_filters.py): candidate and rollback providers created
-# in the task, HTTP-200 service errors (ArcGIS JSON, WFS OWS ExceptionReport)
-# and HTTP 500 refused, timeout and cancellation without a late mutation,
-# failed installation restored, a map canvas downloading the layer
-# meanwhile. Proven on 3.32.3 (the last 3.32 release), 3.34.5, 3.36.1,
-# 3.36.3, 3.38.3, 3.40.15, 3.42.3, 3.44.15, 4.0.3, 4.2.3 and the 4.3 nightly,
-# Qt 5 and Qt 6; no tested version failed, so the rule has no upper bound.
-# (QGIS itself reads a WFS 1.0 ServiceExceptionReport as an empty result, on
-# every version: that rejection gives an empty layer.) Database connections
-# have thread-specific state: never assume they support the pattern unless
-# their provider declares it.
-_VERIFIED_WEB_PROVIDERS = ('wfs', 'arcgisfeatureserver')
-
-# The WFS setter sends no request (features download when read). On 3.22
-# it resets the provider's shared cache in place: a render or any other
-# iterator still reading the layer then corrupts the heap (3.22.16: 12
-# crashes in 27 runs with a map canvas downloading the layer, during its
-# render or just after it was canceled). 3.24.3 and 3.26.1 never crashed
-# (0 in 66 runs each, 60 of them under load), nor did 3.28.15 (0 in 18), but
-# on 3.24 and 3.26 the setter can wait for that download to end, bounded by
-# the running request (up to 4.3 s and 3.6 s measured with a 1.5 s server
-# delay under load); 3.28 does not wait (1 - 89 ms). Raise this to 32800 to
-# avoid that wait at the cost of refusing WFS on 3.24 - 3.26.
-WFS_SETTER_SAFE_MIN = 32400
+_OLD = 'core.filter.server_transfer_policy'
+_NEW = 'filtermate_core.filter.server_transfer_policy'
+_ROOT = _os.path.abspath(_os.path.join(_os.path.dirname(__file__), '..', '..'))
 
 
-def transfer_mode(provider_key, qgis_version_int, declares_parallel):
-    """Pick ASYNC, SYNC or REFUSE for a server filter.
-
-    Args:
-        provider_key: ``layer.providerType()`` (any case).
-        qgis_version_int: ``Qgis.QGIS_VERSION_INT``.
-        declares_parallel: the provider metadata declares
-            ``ParallelCreateProvider`` (always False before QGIS 3.32).
-
-    Returns:
-        str: ASYNC, SYNC or REFUSE.
-    """
-    key = (provider_key or '').lower()
-    if qgis_version_int >= PRELOADED_PROVIDER_MIN and (declares_parallel or key in _VERIFIED_WEB_PROVIDERS):
-        return ASYNC
-    if key == 'wfs' and qgis_version_int >= WFS_SETTER_SAFE_MIN:
-        # ArcGIS fetches its object IDs inside the setter and would freeze
-        # the interface, so it has no such fallback.
-        return SYNC
-    return REFUSE
+def _load():
+    if __name__ == _OLD or __name__.endswith('.' + _OLD):
+        try:
+            return _importlib.import_module(__name__[:-len(_OLD)] + _NEW)
+        except ImportError:
+            pass  # not reachable under this prefix: use the top-level spelling
+    if _ROOT not in _sys.path:
+        _sys.path.append(_ROOT)
+    return _importlib.import_module(_NEW)
 
 
-# How long an ASYNC transfer may take before it is canceled, the previous
-# filter kept (ServerSubsetJob). 30 s was too short for the public
-# Géoplateforme WFS, which sometimes answered later (October 2026,
-# tests/qgis_headless/check_stream_e2e.py): WFS and OGC API Features wait
-# 60 s, the other providers 30 s. Configurable under
-# APP.OPTIONS.SERVER_FILTER, from 1 s to MAX_TIMEOUT_SECONDS; a malformed
-# or out-of-range value keeps the default.
-SERVER_FILTER_TIMEOUT_SECONDS = 30
-WEB_FEATURE_TIMEOUT_SECONDS = 60
-MAX_TIMEOUT_SECONDS = 600
-_WEB_FEATURE_PROVIDERS = ('wfs', 'oapif')
+_moved = _load()
+_sys.modules[__name__] = _moved
+__all__ = getattr(_moved, '__all__', [_n for _n in vars(_moved) if not _n.startswith('_')])
 
 
-def server_filter_timeout_ms(provider_key, section=None):
-    """Milliseconds a server filter of ``provider_key`` may take.
-
-    Args:
-        provider_key: ``layer.providerType()`` (any case).
-        section: ``APP.OPTIONS.SERVER_FILTER`` of the configuration, as
-            loaded (None when absent).
-
-    Returns:
-        int: its ``wfs_timeout_seconds`` (WFS, OGC API Features) or
-        ``timeout_seconds`` (other providers) in milliseconds; the default
-        when absent or malformed.
-    """
-    import math
-    if (provider_key or '').lower() in _WEB_FEATURE_PROVIDERS:
-        key, default = 'wfs_timeout_seconds', WEB_FEATURE_TIMEOUT_SECONDS
-    else:
-        key, default = 'timeout_seconds', SERVER_FILTER_TIMEOUT_SECONDS
-    entry = section.get(key) if isinstance(section, dict) else None
-    value = entry.get('value') if isinstance(entry, dict) else entry  # {"value": x, ...} or a plain x
-    if (isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value)
-            or not 1 <= value <= MAX_TIMEOUT_SECONDS):
-        value = default
-    return int(round(value * 1000))
+def __getattr__(name):
+    """Delegate to the moved module for loaders that keep this module object."""
+    return getattr(_moved, name)
