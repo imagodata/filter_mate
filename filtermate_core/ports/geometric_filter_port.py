@@ -25,6 +25,8 @@ from abc import ABC, abstractmethod
 from typing import Dict, Optional, Any
 import logging
 
+from ..domain.datasource_uri import geometry_column_from_uri
+
 logger = logging.getLogger('FilterMate.Ports.GeometricFilter')
 
 
@@ -139,7 +141,7 @@ class GeometricFilterPort(ABC):
     @abstractmethod
     def apply_filter(
         self,
-        layer: 'QgsVectorLayer',
+        layer: Any,
         expression: str,
         old_subset: Optional[str] = None,
         combine_operator: Optional[str] = None
@@ -148,7 +150,7 @@ class GeometricFilterPort(ABC):
         Apply the filter expression to the layer.
 
         Args:
-            layer: QGIS vector layer to filter
+            layer: Vector layer of the host to filter (a QgsVectorLayer in QGIS)
 
             expression: Filter expression to apply
                 - Result from build_expression()
@@ -178,12 +180,12 @@ class GeometricFilterPort(ABC):
         raise NotImplementedError("Subclasses must implement apply_filter()")
 
     @abstractmethod
-    def supports_layer(self, layer: 'QgsVectorLayer') -> bool:
+    def supports_layer(self, layer: Any) -> bool:
         """
         Check if this backend supports the given layer.
 
         Args:
-            layer: QGIS vector layer to check
+            layer: Vector layer of the host to check (a QgsVectorLayer in QGIS)
 
         Returns:
             True if this backend can handle the layer, False otherwise
@@ -279,9 +281,13 @@ class GeometricFilterPort(ABC):
 
         Tries multiple methods in order:
         1. dataProvider().geometryColumn() (most reliable)
-        2. QgsDataSourceUri.geometryColumn()
+        2. The ``table=... (column)`` of the data source URI, read as
+           QgsDataSourceUri.geometryColumn() reads it (domain.datasource_uri)
         3. Parse URI for geometryname= parameter
         4. Fall back to layer_geometry_field from props or 'geom' default
+
+        The layer is duck-typed: ``dataProvider()`` with ``geometryColumn()``
+        and ``dataSourceUri()``.
 
         Args:
             layer_props: Layer properties dictionary with 'layer' key
@@ -303,16 +309,14 @@ class GeometricFilterPort(ABC):
                 except (AttributeError, RuntimeError):
                     pass
 
-                # Method 2: QgsDataSourceUri parsing
+                # Method 2: the geometry column of the URI's table= part
                 try:
-                    from qgis.core import QgsDataSourceUri
                     uri_string = layer.dataProvider().dataSourceUri()
-                    uri_obj = QgsDataSourceUri(uri_string)
-                    uri_geom_col = uri_obj.geometryColumn()
+                    uri_geom_col = geometry_column_from_uri(uri_string)
                     if uri_geom_col:
                         self.log_debug(f"Detected geometry column via URI: '{uri_geom_col}'")
                         return uri_geom_col
-                except (ImportError, AttributeError, RuntimeError):
+                except (AttributeError, RuntimeError, TypeError):
                     pass
 
                 # Method 3: Parse URI for geometryname (GeoPackage style)
@@ -361,7 +365,7 @@ class GeometricFilterPort(ABC):
         Get SRID from layer CRS.
 
         Args:
-            layer: QgsVectorLayer instance
+            layer: Vector layer of the host (``crs()`` with ``isValid()`` and ``authid()``)
 
         Returns:
             SRID as integer, defaults to 4326
@@ -395,18 +399,6 @@ class GeometricFilterPort(ABC):
                 except (ValueError, IndexError):
                     pass
         return 4326
-
-
-# =============================================================================
-# Type hints for QGIS objects (avoid import at module level)
-# =============================================================================
-
-# These are for documentation only - actual types come from qgis.core
-try:
-    from qgis.core import QgsVectorLayer
-except ImportError:
-    # Allow module to be imported without QGIS for testing
-    QgsVectorLayer = 'QgsVectorLayer'
 
 
 # =============================================================================
