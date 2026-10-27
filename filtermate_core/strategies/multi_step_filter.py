@@ -42,12 +42,12 @@ from typing import (
 from dataclasses import dataclass, field
 from enum import Enum, auto
 
-from ...infrastructure.logging import get_logger
+from ..log import get_logger
 
 logger = get_logger(__name__)
 
 # Centralized psycopg2 availability (v2.8.6 refactoring)
-from ...infrastructure.database.postgresql_support import PSYCOPG2_AVAILABLE
+from ..sql.postgresql.availability import PSYCOPG2_AVAILABLE
 
 # For backward compatibility
 POSTGRESQL_AVAILABLE = PSYCOPG2_AVAILABLE

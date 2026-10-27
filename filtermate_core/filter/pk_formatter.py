@@ -27,11 +27,6 @@ import math
 import re
 from typing import Any, Iterable, List, Optional
 
-try:
-    from qgis.core import QgsVectorLayer
-except ImportError:
-    QgsVectorLayer = None
-
 logger = logging.getLogger('FilterMate.Core.Filter.PKFormatter')
 
 # Names a key field is assumed numeric by when neither its type nor its values are known.
@@ -144,7 +139,7 @@ def format_key_literal(value: Any, numeric: bool, dialect: str = SQL) -> str:
 
 
 def is_pk_numeric(
-    layer: 'QgsVectorLayer',
+    layer: Any,
     pk_field: str,
     sample_values: Optional[List] = None
 ) -> bool:
@@ -158,7 +153,7 @@ def is_pk_numeric(
     PostgreSQL integer read through OGR as text, v4.0.9) is still numeric.
 
     Args:
-        layer: QgsVectorLayer to check
+        layer: Vector layer of the host (duck-typed, see key_field) to check
         pk_field: Primary key field name
         sample_values: Optional PK values for value-based detection
 
@@ -188,7 +183,7 @@ def is_pk_numeric(
 def format_pk_values_for_sql(
     values: List,
     is_numeric: Optional[bool] = None,
-    layer: Optional['QgsVectorLayer'] = None,
+    layer: Optional[Any] = None,
     pk_field: Optional[str] = None,
     dialect: str = SQL
 ) -> str:
@@ -205,7 +200,7 @@ def format_pk_values_for_sql(
     Args:
         values: List of primary key values
         is_numeric: Whether PK is numeric (optional, auto-detected if None)
-        layer: QgsVectorLayer to check PK type (optional, for auto-detection)
+        layer: Vector layer of the host to check the PK type (optional, for auto-detection)
         pk_field: Primary key field name (optional, for auto-detection)
         dialect: SQL (default) or QGIS_EXPRESSION (backslashes escaped)
 

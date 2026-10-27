@@ -55,8 +55,8 @@ from typing import Optional, Dict, Any, Tuple, List
 from dataclasses import dataclass
 from enum import Enum, auto
 
-from ...infrastructure.logging import get_logger
-from ...infrastructure.constants import DEFAULT_TEMP_SCHEMA
+from ..log import get_logger
+from ..constants import DEFAULT_TEMP_SCHEMA
 
 logger = get_logger(__name__)
 

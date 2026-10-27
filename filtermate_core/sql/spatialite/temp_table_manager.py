@@ -25,7 +25,7 @@ import time
 from typing import Optional, List, Dict, Any
 from datetime import datetime
 
-from ....core.ports.materialized_view_port import (
+from ...ports.materialized_view_port import (
     MaterializedViewPort,
     ViewType,
     ViewInfo,
@@ -37,7 +37,7 @@ logger = logging.getLogger('FilterMate.Backend.Spatialite.TempTableManager')
 
 # v4.0.4: Import centralized spatialite_connect
 try:
-    from ....infrastructure.utils.task_utils import spatialite_connect
+    from .connect import spatialite_connect
 except ImportError:
     def spatialite_connect(db_path: str) -> sqlite3.Connection:
         """Fallback spatialite_connect."""
