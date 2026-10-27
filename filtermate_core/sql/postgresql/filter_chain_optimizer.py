@@ -41,8 +41,8 @@ from typing import Dict, List, Optional, Any
 from dataclasses import dataclass
 from enum import Enum
 
-from ....infrastructure.database.sql_utils import sanitize_sql_identifier
-from ....infrastructure.constants import DEFAULT_TEMP_SCHEMA
+from ..identifiers import sanitize_sql_identifier
+from ...constants import DEFAULT_TEMP_SCHEMA
 
 logger = logging.getLogger('FilterMate.Backend.PostgreSQL.FilterChainOptimizer')
 

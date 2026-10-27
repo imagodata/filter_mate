@@ -168,9 +168,15 @@ def test_one_temp_schema_constant():
     assert constants.DEFAULT_TEMP_SCHEMA == "filter_mate_temp"
     assert "filtermate_temp" in constants.LEGACY_TEMP_SCHEMAS
     assert constants.TABLE_PREFIX_MATERIALIZED == "fm_temp_mv_"
-    # the host-free core names the schema on its own; both spellings must agree
-    from filtermate_core.constants import DEFAULT_TEMP_SCHEMA as core_schema
-    assert core_schema == constants.DEFAULT_TEMP_SCHEMA
+    # the host-free core names the schema and the buffer tables on its own; both must agree
+    from filtermate_core import constants as core_constants
+    assert core_constants.DEFAULT_TEMP_SCHEMA == constants.DEFAULT_TEMP_SCHEMA
+    assert core_constants.TABLE_PREFIX_BUFFER == constants.TABLE_PREFIX_BUFFER
+    # the cleanup finds the buffer tables by its own copy of the prefix
+    cleanup = ast.parse((PG_DIR / "cleanup.py").read_text(encoding="utf-8"))
+    prefix = next(node.value.value for node in cleanup.body if isinstance(node, ast.Assign)
+                  and any(getattr(t, "id", "") == "BUFFER_TABLE_PREFIX" for t in node.targets))
+    assert prefix == core_constants.TABLE_PREFIX_BUFFER
 
 
 _SCANNED = ("adapters", "core", "filtermate_core", "infrastructure", "config", "ui", "extensions")
@@ -200,7 +206,7 @@ def test_v4_backend_modules_use_the_constant():
     # source text check: these classes are not importable outside QGIS
     for relative, needle in [
         ("adapters/backends/postgresql/mv_manager.py", "MV_SCHEMA = DEFAULT_TEMP_SCHEMA"),
-        ("adapters/backends/postgresql/filter_chain_optimizer.py", "MV_SCHEMA = DEFAULT_TEMP_SCHEMA"),
+        ("filtermate_core/sql/postgresql/filter_chain_optimizer.py", "MV_SCHEMA = DEFAULT_TEMP_SCHEMA"),
         ("adapters/backends/postgresql/cleanup.py", "DEFAULT_SCHEMA = DEFAULT_TEMP_SCHEMA"),
         ("core/services/postgres_session_manager.py", "DEFAULT_SCHEMA = DEFAULT_TEMP_SCHEMA"),
         ("filtermate_core/optimization/combined_query_optimizer.py", "FILTERMATE_MV_SCHEMA = DEFAULT_TEMP_SCHEMA"),

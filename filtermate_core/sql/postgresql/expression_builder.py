@@ -1,18 +1,24 @@
 # -*- coding: utf-8 -*-
 """
-PostgreSQL Expression Builder.
+PostgreSQL Expression Builder: the PostGIS SQL of FilterMate's spatial filters, without a host.
 
 v4.1.0: Migrated from before_migration/modules/backends/postgresql_backend.py
+2026-10-27 (S0 step 3): moved from adapters/backends/postgresql/ into the
+host-free core. ``PostgreSQLSqlBuilder`` builds the SQL; what needs the host
+goes through four methods a host overrides:
 
-This module contains the SQL expression building logic for PostGIS spatial filters.
-It implements the GeometricFilterPort interface for PostgreSQL backends.
+- ``_connection_for_layer(layer)``: DB-API connection to the layer's database
+  (statement timeout, pre-computed buffer tables); None by default, then the
+  timeout is skipped and a dynamic buffer is inlined (in filter chaining,
+  where only the table works, the builder answers None);
+- ``_notify_user_warning(message)``: a warning meant for the user; the log by default;
+- ``_authid_to_srid(authid)`` / ``_srid_is_geographic(srid)``: CRS lookups;
+  by default an ``EPSG:n`` code and a list of known lon/lat SRIDs.
 
-Architecture:
-- PostgreSQLExpressionBuilder: Implements GeometricFilterPort for expression building
-- PostgreSQLBackend: Uses the new BackendPort interface (execute())
-
-The ExpressionBuilder is used by LegacyAdapter to maintain backward compatibility
-with FilterEngineTask while the codebase transitions to the new architecture.
+``supports_layer`` and ``apply_filter`` (putting the SQL on a layer) are the
+host's: ``adapters.backends.postgresql.expression_builder.PostgreSQLExpressionBuilder``
+is the QGIS implementation. Layers are duck-typed (``dataProvider()``,
+``crs()``, ``fields()``).
 
 Author: FilterMate Team
 Date: January 2026
@@ -24,36 +30,16 @@ import hashlib
 import logging
 import re
 import uuid
-from typing import TYPE_CHECKING, Dict, List, Optional, Tuple, Any
+from typing import Dict, List, Optional, Tuple, Any
 
-if TYPE_CHECKING:
-    from qgis.core import QgsVectorLayer
+from ...domain.datasource_uri import geometry_column_from_uri, table_from_uri
+from ...ports.geometric_filter_port import GeometricFilterPort
 
 logger = logging.getLogger('FilterMate.Backend.PostgreSQL.ExpressionBuilder')
 
 # Lon/lat SRIDs recognised when the QGIS CRS database is not available
 # (WGS 84, ETRS89, NAD83, RGF93 geographic, ED50, NTF).
 _GEOGRAPHIC_SRIDS = frozenset({4326, 4258, 4269, 4171, 4230, 4275})
-
-# Import the port interface
-try:
-    from ....core.ports.geometric_filter_port import GeometricFilterPort
-except ImportError:
-    # Fallback for direct import
-    from core.ports.geometric_filter_port import GeometricFilterPort
-
-# Import safe_set_subset_string from infrastructure
-try:
-    from ....infrastructure.database.sql_utils import safe_set_subset_string
-except ImportError:
-    def safe_set_subset_string(layer, expression):
-        """Fallback implementation."""
-        if layer is None:
-            return False
-        try:
-            return layer.setSubsetString(expression)
-        except Exception:
-            return False
 
 # v4.2.10: Import filter chain optimizer for MV-based optimization
 try:
@@ -68,12 +54,13 @@ except ImportError:
     logger.debug("Filter chain optimizer not available")
 
 
-class PostgreSQLExpressionBuilder(GeometricFilterPort):
+class PostgreSQLSqlBuilder(GeometricFilterPort):
     """
     PostgreSQL/PostGIS expression builder.
 
     Generates PostGIS SQL expressions for spatial filtering.
-    Implements the legacy GeometricFilterPort interface for backward compatibility.
+    Implements the legacy GeometricFilterPort interface for backward compatibility;
+    ``supports_layer`` and ``apply_filter`` are left to the host's subclass.
 
     Features:
     - Simple WKT mode for small datasets
@@ -84,8 +71,8 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
     - Column case normalization
     - Numeric type casting for varchar fields
 
-    Example:
-        builder = PostgreSQLExpressionBuilder(task_params)
+    Example (with a host subclass, e.g. the QGIS PostgreSQLExpressionBuilder):
+        builder = HostBuilder(task_params)
         expr = builder.build_expression(
             layer_props={'layer_schema': 'public', 'layer_table_name': 'buildings'},
             predicates={'intersects': True},
@@ -140,20 +127,6 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
     def get_backend_name(self) -> str:
         """Get backend name."""
         return "PostgreSQL"
-
-    def supports_layer(self, layer: 'QgsVectorLayer') -> bool:
-        """
-        Check if this backend supports the given layer.
-
-        Args:
-            layer: QGIS vector layer to check
-
-        Returns:
-            True if layer is PostgreSQL
-        """
-        if layer is None:
-            return False
-        return layer.providerType() == 'postgres'
 
     def build_expression(
         self,
@@ -213,11 +186,10 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
 
         if layer:
             try:
-                from qgis.core import QgsDataSourceUri
-                uri = QgsDataSourceUri(layer.dataProvider().dataSourceUri())
-                schema = uri.schema() or "public"
-                table = uri.table()
-                geom_field = uri.geometryColumn() or "geom"
+                uri = table_from_uri(layer.dataProvider().dataSourceUri())
+                schema = uri.schema or "public"
+                table = uri.table
+                geom_field = uri.geometry_column or "geom"
                 self.log_debug(f"Extracted from URI: schema={schema}, table={table}, geom={geom_field}")
             except Exception as e:
                 self.log_warning(f"Failed to extract from URI: {e}")
@@ -326,10 +298,7 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
 
         if source_filter and 'EXISTS' in source_filter.upper():
             # Extract EXISTS clauses to combine at the top level
-            try:
-                from ....core.filter.expression_combiner import extract_exists_clauses, adapt_exists_for_nested_context
-            except ImportError:
-                from core.filter.expression_combiner import extract_exists_clauses, adapt_exists_for_nested_context
+            from ...filter.expression_combiner import extract_exists_clauses, adapt_exists_for_nested_context
             extracted = extract_exists_clauses(source_filter)
             if extracted:
                 # FIX v4.2.12 (2026-01-21): Adapt EXISTS clauses for distant layer context
@@ -534,11 +503,10 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
 
         if layer:
             try:
-                from qgis.core import QgsDataSourceUri
-                uri = QgsDataSourceUri(layer.dataProvider().dataSourceUri())
-                distant_schema = uri.schema() or distant_schema
-                distant_table = uri.table() or distant_table
-                distant_geom = uri.geometryColumn() or distant_geom
+                uri = table_from_uri(layer.dataProvider().dataSourceUri())
+                distant_schema = uri.schema or distant_schema
+                distant_table = uri.table or distant_table
+                distant_geom = uri.geometry_column or distant_geom
             except (AttributeError, RuntimeError, KeyError):
                 pass  # Use default values if URI parsing fails
 
@@ -616,95 +584,6 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
             **kwargs
         )
 
-    def apply_filter(
-        self,
-        layer: 'QgsVectorLayer',
-        expression: str,
-        old_subset: Optional[str] = None,
-        combine_operator: Optional[str] = None
-    ) -> bool:
-        """
-        Apply filter to PostgreSQL layer.
-
-        Args:
-            layer: PostgreSQL layer to filter
-            expression: PostGIS SQL expression
-            old_subset: Existing subset string
-            combine_operator: Operator to combine (AND/OR)
-
-        Returns:
-            True if filter applied successfully
-        """
-        # DIAGNOSTIC 2026-01-19: Trace apply_filter execution
-
-        try:
-            if not expression:
-                self.last_error = "Empty expression, skipping filter"
-                self.log_warning(self.last_error)
-                return False
-
-            # Normalize column case and apply type casting
-            expression = self._normalize_column_case(expression, layer)
-            expression = self._apply_numeric_type_casting(expression, layer)
-
-            if old_subset:
-                old_subset = self._normalize_column_case(old_subset, layer)
-                old_subset = self._apply_numeric_type_casting(old_subset, layer)
-
-            # Handle existing subset
-            if old_subset and combine_operator:
-                # Check if old subset contains geometric filter (should be replaced)
-                if self._is_geometric_filter(old_subset):
-                    self.log_info("🔄 Replacing geometric filter in old_subset")
-                    final_expression = expression
-                else:
-                    # Combine with attribute filter
-                    final_expression = f"({old_subset}) {combine_operator} ({expression})"
-                    self.log_info(f"✅ Combined with existing filter using {combine_operator}")
-            else:
-                final_expression = expression
-
-            # DIAGNOSTIC: Print final expression before applying
-
-            # Apply filter
-            # FIX v4.2.13: Enhanced logging for debugging failures
-            self.log_info(f"📝 Applying PostgreSQL filter to {layer.name()}:")
-            self.log_info(f"   Expression length: {len(final_expression)} chars")
-            self.log_debug(f"   Expression preview: {final_expression[:300]}...")
-
-            # 2026-04-29 fix: prefer the task's subset queue when available so
-            # `setSubsetString` runs on the Qt main thread. Same root cause as
-            # the spatialite cascade silent no-op — calling setSubsetString
-            # straight from `QgsTask.run()` (worker) is not thread-safe per
-            # `FilterEngineTask.queue_subset_request` docstring. PG appeared
-            # to "work" historically only because EXISTS subsets are short
-            # enough that the worker-thread call sometimes succeeds; routing
-            # through the queue eliminates the race for both backends.
-            queue_callback = self.task_params.get('_subset_queue_callback') if self.task_params else None
-            if queue_callback is not None:
-                queue_callback(layer, final_expression)
-                self.log_info(f"✓ Filter queued for main-thread application: {layer.name()}")
-                return True
-
-            success = safe_set_subset_string(layer, final_expression)
-
-            if success:
-                self.log_info(f"✓ Filter applied successfully to {layer.name()}")
-                self.log_info(f"   → Feature count after filter: {layer.featureCount()}")
-            else:
-                self.last_error = f"setSubsetString failed for {layer.name()} (postgresql, expr_len={len(final_expression)})"
-                self.log_error(f"✗ FAILED to apply filter to {layer.name()}!")
-                self.log_error("   → This triggers OGR fallback")
-                # Log the FULL expression for debugging (not truncated)
-                self.log_error(f"   Expression that FAILED:\n{final_expression}")
-
-            return success
-
-        except Exception as e:
-            self.last_error = f"PostgreSQL apply_filter exception: {e}"
-            self.log_error(self.last_error)
-            return False
-
     # =========================================================================
     # Private Helper Methods
     # =========================================================================
@@ -716,11 +595,7 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
 
         if layer:
             try:
-                from qgis.core import QgsDataSourceUri
-                provider = layer.dataProvider()
-                uri_string = provider.dataSourceUri()
-                uri_obj = QgsDataSourceUri(uri_string)
-                geom_col = uri_obj.geometryColumn()
+                geom_col = geometry_column_from_uri(layer.dataProvider().dataSourceUri())
                 if geom_col:
                     geom_field = geom_col
                     self.log_debug(f"Detected geometry column: '{geom_field}'")
@@ -791,19 +666,34 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
             self.log_warning("   → Filter chaining (multiple EXISTS)")
             self.log_warning("   ⚠️  This may cause slow performance or timeout")
 
-            # Warn user via QGIS message bar
+            # Warn the user (QGIS: the message log)
             try:
-                from qgis.core import QgsMessageLog, Qgis
-                QgsMessageLog.logMessage(
+                self._notify_user_warning(
                     f"⚠️ FilterMate: Complex query on '{layer_name}'\n"
                     f"Combining dynamic buffer ({buffer_expression[:30]}...) with filter chaining.\n"
                     "Query may take 10-60 seconds. A 2-minute timeout is set for protection.\n"
-                    "Consider using static buffer values for better performance.",
-                    "FilterMate",
-                    Qgis.MessageLevel.Warning
+                    "Consider using static buffer values for better performance."
                 )
             except Exception as e:
                 self.log_debug(f"Could not display warning in QGIS UI: {e}")
+
+    # =========================================================================
+    # Host hooks (2026-10-27): what the SQL generation asks of the host
+    # =========================================================================
+
+    def _connection_for_layer(self, layer):
+        """DB-API connection to the database of ``layer``, None when the host gives none.
+
+        Used for the statement timeout of complex queries and the
+        pre-computed buffer tables of dynamic buffers: without a connection
+        the timeout is skipped and the buffer is inlined in the SQL, except in
+        filter chaining, where the builder answers None (OGR fallback).
+        """
+        return None
+
+    def _notify_user_warning(self, message: str) -> None:
+        """Show ``message`` to the user; the log when the host has no other place."""
+        self.log_warning(message)
 
     def _set_query_timeout(self, layer) -> None:
         """
@@ -820,8 +710,7 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
 
         try:
             # Get PostgreSQL connection from layer
-            from ....infrastructure.utils import get_datasource_connexion_from_layer
-            connexion, _ = get_datasource_connexion_from_layer(layer)
+            connexion = self._connection_for_layer(layer)
 
             if not connexion:
                 self.log_warning("No PostgreSQL connection available for timeout")
@@ -861,16 +750,13 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
 
     @classmethod
     def _authid_to_srid(cls, authid) -> Optional[int]:
-        """PostGIS SRID of a CRS authid (``EPSG:2154`` → 2154), None when unknown."""
+        """PostGIS SRID of a CRS authid (``EPSG:2154`` → 2154), None when unknown.
+
+        Without a CRS database only ``EPSG:<n>`` is understood; a host that has
+        one overrides this to resolve other authorities.
+        """
         if not authid or not isinstance(authid, str):
             return None
-        try:
-            from qgis.core import QgsCoordinateReferenceSystem
-            srid = cls._positive_srid(QgsCoordinateReferenceSystem(authid).postgisSrid())
-            if srid:
-                return srid
-        except Exception:  # nosec B110 - no QGIS CRS database: parse the EPSG code below
-            pass
         match = re.fullmatch(r'\s*EPSG:(\d+)\s*', authid, re.IGNORECASE)
         return cls._positive_srid(int(match.group(1))) if match else None
 
@@ -899,16 +785,13 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
 
     @staticmethod
     def _srid_is_geographic(srid: Optional[int]) -> bool:
-        """Whether ``srid`` is a lon/lat CRS (degrees)."""
+        """Whether ``srid`` is a lon/lat CRS (degrees).
+
+        Without a CRS database: the SRIDs of ``_GEOGRAPHIC_SRIDS``; a host
+        that has one overrides this.
+        """
         if not srid:
             return False
-        try:
-            from qgis.core import QgsCoordinateReferenceSystem
-            crs = QgsCoordinateReferenceSystem(f"EPSG:{int(srid)}")
-            if crs.isValid() is True:
-                return crs.isGeographic() is True
-        except Exception:  # nosec B110 - no QGIS CRS database: known lon/lat SRIDs below
-            pass
         return int(srid) in _GEOGRAPHIC_SRIDS
 
     @staticmethod
@@ -982,7 +865,7 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
         At most 12 + 12 + 1 + 20 = 45 characters: the 63-character identifier
         limit is never reached, also with the ``idx_..._geom`` index name.
         """
-        from ....infrastructure.constants import TABLE_PREFIX_BUFFER
+        from ...constants import TABLE_PREFIX_BUFFER
         params = self.task_params if self.task_params is not None else {}
         # The token lives in the "task" section: the app rebuilds it for each
         # task, while the top-level dict is the layer's PROJECT_LAYERS entry,
@@ -1007,7 +890,7 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
         params = self.task_params or {}
         task_section = params.get('task') if isinstance(params.get('task'), dict) else {}
         session_id = params.get('session_id') or task_section.get('session_id') or ''
-        from .cleanup import session_token
+        from .naming import session_token
         return session_token(session_id)
 
     def _build_exists_with_buffer_table(
@@ -1051,8 +934,7 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
             EXISTS expression using temp buffer table
         """
         import time
-        from .filter_executor import qgis_expression_to_postgis
-        from ....infrastructure.utils import get_datasource_connexion_from_layer
+        from .qgis_expression import qgis_expression_to_postgis
 
         start_time = time.time()
 
@@ -1062,7 +944,7 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
             return None
 
         # Get PostgreSQL connection
-        connexion, _ = get_datasource_connexion_from_layer(layer)
+        connexion = self._connection_for_layer(layer)
         if not connexion:
             self.log_warning("No PostgreSQL connection for buffer table")
             return None
@@ -1816,7 +1698,7 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
                 return None
 
             # Non-complex: Use inline buffer (existing code)
-            from .filter_executor import qgis_expression_to_postgis
+            from .qgis_expression import qgis_expression_to_postgis
             buffer_expr_sql = qgis_expression_to_postgis(buffer_expression)
 
             # Prefix field references with __source. for subquery context
@@ -2179,5 +2061,6 @@ class PostgreSQLExpressionBuilder(GeometricFilterPort):
 # =============================================================================
 
 __all__ = [
-    'PostgreSQLExpressionBuilder',
+    'CHAIN_OPTIMIZER_AVAILABLE',
+    'PostgreSQLSqlBuilder',
 ]
