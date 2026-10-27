@@ -21,7 +21,6 @@ Date: January 2025
 """
 
 import logging
-import re
 from typing import Optional, List, Tuple
 from datetime import datetime
 
@@ -43,10 +42,10 @@ logger = logging.getLogger('FilterMate.Cleanup.PostgreSQL')
 BUFFER_TABLE_PREFIX = "fm_temp_buf_"
 
 
-def session_token(session_id) -> str:
-    """``session_id`` reduced to ``[0-9a-z]{1,12}``, as buffer table names carry it."""
-    token = re.sub(r'[^0-9a-z]', '', str(session_id or '').lower())[:12]
-    return token or 'nosession'
+try:
+    from ....filtermate_core.sql.postgresql.naming import session_token  # noqa: F401  (moved to the host-free core)
+except ImportError:  # imported from the repository root (tests)
+    from filtermate_core.sql.postgresql.naming import session_token  # noqa: F401
 
 
 def _like_prefix(prefix: str) -> str:

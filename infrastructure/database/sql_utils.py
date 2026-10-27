@@ -7,7 +7,6 @@ Provides SQL sanitization and safety functions.
 Migrated from modules/appUtils.py to infrastructure/database/sql_utils.py
 """
 
-import re
 import logging
 import sys
 import time as _perf
@@ -75,39 +74,10 @@ def feature_picker_guard(layer):
                 logger.debug(f"FIX-2026-02-11: feature_picker_guard reattach failed: {e}")
 
 
-def sanitize_sql_identifier(identifier: str) -> str:
-    """
-    Sanitize SQL identifier (table name, column name, schema name).
-
-    Removes or replaces dangerous characters that could lead to SQL injection
-    or syntax errors.
-
-    Args:
-        identifier: Raw SQL identifier (table, column, schema name)
-
-    Returns:
-        str: Sanitized identifier safe for SQL queries
-
-    Examples:
-        >>> sanitize_sql_identifier("my_table")
-        'my_table'
-        >>> sanitize_sql_identifier("table; DROP TABLE users;")
-        'table_DROP_TABLE_users'
-        >>> sanitize_sql_identifier("schema.table")
-        'schema.table'
-    """
-    if not identifier:
-        return ""
-
-    # Remove dangerous characters, keep only alphanumeric, underscore, dot, quotes
-    # Allow dots for schema.table notation
-    # Allow double quotes for PostgreSQL quoted identifiers
-    sanitized = re.sub(r'[^\w\.\"]', '_', str(identifier))
-
-    # Remove leading/trailing underscores added by sanitization
-    sanitized = sanitized.strip('_')
-
-    return sanitized
+try:
+    from ...filtermate_core.sql.identifiers import sanitize_sql_identifier  # noqa: F401  (moved to the host-free core)
+except ImportError:  # imported from the repository root (tests)
+    from filtermate_core.sql.identifiers import sanitize_sql_identifier  # noqa: F401
 
 
 def _layer_count_label(layer) -> str:

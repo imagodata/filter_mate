@@ -16,6 +16,13 @@ Tests the PostgreSQLExpressionBuilder class for:
 - Supports_layer check
 
 All QGIS dependencies are mocked via the root conftest.py.
+
+2026-10-27: the SQL generation lives in
+filtermate_core.sql.postgresql.expression_builder (PostgreSQLSqlBuilder, with
+the real GeometricFilterPort); the module loaded here is the QGIS subclass.
+Loaded under a stub ``filter_mate`` package, its core import falls back to the
+top-level ``filtermate_core``: the patches of the translation and the
+constants target that package.
 """
 import sys
 import types
@@ -41,7 +48,6 @@ def _ensure_module_mocks():
     mocks_needed = {
         f"{ROOT}.core": MagicMock(),
         f"{ROOT}.core.ports": MagicMock(),
-        f"{ROOT}.core.ports.geometric_filter_port": MagicMock(),
         f"{ROOT}.core.filter": MagicMock(),
         f"{ROOT}.core.filter.expression_combiner": MagicMock(),
         f"{ROOT}.infrastructure": MagicMock(),
@@ -52,7 +58,6 @@ def _ensure_module_mocks():
         f"{ROOT}.adapters": MagicMock(),
         f"{ROOT}.adapters.backends": MagicMock(),
         f"{ROOT}.adapters.backends.postgresql": MagicMock(),
-        f"{ROOT}.adapters.backends.postgresql.filter_chain_optimizer": MagicMock(),
         f"{ROOT}.adapters.backends.postgresql.filter_executor": MagicMock(),
     }
 
@@ -60,41 +65,16 @@ def _ensure_module_mocks():
         if mod_name not in sys.modules:
             sys.modules[mod_name] = mock_obj
 
-    # Provide a real ABC base for GeometricFilterPort so the builder can subclass
-    from abc import ABC
-
-    class _FakeGeometricFilterPort(ABC):
-        def __init__(self, task_params):
-            self.task_params = task_params
-            self._warnings = []
-
-        def log_debug(self, msg): pass
-        def log_info(self, msg): pass
-        def log_warning(self, msg): self._warnings.append(msg)
-        def log_error(self, msg): pass
-
-        def _get_buffer_endcap_style(self):
-            return self.task_params.get("buffer_endcap_style", "round")
-
-        def _apply_centroid_transform(self, geom_expr, layer_props):
-            return f"ST_PointOnSurface({geom_expr})"
-
-    sys.modules[f"{ROOT}.core.ports.geometric_filter_port"].GeometricFilterPort = _FakeGeometricFilterPort
-    # Also ensure safe_set_subset_string is a callable
+    # Ensure safe_set_subset_string is a callable
     sys.modules[f"{ROOT}.infrastructure.database.sql_utils"].safe_set_subset_string = MagicMock(return_value=True)
     sys.modules[f"{ROOT}.infrastructure.database.sql_utils"].sanitize_sql_identifier = lambda x: x
-
-    # Mark chain optimizer as unavailable so import doesn't fail
-    chain_mod = sys.modules[f"{ROOT}.adapters.backends.postgresql.filter_chain_optimizer"]
-    chain_mod.FilterChainOptimizer = MagicMock
-    chain_mod.FilterChainContext = MagicMock
-    chain_mod.OptimizationStrategy = MagicMock
 
 
 _ensure_module_mocks()
 
 
 # Now import the class under test
+import importlib
 import importlib.util
 import os
 
@@ -846,9 +826,9 @@ class TestDynamicBufferTable:
 
     @pytest.fixture(autouse=True)
     def _constants(self, monkeypatch):
-        constants = sys.modules["filter_mate.infrastructure.constants"]
+        constants = importlib.import_module("filtermate_core.constants")
         monkeypatch.setattr(constants, "TABLE_PREFIX_BUFFER", "fm_temp_buf_", raising=False)
-        executor = sys.modules["filter_mate.adapters.backends.postgresql.filter_executor"]
+        executor = importlib.import_module("filtermate_core.sql.postgresql.qgis_expression")
         monkeypatch.setattr(executor, "qgis_expression_to_postgis", lambda expr: expr, raising=False)
 
     @staticmethod
@@ -1232,9 +1212,9 @@ class TestSourceTargetSrid:
     def test_buffer_table_rows_are_reprojected(self, monkeypatch):
         b = TestDynamicBufferTable._builder()
         b.task_params["infos"] = {"layer_crs_authid": "EPSG:4326"}
-        constants = sys.modules["filter_mate.infrastructure.constants"]
+        constants = importlib.import_module("filtermate_core.constants")
         monkeypatch.setattr(constants, "TABLE_PREFIX_BUFFER", "fm_temp_buf_", raising=False)
-        executor = sys.modules["filter_mate.adapters.backends.postgresql.filter_executor"]
+        executor = importlib.import_module("filtermate_core.sql.postgresql.qgis_expression")
         monkeypatch.setattr(executor, "qgis_expression_to_postgis", lambda expr: expr, raising=False)
         cursor = _RecordingCursor()
         utils = sys.modules["filter_mate.infrastructure.utils"]
@@ -1257,9 +1237,9 @@ class TestSourceTargetSrid:
     def test_dynamic_buffer_of_a_geographic_source_is_in_metres(self, monkeypatch):
         b = TestDynamicBufferTable._builder()
         b.task_params["infos"] = {"layer_crs_authid": "EPSG:4326"}
-        constants = sys.modules["filter_mate.infrastructure.constants"]
+        constants = importlib.import_module("filtermate_core.constants")
         monkeypatch.setattr(constants, "TABLE_PREFIX_BUFFER", "fm_temp_buf_", raising=False)
-        executor = sys.modules["filter_mate.adapters.backends.postgresql.filter_executor"]
+        executor = importlib.import_module("filtermate_core.sql.postgresql.qgis_expression")
         monkeypatch.setattr(executor, "qgis_expression_to_postgis", lambda expr: expr, raising=False)
         cursor = _RecordingCursor()
         utils = sys.modules["filter_mate.infrastructure.utils"]
