@@ -7,12 +7,13 @@ It is the part of the plugin another GIS (or a plain Python program) can embed.
 
 | Package | Contents |
 |---|---|
-| `domain/` | value objects and criteria: filter expressions and results, layer descriptions, raster and point-cloud criteria, centroid targets |
+| `domain/` | value objects and criteria: filter expressions and results, layer descriptions, raster and point-cloud criteria, centroid targets; `datasource_uri` reads the geometry column of a QGIS URI as `QgsDataSourceUri` does |
 | `filter/` | expression combination (`expression_combiner`), sanitisation, SQL quoting, server dialects, transfer policy |
 | `optimization/` | query analysis, combined-query optimiser, performance advisor, backend selection |
 | `services/` | host-free application services: filter, expression, buffer, source-subset buffer, point cloud |
 | `strategies/` | progressive and multi-step filtering |
-| `ports/` | the interfaces a host implements for the core: backend, filter executor, repository, cache, materialized views, point clouds, host layer (`qgis_port`, kept under its historical name) |
+| `ports/` | the interfaces a host implements for the core: backend, filter executor, repository, cache, materialized views, point clouds, geometric filter backends, host layer and geometry (`qgis_port`, kept under its historical name) |
+| `geometry/` | `IGeometry` on shapely (`ShapelyGeometry`, reprojection with pyproj) and the spatial filter's semantics: `source_union` + `matches` (see below) |
 | `sql/postgresql/` | SQL safety checks, optimiser, materialized-view reference tracking, driver availability |
 | `sql/spatialite/` | index and temp-table managers, cache, Spatialite connection |
 | `tasks/builders/` | subset-string builder shared with the host's task layer |
@@ -51,3 +52,22 @@ from filtermate_core.filter.expression_combiner import combine_expressions
 ```
 
 Everything a host must provide is declared in `ports/`.
+
+## The spatial filter without a database
+
+`filtermate_core.geometry` (needs `shapely>=2.0`; `pyproj` to reproject)
+applies the rule the SQL backends implement: a target is kept when one of the
+enabled predicates holds between it and the **union** of the selected source
+features, each made valid, the union grown (or eroded) by the buffer. A target
+without geometry is never kept.
+
+```python
+from filtermate_core.geometry import ShapelyGeometry, matches, source_union
+
+source = source_union([ShapelyGeometry.from_wkt(w) for w in selected_wkts], buffer_distance=50)
+kept = [f for f in targets if matches(f.geometry, source, {"intersects": True, "touches": False})]
+```
+
+Testing each source feature alone gives other answers for `within`,
+`coveredby`, `touches`, `contains`, `covers`, `equals`, `overlaps`, `crosses`
+and `disjoint`, and for a negative buffer.
