@@ -1,11 +1,23 @@
 # -*- coding: utf-8 -*-
 """
-Spatialite Expression Builder.
+Spatialite Expression Builder: the SpatiaLite / GeoPackage SQL of FilterMate's spatial filters, without a host.
 
 v4.1.0: Migrated from before_migration/modules/backends/spatialite_backend.py
+2026-10-28 (S0 step 4): moved from adapters/backends/spatialite/ into the
+host-free core. ``SpatialiteSqlBuilder`` builds the SQL and reads GeoPackage
+R-trees with ``sqlite3``; what needs the host goes through two methods a host
+overrides:
 
-This module contains the SQL expression building logic for Spatialite spatial filters.
-It implements the GeometricFilterPort interface for Spatialite backends.
+- ``_wkt_bounds_in_target_crs(wkt, source_srid, target_srid)``: the source's
+  bounding box in the target CRS (R-tree prefilter, inline cost); by default
+  ``domain.wkt_bounds`` when both SRIDs are the same, else None (no prefilter);
+- ``_json1_available()``: whether the host's OGR backend can write long key
+  lists with ``json_each``; False by default (a costly source stays inline).
+
+``supports_layer`` and ``apply_filter`` are the host's:
+``adapters.backends.spatialite.expression_builder.SpatialiteExpressionBuilder``
+is the QGIS implementation. Layers are duck-typed (``providerType()``,
+``source()``, ``crs()``, ``dataProvider()``).
 
 Features:
 - GeoPackage support with GeomFromGPB conversion
@@ -28,31 +40,10 @@ import time
 from typing import Dict, Optional, Any, Tuple
 from urllib.request import pathname2url
 
-try:
-    from qgis.core import QgsVectorLayer
-except ImportError:
-    QgsVectorLayer = None
+from ...domain.wkt_bounds import wkt_bounds
+from ...ports.geometric_filter_port import GeometricFilterPort
 
 logger = logging.getLogger('FilterMate.Backend.Spatialite.ExpressionBuilder')
-
-# Import the port interface
-try:
-    from ....core.ports.geometric_filter_port import GeometricFilterPort
-except ImportError:
-    from core.ports.geometric_filter_port import GeometricFilterPort
-
-# Import safe_set_subset_string from infrastructure
-try:
-    from ....infrastructure.database.sql_utils import safe_set_subset_string
-except ImportError:
-    def safe_set_subset_string(layer, expression):
-        """Fallback implementation."""
-        if layer is None:
-            return False
-        try:
-            return layer.setSubsetString(expression)
-        except Exception:
-            return False
 
 # Sentinel value for OGR fallback
 USE_OGR_FALLBACK = "__USE_OGR_FALLBACK__"
@@ -118,18 +109,6 @@ _GEOMETRIC_FILTER_RE = re.compile(
     r"|MbrIntersects|GeomFromText|GeomFromGPB|Buffer)\s*\(",
     re.IGNORECASE,
 )
-
-
-def json1_available() -> bool:
-    """Whether GDAL's SQLite has ``json_each`` (see infrastructure.database.sqlite_capabilities)."""
-    try:
-        from ....infrastructure.database.sqlite_capabilities import gdal_sqlite_json1_available
-    except ImportError:
-        try:
-            from infrastructure.database.sqlite_capabilities import gdal_sqlite_json1_available
-        except ImportError:
-            return False
-    return gdal_sqlite_json1_available()
 
 
 def task_scoped_cache(task, name: str, owner) -> dict:
@@ -256,12 +235,13 @@ def clear_rtree_cache() -> None:
         _RTREE_COUNT_CACHE.clear()
 
 
-class SpatialiteExpressionBuilder(GeometricFilterPort):
+class SpatialiteSqlBuilder(GeometricFilterPort):
     """
     Spatialite expression builder.
 
     Generates Spatialite SQL expressions for spatial filtering.
-    Implements the legacy GeometricFilterPort interface for backward compatibility.
+    Implements the legacy GeometricFilterPort interface for backward compatibility;
+    ``supports_layer`` and ``apply_filter`` are left to the host's subclass.
 
     Features:
     - GeoPackage binary geometry support
@@ -270,8 +250,8 @@ class SpatialiteExpressionBuilder(GeometricFilterPort):
     - Centroid optimization
     - CRS transformation
 
-    Example:
-        builder = SpatialiteExpressionBuilder(task_params)
+    Example (with a host subclass, e.g. the QGIS SpatialiteExpressionBuilder):
+        builder = HostBuilder(task_params)
         expr = builder.build_expression(
             layer_props={'layer_table_name': 'buildings'},
             predicates={'intersects': True},
@@ -316,31 +296,6 @@ class SpatialiteExpressionBuilder(GeometricFilterPort):
     def get_backend_name(self) -> str:
         """Get backend name."""
         return "Spatialite"
-
-    def supports_layer(self, layer: 'QgsVectorLayer') -> bool:
-        """
-        Check if this backend supports the given layer.
-
-        Args:
-            layer: QGIS vector layer to check
-
-        Returns:
-            True if layer is Spatialite or GeoPackage
-        """
-        if layer is None:
-            return False
-
-        provider = layer.providerType()
-        if provider == 'spatialite':
-            return True
-
-        # Check for GeoPackage via OGR
-        if provider == 'ogr':
-            source = layer.source().lower()
-            if '.gpkg' in source or 'gpkg|' in source:
-                return True
-
-        return False
 
     def build_expression(
         self,
@@ -474,7 +429,7 @@ class SpatialiteExpressionBuilder(GeometricFilterPort):
             (inline_cost is None and wkt_length > SPATIALITE_WKT_STATIC_INLINE_LIMIT)
             or (inline_cost is not None and inline_cost > SPATIALITE_INLINE_BUDGET_SECONDS)
         )
-        if too_costly and not json1_available():
+        if too_costly and not self._json1_available():
             # 2026-10-17: the OGR backend writes long key lists with json_each;
             # without JSON1 it would have to refuse them (a plain list that
             # long freezes QGIS). The inline subset is slow but exact.
@@ -536,79 +491,6 @@ class SpatialiteExpressionBuilder(GeometricFilterPort):
             self.log_info(f"✓ GeoPackage R-tree prefilter added for {layer_props.get('layer_name', 'layer')}")
             return f"{prefilter} AND {expression}"
         return expression
-
-    def apply_filter(
-        self,
-        layer: 'QgsVectorLayer',
-        expression: str,
-        old_subset: Optional[str] = None,
-        combine_operator: Optional[str] = None
-    ) -> bool:
-        """
-        Apply filter to Spatialite layer.
-
-        Args:
-            layer: Layer to filter
-            expression: SQL expression
-            old_subset: Existing filter
-            combine_operator: Combine operator (AND/OR)
-
-        Returns:
-            True if filter applied successfully
-        """
-        try:
-            if not expression:
-                self.last_error = "Empty expression, skipping filter"
-                self.log_warning(self.last_error)
-                return False
-
-            # Check for OGR fallback sentinel
-            if expression == USE_OGR_FALLBACK:
-                self.last_error = "OGR fallback requested"
-                self.log_info(self.last_error)
-                return False
-
-            # Combine with existing filter if needed
-            if old_subset and combine_operator:
-                if self._is_geometric_filter(old_subset):
-                    self.log_info("Replacing geometric filter in old_subset")
-                    final_expression = expression
-                else:
-                    final_expression = f"({old_subset}) {combine_operator} ({expression})"
-            else:
-                final_expression = expression
-
-            # 2026-04-29 fix: prefer the task's subset queue when available so
-            # `setSubsetString` runs on the Qt main thread. The cascade is
-            # invoked from `QgsTask.run()` (worker thread) and the docstring
-            # of ``FilterEngineTask.queue_subset_request`` is explicit:
-            # "Subset strings cannot be applied directly from background
-            # threads due to Qt thread safety constraints." Calling
-            # `safe_set_subset_string` straight from the worker silently
-            # no-ops on spatialite (the cascade reported "8/8 filtered
-            # successfully" while every distant layer kept its full feature
-            # count). When no queue is wired (tests, public-API direct use),
-            # fall back to the synchronous path.
-            queue_callback = self.task_params.get('_subset_queue_callback') if self.task_params else None
-            if queue_callback is not None:
-                queue_callback(layer, final_expression)
-                self.log_info("✓ Filter queued for main-thread application")
-                return True
-
-            success = safe_set_subset_string(layer, final_expression)
-
-            if success:
-                self.log_info("✓ Filter applied successfully")
-            else:
-                self.last_error = f"setSubsetString failed for {layer.name()} (spatialite)"
-                self.log_error(f"✗ Failed to apply filter: {self.last_error}")
-
-            return success
-
-        except Exception as e:
-            self.last_error = f"Spatialite apply_filter exception: {e}"
-            self.log_error(self.last_error)
-            return False
 
     # =========================================================================
     # Private Helper Methods
@@ -744,25 +626,14 @@ class SpatialiteExpressionBuilder(GeometricFilterPort):
     ) -> Optional[Tuple[float, float, float, float]]:
         """See _source_bbox."""
         try:
-            from qgis.core import (
-                QgsGeometry, QgsCoordinateReferenceSystem, QgsCoordinateTransform, QgsProject
-            )
-            geometry = QgsGeometry.fromWkt(source_wkt)
-            if geometry is None or geometry.isEmpty():
-                return None
-            bbox = geometry.boundingBox()
-            if source_srid != target_srid:
-                source_crs = QgsCoordinateReferenceSystem(f"EPSG:{source_srid}")
-                target_crs = QgsCoordinateReferenceSystem(f"EPSG:{target_srid}")
-                if not source_crs.isValid() or not target_crs.isValid():
-                    return None
-                bbox = QgsCoordinateTransform(source_crs, target_crs, QgsProject.instance()).transformBoundingBox(bbox)
-            if bbox.isNull():
+            raw = self._wkt_bounds_in_target_crs(source_wkt, source_srid, target_srid)
+            if raw is None:
                 return None
             margin = max(float(buffer_value or 0.0), 0.0)
+            xmin, ymin, xmax, ymax = raw
             bounds = (
-                float(bbox.xMinimum()) - margin, float(bbox.yMinimum()) - margin,
-                float(bbox.xMaximum()) + margin, float(bbox.yMaximum()) + margin,
+                float(xmin) - margin, float(ymin) - margin,
+                float(xmax) + margin, float(ymax) + margin,
             )
             # A transform out of the target CRS domain yields inf/nan, which
             # SQLite would read as column names: no prefilter in that case.
@@ -772,6 +643,31 @@ class SpatialiteExpressionBuilder(GeometricFilterPort):
         except Exception as exc:
             self.log_debug(f"R-tree prefilter skipped (source bbox unavailable): {exc}")
             return None
+
+    # =========================================================================
+    # Host hooks (2026-10-28): what the SQL generation asks of the host
+    # =========================================================================
+
+    def _wkt_bounds_in_target_crs(
+        self, source_wkt: str, source_srid: int, target_srid: int
+    ) -> Optional[Tuple[float, float, float, float]]:
+        """``(xmin, ymin, xmax, ymax)`` of the source WKT in the target CRS, None when unknown.
+
+        Without a geometry library the core answers only in the source CRS
+        (``domain.wkt_bounds``, linear geometries): a reprojected box needs
+        the host. None means no R-tree prefilter, never a wrong result.
+        """
+        if source_srid != target_srid:
+            return None
+        return wkt_bounds(source_wkt)
+
+    def _json1_available(self) -> bool:
+        """Whether the host's OGR backend can write long key lists with ``json_each``.
+
+        False by default: a source too costly to inline then stays inline
+        (slow but exact) instead of going to a backend that could not take it.
+        """
+        return False
 
     def _is_geopackage(self, layer) -> bool:
         """Check if layer is from a GeoPackage."""
@@ -821,7 +717,7 @@ class SpatialiteExpressionBuilder(GeometricFilterPort):
         # Priority: buffer_expression (dynamic) > buffer_value (static)
         if buffer_expression and buffer_expression.strip():
             # Convert QGIS expression to Spatialite SQL
-            from .filter_executor import qgis_expression_to_spatialite
+            from .qgis_expression import qgis_expression_to_spatialite
             buffer_expr_sql = qgis_expression_to_spatialite(buffer_expression)
 
             self.log_info(f"🔧 Applying dynamic buffer expression: {buffer_expr_sql[:100]}...")
@@ -852,6 +748,6 @@ class SpatialiteExpressionBuilder(GeometricFilterPort):
 # =============================================================================
 
 __all__ = [
-    'SpatialiteExpressionBuilder',
+    'SpatialiteSqlBuilder',
     'USE_OGR_FALLBACK',
 ]
