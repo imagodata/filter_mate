@@ -239,6 +239,7 @@ class _RailSpreader(QObject if QObject is not None else object):
         self._dw = dw
         self._state = None
         self._watched = set()
+        self._watched_bands = set()
         self._pending = False
         rail.installEventFilter(self)
         self.spread()
@@ -248,11 +249,31 @@ class _RailSpreader(QObject if QObject is not None else object):
             if event.type() in (QEvent.Type.ShowToParent, QEvent.Type.HideToParent,
                                 QEvent.Type.ChildAdded, QEvent.Type.LayoutRequest):
                 self._schedule()
-            elif event.type() == QEvent.Type.Resize and watched is self.parent():
+            elif event.type() == QEvent.Type.Resize and (watched is self.parent() or watched is self._band()):
+                self._follow_rail_width()
                 self._fit()  # the band changed: the buttons fit it (compact or natural)
         except RuntimeError:
             pass  # plugin closing
         return False
+
+    def _band(self):
+        """The viewport of the scroll area holding the rail, None before rail_outside_scroll."""
+        viewport = self.parent().parentWidget() if self.parent() is not None else None
+        return viewport if viewport is not None and viewport.objectName() == 'qt_scrollarea_viewport' else None
+
+    def _follow_rail_width(self) -> None:
+        """The scroll area has the width of the rail, and goes away with it."""
+        band = self._band()
+        if band is None:
+            return
+        holder = band.parentWidget()
+        rail = self.parent()
+        holder.setFixedWidth(rail.minimumSizeHint().width())
+        if holder.isHidden() != rail.isHidden():
+            holder.setVisible(not rail.isHidden())
+        if band not in self._watched_bands:
+            band.installEventFilter(self)  # the band can change while the rail keeps its height
+            self._watched_bands.add(band)
 
     def _schedule(self) -> None:
         if not self._pending:
@@ -327,7 +348,9 @@ class _RailSpreader(QObject if QObject is not None else object):
                     button.setProperty('fm_natural_max', button.maximumHeight())
                 naturals.append(int(natural))
             margins = self._layout.contentsMargins()
-            available = rail.height() - margins.top() - margins.bottom()
+            # The rail may be taller than its band when it scrolls: the band is what counts.
+            band = self._band()
+            available = (band.height() if band is not None else rail.height()) - margins.top() - margins.bottom()
             if available <= 0:
                 return
             natural = max(naturals)
@@ -440,7 +463,8 @@ def rail_outside_scroll(dw: Any) -> bool:
     index = outer.indexOf(scroll)
     if index < 0 or grid.indexOf(rail) < 0:
         return False
-    from qgis.PyQt.QtWidgets import QHBoxLayout
+    from qgis.PyQt.QtCore import Qt
+    from qgis.PyQt.QtWidgets import QFrame, QHBoxLayout, QScrollArea, QSizePolicy
     grid.removeWidget(rail)
     grid.setColumnMinimumWidth(0, 0)
     grid.setHorizontalSpacing(0)
@@ -449,7 +473,20 @@ def rail_outside_scroll(dw: Any) -> bool:
     row.setObjectName('horizontalLayout_exploring_rail_and_groups')
     row.setContentsMargins(RAIL_LEFT_INSET, 0, 0, 0)
     row.setSpacing(RAIL_GAP)
-    row.addWidget(rail, 0)
+    # 2026-11-06: a band shorter than the compact buttons (103 px on a 720 px screen, 218 needed) overlapped
+    # them. The rail now scrolls with the wheel in that case, without a scroll bar (no room for one).
+    holder = QScrollArea()
+    holder.setObjectName('scrollArea_exploring_rail')
+    holder.setFrameShape(QFrame.Shape.NoFrame)
+    holder.setWidgetResizable(True)
+    holder.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+    holder.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+    holder.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Expanding)
+    holder.setMinimumHeight(0)
+    holder.setStyleSheet('QScrollArea#scrollArea_exploring_rail { background: transparent; border: none; }')
+    holder.viewport().setAutoFillBackground(False)
+    holder.setWidget(rail)
+    row.addWidget(holder, 0)
     row.addWidget(scroll, 1)
     outer.insertLayout(index, row, 1)
     dw.setProperty('fm_rail_outside', True)
