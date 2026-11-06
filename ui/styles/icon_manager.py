@@ -386,7 +386,7 @@ class IconManager(StylerBase):
                     return
 
             # Try legacy StyleLoader
-            from ui.styles import StyleLoader
+            from .style_loader import StyleLoader
             self._current_theme = StyleLoader.get_current_theme()
         except Exception:
             # Default theme
