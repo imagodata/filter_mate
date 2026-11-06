@@ -1085,6 +1085,36 @@ def s_remove_layer_check():
           dock()._signal_connection_states.get('FILTERING.CURRENT_LAYER.layerChanged') is True)
 
 
+def s_plugin_imports_check():
+    """Absolute project imports fail here, not in the unit tests (tests/test_no_bare_project_imports.py)."""
+    from unittest import mock
+    from qgis.PyQt.QtWidgets import QFileDialog
+    d = dock()
+    features, expression = d._exploring_ctrl.get_exploring_features(None, custom_expression='"label" IS NOT NULL')
+    check('a custom expression gives its features', len(features) == 4, f"{len(features)} feature(s), {expression!r}")
+    exploring = app().PROJECT_LAYERS[d.current_layer.id()]['exploring']
+    exploring.pop('is_linking', None)
+    d._exploring_ctrl.exploring_link_widgets()
+    check('a layer saved without is_linking gets the default', 'is_linking' in exploring, str(exploring.get('is_linking')))
+    responsiveness = d.CONFIG_DATA.setdefault('APP', {}).setdefault('OPTIONS', {}).setdefault('UI_RESPONSIVENESS', {})
+    saved = responsiveness.get('expression_debounce_ms')
+    responsiveness['expression_debounce_ms'] = 777
+    d.refresh_ui_responsiveness_params()
+    check('the expression debounce setting applies', d._expression_debounce_timer.interval() == 777,
+          str(d._expression_debounce_timer.interval()))
+    responsiveness['expression_debounce_ms'] = saved if saved is not None else 450
+    d.refresh_ui_responsiveness_params()
+    exporting = d.widgets['EXPORTING']
+    for key in ('HAS_LAYERS_TO_EXPORT', 'HAS_DATATYPE_TO_EXPORT', 'HAS_OUTPUT_FOLDER_TO_EXPORT'):
+        exporting[key]['WIDGET'].setChecked(True)
+    with mock.patch.object(exporting['LAYERS_TO_EXPORT']['WIDGET'], 'checkedItems', return_value=['zones [EPSG:2154]'], create=True), \
+            mock.patch.object(QFileDialog, 'getSaveFileName', return_value=('', '')) as save_dialog:
+        d._export_dialog_manager.dialog_export_output_path()
+    check('one layer and a format: the export asks where to save the file', save_dialog.called)
+    for key in ('HAS_LAYERS_TO_EXPORT', 'HAS_DATATYPE_TO_EXPORT', 'HAS_OUTPUT_FOLDER_TO_EXPORT'):
+        exporting[key]['WIDGET'].setChecked(False)
+
+
 def s_finish():
     failed_extensions = [line for line in _RECENT.lines if 'Failed to load extension' in line]
     check(f"extensions discovered under the plugin folder name '{PACKAGE}'", not failed_extensions,
@@ -1115,7 +1145,7 @@ STEPS = [s_setup, s_open_plugin, s_dock_ready, s_controllers_check, s_layout_che
          s_remove_layer, s_remove_layer_check,
          s_switch_setup, s_switch_zones, s_switch_multiple, s_switch_link, s_switch_to_parcels, s_switch_parcels_check,
          s_switch_parcels_values, s_switch_to_wells, s_switch_wells_check, s_switch_back_check, s_switch_same_layer_reload,
-         s_switch_same_layer_check, s_switch_late_check, s_finish]
+         s_switch_same_layer_check, s_switch_late_check, s_plugin_imports_check, s_finish]
 
 
 def run_step(index=0):
