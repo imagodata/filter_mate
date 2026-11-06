@@ -29,7 +29,7 @@ except ImportError:
     QColor = None
 
 from .base_controller import BaseController
-from ..widgets.custom_widgets import apply_feature_picker_fetch_limit
+from ..widgets.custom_widgets import apply_feature_picker_fetch_limit, clear_feature_picker_feature
 from ...infrastructure.signal_utils import SignalBlocker
 from .mixins.layer_selection_mixin import LayerSelectionMixin
 from .selection_modes import group_for_count
@@ -3179,10 +3179,24 @@ class ExploringController(BaseController, LayerSelectionMixin):
 
             # v4.0 SMART FIELD SELECTION: Upgrade primary-key-only expressions to better fields
             # Priority: 1) User's custom field (if set), 2) Best available field, 3) Primary key
+            # 2026-11-06 (R5): never index layer_props directly here — a KeyError
+            # mid-reload left the picker on the previous layer with signals half
+            # reconnected. Missing keys fall through to the fallbacks below.
             expressions_updated = False
-            single_expr = layer_props["exploring"]["single_selection_expression"]
-            multiple_expr = layer_props["exploring"]["multiple_selection_expression"]
-            custom_expr = layer_props["exploring"]["custom_selection_expression"]
+            exploring = layer_props.setdefault("exploring", {})
+            single_expr = exploring.get("single_selection_expression", "")
+            multiple_expr = exploring.get("multiple_selection_expression", "")
+            custom_expr = exploring.get("custom_selection_expression", "")
+
+            def _remember_expression(key, value):
+                """Store a resolved display expression, here and in PROJECT_LAYERS."""
+                exploring[key] = value
+                try:
+                    entry = self._dockwidget.PROJECT_LAYERS.get(layer.id())
+                except (AttributeError, RuntimeError):
+                    entry = None
+                if entry is not None:
+                    entry.setdefault("exploring", {})[key] = value
 
             # Get primary key to detect default (unset) expressions
             primary_key = layer_props.get("infos", {}).get("primary_key_name", "")
@@ -3225,18 +3239,15 @@ class ExploringController(BaseController, LayerSelectionMixin):
                 # Ceci garantit que les combobox ne soient JAMAIS vides
                 if best_field:
                     if should_upgrade_single:
-                        layer_props["exploring"]["single_selection_expression"] = best_field
-                        self._dockwidget.PROJECT_LAYERS[layer.id()]["exploring"]["single_selection_expression"] = best_field
+                        _remember_expression("single_selection_expression", best_field)
                         expressions_updated = True
                         logger.info(f"✨ Set single_selection to '{best_field}' for layer '{layer.name()}'")
                     if should_upgrade_multiple:
-                        layer_props["exploring"]["multiple_selection_expression"] = best_field
-                        self._dockwidget.PROJECT_LAYERS[layer.id()]["exploring"]["multiple_selection_expression"] = best_field
+                        _remember_expression("multiple_selection_expression", best_field)
                         expressions_updated = True
                         logger.info(f"✨ Set multiple_selection to '{best_field}' for layer '{layer.name()}'")
                     if should_upgrade_custom:
-                        layer_props["exploring"]["custom_selection_expression"] = best_field
-                        self._dockwidget.PROJECT_LAYERS[layer.id()]["exploring"]["custom_selection_expression"] = best_field
+                        _remember_expression("custom_selection_expression", best_field)
                         expressions_updated = True
                         logger.info(f"✨ Set custom_selection to '{best_field}' for layer '{layer.name()}'")
 
@@ -3261,9 +3272,9 @@ class ExploringController(BaseController, LayerSelectionMixin):
                 logger.debug(f"Using user-customized expressions for layer '{layer.name()}': single={single_expr}, multiple={multiple_expr}")
 
             # Update expressions after potential auto-initialization
-            single_expr = layer_props["exploring"]["single_selection_expression"]
-            multiple_expr = layer_props["exploring"]["multiple_selection_expression"]
-            custom_expr = layer_props["exploring"]["custom_selection_expression"]
+            single_expr = exploring.get("single_selection_expression", "")
+            multiple_expr = exploring.get("multiple_selection_expression", "")
+            custom_expr = exploring.get("custom_selection_expression", "")
 
             # FIX v4.1 Simon 2026-01-16: GARANTIR que les expressions ne sont JAMAIS vides
             # Fallback absolu si une expression est vide (dernier rempart avant les widgets)
@@ -3271,8 +3282,7 @@ class ExploringController(BaseController, LayerSelectionMixin):
                 fields = layer.fields()
                 if fields.count() > 0:
                     single_expr = fields[0].name()
-                    layer_props["exploring"]["single_selection_expression"] = single_expr
-                    self._dockwidget.PROJECT_LAYERS[layer.id()]["exploring"]["single_selection_expression"] = single_expr
+                    _remember_expression("single_selection_expression", single_expr)
                     logger.warning(f"Emergency fallback: Set single_selection to first field '{single_expr}'")
                 else:
                     single_expr = "$id"
@@ -3282,8 +3292,7 @@ class ExploringController(BaseController, LayerSelectionMixin):
                 fields = layer.fields()
                 if fields.count() > 0:
                     multiple_expr = fields[0].name()
-                    layer_props["exploring"]["multiple_selection_expression"] = multiple_expr
-                    self._dockwidget.PROJECT_LAYERS[layer.id()]["exploring"]["multiple_selection_expression"] = multiple_expr
+                    _remember_expression("multiple_selection_expression", multiple_expr)
                     logger.warning(f"Emergency fallback: Set multiple_selection to first field '{multiple_expr}'")
                 else:
                     multiple_expr = "$id"
@@ -3293,8 +3302,7 @@ class ExploringController(BaseController, LayerSelectionMixin):
                 fields = layer.fields()
                 if fields.count() > 0:
                     custom_expr = fields[0].name()
-                    layer_props["exploring"]["custom_selection_expression"] = custom_expr
-                    self._dockwidget.PROJECT_LAYERS[layer.id()]["exploring"]["custom_selection_expression"] = custom_expr
+                    _remember_expression("custom_selection_expression", custom_expr)
                     logger.warning(f"Emergency fallback: Set custom_selection to first field '{custom_expr}'")
                 else:
                     custom_expr = "$id"
@@ -3311,8 +3319,14 @@ class ExploringController(BaseController, LayerSelectionMixin):
                 current_feature = picker_widget.feature() if picker_widget else None
                 if current_feature and current_feature.isValid() and current_feature.id() is not None:
                     saved_fid = current_feature.id()
-                    if picker_widget.layer():
-                        saved_layer_id = picker_widget.layer().id()
+                    # 2026-11-06: the feature survives setLayer(None): when a subset change
+                    # has detached the picker, the connection still names its layer.
+                    source_layer = picker_widget.layer() or getattr(self._dockwidget, '_feature_picker_layer_connection', None)
+                    if source_layer:
+                        try:
+                            saved_layer_id = source_layer.id()
+                        except RuntimeError:  # layer deleted
+                            pass
                     logger.debug(f"_reload_exploration_widgets: Saved current feature FID={saved_fid} from widget")
                 elif hasattr(self._dockwidget, '_last_single_selection_fid') and self._dockwidget._last_single_selection_fid is not None:
                     saved_fid = self._dockwidget._last_single_selection_fid
@@ -3321,6 +3335,13 @@ class ExploringController(BaseController, LayerSelectionMixin):
 
                 picker_widget = self._dockwidget.widgets["EXPLORING"]["SINGLE_SELECTION_FEATURES"]["WIDGET"]
                 picker_widget.setLayer(None)
+                # 2026-11-06: drop the filter of the previous layer. exploring_link_widgets
+                # puts one on the picker (built from that layer's multiple selection,
+                # e.g. '"pk_a" IN (...)'); it is a property of the widget, setLayer()
+                # does not clear it, so the new layer was fetched through it and the
+                # picker showed no feature. The link logic re-applies one if relevant.
+                if hasattr(picker_widget, 'setFilterExpression'):
+                    picker_widget.setFilterExpression('')
                 apply_feature_picker_fetch_limit(picker_widget)
                 picker_widget.setLayer(layer)
                 # FIX 2026-01-19: Connect willBeDeleted to prevent crash on layer deletion
@@ -3335,7 +3356,7 @@ class ExploringController(BaseController, LayerSelectionMixin):
                 picker_widget.repaint()
 
                 if saved_fid is not None and layer is not None:
-                    if saved_layer_id is None or saved_layer_id == layer.id():
+                    if saved_layer_id == layer.id():
                         logger.info(f"_reload_exploration_widgets: Restoring feature FID={saved_fid} after widget refresh")
                         try:
                             self._dockwidget.widgets["EXPLORING"]["SINGLE_SELECTION_FEATURES"]["WIDGET"].setFeature(saved_fid)
@@ -3345,6 +3366,9 @@ class ExploringController(BaseController, LayerSelectionMixin):
                             logger.warning(f"_reload_exploration_widgets: Failed to restore feature FID={saved_fid}: {e}")
                     else:
                         logger.debug("_reload_exploration_widgets: Layer changed, not restoring FID")
+                        # 2026-11-06: not restoring is not enough, the picker kept the id:
+                        # the feature with that id on this layer appeared selected.
+                        clear_feature_picker_feature(picker_widget)
 
             # Multiple selection widget
             if "MULTIPLE_SELECTION_FEATURES" in self._dockwidget.widgets.get("EXPLORING", {}):

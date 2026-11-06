@@ -717,6 +717,150 @@ def s_back_to_vector():
     return switched_to('zones', coverage_page=False)
 
 
+def pick_vector(name):
+    dock().comboBox_filtering_current_layer.setLayer(layer(name))
+    return switched_to(name, coverage_page=False)
+
+
+def single_picker():
+    return dock().mFeaturePickerWidget_exploring_single_selection
+
+
+def picker_rows():
+    from qgis.PyQt.QtWidgets import QComboBox
+    return single_picker().findChild(QComboBox).count()
+
+
+def picked_fid():
+    feature = single_picker().feature()
+    return feature.id() if feature.isValid() else None
+
+
+def waits(seconds, condition=lambda: True):
+    since = time.time()
+    return lambda: time.time() - since > seconds and condition()
+
+
+def buffer_box():
+    return dock().mQgsDoubleSpinBox_filtering_buffer_value
+
+
+def s_switch_setup():
+    """Vector -> vector layer changes: two more layers, each with its own key field (a link
+    filter built on one is an unknown field on the other). QGIS keeps the filter and the feature
+    id of QgsFeaturePickerWidget across setLayer(): the next layer showed no feature, or one the
+    user never picked. Nothing covered a change between two vector layers until November 2026."""
+    from osgeo import ogr, osr
+    srs = osr.SpatialReference()
+    srs.ImportFromEPSG(2154)
+
+    def write(name, pk, kind, wkt, count):
+        path = os.path.join(tempfile.mkdtemp(prefix='fm_switch_'), f'{name}.gpkg')
+        source = ogr.GetDriverByName('GPKG').CreateDataSource(path)
+        table = source.CreateLayer(name, srs, kind, options=[f'FID={pk}'])
+        table.CreateField(ogr.FieldDefn('label', ogr.OFTString))
+        table.CreateField(ogr.FieldDefn('ref', ogr.OFTInteger))
+        for index in range(1, count + 1):
+            feature = ogr.Feature(table.GetLayerDefn())
+            feature.SetField('label', f'{name}_{index}')
+            feature.SetField('ref', index * 10)
+            feature.SetGeometry(ogr.CreateGeometryFromWkt(wkt.format(x=index * 100, x2=index * 100 + 50)))
+            table.CreateFeature(feature)
+        source = None
+        return QgsVectorLayer(f'{path}|layername={name}', name, 'ogr')
+
+    polygon = 'POLYGON(({x} 0,{x2} 0,{x2} 50,{x} 50,{x} 0))'
+    STATE['write_switch_layer'] = lambda name: write(name, 'pk_late', ogr.wkbPolygon, polygon, 4)
+    project.addMapLayers([write('parcels', 'pk_parcel', ogr.wkbPolygon, polygon, 7),
+                          write('wells', 'pk_well', ogr.wkbPoint, 'POINT({x} 0)', 5)])
+    return lambda: registered('parcels', 'wells') and tasks_idle()
+
+
+def s_switch_zones():
+    return pick_vector('zones')  # layers added: QGIS made one current, the dock follows it (auto current layer)
+
+
+def s_switch_multiple():
+    dock().mGroupBox_exploring_multiple_selection.setChecked(True)
+    return waits(2.5, tasks_idle)
+
+
+def s_switch_link():
+    fids = sorted(feature.id() for feature in layer('zones').getFeatures())[:2]
+    dock().widgets['EXPLORING']['MULTIPLE_SELECTION_FEATURES']['WIDGET'].setCheckedFeatureIds(fids)
+    return waits(0.5, lambda: bool(single_picker().filterExpression()))
+
+
+def s_switch_to_parcels():
+    check('linking: features checked in multiple selection filter the single selection picker',
+          bool(single_picker().filterExpression()), repr(single_picker().filterExpression()))
+    return pick_vector('parcels')
+
+
+def s_switch_parcels_check():
+    return waits(0, lambda: picker_rows() >= 7)
+
+
+def s_switch_parcels_values():
+    picker = single_picker()
+    check('vector -> vector: the picker is on the new layer, without the link filter of the previous one',
+          picker.layer() is not None and picker.layer().name() == 'parcels' and not picker.filterExpression(),
+          f"filter={picker.filterExpression()!r}")
+    check('vector -> vector: the single selection list shows the features of the new layer', picker_rows() >= 7,
+          f"rows={picker_rows()}")
+    check('vector -> vector: no feature selected that the user never picked', picked_fid() is None, f"fid={picked_fid()}")
+    dock().mFieldExpressionWidget_exploring_single_selection.setField('ref')
+    picker.setFeature(3)
+    buffer_box().setValue(-5)
+    return waits(1.5, tasks_idle)
+
+
+def s_switch_to_wells():
+    check('negative buffer accepted on a polygon layer', buffer_box().value() == -5, str(buffer_box().value()))
+    return pick_vector('wells')
+
+
+def s_switch_wells_check():
+    check('polygon -> point: no negative buffer left, none possible', buffer_box().minimum() == 0
+          and buffer_box().value() == 0, f"minimum={buffer_box().minimum()} value={buffer_box().value()}")
+    check('vector -> vector: the feature picked on the previous layer is not carried over', picked_fid() is None,
+          f"fid={picked_fid()}")
+    return pick_vector('parcels')
+
+
+def s_switch_back_check():
+    check('point -> polygon: negative buffers possible again', buffer_box().minimum() < 0, str(buffer_box().minimum()))
+    stored = app().PROJECT_LAYERS[layer('parcels').id()]['exploring']['single_selection_expression']
+    check('vector -> vector: the display field chosen for a layer survives the round trip',
+          'ref' in single_picker().displayExpression() and 'ref' in stored,
+          f"display={single_picker().displayExpression()!r} stored={stored!r}")
+    picker = single_picker()
+    picker.setFeature(2)
+    STATE['switch_fid'] = 2
+    return waits(1, tasks_idle)
+
+
+def s_switch_same_layer_reload():
+    target = layer('parcels')
+    dock()._reload_exploration_widgets(target, app().PROJECT_LAYERS[target.id()])  # what follows a filter
+    return waits(1, tasks_idle)
+
+
+def s_switch_same_layer_check():
+    check('reload on the same layer: the picked feature stays', picked_fid() == STATE['switch_fid'], f"fid={picked_fid()}")
+    late = STATE['write_switch_layer']('late_pick')
+    project.addMapLayer(late)
+    check('layer not registered yet when picked', late.id() not in app().PROJECT_LAYERS)
+    dock().current_layer_changed(late, manual_change=True)
+    return switched_to('late_pick', coverage_page=False)
+
+
+def s_switch_late_check():
+    current = dock().current_layer
+    check('vector layer picked before its registration: shown once registered',
+          current is not None and current.name() == 'late_pick', current.name() if current else 'no layer')
+
+
 def s_close_dock():
     check('back to a vector layer: vector groups again', dock().mGroupBox_exploring_single_selection.isVisible())
     STATE['coverage_before_close'] = coverage()
@@ -935,7 +1079,10 @@ STEPS = [s_setup, s_open_plugin, s_dock_ready, s_controllers_check, s_layout_che
          s_rasters_off, s_rasters_off_check, s_rasters_on_check,
          s_replay_select, s_replay_filter, s_replay_save_and_clear, s_replay_read, s_replay_check,
          s_badge_raster_source, s_raster_badge_add_layer, s_raster_badge_check, s_raster_badge_removed_check,
-         s_remove_layer, s_remove_layer_check, s_finish]
+         s_remove_layer, s_remove_layer_check,
+         s_switch_setup, s_switch_zones, s_switch_multiple, s_switch_link, s_switch_to_parcels, s_switch_parcels_check,
+         s_switch_parcels_values, s_switch_to_wells, s_switch_wells_check, s_switch_back_check, s_switch_same_layer_reload,
+         s_switch_same_layer_check, s_switch_late_check, s_finish]
 
 
 def run_step(index=0):
