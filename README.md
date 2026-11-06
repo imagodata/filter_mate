@@ -2,7 +2,7 @@
 
 **🧭 Explore, 🔍 filter and 📦 export vector 🗺️, raster 🏔️ and LiDAR point cloud ☁️ layers in QGIS, from one panel.**
 
-[![QGIS Plugin](https://img.shields.io/badge/QGIS%20plugin-5.0.1-589632?logo=qgis&logoColor=white)](https://plugins.qgis.org/plugins/filter_mate)
+[![QGIS Plugin](https://img.shields.io/badge/QGIS%20plugin-5.0.2-589632?logo=qgis&logoColor=white)](https://plugins.qgis.org/plugins/filter_mate)
 [![QGIS 3.22 → 4.x](https://img.shields.io/badge/QGIS-3.22%20%E2%86%92%204.x%20%C2%B7%20Qt5%20%2F%20Qt6-589632)](https://plugins.qgis.org/plugins/filter_mate)
 [![Tests](https://github.com/imagodata/filter_mate/actions/workflows/test.yml/badge.svg)](https://github.com/imagodata/filter_mate/actions/workflows/test.yml)
 [![QGIS headless](https://github.com/imagodata/filter_mate/actions/workflows/qgis-headless.yml/badge.svg)](https://github.com/imagodata/filter_mate/actions/workflows/qgis-headless.yml)
@@ -67,6 +67,7 @@ the original source back, and project files are always saved with the original s
   repository ([docs/favorites_sharing/USER_GUIDE.md](docs/favorites_sharing/USER_GUIDE.md)).
 - 🤖 **Automation**: nine Processing algorithms and four ready-made models, `qgis_process`, a Python API for scripts and
   other plugins, an optional REST API and an MCP server for AI assistants ([docs/AUTOMATION.md](docs/AUTOMATION.md)).
+- ⚙️ **Configuration**: search a setting by name; display profile automatic from the screen or chosen (compact, normal, hidpi).
 - 🧩 **QGIS 3.22 to 4.x**, Qt5 and Qt6, 🌗 light and dark themes, 🌍 34 languages.
 
 ## 📥 Installation

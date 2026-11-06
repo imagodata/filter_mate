@@ -2,8 +2,12 @@
 
 All notable changes to FilterMate will be documented in this file.
 
-## [Unreleased]
+## [5.0.2] - 2026-11-06
 
+Patch release on 5.0.1: changing between vector layers no longer empties the single selection or selects a feature nobody picked, the dock stays usable on small scaled screens, several features that failed only in QGIS work, and the Configuration tab gets a search bar.
+
+- **One order for the EXPLORING tools.** The rail shows its buttons in the same order on vector, raster and point cloud layers.
+- **Histogram range stays blue when QGIS is not the active window.** It followed the inactive palette and turned grey on Windows.
 - **Single selection empty after a layer change.** The link filter of the previous layer (built from its multiple selection) stayed on the single-selection feature picker: it is a property of the widget and `setLayer()` does not clear it, so the new layer was fetched through the old layer's filter and showed no feature. The reload of the exploring widgets now clears it (the link logic re-applies one for the new layer when relevant).
 - **A feature the user never picked was selected after a layer change.** The picker keeps its feature id across `setLayer()`: fid 3 picked on one layer showed the unrelated fid 3 of the next layer as selected, and a filter started from it. The picker now shows no feature on the new layer, and still keeps its feature on a reload of the same layer.
 - **The display field chosen for a layer was lost at each layer change.** The `fieldChanged("")` echo of the widget clear emptied the stored expression of the layer being switched to, and a debounced replay wrote it back. Neither happens during a layer change any more, and a field change still pending when the layer changes no longer lands on the new layer. The buffer validation that this replay ran as a side effect (no negative buffer on points and lines) now runs explicitly.
