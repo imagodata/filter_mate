@@ -18,7 +18,6 @@ v4.4: Strangler Fig Pattern - New service with fallback to FilterMateApp legacy 
 
 from typing import Callable, List, Any
 from qgis.PyQt.QtCore import QTimer, QCoreApplication
-from qgis.PyQt.QtWidgets import QApplication
 from qgis.core import QgsVectorLayer, QgsProject
 from qgis.utils import iface
 try:
@@ -332,63 +331,21 @@ class AppInitializer:
             return False
 
     def _initialize_ui_profile(self):
-        """Initialize UI profile based on screen resolution and DPI.
-
-        Selection matrix:
-        - COMPACT  : usable logical height < 800 px, whatever the scaling
-                     (a 1080p laptop at 150% reports 1280x720 logical px:
-                     Qt scales logical px by the devicePixelRatio at render
-                     time, so only the logical room decides the heights),
-                     or logical resolution < 1920x1080 (laptops, tablets)
-        - HIDPI    : devicePixelRatio >= 1.5 OR logicalDotsPerInch > 120
-                     (covers 4K, Retina, Windows 125/150/200% scaling)
-        - NORMAL   : default for standard desktop screens
-        """
+        """Initialize the UI profile: the UI_PROFILE setting, 'auto' detecting from the screen."""
         try:
-            screen = QApplication.primaryScreen()
+            config_data = (self._get_config_data() if self._get_config_data else None) or {}
+            setting = config_data.get("APP", {}).get("DOCKWIDGET", {}).get("UI_PROFILE")
+            profile = UIConfig.resolve_profile(setting)
+            UIConfig.set_profile(profile)
+            screen = UIConfig.current_screen()
             if screen:
-                screen_geometry = screen.geometry()
-                screen_width = screen_geometry.width()
-                screen_height = screen_geometry.height()
-                # The dock lives in the available area (taskbar excluded), in
-                # logical px: HIDPI/NORMAL impose a 600 px dock minimum height.
-                try:
-                    available_height = screen.availableGeometry().height()
-                except Exception:
-                    available_height = screen_height
-                dpr = float(screen.devicePixelRatio() or 1.0)
-                try:
-                    dpi = float(screen.logicalDotsPerInch() or 96.0)
-                except Exception:
-                    dpi = 96.0
-
-                if available_height < 800:
-                    UIConfig.set_profile(DisplayProfile.COMPACT)
-                    logger.info(
-                        f"FilterMate: Using COMPACT profile "
-                        f"({screen_width}x{screen_height}, available height {available_height}, dpr={dpr:g})"
-                    )
-                elif dpr >= 1.5 or dpi > 120.0:
-                    UIConfig.set_profile(DisplayProfile.HIDPI)
-                    logger.info(
-                        f"FilterMate: Using HIDPI profile "
-                        f"({screen_width}x{screen_height}, dpr={dpr:g}, dpi={dpi:g})"
-                    )
-                elif screen_width < 1920 or screen_height < 1080:
-                    UIConfig.set_profile(DisplayProfile.COMPACT)
-                    logger.info(
-                        f"FilterMate: Using COMPACT profile "
-                        f"({screen_width}x{screen_height}, dpr={dpr:g})"
-                    )
-                else:
-                    UIConfig.set_profile(DisplayProfile.NORMAL)
-                    logger.info(
-                        f"FilterMate: Using NORMAL profile "
-                        f"({screen_width}x{screen_height}, dpr={dpr:g})"
-                    )
+                geometry = screen.geometry()
+                logger.info(
+                    f"FilterMate: Using {profile.name} profile ({geometry.width()}x{geometry.height()}, available "
+                    f"height {screen.availableGeometry().height()}, dpr={float(screen.devicePixelRatio() or 1.0):g})"
+                )
             else:
-                UIConfig.set_profile(DisplayProfile.NORMAL)
-                logger.warning("FilterMate: Could not detect screen, using NORMAL profile (desktop default)")
+                logger.warning(f"FilterMate: Could not detect screen, using {profile.name} profile")
         except Exception as e:
             logger.error(f"FilterMate: Error detecting screen resolution: {e}")
             UIConfig.set_profile(DisplayProfile.NORMAL)  # Fail-safe: NORMAL for desktop QGIS
