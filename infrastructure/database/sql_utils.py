@@ -69,8 +69,15 @@ def feature_picker_guard(layer):
         if picker is not None:
             try:
                 if layer and hasattr(layer, 'isValid') and layer.isValid():
-                    picker.setLayer(layer)
-                    logger.debug("FIX-2026-02-11: FeaturePickerWidget reattached after subset change")
+                    # 2026-11-06: a layer change may have taken the picker while the
+                    # subset changed (events processed in between): reattaching would
+                    # put it back on the previous layer.
+                    current = picker.layer() if hasattr(picker, 'layer') else None
+                    if current is not None and current != layer:
+                        logger.debug("FIX-2026-02-11: picker moved to another layer meanwhile, left there")
+                    else:
+                        picker.setLayer(layer)
+                        logger.debug("FIX-2026-02-11: FeaturePickerWidget reattached after subset change")
             except (RuntimeError, Exception) as e:
                 logger.debug(f"FIX-2026-02-11: feature_picker_guard reattach failed: {e}")
 

@@ -2,6 +2,15 @@
 
 All notable changes to FilterMate will be documented in this file.
 
+## [Unreleased]
+
+- **Single selection empty after a layer change.** The link filter of the previous layer (built from its multiple selection) stayed on the single-selection feature picker: it is a property of the widget and `setLayer()` does not clear it, so the new layer was fetched through the old layer's filter and showed no feature. The reload of the exploring widgets now clears it (the link logic re-applies one for the new layer when relevant).
+- **A feature the user never picked was selected after a layer change.** The picker keeps its feature id across `setLayer()`: fid 3 picked on one layer showed the unrelated fid 3 of the next layer as selected, and a filter started from it. The picker now shows no feature on the new layer, and still keeps its feature on a reload of the same layer.
+- **The display field chosen for a layer was lost at each layer change.** The `fieldChanged("")` echo of the widget clear emptied the stored expression of the layer being switched to, and a debounced replay wrote it back. Neither happens during a layer change any more, and a field change still pending when the layer changes no longer lands on the new layer. The buffer validation that this replay ran as a side effect (no negative buffer on points and lines) now runs explicitly.
+- **A vector layer picked before its registration is shown once registered**, as rasters and point clouds already were; the pick was lost and the previous layer came back.
+- **Two smaller layer-change defects.** The feature picker detach/reattach around subset changes no longer puts the picker back on the previous layer when a layer change took it meanwhile, and the truncation tooltips of the expression widgets no longer stop updating after the first layer change.
+- **Dock too tall on small scaled screens.** A small screen with display scaling (a 1080p laptop at 150 %: 1280x720 logical px) matched the HIDPI profile before the resolution check and got its 600 px dock minimum height, taller than its dock area. A usable logical height under 800 px now selects the COMPACT profile whatever the scaling, read from the screen's available geometry (taskbar excluded).
+
 ## [5.0.1] - 2026-10-22
 
 Patch release on 5.0.0: the Zone on the vector and raster rails, checkbox band selection and band display, centroid controls for every source kind, and two dock fixes.
