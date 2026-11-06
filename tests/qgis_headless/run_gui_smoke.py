@@ -29,6 +29,7 @@ import types
 
 from qgis.core import Qgis, QgsApplication, QgsProject, QgsProviderRegistry, QgsRasterLayer, QgsVectorLayer
 from qgis.PyQt.QtCore import QSettings, Qt, QTimer
+from qgis.PyQt.QtWidgets import QPushButton, QScrollArea
 from qgis.utils import iface
 import qgis.utils
 
@@ -383,6 +384,43 @@ def s_layout_check():
     # The key column aligner used to grow the page at every pass: rows 4000 px apart, one row visible.
     span = filtering_rows_span()
     check('FILTERING rows laid out together (key column aligner)', 0 < span < 600, f"first to last row: {span} px")
+
+
+def rail_buttons_apart():
+    """The shown EXPLORING rail buttons, top to bottom, do not overlap."""
+    rail = dock().widget_exploring_keys
+    buttons = sorted((button for button in rail.findChildren(QPushButton) if not button.isHidden()),
+                     key=lambda button: button.y())
+    return len(buttons) > 3 and all(upper.geometry().bottom() < lower.geometry().top()
+                                    for upper, lower in zip(buttons, buttons[1:]))
+
+
+def rail_scroll_maximum():
+    return dock().findChild(QScrollArea, 'scrollArea_exploring_rail').verticalScrollBar().maximum()
+
+
+def s_rail_short():
+    """A band shorter than the compact buttons overlapped them (720 px screen): the rail now scrolls."""
+    d = dock()
+    STATE['splitter_sizes'] = d.main_splitter.sizes()
+    d.main_splitter.setSizes([100, sum(STATE['splitter_sizes']) - 100])
+    return waits(0.5)
+
+
+def s_rail_short_check():
+    d = dock()
+    check('EXPLORING rail in a short band: buttons apart, and it scrolls', rail_buttons_apart() and rail_scroll_maximum() > 0,
+          f"band={d.main_splitter.sizes()[0]} maximum={rail_scroll_maximum()}")
+    d.main_splitter.setSizes([sum(STATE['splitter_sizes']), 0])
+    return waits(0.5)
+
+
+def s_rail_tall_check():
+    d = dock()
+    check('EXPLORING rail in a tall band: no scrolling', rail_buttons_apart() and rail_scroll_maximum() == 0,
+          f"band={d.main_splitter.sizes()[0]} maximum={rail_scroll_maximum()}")
+    d.main_splitter.setSizes(STATE['splitter_sizes'])
+    return waits(0.5)
 
 
 def set_ui_profile(value):
@@ -1149,7 +1187,8 @@ def s_finish():
     os._exit(1 if failed else 0)  # QGIS exit code = test result; skips the slow GUI teardown
 
 
-STEPS = [s_setup, s_open_plugin, s_dock_ready, s_controllers_check, s_layout_check, s_ui_profile_check, s_qt6_enums_check, s_pick_before_late_refresh,
+STEPS = [s_setup, s_open_plugin, s_dock_ready, s_controllers_check, s_layout_check, s_rail_short, s_rail_short_check, s_rail_tall_check,
+         s_ui_profile_check, s_qt6_enums_check, s_pick_before_late_refresh,
          s_late_refresh_check,
          s_vector_source, s_vector_select, s_vector_filter, s_vector_check, s_vector_undo_check,
          s_user_pick_after_undo_check,
