@@ -14,6 +14,7 @@ All notable changes to FilterMate will be documented in this file.
 - **Features that failed in QGIS only.** Several imports worked in the tests but not in QGIS. A custom expression passed to the exploring features raised an error, a layer saved without its linking option raised one too, choosing where to save a single exported layer with a format failed, and the expression debounce setting was ignored.
 - **A custom expression matching nothing no longer empties the single selection list.** With linking on, the single list stayed empty even after leaving the custom selection group. The filter now applies only while that group is in use.
 - **Overlapping EXPLORING tools on short docks.** When the band was shorter than the tools at their smallest size (a 720 px screen), they overlapped. The tools now scroll with the mouse wheel in that case.
+- **Search bar in the Configuration tab.** It was written long ago but never appeared in QGIS. It finds a setting by name, opens its branch and selects it (Ctrl+F while in the tab, Escape to clear).
 - **Dock too tall on small scaled screens.** A small screen with display scaling (a 1080p laptop at 150 %: 1280x720 logical px) matched the HIDPI profile before the resolution check and got its 600 px dock minimum height, taller than its dock area. A usable logical height under 800 px now selects the COMPACT profile whatever the scaling, read from the screen's available geometry (taskbar excluded).
 
 ## [5.0.1] - 2026-10-22

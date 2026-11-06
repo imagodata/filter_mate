@@ -15,7 +15,6 @@ try:
 except ImportError:  # QGIS < 3.34.2 (Qt5): QShortcut is in QtWidgets
     from qgis.PyQt.QtWidgets import QShortcut
 from .view import JsonView
-from .model import JsonSortFilterProxyModel
 
 
 class SearchableJsonView(QtWidgets.QWidget):
@@ -53,8 +52,8 @@ class SearchableJsonView(QtWidgets.QWidget):
         super(SearchableJsonView, self).__init__(parent)
         self.plugin_dir = plugin_dir
         self._source_model = model
+        self._force_dark = None  # None: the QGIS palette decides (see refresh_theme)
         self._setup_ui()
-        self._setup_filter()
         self._connect_signals()
 
     def _setup_ui(self):
@@ -69,15 +68,16 @@ class SearchableJsonView(QtWidgets.QWidget):
         search_layout.setContentsMargins(2, 2, 2, 2)
         search_layout.setSpacing(4)
 
-        # Search icon label
-        self._search_icon = QtWidgets.QLabel("🔍")
-        self._search_icon.setFixedWidth(20)
-        search_layout.addWidget(self._search_icon)
-
         # Search input
         self._search_input = QtWidgets.QLineEdit()
         self._search_input.setPlaceholderText(self.tr("Search configuration... (Ctrl+F)"))
         self._search_input.setClearButtonEnabled(True)
+        try:
+            from qgis.core import QgsApplication
+            self._search_input.addAction(QgsApplication.getThemeIcon('/search.svg'),
+                                         QtWidgets.QLineEdit.ActionPosition.LeadingPosition)
+        except (ImportError, AttributeError):
+            pass  # no icon: the placeholder says what the field is for
         self._search_input.setMinimumHeight(26)
         search_layout.addWidget(self._search_input)
 
@@ -96,39 +96,39 @@ class SearchableJsonView(QtWidgets.QWidget):
         # Apply search bar styling
         self._apply_search_styling()
 
-    def _setup_filter(self):
-        """Setup the filter proxy model."""
-        self._proxy_model = JsonSortFilterProxyModel()
-        self._proxy_model.setSourceModel(self._source_model)
-        self._proxy_model.setFilterCaseSensitivity(QtCore.Qt.CaseSensitivity.CaseInsensitive)
-        self._proxy_model.setFilterKeyColumn(0)  # Filter on property column
-
-        # Keep source model for now - filtering is optional
-        # Users can toggle between filtered and unfiltered view
-        self._filtering_enabled = False
-
     def _connect_signals(self):
         """Connect signal handlers."""
         self._search_input.textChanged.connect(self._on_search_changed)
         self._search_input.returnPressed.connect(self._on_search_enter)
 
         # Keyboard shortcut for search
+        # The dock shares the QGIS main window: at the default window scope these shortcuts
+        # would apply everywhere in QGIS, Escape included (it cancels the map tools).
         shortcut = QShortcut(QtGui.QKeySequence("Ctrl+F"), self)
+        shortcut.setContext(QtCore.Qt.ShortcutContext.WidgetWithChildrenShortcut)
         shortcut.activated.connect(self._focus_search)
 
         # Escape to clear search
         escape_shortcut = QShortcut(QtGui.QKeySequence("Escape"), self._search_input)
+        escape_shortcut.setContext(QtCore.Qt.ShortcutContext.WidgetShortcut)
         escape_shortcut.activated.connect(self._clear_search)
+
+    def refresh_theme(self, force_dark=None):
+        """Search bar in the plugin theme, which may differ from the QGIS one (None reads the QGIS palette)."""
+        self._force_dark = force_dark
+        self._apply_search_styling()
 
     def _apply_search_styling(self):
         """Apply styling to the search bar based on theme."""
-        try:
-            from qgis.core import QgsApplication
-            palette = QgsApplication.palette()
-            bg_color = palette.color(QtGui.QPalette.ColorRole.Window)
-            is_dark = bg_color.lightness() < 128
-        except (ImportError, AttributeError):
-            is_dark = False
+        is_dark = self._force_dark
+        if is_dark is None:
+            try:
+                from qgis.core import QgsApplication
+                palette = QgsApplication.palette()
+                bg_color = palette.color(QtGui.QPalette.ColorRole.Window)
+                is_dark = bg_color.lightness() < 128
+            except (ImportError, AttributeError):
+                is_dark = False
 
         if is_dark:
             self._search_input.setStyleSheet("""
@@ -186,7 +186,7 @@ class SearchableJsonView(QtWidgets.QWidget):
                 self._match_label.styleSheet() + "color: #FF6B6B;"
             )
         else:
-            self._match_label.setText(f"{count} found")
+            self._match_label.setText(self.tr("{0} found").format(count))
             self._apply_search_styling()  # Reset color
 
         # Highlight and expand to show matches
@@ -299,7 +299,6 @@ class SearchableJsonView(QtWidgets.QWidget):
         self._source_model = new_model
         self._json_view.setModel(new_model)
         self._json_view.model = new_model
-        self._proxy_model.setSourceModel(new_model)
         self._clear_search()
 
     def setModel(self, model):

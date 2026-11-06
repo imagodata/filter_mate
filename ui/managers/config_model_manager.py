@@ -263,7 +263,10 @@ class ConfigModelManager:
                 editable_values=True,
                 plugin_dir=dw.plugin_dir,
             )
-            if hasattr(dw, 'config_view') and dw.config_view:
+            container = getattr(dw, 'config_view_container', None)
+            if container is not None:
+                container.model = dw.config_model  # its search reads this model, not the view's
+            elif hasattr(dw, 'config_view') and dw.config_view:
                 dw.config_view.setModel(dw.config_model)
                 dw.config_view.model = dw.config_model
             # Sync ENV_VARS so all code reading from it sees updated values
@@ -494,7 +497,7 @@ class ConfigModelManager:
 
             # Use SearchableJsonView with integrated search bar
             try:
-                from ui.widgets.json_view import SearchableJsonView
+                from ..widgets.json_view import SearchableJsonView
                 dw.config_view_container = SearchableJsonView(
                     dw.config_model, dw.plugin_dir
                 )
