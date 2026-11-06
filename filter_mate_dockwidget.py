@@ -85,6 +85,7 @@ from qgis.utils import iface
 import webbrowser
 from .ui.widgets import QgsCheckableComboBoxFeaturesListPickerWidget
 from .ui.widgets.custom_widgets import apply_feature_picker_fetch_limit, clear_feature_picker_feature
+from .ui.widgets.wheel_guard import guard_input_wheel
 
 # Object safety and layer utilities (migrated to infrastructure)
 from .infrastructure.utils import is_layer_valid as is_valid_layer
@@ -840,6 +841,7 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         self.dockwidget_widgets_configuration()
         self._load_all_pushbutton_icons()
         self._setup_truncation_tooltips()
+        guard_input_wheel(self)  # a wheel over a list or a number scrolls the panel, it does not change them
 
     def _load_all_pushbutton_icons(self):
         """v4.0 S16: Load icons from config.
