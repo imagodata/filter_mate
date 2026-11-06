@@ -708,6 +708,8 @@ class CoverageModeController(BaseController):
                 host.layout().setContentsMargins(0, 0, 0, 0)
             fit_panel(self._raster_panel)
             fit_panel(self._pc_panel)
+            from ..widgets.wheel_guard import guard_input_wheel
+            guard_input_wheel(host)
         except Exception as exc:
             logger.debug(f"[FM5] coverage panel spacing skipped: {exc}")
         self._connect_panels()

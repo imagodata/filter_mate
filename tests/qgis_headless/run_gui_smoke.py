@@ -30,7 +30,7 @@ import types
 from qgis.core import Qgis, QgsApplication, QgsProject, QgsProviderRegistry, QgsRasterLayer, QgsVectorLayer
 from qgis.PyQt.QtCore import QPoint, QPointF, QSettings, Qt, QTimer
 from qgis.PyQt.QtGui import QWheelEvent
-from qgis.PyQt.QtWidgets import QApplication, QLineEdit, QPushButton, QScrollArea, QToolButton
+from qgis.PyQt.QtWidgets import QApplication, QComboBox, QLineEdit, QPushButton, QScrollArea, QToolButton
 try:
     from qgis.PyQt.QtGui import QShortcut
 except ImportError:  # QGIS < 3.34.2 (Qt5): QShortcut is in QtWidgets
@@ -1213,6 +1213,44 @@ def s_config_search():
           str(shortcuts))
 
 
+def s_wheel_needs_focus():
+    """A wheel turned while a list passed under the pointer changed the feature, without a click."""
+    picker = single_picker()
+    combo = picker.findChild(QComboBox)
+    dock().mGroupBox_exploring_single_selection.setChecked(True)
+    picker.setFeature(2)
+    focused = QApplication.focusWidget()
+    if focused is not None:
+        focused.clearFocus()
+    STATE['wheel_combo'] = combo
+    return waits(1, lambda: picked_fid() == 2)
+
+
+def _wheel_on(widget):
+    centre = widget.rect().center()
+    event = QWheelEvent(QPointF(centre), QPointF(widget.mapToGlobal(centre)), QPoint(0, 0), QPoint(0, -120),
+                        Qt.MouseButton.NoButton, Qt.KeyboardModifier.NoModifier, Qt.ScrollPhase.NoScrollPhase, False)
+    QApplication.sendEvent(widget, event)
+    return event
+
+
+def s_wheel_needs_focus_check():
+    combo = STATE['wheel_combo']
+    index = combo.currentIndex()
+    event = _wheel_on(combo)
+    check('wheel over a list without the focus: value kept, the panel gets the event',
+          combo.currentIndex() == index and not event.isAccepted(), f"index {index} -> {combo.currentIndex()}")
+    iface.mainWindow().activateWindow()
+    combo.setFocus()
+    QApplication.processEvents()
+    if combo.hasFocus() or combo.isAncestorOf(QApplication.focusWidget()):
+        _wheel_on(combo)
+        check('wheel over a list with the focus: it changes as usual', combo.currentIndex() != index,
+              f"index {index} -> {combo.currentIndex()}")
+    else:
+        report('SKIP', 'wheel over a list with the focus', 'no focus under Xvfb')
+
+
 def s_finish():
     failed_extensions = [line for line in _RECENT.lines if 'Failed to load extension' in line]
     check(f"extensions discovered under the plugin folder name '{PACKAGE}'", not failed_extensions,
@@ -1245,7 +1283,7 @@ STEPS = [s_setup, s_open_plugin, s_dock_ready, s_controllers_check, s_layout_che
          s_switch_setup, s_switch_zones, s_switch_multiple, s_switch_link, s_switch_to_parcels, s_switch_parcels_check,
          s_switch_parcels_values, s_switch_to_wells, s_switch_wells_check, s_switch_back_check, s_switch_same_layer_reload,
          s_switch_same_layer_check, s_switch_late_check, s_plugin_imports_check,
-         s_custom_matching_nothing, s_custom_matching_nothing_single, s_custom_matching_nothing_check, s_config_search, s_finish]
+         s_custom_matching_nothing, s_custom_matching_nothing_single, s_custom_matching_nothing_check, s_config_search, s_wheel_needs_focus, s_wheel_needs_focus_check, s_finish]
 
 
 def run_step(index=0):
