@@ -30,7 +30,7 @@ import types
 from qgis.core import Qgis, QgsApplication, QgsProject, QgsProviderRegistry, QgsRasterLayer, QgsVectorLayer
 from qgis.PyQt.QtCore import QPoint, QPointF, QSettings, Qt, QTimer
 from qgis.PyQt.QtGui import QWheelEvent
-from qgis.PyQt.QtWidgets import QApplication, QPushButton, QScrollArea
+from qgis.PyQt.QtWidgets import QApplication, QLineEdit, QPushButton, QScrollArea, QToolButton
 try:
     from qgis.PyQt.QtGui import QShortcut
 except ImportError:  # QGIS < 3.34.2 (Qt5): QShortcut is in QtWidgets
@@ -1198,6 +1198,14 @@ def s_config_search():
     check('Configuration tab: the search finds a setting, after a reload too',
           current.isValid() and current.data() == 'UI_PROFILE' and container.model is d.config_model and current.model() is d.config_model,
           f"current={current.data() if current.isValid() else None!r}")
+    # The dock stylesheet of the section headers (`QToolBox QToolButton`) drew these buttons off their frame.
+    d.toolBox_tabTools.setCurrentWidget(d.CONFIGURATION)  # nothing is visible in a closed section
+    QApplication.processEvents()
+    field = container.findChild(QLineEdit)
+    field_buttons = [button for button in field.findChildren(QToolButton) if button.isVisible()]
+    check('Configuration tab: search icon and clear button drawn inside the field',
+          len(field_buttons) == 2 and all(button.height() <= field.height() for button in field_buttons),
+          str([(button.geometry().x(), button.height()) for button in field_buttons]) + f" field height {field.height()}")
     container.set_search_text('')
     shortcuts = {shortcut.key().toString(): shortcut.context() for shortcut in container.findChildren(QShortcut)}
     check('Configuration tab: Ctrl+F and Escape stay inside the search bar, not the whole QGIS window',

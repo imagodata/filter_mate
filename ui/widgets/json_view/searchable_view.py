@@ -17,6 +17,14 @@ except ImportError:  # QGIS < 3.34.2 (Qt5): QShortcut is in QtWidgets
 from .view import JsonView
 
 
+_FIELD_BUTTONS_STYLE = """
+    QLineEdit QToolButton {
+        background: transparent; border: none; margin: 0; padding: 0;
+        min-height: 0; max-height: 22px; height: 22px;
+    }
+"""
+
+
 class SearchableJsonView(QtWidgets.QWidget):
     """
     A widget combining JsonView with a search bar for filtering configuration items.
@@ -166,6 +174,10 @@ class SearchableJsonView(QtWidgets.QWidget):
                 }
             """)
             self._match_label.setStyleSheet("color: #666666; font-size: 8pt;")
+
+        # The dock stylesheet sizes the tool box section headers with `QToolBox QToolButton` (45 px of left
+        # padding, 50 px high): it also caught the icon and clear buttons of this field, drawn off their frame.
+        self._search_input.setStyleSheet(self._search_input.styleSheet() + _FIELD_BUTTONS_STYLE)
 
     def _on_search_changed(self, text):
         """Handle search text changes."""
