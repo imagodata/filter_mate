@@ -5,6 +5,7 @@ scripts/publish_qgis.py validates the release archive (the 'Verify the ZIP' step
 Checks: forbidden file types, size ceilings, mandatory metadata.txt keys (and the icon file),
 Python 3.8 grammar and unscoped Qt enums in the Python files of the archive.
 """
+import configparser
 import sys
 import zipfile
 from pathlib import Path
@@ -117,3 +118,10 @@ def test_flake8_findings_are_problems():
     output = "filter_mate/a.py:3:5: E731 do not assign a lambda expression, use a def\n\n"
     assert publish_qgis.flake8_problems(output) == ["flake8 filter_mate/a.py:3:5: E731 do not assign a lambda expression, use a def"]
     assert publish_qgis.flake8_problems("") == []
+
+
+def test_the_metadata_of_the_plugin_can_be_read():
+    """A % in metadata.txt (`150 %` in the changelog) fails the validation: ConfigParser interpolates it."""
+    parser = configparser.ConfigParser()
+    parser.read(Path(__file__).resolve().parents[1] / "metadata.txt", encoding="utf-8")
+    assert parser["general"]["version"] and parser["general"]["changelog"]
