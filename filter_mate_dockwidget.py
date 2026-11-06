@@ -2440,7 +2440,7 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
     def refresh_ui_responsiveness_params(self):
         """Re-read UI_RESPONSIVENESS params from CONFIG_DATA and update timers."""
         try:
-            from config.config import _get_option_value
+            from .config.config import _get_option_value
             ui_resp = self.CONFIG_DATA.get("APP", {}).get("OPTIONS", {}).get("UI_RESPONSIVENESS", {})
             expr_ms = _get_option_value(ui_resp.get("expression_debounce_ms"), 450)
             if hasattr(self, '_expression_debounce_timer'):

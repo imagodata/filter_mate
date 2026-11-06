@@ -214,7 +214,7 @@ class DockWidgetOrchestrator:
 
     def _init_layout_managers(self) -> None:
         """Initialize layout managers."""
-        from ui.layout import (
+        from .layout import (
             SplitterManager,
             DimensionsManager,
             SpacingManager,
@@ -231,7 +231,7 @@ class DockWidgetOrchestrator:
 
     def _init_style_managers(self) -> None:
         """Initialize styling managers."""
-        from ui.styles import ThemeManager, IconManager, ButtonStyler
+        from .styles import ThemeManager, IconManager, ButtonStyler
 
         self._style_managers = {
             'theme': ThemeManager(self._dockwidget),

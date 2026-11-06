@@ -2219,7 +2219,7 @@ class ExploringController(BaseController, LayerSelectionMixin):
         # Try cache for custom expressions (most common case for repeated queries)
         if custom_expression is not None and custom_expression.strip():
             # FIX 2026-01-22: Skip non-filter expressions (field names, COALESCE, etc.)
-            from infrastructure.utils import should_skip_expression_for_filtering
+            from ...infrastructure.utils import should_skip_expression_for_filtering
 
             should_skip, reason = should_skip_expression_for_filtering(custom_expression)
             if should_skip:
@@ -2883,7 +2883,7 @@ class ExploringController(BaseController, LayerSelectionMixin):
 
             # Ensure is_linking property exists (backward compatibility)
             if "is_linking" not in layer_props["exploring"]:
-                from config.config import _get_option_value
+                from ...config.config import _get_option_value
                 default_is_linking = _get_option_value(
                     self._dockwidget.project_props.get("OPTIONS", {}).get("LAYERS", {}).get("DEFAULT_IS_LINKING"), True)
                 layer_props["exploring"]["is_linking"] = default_is_linking
