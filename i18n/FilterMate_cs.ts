@@ -6721,6 +6721,11 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <source>No match</source>
         <translation>Žádná shoda</translation>
     </message>
+    <message>
+        <location filename="../ui/widgets/json_view/searchable_view.py" line="180"/>
+        <source>{0} found</source>
+        <translation>Nalezeno: {0}</translation>
+    </message>
 </context>
 <context>
     <name>ServerFilterTranslation</name>

@@ -6739,6 +6739,11 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <source>No match</source>
         <translation>일치 항목 없음</translation>
     </message>
+    <message>
+        <location filename="../ui/widgets/json_view/searchable_view.py" line="180"/>
+        <source>{0} found</source>
+        <translation>{0}개 찾음</translation>
+    </message>
 </context>
 <context>
     <name>ServerFilterTranslation</name>
