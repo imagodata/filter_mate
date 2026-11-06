@@ -7013,6 +7013,11 @@ Objet cliqué : seulement la tache de ces pixels où tombe le clic (une piscine,
         <source>No match</source>
         <translation>Aucun résultat</translation>
     </message>
+    <message>
+        <location filename="../ui/widgets/json_view/searchable_view.py" line="180"/>
+        <source>{0} found</source>
+        <translation>{0} trouvé(s)</translation>
+    </message>
 </context>
 <context>
     <name>ServerFilterTranslation</name>
