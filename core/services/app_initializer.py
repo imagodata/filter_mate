@@ -335,9 +335,13 @@ class AppInitializer:
         """Initialize UI profile based on screen resolution and DPI.
 
         Selection matrix:
+        - COMPACT  : usable logical height < 800 px, whatever the scaling
+                     (a 1080p laptop at 150% reports 1280x720 logical px:
+                     Qt scales logical px by the devicePixelRatio at render
+                     time, so only the logical room decides the heights),
+                     or logical resolution < 1920x1080 (laptops, tablets)
         - HIDPI    : devicePixelRatio >= 1.5 OR logicalDotsPerInch > 120
                      (covers 4K, Retina, Windows 125/150/200% scaling)
-        - COMPACT  : logical resolution < 1920x1080 (laptops, tablets)
         - NORMAL   : default for standard desktop screens
         """
         try:
@@ -346,13 +350,25 @@ class AppInitializer:
                 screen_geometry = screen.geometry()
                 screen_width = screen_geometry.width()
                 screen_height = screen_geometry.height()
+                # The dock lives in the available area (taskbar excluded), in
+                # logical px: HIDPI/NORMAL impose a 600 px dock minimum height.
+                try:
+                    available_height = screen.availableGeometry().height()
+                except Exception:
+                    available_height = screen_height
                 dpr = float(screen.devicePixelRatio() or 1.0)
                 try:
                     dpi = float(screen.logicalDotsPerInch() or 96.0)
                 except Exception:
                     dpi = 96.0
 
-                if dpr >= 1.5 or dpi > 120.0:
+                if available_height < 800:
+                    UIConfig.set_profile(DisplayProfile.COMPACT)
+                    logger.info(
+                        f"FilterMate: Using COMPACT profile "
+                        f"({screen_width}x{screen_height}, available height {available_height}, dpr={dpr:g})"
+                    )
+                elif dpr >= 1.5 or dpi > 120.0:
                     UIConfig.set_profile(DisplayProfile.HIDPI)
                     logger.info(
                         f"FilterMate: Using HIDPI profile "
