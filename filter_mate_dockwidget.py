@@ -6828,6 +6828,22 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             _activate_awaited_vector = getattr(self, '_activate_awaited_vector_layer', None)
             if activate_awaited and _activate_awaited_vector is not None:
                 _activate_awaited_vector()
+            if activate_awaited:
+                self._show_combo_layer_when_none()
+
+    def _show_combo_layer_when_none(self):
+        """Apply the layer the current-layer combo box shows when the dock has no current layer yet.
+
+        A dock opened on a project whose active layer is a raster or a point cloud (a web basemap selected in the
+        layer tree) refreshed nothing: the combo box showed its first layer, but the panel had no current layer,
+        no layer card, and no Zone or "more" button on the rail until another layer was picked.
+        """
+        if self.current_layer is not None or getattr(self, '_awaited_vector_pick', None) is not None:
+            return
+        combo = getattr(self, 'comboBox_filtering_current_layer', None)
+        layer = combo.currentLayer() if combo is not None else None
+        if layer is not None:
+            self.current_layer_changed(layer)
 
     def open_project_page(self):
         """v4.0 S18: Open project website page."""

@@ -206,6 +206,15 @@ def rail_floor(button_heights, gap: int) -> int:
     return sum(heights) + gap * (len(heights) + 1) if heights else 0
 
 
+def rail_width(rail: Any) -> int:
+    """Width the rail really takes: a scroll area keeps its widget at the larger of these two.
+
+    ``minimumSizeHint`` alone is the width of the buttons (36 px), and ignores the minimum width of the display
+    profile (56 px from 1920 x 1080 up), so the scroll area cut the rail, and the centred icons, on the right.
+    """
+    return max(rail.minimumWidth(), rail.minimumSizeHint().width())
+
+
 COMPACT_BUTTON_MIN = 22  # a rail button never goes under this (16 px icon with a margin)
 
 
@@ -268,7 +277,7 @@ class _RailSpreader(QObject if QObject is not None else object):
             return
         holder = band.parentWidget()
         rail = self.parent()
-        holder.setFixedWidth(rail.minimumSizeHint().width())
+        holder.setFixedWidth(rail_width(rail))
         if holder.isHidden() != rail.isHidden():
             holder.setVisible(not rail.isHidden())
         if band not in self._watched_bands:
@@ -285,6 +294,7 @@ class _RailSpreader(QObject if QObject is not None else object):
         """Rebuild even if no button changed: the dimensions manager resets the rail spacing and
         resizes its spacers (``apply_dynamic_dimensions`` runs after this spreader is built)."""
         self._state = None
+        self._follow_rail_width()  # a lower minimum width (other screen) resizes nothing by itself
         self.spread()
 
     def spread(self) -> None:

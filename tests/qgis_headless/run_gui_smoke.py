@@ -404,6 +404,26 @@ def rail_scroll_maximum():
     return dock().findChild(QScrollArea, 'scrollArea_exploring_rail').verticalScrollBar().maximum()
 
 
+def s_rail_width_check():
+    """The scroll area took the width of the buttons and cut a rail wider than them (from 1920 x 1080 up: 56 px)."""
+    rail = dock().widget_exploring_keys
+    STATE['rail_min_width'] = rail.minimumWidth()
+    rail.setMinimumWidth(rail.minimumSizeHint().width() + 20)
+    return waits(0.5)
+
+
+def s_rail_width_after():
+    d = dock()
+    rail = d.widget_exploring_keys
+    band = d.findChild(QScrollArea, 'scrollArea_exploring_rail').viewport()
+    shown = [button for button in rail.findChildren(QPushButton) if not button.isHidden()]
+    check('EXPLORING rail wider than its buttons: not cut by its scroll area',
+          band.width() == rail.width() and all(button.geometry().right() < band.width() for button in shown),
+          f"band={band.width()} rail={rail.width()} right={[button.geometry().right() for button in shown]}")
+    rail.setMinimumWidth(STATE['rail_min_width'])
+    return waits(0.5)
+
+
 def s_rail_short():
     """A band shorter than the compact buttons overlapped them (720 px screen): the rail now scrolls."""
     d = dock()
@@ -1266,7 +1286,7 @@ def s_finish():
     os._exit(1 if failed else 0)  # QGIS exit code = test result; skips the slow GUI teardown
 
 
-STEPS = [s_setup, s_open_plugin, s_dock_ready, s_controllers_check, s_layout_check, s_rail_short, s_rail_short_check, s_rail_tall_check,
+STEPS = [s_setup, s_open_plugin, s_dock_ready, s_controllers_check, s_layout_check, s_rail_width_check, s_rail_width_after, s_rail_short, s_rail_short_check, s_rail_tall_check,
          s_ui_profile_check, s_qt6_enums_check, s_pick_before_late_refresh,
          s_late_refresh_check,
          s_vector_source, s_vector_select, s_vector_filter, s_vector_check, s_vector_undo_check,
