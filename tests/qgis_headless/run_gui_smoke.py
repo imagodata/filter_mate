@@ -28,8 +28,9 @@ import traceback
 import types
 
 from qgis.core import Qgis, QgsApplication, QgsProject, QgsProviderRegistry, QgsRasterLayer, QgsVectorLayer
-from qgis.PyQt.QtCore import QSettings, Qt, QTimer
-from qgis.PyQt.QtWidgets import QPushButton, QScrollArea
+from qgis.PyQt.QtCore import QPoint, QPointF, QSettings, Qt, QTimer
+from qgis.PyQt.QtGui import QWheelEvent
+from qgis.PyQt.QtWidgets import QApplication, QPushButton, QScrollArea
 from qgis.utils import iface
 import qgis.utils
 
@@ -411,6 +412,16 @@ def s_rail_short_check():
     d = dock()
     check('EXPLORING rail in a short band: buttons apart, and it scrolls', rail_buttons_apart() and rail_scroll_maximum() > 0,
           f"band={d.main_splitter.sizes()[0]} maximum={rail_scroll_maximum()}")
+    # A button ignores the wheel, so Qt hands real input on to the scroll area. It does not do that for an
+    # event sent from here: the band gets it directly. (Checked once with a real X11 wheel over a button.)
+    band = d.findChild(QScrollArea, 'scrollArea_exploring_rail').viewport()
+    centre = band.rect().center()
+    QApplication.sendEvent(band, QWheelEvent(QPointF(centre), QPointF(band.mapToGlobal(centre)), QPoint(0, 0), QPoint(0, -120),
+                                             Qt.MouseButton.NoButton, Qt.KeyboardModifier.NoModifier,
+                                             Qt.ScrollPhase.NoScrollPhase, False))
+    scrollbar = d.findChild(QScrollArea, 'scrollArea_exploring_rail').verticalScrollBar()
+    check('EXPLORING rail in a short band: the wheel scrolls it', scrollbar.value() > 0, f"value={scrollbar.value()}")
+    scrollbar.setValue(0)
     d.main_splitter.setSizes([sum(STATE['splitter_sizes']), 0])
     return waits(0.5)
 

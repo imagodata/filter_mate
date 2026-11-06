@@ -2226,19 +2226,6 @@ class ExploringController(BaseController, LayerSelectionMixin):
                 logger.debug(f"get_exploring_features: Skipping non-filter expression - {reason}")
                 return [], custom_expression.strip()
 
-            try:
-                from infrastructure.cache.exploring_cache import ExploringFeaturesCache
-                cache = ExploringFeaturesCache()
-                layer_id = self._dockwidget.current_layer.id() if self._dockwidget.current_layer else None
-
-                if layer_id:
-                    # Try to get from cache
-                    cached = cache.get(layer_id, "custom_expression")
-                    if cached and cached.get('expression') == custom_expression.strip():
-                        logger.debug(f"Cache HIT: custom_expression for {layer_id[:8]}...")
-                        return cached['features'], cached['expression']
-            except Exception as e:
-                logger.debug(f"Cache lookup failed (non-critical): {e}")
         # === END CACHE INTEGRATION ===
 
         features = []
@@ -2510,17 +2497,6 @@ class ExploringController(BaseController, LayerSelectionMixin):
 
         # === PHASE 2: CACHE STORAGE ===
         # Cache custom expression results for future reuse
-        if custom_expression is not None and custom_expression.strip() and features and expression:
-            try:
-                from infrastructure.cache.exploring_cache import ExploringFeaturesCache
-                cache = ExploringFeaturesCache()
-                layer_id = self._dockwidget.current_layer.id() if self._dockwidget.current_layer else None
-
-                if layer_id:
-                    cache.put(layer_id, "custom_expression", features, expression)
-                    logger.debug(f"Cached {len(features)} features for custom_expression")
-            except Exception as e:
-                logger.debug(f"Cache storage failed (non-critical): {e}")
         # === END CACHE STORAGE ===
 
         return features, expression
