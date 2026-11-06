@@ -1050,6 +1050,9 @@ def s_remove_layer():
 def s_remove_layer_check():
     check('layer removed from the project: unregistered', STATE['removed_id'] not in app().PROJECT_LAYERS
           and 'dem' not in current_layer_list(), f"registered={STATE['removed_id'] in app().PROJECT_LAYERS}")
+    # The results of a short remove task used to land during its begun slot, which disconnected everything after them.
+    check('layer removed from the project: the current-layer combo still answers',
+          dock()._signal_connection_states.get('FILTERING.CURRENT_LAYER.layerChanged') is True)
 
 
 def s_finish():
