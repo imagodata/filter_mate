@@ -1115,6 +1115,25 @@ def s_plugin_imports_check():
         exporting[key]['WIDGET'].setChecked(False)
 
 
+def s_custom_matching_nothing():
+    d = dock()
+    d.mGroupBox_exploring_custom_selection.setChecked(True)
+    d.mFieldExpressionWidget_exploring_custom_selection.setExpression('"label" = \'nothing matches\'')
+    return waits(1.5, tasks_idle)
+
+
+def s_custom_matching_nothing_single():
+    dock().mGroupBox_exploring_single_selection.setChecked(True)
+    return waits(1.5, tasks_idle)
+
+
+def s_custom_matching_nothing_check():
+    check('a custom expression matching nothing does not empty the single selection list once left',
+          not single_picker().filterExpression() and picker_rows() >= 4,
+          f"filter={single_picker().filterExpression()!r} rows={picker_rows()}")
+    dock().mFieldExpressionWidget_exploring_custom_selection.setField('label')
+
+
 def s_finish():
     failed_extensions = [line for line in _RECENT.lines if 'Failed to load extension' in line]
     check(f"extensions discovered under the plugin folder name '{PACKAGE}'", not failed_extensions,
@@ -1145,7 +1164,8 @@ STEPS = [s_setup, s_open_plugin, s_dock_ready, s_controllers_check, s_layout_che
          s_remove_layer, s_remove_layer_check,
          s_switch_setup, s_switch_zones, s_switch_multiple, s_switch_link, s_switch_to_parcels, s_switch_parcels_check,
          s_switch_parcels_values, s_switch_to_wells, s_switch_wells_check, s_switch_back_check, s_switch_same_layer_reload,
-         s_switch_same_layer_check, s_switch_late_check, s_plugin_imports_check, s_finish]
+         s_switch_same_layer_check, s_switch_late_check, s_plugin_imports_check,
+         s_custom_matching_nothing, s_custom_matching_nothing_single, s_custom_matching_nothing_check, s_finish]
 
 
 def run_step(index=0):
