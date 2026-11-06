@@ -31,6 +31,10 @@ from qgis.core import Qgis, QgsApplication, QgsProject, QgsProviderRegistry, Qgs
 from qgis.PyQt.QtCore import QPoint, QPointF, QSettings, Qt, QTimer
 from qgis.PyQt.QtGui import QWheelEvent
 from qgis.PyQt.QtWidgets import QApplication, QPushButton, QScrollArea
+try:
+    from qgis.PyQt.QtGui import QShortcut
+except ImportError:  # QGIS < 3.34.2 (Qt5): QShortcut is in QtWidgets
+    from qgis.PyQt.QtWidgets import QShortcut
 from qgis.utils import iface
 import qgis.utils
 
@@ -1183,6 +1187,24 @@ def s_custom_matching_nothing_check():
     dock().mFieldExpressionWidget_exploring_custom_selection.setField('label')
 
 
+def s_config_search():
+    """The search bar of the Configuration tab never ran until November 2026 (import failing in QGIS)."""
+    d = dock()
+    container = d.config_view_container
+    check('Configuration tab: search bar in place', container is not None and d.config_view is container.json_view)
+    d.reload_configuration_model()  # the search must read the new model
+    container.set_search_text('UI_PROFILE')
+    current = d.config_view.currentIndex()
+    check('Configuration tab: the search finds a setting, after a reload too',
+          current.isValid() and current.data() == 'UI_PROFILE' and container.model is d.config_model and current.model() is d.config_model,
+          f"current={current.data() if current.isValid() else None!r}")
+    container.set_search_text('')
+    shortcuts = {shortcut.key().toString(): shortcut.context() for shortcut in container.findChildren(QShortcut)}
+    check('Configuration tab: Ctrl+F and Escape stay inside the search bar, not the whole QGIS window',
+          shortcuts == {'Ctrl+F': Qt.ShortcutContext.WidgetWithChildrenShortcut, 'Esc': Qt.ShortcutContext.WidgetShortcut},
+          str(shortcuts))
+
+
 def s_finish():
     failed_extensions = [line for line in _RECENT.lines if 'Failed to load extension' in line]
     check(f"extensions discovered under the plugin folder name '{PACKAGE}'", not failed_extensions,
@@ -1215,7 +1237,7 @@ STEPS = [s_setup, s_open_plugin, s_dock_ready, s_controllers_check, s_layout_che
          s_switch_setup, s_switch_zones, s_switch_multiple, s_switch_link, s_switch_to_parcels, s_switch_parcels_check,
          s_switch_parcels_values, s_switch_to_wells, s_switch_wells_check, s_switch_back_check, s_switch_same_layer_reload,
          s_switch_same_layer_check, s_switch_late_check, s_plugin_imports_check,
-         s_custom_matching_nothing, s_custom_matching_nothing_single, s_custom_matching_nothing_check, s_finish]
+         s_custom_matching_nothing, s_custom_matching_nothing_single, s_custom_matching_nothing_check, s_config_search, s_finish]
 
 
 def run_step(index=0):

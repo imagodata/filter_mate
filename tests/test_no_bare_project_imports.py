@@ -21,8 +21,6 @@ SCANNED = PROJECT_PACKAGES + ("processing",)
 
 # Known, inert: each one fails in QGIS and falls back on something that works.
 KNOWN = {
-    # Falls back on the plain JsonView. Fixing it would add a search bar to the Configuration tab.
-    ("ui/managers/config_model_manager.py", "ui.widgets.json_view"),
     # Falls back on the legacy names just below.
     ("ui/elements/__init__.py", "ui.elements"),
 }

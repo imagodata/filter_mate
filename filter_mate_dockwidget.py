@@ -2790,7 +2790,11 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         try:
             from .ui.styles.mockup_design import stylesheet_is_dark
             # The applied stylesheet; None before it is applied (the view then reads the QGIS palette).
-            view.refresh_theme_stylesheet(force_dark=stylesheet_is_dark(self.dockWidgetContents))
+            force_dark = stylesheet_is_dark(self.dockWidgetContents)
+            view.refresh_theme_stylesheet(force_dark=force_dark)
+            container = getattr(self, 'config_view_container', None)
+            if container is not None:
+                container.refresh_theme(force_dark)
         except Exception as e:  # view deleted (plugin reload)
             logger.debug(f"Config view theme not refreshed: {e}")
 
