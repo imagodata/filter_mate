@@ -2918,7 +2918,11 @@ class ExploringController(BaseController, LayerSelectionMixin):
                     if len(features) > 0 and expression is not None:
                         _safe_set_single_filter(expression)
                 elif custom_filter is not None:
-                    _safe_set_single_filter(custom_filter)
+                    # 2026-11-06: nothing visible in the multiple list means the custom expression matches
+                    # nothing (or the list is not loaded yet). Applied to the single list while another
+                    # group is in use, it emptied that list for an expression the user had left behind.
+                    in_custom_group = self._dockwidget.current_exploring_groupbox == "custom_selection"
+                    _safe_set_single_filter(custom_filter if in_custom_group else '')
 
                 # BIDIRECTIONAL DISPLAY EXPRESSION SYNCHRONIZATION
                 # FIX 2026-01-18: Enhanced linking to always sync when is_linking is checked
