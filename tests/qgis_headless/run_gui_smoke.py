@@ -25,6 +25,7 @@ import sys
 import tempfile
 import time
 import traceback
+import types
 
 from qgis.core import Qgis, QgsApplication, QgsProject, QgsProviderRegistry, QgsRasterLayer, QgsVectorLayer
 from qgis.PyQt.QtCore import QSettings, Qt, QTimer
@@ -382,6 +383,35 @@ def s_layout_check():
     # The key column aligner used to grow the page at every pass: rows 4000 px apart, one row visible.
     span = filtering_rows_span()
     check('FILTERING rows laid out together (key column aligner)', 0 < span < 600, f"first to last row: {span} px")
+
+
+def set_ui_profile(value):
+    """What the Configuration tab does for UI_PROFILE: it never ran until November 2026 (import failing in QGIS)."""
+    d = dock()
+    item = types.SimpleNamespace(data=lambda role: {'value': value})
+    config_view = d.config_view
+    d.config_view = types.SimpleNamespace(model=types.SimpleNamespace(itemFromIndex=lambda index: item))
+    try:
+        d._controller_integration.registry.get('config')._apply_ui_profile_change(
+            {'path': ['UI_PROFILE'], 'index': types.SimpleNamespace(siblingAtColumn=lambda column: None)}, [])
+    finally:
+        d.config_view = config_view
+
+
+def s_ui_profile_check():
+    d = dock()
+    ui_config = importlib.import_module(f'{PACKAGE}.ui.config').UIConfig
+    check('UI profile at startup: the one detected from the screen', ui_config.get_profile() is ui_config.detect_profile_from_screen(),
+          f"{ui_config.get_profile().name} vs {ui_config.detect_profile_from_screen().name}")
+    set_ui_profile('normal')
+    normal_height = d.minimumHeight()
+    set_ui_profile('compact')
+    check('UI_PROFILE setting: compact applied to the dock, splitter collapsible',
+          ui_config.get_profile().name == 'COMPACT' and d.minimumHeight() < normal_height and d.main_splitter.childrenCollapsible(),
+          f"{ui_config.get_profile().name} minimum height {normal_height} -> {d.minimumHeight()}")
+    set_ui_profile('auto')
+    check('UI_PROFILE setting: auto goes back to the profile of the screen',
+          ui_config.get_profile() is ui_config.detect_profile_from_screen(), ui_config.get_profile().name)
 
 
 def s_qt6_enums_check():
@@ -1070,7 +1100,7 @@ def s_finish():
     os._exit(1 if failed else 0)  # QGIS exit code = test result; skips the slow GUI teardown
 
 
-STEPS = [s_setup, s_open_plugin, s_dock_ready, s_controllers_check, s_layout_check, s_qt6_enums_check, s_pick_before_late_refresh,
+STEPS = [s_setup, s_open_plugin, s_dock_ready, s_controllers_check, s_layout_check, s_ui_profile_check, s_qt6_enums_check, s_pick_before_late_refresh,
          s_late_refresh_check,
          s_vector_source, s_vector_select, s_vector_filter, s_vector_check, s_vector_undo_check,
          s_user_pick_after_undo_check,
