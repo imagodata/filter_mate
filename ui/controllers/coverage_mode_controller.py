@@ -269,6 +269,7 @@ class CoverageModeController(BaseController):
     def _on_project_cleared(self) -> None:
         """A new / closed project: histories and links refer to layers that are gone."""
         from ...core.services.cross_filter_service import clear_histories
+        self._awaiting_registration = None  # picked in the outgoing project: reopening it would jump to that layer
         self._leave_removed_layers(None)
         clear_histories()  # the dock's and the automation one
         self._linked_runs.clear()
