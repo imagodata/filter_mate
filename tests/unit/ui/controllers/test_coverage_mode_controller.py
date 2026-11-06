@@ -595,8 +595,10 @@ class TestFailuresCacheAndTeardown:
     def test_project_cleared_clears_every_history(self, ctrl_module, monkeypatch):
         controller = ctrl_module.CoverageModeController(_dock())
         monkeypatch.setattr(controller, "_schedule_cache_tidy", lambda *a: None)
+        controller._awaiting_registration = "picked_in_the_outgoing_project"
         controller._on_project_cleared()
         assert ctrl_module._test_service_module.calls == [("clear_histories",)]
+        assert controller._awaiting_registration is None
 
     def test_tidy_waits_for_running_tasks(self, ctrl_module, monkeypatch):
         controller = ctrl_module.CoverageModeController(_dock())
