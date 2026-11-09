@@ -1,72 +1,39 @@
 # -*- coding: utf-8 -*-
+"""Compatibility shim: this module moved to ``filtermate_core.domain.centroid_targets``.
+
+The name is aliased to the moved module so existing imports, ``isinstance``
+checks and ``mock.patch`` targets keep working; new code imports
+``filtermate_core`` directly. The moved module is looked up under this
+module's own package prefix (``filter_mate.`` in QGIS, nothing when the
+sub-packages are imported from the repository root) and, failing that, as the
+top-level ``filtermate_core`` next to this file, so loaders that register the
+file under another name (tests) get the same objects.
 """
-Centroids of the target layers, chosen layer by layer (FilterMate 5).
+import importlib as _importlib
+import os as _os
+import sys as _sys
 
-A target layer of FILTERING may be tested by its centroids (point on surface)
-instead of its full geometries: faster on large polygons or lines, and the
-predicate then reads "the centre of the target ...". It only means something
-for line and polygon vector layers: a point layer is its own centroid, and a
-raster or point cloud target is clipped by the source geometry, never tested
-by geometry.
-
-The choice is stored per source layer in ``filtering.centroid_layers`` (ids of
-the targets tested by their centroids). Projects saved before it only have the
-global ``filtering.use_centroids_distant_layers`` flag, which applied to every
-target: :func:`distant_centroids_for` falls back to it when the list is absent.
-"""
-from typing import Any, Iterable, List, Mapping, Optional
-
-CENTROID_LAYERS_KEY = 'centroid_layers'
-LEGACY_FLAG_KEY = 'use_centroids_distant_layers'
-# ``layer_geometry_type`` values (PROJECT_LAYERS infos) of the targets a centroid changes.
-CENTROID_GEOMETRY_TYPES = frozenset({'GeometryType.Line', 'GeometryType.Polygon'})
+_OLD = 'core.domain.centroid_targets'
+_NEW = 'filtermate_core.domain.centroid_targets'
+_ROOT = _os.path.abspath(_os.path.join(_os.path.dirname(__file__), '..', '..'))
 
 
-def centroid_eligible(geometry_type: Any) -> bool:
-    """Whether a target of ``geometry_type`` can be tested by its centroids (line or polygon layer)."""
-    return str(geometry_type or '') in CENTROID_GEOMETRY_TYPES
+def _load():
+    if __name__ == _OLD or __name__.endswith('.' + _OLD):
+        try:
+            return _importlib.import_module(__name__[:-len(_OLD)] + _NEW)
+        except ImportError:
+            pass  # not reachable under this prefix: use the top-level spelling
+    if _ROOT not in _sys.path:
+        _sys.path.append(_ROOT)
+    return _importlib.import_module(_NEW)
 
 
-def distant_centroids_for(layer_id: Optional[str], filtering: Optional[Mapping[str, Any]],
-                          default: bool = False) -> bool:
-    """Whether the target ``layer_id`` is tested by its centroids.
-
-    Args:
-        layer_id: Id of the target layer.
-        filtering: ``filtering`` parameters of the source layer (task or PROJECT_LAYERS).
-        default: The global flag, used when ``filtering`` has no per-layer list.
-    """
-    chosen = (filtering or {}).get(CENTROID_LAYERS_KEY)
-    if chosen is None:
-        return bool(default)
-    return bool(layer_id) and layer_id in set(chosen)
+_moved = _load()
+_sys.modules[__name__] = _moved
+__all__ = getattr(_moved, '__all__', [_n for _n in vars(_moved) if not _n.startswith('_')])
 
 
-def initial_centroid_layers(filtering: Optional[Mapping[str, Any]], eligible_ids: Iterable[str]) -> List[str]:
-    """Targets shown with their centroid toggle on when the list of targets is filled.
-
-    The stored list when there is one; otherwise every eligible target if the old
-    global flag was on (projects saved before the per-layer choice), none if not.
-    """
-    filtering = filtering or {}
-    eligible = list(eligible_ids)
-    chosen = filtering.get(CENTROID_LAYERS_KEY)
-    if chosen is not None:
-        wanted = set(chosen)
-        return [layer_id for layer_id in eligible if layer_id in wanted]
-    return eligible if filtering.get(LEGACY_FLAG_KEY) else []
-
-
-def global_centroid_state(checked_eligible: Iterable[str], centroid_ids: Iterable[str]) -> Optional[bool]:
-    """State of the global centroid button for the checked line / polygon targets.
-
-    Returns:
-        True when all of them use their centroids, False when none does, None when
-        only some do (partial), and False when no such target is checked.
-    """
-    targets = list(checked_eligible)
-    chosen = set(centroid_ids)
-    using = [layer_id for layer_id in targets if layer_id in chosen]
-    if not targets or not using:
-        return False
-    return True if len(using) == len(targets) else None
+def __getattr__(name):
+    """Delegate to the moved module for loaders that keep this module object."""
+    return getattr(_moved, name)

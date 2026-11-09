@@ -168,9 +168,12 @@ def test_one_temp_schema_constant():
     assert constants.DEFAULT_TEMP_SCHEMA == "filter_mate_temp"
     assert "filtermate_temp" in constants.LEGACY_TEMP_SCHEMAS
     assert constants.TABLE_PREFIX_MATERIALIZED == "fm_temp_mv_"
+    # the host-free core names the schema on its own; both spellings must agree
+    from filtermate_core.constants import DEFAULT_TEMP_SCHEMA as core_schema
+    assert core_schema == constants.DEFAULT_TEMP_SCHEMA
 
 
-_SCANNED = ("adapters", "core", "infrastructure", "config", "ui", "extensions")
+_SCANNED = ("adapters", "core", "filtermate_core", "infrastructure", "config", "ui", "extensions")
 # backend_controller cleans both spellings on purpose (owned by another change)
 _ALLOWED = {
     PLUGIN_ROOT / "infrastructure" / "constants.py",
@@ -200,6 +203,6 @@ def test_v4_backend_modules_use_the_constant():
         ("adapters/backends/postgresql/filter_chain_optimizer.py", "MV_SCHEMA = DEFAULT_TEMP_SCHEMA"),
         ("adapters/backends/postgresql/cleanup.py", "DEFAULT_SCHEMA = DEFAULT_TEMP_SCHEMA"),
         ("core/services/postgres_session_manager.py", "DEFAULT_SCHEMA = DEFAULT_TEMP_SCHEMA"),
-        ("core/optimization/combined_query_optimizer.py", "FILTERMATE_MV_SCHEMA = DEFAULT_TEMP_SCHEMA"),
+        ("filtermate_core/optimization/combined_query_optimizer.py", "FILTERMATE_MV_SCHEMA = DEFAULT_TEMP_SCHEMA"),
     ]:
         assert needle in (PLUGIN_ROOT / relative).read_text(encoding="utf-8"), relative

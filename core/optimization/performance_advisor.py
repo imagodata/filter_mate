@@ -1,103 +1,39 @@
+# -*- coding: utf-8 -*-
+"""Compatibility shim: this module moved to ``filtermate_core.optimization.performance_advisor``.
+
+The name is aliased to the moved module so existing imports, ``isinstance``
+checks and ``mock.patch`` targets keep working; new code imports
+``filtermate_core`` directly. The moved module is looked up under this
+module's own package prefix (``filter_mate.`` in QGIS, nothing when the
+sub-packages are imported from the repository root) and, failing that, as the
+top-level ``filtermate_core`` next to this file, so loaders that register the
+file under another name (tests) get the same objects.
 """
-Performance Advisor Module
+import importlib as _importlib
+import os as _os
+import sys as _sys
 
-EPIC-1 Phase E7.5: Extracted from modules/tasks/filter_task.py
-
-Provides contextual performance warnings and recommendations based on:
-- Current backend (PostgreSQL, Spatialite, OGR)
-- Query duration
-- Dataset size
-
-Author: FilterMate Team
-Created: January 2026 (EPIC-1 Phase E7.5)
-"""
-
-import logging
-from typing import Optional
-
-logger = logging.getLogger('FilterMate.Core.Optimization.PerformanceAdvisor')
+_OLD = 'core.optimization.performance_advisor'
+_NEW = 'filtermate_core.optimization.performance_advisor'
+_ROOT = _os.path.abspath(_os.path.join(_os.path.dirname(__file__), '..', '..'))
 
 
-def get_contextual_performance_warning(
-    elapsed_time: float,
-    provider_type: str,
-    postgresql_available: bool = True,
-    severity: str = 'warning'
-) -> Optional[str]:
-    """
-    Generate contextual performance warning based on current backend.
+def _load():
+    if __name__ == _OLD or __name__.endswith('.' + _OLD):
+        try:
+            return _importlib.import_module(__name__[:-len(_OLD)] + _NEW)
+        except ImportError:
+            pass  # not reachable under this prefix: use the top-level spelling
+    if _ROOT not in _sys.path:
+        _sys.path.append(_ROOT)
+    return _importlib.import_module(_NEW)
 
-    Provides relevant advice based on current backend instead of always suggesting PostgreSQL.
 
-    Args:
-        elapsed_time: Query duration in seconds
-        provider_type: Provider type ('postgresql', 'spatialite', 'ogr')
-        postgresql_available: Whether PostgreSQL/psycopg2 is available
-        severity: 'warning' or 'critical'
+_moved = _load()
+_sys.modules[__name__] = _moved
+__all__ = getattr(_moved, '__all__', [_n for _n in vars(_moved) if not _n.startswith('_')])
 
-    Returns:
-        Contextual warning message string, or None if no warning needed
-    """
-    is_postgresql = postgresql_available and provider_type == 'postgresql'
-    is_spatialite = provider_type == 'spatialite'
-    is_ogr = provider_type == 'ogr'
 
-    # Base message with timing
-    base_msg = f"Filter query took {elapsed_time:.1f}s"
-
-    if is_postgresql:
-        # Already using PostgreSQL - suggest complexity reduction
-        if severity == 'critical':
-            return (
-                f"{base_msg} (backend: PostgreSQL). "
-                "To improve performance, you can: "
-                "reduce the buffer radius, limit the number of layers, "
-                "or create spatial indexes on the affected tables."
-            )
-        else:
-            return (
-                f"{base_msg} (backend: PostgreSQL). "
-                "Normal time for a complex query. "
-                "Check your spatial indexes if performance remains slow."
-            )
-    elif is_spatialite:
-        # Using Spatialite - suggest PostgreSQL for large datasets
-        if severity == 'critical':
-            return (
-                f"{base_msg} (backend: Spatialite). "
-                "For better performance, consider: "
-                "PostgreSQL/PostGIS for large datasets, "
-                "or reduce filter complexity."
-            )
-        else:
-            return (
-                f"{base_msg} (backend: Spatialite). "
-                "Acceptable performance. PostgreSQL/PostGIS would be faster "
-                "for frequent queries on this dataset."
-            )
-    elif is_ogr:
-        # Using OGR fallback - suggest optimized backend
-        if severity == 'critical':
-            return (
-                f"{base_msg} (backend: OGR/memory). "
-                "For better performance, use PostgreSQL/PostGIS "
-                "or Spatialite. The current backend is not optimized for large data."
-            )
-        else:
-            return (
-                f"{base_msg} (backend: OGR/memory). "
-                "Consider PostgreSQL or GeoPackage (Spatialite) for better performance."
-            )
-    else:
-        # Unknown/default backend
-        if severity == 'critical':
-            return (
-                f"{base_msg}. "
-                "For better performance, use PostgreSQL/PostGIS "
-                "or reduce filter complexity."
-            )
-        else:
-            return (
-                f"{base_msg}. "
-                "High processing time. Check data size and filter complexity."
-            )
+def __getattr__(name):
+    """Delegate to the moved module for loaders that keep this module object."""
+    return getattr(_moved, name)

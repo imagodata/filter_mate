@@ -1,6 +1,28 @@
 # Project Memory
 _Auto-maintained by project agent_
 
+## [2026-10-27] S0 : `filtermate_core/`, le cœur sans hôte (étape 1 du portage RustGIS / GeoLibre)
+Décision : extraire la sémantique de filtrage dans un paquet `filtermate_core/` sans QGIS / Qt / GDAL, vendu dans le
+plugin et importable seul (`import filtermate_core` avec la racine du dépôt sur `sys.path`). Première PR = déplacement
+mécanique des 54 modules transitivement purs (domaine, combinateur, dialectes, optimiseur, stratégies, services purs,
+ports, SQL PG / Spatialite, `subset_string_builder`) avec un shim d'alias à chaque ancien chemin.
+- **Shim** : `sys.modules[ancien nom] = module déplacé` (mêmes objets, `mock.patch` intact), préfixe tiré de `__name__`
+  (`filter_mate.` en QGIS, rien quand les tests importent `core` en premier niveau), repli sur `filtermate_core` de
+  premier niveau pour les tests qui chargent un fichier sous un nom synthétique, `__getattr__` pour ceux qui gardent
+  l'objet module d'origine. Ne pas écrire `from ...filtermate_core` dans un shim : « beyond top-level package ».
+- **Garde** : `tests/test_filtermate_core_is_host_free.py` (AST : aucun import qgis / PyQt / osgeo / processing / sip
+  ni des autres paquets du plugin, aucun import relatif qui sort du paquet ; puis import de chaque module dans un
+  interpréteur `-I` où ces paquets sont bloqués). Les constantes partagées restent définies des deux côtés
+  (`DEFAULT_TEMP_SCHEMA`) avec un test d'égalité : un import relatif de `filtermate_core` depuis `infrastructure`
+  casse les tests qui importent `infrastructure` en premier niveau.
+- **Maillons coupés** : `pk_formatter` (QgsVectorLayer n'était qu'une annotation), stratégies (`get_logger`,
+  `PSYCOPG2_AVAILABLE`), optimiseur (`constants`), `temp_table_manager` (`spatialite_connect` recopié dans
+  `sql/spatialite/connect.py`, l'original de `task_utils` reste). Tests qui lisent le code par chemin : repointés.
+- **Reste pour S0** : `geometric_filter_port` (2 imports QGIS paresseux), port géométrie + implémentation shapely,
+  séparation des 4 `expression_builder` (≈6 k lignes) entre « quel SQL » et « lecture de la couche », favoris
+  (`config.config`), puis réécriture des sites d'import et suppression des shims. Brainstorm complet en mémoire
+  utilisateur (`port-rustgis-geolibre-brainstorm-2026-10-27`).
+
 ## [2026-10-20] Sources en flux (5.1) : lots A à F → PR #190 – #208, plan `docs/internal/plans/V5_STREAMING/`
 Décisions et pièges QGIS (le détail de chaque lot est dans sa PR) :
 - **Classement** : `core/domain/source_capability.py` (pur) + `adapters/qgis/source_capability_probe.py`. Une classe de

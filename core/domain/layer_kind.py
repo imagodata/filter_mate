@@ -1,45 +1,39 @@
 # -*- coding: utf-8 -*-
+"""Compatibility shim: this module moved to ``filtermate_core.domain.layer_kind``.
+
+The name is aliased to the moved module so existing imports, ``isinstance``
+checks and ``mock.patch`` targets keep working; new code imports
+``filtermate_core`` directly. The moved module is looked up under this
+module's own package prefix (``filter_mate.`` in QGIS, nothing when the
+sub-packages are imported from the repository root) and, failing that, as the
+top-level ``filtermate_core`` next to this file, so loaders that register the
+file under another name (tests) get the same objects.
 """
-Layer kind - the three layer families FilterMate 5 can explore and filter.
+import importlib as _importlib
+import os as _os
+import sys as _sys
 
-The kind drives which EXPLORING panel is shown, how a selection becomes a
-source geometry and how a target layer applies a spatial relation.
-
-This is a PURE PYTHON module with NO QGIS dependencies.
-"""
-from enum import Enum
-
-
-class LayerKind(Enum):
-    """Family of a map layer, as far as FilterMate is concerned."""
-
-    VECTOR = "vector"
-    RASTER = "raster"
-    POINT_CLOUD = "point_cloud"
-    VECTOR_TILE = "vector_tile"
-    OTHER = "other"
-
-    @property
-    def is_vector(self) -> bool:
-        """True for vector layers (the historical FilterMate path)."""
-        return self is LayerKind.VECTOR
-
-    @property
-    def is_coverage(self) -> bool:
-        """True for raster and point cloud layers (no features, no subset of features)."""
-        return self in (LayerKind.RASTER, LayerKind.POINT_CLOUD)
-
-    @property
-    def is_filter_target(self) -> bool:
-        """Kinds handled by the cross filter engine, including target-only tiles."""
-        return self.is_coverage or self is LayerKind.VECTOR_TILE
+_OLD = 'core.domain.layer_kind'
+_NEW = 'filtermate_core.domain.layer_kind'
+_ROOT = _os.path.abspath(_os.path.join(_os.path.dirname(__file__), '..', '..'))
 
 
-def kind_label(kind: LayerKind) -> str:
-    """Return the English display label of a kind (translated by the UI)."""
-    return {
-        LayerKind.VECTOR: "Vector",
-        LayerKind.RASTER: "Raster",
-        LayerKind.POINT_CLOUD: "Point cloud",
-        LayerKind.VECTOR_TILE: "Vector tiles",
-    }.get(kind, "Other")
+def _load():
+    if __name__ == _OLD or __name__.endswith('.' + _OLD):
+        try:
+            return _importlib.import_module(__name__[:-len(_OLD)] + _NEW)
+        except ImportError:
+            pass  # not reachable under this prefix: use the top-level spelling
+    if _ROOT not in _sys.path:
+        _sys.path.append(_ROOT)
+    return _importlib.import_module(_NEW)
+
+
+_moved = _load()
+_sys.modules[__name__] = _moved
+__all__ = getattr(_moved, '__all__', [_n for _n in vars(_moved) if not _n.startswith('_')])
+
+
+def __getattr__(name):
+    """Delegate to the moved module for loaders that keep this module object."""
+    return getattr(_moved, name)
