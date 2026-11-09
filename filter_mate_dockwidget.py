@@ -3498,6 +3498,10 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
                 widget.setEnabled(True)
                 logger.debug(f"✓ Widget {widget_name} set to always enabled")
 
+    def _section_index(self, toolbox):
+        """0 FILTERING, 1 EXPORTING, 2 CONFIGURATION whatever comes before them; -1 on any other (AGENT)."""
+        return {self.FILTERING: 0, self.EXPORTING: 1, self.CONFIGURATION: 2}.get(toolbox.currentWidget(), -1)
+
     def select_tabTools_index(self, index=None):
         """v4.0 S18: Update action buttons based on active tab.
 
@@ -3508,7 +3512,7 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         if not self.widgets_initialized:
             logger.debug("select_tabTools_index: SKIPPED (widgets not initialized)")
             return
-        self.tabTools_current_index = self.widgets["DOCK"]["TOOLS"]["WIDGET"].currentIndex()
+        self.tabTools_current_index = self._section_index(self.widgets["DOCK"]["TOOLS"]["WIDGET"])
         #                           FILTER  UNDO   REDO   UNFILT EXPORT QFCLOUD
         states = {
             0: (True,  True,  True,  True,  False, False),  # FILTERING
@@ -7082,6 +7086,27 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         if _active_dockwidget is self:
             _active_dockwidget = None
 
+    def install_agent_panel(self, plugin):
+        """Add the AGENT section before FILTERING when ``APP.OPTIONS.AGENT.enabled`` is on. Never blocks the dock."""
+        if getattr(self, '_agent_chat', None) is not None:
+            return
+        try:
+            from .ui.controllers.agent_chat_controller import AgentChatController, agent_enabled
+            from .ui.layout.mockup_layout import add_agent_section
+            if agent_enabled(self.CONFIG_DATA):
+                self._agent_chat = AgentChatController(lambda page: add_agent_section(self, page), plugin, self)
+        except Exception:
+            logger.exception("Agent panel could not be installed")
+
+    def shutdown_agent_panel(self, unloading=False):
+        """Stop a running request; when the plugin unloads, also let go of the project."""
+        chat = getattr(self, '_agent_chat', None)
+        if chat is not None:
+            try:
+                chat.shutdown() if unloading else chat.stop()
+            except Exception:
+                logger.exception("Agent panel could not be stopped")
+
     def closeEvent(self, event):
         """Handle dockwidget close event.
 
@@ -7131,6 +7156,7 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         if _active_dockwidget is self:
             _active_dockwidget = None
 
+        self.shutdown_agent_panel()
         self.closingPlugin.emit()
         event.accept()
 

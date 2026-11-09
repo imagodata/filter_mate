@@ -16,7 +16,7 @@ from core.agent.messages import (
 from core.agent.providers import create_provider
 from core.agent.providers.base import ProviderConfig
 from core.agent.session import AgentLimits, AgentSession, run_exchange
-from core.agent.sql_guard import filter_problem, quoted_identifiers
+from core.agent.sql_guard import expression_problem, filter_problem, quoted_identifiers
 from core.agent.tool_catalog import NOT_IN_CHAT, ToolSpec, chat_tools, load_catalog
 from core.agent.tool_executor import MAX_RESULT_CHARS, ToolExecutor, ToolFailure, bounded_json
 
@@ -91,6 +91,26 @@ class TestFilterGuard:
     ])
     def test_anything_else_is_refused(self, expression):
         assert filter_problem(expression)
+
+
+class TestExpressionGuard:
+    @pytest.mark.parametrize("expression", [
+        '"pop" > 3', "\"nom\" ILIKE 'saint%'", "area($geometry) > 1000", '$area > 5', "year(\"d\") = 2020", 'to_int("a") > 1',
+    ])
+    def test_a_plain_condition_passes(self, expression):
+        assert expression_problem(expression) == ""
+
+    @pytest.mark.parametrize("expression", [
+        "sqlite_fetch_and_increment('/x.sqlite','t','id','k','a',map('s','(select 1)'))>0",
+        "\"pop\" <= ascii(env('FM_SECRET'))", "file_exists('/etc/passwd')", "aggregate('l','concatenate',\"n\") = ''",
+        "generate_series(1,2000000000) IS NULL", "load_layer('x','ogr') IS NULL", "eval('1') = 1", "@layer IS NULL", "$foo > 1",
+        "exif('/x.jpg') = 1", "'a'; b",
+    ])
+    def test_anything_else_is_refused(self, expression):
+        assert expression_problem(expression)
+
+    def test_a_filter_stays_stricter(self):
+        assert filter_problem("area($geometry) > 1")
 
 
 class TestQuotedIdentifiers:
@@ -287,8 +307,10 @@ class TestCatalog:
         assert names == {tool.name for tool in load_catalog()} - NOT_IN_CHAT
         assert {"describe_layer", "field_values", "preview_filter", "map_context"} <= names
 
-    def test_only_export_needs_confirmation(self):
-        assert {tool.name for tool in load_catalog() if tool.requires_confirmation} == {"export_layers"}
+    def test_what_needs_confirmation(self):
+        assert {tool.name for tool in load_catalog() if tool.requires_confirmation} == {
+            "export_layers", "remove_layers", "add_layer"}
+        assert not next(tool for tool in load_catalog() if tool.name == "search_open_data").requires_confirmation
 
     def test_read_only_flags(self):
         flags = {tool.name: tool.read_only for tool in load_catalog()}

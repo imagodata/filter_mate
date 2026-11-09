@@ -1,0 +1,449 @@
+# -*- coding: utf-8 -*-
+"""Connects the AGENT section to the conversation: settings, key, tools, undo."""
+from __future__ import annotations
+
+import json
+import logging
+from typing import Optional
+
+from qgis.core import QgsProject
+from qgis.PyQt.QtCore import QCoreApplication, QObject, QTimer
+from qgis.PyQt.QtWidgets import QDialog
+
+from ...adapters.agent.qt_transport import QtTransport
+from ...adapters.agent.settings import (
+    AgentSettings, KeyStoreError, delete_key, load_settings, provider_config, read_key, save_settings, store_key,
+    target_of,
+)
+from ...adapters.agent import transcript_store
+from ...adapters.agent.turn_checkpoint import TurnCheckpoint
+from ...core.agent.chat_engine import OUTCOME_CANCELLED, OUTCOME_FAILED, OUTCOME_STOPPED, ChatEngine, ChatOutcome
+from ...core.agent.open_data import display_source
+from ...core.agent.messages import (
+    ERROR_AUTH, ERROR_NETWORK, ERROR_QUOTA, ERROR_RATE_LIMIT, ToolCallPart, ToolResultPart,
+)
+from ...core.agent.providers import create_provider
+from ...core.agent.session import AgentSession
+from ...core.agent.system_prompt import SYSTEM_PROMPT
+from ...core.agent.tool_catalog import chat_tools
+from ...core.agent.tool_executor import ToolExecutor
+from ...core.agent.transcript import entry as transcript_entry
+from ...filtermate_api.agent_tools import build_handlers
+from ...filtermate_api.config import _default_export_root
+from ...filtermate_api.qgis_accessor import QGISFilterMateAccessor
+from ..widgets.agent_panel import PRESET_LABELS, AgentPanel, AgentSettingsDialog, ask_plain
+
+logger = logging.getLogger("FilterMate.agent")
+
+VALUES_TOOL = "field_values"
+OPEN_DATA_TOOL = "search_open_data"
+NO_OPEN_DATA_NOTE = ("\n\nThe user did not allow open data platforms: search_open_data is not available and add_layer "
+                     "only takes local files.")
+FIXED_IN_SETTINGS = (ERROR_AUTH, ERROR_QUOTA)
+MAX_DETAIL_CHARS = 200
+MAX_LISTED = 20
+NO_VALUES_NOTE = ("\n\nThe user chose not to share attribute values: field_values is not available. When you need the "
+                  "exact spelling of a value, ask the user.")
+
+
+def _tr(text: str) -> str:
+    return QCoreApplication.translate("AgentChat", text)
+
+
+def agent_enabled(config_data) -> bool:
+    """``APP.OPTIONS.AGENT.enabled``; off when the section is absent."""
+    try:
+        from ...config.config import _get_option_value
+        section = config_data.get("APP", {}).get("OPTIONS", {}).get("AGENT", {})
+        return _get_option_value(section.get("enabled"), False) is True
+    except Exception:
+        logger.debug("AGENT option unreadable", exc_info=True)
+        return False
+
+
+class AgentChatController(QObject):
+    """One panel and its conversation. Also the listener of the conversation."""
+
+    def __init__(self, add_page, plugin, parent_widget=None, ask_user=None) -> None:
+        super().__init__(parent_widget)
+        self._plugin = plugin
+        self._ask_user = ask_user or (lambda title, text: ask_plain(parent_widget, title, text))
+        self._parent_widget = parent_widget
+        self._engine: Optional[ChatEngine] = None
+        self._checkpoint = TurnCheckpoint()
+        self._last_request = ""
+        self._tools = {tool.name: tool for tool in chat_tools()}
+        self._transcript = []
+        self._transcript_key = ""
+        self._answer = []
+        self._header_label = None
+        self.panel = AgentPanel(parent_widget)
+        self.panel.send_requested.connect(self._on_send)
+        self.panel.stop_requested.connect(self._on_stop)
+        self.panel.undo_requested.connect(self._on_undo)
+        self.panel.redo_requested.connect(self._on_redo)
+        self.panel.history_requested.connect(self._show_history)
+        self.panel.resend_requested.connect(self._on_resend)
+        self.panel.settings_requested.connect(self.open_settings)
+        self.panel.new_conversation_requested.connect(self.new_conversation)
+        self._restore_transcript()
+        self._refresh_history()
+        QgsProject.instance().cleared.connect(self._on_project_cleared)
+        QgsProject.instance().readProject.connect(self._on_project_read)
+        QgsProject.instance().fileNameChanged.connect(self._on_file_name_changed)
+        trailer = add_page(self.panel)  # last: a failure before leaves the accordion untouched
+        self._header_label = trailer if hasattr(trailer, "setText") else None
+        self._refresh_ready()
+
+    def _refresh_ready(self) -> None:
+        """Whether the agent can answer, without opening the key store (it may ask for the master password)."""
+        values = load_settings()
+        destination = f"{PRESET_LABELS.get(values.preset, values.preset)} · {values.model}"
+        if self._header_label is not None:
+            try:
+                from ..styles.mockup_design import tokens
+                muted = tokens(bool(getattr(getattr(self._parent_widget, "_icon_manager", None), "is_dark_mode", False)))
+                self._header_label.setStyleSheet(f"color: {muted['fm_text_muted']}; font-weight: normal; font-size: 11px;")
+                self._header_label.setText(destination if values.ready else "")
+            except RuntimeError:  # the header is gone with its dock
+                self._header_label = None
+        self.panel.set_ready(values.ready, "" if self._header_label is not None else destination)
+
+    def stop(self) -> None:
+        """The dock closes: it can reopen on this same conversation."""
+        if self._engine is not None:
+            self._engine.cancel()
+
+    def shutdown(self) -> None:
+        """The plugin unloads: nothing may arrive afterwards."""
+        self.stop()
+        for signal, handler in ((QgsProject.instance().cleared, self._on_project_cleared),
+                                (QgsProject.instance().readProject, self._on_project_read),
+                                (QgsProject.instance().fileNameChanged, self._on_file_name_changed)):
+            try:
+                signal.disconnect(handler)
+            except TypeError:  # already done
+                pass
+
+    def _on_file_name_changed(self, *_args) -> None:
+        """Saved for the first time, or under another name: the conversation follows the project."""
+        key = transcript_store.project_key()
+        if key != self._transcript_key:
+            self._transcript_key = key
+            if self._transcript:  # empty while a project opens: what is stored for it must stay
+                self._save_transcript()
+
+    def _on_project_read(self, *_args) -> None:
+        """Another project is open: its own transcript comes back."""
+        self._restore_transcript()
+        self._refresh_history()
+
+    # --- transcript and history -------------------------------------------------
+
+    def _record(self, kind: str, text: str, **fields) -> None:
+        self._transcript.append(transcript_entry(kind, text, **fields))
+
+    def _save_transcript(self) -> None:
+        if self._transcript_key:
+            transcript_store.save(self._transcript_key, self._transcript)
+
+    def _restore_transcript(self) -> None:
+        """Show again what this project's conversation looked like; the model does not remember it."""
+        self._transcript_key = transcript_store.project_key()
+        self._transcript = transcript_store.load(self._transcript_key)
+        self._engine = None
+        self.panel.input.forget()
+        self.panel.clear_thread()
+        if not self._transcript:
+            return
+        for item in self._transcript:
+            kind = item["kind"]
+            if kind == "user":
+                self.panel.add_user(item["text"])
+            elif kind == "action":
+                self.panel.add_action(item["text"], item["ok"], item["detail"], item["count"])
+            elif kind == "text":
+                self.panel.add_text(item["text"])
+                self.panel.end_answer()
+            else:
+                self.panel.add_note(item["text"])
+        self.panel.add_note(_tr("Earlier conversation: the agent starts afresh from here."))
+
+    def _refresh_history(self) -> None:
+        self.panel.set_can_undo(TurnCheckpoint.can_undo())
+        self.panel.set_history(TurnCheckpoint.turns(), TurnCheckpoint.can_undo(), TurnCheckpoint.can_redo())
+
+    def _show_history(self) -> None:
+        self._refresh_history()
+        self.panel.show_history()
+
+    def _on_redo(self) -> None:
+        if self._engine is not None and self._engine.busy:
+            return
+        busy = self._checkpoint.busy()
+        if busy:
+            self._say(busy, error=True)
+            return
+        changed, skipped = self._checkpoint.redo()
+        message = _tr("Applied again: {}.").format(", ".join(changed)) if changed else _tr("Nothing to redo.")
+        if skipped:
+            message += " " + _tr("Changed since, left as is: {}.").format(", ".join(skipped))
+        self._say(message)
+        self._refresh_history()
+
+    def _on_resend(self, text: str) -> None:
+        if text and not (self._engine is not None and self._engine.busy):
+            self.panel.show_thread()
+            self._on_send(text)
+
+    def _on_project_cleared(self) -> None:
+        """What was said is about the layers of the project that just went away. What is stored stays."""
+        self._last_request = ""
+        if self._engine is not None:
+            self._engine.cancel()
+        self._transcript, self._transcript_key = [], ""
+        self.panel.input.forget()
+        self._reset_view()
+        self._refresh_history()
+
+    # --- settings ---------------------------------------------------------------
+
+    def open_settings(self) -> bool:
+        """Ask for the settings; True when saved."""
+        values = load_settings()
+        dialog = AgentSettingsDialog(values, target_of, self._parent_widget)
+        try:
+            if dialog.exec() != QDialog.DialogCode.Accepted:
+                return False
+            authcfg = values.authcfg
+            key_target = values.key_target
+            key = dialog.key.text().strip()
+            target = dialog.chosen_target()
+            try:
+                if key:
+                    authcfg, key_target = store_key(key, authcfg), target
+                elif dialog.forget_key:
+                    delete_key(authcfg)
+                    authcfg, key_target = "", ""
+            except KeyStoreError as exc:
+                self._say(str(exc), error=True)
+                return False
+            save_settings(AgentSettings(preset=dialog.chosen_preset(), model=dialog.chosen_model(),
+                                        base_url=dialog.base_url.text().strip(), consent=dialog.consent.isChecked(),
+                                        send_values=dialog.send_values.isChecked(), open_data=dialog.open_data.isChecked(),
+                                        authcfg=authcfg,
+                                        consent_target=target, key_target=key_target))
+        finally:
+            dialog.key.clear()
+            dialog.deleteLater()
+        self._reset_view()  # another provider cannot continue this conversation
+        self._refresh_ready()
+        return True
+
+    def _build_engine(self) -> Optional[ChatEngine]:
+        """A conversation from the settings; None, after saying why, when they are not complete."""
+        values = load_settings()
+        if not values.has_consent or not values.model:
+            if not self.open_settings():
+                return None
+            values = load_settings()
+            if not values.has_consent or not values.model:
+                self._say(_tr("Choose a model and agree to send your data to use the agent."), offer_settings=True)
+                return None
+        try:
+            # Only the key typed for this server, and none for a local one.
+            key = read_key(values.authcfg) if values.needs_key and values.has_key else ""
+            if values.needs_key and not key:
+                self._say(_tr("Enter your API key in the agent settings."), offer_settings=True)
+                return None
+            provider = create_provider(provider_config(values, key))
+        except (KeyStoreError, ValueError) as exc:
+            self._say(str(exc), error=True, offer_settings=True)
+            return None
+        left_out = set()
+        if not values.send_values:
+            left_out.add(VALUES_TOOL)
+        if not values.open_data:
+            left_out.add(OPEN_DATA_TOOL)
+        tools = [tool for tool in chat_tools() if tool.name not in left_out]
+        handlers = build_handlers(QGISFilterMateAccessor(self._plugin.get_public_api(), self._plugin),
+                                  _default_export_root(), allow_remote_sources=values.open_data)
+        prompt = SYSTEM_PROMPT + ("" if values.send_values else NO_VALUES_NOTE) + ("" if values.open_data else NO_OPEN_DATA_NOTE)
+        session = AgentSession(provider, tools, prompt)
+        return ChatEngine(session, ToolExecutor(tools, handlers), QtTransport(self), self, self._checkpoint,
+                          defer=lambda step: QTimer.singleShot(0, step))
+
+    def _reset_view(self) -> None:
+        self._engine = None
+        self.panel.clear_thread()
+
+    def new_conversation(self) -> None:
+        """The user starts again: what this project's conversation kept is forgotten."""
+        self._reset_view()
+        self._transcript = []
+        self.panel.input.forget()
+        self._save_transcript()
+
+    # --- what the user does -----------------------------------------------------
+
+    def _on_send(self, text: str) -> None:
+        if self._engine is None:
+            self._engine = self._build_engine()
+        if self._engine is None:
+            return
+        self._last_request = text
+        self._checkpoint.label = text
+        self.panel.clear_input()
+        self.panel.show_thread()
+        self.panel.add_user(text)
+        self._record("user", text)
+        self.panel.set_status(_tr("Thinking…"))
+        self.panel.set_working(True)
+        self.panel.set_can_undo(False)
+        self._engine.send(text)
+
+    def _on_stop(self) -> None:
+        if self._engine is not None:
+            self._engine.cancel()
+
+    def _on_undo(self) -> None:
+        if self._engine is not None and self._engine.busy:
+            return
+        busy = self._checkpoint.busy()
+        if busy:
+            self._say(busy, error=True)
+            return
+        restored, skipped = self._checkpoint.undo()
+        message = _tr("Restored: {}.").format(", ".join(restored)) if restored else _tr("Nothing to restore.")
+        if skipped:
+            message += " " + _tr("Changed since, left as is: {}.").format(", ".join(skipped))
+        self._say(message)
+        self._refresh_history()
+
+    def _say(self, text: str, error: bool = False, offer_settings: bool = False) -> None:
+        self.panel.set_status(text, error, offer_settings)
+
+    # --- what the conversation does (ChatListener) --------------------------------
+
+    def on_text(self, text: str) -> None:
+        self.panel.add_text(text)
+        self._answer.append(text)
+
+    def _flush_answer(self) -> None:
+        """What the screen showed of the answer so far goes in the transcript, in its place."""
+        if self._answer:
+            self._record("text", "".join(self._answer))
+            self._answer = []
+
+    @staticmethod
+    def _names(values) -> str:
+        return ", ".join(str(value) for value in (values or []))
+
+    def _describe(self, call: ToolCallPart) -> str:
+        """What the tool does, in the words of the user."""
+        args = call.arguments
+        layer = str(args.get("layer") or args.get("layer_name") or "")
+        return {
+            "list_layers": lambda: _tr("Reading the layers"),
+            "describe_layer": lambda: _tr("Reading the fields of {}").format(layer),
+            "field_values": lambda: _tr("Reading the values of {}").format(args.get("field", "")),
+            "preview_filter": lambda: _tr("Trying a filter on {}").format(layer),
+            "map_context": lambda: _tr("Reading the map"),
+            "filter_state": lambda: _tr("Reading the active filters"),
+            "list_favorites": lambda: _tr("Reading the favorites"),
+            "apply_filter": lambda: _tr("Filter on {}").format(layer),
+            "cross_filter": lambda: _tr("Filter on {} by {}").format(self._names(args.get("target_layers")),
+                                                                     args.get("source_layer", "")),
+            "geometry_filter": lambda: _tr("Filter on {} by an area").format(self._names(args.get("target_layers"))),
+            "point_cloud_filter": lambda: _tr("Filter on the points of {}").format(self._names(args.get("layers"))),
+            "clear_filters": lambda: _tr("Filters removed from {}").format(self._names(args.get("layers"))),
+            "apply_favorite": lambda: _tr("Favorite applied"),
+            "export_layers": lambda: _tr("Export of {}").format(self._names(args.get("layers"))),
+            "zoom_to": lambda: _tr("Zoom on {}").format(layer or (_tr("an area") if args.get("extent_wkt") else _tr("everything"))),
+            "select_features": lambda: (_tr("Selection cleared on {}") if args.get("clear") else _tr("Selection on {}")).format(layer),
+            "set_layers_visibility": lambda: (_tr("Shown: {}") if args.get("visible") else _tr("Hidden: {}")).format(
+                self._names(args.get("layers"))),
+            "add_layer": lambda: _tr("Layer added: {}").format(args.get("name") or str(args.get("source", ""))[-60:]),
+            "remove_layers": lambda: _tr("Layers removed: {}").format(self._names(args.get("layers"))),
+            "search_open_data": lambda: _tr("Searching {} for {}").format(args.get("platform", ""), args.get("query", "")),
+        }.get(call.name, lambda: call.name.replace("_", " "))()
+
+    def on_tool_start(self, call: ToolCallPart) -> None:
+        self.panel.set_status(self._describe(call) + "…")
+
+    def on_tool_end(self, call: ToolCallPart, result: ToolResultPart) -> None:
+        if result.is_error:
+            logger.info("Agent tool %s refused: %s", call.name, result.content[:300])
+        spec = self._tools.get(call.name)
+        if spec is not None and (not spec.read_only or spec.open_world):  # what leaves the machine stays in the thread
+            self._flush_answer()
+            detail = str(call.arguments.get("expression") or "")[:MAX_DETAIL_CHARS]
+            count = self._kept_count(result)
+            self.panel.add_action(self._describe(call), not result.is_error, detail, count)
+            self._record("action", self._describe(call), ok=not result.is_error, detail=detail, count=count)
+        self.panel.set_status(_tr("Thinking…"))
+
+    @staticmethod
+    def _kept_count(result: ToolResultPart) -> str:
+        """``kept / total`` when the tool said how many features it kept."""
+        if result.is_error:
+            return ""
+        try:
+            data = json.loads(result.content)
+        except ValueError:
+            return ""
+        if not isinstance(data, dict) or not isinstance(data.get("feature_count"), int) or data["feature_count"] < 0:
+            return ""
+        total = data.get("total_count")
+        return f"{data['feature_count']:,} / {total:,}" if isinstance(total, int) and total >= 0 else f"{data['feature_count']:,}"
+
+    def confirm(self, call: ToolCallPart) -> bool:
+        names = [str(layer)[:100] for layer in (call.arguments.get("layers") or [])]
+        layers = "\n".join(names[:MAX_LISTED]) + (f"\n(+{len(names) - MAX_LISTED})" if len(names) > MAX_LISTED else "")
+        if call.name == "add_layer":
+            text = _tr("The agent wants to add this layer to the project:\n{}\n\nA remote source is read from its "
+                       "server by QGIS, and what the layer holds can be sent to the provider of the agent. "
+                       "Do you agree?").format(display_source(str(call.arguments.get("source", ""))))
+        elif call.name == "remove_layers":
+            text = _tr("The agent wants to remove these layers from the project (their files stay, their styles and "
+                       "filters here are lost):\n{}\n\nDo you agree?").format(layers)
+        else:
+            text = _tr("The agent wants to export these layers to files:\n{}\n\nDo you agree?").format(layers)
+        return self._ask_user(_tr("FilterMate agent"), text)
+
+    def on_finished(self, outcome: ChatOutcome) -> None:
+        self.panel.set_working(False)
+        self._flush_answer()
+        self.panel.end_answer()
+        self._save_transcript()
+        self._refresh_history()
+        if outcome.status == OUTCOME_FAILED and outcome.error is not None:
+            self._give_back_request()
+            self._say(self._error_message(outcome.error), error=True, offer_settings=outcome.error.kind in FIXED_IN_SETTINGS)
+            return
+        if outcome.status == OUTCOME_CANCELLED:
+            self._give_back_request()
+            self._say(_tr("Stopped."))
+            return
+        if outcome.status == OUTCOME_STOPPED:
+            self._say(_tr("The agent stopped before the end ({}).").format(outcome.reason), error=True)
+            return
+        self._say(_tr("Changed: {}.").format(", ".join(outcome.changed_layers)) if outcome.changed_layers else "")
+
+    def _give_back_request(self) -> None:
+        """A request that went nowhere can be sent again without retyping it."""
+        if not self.panel.input.text():
+            self.panel.input.setText(self._last_request)
+
+    @staticmethod
+    def _error_message(error) -> str:
+        known = {
+            ERROR_AUTH: _tr("The provider refused the API key: check it in the agent settings."),
+            ERROR_QUOTA: _tr("The credit or quota of this account is used up."),
+            ERROR_RATE_LIMIT: _tr("Too many requests for now: try again in a moment."),
+            ERROR_NETWORK: _tr("The provider could not be reached: {}"),
+        }
+        template = known.get(error.kind)
+        if template is None:
+            return _tr("The provider reported a problem: {}").format(error.message)
+        return template.format(error.message) if "{}" in template else template

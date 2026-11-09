@@ -142,6 +142,11 @@ ICON_BODIES: Dict[str, str] = {
     'unfilter': '<path d="M3 4h18l-7 8v6l-4 2v-8z"/><path d="M16 16l5 5M21 16l-5 5"/>',
     'export': '<path d="M12 15V3M7 8l5-5 5 5"/><path d="M5 13v7h14v-7"/>',
     'reset_all': '<path d="M12 21s-6-5.5-6-11a6 6 0 0112 0c0 5.5-6 11-6 11z"/><path d="M4 4l16 16"/>',
+    'agent': '<path d="M4 5h16v11H9l-5 4z"/><path d="M8 9h8M8 12h5"/>',
+    'agent_send': '<path d="M4 12l16-8-6 16-3-6z"/><path d="M11 14l9-10"/>',
+    'agent_stop': '<rect x="6" y="6" width="12" height="12" rx="2" fill="currentColor"/>',
+    'more': '<circle cx="5" cy="12" r="1.4" fill="currentColor"/><circle cx="12" cy="12" r="1.4" fill="currentColor"/>'
+            '<circle cx="19" cy="12" r="1.4" fill="currentColor"/>',
     'settings': '<path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0"/><circle cx="16" cy="6" r="2"/>'
                 '<circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/>',
     'projection': '<circle cx="12" cy="12" r="9"/><path d="M12 3v18M3 12h18"/><circle cx="12" cy="12" r="4"/>',

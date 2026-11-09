@@ -17,9 +17,11 @@ from .export_root import ExportRootError, prepare_export_root, resolve_export_fo
 from .main_thread import QGISBusy
 
 try:
+    from ..core.agent.open_data import source_problem
     from ..core.agent.sql_guard import filter_problem
     from ..core.agent.tool_executor import ToolFailure
 except ImportError:  # the API package loaded on its own, with the plugin root on the path
+    from core.agent.open_data import source_problem
     from core.agent.sql_guard import filter_problem
     from core.agent.tool_executor import ToolFailure
 
@@ -72,8 +74,11 @@ def _guarded(handler: Handler) -> Handler:
     return run
 
 
-def build_handlers(accessor: FilterMateAccessor, export_root: Path) -> Dict[str, Handler]:
-    """One handler per tool of the chat (see ``core.agent.tool_catalog.chat_tools``)."""
+def build_handlers(accessor: FilterMateAccessor, export_root: Path, allow_remote_sources: bool = False) -> Dict[str, Handler]:
+    """One handler per tool of the chat (see ``core.agent.tool_catalog.chat_tools``).
+
+    ``allow_remote_sources`` False: no layer is read over the network (the user kept open data off).
+    """
 
     def list_layers(_: Dict[str, Any]) -> Dict[str, Any]:
         return {"layers": [asdict(layer) for layer in accessor.list_layers()]}
@@ -124,7 +129,14 @@ def build_handlers(accessor: FilterMateAccessor, export_root: Path) -> Dict[str,
         name = _resolved_name(args["layer_name"], expression)
         if not accessor.apply_filter(name, expression, SOURCE):
             raise ToolFailure("Layer not found.")
-        return {"success": True, "layer_name": name, "expression": expression, "active_filters": _active_after_change()}
+        answer = {"success": True, "layer_name": name, "expression": expression, "active_filters": _active_after_change()}
+        try:
+            details = accessor.describe_layer(name)
+        except (QGISBusy, FilterRejected):
+            details = None
+        if details is not None and details.feature_count >= 0:
+            answer["feature_count"] = details.feature_count
+        return answer
 
     def cross_filter(args: Dict[str, Any]) -> Dict[str, Any]:
         result = accessor.cross_filter(
@@ -154,6 +166,29 @@ def build_handlers(accessor: FilterMateAccessor, export_root: Path) -> Dict[str,
         step = _found(accessor.apply_favorite(args["favorite_id"]), "Favorite not found.")
         return {"step": asdict(step), "active_filters": _active_after_change()}
 
+    def zoom_to(args: Dict[str, Any]) -> Dict[str, Any]:
+        return asdict(accessor.zoom_to(layer=args.get("layer"), extent_wkt=args.get("extent_wkt"), crs=args.get("crs"),
+                                       selected_only=args["selected_only"]))
+
+    def select_features(args: Dict[str, Any]) -> Dict[str, Any]:
+        return asdict(accessor.select_features(args["layer"], expression=args["expression"], clear=args["clear"],
+                                               add=args["add"]))
+
+    def set_layers_visibility(args: Dict[str, Any]) -> Dict[str, Any]:
+        return _report("Visibility", accessor.set_layers_visibility(args["layers"], args["visible"]))
+
+    def add_layer(args: Dict[str, Any]) -> Dict[str, Any]:
+        problem = source_problem(args["source"], allow_remote_sources)
+        if problem:
+            raise ToolFailure(f"This layer cannot be added: {problem}.")
+        return asdict(accessor.add_layer(args["source"], name=args["name"], kind=args["kind"]))
+
+    def remove_layers(args: Dict[str, Any]) -> Dict[str, Any]:
+        return _report("Remove", accessor.remove_layers(args["layers"]))
+
+    def search_open_data(args: Dict[str, Any]) -> Dict[str, Any]:
+        return asdict(accessor.search_open_data(args["query"], platform=args["platform"], limit=args["limit"]))
+
     def export_layers(args: Dict[str, Any]) -> Dict[str, Any]:
         try:
             folder = resolve_export_folder(prepare_export_root(export_root), args["subfolder"])
@@ -176,5 +211,7 @@ def build_handlers(accessor: FilterMateAccessor, export_root: Path) -> Dict[str,
         "map_context": map_context, "apply_filter": apply_filter, "cross_filter": cross_filter,
         "geometry_filter": geometry_filter, "point_cloud_filter": point_cloud_filter,
         "clear_filters": clear_filters, "apply_favorite": apply_favorite, "export_layers": export_layers,
+        "zoom_to": zoom_to, "select_features": select_features, "set_layers_visibility": set_layers_visibility,
+        "add_layer": add_layer, "remove_layers": remove_layers, "search_open_data": search_open_data,
     }
     return {name: _guarded(handler) for name, handler in handlers.items()}

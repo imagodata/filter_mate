@@ -185,6 +185,27 @@ class TestHandlers:
         assert run(accessor, root, "geometry_filter", wkt="POINT(0 0)", crs="EPSG:2154", target_layers=["b"])[0] is False
         assert run(accessor, root, "clear_filters", layers=["a"])[1]["done"] == ["a"]
 
+    def test_remote_layers_follow_the_open_data_choice(self, tmp_path):
+        accessor = Accessor()
+        tools = chat_tools()
+        closed = ToolExecutor(tools, build_handlers(accessor, tmp_path))  # closed unless opened
+        result = closed.execute(ToolCallPart("c", "add_layer", {"source": "https://x.org/a.geojson"}))
+        assert result.is_error and "open data" in result.content
+        result = closed.execute(ToolCallPart("c", "add_layer", {"source": "/data/a.gpkg", "name": "a"}))
+        assert not result.is_error and json.loads(result.content)["name"] == "a"
+        opened = ToolExecutor(tools, build_handlers(accessor, tmp_path, allow_remote_sources=True))
+        assert not opened.execute(ToolCallPart("c", "add_layer", {"source": "https://x.org/b.geojson"})).is_error
+
+    def test_driving_tools(self, api):
+        accessor, root = api
+        assert run(accessor, root, "zoom_to", layer="communes", selected_only=True)[1]["scale"] == 10000.0
+        assert run(accessor, root, "zoom_to", layer="nope")[0] is True
+        assert run(accessor, root, "select_features", layer="communes", expression='"a" = 1')[1]["selected_count"] == 3
+        assert run(accessor, root, "set_layers_visibility", layers=["communes", "x"], visible=False)[1]["failed"] == {"x": "layer not found"}
+        assert run(accessor, root, "search_open_data", query="communes")[1]["count"] == 0
+        assert run(accessor, root, "remove_layers", layers=["communes"])[1]["done"] == ["communes"]
+        assert accessor.layers == []
+
     def test_export_stays_below_the_root(self, api):
         accessor, root = api
         assert run(accessor, root, "export_layers", layers=["a"], subfolder="ok/sub")[0] is False
@@ -240,6 +261,19 @@ class TestRoutes:
         assert response.status_code == 200 and response.json()["valid"] is True
         assert client.post("/filters/preview", json={"layer_name": "x", "expression": "a"}).status_code == 404
         assert client.post("/filters/preview", json={"layer_name": "communes", "expression": ""}).status_code == 422
+
+    def test_driving_routes(self, client):
+        assert client.post("/map/zoom", json={"layer": "communes"}).status_code == 200
+        assert client.post("/map/zoom", json={"layer": "absent"}).status_code == 400
+        assert client.post("/layers/select", json={"layer": "communes", "expression": '"a"=1'}).json()["selected_count"] == 3
+        assert client.post("/layers/visibility", json={"layers": ["communes"], "visible": True}).json()["done"] == ["communes"]
+        added = client.post("/layers/add", json={"source": "/data/a.gpkg", "name": "a"})
+        assert added.status_code == 200 and added.json()["name"] == "a"
+        assert client.post("/layers/add", json={"source": "/data/a.gpkg", "kind": "cube"}).status_code == 422
+        assert client.post("/open-data/search", json={"query": "communes"}).json()["count"] == 0
+        assert client.post("/open-data/search", json={"query": ""}).status_code == 422
+        assert client.get("/open-data/search", params={"query": "x"}).status_code == 405  # a page cannot trigger it
+        assert client.post("/layers/remove", json={"layers": ["a"]}).json()["done"] == ["a"]
 
     def test_map_context(self, client):
         response = client.get("/map/context")

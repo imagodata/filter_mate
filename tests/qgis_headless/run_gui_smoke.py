@@ -30,7 +30,7 @@ import types
 from qgis.core import Qgis, QgsApplication, QgsProject, QgsProviderRegistry, QgsRasterLayer, QgsVectorLayer
 from qgis.PyQt.QtCore import QPoint, QPointF, QSettings, Qt, QTimer
 from qgis.PyQt.QtGui import QWheelEvent
-from qgis.PyQt.QtWidgets import QApplication, QComboBox, QLineEdit, QPushButton, QScrollArea, QToolButton
+from qgis.PyQt.QtWidgets import QAbstractButton, QApplication, QComboBox, QLineEdit, QPushButton, QScrollArea, QToolButton
 try:
     from qgis.PyQt.QtGui import QShortcut
 except ImportError:  # QGIS < 3.34.2 (Qt5): QShortcut is in QtWidgets
@@ -1271,6 +1271,79 @@ def s_wheel_needs_focus_check():
         report('SKIP', 'wheel over a list with the focus', 'no focus under Xvfb')
 
 
+def s_agent_panel():
+    """The AGENT section: absent by default, then first in the accordion when the option is on."""
+    d = dock()
+    plugin = qgis.utils.plugins[PACKAGE]
+    toolbox = d.toolBox_tabTools
+    check('agent: no section by default', getattr(d, '_agent_chat', None) is None and toolbox.count() == 3)
+    toolbox.setCurrentWidget(d.FILTERING)
+    QApplication.processEvents()
+    d.select_tabTools_index()
+    options = d.CONFIG_DATA['APP']['OPTIONS']
+    previous = options.get('AGENT')
+    options['AGENT'] = {'enabled': {'value': True}}
+    d.install_agent_panel(plugin)
+    chat = getattr(d, '_agent_chat', None)
+    if not check('agent: the section is installed', chat is not None):
+        return
+    first = chat
+    d.install_agent_panel(plugin)
+    check('agent: installed once', d._agent_chat is first and toolbox.count() == 4)
+    check('agent: first, under its name', toolbox.widget(0) is chat.panel and toolbox.itemText(0) == 'AGENT')
+    check('agent: the others keep their order', [toolbox.itemText(i) for i in range(1, 4)] ==
+          [toolbox.itemText(toolbox.indexOf(page)) for page in (d.FILTERING, d.EXPORTING, d.CONFIGURATION)])
+    check('agent: the open section stays open', toolbox.currentWidget() is d.FILTERING)
+    QApplication.processEvents()
+    check('agent: FILTERING is still section 0', d.tabTools_current_index == 0, str(d.tabTools_current_index))
+    filter_button = d.widgets['ACTION']['FILTER']['WIDGET']
+    check('agent: filter button on FILTERING', filter_button.isEnabled())
+    shots = os.environ.get('FM_SHOTS')
+    if shots:
+        d.grab().save(os.path.join(shots, 'agent_folded.png'))
+    toolbox.setCurrentWidget(chat.panel)
+    QApplication.processEvents()
+    check('agent: its own state', d.tabTools_current_index == -1, str(d.tabTools_current_index))
+    check('agent: filter button off here', not filter_button.isEnabled())
+    panel = chat.panel
+    check('agent: the welcome is shown', panel.welcome_title.isVisible())
+    check('agent: the input is below it', panel.input.geometry().top() > panel.stack.geometry().bottom())
+    check('agent: the input takes the width', panel.input.width() > panel.width() * 0.7,
+          f"{panel.input.width()} of {panel.width()}")
+    headers = [b for b in toolbox.findChildren(QAbstractButton) if b.objectName() == 'qt_toolbox_toolboxbutton']
+    check('agent: same header height', len({b.height() for b in headers}) == 1, str([b.height() for b in headers]))
+    if shots:
+        d.grab().save(os.path.join(shots, 'agent_welcome.png'))
+    panel.set_ready(True, 'Claude (Anthropic) · claude-haiku-5-5')
+    QApplication.processEvents()
+    if shots:
+        d.grab().save(os.path.join(shots, 'agent_ready.png'))
+    panel.add_user('Keep the municipalities above 10000 inhabitants')
+    panel.add_action('Filter on communes', True, '"population" > 10000', '12 / 586')
+    panel.add_text('12 municipalities are kept in the layer.')
+    panel.set_can_undo(True)
+    panel.set_status('Changed: communes. Changed since, left as is: a very long list of layers that wraps on two lines.')
+    QApplication.processEvents()
+    page_scroll = panel.parentWidget().parentWidget() if panel.parentWidget() is not None else None
+    bar = page_scroll.verticalScrollBar() if isinstance(page_scroll, QScrollArea) else None
+    check('agent: the input stays in view with a conversation', panel.input.isVisible() and
+          (bar is None or not bar.isVisible()), f"input {panel.input.geometry()} panel h={panel.height()}")
+    check('agent: the undo button is in view', panel.undo_button.isVisible() and
+          panel.undo_button.geometry().bottom() <= panel.height(), str(panel.undo_button.geometry()))
+    if shots:
+        d.grab().save(os.path.join(shots, 'agent_open.png'))
+    panel.clear_thread()
+    toolbox.setCurrentWidget(d.EXPORTING)
+    QApplication.processEvents()
+    check('agent: EXPORTING is still section 1', d.tabTools_current_index == 1, str(d.tabTools_current_index))
+    toolbox.setCurrentWidget(d.FILTERING)
+    QApplication.processEvents()
+    if previous is None:
+        options.pop('AGENT', None)
+    else:
+        options['AGENT'] = previous
+
+
 def s_finish():
     failed_extensions = [line for line in _RECENT.lines if 'Failed to load extension' in line]
     check(f"extensions discovered under the plugin folder name '{PACKAGE}'", not failed_extensions,
@@ -1303,7 +1376,7 @@ STEPS = [s_setup, s_open_plugin, s_dock_ready, s_controllers_check, s_layout_che
          s_switch_setup, s_switch_zones, s_switch_multiple, s_switch_link, s_switch_to_parcels, s_switch_parcels_check,
          s_switch_parcels_values, s_switch_to_wells, s_switch_wells_check, s_switch_back_check, s_switch_same_layer_reload,
          s_switch_same_layer_check, s_switch_late_check, s_plugin_imports_check,
-         s_custom_matching_nothing, s_custom_matching_nothing_single, s_custom_matching_nothing_check, s_config_search, s_wheel_needs_focus, s_wheel_needs_focus_check, s_finish]
+         s_custom_matching_nothing, s_custom_matching_nothing_single, s_custom_matching_nothing_check, s_config_search, s_wheel_needs_focus, s_wheel_needs_focus_check, s_agent_panel, s_finish]
 
 
 def run_step(index=0):

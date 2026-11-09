@@ -193,6 +193,30 @@ class MapContext:
     selections: List[Dict[str, Any]] = field(default_factory=list)
 
 
+@dataclass(frozen=True)
+class ViewState:
+    """Where the map looks after a zoom."""
+    extent_wkt: str = ""
+    scale: Optional[float] = None
+
+
+@dataclass(frozen=True)
+class SelectionResult:
+    """The selection of a vector layer after a change."""
+    layer_id: str
+    layer_name: str
+    selected_count: int = 0
+
+
+@dataclass(frozen=True)
+class OpenDataResult:
+    """Datasets an open data platform answered with; each has id, title, publisher, description, page, resources."""
+    platform: str
+    query: str
+    datasets: List[Dict[str, Any]] = field(default_factory=list)
+    count: int = 0
+
+
 @runtime_checkable
 class FilterMateAccessor(Protocol):
     """The contract REST routes use to talk to the running FilterMate plugin."""
@@ -221,6 +245,31 @@ class FilterMateAccessor(Protocol):
 
     def map_context(self) -> MapContext:
         """CRS, extent, active layer and selections of the QGIS window."""
+        ...
+
+    def zoom_to(self, layer: Optional[str] = None, extent_wkt: Optional[str] = None, crs: Optional[str] = None,
+                selected_only: bool = False) -> ViewState:
+        """Zoom the map; raises FilterRejected when there is no canvas or the target is empty."""
+        ...
+
+    def select_features(self, layer: str, expression: str = "", clear: bool = False, add: bool = False) -> SelectionResult:
+        """Select by QGIS expression, or clear; raises FilterRejected on a bad layer or expression."""
+        ...
+
+    def set_layers_visibility(self, layers: List[str], visible: bool) -> OperationResult:
+        """Check or uncheck layers in the layer tree."""
+        ...
+
+    def add_layer(self, source: str, name: str = "", kind: str = "vector") -> LayerSummary:
+        """Add a layer from a file or a public https URL; raises FilterRejected on any other source."""
+        ...
+
+    def remove_layers(self, layers: List[str]) -> OperationResult:
+        """Remove layers from the project."""
+        ...
+
+    def search_open_data(self, query: str, platform: str = "datagouv", limit: int = 10) -> OpenDataResult:
+        """Datasets of an allowed platform; raises FilterRejected on a platform not allowed or unreachable."""
         ...
 
     def apply_filter(self, layer_name: str, expression: str, source: str) -> bool:
@@ -341,6 +390,43 @@ class InMemoryAccessor:
 
     def map_context(self) -> MapContext:
         return MapContext()
+
+    def zoom_to(self, layer: Optional[str] = None, extent_wkt: Optional[str] = None, crs: Optional[str] = None,
+                selected_only: bool = False) -> ViewState:
+        if layer is not None and self._find(layer) is None:
+            raise FilterRejected(f"layer {layer!r} not found")
+        return ViewState(extent_wkt=extent_wkt or "POLYGON((0 0, 1 0, 1 1, 0 1, 0 0))", scale=10000.0)
+
+    def select_features(self, layer: str, expression: str = "", clear: bool = False, add: bool = False) -> SelectionResult:
+        found = self._find(layer)
+        if found is None:
+            raise FilterRejected(f"layer {layer!r} not found")
+        return SelectionResult(found.layer_id, found.name, 0 if clear else 3)
+
+    def set_layers_visibility(self, layers: List[str], visible: bool) -> OperationResult:
+        done = [found.name for found in (self._find(name) for name in layers) if found is not None]
+        failed = {name: "layer not found" for name in layers if self._find(name) is None}
+        return OperationResult(done=done, failed=failed)
+
+    def add_layer(self, source: str, name: str = "", kind: str = "vector") -> LayerSummary:
+        summary = LayerSummary(layer_id=f"L{len(self.layers) + 1}", name=name or source.rsplit("/", 1)[-1],
+                               provider_type="ogr" if kind == "vector" else "gdal", layer_kind=kind)
+        self.layers.append(summary)
+        return summary
+
+    def remove_layers(self, layers: List[str]) -> OperationResult:
+        done, failed = [], {}
+        for name in layers:
+            found = self._find(name)
+            if found is None:
+                failed[name] = "layer not found"
+            else:
+                self.layers.remove(found)
+                done.append(found.name)
+        return OperationResult(done=done, failed=failed)
+
+    def search_open_data(self, query: str, platform: str = "datagouv", limit: int = 10) -> OpenDataResult:
+        return OpenDataResult(platform, query, [], 0)
 
     def apply_filter(self, layer_name: str, expression: str, source: str) -> bool:
         if not any(layer.name == layer_name for layer in self.layers):

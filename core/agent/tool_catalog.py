@@ -31,18 +31,21 @@ class ToolSpec:
     read_only: bool = False
     destructive: bool = False
     idempotent: bool = False
+    # Reaches outside QGIS (the network): a read is logged, a change is confirmed by the user.
+    open_world: bool = False
 
     @property
     def requires_confirmation(self) -> bool:
-        """Writes outside the project (files): the user says yes first."""
-        return self.destructive
+        """Writes outside the project (files), or changes that bring the outside in: the user says yes first."""
+        return self.destructive or (self.open_world and not self.read_only)
 
 
 def tool_from_entry(entry: Dict[str, Any]) -> ToolSpec:
     return ToolSpec(
         name=entry["name"], description=entry["description"], input_schema=entry["input_schema"],
         title=entry.get("title", ""), read_only=bool(entry.get("read_only")),
-        destructive=bool(entry.get("destructive")), idempotent=bool(entry.get("idempotent")))
+        destructive=bool(entry.get("destructive")), idempotent=bool(entry.get("idempotent")),
+        open_world=bool(entry.get("open_world")))
 
 
 def load_catalog(path: Optional[Path] = None) -> Tuple[ToolSpec, ...]:

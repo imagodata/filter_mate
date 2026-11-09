@@ -7897,4 +7897,388 @@ L'installer maintenant depuis PyPI avec pip, dans votre profil QGIS ? Le Python 
         <translation type="obsolete">Points retenus</translation>
     </message>
 </context>
+<context>
+    <name>AgentPanel</name>
+    <message>
+        <source>History…</source>
+        <translation>Historique…</translation>
+    </message>
+    <message>
+        <source>Back to the conversation</source>
+        <translation>Retour à la conversation</translation>
+    </message>
+    <message>
+        <source>History</source>
+        <translation>Historique</translation>
+    </message>
+    <message>
+        <source>Undo the last</source>
+        <translation>Annuler le dernier</translation>
+    </message>
+    <message>
+        <source>Redo</source>
+        <translation>Rétablir</translation>
+    </message>
+    <message>
+        <source>Send again</source>
+        <translation>Renvoyer</translation>
+    </message>
+    <message>
+        <source>no change</source>
+        <translation>aucun changement</translation>
+    </message>
+    <message>
+        <source>applied</source>
+        <translation>appliqué</translation>
+    </message>
+    <message>
+        <source>undone</source>
+        <translation>annulé</translation>
+    </message>
+    <message>
+        <source>(no request)</source>
+        <translation>(sans demande)</translation>
+    </message>
+    <message>
+        <source>{} turn(s)</source>
+        <translation>{} tour(s)</translation>
+    </message>
+    <message>
+        <source>Allow open data platforms (data.gouv.fr, Opendatasoft...)</source>
+        <translation>Autoriser les plateformes open data (data.gouv.fr, Opendatasoft…)</translation>
+    </message>
+    <message>
+        <source>Your searches are sent to them, and a layer added from them is read from their servers. Other platforms can be allowed in the FilterMate configuration.</source>
+        <translation>Vos recherches leur sont envoyées, et une couche ajoutée depuis elles est lue sur leurs serveurs. D'autres plateformes peuvent être autorisées dans la configuration de FilterMate.</translation>
+    </message>
+    <message>
+        <source>Remove the stored key</source>
+        <translation>Supprimer la clé enregistrée</translation>
+    </message>
+    <message>
+        <source>More</source>
+        <translation>Plus</translation>
+    </message>
+    <message>
+        <source>Open the settings</source>
+        <translation>Ouvrir les réglages</translation>
+    </message>
+    <message>
+        <source>Set up the agent</source>
+        <translation>Configurer l'agent</translation>
+    </message>
+    <message>
+        <source>What do you want to filter?</source>
+        <translation>Que voulez-vous filtrer ?</translation>
+    </message>
+    <message>
+        <source>Describe it in your own words. Each filter can be undone.</source>
+        <translation>Décrivez-le avec vos mots. Chaque filtre peut être annulé.</translation>
+    </message>
+    <message>
+        <source>Filter your layers from a sentence</source>
+        <translation>Filtrez vos couches en une phrase</translation>
+    </message>
+    <message>
+        <source>Connect an AI provider to start. Nothing is sent before you agree.</source>
+        <translation>Connectez un fournisseur d'IA pour commencer. Rien n'est envoyé sans votre accord.</translation>
+    </message>
+    <message>
+        <source>Sent to: {}</source>
+        <translation>Envoyé à : {}</translation>
+    </message>
+    <message>
+        <source>Stop (Esc)</source>
+        <translation>Arrêter (Échap)</translation>
+    </message>
+    <message>
+        <source>Send (Enter)</source>
+        <translation>Envoyer (Entrée)</translation>
+    </message>
+    <message>
+        <source>Which layers are in this project?</source>
+        <translation>Quelles couches contient ce projet ?</translation>
+    </message>
+    <message>
+        <source>Keep the buildings taller than 15 m</source>
+        <translation>Garder les bâtiments de plus de 15 m</translation>
+    </message>
+    <message>
+        <source>Filter the roads inside the selected feature</source>
+        <translation>Filtrer les routes dans l'entité sélectionnée</translation>
+    </message>
+    <message>
+        <source>Ask the agent to filter your layers</source>
+        <translation>Demandez à l'agent de filtrer vos couches</translation>
+    </message>
+    <message>
+        <source>Agent settings</source>
+        <translation>Réglages de l'agent</translation>
+    </message>
+    <message>
+        <source>Undo this turn</source>
+        <translation>Annuler ce tour</translation>
+    </message>
+    <message>
+        <source>New conversation</source>
+        <translation>Nouvelle conversation</translation>
+    </message>
+    <message>
+        <source>FilterMate agent</source>
+        <translation>Agent FilterMate</translation>
+    </message>
+    <message>
+        <source>Stored: leave empty to keep it</source>
+        <translation>Enregistrée : laisser vide pour la conserver</translation>
+    </message>
+    <message>
+        <source>Allow attribute values to be sent</source>
+        <translation>Autoriser l'envoi des valeurs attributaires</translation>
+    </message>
+    <message>
+        <source>The agent sends your request, the names of your layers and fields, your filter expressions and the results of its tools to the provider chosen here, under that provider's terms. Without the option below, the agent does not read the values of your fields; values already written in your filters and favorites are still sent. The conversation is kept on this computer for each project, until you start a new one.</source>
+        <translation>L'agent envoie votre demande, les noms de vos couches et de vos champs, vos expressions de filtre et les résultats de ses outils au fournisseur choisi ici, selon les conditions de ce fournisseur. Sans l'option ci-dessous, l'agent ne lit pas les valeurs de vos champs ; les valeurs déjà écrites dans vos filtres et favoris restent envoyées. La conversation est conservée sur cet ordinateur pour chaque projet, jusqu'à ce que vous en commenciez une nouvelle.</translation>
+    </message>
+    <message>
+        <source>I agree to send this data to this provider</source>
+        <translation>J'accepte d'envoyer ces données à ce fournisseur</translation>
+    </message>
+    <message>
+        <source>Provider</source>
+        <translation>Fournisseur</translation>
+    </message>
+    <message>
+        <source>Model</source>
+        <translation>Modèle</translation>
+    </message>
+    <message>
+        <source>Address</source>
+        <translation>Adresse</translation>
+    </message>
+    <message>
+        <source>API key</source>
+        <translation>Clé API</translation>
+    </message>
+</context>
+<context>
+    <name>AgentChat</name>
+    <message>
+        <source>Earlier conversation: the agent starts afresh from here.</source>
+        <translation>Conversation précédente : l'agent repart de zéro à partir d'ici.</translation>
+    </message>
+    <message>
+        <source>Applied again: {}.</source>
+        <translation>Appliqué à nouveau : {}.</translation>
+    </message>
+    <message>
+        <source>Nothing to redo.</source>
+        <translation>Rien à rétablir.</translation>
+    </message>
+    <message>
+        <source>The agent wants to add this layer to the project:
+{}
+
+A remote source is read from its server by QGIS, and what the layer holds can be sent to the provider of the agent. Do you agree?</source>
+        <translation>L'agent veut ajouter cette couche au projet :
+{}
+
+Une source distante est lue sur son serveur par QGIS, et le contenu de la couche peut être envoyé au fournisseur de l'agent. Acceptez-vous ?</translation>
+    </message>
+    <message>
+        <source>The agent wants to remove these layers from the project (their files stay, their styles and filters here are lost):
+{}
+
+Do you agree?</source>
+        <translation>L'agent veut retirer ces couches du projet (leurs fichiers restent, leurs styles et filtres ici sont perdus) :
+{}
+
+Acceptez-vous ?</translation>
+    </message>
+    <message>
+        <source>Zoom on {}</source>
+        <translation>Zoom sur {}</translation>
+    </message>
+    <message>
+        <source>an area</source>
+        <translation>une zone</translation>
+    </message>
+    <message>
+        <source>everything</source>
+        <translation>tout</translation>
+    </message>
+    <message>
+        <source>Selection cleared on {}</source>
+        <translation>Sélection vidée sur {}</translation>
+    </message>
+    <message>
+        <source>Selection on {}</source>
+        <translation>Sélection sur {}</translation>
+    </message>
+    <message>
+        <source>Shown: {}</source>
+        <translation>Affiché : {}</translation>
+    </message>
+    <message>
+        <source>Hidden: {}</source>
+        <translation>Masqué : {}</translation>
+    </message>
+    <message>
+        <source>Layer added: {}</source>
+        <translation>Couche ajoutée : {}</translation>
+    </message>
+    <message>
+        <source>Layers removed: {}</source>
+        <translation>Couches retirées : {}</translation>
+    </message>
+    <message>
+        <source>Searching {} for {}</source>
+        <translation>Recherche sur {} de {}</translation>
+    </message>
+    <message>
+        <source>Thinking…</source>
+        <translation>Réflexion…</translation>
+    </message>
+    <message>
+        <source>Reading the layers</source>
+        <translation>Lecture des couches</translation>
+    </message>
+    <message>
+        <source>Reading the fields of {}</source>
+        <translation>Lecture des champs de {}</translation>
+    </message>
+    <message>
+        <source>Reading the values of {}</source>
+        <translation>Lecture des valeurs de {}</translation>
+    </message>
+    <message>
+        <source>Trying a filter on {}</source>
+        <translation>Test d'un filtre sur {}</translation>
+    </message>
+    <message>
+        <source>Reading the map</source>
+        <translation>Lecture de la carte</translation>
+    </message>
+    <message>
+        <source>Reading the active filters</source>
+        <translation>Lecture des filtres actifs</translation>
+    </message>
+    <message>
+        <source>Reading the favorites</source>
+        <translation>Lecture des favoris</translation>
+    </message>
+    <message>
+        <source>Filter on {}</source>
+        <translation>Filtre sur {}</translation>
+    </message>
+    <message>
+        <source>Filter on {} by {}</source>
+        <translation>Filtre sur {} par {}</translation>
+    </message>
+    <message>
+        <source>Filter on {} by an area</source>
+        <translation>Filtre sur {} par une zone</translation>
+    </message>
+    <message>
+        <source>Filter on the points of {}</source>
+        <translation>Filtre sur les points de {}</translation>
+    </message>
+    <message>
+        <source>Filters removed from {}</source>
+        <translation>Filtres retirés de {}</translation>
+    </message>
+    <message>
+        <source>Favorite applied</source>
+        <translation>Favori appliqué</translation>
+    </message>
+    <message>
+        <source>Export of {}</source>
+        <translation>Export de {}</translation>
+    </message>
+    <message>
+        <source>Choose a model and agree to send your data to use the agent.</source>
+        <translation>Choisissez un modèle et acceptez l'envoi de vos données pour utiliser l'agent.</translation>
+    </message>
+    <message>
+        <source>Enter your API key in the agent settings.</source>
+        <translation>Saisissez votre clé API dans les réglages de l'agent.</translation>
+    </message>
+    <message>
+        <source>Restored: {}.</source>
+        <translation>Rétabli : {}.</translation>
+    </message>
+    <message>
+        <source>Nothing to restore.</source>
+        <translation>Rien à rétablir.</translation>
+    </message>
+    <message>
+        <source>Changed since, left as is: {}.</source>
+        <translation>Modifié depuis, laissé tel quel : {}.</translation>
+    </message>
+    <message>
+        <source>Working: {}</source>
+        <translation>En cours : {}</translation>
+    </message>
+    <message>
+        <source>The agent wants to export these layers to files:
+{}
+
+Do you agree?</source>
+        <translation>L'agent veut exporter ces couches dans des fichiers :
+{}
+
+Acceptez-vous ?</translation>
+    </message>
+    <message>
+        <source>FilterMate agent</source>
+        <translation>Agent FilterMate</translation>
+    </message>
+    <message>
+        <source>Changed: {}.</source>
+        <translation>Modifié : {}.</translation>
+    </message>
+    <message>
+        <source>The agent stopped before the end ({}).</source>
+        <translation>L'agent s'est arrêté avant la fin ({}).</translation>
+    </message>
+    <message>
+        <source>Stopped.</source>
+        <translation>Arrêté.</translation>
+    </message>
+    <message>
+        <source>The provider refused the API key: check it in the agent settings.</source>
+        <translation>Le fournisseur a refusé la clé API : vérifiez-la dans les réglages de l'agent.</translation>
+    </message>
+    <message>
+        <source>The credit or quota of this account is used up.</source>
+        <translation>Le crédit ou le quota de ce compte est épuisé.</translation>
+    </message>
+    <message>
+        <source>Too many requests for now: try again in a moment.</source>
+        <translation>Trop de requêtes pour l'instant : réessayez dans un moment.</translation>
+    </message>
+    <message>
+        <source>The provider could not be reached: {}</source>
+        <translation>Le fournisseur est injoignable : {}</translation>
+    </message>
+    <message>
+        <source>The provider reported a problem: {}</source>
+        <translation>Le fournisseur a signalé un problème : {}</translation>
+    </message>
+    <message>
+        <source>The QGIS authentication database is not available.</source>
+        <translation>La base d'authentification de QGIS n'est pas disponible.</translation>
+    </message>
+    <message>
+        <source>The QGIS master password is needed to use the stored key.</source>
+        <translation>Le mot de passe principal de QGIS est nécessaire pour utiliser la clé enregistrée.</translation>
+    </message>
+    <message>
+        <source>The key could not be stored.</source>
+        <translation>La clé n'a pas pu être enregistrée.</translation>
+    </message>
+    <message>
+        <source>The stored key could not be read.</source>
+        <translation>La clé enregistrée n'a pas pu être lue.</translation>
+    </message>
+</context>
 </TS>

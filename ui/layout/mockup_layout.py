@@ -394,7 +394,9 @@ def pack_exploring_rail(dw: Any) -> bool:
 SECTION_TAB_HEIGHT = BAND
 SECTION_ICON_SIZE = 16
 SECTION_ICON_LEFT = 12
-SECTION_ICONS = ('filter', 'export', 'settings')  # FILTERING, EXPORTING, CONFIGURATION
+SECTION_ICONS = ('filter', 'export', 'settings', 'agent')  # FILTERING, EXPORTING, CONFIGURATION, AGENT (optional)
+AGENT_SECTION_TITLE = 'AGENT'
+_AGENT_ICON_KEY = SECTION_ICONS.index('agent')
 
 
 def size_section_tabs(dw: Any) -> bool:
@@ -408,9 +410,8 @@ def size_section_tabs(dw: Any) -> bool:
         return False
     if getattr(dw, '_fm_section_icon_labels', None):
         return True  # already done: a second pass would stack a second set of labels
-    from qgis.PyQt.QtCore import Qt
     from qgis.PyQt.QtGui import QIcon
-    from qgis.PyQt.QtWidgets import QAbstractButton, QLabel
+    from qgis.PyQt.QtWidgets import QAbstractButton
     buttons = {button.text(): button for button in toolbox.findChildren(QAbstractButton)
                if button.objectName() == 'qt_toolbox_toolboxbutton'}
     labels = {}
@@ -418,19 +419,57 @@ def size_section_tabs(dw: Any) -> bool:
         button = buttons.get(toolbox.itemText(index))
         if button is None:
             continue
-        button.setMinimumHeight(SECTION_TAB_HEIGHT)
-        # Qt draws a tab icon at the top of the tab: the icon becomes a label centred on the left.
         toolbox.setItemIcon(index, QIcon())
-        label = QLabel(button)
-        label.setObjectName('label_section_icon')
-        label.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents, True)
-        label.setScaledContents(True)  # a 64 px pixmap shown at 16 px stays sharp on HiDPI screens
-        label.setGeometry(SECTION_ICON_LEFT, (SECTION_TAB_HEIGHT - SECTION_ICON_SIZE) // 2,
-                          SECTION_ICON_SIZE, SECTION_ICON_SIZE)
-        labels[index] = label
+        labels[index] = _section_icon_label(button)
     dw._fm_section_icon_labels = labels
     update_section_icons(dw)
     return bool(labels)
+
+
+def _section_icon_label(button: Any) -> Any:
+    """Header at the mockup height. Qt draws a tab icon at the top of the tab: it becomes a label centred on the left."""
+    from qgis.PyQt.QtCore import Qt
+    from qgis.PyQt.QtWidgets import QLabel
+    button.setMinimumHeight(SECTION_TAB_HEIGHT)
+    label = QLabel(button)
+    label.setObjectName('label_section_icon')
+    label.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents, True)
+    label.setScaledContents(True)  # a 64 px pixmap shown at 16 px stays sharp on HiDPI screens
+    label.setGeometry(SECTION_ICON_LEFT, (SECTION_TAB_HEIGHT - SECTION_ICON_SIZE) // 2,
+                      SECTION_ICON_SIZE, SECTION_ICON_SIZE)
+    return label
+
+
+def add_agent_section(dw: Any, page: Any) -> Any:
+    """``page`` as the first section of the accordion, with the look of the others. The open section stays open.
+
+    Returns the label at the right of its header (where the requests go), None when the header stays plain.
+    """
+    from qgis.PyQt.QtCore import Qt
+    from qgis.PyQt.QtWidgets import QAbstractButton, QHBoxLayout, QLabel
+    toolbox = dw.toolBox_tabTools
+    toolbox.insertItem(0, page, AGENT_SECTION_TITLE)
+    labels = getattr(dw, '_fm_section_icon_labels', None)
+    if not labels:
+        return None
+    trailer = None
+    try:
+        for button in toolbox.findChildren(QAbstractButton):
+            if button.objectName() == 'qt_toolbox_toolboxbutton' and button.text() == AGENT_SECTION_TITLE:
+                labels[_AGENT_ICON_KEY] = _section_icon_label(button)
+                labels[_AGENT_ICON_KEY].show()
+                row = QHBoxLayout(button)
+                row.setContentsMargins(0, 0, SECTION_ICON_LEFT, 0)
+                row.addStretch(1)
+                trailer = QLabel(button)
+                trailer.setObjectName('label_agent_destination')
+                trailer.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents, True)
+                trailer.setTextFormat(Qt.TextFormat.PlainText)
+                row.addWidget(trailer)
+        update_section_icons(dw)
+    except RuntimeError:  # the section is there, its header is only plainer
+        pass
+    return trailer
 
 
 def update_section_icons(dw: Any, dark: Any = None) -> bool:

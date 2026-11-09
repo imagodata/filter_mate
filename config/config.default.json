@@ -723,6 +723,18 @@
           "description": "Circuit breaker timeout for local (SpatiaLite/OGR) operations in seconds"
         }
       },
+      "AGENT": {
+        "description": "Chat section that filters your layers from a sentence. Sends your request, the names of your layers and fields and the results of its tools to the provider you choose",
+        "open_data_domains": {
+          "value": "",
+          "description": "Open data platforms allowed besides data.gouv.fr and the Opendatasoft hub, comma separated: a host (Opendatasoft portal) or host:kind with kind opendatasoft or ckan, e.g. data.toulouse-metropole.fr, data.example.org:ckan"
+        },
+        "enabled": {
+          "value": false,
+          "choices": [true, false],
+          "description": "Show the AGENT section before FILTERING (on: when the panel is next opened; off: after restarting QGIS)"
+        }
+      },
       "EXPLORATION": {
         "description": "Layer exploration and feature identification settings",
         "point_buffer_distance_m": {

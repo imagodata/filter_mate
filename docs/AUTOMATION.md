@@ -326,6 +326,12 @@ One tool per REST endpoint. Layers are designated by id or name (list them with 
 | `clear_filters` | `POST /filters/clear` | back to the original source, no filter (reverts all of the above except undo / redo) |
 | `list_favorites`, `apply_favorite` | `GET /favorites`, `POST /favorites/{id}/apply` | saved filters |
 | `export_layers` | `POST /export` | writes the layers as filtered now below the export root of the QGIS machine |
+| `zoom_to` | `POST /map/zoom` | zooms the map to a layer, its selection, a WKT extent or everything |
+| `select_features` | `POST /layers/select` | selects by QGIS expression (not SQL), or clears the selection |
+| `set_layers_visibility` | `POST /layers/visibility` | checks or unchecks layers in the layer tree |
+| `add_layer` | `POST /layers/add` | adds a layer from a path, an https URL or a provider URI (http refused) |
+| `remove_layers` | `POST /layers/remove` | removes layers from the project (files kept) |
+| `search_open_data` | `GET /open-data/search` | datasets of an allowed open data platform, with their geo resources |
 
 The tools carry MCP annotations: the four readers are `readOnlyHint`; no filter tool is destructive (a filter changes
 what a layer shows, never its data, and `clear_filters` reverts it); `export_layers` is the only one flagged

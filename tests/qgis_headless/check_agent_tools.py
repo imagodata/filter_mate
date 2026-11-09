@@ -12,6 +12,10 @@ import os
 import shutil
 import sys
 import tempfile
+import threading
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+
+os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
 from qgis.core import (
     QgsApplication, QgsFeature, QgsField, QgsFields, QgsGeometry, QgsPalettedRasterRenderer, QgsPointCloudLayer,
@@ -260,6 +264,105 @@ def main(introspection):
     check("tool: layer not found", error and content == "Layer not found.", content)
     error, content = tool("map_context")
     check("tool map_context", not error and json.loads(content)["available"] is False, content)
+
+    # --- driving QGIS (adapters.public_api.project_control), without a window
+    from filter_mate.adapters.public_api import project_control
+
+    selected = project_control.select_features("communes", '"pop" <= 300')
+    check("select by expression", selected["selected_count"] == 3 and gpkg.selectedFeatureCount() == 3, selected)
+    check("select adds", project_control.select_features("communes", '"pop" = 400', add=True)["selected_count"] == 4)
+    check("select clears", project_control.select_features("communes", clear=True)["selected_count"] == 0)
+    for bad in ('"pop" >', 'DROP TABLE x', '"inconnu" > 3', "file_exists('/etc/passwd')", "\"pop\" <= ascii(env('HOME'))",
+                "sqlite_fetch_and_increment('/tmp/x.sqlite','t','id','k','a',map('s','1'))>0"):
+        try:
+            project_control.select_features("communes", bad)
+            check(f"bad expression refused {bad!r}", False)
+        except ValueError:
+            check(f"bad expression refused {bad!r}", True)
+    try:
+        project_control.zoom_to("communes")
+        check("zoom without a window is refused", False)
+    except ValueError:
+        check("zoom without a window is refused", True)
+    project_control.select_features("communes", '"pop" = 100')
+    try:
+        project_control.select_features("communes", '"inconnu" > 3')
+    except ValueError:
+        pass
+    check("a refused expression keeps the selection", gpkg.selectedFeatureCount() == 1, gpkg.selectedFeatureCount())
+    check("geometry functions are accepted", project_control.select_features("communes", "area($geometry) >= 0")["layer_name"] == "communes")
+    project_control.select_features("communes", clear=True)
+    hidden = project_control.set_layers_visibility(["communes", "nope"], False)
+    node = project.layerTreeRoot().findLayer(gpkg.id())
+    check("visibility", hidden["done"] == ["communes"] and hidden["failed"] == {"nope": "layer not found"} and
+          node is not None and not node.isVisible(), hidden)
+    project_control.set_layers_visibility([gpkg.id()], True)
+    check("visible again", node.isVisible())
+
+    added = project_control.add_layer(gpkg_path, name="communes_bis")
+    check("add a local layer", added["name"] == "communes_bis" and added["feature_count"] == 60 and
+          len(project.mapLayersByName("communes_bis")) == 1, added)
+    for source, label in (("http://example.org/a.geojson", "http"), ("/vsicurl/http://x/a.gpkg", "vsicurl http"),
+                          (os.path.join(work, "absent.gpkg"), "absent file"), ("PG:host=127.0.0.1 dbname=x", "PG"),
+                          ("//127.0.0.1/share/x.gpkg", "UNC"), ("CSV:/etc/passwd", "CSV prefix"), ("/etc/passwd", "no data file"),
+                          ("type=xyz&u%72l=http%3A%2F%2F127.0.0.1%2F", "obscured URI"),
+                          ("<GDAL_WMS><ServerUrl>http://127.0.0.1/</ServerUrl></GDAL_WMS>", "inline XML")):
+        try:
+            project_control.add_layer(source)
+            check(f"add refuses {label}", False)
+        except ValueError:
+            check(f"add refuses {label}", True)
+    removed = project_control.remove_layers(["communes_bis", "nope"])
+    check("remove", removed["done"] == ["communes_bis"] and not project.mapLayersByName("communes_bis"), removed)
+
+    # --- open data, against a platform on this machine
+    class Platform(BaseHTTPRequestHandler):
+        def log_message(self, *args):
+            pass
+
+        def do_GET(self):
+            seen.append(self.path)
+            if self.path.startswith("/api/1/datasets/"):
+                body = json.dumps({"data": [{"id": "ae", "title": "Communes", "organization": {"name": "IGN"},
+                                             "page": "https://www.data.gouv.fr/datasets/ae", "resources": [
+                                                 {"title": "GeoJSON", "format": "geojson", "url": "https://static.data.gouv.fr/c.geojson"},
+                                                 {"title": "Doc", "format": "pdf", "url": "https://static.data.gouv.fr/d.pdf"}]}]})
+            else:
+                body = "not json"
+            data = body.encode("utf-8")
+            self.send_response(200)
+            self.send_header("Content-Length", str(len(data)))
+            self.end_headers()
+            self.wfile.write(data)
+
+    seen = []
+    server = ThreadingHTTPServer(("127.0.0.1", 0), Platform)
+    threading.Thread(target=server.serve_forever, daemon=True).start()
+    local = f"http://127.0.0.1:{server.server_address[1]}"
+    try:
+        found = project_control.search_open_data("communes", platform=local, extra_domains=f"{local}:datagouv")
+        check("open data: datasets and geo resources only", found["count"] == 1 and
+              [r["format"] for r in found["datasets"][0]["resources"]] == ["geojson"], found)
+        check("open data: the query went to the platform", seen and "q=communes" in seen[0], seen)
+        try:
+            project_control.search_open_data("x", platform=local)
+            check("open data: a platform not allowed is refused", False)
+        except ValueError:
+            check("open data: a platform not allowed is refused", True)
+        check("open data: nothing was sent to it", len(seen) == 1, seen)
+        try:
+            project_control.search_open_data("x", platform=local, extra_domains=f"{local}:ckan")
+            check("open data: a non-JSON answer is an error", False)
+        except ValueError:
+            check("open data: a non-JSON answer is an error", True)
+        try:
+            project_control.search_open_data("x", platform="http://127.0.0.1:9", extra_domains="http://127.0.0.1:9:datagouv")
+            check("open data: unreachable is an error", False)
+        except ValueError:
+            check("open data: unreachable is an error", True)
+    finally:
+        server.shutdown()
+        server.server_close()
 
     project.removeAllMapLayers()
     shutil.rmtree(work, ignore_errors=True)
