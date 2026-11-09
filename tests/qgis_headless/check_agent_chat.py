@@ -26,7 +26,7 @@ from qgis.core import (  # noqa: E402
     Qgis, QgsApplication, QgsFeature, QgsGeometry, QgsPointXY, QgsProject, QgsSettings, QgsVectorFileWriter,
     QgsVectorLayer,
 )
-from qgis.PyQt.QtCore import QCoreApplication, Qt  # noqa: E402
+from qgis.PyQt.QtCore import QCoreApplication, Qt, QTimer  # noqa: E402
 from qgis.PyQt.QtTest import QTest  # noqa: E402
 from qgis.PyQt.QtWidgets import QLabel, QToolBox  # noqa: E402
 
@@ -206,6 +206,155 @@ def check_transport(provider, pkg):
 
     events, _, finished = run((200, {}, b'{"not":"a stream"}'))
     check("a response that is no stream is a failure", finished and isinstance(events[-1], StreamFailure), events)
+
+
+def check_hostile_connector():
+    """What a remote server should not be able to do to QGIS."""
+    from filter_mate.adapters.agent.bounded_http import HttpFailure, fetch
+    from filter_mate.adapters.agent.mcp_connection import McpConnection
+    from filter_mate.core.agent.mcp_client import McpError
+    from filter_mate.core.agent.sources import make_source
+
+    seen = []
+    plan = {}
+
+    class Hostile(BaseHTTPRequestHandler):
+        protocol_version = "HTTP/1.0"
+
+        def log_message(self, *args):
+            pass
+
+        def _send(self, status, payload=b"", headers=()):
+            self.send_response(status)
+            for name, value in headers:
+                self.send_header(name, value)
+            self.end_headers()
+            self.wfile.write(payload)
+
+        def do_GET(self):
+            seen.append(("GET", self.path))
+            self._send(200, b"ok")
+
+        def do_POST(self):
+            body = json.loads(self.rfile.read(int(self.headers["Content-Length"])))
+            method = body.get("method")
+            seen.append((self.path, method, self.headers.get("Mcp-Session-Id")))
+            if self.path == "/redirect":
+                self._send(307, b"", [("Location", "/target")])
+                return
+            if "id" not in body:
+                self._send(202)
+                return
+            def rpc(result):
+                return ("data: " + json.dumps({"jsonrpc": "2.0", "id": body["id"], "result": result}) + "\n\n").encode()
+            if method == "initialize":
+                self._send(200, rpc({"protocolVersion": "2025-06-18", "capabilities": {}}), [("mcp-session-id", "lower-sess")])
+                return
+            if method == "tools/list":
+                if self.path == "/drip":
+                    self.send_response(200)
+                    self.end_headers()
+                    try:
+                        for _ in range(60):
+                            self.wfile.write(b": keepalive\n\n")
+                            self.wfile.flush()
+                            time.sleep(0.1)
+                    except OSError:
+                        pass
+                    return
+                if self.path == "/huge":
+                    self.send_response(200)
+                    self.end_headers()
+                    try:
+                        for _ in range(4000):
+                            self.wfile.write(b"x" * 65536)
+                    except OSError:
+                        pass
+                    return
+                if self.path == "/open":  # answers, and never closes the stream
+                    self.send_response(200)
+                    self.end_headers()
+                    self.wfile.write(rpc({"tools": []}))
+                    self.wfile.flush()
+                    time.sleep(3)
+                    return
+                self._send(200, rpc({"tools": [
+                    {"name": "bad", "inputSchema": {"required": 5, "properties": 3}},
+                    {"name": "ok", "inputSchema": {"type": "object"}}]}))
+                return
+            if method == "tools/call":
+                if plan.get("mode") == "error":
+                    self._send(200, ("data: " + json.dumps({"jsonrpc": "2.0", "id": body["id"], "error": {"code": -32603, "message": "boom"}}) + "\n\n").encode())
+                    return
+                if plan.get("mode") == "lost" and not plan.get("lost_once"):
+                    plan["lost_once"] = True
+                    self._send(404)
+                    return
+                self._send(200, rpc({"content": [{"type": "text", "text": "done\u2028line"}]}))
+
+    server = ThreadingHTTPServer(("127.0.0.1", 0), Hostile)
+    threading.Thread(target=server.serve_forever, daemon=True).start()
+    base = f"http://127.0.0.1:{server.server_address[1]}"
+
+    def connection(path):
+        return McpConnection(make_source(base + path, "mcp", "T"))
+
+    seen.clear()
+    try:
+        connection("/redirect").connect()
+        check("hostile: a redirect is refused", False)
+    except McpError as exc:
+        check("hostile: a redirect is refused", "redirect" in str(exc) and not any(item[0] == "/target" for item in seen), seen)
+
+    link = connection("/ok")
+    tools = link.list_tools()
+    check("hostile: a session in lower case is kept", any(item[2] == "lower-sess" for item in seen if item[0] == "/ok"), seen)
+    check("hostile: a malformed schema is cleaned", tools[0].spec.input_schema["type"] == "object" and len(tools) == 2, tools)
+    plan["mode"] = "error"
+    seen.clear()
+    try:
+        link.call_tool("ok", {})
+        check("hostile: an error is not sent again", False)
+    except McpError:
+        check("hostile: an error is not sent again", sum(item[1] == "tools/call" for item in seen) == 1, seen)
+    plan.update(mode="lost")
+    seen.clear()
+    text = link.call_tool("ok", {})
+    check("hostile: a lost session is resumed", sum(item[1] == "tools/call" for item in seen) == 2 and "done" in text, seen)
+    plan.clear()
+    check("hostile: U+2028 does not break an answer", "\u2028" in link.call_tool("ok", {}))
+
+    dripping = connection("/drip")
+    dripping.timeout_ms = 800
+    started = time.time()
+    try:
+        dripping.list_tools()
+        check("hostile: a dripping stream is cut", False)
+    except McpError:
+        check("hostile: a dripping stream is cut", time.time() - started < 3, time.time() - started)
+
+    started = time.time()
+    try:
+        connection("/huge").list_tools()
+        check("hostile: an endless answer is cut", False)
+    except McpError as exc:
+        check("hostile: an endless answer is cut", "too much" in str(exc) and time.time() - started < 15, (str(exc), time.time() - started))
+
+    started = time.time()
+    connection("/open").list_tools()
+    check("hostile: an answered stream that stays open does not hold QGIS", time.time() - started < 2, time.time() - started)
+
+    from filter_mate.adapters.agent import bounded_http
+    timer_hits = []
+    QTimer.singleShot(100, lambda: timer_hits.append(1) or bounded_http.abort_active())
+    started = time.time()
+    try:
+        fetch(base + "/drip", body=json.dumps({"jsonrpc": "2.0", "id": 1, "method": "tools/list"}).encode(), timeout_ms=5000)
+        check("stop: it interrupts a wait", False)
+    except HttpFailure:
+        check("stop: it interrupts a wait", time.time() - started < 2 and timer_hits, time.time() - started)
+    server.shutdown()
+    server.server_close()
 
 
 def check_key_store():
@@ -563,7 +712,7 @@ def check_chat(provider, layer, authcfg, work):
     ask("ajoute")
     result = provider.requests[1]["body"]["messages"][-1]["content"][0]
     check("open data off: a remote layer is refused", result.get("is_error") is True and "open data" in result["content"], result)
-    settings(open_data=True)
+    settings(enabled_sources=("datagouv",))
     provider.reset((200, {}, text_turn("ok")))
     ask("salut")
     names = [tool["name"] for tool in provider.requests[0]["body"]["tools"]]
@@ -579,6 +728,105 @@ def check_chat(provider, layer, authcfg, work):
     ask("retire")
     check("removing layers asks the user", len(asked) == 2 and "communes" in asked[1] and layer.isValid(), asked)
     chat._ask_user = lambda title, text: answers["export"]
+
+    # --- MCP connectors and the Sources tab, against a server on this machine
+    from filter_mate.core.agent.mcp_client import tool_name
+    from filter_mate.core.agent.sources import custom_to_json, make_source
+    from filter_mate.ui.widgets.agent_panel import AgentSettingsDialog as Dialog
+
+    mcp_seen = []
+
+    class Mcp(BaseHTTPRequestHandler):
+        protocol_version = "HTTP/1.0"
+
+        def log_message(self, *args):
+            pass
+
+        def do_POST(self):
+            body = json.loads(self.rfile.read(int(self.headers["Content-Length"])))
+            method = body.get("method")
+            mcp_seen.append((method, self.headers.get("Mcp-Session-Id"), body.get("params")))
+            if "id" not in body:
+                self.send_response(202)
+                self.end_headers()
+                return
+            result = {"initialize": {"protocolVersion": "2025-06-18", "capabilities": {}, "serverInfo": {"name": "x"}},
+                      "tools/list": {"tools": [
+                          {"name": "hello", "description": "Says hello", "annotations": {"readOnlyHint": True},
+                           "inputSchema": {"type": "object", "properties": {"who": {"type": "string"}}, "required": ["who"]}},
+                          {"name": "change", "description": "Changes", "inputSchema": {"type": "object", "properties": {}}}]},
+                      "tools/call": {"content": [{"type": "text", "text": "Bonjour " + str((body.get("params") or {}).get("arguments"))}]}}[method]
+            data = ("event: message\ndata: " + json.dumps({"jsonrpc": "2.0", "id": body["id"], "result": result}) + "\n\n").encode()
+            self.send_response(200)
+            self.send_header("Content-Type", "text/event-stream")
+            if method == "initialize":
+                self.send_header("Mcp-Session-Id", "sess-1")
+            self.send_header("Content-Length", str(len(data)))
+            self.end_headers()
+            self.wfile.write(data)
+
+    server = ThreadingHTTPServer(("127.0.0.1", 0), Mcp)
+    threading.Thread(target=server.serve_forever, daemon=True).start()
+    source = make_source(f"http://127.0.0.1:{server.server_address[1]}/mcp", "mcp", "Local")
+    hello = tool_name(source.id, "hello")
+    settings(enabled_sources=(source.id,), custom_sources=custom_to_json([source]))
+    provider.reset((200, {}, tool_turn(hello, {"who": "QGIS"})), (200, {}, text_turn("ok")))
+    ask("dis bonjour")
+    names = [tool["name"] for tool in provider.requests[0]["body"]["tools"]]
+    check("connector: its tools are offered", hello in names and tool_name(source.id, "change") in names, names)
+    result = provider.requests[1]["body"]["messages"][2]["content"][0]
+    check("connector: the call is answered", not result.get("is_error") and "Bonjour" in result["content"] and "QGIS" in result["content"], result)
+    check("connector: the session is kept", mcp_seen[-1][0] == "tools/call" and mcp_seen[-1][1] == "sess-1" and
+          mcp_seen[-1][2]["name"] == "hello", mcp_seen[-1])
+    check("connector: the call stays in the thread", "Local: hello" in panel.thread.toPlainText(), panel.thread.toPlainText())
+    asked.clear()
+    chat._ask_user = lambda title, text: asked.append(text) or False
+    provider.reset((200, {}, tool_turn(tool_name(source.id, "change"), {})), (200, {}, text_turn("ok")))
+    calls_before = sum(1 for item in mcp_seen if item[0] == "tools/call")
+    ask("change")
+    check("connector: a call not declared read-only asks first", asked and "Local" in asked[0] and
+          sum(1 for item in mcp_seen if item[0] == "tools/call") == calls_before, asked)
+    chat._ask_user = lambda title, text: answers["export"]
+    server.shutdown()
+    server.server_close()
+    dead = make_source("http://127.0.0.1:9/mcp", "mcp", "Dead")
+    settings(enabled_sources=(dead.id,), custom_sources=custom_to_json([dead]))
+    provider.reset((200, {}, text_turn("sans connecteur")))
+    ask("salut")
+    check("connector: one that does not answer does not stop the chat", provider.requests and "Dead" in panel.thread.toPlainText(),
+          panel.thread.toPlainText())
+
+    check_hostile_connector()
+    settings(enabled_sources=("datagouv_mcp",))
+    chat._add_connectors = lambda active, tools, handlers: []
+    provider.reset((200, {}, tool_turn("add_layer", {"source": "https://example.org/a.geojson"})), (200, {}, text_turn("ok")))
+    answers["export"] = True
+    ask("ajoute")
+    result = provider.requests[1]["body"]["messages"][2]["content"][0]
+    check("a connector alone does not open the web to add_layer", result.get("is_error") is True and "open data" in result["content"], result)
+    del chat._add_connectors
+
+    values = AgentSettings(preset="anthropic", model="m", enabled_sources=("ign_wfs",), custom_sources=custom_to_json([source]))
+    tested = []
+    dialog = Dialog(values, target_of, None, tester=lambda item: tested.append(item.id) or "12 tools")
+    dialog.show()
+    wait(lambda: False, 0.05)
+    check("sources: nothing but what was ticked", dialog.chosen_sources() == ("ign_wfs",), dialog.chosen_sources())
+    dialog.new_address.setText("http://evil.example.org/mcp")
+    dialog.new_kind.setCurrentIndex(dialog.new_kind.findData("mcp"))
+    dialog.add_button.click()
+    check("sources: an address in clear is refused", "https" in dialog.source_result.text(), dialog.source_result.text())
+    dialog.new_address.setText("https://mcp.example.org/mcp")
+    dialog.add_button.click()
+    check("sources: a connector can be added, ticked", make_source("https://mcp.example.org/mcp", "mcp").id in dialog.chosen_sources(), dialog.chosen_sources())
+    check("sources: kept as JSON", "mcp.example.org" in dialog.chosen_custom_sources())
+    tree = dialog.sources_tree
+    group = next(tree.topLevelItem(i) for i in range(tree.topLevelItemCount()) if tree.topLevelItem(i).childCount() and
+                 "mcp" in str(tree.topLevelItem(i).child(0).data(0, 256)).lower())
+    tree.setCurrentItem(group.child(0))
+    dialog.test_button.click()
+    check("sources: test shows the answer", dialog.source_result.text() == "12 tools" and len(tested) == 1, dialog.source_result.text())
+    dialog.close()
     host.close()
 
 

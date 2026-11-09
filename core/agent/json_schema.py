@@ -104,5 +104,8 @@ def _check(value: Any, schema: Dict[str, Any], path: str, errors: List[str]) -> 
 def validate(value: Any, schema: Dict[str, Any]) -> List[str]:
     """Problems of ``value`` against ``schema``, the first ones only; empty when it is valid."""
     errors: List[str] = []
-    _check(value, schema, "$", errors)
+    try:
+        _check(value, schema, "$", errors)
+    except (TypeError, AttributeError, KeyError, RecursionError):  # a schema from elsewhere that makes no sense
+        return ["$: these arguments cannot be checked"]
     return errors[:_MAX_REPORTED]

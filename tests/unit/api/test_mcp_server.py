@@ -25,10 +25,11 @@ EXPECTED_TOOLS = {
     "point_cloud_filter", "clear_filters", "filter_state", "list_favorites", "apply_favorite", "export_layers",
     "describe_layer", "field_values", "preview_filter", "map_context",
     "zoom_to", "select_features", "set_layers_visibility", "add_layer", "remove_layers", "search_open_data",
+    "add_service_layer", "search_imagery",
 }
 READ_ONLY = {"list_layers", "filter_status", "filter_state", "list_favorites", "describe_layer", "field_values",
-             "preview_filter", "map_context", "search_open_data"}
-OPEN_WORLD = {"add_layer", "search_open_data"}
+             "preview_filter", "map_context", "search_open_data", "search_imagery"}
+OPEN_WORLD = {"add_layer", "search_open_data", "add_service_layer", "search_imagery"}
 DESTRUCTIVE = {"export_layers", "remove_layers"}
 
 

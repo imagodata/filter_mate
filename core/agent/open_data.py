@@ -8,18 +8,32 @@ from __future__ import annotations
 
 import ipaddress
 import re
-from typing import Any, Dict, List, Tuple
-from urllib.parse import quote, urlsplit
+from typing import Any, Callable, Dict, List, Tuple
+from urllib.parse import quote, urljoin, urlsplit
 
 KIND_DATAGOUV = "datagouv"
 KIND_OPENDATASOFT = "opendatasoft"
 KIND_CKAN = "ckan"
-KINDS = (KIND_DATAGOUV, KIND_OPENDATASOFT, KIND_CKAN)
+KIND_WFS = "wfs"
+KIND_STAC = "stac"
+KINDS = (KIND_DATAGOUV, KIND_OPENDATASOFT, KIND_CKAN, KIND_WFS, KIND_STAC)
 
 # Built in: name -> (kind, host). The user adds others in the configuration (APP.OPTIONS.AGENT.open_data_domains).
 PLATFORMS: Dict[str, Tuple[str, str]] = {
     "datagouv": (KIND_DATAGOUV, "www.data.gouv.fr"),
     "opendatasoft": (KIND_OPENDATASOFT, "data.opendatasoft.com"),
+    "ign_wfs": (KIND_WFS, "data.geopf.fr/wfs/ows"),
+    "earth_search": (KIND_STAC, "earth-search.aws.element84.com/v1"),
+    "ibge_br": (KIND_WFS, "geoservicos.ibge.gov.br/geoserver/wfs"),
+    "prg_pl": (KIND_WFS, "mapy.geoportal.gov.pl/wss/service/PZGIK/PRG/WFS/AdministrativeBoundaries"),
+    "data_gov_uk": (KIND_CKAN, "ckan.publishing.service.gov.uk"),
+    "open_canada": (KIND_CKAN, "open.canada.ca/data"),
+    "data_gov_au": (KIND_CKAN, "data.gov.au/data"),
+    "govdata_de": (KIND_CKAN, "ckan.govdata.de"),
+    "dati_gov_it": (KIND_CKAN, "dati.gov.it/opendata"),
+    "data_overheid_nl": (KIND_CKAN, "data.overheid.nl/data"),
+    "data_gov_ie": (KIND_CKAN, "data.gov.ie"),
+    "geospatial_jp": (KIND_CKAN, "www.geospatial.jp/ckan"),
 }
 # What add_layer can open from a URL (a service needs a provider URI, which a model does not get to write).
 GEO_FORMATS = frozenset({
@@ -30,6 +44,7 @@ LOCAL_FORMATS = frozenset({"csv", "fgb", "geojson", "gml", "gpkg", "json", "kml"
 MAX_SOURCE = 2000
 _LAYER_NAME_SUFFIX = re.compile(r"\|layername=[\w .-]+$")
 _DRIVER_PREFIX = re.compile(r"^[A-Za-z0-9_]+:")
+_DAY = re.compile(r"\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])")
 _WINDOWS_DRIVE = re.compile(r"^[A-Za-z]:[\\/]")
 MAX_RESULTS = 20
 MAX_TEXT = 300
@@ -117,7 +132,8 @@ def _geo_resources(items: Any) -> List[Dict[str, str]]:
     resources = []
     for item in _dicts(items):
         url = _link(item.get("url"))
-        fmt = str(item.get("format") or "").strip().lower().lstrip(".")
+        # Some portals give the EU vocabulary URI (.../file-type/SHP) for the format.
+        fmt = str(item.get("format") or "").strip().rstrip("/").rsplit("/", 1)[-1].lower().lstrip(".")
         if not url.startswith("https://") or fmt not in GEO_FORMATS:
             continue
         resources.append({"title": _text(item.get("title") or item.get("name") or fmt), "format": fmt, "url": url})
@@ -204,16 +220,91 @@ def _url_problem(url: str) -> str:
         port = parts.port
     except ValueError:
         return "this URL cannot be read"
-    host = (parts.hostname or "").lower()
+    host = (parts.hostname or "").lower().rstrip(".")  # "localhost." is localhost
     if not host or parts.username or parts.password or port not in (None, 443) or any(char in url for char in " |<>\\"):
         return "this URL cannot be read"
     if host == "localhost" or host.endswith((".localhost", ".local", ".internal", ".lan")) or "." not in host.strip("[]"):
         return "only a public address can be read"
     try:
         address = ipaddress.ip_address(host)
-    except ValueError:
-        return ""
+    except ValueError:  # 127.1, 0x7f.0.0.1: a real name ends with letters
+        return "" if host.rsplit(".", 1)[-1].isalpha() else "only a public address can be read"
     return "" if address.is_global else "only a public address can be read"
+
+
+def gdal_source(url: str, kind: str) -> str:
+    """How GDAL reads a public URL without downloading it first. Built here, never written by a model."""
+    path = urlsplit(url).path.lower()
+    extension = path.rsplit(".", 1)[-1]
+    if extension == "zip":
+        return "/vsizip//vsicurl/" + url
+    if path.rsplit("/", 1)[-1] == "csv":  # an export link with no extension: GDAL has to be told
+        return "CSV:/vsicurl/" + url
+    if kind == "raster" or extension in ("gpkg", "fgb", "shp", "tif", "tiff"):
+        return "/vsicurl/" + url
+    return url
+
+
+def follow_redirects(url: str, head: Callable[[str], Tuple[int, str]], max_hops: int = 4) -> str:
+    """The URL a resource really ends at, each hop held to the rules of the first.
+
+    Raises:
+        ValueError: A hop leaves public https, or there are too many.
+    """
+    for _ in range(max_hops):
+        status, location = head(url)
+        if not 300 <= status < 400:
+            return url
+        url = urljoin(url, location)
+        problem = source_problem(url, True) if url.lower().startswith("https://") else "it redirects to an address in clear"
+        if problem:
+            raise ValueError(f"this link cannot be followed: {problem}")
+    raise ValueError("this link redirects too many times")
+
+
+def valid_day(text: str) -> bool:
+    return not text or _DAY.fullmatch(text) is not None
+
+
+def stac_search_body(collections: List[str], bbox: List[float], start: str, end: str, max_cloud: float,
+                     limit: int) -> Dict[str, Any]:
+    """The body of a STAC ``/search``: newest and least cloudy first."""
+    body: Dict[str, Any] = {"bbox": bbox, "limit": max(1, min(int(limit), MAX_RESULTS)),
+                            "sortby": [{"field": "properties.datetime", "direction": "desc"}]}
+    if collections:
+        body["collections"] = collections
+    if start or end:
+        body["datetime"] = f"{start or '..'}T00:00:00Z/{end or '..'}T23:59:59Z".replace("..T00:00:00Z", "..").replace(
+            "..T23:59:59Z", "..")
+    if max_cloud < 100:
+        body["query"] = {"eo:cloud_cover": {"lte": max_cloud}}
+    return body
+
+
+def parse_stac_items(payload: Any) -> List[Dict[str, Any]]:
+    """Scenes of a STAC answer with the assets QGIS can show: public https GeoTIFFs only."""
+    try:
+        return _parse_stac_items(payload)
+    except (AttributeError, TypeError, RecursionError):
+        return []
+
+
+def _parse_stac_items(payload: Any) -> List[Dict[str, Any]]:
+    scenes = []
+    for item in _dicts(payload.get("features") if isinstance(payload, dict) else None):
+        properties = item.get("properties") if isinstance(item.get("properties"), dict) else {}
+        assets = item.get("assets") if isinstance(item.get("assets"), dict) else {}
+        images = []
+        for key in ("visual", "red", "green", "blue", "nir", "scl"):
+            asset = assets.get(key) if isinstance(assets.get(key), dict) else {}
+            href = _link(asset.get("href"))
+            if href.startswith("https://") and "image/tiff" in str(asset.get("type", "")):
+                images.append({"title": _text(asset.get("title") or key), "format": key, "url": href})
+        if images:
+            scenes.append({"id": _text(item.get("id")), "title": _text(item.get("id")), "publisher": _text(item.get("collection")),
+                           "description": f"{_text(properties.get('datetime'))} · cloud cover {properties.get('eo:cloud_cover', '?')} %",
+                           "page": "", "resources": images})
+    return scenes[:MAX_RESULTS]
 
 
 def display_source(source: str) -> str:
@@ -221,5 +312,6 @@ def display_source(source: str) -> str:
     if source.lower().startswith("https://"):
         parts = urlsplit(source)
         path = parts.path if len(parts.path) <= 80 else parts.path[:77] + "..."
-        return f"{parts.hostname}\n{parts.scheme}://{parts.netloc}{path}"
+        query = f"?{parts.query[:120]}" if parts.query else ""  # what would leave with the request is shown
+        return f"{parts.hostname}\n{parts.scheme}://{parts.netloc}{path}{query}"
     return source[:300]

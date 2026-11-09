@@ -268,8 +268,20 @@ class FilterMateAccessor(Protocol):
         """Remove layers from the project."""
         ...
 
-    def search_open_data(self, query: str, platform: str = "datagouv", limit: int = 10) -> OpenDataResult:
+    def search_open_data(self, query: str, platform: str = "datagouv", limit: int = 10,
+                         extra_domains: Optional[str] = None) -> OpenDataResult:
         """Datasets of an allowed platform; raises FilterRejected on a platform not allowed or unreachable."""
+        ...
+
+    def add_service_layer(self, platform: str, typename: str, name: str = "",
+                          extra_domains: Optional[str] = None) -> LayerSummary:
+        """Add a layer of a WFS platform; raises FilterRejected when it does not offer it."""
+        ...
+
+    def search_imagery(self, bbox: Optional[List[float]] = None, start: str = "", end: str = "", max_cloud: float = 20.0,
+                       collections: Optional[List[str]] = None, limit: int = 5, platform: str = "earth_search",
+                       extra_domains: Optional[str] = None) -> OpenDataResult:
+        """Scenes of a STAC catalog; raises FilterRejected on a catalog not allowed or unreachable."""
         ...
 
     def apply_filter(self, layer_name: str, expression: str, source: str) -> bool:
@@ -425,8 +437,20 @@ class InMemoryAccessor:
                 done.append(found.name)
         return OperationResult(done=done, failed=failed)
 
-    def search_open_data(self, query: str, platform: str = "datagouv", limit: int = 10) -> OpenDataResult:
+    def search_open_data(self, query: str, platform: str = "datagouv", limit: int = 10,
+                         extra_domains: Optional[str] = None) -> OpenDataResult:
         return OpenDataResult(platform, query, [], 0)
+
+    def search_imagery(self, bbox: Optional[List[float]] = None, start: str = "", end: str = "", max_cloud: float = 20.0,
+                       collections: Optional[List[str]] = None, limit: int = 5, platform: str = "earth_search",
+                       extra_domains: Optional[str] = None) -> OpenDataResult:
+        return OpenDataResult(platform, "imagery", [], 0)
+
+    def add_service_layer(self, platform: str, typename: str, name: str = "",
+                          extra_domains: Optional[str] = None) -> LayerSummary:
+        summary = LayerSummary(layer_id=f"L{len(self.layers) + 1}", name=name or typename, provider_type="WFS")
+        self.layers.append(summary)
+        return summary
 
     def apply_filter(self, layer_name: str, expression: str, source: str) -> bool:
         if not any(layer.name == layer_name for layer in self.layers):

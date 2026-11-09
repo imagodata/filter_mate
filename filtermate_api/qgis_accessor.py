@@ -320,16 +320,32 @@ class QGISFilterMateAccessor:
         result = self._control("remove_layers", layers)
         return OperationResult(done=result["done"], failed=result["failed"])
 
-    def search_open_data(self, query: str, platform: str = "datagouv", limit: int = 10) -> OpenDataResult:
-        extra = ""
+    @staticmethod
+    def configured_domains() -> str:
         try:
             config = _plugin_module("config.config")
             section = config.ENV_VARS.get("CONFIG_DATA", {}).get("APP", {}).get("OPTIONS", {}).get("AGENT", {})
-            extra = str(config._get_option_value(section.get("open_data_domains"), "") or "")
+            return str(config._get_option_value(section.get("open_data_domains"), "") or "")
         except Exception:  # the list of platforms is a convenience, not a dependency
             logger.debug("open_data_domains unreadable", exc_info=True)
+            return ""
+
+    def search_open_data(self, query: str, platform: str = "datagouv", limit: int = 10,
+                         extra_domains: Optional[str] = None) -> OpenDataResult:
+        extra = self.configured_domains() if extra_domains is None else extra_domains
         return OpenDataResult(**self._control("search_open_data", query, platform=platform, limit=limit,
                                               extra_domains=extra))
+
+    def search_imagery(self, bbox=None, start: str = "", end: str = "", max_cloud: float = 20.0, collections=None,
+                       limit: int = 5, platform: str = "earth_search", extra_domains: Optional[str] = None) -> OpenDataResult:
+        extra = self.configured_domains() if extra_domains is None else extra_domains
+        return OpenDataResult(**self._control("search_imagery", bbox=bbox, start=start, end=end, max_cloud=max_cloud,
+                                              collections=collections, limit=limit, platform=platform, extra_domains=extra))
+
+    def add_service_layer(self, platform: str, typename: str, name: str = "",
+                          extra_domains: Optional[str] = None) -> LayerSummary:
+        extra = self.configured_domains() if extra_domains is None else extra_domains
+        return LayerSummary(**self._control("add_service_layer", platform, typename, name=name, extra_domains=extra))
 
     def cross_filter(self, source_layer: str, target_layers: List[str], predicates: List[str],
                      buffer: float = 0.0, coverage_min: float = 0.0, operator: Optional[str] = None,

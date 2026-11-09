@@ -182,6 +182,11 @@ class SimulatedProject:
             "export_layers": export_layers, "map_context": map_context, "zoom_to": zoom_to,
             "select_features": select_features, "set_layers_visibility": operation, "add_layer": add_layer,
             "remove_layers": operation, "search_open_data": search_open_data,
+            "add_service_layer": lambda args: {"layer_id": "wfs_1", "name": args.get("name") or args["typename"], "layer_kind": "vector"},
+            "search_imagery": lambda args: {"platform": args["platform"], "query": "imagery", "count": 1, "datasets": [{
+                "id": "S2B_31TCJ_20261031_0_L2A", "title": "S2B_31TCJ_20261031_0_L2A", "publisher": "sentinel-2-l2a",
+                "description": "2026-10-31 · cloud cover 2.1 %", "page": "", "resources": [
+                    {"title": "visual", "format": "visual", "url": "https://sentinel-cogs.s3.us-west-2.amazonaws.com/TCI.tif"}]}]},
             "filter_state": lambda _: {"layers": []}, "list_favorites": lambda _: {"favorites": FAVORITES},
             "apply_favorite": lambda args: {"step": {"layer_name": "communes"}, "active_filters": {}},
         }

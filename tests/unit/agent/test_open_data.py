@@ -117,12 +117,18 @@ class TestSources:
     def test_private_or_odd_urls(self, url):
         assert source_problem(url, True)
 
+    @pytest.mark.parametrize("url", ["https://localhost./a", "https://foo.local./a", "https://169.254.169.254./a", "https://127.1/a",
+                                     "https://0x7f.0.0.1/a", "https://0177.0.0.1/a"])
+    def test_disguised_private_hosts(self, url):
+        assert source_problem(url, True)
+
     def test_too_long(self):
         assert source_problem("https://x.org/" + "a" * 3000, True)
 
     def test_what_the_user_reads_starts_with_the_host(self):
         shown = display_source("https://static.example.org/" + "p" * 200 + "?secret=1")
-        assert shown.startswith("static.example.org\n") and "secret" not in shown and len(shown) < 150
+        assert shown.startswith("static.example.org\n") and len(shown) < 200
+        assert "?secret=1" in shown  # what would leave with the request is shown
 
 
 class TestOddAnswers:

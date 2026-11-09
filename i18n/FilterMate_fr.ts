@@ -7630,6 +7630,70 @@ Objet cliqué : seulement la tache de ces pixels où tombe le clic (une piscine,
 <context>
     <name>AgentPanel</name>
     <message>
+        <source>Too many sources added: remove one first.</source>
+        <translation>Trop de sources ajoutées : retirez-en une d'abord.</translation>
+    </message>
+    <message>
+        <source>Sources</source>
+        <translation>Sources</translation>
+    </message>
+    <message>
+        <source>The agent can search the sources ticked here. Your searches, and what the agent passes to a connector, are sent to them; a layer added from them is read from their servers.</source>
+        <translation>L'agent peut interroger les sources cochées ici. Vos recherches, et ce que l'agent transmet à un connecteur, leur sont envoyés ; une couche ajoutée depuis elles est lue sur leurs serveurs.</translation>
+    </message>
+    <message>
+        <source>Test</source>
+        <translation>Tester</translation>
+    </message>
+    <message>
+        <source>Remove</source>
+        <translation>Retirer</translation>
+    </message>
+    <message>
+        <source>Add</source>
+        <translation>Ajouter</translation>
+    </message>
+    <message>
+        <source>https://... or a portal address</source>
+        <translation>https://... ou adresse d'un portail</translation>
+    </message>
+    <message>
+        <source>MCP connector</source>
+        <translation>Connecteur MCP</translation>
+    </message>
+    <message>
+        <source>official</source>
+        <translation>officiel</translation>
+    </message>
+    <message>
+        <source>community</source>
+        <translation>communautaire</translation>
+    </message>
+    <message>
+        <source>this computer</source>
+        <translation>cet ordinateur</translation>
+    </message>
+    <message>
+        <source>added by you</source>
+        <translation>ajouté par vous</translation>
+    </message>
+    <message>
+        <source>Open data platforms</source>
+        <translation>Plateformes open data</translation>
+    </message>
+    <message>
+        <source>Satellite imagery</source>
+        <translation>Imagerie satellite</translation>
+    </message>
+    <message>
+        <source>MCP connectors</source>
+        <translation>Connecteurs MCP</translation>
+    </message>
+    <message>
+        <source>Testing…</source>
+        <translation>Test en cours…</translation>
+    </message>
+    <message>
         <source>History…</source>
         <translation>Historique…</translation>
     </message>
@@ -7672,10 +7736,6 @@ Objet cliqué : seulement la tache de ces pixels où tombe le clic (une piscine,
     <message>
         <source>{} turn(s)</source>
         <translation>{} tour(s)</translation>
-    </message>
-    <message>
-        <source>Allow open data platforms (data.gouv.fr, Opendatasoft...)</source>
-        <translation>Autoriser les plateformes open data (data.gouv.fr, Opendatasoft…)</translation>
     </message>
     <message>
         <source>Your searches are sent to them, and a layer added from them is read from their servers. Other platforms can be allowed in the FilterMate configuration.</source>
@@ -7792,6 +7852,48 @@ Objet cliqué : seulement la tache de ces pixels où tombe le clic (une piscine,
 </context>
 <context>
     <name>AgentChat</name>
+    <message>
+        <source>Not reachable for this conversation: {}</source>
+        <translation>Injoignable pour cette conversation : {}</translation>
+    </message>
+    <message>
+        <source>Connecting to {}…</source>
+        <translation>Connexion à {}…</translation>
+    </message>
+    <message>
+        <source>{} tools available</source>
+        <translation>{} outils disponibles</translation>
+    </message>
+    <message>
+        <source>It answers.</source>
+        <translation>La source répond.</translation>
+    </message>
+    <message>
+        <source>Searching satellite imagery on {}</source>
+        <translation>Recherche d'imagerie satellite sur {}</translation>
+    </message>
+    <message>
+        <source>The agent wants to run this action on an external connector:
+{}
+{}
+
+Do you agree?</source>
+        <translation>L'agent veut lancer cette action sur un connecteur externe :
+{}
+{}
+
+Acceptez-vous ?</translation>
+    </message>
+    <message>
+        <source>The agent wants to add this layer of a web service to the project:
+{} · {}
+
+Do you agree?</source>
+        <translation>L'agent veut ajouter cette couche d'un service web au projet :
+{} · {}
+
+Acceptez-vous ?</translation>
+    </message>
     <message>
         <source>Earlier conversation: the agent starts afresh from here.</source>
         <translation>Conversation précédente : l'agent repart de zéro à partir d'ici.</translation>
