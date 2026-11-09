@@ -110,7 +110,7 @@ def _wait_cursor():
 
 def _detects_objects(selection: Any) -> bool:
     """A selection of the pipette in object detection: the patches under its clicks only."""
-    return bool(getattr(selection, 'seeds', ()))
+    return bool(getattr(selection, 'seeds', ())) or bool(getattr(selection, 'segments', ()))
 
 
 def _is_expression(selection: Any) -> bool:
@@ -165,6 +165,9 @@ class CoverageModeController(BaseController):
         self._color_pick = False  # the pipette: a click on the map picks a colour to select
         self._mask_overlay = None  # veil of a terrain derivative or expression preview (canvas item)
         self._object_outline = None  # outline of the objects the pipette detected (rubber band)
+        self._segmentation = None  # SegmentationController, made when the tool is first put on
+        self._watching_runtime_install = False  # the panel is refreshed when pip ends
+        self._swapping_pick_tool = False
         self._pc_pick_mode = 'class'  # what a click of the point cloud picker does: one of PC_PICK_MODES
         self._detected: Any = None  # (key, SelectionGeometryResult) of the last object detection
         # (layer id, source, filter, class) -> footprint of the class, for the similar point cloud objects
@@ -412,6 +415,8 @@ class CoverageModeController(BaseController):
                     task.cancel()  # its callback returns early once torn down
                 except RuntimeError:
                     pass
+        if self._segmentation is not None:
+            self._segmentation.cancel_download()  # a reloaded plugin must not find it still writing the model
         for widget_name in ('_host', '_coverage_spin'):
             widget = getattr(self, widget_name)
             setattr(self, widget_name, None)
@@ -607,7 +612,8 @@ class CoverageModeController(BaseController):
         if layer is None:
             return
         # R3 (2026-10-18): the tool on the map leaves with the layer and comes back with it.
-        pipette_on, target = self._color_pick and self._tool_on_map(self._pixel_tool), None
+        segmenting = self._segmentation is not None and self._segmentation.on_map()
+        pipette_on, target = self._color_pick and (self._tool_on_map(self._pixel_tool) or segmenting), None
         if pipette_on and self._raster_panel is not None and hasattr(self._raster_panel, 'pick_target'):
             target = self._raster_panel.pick_target()
         class_pipette_on = self._tool_on_map(self._class_tool)
@@ -1083,6 +1089,12 @@ class CoverageModeController(BaseController):
         pc.criteriaChanged.connect(self._on_point_cloud_criteria_changed)
         if hasattr(raster, 'modeChosen'):
             raster.modeChosen.connect(self._on_raster_mode_chosen)
+        if hasattr(raster, 'segmentValidateRequested'):
+            raster.segmentValidateRequested.connect(lambda: self._segmentation_controller().validate())
+            raster.targetChanged.connect(self._on_raster_target_changed)
+            raster.segmentToolRequested.connect(self._on_segment_tool_requested)
+            raster.segmentModelInstallRequested.connect(lambda: self._segmentation_controller().install_model())
+            raster.segmentRuntimeInstallRequested.connect(self._on_segment_runtime_install_requested)
         if hasattr(pc, 'groupChosen'):
             pc.groupChosen.connect(self._on_point_cloud_group_chosen)
         if hasattr(pc, 'objectsChanged'):
@@ -1090,6 +1102,7 @@ class CoverageModeController(BaseController):
 
     def _populate_raster(self, layer: Any) -> None:
         try:
+            self._refresh_segmentation_readiness()  # first: a raster that cannot be read must not leave the state of the previous one
             from ...adapters.qgis.coverage_layers.raster_adapter import raster_reference, read_raster_summary
             summary = read_raster_summary(layer)
             self._raster_panel.set_summary(summary)
@@ -1109,6 +1122,35 @@ class CoverageModeController(BaseController):
             self._refresh_histogram(layer, self._raster_panel.current_band())
         except Exception as exc:
             logger.warning(f"[FM5] raster panel not populated: {exc}", exc_info=True)
+
+    def _refresh_segmentation_readiness(self) -> None:
+        """Tell the panel what the Segment target lacks (nothing is made for it before the target is used)."""
+        try:
+            from ...adapters.qgis.coverage_layers.segmentation import model_state
+            state = model_state()
+            downloading = self._segmentation is not None and bool(self._segmentation.downloading())
+            self._call(self._raster_panel, 'set_segmentation_readiness', state.runtime, state.installed, downloading, state.installing_runtime, state.runtime_failed)
+            if state.installing_runtime and not self._watching_runtime_install:
+                from ...adapters.qgis import python_dependencies
+                self._watching_runtime_install = True
+                python_dependencies.notify_when_done(self._on_runtime_install_done)
+        except Exception as exc:  # the rest of the raster panel does not depend on it
+            logger.debug(f"[FM5] segmentation readiness not refreshed: {exc}")
+
+    def _on_segment_runtime_install_requested(self) -> None:
+        """The user agreed to the install of onnxruntime."""
+        from ...adapters.qgis import python_dependencies
+        python_dependencies.install_missing(self._on_runtime_installed)
+        self._refresh_segmentation_readiness()
+
+    def _on_runtime_installed(self, _packages: Any) -> None:
+        if not getattr(self, '_torn_down', False) and self._raster_panel is not None:
+            self._call(self._raster_panel, 'set_segmentation_status', self.tr("onnxruntime installed"))
+
+    def _on_runtime_install_done(self) -> None:
+        self._watching_runtime_install = False
+        if not getattr(self, '_torn_down', False) and self._raster_panel is not None:
+            self._refresh_segmentation_readiness()
 
     def _band_spans(self, layer: Any, band_count: int) -> Dict[int, float]:
         """Observed value range of the first four bands (the colour of an image), for the pipette tolerance."""
@@ -1786,7 +1828,8 @@ class CoverageModeController(BaseController):
         except Exception:
             QApplication = None
         try:
-            result = layer_object_geometry(self._base_raster(layer), selection)
+            # Validated polygons read nothing: a service needs no local sample to show them again.
+            result = layer_object_geometry(layer if selection.segments else self._base_raster(layer), selection)
         except RuntimeError as exc:
             logger.debug(f"[FM5] objects not detected, layer deleted: {exc}")
             return None
@@ -2016,6 +2059,7 @@ class CoverageModeController(BaseController):
                     panel.reset()  # does not emit: its outline goes here
                 self._restore_raster_band_display(layer)
                 self._hide_detected_objects()
+                self._stop_segmentation()
                 self._sync_object_pick_mode()  # the target is back to the clicked object
                 self._panel_states.pop(layer.id(), None)
         except Exception as exc:
@@ -2138,7 +2182,8 @@ class CoverageModeController(BaseController):
             target: ``'similar'`` (the pipette) or ``'object'`` (the detector); None keeps the target of the panel.
         """
         panel = self._raster_panel
-        if self._active_layer is not None and not self._raster_capability(self._active_layer).has_raw_values:
+        chosen = target if target is not None else (panel.pick_target() if panel is not None and hasattr(panel, 'pick_target') else None)
+        if chosen != 'segment' and self._active_layer is not None and not self._raster_capability(self._active_layer).has_raw_values:
             target = 'similar'
         if target is not None and panel is not None and hasattr(panel, 'set_pick_target'):
             panel.set_pick_target(target)
@@ -2151,11 +2196,49 @@ class CoverageModeController(BaseController):
         iface = self._iface()
         if iface is None:
             return
+        self._swapping_pick_tool = True  # the tool leaving the map must not turn the pipette off
+        try:
+            if (target or 'similar') == 'segment':  # its own map tool: prompts, not picks
+                self._deactivate_pixel_tool()
+                if enabled:
+                    self._segmentation_controller().activate()
+                elif self._segmentation is not None:
+                    self._segmentation.deactivate()
+                return
+            if self._segmentation is not None and self._segmentation.on_map():
+                self._segmentation.deactivate()
+        finally:
+            self._swapping_pick_tool = False
         on_map = self._pixel_tool is not None and iface.mapCanvas().mapTool() is self._pixel_tool
         if enabled and not on_map:
             self._toggle_pixel_tool()
         elif not enabled and on_map:
             self._deactivate_pixel_tool()
+
+    def _on_raster_target_changed(self, target: str) -> None:
+        """A target of the PIPETTE group: the segmentation has no rail button, choosing it puts its tool on."""
+        segmenting = self._segmentation is not None and self._segmentation.on_map()
+        if target == 'segment' and not segmenting:
+            self._on_color_pick_toggled(True, 'segment')
+        elif target != 'segment' and segmenting:
+            self._on_color_pick_toggled(True, target)
+
+    def _on_segment_tool_requested(self) -> None:
+        """The Segment target, already chosen, clicked again: its tool comes back after another QGIS tool took the map."""
+        if self._raster_panel is not None and self._raster_panel.pick_target() == 'segment':
+            self._on_color_pick_toggled(True, 'segment')
+
+    def _stop_segmentation(self) -> None:
+        """A reset of the panel: the target goes back to the pipette, the tool leaves with it."""
+        if self._segmentation is not None and self._segmentation.on_map():
+            self._segmentation.deactivate()
+
+    def _segmentation_controller(self) -> Any:
+        """The segmentation tool of the raster panel (made on first use)."""
+        if self._segmentation is None:
+            from .segmentation_controller import SegmentationController
+            self._segmentation = SegmentationController(self)
+        return self._segmentation
 
     def _on_raster_mode_chosen(self, mode: str) -> None:
         """The user made a group of the raster panel the active one: the pipette follows the PIPETTE group."""
@@ -2166,6 +2249,8 @@ class CoverageModeController(BaseController):
 
     def _show_picker_state(self, active: bool) -> None:
         """The picker tool went on or left the map: the pipette / detector buttons and the BANDS block follow."""
+        if not active and self._swapping_pick_tool:
+            return  # one picker replaced by the other: the pipette stays on
         if not active and self._color_pick:
             self._color_pick = False  # the picker was dropped (another tool, the rail button): the pipette goes off
             self._extras_call('set_pipette_checked', False)
@@ -2187,6 +2272,8 @@ class CoverageModeController(BaseController):
         """Delete the pixel and class pickers (made again on demand); their destructor takes them off the
         canvas and out of the tool QGIS gives back after Pan / Zoom."""
         self._previous_map_tool = self._previous_class_map_tool = None
+        if self._segmentation is not None:
+            self._segmentation.drop()
         for tool_name in ('_pixel_tool', '_class_tool'):
             tool = getattr(self, tool_name)
             setattr(self, tool_name, None)
@@ -2856,7 +2943,7 @@ class CoverageModeController(BaseController):
                 return
             from ...adapters.qgis.coverage_layers.source_jobs import RasterSourceJob
             # Read and bounded by the job (raster_adapter.source_max_pixels): "4e8", 0, text...
-            if not self._raster_capability(layer).has_raw_values:
+            if not self._raster_capability(layer).has_raw_values and not selection.segments:
                 sample = self._local_raster_sample(layer)
                 if sample is None:
                     show_warning(self.tr("Prepare a color snapshot before filtering this rendered layer."))
@@ -3115,6 +3202,7 @@ class CoverageModeController(BaseController):
                 panel.reset()  # does not emit: its outline goes here
             self._restore_raster_band_display(layer)
             self._hide_detected_objects()
+            self._stop_segmentation()
             self._sync_object_pick_mode()
             self._panel_states.pop(layer.id(), None)
         self._finish_restore(restored)

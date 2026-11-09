@@ -845,6 +845,8 @@ def selection_geometry(provider: QgsRasterDataProvider, selection: RasterSelecti
             they are.
     """
     from .geometry_tools import make_valid, merge_tile_polygons, patch_cores, pixel_to_map, polygonize_mask
+    if selection.segments:
+        return segments_geometry(selection, extent, native_width, native_height)
     if selection.seeds and selection.similar:
         return similar_objects_geometry(provider, selection, extent, native_width, native_height, crs_wkt,
                                         max_pixels=max_pixels, provider_for=provider_for, patch_provider=provider,
@@ -1140,6 +1142,31 @@ def _window_mask(provider, selection: RasterSelection, extent: QgsRectangle, siz
     return mask[row0 - pad_row0:row0 - pad_row0 + row1 - row0, col0 - pad_col0:col0 - pad_col0 + col1 - col0]
 
 
+def segments_geometry(selection: RasterSelection, extent: QgsRectangle, native_width: int,
+                      native_height: int) -> SelectionGeometryResult:
+    """Union of the polygons validated with the segmentation tool; nothing is read from the raster.
+
+    A polygon that cannot be parsed is skipped and logged: the others still select.
+    ``native_width`` is 0 for a rendered service without pixels of its own (no pixel count then).
+    """
+    from .geometry_tools import make_valid, union_geometries
+    geometries = []
+    for wkt in selection.segments:
+        geometry = QgsGeometry.fromWkt(wkt)
+        if geometry is None or geometry.isEmpty():
+            logger.warning("[FM5] a segmented object could not be read and was skipped")
+            continue
+        geometries.append(make_valid(geometry))
+    union = union_geometries(geometries) if geometries else QgsGeometry()
+    total, kept, cell = 0, 0, 0.0
+    if native_width > 0 and native_height > 0:
+        size_x, size_y = extent.width() / native_width, extent.height() / native_height
+        total, cell = int(native_width) * int(native_height), max(size_x, size_y)
+        if size_x > 0 and size_y > 0 and not union.isEmpty():
+            kept = min(total, int(round(union.area() / (size_x * size_y))))
+    return SelectionGeometryResult(union, kept, total, cell, objects=len(geometries))
+
+
 def object_parts(selection: RasterSelection) -> List[Tuple[RasterSelection, Tuple[float, float]]]:
     """``(criterion, seed)`` of each object: its own criterion, else the one of the selection for every seed."""
     if selection.objects:
@@ -1389,6 +1416,8 @@ def object_virtual_layers(layer: QgsRasterLayer, selection: RasterSelection, sou
 
 def layer_object_geometry(layer: QgsRasterLayer, selection: RasterSelection) -> SelectionGeometryResult:
     """:func:`object_geometry` read from ``layer`` itself (main thread: the pipette shows what it detects)."""
+    if selection.segments:
+        return segments_geometry(selection, layer.extent(), layer.width(), layer.height())
     virtuals = object_virtual_layers(layer, selection)  # kept alive while their providers are read
     base = layer.dataProvider()
 
