@@ -19,8 +19,8 @@ _PKG = "fm_seg_ctrl_test"
 
 
 class ModelState:
-    def __init__(self, runtime, installed, installing_runtime=False):
-        self.runtime, self.installed, self.installing_runtime = runtime, installed, installing_runtime
+    def __init__(self, runtime, installed, installing_runtime=False, runtime_failed=False):
+        self.runtime, self.installed, self.installing_runtime, self.runtime_failed = runtime, installed, installing_runtime, runtime_failed
 
     @property
     def ready(self):
@@ -93,9 +93,13 @@ def controller(ctrl_module):
 
 
 class TestMissingModel:
-    def test_without_the_runtime_the_command_is_told(self, ctrl_module, controller):
-        ctrl_module._segmentation_stub.state = ModelState(False, False)
+    def test_after_a_failed_install_the_command_is_told(self, ctrl_module, controller):
+        ctrl_module._segmentation_stub.state = ModelState(False, False, False, True)
         assert "pip install onnxruntime" in controller._missing_model_text()
+
+    def test_before_any_install_the_button_is_told(self, ctrl_module, controller):
+        ctrl_module._segmentation_stub.state = ModelState(False, False)
+        assert "Install onnxruntime first" in controller._missing_model_text()
 
     def test_while_pip_runs_no_command_is_told(self, ctrl_module, controller):
         ctrl_module._segmentation_stub.state = ModelState(False, False, True)
@@ -137,14 +141,14 @@ class TestInstallModel:
         ctrl_module._segmentation_stub.state = ModelState(True, True)
         FakeDownloadTask.made[0].finish(True)
         assert not controller.downloading()
-        assert ("set_segmentation_readiness", True, True, False, False) in controller._host.calls
+        assert ("set_segmentation_readiness", True, True, False, False, False) in controller._host.calls
         assert controller._host.calls[-1] == ("set_segmentation_status", "Model installed: left click on an object, or draw a box")
 
     def test_a_failure_is_told_and_the_button_comes_back(self, ctrl_module, controller):
         controller.install_model()
         ctrl_module._segmentation_stub.state = ModelState(True, False)
         FakeDownloadTask.made[0].finish(False, "disk full")
-        assert ("set_segmentation_readiness", True, False, False, False) in controller._host.calls
+        assert ("set_segmentation_readiness", True, False, False, False, False) in controller._host.calls
         assert controller._host.calls[-1] == ("set_segmentation_status", "The model could not be downloaded: disk full")
         controller.install_model()
         assert len(ctrl_module._added_tasks) == 2
@@ -153,7 +157,7 @@ class TestInstallModel:
         controller.install_model()
         ctrl_module._segmentation_stub.state = ModelState(False, True)
         FakeDownloadTask.made[0].finish(True)
-        assert "onnxruntime is missing" in controller._host.calls[-1][1]
+        assert "Install onnxruntime first" in controller._host.calls[-1][1]
 
     def test_the_dock_going_away_cancels_it(self, ctrl_module, controller):
         controller.install_model()

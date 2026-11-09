@@ -139,6 +139,32 @@ class Host:
         self.picker_states.append(active)
 
 
+def test_runtime_confirmation(panel):
+    """Nothing is installed without an answer, and the question comes once."""
+    from qgis.PyQt.QtWidgets import QMessageBox
+    original = QMessageBox.question
+    answers, asked, requested = [QMessageBox.StandardButton.No, QMessageBox.StandardButton.Yes], [], []
+    QMessageBox.question = lambda *args, **kwargs: asked.append(args) or answers.pop(0)
+    panel.segmentRuntimeInstallRequested.connect(lambda: requested.append(True))
+    try:
+        panel._target_buttons[panels.PICK_SIMILAR].setChecked(True)
+        panel._runtime_asked = False
+        panel.set_segmentation_readiness(False, False)
+        panel._target_buttons[panels.PICK_SEGMENT].setChecked(True)
+        check("the first click on Segment asks", len(asked) == 1, len(asked))
+        check("a refusal installs nothing", requested == [])
+        check("and the button stays", not panel._segment_install_button.isHidden() and panel._segment_install_button.isEnabled())
+        panel._target_buttons[panels.PICK_SIMILAR].setChecked(True)
+        panel._target_buttons[panels.PICK_SEGMENT].setChecked(True)
+        check("the question is not repeated", len(asked) == 1, len(asked))
+        panel._segment_install_button.click()
+        check("the button asks again and a yes installs", len(asked) == 2 and requested == [True], (len(asked), requested))
+        check("and it waits", not panel._segment_install_button.isEnabled())
+    finally:
+        QMessageBox.question = original
+    panel.set_segmentation_readiness(True, False)
+
+
 def test_tool_flow(layer):
     QgsProject.instance().addMapLayer(layer)
     canvas = QgsMapCanvas()
@@ -230,9 +256,11 @@ def test_tool_flow(layer):
     check("without the runtime and the model the target stays", not panel._target_buttons[panels.PICK_SEGMENT].isHidden()
           and panel.pick_target() == panels.PICK_SEGMENT)
     check("and says what to install", not panel._segment_install_label.isHidden() and not panel._segment_install_button.isHidden()
-          and "onnxruntime" in panel._segment_install_label.text() and "62" in panel._segment_install_button.text())
+          and "onnxruntime" in panel._segment_install_label.text() and "onnxruntime" in panel._segment_install_button.text())
     panel.set_segmentation_readiness(True, False)
-    check("with the runtime only the download is offered", panel._segment_install_label.isHidden() and not panel._segment_install_button.isHidden())
+    check("with the runtime only the download is offered", panel._segment_install_label.isHidden() and not panel._segment_install_button.isHidden()
+          and "62" in panel._segment_install_button.text())
+    test_runtime_confirmation(panel)
     panel.set_segmentation_readiness(True, False, True)
     check("during a download the button waits", not panel._segment_install_button.isEnabled())
     panel.set_segmentation_readiness(False, False, False, True)

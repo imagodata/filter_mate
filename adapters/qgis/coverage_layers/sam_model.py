@@ -3,7 +3,7 @@
 
 SAM 2.1 hiera tiny (Meta, Apache 2.0), quantized ONNX export of a pinned
 revision, run by onnxruntime on the CPU. FilterMate ships neither the model nor
-the runtime: onnxruntime is installed at launch when missing (``python_dependencies``),
+the runtime: onnxruntime is installed once the user agrees (``python_dependencies``),
 and the model is downloaded only when the user asks for it, every file checked
 against its SHA-256 before it replaces anything. No QGIS import here: pure Python and numpy.
 """
@@ -38,6 +38,7 @@ SIZES: Dict[str, int] = {
 CHUNK = 1 << 20
 USER_AGENT = 'FilterMate-QGIS-plugin'
 RUNTIME_MODULE = 'onnxruntime'
+RUNTIME_MEGABYTES = 100  # about, on disk with its dependencies (105 MB measured under Windows, 2026-11-09)
 
 INPUT_SIZE = 1024
 MEAN = np.array([0.485, 0.456, 0.406], dtype=np.float32)
@@ -88,7 +89,7 @@ def python_executable() -> str:
 
 
 def install_command() -> str:
-    """The pip command to run by hand when the automatic install at launch failed."""
+    """The pip command to run by hand when the install from the panel failed."""
     python = python_executable()
     quoted = f'"{python}"' if ' ' in python else python
     return f'{quoted} -m pip install {RUNTIME_MODULE}'

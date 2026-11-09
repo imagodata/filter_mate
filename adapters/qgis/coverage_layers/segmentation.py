@@ -37,6 +37,7 @@ class ModelState:
     runtime: bool  #: onnxruntime can be imported
     installed: bool  #: the model files are in :func:`model_directory`
     installing_runtime: bool = False  #: pip is installing onnxruntime in the background
+    runtime_failed: bool = False  #: the last install of onnxruntime did not succeed
 
     @property
     def ready(self) -> bool:
@@ -59,7 +60,7 @@ def model_state() -> ModelState:
         installed = False
     from .. import python_dependencies
     runtime = sam_model.runtime_available()
-    return ModelState(runtime, installed, not runtime and python_dependencies.installing())
+    return ModelState(runtime, installed, not runtime and python_dependencies.installing(), not runtime and python_dependencies.install_failed())
 
 
 def find_provider() -> Optional[Any]:

@@ -1,11 +1,14 @@
 # -*- coding: utf-8 -*-
-"""Python packages FilterMate installs for itself at launch.
+"""Python packages FilterMate installs for itself, once the user agreed.
 
 They are declared by the ``python_dependencies`` key of ``metadata.txt`` (the
 ``plugin_dependencies`` key of QGIS only names other QGIS plugins). A package this
 Python already finds is left alone. A missing one goes to a folder of the QGIS
 profile, one per Python version, at the end of ``sys.path``: nothing is written
 to the Python of QGIS, and what QGIS ships (numpy) keeps priority.
+
+At launch only the folder is put on ``sys.path``: nothing is downloaded before the
+user confirms, which the raster panel asks at the first click on its Segment target.
 """
 import importlib
 import importlib.util
@@ -28,6 +31,7 @@ POLL_SECONDS = 0.2
 OUTPUT_TAIL = 2000
 
 _task: Any = None
+_failed = False
 _listeners: List[Callable[[], None]] = []
 
 
@@ -55,6 +59,16 @@ def activate(directory: str) -> None:
     if directory not in sys.path:
         sys.path.append(directory)
     importlib.invalidate_caches()
+
+
+def activate_installed() -> None:
+    """At launch: what an earlier session installed becomes importable. Installs nothing, never raises."""
+    try:
+        directory = target_directory()
+        if os.path.isdir(directory):
+            activate(directory)
+    except Exception as exc:
+        logger.debug(f"[FM5] Python dependencies folder not activated: {exc}")
 
 
 def is_available(package: str) -> bool:
@@ -122,16 +136,29 @@ class PipInstallTask(QgsTask):
         global _task
         _task = None
         callback, self.callback = self.callback, None
-        if callback is not None:
-            callback(self, bool(result))
         listeners = list(_listeners)
         _listeners.clear()
+        if callback is not None:
+            self._notify(lambda: callback(self, bool(result)))
         for listener in listeners:
-            listener()
+            self._notify(listener)
+
+    @staticmethod
+    def _notify(call: Callable[[], None]) -> None:
+        """One failing listener must not leave the others, nor the panel, waiting."""
+        try:
+            call()
+        except Exception as exc:
+            logger.warning(f"[FM5] end of the Python dependencies install not notified: {exc}", exc_info=True)
 
 
 def installing() -> bool:
     return _task is not None
+
+
+def install_failed() -> bool:
+    """The last install of this session did not succeed (a cancel is no failure)."""
+    return _failed
 
 
 def notify_when_done(listener: Callable[[], None]) -> None:
@@ -141,11 +168,12 @@ def notify_when_done(listener: Callable[[], None]) -> None:
 
 
 def install_missing(on_installed: Optional[Callable[[Sequence[str]], None]] = None) -> None:
-    """Install in the background what ``metadata.txt`` declares and this Python lacks. Never raises: QGIS must start."""
-    global _task
+    """Install in the background what ``metadata.txt`` declares and this Python lacks, the user having agreed. Never raises."""
+    global _task, _failed
     try:
         if _task is not None:
             return
+        _failed = False
         directory = target_directory()
         activate(directory)
         packages = missing_packages(declared_packages())
@@ -156,9 +184,12 @@ def install_missing(on_installed: Optional[Callable[[Sequence[str]], None]] = No
         python = python_executable()
         if not os.path.isfile(python):
             logger.warning(f"[FM5] {packages} not installed: the Python of QGIS was not found")
+            _failed = True
             return
 
         def done(task: Any, success: bool) -> None:
+            global _failed
+            _failed = not success and bool(task.error)
             if success:
                 logger.info(f"[FM5] installed {task.packages} into {directory}")
                 if on_installed is not None:
@@ -170,6 +201,7 @@ def install_missing(on_installed: Optional[Callable[[Sequence[str]], None]] = No
         _task = PipInstallTask(pip_command(python, directory, packages), packages, done, qgis_proxy_url())
         QgsApplication.taskManager().addTask(_task)
     except Exception as exc:
+        _failed = True
         logger.warning(f"[FM5] Python dependencies not checked: {exc}", exc_info=True)
 
 

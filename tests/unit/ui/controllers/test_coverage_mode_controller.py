@@ -1795,6 +1795,27 @@ class TestSegmentationTarget:
         monkeypatch.setattr(controller, "_deactivate_pixel_tool", lambda: calls.append("picker off"))
         return controller, panel, calls
 
+    def test_the_end_of_the_runtime_install_reaches_a_live_panel(self, ctrl_module, monkeypatch):
+        """2026-11-09: _torn_down only exists after a teardown; reading it raised and the panel stayed on "Installing..."."""
+        controller, panel, _calls = self._controller(ctrl_module, monkeypatch)
+        refreshed = []
+        monkeypatch.setattr(controller, "_refresh_segmentation_readiness", lambda: refreshed.append(True))
+        controller._watching_runtime_install = True
+        controller._on_runtime_installed(["onnxruntime"])
+        controller._on_runtime_install_done()
+        panel.set_segmentation_status.assert_called_once_with("onnxruntime installed")
+        assert refreshed == [True] and controller._watching_runtime_install is False
+
+    def test_the_end_of_the_runtime_install_spares_a_closed_dock(self, ctrl_module, monkeypatch):
+        controller, panel, _calls = self._controller(ctrl_module, monkeypatch)
+        refreshed = []
+        monkeypatch.setattr(controller, "_refresh_segmentation_readiness", lambda: refreshed.append(True))
+        controller._torn_down = True
+        controller._on_runtime_installed(["onnxruntime"])
+        controller._on_runtime_install_done()
+        panel.set_segmentation_status.assert_not_called()
+        assert refreshed == []
+
     def test_segment_replaces_the_picker(self, ctrl_module, monkeypatch):
         controller, _panel, calls = self._controller(ctrl_module, monkeypatch)
         controller._on_color_pick_toggled(True, "segment")

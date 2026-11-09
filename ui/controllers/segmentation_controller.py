@@ -245,8 +245,10 @@ class SegmentationController:
         state = self.model_state()
         if state.installing_runtime:
             return self.tr("onnxruntime is being installed, click again in a moment")
-        if not state.runtime:
+        if not state.runtime and state.runtime_failed:
             return self.tr("onnxruntime is missing: run {0}, then restart QGIS").format(install_command())
+        if not state.runtime:
+            return self.tr("Install onnxruntime first, with the button below")
         if self.downloading():
             return self.tr("The segmentation model is being downloaded, click again once it is installed")
         if not state.installed:
@@ -255,7 +257,7 @@ class SegmentationController:
 
     def _refresh_readiness(self) -> None:
         state = self.model_state()
-        self._host._call(self._host._raster_panel, 'set_segmentation_readiness', state.runtime, state.installed, self.downloading(), state.installing_runtime)
+        self._host._call(self._host._raster_panel, 'set_segmentation_readiness', state.runtime, state.installed, self.downloading(), state.installing_runtime, state.runtime_failed)
 
     def install_model(self) -> None:
         """Download the model files (the panel asked the user first); one download at a time."""
