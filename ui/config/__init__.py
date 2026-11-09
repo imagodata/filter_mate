@@ -891,30 +891,69 @@ class UIConfig:
         return paddings.get(component, '4px')
 
     @classmethod
-    def detect_profile_from_screen(cls) -> str:
-        """
-        Auto-detect best profile based on screen resolution.
-
-        Returns:
-            str: Recommended profile name
-        """
+    def current_screen(cls):
+        """The screen of the QGIS window, else the primary one (None when there is no screen)."""
+        from qgis.PyQt.QtWidgets import QApplication
         try:
-            from qgis.PyQt.QtWidgets import QApplication  # noqa: F401
-            screen = QApplication.primaryScreen()
+            from qgis.utils import iface
+            screen = iface.mainWindow().screen()
             if screen:
-                geometry = screen.geometry()
-                height = geometry.height()
-
-                if height < 800:
-                    return DisplayProfile.COMPACT
-                elif height > 1200:
-                    return DisplayProfile.EXPANDED
-                else:
-                    return DisplayProfile.NORMAL
-        except Exception:  # nosec B110 - best-effort detection, falls back below
+                return screen
+        except (ImportError, AttributeError, RuntimeError):  # no iface, or QWidget.screen() before Qt 5.14
             pass
+        return QApplication.primaryScreen()
 
+    @classmethod
+    def profile_for_screen(cls, screen) -> DisplayProfile:
+        """Profile for a screen.
+
+        - COMPACT: usable logical height < 800 px, whatever the scaling (a 1080p
+          laptop at 150 % reports 1280x720 logical px: Qt scales logical px by the
+          devicePixelRatio at render time, so only the logical room decides the
+          heights), or logical resolution < 1920x1080 (laptops, tablets)
+        - HIDPI: devicePixelRatio >= 1.5 or logicalDotsPerInch > 120 (4K, Retina,
+          Windows 125/150/200 % scaling)
+        - NORMAL: standard desktop screens, and no screen at all
+        """
+        if not screen:
+            return DisplayProfile.NORMAL
+        geometry = screen.geometry()
+        # The dock lives in the available area (taskbar excluded): HIDPI / NORMAL impose
+        # a 600 px dock minimum height.
+        try:
+            available_height = screen.availableGeometry().height()
+        except (AttributeError, RuntimeError):
+            available_height = geometry.height()
+        dpr = float(screen.devicePixelRatio() or 1.0)
+        try:
+            dpi = float(screen.logicalDotsPerInch() or 96.0)
+        except (AttributeError, RuntimeError):
+            dpi = 96.0
+        if available_height < 800:
+            return DisplayProfile.COMPACT
+        if dpr >= 1.5 or dpi > 120.0:
+            return DisplayProfile.HIDPI
+        if geometry.width() < 1920 or geometry.height() < 1080:
+            return DisplayProfile.COMPACT
         return DisplayProfile.NORMAL
+
+    @classmethod
+    def detect_profile_from_screen(cls) -> DisplayProfile:
+        """Profile for the screen QGIS is on."""
+        return cls.profile_for_screen(cls.current_screen())
+
+    @classmethod
+    def resolve_profile(cls, setting=None) -> DisplayProfile:
+        """Profile for the UI_PROFILE setting: its value (a {'value': ...} entry or a string), or detected.
+
+        'auto', and anything that is not a profile name, detect from the screen.
+        """
+        value = setting.get('value') if isinstance(setting, dict) else setting
+        if isinstance(value, str):
+            for profile in DisplayProfile:
+                if profile.value == value.strip().lower():
+                    return profile
+        return cls.detect_profile_from_screen()
 
 
 # Import ui_elements for centralized spacer/layout references

@@ -84,7 +84,8 @@ from qgis.utils import iface
 
 import webbrowser
 from .ui.widgets import QgsCheckableComboBoxFeaturesListPickerWidget
-from .ui.widgets.custom_widgets import apply_feature_picker_fetch_limit
+from .ui.widgets.custom_widgets import apply_feature_picker_fetch_limit, clear_feature_picker_feature
+from .ui.widgets.wheel_guard import guard_input_wheel
 
 # Object safety and layer utilities (migrated to infrastructure)
 from .infrastructure.utils import is_layer_valid as is_valid_layer
@@ -505,6 +506,12 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             # Reattach on next event loop iteration (layer is stable by then)
             def _reattach():
                 try:
+                    # 2026-11-06: a layer change queued after this subset change has
+                    # taken the picker (and this connection) to the new layer by the
+                    # time the timer fires: putting the old layer back left the
+                    # single-selection picker on the previous layer.
+                    if self._feature_picker_layer_connection is not layer:
+                        return
                     if layer and not is_sip_deleted(layer) and layer.isValid():
                         picker.setLayer(layer)
                         logger.debug("FIX-2026-02-11: FeaturePickerWidget reattached after subset change")
@@ -834,6 +841,7 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         self.dockwidget_widgets_configuration()
         self._load_all_pushbutton_icons()
         self._setup_truncation_tooltips()
+        guard_input_wheel(self)  # a wheel over a list or a number scrolls the panel, it does not change them
 
     def _load_all_pushbutton_icons(self):
         """v4.0 S16: Load icons from config.
@@ -1728,7 +1736,26 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
 
     def _schedule_expression_change(self, groupbox: str, expression: str):
         """v4.0 Sprint 16: Schedule debounced expression change."""
+        if getattr(self, '_updating_current_layer', False):
+            # 2026-11-06: echoes of the programmatic widget sets of the layer
+            # change (including the setExpression('') clear): the reload step
+            # applies the layer's expressions, a debounced replay afterwards
+            # would write the echoed value back as a layer property.
+            return
         self._pending_expression_change = (groupbox, expression); self._set_expression_loading_state(True, groupbox); self._expression_debounce_timer.start()
+
+    def _cancel_pending_expression_change(self):
+        """Forget a debounced expression change: it belongs to the layer being left.
+
+        2026-11-06: armed on layer A, it fired once layer B was current and wrote
+        A's field through layer_property_changed. The field chosen on A stays in
+        PROJECT_LAYERS (_refresh_feature_pickers_for_field_change wrote it).
+        """
+        if getattr(self, '_pending_expression_change', None) is None:
+            return
+        self._pending_expression_change = None
+        self._expression_debounce_timer.stop()
+        self._set_expression_loading_state(False)
 
     def _setup_expression_widget_direct_connections(self):
         """
@@ -1742,6 +1769,12 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
 
         PERFORMANCE: Uses debounced handlers to prevent excessive recomputation
         when the user types quickly or makes rapid changes to complex expressions.
+
+        2026-11-06: keep at most one direct handler per widget. A bare
+        fieldChanged.disconnect() removed every receiver — including the
+        truncation tooltips connected once by _setup_truncation_tooltips —
+        at each call, and this method runs on every layer change. The
+        previous direct handler is stored, so only it is disconnected.
         """
         logger.debug("🔧 _setup_expression_widget_direct_connections CALLED")
 
@@ -1750,44 +1783,37 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             logger.error("❌ mFieldExpressionWidget_exploring_single_selection does NOT exist!")
             return
 
-        # SINGLE SELECTION: mFieldExpressionWidget -> mFeaturePickerWidget
-        def on_single_field_changed(field_name):
-            logger.debug(f"🔄 Single field changed: {field_name}")
-            self._refresh_feature_pickers_for_field_change("single_selection", field_name)
-            self._schedule_expression_change("single_selection", field_name)
+        direct = getattr(self, '_direct_field_changed_handlers', None)
+        if direct is None:
+            direct = self._direct_field_changed_handlers = {}
 
-        try:
-            self.mFieldExpressionWidget_exploring_single_selection.fieldChanged.disconnect()
-        except (TypeError, RuntimeError):
-            pass
-        self.mFieldExpressionWidget_exploring_single_selection.fieldChanged.connect(on_single_field_changed)
-        logger.debug("✓ Connected mFieldExpressionWidget_exploring_single_selection.fieldChanged DIRECTLY")
+        for attr, groupbox in (
+            ('mFieldExpressionWidget_exploring_single_selection', 'single_selection'),
+            ('mFieldExpressionWidget_exploring_multiple_selection', 'multiple_selection'),
+            ('mFieldExpressionWidget_exploring_custom_selection', 'custom_selection'),
+        ):
+            widget = getattr(self, attr, None)
+            if widget is None:
+                logger.error(f"❌ {attr} does NOT exist!")
+                continue
+            try:
+                previous = direct.get(attr)
+                if previous is not None:
+                    try:
+                        widget.fieldChanged.disconnect(previous)
+                    except (TypeError, RuntimeError):
+                        pass  # already disconnected or signal gone
 
-        # MULTIPLE SELECTION: mFieldExpressionWidget -> checkableComboBoxFeaturesListPickerWidget
-        def on_multiple_field_changed(field_name):
-            logger.info(f"🔄 Multiple field changed: {field_name}")
-            self._refresh_feature_pickers_for_field_change("multiple_selection", field_name)
-            self._schedule_expression_change("multiple_selection", field_name)
+                def _on_field_changed(field_name, _groupbox=groupbox):
+                    logger.debug(f"🔄 {_groupbox} field changed: {field_name}")
+                    self._refresh_feature_pickers_for_field_change(_groupbox, field_name)
+                    self._schedule_expression_change(_groupbox, field_name)
 
-        try:
-            self.mFieldExpressionWidget_exploring_multiple_selection.fieldChanged.disconnect()
-        except (TypeError, RuntimeError):
-            pass
-        self.mFieldExpressionWidget_exploring_multiple_selection.fieldChanged.connect(on_multiple_field_changed)
-        logger.debug("✓ Connected mFieldExpressionWidget_exploring_multiple_selection.fieldChanged DIRECTLY")
-
-        # CUSTOM SELECTION: mFieldExpressionWidget (no FeaturePicker to update, but may have other uses)
-        def on_custom_field_changed(field_name):
-            logger.info(f"🔄 Custom field changed: {field_name}")
-            self._refresh_feature_pickers_for_field_change("custom_selection", field_name)
-            self._schedule_expression_change("custom_selection", field_name)
-
-        try:
-            self.mFieldExpressionWidget_exploring_custom_selection.fieldChanged.disconnect()
-        except (TypeError, RuntimeError):
-            pass
-        self.mFieldExpressionWidget_exploring_custom_selection.fieldChanged.connect(on_custom_field_changed)
-        logger.debug("✓ Connected mFieldExpressionWidget_exploring_custom_selection.fieldChanged DIRECTLY")
+                widget.fieldChanged.connect(_on_field_changed)
+                direct[attr] = _on_field_changed
+                logger.debug(f"✓ Connected {attr}.fieldChanged DIRECTLY")
+            except RuntimeError:
+                pass  # widget C++ object deleted
 
     def _on_expression_field_changed(self, groupbox: str, field_or_expression: str):
         """
@@ -1859,14 +1885,6 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             if layer_id not in self.PROJECT_LAYERS:
                 return
 
-            layer_props = self.PROJECT_LAYERS[layer_id]
-
-            # FIX v4: ALWAYS update PROJECT_LAYERS with new expression (create if missing)
-            expression_key = f"{groupbox}_expression"
-            if "exploring" not in layer_props:
-                layer_props["exploring"] = {}
-            layer_props["exploring"][expression_key] = field_or_expression
-            logger.info(f"  → Updated PROJECT_LAYERS[exploring][{expression_key}] = {field_or_expression}")
             if getattr(self, '_updating_current_layer', False):
                 # PERF 2026-09-14: during current_layer_changed the expression
                 # widgets are cleared (setExpression('') in _disconnect_layer_signals)
@@ -1875,8 +1893,21 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
                 # empty expression on a PostgreSQL layer, measured in QGIS 4.2)
                 # right before _reload_exploration_widgets rebuilt them again
                 # with the final expression. Only the reload step populates.
+                # 2026-11-06: the guard also runs before the write below: these
+                # fieldChanged are echoes of the programmatic widget sets of the
+                # layer change (the '' clear first), and writing them emptied the
+                # stored expression of the layer being switched to.
                 logger.debug(f"  → Layer change in progress: picker rebuild for {groupbox} left to the reload step")
                 return
+
+            layer_props = self.PROJECT_LAYERS[layer_id]
+
+            # FIX v4: ALWAYS update PROJECT_LAYERS with new expression (create if missing)
+            expression_key = f"{groupbox}_expression"
+            if "exploring" not in layer_props:
+                layer_props["exploring"] = {}
+            layer_props["exploring"][expression_key] = field_or_expression
+            logger.info(f"  → Updated PROJECT_LAYERS[exploring][{expression_key}] = {field_or_expression}")
 
             # Update single selection picker (QgsFeaturePickerWidget)
             if groupbox == "single_selection":
@@ -2411,7 +2442,7 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
     def refresh_ui_responsiveness_params(self):
         """Re-read UI_RESPONSIVENESS params from CONFIG_DATA and update timers."""
         try:
-            from config.config import _get_option_value
+            from .config.config import _get_option_value
             ui_resp = self.CONFIG_DATA.get("APP", {}).get("OPTIONS", {}).get("UI_RESPONSIVENESS", {})
             expr_ms = _get_option_value(ui_resp.get("expression_debounce_ms"), 450)
             if hasattr(self, '_expression_debounce_timer'):
@@ -2761,7 +2792,11 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         try:
             from .ui.styles.mockup_design import stylesheet_is_dark
             # The applied stylesheet; None before it is applied (the view then reads the QGIS palette).
-            view.refresh_theme_stylesheet(force_dark=stylesheet_is_dark(self.dockWidgetContents))
+            force_dark = stylesheet_is_dark(self.dockWidgetContents)
+            view.refresh_theme_stylesheet(force_dark=force_dark)
+            container = getattr(self, 'config_view_container', None)
+            if container is not None:
+                container.refresh_theme(force_dark)
         except Exception as e:  # view deleted (plugin reload)
             logger.debug(f"Config view theme not refreshed: {e}")
 
@@ -3463,6 +3498,10 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
                 widget.setEnabled(True)
                 logger.debug(f"✓ Widget {widget_name} set to always enabled")
 
+    def _section_index(self, toolbox):
+        """0 FILTERING, 1 EXPORTING, 2 CONFIGURATION whatever comes before them; -1 on any other (AGENT)."""
+        return {self.FILTERING: 0, self.EXPORTING: 1, self.CONFIGURATION: 2}.get(toolbox.currentWidget(), -1)
+
     def select_tabTools_index(self, index=None):
         """v4.0 S18: Update action buttons based on active tab.
 
@@ -3473,7 +3512,7 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         if not self.widgets_initialized:
             logger.debug("select_tabTools_index: SKIPPED (widgets not initialized)")
             return
-        self.tabTools_current_index = self.widgets["DOCK"]["TOOLS"]["WIDGET"].currentIndex()
+        self.tabTools_current_index = self._section_index(self.widgets["DOCK"]["TOOLS"]["WIDGET"])
         #                           FILTER  UNDO   REDO   UNFILT EXPORT QFCLOUD
         states = {
             0: (True,  True,  True,  True,  False, False),  # FILTERING
@@ -5563,12 +5602,19 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
                 widget = self.widgets["EXPLORING"]["SINGLE_SELECTION_FEATURES"]["WIDGET"]
                 if widget:
                     logger.debug(f"Updating SINGLE_SELECTION_FEATURES: old_layer={widget.layer().name() if widget.layer() else 'None'} → new_layer={layer.name()}")  # nosec B608
+                    previous_layer = widget.layer()
                     widget.setLayer(None)  # Force refresh
+                    # 2026-11-06: drop the previous layer's link filter (it survives
+                    # setLayer on a QgsFeaturePickerWidget: no feature of the new layer)
+                    if hasattr(widget, 'setFilterExpression'):
+                        widget.setFilterExpression('')
                     widget.setLayer(layer)
                     widget.setDisplayExpression(single_expr)
                     widget.setFetchGeometry(True)
                     widget.setShowBrowserButtons(True)
                     widget.setAllowNull(True)
+                    if previous_layer is not None and previous_layer.id() != layer.id():
+                        clear_feature_picker_feature(widget)  # 2026-11-06: it kept the previous layer's feature id
                     # FIX 2026-01-15: Force visual refresh to display features
                     widget.update()
                     widget.repaint()
@@ -5853,8 +5899,15 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         except (RuntimeError, AttributeError):
             logger.warning("current_layer_changed: Layer C++ object deleted")
             return
+        # 2026-11-06: a spatial vector layer picked before add_layers registered it
+        # waits for its registration (shown by get_project_layers_from_app), as a
+        # raster / point cloud already does; the chain stops for it either way.
+        _note_pick = getattr(self, '_note_unregistered_vector_pick', None)
+        awaited_unregistered = bool(_note_pick and _note_pick(layer, manual_change))
         if self._controller_integration and self._controller_integration.delegate_point_cloud_layer_change(
                 layer, manual_change=manual_change):
+            return
+        if awaited_unregistered:
             return
         self._updating_current_layer = True
         # PERF 2026-09-12: "layer change → all widgets reloaded" latency; closed
@@ -5868,6 +5921,7 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             should_continue, validated_layer, layer_props = self._validate_and_prepare_layer(layer)
             perf_mark_end("layer_change_validate", layer.name() if layer is not None else "", min_ms=250)
             if not should_continue: return
+            self._cancel_pending_expression_change()
             perf_mark_start("layer_change_reset")
             self._reset_layer_expressions(layer_props); widgets = self._disconnect_layer_signals()
             perf_mark_end("layer_change_reset", validated_layer.name(), min_ms=250)
@@ -5910,6 +5964,10 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
                 logger.info("✓ Step 4: Exploring groupbox initialized")
 
             self._update_exploring_buttons_state()
+            # 2026-11-06: negative buffers only exist on polygons. Until now this ran only
+            # as a side effect of the debounced replay of the widget clear's fieldChanged,
+            # which also wrote the cleared expression back (see _schedule_expression_change).
+            self._update_buffer_validation()
             logger.info("✓ Step 5: Exploring buttons state updated")
 
             self._reconnect_layer_signals(widgets, layer_props)
@@ -5928,6 +5986,84 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
                 perf_mark_end("layer_change")
             logger.debug("current_layer_changed: Lock released")
             self._run_layer_change_after_update(layer)
+
+    def _note_unregistered_vector_pick(self, layer, manual_change=False):
+        """Record a spatial vector layer picked before its registration.
+
+        2026-11-06: picking a just-added vector layer while the add_layers
+        task still registered it aborted the change and the pick was lost
+        (the refresh after the registration re-applied the previous layer).
+        The pick waits here and is shown by get_project_layers_from_app,
+        mirroring CoverageModeController.activate_awaited_layer. A newer
+        manual pick replaces it; an automatic change never replaces a
+        manual pick, as in current_layer_changed.
+
+        Returns:
+            True when the layer is an unregistered vector layer and the
+            layer-change chain must stop (registered or not spatial: a
+            table without geometry never registers, nothing awaits it).
+        """
+        import time
+        try:
+            layer_id = layer.id() if layer is not None else None
+        except (RuntimeError, AttributeError):
+            return False
+        if manual_change:
+            awaited = getattr(self, '_awaited_vector_pick', None)
+            if awaited is not None and awaited[0] != layer_id:
+                self._awaited_vector_pick = None  # the user picked another layer
+        if layer_id is None or not isinstance(layer, QgsVectorLayer):
+            return False
+        if layer_id in (self.PROJECT_LAYERS or {}):
+            return False
+        try:
+            if layer.isSpatial():
+                awaited = getattr(self, '_awaited_vector_pick', None)
+                if manual_change or awaited is None or not awaited[2]:
+                    self._awaited_vector_pick = (layer_id, time.perf_counter(), bool(manual_change))
+                logger.info(f"Layer {layer.name()} not registered yet: shown once it is")
+        except (RuntimeError, AttributeError):
+            pass
+        return True
+
+    def _activate_awaited_vector_layer(self):
+        """Show the vector layer picked before its registration, now registered.
+
+        Called by get_project_layers_from_app once the dock has the layers
+        of an add_layers. A user pick made after the awaited one (stamped
+        in _user_layer_pick, e.g. a coverage layer shown meanwhile) wins.
+
+        Returns:
+            True when the awaited layer was activated.
+        """
+        import time
+        awaited = getattr(self, '_awaited_vector_pick', None)
+        if awaited is None:
+            return False
+        layer_id, requested_at, manual_change = awaited
+        if layer_id not in (self.PROJECT_LAYERS or {}):
+            return False
+        self._awaited_vector_pick = None
+        picked_at, picked_id = getattr(self, '_user_layer_pick', None) or (0.0, None)
+        if picked_at >= requested_at and picked_id not in (None, layer_id):
+            return False  # a newer user pick was shown meanwhile
+        try:
+            from qgis.core import QgsProject
+            fresh = QgsProject.instance().mapLayer(layer_id)
+        except Exception as e:  # project or layer gone - nothing to show
+            logger.debug(f"Awaited vector layer not found: {e}")
+            return False
+        if fresh is None:
+            return False
+        if manual_change:
+            try:
+                self._user_layer_pick = (time.perf_counter(), layer_id)
+            except AttributeError:
+                pass
+        # An automatic pick stays automatic: it must not pass for a user's choice
+        # (post-filter protection, undo / redo checks read _user_layer_pick).
+        self.current_layer_changed(fresh, manual_change=manual_change)
+        return True
 
     def _run_layer_change_after_update(self, applied_layer):
         """Run the layer change requested while the previous one ran (see current_layer_changed)."""
@@ -6692,6 +6828,26 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
             integration = getattr(self, '_controller_integration', None)
             if activate_awaited and integration is not None and hasattr(integration, 'delegate_coverage_activate_awaited'):
                 integration.delegate_coverage_activate_awaited()
+            # 2026-11-06: same for a vector layer picked before this registration.
+            _activate_awaited_vector = getattr(self, '_activate_awaited_vector_layer', None)
+            if activate_awaited and _activate_awaited_vector is not None:
+                _activate_awaited_vector()
+            if activate_awaited:
+                self._show_combo_layer_when_none()
+
+    def _show_combo_layer_when_none(self):
+        """Apply the layer the current-layer combo box shows when the dock has no current layer yet.
+
+        A dock opened on a project whose active layer is a raster or a point cloud (a web basemap selected in the
+        layer tree) refreshed nothing: the combo box showed its first layer, but the panel had no current layer,
+        no layer card, and no Zone or "more" button on the rail until another layer was picked.
+        """
+        if self.current_layer is not None or getattr(self, '_awaited_vector_pick', None) is not None:
+            return
+        combo = getattr(self, 'comboBox_filtering_current_layer', None)
+        layer = combo.currentLayer() if combo is not None else None
+        if layer is not None:
+            self.current_layer_changed(layer)
 
     def open_project_page(self):
         """v4.0 S18: Open project website page."""
@@ -6930,6 +7086,27 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         if _active_dockwidget is self:
             _active_dockwidget = None
 
+    def install_agent_panel(self, plugin):
+        """Add the AGENT section before FILTERING when ``APP.OPTIONS.AGENT.enabled`` is on. Never blocks the dock."""
+        if getattr(self, '_agent_chat', None) is not None:
+            return
+        try:
+            from .ui.controllers.agent_chat_controller import AgentChatController, agent_enabled
+            from .ui.layout.mockup_layout import add_agent_section
+            if agent_enabled(self.CONFIG_DATA):
+                self._agent_chat = AgentChatController(lambda page: add_agent_section(self, page), plugin, self)
+        except Exception:
+            logger.exception("Agent panel could not be installed")
+
+    def shutdown_agent_panel(self, unloading=False):
+        """Stop a running request; when the plugin unloads, also let go of the project."""
+        chat = getattr(self, '_agent_chat', None)
+        if chat is not None:
+            try:
+                chat.shutdown() if unloading else chat.stop()
+            except Exception:
+                logger.exception("Agent panel could not be stopped")
+
     def closeEvent(self, event):
         """Handle dockwidget close event.
 
@@ -6979,6 +7156,7 @@ class FilterMateDockWidget(QtWidgets.QDockWidget, FORM_CLASS):
         if _active_dockwidget is self:
             _active_dockwidget = None
 
+        self.shutdown_agent_panel()
         self.closingPlugin.emit()
         event.accept()
 

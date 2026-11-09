@@ -18,7 +18,6 @@ v4.4: Strangler Fig Pattern - New service with fallback to FilterMateApp legacy 
 
 from typing import Callable, List, Any
 from qgis.PyQt.QtCore import QTimer, QCoreApplication
-from qgis.PyQt.QtWidgets import QApplication
 from qgis.core import QgsVectorLayer, QgsProject
 from qgis.utils import iface
 try:
@@ -332,47 +331,21 @@ class AppInitializer:
             return False
 
     def _initialize_ui_profile(self):
-        """Initialize UI profile based on screen resolution and DPI.
-
-        Selection matrix:
-        - HIDPI    : devicePixelRatio >= 1.5 OR logicalDotsPerInch > 120
-                     (covers 4K, Retina, Windows 125/150/200% scaling)
-        - COMPACT  : logical resolution < 1920x1080 (laptops, tablets)
-        - NORMAL   : default for standard desktop screens
-        """
+        """Initialize the UI profile: the UI_PROFILE setting, 'auto' detecting from the screen."""
         try:
-            screen = QApplication.primaryScreen()
+            config_data = (self._get_config_data() if self._get_config_data else None) or {}
+            setting = config_data.get("APP", {}).get("DOCKWIDGET", {}).get("UI_PROFILE")
+            profile = UIConfig.resolve_profile(setting)
+            UIConfig.set_profile(profile)
+            screen = UIConfig.current_screen()
             if screen:
-                screen_geometry = screen.geometry()
-                screen_width = screen_geometry.width()
-                screen_height = screen_geometry.height()
-                dpr = float(screen.devicePixelRatio() or 1.0)
-                try:
-                    dpi = float(screen.logicalDotsPerInch() or 96.0)
-                except Exception:
-                    dpi = 96.0
-
-                if dpr >= 1.5 or dpi > 120.0:
-                    UIConfig.set_profile(DisplayProfile.HIDPI)
-                    logger.info(
-                        f"FilterMate: Using HIDPI profile "
-                        f"({screen_width}x{screen_height}, dpr={dpr:g}, dpi={dpi:g})"
-                    )
-                elif screen_width < 1920 or screen_height < 1080:
-                    UIConfig.set_profile(DisplayProfile.COMPACT)
-                    logger.info(
-                        f"FilterMate: Using COMPACT profile "
-                        f"({screen_width}x{screen_height}, dpr={dpr:g})"
-                    )
-                else:
-                    UIConfig.set_profile(DisplayProfile.NORMAL)
-                    logger.info(
-                        f"FilterMate: Using NORMAL profile "
-                        f"({screen_width}x{screen_height}, dpr={dpr:g})"
-                    )
+                geometry = screen.geometry()
+                logger.info(
+                    f"FilterMate: Using {profile.name} profile ({geometry.width()}x{geometry.height()}, available "
+                    f"height {screen.availableGeometry().height()}, dpr={float(screen.devicePixelRatio() or 1.0):g})"
+                )
             else:
-                UIConfig.set_profile(DisplayProfile.NORMAL)
-                logger.warning("FilterMate: Could not detect screen, using NORMAL profile (desktop default)")
+                logger.warning(f"FilterMate: Could not detect screen, using {profile.name} profile")
         except Exception as e:
             logger.error(f"FilterMate: Error detecting screen resolution: {e}")
             UIConfig.set_profile(DisplayProfile.NORMAL)  # Fail-safe: NORMAL for desktop QGIS

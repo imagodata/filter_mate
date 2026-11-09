@@ -5,6 +5,7 @@ scripts/publish_qgis.py validates the release archive (the 'Verify the ZIP' step
 Checks: forbidden file types, size ceilings, mandatory metadata.txt keys (and the icon file),
 Python 3.8 grammar and unscoped Qt enums in the Python files of the archive.
 """
+import configparser
 import sys
 import zipfile
 from pathlib import Path
@@ -20,7 +21,7 @@ name=FilterMate
 qgisMinimumVersion=3.22
 description=d
 about=a
-version=5.0.1
+version=5.0.2
 author=x
 email=x@example.org
 repository=https://example.org/r
@@ -48,7 +49,7 @@ pytestmark = pytest.mark.unit
 
 
 def test_a_clean_archive_is_accepted(tmp_path):
-    assert publish_qgis.validate(_build(tmp_path)) == "5.0.1"
+    assert publish_qgis.validate(_build(tmp_path)) == "5.0.2"
 
 
 @pytest.mark.parametrize("name", ["filter_mate/a.pyc", "filter_mate/x.log", "filter_mate/lib.so",
@@ -110,10 +111,17 @@ def test_security_findings_reject_the_archive(tmp_path, monkeypatch):
     monkeypatch.setattr(publish_qgis, "check_security", lambda archive: ["Bandit B603 filter_mate/x.py:1 call"])
     with pytest.raises(ValueError, match="Bandit B603"):
         publish_qgis.validate(_build(tmp_path), security=True)
-    assert publish_qgis.validate(_build(tmp_path), security=False) == "5.0.1"
+    assert publish_qgis.validate(_build(tmp_path), security=False) == "5.0.2"
 
 
 def test_flake8_findings_are_problems():
     output = "filter_mate/a.py:3:5: E731 do not assign a lambda expression, use a def\n\n"
     assert publish_qgis.flake8_problems(output) == ["flake8 filter_mate/a.py:3:5: E731 do not assign a lambda expression, use a def"]
     assert publish_qgis.flake8_problems("") == []
+
+
+def test_the_metadata_of_the_plugin_can_be_read():
+    """A % in metadata.txt (`150 %` in the changelog) fails the validation: ConfigParser interpolates it."""
+    parser = configparser.ConfigParser()
+    parser.read(Path(__file__).resolve().parents[1] / "metadata.txt", encoding="utf-8")
+    assert parser["general"]["version"] and parser["general"]["changelog"]

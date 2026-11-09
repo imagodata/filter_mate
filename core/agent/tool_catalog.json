@@ -1,0 +1,1184 @@
+{
+ "generated_by": "scripts/export_agent_tools.py",
+ "tools": [
+  {
+   "name": "list_layers",
+   "title": "List layers",
+   "description": "List the layers of the open QGIS project that FilterMate knows, as {\"layers\": [...]}. Each layer has layer_id, name, provider_type, feature_count (-1 when unknown), geometry_type, crs_authid, layer_kind (vector, raster or point_cloud), has_active_filter and active_filter_expression. Call this first: the other tools take layer names or ids from it.",
+   "read_only": true,
+   "destructive": false,
+   "idempotent": false,
+   "open_world": false,
+   "input_schema": {
+    "properties": {},
+    "type": "object"
+   }
+  },
+  {
+   "name": "filter_status",
+   "title": "Filter status",
+   "description": "Snapshot of the filter session: status, active_filters ({layer name: subset string}), their count, last_applied_at / last_applied_layer / last_applied_source and last_error. Vector subset strings only. filter_state also covers raster and point cloud layers.",
+   "read_only": true,
+   "destructive": false,
+   "idempotent": false,
+   "open_world": false,
+   "input_schema": {
+    "properties": {},
+    "type": "object"
+   }
+  },
+  {
+   "name": "filter_state",
+   "title": "Filter state",
+   "description": "Every layer FilterMate filters right now, of any kind, as {\"layers\": [...]}. Each row has layer_id, name, layer_kind, subset (the filter string, empty for a clipped raster) and derived (true when the layer reads a clipped copy of its source). Use it to check what a filter did, and to find out what a previous call did when a request timed out.",
+   "read_only": true,
+   "destructive": false,
+   "idempotent": false,
+   "open_world": false,
+   "input_schema": {
+    "properties": {},
+    "type": "object"
+   }
+  },
+  {
+   "name": "list_favorites",
+   "title": "List favorites",
+   "description": "List the favorites (saved filters) of the FilterMate project, as {\"favorites\": [...]}. Each has favorite_id (what apply_favorite takes), name, description, layer_name and expression.",
+   "read_only": true,
+   "destructive": false,
+   "idempotent": false,
+   "open_world": false,
+   "input_schema": {
+    "properties": {},
+    "type": "object"
+   }
+  },
+  {
+   "name": "describe_layer",
+   "title": "Describe a layer",
+   "description": "What a filter can test on a layer: its fields, bands or point attributes. Returns layer_id, name, layer_kind, provider_type, crs_authid, geometry_type, feature_count, subset (its current filter), and by kind: fields [{name, type, alias, filterable}] for a vector layer (filterable is false for virtual and joined fields, which a filter expression cannot test); bands [{band, name, classes}] and pixel_size for a raster, classes [{value, label}] only on a paletted band; attributes [name] for a point cloud.",
+   "read_only": true,
+   "destructive": false,
+   "idempotent": false,
+   "open_world": false,
+   "input_schema": {
+    "properties": {
+     "layer": {
+      "description": "Layer id or name, of any kind",
+      "maxLength": 1000,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "layer"
+    ],
+    "type": "object"
+   }
+  },
+  {
+   "name": "field_values",
+   "title": "Values of a field",
+   "description": "Distinct values a field really takes, among the features the layer shows now (its filter applies). Use it to write a filter with the exact spelling of a value. Returns values, truncated (more values exist), and minimum and maximum for a numeric or date field. NULL is left out. Refused on web services (WFS...), which would have to be read whole.",
+   "read_only": true,
+   "destructive": false,
+   "idempotent": false,
+   "open_world": false,
+   "input_schema": {
+    "properties": {
+     "layer": {
+      "description": "Vector layer id or name",
+      "maxLength": 1000,
+      "minLength": 1,
+      "type": "string"
+     },
+     "field": {
+      "description": "Field name, from describe_layer",
+      "maxLength": 1000,
+      "minLength": 1,
+      "type": "string"
+     },
+     "search": {
+      "default": "",
+      "description": "Text fields: only values containing this text, ignoring case",
+      "maxLength": 200,
+      "type": "string"
+     },
+     "limit": {
+      "default": 50,
+      "description": "Maximum number of values returned",
+      "maximum": 200,
+      "minimum": 1,
+      "type": "integer"
+     }
+    },
+    "required": [
+     "layer",
+     "field"
+    ],
+    "type": "object"
+   }
+  },
+  {
+   "name": "preview_filter",
+   "title": "Try a filter",
+   "description": "Try a filter expression on a private copy of the layer: nothing changes in the project. It is what apply_filter would do, and it replaces the layer's current filter in the same way. Returns valid, feature_count (features kept, -1 when unknown) and error (the reason when valid is false). Refused on web services and memory layers, and for anything but a plain condition (subqueries, most functions).",
+   "read_only": true,
+   "destructive": false,
+   "idempotent": false,
+   "open_world": false,
+   "input_schema": {
+    "properties": {
+     "layer_name": {
+      "description": "Vector layer id or name",
+      "maxLength": 1000,
+      "minLength": 1,
+      "type": "string"
+     },
+     "expression": {
+      "description": "Subset string, as for apply_filter",
+      "maxLength": 500000,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "layer_name",
+     "expression"
+    ],
+    "type": "object"
+   }
+  },
+  {
+   "name": "map_context",
+   "title": "Map context",
+   "description": "What the user is looking at in QGIS. Returns project_crs, canvas_crs, extent_wkt (the visible extent, usable as is with geometry_filter and canvas_crs), scale, active_layer_id, active_layer_name and selections [{layer_id, name, selected_count}] (the layers with selected features, which cross_filter uses as its source). available is false when QGIS has no map canvas.",
+   "read_only": true,
+   "destructive": false,
+   "idempotent": false,
+   "open_world": false,
+   "input_schema": {
+    "properties": {},
+    "type": "object"
+   }
+  },
+  {
+   "name": "apply_filter",
+   "title": "Apply a filter expression",
+   "description": "Set the filter (subset string) of one vector layer; it replaces the layer's previous filter. Returns success and active_filters ({layer name: subset string} after the call). For spatial filtering between layers use cross_filter or geometry_filter. Revert with clear_filters. Caution: some providers (GeoPackage, Shapefile through OGR) accept an invalid SQL expression without any error and the layer then shows no feature. Check list_layers afterwards (feature_count -1, or 0 when you expected matches) and use clear_filters to recover.",
+   "read_only": false,
+   "destructive": false,
+   "idempotent": true,
+   "open_world": false,
+   "input_schema": {
+    "properties": {
+     "layer_name": {
+      "description": "Name of a VECTOR layer (not its id; the first vector layer of that name is used)",
+      "maxLength": 1000,
+      "minLength": 1,
+      "type": "string"
+     },
+     "expression": {
+      "description": "Subset string: the provider's SQL WHERE clause, without the WHERE keyword. For a PostgreSQL, GeoPackage, Shapefile or Spatialite layer: \"population\" > 10000 AND \"dep\" = '31'. Quote field names with double quotes and text values with single quotes. Plain conditions only: comparisons, IN, LIKE, BETWEEN, IS NULL and simple text or number functions; a subquery or another function is refused.",
+      "maxLength": 500000,
+      "minLength": 1,
+      "type": "string"
+     },
+     "source": {
+      "default": "mcp",
+      "description": "Free-text tag shown in the FilterMate log to tell where the filter came from",
+      "maxLength": 200,
+      "type": "string"
+     }
+    },
+    "required": [
+     "layer_name",
+     "expression"
+    ],
+    "type": "object"
+   }
+  },
+  {
+   "name": "undo_filter",
+   "title": "Undo the last vector filter",
+   "description": "Undo the last step of the dock's vector filter history (the dock's Undo button). Returns the step rolled back to (layer_name, expression, is_clear) and active_filters. Only steps recorded by the dock itself are undone: nothing done through these tools (apply_filter, cross_filter, geometry_filter, point_cloud_filter, clear_filters, apply_favorite) is, so use clear_filters to revert those. Fails with 'Nothing to undo' when the history is empty. Not idempotent: each call undoes one more step, so after an error or a timeout read filter_state before calling again.",
+   "read_only": false,
+   "destructive": false,
+   "idempotent": false,
+   "open_world": false,
+   "input_schema": {
+    "properties": {},
+    "type": "object"
+   }
+  },
+  {
+   "name": "redo_filter",
+   "title": "Redo the last undone vector filter",
+   "description": "Redo the step undone last in the dock's vector filter history (the dock's Redo button). Same answer and same caution as undo_filter (not idempotent: read filter_state after an error or a timeout). Fails with 'Nothing to redo' when there is nothing to redo.",
+   "read_only": false,
+   "destructive": false,
+   "idempotent": false,
+   "open_world": false,
+   "input_schema": {
+    "properties": {},
+    "type": "object"
+   }
+  },
+  {
+   "name": "cross_filter",
+   "title": "Cross filter",
+   "description": "Filter layers by their spatial relation to a selection made on a source layer, any kind to any kind. Source kinds: a vector layer (its selected features), a raster (pixels kept by raster_selection, e.g. elevation between 1200 and 1300) or a point cloud (points kept by point_cloud_criteria, e.g. class 6). Targets keep what satisfies the predicates: vector features, raster pixels or LiDAR points inside the source area (outside with Disjoint). Filters apply in place to the project layers and replace the previous filter of each target unless operator is given. Not recorded in the undo history: revert with clear_filters. Returns filtered (names of the layers filtered), failed ({layer: reason}), skipped ({layer: reason}) and warnings ({layer: reason}: filtered, but a web service read up to its budget, so features may be missing). A layer that is not found is reported in failed; a source that is not found is an error.",
+   "read_only": false,
+   "destructive": false,
+   "idempotent": true,
+   "open_world": false,
+   "input_schema": {
+    "properties": {
+     "source_layer": {
+      "description": "Source layer, vector, raster or point cloud: layer id or name",
+      "maxLength": 1000,
+      "minLength": 1,
+      "type": "string"
+     },
+     "target_layers": {
+      "description": "Layers to filter, of any kind: layer ids or names. The source itself is not filtered (except with filter_source).",
+      "items": {
+       "type": "string"
+      },
+      "maxItems": 1000,
+      "minItems": 1,
+      "type": "array"
+     },
+     "predicates": {
+      "default": [
+       "Intersect"
+      ],
+      "description": "Spatial predicates, each tested as `target <predicate> source`: Intersect (share any space), Contain (the target contains the source), Disjoint (share nothing; rasters and point clouds then keep the outside of the source), Equal (same geometry), Touch (borders meet, interiors do not), Overlap (partial overlap of same-dimension geometries), Are within (the target lies inside the source), Cross (lines crossing). A target is kept when ANY listed predicate holds.",
+      "items": {
+       "enum": [
+        "Intersect",
+        "Contain",
+        "Disjoint",
+        "Equal",
+        "Touch",
+        "Overlap",
+        "Are within",
+        "Cross"
+       ],
+       "type": "string"
+      },
+      "maxItems": 8,
+      "type": "array"
+     },
+     "buffer": {
+      "default": 0.0,
+      "description": "Buffer applied to the source geometry before testing, in the source CRS units (metres for a projected CRS; for a geographic CRS the API treats them as metres). Negative shrinks. 0 = none.",
+      "maximum": 10000000.0,
+      "minimum": -10000000.0,
+      "type": "number"
+     },
+     "coverage_min": {
+      "default": 0.0,
+      "description": "Polygon targets only: minimum share (%) of the target that must lie inside the source",
+      "maximum": 100,
+      "minimum": 0,
+      "type": "number"
+     },
+     "operator": {
+      "anyOf": [
+       {
+        "enum": [
+         "AND",
+         "OR",
+         "AND NOT"
+        ],
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "description": "How to combine with the previous filter of each target: AND (keep what both filters keep), OR (keep what either keeps), AND NOT (remove the new selection from the previous filter). Omit to replace the previous filter."
+     },
+     "selected_only": {
+      "default": true,
+      "description": "Vector source: use the features currently selected in QGIS (all features when none is selected; a web service source such as WFS must be selected or already filtered, it is never read whole). You cannot change the QGIS selection with these tools: ask the user to select the features, or use geometry_filter with a WKT geometry.",
+      "type": "boolean"
+     },
+     "raster_selection": {
+      "anyOf": [
+       {
+        "additionalProperties": false,
+        "description": "Pixels kept on a raster source (same rules as the EXPLORING raster panel of the dock).",
+        "properties": {
+         "band": {
+          "default": 1,
+          "description": "1-based band number",
+          "minimum": 1,
+          "type": "integer"
+         },
+         "mode": {
+          "default": "range",
+          "description": "range: pixels between minimum and maximum; classes: pixels whose value is in `classes`; expression: raster calculator expression",
+          "enum": [
+           "range",
+           "classes",
+           "expression"
+          ],
+          "type": "string"
+         },
+         "minimum": {
+          "anyOf": [
+           {
+            "type": "number"
+           },
+           {
+            "type": "null"
+           }
+          ],
+          "default": null,
+          "description": "range: lower bound, inclusive (in band units)"
+         },
+         "maximum": {
+          "anyOf": [
+           {
+            "type": "number"
+           },
+           {
+            "type": "null"
+           }
+          ],
+          "default": null,
+          "description": "range: upper bound, inclusive (in band units)"
+         },
+         "classes": {
+          "description": "classes: pixel values kept (paletted rasters)",
+          "items": {
+           "type": "integer"
+          },
+          "type": "array"
+         },
+         "expression": {
+          "default": "",
+          "description": "expression: raster calculator expression, e.g. \"mnt@1\" > 1200",
+          "maxLength": 2000,
+          "type": "string"
+         },
+         "derivative": {
+          "default": "value",
+          "description": "range only: quantity the bounds apply to. With anything but `value` the band is read as a DTM (elevation model) and the bounds are in degrees / percent / etc.",
+          "enum": [
+           "value",
+           "slope_degrees",
+           "slope_percent",
+           "aspect",
+           "hillshade",
+           "roughness"
+          ],
+          "type": "string"
+         }
+        },
+        "type": "object"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "description": "REQUIRED when the source is a raster: which pixels are the source area"
+     },
+     "point_cloud_criteria": {
+      "anyOf": [
+       {
+        "additionalProperties": false,
+        "description": "Points kept on a point cloud (ASPRS classes, ranges, return number, expression).",
+        "properties": {
+         "classes": {
+          "description": "ASPRS classification codes kept (0-255), e.g. 2 ground, 3-5 vegetation, 6 building, 9 water",
+          "items": {
+           "type": "integer"
+          },
+          "type": "array"
+         },
+         "z_min": {
+          "anyOf": [
+           {
+            "type": "number"
+           },
+           {
+            "type": "null"
+           }
+          ],
+          "default": null,
+          "description": "Minimum Z (elevation), in the layer CRS units"
+         },
+         "z_max": {
+          "anyOf": [
+           {
+            "type": "number"
+           },
+           {
+            "type": "null"
+           }
+          ],
+          "default": null,
+          "description": "Maximum Z (elevation), in the layer CRS units"
+         },
+         "intensity_min": {
+          "anyOf": [
+           {
+            "type": "number"
+           },
+           {
+            "type": "null"
+           }
+          ],
+          "default": null,
+          "description": "Minimum intensity"
+         },
+         "intensity_max": {
+          "anyOf": [
+           {
+            "type": "number"
+           },
+           {
+            "type": "null"
+           }
+          ],
+          "default": null,
+          "description": "Maximum intensity"
+         },
+         "return_number": {
+          "anyOf": [
+           {
+            "maximum": 15,
+            "minimum": 1,
+            "type": "integer"
+           },
+           {
+            "type": "null"
+           }
+          ],
+          "default": null,
+          "description": "Return number kept (1 = first return)"
+         },
+         "expression": {
+          "default": "",
+          "description": "Point cloud expression (e.g. Classification = 6 AND Z > 1000), ANDed with the other criteria",
+          "maxLength": 2000,
+          "type": "string"
+         }
+        },
+        "type": "object"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "description": "Point cloud source: which points make the source area (omit = the points it shows now)"
+     },
+     "filter_source": {
+      "default": false,
+      "description": "Raster source: also mask the source raster outside the selection",
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "source_layer",
+     "target_layers"
+    ],
+    "type": "object"
+   }
+  },
+  {
+   "name": "geometry_filter",
+   "title": "Filter by a WKT geometry",
+   "description": "Filter layers of any kind by a WKT geometry (a drawn area, an extent, a commune outline). Same effect and answer as cross_filter, with a geometry given inline instead of a source layer: the way to filter by an area when no source feature can be selected in QGIS. Replaces the previous filter of each target unless operator is given. Not in the undo history: revert with clear_filters. Returns filtered, failed, skipped and warnings.",
+   "read_only": false,
+   "destructive": false,
+   "idempotent": true,
+   "open_world": false,
+   "input_schema": {
+    "properties": {
+     "wkt": {
+      "description": "Geometry in WKT, e.g. POLYGON((650000 6860000, 651000 6860000, 651000 6861000, 650000 6861000, 650000 6860000)); an extent as a rectangle polygon",
+      "maxLength": 1000000,
+      "minLength": 1,
+      "type": "string"
+     },
+     "crs": {
+      "description": "CRS of the geometry, authority code such as EPSG:2154 or EPSG:4326 (the coordinate order is x/longitude first)",
+      "maxLength": 64,
+      "minLength": 1,
+      "type": "string"
+     },
+     "target_layers": {
+      "description": "Layers to filter, of any kind: layer ids or names",
+      "items": {
+       "type": "string"
+      },
+      "maxItems": 1000,
+      "minItems": 1,
+      "type": "array"
+     },
+     "predicates": {
+      "default": [
+       "Intersect"
+      ],
+      "description": "Spatial predicates, each tested as `target <predicate> source`: Intersect (share any space), Contain (the target contains the source), Disjoint (share nothing; rasters and point clouds then keep the outside of the source), Equal (same geometry), Touch (borders meet, interiors do not), Overlap (partial overlap of same-dimension geometries), Are within (the target lies inside the source), Cross (lines crossing). A target is kept when ANY listed predicate holds.",
+      "items": {
+       "enum": [
+        "Intersect",
+        "Contain",
+        "Disjoint",
+        "Equal",
+        "Touch",
+        "Overlap",
+        "Are within",
+        "Cross"
+       ],
+       "type": "string"
+      },
+      "maxItems": 8,
+      "type": "array"
+     },
+     "buffer": {
+      "default": 0.0,
+      "description": "Buffer applied to the geometry, in the units of the CRS of the first target",
+      "maximum": 10000000.0,
+      "minimum": -10000000.0,
+      "type": "number"
+     },
+     "coverage_min": {
+      "default": 0.0,
+      "description": "Polygon targets only: minimum share (%) of the target inside the geometry",
+      "maximum": 100,
+      "minimum": 0,
+      "type": "number"
+     },
+     "operator": {
+      "anyOf": [
+       {
+        "enum": [
+         "AND",
+         "OR",
+         "AND NOT"
+        ],
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "description": "How to combine with the previous filter of each target: AND (keep what both filters keep), OR (keep what either keeps), AND NOT (remove the new selection from the previous filter). Omit to replace the previous filter."
+     }
+    },
+    "required": [
+     "wkt",
+     "crs",
+     "target_layers"
+    ],
+    "type": "object"
+   }
+  },
+  {
+   "name": "point_cloud_filter",
+   "title": "Filter point clouds",
+   "description": "Keep only some points (by class, elevation, intensity, return number or expression) on point cloud layers. The same criteria apply to every listed layer, e.g. all the tiles of a LiDAR HD dataset. Sets the layer filter (e.g. 'Classification = 6 AND Z >= 1000'). It is one step of the dock's history of those point clouds (the dock's Undo on the layer reverts it) but undo_filter does not undo it: revert with clear_filters. Returns done (layers filtered), failed and skipped.",
+   "read_only": false,
+   "destructive": false,
+   "idempotent": true,
+   "open_world": false,
+   "input_schema": {
+    "properties": {
+     "layers": {
+      "description": "Point cloud layers (LiDAR tiles...): layer ids or names",
+      "items": {
+       "type": "string"
+      },
+      "maxItems": 1000,
+      "minItems": 1,
+      "type": "array"
+     },
+     "criteria": {
+      "additionalProperties": false,
+      "description": "Points to keep; at least one criterion is required",
+      "properties": {
+       "classes": {
+        "description": "ASPRS classification codes kept (0-255), e.g. 2 ground, 3-5 vegetation, 6 building, 9 water",
+        "items": {
+         "type": "integer"
+        },
+        "type": "array"
+       },
+       "z_min": {
+        "anyOf": [
+         {
+          "type": "number"
+         },
+         {
+          "type": "null"
+         }
+        ],
+        "default": null,
+        "description": "Minimum Z (elevation), in the layer CRS units"
+       },
+       "z_max": {
+        "anyOf": [
+         {
+          "type": "number"
+         },
+         {
+          "type": "null"
+         }
+        ],
+        "default": null,
+        "description": "Maximum Z (elevation), in the layer CRS units"
+       },
+       "intensity_min": {
+        "anyOf": [
+         {
+          "type": "number"
+         },
+         {
+          "type": "null"
+         }
+        ],
+        "default": null,
+        "description": "Minimum intensity"
+       },
+       "intensity_max": {
+        "anyOf": [
+         {
+          "type": "number"
+         },
+         {
+          "type": "null"
+         }
+        ],
+        "default": null,
+        "description": "Maximum intensity"
+       },
+       "return_number": {
+        "anyOf": [
+         {
+          "maximum": 15,
+          "minimum": 1,
+          "type": "integer"
+         },
+         {
+          "type": "null"
+         }
+        ],
+        "default": null,
+        "description": "Return number kept (1 = first return)"
+       },
+       "expression": {
+        "default": "",
+        "description": "Point cloud expression (e.g. Classification = 6 AND Z > 1000), ANDed with the other criteria",
+        "maxLength": 2000,
+        "type": "string"
+       }
+      },
+      "type": "object"
+     },
+     "operator": {
+      "anyOf": [
+       {
+        "enum": [
+         "AND",
+         "OR",
+         "AND NOT"
+        ],
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "description": "How to combine with the previous filter of each target: AND (keep what both filters keep), OR (keep what either keeps), AND NOT (remove the new selection from the previous filter). Omit to replace the previous filter. AND NOT needs an existing filter on each layer."
+     }
+    },
+    "required": [
+     "layers",
+     "criteria"
+    ],
+    "type": "object"
+   }
+  },
+  {
+   "name": "clear_filters",
+   "title": "Clear filters",
+   "description": "Put layers back on their original source with no filter (the dock's Unfilter). Removes subset strings and restores the original source of raster and point cloud layers that were clipped. This is the way to revert cross_filter, geometry_filter, point_cloud_filter and apply_favorite. Returns done, failed and skipped.",
+   "read_only": false,
+   "destructive": false,
+   "idempotent": true,
+   "open_world": false,
+   "input_schema": {
+    "properties": {
+     "layers": {
+      "description": "Layers of any kind to unfilter: layer ids or names",
+      "items": {
+       "type": "string"
+      },
+      "maxItems": 1000,
+      "minItems": 1,
+      "type": "array"
+     }
+    },
+    "required": [
+     "layers"
+    ],
+    "type": "object"
+   }
+  },
+  {
+   "name": "apply_favorite",
+   "title": "Apply a favorite",
+   "description": "Apply a saved favorite, as the dock's favorites menu does. Returns the step (layer_name, expression, is_clear) and active_filters. The favorite id must exist: use list_favorites first.",
+   "read_only": false,
+   "destructive": false,
+   "idempotent": true,
+   "open_world": false,
+   "input_schema": {
+    "properties": {
+     "favorite_id": {
+      "description": "favorite_id from list_favorites",
+      "maxLength": 200,
+      "minLength": 1,
+      "type": "string"
+     }
+    },
+    "required": [
+     "favorite_id"
+    ],
+    "type": "object"
+   }
+  },
+  {
+   "name": "zoom_to",
+   "title": "Zoom the map",
+   "description": "Zoom the QGIS map to a layer, to its selected features, to a WKT extent, or to everything (no argument). Changes only the view, never the data or the filters. Returns extent_wkt and scale after the zoom. Fails without a map window (headless QGIS).",
+   "read_only": false,
+   "destructive": false,
+   "idempotent": true,
+   "open_world": false,
+   "input_schema": {
+    "properties": {
+     "layer": {
+      "anyOf": [
+       {
+        "maxLength": 1000,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "description": "Layer id or name to zoom to (its whole extent, or its selection with selected_only)"
+     },
+     "extent_wkt": {
+      "anyOf": [
+       {
+        "maxLength": 100000,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "description": "Instead of a layer: an extent or geometry as WKT"
+     },
+     "crs": {
+      "anyOf": [
+       {
+        "maxLength": 64,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "description": "CRS of the WKT, e.g. EPSG:2154"
+     },
+     "selected_only": {
+      "default": false,
+      "description": "With layer: zoom to its selected features",
+      "type": "boolean"
+     }
+    },
+    "type": "object"
+   }
+  },
+  {
+   "name": "select_features",
+   "title": "Select features",
+   "description": "Select the features of a vector layer matching a QGIS expression, as the user would in QGIS. A selection is not a filter: the features stay visible, they are highlighted. Use it to make the source of cross_filter (which uses the selected features), or when the user asks to select. Returns layer_name and selected_count. Comparisons, IN, LIKE and simple text, number, date and geometry functions are accepted; other functions are refused.",
+   "read_only": false,
+   "destructive": false,
+   "idempotent": true,
+   "open_world": false,
+   "input_schema": {
+    "properties": {
+     "layer": {
+      "description": "Vector layer id or name",
+      "maxLength": 1000,
+      "minLength": 1,
+      "type": "string"
+     },
+     "expression": {
+      "default": "",
+      "description": "QGIS expression (NOT SQL), plain conditions only: \"population\" > 10000, \"nom\" ILIKE 'saint%', area($geometry) > 1000. Field names in double quotes, text in single quotes.",
+      "maxLength": 100000,
+      "type": "string"
+     },
+     "clear": {
+      "default": false,
+      "description": "Empty the selection instead of selecting",
+      "type": "boolean"
+     },
+     "add": {
+      "default": false,
+      "description": "Add to the current selection instead of replacing it",
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "layer"
+    ],
+    "type": "object"
+   }
+  },
+  {
+   "name": "set_layers_visibility",
+   "title": "Show or hide layers",
+   "description": "Check or uncheck layers in the layer tree (shown or hidden on the map). Returns done and failed.",
+   "read_only": false,
+   "destructive": false,
+   "idempotent": true,
+   "open_world": false,
+   "input_schema": {
+    "properties": {
+     "layers": {
+      "description": "Layer ids or names",
+      "items": {
+       "type": "string"
+      },
+      "maxItems": 1000,
+      "minItems": 1,
+      "type": "array"
+     },
+     "visible": {
+      "description": "true shows the layers, false hides them",
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "layers",
+     "visible"
+    ],
+    "type": "object"
+   }
+  },
+  {
+   "name": "add_layer",
+   "title": "Add a layer",
+   "description": "Add a layer to the open project from a local file or a public https URL. Typical use after search_open_data: pick a geojson or gpkg resource url and add it, then filter it like any other layer. A remote layer is read from its server by QGIS. Returns the layer summary (layer_id, name, layer_kind, provider_type, crs_authid, feature_count). The chat of FilterMate asks the user first.",
+   "read_only": false,
+   "destructive": false,
+   "idempotent": false,
+   "open_world": true,
+   "input_schema": {
+    "properties": {
+     "source": {
+      "description": "A local data file on the QGIS machine (gpkg, shp, geojson, json, kml, gml, fgb, csv, tif; a GeoPackage table with |layername=name), or a public https URL of such a file (a resource url from search_open_data). Nothing else: no http, no provider URI, no database connection.",
+      "maxLength": 2000,
+      "minLength": 1,
+      "type": "string"
+     },
+     "name": {
+      "default": "",
+      "description": "Name of the layer in the project (default: the file name)",
+      "maxLength": 200,
+      "type": "string"
+     },
+     "kind": {
+      "default": "vector",
+      "description": "vector (default) or raster",
+      "enum": [
+       "vector",
+       "raster"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "source"
+    ],
+    "type": "object"
+   }
+  },
+  {
+   "name": "add_service_layer",
+   "title": "Add a layer of a WFS service",
+   "description": "Add a layer of a WFS service, read from the service as the map moves and filtered on the server. Only a layer the service lists can be added. Returns the layer summary. The chat of FilterMate asks the user first.",
+   "read_only": false,
+   "destructive": false,
+   "idempotent": false,
+   "open_world": true,
+   "input_schema": {
+    "properties": {
+     "platform": {
+      "description": "A WFS platform the user allowed, e.g. ign_wfs (IGN Géoplateforme)",
+      "maxLength": 200,
+      "minLength": 1,
+      "type": "string"
+     },
+     "typename": {
+      "description": "Layer id given by search_open_data on that platform, e.g. ADMINEXPRESS-COG-CARTO.LATEST:commune",
+      "maxLength": 300,
+      "minLength": 1,
+      "type": "string"
+     },
+     "name": {
+      "default": "",
+      "description": "Name of the layer in the project (default: its title)",
+      "maxLength": 200,
+      "type": "string"
+     }
+    },
+    "required": [
+     "platform",
+     "typename"
+    ],
+    "type": "object"
+   }
+  },
+  {
+   "name": "search_imagery",
+   "title": "Search satellite imagery",
+   "description": "Find satellite scenes over an area, newest first, with the GeoTIFF of each one. Returns datasets [{id, publisher (collection), description (date and cloud cover), resources: [{format, url}]}]; format visual is the natural colour image. Then add_layer with its url and kind raster.",
+   "read_only": true,
+   "destructive": false,
+   "idempotent": false,
+   "open_world": true,
+   "input_schema": {
+    "properties": {
+     "bbox": {
+      "anyOf": [
+       {
+        "items": {
+         "type": "number"
+        },
+        "maxItems": 4,
+        "minItems": 4,
+        "type": "array"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "description": "[west, south, east, north] in degrees; omit for the current map extent"
+     },
+     "start": {
+      "default": "",
+      "description": "First day, YYYY-MM-DD",
+      "maxLength": 10,
+      "type": "string"
+     },
+     "end": {
+      "default": "",
+      "description": "Last day, YYYY-MM-DD",
+      "maxLength": 10,
+      "type": "string"
+     },
+     "max_cloud": {
+      "default": 20.0,
+      "description": "Maximum cloud cover, %",
+      "maximum": 100,
+      "minimum": 0,
+      "type": "number"
+     },
+     "collections": {
+      "anyOf": [
+       {
+        "items": {
+         "type": "string"
+        },
+        "maxItems": 5,
+        "type": "array"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "description": "STAC collections (default sentinel-2-l2a)"
+     },
+     "limit": {
+      "default": 5,
+      "description": "Maximum number of scenes",
+      "maximum": 20,
+      "minimum": 1,
+      "type": "integer"
+     },
+     "platform": {
+      "default": "earth_search",
+      "description": "STAC catalog the user allowed, e.g. earth_search",
+      "maxLength": 200,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   }
+  },
+  {
+   "name": "remove_layers",
+   "title": "Remove layers",
+   "description": "Remove layers from the project. Their files are not deleted, but their styles and filters in this project are lost and this cannot be undone. The chat of FilterMate asks the user first. Returns done and failed.",
+   "read_only": false,
+   "destructive": true,
+   "idempotent": true,
+   "open_world": false,
+   "input_schema": {
+    "properties": {
+     "layers": {
+      "description": "Layer ids or names to remove from the project",
+      "items": {
+       "type": "string"
+      },
+      "maxItems": 1000,
+      "minItems": 1,
+      "type": "array"
+     }
+    },
+    "required": [
+     "layers"
+    ],
+    "type": "object"
+   }
+  },
+  {
+   "name": "search_open_data",
+   "title": "Search open data",
+   "description": "Search datasets on an open data platform the user allowed, and get the URLs a layer can be made of. Returns datasets [{id, title, publisher, description, page, resources: [{title, format, url}]}], the resources kept to files add_layer can open (geojson, gpkg, zip, csv, tif...). Then add_layer with a resource url (geojson or gpkg first), or add_service_layer with the id on a WFS platform. The query is sent to the platform.",
+   "read_only": true,
+   "destructive": false,
+   "idempotent": false,
+   "open_world": true,
+   "input_schema": {
+    "properties": {
+     "query": {
+      "description": "Words to search, in the language of the platform",
+      "maxLength": 200,
+      "minLength": 1,
+      "type": "string"
+     },
+     "platform": {
+      "default": "datagouv",
+      "description": "datagouv (data.gouv.fr, France), opendatasoft (the public Opendatasoft hub), ign_wfs (IGN Géoplateforme layers), or a portal the user allowed",
+      "maxLength": 200,
+      "type": "string"
+     },
+     "limit": {
+      "default": 10,
+      "description": "Maximum number of datasets",
+      "maximum": 20,
+      "minimum": 1,
+      "type": "integer"
+     }
+    },
+    "required": [
+     "query"
+    ],
+    "type": "object"
+   }
+  },
+  {
+   "name": "export_layers",
+   "title": "Export filtered layers",
+   "description": "Write layers, as filtered now, to files on the QGIS machine, below the server's export root. Writes files: a file with the same name already in the sub-folder is overwritten. The files stay on the machine running QGIS; the answer gives their paths there. Returns done (layers written), outputs ({layer name: file path}), failed and skipped.",
+   "read_only": false,
+   "destructive": true,
+   "idempotent": true,
+   "open_world": false,
+   "input_schema": {
+    "properties": {
+     "layers": {
+      "description": "Layers of any kind to export as they are filtered now, one file per layer: ids or names",
+      "items": {
+       "type": "string"
+      },
+      "maxItems": 1000,
+      "minItems": 1,
+      "type": "array"
+     },
+     "subfolder": {
+      "default": "export",
+      "description": "Sub-folder of the export root configured on the QGIS machine (a or a/b, letters, digits, _ . - only, no .. and never an absolute path)",
+      "maxLength": 300,
+      "type": "string"
+     },
+     "vector_format": {
+      "default": "GPKG",
+      "description": "Format of vector layers",
+      "enum": [
+       "GPKG",
+       "GeoJSON",
+       "ESRI Shapefile",
+       "FlatGeobuf",
+       "CSV"
+      ],
+      "type": "string"
+     },
+     "raster_format": {
+      "default": "COG",
+      "description": "Format of raster layers",
+      "enum": [
+       "COG",
+       "GTiff"
+      ],
+      "type": "string"
+     },
+     "point_cloud_format": {
+      "default": "LAZ",
+      "description": "Format of point cloud layers",
+      "enum": [
+       "LAZ",
+       "COPC",
+       "LAS",
+       "GPKG",
+       "CSV"
+      ],
+      "type": "string"
+     },
+     "crs": {
+      "anyOf": [
+       {
+        "maxLength": 64,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "description": "Output CRS such as EPSG:2154 (omit = each layer's CRS)"
+     }
+    },
+    "required": [
+     "layers"
+    ],
+    "type": "object"
+   }
+  }
+ ]
+}

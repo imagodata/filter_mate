@@ -2216,6 +2216,13 @@ class FilterMateApp:
 
     def on_remove_layer_task_begun(self):
         """Called when layer removal task begins. Cleanup UI before layers are removed."""
+        # 2026-11-06: first, as for a project change (layer_lifecycle_service). Cleared with its signals
+        # connected, the combo ran a chain that processes events: the results of a short task landed
+        # during this method, and the disconnection after them was never undone (deaf dock).
+        if not self.dockwidget:
+            return
+        self.dockwidget.disconnect_widgets_signals()
+
         # CRITICAL: Clear layer combo box before layers are removed to prevent access violations
         if self.dockwidget and hasattr(self.dockwidget, 'comboBox_filtering_current_layer'):
             try:
@@ -2237,7 +2244,6 @@ class FilterMateApp:
             except Exception as e:
                 logger.debug(f"FilterMate: Error clearing FeaturePickerWidget in on_remove_layer_task_begun: {e}")
 
-        self.dockwidget.disconnect_widgets_signals()
         # v4.1.5: Skip reset during filtering - the filter result handler already configured
         # the widget, and destroying it now would leave it unconfigured because
         # get_project_layers_from_app() early-returns while _filtering_in_progress is True.
