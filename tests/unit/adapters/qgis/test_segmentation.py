@@ -3,7 +3,6 @@
 import importlib.util
 import pathlib
 import sys
-import types
 
 import pytest
 
@@ -127,24 +126,116 @@ class TestSession:
 
 
 class TestFindProvider:
-    def plugins(self, monkeypatch, plugins):
-        monkeypatch.setitem(sys.modules, 'qgis.utils', types.SimpleNamespace(plugins=plugins))
+    """The model is FilterMate's own: made once its files and onnxruntime are there, never before."""
 
-    def test_absent_plugin(self, monkeypatch):
-        self.plugins(monkeypatch, {})
+    @pytest.fixture(autouse=True)
+    def forget(self):
+        segmentation.forget_provider()
+        yield
+        segmentation.forget_provider()
+
+    def ready(self, monkeypatch, runtime=True, installed=True, directory='/profile/filter_mate/models/sam'):
+        sam_model = fk.load("sam_model")
+        monkeypatch.setattr(segmentation, 'model_directory', lambda: directory)
+        monkeypatch.setattr(sam_model, 'runtime_available', lambda: runtime)
+        monkeypatch.setattr(sam_model, 'is_installed', lambda folder: installed and folder == directory)
+        return sam_model
+
+    def test_nothing_installed(self, monkeypatch):
+        self.ready(monkeypatch, runtime=False, installed=False)
+        assert segmentation.find_provider() is None
+        assert segmentation.model_state() == segmentation.ModelState(False, False)
+        assert not segmentation.model_state().ready
+
+    def test_the_runtime_without_the_files(self, monkeypatch):
+        self.ready(monkeypatch, installed=False)
+        assert segmentation.find_provider() is None
+        assert segmentation.model_state() == segmentation.ModelState(True, False)
+
+    def test_the_files_without_the_runtime(self, monkeypatch):
+        self.ready(monkeypatch, runtime=False)
+        assert segmentation.find_provider() is None
+        assert segmentation.model_state() == segmentation.ModelState(False, True)
+
+    def test_ready_makes_the_model_once(self, monkeypatch):
+        sam_model = self.ready(monkeypatch)
+        made = []
+        monkeypatch.setattr(sam_model, 'SamOnnxProvider', lambda directory: made.append(directory) or object())
+        first = segmentation.find_provider()
+        assert first is not None and segmentation.find_provider() is first
+        assert made == ['/profile/filter_mate/models/sam']
+        segmentation.forget_provider()
+        assert segmentation.find_provider() is not first and len(made) == 2
+
+    def test_files_removed_after_the_model_was_made(self, monkeypatch):
+        sam_model = self.ready(monkeypatch)
+        monkeypatch.setattr(sam_model, 'SamOnnxProvider', lambda directory: object())
+        assert segmentation.find_provider() is not None
+        monkeypatch.setattr(sam_model, 'is_installed', lambda folder: False)
         assert segmentation.find_provider() is None
 
-    def test_the_plugin_provides_it(self, monkeypatch):
-        model = FakeModel()
-        self.plugins(monkeypatch, {segmentation.PROVIDER_PLUGIN: types.SimpleNamespace(segmentation_provider=lambda: model)})
-        assert segmentation.find_provider() is model
+    def test_a_model_that_cannot_be_made_is_none(self, monkeypatch):
+        sam_model = self.ready(monkeypatch)
 
-    def test_a_failing_plugin_is_no_provider(self, monkeypatch):
-        def fail():
+        def fail(directory):
             raise RuntimeError('broken')
 
-        self.plugins(monkeypatch, {segmentation.PROVIDER_PLUGIN: types.SimpleNamespace(segmentation_provider=fail)})
+        monkeypatch.setattr(sam_model, 'SamOnnxProvider', fail)
         assert segmentation.find_provider() is None
+
+    def test_an_unknown_profile_is_not_installed(self, monkeypatch):
+        sam_model = fk.load("sam_model")
+        monkeypatch.setattr(sam_model, 'runtime_available', lambda: True)
+        monkeypatch.setattr(segmentation, 'model_directory', lambda: (_ for _ in ()).throw(TypeError('no profile')))
+        assert segmentation.model_state() == segmentation.ModelState(True, False)
+
+
+class TestModelDownloadTask:
+    @pytest.fixture(autouse=True)
+    def forget(self):
+        segmentation.forget_provider()
+        yield
+        segmentation.forget_provider()
+
+    def test_success_forgets_the_old_model_and_calls_back(self, monkeypatch, tmp_path):
+        sam_model = fk.load("sam_model")
+        monkeypatch.setattr(sam_model, 'download', lambda directory, is_canceled, progress, proxy: progress(100.0))
+        segmentation._provider = 'old'
+        results = []
+        task = segmentation.ModelDownloadTask(str(tmp_path), lambda t, ok: results.append((t, ok)))
+        assert task.run() is True
+        task.finished(True)
+        assert results == [(task, True)] and task.error == '' and segmentation.find_provider() != 'old'
+
+    def test_a_failure_is_told(self, monkeypatch, tmp_path):
+        sam_model = fk.load("sam_model")
+
+        def fail(directory, is_canceled, progress, proxy):
+            raise OSError('disk full')
+
+        monkeypatch.setattr(sam_model, 'download', fail)
+        task = segmentation.ModelDownloadTask(str(tmp_path), lambda t, ok: None)
+        assert task.run() is False and task.error == 'disk full'
+
+    def test_an_error_without_a_message_is_no_cancel(self, monkeypatch, tmp_path):
+        sam_model = fk.load("sam_model")
+
+        def fail(directory, is_canceled, progress, proxy):
+            raise ValueError()
+
+        monkeypatch.setattr(sam_model, 'download', fail)
+        task = segmentation.ModelDownloadTask(str(tmp_path), lambda t, ok: None)
+        assert task.run() is False and task.error == 'ValueError'
+
+    def test_a_cancel_is_no_error(self, monkeypatch, tmp_path):
+        sam_model = fk.load("sam_model")
+
+        def cancel(directory, is_canceled, progress, proxy):
+            raise sam_model.Canceled()
+
+        monkeypatch.setattr(sam_model, 'download', cancel)
+        task = segmentation.ModelDownloadTask(str(tmp_path), lambda t, ok: None)
+        assert task.run() is False and task.error == ''
 
 
 class TestSegmentsCriteria:

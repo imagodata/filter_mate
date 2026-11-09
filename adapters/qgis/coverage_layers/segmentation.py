@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 """Interactive segmentation of a raster: prompts on the map, polygons out.
 
-FilterMate holds no model: the optional plugin :data:`PROVIDER_PLUGIN` provides a
-:class:`~core.ports.segmentation_port.SegmentationProvider`. The model only helps
-to draw the objects; the validated polygons are what a filter reads and replays
+The model (``sam_model``: SAM 2.1 tiny run by onnxruntime) is a
+:class:`~core.ports.segmentation_port.SegmentationProvider`. FilterMate ships
+neither the model nor the runtime: the user installs onnxruntime in the Python
+of QGIS and asks for the download of the model files. The model only helps to
+draw the objects; the validated polygons are what a filter reads and replays
 (``RasterSelection.segments``).
 
 The window is the rendering of the layer (any raster the map can draw, a web
@@ -12,6 +14,7 @@ to a task; the prompts that follow reuse it on the main thread (tens of ms).
 """
 import logging
 import math
+import os
 from dataclasses import dataclass, field
 from typing import Any, List, Optional, Tuple
 
@@ -21,20 +24,76 @@ from qgis.PyQt.QtGui import QColor, QImage
 
 logger = logging.getLogger(__name__)
 
-PROVIDER_PLUGIN = 'filter_mate_segmentation'
 # Connected specks of the mask under this many pixels are dropped (the sieve never empties a mask).
 SIEVE_PIXELS = 16
 
+_provider: Any = None
+
+
+@dataclass(frozen=True)
+class ModelState:
+    """What the Segment target has at hand."""
+
+    runtime: bool  #: onnxruntime can be imported
+    installed: bool  #: the model files are in :func:`model_directory`
+
+    @property
+    def ready(self) -> bool:
+        return self.runtime and self.installed
+
+
+def model_directory() -> str:
+    """Where the model files live: in the QGIS profile, with the other data of FilterMate."""
+    from qgis.core import QgsApplication
+    from . import sam_model
+    return os.path.join(QgsApplication.qgisSettingsDirPath(), 'filtermate', 'models', sam_model.MODEL_FOLDER)  # next to filtermate/cache
+
+
+def model_state() -> ModelState:
+    from . import sam_model
+    try:
+        installed = sam_model.is_installed(model_directory())
+    except Exception as exc:  # no profile folder (a bare qgis_process, the tests)
+        logger.debug(f"[FM5] segmentation model folder unknown: {exc}")
+        installed = False
+    return ModelState(sam_model.runtime_available(), installed)
+
 
 def find_provider() -> Optional[Any]:
-    """The provider of the optional plugin; None when it is absent or not ready."""
+    """The model, made once its files and onnxruntime are there (opened at its first use); None until then."""
+    global _provider
     try:
-        from qgis.utils import plugins
-        getter = getattr(plugins.get(PROVIDER_PLUGIN), 'segmentation_provider', None)
-        return getter() if getter is not None else None
-    except Exception as exc:  # a third party plugin must not break the panel
-        logger.warning(f"[FM5] segmentation provider unavailable: {exc}")
+        if not model_state().ready:
+            _provider = None  # the files may have been removed since it was made
+        elif _provider is None:
+            from . import sam_model
+            _provider = sam_model.SamOnnxProvider(model_directory())
+    except Exception as exc:  # the panel must not break for the model
+        logger.warning(f"[FM5] segmentation model unavailable: {exc}")
         return None
+    return _provider
+
+
+def qgis_proxy_url() -> Optional[str]:
+    """The HTTP proxy set in the options of QGIS, as a URL; None for any other setting. Main thread."""
+    from urllib.parse import quote
+    try:
+        from qgis.core import QgsNetworkAccessManager
+        from qgis.PyQt.QtNetwork import QNetworkProxy
+        proxy = QgsNetworkAccessManager.instance().fallbackProxy()
+        if proxy.type() != QNetworkProxy.ProxyType.HttpProxy or not proxy.hostName():
+            return None
+        credentials = f"{quote(proxy.user(), safe='')}:{quote(proxy.password(), safe='')}@" if proxy.user() else ''
+        return f'http://{credentials}{proxy.hostName()}:{proxy.port()}'
+    except Exception as exc:  # the system proxy still applies
+        logger.debug(f"[FM5] QGIS proxy not read: {exc}")
+        return None
+
+
+def forget_provider() -> None:
+    """Drop the model made by :func:`find_provider` (its files changed, or a test)."""
+    global _provider
+    _provider = None
 
 
 @dataclass(frozen=True)
@@ -181,6 +240,7 @@ class SegmentationEmbedTask(QgsTask):
         self.callback = callback
         self.embedding = None
         self.error = ''
+        self.model_damaged = False  # the files of the model were refused: downloading them again can repair them
         self.settings = QgsMapSettings()
         self.settings.setDestinationCrs(crs)
         if context is not None:
@@ -225,7 +285,9 @@ class SegmentationEmbedTask(QgsTask):
             self.embedding = self.model.embed(image_to_rgb(image))
             return not self.isCanceled()
         except Exception as exc:  # the model is third party code: its failure is told, not raised in a task
+            from . import sam_model
             self.error = str(exc)
+            self.model_damaged = isinstance(exc, sam_model.ModelLoadError)
             logger.warning(f"[FM5] segmentation window not encoded: {exc}", exc_info=True)
             return False
         finally:
@@ -233,6 +295,38 @@ class SegmentationEmbedTask(QgsTask):
             layer = None
 
     def finished(self, result: bool) -> None:
+        callback, self.callback = self.callback, None
+        if callback is not None:
+            callback(self, bool(result))
+
+
+class ModelDownloadTask(QgsTask):
+    """Fetch the files of the model into a folder, off the main thread, once the user asked for it.
+
+    Args:
+        callback: ``callback(task, success)`` on the main thread; ``task.error`` says why it
+            failed, and stays empty when it was canceled.
+    """
+
+    def __init__(self, directory: str, callback: Any) -> None:
+        super().__init__(QCoreApplication.translate('ModelDownloadTask', 'FilterMate: downloading the segmentation model'),
+                         QgsTask.Flag.CanCancel)
+        self.directory, self.callback, self.error = directory, callback, ''
+        self.proxy = qgis_proxy_url()  # read here, on the main thread
+
+    def run(self) -> bool:
+        from . import sam_model
+        try:
+            sam_model.download(self.directory, self.isCanceled, self.setProgress, self.proxy)
+            return True
+        except sam_model.Canceled:
+            return False
+        except Exception as exc:  # network or disk: told to the user
+            self.error = str(exc) or type(exc).__name__
+            return False
+
+    def finished(self, result: bool) -> None:
+        forget_provider()
         callback, self.callback = self.callback, None
         if callback is not None:
             callback(self, bool(result))

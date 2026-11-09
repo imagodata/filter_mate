@@ -263,7 +263,7 @@ DEFAULT_COLOR_TOLERANCE = 12.0  # percent of the value range, per band
 PICK_SIMILAR = "similar"
 PICK_OBJECT = "object"
 PICK_SIMILAR_OBJECTS = "similar_objects"  # every object of the raster like the clicked one (colour and size)
-PICK_SEGMENT = "segment"  # prompts to a segmentation model (only with the optional plugin that provides one)
+PICK_SEGMENT = "segment"  # prompts to the segmentation model (downloaded on request, see sam_model)
 PICK_TARGETS = (PICK_SIMILAR, PICK_OBJECT, PICK_SIMILAR_OBJECTS, PICK_SEGMENT)
 DEFAULT_SIMILAR_RATIO = (0.5, 2.0)  # area of a similar object: half to twice the clicked one
 CUSTOM_QUANTITY = "custom_expression"
@@ -734,6 +734,7 @@ class RasterExploringPanel(QWidget):
     targetChanged = pyqtSignal(str)
     segmentValidateRequested = pyqtSignal()
     segmentToolRequested = pyqtSignal()
+    segmentModelInstallRequested = pyqtSignal()
     displayChanged = pyqtSignal()
 
     def __init__(self, parent=None):
@@ -763,7 +764,8 @@ class RasterExploringPanel(QWidget):
         self._seeds: List[Tuple[float, float, Any]] = []
         self._pick_target = PICK_SIMILAR  # PICK_OBJECT: a click selects the object under it only
         self._segments: List[str] = []  # WKT of the objects validated with the segmentation tool (layer CRS)
-        self._segmentation_available = False  # a plugin provides a model: the Segment target can be chosen
+        self._model_runtime = True  # onnxruntime can be imported (the user installs it)
+        self._model_installed = True  # the model files are in the profile (downloaded on request)
         self._stashed_preset: Optional[RasterSelection] = None  # the spectral preset the Segment target set aside
         self._band_spans: Dict[int, float] = {}  # observed value range of each band (statistics of the layer)
         self._pipette_on = False  # the pipette tool is on the map
@@ -1159,7 +1161,6 @@ class RasterExploringPanel(QWidget):
             target_row.addWidget(button)
         target_row.addStretch(1)
         group_layout.addLayout(target_row)
-        self._target_buttons[PICK_SEGMENT].setVisible(False)  # until the plugin providing a model is found
         # Clicked though already checked, it brings the tool back once another QGIS tool took the map.
         self._target_buttons[PICK_SEGMENT].clicked.connect(lambda _checked=False: self.segmentToolRequested.emit())
         self._segment_widget = QWidget(self._pipette_group)
@@ -1167,6 +1168,24 @@ class RasterExploringPanel(QWidget):
         segment_layout = QVBoxLayout(self._segment_widget)
         segment_layout.setContentsMargins(0, 0, 0, 0)
         segment_layout.setSpacing(GAP)
+        # What is missing to segment: the runtime (installed by the user), the model (downloaded on request).
+        self._segment_install_label = QLabel("", self._segment_widget)
+        self._segment_install_label.setObjectName("label_raster_segment_install")
+        self._segment_install_label.setWordWrap(True)
+        self._segment_install_label.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
+        self._segment_install_label.setVisible(False)
+        segment_layout.addWidget(self._segment_install_label)
+        install_row = QHBoxLayout()
+        install_row.setSpacing(GAP)
+        self._segment_install_button = QPushButton("", self._segment_widget)
+        self._segment_install_button.setObjectName("pushButton_raster_segment_install")
+        self._segment_install_button.setToolTip(self.tr("Download the SAM 2.1 tiny model once, into your QGIS profile; "
+                                                        "the segmentation then runs locally, on the CPU"))
+        self._segment_install_button.clicked.connect(self._on_install_model_clicked)
+        self._segment_install_button.setVisible(False)
+        install_row.addWidget(self._segment_install_button)
+        install_row.addStretch(1)
+        segment_layout.addLayout(install_row)
         segment_row = QHBoxLayout()
         segment_row.setSpacing(GAP)
         self._segment_validate_button = QPushButton(self.tr("Validate object"), self._segment_widget)
@@ -2580,8 +2599,6 @@ class RasterExploringPanel(QWidget):
 
     def _set_pick_target(self, target: str) -> bool:
         target = target if target in PICK_TARGETS else PICK_SIMILAR
-        if target == PICK_SEGMENT and not self._segmentation_available:
-            target = PICK_SIMILAR  # a state saved while a model was there
         changed = target != self._pick_target
         self._pick_target = target
         button = self._target_buttons.get(target)
@@ -2612,14 +2629,39 @@ class RasterExploringPanel(QWidget):
         elif self._picks and self._pick_kind in ("color", "value", "classes"):
             self._apply_picks()
 
-    # === Segmentation (the model is provided by an optional plugin) ===
+    # === Segmentation (the model is FilterMate's own, downloaded on request; see adapters sam_model) ===
 
-    def set_segmentation_available(self, available: bool) -> None:
-        """Show the Segment target when a model is available; validated objects keep filtering without one."""
-        self._segmentation_available = bool(available)
-        self._target_buttons[PICK_SEGMENT].setVisible(self._segmentation_available)
-        if not available and self._pick_target == PICK_SEGMENT:
-            self._set_pick_target(PICK_SIMILAR)
+    def set_segmentation_readiness(self, runtime_available: bool, model_installed: bool, downloading: bool = False) -> None:
+        """Say what the Segment target still lacks; the target itself stays, validated objects filter without a model."""
+        from ....adapters.qgis.coverage_layers.sam_model import install_command, total_megabytes
+        self._model_runtime, self._model_installed = bool(runtime_available), bool(model_installed)
+        if not self._model_runtime:
+            self._segment_install_label.setText(self.tr(
+                "The segmentation needs onnxruntime, which FilterMate does not install. In a terminal "
+                "(the OSGeo4W Shell on Windows), run {0} then restart QGIS.").format(install_command()))
+        self._segment_install_label.setVisible(not self._model_runtime)
+        self._segment_install_button.setText(self.tr("Install the model ({0} MB)…").format(total_megabytes()))
+        self._segment_install_button.setEnabled(not downloading)
+        self._segment_install_button.setVisible(not self._model_installed)
+
+    def offer_model_repair(self) -> None:
+        """The files have the right size but the runtime refused them: the download replaces the damaged ones."""
+        self._segment_install_button.setText(self.tr("Repair the model…"))
+        self._segment_install_button.setEnabled(True)
+        self._segment_install_button.setVisible(True)
+
+    def _on_install_model_clicked(self) -> None:
+        """Ask before the download, then let the controller fetch the files; the button waits for the answer."""
+        from qgis.PyQt.QtWidgets import QMessageBox
+        from ....adapters.qgis.coverage_layers.sam_model import REPOSITORY, total_megabytes
+        answer = QMessageBox.question(self, self.tr("Segmentation model"), self.tr(
+            "Download the SAM 2.1 tiny model ({0} MB) from huggingface.co/{1} into your QGIS profile?\n\n"
+            "Every file is checked against its SHA-256. The model then runs locally, on the CPU; "
+            "nothing leaves your computer.").format(total_megabytes(), REPOSITORY))
+        if answer != QMessageBox.StandardButton.Yes:
+            return
+        self._segment_install_button.setEnabled(False)
+        self.segmentModelInstallRequested.emit()
 
     def _leave_segments(self) -> None:
         """Another target was chosen: its picks select again; the validated objects wait for the Segment target."""

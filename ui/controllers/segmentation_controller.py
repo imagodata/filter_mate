@@ -22,6 +22,7 @@ class SegmentationController:
         self._session: Any = None
         self._session_layer = ''
         self._task: Any = None
+        self._download: Any = None
         self._generation = 0
         self._previous_tool: Any = None
         self._pending: List[Tuple[str, Any, bool]] = []  # prompts waiting for the window being encoded
@@ -149,7 +150,7 @@ class SegmentationController:
             return False
         model = find_provider()
         if model is None:
-            self._status(self.tr("The segmentation plugin is not ready"))
+            self._status(self._missing_model_text())
             return False
         source, provider_key, native = self._window_source(layer)
         try:
@@ -219,6 +220,8 @@ class SegmentationController:
                 self._pending = []
                 self._hide_preview()
                 self._status(self.tr("The segmentation of this area failed: {0}").format(task.error or self.tr("canceled")))
+                if getattr(task, 'model_damaged', False):
+                    self._host._call(self._host._raster_panel, 'offer_model_repair')
                 return
             from ...adapters.qgis.coverage_layers.segmentation import SegmentationSession
             session = SegmentationSession(model, window, task.embedding)
@@ -229,6 +232,69 @@ class SegmentationController:
                 self.tool.clear_markers()  # the map moved while the area was prepared: a marker would lie
             self._predict(session)
         return finish
+
+    # === The model ===
+
+    @staticmethod
+    def model_state() -> Any:
+        from ...adapters.qgis.coverage_layers.segmentation import model_state
+        return model_state()
+
+    def _missing_model_text(self) -> str:
+        from ...adapters.qgis.coverage_layers.sam_model import install_command
+        state = self.model_state()
+        if not state.runtime:
+            return self.tr("onnxruntime is missing: run {0}, then restart QGIS").format(install_command())
+        if self.downloading():
+            return self.tr("The segmentation model is being downloaded, click again once it is installed")
+        if not state.installed:
+            return self.tr("Install the segmentation model first (button below)")
+        return self.tr("The segmentation model could not be loaded (see the FilterMate log)")
+
+    def _refresh_readiness(self) -> None:
+        state = self.model_state()
+        self._host._call(self._host._raster_panel, 'set_segmentation_readiness', state.runtime, state.installed, self.downloading())
+
+    def install_model(self) -> None:
+        """Download the model files (the panel asked the user first); one download at a time."""
+        if self._download is not None:
+            return
+        from qgis.core import QgsApplication
+        from ...adapters.qgis.coverage_layers.segmentation import ModelDownloadTask, model_directory
+        task = ModelDownloadTask(model_directory(), self._downloaded)
+        self._download = task
+        task.progressChanged.connect(self._on_download_progress)
+        self._status(self.tr("Downloading the segmentation model… {0} %").format(0))
+        QgsApplication.taskManager().addTask(task)
+
+    def _on_download_progress(self, progress: float) -> None:
+        if self._download is not None and not getattr(self._host, '_torn_down', False):
+            self._status(self.tr("Downloading the segmentation model… {0} %").format(int(progress)))
+
+    def _downloaded(self, task: Any, success: bool) -> None:
+        self._download = None
+        if getattr(self._host, '_torn_down', False):
+            return
+        self._refresh_readiness()
+        if success:
+            ready = self.model_state().ready
+            self._status(self.tr("Model installed: left click on an object, or draw a box") if ready else self._missing_model_text())
+        elif task.error:
+            self._status(self.tr("The model could not be downloaded: {0}").format(task.error))
+        else:
+            self._status(self.tr("Download canceled"))
+
+    def downloading(self) -> bool:
+        return self._download is not None
+
+    def cancel_download(self) -> None:
+        """The dock goes away (the callback of the task then returns at once)."""
+        task, self._download = self._download, None
+        if task is not None:
+            try:
+                task.cancel()
+            except RuntimeError:
+                pass  # already finished and deleted
 
     # === Result ===
 
