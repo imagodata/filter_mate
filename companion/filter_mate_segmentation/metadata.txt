@@ -1,0 +1,13 @@
+[general]
+name=FilterMate Segmentation
+qgisMinimumVersion=3.22
+qgisMaximumVersion=4.99
+description=Interactive segmentation model for the raster panel of FilterMate.
+about=Adds the Segment target to the PIPETTE group of FilterMate: click on an object or frame it, the model draws it, FilterMate filters the other layers with it. Runs locally, on the CPU. Needs onnxruntime (installed by you) and a model of 62 MB (downloaded when you ask for it).
+version=0.1.0
+author=imagodata
+email=simon.ducournau+filter_mate@gmail.com
+tracker=https://github.com/imagodata/filter_mate/issues
+repository=https://github.com/imagodata/filter_mate
+experimental=True
+plugin_dependencies=FilterMate

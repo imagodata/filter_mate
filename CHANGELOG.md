@@ -2,6 +2,10 @@
 
 All notable changes to FilterMate will be documented in this file.
 
+## [5.0.3] - 2026-11-09
+
+- **Interactive segmentation of a raster (experimental).** With the optional plugin `companion/filter_mate_segmentation` installed, a **Segment** target appears in the PIPETTE group: click on an object or drag a box, and a SAM 2.1 model draws it locally, on the CPU. Validated objects are plain polygons (`RasterSelection.segments`), so the filter applied to the other layers needs no model; Processing and the REST API do not accept them yet. Best on buildings and well delimited objects (median IoU 0.82 with a box against 0.52 for the object detector with 3 clicks); parcels and trees are not validated. FilterMate itself ships no model and downloads nothing, and the object detector stays as it was.
+
 ## [5.0.2] - 2026-11-06
 
 Patch release on 5.0.1: changing between vector layers no longer empties the single selection or selects a feature nobody picked, the dock stays usable on small scaled screens, several features that failed only in QGIS work, and the Configuration tab gets a search bar.

@@ -101,7 +101,9 @@ def raster_strip_value(selection, kept_ratio: Optional[float],
     if selection is None:
         return translate("no constraint")
     mode = getattr(getattr(selection, 'mode', None), 'value', '')
-    if mode == 'range':
+    if getattr(selection, 'segments', ()):
+        text = translate("segmented")
+    elif mode == 'range':
         unit = _DERIVATIVE_UNITS.get(getattr(getattr(selection, 'derivative', None), 'value', ''), '')
         low, high = selection.minimum, selection.maximum
         if low is not None and high is not None:
