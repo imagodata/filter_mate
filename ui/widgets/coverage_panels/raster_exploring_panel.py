@@ -1136,13 +1136,15 @@ class RasterExploringPanel(QWidget):
         """The settings of the pipette and of the object detector: target, tolerance, picks."""
         self._pipette_group = self._make_group(self.tr("PIPETTE"), "mGroupBox_raster_pipette", checkable=True)
         group_layout = self._pipette_group.layout()
-        target_row = QHBoxLayout()
-        target_row.setSpacing(GAP)
-        target_row.addWidget(QLabel(self.tr("Select"), self._pipette_group))
+        # Two columns under the label: on one row the last targets ran past a 300 px dock, hidden without a scroll bar.
+        target_row = QGridLayout()
+        target_row.setHorizontalSpacing(GAP)
+        target_row.setVerticalSpacing(GAP)
+        target_row.addWidget(QLabel(self.tr("Select"), self._pipette_group), 0, 0, 1, 2)
         self._target_buttons: Dict[str, Any] = {}
         self._target_group = QButtonGroup(self)
         self._target_group.setExclusive(True)
-        for key, label, tip in ((PICK_SIMILAR, self.tr("Similar pixels"),
+        targets = ((PICK_SIMILAR, self.tr("Similar pixels"),
                                  self.tr("Every pixel of the raster close to the picked colour or value (the pipette of the rail)")),
                                 (PICK_OBJECT, self.tr("Clicked object"),
                                  self.tr("Only the patch of such pixels the click falls in: a pool, a roof, a field "
@@ -1154,15 +1156,16 @@ class RasterExploringPanel(QWidget):
                                 (PICK_SEGMENT, self.tr("Segment"),
                                  self.tr("Draw an object with the segmentation model: left click on it, right click "
                                          "off it, or drag a box; Enter validates. Best on buildings and "
-                                         "other well delimited objects"))):
+                                         "other well delimited objects")))
+        for index, (key, label, tip) in enumerate(targets):
             button = QRadioButton(label, self._pipette_group)
             button.setObjectName(f"radioButton_raster_pipette_{key}")
             button.setToolTip(tip)
             button.toggled.connect(lambda checked, k=key: self._on_target_button(k, checked))
             self._target_group.addButton(button)
             self._target_buttons[key] = button
-            target_row.addWidget(button)
-        target_row.addStretch(1)
+            target_row.addWidget(button, 1 + index // 2, index % 2)
+        target_row.setColumnStretch(2, 1)
         group_layout.addLayout(target_row)
         # Clicked though already checked, it brings the tool back once another QGIS tool took the map.
         self._target_buttons[PICK_SEGMENT].clicked.connect(lambda _checked=False: self.segmentToolRequested.emit())
