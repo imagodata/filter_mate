@@ -8,6 +8,10 @@ from .openai_chat import OpenAIChatProvider
 
 KIND_ANTHROPIC = "anthropic"
 KIND_OPENAI_COMPATIBLE = "openai_compatible"
+FREE_PRESET = "free"
+FREE_MODEL = "claude-haiku-5-5"  # the relay decides; this is what the panel shows
+# Set here and not in config.default.json: that file is copied once per profile and would never follow a change.
+FREE_QUOTA_URL = ""  # not deployed yet: see free-quota-proxy/README.md
 
 # Where each known service lives. The model is always the user's choice.
 PRESETS = {
@@ -15,6 +19,8 @@ PRESETS = {
     "mistral": (KIND_OPENAI_COMPATIBLE, "https://api.mistral.ai/v1"),
     "openai": (KIND_OPENAI_COMPATIBLE, "https://api.openai.com/v1"),
     "ollama": (KIND_OPENAI_COMPATIBLE, "http://localhost:11434/v1"),
+    # Its address: see adapters.agent.settings.free_quota_url.
+    FREE_PRESET: (KIND_ANTHROPIC, ""),
 }
 
 

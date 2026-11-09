@@ -173,3 +173,39 @@ send subqueries. An external agent exposed to untrusted data should be run with 
 31 cases in French and English, on a simulated project with attribute, spatial, raster, LiDAR, export and read-only
 requests and one attribute value holding a prompt injection. A case is scored on the filters finally applied. It is
 what decides the model of the free quota, and whether a local model is good enough to offer.
+
+## Other applications (MCP server of the plugin)
+
+Agent settings, tab **Other applications**. Off by default. Once on, FilterMate listens on `http://127.0.0.1:17823/mcp`
+(port configurable) and needs no Python package, unlike the stdio server of `filtermate_api/mcp`, which stays.
+
+Buttons copy the JSON most clients read, or the `claude mcp add` command. Both contain the access token. A client that only
+speaks stdio needs a bridge to Streamable HTTP. The server starts when FilterMate is opened and keeps running while its panel is
+closed, until QGIS closes or the plugin unloads.
+
+It listens on `127.0.0.1` of the machine running QGIS. With QGIS on Windows and the client in WSL 2, that address is not the same
+machine unless WSL uses mirrored networking.
+
+Rules of a call, in `ui/controllers/agent_mcp_bridge.py`:
+
+- Same tools as the chat, under the same Sources ticks and the same "attribute values" option. External connectors are not relayed.
+- Same SQL allowlist and same confirmations (export, adding or removing a layer), under the name of the application that asks.
+- One change is one step of the history of the panel, and shows in the thread with the name of the application.
+- A change is refused while the chat is working or while a QGIS dialog is open; reads go on.
+- After a refusal, the same tool from the same client is declined for 20 s without a new dialog. A confirmation that comes after
+  the client left does nothing.
+
+Access rules, in `core/agent/mcp_server.py`: loopback only, a `Host` of this machine, no `Origin` from elsewhere, a Bearer token
+compared in constant time, `application/json` only, one request per connection, heads of 16 KiB and bodies of 4 MiB at most.
+Requests are served one at a time, on the Qt main thread, where the tools have to run.
+
+The token is kept in the QGIS settings, not in the authentication database: reading it at startup must not ask for the master
+password, and the client's own configuration holds a copy anyway. **New access token** replaces it.
+
+## Free quota
+
+`free-quota-proxy/` is a Cloudflare Worker, outside the plugin zip, that relays the requests of the panel to the Messages API with
+one server-side key. **It is not deployed.** Until `FREE_QUOTA_URL` is set in `core/agent/providers/__init__.py`, or a user fills
+`APP.OPTIONS.AGENT.free_quota_url`, the panel does not offer it.
+
+See `free-quota-proxy/README.md` for deployment, limits and what happens when the budget is reached.

@@ -7900,6 +7900,50 @@ L'installer maintenant depuis PyPI avec pip, dans votre profil QGIS ? Le Python 
 <context>
     <name>AgentPanel</name>
     <message>
+        <source>Other applications</source>
+        <translation>Autres applications</translation>
+    </message>
+    <message>
+        <source>Claude Code or another MCP client on this computer can then filter your layers, once FilterMate has been opened, under the rules of this panel: the same sources, the same confirmations, and filters can be undone here. That application sends what it reads to its own AI provider.</source>
+        <translation>Claude Code ou un autre client MCP de cet ordinateur peut alors filtrer vos couches, une fois FilterMate ouvert, selon les règles de ce panneau : mêmes sources, mêmes confirmations, et les filtres s'annulent ici. Cette application envoie ce qu'elle lit à son propre fournisseur d'IA.</translation>
+    </message>
+    <message>
+        <source>Let other applications on this computer drive FilterMate (MCP server)</source>
+        <translation>Laisser les autres applications de cet ordinateur piloter FilterMate (serveur MCP)</translation>
+    </message>
+    <message>
+        <source>Port</source>
+        <translation>Port</translation>
+    </message>
+    <message>
+        <source>Copy the configuration</source>
+        <translation>Copier la configuration</translation>
+    </message>
+    <message>
+        <source>Copy the Claude Code command</source>
+        <translation>Copier la commande Claude Code</translation>
+    </message>
+    <message>
+        <source>New access token</source>
+        <translation>Nouveau jeton d'accès</translation>
+    </message>
+    <message>
+        <source>Applications already set up will have to be set up again.</source>
+        <translation>Les applications déjà configurées devront l'être de nouveau.</translation>
+    </message>
+    <message>
+        <source>New token: it applies once these settings are saved.</source>
+        <translation>Nouveau jeton : il s'applique une fois ces réglages enregistrés.</translation>
+    </message>
+    <message>
+        <source>Copied, with the access token: keep it to yourself. Save these settings for it to apply.</source>
+        <translation>Copié, avec le jeton d'accès : gardez-le pour vous. Enregistrez ces réglages pour qu'il s'applique.</translation>
+    </message>
+    <message>
+        <source>A few free requests a month, through the relay of FilterMate to Claude (Anthropic), under the terms of Anthropic. The relay counts what is spent and keeps no conversation. When it is used up, choose a provider and enter your own API key.</source>
+        <translation>Quelques requêtes gratuites par mois, par le relais de FilterMate vers Claude (Anthropic), selon les conditions d'Anthropic. Le relais compte ce qui est dépensé et ne garde aucune conversation. Une fois le quota épuisé, choisissez un fournisseur et saisissez votre propre clé d'API.</translation>
+    </message>
+    <message>
         <source>Too many sources added: remove one first.</source>
         <translation>Trop de sources ajoutées : retirez-en une d'abord.</translation>
     </message>
@@ -8122,6 +8166,42 @@ L'installer maintenant depuis PyPI avec pip, dans votre profil QGIS ? Le Python 
 </context>
 <context>
     <name>AgentChat</name>
+    <message>
+        <source>The MCP server could not start: {}</source>
+        <translation>Le serveur MCP n'a pas pu démarrer : {}</translation>
+    </message>
+    <message>
+        <source>Another application is changing the project: try again in a moment.</source>
+        <translation>Une autre application modifie le projet : réessayez dans un instant.</translation>
+    </message>
+    <message>
+        <source>Another application: {}</source>
+        <translation>Autre application : {}</translation>
+    </message>
+    <message>
+        <source>The free quota is used up for this month. Enter your own API key in the agent settings.</source>
+        <translation>Le quota gratuit est épuisé pour ce mois-ci. Saisissez votre propre clé d'API dans les réglages de l'agent.</translation>
+    </message>
+    <message>
+        <source>Access to the free quota was renewed: send your request again.</source>
+        <translation>L'accès au quota gratuit a été renouvelé : renvoyez votre demande.</translation>
+    </message>
+    <message>
+        <source>The free quota could not be reached: {}</source>
+        <translation>Le quota gratuit est injoignable : {}</translation>
+    </message>
+    <message>
+        <source>Too many new accounts from this address today: try again tomorrow, or enter your own API key.</source>
+        <translation>Trop de nouveaux comptes depuis cette adresse aujourd'hui : réessayez demain, ou saisissez votre propre clé d'API.</translation>
+    </message>
+    <message>
+        <source>The free quota is unavailable for now.</source>
+        <translation>Le quota gratuit est indisponible pour le moment.</translation>
+    </message>
+    <message>
+        <source>The free quota is not available.</source>
+        <translation>Le quota gratuit n'est pas disponible.</translation>
+    </message>
     <message>
         <source>Not reachable for this conversation: {}</source>
         <translation>Injoignable pour cette conversation : {}</translation>
