@@ -18,10 +18,19 @@ ports, SQL PG / Spatialite, `subset_string_builder`) avec un shim d'alias à cha
 - **Maillons coupés** : `pk_formatter` (QgsVectorLayer n'était qu'une annotation), stratégies (`get_logger`,
   `PSYCOPG2_AVAILABLE`), optimiseur (`constants`), `temp_table_manager` (`spatialite_connect` recopié dans
   `sql/spatialite/connect.py`, l'original de `task_utils` reste). Tests qui lisent le code par chemin : repointés.
-- **Reste pour S0** : `geometric_filter_port` (2 imports QGIS paresseux), port géométrie + implémentation shapely,
-  séparation des 4 `expression_builder` (≈6 k lignes) entre « quel SQL » et « lecture de la couche », favoris
-  (`config.config`), puis réécriture des sites d'import et suppression des shims. Brainstorm complet en mémoire
-  utilisateur (`port-rustgis-geolibre-brainstorm-2026-10-27`).
+- **Étape 2 (PR empilée sur #232)** : `geometric_filter_port` déplacé ; sa méthode 2 lit la colonne géométrique avec
+  `domain/datasource_uri.geometry_column_from_uri`, miroir du tokenizer de `QgsDataSourceUri` (identique à QGIS 3.44
+  et 4.3 sur 39 URI, valeurs attendues du test produites par QGIS : `""` n'échappe pas, parenthèse non fermée = reste
+  de la chaîne, `sql=` avale la fin, dernier `table=` gagne). `geometry/shapely_geometry.py` : `ShapelyGeometry`
+  (IGeometry, garde son SCR, `transform` reprojette avec pyproj au lieu de la copie silencieuse de l'adaptateur QGIS)
+  + `source_union` / `matches` = sémantique de `_predicate_against_sources` (OR des prédicats contre l'UNION valide
+  des sources, buffer sur l'union, cible sans géométrie jamais gardée). shapely / pyproj optionnels (import gardé),
+  ajoutés à `requirements-test.txt`. Vérifier les shims en vrai QGIS : script Docker qui importe `filter_mate.<ancien>`
+  et compare à `filter_mate.filtermate_core.<nouveau>` (55/55 en 3.44 et 4.3, pas de `filtermate_core` en double).
+- **Reste pour S0** : séparation des 4 `expression_builder` (≈6 k lignes) entre « quel SQL » et « lecture de la
+  couche », le reste de `core/geometry` (QgsGeometry partout), favoris (`config.config`), puis réécriture des sites
+  d'import et suppression des shims. Brainstorm complet en mémoire utilisateur
+  (`port-rustgis-geolibre-brainstorm-2026-10-27`).
 
 ## [2026-10-20] Sources en flux (5.1) : lots A à F → PR #190 – #208, plan `docs/internal/plans/V5_STREAMING/`
 Décisions et pièges QGIS (le détail de chaque lot est dans sa PR) :

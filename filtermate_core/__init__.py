@@ -9,6 +9,8 @@ What lives here
     services/      host-free application services
     strategies/    progressive and multi-step filtering
     ports/         the interfaces a host implements for the core
+    geometry/      IGeometry on shapely and the union semantics of the
+                   spatial filter, for hosts other than QGIS (optional deps)
     sql/           PostgreSQL and Spatialite helpers that need no host
     tasks/         builders shared with the host's task layer
 
