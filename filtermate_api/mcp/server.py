@@ -233,7 +233,9 @@ def build_server(client: FilterMateClient) -> Any:
         expression: Annotated[str, Field(min_length=1, max_length=500_000, description=(
             "Subset string: the provider's SQL WHERE clause, without the WHERE keyword. For a PostgreSQL, "
             "GeoPackage, Shapefile or Spatialite layer: \"population\" > 10000 AND \"dep\" = '31'. "
-            "Quote field names with double quotes and text values with single quotes."))],
+            "Quote field names with double quotes and text values with single quotes. Plain conditions only: "
+            "comparisons, IN, LIKE, BETWEEN, IS NULL and simple text or number functions; a subquery or another "
+            "function is refused."))],
         source: Annotated[str, Field(max_length=200, description=(
             "Free-text tag shown in the FilterMate log to tell where the filter came from"))] = "mcp",
     ) -> Dict[str, Any]:

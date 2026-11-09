@@ -161,8 +161,9 @@ What the chat adds to the REST checks, because a model can be steered by what it
 `preview_filter` and `field_values` run on the main thread: on a very large PostgreSQL table they hold the interface
 while they run.
 
-`apply_filter` through REST or MCP is not restricted this way: those callers hold the API key and existing clients may
-send subqueries. An external agent exposed to untrusted data should be run with a database role that cannot write.
+`apply_filter` and `preview_filter` take the same plain clauses through REST and both MCP servers: a subquery or a function
+outside the list answers 400. A filter still reaches the database with the rights of the user, so an external agent exposed to
+untrusted data is best run with a database role that cannot write.
 
 ## Evaluation bench
 
