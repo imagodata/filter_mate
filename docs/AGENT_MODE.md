@@ -211,7 +211,8 @@ password, and the client's own configuration holds a copy anyway. **New access t
 ## Free quota
 
 `free-quota-proxy/` is a Cloudflare Worker, outside the plugin zip, that relays the requests of the panel to the Messages API with
-one server-side key. **It is not deployed.** Until `FREE_QUOTA_URL` is set in `core/agent/providers/__init__.py`, or a user fills
-`APP.OPTIONS.AGENT.free_quota_url`, the panel does not offer it.
+one server-side key. It is deployed at https://filtermate-free-quota.filtermate-free-quota-proxy.workers.dev and set in `FREE_QUOTA_URL` (`core/agent/providers/__init__.py`); a user can
+point to another relay with `APP.OPTIONS.AGENT.free_quota_url`. `tests/qgis_headless/check_free_quota_live.py` sends one real
+request through it, the way the plugin does.
 
 See `free-quota-proxy/README.md` for deployment, limits and what happens when the budget is reached.

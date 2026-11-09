@@ -27,7 +27,19 @@ const upstream = createServer((request, response) => {
       return;
     }
     response.writeHead(200, { "content-type": "text/event-stream" });
-    response.end(sse);
+    // In small pieces, as the real API sends them: an event is often split between two reads.
+    const bytes = Buffer.from(sse);
+    let at = 0;
+    const next = () => {
+      if (at >= bytes.length) {
+        response.end();
+        return;
+      }
+      response.write(bytes.subarray(at, at + 7));
+      at += 7;
+      setTimeout(next, 2);
+    };
+    next();
   });
 });
 await new Promise((resolve) => upstream.listen(UP_PORT, "127.0.0.1", resolve));

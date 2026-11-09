@@ -65,6 +65,8 @@ LAYERS = {
 FAVORITES = [{"favorite_id": "fav-1", "name": "Communes denses", "description": "Plus de 10 000 habitants",
               "layer_name": "communes", "expression": "\"population\" > 10000"}]
 EXTENT_WKT = "POLYGON((570000 6270000, 580000 6270000, 580000 6280000, 570000 6280000, 570000 6270000))"
+# Says what is calling: some hosts, such as the Cloudflare edge of the free quota relay, refuse Python's default.
+USER_AGENT = "FilterMate-agent-eval"
 
 
 class SimulatedProject:
@@ -288,7 +290,7 @@ class UrllibTransport:
 
     def send(self, request, session):
         parser = session.new_parser()
-        http_request = urllib.request.Request(request.url, data=request.body, headers=dict(request.headers),
+        http_request = urllib.request.Request(request.url, data=request.body, headers={"User-Agent": USER_AGENT, **dict(request.headers)},
                                               method="POST")
         events = []
         try:

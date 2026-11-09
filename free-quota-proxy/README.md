@@ -3,7 +3,7 @@
 A Cloudflare Worker that lets people try the agent of FilterMate without an API key. It relays the requests of the panel to the
 Messages API with one server-side key, and stops at a fixed monthly budget. When it stops, the panel asks for the user's own key.
 
-Not deployed. Nothing is sent to it until `free_quota_url` is set.
+Deployed at https://filtermate-free-quota.filtermate-free-quota-proxy.workers.dev.
 
 ## Limits
 

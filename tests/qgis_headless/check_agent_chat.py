@@ -842,6 +842,10 @@ def check_free_quota(chat, provider, settings, ask):
 
     panel = chat.panel
     agent = config.ENV_VARS.setdefault("CONFIG_DATA", {}).setdefault("APP", {}).setdefault("OPTIONS", {}).setdefault("AGENT", {})
+    from filter_mate.adapters.agent import settings as settings_module
+    released = settings_module.FREE_QUOTA_URL
+    check("free: the release points to an https relay", released.startswith("https://"), released)
+    settings_module.FREE_QUOTA_URL = ""  # the fake relay only: these checks must never reach the real one
 
     dialog = AgentSettingsDialog(AgentSettings(), target_of, None, free_available=False)
     check("free: not offered without a relay", dialog.preset.findData(FREE_PRESET) == -1)
@@ -918,6 +922,7 @@ def check_free_quota(chat, provider, settings, ask):
     check("free: the relay removed, nothing is sent", provider.requests == [] and chat._engine is None, provider.requests)
     panel.input.clear()
     settings()
+    settings_module.FREE_QUOTA_URL = released
 
 
 def check_native_mcp(chat, settings, answers, layer):
