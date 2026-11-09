@@ -23,8 +23,10 @@ ROOT = Path(__file__).resolve().parents[3]
 EXPECTED_TOOLS = {
     "list_layers", "apply_filter", "filter_status", "undo_filter", "redo_filter", "cross_filter", "geometry_filter",
     "point_cloud_filter", "clear_filters", "filter_state", "list_favorites", "apply_favorite", "export_layers",
+    "describe_layer", "field_values", "preview_filter", "map_context",
 }
-READ_ONLY = {"list_layers", "filter_status", "filter_state", "list_favorites"}
+READ_ONLY = {"list_layers", "filter_status", "filter_state", "list_favorites", "describe_layer", "field_values",
+             "preview_filter", "map_context"}
 
 
 @pytest.fixture(scope="module")

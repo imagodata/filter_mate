@@ -315,6 +315,10 @@ One tool per REST endpoint. Layers are designated by id or name (list them with 
 | `filter_status` | `GET /filters/status` | vector filters active, last change, last error |
 | `filter_state` | `GET /filters/state` | every layer filtered now, of any kind (subset, clipped source) |
 | `apply_filter` | `POST /filters/apply` | sets the subset string (provider SQL `WHERE` clause) of one vector layer |
+| `describe_layer` | `GET /layers/details` | fields, bands (with the classes of a paletted band) or point attributes of a layer |
+| `field_values` | `GET /layers/field-values` | distinct values of a vector field, minimum and maximum; refused on web services |
+| `preview_filter` | `POST /filters/preview` | tries an expression on a private copy of the layer and counts what it keeps |
+| `map_context` | `GET /map/context` | CRS, visible extent as WKT, scale, active layer, layers with a selection |
 | `undo_filter`, `redo_filter` | `POST /filters/undo`, `/redo` | the dock's vector history (not what the other tools record, see above) |
 | `cross_filter` | `POST /filters/cross` | filters layers of any kind by the selection of a source layer of any kind (selected features, raster pixels, point cloud points) with spatial predicates, buffer, minimum coverage, combine operator |
 | `geometry_filter` | `POST /filters/geometry` | same, by a WKT geometry in a given CRS |
