@@ -1776,6 +1776,105 @@ class TestPipetteAndDetectorButtons:
 
 
 @pytest.mark.unit
+class TestSegmentationTarget:
+    """2026-11-09: the segmentation has its own map tool, swapped with the picker without turning the pipette off."""
+
+    def _controller(self, ctrl_module, monkeypatch):
+        controller = ctrl_module.CoverageModeController(_dock())
+        calls = []
+        iface = MagicMock()
+        iface.mapCanvas.return_value.mapTool.return_value = None
+        panel = MagicMock()
+        panel.pick_target.return_value = "segment"
+        controller._raster_panel = panel
+        controller._segmentation = MagicMock()
+        controller._segmentation.on_map.return_value = False
+        monkeypatch.setattr(controller, "_iface", lambda: iface)
+        monkeypatch.setattr(controller, "_extras_call", lambda *args: None)
+        monkeypatch.setattr(controller, "_toggle_pixel_tool", lambda: calls.append("picker on"))
+        monkeypatch.setattr(controller, "_deactivate_pixel_tool", lambda: calls.append("picker off"))
+        return controller, panel, calls
+
+    def test_the_end_of_the_runtime_install_reaches_a_live_panel(self, ctrl_module, monkeypatch):
+        """2026-11-09: _torn_down only exists after a teardown; reading it raised and the panel stayed on "Installing..."."""
+        controller, panel, _calls = self._controller(ctrl_module, monkeypatch)
+        refreshed = []
+        monkeypatch.setattr(controller, "_refresh_segmentation_readiness", lambda: refreshed.append(True))
+        controller._watching_runtime_install = True
+        controller._on_runtime_installed(["onnxruntime"])
+        controller._on_runtime_install_done()
+        panel.set_segmentation_status.assert_called_once_with("onnxruntime installed")
+        assert refreshed == [True] and controller._watching_runtime_install is False
+
+    def test_the_end_of_the_runtime_install_spares_a_closed_dock(self, ctrl_module, monkeypatch):
+        controller, panel, _calls = self._controller(ctrl_module, monkeypatch)
+        refreshed = []
+        monkeypatch.setattr(controller, "_refresh_segmentation_readiness", lambda: refreshed.append(True))
+        controller._torn_down = True
+        controller._on_runtime_installed(["onnxruntime"])
+        controller._on_runtime_install_done()
+        panel.set_segmentation_status.assert_not_called()
+        assert refreshed == []
+
+    def test_segment_replaces_the_picker(self, ctrl_module, monkeypatch):
+        controller, _panel, calls = self._controller(ctrl_module, monkeypatch)
+        controller._on_color_pick_toggled(True, "segment")
+        assert calls == ["picker off"]
+        controller._segmentation.activate.assert_called_once_with()
+        assert controller._color_pick is True
+
+    def test_off_takes_the_tool_off(self, ctrl_module, monkeypatch):
+        controller, _panel, calls = self._controller(ctrl_module, monkeypatch)
+        controller._on_color_pick_toggled(False, "segment")
+        controller._segmentation.deactivate.assert_called_once_with()
+        controller._segmentation.activate.assert_not_called()
+
+    def test_the_tool_leaving_for_the_picker_keeps_the_pipette_on(self, ctrl_module, monkeypatch):
+        controller, panel, calls = self._controller(ctrl_module, monkeypatch)
+        controller._segmentation.on_map.return_value = True
+        controller._segmentation.deactivate.side_effect = lambda: controller._show_picker_state(False)
+        controller._on_color_pick_toggled(True, "object")
+        assert controller._color_pick is True and controller._swapping_pick_tool is False
+        assert calls == ["picker on"]
+        panel.show_pipette_active.assert_called_once_with(True)  # never turned off on the way
+
+    def test_a_dropped_tool_still_turns_the_pipette_off(self, ctrl_module, monkeypatch):
+        controller, panel, _calls = self._controller(ctrl_module, monkeypatch)
+        controller._color_pick = True
+        controller._show_picker_state(False)
+        assert controller._color_pick is False
+
+    def test_choosing_the_target_puts_the_tool_on(self, ctrl_module, monkeypatch):
+        controller, _panel, _calls = self._controller(ctrl_module, monkeypatch)
+        controller._on_raster_target_changed("segment")
+        controller._segmentation.activate.assert_called_once_with()
+
+    def test_leaving_the_target_gives_the_picker_back(self, ctrl_module, monkeypatch):
+        controller, _panel, calls = self._controller(ctrl_module, monkeypatch)
+        controller._segmentation.on_map.return_value = True
+        controller._on_raster_target_changed("object")
+        controller._segmentation.deactivate.assert_called_once_with()
+        assert calls == ["picker on"]
+
+    def test_another_target_with_the_picker_on_changes_nothing(self, ctrl_module, monkeypatch):
+        controller, _panel, calls = self._controller(ctrl_module, monkeypatch)
+        controller._on_raster_target_changed("object")
+        assert calls == []
+
+    def test_a_rendered_layer_keeps_the_segment_target(self, ctrl_module, monkeypatch):
+        controller, panel, _calls = self._controller(ctrl_module, monkeypatch)
+        controller._active_layer = MagicMock()
+        monkeypatch.setattr(controller, "_raster_capability", lambda layer: types.SimpleNamespace(has_raw_values=False))
+        controller._on_color_pick_toggled(True, "segment")
+        panel.set_pick_target.assert_called_once_with("segment")
+        controller._segmentation.activate.assert_called_once_with()
+
+    def test_validated_objects_count_as_detected(self, ctrl_module):
+        selection = types.SimpleNamespace(seeds=(), segments=("POLYGON((0 0,1 0,1 1,0 0))",))
+        assert ctrl_module._detects_objects(selection)
+
+
+@pytest.mark.unit
 class TestIdentifyIsTheClassPipette:
     """2026-10-18: on a point cloud the Identify button toggles the class pipette, not the QGIS identify tool."""
 
