@@ -40,7 +40,7 @@ repository=https://github.com/imagodata/filter_mate
 
 hasProcessingProvider=yes
 
-changelog=v5.0.3 (2026-11-09): Interactive segmentation of a raster (experimental) - a Segment target of the PIPETTE group draws an object from a click or a box with a SAM 2.1 model, locally on the CPU, and the validated polygons filter the other layers without the model. Best on buildings and well delimited objects. FilterMate ships neither the model nor its runtime: onnxruntime is installed by you, the model (62 MB) is downloaded when you ask for it. The object detector is unchanged.
+changelog=v5.0.3 (2026-11-09): Interactive segmentation of a raster (experimental) - a Segment target of the PIPETTE group draws an object from a click or a box with a SAM 2.1 model, locally on the CPU, and the validated polygons filter the other layers without the model. Best on buildings and well delimited objects. FilterMate ships neither the model nor its runtime: onnxruntime is installed at launch when missing, into your QGIS profile, and the model (62 MB) is downloaded when you ask for it. The object detector is unchanged.
     v5.0.2 (2026-11-06): Changing between vector layers - the single selection list is no longer empty (the link filter of the previous layer stayed on it), no feature appears selected that nobody picked, and the display field chosen for a layer is kept. A vector layer picked before its registration is shown once registered. The dock no longer stops reacting after a layer is removed. Small scaled screens - a 1080p laptop scaled to 150 percent gets the compact profile instead of a dock too tall for its area, and the EXPLORING tools scroll instead of overlapping. The UI_PROFILE setting now works, at once and at startup. Several features that failed only in QGIS work: custom expressions in the exploring features, layers saved without their linking option, choosing where to save a single exported layer, the expression debounce setting. A custom expression matching nothing no longer empties the single selection list. Scrolling the dock no longer changes a list or a number by accident: they answer the wheel once clicked. Search bar in the Configuration tab. One order for the EXPLORING tools on every layer kind.
     Release notes of every version: https://github.com/imagodata/filter_mate/blob/main/CHANGELOG.md
 
@@ -60,6 +60,11 @@ deprecated=False
 # (or upgraded) can be specified.
 # Check the documentation for more information.
 # plugin_dependencies=
+
+# Python packages FilterMate installs at launch when this Python lacks them, into
+# the QGIS profile (adapters/qgis/python_dependencies.py). Not plugin_dependencies:
+# that key only names other QGIS plugins.
+python_dependencies=onnxruntime
 
 Category of the plugin: Raster, Vector, Database or Web
 #category=Database

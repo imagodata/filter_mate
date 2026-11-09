@@ -9,17 +9,12 @@ plugins.qgis.org. Both are set up once, from the panel.
 
 ## Set up
 
-1. In FilterMate, select a raster and choose **Segment** in the PIPETTE group. While onnxruntime is
-   missing, the group shows the exact command for the Python of your QGIS.
-2. Run that command in a terminal (the OSGeo4W Shell on Windows, as administrator when QGIS is in
-   `Program Files`), then restart QGIS. FilterMate never installs it for you. It has this form:
-
-   ```
-   <python of QGIS> -m pip install onnxruntime
-   ```
-
-   On a recent Debian or Ubuntu, pip refuses to write to the system Python: add `--break-system-packages`,
-   or install it with your own method.
+1. When QGIS starts, FilterMate looks for the packages listed by the `python_dependencies` key of its
+   `metadata.txt`. If onnxruntime is missing, pip installs it in the background, as a QGIS task, into your
+   QGIS profile (`filtermate/python/py<version>`). The Python of QGIS itself is not modified, and QGIS stays usable.
+2. Select a raster and choose **Segment** in the PIPETTE group. If the automatic install failed (no network,
+   no pip), the reason is in the FilterMate log and the group shows the command to run by hand, in a terminal
+   (the OSGeo4W Shell on Windows), before restarting QGIS.
 3. Click **Install the model (62 MB)…** and confirm. The files of SAM 2.1 hiera tiny are downloaded from a
    pinned revision of [onnx-community/sam2.1-hiera-tiny-ONNX](https://huggingface.co/onnx-community/sam2.1-hiera-tiny-ONNX)
    into your QGIS profile (`filtermate/models/sam2.1-hiera-tiny-q`), each one checked against its SHA-256 before it replaces

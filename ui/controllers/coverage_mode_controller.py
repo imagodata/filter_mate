@@ -166,6 +166,7 @@ class CoverageModeController(BaseController):
         self._mask_overlay = None  # veil of a terrain derivative or expression preview (canvas item)
         self._object_outline = None  # outline of the objects the pipette detected (rubber band)
         self._segmentation = None  # SegmentationController, made when the tool is first put on
+        self._watching_runtime_install = False  # the panel is refreshed when pip ends
         self._swapping_pick_tool = False
         self._pc_pick_mode = 'class'  # what a click of the point cloud picker does: one of PC_PICK_MODES
         self._detected: Any = None  # (key, SelectionGeometryResult) of the last object detection
@@ -1123,10 +1124,22 @@ class CoverageModeController(BaseController):
 
     def _refresh_segmentation_readiness(self) -> None:
         """Tell the panel what the Segment target lacks (nothing is made for it before the target is used)."""
-        from ...adapters.qgis.coverage_layers.segmentation import model_state
-        state = model_state()
-        downloading = self._segmentation is not None and bool(self._segmentation.downloading())
-        self._call(self._raster_panel, 'set_segmentation_readiness', state.runtime, state.installed, downloading)
+        try:
+            from ...adapters.qgis.coverage_layers.segmentation import model_state
+            state = model_state()
+            downloading = self._segmentation is not None and bool(self._segmentation.downloading())
+            self._call(self._raster_panel, 'set_segmentation_readiness', state.runtime, state.installed, downloading, state.installing_runtime)
+            if state.installing_runtime and not self._watching_runtime_install:
+                from ...adapters.qgis import python_dependencies
+                self._watching_runtime_install = True
+                python_dependencies.notify_when_done(self._on_runtime_install_done)
+        except Exception as exc:  # the rest of the raster panel does not depend on it
+            logger.debug(f"[FM5] segmentation readiness not refreshed: {exc}")
+
+    def _on_runtime_install_done(self) -> None:
+        self._watching_runtime_install = False
+        if not self._torn_down and self._raster_panel is not None:
+            self._refresh_segmentation_readiness()
 
     def _band_spans(self, layer: Any, band_count: int) -> Dict[int, float]:
         """Observed value range of the first four bands (the colour of an image), for the pipette tolerance."""

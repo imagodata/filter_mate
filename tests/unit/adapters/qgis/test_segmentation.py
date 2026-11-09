@@ -21,6 +21,7 @@ def _fakes():
 
 
 fk = _fakes()
+fk.load("adapters.qgis.python_dependencies")  # model_state() asks it; loaded here for its real QgsTask base
 segmentation = fk.load("segmentation")
 geometry_tools = fk.load("geometry_tools")
 raster_adapter = fk.load("raster_adapter")

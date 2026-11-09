@@ -2631,13 +2631,16 @@ class RasterExploringPanel(QWidget):
 
     # === Segmentation (the model is FilterMate's own, downloaded on request; see adapters sam_model) ===
 
-    def set_segmentation_readiness(self, runtime_available: bool, model_installed: bool, downloading: bool = False) -> None:
+    def set_segmentation_readiness(self, runtime_available: bool, model_installed: bool, downloading: bool = False,
+                                   installing_runtime: bool = False) -> None:
         """Say what the Segment target still lacks; the target itself stays, validated objects filter without a model."""
         from ....adapters.qgis.coverage_layers.sam_model import install_command, total_megabytes
         self._model_runtime, self._model_installed = bool(runtime_available), bool(model_installed)
-        if not self._model_runtime:
+        if installing_runtime:
+            self._segment_install_label.setText(self.tr("Installing onnxruntime in the background…"))
+        elif not self._model_runtime:
             self._segment_install_label.setText(self.tr(
-                "The segmentation needs onnxruntime, which FilterMate does not install. In a terminal "
+                "onnxruntime could not be installed automatically (see the FilterMate log). In a terminal "
                 "(the OSGeo4W Shell on Windows), run {0} then restart QGIS.").format(install_command()))
         self._segment_install_label.setVisible(not self._model_runtime)
         self._segment_install_button.setText(self.tr("Install the model ({0} MB)…").format(total_megabytes()))

@@ -3,9 +3,9 @@
 
 SAM 2.1 hiera tiny (Meta, Apache 2.0), quantized ONNX export of a pinned
 revision, run by onnxruntime on the CPU. FilterMate ships neither the model nor
-the runtime: the user installs onnxruntime in the Python of QGIS, and the model
-is downloaded only when the user asks for it, every file checked against its
-SHA-256 before it replaces anything. No QGIS import here: pure Python and numpy.
+the runtime: onnxruntime is installed at launch when missing (``python_dependencies``),
+and the model is downloaded only when the user asks for it, every file checked
+against its SHA-256 before it replaces anything. No QGIS import here: pure Python and numpy.
 """
 import hashlib
 import importlib.util
@@ -88,7 +88,7 @@ def python_executable() -> str:
 
 
 def install_command() -> str:
-    """The pip command installing the runtime in the Python of QGIS, shown to the user (never run by FilterMate)."""
+    """The pip command to run by hand when the automatic install at launch failed."""
     python = python_executable()
     quoted = f'"{python}"' if ' ' in python else python
     return f'{quoted} -m pip install {RUNTIME_MODULE}'

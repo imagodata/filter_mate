@@ -36,6 +36,7 @@ class ModelState:
 
     runtime: bool  #: onnxruntime can be imported
     installed: bool  #: the model files are in :func:`model_directory`
+    installing_runtime: bool = False  #: pip is installing onnxruntime in the background
 
     @property
     def ready(self) -> bool:
@@ -56,7 +57,9 @@ def model_state() -> ModelState:
     except Exception as exc:  # no profile folder (a bare qgis_process, the tests)
         logger.debug(f"[FM5] segmentation model folder unknown: {exc}")
         installed = False
-    return ModelState(sam_model.runtime_available(), installed)
+    from .. import python_dependencies
+    runtime = sam_model.runtime_available()
+    return ModelState(runtime, installed, not runtime and python_dependencies.installing())
 
 
 def find_provider() -> Optional[Any]:
