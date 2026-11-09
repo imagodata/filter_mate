@@ -13,6 +13,7 @@ SOURCES = \
     ../adapters/backends/ogr/filter_executor.py \
     ../adapters/public_api/operations.py \
     ../adapters/qgis/async_query.py \
+    ../adapters/qgis/python_dependencies.py \
     ../adapters/qgis/coverage_layers/favorites_bridge.py \
     ../adapters/qgis/coverage_layers/hag_task.py \
     ../adapters/qgis/coverage_layers/pdal_cli.py \
@@ -21,6 +22,7 @@ SOURCES = \
     ../adapters/qgis/coverage_layers/raster_surface_task.py \
     ../adapters/qgis/coverage_layers/rendered_raster.py \
     ../adapters/qgis/coverage_layers/snapshots.py \
+    ../adapters/qgis/coverage_layers/segmentation.py \
     ../adapters/qgis/coverage_layers/source_jobs.py \
     ../adapters/qgis/coverage_layers/target_appliers.py \
     ../adapters/qgis/coverage_layers/vector_tile_filters.py \
@@ -54,6 +56,7 @@ SOURCES = \
     ../ui/controllers/favorites_controller.py \
     ../ui/controllers/integration.py \
     ../ui/controllers/coverage_mode_controller.py \
+    ../ui/controllers/segmentation_controller.py \
     ../ui/controllers/coverage_dock_extras.py \
     ../ui/controllers/centroid_targets_sync.py \
     ../ui/dialogs/config_editor_widget.py \
