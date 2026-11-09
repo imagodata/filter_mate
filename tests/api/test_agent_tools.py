@@ -324,3 +324,31 @@ def test_catalog_agrees_with_the_mcp_server():
         assert shape(fresh[name]["input_schema"]) == shape(tool.input_schema), name
         assert (fresh[name]["read_only"], fresh[name]["destructive"], fresh[name]["idempotent"]) == (
             tool.read_only, tool.destructive, tool.idempotent), name
+
+
+class TestRestFiltersArePlainClauses:
+    """REST and the stdio MCP server, which relays to it, take the filters the chat takes."""
+
+    @pytest.mark.parametrize("route", ["/filters/apply", "/filters/preview"])
+    @pytest.mark.parametrize("expression", [
+        "1=1; DROP TABLE communes", "\"pop\" > (SELECT max(pop) FROM x)", "$$; DROP TABLE x; $$",
+        "E'\\x27; DROP TABLE x'", "pg_sleep(10) IS NULL", "\"pop\" > 1 -- comment", "$area > 1e6",
+    ])
+    def test_refused_before_qgis(self, route, expression, make_client):
+        calls = []
+
+        class Watching(Accessor):
+            def apply_filter(self, *args, **kwargs):
+                calls.append(args)
+                return True
+
+            def preview_filter(self, *args, **kwargs):
+                calls.append(args)
+                return None
+
+        response = make_client(Watching()).post(route, json={"layer_name": "communes", "expression": expression})
+        assert response.status_code == 400 and "plain WHERE clause" in response.json()["detail"] and not calls
+
+    def test_a_plain_filter_passes(self, make_client):
+        response = make_client(Accessor()).post("/filters/apply", json={"layer_name": "communes", "expression": '"pop" > 1000 AND "nom" LIKE \'A%\''})
+        assert response.status_code != 400, response.text

@@ -314,7 +314,7 @@ One tool per REST endpoint. Layers are designated by id or name (list them with 
 | `list_layers` | `GET /layers` | layers with id, name, kind (vector / raster / point cloud), CRS, active filter |
 | `filter_status` | `GET /filters/status` | vector filters active, last change, last error |
 | `filter_state` | `GET /filters/state` | every layer filtered now, of any kind (subset, clipped source) |
-| `apply_filter` | `POST /filters/apply` | sets the subset string (provider SQL `WHERE` clause) of one vector layer |
+| `apply_filter` | `POST /filters/apply` | sets the subset string (provider SQL `WHERE` clause) of one vector layer: plain conditions only, a subquery or a function outside the list answers 400 |
 | `describe_layer` | `GET /layers/details` | fields, bands (with the classes of a paletted band) or point attributes of a layer |
 | `field_values` | `GET /layers/field-values` | distinct values of a vector field, minimum and maximum; refused on web services |
 | `preview_filter` | `POST /filters/preview` | tries an expression on a private copy of the layer and counts what it keeps |

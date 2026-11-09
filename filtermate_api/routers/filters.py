@@ -31,6 +31,34 @@ from ..accessor import (
 )
 from ..main_thread import QGISBusy
 
+try:
+    from ...core.agent.sql_guard import filter_problem
+except ImportError:
+    # The API package loaded on its own: importing the plugin's ``core`` package would import QGIS. The guard has no
+    # dependency, so its file is loaded alone.
+    import importlib.util
+    from pathlib import Path
+
+    _spec = importlib.util.spec_from_file_location(
+        "filtermate_sql_guard", Path(__file__).resolve().parents[2] / "core" / "agent" / "sql_guard.py")
+    _guard = importlib.util.module_from_spec(_spec)
+    _spec.loader.exec_module(_guard)
+    filter_problem = _guard.filter_problem
+
+
+def _plain_filter(expression: str) -> str:
+    """A filter reaches the database with the rights of the user: one plain WHERE clause, as the chat accepts.
+
+    The same list of what a filter needs (comparisons, IN, LIKE, BETWEEN, IS NULL, simple text and number
+    functions). A subquery, a second statement or another function is refused, however it is quoted.
+    """
+    problem = filter_problem(expression)
+    if problem:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                            detail=f"An expression is a single plain WHERE clause: {problem}.")
+    return expression
+
+
 router = APIRouter(prefix="/filters", tags=["filters"])
 
 # Field caps, below the 1 MiB body cap (server.BodySizeLimitMiddleware):
@@ -99,11 +127,12 @@ def apply_filter(
 ) -> ApplyFilterResponse:
     """Apply a QGIS filter expression to the named layer."""
     accessor = _accessor(request)
+    expression = _plain_filter(payload.expression)
 
     try:
         success = accessor.apply_filter(
             layer_name=payload.layer_name,
-            expression=payload.expression,
+            expression=expression,
             source=payload.source,
         )
     except FilterRejected as exc:
@@ -136,7 +165,7 @@ class PreviewFilterRequest(BaseModel):
 @router.post("/preview", response_model=FilterPreview)
 def preview_filter(payload: PreviewFilterRequest, request: Request) -> FilterPreview:
     """Try an expression on a private copy of the layer: nothing changes in the project."""
-    preview = _accessor(request).preview_filter(payload.layer_name, payload.expression)
+    preview = _accessor(request).preview_filter(payload.layer_name, _plain_filter(payload.expression))
     if preview is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Layer not found")
     return preview
