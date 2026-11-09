@@ -9,7 +9,8 @@ All notable changes to FilterMate will be documented in this file.
 - **MCP server built into the plugin (off by default).** Claude Code or another MCP client on this computer can drive FilterMate over `http://127.0.0.1:17823/mcp` with an access token, under the rules of the chat: same tools and sources, same confirmations, and each change is a step of the panel's history. No Python package is needed; the stdio server of `filtermate_api/mcp` stays. Buttons copy the configuration for MCP clients, for Claude Desktop through `mcp-remote`, and the `claude mcp add` command.
 - **REST API and stdio MCP server: plain filters only (breaking).** `POST /filters/apply` and `POST /filters/preview` answer 400 to a subquery, a second statement or a function outside the list, as the chat does. Spatial filtering stays available through `cross_filter` and `geometry_filter`.
 - **Internal: `filtermate_core`.** The modules that need neither QGIS, Qt nor GDAL moved to a `filtermate_core` package, with compatibility shims at their former paths, and the spatial SQL of PostGIS and SpatiaLite is built there. No change of behaviour intended; the QGIS benches give the same results before and after.
-- The texts of the agent are translated in the 34 languages of FilterMate. The free quota of the agent is not offered yet.
+- **A free quota to try the agent.** The first time, the settings offer a few free requests a month, through a relay of FilterMate to Claude Haiku 5.5 (Anthropic), with no key to enter. The relay counts what is spent and keeps no conversation; once the quota is used up, the panel asks for your own API key.
+- The texts of the agent are translated in the 34 languages of FilterMate.
 
 ## [5.0.3] - 2026-11-09
 

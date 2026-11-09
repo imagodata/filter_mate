@@ -171,18 +171,25 @@ async function messages(request, env, ctx) {
     }
   };
   const stream = new ReadableStream({
+    // A pull must enqueue something or close: one that returns empty is not called again, and the stream stalls.
+    // A read often ends inside an event, which the meter holds back until its end arrives.
     async pull(controller) {
       try {
-        const { value, done } = await reader.read();
-        if (done) {
-          finish();
-          const rest = meter.flush();
-          if (rest.byteLength) controller.enqueue(rest);
-          controller.close();
-          return;
+        for (;;) {
+          const { value, done } = await reader.read();
+          if (done) {
+            finish();
+            const rest = meter.flush();
+            if (rest.byteLength) controller.enqueue(rest);
+            controller.close();
+            return;
+          }
+          const passed = meter.feed(value);
+          if (passed.byteLength) {
+            controller.enqueue(passed);
+            return;
+          }
         }
-        const passed = meter.feed(value);
-        if (passed.byteLength) controller.enqueue(passed);
       } catch (error) {
         finish();
         controller.error(error);
