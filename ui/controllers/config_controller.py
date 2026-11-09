@@ -452,7 +452,7 @@ class ConfigController(BaseController):
         """
         Apply UI_PROFILE configuration change.
 
-        Updates UIConfig with new profile (compact/normal/auto) and
+        Updates UIConfig with new profile (auto/compact/normal/hidpi) and
         re-applies dynamic dimensions.
 
         Args:
@@ -480,26 +480,21 @@ class ConfigController(BaseController):
             if new_profile_value:
                 logger.info(f"UI_PROFILE changed to: {new_profile_value}")
 
-                try:
-                    from ui.config import UIConfig, DisplayProfile
-                except ImportError:
-                    logger.warning("UIConfig not available")
-                    return
+                # 2026-11-06: was `from ui.config import ...`, which fails in QGIS (the plugin root is
+                # not on sys.path), and detect_optimal_profile() did not exist: this setting did nothing.
+                from ..config import UIConfig
 
-                if new_profile_value == 'compact':
-                    UIConfig.set_profile(DisplayProfile.COMPACT)
-                    logger.info("Switched to COMPACT profile")
-                elif new_profile_value == 'normal':
-                    UIConfig.set_profile(DisplayProfile.NORMAL)
-                    logger.info("Switched to NORMAL profile")
-                elif new_profile_value == 'auto':
-                    detected_profile = UIConfig.detect_optimal_profile()
-                    UIConfig.set_profile(detected_profile)
-                    logger.info(f"Auto-detected profile: {detected_profile.value}")
+                profile = UIConfig.resolve_profile(new_profile_value)
+                UIConfig.set_profile(profile)
+                logger.info(f"Switched to {profile.name} profile")
 
                 # Re-apply dynamic dimensions with new profile
                 if hasattr(self.dockwidget, 'apply_dynamic_dimensions'):
                     self.dockwidget.apply_dynamic_dimensions()
+                # ...and its splitter settings (collapsible in COMPACT): the sizes they impose are part of the profile.
+                splitter_manager = getattr(self.dockwidget, '_splitter_manager', None)
+                if splitter_manager:
+                    splitter_manager.apply()
 
                 profile_display = UIConfig.get_profile_name().upper()
                 logger.info(f"UI profile changed to {profile_display} mode")

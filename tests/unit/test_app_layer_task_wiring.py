@@ -155,3 +155,42 @@ def test_an_add_layers_terminated_without_results_still_releases(tasks_package):
     namespace["_execute_layer_task"](app, "add_layers", {"task": {"layers": []}})
     app.appTasks["add_layers"].taskTerminated.emit()
     app._handle_layer_task_terminated.assert_called_once_with("add_layers", results_delivered=False)
+
+
+class _ReentrantDock:
+    """Clearing the combo with its signals connected processes events: the task results land there."""
+
+    def __init__(self):
+        self.connected = True
+        self._filtering_in_progress = False
+        self.current_layer = object()
+        self.mFeaturePickerWidget_exploring_single_selection = MagicMock()
+        self.reset_multiple_checkable_combobox = MagicMock()
+        self.comboBox_filtering_current_layer = MagicMock()
+
+    def disconnect_widgets_signals(self):
+        self.connected = False
+
+
+def test_the_remove_task_disconnects_before_clearing_the_widgets():
+    dock = _ReentrantDock()
+    calls = []
+    dock.disconnect_widgets_signals = lambda: calls.append("disconnect")
+    dock.comboBox_filtering_current_layer.setLayer.side_effect = lambda layer: calls.append("combo")
+    dock.mFeaturePickerWidget_exploring_single_selection.setLayer.side_effect = lambda layer: calls.append("picker")
+    namespace = _extract(["on_remove_layer_task_begun"], {"logger": MagicMock()})
+    namespace["on_remove_layer_task_begun"](types.SimpleNamespace(dockwidget=dock))
+    assert calls == ["disconnect", "combo", "picker"]
+
+
+def test_results_landing_during_the_remove_task_begin_leave_the_dock_connected():
+    dock = _ReentrantDock()
+    dock.comboBox_filtering_current_layer.setLayer.side_effect = lambda layer: setattr(dock, "connected", True)
+    namespace = _extract(["on_remove_layer_task_begun"], {"logger": MagicMock()})
+    namespace["on_remove_layer_task_begun"](types.SimpleNamespace(dockwidget=dock))
+    assert dock.connected is True
+
+
+def test_the_remove_task_begin_without_a_dock_is_no_error():
+    namespace = _extract(["on_remove_layer_task_begun"], {"logger": MagicMock()})
+    namespace["on_remove_layer_task_begun"](types.SimpleNamespace(dockwidget=None))

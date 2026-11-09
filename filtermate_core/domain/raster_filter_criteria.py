@@ -298,6 +298,9 @@ class RasterSelection:
             by narrow bridges (0: keep connected pixels, 1 to 4: stronger separation).
         fill_holes: Fill enclosed gaps when selecting a clicked object. Similar
             objects always keep their holes so area and shape remain comparable.
+        segments: WKT polygons (layer CRS) of the objects validated with the
+            segmentation tool. The model is only used to draw them: a stored or
+            replayed selection reads these polygons, whatever is installed.
     """
 
     band: int = 1
@@ -313,11 +316,13 @@ class RasterSelection:
     shape: bool = False
     object_opening: int = 1
     fill_holes: bool = True
+    segments: Tuple[str, ...] = ()
 
     def __post_init__(self):
         if isinstance(self.object_opening, bool) or self.object_opening not in range(5):
             raise ValueError("object opening must be an integer from 0 to 4 pixels")
         object.__setattr__(self, "object_opening", int(self.object_opening))
+        object.__setattr__(self, "segments", _segments_from(self.segments))
         object.__setattr__(self, "similar", _similar_from(self.similar))
         if self.similar and not (self.seeds or self.objects):
             raise ValueError("similar objects need a clicked object (a seed)")
@@ -343,6 +348,8 @@ class RasterSelection:
     @property
     def is_empty(self) -> bool:
         """True when the selection keeps no constraint at all."""
+        if self.segments:
+            return False
         if self.mode is RasterSelectionMode.RANGE:
             return self.minimum is None and self.maximum is None and not self.seeds
         if self.mode is RasterSelectionMode.CLASSES:
@@ -353,8 +360,11 @@ class RasterSelection:
         """Tell whether one pixel value is selected (RANGE and CLASSES only).
 
         Raises:
-            ValueError: For EXPRESSION, which needs the raster calculator.
+            ValueError: For EXPRESSION, which needs the raster calculator, and for
+                segments, which are polygons and keep no pixel value.
         """
+        if self.segments:
+            raise ValueError("a selection of segments cannot be evaluated per value")
         if not math.isfinite(value):
             return False
         if self.mode is RasterSelectionMode.RANGE:
@@ -377,8 +387,11 @@ class RasterSelection:
             Formula such as ``("mnt@1" >= 200 AND "mnt@1" <= 260)``.
 
         Raises:
-            ValueError: For a terrain derivative, which the raster calculator cannot compute.
+            ValueError: For a terrain derivative, which the raster calculator cannot compute,
+                and for segments: an unbounded range would read as "every pixel".
         """
+        if self.segments:
+            raise ValueError("a selection of segments cannot be written as a raster calculator formula")
         if self.derivative.is_terrain:
             raise ValueError("a terrain derivative cannot be written as a raster calculator formula")
         ref = f'"{reference}@{self.band}"'
@@ -397,6 +410,8 @@ class RasterSelection:
 
     def describe(self) -> str:
         """Short human readable summary (English, translated by the UI)."""
+        if self.segments:
+            return f"{len(self.segments)} segmented object(s)"
         if self.mode is RasterSelectionMode.RANGE:
             low = "-∞" if self.minimum is None else _fmt(self.minimum)
             high = "+∞" if self.maximum is None else _fmt(self.maximum)
@@ -437,6 +452,8 @@ class RasterSelection:
             data["object_opening"] = self.object_opening
         if not self.fill_holes:
             data["fill_holes"] = False
+        if self.segments:
+            data["segments"] = list(self.segments)
         return data
 
     @classmethod
@@ -455,6 +472,7 @@ class RasterSelection:
             shape=bool(data.get("shape", False)),
             object_opening=data.get("object_opening", 1),
             fill_holes=bool(data.get("fill_holes", True)),
+            segments=data.get("segments") or (),
         )
 
 
@@ -499,6 +517,25 @@ def _seeds_from(value) -> Tuple[Tuple[float, float], ...]:
         if (x, y) not in seeds:
             seeds.append((x, y))
     return tuple(seeds)
+
+
+def _segments_from(value) -> Tuple[str, ...]:
+    """Segments as a tuple of non-empty WKT strings, in order, without duplicates.
+
+    Raises:
+        ValueError: For anything else than a list of texts (a bare text included).
+    """
+    if not value:
+        return ()
+    if isinstance(value, (str, dict)) or not hasattr(value, '__iter__'):
+        raise ValueError(f"segments must be a list of WKT polygons, got {value!r}")
+    segments = []
+    for item in value:
+        if not isinstance(item, str) or not item.strip():
+            raise ValueError(f"a segment is a WKT polygon, got {item!r}")
+        if item not in segments:
+            segments.append(item)
+    return tuple(segments)
 
 
 def _derivative_from(value) -> RasterDerivative:

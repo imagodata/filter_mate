@@ -259,8 +259,10 @@ class IconManager(StylerBase):
         if update_section_icons(self.dockwidget, self.is_dark_mode):
             toolbox = None  # FilterMate 5 design: the headers draw their own centred icon
         if toolbox is not None:
-            for index, filename in enumerate(('filter_multi.png', 'save.png', 'parameters.png')):
-                if index < toolbox.count():
+            for name, filename in (('FILTERING', 'filter_multi.png'), ('EXPORTING', 'save.png'),
+                                   ('CONFIGURATION', 'parameters.png')):
+                index = toolbox.indexOf(getattr(self.dockwidget, name, None))
+                if index >= 0:
                     toolbox.setItemIcon(index, self.get_icon(filename))
 
         for name in ('checkBox_filtering_use_centroids_source_layer',
@@ -386,7 +388,7 @@ class IconManager(StylerBase):
                     return
 
             # Try legacy StyleLoader
-            from ui.styles import StyleLoader
+            from .style_loader import StyleLoader
             self._current_theme = StyleLoader.get_current_theme()
         except Exception:
             # Default theme

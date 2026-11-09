@@ -15,7 +15,7 @@ def test_rest_returns_the_actual_filter_rejection():
             raise FilterRejected('Unsupported part: $area. The previous filter is unchanged.')
 
     client = TestClient(create_app(accessor=RejectingAccessor()), base_url='http://127.0.0.1:8000')
-    result = client.post('/filters/apply', json={'layer_name': 'communes', 'expression': '$area > 1e6'})
+    result = client.post('/filters/apply', json={'layer_name': 'communes', 'expression': '"surface" > 1e6'})
     assert result.status_code == 400
     assert 'Unsupported part: $area' in result.json()['detail']
     assert 'unchanged' in result.json()['detail']

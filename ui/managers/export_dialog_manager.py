@@ -71,7 +71,7 @@ class ExportDialogManager:
             if dw.widgets["EXPORTING"]["HAS_LAYERS_TO_EXPORT"]["WIDGET"].isChecked():
                 layers = dw.widgets["EXPORTING"]["LAYERS_TO_EXPORT"]["WIDGET"].checkedItems()
                 if len(layers) == 1 and datatype:
-                    from core.export.layer_exporter import get_extension_for_format
+                    from ...core.export.layer_exporter import get_extension_for_format
                     layer = layers[0]
                     match = re.search('.* ', layer)
                     layer = match.group() if match else layer

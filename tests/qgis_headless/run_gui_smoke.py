@@ -25,9 +25,16 @@ import sys
 import tempfile
 import time
 import traceback
+import types
 
 from qgis.core import Qgis, QgsApplication, QgsProject, QgsProviderRegistry, QgsRasterLayer, QgsVectorLayer
-from qgis.PyQt.QtCore import QSettings, Qt, QTimer
+from qgis.PyQt.QtCore import QPoint, QPointF, QSettings, Qt, QTimer
+from qgis.PyQt.QtGui import QWheelEvent
+from qgis.PyQt.QtWidgets import QAbstractButton, QApplication, QComboBox, QLineEdit, QPushButton, QScrollArea, QToolButton
+try:
+    from qgis.PyQt.QtGui import QShortcut
+except ImportError:  # QGIS < 3.34.2 (Qt5): QShortcut is in QtWidgets
+    from qgis.PyQt.QtWidgets import QShortcut
 from qgis.utils import iface
 import qgis.utils
 
@@ -384,6 +391,102 @@ def s_layout_check():
     check('FILTERING rows laid out together (key column aligner)', 0 < span < 600, f"first to last row: {span} px")
 
 
+def rail_buttons_apart():
+    """The shown EXPLORING rail buttons, top to bottom, do not overlap."""
+    rail = dock().widget_exploring_keys
+    buttons = sorted((button for button in rail.findChildren(QPushButton) if not button.isHidden()),
+                     key=lambda button: button.y())
+    return len(buttons) > 3 and all(upper.geometry().bottom() < lower.geometry().top()
+                                    for upper, lower in zip(buttons, buttons[1:]))
+
+
+def rail_scroll_maximum():
+    return dock().findChild(QScrollArea, 'scrollArea_exploring_rail').verticalScrollBar().maximum()
+
+
+def s_rail_width_check():
+    """The scroll area took the width of the buttons and cut a rail wider than them (from 1920 x 1080 up: 56 px)."""
+    rail = dock().widget_exploring_keys
+    STATE['rail_min_width'] = rail.minimumWidth()
+    rail.setMinimumWidth(rail.minimumSizeHint().width() + 20)
+    return waits(0.5)
+
+
+def s_rail_width_after():
+    d = dock()
+    rail = d.widget_exploring_keys
+    band = d.findChild(QScrollArea, 'scrollArea_exploring_rail').viewport()
+    shown = [button for button in rail.findChildren(QPushButton) if not button.isHidden()]
+    check('EXPLORING rail wider than its buttons: not cut by its scroll area',
+          band.width() == rail.width() and all(button.geometry().right() < band.width() for button in shown),
+          f"band={band.width()} rail={rail.width()} right={[button.geometry().right() for button in shown]}")
+    rail.setMinimumWidth(STATE['rail_min_width'])
+    return waits(0.5)
+
+
+def s_rail_short():
+    """A band shorter than the compact buttons overlapped them (720 px screen): the rail now scrolls."""
+    d = dock()
+    STATE['splitter_sizes'] = d.main_splitter.sizes()
+    d.main_splitter.setSizes([100, sum(STATE['splitter_sizes']) - 100])
+    return waits(0.5)
+
+
+def s_rail_short_check():
+    d = dock()
+    check('EXPLORING rail in a short band: buttons apart, and it scrolls', rail_buttons_apart() and rail_scroll_maximum() > 0,
+          f"band={d.main_splitter.sizes()[0]} maximum={rail_scroll_maximum()}")
+    # A button ignores the wheel, so Qt hands real input on to the scroll area. It does not do that for an
+    # event sent from here: the band gets it directly. (Checked once with a real X11 wheel over a button.)
+    band = d.findChild(QScrollArea, 'scrollArea_exploring_rail').viewport()
+    centre = band.rect().center()
+    QApplication.sendEvent(band, QWheelEvent(QPointF(centre), QPointF(band.mapToGlobal(centre)), QPoint(0, 0), QPoint(0, -120),
+                                             Qt.MouseButton.NoButton, Qt.KeyboardModifier.NoModifier,
+                                             Qt.ScrollPhase.NoScrollPhase, False))
+    scrollbar = d.findChild(QScrollArea, 'scrollArea_exploring_rail').verticalScrollBar()
+    check('EXPLORING rail in a short band: the wheel scrolls it', scrollbar.value() > 0, f"value={scrollbar.value()}")
+    scrollbar.setValue(0)
+    d.main_splitter.setSizes([sum(STATE['splitter_sizes']), 0])
+    return waits(0.5)
+
+
+def s_rail_tall_check():
+    d = dock()
+    check('EXPLORING rail in a tall band: no scrolling', rail_buttons_apart() and rail_scroll_maximum() == 0,
+          f"band={d.main_splitter.sizes()[0]} maximum={rail_scroll_maximum()}")
+    d.main_splitter.setSizes(STATE['splitter_sizes'])
+    return waits(0.5)
+
+
+def set_ui_profile(value):
+    """What the Configuration tab does for UI_PROFILE: it never ran until November 2026 (import failing in QGIS)."""
+    d = dock()
+    item = types.SimpleNamespace(data=lambda role: {'value': value})
+    config_view = d.config_view
+    d.config_view = types.SimpleNamespace(model=types.SimpleNamespace(itemFromIndex=lambda index: item))
+    try:
+        d._controller_integration.registry.get('config')._apply_ui_profile_change(
+            {'path': ['UI_PROFILE'], 'index': types.SimpleNamespace(siblingAtColumn=lambda column: None)}, [])
+    finally:
+        d.config_view = config_view
+
+
+def s_ui_profile_check():
+    d = dock()
+    ui_config = importlib.import_module(f'{PACKAGE}.ui.config').UIConfig
+    check('UI profile at startup: the one detected from the screen', ui_config.get_profile() is ui_config.detect_profile_from_screen(),
+          f"{ui_config.get_profile().name} vs {ui_config.detect_profile_from_screen().name}")
+    set_ui_profile('normal')
+    normal_height = d.minimumHeight()
+    set_ui_profile('compact')
+    check('UI_PROFILE setting: compact applied to the dock, splitter collapsible',
+          ui_config.get_profile().name == 'COMPACT' and d.minimumHeight() < normal_height and d.main_splitter.childrenCollapsible(),
+          f"{ui_config.get_profile().name} minimum height {normal_height} -> {d.minimumHeight()}")
+    set_ui_profile('auto')
+    check('UI_PROFILE setting: auto goes back to the profile of the screen',
+          ui_config.get_profile() is ui_config.detect_profile_from_screen(), ui_config.get_profile().name)
+
+
 def s_qt6_enums_check():
     """Scoped-enum spellings that raised AttributeError in QGIS 4 (October 2026 audit)."""
     from qgis.PyQt.QtGui import QColor, QStandardItem, QStandardItemModel
@@ -717,6 +820,150 @@ def s_back_to_vector():
     return switched_to('zones', coverage_page=False)
 
 
+def pick_vector(name):
+    dock().comboBox_filtering_current_layer.setLayer(layer(name))
+    return switched_to(name, coverage_page=False)
+
+
+def single_picker():
+    return dock().mFeaturePickerWidget_exploring_single_selection
+
+
+def picker_rows():
+    from qgis.PyQt.QtWidgets import QComboBox
+    return single_picker().findChild(QComboBox).count()
+
+
+def picked_fid():
+    feature = single_picker().feature()
+    return feature.id() if feature.isValid() else None
+
+
+def waits(seconds, condition=lambda: True):
+    since = time.time()
+    return lambda: time.time() - since > seconds and condition()
+
+
+def buffer_box():
+    return dock().mQgsDoubleSpinBox_filtering_buffer_value
+
+
+def s_switch_setup():
+    """Vector -> vector layer changes: two more layers, each with its own key field (a link
+    filter built on one is an unknown field on the other). QGIS keeps the filter and the feature
+    id of QgsFeaturePickerWidget across setLayer(): the next layer showed no feature, or one the
+    user never picked. Nothing covered a change between two vector layers until November 2026."""
+    from osgeo import ogr, osr
+    srs = osr.SpatialReference()
+    srs.ImportFromEPSG(2154)
+
+    def write(name, pk, kind, wkt, count):
+        path = os.path.join(tempfile.mkdtemp(prefix='fm_switch_'), f'{name}.gpkg')
+        source = ogr.GetDriverByName('GPKG').CreateDataSource(path)
+        table = source.CreateLayer(name, srs, kind, options=[f'FID={pk}'])
+        table.CreateField(ogr.FieldDefn('label', ogr.OFTString))
+        table.CreateField(ogr.FieldDefn('ref', ogr.OFTInteger))
+        for index in range(1, count + 1):
+            feature = ogr.Feature(table.GetLayerDefn())
+            feature.SetField('label', f'{name}_{index}')
+            feature.SetField('ref', index * 10)
+            feature.SetGeometry(ogr.CreateGeometryFromWkt(wkt.format(x=index * 100, x2=index * 100 + 50)))
+            table.CreateFeature(feature)
+        source = None
+        return QgsVectorLayer(f'{path}|layername={name}', name, 'ogr')
+
+    polygon = 'POLYGON(({x} 0,{x2} 0,{x2} 50,{x} 50,{x} 0))'
+    STATE['write_switch_layer'] = lambda name: write(name, 'pk_late', ogr.wkbPolygon, polygon, 4)
+    project.addMapLayers([write('parcels', 'pk_parcel', ogr.wkbPolygon, polygon, 7),
+                          write('wells', 'pk_well', ogr.wkbPoint, 'POINT({x} 0)', 5)])
+    return lambda: registered('parcels', 'wells') and tasks_idle()
+
+
+def s_switch_zones():
+    return pick_vector('zones')  # layers added: QGIS made one current, the dock follows it (auto current layer)
+
+
+def s_switch_multiple():
+    dock().mGroupBox_exploring_multiple_selection.setChecked(True)
+    return waits(2.5, tasks_idle)
+
+
+def s_switch_link():
+    fids = sorted(feature.id() for feature in layer('zones').getFeatures())[:2]
+    dock().widgets['EXPLORING']['MULTIPLE_SELECTION_FEATURES']['WIDGET'].setCheckedFeatureIds(fids)
+    return waits(0.5, lambda: bool(single_picker().filterExpression()))
+
+
+def s_switch_to_parcels():
+    check('linking: features checked in multiple selection filter the single selection picker',
+          bool(single_picker().filterExpression()), repr(single_picker().filterExpression()))
+    return pick_vector('parcels')
+
+
+def s_switch_parcels_check():
+    return waits(0, lambda: picker_rows() >= 7)
+
+
+def s_switch_parcels_values():
+    picker = single_picker()
+    check('vector -> vector: the picker is on the new layer, without the link filter of the previous one',
+          picker.layer() is not None and picker.layer().name() == 'parcels' and not picker.filterExpression(),
+          f"filter={picker.filterExpression()!r}")
+    check('vector -> vector: the single selection list shows the features of the new layer', picker_rows() >= 7,
+          f"rows={picker_rows()}")
+    check('vector -> vector: no feature selected that the user never picked', picked_fid() is None, f"fid={picked_fid()}")
+    dock().mFieldExpressionWidget_exploring_single_selection.setField('ref')
+    picker.setFeature(3)
+    buffer_box().setValue(-5)
+    return waits(1.5, tasks_idle)
+
+
+def s_switch_to_wells():
+    check('negative buffer accepted on a polygon layer', buffer_box().value() == -5, str(buffer_box().value()))
+    return pick_vector('wells')
+
+
+def s_switch_wells_check():
+    check('polygon -> point: no negative buffer left, none possible', buffer_box().minimum() == 0
+          and buffer_box().value() == 0, f"minimum={buffer_box().minimum()} value={buffer_box().value()}")
+    check('vector -> vector: the feature picked on the previous layer is not carried over', picked_fid() is None,
+          f"fid={picked_fid()}")
+    return pick_vector('parcels')
+
+
+def s_switch_back_check():
+    check('point -> polygon: negative buffers possible again', buffer_box().minimum() < 0, str(buffer_box().minimum()))
+    stored = app().PROJECT_LAYERS[layer('parcels').id()]['exploring']['single_selection_expression']
+    check('vector -> vector: the display field chosen for a layer survives the round trip',
+          'ref' in single_picker().displayExpression() and 'ref' in stored,
+          f"display={single_picker().displayExpression()!r} stored={stored!r}")
+    picker = single_picker()
+    picker.setFeature(2)
+    STATE['switch_fid'] = 2
+    return waits(1, tasks_idle)
+
+
+def s_switch_same_layer_reload():
+    target = layer('parcels')
+    dock()._reload_exploration_widgets(target, app().PROJECT_LAYERS[target.id()])  # what follows a filter
+    return waits(1, tasks_idle)
+
+
+def s_switch_same_layer_check():
+    check('reload on the same layer: the picked feature stays', picked_fid() == STATE['switch_fid'], f"fid={picked_fid()}")
+    late = STATE['write_switch_layer']('late_pick')
+    project.addMapLayer(late)
+    check('layer not registered yet when picked', late.id() not in app().PROJECT_LAYERS)
+    dock().current_layer_changed(late, manual_change=True)
+    return switched_to('late_pick', coverage_page=False)
+
+
+def s_switch_late_check():
+    current = dock().current_layer
+    check('vector layer picked before its registration: shown once registered',
+          current is not None and current.name() == 'late_pick', current.name() if current else 'no layer')
+
+
 def s_close_dock():
     check('back to a vector layer: vector groups again', dock().mGroupBox_exploring_single_selection.isVisible())
     STATE['coverage_before_close'] = coverage()
@@ -906,6 +1153,195 @@ def s_remove_layer():
 def s_remove_layer_check():
     check('layer removed from the project: unregistered', STATE['removed_id'] not in app().PROJECT_LAYERS
           and 'dem' not in current_layer_list(), f"registered={STATE['removed_id'] in app().PROJECT_LAYERS}")
+    # The results of a short remove task used to land during its begun slot, which disconnected everything after them.
+    check('layer removed from the project: the current-layer combo still answers',
+          dock()._signal_connection_states.get('FILTERING.CURRENT_LAYER.layerChanged') is True)
+
+
+def s_plugin_imports_check():
+    """Absolute project imports fail here, not in the unit tests (tests/test_no_bare_project_imports.py)."""
+    from unittest import mock
+    from qgis.PyQt.QtWidgets import QFileDialog
+    d = dock()
+    features, expression = d._exploring_ctrl.get_exploring_features(None, custom_expression='"label" IS NOT NULL')
+    check('a custom expression gives its features', len(features) == 4, f"{len(features)} feature(s), {expression!r}")
+    exploring = app().PROJECT_LAYERS[d.current_layer.id()]['exploring']
+    exploring.pop('is_linking', None)
+    d._exploring_ctrl.exploring_link_widgets()
+    check('a layer saved without is_linking gets the default', 'is_linking' in exploring, str(exploring.get('is_linking')))
+    responsiveness = d.CONFIG_DATA.setdefault('APP', {}).setdefault('OPTIONS', {}).setdefault('UI_RESPONSIVENESS', {})
+    saved = responsiveness.get('expression_debounce_ms')
+    responsiveness['expression_debounce_ms'] = 777
+    d.refresh_ui_responsiveness_params()
+    check('the expression debounce setting applies', d._expression_debounce_timer.interval() == 777,
+          str(d._expression_debounce_timer.interval()))
+    responsiveness['expression_debounce_ms'] = saved if saved is not None else 450
+    d.refresh_ui_responsiveness_params()
+    exporting = d.widgets['EXPORTING']
+    for key in ('HAS_LAYERS_TO_EXPORT', 'HAS_DATATYPE_TO_EXPORT', 'HAS_OUTPUT_FOLDER_TO_EXPORT'):
+        exporting[key]['WIDGET'].setChecked(True)
+    with mock.patch.object(exporting['LAYERS_TO_EXPORT']['WIDGET'], 'checkedItems', return_value=['zones [EPSG:2154]'], create=True), \
+            mock.patch.object(QFileDialog, 'getSaveFileName', return_value=('', '')) as save_dialog:
+        d._export_dialog_manager.dialog_export_output_path()
+    check('one layer and a format: the export asks where to save the file', save_dialog.called)
+    for key in ('HAS_LAYERS_TO_EXPORT', 'HAS_DATATYPE_TO_EXPORT', 'HAS_OUTPUT_FOLDER_TO_EXPORT'):
+        exporting[key]['WIDGET'].setChecked(False)
+
+
+def s_custom_matching_nothing():
+    d = dock()
+    d.mGroupBox_exploring_custom_selection.setChecked(True)
+    d.mFieldExpressionWidget_exploring_custom_selection.setExpression('"label" = \'nothing matches\'')
+    return waits(1.5, tasks_idle)
+
+
+def s_custom_matching_nothing_single():
+    dock().mGroupBox_exploring_single_selection.setChecked(True)
+    return waits(1.5, tasks_idle)
+
+
+def s_custom_matching_nothing_check():
+    check('a custom expression matching nothing does not empty the single selection list once left',
+          not single_picker().filterExpression() and picker_rows() >= 4,
+          f"filter={single_picker().filterExpression()!r} rows={picker_rows()}")
+    dock().mFieldExpressionWidget_exploring_custom_selection.setField('label')
+
+
+def s_config_search():
+    """The search bar of the Configuration tab never ran until November 2026 (import failing in QGIS)."""
+    d = dock()
+    container = d.config_view_container
+    check('Configuration tab: search bar in place', container is not None and d.config_view is container.json_view)
+    d.reload_configuration_model()  # the search must read the new model
+    container.set_search_text('UI_PROFILE')
+    current = d.config_view.currentIndex()
+    check('Configuration tab: the search finds a setting, after a reload too',
+          current.isValid() and current.data() == 'UI_PROFILE' and container.model is d.config_model and current.model() is d.config_model,
+          f"current={current.data() if current.isValid() else None!r}")
+    # The dock stylesheet of the section headers (`QToolBox QToolButton`) drew these buttons off their frame.
+    d.toolBox_tabTools.setCurrentWidget(d.CONFIGURATION)  # nothing is visible in a closed section
+    QApplication.processEvents()
+    field = container.findChild(QLineEdit)
+    field_buttons = [button for button in field.findChildren(QToolButton) if button.isVisible()]
+    check('Configuration tab: search icon and clear button drawn inside the field',
+          len(field_buttons) == 2 and all(button.height() <= field.height() for button in field_buttons),
+          str([(button.geometry().x(), button.height()) for button in field_buttons]) + f" field height {field.height()}")
+    container.set_search_text('')
+    shortcuts = {shortcut.key().toString(): shortcut.context() for shortcut in container.findChildren(QShortcut)}
+    check('Configuration tab: Ctrl+F and Escape stay inside the search bar, not the whole QGIS window',
+          shortcuts == {'Ctrl+F': Qt.ShortcutContext.WidgetWithChildrenShortcut, 'Esc': Qt.ShortcutContext.WidgetShortcut},
+          str(shortcuts))
+
+
+def s_wheel_needs_focus():
+    """A wheel turned while a list passed under the pointer changed the feature, without a click."""
+    picker = single_picker()
+    combo = picker.findChild(QComboBox)
+    dock().mGroupBox_exploring_single_selection.setChecked(True)
+    picker.setFeature(2)
+    focused = QApplication.focusWidget()
+    if focused is not None:
+        focused.clearFocus()
+    STATE['wheel_combo'] = combo
+    return waits(1, lambda: picked_fid() == 2)
+
+
+def _wheel_on(widget):
+    centre = widget.rect().center()
+    event = QWheelEvent(QPointF(centre), QPointF(widget.mapToGlobal(centre)), QPoint(0, 0), QPoint(0, -120),
+                        Qt.MouseButton.NoButton, Qt.KeyboardModifier.NoModifier, Qt.ScrollPhase.NoScrollPhase, False)
+    QApplication.sendEvent(widget, event)
+    return event
+
+
+def s_wheel_needs_focus_check():
+    combo = STATE['wheel_combo']
+    index = combo.currentIndex()
+    event = _wheel_on(combo)
+    check('wheel over a list without the focus: value kept, the panel gets the event',
+          combo.currentIndex() == index and not event.isAccepted(), f"index {index} -> {combo.currentIndex()}")
+    iface.mainWindow().activateWindow()
+    combo.setFocus()
+    QApplication.processEvents()
+    if combo.hasFocus() or combo.isAncestorOf(QApplication.focusWidget()):
+        _wheel_on(combo)
+        check('wheel over a list with the focus: it changes as usual', combo.currentIndex() != index,
+              f"index {index} -> {combo.currentIndex()}")
+    else:
+        report('SKIP', 'wheel over a list with the focus', 'no focus under Xvfb')
+
+
+def s_agent_panel():
+    """The AGENT section: absent by default, then first in the accordion when the option is on."""
+    d = dock()
+    plugin = qgis.utils.plugins[PACKAGE]
+    toolbox = d.toolBox_tabTools
+    check('agent: no section by default', getattr(d, '_agent_chat', None) is None and toolbox.count() == 3)
+    toolbox.setCurrentWidget(d.FILTERING)
+    QApplication.processEvents()
+    d.select_tabTools_index()
+    options = d.CONFIG_DATA['APP']['OPTIONS']
+    previous = options.get('AGENT')
+    options['AGENT'] = {'enabled': {'value': True}}
+    d.install_agent_panel(plugin)
+    chat = getattr(d, '_agent_chat', None)
+    if not check('agent: the section is installed', chat is not None):
+        return
+    first = chat
+    d.install_agent_panel(plugin)
+    check('agent: installed once', d._agent_chat is first and toolbox.count() == 4)
+    check('agent: first, under its name', toolbox.widget(0) is chat.panel and toolbox.itemText(0) == 'AGENT')
+    check('agent: the others keep their order', [toolbox.itemText(i) for i in range(1, 4)] ==
+          [toolbox.itemText(toolbox.indexOf(page)) for page in (d.FILTERING, d.EXPORTING, d.CONFIGURATION)])
+    check('agent: the open section stays open', toolbox.currentWidget() is d.FILTERING)
+    QApplication.processEvents()
+    check('agent: FILTERING is still section 0', d.tabTools_current_index == 0, str(d.tabTools_current_index))
+    filter_button = d.widgets['ACTION']['FILTER']['WIDGET']
+    check('agent: filter button on FILTERING', filter_button.isEnabled())
+    shots = os.environ.get('FM_SHOTS')
+    if shots:
+        d.grab().save(os.path.join(shots, 'agent_folded.png'))
+    toolbox.setCurrentWidget(chat.panel)
+    QApplication.processEvents()
+    check('agent: its own state', d.tabTools_current_index == -1, str(d.tabTools_current_index))
+    check('agent: filter button off here', not filter_button.isEnabled())
+    panel = chat.panel
+    check('agent: the welcome is shown', panel.welcome_title.isVisible())
+    check('agent: the input is below it', panel.input.geometry().top() > panel.stack.geometry().bottom())
+    check('agent: the input takes the width', panel.input.width() > panel.width() * 0.7,
+          f"{panel.input.width()} of {panel.width()}")
+    headers = [b for b in toolbox.findChildren(QAbstractButton) if b.objectName() == 'qt_toolbox_toolboxbutton']
+    check('agent: same header height', len({b.height() for b in headers}) == 1, str([b.height() for b in headers]))
+    if shots:
+        d.grab().save(os.path.join(shots, 'agent_welcome.png'))
+    panel.set_ready(True, 'Claude (Anthropic) · claude-haiku-5-5')
+    QApplication.processEvents()
+    if shots:
+        d.grab().save(os.path.join(shots, 'agent_ready.png'))
+    panel.add_user('Keep the municipalities above 10000 inhabitants')
+    panel.add_action('Filter on communes', True, '"population" > 10000', '12 / 586')
+    panel.add_text('12 municipalities are kept in the layer.')
+    panel.set_can_undo(True)
+    panel.set_status('Changed: communes. Changed since, left as is: a very long list of layers that wraps on two lines.')
+    QApplication.processEvents()
+    page_scroll = panel.parentWidget().parentWidget() if panel.parentWidget() is not None else None
+    bar = page_scroll.verticalScrollBar() if isinstance(page_scroll, QScrollArea) else None
+    check('agent: the input stays in view with a conversation', panel.input.isVisible() and
+          (bar is None or not bar.isVisible()), f"input {panel.input.geometry()} panel h={panel.height()}")
+    check('agent: the undo button is in view', panel.undo_button.isVisible() and
+          panel.undo_button.geometry().bottom() <= panel.height(), str(panel.undo_button.geometry()))
+    if shots:
+        d.grab().save(os.path.join(shots, 'agent_open.png'))
+    panel.clear_thread()
+    toolbox.setCurrentWidget(d.EXPORTING)
+    QApplication.processEvents()
+    check('agent: EXPORTING is still section 1', d.tabTools_current_index == 1, str(d.tabTools_current_index))
+    toolbox.setCurrentWidget(d.FILTERING)
+    QApplication.processEvents()
+    if previous is None:
+        options.pop('AGENT', None)
+    else:
+        options['AGENT'] = previous
 
 
 def s_finish():
@@ -923,7 +1359,8 @@ def s_finish():
     os._exit(1 if failed else 0)  # QGIS exit code = test result; skips the slow GUI teardown
 
 
-STEPS = [s_setup, s_open_plugin, s_dock_ready, s_controllers_check, s_layout_check, s_qt6_enums_check, s_pick_before_late_refresh,
+STEPS = [s_setup, s_open_plugin, s_dock_ready, s_controllers_check, s_layout_check, s_rail_width_check, s_rail_width_after, s_rail_short, s_rail_short_check, s_rail_tall_check,
+         s_ui_profile_check, s_qt6_enums_check, s_pick_before_late_refresh,
          s_late_refresh_check,
          s_vector_source, s_vector_select, s_vector_filter, s_vector_check, s_vector_undo_check,
          s_user_pick_after_undo_check,
@@ -935,7 +1372,11 @@ STEPS = [s_setup, s_open_plugin, s_dock_ready, s_controllers_check, s_layout_che
          s_rasters_off, s_rasters_off_check, s_rasters_on_check,
          s_replay_select, s_replay_filter, s_replay_save_and_clear, s_replay_read, s_replay_check,
          s_badge_raster_source, s_raster_badge_add_layer, s_raster_badge_check, s_raster_badge_removed_check,
-         s_remove_layer, s_remove_layer_check, s_finish]
+         s_remove_layer, s_remove_layer_check,
+         s_switch_setup, s_switch_zones, s_switch_multiple, s_switch_link, s_switch_to_parcels, s_switch_parcels_check,
+         s_switch_parcels_values, s_switch_to_wells, s_switch_wells_check, s_switch_back_check, s_switch_same_layer_reload,
+         s_switch_same_layer_check, s_switch_late_check, s_plugin_imports_check,
+         s_custom_matching_nothing, s_custom_matching_nothing_single, s_custom_matching_nothing_check, s_config_search, s_wheel_needs_focus, s_wheel_needs_focus_check, s_agent_panel, s_finish]
 
 
 def run_step(index=0):

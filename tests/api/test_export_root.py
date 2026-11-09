@@ -144,7 +144,7 @@ class TestPrepareRoot:
         assert (root.stat().st_mode & 0o777) == 0o700
 
     def test_windows_junction_is_refused(self, tmp_path, monkeypatch):
-        from filtermate_api.routers import export as export_module
+        from filtermate_api import export_root as export_module
         from filtermate_api.routers.export import ExportRootError
         (tmp_path / "exports").mkdir()
         real_lstat = os.lstat
