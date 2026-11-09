@@ -401,7 +401,7 @@ class FilterMate:
             self._stale_cache_timer.start(30000)
 
             from .adapters.qgis import python_dependencies
-            python_dependencies.install_missing(self._on_python_dependencies_installed)
+            python_dependencies.activate_installed()
 
             logger.debug("FilterMate.initGui: Completed successfully")
 
@@ -417,9 +417,6 @@ class FilterMate:
             )
             # Re-raise to prevent partial initialization
             raise
-
-    def _on_python_dependencies_installed(self, packages):
-        self.iface.messageBar().pushInfo("FilterMate", self.tr("Installed in your QGIS profile: {0}").format(", ".join(packages)))
 
     @staticmethod
     def _cleanup_stale_cache():

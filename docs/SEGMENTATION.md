@@ -9,10 +9,12 @@ plugins.qgis.org. Both are set up once, from the panel.
 
 ## Set up
 
-1. When QGIS starts, FilterMate looks for the packages listed by the `python_dependencies` key of its
-   `metadata.txt`. If onnxruntime is missing, pip installs it in the background, as a QGIS task, into your
-   QGIS profile (`filtermate/python/py<version>`). The Python of QGIS itself is not modified, and QGIS stays usable.
-2. Select a raster and choose **Segment** in the PIPETTE group. If the automatic install failed (no network,
+1. Select a raster and choose **Segment** in the PIPETTE group. FilterMate needs onnxruntime, declared by the
+   `python_dependencies` key of its `metadata.txt`. If it is missing, a message asks your confirmation.
+   Nothing is installed before you agree, and nothing is installed at the start of QGIS.
+2. Once you confirm, pip installs it in the background, as a QGIS task, into your QGIS profile
+   (`filtermate/python/py<version>`, about 100 MB). The Python of QGIS is not modified and QGIS stays usable.
+   If you refuse, an **Install onnxruntime…** button stays in the group. If the install fails (no network,
    no pip), the reason is in the FilterMate log and the group shows the command to run by hand, in a terminal
    (the OSGeo4W Shell on Windows), before restarting QGIS.
 3. Click **Install the model (62 MB)…** and confirm. The files of SAM 2.1 hiera tiny are downloaded from a

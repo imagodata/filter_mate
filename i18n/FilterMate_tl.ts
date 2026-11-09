@@ -616,137 +616,137 @@
         <translation>I-reset ang mga pamantayan ng point cloud</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1586"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1597"/>
         <source>Invalid raster calculator expression</source>
         <translation>Di-wastong expression ng raster calculator</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1901"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1912"/>
         <source>PDAL was not found: the height above a DTM needs the pdal executable</source>
         <translation>Hindi nahanap ang PDAL: kailangan ng taas sa ibabaw ng DTM ang executable na pdal</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3421"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3432"/>
         <source>A FilterMate task is still running: wait for it to finish</source>
         <translation>Tumatakbo pa ang isang gawain ng FilterMate: hintaying matapos ito</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2894"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2905"/>
         <source>FilterMate task failed: {0}</source>
         <translation>Nabigo ang gawain ng FilterMate: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2931"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2942"/>
         <source>Select pixels first: a value range, classes or a raster expression</source>
         <translation>Pumili muna ng mga pixel: saklaw ng halaga, mga klase o raster expression</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2946"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2957"/>
         <source>Raster filtered: {0}</source>
         <translation>Na-filter ang raster: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2980"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2991"/>
         <source>The point cloud expression was rejected: {0}</source>
         <translation>Tinanggihan ang expression ng point cloud: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2983"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2994"/>
         <source>Select points first: classes, attribute ranges or an expression</source>
         <translation>Pumili muna ng mga punto: mga klase, saklaw ng attribute o expression</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2997"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3008"/>
         <source>Point cloud filtered: {0}</source>
         <translation>Na-filter ang point cloud: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3531"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3542"/>
         <source>Filter not applied: {0}</source>
         <translation>Hindi nailapat ang filter: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3383"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3394"/>
         <source>canceled</source>
         <translation>nakansela</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3080"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3091"/>
         <source>{0} target(s) filtered</source>
         <translation>{0} target ang na-filter</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3091"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3102"/>
         <source>{0} failed: {1}</source>
         <translation>Nabigo ang {0}: {1}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3104"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3115"/>
         <source>FilterMate: filtering from '{0}'…</source>
         <translation>FilterMate: nagfi-filter mula sa '{0}'…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3203"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3214"/>
         <source>Changed since, left as is: {0}</source>
         <translation>Nagbago na mula noon, iniwan nang ganoon: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3209"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3220"/>
         <source>{0} layer(s) restored</source>
         <translation>{0} layer ang naibalik</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3243"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3254"/>
         <source>&apos;{0}&apos; not exported: {1}</source>
         <translation>Hindi na-export ang '{0}': {1}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3257"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3268"/>
         <source>Exported: {0}</source>
         <translation>Na-export: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3259"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3270"/>
         <source>Export failed: {0}</source>
         <translation>Nabigo ang pag-export: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3266"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3277"/>
         <source>Exporting {0} layer(s)…</source>
         <translation>Ine-export ang {0} layer…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3272"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3283"/>
         <source>Export folder</source>
         <translation>Folder ng export</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3354"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3365"/>
         <source>Raster / point cloud targets skipped: no source feature selected in EXPLORING</source>
         <translation>Nilaktawan ang mga target na raster / point cloud: walang napiling source feature sa EXPLORING</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3383"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3394"/>
         <source>Raster / point cloud targets not filtered: {0}</source>
         <translation>Hindi na-filter ang mga target na raster / point cloud: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3385"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3396"/>
         <source>{0} raster / point cloud target(s) filtered</source>
         <translation>{0} target na raster / point cloud ang na-filter</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3508"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3519"/>
         <source>Choose the DTM raster used for the height above ground</source>
         <translation>Piliin ang DTM raster na gagamitin para sa taas sa ibabaw ng lupa</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3519"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3530"/>
         <source>Height above ground not computed: {0}</source>
         <translation>Hindi nakalkula ang taas sa ibabaw ng lupa: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3540"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3551"/>
         <source>Computing the height above '{0}' with PDAL…</source>
         <translation>Kinakalkula ang taas sa ibabaw ng '{0}' gamit ang PDAL…</translation>
     </message>
@@ -756,12 +756,12 @@
         <translation>Ang cache ng FilterMate ay gumagamit ng {0} GB, lampas sa limitasyon nitong {1} GB: alisin ang filter sa mga raster / point cloud layer na hindi mo na kailangan</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1903"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1914"/>
         <source>PDAL {0} is too old: the height above a DTM needs PDAL 2.4 or later</source>
         <translation>Masyadong luma ang PDAL {0}: kailangan ng taas sa ibabaw ng DTM ang PDAL 2.4 o mas bago</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1906"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1917"/>
         <source>PDAL could not be run, the height above a DTM is unavailable: {0}</source>
         <translation>Hindi mapatakbo ang PDAL, hindi magagamit ang taas sa ibabaw ng DTM: {0}</translation>
     </message>
@@ -781,27 +781,27 @@
         <translation>Preview: itago ang mga pixel sa labas ng napili (puting tabing para sa dalisdis, direksyon ng dalisdis...)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1781"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1792"/>
         <source>The preview of a slope or aspect needs the map in the CRS of the raster ({0})</source>
         <translation>Kailangan ng preview ng dalisdis o direksyon ng dalisdis na nasa CRS ng raster ang mapa ({0})</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2423"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2434"/>
         <source>only the points drawn on the map can be picked: turn the preview off to pick a class it hides</source>
         <translation>mga punto lang na iginuhit sa mapa ang maaaring piliin: patayin ang preview para pumili ng klaseng itinatago nito</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2494"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2505"/>
         <source>No classified point under the click</source>
         <translation>Walang naka-classify na punto sa na-click</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2429"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2440"/>
         <source>Class {0} is already checked</source>
         <translation>Naka-check na ang klase {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2518"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2529"/>
         <source>Class {0} is not in the class list of the layer</source>
         <translation>Wala ang klase {0} sa listahan ng klase ng layer</translation>
     </message>
@@ -816,159 +816,159 @@
         <translation>Class picker: mag-click sa mapa at ang klase ng mga punto na iginuhit doon ay mamarkahan. Ctrl+click para magdagdag ng isa pa</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1115"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1116"/>
         <source>Preview and statistics use a bounded local sample of the visible extent; filtering reads the source.</source>
         <translation>Gumagamit ang preview at mga istatistika ng may hangganang lokal na sample ng nakikitang extent; binabasa naman ng pag-filter ang source.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1303"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1314"/>
         <source>Preparing a bounded color snapshot of the visible extent…</source>
         <translation>Naghahanda ng may hangganang color snapshot ng nakikitang extent…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1315"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1326"/>
         <source>The color snapshot could not be prepared. Try a smaller visible extent.</source>
         <translation>Hindi naihanda ang color snapshot. Subukan ang mas maliit na nakikitang extent.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1319"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1330"/>
         <source>Color selection applies to the captured visible extent.</source>
         <translation>Nalalapat ang pagpili ng kulay sa nakuhang nakikitang extent.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1383"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1394"/>
         <source>Raster sampling failed. Try a smaller visible extent.</source>
         <translation>Nabigo ang pag-sample ng raster. Subukan ang mas maliit na nakikitang extent.</translation>
     </message>
     <message>
         <location filename="../ui/controllers/coverage_mode_controller.py" line="1515"/>
-        <source>The sampled raster preview could not be calculated.</source>
-        <translation type="obsolete">Hindi makalkula ang preview ng raster na batay sa sample.</translation>
-    </message>
-    <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1781"/>
-        <source>The preview of a color or an expression needs the map in the CRS of the raster ({0})</source>
-        <translation>Kailangan ng preview ng kulay o expression ang mapa sa CRS ng raster ({0})</translation>
-    </message>
-    <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2447"/>
-        <source>No point drawn under the click</source>
-        <translation>Walang iginuhit na punto sa ilalim ng click</translation>
-    </message>
-    <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2449"/>
-        <source>This point has no {0}</source>
-        <translation>Walang {0} ang puntong ito</translation>
-    </message>
-    <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2451"/>
-        <source>{0} cannot be used in a condition</source>
-        <translation>Hindi magagamit ang {0} sa isang kondisyon</translation>
-    </message>
-    <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2508"/>
-        <source>Object not read: {0}</source>
-        <translation>Hindi nabasa ang object: {0}</translation>
-    </message>
-    <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2510"/>
-        <source>Too many points around the click: the object could not be read</source>
-        <translation>Napakaraming punto sa paligid ng click: hindi nabasa ang object</translation>
-    </message>
-    <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2512"/>
-        <source>No point of class {0} under the click: click on the object itself</source>
-        <translation>Walang punto ng klase {0} sa ilalim ng click: i-click mismo ang object</translation>
-    </message>
-    <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2649"/>
-        <source>Similar objects not read: {0}</source>
-        <translation>Hindi nabasa ang mga katulad na object: {0}</translation>
-    </message>
-    <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2652"/>
-        <source>No similar object within the area ratios: widen them</source>
-        <translation>Walang katulad na object sa loob ng mga ratio ng area: palawakin ang mga ito</translation>
-    </message>
-    <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2721"/>
-        <source>Preparing a sample for the new visible extent. Click again when it is ready.</source>
-        <translation>Naghahanda ng sample para sa bagong nakikitang extent. I-click muli kapag handa na.</translation>
-    </message>
-    <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2732"/>
-        <source>The local raster sample is still being prepared. Retry when it is ready.</source>
-        <translation>Inihahanda pa ang lokal na raster sample. Subukan muli kapag handa na.</translation>
-    </message>
-    <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2938"/>
-        <source>Prepare a color snapshot before filtering this rendered layer.</source>
-        <translation>Maghanda ng color snapshot bago i-filter ang rendered na layer na ito.</translation>
-    </message>
-    <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3083"/>
-        <source>{0} raster target(s) resampled to the configured pixel limit</source>
-        <translation>{0} raster target ang na-resample sa naka-configure na limitasyon ng pixel</translation>
-    </message>
-    <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3115"/>
-        <source>color selection limited to the captured extent; colors depend on style and scale</source>
-        <translation>limitado sa nakuhang extent ang pagpili ng kulay; nakadepende sa style at scale ang mga kulay</translation>
-    </message>
-    <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3117"/>
-        <source>raster source resampled to {0} cells within the pixel limit</source>
-        <translation>na-resample ang raster source sa {0} cell sa loob ng limitasyon ng pixel</translation>
-    </message>
-    <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3119"/>
-        <source>raster selection read every {0} pixels: over the pixel limit of the settings</source>
-        <translation>binasa ang pagpili ng raster kada {0} pixel: lampas sa limitasyon ng pixel ng mga setting</translation>
-    </message>
-    <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3122"/>
-        <source>dense raster selection smoothed to keep its outline light</source>
-        <translation>pinakinis ang siksik na pagpili ng raster upang manatiling magaan ang balangkas nito</translation>
-    </message>
-    <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3169"/>
-        <source>{0} left empty, nothing matches the selection: {1}</source>
-        <translation>Naubos ang laman ng {0}, walang tumutugma sa pinili: {1}</translation>
-    </message>
-    <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3153"/>
-        <source>failed</source>
-        <translation>nabigo</translation>
-    </message>
-    <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1504"/>
         <source>No valid pixels to display in the selected bands.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1498"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1792"/>
+        <source>The preview of a color or an expression needs the map in the CRS of the raster ({0})</source>
+        <translation>Kailangan ng preview ng kulay o expression ang mapa sa CRS ng raster ({0})</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2458"/>
+        <source>No point drawn under the click</source>
+        <translation>Walang iginuhit na punto sa ilalim ng click</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2460"/>
+        <source>This point has no {0}</source>
+        <translation>Walang {0} ang puntong ito</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2462"/>
+        <source>{0} cannot be used in a condition</source>
+        <translation>Hindi magagamit ang {0} sa isang kondisyon</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2519"/>
+        <source>Object not read: {0}</source>
+        <translation>Hindi nabasa ang object: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2521"/>
+        <source>Too many points around the click: the object could not be read</source>
+        <translation>Napakaraming punto sa paligid ng click: hindi nabasa ang object</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2523"/>
+        <source>No point of class {0} under the click: click on the object itself</source>
+        <translation>Walang punto ng klase {0} sa ilalim ng click: i-click mismo ang object</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2660"/>
+        <source>Similar objects not read: {0}</source>
+        <translation>Hindi nabasa ang mga katulad na object: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2663"/>
+        <source>No similar object within the area ratios: widen them</source>
+        <translation>Walang katulad na object sa loob ng mga ratio ng area: palawakin ang mga ito</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2732"/>
+        <source>Preparing a sample for the new visible extent. Click again when it is ready.</source>
+        <translation>Naghahanda ng sample para sa bagong nakikitang extent. I-click muli kapag handa na.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2743"/>
+        <source>The local raster sample is still being prepared. Retry when it is ready.</source>
+        <translation>Inihahanda pa ang lokal na raster sample. Subukan muli kapag handa na.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2949"/>
+        <source>Prepare a color snapshot before filtering this rendered layer.</source>
+        <translation>Maghanda ng color snapshot bago i-filter ang rendered na layer na ito.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3094"/>
+        <source>{0} raster target(s) resampled to the configured pixel limit</source>
+        <translation>{0} raster target ang na-resample sa naka-configure na limitasyon ng pixel</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3126"/>
+        <source>color selection limited to the captured extent; colors depend on style and scale</source>
+        <translation>limitado sa nakuhang extent ang pagpili ng kulay; nakadepende sa style at scale ang mga kulay</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3128"/>
+        <source>raster source resampled to {0} cells within the pixel limit</source>
+        <translation>na-resample ang raster source sa {0} cell sa loob ng limitasyon ng pixel</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3130"/>
+        <source>raster selection read every {0} pixels: over the pixel limit of the settings</source>
+        <translation>binasa ang pagpili ng raster kada {0} pixel: lampas sa limitasyon ng pixel ng mga setting</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3133"/>
+        <source>dense raster selection smoothed to keep its outline light</source>
+        <translation>pinakinis ang siksik na pagpili ng raster upang manatiling magaan ang balangkas nito</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3180"/>
+        <source>{0} left empty, nothing matches the selection: {1}</source>
+        <translation>Naubos ang laman ng {0}, walang tumutugma sa pinili: {1}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3164"/>
+        <source>failed</source>
+        <translation>nabigo</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1509"/>
         <source>Preparing band display…</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1514"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1525"/>
         <source>The selected bands could not be displayed.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1586"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1597"/>
         <source>Unknown raster layer or band in expression</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1378"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1389"/>
         <source>The raster histogram could not be calculated.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1727"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1738"/>
         <source>The raster preview could not be calculated.</source>
         <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1148"/>
+        <source>onnxruntime installed</source>
+        <translation>Na-install ang onnxruntime</translation>
     </message>
 </context>
 <context>
@@ -1959,42 +1959,42 @@ I-click ang ★ indicator at piliin ang 'Idagdag ang kasalukuyang filter sa mga 
         <translation>I-reset ang default na pagsasaayos at burahin ang SQLite database</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1575"/>
+        <location filename="../filter_mate.py" line="1572"/>
         <source>Reset Configuration</source>
         <translation>I-reset ang Pagsasaayos</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1601"/>
+        <location filename="../filter_mate.py" line="1598"/>
         <source>Configuration reset successfully.</source>
         <translation>Matagumpay na na-reset ang pagsasaayos.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1606"/>
+        <location filename="../filter_mate.py" line="1603"/>
         <source>Default configuration file not found.</source>
         <translation>Hindi nahanap ang default na file ng pagsasaayos.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1629"/>
+        <location filename="../filter_mate.py" line="1626"/>
         <source>Database deleted: {filename}</source>
         <translation>Nabura ang database: {filename}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1653"/>
+        <location filename="../filter_mate.py" line="1650"/>
         <source>Restart required</source>
         <translation>Kailangang i-restart</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="485"/>
+        <location filename="../filter_mate.py" line="482"/>
         <source>Obsolete configuration detected</source>
         <translation>Lumang pagsasaayos ang nakita</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="486"/>
+        <location filename="../filter_mate.py" line="483"/>
         <source>unknown version</source>
         <translation>hindi kilalang bersyon</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="487"/>
+        <location filename="../filter_mate.py" line="484"/>
         <source>An obsolete configuration ({}) has been detected.
 
 Do you want to reset to default settings?
@@ -2009,12 +2009,12 @@ Do you want to reset to default settings?
 • No: Keep current configuration (may cause issues)</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="494"/>
+        <location filename="../filter_mate.py" line="491"/>
         <source>Corrupted configuration detected</source>
         <translation>Sirang pagsasaayos ang nakita</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="495"/>
+        <location filename="../filter_mate.py" line="492"/>
         <source>The configuration file is corrupted and cannot be read.
 
 Do you want to reset to default settings?
@@ -2029,12 +2029,12 @@ Do you want to reset to default settings?
 • No: Cancel (the plugin may not work correctly)</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="502"/>
+        <location filename="../filter_mate.py" line="499"/>
         <source>Configuration reset</source>
         <translation>I-reset ang Pagsasaayos</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="503"/>
+        <location filename="../filter_mate.py" line="500"/>
         <source>The configuration needs to be reset.
 
 Do you want to continue?</source>
@@ -2043,57 +2043,57 @@ Do you want to continue?</source>
 Do you want to continue?</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="551"/>
+        <location filename="../filter_mate.py" line="548"/>
         <source>Configuration not reset. Some features may not work correctly.</source>
         <translation>Hindi na-reset ang pagsasaayos. Ang ilang mga tampok ay maaaring hindi gumana ng tama.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="562"/>
+        <location filename="../filter_mate.py" line="559"/>
         <source>Configuration created with default values</source>
         <translation>Ang pagsasaayos ay nilikha gamit ang mga default na halaga</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="565"/>
+        <location filename="../filter_mate.py" line="562"/>
         <source>Corrupted configuration reset. Default settings have been restored.</source>
         <translation>Na-reset ang sirang pagsasaayos. Naibalik na ang mga default na setting.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="568"/>
+        <location filename="../filter_mate.py" line="565"/>
         <source>Obsolete configuration reset. Default settings have been restored.</source>
         <translation>Na-reset ang lumang pagsasaayos. Naibalik na ang mga default na setting.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="589"/>
+        <location filename="../filter_mate.py" line="586"/>
         <source>Configuration updated to latest version</source>
         <translation>Na-update ang pagsasaayos sa pinakabagong bersyon</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="586"/>
+        <location filename="../filter_mate.py" line="583"/>
         <source>Configuration updated: new settings available ({sections}). Access via Options menu.</source>
         <translation>Na-update ang pagsasaayos: may bagong mga setting ({sections}). I-access sa pamamagitan ng Options menu.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="580"/>
+        <location filename="../filter_mate.py" line="577"/>
         <source>Geometry Simplification</source>
         <translation>Pagpapasimple ng Geometry</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="581"/>
+        <location filename="../filter_mate.py" line="578"/>
         <source>Optimization Thresholds</source>
         <translation>Mga Threshold ng Optimization</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="608"/>
+        <location filename="../filter_mate.py" line="605"/>
         <source>Error during configuration migration: {}</source>
         <translation>Error during configuration migration: {}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="741"/>
+        <location filename="../filter_mate.py" line="738"/>
         <source>Geometry validation setting</source>
         <translation>Setting ng geometry validation</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="743"/>
+        <location filename="../filter_mate.py" line="740"/>
         <source>The QGIS setting 'Invalid features filtering' is currently set to '{mode}'.
 
 FilterMate recommends disabling this setting (value 'Off') for the following reasons:
@@ -2120,17 +2120,17 @@ Do you want to disable this setting now?
 • No: Keep current setting</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="771"/>
+        <location filename="../filter_mate.py" line="768"/>
         <source>Invalid geometry filtering disabled successfully.</source>
         <translation>Matagumpay na na-disable ang pag-filter ng invalid na geometry.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="778"/>
+        <location filename="../filter_mate.py" line="775"/>
         <source>Invalid geometry filtering not modified. Some features may be excluded from exports.</source>
         <translation>Hindi binago ang pag-filter ng invalid na geometry. Ang ilang mga tampok ay maaaring ihiwalay sa mga pag-export.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1575"/>
+        <location filename="../filter_mate.py" line="1572"/>
         <source>Are you sure you want to reset to the default configuration?
 
 This will:
@@ -2147,7 +2147,7 @@ This will:
 QGIS must be restarted to apply the changes.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1653"/>
+        <location filename="../filter_mate.py" line="1650"/>
         <source>The configuration has been reset.
 
 Please restart QGIS to apply the changes.</source>
@@ -2161,12 +2161,12 @@ Please restart QGIS to apply the changes.</translation>
         <translation>Error sa initialization: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="673"/>
+        <location filename="../filter_mate.py" line="670"/>
         <source>{count} referenced layer(s) not loaded ({layers_list}). Using fallback display.</source>
         <translation>{count} na-reference na layer ang hindi na-load ({layers_list}). Ginagamit ang fallback display.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1644"/>
+        <location filename="../filter_mate.py" line="1641"/>
         <source>Unable to delete {filename}: {e}</source>
         <translation>Hindi matanggal ang {filename}: {e}</translation>
     </message>
@@ -2176,27 +2176,27 @@ Please restart QGIS to apply the changes.</translation>
         <translation type="obsolete">Error sa pag-reset: {str(e)}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1696"/>
+        <location filename="../filter_mate.py" line="1693"/>
         <source>&lt;p style=&apos;font-size:13px;&apos;&gt;Thank you for using &lt;b&gt;FilterMate&lt;/b&gt;!&lt;br&gt;Join our Discord community to:&lt;/p&gt;&lt;ul style=&apos;margin-left:10px; font-size:12px;&apos;&gt;&lt;li&gt;Get help and support&lt;/li&gt;&lt;li&gt;Report bugs and issues&lt;/li&gt;&lt;li&gt;Suggest new features&lt;/li&gt;&lt;li&gt;Share tips with other users&lt;/li&gt;&lt;/ul&gt;</source>
         <translation>&lt;p style='font-size:13px;'&gt;Salamat sa paggamit ng &lt;b&gt;FilterMate&lt;/b&gt;!&lt;br&gt;Sumali sa aming komunidad sa Discord upang:&lt;/p&gt;&lt;ul style='margin-left:10px; font-size:12px;'&gt;&lt;li&gt;Humingi ng tulong at suporta&lt;/li&gt;&lt;li&gt;Mag-report ng mga bug at isyu&lt;/li&gt;&lt;li&gt;Magmungkahi ng mga bagong feature&lt;/li&gt;&lt;li&gt;Magbahagi ng mga tip sa ibang gumagamit&lt;/li&gt;&lt;/ul&gt;</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1712"/>
+        <location filename="../filter_mate.py" line="1709"/>
         <source>  Join us on Discord</source>
         <translation>  Sumali sa amin sa Discord</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1732"/>
+        <location filename="../filter_mate.py" line="1729"/>
         <source>Don&apos;t show this again</source>
         <translation>Huwag nang ipakita ito</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1788"/>
+        <location filename="../filter_mate.py" line="1785"/>
         <source>Close</source>
         <translation>Isara</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1855"/>
+        <location filename="../filter_mate.py" line="1852"/>
         <source>Error loading plugin: {0}. Check QGIS Python console for details.</source>
         <translation>Error sa paglo-load ng plugin: {0}. Suriin ang QGIS Python console para sa mga detalye.</translation>
     </message>
@@ -2240,22 +2240,22 @@ First attribute: {1}</source>
 Unang attribute: {1}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1662"/>
+        <location filename="../filter_mate.py" line="1659"/>
         <source>The configuration could not be reset. Check that the plugin folder is writable, then try again. Details in filtermate.log.</source>
         <translation>Hindi ma-reset ang configuration. Tiyaking nasusulatan ang folder ng plugin, pagkatapos ay subukang muli. Mga detalye sa filtermate.log.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1762"/>
+        <location filename="../filter_mate.py" line="1759"/>
         <source>What&apos;s new in FilterMate 5</source>
         <translation>Ano ang bago sa FilterMate 5</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1768"/>
+        <location filename="../filter_mate.py" line="1765"/>
         <source>&lt;p style=&apos;font-size:13px;&apos;&gt;&lt;b&gt;FilterMate now works with raster and point cloud layers.&lt;/b&gt;&lt;/p&gt;&lt;ul style=&apos;margin-left:10px; font-size:12px;&apos;&gt;&lt;li&gt;&lt;b&gt;EXPLORING&lt;/b&gt; adapts to the current layer: value range and classes of a raster, classes, elevation and attributes of a LiDAR point cloud.&lt;/li&gt;&lt;li&gt;&lt;b&gt;FILTERING&lt;/b&gt; relates that selection to layers of any kind, with the usual predicates and buffer: parcels within an elevation range, LiDAR points under buildings, a DTM clipped to a municipality.&lt;/li&gt;&lt;li&gt;&lt;b&gt;EXPORTING&lt;/b&gt; writes filtered rasters (GeoTIFF, COG) and point clouds (LAZ, COPC).&lt;/li&gt;&lt;li&gt;Processing algorithms and models, qgis_process, Python and REST APIs.&lt;/li&gt;&lt;/ul&gt;</source>
         <translation>&lt;p style='font-size:13px;'&gt;&lt;b&gt;Gumagana na ngayon ang FilterMate sa mga raster at point cloud layer.&lt;/b&gt;&lt;/p&gt;&lt;ul style='margin-left:10px; font-size:12px;'&gt;&lt;li&gt;&lt;b&gt;EXPLORING&lt;/b&gt; ay umaangkop sa kasalukuyang layer: saklaw ng halaga at mga klase ng isang raster, mga klase, elebasyon at mga attribute ng isang LiDAR point cloud.&lt;/li&gt;&lt;li&gt;&lt;b&gt;FILTERING&lt;/b&gt; ay iniuugnay ang seleksyong iyon sa mga layer ng anumang uri, gamit ang karaniwang mga predicate at buffer: mga lote sa loob ng saklaw ng elebasyon, mga LiDAR point sa ilalim ng mga gusali, isang DTM na pinutol ayon sa isang munisipalidad.&lt;/li&gt;&lt;li&gt;&lt;b&gt;EXPORTING&lt;/b&gt; ay nagsusulat ng mga na-filter na raster (GeoTIFF, COG) at point cloud (LAZ, COPC).&lt;/li&gt;&lt;li&gt;Mga algorithm at modelo ng Processing, qgis_process, mga API ng Python at REST.&lt;/li&gt;&lt;/ul&gt;</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1784"/>
+        <location filename="../filter_mate.py" line="1781"/>
         <source>Open the user guide</source>
         <translation>Buksan ang gabay ng gumagamit</translation>
     </message>
@@ -2292,7 +2292,7 @@ Unang attribute: {1}</translation>
     <message>
         <location filename="../filter_mate.py" line="422"/>
         <source>Installed in your QGIS profile: {0}</source>
-        <translation>Naka-install sa iyong QGIS profile: {0}</translation>
+        <translation type="obsolete">Naka-install sa iyong QGIS profile: {0}</translation>
     </message>
 </context>
 <context>
@@ -3437,7 +3437,7 @@ Siguraduhin na ang PostgreSQL table ay may nakatakdang PRIMARY KEY.</translation
 <context>
     <name>ModelDownloadTask</name>
     <message>
-        <location filename="../adapters/qgis/coverage_layers/segmentation.py" line="315"/>
+        <location filename="../adapters/qgis/coverage_layers/segmentation.py" line="316"/>
         <source>FilterMate: downloading the segmentation model</source>
         <translation>FilterMate: dina-download ang segmentation model</translation>
     </message>
@@ -3616,7 +3616,7 @@ Siguraduhin na ang PostgreSQL table ay may nakatakdang PRIMARY KEY.</translation
 <context>
     <name>PipInstallTask</name>
     <message>
-        <location filename="../adapters/qgis/python_dependencies.py" line="85"/>
+        <location filename="../adapters/qgis/python_dependencies.py" line="99"/>
         <source>FilterMate: installing {0}</source>
         <translation>FilterMate: ini-install ang {0}</translation>
     </message>
@@ -5830,27 +5830,27 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">Mag-click sa mapa gamit ang pixel picker. Pinapalawak ng Ctrl+click ang saklaw hanggang sa halaga.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2135"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2138"/>
         <source>VALUE RANGE</source>
         <translation>SAKLAW NG HALAGA</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1441"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1444"/>
         <source>Min</source>
         <translation>Min</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1441"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1444"/>
         <source>Lowest value kept</source>
         <translation>Pinakamababang halagang pinanatili</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1441"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1444"/>
         <source>Max</source>
         <translation>Max</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1441"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1444"/>
         <source>Highest value kept</source>
         <translation>Pinakamataas na halagang pinanatili</translation>
     </message>
@@ -5880,17 +5880,17 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">Wala</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1461"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1464"/>
         <source>RASTER EXPRESSION</source>
         <translation>EXPRESSION NG RASTER</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1465"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1468"/>
         <source>Raster calculator expression; a pixel is kept where it is not 0</source>
         <translation>Expression ng raster calculator; pinananatili ang pixel kung saan hindi ito 0</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1466"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1469"/>
         <source>Raster expression</source>
         <translation>Expression ng raster</translation>
     </message>
@@ -5910,12 +5910,12 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">Mga napiling pixel: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1547"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1550"/>
         <source>Set a value range first</source>
         <translation>Magtakda muna ng saklaw ng halaga</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2727"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2758"/>
         <source>NoData</source>
         <translation>NoData</translation>
     </message>
@@ -5935,22 +5935,22 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">Estadistika ng kasalukuyang band sa huling parihabang iginuhit sa mapa</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1841"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1844"/>
         <source>Under the cursor: {0}  (X {1:.{3}f}  Y {2:.{3}f})</source>
         <translation>Sa ilalim ng cursor: {0}  (X {1:.{3}f}  Y {2:.{3}f})</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1851"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1854"/>
         <source>Zone: {0}</source>
         <translation>Sona: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1851"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1854"/>
         <source>no pixel</source>
         <translation>walang pixel</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2745"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2776"/>
         <source>LAST PICKS</source>
         <translation>HULING MGA PAGBASA</translation>
     </message>
@@ -5965,37 +5965,37 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">Dami na pinaglalapatan ng saklaw. Binabasa ng dalisdis, direksyon ng dalisdis, hillshade at gaspang ang band bilang DTM.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1398"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1401"/>
         <source>Pixel value</source>
         <translation>Halaga ng pixel</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1398"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1401"/>
         <source>Slope (degrees)</source>
         <translation>Dalisdis (degree)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1398"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1401"/>
         <source>Slope (%)</source>
         <translation>Dalisdis (%)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1398"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1401"/>
         <source>Aspect (degrees)</source>
         <translation>Direksyon ng dalisdis (degree)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1398"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1401"/>
         <source>Hillshade (0-255)</source>
         <translation>Hillshade (0-255)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1398"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1401"/>
         <source>Roughness (TRI, mean difference)</source>
         <translation>Gaspang (TRI, karaniwang pagkakaiba)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1408"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1411"/>
         <source>Usual thresholds of the quantity</source>
         <translation>Karaniwang mga threshold ng dami</translation>
     </message>
@@ -6005,47 +6005,47 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">Karaniwang mga threshold</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2272"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2275"/>
         <source>Flat</source>
         <translation>Patag</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2272"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2275"/>
         <source>Gentle</source>
         <translation>Banayad</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2272"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2275"/>
         <source>Moderate</source>
         <translation>Katamtaman</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2273"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2276"/>
         <source>Steep</source>
         <translation>Matarik</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2273"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2276"/>
         <source>East</source>
         <translation>Silangan</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2273"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2276"/>
         <source>South</source>
         <translation>Timog</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2274"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2277"/>
         <source>West</source>
         <translation>Kanluran</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2274"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2277"/>
         <source>Shadow</source>
         <translation>Anino</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2274"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2277"/>
         <source>Lit</source>
         <translation>Maliwanag</translation>
     </message>
@@ -6055,27 +6055,27 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">Karaniwang mga threshold…</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1134"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1137"/>
         <source>PIPETTE</source>
         <translation>PICKER</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1270"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1273"/>
         <source>Tolerance ±</source>
         <translation>Tolerance ±</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1277"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1280"/>
         <source>Tolerance around the picked color or value, in % of the value range</source>
         <translation>Tolerance sa paligid ng napiling kulay o halaga, sa % ng saklaw ng halaga</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1278"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1281"/>
         <source>Pipette tolerance</source>
         <translation>Tolerance ng picker</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1501"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1504"/>
         <source>Bands</source>
         <translation>Mga band</translation>
     </message>
@@ -6120,22 +6120,22 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">Kailangan ng larawang may tatlo o higit pang band (pula, berde, asul...)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1520"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1523"/>
         <source>Vegetation (NDVI &gt; 0.3)</source>
         <translation>Halaman (NDVI &gt; 0.3)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1520"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1523"/>
         <source>No vegetation (NDVI &lt; 0.1)</source>
         <translation>Walang halaman (NDVI &lt; 0.1)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1521"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1524"/>
         <source>Water (NDWI &gt; 0.1)</source>
         <translation>Tubig (NDWI &gt; 0.1)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1521"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1524"/>
         <source>Vegetation (excess green)</source>
         <translation>Halaman (excess green)</translation>
     </message>
@@ -6145,12 +6145,12 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">Mga spectral preset…</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2428"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2431"/>
         <source>This pixel has no value (NoData): pick another one</source>
         <translation>Walang halaga ang pixel na ito (NoData): pumili ng iba</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2538"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2541"/>
         <source>The tolerance covers every value: lower it</source>
         <translation>Sakop ng tolerance ang bawat halaga: ibaba ito</translation>
     </message>
@@ -6175,12 +6175,12 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">Expression</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="854"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="857"/>
         <source>BANDS</source>
         <translation>MGA BAND</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="897"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="900"/>
         <source>Value of the active band under the cursor</source>
         <translation>Halaga ng aktibong band sa ilalim ng cursor</translation>
     </message>
@@ -6190,7 +6190,7 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">Mga istatistika ng aktibong band sa huling parihabang iginuhit sa mapa</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="938"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="941"/>
         <source>Every band</source>
         <translation>Lahat ng band</translation>
     </message>
@@ -6200,7 +6200,7 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">Sabay-sabay na nalalapat ang saklaw ng halaga sa bawat color band (pinananatili ang pixel kapag nasa saklaw ang bawat band); ipinapakita ng histogram ang una</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="872"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="875"/>
         <source>Display the first checked band in grey or the checked bands as a colour composite</source>
         <translation type="unfinished"></translation>
     </message>
@@ -6210,142 +6210,142 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">Ikinukumpara ng picker ang band na ito</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1049"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1052"/>
         <source>Colour the band holds: the spectral indexes and the chips use it. Click to change it</source>
         <translation>Kulay na taglay ng band: ginagamit ito ng mga spectral index at ng mga chip. I-click para baguhin</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1059"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1062"/>
         <source>Value at the last click of the pipette</source>
         <translation>Halaga sa huling click ng picker</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="991"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="994"/>
         <source>No colour</source>
         <translation>Walang kulay</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="999"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1002"/>
         <source>RGB</source>
         <translation>RGB</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="999"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1002"/>
         <source>Bands 1, 2, 3 are red, green, blue</source>
         <translation>Ang mga band 1, 2, 3 ay pula, berde, asul</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="999"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1002"/>
         <source>IRC</source>
         <translation>CIR</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="999"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1002"/>
         <source>Bands 1, 2, 3 are infrared, red, green (IGN infrared colour orthophoto)</source>
         <translation>Ang mga band 1, 2, 3 ay infrared, pula, berde (IGN infrared color orthophoto)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="999"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1002"/>
         <source>RGB + NIR</source>
         <translation>RGB + NIR</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="999"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1002"/>
         <source>Bands 1, 2, 3, 4 are red, green, blue, near infrared</source>
         <translation>Ang mga band 1, 2, 3, 4 ay pula, berde, asul, near infrared</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1002"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1005"/>
         <source>Every band: {0}</source>
         <translation>Lahat ng band: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1048"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1051"/>
         <source> Roles guessed, to confirm.</source>
         <translation> Hinulaan ang mga tungkulin, kumpirmahin.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1112"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1115"/>
         <source>R</source>
         <translation>R</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1112"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1115"/>
         <source>G</source>
         <translation>G</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1112"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1115"/>
         <source>B</source>
         <translation>B</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1113"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1116"/>
         <source>NIR</source>
         <translation>NIR</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1116"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1119"/>
         <source>Red</source>
         <translation>Pula</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1116"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1119"/>
         <source>Green</source>
         <translation>Berde</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1116"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1119"/>
         <source>Blue</source>
         <translation>Asul</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1117"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1120"/>
         <source>Near infrared</source>
         <translation>Near infrared</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1123"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1126"/>
         <source>roles guessed, to confirm</source>
         <translation>hinulaan ang mga tungkulin, kumpirmahin</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1138"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1141"/>
         <source>Select</source>
         <translation>Piliin</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1142"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1145"/>
         <source>Similar pixels</source>
         <translation>Mga katulad na pixel</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1142"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1145"/>
         <source>Every pixel of the raster close to the picked colour or value (the pipette of the rail)</source>
         <translation>Bawat pixel ng raster na malapit sa kinuhang kulay o halaga (ang picker ng rail)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1142"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1145"/>
         <source>Clicked object</source>
         <translation>Na-click na object</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1142"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1145"/>
         <source>Only the patch of such pixels the click falls in: a pool, a roof, a field (the object detector of the rail); Ctrl+click adds another object</source>
         <translation>Ang patch lamang ng gayong pixel kung saan bumagsak ang click: isang pool, bubong, bukid (ang object detector ng rail); ang Ctrl+click ay nagdaragdag ng isa pang object</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1142"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1145"/>
         <source>Similar objects</source>
         <translation>Mga katulad na object</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1142"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1145"/>
         <source>Every object of the raster like the clicked one: the patches of such pixels whose area is within the ratios below (the similar objects tool of the rail); Ctrl+click adds another reference object</source>
         <translation>Bawat object ng raster na katulad ng na-click: ang mga patch ng gayong pixel na nasa loob ng mga ratio sa ibaba ang area (ang similar objects tool ng rail); ang Ctrl+click ay nagdaragdag ng isa pang reference na object</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1215"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1218"/>
         <source>Area ×</source>
         <translation>Area ×</translation>
     </message>
@@ -6360,72 +6360,72 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">Pinakamalaking katulad na object, bilang multiple ng pinakamalaking na-click na object</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1231"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1234"/>
         <source>to ×</source>
         <translation>hanggang ×</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1234"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1237"/>
         <source>same shape</source>
         <translation>kaparehong hugis</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1237"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1240"/>
         <source>Keep only the objects shaped like the clicked ones: their compactness (4π × area / perimeter², 1 for a disc) within the same ratios; off, a road of the area of a pool is a pool</source>
         <translation>Panatilihin lamang ang mga object na kahugis ng mga na-click: ang compactness nila (4π × area / perimeter², 1 para sa isang disc) sa loob ng parehong ratio; kapag naka-off, ang kalsadang kasing-area ng isang pool ay pool</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1311"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1314"/>
         <source>Remove this pick</source>
         <translation>Alisin ang pagkuhang ito</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1390"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1393"/>
         <source>Quantity</source>
         <translation>Sukat</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2331"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2334"/>
         <source>Quantity the range applies to. Slope, aspect, hillshade and roughness read the active band as a DTM.</source>
         <translation>Sukat na pinaglalapatan ng saklaw. Binabasa ng slope, aspect, hillshade at roughness ang aktibong band bilang DTM.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1408"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1411"/>
         <source>Thresholds ▾</source>
         <translation>Mga threshold ▾</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1480"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1483"/>
         <source>Insert ▾</source>
         <translation>Isingit ▾</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1480"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1483"/>
         <source>Insert a band reference, a usual spectral index or the current range</source>
         <translation>Magsingit ng reference ng band, karaniwang spectral index o ang kasalukuyang saklaw</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1509"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1512"/>
         <source>Spectral indexes</source>
         <translation>Mga spectral index</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1514"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1517"/>
         <source>Range</source>
         <translation>Saklaw</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1515"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1518"/>
         <source>The current value range</source>
         <translation>Ang kasalukuyang saklaw ng halaga</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1626"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1629"/>
         <source>Rendered colors depend on style and scale.</source>
         <translation>Nakadepende sa style at scale ang mga kulay na ipinapakita.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1626"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1629"/>
         <source>Only color selection is available: numeric bands, indices, ranges, classes and derivatives are unavailable.</source>
         <translation>Pagpili ng kulay lamang ang available: hindi available ang mga numerong band, index, saklaw, klase at derivative.</translation>
     </message>
@@ -6435,287 +6435,287 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">VALUE RANGE — lahat ng band</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2133"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2136"/>
         <source>VALUE RANGE — band {0}</source>
         <translation>VALUE RANGE — band {0}</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2327"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2330"/>
         <source>picks on: {0}</source>
         <translation>kumukuha mula sa: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2331"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2334"/>
         <source>A slope, aspect... reads one band as a DTM: choose a band in BANDS first</source>
         <translation>Binabasa ng slope, aspect... ang isang band bilang DTM: pumili muna ng band sa BANDS</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2573"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2576"/>
         <source>The object could not be read</source>
         <translation>Hindi nabasa ang object</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2575"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2578"/>
         <source>No object under the click: raise the tolerance or click another pixel</source>
         <translation>Walang object sa ilalim ng click: itaas ang tolerance o mag-click ng ibang pixel</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2577"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2580"/>
         <source>An object is larger than the window read and was cut: lower the tolerance</source>
         <translation>Mas malaki sa binasang window ang isang object at pinutol: ibaba ang tolerance</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1077"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1080"/>
         <source>Choose 1 to 3 bands for display.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1079"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1082"/>
         <source>Grey: band {0}</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="869"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="872"/>
         <source>Layer style</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="865"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="868"/>
         <source>Map display</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1081"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1084"/>
         <source>R: {0} · G: {1} · B: {2}</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="952"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="955"/>
         <source>Select band {0}</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="871"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="874"/>
         <source>Selected bands</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2409"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2412"/>
         <source>Choose at least one band in BANDS before using the pipette.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="870"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="873"/>
         <source>First checked band</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="941"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="944"/>
         <source>Select or clear every band. The histogram shows the first checked band.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="951"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="954"/>
         <source>Use this band for the pipette, value range and selected bands display</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2131"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2134"/>
         <source>VALUE RANGE — selected bands</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="904"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="907"/>
         <source>Statistics of the active band in the box of the last zone drawn on the map; only the pixels inside the zone are selected</source>
         <translation>Mga istatistika ng aktibong band sa extent ng huling zone na iginuhit sa mapa; ang mga pixel lamang sa loob ng zone ang napipili</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1142"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1145"/>
         <source>Segment</source>
         <translation>I-segment</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1142"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1145"/>
         <source>Draw an object with the segmentation model: left click on it, right click off it, or drag a box; Enter validates. Best on buildings and other well delimited objects</source>
         <translation>Gumuhit ng bagay gamit ang segmentation model: left-click dito, right-click sa labas nito, o mag-drag ng kahon; ang Enter ang magpapatunay. Pinakamahusay sa mga gusali at iba pang malinaw ang hangganang bagay</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1182"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1185"/>
         <source>Download the SAM 2.1 tiny model once, into your QGIS profile; the segmentation then runs locally, on the CPU</source>
         <translation>I-download nang isang beses ang SAM 2.1 tiny model sa iyong QGIS profile; tatakbo na ang segmentation nang lokal, sa CPU</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1191"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1194"/>
         <source>Validate object</source>
         <translation>Patunayan ang bagay</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1193"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1196"/>
         <source>Add the object drawn to the selection (Enter on the map)</source>
         <translation>Idagdag ang iginuhit na bagay sa napili (Enter sa mapa)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2709"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2740"/>
         <source>Clear</source>
         <translation>I-clear</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1198"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1201"/>
         <source>Forget the validated objects</source>
         <translation>Kalimutan ang mga napatunayang bagay</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1218"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1221"/>
         <source>Smallest similar object, as a share of each clicked reference</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1218"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1221"/>
         <source>Largest similar object, as a multiple of each clicked reference</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1250"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1253"/>
         <source>Separation</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1253"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1256"/>
         <source>Connected pixels</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1255"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1258"/>
         <source>Bridge removal: {0} px</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1257"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1260"/>
         <source>Separate objects joined by narrow bridges; higher values cut wider bridges</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1260"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1263"/>
         <source>Fill holes</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1263"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1266"/>
         <source>Fill enclosed gaps in the clicked object; clear to preserve courtyards and inner rings</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1405"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1408"/>
         <source>Custom expression</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1415"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1418"/>
         <source>Numeric raster formula, e.g. (&quot;raster@4&quot; - &quot;raster@1&quot;) / (&quot;raster@4&quot; + &quot;raster@1&quot;)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1416"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1419"/>
         <source>Custom derived value expression</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1417"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1420"/>
         <source>A numeric raster calculator expression. The histogram and thresholds use its computed values.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1475"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1478"/>
         <source>Computed expression values. Drag the handles to use this expression as a derived value with thresholds.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1484"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1487"/>
         <source>Use as derived value</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1693"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1696"/>
         <source>Computing histogram…</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2150"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2153"/>
         <source>No histogram available</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2150"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2153"/>
         <source>Constant value: {0}</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2150"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2153"/>
         <source>{0} sampled pixels · {1} to {2}</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2284"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2287"/>
         <source>Distribution (approximate)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2286"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2289"/>
         <source>Central 98% (P1–P99)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2286"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2289"/>
         <source>Central 90% (P5–P95)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2286"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2289"/>
         <source>Interquartile range (P25–P75)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2286"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2289"/>
         <source>Upper quartile (≥ P75)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2293"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2296"/>
         <source>All values</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2297"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2300"/>
         <source>Derived spectral values</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2640"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2646"/>
         <source>Installing onnxruntime in the background…</source>
         <translation>Ini-install ang onnxruntime sa background…</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2642"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2648"/>
         <source>onnxruntime could not be installed automatically (see the FilterMate log). In a terminal (the OSGeo4W Shell on Windows), run {0} then restart QGIS.</source>
         <translation>Hindi awtomatikong na-install ang onnxruntime (tingnan ang log ng FilterMate). Sa isang terminal (ang OSGeo4W Shell sa Windows), patakbuhin ang {0} at saka i-restart ang QGIS.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2646"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2660"/>
         <source>Install the model ({0} MB)…</source>
         <translation>I-install ang model ({0} MB)…</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2652"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2666"/>
         <source>Repair the model…</source>
         <translation>Ayusin ang model…</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2660"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2691"/>
         <source>Segmentation model</source>
         <translation>Segmentation model</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2660"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2691"/>
         <source>Download the SAM 2.1 tiny model ({0} MB) from huggingface.co/{1} into your QGIS profile?
 
 Every file is checked against its SHA-256. The model then runs locally, on the CPU; nothing leaves your computer.</source>
@@ -6724,14 +6724,38 @@ Every file is checked against its SHA-256. The model then runs locally, on the C
 Bawat file ay sinusuri laban sa SHA-256 nito. Tatakbo na ang model nang lokal, sa CPU; walang lalabas sa iyong computer.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2709"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2740"/>
         <source>Clear ({0})</source>
         <translation>I-clear ({0})</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2749"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2780"/>
         <source>Derived value: {0}</source>
         <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2652"/>
+        <source>The segmentation needs onnxruntime (about {0} MB), which is not installed yet.</source>
+        <translation>Kailangan ng segmentation ang onnxruntime (mga {0} MB), na hindi pa naka-install.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2656"/>
+        <source>Install onnxruntime…</source>
+        <translation>I-install ang onnxruntime…</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2675"/>
+        <source>Segmentation</source>
+        <translation>Segmentation</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2675"/>
+        <source>The segmentation needs onnxruntime (about {0} MB), which this QGIS does not have.
+
+Install it now from PyPI with pip, into your QGIS profile? The Python of QGIS is not modified.</source>
+        <translation>Kailangan ng segmentation ang onnxruntime (mga {0} MB), na wala sa QGIS na ito.
+
+I-install ito ngayon mula sa PyPI gamit ang pip, sa iyong QGIS profile? Hindi binabago ang Python ng QGIS.</translation>
     </message>
 </context>
 <context>
@@ -7038,7 +7062,7 @@ Bawat file ay sinusuri laban sa SHA-256 nito. Tatakbo na ang model nang lokal, s
         <translation>Inihahanda ang segmentation ng lugar na ito…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="368"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="370"/>
         <source>The segmentation of this area failed: {0}</source>
         <translation>Nabigo ang segmentation ng lugar na ito: {0}</translation>
     </message>
@@ -7058,65 +7082,70 @@ Bawat file ay sinusuri laban sa SHA-256 nito. Tatakbo na ang model nang lokal, s
         <translation>Wala ang onnxruntime: patakbuhin ang {0}, at saka i-restart ang QGIS</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="251"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="253"/>
         <source>The segmentation model is being downloaded, click again once it is installed</source>
         <translation>Dina-download ang segmentation model, mag-click muli kapag na-install na ito</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="253"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="255"/>
         <source>Install the segmentation model first (button below)</source>
         <translation>I-install muna ang segmentation model (button sa ibaba)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="254"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="256"/>
         <source>The segmentation model could not be loaded (see the FilterMate log)</source>
         <translation>Hindi ma-load ang segmentation model (tingnan ang log ng FilterMate)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="274"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="276"/>
         <source>Downloading the segmentation model… {0} %</source>
         <translation>Dina-download ang segmentation model… {0} %</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="283"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="285"/>
         <source>Model installed: left click on an object, or draw a box</source>
         <translation>Naka-install na ang model: left-click sa isang bagay, o gumuhit ng kahon</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="285"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="287"/>
         <source>The model could not be downloaded: {0}</source>
         <translation>Hindi ma-download ang model: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="287"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="289"/>
         <source>Download canceled</source>
         <translation>Kinansela ang pag-download</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="305"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="307"/>
         <source>Click on an object in the area prepared</source>
         <translation>Mag-click sa isang bagay sa inihandang lugar</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="371"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="373"/>
         <source>No object found: add a point or draw a box</source>
         <translation>Walang nakitang bagay: magdagdag ng punto o gumuhit ng kahon</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="322"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="324"/>
         <source>Left click adds to the object, right click removes, Enter validates</source>
         <translation>Ang left-click ay nagdaragdag sa bagay, ang right-click ay nag-aalis, ang Enter ay nagpapatunay</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="362"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="364"/>
         <source>Click an object first</source>
         <translation>Mag-click muna sa isang bagay</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="251"/>
+        <source>Install onnxruntime first, with the button below</source>
+        <translation>I-install muna ang onnxruntime gamit ang button sa ibaba</translation>
     </message>
 </context>
 <context>
     <name>SegmentationEmbedTask</name>
     <message>
-        <location filename="../adapters/qgis/coverage_layers/segmentation.py" line="237"/>
+        <location filename="../adapters/qgis/coverage_layers/segmentation.py" line="238"/>
         <source>FilterMate: preparing the segmentation</source>
         <translation>FilterMate: inihahanda ang segmentation</translation>
     </message>

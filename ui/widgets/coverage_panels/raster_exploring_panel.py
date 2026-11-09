@@ -735,6 +735,7 @@ class RasterExploringPanel(QWidget):
     segmentValidateRequested = pyqtSignal()
     segmentToolRequested = pyqtSignal()
     segmentModelInstallRequested = pyqtSignal()
+    segmentRuntimeInstallRequested = pyqtSignal()
     displayChanged = pyqtSignal()
 
     def __init__(self, parent=None):
@@ -766,6 +767,8 @@ class RasterExploringPanel(QWidget):
         self._segments: List[str] = []  # WKT of the objects validated with the segmentation tool (layer CRS)
         self._model_runtime = True  # onnxruntime can be imported (the user installs it)
         self._model_installed = True  # the model files are in the profile (downloaded on request)
+        self._runtime_installing = False  # pip runs for onnxruntime
+        self._runtime_asked = False  # the user was asked once this session: the button stays for a change of mind
         self._stashed_preset: Optional[RasterSelection] = None  # the spectral preset the Segment target set aside
         self._band_spans: Dict[int, float] = {}  # observed value range of each band (statistics of the layer)
         self._pipette_on = False  # the pipette tool is on the map
@@ -2624,6 +2627,8 @@ class RasterExploringPanel(QWidget):
         self.targetChanged.emit(self._pick_target)
         if target == PICK_SEGMENT:
             self._apply_segments()
+            if not self._model_runtime and not self._runtime_installing and not self._runtime_asked:
+                self._ask_runtime_install()
         elif left_segments:
             self._leave_segments()
         elif self._picks and self._pick_kind in ("color", "value", "classes"):
@@ -2632,17 +2637,26 @@ class RasterExploringPanel(QWidget):
     # === Segmentation (the model is FilterMate's own, downloaded on request; see adapters sam_model) ===
 
     def set_segmentation_readiness(self, runtime_available: bool, model_installed: bool, downloading: bool = False,
-                                   installing_runtime: bool = False) -> None:
+                                   installing_runtime: bool = False, runtime_failed: bool = False) -> None:
         """Say what the Segment target still lacks; the target itself stays, validated objects filter without a model."""
-        from ....adapters.qgis.coverage_layers.sam_model import install_command, total_megabytes
+        from ....adapters.qgis.coverage_layers.sam_model import RUNTIME_MEGABYTES, install_command, total_megabytes
         self._model_runtime, self._model_installed = bool(runtime_available), bool(model_installed)
+        self._runtime_installing = bool(installing_runtime)
         if installing_runtime:
             self._segment_install_label.setText(self.tr("Installing onnxruntime in the background…"))
-        elif not self._model_runtime:
+        elif runtime_failed:
             self._segment_install_label.setText(self.tr(
                 "onnxruntime could not be installed automatically (see the FilterMate log). In a terminal "
                 "(the OSGeo4W Shell on Windows), run {0} then restart QGIS.").format(install_command()))
+        elif not self._model_runtime:
+            self._segment_install_label.setText(self.tr(
+                "The segmentation needs onnxruntime (about {0} MB), which is not installed yet.").format(RUNTIME_MEGABYTES))
         self._segment_install_label.setVisible(not self._model_runtime)
+        if not self._model_runtime:  # first the runtime, then the model
+            self._segment_install_button.setText(self.tr("Install onnxruntime…"))
+            self._segment_install_button.setEnabled(not installing_runtime)
+            self._segment_install_button.setVisible(True)
+            return
         self._segment_install_button.setText(self.tr("Install the model ({0} MB)…").format(total_megabytes()))
         self._segment_install_button.setEnabled(not downloading)
         self._segment_install_button.setVisible(not self._model_installed)
@@ -2653,8 +2667,25 @@ class RasterExploringPanel(QWidget):
         self._segment_install_button.setEnabled(True)
         self._segment_install_button.setVisible(True)
 
+    def _ask_runtime_install(self) -> None:
+        """Nothing is installed without this answer; a refusal is not asked again this session, the button stays."""
+        from qgis.PyQt.QtWidgets import QMessageBox
+        from ....adapters.qgis.coverage_layers.sam_model import RUNTIME_MEGABYTES
+        self._runtime_asked = True
+        answer = QMessageBox.question(self, self.tr("Segmentation"), self.tr(
+            "The segmentation needs onnxruntime (about {0} MB), which this QGIS does not have.\n\n"
+            "Install it now from PyPI with pip, into your QGIS profile? "
+            "The Python of QGIS is not modified.").format(RUNTIME_MEGABYTES))
+        if answer != QMessageBox.StandardButton.Yes:
+            return
+        self._segment_install_button.setEnabled(False)
+        self.segmentRuntimeInstallRequested.emit()
+
     def _on_install_model_clicked(self) -> None:
         """Ask before the download, then let the controller fetch the files; the button waits for the answer."""
+        if not self._model_runtime:
+            self._ask_runtime_install()
+            return
         from qgis.PyQt.QtWidgets import QMessageBox
         from ....adapters.qgis.coverage_layers.sam_model import REPOSITORY, total_megabytes
         answer = QMessageBox.question(self, self.tr("Segmentation model"), self.tr(

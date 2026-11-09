@@ -1094,6 +1094,7 @@ class CoverageModeController(BaseController):
             raster.targetChanged.connect(self._on_raster_target_changed)
             raster.segmentToolRequested.connect(self._on_segment_tool_requested)
             raster.segmentModelInstallRequested.connect(lambda: self._segmentation_controller().install_model())
+            raster.segmentRuntimeInstallRequested.connect(self._on_segment_runtime_install_requested)
         if hasattr(pc, 'groupChosen'):
             pc.groupChosen.connect(self._on_point_cloud_group_chosen)
         if hasattr(pc, 'objectsChanged'):
@@ -1128,7 +1129,7 @@ class CoverageModeController(BaseController):
             from ...adapters.qgis.coverage_layers.segmentation import model_state
             state = model_state()
             downloading = self._segmentation is not None and bool(self._segmentation.downloading())
-            self._call(self._raster_panel, 'set_segmentation_readiness', state.runtime, state.installed, downloading, state.installing_runtime)
+            self._call(self._raster_panel, 'set_segmentation_readiness', state.runtime, state.installed, downloading, state.installing_runtime, state.runtime_failed)
             if state.installing_runtime and not self._watching_runtime_install:
                 from ...adapters.qgis import python_dependencies
                 self._watching_runtime_install = True
@@ -1136,9 +1137,19 @@ class CoverageModeController(BaseController):
         except Exception as exc:  # the rest of the raster panel does not depend on it
             logger.debug(f"[FM5] segmentation readiness not refreshed: {exc}")
 
+    def _on_segment_runtime_install_requested(self) -> None:
+        """The user agreed to the install of onnxruntime."""
+        from ...adapters.qgis import python_dependencies
+        python_dependencies.install_missing(self._on_runtime_installed)
+        self._refresh_segmentation_readiness()
+
+    def _on_runtime_installed(self, _packages: Any) -> None:
+        if not getattr(self, '_torn_down', False) and self._raster_panel is not None:
+            self._call(self._raster_panel, 'set_segmentation_status', self.tr("onnxruntime installed"))
+
     def _on_runtime_install_done(self) -> None:
         self._watching_runtime_install = False
-        if not self._torn_down and self._raster_panel is not None:
+        if not getattr(self, '_torn_down', False) and self._raster_panel is not None:
             self._refresh_segmentation_readiness()
 
     def _band_spans(self, layer: Any, band_count: int) -> Dict[int, float]:
