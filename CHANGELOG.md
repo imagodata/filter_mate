@@ -15,6 +15,8 @@ All notable changes to FilterMate will be documented in this file.
 
 - **Interactive segmentation of a raster (experimental).** A **Segment** target in the PIPETTE group: click on an object or drag a box, and a SAM 2.1 model draws it locally, on the CPU; Enter validates. Validated objects are plain polygons (`RasterSelection.segments`), so the filter applied to the other layers needs no model; Processing and the REST API do not accept them yet. Best on buildings and well delimited objects (median IoU 0.82 with a box against 0.52 for the object detector with 3 clicks); parcels and trees are not validated. FilterMate ships neither the model nor its runtime: `onnxruntime`, declared by the `python_dependencies` key of `metadata.txt`, is installed into your QGIS profile once you confirm, at the first click on Segment, and the panel offers to download the model (62 MB, pinned revision, every file checked against its SHA-256) into your QGIS profile. See `docs/SEGMENTATION.md`. The object detector stays as it was.
 
+- **The targets of the PIPETTE group fit the dock.** They stood on one row of 531 px in French: in a dock of the default width, *Similar objects* and *Segment* were cut off on the right, with no scroll bar. They now stand on two columns.
+
 ## [5.0.2] - 2026-11-06
 
 Patch release on 5.0.1: changing between vector layers no longer empties the single selection or selects a feature nobody picked, the dock stays usable on small scaled screens, several features that failed only in QGIS work, and the Configuration tab gets a search bar.
