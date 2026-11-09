@@ -400,6 +400,9 @@ class FilterMate:
             self._stale_cache_timer.timeout.connect(self._cleanup_stale_cache)
             self._stale_cache_timer.start(30000)
 
+            from .adapters.qgis import python_dependencies
+            python_dependencies.activate_installed()
+
             logger.debug("FilterMate.initGui: Completed successfully")
 
         except Exception as e:
@@ -1379,6 +1382,12 @@ class FilterMate:
 
         # print "** UNLOAD FilterMate"
 
+        try:
+            from .adapters.qgis import python_dependencies
+            python_dependencies.cancel()
+        except Exception as exc:  # nothing may stop the unload
+            logger.debug(f"Python dependencies install not canceled: {exc}")
+
         # v4.7.0: Emit about_to_unload signal for inter-plugin communication
         if hasattr(self, '_public_api') and self._public_api is not None:
             try:
@@ -1390,6 +1399,7 @@ class FilterMate:
         # signals and stop their tasks. removeDockWidget / deleteLater below
         # never send the dock a closeEvent (and closing it only hides it).
         if self.app and self.app.dockwidget:
+            self.app.dockwidget.shutdown_agent_panel(unloading=True)
             try:
                 integration = getattr(self.app.dockwidget, '_controller_integration', None)
                 if integration is not None:
@@ -1827,6 +1837,7 @@ class FilterMate:
                         if not self._show_whats_new():
                             self._show_discord_welcome()
                         self._init_extensions_dockwidget_ui()
+                        self.app.dockwidget.install_agent_panel(self)
                 else:
                     # App already exists, call run() which will show the dockwidget
                     # and refresh layers if needed
@@ -1839,6 +1850,7 @@ class FilterMate:
                         except TypeError:
                             pass  # Not connected, ignore
                         self.app.dockwidget.closingPlugin.connect(self.onClosePlugin)
+                        self.app.dockwidget.install_agent_panel(self)
             except Exception as e:
                 self.iface.messageBar().pushCritical(
                     "FilterMate",

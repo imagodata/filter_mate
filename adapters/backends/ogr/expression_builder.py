@@ -166,7 +166,10 @@ def source_capability(layer):
         from core.domain.source_capability import classify_layer as capability_for_layer
     capability = capability_for_layer(layer)
     if capability is None:
-        from core.domain.source_capability import classify
+        try:
+            from ....core.domain.source_capability import classify
+        except ImportError:  # loaded outside the plugin package (unit tests)
+            from core.domain.source_capability import classify
         capability = classify('', '')
     return capability
 

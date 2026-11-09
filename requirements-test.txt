@@ -1,5 +1,7 @@
 # Test dependencies for FilterMate
-pytest>=7.0.0
+# < 9.2: its monkeypatch.undo() deletes an auto-created attribute of a MagicMock for good, and the
+# qgis.* mocks of tests/conftest.py are shared by the whole suite (296 failures, 184 errors).
+pytest>=7.0.0,<9.2
 pytest-cov>=4.0.0
 pytest-mock>=3.10.0
 numpy>=1.24,<3

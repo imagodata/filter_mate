@@ -23,8 +23,14 @@ ROOT = Path(__file__).resolve().parents[3]
 EXPECTED_TOOLS = {
     "list_layers", "apply_filter", "filter_status", "undo_filter", "redo_filter", "cross_filter", "geometry_filter",
     "point_cloud_filter", "clear_filters", "filter_state", "list_favorites", "apply_favorite", "export_layers",
+    "describe_layer", "field_values", "preview_filter", "map_context",
+    "zoom_to", "select_features", "set_layers_visibility", "add_layer", "remove_layers", "search_open_data",
+    "add_service_layer", "search_imagery",
 }
-READ_ONLY = {"list_layers", "filter_status", "filter_state", "list_favorites"}
+READ_ONLY = {"list_layers", "filter_status", "filter_state", "list_favorites", "describe_layer", "field_values",
+             "preview_filter", "map_context", "search_open_data", "search_imagery"}
+OPEN_WORLD = {"add_layer", "search_open_data", "add_service_layer", "search_imagery"}
+DESTRUCTIVE = {"export_layers", "remove_layers"}
 
 
 @pytest.fixture(scope="module")
@@ -51,12 +57,12 @@ def test_one_tool_per_endpoint_with_annotations(mcp):
         assert tool["description"] and len(tool["description"]) > 40, name
         annotations = tool["annotations"]
         assert annotations is not None, name
-        assert annotations["openWorldHint"] is False
+        assert annotations["openWorldHint"] is (name in OPEN_WORLD), name
         if name in READ_ONLY:
             assert annotations["readOnlyHint"] is True, name
         else:
             assert annotations["readOnlyHint"] is False, name
-            assert annotations["destructiveHint"] is (name == "export_layers"), name
+            assert annotations["destructiveHint"] is (name in DESTRUCTIVE), name
     assert tools["undo_filter"]["annotations"]["idempotentHint"] is False
     assert tools["redo_filter"]["annotations"]["idempotentHint"] is False
     assert tools["clear_filters"]["annotations"]["idempotentHint"] is True

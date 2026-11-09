@@ -206,6 +206,15 @@ def rail_floor(button_heights, gap: int) -> int:
     return sum(heights) + gap * (len(heights) + 1) if heights else 0
 
 
+def rail_width(rail: Any) -> int:
+    """Width the rail really takes: a scroll area keeps its widget at the larger of these two.
+
+    ``minimumSizeHint`` alone is the width of the buttons (36 px), and ignores the minimum width of the display
+    profile (56 px from 1920 x 1080 up), so the scroll area cut the rail, and the centred icons, on the right.
+    """
+    return max(rail.minimumWidth(), rail.minimumSizeHint().width())
+
+
 COMPACT_BUTTON_MIN = 22  # a rail button never goes under this (16 px icon with a margin)
 
 
@@ -239,6 +248,7 @@ class _RailSpreader(QObject if QObject is not None else object):
         self._dw = dw
         self._state = None
         self._watched = set()
+        self._watched_bands = set()
         self._pending = False
         rail.installEventFilter(self)
         self.spread()
@@ -248,11 +258,31 @@ class _RailSpreader(QObject if QObject is not None else object):
             if event.type() in (QEvent.Type.ShowToParent, QEvent.Type.HideToParent,
                                 QEvent.Type.ChildAdded, QEvent.Type.LayoutRequest):
                 self._schedule()
-            elif event.type() == QEvent.Type.Resize and watched is self.parent():
+            elif event.type() == QEvent.Type.Resize and (watched is self.parent() or watched is self._band()):
+                self._follow_rail_width()
                 self._fit()  # the band changed: the buttons fit it (compact or natural)
         except RuntimeError:
             pass  # plugin closing
         return False
+
+    def _band(self):
+        """The viewport of the scroll area holding the rail, None before rail_outside_scroll."""
+        viewport = self.parent().parentWidget() if self.parent() is not None else None
+        return viewport if viewport is not None and viewport.objectName() == 'qt_scrollarea_viewport' else None
+
+    def _follow_rail_width(self) -> None:
+        """The scroll area has the width of the rail, and goes away with it."""
+        band = self._band()
+        if band is None:
+            return
+        holder = band.parentWidget()
+        rail = self.parent()
+        holder.setFixedWidth(rail_width(rail))
+        if holder.isHidden() != rail.isHidden():
+            holder.setVisible(not rail.isHidden())
+        if band not in self._watched_bands:
+            band.installEventFilter(self)  # the band can change while the rail keeps its height
+            self._watched_bands.add(band)
 
     def _schedule(self) -> None:
         if not self._pending:
@@ -264,6 +294,7 @@ class _RailSpreader(QObject if QObject is not None else object):
         """Rebuild even if no button changed: the dimensions manager resets the rail spacing and
         resizes its spacers (``apply_dynamic_dimensions`` runs after this spreader is built)."""
         self._state = None
+        self._follow_rail_width()  # a lower minimum width (other screen) resizes nothing by itself
         self.spread()
 
     def spread(self) -> None:
@@ -327,7 +358,9 @@ class _RailSpreader(QObject if QObject is not None else object):
                     button.setProperty('fm_natural_max', button.maximumHeight())
                 naturals.append(int(natural))
             margins = self._layout.contentsMargins()
-            available = rail.height() - margins.top() - margins.bottom()
+            # The rail may be taller than its band when it scrolls: the band is what counts.
+            band = self._band()
+            available = (band.height() if band is not None else rail.height()) - margins.top() - margins.bottom()
             if available <= 0:
                 return
             natural = max(naturals)
@@ -361,7 +394,9 @@ def pack_exploring_rail(dw: Any) -> bool:
 SECTION_TAB_HEIGHT = BAND
 SECTION_ICON_SIZE = 16
 SECTION_ICON_LEFT = 12
-SECTION_ICONS = ('filter', 'export', 'settings')  # FILTERING, EXPORTING, CONFIGURATION
+SECTION_ICONS = ('filter', 'export', 'settings', 'agent')  # FILTERING, EXPORTING, CONFIGURATION, AGENT (optional)
+AGENT_SECTION_TITLE = 'AGENT'
+_AGENT_ICON_KEY = SECTION_ICONS.index('agent')
 
 
 def size_section_tabs(dw: Any) -> bool:
@@ -375,9 +410,8 @@ def size_section_tabs(dw: Any) -> bool:
         return False
     if getattr(dw, '_fm_section_icon_labels', None):
         return True  # already done: a second pass would stack a second set of labels
-    from qgis.PyQt.QtCore import Qt
     from qgis.PyQt.QtGui import QIcon
-    from qgis.PyQt.QtWidgets import QAbstractButton, QLabel
+    from qgis.PyQt.QtWidgets import QAbstractButton
     buttons = {button.text(): button for button in toolbox.findChildren(QAbstractButton)
                if button.objectName() == 'qt_toolbox_toolboxbutton'}
     labels = {}
@@ -385,19 +419,57 @@ def size_section_tabs(dw: Any) -> bool:
         button = buttons.get(toolbox.itemText(index))
         if button is None:
             continue
-        button.setMinimumHeight(SECTION_TAB_HEIGHT)
-        # Qt draws a tab icon at the top of the tab: the icon becomes a label centred on the left.
         toolbox.setItemIcon(index, QIcon())
-        label = QLabel(button)
-        label.setObjectName('label_section_icon')
-        label.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents, True)
-        label.setScaledContents(True)  # a 64 px pixmap shown at 16 px stays sharp on HiDPI screens
-        label.setGeometry(SECTION_ICON_LEFT, (SECTION_TAB_HEIGHT - SECTION_ICON_SIZE) // 2,
-                          SECTION_ICON_SIZE, SECTION_ICON_SIZE)
-        labels[index] = label
+        labels[index] = _section_icon_label(button)
     dw._fm_section_icon_labels = labels
     update_section_icons(dw)
     return bool(labels)
+
+
+def _section_icon_label(button: Any) -> Any:
+    """Header at the mockup height. Qt draws a tab icon at the top of the tab: it becomes a label centred on the left."""
+    from qgis.PyQt.QtCore import Qt
+    from qgis.PyQt.QtWidgets import QLabel
+    button.setMinimumHeight(SECTION_TAB_HEIGHT)
+    label = QLabel(button)
+    label.setObjectName('label_section_icon')
+    label.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents, True)
+    label.setScaledContents(True)  # a 64 px pixmap shown at 16 px stays sharp on HiDPI screens
+    label.setGeometry(SECTION_ICON_LEFT, (SECTION_TAB_HEIGHT - SECTION_ICON_SIZE) // 2,
+                      SECTION_ICON_SIZE, SECTION_ICON_SIZE)
+    return label
+
+
+def add_agent_section(dw: Any, page: Any) -> Any:
+    """``page`` as the first section of the accordion, with the look of the others. The open section stays open.
+
+    Returns the label at the right of its header (where the requests go), None when the header stays plain.
+    """
+    from qgis.PyQt.QtCore import Qt
+    from qgis.PyQt.QtWidgets import QAbstractButton, QHBoxLayout, QLabel
+    toolbox = dw.toolBox_tabTools
+    toolbox.insertItem(0, page, AGENT_SECTION_TITLE)
+    labels = getattr(dw, '_fm_section_icon_labels', None)
+    if not labels:
+        return None
+    trailer = None
+    try:
+        for button in toolbox.findChildren(QAbstractButton):
+            if button.objectName() == 'qt_toolbox_toolboxbutton' and button.text() == AGENT_SECTION_TITLE:
+                labels[_AGENT_ICON_KEY] = _section_icon_label(button)
+                labels[_AGENT_ICON_KEY].show()
+                row = QHBoxLayout(button)
+                row.setContentsMargins(0, 0, SECTION_ICON_LEFT, 0)
+                row.addStretch(1)
+                trailer = QLabel(button)
+                trailer.setObjectName('label_agent_destination')
+                trailer.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents, True)
+                trailer.setTextFormat(Qt.TextFormat.PlainText)
+                row.addWidget(trailer)
+        update_section_icons(dw)
+    except RuntimeError:  # the section is there, its header is only plainer
+        pass
+    return trailer
 
 
 def update_section_icons(dw: Any, dark: Any = None) -> bool:
@@ -440,7 +512,8 @@ def rail_outside_scroll(dw: Any) -> bool:
     index = outer.indexOf(scroll)
     if index < 0 or grid.indexOf(rail) < 0:
         return False
-    from qgis.PyQt.QtWidgets import QHBoxLayout
+    from qgis.PyQt.QtCore import Qt
+    from qgis.PyQt.QtWidgets import QFrame, QHBoxLayout, QScrollArea, QSizePolicy
     grid.removeWidget(rail)
     grid.setColumnMinimumWidth(0, 0)
     grid.setHorizontalSpacing(0)
@@ -449,7 +522,20 @@ def rail_outside_scroll(dw: Any) -> bool:
     row.setObjectName('horizontalLayout_exploring_rail_and_groups')
     row.setContentsMargins(RAIL_LEFT_INSET, 0, 0, 0)
     row.setSpacing(RAIL_GAP)
-    row.addWidget(rail, 0)
+    # 2026-11-06: a band shorter than the compact buttons (103 px on a 720 px screen, 218 needed) overlapped
+    # them. The rail now scrolls with the wheel in that case, without a scroll bar (no room for one).
+    holder = QScrollArea()
+    holder.setObjectName('scrollArea_exploring_rail')
+    holder.setFrameShape(QFrame.Shape.NoFrame)
+    holder.setWidgetResizable(True)
+    holder.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+    holder.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+    holder.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Expanding)
+    holder.setMinimumHeight(0)
+    holder.setStyleSheet('QScrollArea#scrollArea_exploring_rail { background: transparent; border: none; }')
+    holder.viewport().setAutoFillBackground(False)
+    holder.setWidget(rail)
+    row.addWidget(holder, 0)
     row.addWidget(scroll, 1)
     outer.insertLayout(index, row, 1)
     dw.setProperty('fm_rail_outside', True)

@@ -1320,7 +1320,8 @@ class CoverageDockExtras(QObject):
             checked: Whether the tool is on the map.
             target: ``'similar'`` (the pipette button) or ``'object'`` (the detector button).
         """
-        wanted = self.PIPETTE_BUTTONS.get(target, self.PIPETTE_BUTTONS['similar'])
+        # The segmentation has no button of its own: no pipette of the rail shows down for it.
+        wanted = None if target == 'segment' else self.PIPETTE_BUTTONS.get(target, self.PIPETTE_BUTTONS['similar'])
         for name in self.PIPETTE_BUTTONS.values():
             button = self._tools.get(name)
             if button is None:
@@ -1462,6 +1463,8 @@ class CoverageDockExtras(QObject):
             return
         selection = panel.selection()
         mode = getattr(getattr(panel, 'active_mode', lambda: None)(), 'value', '')
+        if getattr(selection, 'segments', ()):
+            return  # polygons have no range either
         if (selection is not None and getattr(selection.mode, 'value', '') != 'range') or (selection is None and mode == 'pipette'):
             # A colour, a class or an expression has no range: the current stretch stays as it is
             # (stretching over the whole data would undo the user's contrast for nothing).

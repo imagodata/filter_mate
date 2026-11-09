@@ -77,6 +77,34 @@ def test_a_worker_thread_never_touches_the_widget(sql_utils, monkeypatch):
     picker.setLayer.assert_not_called()
 
 
+class _StatefulPicker:
+    """Picker whose layer() follows setLayer(), as the real widget does."""
+
+    def __init__(self, layer):
+        self._layer = layer
+
+    def layer(self):
+        return self._layer
+
+    def setLayer(self, layer):
+        self._layer = layer
+
+
+def test_reattach_does_not_steal_the_picker_back(sql_utils, monkeypatch):
+    """A layer change during the subset change moved the picker to the new
+    layer: the guard must not put it back on the previous one."""
+    layer, other = MagicMock(), MagicMock()
+    picker = _StatefulPicker(layer)
+    dock_module = types.ModuleType(f"{PACKAGE}.filter_mate_dockwidget")
+    dock_module._active_dockwidget = types.SimpleNamespace(mFeaturePickerWidget_exploring_single_selection=picker)
+    monkeypatch.setitem(sys.modules, dock_module.__name__, dock_module)
+    monkeypatch.setattr(sql_utils, "_on_main_thread", lambda: True)
+    with sql_utils.feature_picker_guard(layer):
+        assert picker.layer() is None  # detached
+        picker.setLayer(other)  # the layer change took it meanwhile
+    assert picker.layer() is other
+
+
 def test_no_dock_loaded_is_no_error(sql_utils, monkeypatch):
     monkeypatch.delitem(sys.modules, f"{PACKAGE}.filter_mate_dockwidget", raising=False)
     with sql_utils.feature_picker_guard(MagicMock()):

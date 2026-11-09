@@ -125,6 +125,7 @@ def test_bulk_widget_cleanup_resets_existing_picker_without_rebuilding():
                             'Any': Any, 'Callable': Callable})
     dock = MagicMock()
     dock.PROJECT_LAYERS = {'old': object()}
+    dock._awaited_vector_pick = ('picked_in_the_outgoing_project', 1.0, True)
     picker = dock.checkableComboBoxFeaturesListPickerWidget_exploring_multiple_selection
     picker.blockSignals.return_value = False
     cancel = MagicMock()
@@ -137,5 +138,6 @@ def test_bulk_widget_cleanup_resets_existing_picker_without_rebuilding():
     dock.comboBox_filtering_current_layer.clear.assert_not_called()
     assert dock.current_layer is None
     assert not dock.PROJECT_LAYERS
+    assert dock._awaited_vector_pick is None
     assert not dock._signals_connected
     assert not dock._layer_tree_view_signal_connected

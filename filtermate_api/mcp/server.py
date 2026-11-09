@@ -14,6 +14,7 @@ import json
 import os
 import sys
 from typing import Annotated, Any, Dict, List, Literal, Optional, Sequence
+from urllib.parse import urlencode
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -33,7 +34,8 @@ SERVER_NAME = "filtermate"
 INSTRUCTIONS = """\
 Drives FilterMate, the QGIS filtering plugin, through its local REST API. QGIS must be running with the API started.
 
-Typical workflow: list_layers (names, ids, kinds), then cross_filter / geometry_filter / point_cloud_filter / \
+Typical workflow: list_layers (names, ids, kinds), describe_layer and field_values (what a filter can test), \
+preview_filter (try an expression), then cross_filter / select_features / zoom_to / geometry_filter / point_cloud_filter / \
 apply_filter to filter, filter_state to see what is filtered now, export_layers to write the filtered layers, \
 clear_filters to put layers back on their original source.
 undo_filter / redo_filter are not idempotent: after one (also after an error or a timeout), read filter_state \
@@ -166,6 +168,62 @@ def build_server(client: FilterMateClient) -> Any:
         """
         return {"favorites": await call("GET", "/favorites")}
 
+    @mcp.tool(annotations=ToolAnnotations(title="Describe a layer", readOnlyHint=True, openWorldHint=False))
+    async def describe_layer(
+        layer: Annotated[str, Field(min_length=1, max_length=1000, description="Layer id or name, of any kind")],
+    ) -> Dict[str, Any]:
+        """What a filter can test on a layer: its fields, bands or point attributes.
+
+        Returns layer_id, name, layer_kind, provider_type, crs_authid, geometry_type, feature_count, subset (its
+        current filter), and by kind: fields [{name, type, alias, filterable}] for a vector layer (filterable is
+        false for virtual and joined fields, which a filter expression cannot test); bands [{band, name, classes}]
+        and pixel_size for a raster, classes [{value, label}] only on a paletted band; attributes [name] for a point
+        cloud.
+        """
+        return await call("GET", "/layers/details?" + urlencode({"layer": layer}))
+
+    @mcp.tool(annotations=ToolAnnotations(title="Values of a field", readOnlyHint=True, openWorldHint=False))
+    async def field_values(
+        layer: Annotated[str, Field(min_length=1, max_length=1000, description="Vector layer id or name")],
+        field: Annotated[str, Field(min_length=1, max_length=1000, description="Field name, from describe_layer")],
+        search: Annotated[str, Field(max_length=200, description=(
+            "Text fields: only values containing this text, ignoring case"))] = "",
+        limit: Annotated[int, Field(ge=1, le=200, description="Maximum number of values returned")] = 50,
+    ) -> Dict[str, Any]:
+        """Distinct values a field really takes, among the features the layer shows now (its filter applies).
+
+        Use it to write a filter with the exact spelling of a value. Returns values, truncated (more values exist),
+        and minimum and maximum for a numeric or date field. NULL is left out. Refused on web services (WFS...),
+        which would have to be read whole.
+        """
+        return await call("GET", "/layers/field-values?" + urlencode(
+            {"layer": layer, "field": field, "search": search, "limit": limit}))
+
+    @mcp.tool(annotations=ToolAnnotations(title="Try a filter", readOnlyHint=True, openWorldHint=False))
+    async def preview_filter(
+        layer_name: Annotated[str, Field(min_length=1, max_length=1000, description="Vector layer id or name")],
+        expression: Annotated[str, Field(min_length=1, max_length=500_000, description=(
+            "Subset string, as for apply_filter"))],
+    ) -> Dict[str, Any]:
+        """Try a filter expression on a private copy of the layer: nothing changes in the project.
+
+        It is what apply_filter would do, and it replaces the layer's current filter in the same way. Returns valid,
+        feature_count (features kept, -1 when unknown) and error (the reason when valid is false). Refused on web
+        services and memory layers, and for anything but a plain condition (subqueries, most functions).
+        """
+        return await call("POST", "/filters/preview", _body(layer_name=layer_name, expression=expression))
+
+    @mcp.tool(annotations=ToolAnnotations(title="Map context", readOnlyHint=True, openWorldHint=False))
+    async def map_context() -> Dict[str, Any]:
+        """What the user is looking at in QGIS.
+
+        Returns project_crs, canvas_crs, extent_wkt (the visible extent, usable as is with geometry_filter and
+        canvas_crs), scale, active_layer_id, active_layer_name and selections [{layer_id, name, selected_count}]
+        (the layers with selected features, which cross_filter uses as its source). available is false when QGIS
+        has no map canvas.
+        """
+        return await call("GET", "/map/context")
+
     # -- filters ---------------------------------------------------------------
 
     @mcp.tool(annotations=_write("Apply a filter expression", idempotent=True))
@@ -175,7 +233,9 @@ def build_server(client: FilterMateClient) -> Any:
         expression: Annotated[str, Field(min_length=1, max_length=500_000, description=(
             "Subset string: the provider's SQL WHERE clause, without the WHERE keyword. For a PostgreSQL, "
             "GeoPackage, Shapefile or Spatialite layer: \"population\" > 10000 AND \"dep\" = '31'. "
-            "Quote field names with double quotes and text values with single quotes."))],
+            "Quote field names with double quotes and text values with single quotes. Plain conditions only: "
+            "comparisons, IN, LIKE, BETWEEN, IS NULL and simple text or number functions; a subquery or another "
+            "function is refused."))],
         source: Annotated[str, Field(max_length=200, description=(
             "Free-text tag shown in the FilterMate log to tell where the filter came from"))] = "mcp",
     ) -> Dict[str, Any]:
@@ -325,6 +385,129 @@ def build_server(client: FilterMateClient) -> Any:
         list_favorites first.
         """
         return await call("POST", f"/favorites/{quote_segment(favorite_id)}/apply")
+
+    # -- driving QGIS ----------------------------------------------------------
+
+    @mcp.tool(annotations=_write("Zoom the map", idempotent=True))
+    async def zoom_to(
+        layer: Annotated[Optional[str], Field(max_length=1000, description=(
+            "Layer id or name to zoom to (its whole extent, or its selection with selected_only)"))] = None,
+        extent_wkt: Annotated[Optional[str], Field(max_length=100_000, description=(
+            "Instead of a layer: an extent or geometry as WKT"))] = None,
+        crs: Annotated[Optional[str], Field(max_length=64, description="CRS of the WKT, e.g. EPSG:2154")] = None,
+        selected_only: Annotated[bool, Field(description="With layer: zoom to its selected features")] = False,
+    ) -> Dict[str, Any]:
+        """Zoom the QGIS map to a layer, to its selected features, to a WKT extent, or to everything (no argument).
+
+        Changes only the view, never the data or the filters. Returns extent_wkt and scale after the zoom. Fails
+        without a map window (headless QGIS).
+        """
+        return await call("POST", "/map/zoom", _body(layer=layer, extent_wkt=extent_wkt, crs=crs, selected_only=selected_only))
+
+    @mcp.tool(annotations=_write("Select features", idempotent=True))
+    async def select_features(
+        layer: Annotated[str, Field(min_length=1, max_length=1000, description="Vector layer id or name")],
+        expression: Annotated[str, Field(max_length=100_000, description=(
+            'QGIS expression (NOT SQL), plain conditions only: "population" > 10000, "nom" ILIKE \'saint%\', '
+            "area($geometry) > 1000. Field names in double quotes, text in single quotes."))] = "",
+        clear: Annotated[bool, Field(description="Empty the selection instead of selecting")] = False,
+        add: Annotated[bool, Field(description="Add to the current selection instead of replacing it")] = False,
+    ) -> Dict[str, Any]:
+        """Select the features of a vector layer matching a QGIS expression, as the user would in QGIS.
+
+        A selection is not a filter: the features stay visible, they are highlighted. Use it to make the source of
+        cross_filter (which uses the selected features), or when the user asks to select. Returns layer_name and
+        selected_count. Comparisons, IN, LIKE and simple text, number, date and geometry functions are accepted; other
+        functions are refused.
+        """
+        return await call("POST", "/layers/select", _body(layer=layer, expression=expression, clear=clear, add=add))
+
+    @mcp.tool(annotations=_write("Show or hide layers", idempotent=True))
+    async def set_layers_visibility(
+        layers: Annotated[LayerList, Field(description="Layer ids or names")],
+        visible: Annotated[bool, Field(description="true shows the layers, false hides them")],
+    ) -> Dict[str, Any]:
+        """Check or uncheck layers in the layer tree (shown or hidden on the map). Returns done and failed."""
+        return await call("POST", "/layers/visibility", _body(layers=layers, visible=visible))
+
+    @mcp.tool(annotations=ToolAnnotations(title="Add a layer", readOnlyHint=False, destructiveHint=False,
+                                          idempotentHint=False, openWorldHint=True))
+    async def add_layer(
+        source: Annotated[str, Field(min_length=1, max_length=2000, description=(
+            "A local data file on the QGIS machine (gpkg, shp, geojson, json, kml, gml, fgb, csv, tif; a GeoPackage "
+            "table with |layername=name), or a public https URL of such a file (a resource url from "
+            "search_open_data). Nothing else: no http, no provider URI, no database connection."))],
+        name: Annotated[str, Field(max_length=200, description="Name of the layer in the project (default: the file name)")] = "",
+        kind: Annotated[Literal["vector", "raster"], Field(description="vector (default) or raster")] = "vector",
+    ) -> Dict[str, Any]:
+        """Add a layer to the open project from a local file or a public https URL.
+
+        Typical use after search_open_data: pick a geojson or gpkg resource url and add it, then filter it like any
+        other layer. A remote layer is read from its server by QGIS. Returns the layer summary (layer_id, name,
+        layer_kind, provider_type, crs_authid, feature_count). The chat of FilterMate asks the user first.
+        """
+        return await call("POST", "/layers/add", _body(source=source, name=name, kind=kind))
+
+    @mcp.tool(annotations=ToolAnnotations(title="Add a layer of a WFS service", readOnlyHint=False, destructiveHint=False,
+                                          idempotentHint=False, openWorldHint=True))
+    async def add_service_layer(
+        platform: Annotated[str, Field(min_length=1, max_length=200, description=(
+            "A WFS platform the user allowed, e.g. ign_wfs (IGN Géoplateforme)"))],
+        typename: Annotated[str, Field(min_length=1, max_length=300, description=(
+            "Layer id given by search_open_data on that platform, e.g. ADMINEXPRESS-COG-CARTO.LATEST:commune"))],
+        name: Annotated[str, Field(max_length=200, description="Name of the layer in the project (default: its title)")] = "",
+    ) -> Dict[str, Any]:
+        """Add a layer of a WFS service, read from the service as the map moves and filtered on the server.
+
+        Only a layer the service lists can be added. Returns the layer summary. The chat of FilterMate asks the
+        user first.
+        """
+        return await call("POST", "/layers/add-service", _body(platform=platform, typename=typename, name=name))
+
+    @mcp.tool(annotations=ToolAnnotations(title="Search satellite imagery", readOnlyHint=True, openWorldHint=True))
+    async def search_imagery(
+        bbox: Annotated[Optional[List[float]], Field(min_length=4, max_length=4, description=(
+            "[west, south, east, north] in degrees; omit for the current map extent"))] = None,
+        start: Annotated[str, Field(max_length=10, description="First day, YYYY-MM-DD")] = "",
+        end: Annotated[str, Field(max_length=10, description="Last day, YYYY-MM-DD")] = "",
+        max_cloud: Annotated[float, Field(ge=0, le=100, description="Maximum cloud cover, %")] = 20.0,
+        collections: Annotated[Optional[List[str]], Field(max_length=5, description=(
+            "STAC collections (default sentinel-2-l2a)"))] = None,
+        limit: Annotated[int, Field(ge=1, le=20, description="Maximum number of scenes")] = 5,
+        platform: Annotated[str, Field(max_length=200, description="STAC catalog the user allowed, e.g. earth_search")] = "earth_search",
+    ) -> Dict[str, Any]:
+        """Find satellite scenes over an area, newest first, with the GeoTIFF of each one.
+
+        Returns datasets [{id, publisher (collection), description (date and cloud cover), resources: [{format, url}]}];
+        format visual is the natural colour image. Then add_layer with its url and kind raster.
+        """
+        return await call("POST", "/open-data/imagery", _body(
+            bbox=bbox, start=start, end=end, max_cloud=max_cloud, collections=collections, limit=limit, platform=platform))
+
+    @mcp.tool(annotations=_write("Remove layers", idempotent=True, destructive=True))
+    async def remove_layers(
+        layers: Annotated[LayerList, Field(description="Layer ids or names to remove from the project")],
+    ) -> Dict[str, Any]:
+        """Remove layers from the project. Their files are not deleted, but their styles and filters in this project
+        are lost and this cannot be undone. The chat of FilterMate asks the user first. Returns done and failed."""
+        return await call("POST", "/layers/remove", _body(layers=layers))
+
+    @mcp.tool(annotations=ToolAnnotations(title="Search open data", readOnlyHint=True, openWorldHint=True))
+    async def search_open_data(
+        query: Annotated[str, Field(min_length=1, max_length=200, description="Words to search, in the language of the platform")],
+        platform: Annotated[str, Field(max_length=200, description=(
+            "datagouv (data.gouv.fr, France), opendatasoft (the public Opendatasoft hub), ign_wfs (IGN Géoplateforme "
+            "layers), or a portal the user allowed"))] = "datagouv",
+        limit: Annotated[int, Field(ge=1, le=20, description="Maximum number of datasets")] = 10,
+    ) -> Dict[str, Any]:
+        """Search datasets on an open data platform the user allowed, and get the URLs a layer can be made of.
+
+        Returns datasets [{id, title, publisher, description, page, resources: [{title, format, url}]}], the
+        resources kept to files add_layer can open (geojson, gpkg, zip, csv, tif...). Then add_layer with a
+        resource url (geojson or gpkg first), or add_service_layer with the id on a WFS platform. The query is sent to
+        the platform.
+        """
+        return await call("POST", "/open-data/search", _body(query=query, platform=platform, limit=limit))
 
     # -- export ----------------------------------------------------------------
 
