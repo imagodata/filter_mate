@@ -3,6 +3,7 @@
 import importlib.util
 import pathlib
 import sys
+import types
 
 import pytest
 
@@ -294,3 +295,74 @@ class TestSegmentsGeometry:
     def test_a_service_has_no_pixel_count(self, monkeypatch):
         result = self.result(monkeypatch, [self.SQUARE], width=0, height=0)
         assert (result.kept_pixels, result.total_pixels, result.objects) == (0, 0, 1)
+
+
+class TestSimilarWithSam:
+    """2026-11-10: similar objects drawn by SAM, grouped into as few encoded windows as possible."""
+
+    RASTER = (0.0, 0.0, 10000.0, 10000.0)
+
+    def test_close_points_share_a_window(self):
+        windows = segmentation.assign_windows([(5000.0, 5000.0), (5050.0, 5020.0), (5080.0, 4950.0)], self.RASTER, 0.25, 1024)
+        assert len(windows) == 1 and windows[0][1] == [0, 1, 2]
+
+    def test_a_far_point_opens_a_window_around_it(self):
+        windows = segmentation.assign_windows([(5000.0, 5000.0), (8000.0, 2000.0)], self.RASTER, 0.25, 1024)
+        assert [members for _window, members in windows] == [[0], [1]]
+        assert windows[1][0].contains(8000.0, 2000.0)
+
+    def test_a_point_near_the_border_of_a_window_opens_another(self):
+        first = segmentation.window_at(5000.0, 5000.0, self.RASTER, 0.25, 1024)
+        near_edge = first.x_min + first.side - 10.0  # inside, but within the margin of 128 pixels (32 m)
+        windows = segmentation.assign_windows([(5000.0, 5000.0), (near_edge, 5000.0)], self.RASTER, 0.25, 1024)
+        assert len(windows) == 2 and windows[1][0].contains(near_edge, 5000.0)
+
+    def test_windows_stay_in_the_raster(self):
+        window = segmentation.window_at(10.0, 10.0, self.RASTER, 0.25, 1024)
+        assert window.x_min == 0.0 and window.y_max - window.side == 0.0
+
+    @staticmethod
+    def polygon(area, perimeter):
+        return types.SimpleNamespace(area=lambda: area, length=lambda: perimeter)
+
+    def test_the_area_must_be_within_the_ratios(self):
+        reference = (100.0, 0.785)
+        assert segmentation.is_similar(self.polygon(150.0, 49.0), *reference, (0.5, 2.0), False)
+        assert not segmentation.is_similar(self.polygon(250.0, 63.0), *reference, (0.5, 2.0), False)
+        assert not segmentation.is_similar(self.polygon(40.0, 25.0), *reference, (0.5, 2.0), False)
+
+    def test_the_shape_when_asked(self):
+        strip = self.polygon(100.0, 104.0)  # 2 x 50: compactness 0.116
+        assert segmentation.is_similar(strip, 100.0, 0.785, (0.5, 2.0), False)
+        assert not segmentation.is_similar(strip, 100.0, 0.785, (0.5, 2.0), True)
+        assert segmentation.is_similar(self.polygon(100.0, 40.0), 100.0, 0.785, (0.5, 2.0), True)
+
+    def test_an_invalid_geometry_is_no_overlap(self):
+        def broken(*_args):
+            raise ValueError('GEOS')
+
+        geometry = types.SimpleNamespace(combine=broken, intersection=broken)
+        assert segmentation.overlap(geometry, geometry) == 0.0
+
+    def test_the_ratio_given_to_the_colour_is_wide(self):
+        low, high = segmentation.CANDIDATE_RATIO
+        assert low <= 0.1 and high >= 10.0 and segmentation.SIMILAR_CANDIDATES > 0
+
+
+class TestWindowMapping:
+    def test_to_map_inverts_to_pixel(self):
+        w = window()
+        column, row = w.to_pixel(123.0, 150.0)
+        assert w.to_map(column, row) == pytest.approx((123.0, 150.0))
+
+
+class TestWindowsAtTheEdge:
+    """A window kept inside the raster near its edge must serve every point there, not be encoded once per point."""
+
+    def test_points_along_the_edge_share_the_window(self):
+        windows = segmentation.assign_windows([(1450.0 + i, 700.0) for i in range(10)], (0.0, 0.0, 1500.0, 1500.0), 1.0, 1024)
+        assert len(windows) == 1 and len(windows[0][1]) == 10
+
+    def test_a_raster_smaller_than_the_window_needs_one(self):
+        windows = segmentation.assign_windows([(5.0 + i, 5.0) for i in range(10)], (0.0, 0.0, 900.0, 900.0), 1.0, 1024)
+        assert len(windows) == 1

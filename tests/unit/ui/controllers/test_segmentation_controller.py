@@ -124,7 +124,8 @@ class TestInstallModel:
         assert len(ctrl_module._added_tasks) == 1 and controller.downloading()
         task = FakeDownloadTask.made[0]
         assert task.directory == "/profile/filtermate/models/sam"
-        assert controller._host.calls[-1] == ("set_segmentation_status", "Downloading the segmentation model… 0 %")
+        assert ("set_segmentation_status", "Downloading the segmentation model… 0 %") in controller._host.calls
+        assert controller._host.calls[-1][0] == "set_segmentation_readiness"  # the button waits for the download
 
     def test_one_download_at_a_time(self, ctrl_module, controller):
         controller.install_model()

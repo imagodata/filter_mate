@@ -2,6 +2,10 @@
 
 All notable changes to FilterMate will be documented in this file.
 
+## [Unreleased]
+
+- **The raster pipette draws objects with SAM (experimental).** The *Segment* target is gone: when SAM is installed, *Clicked object* and *Similar objects* use it, and the colour engine stays for those who do not install it (an *Engine* list switches between them). A click adds an object at once, Shift+click extends the last one, a right click trims it, a box frames a new one, Escape removes the last object, and the object under the mouse is outlined before the click. *Similar objects* draws the clicked object, proposes the patches of a similar colour in the visible map to SAM, and keeps the objects whose area (and shape) are within the ratios, in the background. One confirmation installs onnxruntime and the model. A filter saved with the *Segment* target opens on *Clicked object*. See `docs/SEGMENTATION.md`.
+
 ## [5.0.4] - 2026-11-09
 
 - **AGENT section (experimental, off by default).** A chat in the accordion, before FILTERING, that filters, selects, zooms, shows or hides layers and exports from a sentence. It is turned on with `AGENT` in the Configuration tab. Providers: Claude, Mistral, OpenAI and any OpenAI-compatible server, or a local Ollama model. The API key is kept in the QGIS authentication database. Filters apply at once and each request can be undone or applied again from the panel, with a history of the requests; exports and added or removed layers are confirmed. A filter written by the model is one plain `WHERE` clause, checked against a list of what a filter needs. The conversation is kept per project on this computer. See `docs/AGENT_MODE.md`.

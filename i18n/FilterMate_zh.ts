@@ -30,6 +30,709 @@
     </message>
 </context>
 <context>
+    <name>AgentChat</name>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Access to the free quota was renewed: send your request again.</source>
+        <translation type="obsolete">免费额度的访问权限已续期：请重新发送您的请求。</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Another application is changing the project: try again in a moment.</source>
+        <translation type="obsolete">另一个应用程序正在修改项目：请稍后再试。</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Another application: {}</source>
+        <translation type="obsolete">其他应用程序：{}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Applied again: {}.</source>
+        <translation type="obsolete">已重新应用：{}。</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Changed since, left as is: {}.</source>
+        <translation type="obsolete">此后已被更改，保持原样：{}。</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Changed: {}.</source>
+        <translation type="obsolete">已更改：{}。</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Choose a model and agree to send your data to use the agent.</source>
+        <translation type="obsolete">请选择模型并同意发送数据，以使用智能体。</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Connecting to {}…</source>
+        <translation type="obsolete">正在连接 {}…</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Earlier conversation: the agent starts afresh from here.</source>
+        <translation type="obsolete">之前的对话：智能体将从此处重新开始。</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Enter your API key in the agent settings.</source>
+        <translation type="obsolete">请在智能体设置中输入您的 API 密钥。</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Export of {}</source>
+        <translation type="obsolete">{} 的导出</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Favorite applied</source>
+        <translation type="obsolete">已应用收藏</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Filter on the points of {}</source>
+        <translation type="obsolete">对 {} 的点过滤</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Filter on {}</source>
+        <translation type="obsolete">对 {} 过滤</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Filter on {} by an area</source>
+        <translation type="obsolete">对 {} 按区域过滤</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Filter on {} by {}</source>
+        <translation type="obsolete">对 {} 按 {} 过滤</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>FilterMate agent</source>
+        <translation type="obsolete">FilterMate 智能体</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Filters removed from {}</source>
+        <translation type="obsolete">已移除 {} 的过滤器</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Hidden: {}</source>
+        <translation type="obsolete">已隐藏：{}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>It answers.</source>
+        <translation type="obsolete">来源有响应。</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Layer added: {}</source>
+        <translation type="obsolete">已添加图层：{}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Layers removed: {}</source>
+        <translation type="obsolete">已移除图层：{}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Not reachable for this conversation: {}</source>
+        <translation type="obsolete">此对话无法访问：{}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Nothing to redo.</source>
+        <translation type="obsolete">没有可重做的操作。</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Nothing to restore.</source>
+        <translation type="obsolete">没有可恢复的内容。</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Reading the active filters</source>
+        <translation type="obsolete">正在读取当前过滤器</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Reading the favorites</source>
+        <translation type="obsolete">正在读取收藏</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Reading the fields of {}</source>
+        <translation type="obsolete">正在读取 {} 的字段</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Reading the layers</source>
+        <translation type="obsolete">正在读取图层</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Reading the map</source>
+        <translation type="obsolete">正在读取地图</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Reading the values of {}</source>
+        <translation type="obsolete">正在读取 {} 的值</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Restored: {}.</source>
+        <translation type="obsolete">已恢复：{}。</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Searching satellite imagery on {}</source>
+        <translation type="obsolete">正在 {} 上搜索卫星影像</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Searching {} for {}</source>
+        <translation type="obsolete">正在 {} 上搜索：{}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Selection cleared on {}</source>
+        <translation type="obsolete">已清除 {} 上的选择</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Selection on {}</source>
+        <translation type="obsolete">{} 上的选择</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Shown: {}</source>
+        <translation type="obsolete">已显示：{}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Stopped.</source>
+        <translation type="obsolete">已停止。</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The MCP server could not start: {}</source>
+        <translation type="obsolete">MCP 服务器无法启动：{}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The QGIS authentication database is not available.</source>
+        <translation type="obsolete">QGIS 认证数据库不可用。</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The QGIS master password is needed to use the stored key.</source>
+        <translation type="obsolete">使用已保存的密钥需要 QGIS 主密码。</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The agent stopped before the end ({}).</source>
+        <translation type="obsolete">智能体在结束前已停止（{}）。</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The agent wants to add this layer of a web service to the project:
+{} · {}
+
+Do you agree?</source>
+        <translation type="obsolete">智能体想将此网络服务的图层添加到项目：
+{} · {}
+
+是否同意？</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The agent wants to add this layer to the project:
+{}
+
+A remote source is read from its server by QGIS, and what the layer holds can be sent to the provider of the agent. Do you agree?</source>
+        <translation type="obsolete">智能体想将此图层添加到项目：
+{}
+
+远程来源由 QGIS 从其服务器读取，图层所含内容可能会发送给智能体的提供者。是否同意？</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The agent wants to export these layers to files:
+{}
+
+Do you agree?</source>
+        <translation type="obsolete">智能体想将这些图层导出为文件：
+{}
+
+是否同意？</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The agent wants to remove these layers from the project (their files stay, their styles and filters here are lost):
+{}
+
+Do you agree?</source>
+        <translation type="obsolete">智能体想从项目中移除这些图层（其文件会保留，但此处的样式和过滤器将丢失）：
+{}
+
+是否同意？</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The agent wants to run this action on an external connector:
+{}
+{}
+
+Do you agree?</source>
+        <translation type="obsolete">智能体想在外部连接器上运行此操作：
+{}
+{}
+
+是否同意？</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The credit or quota of this account is used up.</source>
+        <translation type="obsolete">此账户的额度或配额已用完。</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The free quota could not be reached: {}</source>
+        <translation type="obsolete">无法连接免费额度：{}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The free quota is not available.</source>
+        <translation type="obsolete">免费额度不可用。</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The free quota is unavailable for now.</source>
+        <translation type="obsolete">免费额度暂时不可用。</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The free quota is used up for this month. Enter your own API key in the agent settings.</source>
+        <translation type="obsolete">本月免费额度已用完。请在智能体设置中输入您自己的 API 密钥。</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The key could not be stored.</source>
+        <translation type="obsolete">无法保存密钥。</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The provider could not be reached: {}</source>
+        <translation type="obsolete">无法连接提供者：{}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The provider refused the API key: check it in the agent settings.</source>
+        <translation type="obsolete">提供者拒绝了 API 密钥：请在智能体设置中检查。</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The provider reported a problem: {}</source>
+        <translation type="obsolete">提供者报告了问题：{}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The stored key could not be read.</source>
+        <translation type="obsolete">无法读取已保存的密钥。</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Thinking…</source>
+        <translation type="obsolete">思考中…</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Too many new accounts from this address today: try again tomorrow, or enter your own API key.</source>
+        <translation type="obsolete">今天此地址创建的新账户过多：请明天再试，或输入您自己的 API 密钥。</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Too many requests for now: try again in a moment.</source>
+        <translation type="obsolete">请求过多：请稍后再试。</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Trying a filter on {}</source>
+        <translation type="obsolete">正在尝试对 {} 的过滤</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Zoom on {}</source>
+        <translation type="obsolete">缩放到 {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>an area</source>
+        <translation type="obsolete">一个区域</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>everything</source>
+        <translation type="obsolete">全部</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>{} tools available</source>
+        <translation type="obsolete">{} 个可用工具</translation>
+    </message>
+</context>
+<context>
+    <name>AgentPanel</name>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>(no request)</source>
+        <translation type="obsolete">（无请求）</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>A few free requests a month, through the relay of FilterMate to Claude (Anthropic), under the terms of Anthropic. The relay counts what is spent and keeps no conversation. When it is used up, choose a provider and enter your own API key.</source>
+        <translation type="obsolete">每月提供少量免费请求，经由 FilterMate 到 Claude（Anthropic）的中继，适用 Anthropic 的条款。中继只统计消耗量，不保留任何对话。用完后，请选择提供者并输入您自己的 API 密钥。</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>API key</source>
+        <translation type="obsolete">API 密钥</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Add</source>
+        <translation type="obsolete">添加</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Address</source>
+        <translation type="obsolete">地址</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Agent settings</source>
+        <translation type="obsolete">智能体设置</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Allow attribute values to be sent</source>
+        <translation type="obsolete">允许发送属性值</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Applications already set up will have to be set up again.</source>
+        <translation type="obsolete">已设置的应用程序需要重新设置。</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Ask the agent to filter your layers</source>
+        <translation type="obsolete">让智能体来过滤您的图层</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Back to the conversation</source>
+        <translation type="obsolete">返回对话</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Claude Code or another MCP client on this computer can then filter your layers, once FilterMate has been opened, under the rules of this panel: the same sources, the same confirmations, and filters can be undone here. That application sends what it reads to its own AI provider.</source>
+        <translation type="obsolete">此计算机上的 Claude Code 或其他 MCP 客户端随后可在 FilterMate 打开后过滤您的图层，遵循本面板的规则：相同的来源、相同的确认，过滤可在此撤销。该应用程序会将其读取的内容发送给其自己的 AI 提供者。</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Connect an AI provider to start. Nothing is sent before you agree.</source>
+        <translation type="obsolete">连接 AI 提供者即可开始。未经您同意，不会发送任何内容。</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Copied, with the access token: keep it to yourself. Save these settings for it to apply.</source>
+        <translation type="obsolete">已复制（含访问令牌）：请妥善保管。保存这些设置后才会生效。</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Copy for Claude Desktop</source>
+        <translation type="obsolete">复制给 Claude Desktop</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Copy the Claude Code command</source>
+        <translation type="obsolete">复制 Claude Code 命令</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Copy the configuration</source>
+        <translation type="obsolete">复制配置</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Describe it in your own words. Each filter can be undone.</source>
+        <translation type="obsolete">用您自己的话描述。每个过滤都可以撤销。</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Filter your layers from a sentence</source>
+        <translation type="obsolete">一句话过滤您的图层</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>FilterMate agent</source>
+        <translation type="obsolete">FilterMate 智能体</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>History</source>
+        <translation type="obsolete">历史记录</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>History…</source>
+        <translation type="obsolete">历史记录…</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>I agree to send this data to this provider</source>
+        <translation type="obsolete">我同意将这些数据发送给此提供者</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Let other applications on this computer drive FilterMate (MCP server)</source>
+        <translation type="obsolete">允许此计算机上的其他应用程序控制 FilterMate（MCP 服务器）</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>MCP connector</source>
+        <translation type="obsolete">MCP 连接器</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>MCP connectors</source>
+        <translation type="obsolete">MCP 连接器</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Model</source>
+        <translation type="obsolete">模型</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>More</source>
+        <translation type="obsolete">更多</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>New access token</source>
+        <translation type="obsolete">新的访问令牌</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>New conversation</source>
+        <translation type="obsolete">新对话</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>New token: it applies once these settings are saved.</source>
+        <translation type="obsolete">新令牌：保存这些设置后生效。</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Open data platforms</source>
+        <translation type="obsolete">开放数据平台</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Open the settings</source>
+        <translation type="obsolete">打开设置</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Other applications</source>
+        <translation type="obsolete">其他应用程序</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Port</source>
+        <translation type="obsolete">端口</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Provider</source>
+        <translation type="obsolete">提供者</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Redo</source>
+        <translation type="obsolete">重做</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Remove</source>
+        <translation type="obsolete">移除</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Remove the stored key</source>
+        <translation type="obsolete">删除已保存的密钥</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Satellite imagery</source>
+        <translation type="obsolete">卫星影像</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Send (Enter)</source>
+        <translation type="obsolete">发送（Enter）</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Send again</source>
+        <translation type="obsolete">重新发送</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Sent to: {}</source>
+        <translation type="obsolete">发送至：{}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Set up the agent</source>
+        <translation type="obsolete">设置智能体</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Sources</source>
+        <translation type="obsolete">来源</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Stop (Esc)</source>
+        <translation type="obsolete">停止（Esc）</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Stored: leave empty to keep it</source>
+        <translation type="obsolete">已保存：留空则保留</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Test</source>
+        <translation type="obsolete">测试</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Testing…</source>
+        <translation type="obsolete">测试中…</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The MCP server could not start: {}</source>
+        <translation type="obsolete">MCP 服务器无法启动：{}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The agent can search the sources ticked here. Your searches, and what the agent passes to a connector, are sent to them; a layer added from them is read from their servers.</source>
+        <translation type="obsolete">智能体可以搜索此处勾选的来源。您的搜索内容以及智能体传给连接器的内容会发送给这些来源；从中添加的图层将从其服务器读取。</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The agent sends your request, the names of your layers and fields, your filter expressions and the results of its tools to the provider chosen here, under that provider&apos;s terms. Without the option below, the agent does not read the values of your fields; values already written in your filters and favorites are still sent. The conversation is kept on this computer for each project, until you start a new one.</source>
+        <translation type="obsolete">智能体会将您的请求、图层和字段的名称、过滤表达式以及其工具的结果发送给此处选择的提供者，适用该提供者的条款。未启用下方选项时，智能体不会读取字段的值；但已写入您的过滤器和收藏中的值仍会被发送。对话按项目保存在此计算机上，直到您开始新的对话。</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Through mcp-remote, which needs Node.js: Claude Desktop starts local servers as programs.</source>
+        <translation type="obsolete">通过 mcp-remote（需要 Node.js）：Claude Desktop 会将本地服务器作为程序启动。</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Too many sources added: remove one first.</source>
+        <translation type="obsolete">添加的来源过多：请先移除一个。</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Undo the last</source>
+        <translation type="obsolete">撤销最近的</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Undo this turn</source>
+        <translation type="obsolete">撤销本轮</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>What do you want to filter?</source>
+        <translation type="obsolete">您想过滤什么？</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>added by you</source>
+        <translation type="obsolete">由您添加</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>applied</source>
+        <translation type="obsolete">已应用</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>community</source>
+        <translation type="obsolete">社区</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>https://... or a portal address</source>
+        <translation type="obsolete">https://... 或门户网站地址</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>no change</source>
+        <translation type="obsolete">无更改</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>official</source>
+        <translation type="obsolete">官方</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>this computer</source>
+        <translation type="obsolete">此计算机</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>undone</source>
+        <translation type="obsolete">已撤销</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>{} turn(s)</source>
+        <translation type="obsolete">{} 轮</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Which layers are in this project?</source>
+        <translation type="obsolete">此项目包含哪些图层？</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Keep the buildings taller than 15 m</source>
+        <translation type="obsolete">保留高于 15 米的建筑物</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Filter the roads inside the selected feature</source>
+        <translation type="obsolete">过滤所选要素内的道路</translation>
+    </message>
+</context>
+<context>
     <name>AppInitializer</name>
     <message>
         <location filename="../core/services/app_initializer.py" line="174"/>
@@ -616,137 +1319,137 @@
         <translation>重置点云条件</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1597"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1605"/>
         <source>Invalid raster calculator expression</source>
         <translation>栅格计算器表达式无效</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1912"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1920"/>
         <source>PDAL was not found: the height above a DTM needs the pdal executable</source>
         <translation>未找到 PDAL：计算相对于 DTM 的高度需要 pdal 可执行文件</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3432"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3475"/>
         <source>A FilterMate task is still running: wait for it to finish</source>
         <translation>FilterMate 任务仍在运行：请等待其完成</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2905"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2948"/>
         <source>FilterMate task failed: {0}</source>
         <translation>FilterMate 任务失败：{0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2942"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2985"/>
         <source>Select pixels first: a value range, classes or a raster expression</source>
         <translation>请先选择像元：值范围、类别或栅格表达式</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2957"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3000"/>
         <source>Raster filtered: {0}</source>
         <translation>栅格已过滤：{0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2991"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3034"/>
         <source>The point cloud expression was rejected: {0}</source>
         <translation>点云表达式被拒绝：{0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2994"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3037"/>
         <source>Select points first: classes, attribute ranges or an expression</source>
         <translation>请先选择点：类别、属性范围或表达式</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3008"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3051"/>
         <source>Point cloud filtered: {0}</source>
         <translation>点云已过滤：{0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3542"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3585"/>
         <source>Filter not applied: {0}</source>
         <translation>未应用过滤器：{0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3394"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3437"/>
         <source>canceled</source>
         <translation>已取消</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3091"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3134"/>
         <source>{0} target(s) filtered</source>
         <translation>已过滤 {0} 个目标</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3102"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3145"/>
         <source>{0} failed: {1}</source>
         <translation>{0} 失败：{1}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3115"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3158"/>
         <source>FilterMate: filtering from '{0}'…</source>
         <translation>FilterMate：正在从“{0}”过滤…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3214"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3257"/>
         <source>Changed since, left as is: {0}</source>
         <translation>此后已更改，保持原样：{0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3220"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3263"/>
         <source>{0} layer(s) restored</source>
         <translation>已恢复 {0} 个图层</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3254"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3297"/>
         <source>&apos;{0}&apos; not exported: {1}</source>
         <translation>未导出“{0}”：{1}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3268"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3311"/>
         <source>Exported: {0}</source>
         <translation>已导出：{0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3270"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3313"/>
         <source>Export failed: {0}</source>
         <translation>导出失败：{0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3277"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3320"/>
         <source>Exporting {0} layer(s)…</source>
         <translation>正在导出 {0} 个图层…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3283"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3326"/>
         <source>Export folder</source>
         <translation>导出文件夹</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3365"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3408"/>
         <source>Raster / point cloud targets skipped: no source feature selected in EXPLORING</source>
         <translation>已跳过栅格/点云目标：EXPLORING 中未选择源要素</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3394"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3437"/>
         <source>Raster / point cloud targets not filtered: {0}</source>
         <translation>栅格/点云目标未过滤：{0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3396"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3439"/>
         <source>{0} raster / point cloud target(s) filtered</source>
         <translation>已过滤 {0} 个栅格/点云目标</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3519"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3562"/>
         <source>Choose the DTM raster used for the height above ground</source>
         <translation>选择用于计算离地高度的 DTM 栅格</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3530"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3573"/>
         <source>Height above ground not computed: {0}</source>
         <translation>未计算离地高度：{0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3551"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3594"/>
         <source>Computing the height above '{0}' with PDAL…</source>
         <translation>正在使用 PDAL 计算相对于“{0}”的高度…</translation>
     </message>
@@ -756,12 +1459,12 @@
         <translation>FilterMate 缓存占用 {0} GB，超过了 {1} GB 的上限：请取消不再需要的栅格 / 点云图层的过滤</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1914"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1922"/>
         <source>PDAL {0} is too old: the height above a DTM needs PDAL 2.4 or later</source>
         <translation>PDAL {0} 版本过旧：计算相对于 DTM 的高度需要 PDAL 2.4 或更高版本</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1917"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1925"/>
         <source>PDAL could not be run, the height above a DTM is unavailable: {0}</source>
         <translation>无法运行 PDAL，相对于 DTM 的高度不可用：{0}</translation>
     </message>
@@ -781,27 +1484,27 @@
         <translation>预览：隐藏所选范围之外的像元（坡度、坡向等以白色遮罩显示）</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1792"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1800"/>
         <source>The preview of a slope or aspect needs the map in the CRS of the raster ({0})</source>
         <translation>坡度或坡向的预览需要地图使用栅格的 CRS（{0}）</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2434"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2477"/>
         <source>only the points drawn on the map can be picked: turn the preview off to pick a class it hides</source>
         <translation>只能拾取地图上所绘制的点：要拾取被预览隐藏的类别，请关闭预览</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2505"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2548"/>
         <source>No classified point under the click</source>
         <translation>点击处没有已分类的点</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2440"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2483"/>
         <source>Class {0} is already checked</source>
         <translation>类别 {0} 已被勾选</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2529"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2572"/>
         <source>Class {0} is not in the class list of the layer</source>
         <translation>类别 {0} 不在图层的类别列表中</translation>
     </message>
@@ -816,157 +1519,157 @@
         <translation>类别吸管：点击地图，即勾选此处所绘制点的类别。Ctrl+点击可再添加一个类别</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1116"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1118"/>
         <source>Preview and statistics use a bounded local sample of the visible extent; filtering reads the source.</source>
         <translation>预览和统计使用可见范围内有限的本地样本；过滤则读取数据源。</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1314"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1322"/>
         <source>Preparing a bounded color snapshot of the visible extent…</source>
         <translation>正在准备可见范围内的有限颜色快照…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1326"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1334"/>
         <source>The color snapshot could not be prepared. Try a smaller visible extent.</source>
         <translation>无法准备颜色快照。请尝试缩小可见范围。</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1330"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1338"/>
         <source>Color selection applies to the captured visible extent.</source>
         <translation>颜色选择适用于已捕获的可见范围。</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1394"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1402"/>
         <source>Raster sampling failed. Try a smaller visible extent.</source>
         <translation>栅格采样失败。请缩小可见范围后重试。</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1515"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1523"/>
         <source>No valid pixels to display in the selected bands.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1792"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1800"/>
         <source>The preview of a color or an expression needs the map in the CRS of the raster ({0})</source>
         <translation>颜色或表达式的预览需要地图使用栅格的 CRS ({0})</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2458"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2501"/>
         <source>No point drawn under the click</source>
         <translation>点击处没有绘制的点</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2460"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2503"/>
         <source>This point has no {0}</source>
         <translation>该点没有 {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2462"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2505"/>
         <source>{0} cannot be used in a condition</source>
         <translation>{0} 不能用于条件</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2519"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2562"/>
         <source>Object not read: {0}</source>
         <translation>未读取对象：{0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2521"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2564"/>
         <source>Too many points around the click: the object could not be read</source>
         <translation>点击处周围的点过多：无法读取该对象</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2523"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2566"/>
         <source>No point of class {0} under the click: click on the object itself</source>
         <translation>点击处没有类别 {0} 的点：请点击对象本身</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2660"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2703"/>
         <source>Similar objects not read: {0}</source>
         <translation>未读取相似对象：{0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2663"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2706"/>
         <source>No similar object within the area ratios: widen them</source>
         <translation>在面积比范围内没有相似对象：请放宽范围</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2732"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2775"/>
         <source>Preparing a sample for the new visible extent. Click again when it is ready.</source>
         <translation>正在为新的可见范围准备样本。准备就绪后请再次点击。</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2743"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2786"/>
         <source>The local raster sample is still being prepared. Retry when it is ready.</source>
         <translation>本地栅格样本仍在准备中。准备就绪后请重试。</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2949"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2992"/>
         <source>Prepare a color snapshot before filtering this rendered layer.</source>
         <translation>过滤此渲染图层之前，请先准备颜色快照。</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3094"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3137"/>
         <source>{0} raster target(s) resampled to the configured pixel limit</source>
         <translation>{0} 个栅格目标已重采样至配置的像素上限</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3126"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3169"/>
         <source>color selection limited to the captured extent; colors depend on style and scale</source>
         <translation>颜色选择仅限于已捕获的范围；颜色取决于样式和比例尺</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3128"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3171"/>
         <source>raster source resampled to {0} cells within the pixel limit</source>
         <translation>栅格数据源已重采样为 {0} 个像元，在像素上限之内</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3130"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3173"/>
         <source>raster selection read every {0} pixels: over the pixel limit of the settings</source>
         <translation>栅格选择每隔 {0} 个像素读取一次：超出设置中的像素上限</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3133"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3176"/>
         <source>dense raster selection smoothed to keep its outline light</source>
         <translation>密集的栅格选择已平滑处理，以保持轮廓轻量</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3180"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3223"/>
         <source>{0} left empty, nothing matches the selection: {1}</source>
         <translation>{0} 已清空，没有任何内容与所选内容匹配：{1}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3164"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3207"/>
         <source>failed</source>
         <translation>失败</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1509"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1517"/>
         <source>Preparing band display…</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1525"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1533"/>
         <source>The selected bands could not be displayed.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1597"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1605"/>
         <source>Unknown raster layer or band in expression</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1389"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1397"/>
         <source>The raster histogram could not be calculated.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1738"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1746"/>
         <source>The raster preview could not be calculated.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1148"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1150"/>
         <source>onnxruntime installed</source>
         <translation>onnxruntime 已安装</translation>
     </message>
@@ -1959,27 +2662,27 @@ Click the ★ indicator and select 'Add current filter to favorites' to save you
         <translation>恢复默认配置并删除 SQLite 数据库</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1572"/>
+        <location filename="../filter_mate.py" line="1573"/>
         <source>Reset Configuration</source>
         <translation>重置配置</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1598"/>
+        <location filename="../filter_mate.py" line="1599"/>
         <source>Configuration reset successfully.</source>
         <translation>配置重置成功。</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1603"/>
+        <location filename="../filter_mate.py" line="1604"/>
         <source>Default configuration file not found.</source>
         <translation>未找到默认配置文件。</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1626"/>
+        <location filename="../filter_mate.py" line="1627"/>
         <source>Database deleted: {filename}</source>
         <translation>数据库已删除：{filename}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1650"/>
+        <location filename="../filter_mate.py" line="1651"/>
         <source>Restart required</source>
         <translation>需要重新启动</translation>
     </message>
@@ -2130,7 +2833,7 @@ Do you want to disable this setting now?
 • No: Keep current setting</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1572"/>
+        <location filename="../filter_mate.py" line="1573"/>
         <source>Are you sure you want to reset to the default configuration?
 
 This will:
@@ -2147,7 +2850,7 @@ QGIS must be restarted to apply the changes.</source>
 必须重启 QGIS 才能应用更改。</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1650"/>
+        <location filename="../filter_mate.py" line="1651"/>
         <source>The configuration has been reset.
 
 Please restart QGIS to apply the changes.</source>
@@ -2166,7 +2869,7 @@ Please restart QGIS to apply the changes.</source>
         <translation>{count} 个引用的图层未加载 ({layers_list})。使用备用显示。</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1641"/>
+        <location filename="../filter_mate.py" line="1642"/>
         <source>Unable to delete {filename}: {e}</source>
         <translation>无法删除 {filename}：{e}</translation>
     </message>
@@ -2176,86 +2879,86 @@ Please restart QGIS to apply the changes.</source>
         <translation type="obsolete">重置期间出错：{str(e)}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1693"/>
+        <location filename="../filter_mate.py" line="1694"/>
         <source>&lt;p style=&apos;font-size:13px;&apos;&gt;Thank you for using &lt;b&gt;FilterMate&lt;/b&gt;!&lt;br&gt;Join our Discord community to:&lt;/p&gt;&lt;ul style=&apos;margin-left:10px; font-size:12px;&apos;&gt;&lt;li&gt;Get help and support&lt;/li&gt;&lt;li&gt;Report bugs and issues&lt;/li&gt;&lt;li&gt;Suggest new features&lt;/li&gt;&lt;li&gt;Share tips with other users&lt;/li&gt;&lt;/ul&gt;</source>
         <translation>&lt;p style='font-size:13px;'&gt;感谢您使用 &lt;b&gt;FilterMate&lt;/b&gt;！&lt;br&gt;加入我们的 Discord 社区：&lt;/p&gt;&lt;ul style='margin-left:10px; font-size:12px;'&gt;&lt;li&gt;获取帮助和支持&lt;/li&gt;&lt;li&gt;报告错误和问题&lt;/li&gt;&lt;li&gt;建议新功能&lt;/li&gt;&lt;li&gt;与其他用户分享技巧&lt;/li&gt;&lt;/ul&gt;</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1709"/>
+        <location filename="../filter_mate.py" line="1710"/>
         <source>  Join us on Discord</source>
         <translation>  加入我们的 Discord</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1729"/>
+        <location filename="../filter_mate.py" line="1730"/>
         <source>Don&apos;t show this again</source>
         <translation>不再显示</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1785"/>
+        <location filename="../filter_mate.py" line="1786"/>
         <source>Close</source>
         <translation>关闭</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1852"/>
+        <location filename="../filter_mate.py" line="1855"/>
         <source>Error loading plugin: {0}. Check QGIS Python console for details.</source>
         <translation>加载插件出错：{0}。查看 QGIS Python 控制台了解详情。</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7560"/>
+        <location filename="../filter_mate_dockwidget.py" line="7586"/>
         <source>Current layer: {0}</source>
         <translation>当前图层：{0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7562"/>
+        <location filename="../filter_mate_dockwidget.py" line="7588"/>
         <source>No layer selected</source>
         <translation>未选择图层</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7572"/>
+        <location filename="../filter_mate_dockwidget.py" line="7598"/>
         <source>Selected layers:
 {0}</source>
         <translation>选定的图层：
 {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7572"/>
+        <location filename="../filter_mate_dockwidget.py" line="7598"/>
         <source>No layers selected</source>
         <translation>未选择图层</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7592"/>
+        <location filename="../filter_mate_dockwidget.py" line="7618"/>
         <source>No expression defined</source>
         <translation>未定义表达式</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7604"/>
+        <location filename="../filter_mate_dockwidget.py" line="7630"/>
         <source>Display expression: {0}</source>
         <translation>显示表达式：{0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7621"/>
+        <location filename="../filter_mate_dockwidget.py" line="7647"/>
         <source>Feature ID: {0}
 First attribute: {1}</source>
         <translation>要素 ID：{0}
 第一个属性：{1}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1659"/>
+        <location filename="../filter_mate.py" line="1660"/>
         <source>The configuration could not be reset. Check that the plugin folder is writable, then try again. Details in filtermate.log.</source>
         <translation>无法重置配置。请检查插件文件夹是否可写，然后重试。详情见 filtermate.log。</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1759"/>
+        <location filename="../filter_mate.py" line="1760"/>
         <source>What&apos;s new in FilterMate 5</source>
         <translation>FilterMate 5 新功能</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1765"/>
+        <location filename="../filter_mate.py" line="1766"/>
         <source>&lt;p style=&apos;font-size:13px;&apos;&gt;&lt;b&gt;FilterMate now works with raster and point cloud layers.&lt;/b&gt;&lt;/p&gt;&lt;ul style=&apos;margin-left:10px; font-size:12px;&apos;&gt;&lt;li&gt;&lt;b&gt;EXPLORING&lt;/b&gt; adapts to the current layer: value range and classes of a raster, classes, elevation and attributes of a LiDAR point cloud.&lt;/li&gt;&lt;li&gt;&lt;b&gt;FILTERING&lt;/b&gt; relates that selection to layers of any kind, with the usual predicates and buffer: parcels within an elevation range, LiDAR points under buildings, a DTM clipped to a municipality.&lt;/li&gt;&lt;li&gt;&lt;b&gt;EXPORTING&lt;/b&gt; writes filtered rasters (GeoTIFF, COG) and point clouds (LAZ, COPC).&lt;/li&gt;&lt;li&gt;Processing algorithms and models, qgis_process, Python and REST APIs.&lt;/li&gt;&lt;/ul&gt;</source>
         <translation>&lt;p style='font-size:13px;'&gt;&lt;b&gt;FilterMate 现在支持栅格图层和点云图层。&lt;/b&gt;&lt;/p&gt;&lt;ul style='margin-left:10px; font-size:12px;'&gt;&lt;li&gt;&lt;b&gt;EXPLORING&lt;/b&gt; 会随当前图层调整：栅格的值范围和类别，LiDAR 点云的类别、高程和属性。&lt;/li&gt;&lt;li&gt;&lt;b&gt;FILTERING&lt;/b&gt; 使用常用的空间谓词和缓冲区，将该选择与任意类型的图层关联：位于某一高程范围内的地块、建筑物下方的 LiDAR 点、按行政区裁剪的 DTM。&lt;/li&gt;&lt;li&gt;&lt;b&gt;EXPORTING&lt;/b&gt; 写出过滤后的栅格（GeoTIFF、COG）和点云（LAZ、COPC）。&lt;/li&gt;&lt;li&gt;Processing 算法和模型、qgis_process、Python 和 REST API。&lt;/li&gt;&lt;/ul&gt;</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1781"/>
+        <location filename="../filter_mate.py" line="1782"/>
         <source>Open the user guide</source>
         <translation>打开用户指南</translation>
     </message>
@@ -2628,59 +3331,59 @@ Drop anyway?</source>
         <translation>浅色模式</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="4151"/>
+        <location filename="../filter_mate_dockwidget.py" line="4155"/>
         <location filename="../ui/controllers/exploring_controller.py" line="884"/>
         <source>Selected features have no geometry.</source>
         <translation>所选要素没有几何图形。</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="4170"/>
+        <location filename="../filter_mate_dockwidget.py" line="4174"/>
         <location filename="../ui/controllers/exploring_controller.py" line="885"/>
         <source>No feature selected. Select a feature from the dropdown list.</source>
         <translation>未选择要素。请从下拉列表中选择一个要素。</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="5345"/>
+        <location filename="../filter_mate_dockwidget.py" line="5349"/>
         <source>The selected layer is invalid or its source cannot be found.</source>
         <translation>所选图层无效或找不到其数据源。</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6238"/>
+        <location filename="../filter_mate_dockwidget.py" line="6242"/>
         <source>Negative buffer (erosion): shrinks polygons inward</source>
         <translation>负缓冲区（侵蚀）：向内收缩多边形</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6241"/>
+        <location filename="../filter_mate_dockwidget.py" line="6245"/>
         <source>Buffer value in meters (positive=expand, negative=shrink polygons)</source>
         <translation>缓冲区值（米）（正值=扩展，负值=收缩多边形）</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6743"/>
+        <location filename="../filter_mate_dockwidget.py" line="6747"/>
         <source>Plugin activated with {0} vector layer(s)</source>
         <translation>插件已激活，包含 {0} 个矢量图层</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6862"/>
+        <location filename="../filter_mate_dockwidget.py" line="6866"/>
         <source>Could not reload plugin automatically.</source>
         <translation>无法自动重新加载插件。</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6867"/>
+        <location filename="../filter_mate_dockwidget.py" line="6871"/>
         <source>Error reloading plugin: {0}</source>
         <translation>重新加载插件时出错：{0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6942"/>
+        <location filename="../filter_mate_dockwidget.py" line="6946"/>
         <source>Layer properties reset to defaults</source>
         <translation>图层属性已重置为默认值</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6943"/>
+        <location filename="../filter_mate_dockwidget.py" line="6947"/>
         <source>Error resetting layer properties: {}</source>
         <translation>重置图层属性时出错：{}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7206"/>
+        <location filename="../filter_mate_dockwidget.py" line="7232"/>
         <source>Filter</source>
         <translation>过滤</translation>
     </message>
@@ -2810,7 +3513,7 @@ Drop anyway?</source>
         <translation>无法应用面板布局；将使用默认尺寸。详情见 filtermate.log。</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7034"/>
+        <location filename="../filter_mate_dockwidget.py" line="7038"/>
         <location filename="../ui/controllers/backend_controller.py" line="682"/>
         <source>Vector</source>
         <translation>矢量</translation>
@@ -2841,22 +3544,22 @@ Drop anyway?</source>
         <translation>删除 FilterMate 模式</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="4282"/>
+        <location filename="../filter_mate_dockwidget.py" line="4286"/>
         <source>Read failed</source>
         <translation>读取失败</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="4282"/>
+        <location filename="../filter_mate_dockwidget.py" line="4286"/>
         <source>The service could not be read. Please retry.</source>
         <translation>无法读取该服务。请重试。</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="4624"/>
+        <location filename="../filter_mate_dockwidget.py" line="4628"/>
         <source>Loading filtered extent…</source>
         <translation>正在加载过滤后的范围…</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="5210"/>
+        <location filename="../filter_mate_dockwidget.py" line="5214"/>
         <location filename="../ui/controllers/exploring_controller.py" line="742"/>
         <location filename="../ui/controllers/exploring_controller.py" line="3662"/>
         <source>Loading selected values…</source>
@@ -2898,7 +3601,7 @@ Drop anyway?</source>
         <translation>仅显示有限的一组值。请细化搜索以查找其他值。</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="5145"/>
+        <location filename="../filter_mate_dockwidget.py" line="5149"/>
         <location filename="../ui/controllers/exploring_controller.py" line="551"/>
         <location filename="../ui/controllers/exploring_controller.py" line="568"/>
         <location filename="../ui/controllers/exploring_controller.py" line="636"/>
@@ -3057,7 +3760,7 @@ Drop anyway?</source>
         <translation>📁 当前项目</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7206"/>
+        <location filename="../filter_mate_dockwidget.py" line="7232"/>
         <source>The filter was not launched: its selection changed or could not be read. Click Filter again.</source>
         <translation>过滤未启动：其选择已更改或无法读取。请再次点击“过滤”。</translation>
     </message>
@@ -3437,7 +4140,7 @@ Make sure the PostgreSQL table has a PRIMARY KEY defined.</source>
 <context>
     <name>ModelDownloadTask</name>
     <message>
-        <location filename="../adapters/qgis/coverage_layers/segmentation.py" line="316"/>
+        <location filename="../adapters/qgis/coverage_layers/segmentation.py" line="558"/>
         <source>FilterMate: downloading the segmentation model</source>
         <translation>FilterMate：正在下载分割模型</translation>
     </message>
@@ -5830,27 +6533,27 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">使用像元拾取器点击地图。Ctrl+点击可将范围扩展到该值。</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2138"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2160"/>
         <source>VALUE RANGE</source>
         <translation>值范围</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1444"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1461"/>
         <source>Min</source>
         <translation>最小</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1444"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1461"/>
         <source>Lowest value kept</source>
         <translation>保留的最低值</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1444"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1461"/>
         <source>Max</source>
         <translation>最大</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1444"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1461"/>
         <source>Highest value kept</source>
         <translation>保留的最高值</translation>
     </message>
@@ -5880,17 +6583,17 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">无</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1464"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1481"/>
         <source>RASTER EXPRESSION</source>
         <translation>栅格表达式</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1468"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1485"/>
         <source>Raster calculator expression; a pixel is kept where it is not 0</source>
         <translation>栅格计算器表达式；像元值不为 0 处保留该像元</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1469"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1486"/>
         <source>Raster expression</source>
         <translation>栅格表达式</translation>
     </message>
@@ -5910,12 +6613,12 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">已选像元：{0}</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1550"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1567"/>
         <source>Set a value range first</source>
         <translation>请先设置值范围</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2758"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2910"/>
         <source>NoData</source>
         <translation>NoData</translation>
     </message>
@@ -5935,22 +6638,22 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">地图上最后绘制的矩形内当前波段的统计</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1844"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1861"/>
         <source>Under the cursor: {0}  (X {1:.{3}f}  Y {2:.{3}f})</source>
         <translation>光标处: {0}  (X {1:.{3}f}  Y {2:.{3}f})</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1854"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1871"/>
         <source>Zone: {0}</source>
         <translation>区域: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1854"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1871"/>
         <source>no pixel</source>
         <translation>无像元</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2776"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2928"/>
         <source>LAST PICKS</source>
         <translation>最近读数</translation>
     </message>
@@ -5965,37 +6668,37 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">范围所应用的量。坡度、坡向、山体阴影和粗糙度将该波段视为 DTM 读取。</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1401"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1418"/>
         <source>Pixel value</source>
         <translation>像元值</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1401"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1418"/>
         <source>Slope (degrees)</source>
         <translation>坡度（度）</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1401"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1418"/>
         <source>Slope (%)</source>
         <translation>坡度（%）</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1401"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1418"/>
         <source>Aspect (degrees)</source>
         <translation>坡向（度）</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1401"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1418"/>
         <source>Hillshade (0-255)</source>
         <translation>山体阴影（0-255）</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1401"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1418"/>
         <source>Roughness (TRI, mean difference)</source>
         <translation>粗糙度（TRI，平均差）</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1411"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1428"/>
         <source>Usual thresholds of the quantity</source>
         <translation>该量的常用阈值</translation>
     </message>
@@ -6005,47 +6708,47 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">常用阈值</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2275"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2297"/>
         <source>Flat</source>
         <translation>平坦</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2275"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2297"/>
         <source>Gentle</source>
         <translation>平缓</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2275"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2297"/>
         <source>Moderate</source>
         <translation>中等</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2276"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2298"/>
         <source>Steep</source>
         <translation>陡</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2276"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2298"/>
         <source>East</source>
         <translation>东</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2276"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2298"/>
         <source>South</source>
         <translation>南</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2277"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2299"/>
         <source>West</source>
         <translation>西</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2277"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2299"/>
         <source>Shadow</source>
         <translation>阴影</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2277"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2299"/>
         <source>Lit</source>
         <translation>受光</translation>
     </message>
@@ -6055,27 +6758,27 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">常用阈值…</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1137"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1146"/>
         <source>PIPETTE</source>
         <translation>拾取器</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1273"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1290"/>
         <source>Tolerance ±</source>
         <translation>容差 ±</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1280"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1297"/>
         <source>Tolerance around the picked color or value, in % of the value range</source>
         <translation>所拾取颜色或值周围的容差，占值范围的百分比</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1281"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1298"/>
         <source>Pipette tolerance</source>
         <translation>拾取器容差</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1504"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1521"/>
         <source>Bands</source>
         <translation>波段</translation>
     </message>
@@ -6120,22 +6823,22 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">需要三个或更多波段的图像（红、绿、蓝...）</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1523"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1540"/>
         <source>Vegetation (NDVI &gt; 0.3)</source>
         <translation>植被（NDVI &gt; 0.3）</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1523"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1540"/>
         <source>No vegetation (NDVI &lt; 0.1)</source>
         <translation>无植被（NDVI &lt; 0.1）</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1524"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1541"/>
         <source>Water (NDWI &gt; 0.1)</source>
         <translation>水体（NDWI &gt; 0.1）</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1524"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1541"/>
         <source>Vegetation (excess green)</source>
         <translation>植被（超绿）</translation>
     </message>
@@ -6145,12 +6848,12 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">光谱预设…</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2431"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2470"/>
         <source>This pixel has no value (NoData): pick another one</source>
         <translation>此像元没有值（NoData）：请选择另一个</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2541"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2578"/>
         <source>The tolerance covers every value: lower it</source>
         <translation>容差涵盖了所有值：请调小</translation>
     </message>
@@ -6175,12 +6878,12 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">表达式</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="857"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="866"/>
         <source>BANDS</source>
         <translation>波段</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="900"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="909"/>
         <source>Value of the active band under the cursor</source>
         <translation>光标下活动波段的值</translation>
     </message>
@@ -6190,7 +6893,7 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">地图上最后绘制的矩形内活动波段的统计</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="941"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="950"/>
         <source>Every band</source>
         <translation>所有波段</translation>
     </message>
@@ -6200,7 +6903,7 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">值范围同时适用于所有颜色波段（每个波段都在范围内的像素才会保留）；直方图显示第一个波段</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="875"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="884"/>
         <source>Display the first checked band in grey or the checked bands as a colour composite</source>
         <translation type="unfinished"></translation>
     </message>
@@ -6210,142 +6913,142 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">吸管比较此波段</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1052"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1061"/>
         <source>Colour the band holds: the spectral indexes and the chips use it. Click to change it</source>
         <translation>该波段所代表的颜色：光谱指数和色块会使用它。点击可更改</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1062"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1071"/>
         <source>Value at the last click of the pipette</source>
         <translation>吸管最后一次点击处的值</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="994"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1003"/>
         <source>No colour</source>
         <translation>无颜色</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1002"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1011"/>
         <source>RGB</source>
         <translation>RGB</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1002"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1011"/>
         <source>Bands 1, 2, 3 are red, green, blue</source>
         <translation>波段 1、2、3 为红、绿、蓝</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1002"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1011"/>
         <source>IRC</source>
         <translation>IRC</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1002"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1011"/>
         <source>Bands 1, 2, 3 are infrared, red, green (IGN infrared colour orthophoto)</source>
         <translation>波段 1、2、3 为红外、红、绿（IGN 红外彩色正射影像）</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1002"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1011"/>
         <source>RGB + NIR</source>
         <translation>RGB + NIR</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1002"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1011"/>
         <source>Bands 1, 2, 3, 4 are red, green, blue, near infrared</source>
         <translation>波段 1、2、3、4 为红、绿、蓝、近红外</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1005"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1014"/>
         <source>Every band: {0}</source>
         <translation>所有波段：{0}</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1051"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1060"/>
         <source> Roles guessed, to confirm.</source>
         <translation> 角色为推测，请确认。</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1115"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1124"/>
         <source>R</source>
         <translation>R</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1115"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1124"/>
         <source>G</source>
         <translation>G</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1115"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1124"/>
         <source>B</source>
         <translation>B</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1116"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1125"/>
         <source>NIR</source>
         <translation>NIR</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1119"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1128"/>
         <source>Red</source>
         <translation>红</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1119"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1128"/>
         <source>Green</source>
         <translation>绿</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1119"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1128"/>
         <source>Blue</source>
         <translation>蓝</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1120"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1129"/>
         <source>Near infrared</source>
         <translation>近红外</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1126"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1135"/>
         <source>roles guessed, to confirm</source>
         <translation>角色为推测，请确认</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1141"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1152"/>
         <source>Select</source>
         <translation>选择</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1145"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1156"/>
         <source>Similar pixels</source>
         <translation>相似像素</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1145"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1156"/>
         <source>Every pixel of the raster close to the picked colour or value (the pipette of the rail)</source>
         <translation>栅格中所有接近所取颜色或值的像素（侧栏的吸管）</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1145"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1156"/>
         <source>Clicked object</source>
         <translation>点击的对象</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1145"/>
         <source>Only the patch of such pixels the click falls in: a pool, a roof, a field (the object detector of the rail); Ctrl+click adds another object</source>
-        <translation>仅点击所在的此类像素块：水池、屋顶、农田（侧栏的对象检测器）；Ctrl+点击可再添加一个对象</translation>
+        <translation type="obsolete">仅点击所在的此类像素块：水池、屋顶、农田（侧栏的对象检测器）；Ctrl+点击可再添加一个对象</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1145"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1156"/>
         <source>Similar objects</source>
         <translation>相似对象</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1145"/>
         <source>Every object of the raster like the clicked one: the patches of such pixels whose area is within the ratios below (the similar objects tool of the rail); Ctrl+click adds another reference object</source>
-        <translation>栅格中所有与所点击对象相似的对象：面积在下方比例范围内的此类像素块（侧栏的相似对象工具）；Ctrl+点击可再添加一个参考对象</translation>
+        <translation type="obsolete">栅格中所有与所点击对象相似的对象：面积在下方比例范围内的此类像素块（侧栏的相似对象工具）；Ctrl+点击可再添加一个参考对象</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1218"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1235"/>
         <source>Area ×</source>
         <translation>面积 ×</translation>
     </message>
@@ -6360,72 +7063,72 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">最大相似对象，以所点击的最大对象的倍数表示</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1234"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1251"/>
         <source>to ×</source>
         <translation>至 ×</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1237"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1254"/>
         <source>same shape</source>
         <translation>形状相同</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1240"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1257"/>
         <source>Keep only the objects shaped like the clicked ones: their compactness (4π × area / perimeter², 1 for a disc) within the same ratios; off, a road of the area of a pool is a pool</source>
         <translation>仅保留与所点击对象形状相似的对象：其紧凑度（4π × 面积 / 周长²，圆盘为 1）在相同比例范围内；关闭时，与水池面积相当的道路也会被当作水池</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1314"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1331"/>
         <source>Remove this pick</source>
         <translation>移除此次取值</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1393"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1410"/>
         <source>Quantity</source>
         <translation>量</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2334"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2356"/>
         <source>Quantity the range applies to. Slope, aspect, hillshade and roughness read the active band as a DTM.</source>
         <translation>范围所适用的量。坡度、坡向、山体阴影和粗糙度会将活动波段作为 DTM 读取。</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1411"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1428"/>
         <source>Thresholds ▾</source>
         <translation>阈值 ▾</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1483"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1500"/>
         <source>Insert ▾</source>
         <translation>插入 ▾</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1483"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1500"/>
         <source>Insert a band reference, a usual spectral index or the current range</source>
         <translation>插入波段引用、常用光谱指数或当前范围</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1512"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1529"/>
         <source>Spectral indexes</source>
         <translation>光谱指数</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1517"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1534"/>
         <source>Range</source>
         <translation>范围</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1518"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1535"/>
         <source>The current value range</source>
         <translation>当前值范围</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1629"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1646"/>
         <source>Rendered colors depend on style and scale.</source>
         <translation>渲染颜色取决于样式和比例尺。</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1629"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1646"/>
         <source>Only color selection is available: numeric bands, indices, ranges, classes and derivatives are unavailable.</source>
         <translation>仅可使用颜色选择：数值波段、指数、范围、类别及其衍生数据不可用。</translation>
     </message>
@@ -6435,316 +7138,316 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">值范围 — 所有波段</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2136"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2158"/>
         <source>VALUE RANGE — band {0}</source>
         <translation>值范围 — 波段 {0}</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2330"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2352"/>
         <source>picks on: {0}</source>
         <translation>取值于：{0}</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2334"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2356"/>
         <source>A slope, aspect... reads one band as a DTM: choose a band in BANDS first</source>
         <translation>坡度、坡向等将一个波段作为 DTM 读取：请先在“波段”中选择一个波段</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2576"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2613"/>
         <source>The object could not be read</source>
         <translation>无法读取该对象</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2578"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2615"/>
         <source>No object under the click: raise the tolerance or click another pixel</source>
         <translation>点击处没有对象：请提高容差或点击其他像素</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2580"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2617"/>
         <source>An object is larger than the window read and was cut: lower the tolerance</source>
         <translation>有对象大于读取窗口并被截断：请降低容差</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1080"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1089"/>
         <source>Choose 1 to 3 bands for display.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1082"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1091"/>
         <source>Grey: band {0}</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="872"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="881"/>
         <source>Layer style</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="868"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="877"/>
         <source>Map display</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1084"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1093"/>
         <source>R: {0} · G: {1} · B: {2}</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="955"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="964"/>
         <source>Select band {0}</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="874"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="883"/>
         <source>Selected bands</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2412"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2452"/>
         <source>Choose at least one band in BANDS before using the pipette.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="873"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="882"/>
         <source>First checked band</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="944"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="953"/>
         <source>Select or clear every band. The histogram shows the first checked band.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="954"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="963"/>
         <source>Use this band for the pipette, value range and selected bands display</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2134"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2156"/>
         <source>VALUE RANGE — selected bands</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="907"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="916"/>
         <source>Statistics of the active band in the box of the last zone drawn on the map; only the pixels inside the zone are selected</source>
         <translation>在地图上最后绘制的区域范围内，活动波段的统计信息；只选中区域内部的像素</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1145"/>
         <source>Segment</source>
-        <translation>分割</translation>
+        <translation type="obsolete">分割</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1145"/>
         <source>Draw an object with the segmentation model: left click on it, right click off it, or drag a box; Enter validates. Best on buildings and other well delimited objects</source>
-        <translation>使用分割模型绘制对象：在对象上左键单击，在对象外右键单击，或拖出一个框；按 Enter 确认。最适合建筑物和其他边界清晰的对象</translation>
+        <translation type="obsolete">使用分割模型绘制对象：在对象上左键单击，在对象外右键单击，或拖出一个框；按 Enter 确认。最适合建筑物和其他边界清晰的对象</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1185"/>
         <source>Download the SAM 2.1 tiny model once, into your QGIS profile; the segmentation then runs locally, on the CPU</source>
-        <translation>将 SAM 2.1 tiny 模型一次性下载到您的 QGIS 配置文件中；之后分割将在本地通过 CPU 运行</translation>
+        <translation type="obsolete">将 SAM 2.1 tiny 模型一次性下载到您的 QGIS 配置文件中；之后分割将在本地通过 CPU 运行</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1194"/>
         <source>Validate object</source>
-        <translation>确认对象</translation>
+        <translation type="obsolete">确认对象</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1196"/>
         <source>Add the object drawn to the selection (Enter on the map)</source>
-        <translation>将绘制的对象添加到选择中（在地图上按 Enter）</translation>
+        <translation type="obsolete">将绘制的对象添加到选择中（在地图上按 Enter）</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2740"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2892"/>
         <source>Clear</source>
         <translation>清除</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1201"/>
         <source>Forget the validated objects</source>
-        <translation>忘记已确认的对象</translation>
+        <translation type="obsolete">忘记已确认的对象</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1221"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1238"/>
         <source>Smallest similar object, as a share of each clicked reference</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1221"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1238"/>
         <source>Largest similar object, as a multiple of each clicked reference</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1253"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1270"/>
         <source>Separation</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1256"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1273"/>
         <source>Connected pixels</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1258"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1275"/>
         <source>Bridge removal: {0} px</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1260"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1277"/>
         <source>Separate objects joined by narrow bridges; higher values cut wider bridges</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1263"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1280"/>
         <source>Fill holes</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1266"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1283"/>
         <source>Fill enclosed gaps in the clicked object; clear to preserve courtyards and inner rings</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1408"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1425"/>
         <source>Custom expression</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1418"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1435"/>
         <source>Numeric raster formula, e.g. (&quot;raster@4&quot; - &quot;raster@1&quot;) / (&quot;raster@4&quot; + &quot;raster@1&quot;)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1419"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1436"/>
         <source>Custom derived value expression</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1420"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1437"/>
         <source>A numeric raster calculator expression. The histogram and thresholds use its computed values.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1478"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1495"/>
         <source>Computed expression values. Drag the handles to use this expression as a derived value with thresholds.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1487"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1504"/>
         <source>Use as derived value</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1696"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1713"/>
         <source>Computing histogram…</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2153"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2175"/>
         <source>No histogram available</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2153"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2175"/>
         <source>Constant value: {0}</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2153"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2175"/>
         <source>{0} sampled pixels · {1} to {2}</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2287"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2309"/>
         <source>Distribution (approximate)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2289"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2311"/>
         <source>Central 98% (P1–P99)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2289"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2311"/>
         <source>Central 90% (P5–P95)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2289"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2311"/>
         <source>Interquartile range (P25–P75)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2289"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2311"/>
         <source>Upper quartile (≥ P75)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2296"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2318"/>
         <source>All values</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2300"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2322"/>
         <source>Derived spectral values</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2646"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2739"/>
         <source>Installing onnxruntime in the background…</source>
         <translation>正在后台安装 onnxruntime…</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2648"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2743"/>
         <source>onnxruntime could not be installed automatically (see the FilterMate log). In a terminal (the OSGeo4W Shell on Windows), run {0} then restart QGIS.</source>
         <translation>无法自动安装 onnxruntime（请查看 FilterMate 日志）。请在终端（Windows 上为 OSGeo4W Shell）中运行 {0}，然后重新启动 QGIS。</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2660"/>
         <source>Install the model ({0} MB)…</source>
-        <translation>安装模型（{0} MB）…</translation>
+        <translation type="obsolete">安装模型（{0} MB）…</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2666"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2769"/>
         <source>Repair the model…</source>
         <translation>修复模型…</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2691"/>
         <source>Segmentation model</source>
-        <translation>分割模型</translation>
+        <translation type="obsolete">分割模型</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2691"/>
         <source>Download the SAM 2.1 tiny model ({0} MB) from huggingface.co/{1} into your QGIS profile?
 
 Every file is checked against its SHA-256. The model then runs locally, on the CPU; nothing leaves your computer.</source>
-        <translation>是否从 huggingface.co/{1} 将 SAM 2.1 tiny 模型（{0} MB）下载到您的 QGIS 配置文件中？
+        <translation type="obsolete">是否从 huggingface.co/{1} 将 SAM 2.1 tiny 模型（{0} MB）下载到您的 QGIS 配置文件中？
 
 每个文件都会根据其 SHA-256 进行校验。之后模型将在本地通过 CPU 运行；不会有任何数据离开您的计算机。</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2740"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2892"/>
         <source>Clear ({0})</source>
         <translation>清除（{0}）</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2780"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2932"/>
         <source>Derived value: {0}</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2652"/>
         <source>The segmentation needs onnxruntime (about {0} MB), which is not installed yet.</source>
-        <translation>分割功能需要 onnxruntime（约 {0} MB），但尚未安装。</translation>
+        <translation type="obsolete">分割功能需要 onnxruntime（约 {0} MB），但尚未安装。</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2656"/>
         <source>Install onnxruntime…</source>
-        <translation>安装 onnxruntime…</translation>
+        <translation type="obsolete">安装 onnxruntime…</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2675"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2779"/>
         <source>Segmentation</source>
         <translation>分割</translation>
     </message>
@@ -6753,9 +7456,68 @@ Every file is checked against its SHA-256. The model then runs locally, on the C
         <source>The segmentation needs onnxruntime (about {0} MB), which this QGIS does not have.
 
 Install it now from PyPI with pip, into your QGIS profile? The Python of QGIS is not modified.</source>
-        <translation>分割功能需要 onnxruntime（约 {0} MB），而此 QGIS 中没有。
+        <translation type="obsolete">分割功能需要 onnxruntime（约 {0} MB），而此 QGIS 中没有。
 
 现在通过 pip 从 PyPI 安装到您的 QGIS 配置文件中吗？QGIS 自带的 Python 不会被修改。</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1156"/>
+        <source>The object under the click: a roof, a pool, a field (the object detector of the rail). With SAM: a click adds an object, Shift+click extends the last one, a right click trims it, a box frames one, Escape removes it. With the colour engine: the patch of such pixels, Ctrl+click adds another one</source>
+        <translation>点击处的对象：屋顶、泳池、农田（侧栏的对象检测器）。使用 SAM：点击添加一个对象，Shift+点击扩大最后一个，右键点击将其收缩，框选圈定一个，Esc 将其移除。使用颜色引擎：相似像素组成的斑块，Ctrl+点击再添加一个</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1156"/>
+        <source>Every object like the clicked one, whose area is within the ratios below (the similar objects tool of the rail). With SAM: the patches of a similar colour in the visible area are redrawn by the model, then compared with the clicked object. With the colour engine: the patches of such pixels</source>
+        <translation>与所点击对象相似、面积落在下方比例范围内的每个对象（侧栏的相似对象工具）。使用 SAM：可见区域内颜色相近的斑块由模型重新绘制，然后与所点击的对象比较。使用颜色引擎：相似像素的斑块</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1185"/>
+        <source>Engine</source>
+        <translation>引擎</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1189"/>
+        <source>Colour</source>
+        <translation>颜色</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1190"/>
+        <source>SAM draws the object from the image, locally on the CPU; the colour engine grows the patch of pixels of the clicked colour</source>
+        <translation>SAM 根据图像在本地 CPU 上绘制对象；颜色引擎扩展所点击颜色的像素斑块</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1207"/>
+        <source>Install SAM 2.1 tiny once, into your QGIS profile; it then runs locally, on the CPU</source>
+        <translation>在您的 QGIS 配置文件中一次性安装 SAM 2.1 tiny；之后它在本地 CPU 上运行</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1218"/>
+        <source>Forget the objects drawn by SAM</source>
+        <translation>清除 SAM 绘制的对象</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2741"/>
+        <source>Downloading the SAM model in the background…</source>
+        <translation>正在后台下载 SAM 模型…</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2747"/>
+        <source>Objects are found by their colour. SAM draws them from the image, far better on buildings (about {0} MB to install).</source>
+        <translation>对象按颜色查找。SAM 根据图像绘制对象，对建筑物效果好得多（需安装约 {0} MB）。</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2751"/>
+        <source>Install SAM ({0} MB)…</source>
+        <translation>安装 SAM（{0} MB）…</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2779"/>
+        <source>Clicked and similar objects can be drawn by the SAM 2.1 segmentation model, locally on the CPU. Install it now (about {0} MB)?
+
+onnxruntime comes from PyPI with pip, the model from huggingface.co/{1}, each file checked against its SHA-256. Both go to your QGIS profile; the Python of QGIS is not modified and nothing leaves your computer. Without SAM, objects are found by their colour.</source>
+        <translation>点击的对象和相似对象可由 SAM 2.1 分割模型在本地 CPU 上绘制。现在安装吗（约 {0} MB）？
+
+onnxruntime 通过 pip 从 PyPI 获取，模型来自 huggingface.co/{1}，每个文件都用 SHA-256 校验。两者都存放在您的 QGIS 配置文件中；QGIS 的 Python 不会被修改，也没有任何内容离开您的计算机。没有 SAM 时，对象按颜色查找。</translation>
     </message>
 </context>
 <context>
@@ -7027,125 +7789,200 @@ Install it now from PyPI with pip, into your QGIS profile? The Python of QGIS is
 <context>
     <name>SegmentationController</name>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="106"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="147"/>
         <source>This point cannot be used on this layer</source>
         <translation>此点无法在该图层上使用</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="134"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="199"/>
         <source>Click inside the raster</source>
         <translation>请在栅格内部单击</translation>
     </message>
     <message>
         <location filename="../ui/controllers/segmentation_controller.py" line="141"/>
         <source>This point is outside the window being segmented: validate or clear the object first</source>
-        <translation>此点位于正在分割的窗口之外：请先确认或清除对象</translation>
+        <translation type="obsolete">此点位于正在分割的窗口之外：请先确认或清除对象</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="164"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="231"/>
         <source>This box is too small</source>
         <translation>此框太小</translation>
     </message>
     <message>
         <location filename="../ui/controllers/segmentation_controller.py" line="149"/>
         <source>Start with a left click on the object, or draw a box</source>
-        <translation>请先在对象上左键单击，或绘制一个框</translation>
+        <translation type="obsolete">请先在对象上左键单击，或绘制一个框</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="160"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="224"/>
         <source>This raster cannot be segmented</source>
         <translation>无法对此栅格进行分割</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="211"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="317"/>
         <source>Preparing the segmentation of this area…</source>
         <translation>正在准备此区域的分割…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="370"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="430"/>
         <source>The segmentation of this area failed: {0}</source>
         <translation>此区域的分割失败：{0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="222"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="328"/>
         <source>canceled</source>
         <translation>已取消</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="247"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="363"/>
         <source>onnxruntime is being installed, click again in a moment</source>
         <translation>onnxruntime 正在安装，请稍后再次单击</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="249"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="365"/>
         <source>onnxruntime is missing: run {0}, then restart QGIS</source>
         <translation>缺少 onnxruntime：请运行 {0}，然后重新启动 QGIS</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="253"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="369"/>
         <source>The segmentation model is being downloaded, click again once it is installed</source>
         <translation>分割模型正在下载，安装完成后请再次单击</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="255"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="371"/>
         <source>Install the segmentation model first (button below)</source>
         <translation>请先安装分割模型（下方按钮）</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="256"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="372"/>
         <source>The segmentation model could not be loaded (see the FilterMate log)</source>
         <translation>无法加载分割模型（请查看 FilterMate 日志）</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="276"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="393"/>
         <source>Downloading the segmentation model… {0} %</source>
         <translation>正在下载分割模型… {0} %</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="285"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="402"/>
         <source>Model installed: left click on an object, or draw a box</source>
         <translation>模型已安装：在对象上左键单击，或绘制一个框</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="287"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="404"/>
         <source>The model could not be downloaded: {0}</source>
         <translation>无法下载模型：{0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="289"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="406"/>
         <source>Download canceled</source>
         <translation>下载已取消</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="307"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="422"/>
         <source>Click on an object in the area prepared</source>
         <translation>请在已准备好的区域内单击一个对象</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="373"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="439"/>
         <source>No object found: add a point or draw a box</source>
         <translation>未找到对象：请添加一个点或绘制一个框</translation>
     </message>
     <message>
         <location filename="../ui/controllers/segmentation_controller.py" line="324"/>
         <source>Left click adds to the object, right click removes, Enter validates</source>
-        <translation>左键单击添加到对象，右键单击移除，按 Enter 确认</translation>
+        <translation type="obsolete">左键单击添加到对象，右键单击移除，按 Enter 确认</translation>
     </message>
     <message>
         <location filename="../ui/controllers/segmentation_controller.py" line="364"/>
         <source>Click an object first</source>
-        <translation>请先单击一个对象</translation>
+        <translation type="obsolete">请先单击一个对象</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="251"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="367"/>
         <source>Install onnxruntime first, with the button below</source>
         <translation>请先使用下方按钮安装 onnxruntime</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="91"/>
+        <source>Click an object, or draw a box around it</source>
+        <translation>点击一个对象，或在其周围绘制一个框</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="166"/>
+        <source>A right click trims the last object: click an object first</source>
+        <translation>右键点击会收缩最后一个对象：请先点击一个对象</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="206"/>
+        <source>This point is outside the area of the last object: click it as a new object</source>
+        <translation>此点在最后一个对象的区域之外：请将其作为新对象点击</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="349"/>
+        <source>{0} click(s) fell outside the area prepared: click them again</source>
+        <translation>有 {0} 次点击落在准备区域之外：请重新点击</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="466"/>
+        <source>Shift+click extends the object, right click trims it, Escape removes it</source>
+        <translation>Shift+点击扩大对象，右键点击收缩，Esc 移除</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="502"/>
+        <source>Similar objects need the values of the raster: this layer is only drawn</source>
+        <translation>相似对象需要栅格的数值：此图层仅为绘制显示</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="510"/>
+        <source>No patch of this colour nearby to compare with the object</source>
+        <translation>附近没有可与该对象比较的此颜色斑块</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="524"/>
+        <source>Drawing the similar objects: {0} candidates…</source>
+        <translation>正在绘制相似对象：{0} 个候选…</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="535"/>
+        <source>Drawing the similar objects… {0} %</source>
+        <translation>正在绘制相似对象… {0} %</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="549"/>
+        <source>The similar objects could not be drawn: {0}</source>
+        <translation>无法绘制相似对象：{0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="559"/>
+        <source>{0} similar objects found among {1} candidates; Escape removes them</source>
+        <translation>在 {1} 个候选中找到 {0} 个相似对象；Esc 将其移除</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="596"/>
+        <source>Click the next object</source>
+        <translation>点击下一个对象</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="603"/>
+        <source>Search stopped</source>
+        <translation>搜索已停止</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="603"/>
+        <source>Click canceled</source>
+        <translation>点击已取消</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="611"/>
+        <source>Last object removed</source>
+        <translation>已移除最后一个对象</translation>
     </message>
 </context>
 <context>
     <name>SegmentationEmbedTask</name>
     <message>
-        <location filename="../adapters/qgis/coverage_layers/segmentation.py" line="238"/>
+        <location filename="../adapters/qgis/coverage_layers/segmentation.py" line="400"/>
         <source>FilterMate: preparing the segmentation</source>
         <translation>FilterMate：正在准备分割</translation>
     </message>
@@ -7441,6 +8278,14 @@ Install it now from PyPI with pip, into your QGIS profile? The Python of QGIS is
     </message>
 </context>
 <context>
+    <name>SimilarObjectsTask</name>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/segmentation.py" line="469"/>
+        <source>FilterMate: drawing the similar objects</source>
+        <translation>FilterMate：正在绘制相似对象</translation>
+    </message>
+</context>
+<context>
     <name>SimpleConfigDialog</name>
     <message>
         <location filename="../ui/dialogs/config_editor_widget.py" line="470"/>
@@ -7475,12 +8320,12 @@ Install it now from PyPI with pip, into your QGIS profile? The Python of QGIS is
 <context>
     <name>SqlUtils</name>
     <message>
-        <location filename="../infrastructure/database/sql_utils.py" line="273"/>
+        <location filename="../infrastructure/database/sql_utils.py" line="243"/>
         <source>FilterMate - PostgreSQL Type Warning</source>
         <translation>FilterMate - PostgreSQL 类型警告</translation>
     </message>
     <message>
-        <location filename="../infrastructure/database/sql_utils.py" line="277"/>
+        <location filename="../infrastructure/database/sql_utils.py" line="247"/>
         <source>Type mismatch in filter: {warning_detail}...</source>
         <translation>过滤器中的类型不匹配：{warning_detail}...</translation>
     </message>
@@ -7756,576 +8601,6 @@ Install it now from PyPI with pip, into your QGIS profile? The Python of QGIS is
         <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
         <source>Kept points</source>
         <translation type="obsolete">保留的点</translation>
-    </message>
-</context>
-<context>
-    <name>AgentPanel</name>
-    <message>
-        <source>(no request)</source>
-        <translation>（无请求）</translation>
-    </message>
-    <message>
-        <source>A few free requests a month, through the relay of FilterMate to Claude (Anthropic), under the terms of Anthropic. The relay counts what is spent and keeps no conversation. When it is used up, choose a provider and enter your own API key.</source>
-        <translation>每月提供少量免费请求，经由 FilterMate 到 Claude（Anthropic）的中继，适用 Anthropic 的条款。中继只统计消耗量，不保留任何对话。用完后，请选择提供者并输入您自己的 API 密钥。</translation>
-    </message>
-    <message>
-        <source>API key</source>
-        <translation>API 密钥</translation>
-    </message>
-    <message>
-        <source>Add</source>
-        <translation>添加</translation>
-    </message>
-    <message>
-        <source>Address</source>
-        <translation>地址</translation>
-    </message>
-    <message>
-        <source>Agent settings</source>
-        <translation>智能体设置</translation>
-    </message>
-    <message>
-        <source>Allow attribute values to be sent</source>
-        <translation>允许发送属性值</translation>
-    </message>
-    <message>
-        <source>Applications already set up will have to be set up again.</source>
-        <translation>已设置的应用程序需要重新设置。</translation>
-    </message>
-    <message>
-        <source>Ask the agent to filter your layers</source>
-        <translation>让智能体来过滤您的图层</translation>
-    </message>
-    <message>
-        <source>Back to the conversation</source>
-        <translation>返回对话</translation>
-    </message>
-    <message>
-        <source>Claude Code or another MCP client on this computer can then filter your layers, once FilterMate has been opened, under the rules of this panel: the same sources, the same confirmations, and filters can be undone here. That application sends what it reads to its own AI provider.</source>
-        <translation>此计算机上的 Claude Code 或其他 MCP 客户端随后可在 FilterMate 打开后过滤您的图层，遵循本面板的规则：相同的来源、相同的确认，过滤可在此撤销。该应用程序会将其读取的内容发送给其自己的 AI 提供者。</translation>
-    </message>
-    <message>
-        <source>Connect an AI provider to start. Nothing is sent before you agree.</source>
-        <translation>连接 AI 提供者即可开始。未经您同意，不会发送任何内容。</translation>
-    </message>
-    <message>
-        <source>Copied, with the access token: keep it to yourself. Save these settings for it to apply.</source>
-        <translation>已复制（含访问令牌）：请妥善保管。保存这些设置后才会生效。</translation>
-    </message>
-    <message>
-        <source>Copy for Claude Desktop</source>
-        <translation>复制给 Claude Desktop</translation>
-    </message>
-    <message>
-        <source>Copy the Claude Code command</source>
-        <translation>复制 Claude Code 命令</translation>
-    </message>
-    <message>
-        <source>Copy the configuration</source>
-        <translation>复制配置</translation>
-    </message>
-    <message>
-        <source>Describe it in your own words. Each filter can be undone.</source>
-        <translation>用您自己的话描述。每个过滤都可以撤销。</translation>
-    </message>
-    <message>
-        <source>Filter your layers from a sentence</source>
-        <translation>一句话过滤您的图层</translation>
-    </message>
-    <message>
-        <source>FilterMate agent</source>
-        <translation>FilterMate 智能体</translation>
-    </message>
-    <message>
-        <source>History</source>
-        <translation>历史记录</translation>
-    </message>
-    <message>
-        <source>History…</source>
-        <translation>历史记录…</translation>
-    </message>
-    <message>
-        <source>I agree to send this data to this provider</source>
-        <translation>我同意将这些数据发送给此提供者</translation>
-    </message>
-    <message>
-        <source>Let other applications on this computer drive FilterMate (MCP server)</source>
-        <translation>允许此计算机上的其他应用程序控制 FilterMate（MCP 服务器）</translation>
-    </message>
-    <message>
-        <source>MCP connector</source>
-        <translation>MCP 连接器</translation>
-    </message>
-    <message>
-        <source>MCP connectors</source>
-        <translation>MCP 连接器</translation>
-    </message>
-    <message>
-        <source>Model</source>
-        <translation>模型</translation>
-    </message>
-    <message>
-        <source>More</source>
-        <translation>更多</translation>
-    </message>
-    <message>
-        <source>New access token</source>
-        <translation>新的访问令牌</translation>
-    </message>
-    <message>
-        <source>New conversation</source>
-        <translation>新对话</translation>
-    </message>
-    <message>
-        <source>New token: it applies once these settings are saved.</source>
-        <translation>新令牌：保存这些设置后生效。</translation>
-    </message>
-    <message>
-        <source>Open data platforms</source>
-        <translation>开放数据平台</translation>
-    </message>
-    <message>
-        <source>Open the settings</source>
-        <translation>打开设置</translation>
-    </message>
-    <message>
-        <source>Other applications</source>
-        <translation>其他应用程序</translation>
-    </message>
-    <message>
-        <source>Port</source>
-        <translation>端口</translation>
-    </message>
-    <message>
-        <source>Provider</source>
-        <translation>提供者</translation>
-    </message>
-    <message>
-        <source>Redo</source>
-        <translation>重做</translation>
-    </message>
-    <message>
-        <source>Remove</source>
-        <translation>移除</translation>
-    </message>
-    <message>
-        <source>Remove the stored key</source>
-        <translation>删除已保存的密钥</translation>
-    </message>
-    <message>
-        <source>Satellite imagery</source>
-        <translation>卫星影像</translation>
-    </message>
-    <message>
-        <source>Send (Enter)</source>
-        <translation>发送（Enter）</translation>
-    </message>
-    <message>
-        <source>Send again</source>
-        <translation>重新发送</translation>
-    </message>
-    <message>
-        <source>Sent to: {}</source>
-        <translation>发送至：{}</translation>
-    </message>
-    <message>
-        <source>Set up the agent</source>
-        <translation>设置智能体</translation>
-    </message>
-    <message>
-        <source>Sources</source>
-        <translation>来源</translation>
-    </message>
-    <message>
-        <source>Stop (Esc)</source>
-        <translation>停止（Esc）</translation>
-    </message>
-    <message>
-        <source>Stored: leave empty to keep it</source>
-        <translation>已保存：留空则保留</translation>
-    </message>
-    <message>
-        <source>Test</source>
-        <translation>测试</translation>
-    </message>
-    <message>
-        <source>Testing…</source>
-        <translation>测试中…</translation>
-    </message>
-    <message>
-        <source>The MCP server could not start: {}</source>
-        <translation>MCP 服务器无法启动：{}</translation>
-    </message>
-    <message>
-        <source>The agent can search the sources ticked here. Your searches, and what the agent passes to a connector, are sent to them; a layer added from them is read from their servers.</source>
-        <translation>智能体可以搜索此处勾选的来源。您的搜索内容以及智能体传给连接器的内容会发送给这些来源；从中添加的图层将从其服务器读取。</translation>
-    </message>
-    <message>
-        <source>The agent sends your request, the names of your layers and fields, your filter expressions and the results of its tools to the provider chosen here, under that provider's terms. Without the option below, the agent does not read the values of your fields; values already written in your filters and favorites are still sent. The conversation is kept on this computer for each project, until you start a new one.</source>
-        <translation>智能体会将您的请求、图层和字段的名称、过滤表达式以及其工具的结果发送给此处选择的提供者，适用该提供者的条款。未启用下方选项时，智能体不会读取字段的值；但已写入您的过滤器和收藏中的值仍会被发送。对话按项目保存在此计算机上，直到您开始新的对话。</translation>
-    </message>
-    <message>
-        <source>Through mcp-remote, which needs Node.js: Claude Desktop starts local servers as programs.</source>
-        <translation>通过 mcp-remote（需要 Node.js）：Claude Desktop 会将本地服务器作为程序启动。</translation>
-    </message>
-    <message>
-        <source>Too many sources added: remove one first.</source>
-        <translation>添加的来源过多：请先移除一个。</translation>
-    </message>
-    <message>
-        <source>Undo the last</source>
-        <translation>撤销最近的</translation>
-    </message>
-    <message>
-        <source>Undo this turn</source>
-        <translation>撤销本轮</translation>
-    </message>
-    <message>
-        <source>What do you want to filter?</source>
-        <translation>您想过滤什么？</translation>
-    </message>
-    <message>
-        <source>added by you</source>
-        <translation>由您添加</translation>
-    </message>
-    <message>
-        <source>applied</source>
-        <translation>已应用</translation>
-    </message>
-    <message>
-        <source>community</source>
-        <translation>社区</translation>
-    </message>
-    <message>
-        <source>https://... or a portal address</source>
-        <translation>https://... 或门户网站地址</translation>
-    </message>
-    <message>
-        <source>no change</source>
-        <translation>无更改</translation>
-    </message>
-    <message>
-        <source>official</source>
-        <translation>官方</translation>
-    </message>
-    <message>
-        <source>this computer</source>
-        <translation>此计算机</translation>
-    </message>
-    <message>
-        <source>undone</source>
-        <translation>已撤销</translation>
-    </message>
-    <message>
-        <source>{} turn(s)</source>
-        <translation>{} 轮</translation>
-    </message>
-    <message>
-        <source>Which layers are in this project?</source>
-        <translation>此项目包含哪些图层？</translation>
-    </message>
-    <message>
-        <source>Keep the buildings taller than 15 m</source>
-        <translation>保留高于 15 米的建筑物</translation>
-    </message>
-    <message>
-        <source>Filter the roads inside the selected feature</source>
-        <translation>过滤所选要素内的道路</translation>
-    </message>
-</context>
-<context>
-    <name>AgentChat</name>
-    <message>
-        <source>Access to the free quota was renewed: send your request again.</source>
-        <translation>免费额度的访问权限已续期：请重新发送您的请求。</translation>
-    </message>
-    <message>
-        <source>Another application is changing the project: try again in a moment.</source>
-        <translation>另一个应用程序正在修改项目：请稍后再试。</translation>
-    </message>
-    <message>
-        <source>Another application: {}</source>
-        <translation>其他应用程序：{}</translation>
-    </message>
-    <message>
-        <source>Applied again: {}.</source>
-        <translation>已重新应用：{}。</translation>
-    </message>
-    <message>
-        <source>Changed since, left as is: {}.</source>
-        <translation>此后已被更改，保持原样：{}。</translation>
-    </message>
-    <message>
-        <source>Changed: {}.</source>
-        <translation>已更改：{}。</translation>
-    </message>
-    <message>
-        <source>Choose a model and agree to send your data to use the agent.</source>
-        <translation>请选择模型并同意发送数据，以使用智能体。</translation>
-    </message>
-    <message>
-        <source>Connecting to {}…</source>
-        <translation>正在连接 {}…</translation>
-    </message>
-    <message>
-        <source>Earlier conversation: the agent starts afresh from here.</source>
-        <translation>之前的对话：智能体将从此处重新开始。</translation>
-    </message>
-    <message>
-        <source>Enter your API key in the agent settings.</source>
-        <translation>请在智能体设置中输入您的 API 密钥。</translation>
-    </message>
-    <message>
-        <source>Export of {}</source>
-        <translation>{} 的导出</translation>
-    </message>
-    <message>
-        <source>Favorite applied</source>
-        <translation>已应用收藏</translation>
-    </message>
-    <message>
-        <source>Filter on the points of {}</source>
-        <translation>对 {} 的点过滤</translation>
-    </message>
-    <message>
-        <source>Filter on {}</source>
-        <translation>对 {} 过滤</translation>
-    </message>
-    <message>
-        <source>Filter on {} by an area</source>
-        <translation>对 {} 按区域过滤</translation>
-    </message>
-    <message>
-        <source>Filter on {} by {}</source>
-        <translation>对 {} 按 {} 过滤</translation>
-    </message>
-    <message>
-        <source>FilterMate agent</source>
-        <translation>FilterMate 智能体</translation>
-    </message>
-    <message>
-        <source>Filters removed from {}</source>
-        <translation>已移除 {} 的过滤器</translation>
-    </message>
-    <message>
-        <source>Hidden: {}</source>
-        <translation>已隐藏：{}</translation>
-    </message>
-    <message>
-        <source>It answers.</source>
-        <translation>来源有响应。</translation>
-    </message>
-    <message>
-        <source>Layer added: {}</source>
-        <translation>已添加图层：{}</translation>
-    </message>
-    <message>
-        <source>Layers removed: {}</source>
-        <translation>已移除图层：{}</translation>
-    </message>
-    <message>
-        <source>Not reachable for this conversation: {}</source>
-        <translation>此对话无法访问：{}</translation>
-    </message>
-    <message>
-        <source>Nothing to redo.</source>
-        <translation>没有可重做的操作。</translation>
-    </message>
-    <message>
-        <source>Nothing to restore.</source>
-        <translation>没有可恢复的内容。</translation>
-    </message>
-    <message>
-        <source>Reading the active filters</source>
-        <translation>正在读取当前过滤器</translation>
-    </message>
-    <message>
-        <source>Reading the favorites</source>
-        <translation>正在读取收藏</translation>
-    </message>
-    <message>
-        <source>Reading the fields of {}</source>
-        <translation>正在读取 {} 的字段</translation>
-    </message>
-    <message>
-        <source>Reading the layers</source>
-        <translation>正在读取图层</translation>
-    </message>
-    <message>
-        <source>Reading the map</source>
-        <translation>正在读取地图</translation>
-    </message>
-    <message>
-        <source>Reading the values of {}</source>
-        <translation>正在读取 {} 的值</translation>
-    </message>
-    <message>
-        <source>Restored: {}.</source>
-        <translation>已恢复：{}。</translation>
-    </message>
-    <message>
-        <source>Searching satellite imagery on {}</source>
-        <translation>正在 {} 上搜索卫星影像</translation>
-    </message>
-    <message>
-        <source>Searching {} for {}</source>
-        <translation>正在 {} 上搜索：{}</translation>
-    </message>
-    <message>
-        <source>Selection cleared on {}</source>
-        <translation>已清除 {} 上的选择</translation>
-    </message>
-    <message>
-        <source>Selection on {}</source>
-        <translation>{} 上的选择</translation>
-    </message>
-    <message>
-        <source>Shown: {}</source>
-        <translation>已显示：{}</translation>
-    </message>
-    <message>
-        <source>Stopped.</source>
-        <translation>已停止。</translation>
-    </message>
-    <message>
-        <source>The MCP server could not start: {}</source>
-        <translation>MCP 服务器无法启动：{}</translation>
-    </message>
-    <message>
-        <source>The QGIS authentication database is not available.</source>
-        <translation>QGIS 认证数据库不可用。</translation>
-    </message>
-    <message>
-        <source>The QGIS master password is needed to use the stored key.</source>
-        <translation>使用已保存的密钥需要 QGIS 主密码。</translation>
-    </message>
-    <message>
-        <source>The agent stopped before the end ({}).</source>
-        <translation>智能体在结束前已停止（{}）。</translation>
-    </message>
-    <message>
-        <source>The agent wants to add this layer of a web service to the project:
-{} · {}
-
-Do you agree?</source>
-        <translation>智能体想将此网络服务的图层添加到项目：
-{} · {}
-
-是否同意？</translation>
-    </message>
-    <message>
-        <source>The agent wants to add this layer to the project:
-{}
-
-A remote source is read from its server by QGIS, and what the layer holds can be sent to the provider of the agent. Do you agree?</source>
-        <translation>智能体想将此图层添加到项目：
-{}
-
-远程来源由 QGIS 从其服务器读取，图层所含内容可能会发送给智能体的提供者。是否同意？</translation>
-    </message>
-    <message>
-        <source>The agent wants to export these layers to files:
-{}
-
-Do you agree?</source>
-        <translation>智能体想将这些图层导出为文件：
-{}
-
-是否同意？</translation>
-    </message>
-    <message>
-        <source>The agent wants to remove these layers from the project (their files stay, their styles and filters here are lost):
-{}
-
-Do you agree?</source>
-        <translation>智能体想从项目中移除这些图层（其文件会保留，但此处的样式和过滤器将丢失）：
-{}
-
-是否同意？</translation>
-    </message>
-    <message>
-        <source>The agent wants to run this action on an external connector:
-{}
-{}
-
-Do you agree?</source>
-        <translation>智能体想在外部连接器上运行此操作：
-{}
-{}
-
-是否同意？</translation>
-    </message>
-    <message>
-        <source>The credit or quota of this account is used up.</source>
-        <translation>此账户的额度或配额已用完。</translation>
-    </message>
-    <message>
-        <source>The free quota could not be reached: {}</source>
-        <translation>无法连接免费额度：{}</translation>
-    </message>
-    <message>
-        <source>The free quota is not available.</source>
-        <translation>免费额度不可用。</translation>
-    </message>
-    <message>
-        <source>The free quota is unavailable for now.</source>
-        <translation>免费额度暂时不可用。</translation>
-    </message>
-    <message>
-        <source>The free quota is used up for this month. Enter your own API key in the agent settings.</source>
-        <translation>本月免费额度已用完。请在智能体设置中输入您自己的 API 密钥。</translation>
-    </message>
-    <message>
-        <source>The key could not be stored.</source>
-        <translation>无法保存密钥。</translation>
-    </message>
-    <message>
-        <source>The provider could not be reached: {}</source>
-        <translation>无法连接提供者：{}</translation>
-    </message>
-    <message>
-        <source>The provider refused the API key: check it in the agent settings.</source>
-        <translation>提供者拒绝了 API 密钥：请在智能体设置中检查。</translation>
-    </message>
-    <message>
-        <source>The provider reported a problem: {}</source>
-        <translation>提供者报告了问题：{}</translation>
-    </message>
-    <message>
-        <source>The stored key could not be read.</source>
-        <translation>无法读取已保存的密钥。</translation>
-    </message>
-    <message>
-        <source>Thinking…</source>
-        <translation>思考中…</translation>
-    </message>
-    <message>
-        <source>Too many new accounts from this address today: try again tomorrow, or enter your own API key.</source>
-        <translation>今天此地址创建的新账户过多：请明天再试，或输入您自己的 API 密钥。</translation>
-    </message>
-    <message>
-        <source>Too many requests for now: try again in a moment.</source>
-        <translation>请求过多：请稍后再试。</translation>
-    </message>
-    <message>
-        <source>Trying a filter on {}</source>
-        <translation>正在尝试对 {} 的过滤</translation>
-    </message>
-    <message>
-        <source>Zoom on {}</source>
-        <translation>缩放到 {}</translation>
-    </message>
-    <message>
-        <source>an area</source>
-        <translation>一个区域</translation>
-    </message>
-    <message>
-        <source>everything</source>
-        <translation>全部</translation>
-    </message>
-    <message>
-        <source>{} tools available</source>
-        <translation>{} 个可用工具</translation>
     </message>
 </context>
 </TS>

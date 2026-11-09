@@ -30,6 +30,709 @@
     </message>
 </context>
 <context>
+    <name>AgentChat</name>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Access to the free quota was renewed: send your request again.</source>
+        <translation type="obsolete">Tilgangen til gratiskvoten er fornyet: send forespørselen din på nytt.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Another application is changing the project: try again in a moment.</source>
+        <translation type="obsolete">Et annet program endrer prosjektet: prøv igjen om et øyeblikk.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Another application: {}</source>
+        <translation type="obsolete">Annet program: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Applied again: {}.</source>
+        <translation type="obsolete">Brukt på nytt: {}.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Changed since, left as is: {}.</source>
+        <translation type="obsolete">Endret siden, latt stå som det er: {}.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Changed: {}.</source>
+        <translation type="obsolete">Endret: {}.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Choose a model and agree to send your data to use the agent.</source>
+        <translation type="obsolete">Velg en modell og godta at dataene dine sendes for å bruke agenten.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Connecting to {}…</source>
+        <translation type="obsolete">Kobler til {}…</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Earlier conversation: the agent starts afresh from here.</source>
+        <translation type="obsolete">Tidligere samtale: agenten starter på nytt herfra.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Enter your API key in the agent settings.</source>
+        <translation type="obsolete">Skriv inn API-nøkkelen din i agentinnstillingene.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Export of {}</source>
+        <translation type="obsolete">Eksport av {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Favorite applied</source>
+        <translation type="obsolete">Favoritt brukt</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Filter on the points of {}</source>
+        <translation type="obsolete">Filter på punktene i {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Filter on {}</source>
+        <translation type="obsolete">Filter på {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Filter on {} by an area</source>
+        <translation type="obsolete">Filter på {} etter et område</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Filter on {} by {}</source>
+        <translation type="obsolete">Filter på {} etter {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>FilterMate agent</source>
+        <translation type="obsolete">FilterMate-agent</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Filters removed from {}</source>
+        <translation type="obsolete">Filtre fjernet fra {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Hidden: {}</source>
+        <translation type="obsolete">Skjult: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>It answers.</source>
+        <translation type="obsolete">Kilden svarer.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Layer added: {}</source>
+        <translation type="obsolete">Lag lagt til: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Layers removed: {}</source>
+        <translation type="obsolete">Lag fjernet: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Not reachable for this conversation: {}</source>
+        <translation type="obsolete">Kan ikke nås for denne samtalen: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Nothing to redo.</source>
+        <translation type="obsolete">Ingenting å gjøre om.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Nothing to restore.</source>
+        <translation type="obsolete">Ingenting å gjenopprette.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Reading the active filters</source>
+        <translation type="obsolete">Leser de aktive filtrene</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Reading the favorites</source>
+        <translation type="obsolete">Leser favorittene</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Reading the fields of {}</source>
+        <translation type="obsolete">Leser feltene i {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Reading the layers</source>
+        <translation type="obsolete">Leser lagene</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Reading the map</source>
+        <translation type="obsolete">Leser kartet</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Reading the values of {}</source>
+        <translation type="obsolete">Leser verdiene i {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Restored: {}.</source>
+        <translation type="obsolete">Gjenopprettet: {}.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Searching satellite imagery on {}</source>
+        <translation type="obsolete">Søker etter satellittbilder på {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Searching {} for {}</source>
+        <translation type="obsolete">Søker i {} etter {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Selection cleared on {}</source>
+        <translation type="obsolete">Utvalg tømt på {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Selection on {}</source>
+        <translation type="obsolete">Utvalg på {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Shown: {}</source>
+        <translation type="obsolete">Vist: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Stopped.</source>
+        <translation type="obsolete">Stoppet.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The MCP server could not start: {}</source>
+        <translation type="obsolete">MCP-serveren kunne ikke starte: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The QGIS authentication database is not available.</source>
+        <translation type="obsolete">QGIS-autentiseringsdatabasen er ikke tilgjengelig.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The QGIS master password is needed to use the stored key.</source>
+        <translation type="obsolete">QGIS-hovedpassordet trengs for å bruke den lagrede nøkkelen.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The agent stopped before the end ({}).</source>
+        <translation type="obsolete">Agenten stoppet før slutten ({}).</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The agent wants to add this layer of a web service to the project:
+{} · {}
+
+Do you agree?</source>
+        <translation type="obsolete">Agenten vil legge til dette laget fra en nettjeneste i prosjektet:
+{} · {}
+
+Godtar du?</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The agent wants to add this layer to the project:
+{}
+
+A remote source is read from its server by QGIS, and what the layer holds can be sent to the provider of the agent. Do you agree?</source>
+        <translation type="obsolete">Agenten vil legge til dette laget i prosjektet:
+{}
+
+En ekstern kilde leses av QGIS fra serveren sin, og innholdet i laget kan sendes til agentens leverandør. Godtar du?</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The agent wants to export these layers to files:
+{}
+
+Do you agree?</source>
+        <translation type="obsolete">Agenten vil eksportere disse lagene til filer:
+{}
+
+Godtar du?</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The agent wants to remove these layers from the project (their files stay, their styles and filters here are lost):
+{}
+
+Do you agree?</source>
+        <translation type="obsolete">Agenten vil fjerne disse lagene fra prosjektet (filene deres beholdes, men stilene og filtrene deres her går tapt):
+{}
+
+Godtar du?</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The agent wants to run this action on an external connector:
+{}
+{}
+
+Do you agree?</source>
+        <translation type="obsolete">Agenten vil kjøre denne handlingen på en ekstern kobling:
+{}
+{}
+
+Godtar du?</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The credit or quota of this account is used up.</source>
+        <translation type="obsolete">Kreditten eller kvoten på denne kontoen er brukt opp.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The free quota could not be reached: {}</source>
+        <translation type="obsolete">Gratiskvoten kunne ikke nås: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The free quota is not available.</source>
+        <translation type="obsolete">Gratiskvoten er ikke tilgjengelig.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The free quota is unavailable for now.</source>
+        <translation type="obsolete">Gratiskvoten er utilgjengelig for øyeblikket.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The free quota is used up for this month. Enter your own API key in the agent settings.</source>
+        <translation type="obsolete">Gratiskvoten er brukt opp for denne måneden. Skriv inn din egen API-nøkkel i agentinnstillingene.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The key could not be stored.</source>
+        <translation type="obsolete">Nøkkelen kunne ikke lagres.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The provider could not be reached: {}</source>
+        <translation type="obsolete">Leverandøren kunne ikke nås: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The provider refused the API key: check it in the agent settings.</source>
+        <translation type="obsolete">Leverandøren avviste API-nøkkelen: kontroller den i agentinnstillingene.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The provider reported a problem: {}</source>
+        <translation type="obsolete">Leverandøren rapporterte et problem: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The stored key could not be read.</source>
+        <translation type="obsolete">Den lagrede nøkkelen kunne ikke leses.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Thinking…</source>
+        <translation type="obsolete">Tenker…</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Too many new accounts from this address today: try again tomorrow, or enter your own API key.</source>
+        <translation type="obsolete">For mange nye kontoer fra denne adressen i dag: prøv igjen i morgen, eller skriv inn din egen API-nøkkel.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Too many requests for now: try again in a moment.</source>
+        <translation type="obsolete">For mange forespørsler for øyeblikket: prøv igjen om et øyeblikk.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Trying a filter on {}</source>
+        <translation type="obsolete">Prøver et filter på {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Zoom on {}</source>
+        <translation type="obsolete">Zoom til {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>an area</source>
+        <translation type="obsolete">et område</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>everything</source>
+        <translation type="obsolete">alt</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>{} tools available</source>
+        <translation type="obsolete">{} verktøy tilgjengelige</translation>
+    </message>
+</context>
+<context>
+    <name>AgentPanel</name>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>(no request)</source>
+        <translation type="obsolete">(ingen forespørsel)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>A few free requests a month, through the relay of FilterMate to Claude (Anthropic), under the terms of Anthropic. The relay counts what is spent and keeps no conversation. When it is used up, choose a provider and enter your own API key.</source>
+        <translation type="obsolete">Noen få gratis forespørsler i måneden, via FilterMates relé til Claude (Anthropic), etter Anthropics vilkår. Releet teller hva som brukes og lagrer ingen samtale. Når kvoten er brukt opp, velg en leverandør og skriv inn din egen API-nøkkel.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>API key</source>
+        <translation type="obsolete">API-nøkkel</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Add</source>
+        <translation type="obsolete">Legg til</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Address</source>
+        <translation type="obsolete">Adresse</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Agent settings</source>
+        <translation type="obsolete">Agentinnstillinger</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Allow attribute values to be sent</source>
+        <translation type="obsolete">Tillat at attributtverdier sendes</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Applications already set up will have to be set up again.</source>
+        <translation type="obsolete">Programmer som allerede er satt opp, må settes opp på nytt.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Ask the agent to filter your layers</source>
+        <translation type="obsolete">Be agenten filtrere lagene dine</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Back to the conversation</source>
+        <translation type="obsolete">Tilbake til samtalen</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Claude Code or another MCP client on this computer can then filter your layers, once FilterMate has been opened, under the rules of this panel: the same sources, the same confirmations, and filters can be undone here. That application sends what it reads to its own AI provider.</source>
+        <translation type="obsolete">Claude Code eller en annen MCP-klient på denne datamaskinen kan da filtrere lagene dine, når FilterMate er åpnet, etter reglene i dette panelet: de samme kildene, de samme bekreftelsene, og filtre kan angres her. Programmet sender det det leser til sin egen KI-leverandør.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Connect an AI provider to start. Nothing is sent before you agree.</source>
+        <translation type="obsolete">Koble til en KI-leverandør for å starte. Ingenting sendes før du godtar.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Copied, with the access token: keep it to yourself. Save these settings for it to apply.</source>
+        <translation type="obsolete">Kopiert, med tilgangstokenet: hold det for deg selv. Lagre disse innstillingene for at det skal gjelde.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Copy for Claude Desktop</source>
+        <translation type="obsolete">Kopier for Claude Desktop</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Copy the Claude Code command</source>
+        <translation type="obsolete">Kopier Claude Code-kommandoen</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Copy the configuration</source>
+        <translation type="obsolete">Kopier konfigurasjonen</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Describe it in your own words. Each filter can be undone.</source>
+        <translation type="obsolete">Beskriv det med dine egne ord. Hvert filter kan angres.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Filter your layers from a sentence</source>
+        <translation type="obsolete">Filtrer lagene dine med én setning</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>FilterMate agent</source>
+        <translation type="obsolete">FilterMate-agent</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>History</source>
+        <translation type="obsolete">Historikk</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>History…</source>
+        <translation type="obsolete">Historikk…</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>I agree to send this data to this provider</source>
+        <translation type="obsolete">Jeg godtar at disse dataene sendes til denne leverandøren</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Let other applications on this computer drive FilterMate (MCP server)</source>
+        <translation type="obsolete">La andre programmer på denne datamaskinen styre FilterMate (MCP-server)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>MCP connector</source>
+        <translation type="obsolete">MCP-kobling</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>MCP connectors</source>
+        <translation type="obsolete">MCP-koblinger</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Model</source>
+        <translation type="obsolete">Modell</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>More</source>
+        <translation type="obsolete">Mer</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>New access token</source>
+        <translation type="obsolete">Nytt tilgangstoken</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>New conversation</source>
+        <translation type="obsolete">Ny samtale</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>New token: it applies once these settings are saved.</source>
+        <translation type="obsolete">Nytt token: det gjelder når disse innstillingene er lagret.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Open data platforms</source>
+        <translation type="obsolete">Plattformer for åpne data</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Open the settings</source>
+        <translation type="obsolete">Åpne innstillingene</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Other applications</source>
+        <translation type="obsolete">Andre programmer</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Port</source>
+        <translation type="obsolete">Port</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Provider</source>
+        <translation type="obsolete">Leverandør</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Redo</source>
+        <translation type="obsolete">Gjør om</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Remove</source>
+        <translation type="obsolete">Fjern</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Remove the stored key</source>
+        <translation type="obsolete">Fjern den lagrede nøkkelen</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Satellite imagery</source>
+        <translation type="obsolete">Satellittbilder</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Send (Enter)</source>
+        <translation type="obsolete">Send (Enter)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Send again</source>
+        <translation type="obsolete">Send på nytt</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Sent to: {}</source>
+        <translation type="obsolete">Sendt til: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Set up the agent</source>
+        <translation type="obsolete">Sett opp agenten</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Sources</source>
+        <translation type="obsolete">Kilder</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Stop (Esc)</source>
+        <translation type="obsolete">Stopp (Esc)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Stored: leave empty to keep it</source>
+        <translation type="obsolete">Lagret: la stå tomt for å beholde den</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Test</source>
+        <translation type="obsolete">Test</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Testing…</source>
+        <translation type="obsolete">Tester…</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The MCP server could not start: {}</source>
+        <translation type="obsolete">MCP-serveren kunne ikke starte: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The agent can search the sources ticked here. Your searches, and what the agent passes to a connector, are sent to them; a layer added from them is read from their servers.</source>
+        <translation type="obsolete">Agenten kan søke i kildene som er avmerket her. Søkene dine, og det agenten sender til en kobling, sendes til dem; et lag som legges til fra dem, leses fra serverne deres.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The agent sends your request, the names of your layers and fields, your filter expressions and the results of its tools to the provider chosen here, under that provider&apos;s terms. Without the option below, the agent does not read the values of your fields; values already written in your filters and favorites are still sent. The conversation is kept on this computer for each project, until you start a new one.</source>
+        <translation type="obsolete">Agenten sender forespørselen din, navnene på lagene og feltene dine, filteruttrykkene dine og resultatene av verktøyene sine til leverandøren som er valgt her, etter leverandørens vilkår. Uten alternativet nedenfor leser ikke agenten verdiene i feltene dine; verdier som allerede står i filtrene og favorittene dine, sendes likevel. Samtalen lagres på denne datamaskinen for hvert prosjekt, til du starter en ny.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Through mcp-remote, which needs Node.js: Claude Desktop starts local servers as programs.</source>
+        <translation type="obsolete">Via mcp-remote, som krever Node.js: Claude Desktop starter lokale servere som programmer.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Too many sources added: remove one first.</source>
+        <translation type="obsolete">For mange kilder lagt til: fjern én først.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Undo the last</source>
+        <translation type="obsolete">Angre den siste</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Undo this turn</source>
+        <translation type="obsolete">Angre denne runden</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>What do you want to filter?</source>
+        <translation type="obsolete">Hva vil du filtrere?</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>added by you</source>
+        <translation type="obsolete">lagt til av deg</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>applied</source>
+        <translation type="obsolete">brukt</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>community</source>
+        <translation type="obsolete">fellesskap</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>https://... or a portal address</source>
+        <translation type="obsolete">https://... eller en portaladresse</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>no change</source>
+        <translation type="obsolete">ingen endring</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>official</source>
+        <translation type="obsolete">offisiell</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>this computer</source>
+        <translation type="obsolete">denne datamaskinen</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>undone</source>
+        <translation type="obsolete">angret</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>{} turn(s)</source>
+        <translation type="obsolete">{} runde(r)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Which layers are in this project?</source>
+        <translation type="obsolete">Hvilke lag inneholder dette prosjektet?</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Keep the buildings taller than 15 m</source>
+        <translation type="obsolete">Behold bygningene som er høyere enn 15 m</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Filter the roads inside the selected feature</source>
+        <translation type="obsolete">Filtrer veiene innenfor det valgte objektet</translation>
+    </message>
+</context>
+<context>
     <name>AppInitializer</name>
     <message>
         <location filename="../core/services/app_initializer.py" line="174"/>
@@ -616,137 +1319,137 @@
         <translation>Tilbakestill punktskykriteriene</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1597"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1605"/>
         <source>Invalid raster calculator expression</source>
         <translation>Ugyldig uttrykk for rasterkalkulator</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1912"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1920"/>
         <source>PDAL was not found: the height above a DTM needs the pdal executable</source>
         <translation>PDAL ble ikke funnet: høyde over en DTM krever den kjørbare filen pdal</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3432"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3475"/>
         <source>A FilterMate task is still running: wait for it to finish</source>
         <translation>En FilterMate-oppgave kjører fortsatt: vent til den er ferdig</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2905"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2948"/>
         <source>FilterMate task failed: {0}</source>
         <translation>FilterMate-oppgaven mislyktes: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2942"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2985"/>
         <source>Select pixels first: a value range, classes or a raster expression</source>
         <translation>Velg piksler først: et verdiområde, klasser eller et rasteruttrykk</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2957"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3000"/>
         <source>Raster filtered: {0}</source>
         <translation>Raster filtrert: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2991"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3034"/>
         <source>The point cloud expression was rejected: {0}</source>
         <translation>Punktskyuttrykket ble avvist: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2994"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3037"/>
         <source>Select points first: classes, attribute ranges or an expression</source>
         <translation>Velg punkter først: klasser, attributtområder eller et uttrykk</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3008"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3051"/>
         <source>Point cloud filtered: {0}</source>
         <translation>Punktsky filtrert: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3542"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3585"/>
         <source>Filter not applied: {0}</source>
         <translation>Filteret ble ikke brukt: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3394"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3437"/>
         <source>canceled</source>
         <translation>avbrutt</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3091"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3134"/>
         <source>{0} target(s) filtered</source>
         <translation>{0} mål filtrert</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3102"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3145"/>
         <source>{0} failed: {1}</source>
         <translation>{0} mislyktes: {1}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3115"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3158"/>
         <source>FilterMate: filtering from '{0}'…</source>
         <translation>FilterMate: filtrerer fra '{0}'…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3214"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3257"/>
         <source>Changed since, left as is: {0}</source>
         <translation>Endret siden, latt være: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3220"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3263"/>
         <source>{0} layer(s) restored</source>
         <translation>{0} lag gjenopprettet</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3254"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3297"/>
         <source>&apos;{0}&apos; not exported: {1}</source>
         <translation>'{0}' ble ikke eksportert: {1}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3268"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3311"/>
         <source>Exported: {0}</source>
         <translation>Eksportert: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3270"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3313"/>
         <source>Export failed: {0}</source>
         <translation>Eksporten mislyktes: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3277"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3320"/>
         <source>Exporting {0} layer(s)…</source>
         <translation>Eksporterer {0} lag…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3283"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3326"/>
         <source>Export folder</source>
         <translation>Eksportmappe</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3365"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3408"/>
         <source>Raster / point cloud targets skipped: no source feature selected in EXPLORING</source>
         <translation>Raster-/punktskymål hoppet over: ingen kildeobjekt valgt i EXPLORING</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3394"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3437"/>
         <source>Raster / point cloud targets not filtered: {0}</source>
         <translation>Raster-/punktskymål ikke filtrert: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3396"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3439"/>
         <source>{0} raster / point cloud target(s) filtered</source>
         <translation>{0} raster-/punktskymål filtrert</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3519"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3562"/>
         <source>Choose the DTM raster used for the height above ground</source>
         <translation>Velg DTM-rasteret som brukes for høyde over bakken</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3530"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3573"/>
         <source>Height above ground not computed: {0}</source>
         <translation>Høyde over bakken ble ikke beregnet: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3551"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3594"/>
         <source>Computing the height above '{0}' with PDAL…</source>
         <translation>Beregner høyden over '{0}' med PDAL…</translation>
     </message>
@@ -756,12 +1459,12 @@
         <translation>FilterMate-hurtigbufferen bruker {0} GB, over grensen på {1} GB: fjern filteret fra raster- / punktskylagene du ikke lenger trenger</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1914"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1922"/>
         <source>PDAL {0} is too old: the height above a DTM needs PDAL 2.4 or later</source>
         <translation>PDAL {0} er for gammel: høyde over en DTM krever PDAL 2.4 eller nyere</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1917"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1925"/>
         <source>PDAL could not be run, the height above a DTM is unavailable: {0}</source>
         <translation>PDAL kunne ikke kjøres, høyde over en DTM er ikke tilgjengelig: {0}</translation>
     </message>
@@ -781,27 +1484,27 @@
         <translation>Forhåndsvisning: skjul pikslene utenfor utvalget (et hvitt slør for helning, eksposisjon ...)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1792"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1800"/>
         <source>The preview of a slope or aspect needs the map in the CRS of the raster ({0})</source>
         <translation>Forhåndsvisning av helning eller eksposisjon krever at kartet er i rasterets KRS ({0})</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2434"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2477"/>
         <source>only the points drawn on the map can be picked: turn the preview off to pick a class it hides</source>
         <translation>bare punktene som er tegnet på kartet kan velges: slå av forhåndsvisningen for å velge en klasse den skjuler</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2505"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2548"/>
         <source>No classified point under the click</source>
         <translation>Ingen klassifisert punkt under klikket</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2440"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2483"/>
         <source>Class {0} is already checked</source>
         <translation>Klasse {0} er allerede merket</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2529"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2572"/>
         <source>Class {0} is not in the class list of the layer</source>
         <translation>Klasse {0} finnes ikke i lagets klasseliste</translation>
     </message>
@@ -816,157 +1519,157 @@
         <translation>Klassevelger: klikk på kartet, så avmerkes klassen til punktene som er tegnet der. Ctrl+klikk legger til en til</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1116"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1118"/>
         <source>Preview and statistics use a bounded local sample of the visible extent; filtering reads the source.</source>
         <translation>Forhåndsvisning og statistikk bruker et begrenset lokalt utvalg av den synlige utstrekningen; filtreringen leser kilden.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1314"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1322"/>
         <source>Preparing a bounded color snapshot of the visible extent…</source>
         <translation>Forbereder et begrenset fargeøyeblikksbilde av den synlige utstrekningen…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1326"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1334"/>
         <source>The color snapshot could not be prepared. Try a smaller visible extent.</source>
         <translation>Fargeøyeblikksbildet kunne ikke forberedes. Prøv en mindre synlig utstrekning.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1330"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1338"/>
         <source>Color selection applies to the captured visible extent.</source>
         <translation>Fargeutvalget gjelder den fangede synlige utstrekningen.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1394"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1402"/>
         <source>Raster sampling failed. Try a smaller visible extent.</source>
         <translation>Rasterprøvetaking mislyktes. Prøv en mindre synlig utstrekning.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1515"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1523"/>
         <source>No valid pixels to display in the selected bands.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1792"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1800"/>
         <source>The preview of a color or an expression needs the map in the CRS of the raster ({0})</source>
         <translation>Forhåndsvisning av en farge eller et uttrykk krever kartet i rasterets KRS ({0})</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2458"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2501"/>
         <source>No point drawn under the click</source>
         <translation>Ingen tegnede punkter under klikket</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2460"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2503"/>
         <source>This point has no {0}</source>
         <translation>Dette punktet har ikke {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2462"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2505"/>
         <source>{0} cannot be used in a condition</source>
         <translation>{0} kan ikke brukes i en betingelse</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2519"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2562"/>
         <source>Object not read: {0}</source>
         <translation>Objektet ble ikke lest: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2521"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2564"/>
         <source>Too many points around the click: the object could not be read</source>
         <translation>For mange punkter rundt klikket: objektet kunne ikke leses</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2523"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2566"/>
         <source>No point of class {0} under the click: click on the object itself</source>
         <translation>Ingen punkter i klasse {0} under klikket: klikk på selve objektet</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2660"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2703"/>
         <source>Similar objects not read: {0}</source>
         <translation>Lignende objekter ble ikke lest: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2663"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2706"/>
         <source>No similar object within the area ratios: widen them</source>
         <translation>Ingen lignende objekter innenfor arealforholdene: utvid dem</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2732"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2775"/>
         <source>Preparing a sample for the new visible extent. Click again when it is ready.</source>
         <translation>Forbereder et utvalg for den nye synlige utstrekningen. Klikk igjen når det er klart.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2743"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2786"/>
         <source>The local raster sample is still being prepared. Retry when it is ready.</source>
         <translation>Det lokale rasterutvalget forberedes fortsatt. Prøv igjen når det er klart.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2949"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2992"/>
         <source>Prepare a color snapshot before filtering this rendered layer.</source>
         <translation>Forbered et fargeøyeblikksbilde før dette gjengitte laget filtreres.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3094"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3137"/>
         <source>{0} raster target(s) resampled to the configured pixel limit</source>
         <translation>{0} rastermål omsamplet til den konfigurerte pikselgrensen</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3126"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3169"/>
         <source>color selection limited to the captured extent; colors depend on style and scale</source>
         <translation>fargeutvalget er begrenset til den fangede utstrekningen; fargene avhenger av stil og målestokk</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3128"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3171"/>
         <source>raster source resampled to {0} cells within the pixel limit</source>
         <translation>rasterkilden omsamplet til {0} celler innenfor pikselgrensen</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3130"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3173"/>
         <source>raster selection read every {0} pixels: over the pixel limit of the settings</source>
         <translation>rasterutvalg lest for hver {0}. piksel: over pikselgrensen i innstillingene</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3133"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3176"/>
         <source>dense raster selection smoothed to keep its outline light</source>
         <translation>tett rasterutvalg glattet for å holde omrisset lett</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3180"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3223"/>
         <source>{0} left empty, nothing matches the selection: {1}</source>
         <translation>{0} tømt, ingenting samsvarer med utvalget: {1}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3164"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3207"/>
         <source>failed</source>
         <translation>mislyktes</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1509"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1517"/>
         <source>Preparing band display…</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1525"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1533"/>
         <source>The selected bands could not be displayed.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1597"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1605"/>
         <source>Unknown raster layer or band in expression</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1389"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1397"/>
         <source>The raster histogram could not be calculated.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1738"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1746"/>
         <source>The raster preview could not be calculated.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1148"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1150"/>
         <source>onnxruntime installed</source>
         <translation>onnxruntime installert</translation>
     </message>
@@ -1959,27 +2662,27 @@ Klikk paa ★-indikatoren og velg 'Legg til gjeldende filter i favoritter' for a
         <translation>Tilbakestill standardkonfigurasjonen og slett SQLite-databasen</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1572"/>
+        <location filename="../filter_mate.py" line="1573"/>
         <source>Reset Configuration</source>
         <translation>Tilbakestill konfigurasjon</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1598"/>
+        <location filename="../filter_mate.py" line="1599"/>
         <source>Configuration reset successfully.</source>
         <translation>Konfigurasjonen ble tilbakestilt.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1603"/>
+        <location filename="../filter_mate.py" line="1604"/>
         <source>Default configuration file not found.</source>
         <translation>Standard konfigurasjonsfil ikke funnet.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1626"/>
+        <location filename="../filter_mate.py" line="1627"/>
         <source>Database deleted: {filename}</source>
         <translation>Database slettet: {filename}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1650"/>
+        <location filename="../filter_mate.py" line="1651"/>
         <source>Restart required</source>
         <translation>Omstart nødvendig</translation>
     </message>
@@ -2130,7 +2833,7 @@ Do you want to disable this setting now?
 • No: Keep current setting</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1572"/>
+        <location filename="../filter_mate.py" line="1573"/>
         <source>Are you sure you want to reset to the default configuration?
 
 This will:
@@ -2147,7 +2850,7 @@ Dette vil:
 QGIS må startes på nytt for å bruke endringene.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1650"/>
+        <location filename="../filter_mate.py" line="1651"/>
         <source>The configuration has been reset.
 
 Please restart QGIS to apply the changes.</source>
@@ -2166,7 +2869,7 @@ Start QGIS på nytt for å bruke endringene.</translation>
         <translation>{count} refererte lag ikke lastet ({layers_list}). Bruker reservevisning.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1641"/>
+        <location filename="../filter_mate.py" line="1642"/>
         <source>Unable to delete {filename}: {e}</source>
         <translation>Kan ikke slette {filename}: {e}</translation>
     </message>
@@ -2176,86 +2879,86 @@ Start QGIS på nytt for å bruke endringene.</translation>
         <translation type="obsolete">Feil under tilbakestilling: {str(e)}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1693"/>
+        <location filename="../filter_mate.py" line="1694"/>
         <source>&lt;p style=&apos;font-size:13px;&apos;&gt;Thank you for using &lt;b&gt;FilterMate&lt;/b&gt;!&lt;br&gt;Join our Discord community to:&lt;/p&gt;&lt;ul style=&apos;margin-left:10px; font-size:12px;&apos;&gt;&lt;li&gt;Get help and support&lt;/li&gt;&lt;li&gt;Report bugs and issues&lt;/li&gt;&lt;li&gt;Suggest new features&lt;/li&gt;&lt;li&gt;Share tips with other users&lt;/li&gt;&lt;/ul&gt;</source>
         <translation>&lt;p style='font-size:13px;'&gt;Takk for at du bruker &lt;b&gt;FilterMate&lt;/b&gt;!&lt;br&gt;Bli med i vart Discord-fellesskap for aa:&lt;/p&gt;&lt;ul style='margin-left:10px; font-size:12px;'&gt;&lt;li&gt;Faa hjelp og stoette&lt;/li&gt;&lt;li&gt;Rapportere feil og problemer&lt;/li&gt;&lt;li&gt;Foreslaaa nye funksjoner&lt;/li&gt;&lt;li&gt;Dele tips med andre brukere&lt;/li&gt;&lt;/ul&gt;</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1709"/>
+        <location filename="../filter_mate.py" line="1710"/>
         <source>  Join us on Discord</source>
         <translation>  Foelg oss paa Discord</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1729"/>
+        <location filename="../filter_mate.py" line="1730"/>
         <source>Don&apos;t show this again</source>
         <translation>Ikke vis dette igjen</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1785"/>
+        <location filename="../filter_mate.py" line="1786"/>
         <source>Close</source>
         <translation>Lukk</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1852"/>
+        <location filename="../filter_mate.py" line="1855"/>
         <source>Error loading plugin: {0}. Check QGIS Python console for details.</source>
         <translation>Feil ved lasting av utvidelse: {0}. Sjekk QGIS Python-konsollen for detaljer.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7560"/>
+        <location filename="../filter_mate_dockwidget.py" line="7586"/>
         <source>Current layer: {0}</source>
         <translation>Gjeldende lag: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7562"/>
+        <location filename="../filter_mate_dockwidget.py" line="7588"/>
         <source>No layer selected</source>
         <translation>Ingen lag valgt</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7572"/>
+        <location filename="../filter_mate_dockwidget.py" line="7598"/>
         <source>Selected layers:
 {0}</source>
         <translation>Valgte lag:
 {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7572"/>
+        <location filename="../filter_mate_dockwidget.py" line="7598"/>
         <source>No layers selected</source>
         <translation>Ingen lag valgt</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7592"/>
+        <location filename="../filter_mate_dockwidget.py" line="7618"/>
         <source>No expression defined</source>
         <translation>Ingen uttrykk definert</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7604"/>
+        <location filename="../filter_mate_dockwidget.py" line="7630"/>
         <source>Display expression: {0}</source>
         <translation>Visningsuttrykk: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7621"/>
+        <location filename="../filter_mate_dockwidget.py" line="7647"/>
         <source>Feature ID: {0}
 First attribute: {1}</source>
         <translation>Objekt-ID: {0}
 Foerste attributt: {1}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1659"/>
+        <location filename="../filter_mate.py" line="1660"/>
         <source>The configuration could not be reset. Check that the plugin folder is writable, then try again. Details in filtermate.log.</source>
         <translation>Konfigurasjonen kunne ikke tilbakestilles. Kontroller at programtilleggsmappen er skrivbar, og prøv igjen. Detaljer i filtermate.log.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1759"/>
+        <location filename="../filter_mate.py" line="1760"/>
         <source>What&apos;s new in FilterMate 5</source>
         <translation>Nytt i FilterMate 5</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1765"/>
+        <location filename="../filter_mate.py" line="1766"/>
         <source>&lt;p style=&apos;font-size:13px;&apos;&gt;&lt;b&gt;FilterMate now works with raster and point cloud layers.&lt;/b&gt;&lt;/p&gt;&lt;ul style=&apos;margin-left:10px; font-size:12px;&apos;&gt;&lt;li&gt;&lt;b&gt;EXPLORING&lt;/b&gt; adapts to the current layer: value range and classes of a raster, classes, elevation and attributes of a LiDAR point cloud.&lt;/li&gt;&lt;li&gt;&lt;b&gt;FILTERING&lt;/b&gt; relates that selection to layers of any kind, with the usual predicates and buffer: parcels within an elevation range, LiDAR points under buildings, a DTM clipped to a municipality.&lt;/li&gt;&lt;li&gt;&lt;b&gt;EXPORTING&lt;/b&gt; writes filtered rasters (GeoTIFF, COG) and point clouds (LAZ, COPC).&lt;/li&gt;&lt;li&gt;Processing algorithms and models, qgis_process, Python and REST APIs.&lt;/li&gt;&lt;/ul&gt;</source>
         <translation>&lt;p style='font-size:13px;'&gt;&lt;b&gt;FilterMate fungerer nå med raster- og punktskylag.&lt;/b&gt;&lt;/p&gt;&lt;ul style='margin-left:10px; font-size:12px;'&gt;&lt;li&gt;&lt;b&gt;EXPLORING&lt;/b&gt; tilpasser seg det gjeldende laget: verdiområde og klasser for et raster, klasser, høyde og attributter for en LiDAR-punktsky.&lt;/li&gt;&lt;li&gt;&lt;b&gt;FILTERING&lt;/b&gt; knytter utvalget til lag av alle typer, med de vanlige predikatene og bufferen: eiendommer innenfor et høydeområde, LiDAR-punkter under bygninger, en terrengmodell klippet til en kommune.&lt;/li&gt;&lt;li&gt;&lt;b&gt;EXPORTING&lt;/b&gt; skriver filtrerte rastere (GeoTIFF, COG) og punktskyer (LAZ, COPC).&lt;/li&gt;&lt;li&gt;Processing-algoritmer og -modeller, qgis_process, Python- og REST-API-er.&lt;/li&gt;&lt;/ul&gt;</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1781"/>
+        <location filename="../filter_mate.py" line="1782"/>
         <source>Open the user guide</source>
         <translation>Åpne brukerveiledningen</translation>
     </message>
@@ -2628,59 +3331,59 @@ Fjerne likevel?</translation>
         <translation>Lys modus</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="4151"/>
+        <location filename="../filter_mate_dockwidget.py" line="4155"/>
         <location filename="../ui/controllers/exploring_controller.py" line="884"/>
         <source>Selected features have no geometry.</source>
         <translation>Valgte objekter har ingen geometri.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="4170"/>
+        <location filename="../filter_mate_dockwidget.py" line="4174"/>
         <location filename="../ui/controllers/exploring_controller.py" line="885"/>
         <source>No feature selected. Select a feature from the dropdown list.</source>
         <translation>Ingen objekt valgt. Velg et objekt fra nedtrekkslisten.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="5345"/>
+        <location filename="../filter_mate_dockwidget.py" line="5349"/>
         <source>The selected layer is invalid or its source cannot be found.</source>
         <translation>Det valgte laget er ugyldig eller kilden kan ikke finnes.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6238"/>
+        <location filename="../filter_mate_dockwidget.py" line="6242"/>
         <source>Negative buffer (erosion): shrinks polygons inward</source>
         <translation>Negativ buffer (erosjon): krymper polygoner innover</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6241"/>
+        <location filename="../filter_mate_dockwidget.py" line="6245"/>
         <source>Buffer value in meters (positive=expand, negative=shrink polygons)</source>
         <translation>Bufferverdi i meter (positiv=utvid, negativ=krymp polygoner)</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6743"/>
+        <location filename="../filter_mate_dockwidget.py" line="6747"/>
         <source>Plugin activated with {0} vector layer(s)</source>
         <translation>Utvidelse aktivert med {0} vektorlag</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6862"/>
+        <location filename="../filter_mate_dockwidget.py" line="6866"/>
         <source>Could not reload plugin automatically.</source>
         <translation>Kunne ikke laste utvidelsen paa nytt automatisk.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6867"/>
+        <location filename="../filter_mate_dockwidget.py" line="6871"/>
         <source>Error reloading plugin: {0}</source>
         <translation>Feil ved ny innlasting av utvidelse: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6942"/>
+        <location filename="../filter_mate_dockwidget.py" line="6946"/>
         <source>Layer properties reset to defaults</source>
         <translation>Lagegenskaper tilbakestilt til standardverdier</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6943"/>
+        <location filename="../filter_mate_dockwidget.py" line="6947"/>
         <source>Error resetting layer properties: {}</source>
         <translation>Feil ved tilbakestilling av lagegenskaper: {}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7206"/>
+        <location filename="../filter_mate_dockwidget.py" line="7232"/>
         <source>Filter</source>
         <translation>Filtrer</translation>
     </message>
@@ -2810,7 +3513,7 @@ Fjerne likevel?</translation>
         <translation>Panelutformingen kunne ikke brukes; standardstørrelser brukes. Detaljer i filtermate.log.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7034"/>
+        <location filename="../filter_mate_dockwidget.py" line="7038"/>
         <location filename="../ui/controllers/backend_controller.py" line="682"/>
         <source>Vector</source>
         <translation>Vektor</translation>
@@ -2841,22 +3544,22 @@ Fjerne likevel?</translation>
         <translation>Slett FilterMate-skjema</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="4282"/>
+        <location filename="../filter_mate_dockwidget.py" line="4286"/>
         <source>Read failed</source>
         <translation>Lesing mislyktes</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="4282"/>
+        <location filename="../filter_mate_dockwidget.py" line="4286"/>
         <source>The service could not be read. Please retry.</source>
         <translation>Tjenesten kunne ikke leses. Prøv igjen.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="4624"/>
+        <location filename="../filter_mate_dockwidget.py" line="4628"/>
         <source>Loading filtered extent…</source>
         <translation>Laster filtrert utstrekning…</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="5210"/>
+        <location filename="../filter_mate_dockwidget.py" line="5214"/>
         <location filename="../ui/controllers/exploring_controller.py" line="742"/>
         <location filename="../ui/controllers/exploring_controller.py" line="3662"/>
         <source>Loading selected values…</source>
@@ -2898,7 +3601,7 @@ Fjerne likevel?</translation>
         <translation>Bare et begrenset sett med verdier vises. Avgrens søket for å finne andre verdier.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="5145"/>
+        <location filename="../filter_mate_dockwidget.py" line="5149"/>
         <location filename="../ui/controllers/exploring_controller.py" line="551"/>
         <location filename="../ui/controllers/exploring_controller.py" line="568"/>
         <location filename="../ui/controllers/exploring_controller.py" line="636"/>
@@ -3057,7 +3760,7 @@ Fjerne likevel?</translation>
         <translation>📁 Gjeldende prosjekt</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7206"/>
+        <location filename="../filter_mate_dockwidget.py" line="7232"/>
         <source>The filter was not launched: its selection changed or could not be read. Click Filter again.</source>
         <translation>Filtreringen ble ikke startet: utvalget endret seg eller kunne ikke leses. Klikk Filtrer igjen.</translation>
     </message>
@@ -3437,7 +4140,7 @@ Soerg for at PostgreSQL-tabellen har en PRIMARY KEY definert.</translation>
 <context>
     <name>ModelDownloadTask</name>
     <message>
-        <location filename="../adapters/qgis/coverage_layers/segmentation.py" line="316"/>
+        <location filename="../adapters/qgis/coverage_layers/segmentation.py" line="558"/>
         <source>FilterMate: downloading the segmentation model</source>
         <translation>FilterMate: laster ned segmenteringsmodellen</translation>
     </message>
@@ -5830,27 +6533,27 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">Klikk på kartet med pikselvelgeren. Ctrl+klikk utvider området til verdien.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2138"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2160"/>
         <source>VALUE RANGE</source>
         <translation>VERDIOMRÅDE</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1444"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1461"/>
         <source>Min</source>
         <translation>Min</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1444"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1461"/>
         <source>Lowest value kept</source>
         <translation>Laveste verdi beholdt</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1444"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1461"/>
         <source>Max</source>
         <translation>Maks</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1444"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1461"/>
         <source>Highest value kept</source>
         <translation>Høyeste verdi beholdt</translation>
     </message>
@@ -5880,17 +6583,17 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">Ingen</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1464"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1481"/>
         <source>RASTER EXPRESSION</source>
         <translation>RASTERUTTRYKK</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1468"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1485"/>
         <source>Raster calculator expression; a pixel is kept where it is not 0</source>
         <translation>Uttrykk for rasterkalkulator; en piksel beholdes der den ikke er 0</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1469"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1486"/>
         <source>Raster expression</source>
         <translation>Rasteruttrykk</translation>
     </message>
@@ -5910,12 +6613,12 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">Valgte piksler: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1550"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1567"/>
         <source>Set a value range first</source>
         <translation>Angi et verdiområde først</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2758"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2910"/>
         <source>NoData</source>
         <translation>NoData</translation>
     </message>
@@ -5935,22 +6638,22 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">Statistikk for gjeldende bånd i det sist tegnede rektangelet på kartet</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1844"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1861"/>
         <source>Under the cursor: {0}  (X {1:.{3}f}  Y {2:.{3}f})</source>
         <translation>Under markøren: {0}  (X {1:.{3}f}  Y {2:.{3}f})</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1854"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1871"/>
         <source>Zone: {0}</source>
         <translation>Sone: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1854"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1871"/>
         <source>no pixel</source>
         <translation>ingen piksel</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2776"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2928"/>
         <source>LAST PICKS</source>
         <translation>SISTE AVLESNINGER</translation>
     </message>
@@ -5965,37 +6668,37 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">Størrelsen intervallet gjelder for. Helning, eksposisjon, skyggerelieff og ruhet leser båndet som en DTM.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1401"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1418"/>
         <source>Pixel value</source>
         <translation>Pikselverdi</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1401"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1418"/>
         <source>Slope (degrees)</source>
         <translation>Helning (grader)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1401"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1418"/>
         <source>Slope (%)</source>
         <translation>Helning (%)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1401"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1418"/>
         <source>Aspect (degrees)</source>
         <translation>Eksposisjon (grader)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1401"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1418"/>
         <source>Hillshade (0-255)</source>
         <translation>Skyggerelieff (0-255)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1401"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1418"/>
         <source>Roughness (TRI, mean difference)</source>
         <translation>Ruhet (TRI, gjennomsnittsforskjell)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1411"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1428"/>
         <source>Usual thresholds of the quantity</source>
         <translation>Vanlige terskelverdier for størrelsen</translation>
     </message>
@@ -6005,47 +6708,47 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">Vanlige terskelverdier</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2275"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2297"/>
         <source>Flat</source>
         <translation>Flat</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2275"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2297"/>
         <source>Gentle</source>
         <translation>Slak</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2275"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2297"/>
         <source>Moderate</source>
         <translation>Moderat</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2276"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2298"/>
         <source>Steep</source>
         <translation>Bratt</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2276"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2298"/>
         <source>East</source>
         <translation>Øst</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2276"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2298"/>
         <source>South</source>
         <translation>Sør</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2277"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2299"/>
         <source>West</source>
         <translation>Vest</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2277"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2299"/>
         <source>Shadow</source>
         <translation>Skygge</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2277"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2299"/>
         <source>Lit</source>
         <translation>Belyst</translation>
     </message>
@@ -6055,27 +6758,27 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">Vanlige terskelverdier…</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1137"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1146"/>
         <source>PIPETTE</source>
         <translation>VELGER</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1273"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1290"/>
         <source>Tolerance ±</source>
         <translation>Toleranse ±</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1280"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1297"/>
         <source>Tolerance around the picked color or value, in % of the value range</source>
         <translation>Toleranse rundt den valgte fargen eller verdien, i % av verdiområdet</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1281"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1298"/>
         <source>Pipette tolerance</source>
         <translation>Toleranse for velgeren</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1504"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1521"/>
         <source>Bands</source>
         <translation>Bånd</translation>
     </message>
@@ -6120,22 +6823,22 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">Krever et bilde med tre bånd eller flere (rød, grønn, blå ...)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1523"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1540"/>
         <source>Vegetation (NDVI &gt; 0.3)</source>
         <translation>Vegetasjon (NDVI &gt; 0.3)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1523"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1540"/>
         <source>No vegetation (NDVI &lt; 0.1)</source>
         <translation>Ingen vegetasjon (NDVI &lt; 0.1)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1524"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1541"/>
         <source>Water (NDWI &gt; 0.1)</source>
         <translation>Vann (NDWI &gt; 0.1)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1524"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1541"/>
         <source>Vegetation (excess green)</source>
         <translation>Vegetasjon (overskudd av grønt)</translation>
     </message>
@@ -6145,12 +6848,12 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">Spektrale forhåndsinnstillinger…</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2431"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2470"/>
         <source>This pixel has no value (NoData): pick another one</source>
         <translation>Denne pikselen har ingen verdi (NoData): velg en annen</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2541"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2578"/>
         <source>The tolerance covers every value: lower it</source>
         <translation>Toleransen dekker alle verdier: reduser den</translation>
     </message>
@@ -6175,12 +6878,12 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">Uttrykk</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="857"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="866"/>
         <source>BANDS</source>
         <translation>BÅND</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="900"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="909"/>
         <source>Value of the active band under the cursor</source>
         <translation>Verdien til det aktive båndet under markøren</translation>
     </message>
@@ -6190,7 +6893,7 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">Statistikk for det aktive båndet i det siste rektangelet tegnet på kartet</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="941"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="950"/>
         <source>Every band</source>
         <translation>Alle bånd</translation>
     </message>
@@ -6200,7 +6903,7 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">Verdiområdet gjelder alle fargebånd samtidig (en piksel beholdes når hvert bånd er innenfor området); histogrammet viser det første</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="875"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="884"/>
         <source>Display the first checked band in grey or the checked bands as a colour composite</source>
         <translation type="unfinished"></translation>
     </message>
@@ -6210,142 +6913,142 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">Velgeren sammenligner dette båndet</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1052"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1061"/>
         <source>Colour the band holds: the spectral indexes and the chips use it. Click to change it</source>
         <translation>Fargen båndet har: spektralindeksene og brikkene bruker den. Klikk for å endre den</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1062"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1071"/>
         <source>Value at the last click of the pipette</source>
         <translation>Verdi ved det siste klikket med velgeren</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="994"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1003"/>
         <source>No colour</source>
         <translation>Ingen farge</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1002"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1011"/>
         <source>RGB</source>
         <translation>RGB</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1002"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1011"/>
         <source>Bands 1, 2, 3 are red, green, blue</source>
         <translation>Bånd 1, 2, 3 er rød, grønn, blå</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1002"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1011"/>
         <source>IRC</source>
         <translation>IRC</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1002"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1011"/>
         <source>Bands 1, 2, 3 are infrared, red, green (IGN infrared colour orthophoto)</source>
         <translation>Bånd 1, 2, 3 er infrarød, rød, grønn (IGNs infrarøde fargeortofoto)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1002"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1011"/>
         <source>RGB + NIR</source>
         <translation>RGB + NIR</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1002"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1011"/>
         <source>Bands 1, 2, 3, 4 are red, green, blue, near infrared</source>
         <translation>Bånd 1, 2, 3, 4 er rød, grønn, blå, nær-infrarød</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1005"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1014"/>
         <source>Every band: {0}</source>
         <translation>Alle bånd: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1051"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1060"/>
         <source> Roles guessed, to confirm.</source>
         <translation> Roller gjettet, må bekreftes.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1115"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1124"/>
         <source>R</source>
         <translation>R</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1115"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1124"/>
         <source>G</source>
         <translation>G</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1115"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1124"/>
         <source>B</source>
         <translation>B</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1116"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1125"/>
         <source>NIR</source>
         <translation>NIR</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1119"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1128"/>
         <source>Red</source>
         <translation>Rød</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1119"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1128"/>
         <source>Green</source>
         <translation>Grønn</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1119"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1128"/>
         <source>Blue</source>
         <translation>Blå</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1120"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1129"/>
         <source>Near infrared</source>
         <translation>Nær-infrarød</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1126"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1135"/>
         <source>roles guessed, to confirm</source>
         <translation>roller gjettet, må bekreftes</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1141"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1152"/>
         <source>Select</source>
         <translation>Velg</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1145"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1156"/>
         <source>Similar pixels</source>
         <translation>Lignende piksler</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1145"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1156"/>
         <source>Every pixel of the raster close to the picked colour or value (the pipette of the rail)</source>
         <translation>Alle piksler i rasteret som ligger nær den valgte fargen eller verdien (velgeren i sidefeltet)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1145"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1156"/>
         <source>Clicked object</source>
         <translation>Klikket objekt</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1145"/>
         <source>Only the patch of such pixels the click falls in: a pool, a roof, a field (the object detector of the rail); Ctrl+click adds another object</source>
-        <translation>Bare flekken av slike piksler som klikket treffer: et basseng, et tak, en åker (objektdetektoren i sidefeltet); Ctrl+klikk legger til et nytt objekt</translation>
+        <translation type="obsolete">Bare flekken av slike piksler som klikket treffer: et basseng, et tak, en åker (objektdetektoren i sidefeltet); Ctrl+klikk legger til et nytt objekt</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1145"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1156"/>
         <source>Similar objects</source>
         <translation>Lignende objekter</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1145"/>
         <source>Every object of the raster like the clicked one: the patches of such pixels whose area is within the ratios below (the similar objects tool of the rail); Ctrl+click adds another reference object</source>
-        <translation>Alle objekter i rasteret som ligner på det klikkede: flekkene av slike piksler som har et areal innenfor forholdene nedenfor (verktøyet for lignende objekter i sidefeltet); Ctrl+klikk legger til et nytt referanseobjekt</translation>
+        <translation type="obsolete">Alle objekter i rasteret som ligner på det klikkede: flekkene av slike piksler som har et areal innenfor forholdene nedenfor (verktøyet for lignende objekter i sidefeltet); Ctrl+klikk legger til et nytt referanseobjekt</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1218"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1235"/>
         <source>Area ×</source>
         <translation>Areal ×</translation>
     </message>
@@ -6360,72 +7063,72 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">Største lignende objekt, som multiplum av det største klikkede</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1234"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1251"/>
         <source>to ×</source>
         <translation>til ×</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1237"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1254"/>
         <source>same shape</source>
         <translation>samme form</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1240"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1257"/>
         <source>Keep only the objects shaped like the clicked ones: their compactness (4π × area / perimeter², 1 for a disc) within the same ratios; off, a road of the area of a pool is a pool</source>
         <translation>Behold bare objekter med samme form som de klikkede: kompaktheten deres (4π × areal / omkrets², 1 for en sirkel) innenfor de samme forholdene; når av, er en vei med samme areal som et basseng et basseng</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1314"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1331"/>
         <source>Remove this pick</source>
         <translation>Fjern dette valget</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1393"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1410"/>
         <source>Quantity</source>
         <translation>Størrelse</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2334"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2356"/>
         <source>Quantity the range applies to. Slope, aspect, hillshade and roughness read the active band as a DTM.</source>
         <translation>Størrelsen verdiområdet gjelder. Helning, eksposisjon, relieffskygge og ruhet leser det aktive båndet som en DTM.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1411"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1428"/>
         <source>Thresholds ▾</source>
         <translation>Terskler ▾</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1483"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1500"/>
         <source>Insert ▾</source>
         <translation>Sett inn ▾</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1483"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1500"/>
         <source>Insert a band reference, a usual spectral index or the current range</source>
         <translation>Sett inn en båndreferanse, en vanlig spektralindeks eller gjeldende område</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1512"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1529"/>
         <source>Spectral indexes</source>
         <translation>Spektralindekser</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1517"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1534"/>
         <source>Range</source>
         <translation>Område</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1518"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1535"/>
         <source>The current value range</source>
         <translation>Gjeldende verdiområde</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1629"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1646"/>
         <source>Rendered colors depend on style and scale.</source>
         <translation>De gjengitte fargene avhenger av stil og målestokk.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1629"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1646"/>
         <source>Only color selection is available: numeric bands, indices, ranges, classes and derivatives are unavailable.</source>
         <translation>Bare fargeutvalg er tilgjengelig: numeriske bånd, indekser, områder, klasser og avledninger er utilgjengelige.</translation>
     </message>
@@ -6435,316 +7138,316 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">VERDIOMRÅDE — alle bånd</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2136"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2158"/>
         <source>VALUE RANGE — band {0}</source>
         <translation>VERDIOMRÅDE — bånd {0}</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2330"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2352"/>
         <source>picks on: {0}</source>
         <translation>velger fra: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2334"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2356"/>
         <source>A slope, aspect... reads one band as a DTM: choose a band in BANDS first</source>
         <translation>En helning, eksposisjon... leser ett bånd som en DTM: velg først et bånd under BÅND</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2576"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2613"/>
         <source>The object could not be read</source>
         <translation>Objektet kunne ikke leses</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2578"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2615"/>
         <source>No object under the click: raise the tolerance or click another pixel</source>
         <translation>Ikke noe objekt under klikket: øk toleransen eller klikk på en annen piksel</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2580"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2617"/>
         <source>An object is larger than the window read and was cut: lower the tolerance</source>
         <translation>Et objekt er større enn vinduet som ble lest og ble kuttet: senk toleransen</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1080"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1089"/>
         <source>Choose 1 to 3 bands for display.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1082"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1091"/>
         <source>Grey: band {0}</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="872"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="881"/>
         <source>Layer style</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="868"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="877"/>
         <source>Map display</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1084"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1093"/>
         <source>R: {0} · G: {1} · B: {2}</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="955"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="964"/>
         <source>Select band {0}</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="874"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="883"/>
         <source>Selected bands</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2412"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2452"/>
         <source>Choose at least one band in BANDS before using the pipette.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="873"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="882"/>
         <source>First checked band</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="944"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="953"/>
         <source>Select or clear every band. The histogram shows the first checked band.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="954"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="963"/>
         <source>Use this band for the pipette, value range and selected bands display</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2134"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2156"/>
         <source>VALUE RANGE — selected bands</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="907"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="916"/>
         <source>Statistics of the active band in the box of the last zone drawn on the map; only the pixels inside the zone are selected</source>
         <translation>Statistikk for det aktive båndet i avgrensningsboksen til den siste sonen som ble tegnet på kartet; bare pikslene innenfor sonen velges</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1145"/>
         <source>Segment</source>
-        <translation>Segmenter</translation>
+        <translation type="obsolete">Segmenter</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1145"/>
         <source>Draw an object with the segmentation model: left click on it, right click off it, or drag a box; Enter validates. Best on buildings and other well delimited objects</source>
-        <translation>Tegn et objekt med segmenteringsmodellen: venstreklikk på det, høyreklikk utenfor det, eller dra en boks; Enter bekrefter. Best for bygninger og andre godt avgrensede objekter</translation>
+        <translation type="obsolete">Tegn et objekt med segmenteringsmodellen: venstreklikk på det, høyreklikk utenfor det, eller dra en boks; Enter bekrefter. Best for bygninger og andre godt avgrensede objekter</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1185"/>
         <source>Download the SAM 2.1 tiny model once, into your QGIS profile; the segmentation then runs locally, on the CPU</source>
-        <translation>Last ned SAM 2.1 tiny-modellen én gang, til QGIS-profilen din; segmenteringen kjører deretter lokalt, på CPU</translation>
+        <translation type="obsolete">Last ned SAM 2.1 tiny-modellen én gang, til QGIS-profilen din; segmenteringen kjører deretter lokalt, på CPU</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1194"/>
         <source>Validate object</source>
-        <translation>Bekreft objektet</translation>
+        <translation type="obsolete">Bekreft objektet</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1196"/>
         <source>Add the object drawn to the selection (Enter on the map)</source>
-        <translation>Legg det tegnede objektet til utvalget (Enter på kartet)</translation>
+        <translation type="obsolete">Legg det tegnede objektet til utvalget (Enter på kartet)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2740"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2892"/>
         <source>Clear</source>
         <translation>Tøm</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1201"/>
         <source>Forget the validated objects</source>
-        <translation>Glem de bekreftede objektene</translation>
+        <translation type="obsolete">Glem de bekreftede objektene</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1221"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1238"/>
         <source>Smallest similar object, as a share of each clicked reference</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1221"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1238"/>
         <source>Largest similar object, as a multiple of each clicked reference</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1253"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1270"/>
         <source>Separation</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1256"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1273"/>
         <source>Connected pixels</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1258"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1275"/>
         <source>Bridge removal: {0} px</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1260"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1277"/>
         <source>Separate objects joined by narrow bridges; higher values cut wider bridges</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1263"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1280"/>
         <source>Fill holes</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1266"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1283"/>
         <source>Fill enclosed gaps in the clicked object; clear to preserve courtyards and inner rings</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1408"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1425"/>
         <source>Custom expression</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1418"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1435"/>
         <source>Numeric raster formula, e.g. (&quot;raster@4&quot; - &quot;raster@1&quot;) / (&quot;raster@4&quot; + &quot;raster@1&quot;)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1419"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1436"/>
         <source>Custom derived value expression</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1420"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1437"/>
         <source>A numeric raster calculator expression. The histogram and thresholds use its computed values.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1478"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1495"/>
         <source>Computed expression values. Drag the handles to use this expression as a derived value with thresholds.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1487"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1504"/>
         <source>Use as derived value</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1696"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1713"/>
         <source>Computing histogram…</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2153"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2175"/>
         <source>No histogram available</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2153"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2175"/>
         <source>Constant value: {0}</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2153"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2175"/>
         <source>{0} sampled pixels · {1} to {2}</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2287"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2309"/>
         <source>Distribution (approximate)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2289"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2311"/>
         <source>Central 98% (P1–P99)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2289"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2311"/>
         <source>Central 90% (P5–P95)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2289"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2311"/>
         <source>Interquartile range (P25–P75)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2289"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2311"/>
         <source>Upper quartile (≥ P75)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2296"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2318"/>
         <source>All values</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2300"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2322"/>
         <source>Derived spectral values</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2646"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2739"/>
         <source>Installing onnxruntime in the background…</source>
         <translation>Installerer onnxruntime i bakgrunnen…</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2648"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2743"/>
         <source>onnxruntime could not be installed automatically (see the FilterMate log). In a terminal (the OSGeo4W Shell on Windows), run {0} then restart QGIS.</source>
         <translation>onnxruntime kunne ikke installeres automatisk (se FilterMate-loggen). Kjør {0} i en terminal (OSGeo4W Shell på Windows), og start deretter QGIS på nytt.</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2660"/>
         <source>Install the model ({0} MB)…</source>
-        <translation>Installer modellen ({0} MB)…</translation>
+        <translation type="obsolete">Installer modellen ({0} MB)…</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2666"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2769"/>
         <source>Repair the model…</source>
         <translation>Reparer modellen…</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2691"/>
         <source>Segmentation model</source>
-        <translation>Segmenteringsmodell</translation>
+        <translation type="obsolete">Segmenteringsmodell</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2691"/>
         <source>Download the SAM 2.1 tiny model ({0} MB) from huggingface.co/{1} into your QGIS profile?
 
 Every file is checked against its SHA-256. The model then runs locally, on the CPU; nothing leaves your computer.</source>
-        <translation>Laste ned SAM 2.1 tiny-modellen ({0} MB) fra huggingface.co/{1} til QGIS-profilen din?
+        <translation type="obsolete">Laste ned SAM 2.1 tiny-modellen ({0} MB) fra huggingface.co/{1} til QGIS-profilen din?
 
 Hver fil kontrolleres mot sin SHA-256. Modellen kjører deretter lokalt, på CPU; ingenting forlater datamaskinen din.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2740"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2892"/>
         <source>Clear ({0})</source>
         <translation>Tøm ({0})</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2780"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2932"/>
         <source>Derived value: {0}</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2652"/>
         <source>The segmentation needs onnxruntime (about {0} MB), which is not installed yet.</source>
-        <translation>Segmenteringen trenger onnxruntime (omtrent {0} MB), som ikke er installert ennå.</translation>
+        <translation type="obsolete">Segmenteringen trenger onnxruntime (omtrent {0} MB), som ikke er installert ennå.</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2656"/>
         <source>Install onnxruntime…</source>
-        <translation>Installer onnxruntime…</translation>
+        <translation type="obsolete">Installer onnxruntime…</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2675"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2779"/>
         <source>Segmentation</source>
         <translation>Segmentering</translation>
     </message>
@@ -6753,9 +7456,68 @@ Hver fil kontrolleres mot sin SHA-256. Modellen kjører deretter lokalt, på CPU
         <source>The segmentation needs onnxruntime (about {0} MB), which this QGIS does not have.
 
 Install it now from PyPI with pip, into your QGIS profile? The Python of QGIS is not modified.</source>
-        <translation>Segmenteringen trenger onnxruntime (omtrent {0} MB), som denne QGIS-en ikke har.
+        <translation type="obsolete">Segmenteringen trenger onnxruntime (omtrent {0} MB), som denne QGIS-en ikke har.
 
 Installere det nå fra PyPI med pip i QGIS-profilen din? QGIS' Python endres ikke.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1156"/>
+        <source>The object under the click: a roof, a pool, a field (the object detector of the rail). With SAM: a click adds an object, Shift+click extends the last one, a right click trims it, a box frames one, Escape removes it. With the colour engine: the patch of such pixels, Ctrl+click adds another one</source>
+        <translation>Objektet under klikket: et tak, et basseng, en åker (objektdetektoren i verktøylinjen). Med SAM: et klikk legger til et objekt, Skift+klikk utvider det siste, et høyreklikk beskjærer det, en boks avgrenser ett, Esc fjerner det. Med fargemotoren: flekken av like piksler, Ctrl+klikk legger til en til</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1156"/>
+        <source>Every object like the clicked one, whose area is within the ratios below (the similar objects tool of the rail). With SAM: the patches of a similar colour in the visible area are redrawn by the model, then compared with the clicked object. With the colour engine: the patches of such pixels</source>
+        <translation>Hvert objekt som ligner det klikkede, og som har et areal innenfor forholdstallene nedenfor (verktøyet for lignende objekter i verktøylinjen). Med SAM: flekkene med lignende farge i det synlige området tegnes på nytt av modellen og sammenlignes deretter med det klikkede objektet. Med fargemotoren: flekkene av like piksler</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1185"/>
+        <source>Engine</source>
+        <translation>Motor</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1189"/>
+        <source>Colour</source>
+        <translation>Farge</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1190"/>
+        <source>SAM draws the object from the image, locally on the CPU; the colour engine grows the patch of pixels of the clicked colour</source>
+        <translation>SAM tegner objektet ut fra bildet, lokalt på CPU-en; fargemotoren lar flekken av piksler i den klikkede fargen vokse</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1207"/>
+        <source>Install SAM 2.1 tiny once, into your QGIS profile; it then runs locally, on the CPU</source>
+        <translation>Installer SAM 2.1 tiny én gang i QGIS-profilen din; deretter kjører den lokalt på CPU-en</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1218"/>
+        <source>Forget the objects drawn by SAM</source>
+        <translation>Glem objektene tegnet av SAM</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2741"/>
+        <source>Downloading the SAM model in the background…</source>
+        <translation>Laster ned SAM-modellen i bakgrunnen…</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2747"/>
+        <source>Objects are found by their colour. SAM draws them from the image, far better on buildings (about {0} MB to install).</source>
+        <translation>Objekter finnes ut fra fargen. SAM tegner dem ut fra bildet, langt bedre på bygninger (ca. {0} MB å installere).</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2751"/>
+        <source>Install SAM ({0} MB)…</source>
+        <translation>Installer SAM ({0} MB)…</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2779"/>
+        <source>Clicked and similar objects can be drawn by the SAM 2.1 segmentation model, locally on the CPU. Install it now (about {0} MB)?
+
+onnxruntime comes from PyPI with pip, the model from huggingface.co/{1}, each file checked against its SHA-256. Both go to your QGIS profile; the Python of QGIS is not modified and nothing leaves your computer. Without SAM, objects are found by their colour.</source>
+        <translation>Klikkede og lignende objekter kan tegnes av segmenteringsmodellen SAM 2.1, lokalt på CPU-en. Installere den nå (ca. {0} MB)?
+
+onnxruntime kommer fra PyPI med pip, modellen fra huggingface.co/{1}, og hver fil kontrolleres med sin SHA-256. Begge havner i QGIS-profilen din; Python i QGIS endres ikke, og ingenting forlater datamaskinen din. Uten SAM finnes objekter ut fra fargen.</translation>
     </message>
 </context>
 <context>
@@ -7027,125 +7789,200 @@ Installere det nå fra PyPI med pip i QGIS-profilen din? QGIS' Python endres ikk
 <context>
     <name>SegmentationController</name>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="106"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="147"/>
         <source>This point cannot be used on this layer</source>
         <translation>Dette punktet kan ikke brukes på dette laget</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="134"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="199"/>
         <source>Click inside the raster</source>
         <translation>Klikk inne i rasteret</translation>
     </message>
     <message>
         <location filename="../ui/controllers/segmentation_controller.py" line="141"/>
         <source>This point is outside the window being segmented: validate or clear the object first</source>
-        <translation>Dette punktet er utenfor vinduet som segmenteres: bekreft eller tøm objektet først</translation>
+        <translation type="obsolete">Dette punktet er utenfor vinduet som segmenteres: bekreft eller tøm objektet først</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="164"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="231"/>
         <source>This box is too small</source>
         <translation>Denne boksen er for liten</translation>
     </message>
     <message>
         <location filename="../ui/controllers/segmentation_controller.py" line="149"/>
         <source>Start with a left click on the object, or draw a box</source>
-        <translation>Start med et venstreklikk på objektet, eller tegn en boks</translation>
+        <translation type="obsolete">Start med et venstreklikk på objektet, eller tegn en boks</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="160"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="224"/>
         <source>This raster cannot be segmented</source>
         <translation>Dette rasteret kan ikke segmenteres</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="211"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="317"/>
         <source>Preparing the segmentation of this area…</source>
         <translation>Forbereder segmenteringen av dette området…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="370"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="430"/>
         <source>The segmentation of this area failed: {0}</source>
         <translation>Segmenteringen av dette området mislyktes: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="222"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="328"/>
         <source>canceled</source>
         <translation>avbrutt</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="247"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="363"/>
         <source>onnxruntime is being installed, click again in a moment</source>
         <translation>onnxruntime installeres, klikk igjen om et øyeblikk</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="249"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="365"/>
         <source>onnxruntime is missing: run {0}, then restart QGIS</source>
         <translation>onnxruntime mangler: kjør {0}, og start deretter QGIS på nytt</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="253"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="369"/>
         <source>The segmentation model is being downloaded, click again once it is installed</source>
         <translation>Segmenteringsmodellen lastes ned, klikk igjen når den er installert</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="255"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="371"/>
         <source>Install the segmentation model first (button below)</source>
         <translation>Installer segmenteringsmodellen først (knappen nedenfor)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="256"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="372"/>
         <source>The segmentation model could not be loaded (see the FilterMate log)</source>
         <translation>Segmenteringsmodellen kunne ikke lastes (se FilterMate-loggen)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="276"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="393"/>
         <source>Downloading the segmentation model… {0} %</source>
         <translation>Laster ned segmenteringsmodellen… {0} %</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="285"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="402"/>
         <source>Model installed: left click on an object, or draw a box</source>
         <translation>Modellen er installert: venstreklikk på et objekt, eller tegn en boks</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="287"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="404"/>
         <source>The model could not be downloaded: {0}</source>
         <translation>Modellen kunne ikke lastes ned: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="289"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="406"/>
         <source>Download canceled</source>
         <translation>Nedlastingen ble avbrutt</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="307"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="422"/>
         <source>Click on an object in the area prepared</source>
         <translation>Klikk på et objekt i det forberedte området</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="373"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="439"/>
         <source>No object found: add a point or draw a box</source>
         <translation>Ingen objekter funnet: legg til et punkt eller tegn en boks</translation>
     </message>
     <message>
         <location filename="../ui/controllers/segmentation_controller.py" line="324"/>
         <source>Left click adds to the object, right click removes, Enter validates</source>
-        <translation>Venstreklikk legger til i objektet, høyreklikk fjerner, Enter bekrefter</translation>
+        <translation type="obsolete">Venstreklikk legger til i objektet, høyreklikk fjerner, Enter bekrefter</translation>
     </message>
     <message>
         <location filename="../ui/controllers/segmentation_controller.py" line="364"/>
         <source>Click an object first</source>
-        <translation>Klikk på et objekt først</translation>
+        <translation type="obsolete">Klikk på et objekt først</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="251"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="367"/>
         <source>Install onnxruntime first, with the button below</source>
         <translation>Installer onnxruntime først, med knappen under</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="91"/>
+        <source>Click an object, or draw a box around it</source>
+        <translation>Klikk på et objekt, eller tegn en boks rundt det</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="166"/>
+        <source>A right click trims the last object: click an object first</source>
+        <translation>Et høyreklikk beskjærer det siste objektet: klikk først på et objekt</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="206"/>
+        <source>This point is outside the area of the last object: click it as a new object</source>
+        <translation>Dette punktet ligger utenfor området til det siste objektet: klikk på det som et nytt objekt</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="349"/>
+        <source>{0} click(s) fell outside the area prepared: click them again</source>
+        <translation>{0} klikk lå utenfor det forberedte området: klikk igjen</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="466"/>
+        <source>Shift+click extends the object, right click trims it, Escape removes it</source>
+        <translation>Skift+klikk utvider objektet, høyreklikk beskjærer det, Esc fjerner det</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="502"/>
+        <source>Similar objects need the values of the raster: this layer is only drawn</source>
+        <translation>Lignende objekter trenger rasterets verdier: dette laget er bare tegnet</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="510"/>
+        <source>No patch of this colour nearby to compare with the object</source>
+        <translation>Ingen flekk i denne fargen i nærheten å sammenligne med objektet</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="524"/>
+        <source>Drawing the similar objects: {0} candidates…</source>
+        <translation>Tegner de lignende objektene: {0} kandidater…</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="535"/>
+        <source>Drawing the similar objects… {0} %</source>
+        <translation>Tegner de lignende objektene… {0} %</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="549"/>
+        <source>The similar objects could not be drawn: {0}</source>
+        <translation>De lignende objektene kunne ikke tegnes: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="559"/>
+        <source>{0} similar objects found among {1} candidates; Escape removes them</source>
+        <translation>{0} lignende objekter funnet blant {1} kandidater; Esc fjerner dem</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="596"/>
+        <source>Click the next object</source>
+        <translation>Klikk på neste objekt</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="603"/>
+        <source>Search stopped</source>
+        <translation>Søket stoppet</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="603"/>
+        <source>Click canceled</source>
+        <translation>Klikk avbrutt</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="611"/>
+        <source>Last object removed</source>
+        <translation>Siste objekt fjernet</translation>
     </message>
 </context>
 <context>
     <name>SegmentationEmbedTask</name>
     <message>
-        <location filename="../adapters/qgis/coverage_layers/segmentation.py" line="238"/>
+        <location filename="../adapters/qgis/coverage_layers/segmentation.py" line="400"/>
         <source>FilterMate: preparing the segmentation</source>
         <translation>FilterMate: forbereder segmenteringen</translation>
     </message>
@@ -7441,6 +8278,14 @@ Installere det nå fra PyPI med pip i QGIS-profilen din? QGIS' Python endres ikk
     </message>
 </context>
 <context>
+    <name>SimilarObjectsTask</name>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/segmentation.py" line="469"/>
+        <source>FilterMate: drawing the similar objects</source>
+        <translation>FilterMate: tegner de lignende objektene</translation>
+    </message>
+</context>
+<context>
     <name>SimpleConfigDialog</name>
     <message>
         <location filename="../ui/dialogs/config_editor_widget.py" line="470"/>
@@ -7475,12 +8320,12 @@ Installere det nå fra PyPI med pip i QGIS-profilen din? QGIS' Python endres ikk
 <context>
     <name>SqlUtils</name>
     <message>
-        <location filename="../infrastructure/database/sql_utils.py" line="273"/>
+        <location filename="../infrastructure/database/sql_utils.py" line="243"/>
         <source>FilterMate - PostgreSQL Type Warning</source>
         <translation>FilterMate - PostgreSQL typeadvarsel</translation>
     </message>
     <message>
-        <location filename="../infrastructure/database/sql_utils.py" line="277"/>
+        <location filename="../infrastructure/database/sql_utils.py" line="247"/>
         <source>Type mismatch in filter: {warning_detail}...</source>
         <translation>Typefeil i filter: {warning_detail}...</translation>
     </message>
@@ -7756,576 +8601,6 @@ Installere det nå fra PyPI med pip i QGIS-profilen din? QGIS' Python endres ikk
         <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
         <source>Kept points</source>
         <translation type="obsolete">Beholdte punkter</translation>
-    </message>
-</context>
-<context>
-    <name>AgentPanel</name>
-    <message>
-        <source>(no request)</source>
-        <translation>(ingen forespørsel)</translation>
-    </message>
-    <message>
-        <source>A few free requests a month, through the relay of FilterMate to Claude (Anthropic), under the terms of Anthropic. The relay counts what is spent and keeps no conversation. When it is used up, choose a provider and enter your own API key.</source>
-        <translation>Noen få gratis forespørsler i måneden, via FilterMates relé til Claude (Anthropic), etter Anthropics vilkår. Releet teller hva som brukes og lagrer ingen samtale. Når kvoten er brukt opp, velg en leverandør og skriv inn din egen API-nøkkel.</translation>
-    </message>
-    <message>
-        <source>API key</source>
-        <translation>API-nøkkel</translation>
-    </message>
-    <message>
-        <source>Add</source>
-        <translation>Legg til</translation>
-    </message>
-    <message>
-        <source>Address</source>
-        <translation>Adresse</translation>
-    </message>
-    <message>
-        <source>Agent settings</source>
-        <translation>Agentinnstillinger</translation>
-    </message>
-    <message>
-        <source>Allow attribute values to be sent</source>
-        <translation>Tillat at attributtverdier sendes</translation>
-    </message>
-    <message>
-        <source>Applications already set up will have to be set up again.</source>
-        <translation>Programmer som allerede er satt opp, må settes opp på nytt.</translation>
-    </message>
-    <message>
-        <source>Ask the agent to filter your layers</source>
-        <translation>Be agenten filtrere lagene dine</translation>
-    </message>
-    <message>
-        <source>Back to the conversation</source>
-        <translation>Tilbake til samtalen</translation>
-    </message>
-    <message>
-        <source>Claude Code or another MCP client on this computer can then filter your layers, once FilterMate has been opened, under the rules of this panel: the same sources, the same confirmations, and filters can be undone here. That application sends what it reads to its own AI provider.</source>
-        <translation>Claude Code eller en annen MCP-klient på denne datamaskinen kan da filtrere lagene dine, når FilterMate er åpnet, etter reglene i dette panelet: de samme kildene, de samme bekreftelsene, og filtre kan angres her. Programmet sender det det leser til sin egen KI-leverandør.</translation>
-    </message>
-    <message>
-        <source>Connect an AI provider to start. Nothing is sent before you agree.</source>
-        <translation>Koble til en KI-leverandør for å starte. Ingenting sendes før du godtar.</translation>
-    </message>
-    <message>
-        <source>Copied, with the access token: keep it to yourself. Save these settings for it to apply.</source>
-        <translation>Kopiert, med tilgangstokenet: hold det for deg selv. Lagre disse innstillingene for at det skal gjelde.</translation>
-    </message>
-    <message>
-        <source>Copy for Claude Desktop</source>
-        <translation>Kopier for Claude Desktop</translation>
-    </message>
-    <message>
-        <source>Copy the Claude Code command</source>
-        <translation>Kopier Claude Code-kommandoen</translation>
-    </message>
-    <message>
-        <source>Copy the configuration</source>
-        <translation>Kopier konfigurasjonen</translation>
-    </message>
-    <message>
-        <source>Describe it in your own words. Each filter can be undone.</source>
-        <translation>Beskriv det med dine egne ord. Hvert filter kan angres.</translation>
-    </message>
-    <message>
-        <source>Filter your layers from a sentence</source>
-        <translation>Filtrer lagene dine med én setning</translation>
-    </message>
-    <message>
-        <source>FilterMate agent</source>
-        <translation>FilterMate-agent</translation>
-    </message>
-    <message>
-        <source>History</source>
-        <translation>Historikk</translation>
-    </message>
-    <message>
-        <source>History…</source>
-        <translation>Historikk…</translation>
-    </message>
-    <message>
-        <source>I agree to send this data to this provider</source>
-        <translation>Jeg godtar at disse dataene sendes til denne leverandøren</translation>
-    </message>
-    <message>
-        <source>Let other applications on this computer drive FilterMate (MCP server)</source>
-        <translation>La andre programmer på denne datamaskinen styre FilterMate (MCP-server)</translation>
-    </message>
-    <message>
-        <source>MCP connector</source>
-        <translation>MCP-kobling</translation>
-    </message>
-    <message>
-        <source>MCP connectors</source>
-        <translation>MCP-koblinger</translation>
-    </message>
-    <message>
-        <source>Model</source>
-        <translation>Modell</translation>
-    </message>
-    <message>
-        <source>More</source>
-        <translation>Mer</translation>
-    </message>
-    <message>
-        <source>New access token</source>
-        <translation>Nytt tilgangstoken</translation>
-    </message>
-    <message>
-        <source>New conversation</source>
-        <translation>Ny samtale</translation>
-    </message>
-    <message>
-        <source>New token: it applies once these settings are saved.</source>
-        <translation>Nytt token: det gjelder når disse innstillingene er lagret.</translation>
-    </message>
-    <message>
-        <source>Open data platforms</source>
-        <translation>Plattformer for åpne data</translation>
-    </message>
-    <message>
-        <source>Open the settings</source>
-        <translation>Åpne innstillingene</translation>
-    </message>
-    <message>
-        <source>Other applications</source>
-        <translation>Andre programmer</translation>
-    </message>
-    <message>
-        <source>Port</source>
-        <translation>Port</translation>
-    </message>
-    <message>
-        <source>Provider</source>
-        <translation>Leverandør</translation>
-    </message>
-    <message>
-        <source>Redo</source>
-        <translation>Gjør om</translation>
-    </message>
-    <message>
-        <source>Remove</source>
-        <translation>Fjern</translation>
-    </message>
-    <message>
-        <source>Remove the stored key</source>
-        <translation>Fjern den lagrede nøkkelen</translation>
-    </message>
-    <message>
-        <source>Satellite imagery</source>
-        <translation>Satellittbilder</translation>
-    </message>
-    <message>
-        <source>Send (Enter)</source>
-        <translation>Send (Enter)</translation>
-    </message>
-    <message>
-        <source>Send again</source>
-        <translation>Send på nytt</translation>
-    </message>
-    <message>
-        <source>Sent to: {}</source>
-        <translation>Sendt til: {}</translation>
-    </message>
-    <message>
-        <source>Set up the agent</source>
-        <translation>Sett opp agenten</translation>
-    </message>
-    <message>
-        <source>Sources</source>
-        <translation>Kilder</translation>
-    </message>
-    <message>
-        <source>Stop (Esc)</source>
-        <translation>Stopp (Esc)</translation>
-    </message>
-    <message>
-        <source>Stored: leave empty to keep it</source>
-        <translation>Lagret: la stå tomt for å beholde den</translation>
-    </message>
-    <message>
-        <source>Test</source>
-        <translation>Test</translation>
-    </message>
-    <message>
-        <source>Testing…</source>
-        <translation>Tester…</translation>
-    </message>
-    <message>
-        <source>The MCP server could not start: {}</source>
-        <translation>MCP-serveren kunne ikke starte: {}</translation>
-    </message>
-    <message>
-        <source>The agent can search the sources ticked here. Your searches, and what the agent passes to a connector, are sent to them; a layer added from them is read from their servers.</source>
-        <translation>Agenten kan søke i kildene som er avmerket her. Søkene dine, og det agenten sender til en kobling, sendes til dem; et lag som legges til fra dem, leses fra serverne deres.</translation>
-    </message>
-    <message>
-        <source>The agent sends your request, the names of your layers and fields, your filter expressions and the results of its tools to the provider chosen here, under that provider's terms. Without the option below, the agent does not read the values of your fields; values already written in your filters and favorites are still sent. The conversation is kept on this computer for each project, until you start a new one.</source>
-        <translation>Agenten sender forespørselen din, navnene på lagene og feltene dine, filteruttrykkene dine og resultatene av verktøyene sine til leverandøren som er valgt her, etter leverandørens vilkår. Uten alternativet nedenfor leser ikke agenten verdiene i feltene dine; verdier som allerede står i filtrene og favorittene dine, sendes likevel. Samtalen lagres på denne datamaskinen for hvert prosjekt, til du starter en ny.</translation>
-    </message>
-    <message>
-        <source>Through mcp-remote, which needs Node.js: Claude Desktop starts local servers as programs.</source>
-        <translation>Via mcp-remote, som krever Node.js: Claude Desktop starter lokale servere som programmer.</translation>
-    </message>
-    <message>
-        <source>Too many sources added: remove one first.</source>
-        <translation>For mange kilder lagt til: fjern én først.</translation>
-    </message>
-    <message>
-        <source>Undo the last</source>
-        <translation>Angre den siste</translation>
-    </message>
-    <message>
-        <source>Undo this turn</source>
-        <translation>Angre denne runden</translation>
-    </message>
-    <message>
-        <source>What do you want to filter?</source>
-        <translation>Hva vil du filtrere?</translation>
-    </message>
-    <message>
-        <source>added by you</source>
-        <translation>lagt til av deg</translation>
-    </message>
-    <message>
-        <source>applied</source>
-        <translation>brukt</translation>
-    </message>
-    <message>
-        <source>community</source>
-        <translation>fellesskap</translation>
-    </message>
-    <message>
-        <source>https://... or a portal address</source>
-        <translation>https://... eller en portaladresse</translation>
-    </message>
-    <message>
-        <source>no change</source>
-        <translation>ingen endring</translation>
-    </message>
-    <message>
-        <source>official</source>
-        <translation>offisiell</translation>
-    </message>
-    <message>
-        <source>this computer</source>
-        <translation>denne datamaskinen</translation>
-    </message>
-    <message>
-        <source>undone</source>
-        <translation>angret</translation>
-    </message>
-    <message>
-        <source>{} turn(s)</source>
-        <translation>{} runde(r)</translation>
-    </message>
-    <message>
-        <source>Which layers are in this project?</source>
-        <translation>Hvilke lag inneholder dette prosjektet?</translation>
-    </message>
-    <message>
-        <source>Keep the buildings taller than 15 m</source>
-        <translation>Behold bygningene som er høyere enn 15 m</translation>
-    </message>
-    <message>
-        <source>Filter the roads inside the selected feature</source>
-        <translation>Filtrer veiene innenfor det valgte objektet</translation>
-    </message>
-</context>
-<context>
-    <name>AgentChat</name>
-    <message>
-        <source>Access to the free quota was renewed: send your request again.</source>
-        <translation>Tilgangen til gratiskvoten er fornyet: send forespørselen din på nytt.</translation>
-    </message>
-    <message>
-        <source>Another application is changing the project: try again in a moment.</source>
-        <translation>Et annet program endrer prosjektet: prøv igjen om et øyeblikk.</translation>
-    </message>
-    <message>
-        <source>Another application: {}</source>
-        <translation>Annet program: {}</translation>
-    </message>
-    <message>
-        <source>Applied again: {}.</source>
-        <translation>Brukt på nytt: {}.</translation>
-    </message>
-    <message>
-        <source>Changed since, left as is: {}.</source>
-        <translation>Endret siden, latt stå som det er: {}.</translation>
-    </message>
-    <message>
-        <source>Changed: {}.</source>
-        <translation>Endret: {}.</translation>
-    </message>
-    <message>
-        <source>Choose a model and agree to send your data to use the agent.</source>
-        <translation>Velg en modell og godta at dataene dine sendes for å bruke agenten.</translation>
-    </message>
-    <message>
-        <source>Connecting to {}…</source>
-        <translation>Kobler til {}…</translation>
-    </message>
-    <message>
-        <source>Earlier conversation: the agent starts afresh from here.</source>
-        <translation>Tidligere samtale: agenten starter på nytt herfra.</translation>
-    </message>
-    <message>
-        <source>Enter your API key in the agent settings.</source>
-        <translation>Skriv inn API-nøkkelen din i agentinnstillingene.</translation>
-    </message>
-    <message>
-        <source>Export of {}</source>
-        <translation>Eksport av {}</translation>
-    </message>
-    <message>
-        <source>Favorite applied</source>
-        <translation>Favoritt brukt</translation>
-    </message>
-    <message>
-        <source>Filter on the points of {}</source>
-        <translation>Filter på punktene i {}</translation>
-    </message>
-    <message>
-        <source>Filter on {}</source>
-        <translation>Filter på {}</translation>
-    </message>
-    <message>
-        <source>Filter on {} by an area</source>
-        <translation>Filter på {} etter et område</translation>
-    </message>
-    <message>
-        <source>Filter on {} by {}</source>
-        <translation>Filter på {} etter {}</translation>
-    </message>
-    <message>
-        <source>FilterMate agent</source>
-        <translation>FilterMate-agent</translation>
-    </message>
-    <message>
-        <source>Filters removed from {}</source>
-        <translation>Filtre fjernet fra {}</translation>
-    </message>
-    <message>
-        <source>Hidden: {}</source>
-        <translation>Skjult: {}</translation>
-    </message>
-    <message>
-        <source>It answers.</source>
-        <translation>Kilden svarer.</translation>
-    </message>
-    <message>
-        <source>Layer added: {}</source>
-        <translation>Lag lagt til: {}</translation>
-    </message>
-    <message>
-        <source>Layers removed: {}</source>
-        <translation>Lag fjernet: {}</translation>
-    </message>
-    <message>
-        <source>Not reachable for this conversation: {}</source>
-        <translation>Kan ikke nås for denne samtalen: {}</translation>
-    </message>
-    <message>
-        <source>Nothing to redo.</source>
-        <translation>Ingenting å gjøre om.</translation>
-    </message>
-    <message>
-        <source>Nothing to restore.</source>
-        <translation>Ingenting å gjenopprette.</translation>
-    </message>
-    <message>
-        <source>Reading the active filters</source>
-        <translation>Leser de aktive filtrene</translation>
-    </message>
-    <message>
-        <source>Reading the favorites</source>
-        <translation>Leser favorittene</translation>
-    </message>
-    <message>
-        <source>Reading the fields of {}</source>
-        <translation>Leser feltene i {}</translation>
-    </message>
-    <message>
-        <source>Reading the layers</source>
-        <translation>Leser lagene</translation>
-    </message>
-    <message>
-        <source>Reading the map</source>
-        <translation>Leser kartet</translation>
-    </message>
-    <message>
-        <source>Reading the values of {}</source>
-        <translation>Leser verdiene i {}</translation>
-    </message>
-    <message>
-        <source>Restored: {}.</source>
-        <translation>Gjenopprettet: {}.</translation>
-    </message>
-    <message>
-        <source>Searching satellite imagery on {}</source>
-        <translation>Søker etter satellittbilder på {}</translation>
-    </message>
-    <message>
-        <source>Searching {} for {}</source>
-        <translation>Søker i {} etter {}</translation>
-    </message>
-    <message>
-        <source>Selection cleared on {}</source>
-        <translation>Utvalg tømt på {}</translation>
-    </message>
-    <message>
-        <source>Selection on {}</source>
-        <translation>Utvalg på {}</translation>
-    </message>
-    <message>
-        <source>Shown: {}</source>
-        <translation>Vist: {}</translation>
-    </message>
-    <message>
-        <source>Stopped.</source>
-        <translation>Stoppet.</translation>
-    </message>
-    <message>
-        <source>The MCP server could not start: {}</source>
-        <translation>MCP-serveren kunne ikke starte: {}</translation>
-    </message>
-    <message>
-        <source>The QGIS authentication database is not available.</source>
-        <translation>QGIS-autentiseringsdatabasen er ikke tilgjengelig.</translation>
-    </message>
-    <message>
-        <source>The QGIS master password is needed to use the stored key.</source>
-        <translation>QGIS-hovedpassordet trengs for å bruke den lagrede nøkkelen.</translation>
-    </message>
-    <message>
-        <source>The agent stopped before the end ({}).</source>
-        <translation>Agenten stoppet før slutten ({}).</translation>
-    </message>
-    <message>
-        <source>The agent wants to add this layer of a web service to the project:
-{} · {}
-
-Do you agree?</source>
-        <translation>Agenten vil legge til dette laget fra en nettjeneste i prosjektet:
-{} · {}
-
-Godtar du?</translation>
-    </message>
-    <message>
-        <source>The agent wants to add this layer to the project:
-{}
-
-A remote source is read from its server by QGIS, and what the layer holds can be sent to the provider of the agent. Do you agree?</source>
-        <translation>Agenten vil legge til dette laget i prosjektet:
-{}
-
-En ekstern kilde leses av QGIS fra serveren sin, og innholdet i laget kan sendes til agentens leverandør. Godtar du?</translation>
-    </message>
-    <message>
-        <source>The agent wants to export these layers to files:
-{}
-
-Do you agree?</source>
-        <translation>Agenten vil eksportere disse lagene til filer:
-{}
-
-Godtar du?</translation>
-    </message>
-    <message>
-        <source>The agent wants to remove these layers from the project (their files stay, their styles and filters here are lost):
-{}
-
-Do you agree?</source>
-        <translation>Agenten vil fjerne disse lagene fra prosjektet (filene deres beholdes, men stilene og filtrene deres her går tapt):
-{}
-
-Godtar du?</translation>
-    </message>
-    <message>
-        <source>The agent wants to run this action on an external connector:
-{}
-{}
-
-Do you agree?</source>
-        <translation>Agenten vil kjøre denne handlingen på en ekstern kobling:
-{}
-{}
-
-Godtar du?</translation>
-    </message>
-    <message>
-        <source>The credit or quota of this account is used up.</source>
-        <translation>Kreditten eller kvoten på denne kontoen er brukt opp.</translation>
-    </message>
-    <message>
-        <source>The free quota could not be reached: {}</source>
-        <translation>Gratiskvoten kunne ikke nås: {}</translation>
-    </message>
-    <message>
-        <source>The free quota is not available.</source>
-        <translation>Gratiskvoten er ikke tilgjengelig.</translation>
-    </message>
-    <message>
-        <source>The free quota is unavailable for now.</source>
-        <translation>Gratiskvoten er utilgjengelig for øyeblikket.</translation>
-    </message>
-    <message>
-        <source>The free quota is used up for this month. Enter your own API key in the agent settings.</source>
-        <translation>Gratiskvoten er brukt opp for denne måneden. Skriv inn din egen API-nøkkel i agentinnstillingene.</translation>
-    </message>
-    <message>
-        <source>The key could not be stored.</source>
-        <translation>Nøkkelen kunne ikke lagres.</translation>
-    </message>
-    <message>
-        <source>The provider could not be reached: {}</source>
-        <translation>Leverandøren kunne ikke nås: {}</translation>
-    </message>
-    <message>
-        <source>The provider refused the API key: check it in the agent settings.</source>
-        <translation>Leverandøren avviste API-nøkkelen: kontroller den i agentinnstillingene.</translation>
-    </message>
-    <message>
-        <source>The provider reported a problem: {}</source>
-        <translation>Leverandøren rapporterte et problem: {}</translation>
-    </message>
-    <message>
-        <source>The stored key could not be read.</source>
-        <translation>Den lagrede nøkkelen kunne ikke leses.</translation>
-    </message>
-    <message>
-        <source>Thinking…</source>
-        <translation>Tenker…</translation>
-    </message>
-    <message>
-        <source>Too many new accounts from this address today: try again tomorrow, or enter your own API key.</source>
-        <translation>For mange nye kontoer fra denne adressen i dag: prøv igjen i morgen, eller skriv inn din egen API-nøkkel.</translation>
-    </message>
-    <message>
-        <source>Too many requests for now: try again in a moment.</source>
-        <translation>For mange forespørsler for øyeblikket: prøv igjen om et øyeblikk.</translation>
-    </message>
-    <message>
-        <source>Trying a filter on {}</source>
-        <translation>Prøver et filter på {}</translation>
-    </message>
-    <message>
-        <source>Zoom on {}</source>
-        <translation>Zoom til {}</translation>
-    </message>
-    <message>
-        <source>an area</source>
-        <translation>et område</translation>
-    </message>
-    <message>
-        <source>everything</source>
-        <translation>alt</translation>
-    </message>
-    <message>
-        <source>{} tools available</source>
-        <translation>{} verktøy tilgjengelige</translation>
     </message>
 </context>
 </TS>

@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
-"""Map tool of the segmentation: points on and off the object, or a box around it.
+"""Map tool of SAM for the object targets of the raster pipette.
 
-Left click: on the object. Right click: off it. Left drag: a box. Enter validates
-the object, Escape forgets the prompts. Points stay marked until they are cleared.
+Left click: a new object. Shift+left click: extend the last object. Right click:
+trim it. Left drag: a box around a new object. Escape: remove the last object.
+Moving the mouse without a button asks for a preview of the object under it.
 """
 from qgis.core import QgsPointXY, QgsRectangle
 from qgis.gui import QgsMapTool, QgsRubberBand, QgsVertexMarker
@@ -35,8 +36,9 @@ def _polygon_type():
 class SegmentationTool(QgsMapTool):
     """Emit the prompts of the object being drawn, in the map CRS."""
 
-    pointPicked = pyqtSignal(object, bool)  # QgsPointXY, on the object
+    pointPicked = pyqtSignal(object, bool, bool)  # QgsPointXY, on the object, Shift held (extend the last object)
     boxDrawn = pyqtSignal(object)  # QgsRectangle
+    hovered = pyqtSignal(object)  # QgsPointXY under the mouse, no button pressed
     validateRequested = pyqtSignal()
     clearRequested = pyqtSignal()
 
@@ -56,6 +58,7 @@ class SegmentationTool(QgsMapTool):
 
     def canvasMoveEvent(self, event) -> None:  # noqa: N802 - Qt override
         if self._press is None:
+            self.hovered.emit(QgsPointXY(self.toMapCoordinates(event.pos())))
             return
         offset = event.pos() - self._press
         self._dragging = self._dragging or max(abs(offset.x()), abs(offset.y())) >= DRAG_THRESHOLD
@@ -64,7 +67,7 @@ class SegmentationTool(QgsMapTool):
 
     def canvasReleaseEvent(self, event) -> None:  # noqa: N802 - Qt override
         if event.button() == Qt.MouseButton.RightButton:
-            self.pointPicked.emit(QgsPointXY(self.toMapCoordinates(event.pos())), False)
+            self.pointPicked.emit(QgsPointXY(self.toMapCoordinates(event.pos())), False, False)
             return
         if event.button() != Qt.MouseButton.LeftButton or self._press is None:
             return
@@ -75,7 +78,8 @@ class SegmentationTool(QgsMapTool):
         if dragging:
             self.boxDrawn.emit(rectangle)
         else:
-            self.pointPicked.emit(QgsPointXY(self.toMapCoordinates(event.pos())), True)
+            extend = bool(event.modifiers() & Qt.KeyboardModifier.ShiftModifier)
+            self.pointPicked.emit(QgsPointXY(self.toMapCoordinates(event.pos())), True, extend)
 
     def keyPressEvent(self, event) -> None:  # noqa: N802 - Qt override
         if event.key() in (Qt.Key.Key_Return, Qt.Key.Key_Enter):

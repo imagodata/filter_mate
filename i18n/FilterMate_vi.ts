@@ -30,6 +30,709 @@
     </message>
 </context>
 <context>
+    <name>AgentChat</name>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Access to the free quota was renewed: send your request again.</source>
+        <translation type="obsolete">Quyền truy cập hạn mức miễn phí đã được gia hạn: hãy gửi lại yêu cầu của bạn.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Another application is changing the project: try again in a moment.</source>
+        <translation type="obsolete">Một ứng dụng khác đang thay đổi dự án: hãy thử lại sau giây lát.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Another application: {}</source>
+        <translation type="obsolete">Ứng dụng khác: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Applied again: {}.</source>
+        <translation type="obsolete">Đã áp dụng lại: {}.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Changed since, left as is: {}.</source>
+        <translation type="obsolete">Đã thay đổi từ đó, giữ nguyên: {}.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Changed: {}.</source>
+        <translation type="obsolete">Đã thay đổi: {}.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Choose a model and agree to send your data to use the agent.</source>
+        <translation type="obsolete">Hãy chọn một mô hình và đồng ý gửi dữ liệu của bạn để dùng tác tử.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Connecting to {}…</source>
+        <translation type="obsolete">Đang kết nối với {}…</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Earlier conversation: the agent starts afresh from here.</source>
+        <translation type="obsolete">Cuộc trò chuyện trước: tác tử bắt đầu lại từ đây.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Enter your API key in the agent settings.</source>
+        <translation type="obsolete">Hãy nhập khóa API của bạn trong cài đặt tác tử.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Export of {}</source>
+        <translation type="obsolete">Xuất {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Favorite applied</source>
+        <translation type="obsolete">Đã áp dụng mục yêu thích</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Filter on the points of {}</source>
+        <translation type="obsolete">Lọc theo các điểm của {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Filter on {}</source>
+        <translation type="obsolete">Lọc {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Filter on {} by an area</source>
+        <translation type="obsolete">Lọc {} theo một vùng</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Filter on {} by {}</source>
+        <translation type="obsolete">Lọc {} theo {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>FilterMate agent</source>
+        <translation type="obsolete">Tác tử FilterMate</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Filters removed from {}</source>
+        <translation type="obsolete">Đã gỡ bộ lọc khỏi {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Hidden: {}</source>
+        <translation type="obsolete">Đã ẩn: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>It answers.</source>
+        <translation type="obsolete">Nguồn có phản hồi.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Layer added: {}</source>
+        <translation type="obsolete">Đã thêm lớp: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Layers removed: {}</source>
+        <translation type="obsolete">Đã gỡ các lớp: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Not reachable for this conversation: {}</source>
+        <translation type="obsolete">Không truy cập được trong cuộc trò chuyện này: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Nothing to redo.</source>
+        <translation type="obsolete">Không có gì để làm lại.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Nothing to restore.</source>
+        <translation type="obsolete">Không có gì để khôi phục.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Reading the active filters</source>
+        <translation type="obsolete">Đang đọc các bộ lọc đang hoạt động</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Reading the favorites</source>
+        <translation type="obsolete">Đang đọc các mục yêu thích</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Reading the fields of {}</source>
+        <translation type="obsolete">Đang đọc các trường của {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Reading the layers</source>
+        <translation type="obsolete">Đang đọc các lớp</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Reading the map</source>
+        <translation type="obsolete">Đang đọc bản đồ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Reading the values of {}</source>
+        <translation type="obsolete">Đang đọc các giá trị của {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Restored: {}.</source>
+        <translation type="obsolete">Đã khôi phục: {}.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Searching satellite imagery on {}</source>
+        <translation type="obsolete">Đang tìm ảnh vệ tinh trên {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Searching {} for {}</source>
+        <translation type="obsolete">Đang tìm kiếm trên {}: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Selection cleared on {}</source>
+        <translation type="obsolete">Đã bỏ chọn trên {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Selection on {}</source>
+        <translation type="obsolete">Vùng chọn trên {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Shown: {}</source>
+        <translation type="obsolete">Đã hiển thị: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Stopped.</source>
+        <translation type="obsolete">Đã dừng.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The MCP server could not start: {}</source>
+        <translation type="obsolete">Không thể khởi động máy chủ MCP: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The QGIS authentication database is not available.</source>
+        <translation type="obsolete">Cơ sở dữ liệu xác thực của QGIS không khả dụng.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The QGIS master password is needed to use the stored key.</source>
+        <translation type="obsolete">Cần mật khẩu chính của QGIS để dùng khóa đã lưu.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The agent stopped before the end ({}).</source>
+        <translation type="obsolete">Tác tử đã dừng trước khi kết thúc ({}).</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The agent wants to add this layer of a web service to the project:
+{} · {}
+
+Do you agree?</source>
+        <translation type="obsolete">Tác tử muốn thêm lớp này của một dịch vụ web vào dự án:
+{} · {}
+
+Bạn có đồng ý không?</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The agent wants to add this layer to the project:
+{}
+
+A remote source is read from its server by QGIS, and what the layer holds can be sent to the provider of the agent. Do you agree?</source>
+        <translation type="obsolete">Tác tử muốn thêm lớp này vào dự án:
+{}
+
+QGIS đọc nguồn từ xa từ máy chủ của nó, và nội dung của lớp có thể được gửi đến nhà cung cấp của tác tử. Bạn có đồng ý không?</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The agent wants to export these layers to files:
+{}
+
+Do you agree?</source>
+        <translation type="obsolete">Tác tử muốn xuất các lớp này ra tệp:
+{}
+
+Bạn có đồng ý không?</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The agent wants to remove these layers from the project (their files stay, their styles and filters here are lost):
+{}
+
+Do you agree?</source>
+        <translation type="obsolete">Tác tử muốn gỡ các lớp này khỏi dự án (tệp của chúng được giữ lại, kiểu và bộ lọc ở đây sẽ mất):
+{}
+
+Bạn có đồng ý không?</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The agent wants to run this action on an external connector:
+{}
+{}
+
+Do you agree?</source>
+        <translation type="obsolete">Tác tử muốn chạy thao tác này trên một trình kết nối bên ngoài:
+{}
+{}
+
+Bạn có đồng ý không?</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The credit or quota of this account is used up.</source>
+        <translation type="obsolete">Tín dụng hoặc hạn mức của tài khoản này đã hết.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The free quota could not be reached: {}</source>
+        <translation type="obsolete">Không truy cập được hạn mức miễn phí: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The free quota is not available.</source>
+        <translation type="obsolete">Hạn mức miễn phí không khả dụng.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The free quota is unavailable for now.</source>
+        <translation type="obsolete">Hạn mức miễn phí tạm thời không khả dụng.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The free quota is used up for this month. Enter your own API key in the agent settings.</source>
+        <translation type="obsolete">Hạn mức miễn phí tháng này đã hết. Hãy nhập khóa API riêng của bạn trong cài đặt tác tử.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The key could not be stored.</source>
+        <translation type="obsolete">Không thể lưu khóa.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The provider could not be reached: {}</source>
+        <translation type="obsolete">Không thể kết nối với nhà cung cấp: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The provider refused the API key: check it in the agent settings.</source>
+        <translation type="obsolete">Nhà cung cấp đã từ chối khóa API: hãy kiểm tra trong cài đặt tác tử.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The provider reported a problem: {}</source>
+        <translation type="obsolete">Nhà cung cấp báo có sự cố: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The stored key could not be read.</source>
+        <translation type="obsolete">Không thể đọc khóa đã lưu.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Thinking…</source>
+        <translation type="obsolete">Đang suy nghĩ…</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Too many new accounts from this address today: try again tomorrow, or enter your own API key.</source>
+        <translation type="obsolete">Hôm nay có quá nhiều tài khoản mới từ địa chỉ này: hãy thử lại vào ngày mai, hoặc nhập khóa API riêng của bạn.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Too many requests for now: try again in a moment.</source>
+        <translation type="obsolete">Quá nhiều yêu cầu lúc này: hãy thử lại sau giây lát.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Trying a filter on {}</source>
+        <translation type="obsolete">Đang thử một bộ lọc trên {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Zoom on {}</source>
+        <translation type="obsolete">Thu phóng đến {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>an area</source>
+        <translation type="obsolete">một vùng</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>everything</source>
+        <translation type="obsolete">tất cả</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>{} tools available</source>
+        <translation type="obsolete">{} công cụ khả dụng</translation>
+    </message>
+</context>
+<context>
+    <name>AgentPanel</name>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>(no request)</source>
+        <translation type="obsolete">(không có yêu cầu)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>A few free requests a month, through the relay of FilterMate to Claude (Anthropic), under the terms of Anthropic. The relay counts what is spent and keeps no conversation. When it is used up, choose a provider and enter your own API key.</source>
+        <translation type="obsolete">Một vài yêu cầu miễn phí mỗi tháng, qua máy chuyển tiếp của FilterMate đến Claude (Anthropic), theo điều khoản của Anthropic. Máy chuyển tiếp chỉ đếm mức đã dùng và không lưu cuộc trò chuyện nào. Khi hết hạn mức, hãy chọn nhà cung cấp và nhập khóa API riêng của bạn.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>API key</source>
+        <translation type="obsolete">Khóa API</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Add</source>
+        <translation type="obsolete">Thêm</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Address</source>
+        <translation type="obsolete">Địa chỉ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Agent settings</source>
+        <translation type="obsolete">Cài đặt tác tử</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Allow attribute values to be sent</source>
+        <translation type="obsolete">Cho phép gửi giá trị thuộc tính</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Applications already set up will have to be set up again.</source>
+        <translation type="obsolete">Các ứng dụng đã thiết lập sẽ phải thiết lập lại.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Ask the agent to filter your layers</source>
+        <translation type="obsolete">Nhờ tác tử lọc các lớp của bạn</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Back to the conversation</source>
+        <translation type="obsolete">Quay lại cuộc trò chuyện</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Claude Code or another MCP client on this computer can then filter your layers, once FilterMate has been opened, under the rules of this panel: the same sources, the same confirmations, and filters can be undone here. That application sends what it reads to its own AI provider.</source>
+        <translation type="obsolete">Claude Code hoặc một ứng dụng khách MCP khác trên máy tính này khi đó có thể lọc các lớp của bạn, sau khi FilterMate đã mở, theo quy tắc của bảng này: cùng nguồn, cùng xác nhận, và bộ lọc có thể được hoàn tác tại đây. Ứng dụng đó gửi những gì nó đọc được đến nhà cung cấp AI của riêng nó.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Connect an AI provider to start. Nothing is sent before you agree.</source>
+        <translation type="obsolete">Hãy kết nối một nhà cung cấp AI để bắt đầu. Không có gì được gửi đi khi bạn chưa đồng ý.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Copied, with the access token: keep it to yourself. Save these settings for it to apply.</source>
+        <translation type="obsolete">Đã sao chép, kèm mã thông báo truy cập: hãy giữ kín. Hãy lưu các cài đặt này để áp dụng.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Copy for Claude Desktop</source>
+        <translation type="obsolete">Sao chép cho Claude Desktop</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Copy the Claude Code command</source>
+        <translation type="obsolete">Sao chép lệnh Claude Code</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Copy the configuration</source>
+        <translation type="obsolete">Sao chép cấu hình</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Describe it in your own words. Each filter can be undone.</source>
+        <translation type="obsolete">Hãy mô tả bằng lời của bạn. Mỗi bộ lọc đều có thể hoàn tác.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Filter your layers from a sentence</source>
+        <translation type="obsolete">Lọc các lớp của bạn chỉ bằng một câu</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>FilterMate agent</source>
+        <translation type="obsolete">Tác tử FilterMate</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>History</source>
+        <translation type="obsolete">Lịch sử</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>History…</source>
+        <translation type="obsolete">Lịch sử…</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>I agree to send this data to this provider</source>
+        <translation type="obsolete">Tôi đồng ý gửi dữ liệu này đến nhà cung cấp này</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Let other applications on this computer drive FilterMate (MCP server)</source>
+        <translation type="obsolete">Cho phép các ứng dụng khác trên máy tính này điều khiển FilterMate (máy chủ MCP)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>MCP connector</source>
+        <translation type="obsolete">Trình kết nối MCP</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>MCP connectors</source>
+        <translation type="obsolete">Các trình kết nối MCP</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Model</source>
+        <translation type="obsolete">Mô hình</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>More</source>
+        <translation type="obsolete">Xem thêm</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>New access token</source>
+        <translation type="obsolete">Mã thông báo truy cập mới</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>New conversation</source>
+        <translation type="obsolete">Cuộc trò chuyện mới</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>New token: it applies once these settings are saved.</source>
+        <translation type="obsolete">Mã thông báo mới: có hiệu lực sau khi lưu các cài đặt này.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Open data platforms</source>
+        <translation type="obsolete">Nền tảng dữ liệu mở</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Open the settings</source>
+        <translation type="obsolete">Mở cài đặt</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Other applications</source>
+        <translation type="obsolete">Ứng dụng khác</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Port</source>
+        <translation type="obsolete">Cổng</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Provider</source>
+        <translation type="obsolete">Nhà cung cấp</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Redo</source>
+        <translation type="obsolete">Làm lại</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Remove</source>
+        <translation type="obsolete">Gỡ bỏ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Remove the stored key</source>
+        <translation type="obsolete">Xóa khóa đã lưu</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Satellite imagery</source>
+        <translation type="obsolete">Ảnh vệ tinh</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Send (Enter)</source>
+        <translation type="obsolete">Gửi (Enter)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Send again</source>
+        <translation type="obsolete">Gửi lại</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Sent to: {}</source>
+        <translation type="obsolete">Đã gửi đến: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Set up the agent</source>
+        <translation type="obsolete">Thiết lập tác tử</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Sources</source>
+        <translation type="obsolete">Nguồn</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Stop (Esc)</source>
+        <translation type="obsolete">Dừng (Esc)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Stored: leave empty to keep it</source>
+        <translation type="obsolete">Đã lưu: để trống để giữ nguyên</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Test</source>
+        <translation type="obsolete">Kiểm tra</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Testing…</source>
+        <translation type="obsolete">Đang kiểm tra…</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The MCP server could not start: {}</source>
+        <translation type="obsolete">Không thể khởi động máy chủ MCP: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The agent can search the sources ticked here. Your searches, and what the agent passes to a connector, are sent to them; a layer added from them is read from their servers.</source>
+        <translation type="obsolete">Tác tử có thể tìm kiếm trong các nguồn được đánh dấu ở đây. Các tìm kiếm của bạn, và những gì tác tử chuyển cho một trình kết nối, sẽ được gửi đến các nguồn đó; lớp được thêm từ chúng được đọc từ máy chủ của chúng.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The agent sends your request, the names of your layers and fields, your filter expressions and the results of its tools to the provider chosen here, under that provider&apos;s terms. Without the option below, the agent does not read the values of your fields; values already written in your filters and favorites are still sent. The conversation is kept on this computer for each project, until you start a new one.</source>
+        <translation type="obsolete">Tác tử gửi yêu cầu của bạn, tên các lớp và trường, biểu thức bộ lọc cùng kết quả của các công cụ đến nhà cung cấp được chọn ở đây, theo điều khoản của nhà cung cấp đó. Nếu không bật tùy chọn bên dưới, tác tử không đọc giá trị của các trường; những giá trị đã có trong bộ lọc và mục yêu thích của bạn vẫn được gửi. Cuộc trò chuyện được lưu trên máy tính này theo từng dự án, cho đến khi bạn bắt đầu cuộc mới.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Through mcp-remote, which needs Node.js: Claude Desktop starts local servers as programs.</source>
+        <translation type="obsolete">Qua mcp-remote, cần Node.js: Claude Desktop khởi chạy các máy chủ cục bộ như chương trình.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Too many sources added: remove one first.</source>
+        <translation type="obsolete">Đã thêm quá nhiều nguồn: hãy gỡ bớt một nguồn trước.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Undo the last</source>
+        <translation type="obsolete">Hoàn tác mục gần nhất</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Undo this turn</source>
+        <translation type="obsolete">Hoàn tác lượt này</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>What do you want to filter?</source>
+        <translation type="obsolete">Bạn muốn lọc gì?</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>added by you</source>
+        <translation type="obsolete">do bạn thêm</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>applied</source>
+        <translation type="obsolete">đã áp dụng</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>community</source>
+        <translation type="obsolete">cộng đồng</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>https://... or a portal address</source>
+        <translation type="obsolete">https://... hoặc địa chỉ cổng thông tin</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>no change</source>
+        <translation type="obsolete">không thay đổi</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>official</source>
+        <translation type="obsolete">chính thức</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>this computer</source>
+        <translation type="obsolete">máy tính này</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>undone</source>
+        <translation type="obsolete">đã hoàn tác</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>{} turn(s)</source>
+        <translation type="obsolete">{} lượt</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Which layers are in this project?</source>
+        <translation type="obsolete">Dự án này có những lớp nào?</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Keep the buildings taller than 15 m</source>
+        <translation type="obsolete">Giữ lại các tòa nhà cao hơn 15 m</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Filter the roads inside the selected feature</source>
+        <translation type="obsolete">Lọc các con đường nằm trong đối tượng đã chọn</translation>
+    </message>
+</context>
+<context>
     <name>AppInitializer</name>
     <message>
         <location filename="../core/services/app_initializer.py" line="174"/>
@@ -616,137 +1319,137 @@
         <translation>Đặt lại tiêu chí đám mây điểm</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1597"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1605"/>
         <source>Invalid raster calculator expression</source>
         <translation>Biểu thức máy tính raster không hợp lệ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1912"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1920"/>
         <source>PDAL was not found: the height above a DTM needs the pdal executable</source>
         <translation>Không tìm thấy PDAL: tính độ cao so với DTM cần tệp thực thi pdal</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3432"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3475"/>
         <source>A FilterMate task is still running: wait for it to finish</source>
         <translation>Một tác vụ FilterMate vẫn đang chạy: hãy chờ tác vụ hoàn tất</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2905"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2948"/>
         <source>FilterMate task failed: {0}</source>
         <translation>Tác vụ FilterMate thất bại: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2942"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2985"/>
         <source>Select pixels first: a value range, classes or a raster expression</source>
         <translation>Hãy chọn điểm ảnh trước: khoảng giá trị, các lớp phân loại hoặc biểu thức raster</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2957"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3000"/>
         <source>Raster filtered: {0}</source>
         <translation>Đã lọc raster: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2991"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3034"/>
         <source>The point cloud expression was rejected: {0}</source>
         <translation>Biểu thức đám mây điểm bị từ chối: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2994"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3037"/>
         <source>Select points first: classes, attribute ranges or an expression</source>
         <translation>Hãy chọn điểm trước: các lớp phân loại, khoảng thuộc tính hoặc biểu thức</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3008"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3051"/>
         <source>Point cloud filtered: {0}</source>
         <translation>Đã lọc đám mây điểm: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3542"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3585"/>
         <source>Filter not applied: {0}</source>
         <translation>Chưa áp dụng bộ lọc: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3394"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3437"/>
         <source>canceled</source>
         <translation>đã hủy</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3091"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3134"/>
         <source>{0} target(s) filtered</source>
         <translation>Đã lọc {0} đích</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3102"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3145"/>
         <source>{0} failed: {1}</source>
         <translation>{0} thất bại: {1}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3115"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3158"/>
         <source>FilterMate: filtering from '{0}'…</source>
         <translation>FilterMate: đang lọc từ '{0}'…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3214"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3257"/>
         <source>Changed since, left as is: {0}</source>
         <translation>Đã thay đổi từ đó, giữ nguyên: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3220"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3263"/>
         <source>{0} layer(s) restored</source>
         <translation>Đã khôi phục {0} lớp</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3254"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3297"/>
         <source>&apos;{0}&apos; not exported: {1}</source>
         <translation>'{0}' chưa được xuất: {1}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3268"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3311"/>
         <source>Exported: {0}</source>
         <translation>Đã xuất: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3270"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3313"/>
         <source>Export failed: {0}</source>
         <translation>Xuất thất bại: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3277"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3320"/>
         <source>Exporting {0} layer(s)…</source>
         <translation>Đang xuất {0} lớp…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3283"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3326"/>
         <source>Export folder</source>
         <translation>Thư mục xuất</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3365"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3408"/>
         <source>Raster / point cloud targets skipped: no source feature selected in EXPLORING</source>
         <translation>Bỏ qua các đích raster / đám mây điểm: chưa chọn đối tượng nguồn trong EXPLORING</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3394"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3437"/>
         <source>Raster / point cloud targets not filtered: {0}</source>
         <translation>Các đích raster / đám mây điểm chưa được lọc: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3396"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3439"/>
         <source>{0} raster / point cloud target(s) filtered</source>
         <translation>Đã lọc {0} đích raster / đám mây điểm</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3519"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3562"/>
         <source>Choose the DTM raster used for the height above ground</source>
         <translation>Chọn raster DTM dùng để tính độ cao so với mặt đất</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3530"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3573"/>
         <source>Height above ground not computed: {0}</source>
         <translation>Chưa tính độ cao so với mặt đất: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3551"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3594"/>
         <source>Computing the height above '{0}' with PDAL…</source>
         <translation>Đang tính độ cao so với '{0}' bằng PDAL…</translation>
     </message>
@@ -756,12 +1459,12 @@
         <translation>Bộ nhớ đệm của FilterMate chiếm {0} GB, vượt quá giới hạn {1} GB: hãy bỏ lọc các lớp raster / đám mây điểm mà bạn không còn cần nữa</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1914"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1922"/>
         <source>PDAL {0} is too old: the height above a DTM needs PDAL 2.4 or later</source>
         <translation>PDAL {0} quá cũ: tính độ cao so với DTM cần PDAL 2.4 trở lên</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1917"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1925"/>
         <source>PDAL could not be run, the height above a DTM is unavailable: {0}</source>
         <translation>Không thể chạy PDAL, độ cao so với DTM không khả dụng: {0}</translation>
     </message>
@@ -781,27 +1484,27 @@
         <translation>Xem trước: ẩn các điểm ảnh ngoài vùng chọn (lớp phủ trắng đối với độ dốc, hướng dốc...)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1792"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1800"/>
         <source>The preview of a slope or aspect needs the map in the CRS of the raster ({0})</source>
         <translation>Xem trước độ dốc hoặc hướng dốc cần bản đồ ở CRS của raster ({0})</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2434"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2477"/>
         <source>only the points drawn on the map can be picked: turn the preview off to pick a class it hides</source>
         <translation>chỉ có thể chọn các điểm được vẽ trên bản đồ: hãy tắt xem trước để chọn lớp phân loại mà nó đang ẩn</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2505"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2548"/>
         <source>No classified point under the click</source>
         <translation>Không có điểm đã phân loại dưới vị trí nhấp</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2440"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2483"/>
         <source>Class {0} is already checked</source>
         <translation>Lớp {0} đã được đánh dấu</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2529"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2572"/>
         <source>Class {0} is not in the class list of the layer</source>
         <translation>Lớp {0} không có trong danh sách lớp của lớp dữ liệu</translation>
     </message>
@@ -816,157 +1519,157 @@
         <translation>Ống hút lớp: nhấp vào bản đồ, lớp của các điểm được vẽ tại đó sẽ được đánh dấu. Ctrl+nhấp để thêm một lớp khác</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1116"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1118"/>
         <source>Preview and statistics use a bounded local sample of the visible extent; filtering reads the source.</source>
         <translation>Xem trước và thống kê dùng một mẫu cục bộ giới hạn của phạm vi hiển thị; việc lọc đọc từ nguồn.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1314"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1322"/>
         <source>Preparing a bounded color snapshot of the visible extent…</source>
         <translation>Đang chuẩn bị ảnh chụp màu giới hạn của phạm vi hiển thị…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1326"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1334"/>
         <source>The color snapshot could not be prepared. Try a smaller visible extent.</source>
         <translation>Không thể chuẩn bị ảnh chụp màu. Hãy thử phạm vi hiển thị nhỏ hơn.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1330"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1338"/>
         <source>Color selection applies to the captured visible extent.</source>
         <translation>Việc chọn theo màu áp dụng cho phạm vi hiển thị đã ghi lại.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1394"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1402"/>
         <source>Raster sampling failed. Try a smaller visible extent.</source>
         <translation>Lấy mẫu raster thất bại. Hãy thử phạm vi hiển thị nhỏ hơn.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1515"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1523"/>
         <source>No valid pixels to display in the selected bands.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1792"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1800"/>
         <source>The preview of a color or an expression needs the map in the CRS of the raster ({0})</source>
         <translation>Xem trước màu hoặc biểu thức cần bản đồ ở CRS của raster ({0})</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2458"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2501"/>
         <source>No point drawn under the click</source>
         <translation>Không có điểm nào được vẽ dưới vị trí nhấp</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2460"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2503"/>
         <source>This point has no {0}</source>
         <translation>Điểm này không có {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2462"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2505"/>
         <source>{0} cannot be used in a condition</source>
         <translation>{0} không thể dùng trong điều kiện</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2519"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2562"/>
         <source>Object not read: {0}</source>
         <translation>Không đọc được đối tượng: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2521"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2564"/>
         <source>Too many points around the click: the object could not be read</source>
         <translation>Có quá nhiều điểm quanh vị trí nhấp: không đọc được đối tượng</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2523"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2566"/>
         <source>No point of class {0} under the click: click on the object itself</source>
         <translation>Không có điểm nào thuộc lớp {0} dưới điểm nhấp: hãy nhấp vào chính đối tượng</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2660"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2703"/>
         <source>Similar objects not read: {0}</source>
         <translation>Không đọc được các đối tượng tương tự: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2663"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2706"/>
         <source>No similar object within the area ratios: widen them</source>
         <translation>Không có đối tượng tương tự trong khoảng tỷ lệ diện tích: hãy mở rộng khoảng này</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2732"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2775"/>
         <source>Preparing a sample for the new visible extent. Click again when it is ready.</source>
         <translation>Đang chuẩn bị mẫu cho phạm vi hiển thị mới. Hãy nhấp lại khi mẫu sẵn sàng.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2743"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2786"/>
         <source>The local raster sample is still being prepared. Retry when it is ready.</source>
         <translation>Mẫu raster cục bộ vẫn đang được chuẩn bị. Hãy thử lại khi sẵn sàng.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2949"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2992"/>
         <source>Prepare a color snapshot before filtering this rendered layer.</source>
         <translation>Hãy chuẩn bị ảnh chụp màu trước khi lọc lớp được kết xuất này.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3094"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3137"/>
         <source>{0} raster target(s) resampled to the configured pixel limit</source>
         <translation>{0} đích raster được lấy mẫu lại theo giới hạn điểm ảnh đã cấu hình</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3126"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3169"/>
         <source>color selection limited to the captured extent; colors depend on style and scale</source>
         <translation>việc chọn theo màu bị giới hạn trong phạm vi đã ghi lại; màu phụ thuộc vào kiểu dáng và tỷ lệ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3128"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3171"/>
         <source>raster source resampled to {0} cells within the pixel limit</source>
         <translation>nguồn raster được lấy mẫu lại thành {0} ô trong giới hạn điểm ảnh</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3130"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3173"/>
         <source>raster selection read every {0} pixels: over the pixel limit of the settings</source>
         <translation>lựa chọn raster đọc cách mỗi {0} điểm ảnh: vượt quá giới hạn điểm ảnh trong cài đặt</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3133"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3176"/>
         <source>dense raster selection smoothed to keep its outline light</source>
         <translation>lựa chọn raster dày đặc được làm mịn để giữ đường viền nhẹ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3180"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3223"/>
         <source>{0} left empty, nothing matches the selection: {1}</source>
         <translation>{0} đã bị làm trống, không có gì khớp với vùng chọn: {1}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3164"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3207"/>
         <source>failed</source>
         <translation>thất bại</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1509"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1517"/>
         <source>Preparing band display…</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1525"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1533"/>
         <source>The selected bands could not be displayed.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1597"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1605"/>
         <source>Unknown raster layer or band in expression</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1389"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1397"/>
         <source>The raster histogram could not be calculated.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1738"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1746"/>
         <source>The raster preview could not be calculated.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1148"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1150"/>
         <source>onnxruntime installed</source>
         <translation>Đã cài đặt onnxruntime</translation>
     </message>
@@ -1959,27 +2662,27 @@ Nhan vao chi bao ★ va chon 'Them bo loc hien tai vao yeu thich' de luu yeu thi
         <translation>Khôi phục cấu hình mặc định và xóa cơ sở dữ liệu SQLite</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1572"/>
+        <location filename="../filter_mate.py" line="1573"/>
         <source>Reset Configuration</source>
         <translation>Đặt lại cấu hình</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1598"/>
+        <location filename="../filter_mate.py" line="1599"/>
         <source>Configuration reset successfully.</source>
         <translation>Đặt lại cấu hình thành công.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1603"/>
+        <location filename="../filter_mate.py" line="1604"/>
         <source>Default configuration file not found.</source>
         <translation>Không tìm thấy tệp cấu hình mặc định.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1626"/>
+        <location filename="../filter_mate.py" line="1627"/>
         <source>Database deleted: {filename}</source>
         <translation>Đã xóa cơ sở dữ liệu: {filename}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1650"/>
+        <location filename="../filter_mate.py" line="1651"/>
         <source>Restart required</source>
         <translation>Cần khởi động lại</translation>
     </message>
@@ -2130,7 +2833,7 @@ Do you want to disable this setting now?
 • No: Keep current setting</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1572"/>
+        <location filename="../filter_mate.py" line="1573"/>
         <source>Are you sure you want to reset to the default configuration?
 
 This will:
@@ -2147,7 +2850,7 @@ QGIS must be restarted to apply the changes.</source>
 QGIS phải được khởi động lại để áp dụng các thay đổi.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1650"/>
+        <location filename="../filter_mate.py" line="1651"/>
         <source>The configuration has been reset.
 
 Please restart QGIS to apply the changes.</source>
@@ -2166,7 +2869,7 @@ Vui lòng khởi động lại QGIS để áp dụng các thay đổi.</translat
         <translation>{count} lop duoc tham chieu chua duoc tai ({layers_list}). Su dung hien thi du phong.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1641"/>
+        <location filename="../filter_mate.py" line="1642"/>
         <source>Unable to delete {filename}: {e}</source>
         <translation>Khong the xoa {filename}: {e}</translation>
     </message>
@@ -2176,86 +2879,86 @@ Vui lòng khởi động lại QGIS để áp dụng các thay đổi.</translat
         <translation type="obsolete">Loi trong qua trinh dat lai: {str(e)}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1693"/>
+        <location filename="../filter_mate.py" line="1694"/>
         <source>&lt;p style=&apos;font-size:13px;&apos;&gt;Thank you for using &lt;b&gt;FilterMate&lt;/b&gt;!&lt;br&gt;Join our Discord community to:&lt;/p&gt;&lt;ul style=&apos;margin-left:10px; font-size:12px;&apos;&gt;&lt;li&gt;Get help and support&lt;/li&gt;&lt;li&gt;Report bugs and issues&lt;/li&gt;&lt;li&gt;Suggest new features&lt;/li&gt;&lt;li&gt;Share tips with other users&lt;/li&gt;&lt;/ul&gt;</source>
         <translation>&lt;p style='font-size:13px;'&gt;Cam on ban da su dung &lt;b&gt;FilterMate&lt;/b&gt;!&lt;br&gt;Tham gia cong dong Discord cua chung toi de:&lt;/p&gt;&lt;ul style='margin-left:10px; font-size:12px;'&gt;&lt;li&gt;Nhan tro giup va ho tro&lt;/li&gt;&lt;li&gt;Bao cao loi va su co&lt;/li&gt;&lt;li&gt;De xuat tinh nang moi&lt;/li&gt;&lt;li&gt;Chia se meo voi nguoi dung khac&lt;/li&gt;&lt;/ul&gt;</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1709"/>
+        <location filename="../filter_mate.py" line="1710"/>
         <source>  Join us on Discord</source>
         <translation>  Tham gia Discord</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1729"/>
+        <location filename="../filter_mate.py" line="1730"/>
         <source>Don&apos;t show this again</source>
         <translation>Khong hien thi lai</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1785"/>
+        <location filename="../filter_mate.py" line="1786"/>
         <source>Close</source>
         <translation>Dong</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1852"/>
+        <location filename="../filter_mate.py" line="1855"/>
         <source>Error loading plugin: {0}. Check QGIS Python console for details.</source>
         <translation>Loi tai plugin: {0}. Kiem tra bang dieu khien Python cua QGIS de biet chi tiet.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7560"/>
+        <location filename="../filter_mate_dockwidget.py" line="7586"/>
         <source>Current layer: {0}</source>
         <translation>Lop hien tai: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7562"/>
+        <location filename="../filter_mate_dockwidget.py" line="7588"/>
         <source>No layer selected</source>
         <translation>Chua chon lop nao</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7572"/>
+        <location filename="../filter_mate_dockwidget.py" line="7598"/>
         <source>Selected layers:
 {0}</source>
         <translation>Cac lop da chon:
 {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7572"/>
+        <location filename="../filter_mate_dockwidget.py" line="7598"/>
         <source>No layers selected</source>
         <translation>Chua chon lop nao</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7592"/>
+        <location filename="../filter_mate_dockwidget.py" line="7618"/>
         <source>No expression defined</source>
         <translation>Chua dinh nghia bieu thuc</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7604"/>
+        <location filename="../filter_mate_dockwidget.py" line="7630"/>
         <source>Display expression: {0}</source>
         <translation>Bieu thuc hien thi: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7621"/>
+        <location filename="../filter_mate_dockwidget.py" line="7647"/>
         <source>Feature ID: {0}
 First attribute: {1}</source>
         <translation>ID doi tuong: {0}
 Thuoc tinh dau tien: {1}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1659"/>
+        <location filename="../filter_mate.py" line="1660"/>
         <source>The configuration could not be reset. Check that the plugin folder is writable, then try again. Details in filtermate.log.</source>
         <translation>Không thể đặt lại cấu hình. Hãy kiểm tra thư mục plugin có ghi được không, rồi thử lại. Chi tiết trong filtermate.log.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1759"/>
+        <location filename="../filter_mate.py" line="1760"/>
         <source>What&apos;s new in FilterMate 5</source>
         <translation>Có gì mới trong FilterMate 5</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1765"/>
+        <location filename="../filter_mate.py" line="1766"/>
         <source>&lt;p style=&apos;font-size:13px;&apos;&gt;&lt;b&gt;FilterMate now works with raster and point cloud layers.&lt;/b&gt;&lt;/p&gt;&lt;ul style=&apos;margin-left:10px; font-size:12px;&apos;&gt;&lt;li&gt;&lt;b&gt;EXPLORING&lt;/b&gt; adapts to the current layer: value range and classes of a raster, classes, elevation and attributes of a LiDAR point cloud.&lt;/li&gt;&lt;li&gt;&lt;b&gt;FILTERING&lt;/b&gt; relates that selection to layers of any kind, with the usual predicates and buffer: parcels within an elevation range, LiDAR points under buildings, a DTM clipped to a municipality.&lt;/li&gt;&lt;li&gt;&lt;b&gt;EXPORTING&lt;/b&gt; writes filtered rasters (GeoTIFF, COG) and point clouds (LAZ, COPC).&lt;/li&gt;&lt;li&gt;Processing algorithms and models, qgis_process, Python and REST APIs.&lt;/li&gt;&lt;/ul&gt;</source>
         <translation>&lt;p style='font-size:13px;'&gt;&lt;b&gt;FilterMate giờ đây hoạt động với các lớp raster và đám mây điểm.&lt;/b&gt;&lt;/p&gt;&lt;ul style='margin-left:10px; font-size:12px;'&gt;&lt;li&gt;&lt;b&gt;EXPLORING&lt;/b&gt; thích ứng với lớp hiện tại: khoảng giá trị và các lớp phân loại của raster, các lớp phân loại, độ cao và thuộc tính của đám mây điểm LiDAR.&lt;/li&gt;&lt;li&gt;&lt;b&gt;FILTERING&lt;/b&gt; liên kết vùng chọn đó với các lớp thuộc mọi loại, bằng các vị từ và vùng đệm quen thuộc: các thửa đất trong một khoảng độ cao, các điểm LiDAR bên dưới tòa nhà, một DTM được cắt theo một xã.&lt;/li&gt;&lt;li&gt;&lt;b&gt;EXPORTING&lt;/b&gt; ghi các raster (GeoTIFF, COG) và đám mây điểm (LAZ, COPC) đã lọc.&lt;/li&gt;&lt;li&gt;Các thuật toán và mô hình Processing, qgis_process, API Python và REST.&lt;/li&gt;&lt;/ul&gt;</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1781"/>
+        <location filename="../filter_mate.py" line="1782"/>
         <source>Open the user guide</source>
         <translation>Mở hướng dẫn sử dụng</translation>
     </message>
@@ -2628,59 +3331,59 @@ Van xoa?</translation>
         <translation>Che do sang</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="4151"/>
+        <location filename="../filter_mate_dockwidget.py" line="4155"/>
         <location filename="../ui/controllers/exploring_controller.py" line="884"/>
         <source>Selected features have no geometry.</source>
         <translation>Cac doi tuong da chon khong co hinh hoc.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="4170"/>
+        <location filename="../filter_mate_dockwidget.py" line="4174"/>
         <location filename="../ui/controllers/exploring_controller.py" line="885"/>
         <source>No feature selected. Select a feature from the dropdown list.</source>
         <translation>Chua chon doi tuong. Chon mot doi tuong tu danh sach xo xuong.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="5345"/>
+        <location filename="../filter_mate_dockwidget.py" line="5349"/>
         <source>The selected layer is invalid or its source cannot be found.</source>
         <translation>Lop da chon khong hop le hoac khong tim thay nguon.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6238"/>
+        <location filename="../filter_mate_dockwidget.py" line="6242"/>
         <source>Negative buffer (erosion): shrinks polygons inward</source>
         <translation>Vung dem am (xoi mon): thu nho da giac vao trong</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6241"/>
+        <location filename="../filter_mate_dockwidget.py" line="6245"/>
         <source>Buffer value in meters (positive=expand, negative=shrink polygons)</source>
         <translation>Gia tri vung dem tinh bang met (duong=mo rong, am=thu nho da giac)</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6743"/>
+        <location filename="../filter_mate_dockwidget.py" line="6747"/>
         <source>Plugin activated with {0} vector layer(s)</source>
         <translation>Plugin da kich hoat voi {0} lop vector</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6862"/>
+        <location filename="../filter_mate_dockwidget.py" line="6866"/>
         <source>Could not reload plugin automatically.</source>
         <translation>Khong the tu dong tai lai plugin.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6867"/>
+        <location filename="../filter_mate_dockwidget.py" line="6871"/>
         <source>Error reloading plugin: {0}</source>
         <translation>Loi tai lai plugin: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6942"/>
+        <location filename="../filter_mate_dockwidget.py" line="6946"/>
         <source>Layer properties reset to defaults</source>
         <translation>Thuoc tinh lop da dat lai ve mac dinh</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6943"/>
+        <location filename="../filter_mate_dockwidget.py" line="6947"/>
         <source>Error resetting layer properties: {}</source>
         <translation>Loi dat lai thuoc tinh lop: {}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7206"/>
+        <location filename="../filter_mate_dockwidget.py" line="7232"/>
         <source>Filter</source>
         <translation>Lọc</translation>
     </message>
@@ -2810,7 +3513,7 @@ Van xoa?</translation>
         <translation>Không thể áp dụng bố cục bảng điều khiển; dùng kích thước mặc định. Chi tiết trong filtermate.log.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7034"/>
+        <location filename="../filter_mate_dockwidget.py" line="7038"/>
         <location filename="../ui/controllers/backend_controller.py" line="682"/>
         <source>Vector</source>
         <translation>Vector</translation>
@@ -2841,22 +3544,22 @@ Van xoa?</translation>
         <translation>Xóa schema FilterMate</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="4282"/>
+        <location filename="../filter_mate_dockwidget.py" line="4286"/>
         <source>Read failed</source>
         <translation>Đọc thất bại</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="4282"/>
+        <location filename="../filter_mate_dockwidget.py" line="4286"/>
         <source>The service could not be read. Please retry.</source>
         <translation>Không đọc được dịch vụ. Vui lòng thử lại.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="4624"/>
+        <location filename="../filter_mate_dockwidget.py" line="4628"/>
         <source>Loading filtered extent…</source>
         <translation>Đang tải phạm vi đã lọc…</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="5210"/>
+        <location filename="../filter_mate_dockwidget.py" line="5214"/>
         <location filename="../ui/controllers/exploring_controller.py" line="742"/>
         <location filename="../ui/controllers/exploring_controller.py" line="3662"/>
         <source>Loading selected values…</source>
@@ -2898,7 +3601,7 @@ Van xoa?</translation>
         <translation>Chỉ hiển thị một tập giá trị giới hạn. Hãy tinh chỉnh tìm kiếm để thấy các giá trị khác.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="5145"/>
+        <location filename="../filter_mate_dockwidget.py" line="5149"/>
         <location filename="../ui/controllers/exploring_controller.py" line="551"/>
         <location filename="../ui/controllers/exploring_controller.py" line="568"/>
         <location filename="../ui/controllers/exploring_controller.py" line="636"/>
@@ -3057,7 +3760,7 @@ Van xoa?</translation>
         <translation>📁 Dự án hiện tại</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7206"/>
+        <location filename="../filter_mate_dockwidget.py" line="7232"/>
         <source>The filter was not launched: its selection changed or could not be read. Click Filter again.</source>
         <translation>Bộ lọc chưa được khởi chạy: vùng chọn của nó đã thay đổi hoặc không đọc được. Hãy nhấp Lọc lại.</translation>
     </message>
@@ -3437,7 +4140,7 @@ Dam bao bang PostgreSQL co PRIMARY KEY duoc dinh nghia.</translation>
 <context>
     <name>ModelDownloadTask</name>
     <message>
-        <location filename="../adapters/qgis/coverage_layers/segmentation.py" line="316"/>
+        <location filename="../adapters/qgis/coverage_layers/segmentation.py" line="558"/>
         <source>FilterMate: downloading the segmentation model</source>
         <translation>FilterMate: đang tải xuống mô hình phân đoạn</translation>
     </message>
@@ -5830,27 +6533,27 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">Nhấp vào bản đồ bằng bộ chọn điểm ảnh. Ctrl+nhấp để mở rộng khoảng tới giá trị đó.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2138"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2160"/>
         <source>VALUE RANGE</source>
         <translation>KHOẢNG GIÁ TRỊ</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1444"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1461"/>
         <source>Min</source>
         <translation>Tối thiểu</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1444"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1461"/>
         <source>Lowest value kept</source>
         <translation>Giá trị thấp nhất được giữ</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1444"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1461"/>
         <source>Max</source>
         <translation>Tối đa</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1444"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1461"/>
         <source>Highest value kept</source>
         <translation>Giá trị cao nhất được giữ</translation>
     </message>
@@ -5880,17 +6583,17 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">Không có</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1464"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1481"/>
         <source>RASTER EXPRESSION</source>
         <translation>BIỂU THỨC RASTER</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1468"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1485"/>
         <source>Raster calculator expression; a pixel is kept where it is not 0</source>
         <translation>Biểu thức máy tính raster; điểm ảnh được giữ khi giá trị khác 0</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1469"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1486"/>
         <source>Raster expression</source>
         <translation>Biểu thức raster</translation>
     </message>
@@ -5910,12 +6613,12 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">Điểm ảnh đã chọn: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1550"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1567"/>
         <source>Set a value range first</source>
         <translation>Hãy đặt khoảng giá trị trước</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2758"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2910"/>
         <source>NoData</source>
         <translation>NoData</translation>
     </message>
@@ -5935,22 +6638,22 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">Thống kê kênh hiện tại trong hình chữ nhật vẽ gần nhất trên bản đồ</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1844"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1861"/>
         <source>Under the cursor: {0}  (X {1:.{3}f}  Y {2:.{3}f})</source>
         <translation>Dưới con trỏ: {0}  (X {1:.{3}f}  Y {2:.{3}f})</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1854"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1871"/>
         <source>Zone: {0}</source>
         <translation>Vùng: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1854"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1871"/>
         <source>no pixel</source>
         <translation>không có điểm ảnh</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2776"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2928"/>
         <source>LAST PICKS</source>
         <translation>SỐ ĐO GẦN NHẤT</translation>
     </message>
@@ -5965,37 +6668,37 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">Đại lượng mà khoảng áp dụng. Độ dốc, hướng dốc, đổ bóng địa hình và độ nhám đọc băng như một DTM.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1401"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1418"/>
         <source>Pixel value</source>
         <translation>Giá trị điểm ảnh</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1401"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1418"/>
         <source>Slope (degrees)</source>
         <translation>Độ dốc (độ)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1401"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1418"/>
         <source>Slope (%)</source>
         <translation>Độ dốc (%)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1401"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1418"/>
         <source>Aspect (degrees)</source>
         <translation>Hướng dốc (độ)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1401"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1418"/>
         <source>Hillshade (0-255)</source>
         <translation>Đổ bóng địa hình (0-255)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1401"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1418"/>
         <source>Roughness (TRI, mean difference)</source>
         <translation>Độ nhám (TRI, chênh lệch trung bình)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1411"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1428"/>
         <source>Usual thresholds of the quantity</source>
         <translation>Các ngưỡng thường dùng của đại lượng</translation>
     </message>
@@ -6005,47 +6708,47 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">Các ngưỡng thường dùng</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2275"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2297"/>
         <source>Flat</source>
         <translation>Bằng phẳng</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2275"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2297"/>
         <source>Gentle</source>
         <translation>Thoải</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2275"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2297"/>
         <source>Moderate</source>
         <translation>Trung bình</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2276"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2298"/>
         <source>Steep</source>
         <translation>Dốc</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2276"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2298"/>
         <source>East</source>
         <translation>Đông</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2276"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2298"/>
         <source>South</source>
         <translation>Nam</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2277"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2299"/>
         <source>West</source>
         <translation>Tây</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2277"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2299"/>
         <source>Shadow</source>
         <translation>Bóng</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2277"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2299"/>
         <source>Lit</source>
         <translation>Sáng</translation>
     </message>
@@ -6055,27 +6758,27 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">Các ngưỡng thường dùng…</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1137"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1146"/>
         <source>PIPETTE</source>
         <translation>BỘ CHỌN</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1273"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1290"/>
         <source>Tolerance ±</source>
         <translation>Dung sai ±</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1280"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1297"/>
         <source>Tolerance around the picked color or value, in % of the value range</source>
         <translation>Dung sai quanh màu hoặc giá trị đã chọn, tính theo % của khoảng giá trị</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1281"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1298"/>
         <source>Pipette tolerance</source>
         <translation>Dung sai của bộ chọn</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1504"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1521"/>
         <source>Bands</source>
         <translation>Băng</translation>
     </message>
@@ -6120,22 +6823,22 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">Cần ảnh có từ ba băng trở lên (đỏ, lục, lam...)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1523"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1540"/>
         <source>Vegetation (NDVI &gt; 0.3)</source>
         <translation>Thực vật (NDVI &gt; 0.3)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1523"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1540"/>
         <source>No vegetation (NDVI &lt; 0.1)</source>
         <translation>Không có thực vật (NDVI &lt; 0.1)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1524"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1541"/>
         <source>Water (NDWI &gt; 0.1)</source>
         <translation>Nước (NDWI &gt; 0.1)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1524"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1541"/>
         <source>Vegetation (excess green)</source>
         <translation>Thực vật (lục dư)</translation>
     </message>
@@ -6145,12 +6848,12 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">Thiết lập sẵn phổ…</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2431"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2470"/>
         <source>This pixel has no value (NoData): pick another one</source>
         <translation>Điểm ảnh này không có giá trị (NoData): hãy chọn điểm ảnh khác</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2541"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2578"/>
         <source>The tolerance covers every value: lower it</source>
         <translation>Dung sai bao trùm mọi giá trị: hãy giảm xuống</translation>
     </message>
@@ -6175,12 +6878,12 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">Biểu thức</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="857"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="866"/>
         <source>BANDS</source>
         <translation>BĂNG</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="900"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="909"/>
         <source>Value of the active band under the cursor</source>
         <translation>Giá trị của băng đang hoạt động dưới con trỏ</translation>
     </message>
@@ -6190,7 +6893,7 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">Thống kê của băng đang hoạt động trong hình chữ nhật vẽ gần nhất trên bản đồ</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="941"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="950"/>
         <source>Every band</source>
         <translation>Mọi băng</translation>
     </message>
@@ -6200,7 +6903,7 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">Khoảng giá trị áp dụng cho mọi băng màu cùng lúc (một điểm ảnh được giữ khi mỗi băng nằm trong khoảng); biểu đồ tần suất hiển thị băng đầu tiên</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="875"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="884"/>
         <source>Display the first checked band in grey or the checked bands as a colour composite</source>
         <translation type="unfinished"></translation>
     </message>
@@ -6210,142 +6913,142 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">Ống hút so sánh băng này</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1052"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1061"/>
         <source>Colour the band holds: the spectral indexes and the chips use it. Click to change it</source>
         <translation>Màu mà băng mang: các chỉ số phổ và các ô màu dùng nó. Nhấp để thay đổi</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1062"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1071"/>
         <source>Value at the last click of the pipette</source>
         <translation>Giá trị tại lần nhấp gần nhất của ống hút</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="994"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1003"/>
         <source>No colour</source>
         <translation>Không có màu</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1002"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1011"/>
         <source>RGB</source>
         <translation>RGB</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1002"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1011"/>
         <source>Bands 1, 2, 3 are red, green, blue</source>
         <translation>Băng 1, 2, 3 là đỏ, lục, lam</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1002"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1011"/>
         <source>IRC</source>
         <translation>IRC</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1002"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1011"/>
         <source>Bands 1, 2, 3 are infrared, red, green (IGN infrared colour orthophoto)</source>
         <translation>Băng 1, 2, 3 là hồng ngoại, đỏ, lục (ảnh trực giao màu hồng ngoại IGN)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1002"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1011"/>
         <source>RGB + NIR</source>
         <translation>RGB + NIR</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1002"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1011"/>
         <source>Bands 1, 2, 3, 4 are red, green, blue, near infrared</source>
         <translation>Băng 1, 2, 3, 4 là đỏ, lục, lam, cận hồng ngoại</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1005"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1014"/>
         <source>Every band: {0}</source>
         <translation>Mọi băng: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1051"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1060"/>
         <source> Roles guessed, to confirm.</source>
         <translation> Vai trò được đoán, cần xác nhận.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1115"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1124"/>
         <source>R</source>
         <translation>R</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1115"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1124"/>
         <source>G</source>
         <translation>G</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1115"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1124"/>
         <source>B</source>
         <translation>B</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1116"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1125"/>
         <source>NIR</source>
         <translation>NIR</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1119"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1128"/>
         <source>Red</source>
         <translation>Đỏ</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1119"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1128"/>
         <source>Green</source>
         <translation>Lục</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1119"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1128"/>
         <source>Blue</source>
         <translation>Lam</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1120"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1129"/>
         <source>Near infrared</source>
         <translation>Cận hồng ngoại</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1126"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1135"/>
         <source>roles guessed, to confirm</source>
         <translation>vai trò được đoán, cần xác nhận</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1141"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1152"/>
         <source>Select</source>
         <translation>Chọn</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1145"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1156"/>
         <source>Similar pixels</source>
         <translation>Điểm ảnh tương tự</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1145"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1156"/>
         <source>Every pixel of the raster close to the picked colour or value (the pipette of the rail)</source>
         <translation>Mọi điểm ảnh của raster gần với màu hoặc giá trị đã lấy (ống hút của thanh bên)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1145"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1156"/>
         <source>Clicked object</source>
         <translation>Đối tượng đã nhấp</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1145"/>
         <source>Only the patch of such pixels the click falls in: a pool, a roof, a field (the object detector of the rail); Ctrl+click adds another object</source>
-        <translation>Chỉ mảng điểm ảnh như vậy chứa vị trí nhấp: một bể bơi, một mái nhà, một cánh đồng (bộ dò đối tượng của thanh bên); Ctrl+nhấp để thêm một đối tượng khác</translation>
+        <translation type="obsolete">Chỉ mảng điểm ảnh như vậy chứa vị trí nhấp: một bể bơi, một mái nhà, một cánh đồng (bộ dò đối tượng của thanh bên); Ctrl+nhấp để thêm một đối tượng khác</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1145"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1156"/>
         <source>Similar objects</source>
         <translation>Đối tượng tương tự</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1145"/>
         <source>Every object of the raster like the clicked one: the patches of such pixels whose area is within the ratios below (the similar objects tool of the rail); Ctrl+click adds another reference object</source>
-        <translation>Mọi đối tượng của raster giống đối tượng đã nhấp: các mảng điểm ảnh như vậy có diện tích nằm trong các tỷ lệ bên dưới (công cụ đối tượng tương tự của thanh bên); Ctrl+nhấp để thêm một đối tượng tham chiếu khác</translation>
+        <translation type="obsolete">Mọi đối tượng của raster giống đối tượng đã nhấp: các mảng điểm ảnh như vậy có diện tích nằm trong các tỷ lệ bên dưới (công cụ đối tượng tương tự của thanh bên); Ctrl+nhấp để thêm một đối tượng tham chiếu khác</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1218"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1235"/>
         <source>Area ×</source>
         <translation>Diện tích ×</translation>
     </message>
@@ -6360,72 +7063,72 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">Đối tượng tương tự lớn nhất, tính theo bội số của đối tượng lớn nhất đã nhấp</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1234"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1251"/>
         <source>to ×</source>
         <translation>đến ×</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1237"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1254"/>
         <source>same shape</source>
         <translation>cùng hình dạng</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1240"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1257"/>
         <source>Keep only the objects shaped like the clicked ones: their compactness (4π × area / perimeter², 1 for a disc) within the same ratios; off, a road of the area of a pool is a pool</source>
         <translation>Chỉ giữ các đối tượng có hình dạng giống đối tượng đã nhấp: độ gọn của chúng (4π × diện tích / chu vi², bằng 1 với hình tròn) nằm trong cùng các tỷ lệ; khi tắt, một con đường có diện tích bằng bể bơi sẽ được coi là bể bơi</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1314"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1331"/>
         <source>Remove this pick</source>
         <translation>Xóa lần lấy này</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1393"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1410"/>
         <source>Quantity</source>
         <translation>Đại lượng</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2334"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2356"/>
         <source>Quantity the range applies to. Slope, aspect, hillshade and roughness read the active band as a DTM.</source>
         <translation>Đại lượng mà khoảng giá trị áp dụng. Độ dốc, hướng dốc, bóng đổ địa hình và độ nhám đọc băng đang hoạt động như DTM.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1411"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1428"/>
         <source>Thresholds ▾</source>
         <translation>Ngưỡng ▾</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1483"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1500"/>
         <source>Insert ▾</source>
         <translation>Chèn ▾</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1483"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1500"/>
         <source>Insert a band reference, a usual spectral index or the current range</source>
         <translation>Chèn tham chiếu băng, một chỉ số phổ thông dụng hoặc khoảng giá trị hiện tại</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1512"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1529"/>
         <source>Spectral indexes</source>
         <translation>Chỉ số phổ</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1517"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1534"/>
         <source>Range</source>
         <translation>Khoảng</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1518"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1535"/>
         <source>The current value range</source>
         <translation>Khoảng giá trị hiện tại</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1629"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1646"/>
         <source>Rendered colors depend on style and scale.</source>
         <translation>Màu hiển thị phụ thuộc vào kiểu dáng và tỷ lệ.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1629"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1646"/>
         <source>Only color selection is available: numeric bands, indices, ranges, classes and derivatives are unavailable.</source>
         <translation>Chỉ có thể chọn theo màu: băng số, chỉ số, khoảng giá trị, lớp phân loại và dữ liệu dẫn xuất không khả dụng.</translation>
     </message>
@@ -6435,316 +7138,316 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">KHOẢNG GIÁ TRỊ — mọi băng</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2136"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2158"/>
         <source>VALUE RANGE — band {0}</source>
         <translation>KHOẢNG GIÁ TRỊ — băng {0}</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2330"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2352"/>
         <source>picks on: {0}</source>
         <translation>lấy từ: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2334"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2356"/>
         <source>A slope, aspect... reads one band as a DTM: choose a band in BANDS first</source>
         <translation>Độ dốc, hướng dốc... đọc một băng như DTM: hãy chọn một băng trong BĂNG trước</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2576"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2613"/>
         <source>The object could not be read</source>
         <translation>Không đọc được đối tượng</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2578"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2615"/>
         <source>No object under the click: raise the tolerance or click another pixel</source>
         <translation>Không có đối tượng dưới vị trí nhấp: hãy tăng dung sai hoặc nhấp vào điểm ảnh khác</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2580"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2617"/>
         <source>An object is larger than the window read and was cut: lower the tolerance</source>
         <translation>Một đối tượng lớn hơn cửa sổ đọc và đã bị cắt: hãy giảm dung sai</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1080"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1089"/>
         <source>Choose 1 to 3 bands for display.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1082"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1091"/>
         <source>Grey: band {0}</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="872"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="881"/>
         <source>Layer style</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="868"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="877"/>
         <source>Map display</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1084"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1093"/>
         <source>R: {0} · G: {1} · B: {2}</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="955"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="964"/>
         <source>Select band {0}</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="874"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="883"/>
         <source>Selected bands</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2412"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2452"/>
         <source>Choose at least one band in BANDS before using the pipette.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="873"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="882"/>
         <source>First checked band</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="944"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="953"/>
         <source>Select or clear every band. The histogram shows the first checked band.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="954"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="963"/>
         <source>Use this band for the pipette, value range and selected bands display</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2134"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2156"/>
         <source>VALUE RANGE — selected bands</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="907"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="916"/>
         <source>Statistics of the active band in the box of the last zone drawn on the map; only the pixels inside the zone are selected</source>
         <translation>Thống kê của băng đang hoạt động trong phạm vi của vùng cuối cùng được vẽ trên bản đồ; chỉ các pixel bên trong vùng được chọn</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1145"/>
         <source>Segment</source>
-        <translation>Phân đoạn</translation>
+        <translation type="obsolete">Phân đoạn</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1145"/>
         <source>Draw an object with the segmentation model: left click on it, right click off it, or drag a box; Enter validates. Best on buildings and other well delimited objects</source>
-        <translation>Vẽ một đối tượng bằng mô hình phân đoạn: nhấp chuột trái lên đối tượng, nhấp chuột phải ra ngoài, hoặc kéo một khung; Enter để xác nhận. Hiệu quả nhất với tòa nhà và các đối tượng có ranh giới rõ ràng khác</translation>
+        <translation type="obsolete">Vẽ một đối tượng bằng mô hình phân đoạn: nhấp chuột trái lên đối tượng, nhấp chuột phải ra ngoài, hoặc kéo một khung; Enter để xác nhận. Hiệu quả nhất với tòa nhà và các đối tượng có ranh giới rõ ràng khác</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1185"/>
         <source>Download the SAM 2.1 tiny model once, into your QGIS profile; the segmentation then runs locally, on the CPU</source>
-        <translation>Tải mô hình SAM 2.1 tiny một lần vào hồ sơ QGIS của bạn; sau đó việc phân đoạn chạy cục bộ, trên CPU</translation>
+        <translation type="obsolete">Tải mô hình SAM 2.1 tiny một lần vào hồ sơ QGIS của bạn; sau đó việc phân đoạn chạy cục bộ, trên CPU</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1194"/>
         <source>Validate object</source>
-        <translation>Xác nhận đối tượng</translation>
+        <translation type="obsolete">Xác nhận đối tượng</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1196"/>
         <source>Add the object drawn to the selection (Enter on the map)</source>
-        <translation>Thêm đối tượng đã vẽ vào vùng chọn (Enter trên bản đồ)</translation>
+        <translation type="obsolete">Thêm đối tượng đã vẽ vào vùng chọn (Enter trên bản đồ)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2740"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2892"/>
         <source>Clear</source>
         <translation>Xóa</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1201"/>
         <source>Forget the validated objects</source>
-        <translation>Quên các đối tượng đã xác nhận</translation>
+        <translation type="obsolete">Quên các đối tượng đã xác nhận</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1221"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1238"/>
         <source>Smallest similar object, as a share of each clicked reference</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1221"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1238"/>
         <source>Largest similar object, as a multiple of each clicked reference</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1253"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1270"/>
         <source>Separation</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1256"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1273"/>
         <source>Connected pixels</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1258"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1275"/>
         <source>Bridge removal: {0} px</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1260"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1277"/>
         <source>Separate objects joined by narrow bridges; higher values cut wider bridges</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1263"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1280"/>
         <source>Fill holes</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1266"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1283"/>
         <source>Fill enclosed gaps in the clicked object; clear to preserve courtyards and inner rings</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1408"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1425"/>
         <source>Custom expression</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1418"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1435"/>
         <source>Numeric raster formula, e.g. (&quot;raster@4&quot; - &quot;raster@1&quot;) / (&quot;raster@4&quot; + &quot;raster@1&quot;)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1419"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1436"/>
         <source>Custom derived value expression</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1420"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1437"/>
         <source>A numeric raster calculator expression. The histogram and thresholds use its computed values.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1478"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1495"/>
         <source>Computed expression values. Drag the handles to use this expression as a derived value with thresholds.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1487"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1504"/>
         <source>Use as derived value</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1696"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1713"/>
         <source>Computing histogram…</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2153"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2175"/>
         <source>No histogram available</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2153"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2175"/>
         <source>Constant value: {0}</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2153"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2175"/>
         <source>{0} sampled pixels · {1} to {2}</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2287"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2309"/>
         <source>Distribution (approximate)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2289"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2311"/>
         <source>Central 98% (P1–P99)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2289"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2311"/>
         <source>Central 90% (P5–P95)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2289"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2311"/>
         <source>Interquartile range (P25–P75)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2289"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2311"/>
         <source>Upper quartile (≥ P75)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2296"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2318"/>
         <source>All values</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2300"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2322"/>
         <source>Derived spectral values</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2646"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2739"/>
         <source>Installing onnxruntime in the background…</source>
         <translation>Đang cài đặt onnxruntime ở nền…</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2648"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2743"/>
         <source>onnxruntime could not be installed automatically (see the FilterMate log). In a terminal (the OSGeo4W Shell on Windows), run {0} then restart QGIS.</source>
         <translation>Không thể tự động cài đặt onnxruntime (xem nhật ký FilterMate). Trong một terminal (OSGeo4W Shell trên Windows), hãy chạy {0} rồi khởi động lại QGIS.</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2660"/>
         <source>Install the model ({0} MB)…</source>
-        <translation>Cài đặt mô hình ({0} MB)…</translation>
+        <translation type="obsolete">Cài đặt mô hình ({0} MB)…</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2666"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2769"/>
         <source>Repair the model…</source>
         <translation>Sửa chữa mô hình…</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2691"/>
         <source>Segmentation model</source>
-        <translation>Mô hình phân đoạn</translation>
+        <translation type="obsolete">Mô hình phân đoạn</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2691"/>
         <source>Download the SAM 2.1 tiny model ({0} MB) from huggingface.co/{1} into your QGIS profile?
 
 Every file is checked against its SHA-256. The model then runs locally, on the CPU; nothing leaves your computer.</source>
-        <translation>Tải mô hình SAM 2.1 tiny ({0} MB) từ huggingface.co/{1} vào hồ sơ QGIS của bạn?
+        <translation type="obsolete">Tải mô hình SAM 2.1 tiny ({0} MB) từ huggingface.co/{1} vào hồ sơ QGIS của bạn?
 
 Mỗi tệp được kiểm tra với SHA-256 của nó. Sau đó mô hình chạy cục bộ, trên CPU; không có gì rời khỏi máy tính của bạn.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2740"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2892"/>
         <source>Clear ({0})</source>
         <translation>Xóa ({0})</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2780"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2932"/>
         <source>Derived value: {0}</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2652"/>
         <source>The segmentation needs onnxruntime (about {0} MB), which is not installed yet.</source>
-        <translation>Phân đoạn cần onnxruntime (khoảng {0} MB), hiện chưa được cài đặt.</translation>
+        <translation type="obsolete">Phân đoạn cần onnxruntime (khoảng {0} MB), hiện chưa được cài đặt.</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2656"/>
         <source>Install onnxruntime…</source>
-        <translation>Cài đặt onnxruntime…</translation>
+        <translation type="obsolete">Cài đặt onnxruntime…</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2675"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2779"/>
         <source>Segmentation</source>
         <translation>Phân đoạn</translation>
     </message>
@@ -6753,9 +7456,68 @@ Mỗi tệp được kiểm tra với SHA-256 của nó. Sau đó mô hình ch�
         <source>The segmentation needs onnxruntime (about {0} MB), which this QGIS does not have.
 
 Install it now from PyPI with pip, into your QGIS profile? The Python of QGIS is not modified.</source>
-        <translation>Phân đoạn cần onnxruntime (khoảng {0} MB), mà QGIS này không có.
+        <translation type="obsolete">Phân đoạn cần onnxruntime (khoảng {0} MB), mà QGIS này không có.
 
 Cài đặt ngay từ PyPI bằng pip vào hồ sơ QGIS của bạn? Python của QGIS không bị sửa đổi.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1156"/>
+        <source>The object under the click: a roof, a pool, a field (the object detector of the rail). With SAM: a click adds an object, Shift+click extends the last one, a right click trims it, a box frames one, Escape removes it. With the colour engine: the patch of such pixels, Ctrl+click adds another one</source>
+        <translation>Đối tượng dưới vị trí nhấp: một mái nhà, một bể bơi, một cánh đồng (bộ phát hiện đối tượng của thanh công cụ). Với SAM: nhấp để thêm một đối tượng, Shift+nhấp mở rộng đối tượng cuối, nhấp chuột phải thu nhỏ nó, một khung bao quanh một đối tượng, Esc gỡ nó. Với bộ máy màu: vùng điểm ảnh tương tự, Ctrl+nhấp thêm một vùng khác</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1156"/>
+        <source>Every object like the clicked one, whose area is within the ratios below (the similar objects tool of the rail). With SAM: the patches of a similar colour in the visible area are redrawn by the model, then compared with the clicked object. With the colour engine: the patches of such pixels</source>
+        <translation>Mọi đối tượng giống đối tượng đã nhấp, có diện tích nằm trong các tỷ lệ bên dưới (công cụ đối tượng tương tự của thanh công cụ). Với SAM: các vùng có màu gần giống trong khu vực hiển thị được mô hình vẽ lại, rồi so sánh với đối tượng đã nhấp. Với bộ máy màu: các vùng điểm ảnh tương tự</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1185"/>
+        <source>Engine</source>
+        <translation>Bộ máy</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1189"/>
+        <source>Colour</source>
+        <translation>Màu</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1190"/>
+        <source>SAM draws the object from the image, locally on the CPU; the colour engine grows the patch of pixels of the clicked colour</source>
+        <translation>SAM vẽ đối tượng từ hình ảnh, cục bộ trên CPU; bộ máy màu mở rộng vùng điểm ảnh có màu đã nhấp</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1207"/>
+        <source>Install SAM 2.1 tiny once, into your QGIS profile; it then runs locally, on the CPU</source>
+        <translation>Cài SAM 2.1 tiny một lần, vào hồ sơ QGIS của bạn; sau đó nó chạy cục bộ trên CPU</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1218"/>
+        <source>Forget the objects drawn by SAM</source>
+        <translation>Bỏ các đối tượng do SAM vẽ</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2741"/>
+        <source>Downloading the SAM model in the background…</source>
+        <translation>Đang tải mô hình SAM ở nền…</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2747"/>
+        <source>Objects are found by their colour. SAM draws them from the image, far better on buildings (about {0} MB to install).</source>
+        <translation>Đối tượng được tìm theo màu. SAM vẽ chúng từ hình ảnh, tốt hơn nhiều với các tòa nhà (cần cài khoảng {0} MB).</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2751"/>
+        <source>Install SAM ({0} MB)…</source>
+        <translation>Cài SAM ({0} MB)…</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2779"/>
+        <source>Clicked and similar objects can be drawn by the SAM 2.1 segmentation model, locally on the CPU. Install it now (about {0} MB)?
+
+onnxruntime comes from PyPI with pip, the model from huggingface.co/{1}, each file checked against its SHA-256. Both go to your QGIS profile; the Python of QGIS is not modified and nothing leaves your computer. Without SAM, objects are found by their colour.</source>
+        <translation>Các đối tượng đã nhấp và tương tự có thể được vẽ bằng mô hình phân đoạn SAM 2.1, cục bộ trên CPU. Cài đặt ngay bây giờ (khoảng {0} MB)?
+
+onnxruntime đến từ PyPI qua pip, mô hình từ huggingface.co/{1}, mỗi tệp được kiểm tra bằng SHA-256. Cả hai được lưu vào hồ sơ QGIS của bạn; Python của QGIS không bị thay đổi và không có gì rời khỏi máy tính của bạn. Không có SAM, đối tượng được tìm theo màu.</translation>
     </message>
 </context>
 <context>
@@ -7027,125 +7789,200 @@ Cài đặt ngay từ PyPI bằng pip vào hồ sơ QGIS của bạn? Python c�
 <context>
     <name>SegmentationController</name>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="106"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="147"/>
         <source>This point cannot be used on this layer</source>
         <translation>Không thể dùng điểm này trên lớp này</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="134"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="199"/>
         <source>Click inside the raster</source>
         <translation>Nhấp vào bên trong raster</translation>
     </message>
     <message>
         <location filename="../ui/controllers/segmentation_controller.py" line="141"/>
         <source>This point is outside the window being segmented: validate or clear the object first</source>
-        <translation>Điểm này nằm ngoài cửa sổ đang được phân đoạn: hãy xác nhận hoặc xóa đối tượng trước</translation>
+        <translation type="obsolete">Điểm này nằm ngoài cửa sổ đang được phân đoạn: hãy xác nhận hoặc xóa đối tượng trước</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="164"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="231"/>
         <source>This box is too small</source>
         <translation>Khung này quá nhỏ</translation>
     </message>
     <message>
         <location filename="../ui/controllers/segmentation_controller.py" line="149"/>
         <source>Start with a left click on the object, or draw a box</source>
-        <translation>Bắt đầu bằng một cú nhấp chuột trái lên đối tượng, hoặc vẽ một khung</translation>
+        <translation type="obsolete">Bắt đầu bằng một cú nhấp chuột trái lên đối tượng, hoặc vẽ một khung</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="160"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="224"/>
         <source>This raster cannot be segmented</source>
         <translation>Không thể phân đoạn raster này</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="211"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="317"/>
         <source>Preparing the segmentation of this area…</source>
         <translation>Đang chuẩn bị phân đoạn khu vực này…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="370"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="430"/>
         <source>The segmentation of this area failed: {0}</source>
         <translation>Phân đoạn khu vực này thất bại: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="222"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="328"/>
         <source>canceled</source>
         <translation>đã hủy</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="247"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="363"/>
         <source>onnxruntime is being installed, click again in a moment</source>
         <translation>onnxruntime đang được cài đặt, hãy nhấp lại sau giây lát</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="249"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="365"/>
         <source>onnxruntime is missing: run {0}, then restart QGIS</source>
         <translation>Thiếu onnxruntime: hãy chạy {0}, sau đó khởi động lại QGIS</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="253"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="369"/>
         <source>The segmentation model is being downloaded, click again once it is installed</source>
         <translation>Mô hình phân đoạn đang được tải xuống, hãy nhấp lại khi đã cài đặt xong</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="255"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="371"/>
         <source>Install the segmentation model first (button below)</source>
         <translation>Hãy cài đặt mô hình phân đoạn trước (nút bên dưới)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="256"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="372"/>
         <source>The segmentation model could not be loaded (see the FilterMate log)</source>
         <translation>Không thể tải mô hình phân đoạn (xem nhật ký FilterMate)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="276"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="393"/>
         <source>Downloading the segmentation model… {0} %</source>
         <translation>Đang tải xuống mô hình phân đoạn… {0} %</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="285"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="402"/>
         <source>Model installed: left click on an object, or draw a box</source>
         <translation>Đã cài đặt mô hình: nhấp chuột trái lên một đối tượng, hoặc vẽ một khung</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="287"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="404"/>
         <source>The model could not be downloaded: {0}</source>
         <translation>Không thể tải xuống mô hình: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="289"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="406"/>
         <source>Download canceled</source>
         <translation>Đã hủy tải xuống</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="307"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="422"/>
         <source>Click on an object in the area prepared</source>
         <translation>Nhấp vào một đối tượng trong khu vực đã chuẩn bị</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="373"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="439"/>
         <source>No object found: add a point or draw a box</source>
         <translation>Không tìm thấy đối tượng: hãy thêm một điểm hoặc vẽ một khung</translation>
     </message>
     <message>
         <location filename="../ui/controllers/segmentation_controller.py" line="324"/>
         <source>Left click adds to the object, right click removes, Enter validates</source>
-        <translation>Nhấp chuột trái để thêm vào đối tượng, nhấp chuột phải để loại bỏ, Enter để xác nhận</translation>
+        <translation type="obsolete">Nhấp chuột trái để thêm vào đối tượng, nhấp chuột phải để loại bỏ, Enter để xác nhận</translation>
     </message>
     <message>
         <location filename="../ui/controllers/segmentation_controller.py" line="364"/>
         <source>Click an object first</source>
-        <translation>Hãy nhấp vào một đối tượng trước</translation>
+        <translation type="obsolete">Hãy nhấp vào một đối tượng trước</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="251"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="367"/>
         <source>Install onnxruntime first, with the button below</source>
         <translation>Hãy cài đặt onnxruntime trước bằng nút bên dưới</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="91"/>
+        <source>Click an object, or draw a box around it</source>
+        <translation>Nhấp vào một đối tượng, hoặc vẽ một khung quanh nó</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="166"/>
+        <source>A right click trims the last object: click an object first</source>
+        <translation>Nhấp chuột phải sẽ thu nhỏ đối tượng cuối: hãy nhấp vào một đối tượng trước</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="206"/>
+        <source>This point is outside the area of the last object: click it as a new object</source>
+        <translation>Điểm này nằm ngoài vùng của đối tượng cuối: hãy nhấp vào nó như một đối tượng mới</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="349"/>
+        <source>{0} click(s) fell outside the area prepared: click them again</source>
+        <translation>{0} lần nhấp nằm ngoài vùng đã chuẩn bị: hãy nhấp lại</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="466"/>
+        <source>Shift+click extends the object, right click trims it, Escape removes it</source>
+        <translation>Shift+nhấp mở rộng đối tượng, nhấp chuột phải thu nhỏ, Esc gỡ bỏ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="502"/>
+        <source>Similar objects need the values of the raster: this layer is only drawn</source>
+        <translation>Đối tượng tương tự cần giá trị của raster: lớp này chỉ được vẽ ra</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="510"/>
+        <source>No patch of this colour nearby to compare with the object</source>
+        <translation>Không có vùng nào cùng màu này ở gần để so sánh với đối tượng</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="524"/>
+        <source>Drawing the similar objects: {0} candidates…</source>
+        <translation>Đang vẽ các đối tượng tương tự: {0} ứng viên…</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="535"/>
+        <source>Drawing the similar objects… {0} %</source>
+        <translation>Đang vẽ các đối tượng tương tự… {0} %</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="549"/>
+        <source>The similar objects could not be drawn: {0}</source>
+        <translation>Không thể vẽ các đối tượng tương tự: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="559"/>
+        <source>{0} similar objects found among {1} candidates; Escape removes them</source>
+        <translation>Tìm thấy {0} đối tượng tương tự trong {1} ứng viên; Esc gỡ bỏ chúng</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="596"/>
+        <source>Click the next object</source>
+        <translation>Nhấp vào đối tượng tiếp theo</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="603"/>
+        <source>Search stopped</source>
+        <translation>Đã dừng tìm kiếm</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="603"/>
+        <source>Click canceled</source>
+        <translation>Đã hủy nhấp</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="611"/>
+        <source>Last object removed</source>
+        <translation>Đã gỡ đối tượng cuối</translation>
     </message>
 </context>
 <context>
     <name>SegmentationEmbedTask</name>
     <message>
-        <location filename="../adapters/qgis/coverage_layers/segmentation.py" line="238"/>
+        <location filename="../adapters/qgis/coverage_layers/segmentation.py" line="400"/>
         <source>FilterMate: preparing the segmentation</source>
         <translation>FilterMate: đang chuẩn bị phân đoạn</translation>
     </message>
@@ -7441,6 +8278,14 @@ Cài đặt ngay từ PyPI bằng pip vào hồ sơ QGIS của bạn? Python c�
     </message>
 </context>
 <context>
+    <name>SimilarObjectsTask</name>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/segmentation.py" line="469"/>
+        <source>FilterMate: drawing the similar objects</source>
+        <translation>FilterMate: đang vẽ các đối tượng tương tự</translation>
+    </message>
+</context>
+<context>
     <name>SimpleConfigDialog</name>
     <message>
         <location filename="../ui/dialogs/config_editor_widget.py" line="470"/>
@@ -7475,12 +8320,12 @@ Cài đặt ngay từ PyPI bằng pip vào hồ sơ QGIS của bạn? Python c�
 <context>
     <name>SqlUtils</name>
     <message>
-        <location filename="../infrastructure/database/sql_utils.py" line="273"/>
+        <location filename="../infrastructure/database/sql_utils.py" line="243"/>
         <source>FilterMate - PostgreSQL Type Warning</source>
         <translation>FilterMate - Canh bao kieu PostgreSQL</translation>
     </message>
     <message>
-        <location filename="../infrastructure/database/sql_utils.py" line="277"/>
+        <location filename="../infrastructure/database/sql_utils.py" line="247"/>
         <source>Type mismatch in filter: {warning_detail}...</source>
         <translation>Khong khop kieu trong bo loc: {warning_detail}...</translation>
     </message>
@@ -7756,576 +8601,6 @@ Cài đặt ngay từ PyPI bằng pip vào hồ sơ QGIS của bạn? Python c�
         <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
         <source>Kept points</source>
         <translation type="obsolete">Điểm được giữ lại</translation>
-    </message>
-</context>
-<context>
-    <name>AgentPanel</name>
-    <message>
-        <source>(no request)</source>
-        <translation>(không có yêu cầu)</translation>
-    </message>
-    <message>
-        <source>A few free requests a month, through the relay of FilterMate to Claude (Anthropic), under the terms of Anthropic. The relay counts what is spent and keeps no conversation. When it is used up, choose a provider and enter your own API key.</source>
-        <translation>Một vài yêu cầu miễn phí mỗi tháng, qua máy chuyển tiếp của FilterMate đến Claude (Anthropic), theo điều khoản của Anthropic. Máy chuyển tiếp chỉ đếm mức đã dùng và không lưu cuộc trò chuyện nào. Khi hết hạn mức, hãy chọn nhà cung cấp và nhập khóa API riêng của bạn.</translation>
-    </message>
-    <message>
-        <source>API key</source>
-        <translation>Khóa API</translation>
-    </message>
-    <message>
-        <source>Add</source>
-        <translation>Thêm</translation>
-    </message>
-    <message>
-        <source>Address</source>
-        <translation>Địa chỉ</translation>
-    </message>
-    <message>
-        <source>Agent settings</source>
-        <translation>Cài đặt tác tử</translation>
-    </message>
-    <message>
-        <source>Allow attribute values to be sent</source>
-        <translation>Cho phép gửi giá trị thuộc tính</translation>
-    </message>
-    <message>
-        <source>Applications already set up will have to be set up again.</source>
-        <translation>Các ứng dụng đã thiết lập sẽ phải thiết lập lại.</translation>
-    </message>
-    <message>
-        <source>Ask the agent to filter your layers</source>
-        <translation>Nhờ tác tử lọc các lớp của bạn</translation>
-    </message>
-    <message>
-        <source>Back to the conversation</source>
-        <translation>Quay lại cuộc trò chuyện</translation>
-    </message>
-    <message>
-        <source>Claude Code or another MCP client on this computer can then filter your layers, once FilterMate has been opened, under the rules of this panel: the same sources, the same confirmations, and filters can be undone here. That application sends what it reads to its own AI provider.</source>
-        <translation>Claude Code hoặc một ứng dụng khách MCP khác trên máy tính này khi đó có thể lọc các lớp của bạn, sau khi FilterMate đã mở, theo quy tắc của bảng này: cùng nguồn, cùng xác nhận, và bộ lọc có thể được hoàn tác tại đây. Ứng dụng đó gửi những gì nó đọc được đến nhà cung cấp AI của riêng nó.</translation>
-    </message>
-    <message>
-        <source>Connect an AI provider to start. Nothing is sent before you agree.</source>
-        <translation>Hãy kết nối một nhà cung cấp AI để bắt đầu. Không có gì được gửi đi khi bạn chưa đồng ý.</translation>
-    </message>
-    <message>
-        <source>Copied, with the access token: keep it to yourself. Save these settings for it to apply.</source>
-        <translation>Đã sao chép, kèm mã thông báo truy cập: hãy giữ kín. Hãy lưu các cài đặt này để áp dụng.</translation>
-    </message>
-    <message>
-        <source>Copy for Claude Desktop</source>
-        <translation>Sao chép cho Claude Desktop</translation>
-    </message>
-    <message>
-        <source>Copy the Claude Code command</source>
-        <translation>Sao chép lệnh Claude Code</translation>
-    </message>
-    <message>
-        <source>Copy the configuration</source>
-        <translation>Sao chép cấu hình</translation>
-    </message>
-    <message>
-        <source>Describe it in your own words. Each filter can be undone.</source>
-        <translation>Hãy mô tả bằng lời của bạn. Mỗi bộ lọc đều có thể hoàn tác.</translation>
-    </message>
-    <message>
-        <source>Filter your layers from a sentence</source>
-        <translation>Lọc các lớp của bạn chỉ bằng một câu</translation>
-    </message>
-    <message>
-        <source>FilterMate agent</source>
-        <translation>Tác tử FilterMate</translation>
-    </message>
-    <message>
-        <source>History</source>
-        <translation>Lịch sử</translation>
-    </message>
-    <message>
-        <source>History…</source>
-        <translation>Lịch sử…</translation>
-    </message>
-    <message>
-        <source>I agree to send this data to this provider</source>
-        <translation>Tôi đồng ý gửi dữ liệu này đến nhà cung cấp này</translation>
-    </message>
-    <message>
-        <source>Let other applications on this computer drive FilterMate (MCP server)</source>
-        <translation>Cho phép các ứng dụng khác trên máy tính này điều khiển FilterMate (máy chủ MCP)</translation>
-    </message>
-    <message>
-        <source>MCP connector</source>
-        <translation>Trình kết nối MCP</translation>
-    </message>
-    <message>
-        <source>MCP connectors</source>
-        <translation>Các trình kết nối MCP</translation>
-    </message>
-    <message>
-        <source>Model</source>
-        <translation>Mô hình</translation>
-    </message>
-    <message>
-        <source>More</source>
-        <translation>Xem thêm</translation>
-    </message>
-    <message>
-        <source>New access token</source>
-        <translation>Mã thông báo truy cập mới</translation>
-    </message>
-    <message>
-        <source>New conversation</source>
-        <translation>Cuộc trò chuyện mới</translation>
-    </message>
-    <message>
-        <source>New token: it applies once these settings are saved.</source>
-        <translation>Mã thông báo mới: có hiệu lực sau khi lưu các cài đặt này.</translation>
-    </message>
-    <message>
-        <source>Open data platforms</source>
-        <translation>Nền tảng dữ liệu mở</translation>
-    </message>
-    <message>
-        <source>Open the settings</source>
-        <translation>Mở cài đặt</translation>
-    </message>
-    <message>
-        <source>Other applications</source>
-        <translation>Ứng dụng khác</translation>
-    </message>
-    <message>
-        <source>Port</source>
-        <translation>Cổng</translation>
-    </message>
-    <message>
-        <source>Provider</source>
-        <translation>Nhà cung cấp</translation>
-    </message>
-    <message>
-        <source>Redo</source>
-        <translation>Làm lại</translation>
-    </message>
-    <message>
-        <source>Remove</source>
-        <translation>Gỡ bỏ</translation>
-    </message>
-    <message>
-        <source>Remove the stored key</source>
-        <translation>Xóa khóa đã lưu</translation>
-    </message>
-    <message>
-        <source>Satellite imagery</source>
-        <translation>Ảnh vệ tinh</translation>
-    </message>
-    <message>
-        <source>Send (Enter)</source>
-        <translation>Gửi (Enter)</translation>
-    </message>
-    <message>
-        <source>Send again</source>
-        <translation>Gửi lại</translation>
-    </message>
-    <message>
-        <source>Sent to: {}</source>
-        <translation>Đã gửi đến: {}</translation>
-    </message>
-    <message>
-        <source>Set up the agent</source>
-        <translation>Thiết lập tác tử</translation>
-    </message>
-    <message>
-        <source>Sources</source>
-        <translation>Nguồn</translation>
-    </message>
-    <message>
-        <source>Stop (Esc)</source>
-        <translation>Dừng (Esc)</translation>
-    </message>
-    <message>
-        <source>Stored: leave empty to keep it</source>
-        <translation>Đã lưu: để trống để giữ nguyên</translation>
-    </message>
-    <message>
-        <source>Test</source>
-        <translation>Kiểm tra</translation>
-    </message>
-    <message>
-        <source>Testing…</source>
-        <translation>Đang kiểm tra…</translation>
-    </message>
-    <message>
-        <source>The MCP server could not start: {}</source>
-        <translation>Không thể khởi động máy chủ MCP: {}</translation>
-    </message>
-    <message>
-        <source>The agent can search the sources ticked here. Your searches, and what the agent passes to a connector, are sent to them; a layer added from them is read from their servers.</source>
-        <translation>Tác tử có thể tìm kiếm trong các nguồn được đánh dấu ở đây. Các tìm kiếm của bạn, và những gì tác tử chuyển cho một trình kết nối, sẽ được gửi đến các nguồn đó; lớp được thêm từ chúng được đọc từ máy chủ của chúng.</translation>
-    </message>
-    <message>
-        <source>The agent sends your request, the names of your layers and fields, your filter expressions and the results of its tools to the provider chosen here, under that provider's terms. Without the option below, the agent does not read the values of your fields; values already written in your filters and favorites are still sent. The conversation is kept on this computer for each project, until you start a new one.</source>
-        <translation>Tác tử gửi yêu cầu của bạn, tên các lớp và trường, biểu thức bộ lọc cùng kết quả của các công cụ đến nhà cung cấp được chọn ở đây, theo điều khoản của nhà cung cấp đó. Nếu không bật tùy chọn bên dưới, tác tử không đọc giá trị của các trường; những giá trị đã có trong bộ lọc và mục yêu thích của bạn vẫn được gửi. Cuộc trò chuyện được lưu trên máy tính này theo từng dự án, cho đến khi bạn bắt đầu cuộc mới.</translation>
-    </message>
-    <message>
-        <source>Through mcp-remote, which needs Node.js: Claude Desktop starts local servers as programs.</source>
-        <translation>Qua mcp-remote, cần Node.js: Claude Desktop khởi chạy các máy chủ cục bộ như chương trình.</translation>
-    </message>
-    <message>
-        <source>Too many sources added: remove one first.</source>
-        <translation>Đã thêm quá nhiều nguồn: hãy gỡ bớt một nguồn trước.</translation>
-    </message>
-    <message>
-        <source>Undo the last</source>
-        <translation>Hoàn tác mục gần nhất</translation>
-    </message>
-    <message>
-        <source>Undo this turn</source>
-        <translation>Hoàn tác lượt này</translation>
-    </message>
-    <message>
-        <source>What do you want to filter?</source>
-        <translation>Bạn muốn lọc gì?</translation>
-    </message>
-    <message>
-        <source>added by you</source>
-        <translation>do bạn thêm</translation>
-    </message>
-    <message>
-        <source>applied</source>
-        <translation>đã áp dụng</translation>
-    </message>
-    <message>
-        <source>community</source>
-        <translation>cộng đồng</translation>
-    </message>
-    <message>
-        <source>https://... or a portal address</source>
-        <translation>https://... hoặc địa chỉ cổng thông tin</translation>
-    </message>
-    <message>
-        <source>no change</source>
-        <translation>không thay đổi</translation>
-    </message>
-    <message>
-        <source>official</source>
-        <translation>chính thức</translation>
-    </message>
-    <message>
-        <source>this computer</source>
-        <translation>máy tính này</translation>
-    </message>
-    <message>
-        <source>undone</source>
-        <translation>đã hoàn tác</translation>
-    </message>
-    <message>
-        <source>{} turn(s)</source>
-        <translation>{} lượt</translation>
-    </message>
-    <message>
-        <source>Which layers are in this project?</source>
-        <translation>Dự án này có những lớp nào?</translation>
-    </message>
-    <message>
-        <source>Keep the buildings taller than 15 m</source>
-        <translation>Giữ lại các tòa nhà cao hơn 15 m</translation>
-    </message>
-    <message>
-        <source>Filter the roads inside the selected feature</source>
-        <translation>Lọc các con đường nằm trong đối tượng đã chọn</translation>
-    </message>
-</context>
-<context>
-    <name>AgentChat</name>
-    <message>
-        <source>Access to the free quota was renewed: send your request again.</source>
-        <translation>Quyền truy cập hạn mức miễn phí đã được gia hạn: hãy gửi lại yêu cầu của bạn.</translation>
-    </message>
-    <message>
-        <source>Another application is changing the project: try again in a moment.</source>
-        <translation>Một ứng dụng khác đang thay đổi dự án: hãy thử lại sau giây lát.</translation>
-    </message>
-    <message>
-        <source>Another application: {}</source>
-        <translation>Ứng dụng khác: {}</translation>
-    </message>
-    <message>
-        <source>Applied again: {}.</source>
-        <translation>Đã áp dụng lại: {}.</translation>
-    </message>
-    <message>
-        <source>Changed since, left as is: {}.</source>
-        <translation>Đã thay đổi từ đó, giữ nguyên: {}.</translation>
-    </message>
-    <message>
-        <source>Changed: {}.</source>
-        <translation>Đã thay đổi: {}.</translation>
-    </message>
-    <message>
-        <source>Choose a model and agree to send your data to use the agent.</source>
-        <translation>Hãy chọn một mô hình và đồng ý gửi dữ liệu của bạn để dùng tác tử.</translation>
-    </message>
-    <message>
-        <source>Connecting to {}…</source>
-        <translation>Đang kết nối với {}…</translation>
-    </message>
-    <message>
-        <source>Earlier conversation: the agent starts afresh from here.</source>
-        <translation>Cuộc trò chuyện trước: tác tử bắt đầu lại từ đây.</translation>
-    </message>
-    <message>
-        <source>Enter your API key in the agent settings.</source>
-        <translation>Hãy nhập khóa API của bạn trong cài đặt tác tử.</translation>
-    </message>
-    <message>
-        <source>Export of {}</source>
-        <translation>Xuất {}</translation>
-    </message>
-    <message>
-        <source>Favorite applied</source>
-        <translation>Đã áp dụng mục yêu thích</translation>
-    </message>
-    <message>
-        <source>Filter on the points of {}</source>
-        <translation>Lọc theo các điểm của {}</translation>
-    </message>
-    <message>
-        <source>Filter on {}</source>
-        <translation>Lọc {}</translation>
-    </message>
-    <message>
-        <source>Filter on {} by an area</source>
-        <translation>Lọc {} theo một vùng</translation>
-    </message>
-    <message>
-        <source>Filter on {} by {}</source>
-        <translation>Lọc {} theo {}</translation>
-    </message>
-    <message>
-        <source>FilterMate agent</source>
-        <translation>Tác tử FilterMate</translation>
-    </message>
-    <message>
-        <source>Filters removed from {}</source>
-        <translation>Đã gỡ bộ lọc khỏi {}</translation>
-    </message>
-    <message>
-        <source>Hidden: {}</source>
-        <translation>Đã ẩn: {}</translation>
-    </message>
-    <message>
-        <source>It answers.</source>
-        <translation>Nguồn có phản hồi.</translation>
-    </message>
-    <message>
-        <source>Layer added: {}</source>
-        <translation>Đã thêm lớp: {}</translation>
-    </message>
-    <message>
-        <source>Layers removed: {}</source>
-        <translation>Đã gỡ các lớp: {}</translation>
-    </message>
-    <message>
-        <source>Not reachable for this conversation: {}</source>
-        <translation>Không truy cập được trong cuộc trò chuyện này: {}</translation>
-    </message>
-    <message>
-        <source>Nothing to redo.</source>
-        <translation>Không có gì để làm lại.</translation>
-    </message>
-    <message>
-        <source>Nothing to restore.</source>
-        <translation>Không có gì để khôi phục.</translation>
-    </message>
-    <message>
-        <source>Reading the active filters</source>
-        <translation>Đang đọc các bộ lọc đang hoạt động</translation>
-    </message>
-    <message>
-        <source>Reading the favorites</source>
-        <translation>Đang đọc các mục yêu thích</translation>
-    </message>
-    <message>
-        <source>Reading the fields of {}</source>
-        <translation>Đang đọc các trường của {}</translation>
-    </message>
-    <message>
-        <source>Reading the layers</source>
-        <translation>Đang đọc các lớp</translation>
-    </message>
-    <message>
-        <source>Reading the map</source>
-        <translation>Đang đọc bản đồ</translation>
-    </message>
-    <message>
-        <source>Reading the values of {}</source>
-        <translation>Đang đọc các giá trị của {}</translation>
-    </message>
-    <message>
-        <source>Restored: {}.</source>
-        <translation>Đã khôi phục: {}.</translation>
-    </message>
-    <message>
-        <source>Searching satellite imagery on {}</source>
-        <translation>Đang tìm ảnh vệ tinh trên {}</translation>
-    </message>
-    <message>
-        <source>Searching {} for {}</source>
-        <translation>Đang tìm kiếm trên {}: {}</translation>
-    </message>
-    <message>
-        <source>Selection cleared on {}</source>
-        <translation>Đã bỏ chọn trên {}</translation>
-    </message>
-    <message>
-        <source>Selection on {}</source>
-        <translation>Vùng chọn trên {}</translation>
-    </message>
-    <message>
-        <source>Shown: {}</source>
-        <translation>Đã hiển thị: {}</translation>
-    </message>
-    <message>
-        <source>Stopped.</source>
-        <translation>Đã dừng.</translation>
-    </message>
-    <message>
-        <source>The MCP server could not start: {}</source>
-        <translation>Không thể khởi động máy chủ MCP: {}</translation>
-    </message>
-    <message>
-        <source>The QGIS authentication database is not available.</source>
-        <translation>Cơ sở dữ liệu xác thực của QGIS không khả dụng.</translation>
-    </message>
-    <message>
-        <source>The QGIS master password is needed to use the stored key.</source>
-        <translation>Cần mật khẩu chính của QGIS để dùng khóa đã lưu.</translation>
-    </message>
-    <message>
-        <source>The agent stopped before the end ({}).</source>
-        <translation>Tác tử đã dừng trước khi kết thúc ({}).</translation>
-    </message>
-    <message>
-        <source>The agent wants to add this layer of a web service to the project:
-{} · {}
-
-Do you agree?</source>
-        <translation>Tác tử muốn thêm lớp này của một dịch vụ web vào dự án:
-{} · {}
-
-Bạn có đồng ý không?</translation>
-    </message>
-    <message>
-        <source>The agent wants to add this layer to the project:
-{}
-
-A remote source is read from its server by QGIS, and what the layer holds can be sent to the provider of the agent. Do you agree?</source>
-        <translation>Tác tử muốn thêm lớp này vào dự án:
-{}
-
-QGIS đọc nguồn từ xa từ máy chủ của nó, và nội dung của lớp có thể được gửi đến nhà cung cấp của tác tử. Bạn có đồng ý không?</translation>
-    </message>
-    <message>
-        <source>The agent wants to export these layers to files:
-{}
-
-Do you agree?</source>
-        <translation>Tác tử muốn xuất các lớp này ra tệp:
-{}
-
-Bạn có đồng ý không?</translation>
-    </message>
-    <message>
-        <source>The agent wants to remove these layers from the project (their files stay, their styles and filters here are lost):
-{}
-
-Do you agree?</source>
-        <translation>Tác tử muốn gỡ các lớp này khỏi dự án (tệp của chúng được giữ lại, kiểu và bộ lọc ở đây sẽ mất):
-{}
-
-Bạn có đồng ý không?</translation>
-    </message>
-    <message>
-        <source>The agent wants to run this action on an external connector:
-{}
-{}
-
-Do you agree?</source>
-        <translation>Tác tử muốn chạy thao tác này trên một trình kết nối bên ngoài:
-{}
-{}
-
-Bạn có đồng ý không?</translation>
-    </message>
-    <message>
-        <source>The credit or quota of this account is used up.</source>
-        <translation>Tín dụng hoặc hạn mức của tài khoản này đã hết.</translation>
-    </message>
-    <message>
-        <source>The free quota could not be reached: {}</source>
-        <translation>Không truy cập được hạn mức miễn phí: {}</translation>
-    </message>
-    <message>
-        <source>The free quota is not available.</source>
-        <translation>Hạn mức miễn phí không khả dụng.</translation>
-    </message>
-    <message>
-        <source>The free quota is unavailable for now.</source>
-        <translation>Hạn mức miễn phí tạm thời không khả dụng.</translation>
-    </message>
-    <message>
-        <source>The free quota is used up for this month. Enter your own API key in the agent settings.</source>
-        <translation>Hạn mức miễn phí tháng này đã hết. Hãy nhập khóa API riêng của bạn trong cài đặt tác tử.</translation>
-    </message>
-    <message>
-        <source>The key could not be stored.</source>
-        <translation>Không thể lưu khóa.</translation>
-    </message>
-    <message>
-        <source>The provider could not be reached: {}</source>
-        <translation>Không thể kết nối với nhà cung cấp: {}</translation>
-    </message>
-    <message>
-        <source>The provider refused the API key: check it in the agent settings.</source>
-        <translation>Nhà cung cấp đã từ chối khóa API: hãy kiểm tra trong cài đặt tác tử.</translation>
-    </message>
-    <message>
-        <source>The provider reported a problem: {}</source>
-        <translation>Nhà cung cấp báo có sự cố: {}</translation>
-    </message>
-    <message>
-        <source>The stored key could not be read.</source>
-        <translation>Không thể đọc khóa đã lưu.</translation>
-    </message>
-    <message>
-        <source>Thinking…</source>
-        <translation>Đang suy nghĩ…</translation>
-    </message>
-    <message>
-        <source>Too many new accounts from this address today: try again tomorrow, or enter your own API key.</source>
-        <translation>Hôm nay có quá nhiều tài khoản mới từ địa chỉ này: hãy thử lại vào ngày mai, hoặc nhập khóa API riêng của bạn.</translation>
-    </message>
-    <message>
-        <source>Too many requests for now: try again in a moment.</source>
-        <translation>Quá nhiều yêu cầu lúc này: hãy thử lại sau giây lát.</translation>
-    </message>
-    <message>
-        <source>Trying a filter on {}</source>
-        <translation>Đang thử một bộ lọc trên {}</translation>
-    </message>
-    <message>
-        <source>Zoom on {}</source>
-        <translation>Thu phóng đến {}</translation>
-    </message>
-    <message>
-        <source>an area</source>
-        <translation>một vùng</translation>
-    </message>
-    <message>
-        <source>everything</source>
-        <translation>tất cả</translation>
-    </message>
-    <message>
-        <source>{} tools available</source>
-        <translation>{} công cụ khả dụng</translation>
     </message>
 </context>
 </TS>

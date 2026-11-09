@@ -30,6 +30,709 @@
     </message>
 </context>
 <context>
+    <name>AgentChat</name>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Access to the free quota was renewed: send your request again.</source>
+        <translation type="obsolete">Akses ke kuota gratis telah diperbarui: kirim ulang permintaan Anda.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Another application is changing the project: try again in a moment.</source>
+        <translation type="obsolete">Aplikasi lain sedang mengubah proyek: coba lagi sebentar lagi.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Another application: {}</source>
+        <translation type="obsolete">Aplikasi lain: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Applied again: {}.</source>
+        <translation type="obsolete">Diterapkan lagi: {}.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Changed since, left as is: {}.</source>
+        <translation type="obsolete">Telah berubah sejak itu, dibiarkan apa adanya: {}.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Changed: {}.</source>
+        <translation type="obsolete">Diubah: {}.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Choose a model and agree to send your data to use the agent.</source>
+        <translation type="obsolete">Pilih model dan setujui pengiriman data Anda untuk menggunakan agen.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Connecting to {}…</source>
+        <translation type="obsolete">Menghubungkan ke {}…</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Earlier conversation: the agent starts afresh from here.</source>
+        <translation type="obsolete">Percakapan sebelumnya: agen memulai dari awal mulai dari sini.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Enter your API key in the agent settings.</source>
+        <translation type="obsolete">Masukkan kunci API Anda di pengaturan agen.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Export of {}</source>
+        <translation type="obsolete">Ekspor {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Favorite applied</source>
+        <translation type="obsolete">Favorit diterapkan</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Filter on the points of {}</source>
+        <translation type="obsolete">Filter pada titik-titik {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Filter on {}</source>
+        <translation type="obsolete">Filter pada {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Filter on {} by an area</source>
+        <translation type="obsolete">Filter pada {} berdasarkan suatu area</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Filter on {} by {}</source>
+        <translation type="obsolete">Filter pada {} berdasarkan {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>FilterMate agent</source>
+        <translation type="obsolete">Agen FilterMate</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Filters removed from {}</source>
+        <translation type="obsolete">Filter dihapus dari {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Hidden: {}</source>
+        <translation type="obsolete">Disembunyikan: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>It answers.</source>
+        <translation type="obsolete">Sumber menjawab.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Layer added: {}</source>
+        <translation type="obsolete">Lapisan ditambahkan: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Layers removed: {}</source>
+        <translation type="obsolete">Lapisan dihapus: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Not reachable for this conversation: {}</source>
+        <translation type="obsolete">Tidak dapat dijangkau untuk percakapan ini: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Nothing to redo.</source>
+        <translation type="obsolete">Tidak ada yang bisa diulang.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Nothing to restore.</source>
+        <translation type="obsolete">Tidak ada yang bisa dipulihkan.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Reading the active filters</source>
+        <translation type="obsolete">Membaca filter yang aktif</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Reading the favorites</source>
+        <translation type="obsolete">Membaca favorit</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Reading the fields of {}</source>
+        <translation type="obsolete">Membaca bidang {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Reading the layers</source>
+        <translation type="obsolete">Membaca lapisan</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Reading the map</source>
+        <translation type="obsolete">Membaca peta</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Reading the values of {}</source>
+        <translation type="obsolete">Membaca nilai {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Restored: {}.</source>
+        <translation type="obsolete">Dipulihkan: {}.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Searching satellite imagery on {}</source>
+        <translation type="obsolete">Mencari citra satelit di {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Searching {} for {}</source>
+        <translation type="obsolete">Mencari di {} untuk {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Selection cleared on {}</source>
+        <translation type="obsolete">Seleksi dihapus pada {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Selection on {}</source>
+        <translation type="obsolete">Seleksi pada {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Shown: {}</source>
+        <translation type="obsolete">Ditampilkan: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Stopped.</source>
+        <translation type="obsolete">Dihentikan.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The MCP server could not start: {}</source>
+        <translation type="obsolete">Server MCP tidak dapat dimulai: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The QGIS authentication database is not available.</source>
+        <translation type="obsolete">Basis data autentikasi QGIS tidak tersedia.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The QGIS master password is needed to use the stored key.</source>
+        <translation type="obsolete">Kata sandi utama QGIS diperlukan untuk menggunakan kunci yang tersimpan.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The agent stopped before the end ({}).</source>
+        <translation type="obsolete">Agen berhenti sebelum selesai ({}).</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The agent wants to add this layer of a web service to the project:
+{} · {}
+
+Do you agree?</source>
+        <translation type="obsolete">Agen ingin menambahkan lapisan layanan web ini ke proyek:
+{} · {}
+
+Apakah Anda setuju?</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The agent wants to add this layer to the project:
+{}
+
+A remote source is read from its server by QGIS, and what the layer holds can be sent to the provider of the agent. Do you agree?</source>
+        <translation type="obsolete">Agen ingin menambahkan lapisan ini ke proyek:
+{}
+
+Sumber jarak jauh dibaca dari servernya oleh QGIS, dan isi lapisan dapat dikirim ke penyedia agen. Apakah Anda setuju?</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The agent wants to export these layers to files:
+{}
+
+Do you agree?</source>
+        <translation type="obsolete">Agen ingin mengekspor lapisan-lapisan ini ke file:
+{}
+
+Apakah Anda setuju?</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The agent wants to remove these layers from the project (their files stay, their styles and filters here are lost):
+{}
+
+Do you agree?</source>
+        <translation type="obsolete">Agen ingin menghapus lapisan-lapisan ini dari proyek (file-nya tetap ada, tetapi gaya dan filter di sini hilang):
+{}
+
+Apakah Anda setuju?</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The agent wants to run this action on an external connector:
+{}
+{}
+
+Do you agree?</source>
+        <translation type="obsolete">Agen ingin menjalankan tindakan ini pada konektor eksternal:
+{}
+{}
+
+Apakah Anda setuju?</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The credit or quota of this account is used up.</source>
+        <translation type="obsolete">Kredit atau kuota akun ini telah habis.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The free quota could not be reached: {}</source>
+        <translation type="obsolete">Kuota gratis tidak dapat dijangkau: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The free quota is not available.</source>
+        <translation type="obsolete">Kuota gratis tidak tersedia.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The free quota is unavailable for now.</source>
+        <translation type="obsolete">Kuota gratis tidak tersedia untuk saat ini.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The free quota is used up for this month. Enter your own API key in the agent settings.</source>
+        <translation type="obsolete">Kuota gratis bulan ini telah habis. Masukkan kunci API Anda sendiri di pengaturan agen.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The key could not be stored.</source>
+        <translation type="obsolete">Kunci tidak dapat disimpan.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The provider could not be reached: {}</source>
+        <translation type="obsolete">Penyedia tidak dapat dijangkau: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The provider refused the API key: check it in the agent settings.</source>
+        <translation type="obsolete">Penyedia menolak kunci API: periksa di pengaturan agen.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The provider reported a problem: {}</source>
+        <translation type="obsolete">Penyedia melaporkan masalah: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The stored key could not be read.</source>
+        <translation type="obsolete">Kunci yang tersimpan tidak dapat dibaca.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Thinking…</source>
+        <translation type="obsolete">Berpikir…</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Too many new accounts from this address today: try again tomorrow, or enter your own API key.</source>
+        <translation type="obsolete">Terlalu banyak akun baru dari alamat ini hari ini: coba lagi besok, atau masukkan kunci API Anda sendiri.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Too many requests for now: try again in a moment.</source>
+        <translation type="obsolete">Terlalu banyak permintaan saat ini: coba lagi sebentar lagi.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Trying a filter on {}</source>
+        <translation type="obsolete">Mencoba filter pada {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Zoom on {}</source>
+        <translation type="obsolete">Zoom ke {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>an area</source>
+        <translation type="obsolete">suatu area</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>everything</source>
+        <translation type="obsolete">semuanya</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>{} tools available</source>
+        <translation type="obsolete">{} alat tersedia</translation>
+    </message>
+</context>
+<context>
+    <name>AgentPanel</name>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>(no request)</source>
+        <translation type="obsolete">(tanpa permintaan)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>A few free requests a month, through the relay of FilterMate to Claude (Anthropic), under the terms of Anthropic. The relay counts what is spent and keeps no conversation. When it is used up, choose a provider and enter your own API key.</source>
+        <translation type="obsolete">Beberapa permintaan gratis per bulan, melalui relai FilterMate ke Claude (Anthropic), sesuai ketentuan Anthropic. Relai menghitung yang terpakai dan tidak menyimpan percakapan. Setelah kuota habis, pilih penyedia dan masukkan kunci API Anda sendiri.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>API key</source>
+        <translation type="obsolete">Kunci API</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Add</source>
+        <translation type="obsolete">Tambah</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Address</source>
+        <translation type="obsolete">Alamat</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Agent settings</source>
+        <translation type="obsolete">Pengaturan agen</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Allow attribute values to be sent</source>
+        <translation type="obsolete">Izinkan pengiriman nilai atribut</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Applications already set up will have to be set up again.</source>
+        <translation type="obsolete">Aplikasi yang sudah diatur harus diatur ulang.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Ask the agent to filter your layers</source>
+        <translation type="obsolete">Minta agen memfilter lapisan Anda</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Back to the conversation</source>
+        <translation type="obsolete">Kembali ke percakapan</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Claude Code or another MCP client on this computer can then filter your layers, once FilterMate has been opened, under the rules of this panel: the same sources, the same confirmations, and filters can be undone here. That application sends what it reads to its own AI provider.</source>
+        <translation type="obsolete">Claude Code atau klien MCP lain di komputer ini kemudian dapat memfilter lapisan Anda, setelah FilterMate dibuka, sesuai aturan panel ini: sumber yang sama, konfirmasi yang sama, dan filter dapat diurungkan di sini. Aplikasi tersebut mengirim apa yang dibacanya ke penyedia AI-nya sendiri.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Connect an AI provider to start. Nothing is sent before you agree.</source>
+        <translation type="obsolete">Hubungkan penyedia AI untuk memulai. Tidak ada yang dikirim sebelum Anda setuju.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Copied, with the access token: keep it to yourself. Save these settings for it to apply.</source>
+        <translation type="obsolete">Disalin, beserta token akses: simpan untuk Anda sendiri. Simpan pengaturan ini agar berlaku.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Copy for Claude Desktop</source>
+        <translation type="obsolete">Salin untuk Claude Desktop</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Copy the Claude Code command</source>
+        <translation type="obsolete">Salin perintah Claude Code</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Copy the configuration</source>
+        <translation type="obsolete">Salin konfigurasi</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Describe it in your own words. Each filter can be undone.</source>
+        <translation type="obsolete">Jelaskan dengan kata-kata Anda sendiri. Setiap filter dapat diurungkan.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Filter your layers from a sentence</source>
+        <translation type="obsolete">Filter lapisan Anda dengan satu kalimat</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>FilterMate agent</source>
+        <translation type="obsolete">Agen FilterMate</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>History</source>
+        <translation type="obsolete">Riwayat</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>History…</source>
+        <translation type="obsolete">Riwayat…</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>I agree to send this data to this provider</source>
+        <translation type="obsolete">Saya setuju mengirim data ini ke penyedia ini</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Let other applications on this computer drive FilterMate (MCP server)</source>
+        <translation type="obsolete">Izinkan aplikasi lain di komputer ini mengendalikan FilterMate (server MCP)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>MCP connector</source>
+        <translation type="obsolete">Konektor MCP</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>MCP connectors</source>
+        <translation type="obsolete">Konektor MCP</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Model</source>
+        <translation type="obsolete">Model</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>More</source>
+        <translation type="obsolete">Lainnya</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>New access token</source>
+        <translation type="obsolete">Token akses baru</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>New conversation</source>
+        <translation type="obsolete">Percakapan baru</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>New token: it applies once these settings are saved.</source>
+        <translation type="obsolete">Token baru: berlaku setelah pengaturan ini disimpan.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Open data platforms</source>
+        <translation type="obsolete">Platform data terbuka</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Open the settings</source>
+        <translation type="obsolete">Buka pengaturan</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Other applications</source>
+        <translation type="obsolete">Aplikasi lain</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Port</source>
+        <translation type="obsolete">Port</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Provider</source>
+        <translation type="obsolete">Penyedia</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Redo</source>
+        <translation type="obsolete">Ulangi</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Remove</source>
+        <translation type="obsolete">Hapus</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Remove the stored key</source>
+        <translation type="obsolete">Hapus kunci yang tersimpan</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Satellite imagery</source>
+        <translation type="obsolete">Citra satelit</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Send (Enter)</source>
+        <translation type="obsolete">Kirim (Enter)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Send again</source>
+        <translation type="obsolete">Kirim ulang</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Sent to: {}</source>
+        <translation type="obsolete">Dikirim ke: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Set up the agent</source>
+        <translation type="obsolete">Atur agen</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Sources</source>
+        <translation type="obsolete">Sumber</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Stop (Esc)</source>
+        <translation type="obsolete">Hentikan (Esc)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Stored: leave empty to keep it</source>
+        <translation type="obsolete">Tersimpan: biarkan kosong untuk mempertahankannya</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Test</source>
+        <translation type="obsolete">Uji</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Testing…</source>
+        <translation type="obsolete">Menguji…</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The MCP server could not start: {}</source>
+        <translation type="obsolete">Server MCP tidak dapat dimulai: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The agent can search the sources ticked here. Your searches, and what the agent passes to a connector, are sent to them; a layer added from them is read from their servers.</source>
+        <translation type="obsolete">Agen dapat mencari di sumber yang dicentang di sini. Pencarian Anda, dan apa yang diteruskan agen ke konektor, dikirim ke sumber tersebut; lapisan yang ditambahkan dari sumber itu dibaca dari server mereka.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The agent sends your request, the names of your layers and fields, your filter expressions and the results of its tools to the provider chosen here, under that provider&apos;s terms. Without the option below, the agent does not read the values of your fields; values already written in your filters and favorites are still sent. The conversation is kept on this computer for each project, until you start a new one.</source>
+        <translation type="obsolete">Agen mengirim permintaan Anda, nama lapisan dan bidang Anda, ekspresi filter Anda, dan hasil alatnya ke penyedia yang dipilih di sini, sesuai ketentuan penyedia tersebut. Tanpa opsi di bawah, agen tidak membaca nilai bidang Anda; nilai yang sudah tertulis di filter dan favorit Anda tetap dikirim. Percakapan disimpan di komputer ini untuk setiap proyek, hingga Anda memulai yang baru.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Through mcp-remote, which needs Node.js: Claude Desktop starts local servers as programs.</source>
+        <translation type="obsolete">Melalui mcp-remote, yang memerlukan Node.js: Claude Desktop menjalankan server lokal sebagai program.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Too many sources added: remove one first.</source>
+        <translation type="obsolete">Terlalu banyak sumber ditambahkan: hapus satu terlebih dahulu.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Undo the last</source>
+        <translation type="obsolete">Urungkan yang terakhir</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Undo this turn</source>
+        <translation type="obsolete">Urungkan giliran ini</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>What do you want to filter?</source>
+        <translation type="obsolete">Apa yang ingin Anda filter?</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>added by you</source>
+        <translation type="obsolete">ditambahkan oleh Anda</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>applied</source>
+        <translation type="obsolete">diterapkan</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>community</source>
+        <translation type="obsolete">komunitas</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>https://... or a portal address</source>
+        <translation type="obsolete">https://... atau alamat portal</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>no change</source>
+        <translation type="obsolete">tidak ada perubahan</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>official</source>
+        <translation type="obsolete">resmi</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>this computer</source>
+        <translation type="obsolete">komputer ini</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>undone</source>
+        <translation type="obsolete">diurungkan</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>{} turn(s)</source>
+        <translation type="obsolete">{} giliran</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Which layers are in this project?</source>
+        <translation type="obsolete">Lapisan apa saja yang ada di proyek ini?</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Keep the buildings taller than 15 m</source>
+        <translation type="obsolete">Pertahankan bangunan yang lebih tinggi dari 15 m</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Filter the roads inside the selected feature</source>
+        <translation type="obsolete">Filter jalan di dalam fitur yang dipilih</translation>
+    </message>
+</context>
+<context>
     <name>AppInitializer</name>
     <message>
         <location filename="../core/services/app_initializer.py" line="174"/>
@@ -616,137 +1319,137 @@
         <translation>Atur ulang kriteria awan titik</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1597"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1605"/>
         <source>Invalid raster calculator expression</source>
         <translation>Ekspresi kalkulator raster tidak valid</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1912"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1920"/>
         <source>PDAL was not found: the height above a DTM needs the pdal executable</source>
         <translation>PDAL tidak ditemukan: tinggi di atas DTM memerlukan berkas eksekusi pdal</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3432"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3475"/>
         <source>A FilterMate task is still running: wait for it to finish</source>
         <translation>Tugas FilterMate masih berjalan: tunggu hingga selesai</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2905"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2948"/>
         <source>FilterMate task failed: {0}</source>
         <translation>Tugas FilterMate gagal: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2942"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2985"/>
         <source>Select pixels first: a value range, classes or a raster expression</source>
         <translation>Pilih piksel terlebih dahulu: rentang nilai, kelas, atau ekspresi raster</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2957"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3000"/>
         <source>Raster filtered: {0}</source>
         <translation>Raster difilter: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2991"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3034"/>
         <source>The point cloud expression was rejected: {0}</source>
         <translation>Ekspresi awan titik ditolak: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2994"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3037"/>
         <source>Select points first: classes, attribute ranges or an expression</source>
         <translation>Pilih titik terlebih dahulu: kelas, rentang atribut, atau ekspresi</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3008"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3051"/>
         <source>Point cloud filtered: {0}</source>
         <translation>Awan titik difilter: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3542"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3585"/>
         <source>Filter not applied: {0}</source>
         <translation>Filter tidak diterapkan: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3394"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3437"/>
         <source>canceled</source>
         <translation>dibatalkan</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3091"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3134"/>
         <source>{0} target(s) filtered</source>
         <translation>{0} target difilter</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3102"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3145"/>
         <source>{0} failed: {1}</source>
         <translation>{0} gagal: {1}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3115"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3158"/>
         <source>FilterMate: filtering from '{0}'…</source>
         <translation>FilterMate: memfilter dari '{0}'…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3214"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3257"/>
         <source>Changed since, left as is: {0}</source>
         <translation>Telah berubah sejak itu, dibiarkan apa adanya: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3220"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3263"/>
         <source>{0} layer(s) restored</source>
         <translation>{0} layer dipulihkan</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3254"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3297"/>
         <source>&apos;{0}&apos; not exported: {1}</source>
         <translation>'{0}' tidak diekspor: {1}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3268"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3311"/>
         <source>Exported: {0}</source>
         <translation>Diekspor: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3270"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3313"/>
         <source>Export failed: {0}</source>
         <translation>Ekspor gagal: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3277"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3320"/>
         <source>Exporting {0} layer(s)…</source>
         <translation>Mengekspor {0} layer…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3283"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3326"/>
         <source>Export folder</source>
         <translation>Folder ekspor</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3365"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3408"/>
         <source>Raster / point cloud targets skipped: no source feature selected in EXPLORING</source>
         <translation>Target raster / awan titik dilewati: tidak ada fitur sumber yang dipilih di EXPLORING</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3394"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3437"/>
         <source>Raster / point cloud targets not filtered: {0}</source>
         <translation>Target raster / awan titik tidak difilter: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3396"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3439"/>
         <source>{0} raster / point cloud target(s) filtered</source>
         <translation>{0} target raster / awan titik difilter</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3519"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3562"/>
         <source>Choose the DTM raster used for the height above ground</source>
         <translation>Pilih raster DTM yang dipakai untuk tinggi di atas tanah</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3530"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3573"/>
         <source>Height above ground not computed: {0}</source>
         <translation>Tinggi di atas tanah tidak dihitung: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3551"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3594"/>
         <source>Computing the height above '{0}' with PDAL…</source>
         <translation>Menghitung tinggi di atas '{0}' dengan PDAL…</translation>
     </message>
@@ -756,12 +1459,12 @@
         <translation>Cache FilterMate memakai {0} GB, melebihi batasnya sebesar {1} GB: hapus filter dari layer raster / point cloud yang tidak lagi Anda perlukan</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1914"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1922"/>
         <source>PDAL {0} is too old: the height above a DTM needs PDAL 2.4 or later</source>
         <translation>PDAL {0} terlalu lama: tinggi di atas DTM memerlukan PDAL 2.4 atau yang lebih baru</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1917"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1925"/>
         <source>PDAL could not be run, the height above a DTM is unavailable: {0}</source>
         <translation>PDAL tidak dapat dijalankan, tinggi di atas DTM tidak tersedia: {0}</translation>
     </message>
@@ -781,27 +1484,27 @@
         <translation>Pratinjau: sembunyikan piksel di luar seleksi (selubung putih untuk kemiringan lereng, aspek...)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1792"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1800"/>
         <source>The preview of a slope or aspect needs the map in the CRS of the raster ({0})</source>
         <translation>Pratinjau kemiringan lereng atau aspek memerlukan peta dalam CRS raster ({0})</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2434"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2477"/>
         <source>only the points drawn on the map can be picked: turn the preview off to pick a class it hides</source>
         <translation>hanya titik yang digambar di peta yang dapat dipilih: matikan pratinjau untuk memilih kelas yang disembunyikannya</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2505"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2548"/>
         <source>No classified point under the click</source>
         <translation>Tidak ada titik terklasifikasi di bawah klik</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2440"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2483"/>
         <source>Class {0} is already checked</source>
         <translation>Kelas {0} sudah dicentang</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2529"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2572"/>
         <source>Class {0} is not in the class list of the layer</source>
         <translation>Kelas {0} tidak ada dalam daftar kelas layer</translation>
     </message>
@@ -816,157 +1519,157 @@
         <translation>Pipet kelas: klik peta dan kelas titik yang digambar di sana akan dicentang. Ctrl+klik menambahkan satu lagi</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1116"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1118"/>
         <source>Preview and statistics use a bounded local sample of the visible extent; filtering reads the source.</source>
         <translation>Pratinjau dan statistik menggunakan sampel lokal terbatas dari cakupan tampilan; pemfilteran membaca sumbernya.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1314"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1322"/>
         <source>Preparing a bounded color snapshot of the visible extent…</source>
         <translation>Menyiapkan snapshot warna terbatas dari cakupan tampilan…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1326"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1334"/>
         <source>The color snapshot could not be prepared. Try a smaller visible extent.</source>
         <translation>Snapshot warna tidak dapat disiapkan. Coba cakupan tampilan yang lebih kecil.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1330"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1338"/>
         <source>Color selection applies to the captured visible extent.</source>
         <translation>Seleksi warna berlaku pada cakupan tampilan yang ditangkap.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1394"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1402"/>
         <source>Raster sampling failed. Try a smaller visible extent.</source>
         <translation>Pengambilan sampel raster gagal. Coba cakupan tampilan yang lebih kecil.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1515"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1523"/>
         <source>No valid pixels to display in the selected bands.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1792"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1800"/>
         <source>The preview of a color or an expression needs the map in the CRS of the raster ({0})</source>
         <translation>Pratinjau warna atau ekspresi memerlukan peta dalam CRS raster ({0})</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2458"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2501"/>
         <source>No point drawn under the click</source>
         <translation>Tidak ada titik yang digambar di bawah klik</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2460"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2503"/>
         <source>This point has no {0}</source>
         <translation>Titik ini tidak memiliki {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2462"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2505"/>
         <source>{0} cannot be used in a condition</source>
         <translation>{0} tidak dapat digunakan dalam kondisi</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2519"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2562"/>
         <source>Object not read: {0}</source>
         <translation>Objek tidak terbaca: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2521"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2564"/>
         <source>Too many points around the click: the object could not be read</source>
         <translation>Terlalu banyak titik di sekitar klik: objek tidak dapat dibaca</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2523"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2566"/>
         <source>No point of class {0} under the click: click on the object itself</source>
         <translation>Tidak ada titik kelas {0} di bawah klik: klik pada objeknya langsung</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2660"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2703"/>
         <source>Similar objects not read: {0}</source>
         <translation>Objek serupa tidak terbaca: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2663"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2706"/>
         <source>No similar object within the area ratios: widen them</source>
         <translation>Tidak ada objek serupa dalam rasio luas: perlebar rasionya</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2732"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2775"/>
         <source>Preparing a sample for the new visible extent. Click again when it is ready.</source>
         <translation>Menyiapkan sampel untuk cakupan tampilan yang baru. Klik lagi saat sudah siap.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2743"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2786"/>
         <source>The local raster sample is still being prepared. Retry when it is ready.</source>
         <translation>Sampel raster lokal masih disiapkan. Coba lagi saat sudah siap.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2949"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2992"/>
         <source>Prepare a color snapshot before filtering this rendered layer.</source>
         <translation>Siapkan snapshot warna sebelum memfilter lapisan yang dirender ini.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3094"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3137"/>
         <source>{0} raster target(s) resampled to the configured pixel limit</source>
         <translation>{0} target raster diresampling ke batas piksel yang dikonfigurasi</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3126"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3169"/>
         <source>color selection limited to the captured extent; colors depend on style and scale</source>
         <translation>seleksi warna dibatasi pada cakupan yang ditangkap; warna bergantung pada gaya dan skala</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3128"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3171"/>
         <source>raster source resampled to {0} cells within the pixel limit</source>
         <translation>sumber raster diresampling menjadi {0} sel dalam batas piksel</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3130"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3173"/>
         <source>raster selection read every {0} pixels: over the pixel limit of the settings</source>
         <translation>seleksi raster dibaca setiap {0} piksel: melebihi batas piksel pengaturan</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3133"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3176"/>
         <source>dense raster selection smoothed to keep its outline light</source>
         <translation>seleksi raster yang padat dihaluskan agar konturnya ringan</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3180"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3223"/>
         <source>{0} left empty, nothing matches the selection: {1}</source>
         <translation>{0} dikosongkan, tidak ada yang cocok dengan seleksi: {1}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3164"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3207"/>
         <source>failed</source>
         <translation>gagal</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1509"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1517"/>
         <source>Preparing band display…</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1525"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1533"/>
         <source>The selected bands could not be displayed.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1597"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1605"/>
         <source>Unknown raster layer or band in expression</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1389"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1397"/>
         <source>The raster histogram could not be calculated.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1738"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1746"/>
         <source>The raster preview could not be calculated.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1148"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1150"/>
         <source>onnxruntime installed</source>
         <translation>onnxruntime terpasang</translation>
     </message>
@@ -1959,27 +2662,27 @@ Klik indikator ★ dan pilih 'Tambahkan filter saat ini ke favorit' untuk menyim
         <translation>Kembalikan konfigurasi default dan hapus database SQLite</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1572"/>
+        <location filename="../filter_mate.py" line="1573"/>
         <source>Reset Configuration</source>
         <translation>Reset Konfigurasi</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1598"/>
+        <location filename="../filter_mate.py" line="1599"/>
         <source>Configuration reset successfully.</source>
         <translation>Konfigurasi berhasil direset.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1603"/>
+        <location filename="../filter_mate.py" line="1604"/>
         <source>Default configuration file not found.</source>
         <translation>File konfigurasi default tidak ditemukan.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1626"/>
+        <location filename="../filter_mate.py" line="1627"/>
         <source>Database deleted: {filename}</source>
         <translation>Database dihapus: {filename}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1650"/>
+        <location filename="../filter_mate.py" line="1651"/>
         <source>Restart required</source>
         <translation>Perlu restart</translation>
     </message>
@@ -2130,7 +2833,7 @@ Do you want to disable this setting now?
 • No: Keep current setting</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1572"/>
+        <location filename="../filter_mate.py" line="1573"/>
         <source>Are you sure you want to reset to the default configuration?
 
 This will:
@@ -2147,7 +2850,7 @@ Ini akan:
 QGIS harus dimulai ulang untuk menerapkan perubahan.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1650"/>
+        <location filename="../filter_mate.py" line="1651"/>
         <source>The configuration has been reset.
 
 Please restart QGIS to apply the changes.</source>
@@ -2166,7 +2869,7 @@ Silakan mulai ulang QGIS untuk menerapkan perubahan.</translation>
         <translation>{count} lapisan referensi tidak dimuat ({layers_list}). Menggunakan tampilan cadangan.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1641"/>
+        <location filename="../filter_mate.py" line="1642"/>
         <source>Unable to delete {filename}: {e}</source>
         <translation>Tidak dapat menghapus {filename}: {e}</translation>
     </message>
@@ -2176,86 +2879,86 @@ Silakan mulai ulang QGIS untuk menerapkan perubahan.</translation>
         <translation type="obsolete">Kesalahan saat reset: {str(e)}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1693"/>
+        <location filename="../filter_mate.py" line="1694"/>
         <source>&lt;p style=&apos;font-size:13px;&apos;&gt;Thank you for using &lt;b&gt;FilterMate&lt;/b&gt;!&lt;br&gt;Join our Discord community to:&lt;/p&gt;&lt;ul style=&apos;margin-left:10px; font-size:12px;&apos;&gt;&lt;li&gt;Get help and support&lt;/li&gt;&lt;li&gt;Report bugs and issues&lt;/li&gt;&lt;li&gt;Suggest new features&lt;/li&gt;&lt;li&gt;Share tips with other users&lt;/li&gt;&lt;/ul&gt;</source>
         <translation>&lt;p style='font-size:13px;'&gt;Terima kasih telah menggunakan &lt;b&gt;FilterMate&lt;/b&gt;!&lt;br&gt;Bergabunglah dengan komunitas Discord kami untuk:&lt;/p&gt;&lt;ul style='margin-left:10px; font-size:12px;'&gt;&lt;li&gt;Mendapatkan bantuan dan dukungan&lt;/li&gt;&lt;li&gt;Melaporkan bug dan masalah&lt;/li&gt;&lt;li&gt;Menyarankan fitur baru&lt;/li&gt;&lt;li&gt;Berbagi tips dengan pengguna lain&lt;/li&gt;&lt;/ul&gt;</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1709"/>
+        <location filename="../filter_mate.py" line="1710"/>
         <source>  Join us on Discord</source>
         <translation>  Bergabung di Discord</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1729"/>
+        <location filename="../filter_mate.py" line="1730"/>
         <source>Don&apos;t show this again</source>
         <translation>Jangan tampilkan lagi</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1785"/>
+        <location filename="../filter_mate.py" line="1786"/>
         <source>Close</source>
         <translation>Tutup</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1852"/>
+        <location filename="../filter_mate.py" line="1855"/>
         <source>Error loading plugin: {0}. Check QGIS Python console for details.</source>
         <translation>Kesalahan memuat plugin: {0}. Periksa konsol Python QGIS untuk detail.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7560"/>
+        <location filename="../filter_mate_dockwidget.py" line="7586"/>
         <source>Current layer: {0}</source>
         <translation>Lapisan saat ini: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7562"/>
+        <location filename="../filter_mate_dockwidget.py" line="7588"/>
         <source>No layer selected</source>
         <translation>Tidak ada lapisan dipilih</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7572"/>
+        <location filename="../filter_mate_dockwidget.py" line="7598"/>
         <source>Selected layers:
 {0}</source>
         <translation>Lapisan terpilih:
 {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7572"/>
+        <location filename="../filter_mate_dockwidget.py" line="7598"/>
         <source>No layers selected</source>
         <translation>Tidak ada lapisan dipilih</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7592"/>
+        <location filename="../filter_mate_dockwidget.py" line="7618"/>
         <source>No expression defined</source>
         <translation>Tidak ada ekspresi didefinisikan</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7604"/>
+        <location filename="../filter_mate_dockwidget.py" line="7630"/>
         <source>Display expression: {0}</source>
         <translation>Ekspresi tampilan: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7621"/>
+        <location filename="../filter_mate_dockwidget.py" line="7647"/>
         <source>Feature ID: {0}
 First attribute: {1}</source>
         <translation>ID Fitur: {0}
 Atribut pertama: {1}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1659"/>
+        <location filename="../filter_mate.py" line="1660"/>
         <source>The configuration could not be reset. Check that the plugin folder is writable, then try again. Details in filtermate.log.</source>
         <translation>Konfigurasi tidak dapat diatur ulang. Periksa apakah folder plugin dapat ditulisi, lalu coba lagi. Detail ada di filtermate.log.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1759"/>
+        <location filename="../filter_mate.py" line="1760"/>
         <source>What&apos;s new in FilterMate 5</source>
         <translation>Yang baru di FilterMate 5</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1765"/>
+        <location filename="../filter_mate.py" line="1766"/>
         <source>&lt;p style=&apos;font-size:13px;&apos;&gt;&lt;b&gt;FilterMate now works with raster and point cloud layers.&lt;/b&gt;&lt;/p&gt;&lt;ul style=&apos;margin-left:10px; font-size:12px;&apos;&gt;&lt;li&gt;&lt;b&gt;EXPLORING&lt;/b&gt; adapts to the current layer: value range and classes of a raster, classes, elevation and attributes of a LiDAR point cloud.&lt;/li&gt;&lt;li&gt;&lt;b&gt;FILTERING&lt;/b&gt; relates that selection to layers of any kind, with the usual predicates and buffer: parcels within an elevation range, LiDAR points under buildings, a DTM clipped to a municipality.&lt;/li&gt;&lt;li&gt;&lt;b&gt;EXPORTING&lt;/b&gt; writes filtered rasters (GeoTIFF, COG) and point clouds (LAZ, COPC).&lt;/li&gt;&lt;li&gt;Processing algorithms and models, qgis_process, Python and REST APIs.&lt;/li&gt;&lt;/ul&gt;</source>
         <translation>&lt;p style='font-size:13px;'&gt;&lt;b&gt;FilterMate kini bekerja dengan layer raster dan point cloud.&lt;/b&gt;&lt;/p&gt;&lt;ul style='margin-left:10px; font-size:12px;'&gt;&lt;li&gt;&lt;b&gt;EXPLORING&lt;/b&gt; menyesuaikan dengan layer saat ini: rentang nilai dan kelas sebuah raster, kelas, elevasi, dan atribut sebuah point cloud LiDAR.&lt;/li&gt;&lt;li&gt;&lt;b&gt;FILTERING&lt;/b&gt; menghubungkan seleksi itu dengan layer jenis apa pun, dengan predikat dan buffer yang biasa: persil dalam rentang elevasi, titik LiDAR di bawah bangunan, DTM yang dipotong sesuai batas kota.&lt;/li&gt;&lt;li&gt;&lt;b&gt;EXPORTING&lt;/b&gt; menulis raster (GeoTIFF, COG) dan point cloud (LAZ, COPC) yang telah difilter.&lt;/li&gt;&lt;li&gt;Algoritma dan model Processing, qgis_process, API Python dan REST.&lt;/li&gt;&lt;/ul&gt;</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1781"/>
+        <location filename="../filter_mate.py" line="1782"/>
         <source>Open the user guide</source>
         <translation>Buka panduan pengguna</translation>
     </message>
@@ -2628,59 +3331,59 @@ Tetap hapus?</translation>
         <translation>Mode terang</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="4151"/>
+        <location filename="../filter_mate_dockwidget.py" line="4155"/>
         <location filename="../ui/controllers/exploring_controller.py" line="884"/>
         <source>Selected features have no geometry.</source>
         <translation>Fitur terpilih tidak memiliki geometri.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="4170"/>
+        <location filename="../filter_mate_dockwidget.py" line="4174"/>
         <location filename="../ui/controllers/exploring_controller.py" line="885"/>
         <source>No feature selected. Select a feature from the dropdown list.</source>
         <translation>Tidak ada fitur dipilih. Pilih fitur dari daftar dropdown.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="5345"/>
+        <location filename="../filter_mate_dockwidget.py" line="5349"/>
         <source>The selected layer is invalid or its source cannot be found.</source>
         <translation>Lapisan terpilih tidak valid atau sumbernya tidak ditemukan.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6238"/>
+        <location filename="../filter_mate_dockwidget.py" line="6242"/>
         <source>Negative buffer (erosion): shrinks polygons inward</source>
         <translation>Buffer negatif (erosi): menyusutkan poligon ke dalam</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6241"/>
+        <location filename="../filter_mate_dockwidget.py" line="6245"/>
         <source>Buffer value in meters (positive=expand, negative=shrink polygons)</source>
         <translation>Nilai buffer dalam meter (positif=perluas, negatif=susutkan poligon)</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6743"/>
+        <location filename="../filter_mate_dockwidget.py" line="6747"/>
         <source>Plugin activated with {0} vector layer(s)</source>
         <translation>Plugin diaktifkan dengan {0} lapisan vektor</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6862"/>
+        <location filename="../filter_mate_dockwidget.py" line="6866"/>
         <source>Could not reload plugin automatically.</source>
         <translation>Tidak dapat memuat ulang plugin secara otomatis.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6867"/>
+        <location filename="../filter_mate_dockwidget.py" line="6871"/>
         <source>Error reloading plugin: {0}</source>
         <translation>Kesalahan memuat ulang plugin: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6942"/>
+        <location filename="../filter_mate_dockwidget.py" line="6946"/>
         <source>Layer properties reset to defaults</source>
         <translation>Properti lapisan direset ke default</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6943"/>
+        <location filename="../filter_mate_dockwidget.py" line="6947"/>
         <source>Error resetting layer properties: {}</source>
         <translation>Kesalahan mereset properti lapisan: {}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7206"/>
+        <location filename="../filter_mate_dockwidget.py" line="7232"/>
         <source>Filter</source>
         <translation>Filter</translation>
     </message>
@@ -2810,7 +3513,7 @@ Tetap hapus?</translation>
         <translation>Tata letak panel tidak dapat diterapkan; ukuran default dipakai. Detail ada di filtermate.log.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7034"/>
+        <location filename="../filter_mate_dockwidget.py" line="7038"/>
         <location filename="../ui/controllers/backend_controller.py" line="682"/>
         <source>Vector</source>
         <translation>Vektor</translation>
@@ -2841,22 +3544,22 @@ Tetap hapus?</translation>
         <translation>Hapus skema FilterMate</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="4282"/>
+        <location filename="../filter_mate_dockwidget.py" line="4286"/>
         <source>Read failed</source>
         <translation>Pembacaan gagal</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="4282"/>
+        <location filename="../filter_mate_dockwidget.py" line="4286"/>
         <source>The service could not be read. Please retry.</source>
         <translation>Layanan tidak dapat dibaca. Silakan coba lagi.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="4624"/>
+        <location filename="../filter_mate_dockwidget.py" line="4628"/>
         <source>Loading filtered extent…</source>
         <translation>Memuat cakupan terfilter…</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="5210"/>
+        <location filename="../filter_mate_dockwidget.py" line="5214"/>
         <location filename="../ui/controllers/exploring_controller.py" line="742"/>
         <location filename="../ui/controllers/exploring_controller.py" line="3662"/>
         <source>Loading selected values…</source>
@@ -2898,7 +3601,7 @@ Tetap hapus?</translation>
         <translation>Hanya sebagian nilai yang ditampilkan. Perhalus pencarian untuk menemukan nilai lain.</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="5145"/>
+        <location filename="../filter_mate_dockwidget.py" line="5149"/>
         <location filename="../ui/controllers/exploring_controller.py" line="551"/>
         <location filename="../ui/controllers/exploring_controller.py" line="568"/>
         <location filename="../ui/controllers/exploring_controller.py" line="636"/>
@@ -3057,7 +3760,7 @@ Tetap hapus?</translation>
         <translation>📁 Proyek Saat Ini</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7206"/>
+        <location filename="../filter_mate_dockwidget.py" line="7232"/>
         <source>The filter was not launched: its selection changed or could not be read. Click Filter again.</source>
         <translation>Filter tidak dijalankan: seleksinya berubah atau tidak dapat dibaca. Klik Filter lagi.</translation>
     </message>
@@ -3437,7 +4140,7 @@ Pastikan tabel PostgreSQL memiliki PRIMARY KEY yang didefinisikan.</translation>
 <context>
     <name>ModelDownloadTask</name>
     <message>
-        <location filename="../adapters/qgis/coverage_layers/segmentation.py" line="316"/>
+        <location filename="../adapters/qgis/coverage_layers/segmentation.py" line="558"/>
         <source>FilterMate: downloading the segmentation model</source>
         <translation>FilterMate: mengunduh model segmentasi</translation>
     </message>
@@ -5830,27 +6533,27 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">Klik peta dengan pemilih piksel. Ctrl+klik memperluas rentang hingga nilai tersebut.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2138"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2160"/>
         <source>VALUE RANGE</source>
         <translation>RENTANG NILAI</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1444"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1461"/>
         <source>Min</source>
         <translation>Min</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1444"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1461"/>
         <source>Lowest value kept</source>
         <translation>Nilai terendah yang dipertahankan</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1444"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1461"/>
         <source>Max</source>
         <translation>Maks</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1444"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1461"/>
         <source>Highest value kept</source>
         <translation>Nilai tertinggi yang dipertahankan</translation>
     </message>
@@ -5880,17 +6583,17 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">Tidak ada</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1464"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1481"/>
         <source>RASTER EXPRESSION</source>
         <translation>EKSPRESI RASTER</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1468"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1485"/>
         <source>Raster calculator expression; a pixel is kept where it is not 0</source>
         <translation>Ekspresi kalkulator raster; piksel dipertahankan jika nilainya bukan 0</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1469"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1486"/>
         <source>Raster expression</source>
         <translation>Ekspresi raster</translation>
     </message>
@@ -5910,12 +6613,12 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">Piksel terpilih: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1550"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1567"/>
         <source>Set a value range first</source>
         <translation>Tetapkan rentang nilai terlebih dahulu</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2758"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2910"/>
         <source>NoData</source>
         <translation>NoData</translation>
     </message>
@@ -5935,22 +6638,22 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">Statistik band saat ini pada persegi panjang terakhir yang digambar di peta</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1844"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1861"/>
         <source>Under the cursor: {0}  (X {1:.{3}f}  Y {2:.{3}f})</source>
         <translation>Di bawah kursor: {0}  (X {1:.{3}f}  Y {2:.{3}f})</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1854"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1871"/>
         <source>Zone: {0}</source>
         <translation>Zona: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1854"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1871"/>
         <source>no pixel</source>
         <translation>tidak ada piksel</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2776"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2928"/>
         <source>LAST PICKS</source>
         <translation>PEMBACAAN TERAKHIR</translation>
     </message>
@@ -5965,37 +6668,37 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">Besaran yang dikenai rentang. Kemiringan lereng, aspek, relief berbayang, dan kekasaran membaca pita sebagai DTM.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1401"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1418"/>
         <source>Pixel value</source>
         <translation>Nilai piksel</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1401"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1418"/>
         <source>Slope (degrees)</source>
         <translation>Kemiringan lereng (derajat)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1401"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1418"/>
         <source>Slope (%)</source>
         <translation>Kemiringan lereng (%)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1401"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1418"/>
         <source>Aspect (degrees)</source>
         <translation>Aspek (derajat)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1401"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1418"/>
         <source>Hillshade (0-255)</source>
         <translation>Relief berbayang (0-255)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1401"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1418"/>
         <source>Roughness (TRI, mean difference)</source>
         <translation>Kekasaran (TRI, selisih rata-rata)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1411"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1428"/>
         <source>Usual thresholds of the quantity</source>
         <translation>Ambang umum besaran</translation>
     </message>
@@ -6005,47 +6708,47 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">Ambang umum</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2275"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2297"/>
         <source>Flat</source>
         <translation>Datar</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2275"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2297"/>
         <source>Gentle</source>
         <translation>Landai</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2275"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2297"/>
         <source>Moderate</source>
         <translation>Sedang</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2276"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2298"/>
         <source>Steep</source>
         <translation>Curam</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2276"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2298"/>
         <source>East</source>
         <translation>Timur</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2276"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2298"/>
         <source>South</source>
         <translation>Selatan</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2277"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2299"/>
         <source>West</source>
         <translation>Barat</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2277"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2299"/>
         <source>Shadow</source>
         <translation>Bayangan</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2277"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2299"/>
         <source>Lit</source>
         <translation>Terang</translation>
     </message>
@@ -6055,27 +6758,27 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">Ambang umum…</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1137"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1146"/>
         <source>PIPETTE</source>
         <translation>PIPET</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1273"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1290"/>
         <source>Tolerance ±</source>
         <translation>Toleransi ±</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1280"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1297"/>
         <source>Tolerance around the picked color or value, in % of the value range</source>
         <translation>Toleransi di sekitar warna atau nilai yang dipilih, dalam % dari rentang nilai</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1281"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1298"/>
         <source>Pipette tolerance</source>
         <translation>Toleransi pipet</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1504"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1521"/>
         <source>Bands</source>
         <translation>Pita</translation>
     </message>
@@ -6120,22 +6823,22 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">Membutuhkan citra dengan tiga pita atau lebih (merah, hijau, biru...)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1523"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1540"/>
         <source>Vegetation (NDVI &gt; 0.3)</source>
         <translation>Vegetasi (NDVI &gt; 0.3)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1523"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1540"/>
         <source>No vegetation (NDVI &lt; 0.1)</source>
         <translation>Tanpa vegetasi (NDVI &lt; 0.1)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1524"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1541"/>
         <source>Water (NDWI &gt; 0.1)</source>
         <translation>Air (NDWI &gt; 0.1)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1524"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1541"/>
         <source>Vegetation (excess green)</source>
         <translation>Vegetasi (hijau berlebih)</translation>
     </message>
@@ -6145,12 +6848,12 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">Preset spektral…</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2431"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2470"/>
         <source>This pixel has no value (NoData): pick another one</source>
         <translation>Piksel ini tidak memiliki nilai (NoData): pilih yang lain</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2541"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2578"/>
         <source>The tolerance covers every value: lower it</source>
         <translation>Toleransi mencakup semua nilai: kecilkan</translation>
     </message>
@@ -6175,12 +6878,12 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">Ekspresi</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="857"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="866"/>
         <source>BANDS</source>
         <translation>BANDS</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="900"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="909"/>
         <source>Value of the active band under the cursor</source>
         <translation>Nilai pita aktif di bawah kursor</translation>
     </message>
@@ -6190,7 +6893,7 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">Statistik pita aktif dalam persegi panjang terakhir yang digambar di peta</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="941"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="950"/>
         <source>Every band</source>
         <translation>Semua pita</translation>
     </message>
@@ -6200,7 +6903,7 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">Rentang nilai berlaku untuk semua pita warna sekaligus (piksel dipertahankan jika setiap pita berada dalam rentang); histogram menampilkan pita pertama</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="875"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="884"/>
         <source>Display the first checked band in grey or the checked bands as a colour composite</source>
         <translation type="unfinished"></translation>
     </message>
@@ -6210,142 +6913,142 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">Pipet membandingkan pita ini</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1052"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1061"/>
         <source>Colour the band holds: the spectral indexes and the chips use it. Click to change it</source>
         <translation>Warna yang dibawa pita: indeks spektral dan chip menggunakannya. Klik untuk mengubahnya</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1062"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1071"/>
         <source>Value at the last click of the pipette</source>
         <translation>Nilai pada klik terakhir pipet</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="994"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1003"/>
         <source>No colour</source>
         <translation>Tanpa warna</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1002"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1011"/>
         <source>RGB</source>
         <translation>RGB</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1002"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1011"/>
         <source>Bands 1, 2, 3 are red, green, blue</source>
         <translation>Pita 1, 2, 3 adalah merah, hijau, biru</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1002"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1011"/>
         <source>IRC</source>
         <translation>IRC</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1002"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1011"/>
         <source>Bands 1, 2, 3 are infrared, red, green (IGN infrared colour orthophoto)</source>
         <translation>Pita 1, 2, 3 adalah inframerah, merah, hijau (ortofoto warna inframerah IGN)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1002"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1011"/>
         <source>RGB + NIR</source>
         <translation>RGB + NIR</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1002"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1011"/>
         <source>Bands 1, 2, 3, 4 are red, green, blue, near infrared</source>
         <translation>Pita 1, 2, 3, 4 adalah merah, hijau, biru, inframerah dekat</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1005"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1014"/>
         <source>Every band: {0}</source>
         <translation>Semua pita: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1051"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1060"/>
         <source> Roles guessed, to confirm.</source>
         <translation> Peran ditebak, harap dikonfirmasi.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1115"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1124"/>
         <source>R</source>
         <translation>R</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1115"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1124"/>
         <source>G</source>
         <translation>G</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1115"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1124"/>
         <source>B</source>
         <translation>B</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1116"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1125"/>
         <source>NIR</source>
         <translation>NIR</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1119"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1128"/>
         <source>Red</source>
         <translation>Merah</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1119"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1128"/>
         <source>Green</source>
         <translation>Hijau</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1119"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1128"/>
         <source>Blue</source>
         <translation>Biru</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1120"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1129"/>
         <source>Near infrared</source>
         <translation>Inframerah dekat</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1126"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1135"/>
         <source>roles guessed, to confirm</source>
         <translation>peran ditebak, harap dikonfirmasi</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1141"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1152"/>
         <source>Select</source>
         <translation>Pilih</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1145"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1156"/>
         <source>Similar pixels</source>
         <translation>Piksel serupa</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1145"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1156"/>
         <source>Every pixel of the raster close to the picked colour or value (the pipette of the rail)</source>
         <translation>Setiap piksel raster yang mendekati warna atau nilai yang diambil (pipet pada rel)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1145"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1156"/>
         <source>Clicked object</source>
         <translation>Objek yang diklik</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1145"/>
         <source>Only the patch of such pixels the click falls in: a pool, a roof, a field (the object detector of the rail); Ctrl+click adds another object</source>
-        <translation>Hanya bidang piksel tersebut tempat klik jatuh: kolam, atap, lahan (pendeteksi objek pada rel); Ctrl+klik menambahkan objek lain</translation>
+        <translation type="obsolete">Hanya bidang piksel tersebut tempat klik jatuh: kolam, atap, lahan (pendeteksi objek pada rel); Ctrl+klik menambahkan objek lain</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1145"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1156"/>
         <source>Similar objects</source>
         <translation>Objek serupa</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1145"/>
         <source>Every object of the raster like the clicked one: the patches of such pixels whose area is within the ratios below (the similar objects tool of the rail); Ctrl+click adds another reference object</source>
-        <translation>Setiap objek raster yang menyerupai objek yang diklik: bidang piksel tersebut yang luasnya dalam rasio di bawah (alat objek serupa pada rel); Ctrl+klik menambahkan objek referensi lain</translation>
+        <translation type="obsolete">Setiap objek raster yang menyerupai objek yang diklik: bidang piksel tersebut yang luasnya dalam rasio di bawah (alat objek serupa pada rel); Ctrl+klik menambahkan objek referensi lain</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1218"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1235"/>
         <source>Area ×</source>
         <translation>Luas ×</translation>
     </message>
@@ -6360,72 +7063,72 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">Objek serupa terbesar, sebagai kelipatan dari objek terbesar yang diklik</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1234"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1251"/>
         <source>to ×</source>
         <translation>hingga ×</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1237"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1254"/>
         <source>same shape</source>
         <translation>bentuk sama</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1240"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1257"/>
         <source>Keep only the objects shaped like the clicked ones: their compactness (4π × area / perimeter², 1 for a disc) within the same ratios; off, a road of the area of a pool is a pool</source>
         <translation>Pertahankan hanya objek berbentuk seperti yang diklik: kekompakannya (4π × luas / keliling², 1 untuk sebuah cakram) dalam rasio yang sama; jika nonaktif, jalan seluas kolam dianggap kolam</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1314"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1331"/>
         <source>Remove this pick</source>
         <translation>Hapus pengambilan ini</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1393"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1410"/>
         <source>Quantity</source>
         <translation>Besaran</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2334"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2356"/>
         <source>Quantity the range applies to. Slope, aspect, hillshade and roughness read the active band as a DTM.</source>
         <translation>Besaran yang dikenai rentang. Kemiringan lereng, aspek, bayangan bukit, dan kekasaran membaca pita aktif sebagai DTM.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1411"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1428"/>
         <source>Thresholds ▾</source>
         <translation>Ambang ▾</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1483"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1500"/>
         <source>Insert ▾</source>
         <translation>Sisipkan ▾</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1483"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1500"/>
         <source>Insert a band reference, a usual spectral index or the current range</source>
         <translation>Sisipkan referensi pita, indeks spektral umum, atau rentang saat ini</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1512"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1529"/>
         <source>Spectral indexes</source>
         <translation>Indeks spektral</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1517"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1534"/>
         <source>Range</source>
         <translation>Rentang</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1518"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1535"/>
         <source>The current value range</source>
         <translation>Rentang nilai saat ini</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1629"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1646"/>
         <source>Rendered colors depend on style and scale.</source>
         <translation>Warna yang dirender bergantung pada gaya dan skala.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1629"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1646"/>
         <source>Only color selection is available: numeric bands, indices, ranges, classes and derivatives are unavailable.</source>
         <translation>Hanya seleksi warna yang tersedia: pita numerik, indeks, rentang, kelas, dan turunan tidak tersedia.</translation>
     </message>
@@ -6435,316 +7138,316 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">RENTANG NILAI — semua pita</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2136"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2158"/>
         <source>VALUE RANGE — band {0}</source>
         <translation>RENTANG NILAI — pita {0}</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2330"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2352"/>
         <source>picks on: {0}</source>
         <translation>mengambil dari: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2334"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2356"/>
         <source>A slope, aspect... reads one band as a DTM: choose a band in BANDS first</source>
         <translation>Kemiringan lereng, aspek... membaca satu pita sebagai DTM: pilih pita di BANDS terlebih dahulu</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2576"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2613"/>
         <source>The object could not be read</source>
         <translation>Objek tidak dapat dibaca</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2578"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2615"/>
         <source>No object under the click: raise the tolerance or click another pixel</source>
         <translation>Tidak ada objek di bawah klik: naikkan toleransi atau klik piksel lain</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2580"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2617"/>
         <source>An object is larger than the window read and was cut: lower the tolerance</source>
         <translation>Sebuah objek lebih besar dari jendela baca dan terpotong: turunkan toleransi</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1080"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1089"/>
         <source>Choose 1 to 3 bands for display.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1082"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1091"/>
         <source>Grey: band {0}</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="872"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="881"/>
         <source>Layer style</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="868"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="877"/>
         <source>Map display</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1084"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1093"/>
         <source>R: {0} · G: {1} · B: {2}</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="955"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="964"/>
         <source>Select band {0}</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="874"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="883"/>
         <source>Selected bands</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2412"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2452"/>
         <source>Choose at least one band in BANDS before using the pipette.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="873"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="882"/>
         <source>First checked band</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="944"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="953"/>
         <source>Select or clear every band. The histogram shows the first checked band.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="954"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="963"/>
         <source>Use this band for the pipette, value range and selected bands display</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2134"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2156"/>
         <source>VALUE RANGE — selected bands</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="907"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="916"/>
         <source>Statistics of the active band in the box of the last zone drawn on the map; only the pixels inside the zone are selected</source>
         <translation>Statistik band aktif dalam cakupan zona terakhir yang digambar pada peta; hanya piksel di dalam zona yang dipilih</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1145"/>
         <source>Segment</source>
-        <translation>Segmentasi</translation>
+        <translation type="obsolete">Segmentasi</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1145"/>
         <source>Draw an object with the segmentation model: left click on it, right click off it, or drag a box; Enter validates. Best on buildings and other well delimited objects</source>
-        <translation>Gambar objek dengan model segmentasi: klik kiri pada objek, klik kanan di luar objek, atau seret sebuah kotak; Enter untuk mengesahkan. Paling cocok untuk bangunan dan objek lain yang batasnya jelas</translation>
+        <translation type="obsolete">Gambar objek dengan model segmentasi: klik kiri pada objek, klik kanan di luar objek, atau seret sebuah kotak; Enter untuk mengesahkan. Paling cocok untuk bangunan dan objek lain yang batasnya jelas</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1185"/>
         <source>Download the SAM 2.1 tiny model once, into your QGIS profile; the segmentation then runs locally, on the CPU</source>
-        <translation>Unduh model SAM 2.1 tiny sekali saja ke profil QGIS Anda; segmentasi kemudian berjalan secara lokal, pada CPU</translation>
+        <translation type="obsolete">Unduh model SAM 2.1 tiny sekali saja ke profil QGIS Anda; segmentasi kemudian berjalan secara lokal, pada CPU</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1194"/>
         <source>Validate object</source>
-        <translation>Sahkan objek</translation>
+        <translation type="obsolete">Sahkan objek</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1196"/>
         <source>Add the object drawn to the selection (Enter on the map)</source>
-        <translation>Tambahkan objek yang digambar ke seleksi (Enter pada peta)</translation>
+        <translation type="obsolete">Tambahkan objek yang digambar ke seleksi (Enter pada peta)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2740"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2892"/>
         <source>Clear</source>
         <translation>Hapus</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1201"/>
         <source>Forget the validated objects</source>
-        <translation>Lupakan objek yang telah disahkan</translation>
+        <translation type="obsolete">Lupakan objek yang telah disahkan</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1221"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1238"/>
         <source>Smallest similar object, as a share of each clicked reference</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1221"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1238"/>
         <source>Largest similar object, as a multiple of each clicked reference</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1253"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1270"/>
         <source>Separation</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1256"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1273"/>
         <source>Connected pixels</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1258"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1275"/>
         <source>Bridge removal: {0} px</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1260"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1277"/>
         <source>Separate objects joined by narrow bridges; higher values cut wider bridges</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1263"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1280"/>
         <source>Fill holes</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1266"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1283"/>
         <source>Fill enclosed gaps in the clicked object; clear to preserve courtyards and inner rings</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1408"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1425"/>
         <source>Custom expression</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1418"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1435"/>
         <source>Numeric raster formula, e.g. (&quot;raster@4&quot; - &quot;raster@1&quot;) / (&quot;raster@4&quot; + &quot;raster@1&quot;)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1419"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1436"/>
         <source>Custom derived value expression</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1420"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1437"/>
         <source>A numeric raster calculator expression. The histogram and thresholds use its computed values.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1478"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1495"/>
         <source>Computed expression values. Drag the handles to use this expression as a derived value with thresholds.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1487"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1504"/>
         <source>Use as derived value</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1696"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1713"/>
         <source>Computing histogram…</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2153"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2175"/>
         <source>No histogram available</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2153"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2175"/>
         <source>Constant value: {0}</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2153"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2175"/>
         <source>{0} sampled pixels · {1} to {2}</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2287"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2309"/>
         <source>Distribution (approximate)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2289"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2311"/>
         <source>Central 98% (P1–P99)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2289"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2311"/>
         <source>Central 90% (P5–P95)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2289"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2311"/>
         <source>Interquartile range (P25–P75)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2289"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2311"/>
         <source>Upper quartile (≥ P75)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2296"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2318"/>
         <source>All values</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2300"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2322"/>
         <source>Derived spectral values</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2646"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2739"/>
         <source>Installing onnxruntime in the background…</source>
         <translation>Memasang onnxruntime di latar belakang…</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2648"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2743"/>
         <source>onnxruntime could not be installed automatically (see the FilterMate log). In a terminal (the OSGeo4W Shell on Windows), run {0} then restart QGIS.</source>
         <translation>onnxruntime tidak dapat dipasang secara otomatis (lihat log FilterMate). Di terminal (OSGeo4W Shell pada Windows), jalankan {0} lalu mulai ulang QGIS.</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2660"/>
         <source>Install the model ({0} MB)…</source>
-        <translation>Pasang model ({0} MB)…</translation>
+        <translation type="obsolete">Pasang model ({0} MB)…</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2666"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2769"/>
         <source>Repair the model…</source>
         <translation>Perbaiki model…</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2691"/>
         <source>Segmentation model</source>
-        <translation>Model segmentasi</translation>
+        <translation type="obsolete">Model segmentasi</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2691"/>
         <source>Download the SAM 2.1 tiny model ({0} MB) from huggingface.co/{1} into your QGIS profile?
 
 Every file is checked against its SHA-256. The model then runs locally, on the CPU; nothing leaves your computer.</source>
-        <translation>Unduh model SAM 2.1 tiny ({0} MB) dari huggingface.co/{1} ke profil QGIS Anda?
+        <translation type="obsolete">Unduh model SAM 2.1 tiny ({0} MB) dari huggingface.co/{1} ke profil QGIS Anda?
 
 Setiap berkas diperiksa dengan SHA-256-nya. Model kemudian berjalan secara lokal, pada CPU; tidak ada yang keluar dari komputer Anda.</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2740"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2892"/>
         <source>Clear ({0})</source>
         <translation>Hapus ({0})</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2780"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2932"/>
         <source>Derived value: {0}</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2652"/>
         <source>The segmentation needs onnxruntime (about {0} MB), which is not installed yet.</source>
-        <translation>Segmentasi memerlukan onnxruntime (sekitar {0} MB), yang belum terpasang.</translation>
+        <translation type="obsolete">Segmentasi memerlukan onnxruntime (sekitar {0} MB), yang belum terpasang.</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2656"/>
         <source>Install onnxruntime…</source>
-        <translation>Pasang onnxruntime…</translation>
+        <translation type="obsolete">Pasang onnxruntime…</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2675"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2779"/>
         <source>Segmentation</source>
         <translation>Segmentasi</translation>
     </message>
@@ -6753,9 +7456,68 @@ Setiap berkas diperiksa dengan SHA-256-nya. Model kemudian berjalan secara lokal
         <source>The segmentation needs onnxruntime (about {0} MB), which this QGIS does not have.
 
 Install it now from PyPI with pip, into your QGIS profile? The Python of QGIS is not modified.</source>
-        <translation>Segmentasi memerlukan onnxruntime (sekitar {0} MB), yang tidak ada di QGIS ini.
+        <translation type="obsolete">Segmentasi memerlukan onnxruntime (sekitar {0} MB), yang tidak ada di QGIS ini.
 
 Pasang sekarang dari PyPI dengan pip ke profil QGIS Anda? Python milik QGIS tidak diubah.</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1156"/>
+        <source>The object under the click: a roof, a pool, a field (the object detector of the rail). With SAM: a click adds an object, Shift+click extends the last one, a right click trims it, a box frames one, Escape removes it. With the colour engine: the patch of such pixels, Ctrl+click adds another one</source>
+        <translation>Objek di bawah klik: atap, kolam renang, ladang (pendeteksi objek di bilah). Dengan SAM: klik menambahkan objek, Shift+klik memperluas objek terakhir, klik kanan memangkasnya, kotak membatasi satu objek, Esc menghapusnya. Dengan mesin warna: bercak piksel serupa, Ctrl+klik menambahkan satu lagi</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1156"/>
+        <source>Every object like the clicked one, whose area is within the ratios below (the similar objects tool of the rail). With SAM: the patches of a similar colour in the visible area are redrawn by the model, then compared with the clicked object. With the colour engine: the patches of such pixels</source>
+        <translation>Setiap objek yang mirip dengan objek yang diklik, dengan luas yang masih dalam rasio di bawah (alat objek serupa di bilah). Dengan SAM: bercak berwarna mirip di area yang terlihat digambar ulang oleh model, lalu dibandingkan dengan objek yang diklik. Dengan mesin warna: bercak piksel serupa</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1185"/>
+        <source>Engine</source>
+        <translation>Mesin</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1189"/>
+        <source>Colour</source>
+        <translation>Warna</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1190"/>
+        <source>SAM draws the object from the image, locally on the CPU; the colour engine grows the patch of pixels of the clicked colour</source>
+        <translation>SAM menggambar objek dari citra, secara lokal pada CPU; mesin warna memperluas bercak piksel berwarna yang diklik</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1207"/>
+        <source>Install SAM 2.1 tiny once, into your QGIS profile; it then runs locally, on the CPU</source>
+        <translation>Pasang SAM 2.1 tiny sekali saja, ke profil QGIS Anda; setelah itu berjalan secara lokal pada CPU</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1218"/>
+        <source>Forget the objects drawn by SAM</source>
+        <translation>Lupakan objek yang digambar SAM</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2741"/>
+        <source>Downloading the SAM model in the background…</source>
+        <translation>Mengunduh model SAM di latar belakang…</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2747"/>
+        <source>Objects are found by their colour. SAM draws them from the image, far better on buildings (about {0} MB to install).</source>
+        <translation>Objek ditemukan berdasarkan warnanya. SAM menggambarnya dari citra, jauh lebih baik pada bangunan (sekitar {0} MB untuk dipasang).</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2751"/>
+        <source>Install SAM ({0} MB)…</source>
+        <translation>Pasang SAM ({0} MB)…</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2779"/>
+        <source>Clicked and similar objects can be drawn by the SAM 2.1 segmentation model, locally on the CPU. Install it now (about {0} MB)?
+
+onnxruntime comes from PyPI with pip, the model from huggingface.co/{1}, each file checked against its SHA-256. Both go to your QGIS profile; the Python of QGIS is not modified and nothing leaves your computer. Without SAM, objects are found by their colour.</source>
+        <translation>Objek yang diklik dan objek serupa dapat digambar oleh model segmentasi SAM 2.1, secara lokal pada CPU. Pasang sekarang (sekitar {0} MB)?
+
+onnxruntime berasal dari PyPI dengan pip, model dari huggingface.co/{1}, dan setiap berkas diperiksa dengan SHA-256. Keduanya masuk ke profil QGIS Anda; Python milik QGIS tidak diubah dan tidak ada yang keluar dari komputer Anda. Tanpa SAM, objek ditemukan berdasarkan warnanya.</translation>
     </message>
 </context>
 <context>
@@ -7027,125 +7789,200 @@ Pasang sekarang dari PyPI dengan pip ke profil QGIS Anda? Python milik QGIS tida
 <context>
     <name>SegmentationController</name>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="106"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="147"/>
         <source>This point cannot be used on this layer</source>
         <translation>Titik ini tidak dapat digunakan pada layer ini</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="134"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="199"/>
         <source>Click inside the raster</source>
         <translation>Klik di dalam raster</translation>
     </message>
     <message>
         <location filename="../ui/controllers/segmentation_controller.py" line="141"/>
         <source>This point is outside the window being segmented: validate or clear the object first</source>
-        <translation>Titik ini berada di luar jendela yang sedang disegmentasi: sahkan atau hapus objek terlebih dahulu</translation>
+        <translation type="obsolete">Titik ini berada di luar jendela yang sedang disegmentasi: sahkan atau hapus objek terlebih dahulu</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="164"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="231"/>
         <source>This box is too small</source>
         <translation>Kotak ini terlalu kecil</translation>
     </message>
     <message>
         <location filename="../ui/controllers/segmentation_controller.py" line="149"/>
         <source>Start with a left click on the object, or draw a box</source>
-        <translation>Mulailah dengan klik kiri pada objek, atau gambar sebuah kotak</translation>
+        <translation type="obsolete">Mulailah dengan klik kiri pada objek, atau gambar sebuah kotak</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="160"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="224"/>
         <source>This raster cannot be segmented</source>
         <translation>Raster ini tidak dapat disegmentasi</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="211"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="317"/>
         <source>Preparing the segmentation of this area…</source>
         <translation>Menyiapkan segmentasi area ini…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="370"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="430"/>
         <source>The segmentation of this area failed: {0}</source>
         <translation>Segmentasi area ini gagal: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="222"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="328"/>
         <source>canceled</source>
         <translation>dibatalkan</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="247"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="363"/>
         <source>onnxruntime is being installed, click again in a moment</source>
         <translation>onnxruntime sedang dipasang, klik lagi sebentar lagi</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="249"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="365"/>
         <source>onnxruntime is missing: run {0}, then restart QGIS</source>
         <translation>onnxruntime tidak ada: jalankan {0}, lalu mulai ulang QGIS</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="253"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="369"/>
         <source>The segmentation model is being downloaded, click again once it is installed</source>
         <translation>Model segmentasi sedang diunduh, klik lagi setelah terpasang</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="255"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="371"/>
         <source>Install the segmentation model first (button below)</source>
         <translation>Pasang model segmentasi terlebih dahulu (tombol di bawah)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="256"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="372"/>
         <source>The segmentation model could not be loaded (see the FilterMate log)</source>
         <translation>Model segmentasi tidak dapat dimuat (lihat log FilterMate)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="276"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="393"/>
         <source>Downloading the segmentation model… {0} %</source>
         <translation>Mengunduh model segmentasi… {0} %</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="285"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="402"/>
         <source>Model installed: left click on an object, or draw a box</source>
         <translation>Model terpasang: klik kiri pada objek, atau gambar sebuah kotak</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="287"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="404"/>
         <source>The model could not be downloaded: {0}</source>
         <translation>Model tidak dapat diunduh: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="289"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="406"/>
         <source>Download canceled</source>
         <translation>Unduhan dibatalkan</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="307"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="422"/>
         <source>Click on an object in the area prepared</source>
         <translation>Klik pada objek di area yang telah disiapkan</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="373"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="439"/>
         <source>No object found: add a point or draw a box</source>
         <translation>Tidak ada objek ditemukan: tambahkan titik atau gambar sebuah kotak</translation>
     </message>
     <message>
         <location filename="../ui/controllers/segmentation_controller.py" line="324"/>
         <source>Left click adds to the object, right click removes, Enter validates</source>
-        <translation>Klik kiri menambah ke objek, klik kanan menghapus, Enter mengesahkan</translation>
+        <translation type="obsolete">Klik kiri menambah ke objek, klik kanan menghapus, Enter mengesahkan</translation>
     </message>
     <message>
         <location filename="../ui/controllers/segmentation_controller.py" line="364"/>
         <source>Click an object first</source>
-        <translation>Klik sebuah objek terlebih dahulu</translation>
+        <translation type="obsolete">Klik sebuah objek terlebih dahulu</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="251"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="367"/>
         <source>Install onnxruntime first, with the button below</source>
         <translation>Pasang onnxruntime terlebih dahulu dengan tombol di bawah</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="91"/>
+        <source>Click an object, or draw a box around it</source>
+        <translation>Klik sebuah objek, atau gambar kotak di sekelilingnya</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="166"/>
+        <source>A right click trims the last object: click an object first</source>
+        <translation>Klik kanan memangkas objek terakhir: klik sebuah objek terlebih dahulu</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="206"/>
+        <source>This point is outside the area of the last object: click it as a new object</source>
+        <translation>Titik ini berada di luar area objek terakhir: klik sebagai objek baru</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="349"/>
+        <source>{0} click(s) fell outside the area prepared: click them again</source>
+        <translation>{0} klik jatuh di luar area yang disiapkan: klik lagi</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="466"/>
+        <source>Shift+click extends the object, right click trims it, Escape removes it</source>
+        <translation>Shift+klik memperluas objek, klik kanan memangkasnya, Esc menghapusnya</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="502"/>
+        <source>Similar objects need the values of the raster: this layer is only drawn</source>
+        <translation>Objek serupa memerlukan nilai raster: layer ini hanya digambar</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="510"/>
+        <source>No patch of this colour nearby to compare with the object</source>
+        <translation>Tidak ada bercak berwarna ini di dekatnya untuk dibandingkan dengan objek</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="524"/>
+        <source>Drawing the similar objects: {0} candidates…</source>
+        <translation>Menggambar objek serupa: {0} kandidat…</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="535"/>
+        <source>Drawing the similar objects… {0} %</source>
+        <translation>Menggambar objek serupa… {0} %</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="549"/>
+        <source>The similar objects could not be drawn: {0}</source>
+        <translation>Objek serupa tidak dapat digambar: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="559"/>
+        <source>{0} similar objects found among {1} candidates; Escape removes them</source>
+        <translation>{0} objek serupa ditemukan dari {1} kandidat; Esc menghapusnya</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="596"/>
+        <source>Click the next object</source>
+        <translation>Klik objek berikutnya</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="603"/>
+        <source>Search stopped</source>
+        <translation>Pencarian dihentikan</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="603"/>
+        <source>Click canceled</source>
+        <translation>Klik dibatalkan</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="611"/>
+        <source>Last object removed</source>
+        <translation>Objek terakhir dihapus</translation>
     </message>
 </context>
 <context>
     <name>SegmentationEmbedTask</name>
     <message>
-        <location filename="../adapters/qgis/coverage_layers/segmentation.py" line="238"/>
+        <location filename="../adapters/qgis/coverage_layers/segmentation.py" line="400"/>
         <source>FilterMate: preparing the segmentation</source>
         <translation>FilterMate: menyiapkan segmentasi</translation>
     </message>
@@ -7441,6 +8278,14 @@ Pasang sekarang dari PyPI dengan pip ke profil QGIS Anda? Python milik QGIS tida
     </message>
 </context>
 <context>
+    <name>SimilarObjectsTask</name>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/segmentation.py" line="469"/>
+        <source>FilterMate: drawing the similar objects</source>
+        <translation>FilterMate: menggambar objek serupa</translation>
+    </message>
+</context>
+<context>
     <name>SimpleConfigDialog</name>
     <message>
         <location filename="../ui/dialogs/config_editor_widget.py" line="470"/>
@@ -7475,12 +8320,12 @@ Pasang sekarang dari PyPI dengan pip ke profil QGIS Anda? Python milik QGIS tida
 <context>
     <name>SqlUtils</name>
     <message>
-        <location filename="../infrastructure/database/sql_utils.py" line="273"/>
+        <location filename="../infrastructure/database/sql_utils.py" line="243"/>
         <source>FilterMate - PostgreSQL Type Warning</source>
         <translation>FilterMate - Peringatan Tipe PostgreSQL</translation>
     </message>
     <message>
-        <location filename="../infrastructure/database/sql_utils.py" line="277"/>
+        <location filename="../infrastructure/database/sql_utils.py" line="247"/>
         <source>Type mismatch in filter: {warning_detail}...</source>
         <translation>Ketidakcocokan tipe dalam filter: {warning_detail}...</translation>
     </message>
@@ -7756,576 +8601,6 @@ Pasang sekarang dari PyPI dengan pip ke profil QGIS Anda? Python milik QGIS tida
         <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
         <source>Kept points</source>
         <translation type="obsolete">Titik yang dipertahankan</translation>
-    </message>
-</context>
-<context>
-    <name>AgentPanel</name>
-    <message>
-        <source>(no request)</source>
-        <translation>(tanpa permintaan)</translation>
-    </message>
-    <message>
-        <source>A few free requests a month, through the relay of FilterMate to Claude (Anthropic), under the terms of Anthropic. The relay counts what is spent and keeps no conversation. When it is used up, choose a provider and enter your own API key.</source>
-        <translation>Beberapa permintaan gratis per bulan, melalui relai FilterMate ke Claude (Anthropic), sesuai ketentuan Anthropic. Relai menghitung yang terpakai dan tidak menyimpan percakapan. Setelah kuota habis, pilih penyedia dan masukkan kunci API Anda sendiri.</translation>
-    </message>
-    <message>
-        <source>API key</source>
-        <translation>Kunci API</translation>
-    </message>
-    <message>
-        <source>Add</source>
-        <translation>Tambah</translation>
-    </message>
-    <message>
-        <source>Address</source>
-        <translation>Alamat</translation>
-    </message>
-    <message>
-        <source>Agent settings</source>
-        <translation>Pengaturan agen</translation>
-    </message>
-    <message>
-        <source>Allow attribute values to be sent</source>
-        <translation>Izinkan pengiriman nilai atribut</translation>
-    </message>
-    <message>
-        <source>Applications already set up will have to be set up again.</source>
-        <translation>Aplikasi yang sudah diatur harus diatur ulang.</translation>
-    </message>
-    <message>
-        <source>Ask the agent to filter your layers</source>
-        <translation>Minta agen memfilter lapisan Anda</translation>
-    </message>
-    <message>
-        <source>Back to the conversation</source>
-        <translation>Kembali ke percakapan</translation>
-    </message>
-    <message>
-        <source>Claude Code or another MCP client on this computer can then filter your layers, once FilterMate has been opened, under the rules of this panel: the same sources, the same confirmations, and filters can be undone here. That application sends what it reads to its own AI provider.</source>
-        <translation>Claude Code atau klien MCP lain di komputer ini kemudian dapat memfilter lapisan Anda, setelah FilterMate dibuka, sesuai aturan panel ini: sumber yang sama, konfirmasi yang sama, dan filter dapat diurungkan di sini. Aplikasi tersebut mengirim apa yang dibacanya ke penyedia AI-nya sendiri.</translation>
-    </message>
-    <message>
-        <source>Connect an AI provider to start. Nothing is sent before you agree.</source>
-        <translation>Hubungkan penyedia AI untuk memulai. Tidak ada yang dikirim sebelum Anda setuju.</translation>
-    </message>
-    <message>
-        <source>Copied, with the access token: keep it to yourself. Save these settings for it to apply.</source>
-        <translation>Disalin, beserta token akses: simpan untuk Anda sendiri. Simpan pengaturan ini agar berlaku.</translation>
-    </message>
-    <message>
-        <source>Copy for Claude Desktop</source>
-        <translation>Salin untuk Claude Desktop</translation>
-    </message>
-    <message>
-        <source>Copy the Claude Code command</source>
-        <translation>Salin perintah Claude Code</translation>
-    </message>
-    <message>
-        <source>Copy the configuration</source>
-        <translation>Salin konfigurasi</translation>
-    </message>
-    <message>
-        <source>Describe it in your own words. Each filter can be undone.</source>
-        <translation>Jelaskan dengan kata-kata Anda sendiri. Setiap filter dapat diurungkan.</translation>
-    </message>
-    <message>
-        <source>Filter your layers from a sentence</source>
-        <translation>Filter lapisan Anda dengan satu kalimat</translation>
-    </message>
-    <message>
-        <source>FilterMate agent</source>
-        <translation>Agen FilterMate</translation>
-    </message>
-    <message>
-        <source>History</source>
-        <translation>Riwayat</translation>
-    </message>
-    <message>
-        <source>History…</source>
-        <translation>Riwayat…</translation>
-    </message>
-    <message>
-        <source>I agree to send this data to this provider</source>
-        <translation>Saya setuju mengirim data ini ke penyedia ini</translation>
-    </message>
-    <message>
-        <source>Let other applications on this computer drive FilterMate (MCP server)</source>
-        <translation>Izinkan aplikasi lain di komputer ini mengendalikan FilterMate (server MCP)</translation>
-    </message>
-    <message>
-        <source>MCP connector</source>
-        <translation>Konektor MCP</translation>
-    </message>
-    <message>
-        <source>MCP connectors</source>
-        <translation>Konektor MCP</translation>
-    </message>
-    <message>
-        <source>Model</source>
-        <translation>Model</translation>
-    </message>
-    <message>
-        <source>More</source>
-        <translation>Lainnya</translation>
-    </message>
-    <message>
-        <source>New access token</source>
-        <translation>Token akses baru</translation>
-    </message>
-    <message>
-        <source>New conversation</source>
-        <translation>Percakapan baru</translation>
-    </message>
-    <message>
-        <source>New token: it applies once these settings are saved.</source>
-        <translation>Token baru: berlaku setelah pengaturan ini disimpan.</translation>
-    </message>
-    <message>
-        <source>Open data platforms</source>
-        <translation>Platform data terbuka</translation>
-    </message>
-    <message>
-        <source>Open the settings</source>
-        <translation>Buka pengaturan</translation>
-    </message>
-    <message>
-        <source>Other applications</source>
-        <translation>Aplikasi lain</translation>
-    </message>
-    <message>
-        <source>Port</source>
-        <translation>Port</translation>
-    </message>
-    <message>
-        <source>Provider</source>
-        <translation>Penyedia</translation>
-    </message>
-    <message>
-        <source>Redo</source>
-        <translation>Ulangi</translation>
-    </message>
-    <message>
-        <source>Remove</source>
-        <translation>Hapus</translation>
-    </message>
-    <message>
-        <source>Remove the stored key</source>
-        <translation>Hapus kunci yang tersimpan</translation>
-    </message>
-    <message>
-        <source>Satellite imagery</source>
-        <translation>Citra satelit</translation>
-    </message>
-    <message>
-        <source>Send (Enter)</source>
-        <translation>Kirim (Enter)</translation>
-    </message>
-    <message>
-        <source>Send again</source>
-        <translation>Kirim ulang</translation>
-    </message>
-    <message>
-        <source>Sent to: {}</source>
-        <translation>Dikirim ke: {}</translation>
-    </message>
-    <message>
-        <source>Set up the agent</source>
-        <translation>Atur agen</translation>
-    </message>
-    <message>
-        <source>Sources</source>
-        <translation>Sumber</translation>
-    </message>
-    <message>
-        <source>Stop (Esc)</source>
-        <translation>Hentikan (Esc)</translation>
-    </message>
-    <message>
-        <source>Stored: leave empty to keep it</source>
-        <translation>Tersimpan: biarkan kosong untuk mempertahankannya</translation>
-    </message>
-    <message>
-        <source>Test</source>
-        <translation>Uji</translation>
-    </message>
-    <message>
-        <source>Testing…</source>
-        <translation>Menguji…</translation>
-    </message>
-    <message>
-        <source>The MCP server could not start: {}</source>
-        <translation>Server MCP tidak dapat dimulai: {}</translation>
-    </message>
-    <message>
-        <source>The agent can search the sources ticked here. Your searches, and what the agent passes to a connector, are sent to them; a layer added from them is read from their servers.</source>
-        <translation>Agen dapat mencari di sumber yang dicentang di sini. Pencarian Anda, dan apa yang diteruskan agen ke konektor, dikirim ke sumber tersebut; lapisan yang ditambahkan dari sumber itu dibaca dari server mereka.</translation>
-    </message>
-    <message>
-        <source>The agent sends your request, the names of your layers and fields, your filter expressions and the results of its tools to the provider chosen here, under that provider's terms. Without the option below, the agent does not read the values of your fields; values already written in your filters and favorites are still sent. The conversation is kept on this computer for each project, until you start a new one.</source>
-        <translation>Agen mengirim permintaan Anda, nama lapisan dan bidang Anda, ekspresi filter Anda, dan hasil alatnya ke penyedia yang dipilih di sini, sesuai ketentuan penyedia tersebut. Tanpa opsi di bawah, agen tidak membaca nilai bidang Anda; nilai yang sudah tertulis di filter dan favorit Anda tetap dikirim. Percakapan disimpan di komputer ini untuk setiap proyek, hingga Anda memulai yang baru.</translation>
-    </message>
-    <message>
-        <source>Through mcp-remote, which needs Node.js: Claude Desktop starts local servers as programs.</source>
-        <translation>Melalui mcp-remote, yang memerlukan Node.js: Claude Desktop menjalankan server lokal sebagai program.</translation>
-    </message>
-    <message>
-        <source>Too many sources added: remove one first.</source>
-        <translation>Terlalu banyak sumber ditambahkan: hapus satu terlebih dahulu.</translation>
-    </message>
-    <message>
-        <source>Undo the last</source>
-        <translation>Urungkan yang terakhir</translation>
-    </message>
-    <message>
-        <source>Undo this turn</source>
-        <translation>Urungkan giliran ini</translation>
-    </message>
-    <message>
-        <source>What do you want to filter?</source>
-        <translation>Apa yang ingin Anda filter?</translation>
-    </message>
-    <message>
-        <source>added by you</source>
-        <translation>ditambahkan oleh Anda</translation>
-    </message>
-    <message>
-        <source>applied</source>
-        <translation>diterapkan</translation>
-    </message>
-    <message>
-        <source>community</source>
-        <translation>komunitas</translation>
-    </message>
-    <message>
-        <source>https://... or a portal address</source>
-        <translation>https://... atau alamat portal</translation>
-    </message>
-    <message>
-        <source>no change</source>
-        <translation>tidak ada perubahan</translation>
-    </message>
-    <message>
-        <source>official</source>
-        <translation>resmi</translation>
-    </message>
-    <message>
-        <source>this computer</source>
-        <translation>komputer ini</translation>
-    </message>
-    <message>
-        <source>undone</source>
-        <translation>diurungkan</translation>
-    </message>
-    <message>
-        <source>{} turn(s)</source>
-        <translation>{} giliran</translation>
-    </message>
-    <message>
-        <source>Which layers are in this project?</source>
-        <translation>Lapisan apa saja yang ada di proyek ini?</translation>
-    </message>
-    <message>
-        <source>Keep the buildings taller than 15 m</source>
-        <translation>Pertahankan bangunan yang lebih tinggi dari 15 m</translation>
-    </message>
-    <message>
-        <source>Filter the roads inside the selected feature</source>
-        <translation>Filter jalan di dalam fitur yang dipilih</translation>
-    </message>
-</context>
-<context>
-    <name>AgentChat</name>
-    <message>
-        <source>Access to the free quota was renewed: send your request again.</source>
-        <translation>Akses ke kuota gratis telah diperbarui: kirim ulang permintaan Anda.</translation>
-    </message>
-    <message>
-        <source>Another application is changing the project: try again in a moment.</source>
-        <translation>Aplikasi lain sedang mengubah proyek: coba lagi sebentar lagi.</translation>
-    </message>
-    <message>
-        <source>Another application: {}</source>
-        <translation>Aplikasi lain: {}</translation>
-    </message>
-    <message>
-        <source>Applied again: {}.</source>
-        <translation>Diterapkan lagi: {}.</translation>
-    </message>
-    <message>
-        <source>Changed since, left as is: {}.</source>
-        <translation>Telah berubah sejak itu, dibiarkan apa adanya: {}.</translation>
-    </message>
-    <message>
-        <source>Changed: {}.</source>
-        <translation>Diubah: {}.</translation>
-    </message>
-    <message>
-        <source>Choose a model and agree to send your data to use the agent.</source>
-        <translation>Pilih model dan setujui pengiriman data Anda untuk menggunakan agen.</translation>
-    </message>
-    <message>
-        <source>Connecting to {}…</source>
-        <translation>Menghubungkan ke {}…</translation>
-    </message>
-    <message>
-        <source>Earlier conversation: the agent starts afresh from here.</source>
-        <translation>Percakapan sebelumnya: agen memulai dari awal mulai dari sini.</translation>
-    </message>
-    <message>
-        <source>Enter your API key in the agent settings.</source>
-        <translation>Masukkan kunci API Anda di pengaturan agen.</translation>
-    </message>
-    <message>
-        <source>Export of {}</source>
-        <translation>Ekspor {}</translation>
-    </message>
-    <message>
-        <source>Favorite applied</source>
-        <translation>Favorit diterapkan</translation>
-    </message>
-    <message>
-        <source>Filter on the points of {}</source>
-        <translation>Filter pada titik-titik {}</translation>
-    </message>
-    <message>
-        <source>Filter on {}</source>
-        <translation>Filter pada {}</translation>
-    </message>
-    <message>
-        <source>Filter on {} by an area</source>
-        <translation>Filter pada {} berdasarkan suatu area</translation>
-    </message>
-    <message>
-        <source>Filter on {} by {}</source>
-        <translation>Filter pada {} berdasarkan {}</translation>
-    </message>
-    <message>
-        <source>FilterMate agent</source>
-        <translation>Agen FilterMate</translation>
-    </message>
-    <message>
-        <source>Filters removed from {}</source>
-        <translation>Filter dihapus dari {}</translation>
-    </message>
-    <message>
-        <source>Hidden: {}</source>
-        <translation>Disembunyikan: {}</translation>
-    </message>
-    <message>
-        <source>It answers.</source>
-        <translation>Sumber menjawab.</translation>
-    </message>
-    <message>
-        <source>Layer added: {}</source>
-        <translation>Lapisan ditambahkan: {}</translation>
-    </message>
-    <message>
-        <source>Layers removed: {}</source>
-        <translation>Lapisan dihapus: {}</translation>
-    </message>
-    <message>
-        <source>Not reachable for this conversation: {}</source>
-        <translation>Tidak dapat dijangkau untuk percakapan ini: {}</translation>
-    </message>
-    <message>
-        <source>Nothing to redo.</source>
-        <translation>Tidak ada yang bisa diulang.</translation>
-    </message>
-    <message>
-        <source>Nothing to restore.</source>
-        <translation>Tidak ada yang bisa dipulihkan.</translation>
-    </message>
-    <message>
-        <source>Reading the active filters</source>
-        <translation>Membaca filter yang aktif</translation>
-    </message>
-    <message>
-        <source>Reading the favorites</source>
-        <translation>Membaca favorit</translation>
-    </message>
-    <message>
-        <source>Reading the fields of {}</source>
-        <translation>Membaca bidang {}</translation>
-    </message>
-    <message>
-        <source>Reading the layers</source>
-        <translation>Membaca lapisan</translation>
-    </message>
-    <message>
-        <source>Reading the map</source>
-        <translation>Membaca peta</translation>
-    </message>
-    <message>
-        <source>Reading the values of {}</source>
-        <translation>Membaca nilai {}</translation>
-    </message>
-    <message>
-        <source>Restored: {}.</source>
-        <translation>Dipulihkan: {}.</translation>
-    </message>
-    <message>
-        <source>Searching satellite imagery on {}</source>
-        <translation>Mencari citra satelit di {}</translation>
-    </message>
-    <message>
-        <source>Searching {} for {}</source>
-        <translation>Mencari di {} untuk {}</translation>
-    </message>
-    <message>
-        <source>Selection cleared on {}</source>
-        <translation>Seleksi dihapus pada {}</translation>
-    </message>
-    <message>
-        <source>Selection on {}</source>
-        <translation>Seleksi pada {}</translation>
-    </message>
-    <message>
-        <source>Shown: {}</source>
-        <translation>Ditampilkan: {}</translation>
-    </message>
-    <message>
-        <source>Stopped.</source>
-        <translation>Dihentikan.</translation>
-    </message>
-    <message>
-        <source>The MCP server could not start: {}</source>
-        <translation>Server MCP tidak dapat dimulai: {}</translation>
-    </message>
-    <message>
-        <source>The QGIS authentication database is not available.</source>
-        <translation>Basis data autentikasi QGIS tidak tersedia.</translation>
-    </message>
-    <message>
-        <source>The QGIS master password is needed to use the stored key.</source>
-        <translation>Kata sandi utama QGIS diperlukan untuk menggunakan kunci yang tersimpan.</translation>
-    </message>
-    <message>
-        <source>The agent stopped before the end ({}).</source>
-        <translation>Agen berhenti sebelum selesai ({}).</translation>
-    </message>
-    <message>
-        <source>The agent wants to add this layer of a web service to the project:
-{} · {}
-
-Do you agree?</source>
-        <translation>Agen ingin menambahkan lapisan layanan web ini ke proyek:
-{} · {}
-
-Apakah Anda setuju?</translation>
-    </message>
-    <message>
-        <source>The agent wants to add this layer to the project:
-{}
-
-A remote source is read from its server by QGIS, and what the layer holds can be sent to the provider of the agent. Do you agree?</source>
-        <translation>Agen ingin menambahkan lapisan ini ke proyek:
-{}
-
-Sumber jarak jauh dibaca dari servernya oleh QGIS, dan isi lapisan dapat dikirim ke penyedia agen. Apakah Anda setuju?</translation>
-    </message>
-    <message>
-        <source>The agent wants to export these layers to files:
-{}
-
-Do you agree?</source>
-        <translation>Agen ingin mengekspor lapisan-lapisan ini ke file:
-{}
-
-Apakah Anda setuju?</translation>
-    </message>
-    <message>
-        <source>The agent wants to remove these layers from the project (their files stay, their styles and filters here are lost):
-{}
-
-Do you agree?</source>
-        <translation>Agen ingin menghapus lapisan-lapisan ini dari proyek (file-nya tetap ada, tetapi gaya dan filter di sini hilang):
-{}
-
-Apakah Anda setuju?</translation>
-    </message>
-    <message>
-        <source>The agent wants to run this action on an external connector:
-{}
-{}
-
-Do you agree?</source>
-        <translation>Agen ingin menjalankan tindakan ini pada konektor eksternal:
-{}
-{}
-
-Apakah Anda setuju?</translation>
-    </message>
-    <message>
-        <source>The credit or quota of this account is used up.</source>
-        <translation>Kredit atau kuota akun ini telah habis.</translation>
-    </message>
-    <message>
-        <source>The free quota could not be reached: {}</source>
-        <translation>Kuota gratis tidak dapat dijangkau: {}</translation>
-    </message>
-    <message>
-        <source>The free quota is not available.</source>
-        <translation>Kuota gratis tidak tersedia.</translation>
-    </message>
-    <message>
-        <source>The free quota is unavailable for now.</source>
-        <translation>Kuota gratis tidak tersedia untuk saat ini.</translation>
-    </message>
-    <message>
-        <source>The free quota is used up for this month. Enter your own API key in the agent settings.</source>
-        <translation>Kuota gratis bulan ini telah habis. Masukkan kunci API Anda sendiri di pengaturan agen.</translation>
-    </message>
-    <message>
-        <source>The key could not be stored.</source>
-        <translation>Kunci tidak dapat disimpan.</translation>
-    </message>
-    <message>
-        <source>The provider could not be reached: {}</source>
-        <translation>Penyedia tidak dapat dijangkau: {}</translation>
-    </message>
-    <message>
-        <source>The provider refused the API key: check it in the agent settings.</source>
-        <translation>Penyedia menolak kunci API: periksa di pengaturan agen.</translation>
-    </message>
-    <message>
-        <source>The provider reported a problem: {}</source>
-        <translation>Penyedia melaporkan masalah: {}</translation>
-    </message>
-    <message>
-        <source>The stored key could not be read.</source>
-        <translation>Kunci yang tersimpan tidak dapat dibaca.</translation>
-    </message>
-    <message>
-        <source>Thinking…</source>
-        <translation>Berpikir…</translation>
-    </message>
-    <message>
-        <source>Too many new accounts from this address today: try again tomorrow, or enter your own API key.</source>
-        <translation>Terlalu banyak akun baru dari alamat ini hari ini: coba lagi besok, atau masukkan kunci API Anda sendiri.</translation>
-    </message>
-    <message>
-        <source>Too many requests for now: try again in a moment.</source>
-        <translation>Terlalu banyak permintaan saat ini: coba lagi sebentar lagi.</translation>
-    </message>
-    <message>
-        <source>Trying a filter on {}</source>
-        <translation>Mencoba filter pada {}</translation>
-    </message>
-    <message>
-        <source>Zoom on {}</source>
-        <translation>Zoom ke {}</translation>
-    </message>
-    <message>
-        <source>an area</source>
-        <translation>suatu area</translation>
-    </message>
-    <message>
-        <source>everything</source>
-        <translation>semuanya</translation>
-    </message>
-    <message>
-        <source>{} tools available</source>
-        <translation>{} alat tersedia</translation>
     </message>
 </context>
 </TS>

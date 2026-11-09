@@ -139,30 +139,77 @@ class Host:
         self.picker_states.append(active)
 
 
-def test_runtime_confirmation(panel):
-    """Nothing is installed without an answer, and the question comes once."""
+def test_sam_confirmation(panel):
+    """Nothing is installed without an answer, the question comes once, one answer installs the runtime then the model."""
     from qgis.PyQt.QtWidgets import QMessageBox
     original = QMessageBox.question
-    answers, asked, requested = [QMessageBox.StandardButton.No, QMessageBox.StandardButton.Yes], [], []
+    answers, asked, runtime, model = [QMessageBox.StandardButton.No, QMessageBox.StandardButton.Yes,
+                                      QMessageBox.StandardButton.Yes], [], [], []
     QMessageBox.question = lambda *args, **kwargs: asked.append(args) or answers.pop(0)
-    panel.segmentRuntimeInstallRequested.connect(lambda: requested.append(True))
+    panel.segmentRuntimeInstallRequested.connect(lambda: runtime.append(True))
+    panel.segmentModelInstallRequested.connect(lambda: model.append(True))
     try:
         panel._target_buttons[panels.PICK_SIMILAR].setChecked(True)
         panel._runtime_asked = False
         panel.set_segmentation_readiness(False, False)
-        panel._target_buttons[panels.PICK_SEGMENT].setChecked(True)
-        check("the first click on Segment asks", len(asked) == 1, len(asked))
-        check("a refusal installs nothing", requested == [])
+        panel._target_buttons[panels.PICK_OBJECT].setChecked(True)
+        check("the first object target asks", len(asked) == 1, len(asked))
+        check("a refusal installs nothing", runtime == [] and model == [])
         check("and the button stays", not panel._segment_install_button.isHidden() and panel._segment_install_button.isEnabled())
+        check("the colour engine works meanwhile", panel.object_engine() == panels.ENGINE_COLOR and not panel._object_settings.isHidden())
         panel._target_buttons[panels.PICK_SIMILAR].setChecked(True)
-        panel._target_buttons[panels.PICK_SEGMENT].setChecked(True)
+        panel._target_buttons[panels.PICK_SIMILAR_OBJECTS].setChecked(True)
         check("the question is not repeated", len(asked) == 1, len(asked))
         panel._segment_install_button.click()
-        check("the button asks again and a yes installs", len(asked) == 2 and requested == [True], (len(asked), requested))
+        check("the button asks again and a yes starts with the runtime", len(asked) == 2 and runtime == [True] and model == [],
+              (len(asked), runtime, model))
         check("and it waits", not panel._segment_install_button.isEnabled())
+        panel.set_segmentation_readiness(True, False)
+        panel._segment_install_button.click()
+        check("with the runtime there, a yes downloads the model", model == [True], model)
     finally:
         QMessageBox.question = original
-    panel.set_segmentation_readiness(True, False)
+
+
+def make_shapes(folder):
+    """A clicked square, a square like it, a square nine times larger and a strip of the clicked area."""
+    path = str(Path(folder) / "shapes.tif")
+    ds = gdal.GetDriverByName("GTiff").Create(path, 800, 800, 3, gdal.GDT_Byte)
+    crs = osr.SpatialReference()
+    crs.ImportFromEPSG(2154)
+    ds.SetProjection(crs.ExportToWkt())
+    ds.SetGeoTransform((600000.0, 0.5, 0, 6100400.0, 0, -0.5))
+    for number in (1, 2, 3):
+        array = np.full((800, 800), 30, dtype=np.uint8)
+        for rows, cols in SHAPES.values():
+            array[rows[0]:rows[1], cols[0]:cols[1]] = 230
+        ds.GetRasterBand(number).WriteArray(array)
+    ds = None
+    layer = QgsRasterLayer(path, "Shapes", "gdal")
+    assert layer.isValid()
+    return layer
+
+
+SHAPES = {"clicked": ((100, 160), (100, 160)), "alike": ((100, 158), (500, 562)),
+          "large": ((450, 630), (80, 260)), "strip": ((450, 462), (500, 800))}
+
+
+def shape_geometry(layer, name):
+    (r0, r1), (c0, c1) = SHAPES[name]
+    extent = layer.extent()
+    return QgsGeometry.fromRect(QgsRectangle(extent.xMinimum() + c0 * 0.5, extent.yMaximum() - r1 * 0.5,
+                                             extent.xMinimum() + c1 * 0.5, extent.yMaximum() - r0 * 0.5))
+
+
+def ready_panel(layer):
+    panel = panels.RasterExploringPanel()
+    panel.set_summary(adapter.read_raster_summary(layer))
+    panel.set_segmentation_readiness(True, True)
+    return panel
+
+
+def install_model(model):
+    segmentation.find_provider = lambda: model
 
 
 def test_tool_flow(layer):
@@ -172,12 +219,10 @@ def test_tool_flow(layer):
     canvas.setDestinationCrs(layer.crs())
     canvas.setLayers([layer])
     canvas.setExtent(layer.extent())
-    panel = panels.RasterExploringPanel()
-    panel.set_summary(adapter.read_raster_summary(layer))
+    panel = ready_panel(layer)
+    panel.set_pick_target(panels.PICK_OBJECT)
     model = BrightModel()
-    segmentation.find_provider = lambda: model
-    controllers_segmentation = importlib.import_module(PACKAGE + ".adapters.qgis.coverage_layers.segmentation")
-    controllers_segmentation.find_provider = lambda: model
+    install_model(model)
     host = Host(layer, panel, canvas)
     tool_controller = controllers.SegmentationController(host)
     tool_controller.activate()
@@ -185,89 +230,105 @@ def test_tool_flow(layer):
 
     extent = layer.extent()
     click = QgsPointXY(extent.xMinimum() + 250 * 0.5, extent.yMaximum() - 320 * 0.5)
-    tool_controller._on_point(click, True)
-    check("a first click encodes in a task", spin(lambda: tool_controller._task is None and tool_controller.session_info() is not None))
-    check("the model saw one window", model.embedded == 1, model.embedded)
-    session = tool_controller.session_info()
-    check("the click is a pixel of the window", session is not None and session.points[0][0] > 0 and session.window.contains(click.x(), click.y()))
-    geometry = session.geometry()
     expected = QgsRectangle(extent.xMinimum() + SQUARE[2] * 0.5, extent.yMaximum() - SQUARE[1] * 0.5,
                             extent.xMinimum() + SQUARE[3] * 0.5, extent.yMaximum() - SQUARE[0] * 0.5)
     truth = QgsGeometry.fromRect(expected)
-    iou = geometry.intersection(truth).area() / geometry.combine(truth).area()
-    check("the polygon lands on the bright square", iou > 0.97, round(iou, 4))
 
-    tool_controller._on_point(QgsPointXY(click.x() + 2.0, click.y()), False)
-    check("a second click reuses the window", model.embedded == 1 and len(session.points) == 2, model.embedded)
-    tool_controller.validate()
-    selection = panel.selection()
-    check("validate adds the object to the panel", selection is not None and len(selection.segments) == 1)
-    check("the panel state keeps it", criteria.RasterSelection.from_dict(panel.state()["pipette_selection"]).segments == selection.segments)
+    def segment_iou(index=0):
+        geometry = QgsGeometry.fromWkt(panel._segments[index])
+        return geometry.intersection(truth).area() / geometry.combine(truth).area()
+
     tool_controller._on_point(click, True)
-    check("the prompts were reset", len(session.points) == 1)
-    tool_controller.clear()
-    check("escape leaves the validated object", panel.selection() is not None and not session.has_prompts)
+    check("a first click encodes in a task", spin(lambda: tool_controller._task is None and tool_controller.session_info() is not None))
+    check("the model saw one window", model.embedded == 1, model.embedded)
+    check("a click adds the object at once, no Enter", len(panel._segments) == 1 and panel.selection() is not None,
+          len(panel._segments))
+    check("the polygon lands on the bright square", segment_iou() > 0.97, round(segment_iou(), 4) if panel._segments else None)
+    check("the panel state keeps it", criteria.RasterSelection.from_dict(panel.state()["pipette_selection"]).segments == tuple(panel._segments))
 
-    # Refused prompts, then a right click alone, then a click outside the raster.
-    tool_controller._on_point(QgsPointXY(click.x(), click.y()), False)
-    check("a right click cannot start an object", not session.has_prompts)
+    session = tool_controller.session_info()
+    tool_controller._on_point(QgsPointXY(click.x() + 2.0, click.y()), True, True)
+    check("Shift+click redraws the last object", len(panel._segments) == 1 and len(session.points) == 2 and model.embedded == 1,
+          (len(panel._segments), len(session.points)))
+    tool_controller._on_point(QgsPointXY(click.x() + 4.0, click.y()), False)
+    check("a right click trims it", len(panel._segments) == 1 and session.labels[-1] == 0, session.labels)
+    tool_controller.clear()
+    check("Escape removes the last object", panel._segments == [] and panel.selection() is None, len(panel._segments))
+    tool_controller._on_point(click, False)
+    check("a right click without an object starts nothing", panel._segments == [] and not session.has_prompts)
     tool_controller._on_point(QgsPointXY(extent.xMaximum() + 500.0, click.y()), True)
     check("a click off the raster encodes nothing", tool_controller._task is None and model.embedded == 1, model.embedded)
 
-    # Another QGIS tool takes the map: the prompts leave with it.
     tool_controller._on_point(click, True)
-    check("a new object started", session.has_prompts)
+    tool_controller._on_point(QgsPointXY(click.x() + 6.0, click.y() + 6.0), True)
+    check("the same object clicked twice is kept once", len(panel._segments) == 1, len(panel._segments))
+    tool_controller._on_box(QgsRectangle(expected.xMinimum() - 5, expected.yMinimum() - 5, expected.xMaximum() + 5, expected.yMaximum() + 5))
+    check("a box frames an object", len(panel._segments) == 1 and session.box is not None)
+
+    # The object under the mouse, outlined before any click.
+    tool_controller._on_hover(click)
+    check("the object under the mouse is outlined", spin(lambda: tool_controller._outline is not None and tool_controller._outline.visible, 3000))
+    hovered = tool_controller._outline.geometry() if tool_controller._outline is not None else None
+    check("on the object", hovered is not None and hovered.intersects(QgsGeometry.fromPointXY(click)))
+    tool_controller._on_point(click, True)
+    check("a click hides that outline", not tool_controller._outline.visible)
+
+    # Another QGIS tool takes the map: the prompts leave with it, the objects stay.
     other = QgsMapToolPan(canvas)
     canvas.setMapTool(other)
     check("another tool drops the prompts", not session.has_prompts and host.picker_states[-1] is False, host.picker_states[-3:])
+    check("the objects stay", len(panel._segments) == 1)
     tool_controller.activate()
     check("the tool can come back", tool_controller.on_map())
     tool_controller.deactivate()
     check("the map goes back to the tool it replaced", canvas.mapTool() is other, canvas.mapTool())
-
-    # A layer change deletes the tool: it must have left the map at once.
     tool_controller.activate()
     tool_controller.drop()
     check("drop releases the map at once", canvas.mapTool() is other, canvas.mapTool())
+    selection = panel.selection()
 
-    # Panel: the target, the validated objects, the state.
-    panel.set_segmentation_readiness(True, True)
-    check("the target shows", not panel._target_buttons[panels.PICK_SEGMENT].isHidden())
-    check("ready: nothing to install", panel._segment_install_label.isHidden() and panel._segment_install_button.isHidden())
-    panel._target_buttons[panels.PICK_SEGMENT].setChecked(True)
-    check("the segment widget shows", not panel._segment_widget.isHidden() and panel.pick_target() == panels.PICK_SEGMENT)
-    check("the objects are selected", panel.selection() is not None and len(panel.selection().segments) == 1)
+    # Panel: three targets, the engine, the objects of each engine, the state.
+    check("three targets, Segment is gone", sorted(panel._target_buttons) == sorted(panels.PICK_TARGETS) and len(panels.PICK_TARGETS) == 3)
+    check("SAM in use: its block shows, the colour settings hide",
+          not panel._segment_widget.isHidden() and panel._object_settings.isHidden() and panel.object_engine() == panels.ENGINE_SAM)
+    engines = []
+    panel.engineChanged.connect(engines.append)
+    panel._engine_combo.setCurrentIndex(panel._engine_combo.findData(panels.ENGINE_COLOR))
+    check("the colour engine takes over", engines == [panels.ENGINE_COLOR] and not panel._object_settings.isHidden()
+          and panel.selection() is None and panel._segments != [], engines)
+    panel._engine_combo.setCurrentIndex(panel._engine_combo.findData(panels.ENGINE_SAM))
+    check("SAM's objects come back with it", engines[-1] == panels.ENGINE_SAM and panel.selection() is not None)
     state = panel.state()
     panel._target_buttons[panels.PICK_SIMILAR].setChecked(True)
-    check("another target sets them aside", panel.selection() is None and panel._segments != [])
-    panel._target_buttons[panels.PICK_SEGMENT].setChecked(True)
-    check("they come back with the target", panel.selection() is not None)
+    check("similar pixels set the objects aside", panel.selection() is None and panel._segment_widget.isHidden())
+    panel._target_buttons[panels.PICK_SIMILAR_OBJECTS].setChecked(True)
+    check("they come back with an object target", panel.selection() is not None and not panel._similar_widget.isHidden())
     bands = panel._pipette_bands
     panel._pipette_bands = []
     check("no band selected, polygons still select", panels.build_raster_selection(panel.state()) is not None)
     panel._pipette_bands = bands
-    panel.set_pick_target(panels.PICK_OBJECT)
-    check("a rail tool leaves the target too", panel.selection() is None and panel._segment_widget.isHidden())
     panel.set_pick_target(panels.PICK_SIMILAR)
     panel.restore_state(state)
-    check("the state brings the objects and the target back",
-          panel.selection() is not None and panel.pick_target() == panels.PICK_SEGMENT and len(panel._segments) == 1)
+    check("the state brings the objects, the target and the engine back",
+          panel.selection() is not None and panel.pick_target() == panels.PICK_OBJECT and panel.object_engine() == panels.ENGINE_SAM)
+    old = dict(state, pipette_target="segment")
+    old.pop("pipette_engine")
+    panel.set_pick_target(panels.PICK_SIMILAR)
+    panel.restore_state(old)
+    check("a state of the Segment target opens on the clicked object", panel.pick_target() == panels.PICK_OBJECT and panel.selection() is not None)
+
     panel.set_segmentation_readiness(False, False)
-    check("without the runtime and the model the target stays", not panel._target_buttons[panels.PICK_SEGMENT].isHidden()
-          and panel.pick_target() == panels.PICK_SEGMENT)
-    check("and says what to install", not panel._segment_install_label.isHidden() and not panel._segment_install_button.isHidden()
-          and "onnxruntime" in panel._segment_install_label.text() and "onnxruntime" in panel._segment_install_button.text())
-    panel.set_segmentation_readiness(True, False)
-    check("with the runtime only the download is offered", panel._segment_install_label.isHidden() and not panel._segment_install_button.isHidden()
-          and "62" in panel._segment_install_button.text())
-    test_runtime_confirmation(panel)
+    check("without SAM the objects wait, the colour engine works", panel.object_engine() == panels.ENGINE_COLOR
+          and panel.selection() is None and len(panel._segments) == 1)
+    check("and the panel offers SAM", not panel._segment_install_label.isHidden() and not panel._segment_install_button.isHidden()
+          and "SAM" in panel._segment_install_button.text())
+    test_sam_confirmation(panel)
     panel.set_segmentation_readiness(True, False, True)
     check("during a download the button waits", not panel._segment_install_button.isEnabled())
     panel.set_segmentation_readiness(False, False, False, True)
-    check("while pip runs no command is shown", "background" in panel._segment_install_label.text()
-          and not panel._segment_install_label.isHidden())
+    check("while pip runs it says so", "background" in panel._segment_install_label.text() and not panel._segment_install_label.isHidden())
     panel.set_segmentation_readiness(True, True)
-    check("installed: no button", panel._segment_install_button.isHidden())
+    check("installed: no button, SAM takes over", panel._segment_install_button.isHidden() and panel.object_engine() == panels.ENGINE_SAM)
     panel.offer_model_repair()
     check("damaged files can be repaired", not panel._segment_install_button.isHidden() and panel._segment_install_button.isEnabled())
     panel.set_segmentation_readiness(True, True)
@@ -276,6 +337,80 @@ def test_tool_flow(layer):
     check("clear forgets the objects", panel.selection() is None and panel._segments == [])
     check("and the button says so", not panel._segment_clear_button.isEnabled())
     return selection
+
+
+def test_similar_flow(folder):
+    """Similar objects with SAM: the colour proposes, the model redraws, the area and the shape judge."""
+    layer = make_shapes(folder)
+    QgsProject.instance().addMapLayer(layer)
+    canvas = QgsMapCanvas()
+    canvas.resize(QSize(600, 600))
+    canvas.setDestinationCrs(layer.crs())
+    canvas.setLayers([layer])
+    canvas.setExtent(layer.extent())
+    panel = ready_panel(layer)
+    panel.set_pick_target(panels.PICK_SIMILAR_OBJECTS)
+    model = BrightModel()
+    install_model(model)
+    host = Host(layer, panel, canvas)
+    reference = shape_geometry(layer, "clicked")
+    criterion = panel.criterion_at({1: 230.0, 2: 230.0, 3: 230.0})
+    check("the panel reads a criterion without touching its picks", criterion is not None and panel._picks == [])
+    points = segmentation.similar_candidate_points(layer, criterion, reference, layer.extent())
+    check("the colour proposes the other patches", len(points) >= 2, points)
+    host._similar_candidates = lambda lay, ref, visible: segmentation.similar_candidate_points(lay, criterion, ref, visible)
+    controller = controllers.SegmentationController(host)
+    controller.activate()
+
+    def names():
+        return sorted(max(SHAPES, key=lambda name: segmentation.overlap(QgsGeometry.fromWkt(wkt), shape_geometry(layer, name)))
+                      for wkt in panel._segments)
+
+    # Clicks while the area is being prepared: each is an object of its own.
+    panel.set_pick_target(panels.PICK_OBJECT)
+    controller._on_point(reference.centroid().asPoint(), True)
+    controller._on_point(shape_geometry(layer, "alike").centroid().asPoint(), True)
+    check("two clicks during the preparation give two objects",
+          spin(lambda: controller._task is None and len(panel._segments) >= 2, 30000) and names() == ["alike", "clicked"], names())
+    controller._session = None  # the next click prepares an area again
+    controller._on_point(shape_geometry(layer, "large").centroid().asPoint(), True)
+    controller.clear()
+    check("Escape during the preparation only cancels that click", controller._task is None and names() == ["alike", "clicked"],
+          (names(), panel._segment_status.text()))
+    controller.clear()
+    check("then Escape removes the last object", names() == ["clicked"], names())
+    panel.clear_segments()
+    controller.clear()
+    check("Clear then Escape removes nothing more", panel._segments == [])
+    controller._on_point(reference.centroid().asPoint(), True)
+    spin(lambda: controller._task is None and len(panel._segments) == 1, 30000)
+    controller._on_point(reference.centroid().asPoint(), True, True)
+    check("Shift+click after Clear redraws the new object", names() == ["clicked"], names())
+    panel.clear_segments()
+
+    panel.set_pick_target(panels.PICK_SIMILAR_OBJECTS)
+    controller._on_point(reference.centroid().asPoint(), True)
+    check("the clicked object is drawn and the search runs",
+          spin(lambda: controller._task is None and controller._search is None and len(panel._segments) >= 1, 60000),
+          panel._segment_status.text())
+    found = [QgsGeometry.fromWkt(wkt) for wkt in panel._segments]
+    kinds = []
+    for geometry in found:
+        best = max(SHAPES, key=lambda name: segmentation.overlap(geometry, shape_geometry(layer, name)))
+        kinds.append(best)
+    check("the alike square is found", "alike" in kinds, kinds)
+    check("the large square and the strip are not", "large" not in kinds and "strip" not in kinds, kinds)
+    check("the status counts them", "1 " in panel._segment_status.text(), panel._segment_status.text())
+    controller.clear()
+    check("Escape removes the clicked object with its similar ones", panel._segments == [], len(panel._segments))
+    panel._similar_shape_check.setChecked(False)
+    controller._on_point(reference.centroid().asPoint(), True)
+    spin(lambda: controller._search is None and len(panel._segments) >= 1, 60000)
+    kinds = [max(SHAPES, key=lambda name: segmentation.overlap(QgsGeometry.fromWkt(wkt), shape_geometry(layer, name)))
+             for wkt in panel._segments]
+    check("without the shape, the strip of the same area joins", "strip" in kinds and "large" not in kinds, kinds)
+    controller.drop()
+    QgsProject.instance().removeMapLayer(layer.id())
 
 
 class _TileHandler(BaseHTTPRequestHandler):
@@ -383,6 +518,7 @@ with tempfile.TemporaryDirectory() as folder:
     raster = make_raster(folder)
     validated = test_tool_flow(raster)
     test_replay(raster, validated)
+    test_similar_flow(folder)
     test_web_service()
     test_real_model()
     QgsProject.instance().removeAllMapLayers()

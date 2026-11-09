@@ -30,6 +30,709 @@
     </message>
 </context>
 <context>
+    <name>AgentChat</name>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Access to the free quota was renewed: send your request again.</source>
+        <translation type="obsolete">የነፃ ኮታ መዳረሻ ታድሷል: ጥያቄዎን እንደገና ይላኩ።</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Another application is changing the project: try again in a moment.</source>
+        <translation type="obsolete">ሌላ መተግበሪያ ፕሮጀክቱን እየቀየረ ነው: ከጥቂት ቆይታ በኋላ እንደገና ይሞክሩ።</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Another application: {}</source>
+        <translation type="obsolete">ሌላ መተግበሪያ: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Applied again: {}.</source>
+        <translation type="obsolete">እንደገና ተተግብሯል: {}።</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Changed since, left as is: {}.</source>
+        <translation type="obsolete">ከዚያ በኋላ ተቀይሯል፣ እንዳለ ተተወ: {}።</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Changed: {}.</source>
+        <translation type="obsolete">ተቀይሯል: {}።</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Choose a model and agree to send your data to use the agent.</source>
+        <translation type="obsolete">ወኪሉን ለመጠቀም ሞዴል ይምረጡ እና ውሂብዎን ለመላክ ይስማሙ።</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Connecting to {}…</source>
+        <translation type="obsolete">ከ{} ጋር በመገናኘት ላይ…</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Earlier conversation: the agent starts afresh from here.</source>
+        <translation type="obsolete">ቀዳሚ ውይይት: ወኪሉ ከዚህ ጀምሮ እንደገና ይጀምራል።</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Enter your API key in the agent settings.</source>
+        <translation type="obsolete">API ቁልፍዎን በወኪል ቅንብሮች ውስጥ ያስገቡ።</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Export of {}</source>
+        <translation type="obsolete">{} መላክ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Favorite applied</source>
+        <translation type="obsolete">ተወዳጅ ተተግብሯል</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Filter on the points of {}</source>
+        <translation type="obsolete">በ{} ነጥቦች ላይ ማጣሪያ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Filter on {}</source>
+        <translation type="obsolete">በ{} ላይ ማጣሪያ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Filter on {} by an area</source>
+        <translation type="obsolete">በ{} ላይ በአካባቢ ማጣሪያ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Filter on {} by {}</source>
+        <translation type="obsolete">በ{} ላይ በ{} ማጣሪያ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>FilterMate agent</source>
+        <translation type="obsolete">የFilterMate ወኪል</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Filters removed from {}</source>
+        <translation type="obsolete">ማጣሪያዎች ከ{} ተወግደዋል</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Hidden: {}</source>
+        <translation type="obsolete">ተደብቋል: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>It answers.</source>
+        <translation type="obsolete">ምላሽ ይሰጣል።</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Layer added: {}</source>
+        <translation type="obsolete">ንብርብር ተጨምሯል: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Layers removed: {}</source>
+        <translation type="obsolete">ንብርብሮች ተወግደዋል: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Not reachable for this conversation: {}</source>
+        <translation type="obsolete">ለዚህ ውይይት ሊደረስበት አይችልም: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Nothing to redo.</source>
+        <translation type="obsolete">እንደገና የሚደረግ ምንም የለም።</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Nothing to restore.</source>
+        <translation type="obsolete">የሚመለስ ምንም የለም።</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Reading the active filters</source>
+        <translation type="obsolete">ንቁ ማጣሪያዎችን በማንበብ ላይ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Reading the favorites</source>
+        <translation type="obsolete">ተወዳጆችን በማንበብ ላይ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Reading the fields of {}</source>
+        <translation type="obsolete">የ{} መስኮችን በማንበብ ላይ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Reading the layers</source>
+        <translation type="obsolete">ንብርብሮችን በማንበብ ላይ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Reading the map</source>
+        <translation type="obsolete">ካርታውን በማንበብ ላይ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Reading the values of {}</source>
+        <translation type="obsolete">የ{} እሴቶችን በማንበብ ላይ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Restored: {}.</source>
+        <translation type="obsolete">ተመልሷል: {}።</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Searching satellite imagery on {}</source>
+        <translation type="obsolete">በ{} ላይ የሳተላይት ምስሎችን በመፈለግ ላይ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Searching {} for {}</source>
+        <translation type="obsolete">በ{} ላይ {} በመፈለግ ላይ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Selection cleared on {}</source>
+        <translation type="obsolete">በ{} ላይ ምርጫ ተጠርጓል</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Selection on {}</source>
+        <translation type="obsolete">በ{} ላይ ምርጫ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Shown: {}</source>
+        <translation type="obsolete">ታይቷል: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Stopped.</source>
+        <translation type="obsolete">ቆሟል።</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The MCP server could not start: {}</source>
+        <translation type="obsolete">የMCP አገልጋይ መጀመር አልቻለም: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The QGIS authentication database is not available.</source>
+        <translation type="obsolete">የQGIS የማረጋገጫ ዳታቤዝ አይገኝም።</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The QGIS master password is needed to use the stored key.</source>
+        <translation type="obsolete">የተከማቸውን ቁልፍ ለመጠቀም የQGIS ዋና የይለፍ ቃል ያስፈልጋል።</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The agent stopped before the end ({}).</source>
+        <translation type="obsolete">ወኪሉ ከመጨረሻው በፊት ቆሟል ({})።</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The agent wants to add this layer of a web service to the project:
+{} · {}
+
+Do you agree?</source>
+        <translation type="obsolete">ወኪሉ የዚህን የድር አገልግሎት ንብርብር ወደ ፕሮጀክቱ ማከል ይፈልጋል:
+{} · {}
+
+ይስማማሉ?</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The agent wants to add this layer to the project:
+{}
+
+A remote source is read from its server by QGIS, and what the layer holds can be sent to the provider of the agent. Do you agree?</source>
+        <translation type="obsolete">ወኪሉ ይህን ንብርብር ወደ ፕሮጀክቱ ማከል ይፈልጋል:
+{}
+
+የርቀት ምንጭ በQGIS ከአገልጋዩ ይነበባል፣ እና ንብርብሩ የያዘው ለወኪሉ አቅራቢ ሊላክ ይችላል። ይስማማሉ?</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The agent wants to export these layers to files:
+{}
+
+Do you agree?</source>
+        <translation type="obsolete">ወኪሉ እነዚህን ንብርብሮች ወደ ፋይሎች መላክ ይፈልጋል:
+{}
+
+ይስማማሉ?</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The agent wants to remove these layers from the project (their files stay, their styles and filters here are lost):
+{}
+
+Do you agree?</source>
+        <translation type="obsolete">ወኪሉ እነዚህን ንብርብሮች ከፕሮጀክቱ ማስወገድ ይፈልጋል (ፋይሎቻቸው ይቀራሉ፣ እዚህ ያሉ ቅጦቻቸው እና ማጣሪያዎቻቸው ይጠፋሉ):
+{}
+
+ይስማማሉ?</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The agent wants to run this action on an external connector:
+{}
+{}
+
+Do you agree?</source>
+        <translation type="obsolete">ወኪሉ ይህን ተግባር በውጫዊ አገናኝ ላይ ማስኬድ ይፈልጋል:
+{}
+{}
+
+ይስማማሉ?</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The credit or quota of this account is used up.</source>
+        <translation type="obsolete">የዚህ መለያ ክሬዲት ወይም ኮታ አልቋል።</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The free quota could not be reached: {}</source>
+        <translation type="obsolete">ነፃው ኮታ ሊደረስበት አልቻለም: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The free quota is not available.</source>
+        <translation type="obsolete">ነፃው ኮታ አይገኝም።</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The free quota is unavailable for now.</source>
+        <translation type="obsolete">ነፃው ኮታ ለጊዜው አይገኝም።</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The free quota is used up for this month. Enter your own API key in the agent settings.</source>
+        <translation type="obsolete">የዚህ ወር ነፃ ኮታ አልቋል። የራስዎን API ቁልፍ በወኪል ቅንብሮች ውስጥ ያስገቡ።</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The key could not be stored.</source>
+        <translation type="obsolete">ቁልፉ ሊከማች አልቻለም።</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The provider could not be reached: {}</source>
+        <translation type="obsolete">አቅራቢው ሊደረስበት አልቻለም: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The provider refused the API key: check it in the agent settings.</source>
+        <translation type="obsolete">አቅራቢው API ቁልፉን ውድቅ አደረገ: በወኪል ቅንብሮች ውስጥ ይፈትሹት።</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The provider reported a problem: {}</source>
+        <translation type="obsolete">አቅራቢው ችግር ሪፖርት አደረገ: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The stored key could not be read.</source>
+        <translation type="obsolete">የተከማቸው ቁልፍ ሊነበብ አልቻለም።</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Thinking…</source>
+        <translation type="obsolete">በማሰብ ላይ…</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Too many new accounts from this address today: try again tomorrow, or enter your own API key.</source>
+        <translation type="obsolete">ዛሬ ከዚህ አድራሻ ብዙ አዳዲስ መለያዎች ተፈጥረዋል: ነገ እንደገና ይሞክሩ፣ ወይም የራስዎን API ቁልፍ ያስገቡ።</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Too many requests for now: try again in a moment.</source>
+        <translation type="obsolete">ለጊዜው ብዙ ጥያቄዎች: ከጥቂት ቆይታ በኋላ እንደገና ይሞክሩ።</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Trying a filter on {}</source>
+        <translation type="obsolete">በ{} ላይ ማጣሪያ በመሞከር ላይ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Zoom on {}</source>
+        <translation type="obsolete">ወደ {} አጉላ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>an area</source>
+        <translation type="obsolete">አካባቢ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>everything</source>
+        <translation type="obsolete">ሁሉም ነገር</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>{} tools available</source>
+        <translation type="obsolete">{} መሣሪያዎች ይገኛሉ</translation>
+    </message>
+</context>
+<context>
+    <name>AgentPanel</name>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>(no request)</source>
+        <translation type="obsolete">(ጥያቄ የለም)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>A few free requests a month, through the relay of FilterMate to Claude (Anthropic), under the terms of Anthropic. The relay counts what is spent and keeps no conversation. When it is used up, choose a provider and enter your own API key.</source>
+        <translation type="obsolete">በወር ጥቂት ነፃ ጥያቄዎች፣ በFilterMate ወደ Claude (Anthropic) በሚያደርሰው ማስተላለፊያ በኩል፣ በAnthropic ውሎች መሠረት። ማስተላለፊያው የሚወጣውን ይቆጥራል እንጂ ምንም ውይይት አያስቀምጥም። ሲያልቅ አቅራቢ ይምረጡ እና የራስዎን API ቁልፍ ያስገቡ።</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>API key</source>
+        <translation type="obsolete">API ቁልፍ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Add</source>
+        <translation type="obsolete">አክል</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Address</source>
+        <translation type="obsolete">አድራሻ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Agent settings</source>
+        <translation type="obsolete">የወኪል ቅንብሮች</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Allow attribute values to be sent</source>
+        <translation type="obsolete">የባህሪ እሴቶች እንዲላኩ ፍቀድ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Applications already set up will have to be set up again.</source>
+        <translation type="obsolete">አስቀድሞ የተዋቀሩ መተግበሪያዎች እንደገና መዋቀር አለባቸው።</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Ask the agent to filter your layers</source>
+        <translation type="obsolete">ንብርብሮችዎን እንዲያጣራ ወኪሉን ይጠይቁ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Back to the conversation</source>
+        <translation type="obsolete">ወደ ውይይቱ ተመለስ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Claude Code or another MCP client on this computer can then filter your layers, once FilterMate has been opened, under the rules of this panel: the same sources, the same confirmations, and filters can be undone here. That application sends what it reads to its own AI provider.</source>
+        <translation type="obsolete">FilterMate ከተከፈተ በኋላ፣ በዚህ ኮምፒውተር ላይ ያለ Claude Code ወይም ሌላ MCP ደንበኛ በዚህ ፓነል ደንቦች መሠረት ንብርብሮችዎን ማጣራት ይችላል: ተመሳሳይ ምንጮች፣ ተመሳሳይ ማረጋገጫዎች፣ እና ማጣሪያዎች እዚህ ሊቀለበሱ ይችላሉ። ያ መተግበሪያ የሚያነበውን ለራሱ AI አቅራቢ ይልካል።</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Connect an AI provider to start. Nothing is sent before you agree.</source>
+        <translation type="obsolete">ለመጀመር AI አቅራቢ ያገናኙ። ከእርስዎ ፈቃድ በፊት ምንም አይላክም።</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Copied, with the access token: keep it to yourself. Save these settings for it to apply.</source>
+        <translation type="obsolete">ከመዳረሻ ቶከን ጋር ተቀድቷል: ለራስዎ ያቆዩት። ተግባራዊ እንዲሆን እነዚህን ቅንብሮች ያስቀምጡ።</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Copy for Claude Desktop</source>
+        <translation type="obsolete">ለClaude Desktop ቅዳ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Copy the Claude Code command</source>
+        <translation type="obsolete">የClaude Code ትዕዛዝ ቅዳ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Copy the configuration</source>
+        <translation type="obsolete">ውቅሩን ቅዳ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Describe it in your own words. Each filter can be undone.</source>
+        <translation type="obsolete">በራስዎ ቃላት ይግለጹት። እያንዳንዱ ማጣሪያ ሊቀለበስ ይችላል።</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Filter your layers from a sentence</source>
+        <translation type="obsolete">ንብርብሮችዎን በአንድ አረፍተ ነገር ያጣሩ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>FilterMate agent</source>
+        <translation type="obsolete">የFilterMate ወኪል</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>History</source>
+        <translation type="obsolete">ታሪክ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>History…</source>
+        <translation type="obsolete">ታሪክ…</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>I agree to send this data to this provider</source>
+        <translation type="obsolete">ይህን ውሂብ ለዚህ አቅራቢ ለመላክ እስማማለሁ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Let other applications on this computer drive FilterMate (MCP server)</source>
+        <translation type="obsolete">በዚህ ኮምፒውተር ላይ ያሉ ሌሎች መተግበሪያዎች FilterMateን እንዲቆጣጠሩ ፍቀድ (MCP አገልጋይ)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>MCP connector</source>
+        <translation type="obsolete">MCP አገናኝ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>MCP connectors</source>
+        <translation type="obsolete">MCP አገናኞች</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Model</source>
+        <translation type="obsolete">ሞዴል</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>More</source>
+        <translation type="obsolete">ተጨማሪ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>New access token</source>
+        <translation type="obsolete">አዲስ የመዳረሻ ቶከን</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>New conversation</source>
+        <translation type="obsolete">አዲስ ውይይት</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>New token: it applies once these settings are saved.</source>
+        <translation type="obsolete">አዲስ ቶከን: እነዚህ ቅንብሮች ከተቀመጡ በኋላ ይተገበራል።</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Open data platforms</source>
+        <translation type="obsolete">ክፍት የውሂብ መድረኮች</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Open the settings</source>
+        <translation type="obsolete">ቅንብሮችን ክፈት</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Other applications</source>
+        <translation type="obsolete">ሌሎች መተግበሪያዎች</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Port</source>
+        <translation type="obsolete">ወደብ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Provider</source>
+        <translation type="obsolete">አቅራቢ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Redo</source>
+        <translation type="obsolete">እንደገና አድርግ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Remove</source>
+        <translation type="obsolete">አስወግድ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Remove the stored key</source>
+        <translation type="obsolete">የተከማቸውን ቁልፍ አስወግድ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Satellite imagery</source>
+        <translation type="obsolete">የሳተላይት ምስሎች</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Send (Enter)</source>
+        <translation type="obsolete">ላክ (Enter)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Send again</source>
+        <translation type="obsolete">እንደገና ላክ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Sent to: {}</source>
+        <translation type="obsolete">የተላከው ወደ: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Set up the agent</source>
+        <translation type="obsolete">ወኪሉን አዋቅር</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Sources</source>
+        <translation type="obsolete">ምንጮች</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Stop (Esc)</source>
+        <translation type="obsolete">አቁም (Esc)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Stored: leave empty to keep it</source>
+        <translation type="obsolete">የተከማቸ: ለማቆየት ባዶ ይተዉት</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Test</source>
+        <translation type="obsolete">ሞክር</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Testing…</source>
+        <translation type="obsolete">በመሞከር ላይ…</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The MCP server could not start: {}</source>
+        <translation type="obsolete">የMCP አገልጋይ መጀመር አልቻለም: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The agent can search the sources ticked here. Your searches, and what the agent passes to a connector, are sent to them; a layer added from them is read from their servers.</source>
+        <translation type="obsolete">ወኪሉ እዚህ ምልክት የተደረገባቸውን ምንጮች መፈለግ ይችላል። ፍለጋዎችዎ እና ወኪሉ ለአገናኝ የሚያስተላልፈው ወደ እነሱ ይላካሉ፤ ከእነሱ የተጨመረ ንብርብር ከአገልጋዮቻቸው ይነበባል።</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The agent sends your request, the names of your layers and fields, your filter expressions and the results of its tools to the provider chosen here, under that provider&apos;s terms. Without the option below, the agent does not read the values of your fields; values already written in your filters and favorites are still sent. The conversation is kept on this computer for each project, until you start a new one.</source>
+        <translation type="obsolete">ወኪሉ ጥያቄዎን፣ የንብርብሮችዎን እና የመስኮችዎን ስሞች፣ የማጣሪያ አገላለጾችዎን እና የመሣሪያዎቹን ውጤቶች እዚህ ለተመረጠው አቅራቢ በዚያ አቅራቢ ውሎች መሠረት ይልካል። ከታች ያለው አማራጭ ከሌለ ወኪሉ የመስኮችዎን እሴቶች አያነብም፤ በማጣሪያዎችዎ እና በተወዳጆችዎ ውስጥ አስቀድመው የተጻፉ እሴቶች አሁንም ይላካሉ። ውይይቱ አዲስ እስኪጀምሩ ድረስ ለእያንዳንዱ ፕሮጀክት በዚህ ኮምፒውተር ላይ ይቀመጣል።</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Through mcp-remote, which needs Node.js: Claude Desktop starts local servers as programs.</source>
+        <translation type="obsolete">በNode.js በሚያስፈልገው mcp-remote በኩል: Claude Desktop የአካባቢ አገልጋዮችን እንደ ፕሮግራሞች ያስነሳል።</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Too many sources added: remove one first.</source>
+        <translation type="obsolete">በጣም ብዙ ምንጮች ተጨምረዋል: መጀመሪያ አንዱን ያስወግዱ።</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Undo the last</source>
+        <translation type="obsolete">የመጨረሻውን ቀልብስ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Undo this turn</source>
+        <translation type="obsolete">ይህን ዙር ቀልብስ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>What do you want to filter?</source>
+        <translation type="obsolete">ምን ማጣራት ይፈልጋሉ?</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>added by you</source>
+        <translation type="obsolete">በእርስዎ የተጨመረ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>applied</source>
+        <translation type="obsolete">ተተግብሯል</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>community</source>
+        <translation type="obsolete">የማህበረሰብ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>https://... or a portal address</source>
+        <translation type="obsolete">https://... ወይም የፖርታል አድራሻ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>no change</source>
+        <translation type="obsolete">ለውጥ የለም</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>official</source>
+        <translation type="obsolete">ይፋዊ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>this computer</source>
+        <translation type="obsolete">ይህ ኮምፒውተር</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>undone</source>
+        <translation type="obsolete">ተቀልብሷል</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>{} turn(s)</source>
+        <translation type="obsolete">{} ዙር(ዎች)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Which layers are in this project?</source>
+        <translation type="obsolete">በዚህ ፕሮጀክት ውስጥ ያሉት የትኞቹ ንብርብሮች ናቸው?</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Keep the buildings taller than 15 m</source>
+        <translation type="obsolete">ከ15 ሜ የሚረዝሙ ሕንፃዎችን አቆይ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Filter the roads inside the selected feature</source>
+        <translation type="obsolete">በተመረጠው ባህሪ ውስጥ ያሉትን መንገዶች አጣራ</translation>
+    </message>
+</context>
+<context>
     <name>AppInitializer</name>
     <message>
         <location filename="../core/services/app_initializer.py" line="174"/>
@@ -616,137 +1319,137 @@
         <translation>የነጥብ ደመና መስፈርቶችን ዳግም አስጀምር</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1597"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1605"/>
         <source>Invalid raster calculator expression</source>
         <translation>ልክ ያልሆነ የራስተር ካልኩሌተር አገላለጽ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1912"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1920"/>
         <source>PDAL was not found: the height above a DTM needs the pdal executable</source>
         <translation>PDAL አልተገኘም፦ ከ DTM በላይ ያለውን ከፍታ ለማስላት የ pdal ተፈጻሚ ፋይል ያስፈልጋል</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3432"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3475"/>
         <source>A FilterMate task is still running: wait for it to finish</source>
         <translation>የ FilterMate ተግባር አሁንም እየሰራ ነው፦ እስኪጨርስ ይጠብቁ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2905"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2948"/>
         <source>FilterMate task failed: {0}</source>
         <translation>የ FilterMate ተግባር አልተሳካም፦ {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2942"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2985"/>
         <source>Select pixels first: a value range, classes or a raster expression</source>
         <translation>መጀመሪያ ፒክሰሎችን ይምረጡ፦ የእሴት ክልል፣ ምድቦች ወይም የራስተር አገላለጽ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2957"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3000"/>
         <source>Raster filtered: {0}</source>
         <translation>ራስተር ተጣርቷል፦ {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2991"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3034"/>
         <source>The point cloud expression was rejected: {0}</source>
         <translation>የነጥብ ደመና አገላለጽ ውድቅ ተደርጓል፦ {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2994"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3037"/>
         <source>Select points first: classes, attribute ranges or an expression</source>
         <translation>መጀመሪያ ነጥቦችን ይምረጡ፦ ምድቦች፣ የባህሪ ክልሎች ወይም አገላለጽ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3008"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3051"/>
         <source>Point cloud filtered: {0}</source>
         <translation>የነጥብ ደመና ተጣርቷል፦ {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3542"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3585"/>
         <source>Filter not applied: {0}</source>
         <translation>ማጣሪያ አልተተገበረም፦ {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3394"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3437"/>
         <source>canceled</source>
         <translation>ተሰርዟል</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3091"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3134"/>
         <source>{0} target(s) filtered</source>
         <translation>{0} ዒላማ(ዎች) ተጣርተዋል</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3102"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3145"/>
         <source>{0} failed: {1}</source>
         <translation>{0} አልተሳካም፦ {1}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3115"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3158"/>
         <source>FilterMate: filtering from '{0}'…</source>
         <translation>FilterMate፦ ከ'{0}' በማጣራት ላይ…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3214"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3257"/>
         <source>Changed since, left as is: {0}</source>
         <translation>ከዚያ በኋላ ተቀይሯል፣ እንደነበረ ቀርቷል፦ {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3220"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3263"/>
         <source>{0} layer(s) restored</source>
         <translation>{0} ንብርብር(ሮች) ተመልሰዋል</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3254"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3297"/>
         <source>&apos;{0}&apos; not exported: {1}</source>
         <translation>'{0}' አልተላከም፦ {1}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3268"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3311"/>
         <source>Exported: {0}</source>
         <translation>ተልኳል፦ {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3270"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3313"/>
         <source>Export failed: {0}</source>
         <translation>መላክ አልተሳካም፦ {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3277"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3320"/>
         <source>Exporting {0} layer(s)…</source>
         <translation>{0} ንብርብር(ሮችን) በመላክ ላይ…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3283"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3326"/>
         <source>Export folder</source>
         <translation>የመላኪያ አቃፊ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3365"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3408"/>
         <source>Raster / point cloud targets skipped: no source feature selected in EXPLORING</source>
         <translation>ራስተር / የነጥብ ደመና ዒላማዎች ተዘልለዋል፦ በ EXPLORING ውስጥ ምንጭ ገጽታ አልተመረጠም</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3394"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3437"/>
         <source>Raster / point cloud targets not filtered: {0}</source>
         <translation>ራስተር / የነጥብ ደመና ዒላማዎች አልተጣሩም፦ {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3396"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3439"/>
         <source>{0} raster / point cloud target(s) filtered</source>
         <translation>{0} ራስተር / የነጥብ ደመና ዒላማ(ዎች) ተጣርተዋል</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3519"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3562"/>
         <source>Choose the DTM raster used for the height above ground</source>
         <translation>ከምድር በላይ ላለው ከፍታ የሚጠቀምበትን DTM ራስተር ይምረጡ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3530"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3573"/>
         <source>Height above ground not computed: {0}</source>
         <translation>ከምድር በላይ ያለው ከፍታ አልተሰላም፦ {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3551"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3594"/>
         <source>Computing the height above '{0}' with PDAL…</source>
         <translation>ከ'{0}' በላይ ያለውን ከፍታ በ PDAL በማስላት ላይ…</translation>
     </message>
@@ -756,12 +1459,12 @@
         <translation>የFilterMate መሸጎጫ {0} GB ይዟል፣ ከ{1} GB ገደቡ በላይ ነው፦ ከእንግዲህ የማያስፈልጉዎትን የራስተር / የነጥብ ደመና ንብርብሮች ማጣሪያ ያስወግዱ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1914"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1922"/>
         <source>PDAL {0} is too old: the height above a DTM needs PDAL 2.4 or later</source>
         <translation>PDAL {0} በጣም ያረጀ ነው፦ ከ DTM በላይ ያለውን ከፍታ ለማስላት PDAL 2.4 ወይም ከዚያ በኋላ ያስፈልጋል</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1917"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1925"/>
         <source>PDAL could not be run, the height above a DTM is unavailable: {0}</source>
         <translation>PDAL ማስኬድ አልተቻለም፤ ከ DTM በላይ ያለው ከፍታ አይገኝም፦ {0}</translation>
     </message>
@@ -781,27 +1484,27 @@
         <translation>ቅድመ እይታ፦ ከምርጫው ውጭ ያሉ ፒክሰሎችን ደብቅ (ለተዳፋት፣ ለአቅጣጫ... ነጭ ሽፋን)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1792"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1800"/>
         <source>The preview of a slope or aspect needs the map in the CRS of the raster ({0})</source>
         <translation>የተዳፋት ወይም የአቅጣጫ ቅድመ እይታ ካርታው በራስተሩ CRS ({0}) እንዲሆን ይፈልጋል</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2434"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2477"/>
         <source>only the points drawn on the map can be picked: turn the preview off to pick a class it hides</source>
         <translation>በካርታው ላይ የተሳሉ ነጥቦች ብቻ ሊመረጡ ይችላሉ፦ የሚደብቀውን ምድብ ለመምረጥ ቅድመ እይታውን ያጥፉ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2505"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2548"/>
         <source>No classified point under the click</source>
         <translation>ጠቅ በተደረገበት ቦታ ምድብ ያለው ነጥብ የለም</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2440"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2483"/>
         <source>Class {0} is already checked</source>
         <translation>ምድብ {0} አስቀድሞ ምልክት ተደርጎበታል</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2529"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2572"/>
         <source>Class {0} is not in the class list of the layer</source>
         <translation>ምድብ {0} በንብርብሩ የምድብ ዝርዝር ውስጥ የለም</translation>
     </message>
@@ -816,157 +1519,157 @@
         <translation>የምድብ መራጭ፦ ካርታው ላይ ጠቅ ያድርጉ፤ እዚያ የተሳሉት ነጥቦች ምድብ ምልክት ይደረግበታል። Ctrl+ጠቅ ማድረግ ሌላ ይጨምራል</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1116"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1118"/>
         <source>Preview and statistics use a bounded local sample of the visible extent; filtering reads the source.</source>
         <translation>ቅድመ እይታ እና ስታቲስቲክስ ከሚታየው ክልል የተገደበ የአካባቢ ናሙና ይጠቀማሉ፤ ማጣራት ግን ምንጩን ያነባል።</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1314"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1322"/>
         <source>Preparing a bounded color snapshot of the visible extent…</source>
         <translation>ለሚታየው ክልል የተገደበ የቀለም ቅጽበታዊ ምስል በማዘጋጀት ላይ…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1326"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1334"/>
         <source>The color snapshot could not be prepared. Try a smaller visible extent.</source>
         <translation>የቀለም ቅጽበታዊ ምስሉ ሊዘጋጅ አልቻለም። አነስ ያለ የሚታይ ክልል ይሞክሩ።</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1330"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1338"/>
         <source>Color selection applies to the captured visible extent.</source>
         <translation>የቀለም ምርጫ በተያዘው የሚታይ ክልል ላይ ይተገበራል።</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1394"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1402"/>
         <source>Raster sampling failed. Try a smaller visible extent.</source>
         <translation>የራስተር ናሙና መውሰድ አልተሳካም። አነስ ያለ የሚታይ ክልል ይሞክሩ።</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1515"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1523"/>
         <source>No valid pixels to display in the selected bands.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1792"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1800"/>
         <source>The preview of a color or an expression needs the map in the CRS of the raster ({0})</source>
         <translation>የቀለም ወይም የአገላለጽ ቅድመ እይታ ካርታው በራስተሩ CRS ({0}) እንዲሆን ይፈልጋል</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2458"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2501"/>
         <source>No point drawn under the click</source>
         <translation>ከጠቅታው ስር የተሳለ ነጥብ የለም</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2460"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2503"/>
         <source>This point has no {0}</source>
         <translation>ይህ ነጥብ {0} የለውም</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2462"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2505"/>
         <source>{0} cannot be used in a condition</source>
         <translation>{0} በሁኔታ ውስጥ መጠቀም አይቻልም</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2519"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2562"/>
         <source>Object not read: {0}</source>
         <translation>ነገሩ አልተነበበም፦ {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2521"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2564"/>
         <source>Too many points around the click: the object could not be read</source>
         <translation>በጠቅታው ዙሪያ በጣም ብዙ ነጥቦች፦ ነገሩ ሊነበብ አልቻለም</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2523"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2566"/>
         <source>No point of class {0} under the click: click on the object itself</source>
         <translation>ከጠቅታው ስር የምድብ {0} ነጥብ የለም፦ ነገሩ ላይ በራሱ ጠቅ ያድርጉ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2660"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2703"/>
         <source>Similar objects not read: {0}</source>
         <translation>ተመሳሳይ ነገሮች አልተነበቡም፦ {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2663"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2706"/>
         <source>No similar object within the area ratios: widen them</source>
         <translation>በስፋት ሬሾዎች ውስጥ ተመሳሳይ ነገር የለም፦ ያስፋፏቸው</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2732"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2775"/>
         <source>Preparing a sample for the new visible extent. Click again when it is ready.</source>
         <translation>ለአዲሱ የሚታይ ክልል ናሙና በማዘጋጀት ላይ። ዝግጁ ሲሆን እንደገና ጠቅ ያድርጉ።</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2743"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2786"/>
         <source>The local raster sample is still being prepared. Retry when it is ready.</source>
         <translation>የአካባቢው የራስተር ናሙና አሁንም እየተዘጋጀ ነው። ዝግጁ ሲሆን እንደገና ይሞክሩ።</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2949"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2992"/>
         <source>Prepare a color snapshot before filtering this rendered layer.</source>
         <translation>ይህን የተሳለ ንብርብር ከማጣራትዎ በፊት የቀለም ቅጽበታዊ ምስል ያዘጋጁ።</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3094"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3137"/>
         <source>{0} raster target(s) resampled to the configured pixel limit</source>
         <translation>{0} የራስተር ዒላማ(ዎች) ወደ ተዋቀረው የፒክሰል ገደብ እንደገና ናሙና ተወስደዋል</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3126"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3169"/>
         <source>color selection limited to the captured extent; colors depend on style and scale</source>
         <translation>የቀለም ምርጫ በተያዘው ክልል ብቻ የተገደበ ነው፤ ቀለሞች በስታይል እና በሚዛን ላይ ይወሰናሉ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3128"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3171"/>
         <source>raster source resampled to {0} cells within the pixel limit</source>
         <translation>የራስተር ምንጭ በፒክሰል ገደቡ ውስጥ ወደ {0} ሴሎች እንደገና ናሙና ተወስዷል</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3130"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3173"/>
         <source>raster selection read every {0} pixels: over the pixel limit of the settings</source>
         <translation>የራስተር ምርጫ በየ{0} ፒክሰሎች ተነብቧል፦ ከቅንብሮች የፒክሰል ገደብ በላይ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3133"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3176"/>
         <source>dense raster selection smoothed to keep its outline light</source>
         <translation>ጥቅጥቅ ያለ የራስተር ምርጫ ዝርዝሩ ቀላል እንዲሆን ተለስልሷል</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3180"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3223"/>
         <source>{0} left empty, nothing matches the selection: {1}</source>
         <translation>{0} ባዶ ሆኗል፣ ከምርጫው ጋር የሚዛመድ ምንም የለም፦ {1}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3164"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3207"/>
         <source>failed</source>
         <translation>አልተሳካም</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1509"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1517"/>
         <source>Preparing band display…</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1525"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1533"/>
         <source>The selected bands could not be displayed.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1597"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1605"/>
         <source>Unknown raster layer or band in expression</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1389"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1397"/>
         <source>The raster histogram could not be calculated.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1738"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1746"/>
         <source>The raster preview could not be calculated.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1148"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1150"/>
         <source>onnxruntime installed</source>
         <translation>onnxruntime ተጭኗል</translation>
     </message>
@@ -1959,27 +2662,27 @@ Click the ★ indicator and select 'Add current filter to favorites' to save you
         <translation>ነባሪ ውቅረትን ዳግም አስጀምርና SQLite ዳታቤዝን ሰርዝ</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1572"/>
+        <location filename="../filter_mate.py" line="1573"/>
         <source>Reset Configuration</source>
         <translation>ውቅረት ዳግም አስጀምር</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1598"/>
+        <location filename="../filter_mate.py" line="1599"/>
         <source>Configuration reset successfully.</source>
         <translation>ውቅረት በተሳካ ሁኔታ ዳግም ተጀምሯል።</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1603"/>
+        <location filename="../filter_mate.py" line="1604"/>
         <source>Default configuration file not found.</source>
         <translation>ነባሪ ውቅረት ፋይል አልተገኘም።</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1626"/>
+        <location filename="../filter_mate.py" line="1627"/>
         <source>Database deleted: {filename}</source>
         <translation>ዳታቤዝ ተሰርዟል: {filename}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1650"/>
+        <location filename="../filter_mate.py" line="1651"/>
         <source>Restart required</source>
         <translation>ዳግም ማስጀመር ያስፈልጋል</translation>
     </message>
@@ -2130,7 +2833,7 @@ Do you want to disable this setting now?
         <translation>ልክ ያልሆነ ጂኦሜትሪ ማጣራት አልተሻሻለም። አንዳንድ ባህሪያት ከወጪዎች ሊገለሉ ይችላሉ።</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1572"/>
+        <location filename="../filter_mate.py" line="1573"/>
         <source>Are you sure you want to reset to the default configuration?
 
 This will:
@@ -2147,7 +2850,7 @@ This will:
 QGIS must be restarted to apply the changes.</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1650"/>
+        <location filename="../filter_mate.py" line="1651"/>
         <source>The configuration has been reset.
 
 Please restart QGIS to apply the changes.</source>
@@ -2166,7 +2869,7 @@ Please restart QGIS to apply the changes.</translation>
         <translation>{count} የተጠቀሰ(ሱ) ንብርብር(ዎች) አልተጫነ(ኑ)ም ({layers_list})። ተለዋጭ ማሳያ ይጠቀማል።</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1641"/>
+        <location filename="../filter_mate.py" line="1642"/>
         <source>Unable to delete {filename}: {e}</source>
         <translation>{filename} ን መሰረዝ አልተቻለም: {e}</translation>
     </message>
@@ -2176,86 +2879,86 @@ Please restart QGIS to apply the changes.</translation>
         <translation type="obsolete">ዳግም ማስጀመር ወቅት ስህተት: {str(e)}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1693"/>
+        <location filename="../filter_mate.py" line="1694"/>
         <source>&lt;p style=&apos;font-size:13px;&apos;&gt;Thank you for using &lt;b&gt;FilterMate&lt;/b&gt;!&lt;br&gt;Join our Discord community to:&lt;/p&gt;&lt;ul style=&apos;margin-left:10px; font-size:12px;&apos;&gt;&lt;li&gt;Get help and support&lt;/li&gt;&lt;li&gt;Report bugs and issues&lt;/li&gt;&lt;li&gt;Suggest new features&lt;/li&gt;&lt;li&gt;Share tips with other users&lt;/li&gt;&lt;/ul&gt;</source>
         <translation>&lt;p style='font-size:13px;'&gt;&lt;b&gt;FilterMate&lt;/b&gt;ን ስለተጠቀሙ እናመሰግናለን!&lt;br&gt;የDiscord ማህበረሰባችንን ይቀላቀሉ:&lt;/p&gt;&lt;ul style='margin-left:10px; font-size:12px;'&gt;&lt;li&gt;እርዳታ እና ድጋፍ ያግኙ&lt;/li&gt;&lt;li&gt;ስህተቶችን እና ችግሮችን ያሳውቁ&lt;/li&gt;&lt;li&gt;አዲስ ባህሪያትን ይጠቁሙ&lt;/li&gt;&lt;li&gt;ምክሮችን ከሌሎች ተጠቃሚዎች ጋር ያጋሩ&lt;/li&gt;&lt;/ul&gt;</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1709"/>
+        <location filename="../filter_mate.py" line="1710"/>
         <source>  Join us on Discord</source>
         <translation>  በDiscord ይቀላቀሉን</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1729"/>
+        <location filename="../filter_mate.py" line="1730"/>
         <source>Don&apos;t show this again</source>
         <translation>ይህን እንደገና አታሳይ</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1785"/>
+        <location filename="../filter_mate.py" line="1786"/>
         <source>Close</source>
         <translation>ዝጋ</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1852"/>
+        <location filename="../filter_mate.py" line="1855"/>
         <source>Error loading plugin: {0}. Check QGIS Python console for details.</source>
         <translation>ፕለጊን መጫን ስህተት: {0}። ዝርዝር ለማየት QGIS Python ኮንሶል ይመልከቱ።</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7560"/>
+        <location filename="../filter_mate_dockwidget.py" line="7586"/>
         <source>Current layer: {0}</source>
         <translation>ወቅታዊ ንብርብር: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7562"/>
+        <location filename="../filter_mate_dockwidget.py" line="7588"/>
         <source>No layer selected</source>
         <translation>ንብርብር አልተመረጠም</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7572"/>
+        <location filename="../filter_mate_dockwidget.py" line="7598"/>
         <source>Selected layers:
 {0}</source>
         <translation>የተመረጡ ንብርብሮች:
 {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7572"/>
+        <location filename="../filter_mate_dockwidget.py" line="7598"/>
         <source>No layers selected</source>
         <translation>ንብርብሮች አልተመረጡም</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7592"/>
+        <location filename="../filter_mate_dockwidget.py" line="7618"/>
         <source>No expression defined</source>
         <translation>አገላለጽ አልተገለጸም</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7604"/>
+        <location filename="../filter_mate_dockwidget.py" line="7630"/>
         <source>Display expression: {0}</source>
         <translation>ማሳያ አገላለጽ: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7621"/>
+        <location filename="../filter_mate_dockwidget.py" line="7647"/>
         <source>Feature ID: {0}
 First attribute: {1}</source>
         <translation>ባህሪ ID: {0}
 የመጀመሪያ ባህሪ: {1}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1659"/>
+        <location filename="../filter_mate.py" line="1660"/>
         <source>The configuration could not be reset. Check that the plugin folder is writable, then try again. Details in filtermate.log.</source>
         <translation>ውቅሩን ዳግም ማስጀመር አልተቻለም። የፕለጊኑ አቃፊ ሊጻፍበት እንደሚችል ያረጋግጡ፣ ከዚያ እንደገና ይሞክሩ። ዝርዝሮች በ filtermate.log ውስጥ።</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1759"/>
+        <location filename="../filter_mate.py" line="1760"/>
         <source>What&apos;s new in FilterMate 5</source>
         <translation>በFilterMate 5 ውስጥ ያሉ አዳዲስ ነገሮች</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1765"/>
+        <location filename="../filter_mate.py" line="1766"/>
         <source>&lt;p style=&apos;font-size:13px;&apos;&gt;&lt;b&gt;FilterMate now works with raster and point cloud layers.&lt;/b&gt;&lt;/p&gt;&lt;ul style=&apos;margin-left:10px; font-size:12px;&apos;&gt;&lt;li&gt;&lt;b&gt;EXPLORING&lt;/b&gt; adapts to the current layer: value range and classes of a raster, classes, elevation and attributes of a LiDAR point cloud.&lt;/li&gt;&lt;li&gt;&lt;b&gt;FILTERING&lt;/b&gt; relates that selection to layers of any kind, with the usual predicates and buffer: parcels within an elevation range, LiDAR points under buildings, a DTM clipped to a municipality.&lt;/li&gt;&lt;li&gt;&lt;b&gt;EXPORTING&lt;/b&gt; writes filtered rasters (GeoTIFF, COG) and point clouds (LAZ, COPC).&lt;/li&gt;&lt;li&gt;Processing algorithms and models, qgis_process, Python and REST APIs.&lt;/li&gt;&lt;/ul&gt;</source>
         <translation>&lt;p style='font-size:13px;'&gt;&lt;b&gt;FilterMate አሁን ከራስተር እና ከነጥብ ደመና ንብርብሮች ጋር ይሰራል።&lt;/b&gt;&lt;/p&gt;&lt;ul style='margin-left:10px; font-size:12px;'&gt;&lt;li&gt;&lt;b&gt;EXPLORING&lt;/b&gt; ከአሁኑ ንብርብር ጋር ይስማማል፦ የራስተር የእሴት ክልል እና ክፍሎች፣ የLiDAR ነጥብ ደመና ክፍሎች፣ ከፍታ እና ባህሪያት።&lt;/li&gt;&lt;li&gt;&lt;b&gt;FILTERING&lt;/b&gt; ያንን ምርጫ ከማንኛውም ዓይነት ንብርብሮች ጋር በተለመዱት ቅድመ ሁኔታዎች እና ቋት ያገናኛል፦ በከፍታ ክልል ውስጥ ያሉ መሬቶች፣ በሕንፃዎች ስር ያሉ የLiDAR ነጥቦች፣ በማዘጋጃ ቤት የተቆረጠ DTM።&lt;/li&gt;&lt;li&gt;&lt;b&gt;EXPORTING&lt;/b&gt; የተጣሩ ራስተሮችን (GeoTIFF, COG) እና የነጥብ ደመናዎችን (LAZ, COPC) ይጽፋል።&lt;/li&gt;&lt;li&gt;የProcessing አልጎሪዝሞች እና ሞዴሎች፣ qgis_process፣ Python እና REST APIዎች።&lt;/li&gt;&lt;/ul&gt;</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1781"/>
+        <location filename="../filter_mate.py" line="1782"/>
         <source>Open the user guide</source>
         <translation>የተጠቃሚ መመሪያውን ክፈት</translation>
     </message>
@@ -2628,59 +3331,59 @@ Drop anyway?</source>
         <translation>ብርሃን ሁነታ</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="4151"/>
+        <location filename="../filter_mate_dockwidget.py" line="4155"/>
         <location filename="../ui/controllers/exploring_controller.py" line="884"/>
         <source>Selected features have no geometry.</source>
         <translation>የተመረጡ ባህሪያት ጂኦሜትሪ የላቸውም።</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="4170"/>
+        <location filename="../filter_mate_dockwidget.py" line="4174"/>
         <location filename="../ui/controllers/exploring_controller.py" line="885"/>
         <source>No feature selected. Select a feature from the dropdown list.</source>
         <translation>ባህሪ አልተመረጠም። ከተቆልቋይ ዝርዝር ባህሪ ይምረጡ።</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="5345"/>
+        <location filename="../filter_mate_dockwidget.py" line="5349"/>
         <source>The selected layer is invalid or its source cannot be found.</source>
         <translation>የተመረጠው ንብርብር ልክ ያልሆነ ወይም ምንጩ ሊገኝ አይችልም።</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6238"/>
+        <location filename="../filter_mate_dockwidget.py" line="6242"/>
         <source>Negative buffer (erosion): shrinks polygons inward</source>
         <translation>አሉታዊ ቋት (መሸርሸር): ብዙ-ጎኖችን ወደ ውስጥ ያሳንሳል</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6241"/>
+        <location filename="../filter_mate_dockwidget.py" line="6245"/>
         <source>Buffer value in meters (positive=expand, negative=shrink polygons)</source>
         <translation>በሜትር የቋት ዋጋ (አዎንታዊ=ማስፋት፣ አሉታዊ=ብዙ-ጎኖችን ማሳነስ)</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6743"/>
+        <location filename="../filter_mate_dockwidget.py" line="6747"/>
         <source>Plugin activated with {0} vector layer(s)</source>
         <translation>ፕለጊን ከ{0} ቬክተር ንብርብር(ዎች) ጋር ነቅቷል</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6862"/>
+        <location filename="../filter_mate_dockwidget.py" line="6866"/>
         <source>Could not reload plugin automatically.</source>
         <translation>ፕለጊኑን ራስ-ሰር እንደገና መጫን አልተቻለም።</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6867"/>
+        <location filename="../filter_mate_dockwidget.py" line="6871"/>
         <source>Error reloading plugin: {0}</source>
         <translation>ፕለጊን እንደገና መጫን ስህተት: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6942"/>
+        <location filename="../filter_mate_dockwidget.py" line="6946"/>
         <source>Layer properties reset to defaults</source>
         <translation>የንብርብር ባህሪያት ወደ ነባሪ ተመልሰዋል</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6943"/>
+        <location filename="../filter_mate_dockwidget.py" line="6947"/>
         <source>Error resetting layer properties: {}</source>
         <translation>የንብርብር ባህሪያትን ዳግም ማስጀመር ስህተት: {}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7206"/>
+        <location filename="../filter_mate_dockwidget.py" line="7232"/>
         <source>Filter</source>
         <translation>አጣራ</translation>
     </message>
@@ -2810,7 +3513,7 @@ Drop anyway?</source>
         <translation>የፓነሉ አቀማመጥ ሊተገበር አልቻለም፤ ነባሪ መጠኖች ጥቅም ላይ ይውላሉ። ዝርዝሮች በ filtermate.log ውስጥ።</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7034"/>
+        <location filename="../filter_mate_dockwidget.py" line="7038"/>
         <location filename="../ui/controllers/backend_controller.py" line="682"/>
         <source>Vector</source>
         <translation>ቬክተር</translation>
@@ -2841,22 +3544,22 @@ Drop anyway?</source>
         <translation>የ FilterMate ስኬማ ሰርዝ</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="4282"/>
+        <location filename="../filter_mate_dockwidget.py" line="4286"/>
         <source>Read failed</source>
         <translation>ማንበብ አልተሳካም</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="4282"/>
+        <location filename="../filter_mate_dockwidget.py" line="4286"/>
         <source>The service could not be read. Please retry.</source>
         <translation>አገልግሎቱ ሊነበብ አልቻለም። እባክዎ እንደገና ይሞክሩ።</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="4624"/>
+        <location filename="../filter_mate_dockwidget.py" line="4628"/>
         <source>Loading filtered extent…</source>
         <translation>የተጣራውን ክልል በመጫን ላይ…</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="5210"/>
+        <location filename="../filter_mate_dockwidget.py" line="5214"/>
         <location filename="../ui/controllers/exploring_controller.py" line="742"/>
         <location filename="../ui/controllers/exploring_controller.py" line="3662"/>
         <source>Loading selected values…</source>
@@ -2898,7 +3601,7 @@ Drop anyway?</source>
         <translation>የተገደበ የእሴቶች ስብስብ ብቻ ይታያል። ሌሎች እሴቶችን ለማግኘት ፍለጋውን ያጥሩ።</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="5145"/>
+        <location filename="../filter_mate_dockwidget.py" line="5149"/>
         <location filename="../ui/controllers/exploring_controller.py" line="551"/>
         <location filename="../ui/controllers/exploring_controller.py" line="568"/>
         <location filename="../ui/controllers/exploring_controller.py" line="636"/>
@@ -3057,7 +3760,7 @@ Drop anyway?</source>
         <translation>📁 የአሁኑ ፕሮጀክት</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7206"/>
+        <location filename="../filter_mate_dockwidget.py" line="7232"/>
         <source>The filter was not launched: its selection changed or could not be read. Click Filter again.</source>
         <translation>ማጣሪያው አልተጀመረም፦ ምርጫው ተቀይሯል ወይም ሊነበብ አልቻለም። አጣራ የሚለውን እንደገና ጠቅ ያድርጉ።</translation>
     </message>
@@ -3437,7 +4140,7 @@ PostgreSQL ሰንጠረዥ PRIMARY KEY እንዳለው ያረጋግጡ።</trans
 <context>
     <name>ModelDownloadTask</name>
     <message>
-        <location filename="../adapters/qgis/coverage_layers/segmentation.py" line="316"/>
+        <location filename="../adapters/qgis/coverage_layers/segmentation.py" line="558"/>
         <source>FilterMate: downloading the segmentation model</source>
         <translation>FilterMate፦ የክፍልፋይ ሞዴሉን በማውረድ ላይ</translation>
     </message>
@@ -5830,27 +6533,27 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">በፒክሰል መራጩ ካርታው ላይ ጠቅ ያድርጉ። Ctrl+ጠቅ ማድረግ ክልሉን እስከ እሴቱ ያሰፋል።</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2138"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2160"/>
         <source>VALUE RANGE</source>
         <translation>የእሴት ክልል</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1444"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1461"/>
         <source>Min</source>
         <translation>ዝቅተኛ</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1444"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1461"/>
         <source>Lowest value kept</source>
         <translation>የሚቀመጠው ዝቅተኛ እሴት</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1444"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1461"/>
         <source>Max</source>
         <translation>ከፍተኛ</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1444"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1461"/>
         <source>Highest value kept</source>
         <translation>የሚቀመጠው ከፍተኛ እሴት</translation>
     </message>
@@ -5880,17 +6583,17 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">ምንም</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1464"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1481"/>
         <source>RASTER EXPRESSION</source>
         <translation>የራስተር አገላለጽ</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1468"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1485"/>
         <source>Raster calculator expression; a pixel is kept where it is not 0</source>
         <translation>የራስተር ካልኩሌተር አገላለጽ፤ ፒክሰል 0 ያልሆነበት ይቀመጣል</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1469"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1486"/>
         <source>Raster expression</source>
         <translation>የራስተር አገላለጽ</translation>
     </message>
@@ -5910,12 +6613,12 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">የተመረጡ ፒክሰሎች፦ {0}</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1550"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1567"/>
         <source>Set a value range first</source>
         <translation>መጀመሪያ የእሴት ክልል ያዘጋጁ</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2758"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2910"/>
         <source>NoData</source>
         <translation>NoData</translation>
     </message>
@@ -5935,22 +6638,22 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">በካርታው ላይ በመጨረሻ በተሳለው አራት ማዕዘን ውስጥ የአሁኑ ባንድ ስታቲስቲክስ</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1844"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1861"/>
         <source>Under the cursor: {0}  (X {1:.{3}f}  Y {2:.{3}f})</source>
         <translation>ከጠቋሚው ስር: {0}  (X {1:.{3}f}  Y {2:.{3}f})</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1854"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1871"/>
         <source>Zone: {0}</source>
         <translation>ዞን: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1854"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1871"/>
         <source>no pixel</source>
         <translation>ምንም ፒክሰል የለም</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2776"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2928"/>
         <source>LAST PICKS</source>
         <translation>የመጨረሻ ንባቦች</translation>
     </message>
@@ -5965,37 +6668,37 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">ክልሉ የሚተገበርበት መጠን። ተዳፋት፣ አቅጣጫ፣ የኮረብታ ጥላ እና ሸካራነት ባንዱን እንደ DTM ያነባሉ።</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1401"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1418"/>
         <source>Pixel value</source>
         <translation>የፒክሰል እሴት</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1401"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1418"/>
         <source>Slope (degrees)</source>
         <translation>ተዳፋት (ዲግሪ)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1401"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1418"/>
         <source>Slope (%)</source>
         <translation>ተዳፋት (%)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1401"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1418"/>
         <source>Aspect (degrees)</source>
         <translation>አቅጣጫ (ዲግሪ)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1401"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1418"/>
         <source>Hillshade (0-255)</source>
         <translation>የኮረብታ ጥላ (0-255)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1401"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1418"/>
         <source>Roughness (TRI, mean difference)</source>
         <translation>ሸካራነት (TRI፣ አማካይ ልዩነት)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1411"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1428"/>
         <source>Usual thresholds of the quantity</source>
         <translation>የመጠኑ የተለመዱ ገደቦች</translation>
     </message>
@@ -6005,47 +6708,47 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">የተለመዱ ገደቦች</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2275"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2297"/>
         <source>Flat</source>
         <translation>ጠፍጣፋ</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2275"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2297"/>
         <source>Gentle</source>
         <translation>መለስተኛ</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2275"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2297"/>
         <source>Moderate</source>
         <translation>መካከለኛ</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2276"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2298"/>
         <source>Steep</source>
         <translation>ገደላማ</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2276"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2298"/>
         <source>East</source>
         <translation>ምሥራቅ</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2276"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2298"/>
         <source>South</source>
         <translation>ደቡብ</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2277"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2299"/>
         <source>West</source>
         <translation>ምዕራብ</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2277"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2299"/>
         <source>Shadow</source>
         <translation>ጥላ</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2277"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2299"/>
         <source>Lit</source>
         <translation>የበራ</translation>
     </message>
@@ -6055,27 +6758,27 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">የተለመዱ ገደቦች…</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1137"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1146"/>
         <source>PIPETTE</source>
         <translation>መራጭ</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1273"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1290"/>
         <source>Tolerance ±</source>
         <translation>መቻቻል ±</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1280"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1297"/>
         <source>Tolerance around the picked color or value, in % of the value range</source>
         <translation>በተመረጠው ቀለም ወይም እሴት ዙሪያ ያለ መቻቻል፣ በእሴት ክልል %</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1281"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1298"/>
         <source>Pipette tolerance</source>
         <translation>የመራጭ መቻቻል</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1504"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1521"/>
         <source>Bands</source>
         <translation>ባንዶች</translation>
     </message>
@@ -6120,22 +6823,22 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">ሦስት ወይም ከዚያ በላይ ባንዶች ያለው ምስል ያስፈልጋል (ቀይ፣ አረንጓዴ፣ ሰማያዊ...)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1523"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1540"/>
         <source>Vegetation (NDVI &gt; 0.3)</source>
         <translation>እፅዋት (NDVI &gt; 0.3)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1523"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1540"/>
         <source>No vegetation (NDVI &lt; 0.1)</source>
         <translation>እፅዋት የለም (NDVI &lt; 0.1)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1524"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1541"/>
         <source>Water (NDWI &gt; 0.1)</source>
         <translation>ውሃ (NDWI &gt; 0.1)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1524"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1541"/>
         <source>Vegetation (excess green)</source>
         <translation>እፅዋት (ከመጠን በላይ አረንጓዴ)</translation>
     </message>
@@ -6145,12 +6848,12 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">ስፔክትራዊ ቅድመ ቅንብሮች…</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2431"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2470"/>
         <source>This pixel has no value (NoData): pick another one</source>
         <translation>ይህ ፒክሰል እሴት የለውም (NoData)፦ ሌላ ይምረጡ</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2541"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2578"/>
         <source>The tolerance covers every value: lower it</source>
         <translation>መቻቻሉ ሁሉንም እሴቶች ይሸፍናል፦ ያሳንሱት</translation>
     </message>
@@ -6175,12 +6878,12 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">አገላለጽ</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="857"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="866"/>
         <source>BANDS</source>
         <translation>ባንዶች</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="900"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="909"/>
         <source>Value of the active band under the cursor</source>
         <translation>ከጠቋሚው ስር ያለው የንቁ ባንድ እሴት</translation>
     </message>
@@ -6190,7 +6893,7 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">በካርታው ላይ በተሳለው የመጨረሻ አራት ማዕዘን ውስጥ የንቁ ባንድ ስታቲስቲክስ</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="941"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="950"/>
         <source>Every band</source>
         <translation>ሁሉም ባንዶች</translation>
     </message>
@@ -6200,7 +6903,7 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">የእሴት ክልሉ በሁሉም የቀለም ባንዶች ላይ በአንድ ጊዜ ይተገበራል (ፒክሰል የሚቆየው እያንዳንዱ ባንድ በክልሉ ውስጥ ሲሆን ነው)፤ ሂስቶግራሙ የመጀመሪያውን ያሳያል</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="875"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="884"/>
         <source>Display the first checked band in grey or the checked bands as a colour composite</source>
         <translation type="unfinished"></translation>
     </message>
@@ -6210,142 +6913,142 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">መራጩ ይህን ባንድ ያወዳድራል</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1052"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1061"/>
         <source>Colour the band holds: the spectral indexes and the chips use it. Click to change it</source>
         <translation>ባንዱ የያዘው ቀለም፦ የስፔክትራል ኢንዴክሶቹ እና ቺፖቹ ይጠቀሙበታል። ለመቀየር ጠቅ ያድርጉ</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1062"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1071"/>
         <source>Value at the last click of the pipette</source>
         <translation>በመራጩ የመጨረሻ ጠቅታ ላይ ያለው እሴት</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="994"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1003"/>
         <source>No colour</source>
         <translation>ቀለም የለም</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1002"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1011"/>
         <source>RGB</source>
         <translation>RGB</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1002"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1011"/>
         <source>Bands 1, 2, 3 are red, green, blue</source>
         <translation>ባንዶች 1፣ 2፣ 3 ቀይ፣ አረንጓዴ፣ ሰማያዊ ናቸው</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1002"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1011"/>
         <source>IRC</source>
         <translation>CIR</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1002"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1011"/>
         <source>Bands 1, 2, 3 are infrared, red, green (IGN infrared colour orthophoto)</source>
         <translation>ባንዶች 1፣ 2፣ 3 ኢንፍራሬድ፣ ቀይ፣ አረንጓዴ ናቸው (IGN ኢንፍራሬድ ቀለም ኦርቶፎቶ)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1002"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1011"/>
         <source>RGB + NIR</source>
         <translation>RGB + NIR</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1002"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1011"/>
         <source>Bands 1, 2, 3, 4 are red, green, blue, near infrared</source>
         <translation>ባንዶች 1፣ 2፣ 3፣ 4 ቀይ፣ አረንጓዴ፣ ሰማያዊ፣ ቅርብ ኢንፍራሬድ ናቸው</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1005"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1014"/>
         <source>Every band: {0}</source>
         <translation>ሁሉም ባንዶች፦ {0}</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1051"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1060"/>
         <source> Roles guessed, to confirm.</source>
         <translation> ሚናዎቹ የተገመቱ ናቸው፣ ለማረጋገጥ።</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1115"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1124"/>
         <source>R</source>
         <translation>R</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1115"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1124"/>
         <source>G</source>
         <translation>G</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1115"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1124"/>
         <source>B</source>
         <translation>B</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1116"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1125"/>
         <source>NIR</source>
         <translation>NIR</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1119"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1128"/>
         <source>Red</source>
         <translation>ቀይ</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1119"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1128"/>
         <source>Green</source>
         <translation>አረንጓዴ</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1119"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1128"/>
         <source>Blue</source>
         <translation>ሰማያዊ</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1120"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1129"/>
         <source>Near infrared</source>
         <translation>ቅርብ ኢንፍራሬድ</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1126"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1135"/>
         <source>roles guessed, to confirm</source>
         <translation>ሚናዎቹ የተገመቱ ናቸው፣ ለማረጋገጥ</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1141"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1152"/>
         <source>Select</source>
         <translation>ምረጥ</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1145"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1156"/>
         <source>Similar pixels</source>
         <translation>ተመሳሳይ ፒክሰሎች</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1145"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1156"/>
         <source>Every pixel of the raster close to the picked colour or value (the pipette of the rail)</source>
         <translation>በራስተሩ ውስጥ ለተወሰደው ቀለም ወይም እሴት ቅርብ የሆኑ ሁሉም ፒክሰሎች (የባቡሩ መራጭ)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1145"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1156"/>
         <source>Clicked object</source>
         <translation>የተጫነው ነገር</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1145"/>
         <source>Only the patch of such pixels the click falls in: a pool, a roof, a field (the object detector of the rail); Ctrl+click adds another object</source>
-        <translation>ጠቅታው የወደቀበት የእነዚህ ፒክሰሎች ንጣፍ ብቻ፦ መዋኛ ገንዳ፣ ጣሪያ፣ እርሻ (የባቡሩ የነገር ጠቋሚ)፤ Ctrl+ጠቅታ ሌላ ነገር ይጨምራል</translation>
+        <translation type="obsolete">ጠቅታው የወደቀበት የእነዚህ ፒክሰሎች ንጣፍ ብቻ፦ መዋኛ ገንዳ፣ ጣሪያ፣ እርሻ (የባቡሩ የነገር ጠቋሚ)፤ Ctrl+ጠቅታ ሌላ ነገር ይጨምራል</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1145"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1156"/>
         <source>Similar objects</source>
         <translation>ተመሳሳይ ነገሮች</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1145"/>
         <source>Every object of the raster like the clicked one: the patches of such pixels whose area is within the ratios below (the similar objects tool of the rail); Ctrl+click adds another reference object</source>
-        <translation>በራስተሩ ውስጥ እንደተጫነው ያሉ ሁሉም ነገሮች፦ ስፋታቸው ከታች ባሉት ሬሾዎች ውስጥ ያሉ የእነዚህ ፒክሰሎች ንጣፎች (የባቡሩ ተመሳሳይ ነገሮች መሳሪያ)፤ Ctrl+ጠቅታ ሌላ የማጣቀሻ ነገር ይጨምራል</translation>
+        <translation type="obsolete">በራስተሩ ውስጥ እንደተጫነው ያሉ ሁሉም ነገሮች፦ ስፋታቸው ከታች ባሉት ሬሾዎች ውስጥ ያሉ የእነዚህ ፒክሰሎች ንጣፎች (የባቡሩ ተመሳሳይ ነገሮች መሳሪያ)፤ Ctrl+ጠቅታ ሌላ የማጣቀሻ ነገር ይጨምራል</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1218"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1235"/>
         <source>Area ×</source>
         <translation>ስፋት ×</translation>
     </message>
@@ -6360,72 +7063,72 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">ትልቁ ተመሳሳይ ነገር፣ ከተጫኑት ትልቁ ነገር ብዜት አንጻር</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1234"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1251"/>
         <source>to ×</source>
         <translation>እስከ ×</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1237"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1254"/>
         <source>same shape</source>
         <translation>ተመሳሳይ ቅርጽ</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1240"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1257"/>
         <source>Keep only the objects shaped like the clicked ones: their compactness (4π × area / perimeter², 1 for a disc) within the same ratios; off, a road of the area of a pool is a pool</source>
         <translation>ልክ እንደተጫኑት ቅርጽ ያላቸውን ነገሮች ብቻ ያቆዩ፦ የታመቁነታቸው (4π × ስፋት / ዙሪያ²፣ ለክብ ዲስክ 1) በተመሳሳይ ሬሾዎች ውስጥ፤ ሲጠፋ፣ የመዋኛ ገንዳ ስፋት ያለው መንገድ መዋኛ ገንዳ ይሆናል</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1314"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1331"/>
         <source>Remove this pick</source>
         <translation>ይህን ምርጫ አስወግድ</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1393"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1410"/>
         <source>Quantity</source>
         <translation>ብዛት</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2334"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2356"/>
         <source>Quantity the range applies to. Slope, aspect, hillshade and roughness read the active band as a DTM.</source>
         <translation>ክልሉ የሚተገበርበት ብዛት። ተዳፋት፣ አቅጣጫ፣ የኮረብታ ጥላ እና ሸካራነት ንቁውን ባንድ እንደ DTM ያነባሉ።</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1411"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1428"/>
         <source>Thresholds ▾</source>
         <translation>ገደቦች ▾</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1483"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1500"/>
         <source>Insert ▾</source>
         <translation>አስገባ ▾</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1483"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1500"/>
         <source>Insert a band reference, a usual spectral index or the current range</source>
         <translation>የባንድ ማጣቀሻ፣ የተለመደ የስፔክትራል ኢንዴክስ ወይም ወቅታዊውን ክልል አስገባ</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1512"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1529"/>
         <source>Spectral indexes</source>
         <translation>የስፔክትራል ኢንዴክሶች</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1517"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1534"/>
         <source>Range</source>
         <translation>ክልል</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1518"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1535"/>
         <source>The current value range</source>
         <translation>ወቅታዊው የእሴት ክልል</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1629"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1646"/>
         <source>Rendered colors depend on style and scale.</source>
         <translation>የሚታዩ ቀለሞች በስታይል እና በሚዛን ላይ ይወሰናሉ።</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1629"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1646"/>
         <source>Only color selection is available: numeric bands, indices, ranges, classes and derivatives are unavailable.</source>
         <translation>የቀለም ምርጫ ብቻ ይገኛል፦ የቁጥር ባንዶች፣ ኢንዴክሶች፣ ክልሎች፣ ምድቦች እና ተዋጽኦዎች አይገኙም።</translation>
     </message>
@@ -6435,316 +7138,316 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">የእሴት ክልል — ሁሉም ባንዶች</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2136"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2158"/>
         <source>VALUE RANGE — band {0}</source>
         <translation>የእሴት ክልል — ባንድ {0}</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2330"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2352"/>
         <source>picks on: {0}</source>
         <translation>የሚወስደው ከ፦ {0}</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2334"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2356"/>
         <source>A slope, aspect... reads one band as a DTM: choose a band in BANDS first</source>
         <translation>ተዳፋት፣ አቅጣጫ... አንድ ባንድን እንደ DTM ያነባል፦ መጀመሪያ በባንዶች ውስጥ ባንድ ይምረጡ</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2576"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2613"/>
         <source>The object could not be read</source>
         <translation>ነገሩ ሊነበብ አልቻለም</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2578"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2615"/>
         <source>No object under the click: raise the tolerance or click another pixel</source>
         <translation>ከጠቅታው ስር ነገር የለም፦ መቻቻሉን ከፍ ያድርጉ ወይም ሌላ ፒክሰል ጠቅ ያድርጉ</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2580"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2617"/>
         <source>An object is larger than the window read and was cut: lower the tolerance</source>
         <translation>አንድ ነገር ከተነበበው መስኮት ይበልጣል እና ተቆርጧል፦ መቻቻሉን ዝቅ ያድርጉ</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1080"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1089"/>
         <source>Choose 1 to 3 bands for display.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1082"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1091"/>
         <source>Grey: band {0}</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="872"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="881"/>
         <source>Layer style</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="868"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="877"/>
         <source>Map display</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1084"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1093"/>
         <source>R: {0} · G: {1} · B: {2}</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="955"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="964"/>
         <source>Select band {0}</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="874"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="883"/>
         <source>Selected bands</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2412"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2452"/>
         <source>Choose at least one band in BANDS before using the pipette.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="873"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="882"/>
         <source>First checked band</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="944"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="953"/>
         <source>Select or clear every band. The histogram shows the first checked band.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="954"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="963"/>
         <source>Use this band for the pipette, value range and selected bands display</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2134"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2156"/>
         <source>VALUE RANGE — selected bands</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="907"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="916"/>
         <source>Statistics of the active band in the box of the last zone drawn on the map; only the pixels inside the zone are selected</source>
         <translation>በካርታው ላይ በመጨረሻ የተሳለው ዞን ስፋት ውስጥ የንቁው ባንድ ስታቲስቲክስ፤ በዞኑ ውስጥ ያሉ ፒክሰሎች ብቻ ይመረጣሉ</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1145"/>
         <source>Segment</source>
-        <translation>ክፈል</translation>
+        <translation type="obsolete">ክፈል</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1145"/>
         <source>Draw an object with the segmentation model: left click on it, right click off it, or drag a box; Enter validates. Best on buildings and other well delimited objects</source>
-        <translation>በክፍልፋይ ሞዴሉ አንድ ነገር ይሳሉ፦ በላዩ ላይ በግራ ጠቅ ያድርጉ፣ ከውጭው በቀኝ ጠቅ ያድርጉ ወይም ሳጥን ይጎትቱ፤ Enter ያረጋግጣል። ለሕንፃዎች እና በደንብ ለተወሰኑ ሌሎች ነገሮች ምርጥ ነው</translation>
+        <translation type="obsolete">በክፍልፋይ ሞዴሉ አንድ ነገር ይሳሉ፦ በላዩ ላይ በግራ ጠቅ ያድርጉ፣ ከውጭው በቀኝ ጠቅ ያድርጉ ወይም ሳጥን ይጎትቱ፤ Enter ያረጋግጣል። ለሕንፃዎች እና በደንብ ለተወሰኑ ሌሎች ነገሮች ምርጥ ነው</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1185"/>
         <source>Download the SAM 2.1 tiny model once, into your QGIS profile; the segmentation then runs locally, on the CPU</source>
-        <translation>የSAM 2.1 tiny ሞዴልን አንድ ጊዜ ወደ QGIS መገለጫዎ ያውርዱ፤ ክፍልፋዩ ከዚያ በኋላ በአካባቢው በCPU ላይ ይሠራል</translation>
+        <translation type="obsolete">የSAM 2.1 tiny ሞዴልን አንድ ጊዜ ወደ QGIS መገለጫዎ ያውርዱ፤ ክፍልፋዩ ከዚያ በኋላ በአካባቢው በCPU ላይ ይሠራል</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1194"/>
         <source>Validate object</source>
-        <translation>ነገሩን አረጋግጥ</translation>
+        <translation type="obsolete">ነገሩን አረጋግጥ</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1196"/>
         <source>Add the object drawn to the selection (Enter on the map)</source>
-        <translation>የተሳለውን ነገር ወደ ምርጫው ጨምር (በካርታው ላይ Enter)</translation>
+        <translation type="obsolete">የተሳለውን ነገር ወደ ምርጫው ጨምር (በካርታው ላይ Enter)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2740"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2892"/>
         <source>Clear</source>
         <translation>አጽዳ</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1201"/>
         <source>Forget the validated objects</source>
-        <translation>የተረጋገጡትን ነገሮች እርሳ</translation>
+        <translation type="obsolete">የተረጋገጡትን ነገሮች እርሳ</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1221"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1238"/>
         <source>Smallest similar object, as a share of each clicked reference</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1221"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1238"/>
         <source>Largest similar object, as a multiple of each clicked reference</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1253"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1270"/>
         <source>Separation</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1256"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1273"/>
         <source>Connected pixels</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1258"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1275"/>
         <source>Bridge removal: {0} px</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1260"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1277"/>
         <source>Separate objects joined by narrow bridges; higher values cut wider bridges</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1263"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1280"/>
         <source>Fill holes</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1266"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1283"/>
         <source>Fill enclosed gaps in the clicked object; clear to preserve courtyards and inner rings</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1408"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1425"/>
         <source>Custom expression</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1418"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1435"/>
         <source>Numeric raster formula, e.g. (&quot;raster@4&quot; - &quot;raster@1&quot;) / (&quot;raster@4&quot; + &quot;raster@1&quot;)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1419"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1436"/>
         <source>Custom derived value expression</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1420"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1437"/>
         <source>A numeric raster calculator expression. The histogram and thresholds use its computed values.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1478"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1495"/>
         <source>Computed expression values. Drag the handles to use this expression as a derived value with thresholds.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1487"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1504"/>
         <source>Use as derived value</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1696"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1713"/>
         <source>Computing histogram…</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2153"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2175"/>
         <source>No histogram available</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2153"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2175"/>
         <source>Constant value: {0}</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2153"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2175"/>
         <source>{0} sampled pixels · {1} to {2}</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2287"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2309"/>
         <source>Distribution (approximate)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2289"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2311"/>
         <source>Central 98% (P1–P99)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2289"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2311"/>
         <source>Central 90% (P5–P95)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2289"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2311"/>
         <source>Interquartile range (P25–P75)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2289"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2311"/>
         <source>Upper quartile (≥ P75)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2296"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2318"/>
         <source>All values</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2300"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2322"/>
         <source>Derived spectral values</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2646"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2739"/>
         <source>Installing onnxruntime in the background…</source>
         <translation>onnxruntimeን በጀርባ በመጫን ላይ…</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2648"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2743"/>
         <source>onnxruntime could not be installed automatically (see the FilterMate log). In a terminal (the OSGeo4W Shell on Windows), run {0} then restart QGIS.</source>
         <translation>onnxruntime በራስ-ሰር መጫን አልተቻለም (የFilterMate ምዝግብ ማስታወሻን ይመልከቱ)። በተርሚናል (በWindows ላይ OSGeo4W Shell) ውስጥ {0}ን ያስኪዱ ከዚያም QGISን እንደገና ያስጀምሩ።</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2660"/>
         <source>Install the model ({0} MB)…</source>
-        <translation>ሞዴሉን ጫን ({0} MB)…</translation>
+        <translation type="obsolete">ሞዴሉን ጫን ({0} MB)…</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2666"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2769"/>
         <source>Repair the model…</source>
         <translation>ሞዴሉን አስተካክል…</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2691"/>
         <source>Segmentation model</source>
-        <translation>የክፍልፋይ ሞዴል</translation>
+        <translation type="obsolete">የክፍልፋይ ሞዴል</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2691"/>
         <source>Download the SAM 2.1 tiny model ({0} MB) from huggingface.co/{1} into your QGIS profile?
 
 Every file is checked against its SHA-256. The model then runs locally, on the CPU; nothing leaves your computer.</source>
-        <translation>የSAM 2.1 tiny ሞዴልን ({0} MB) ከhuggingface.co/{1} ወደ QGIS መገለጫዎ ይውረድ?
+        <translation type="obsolete">የSAM 2.1 tiny ሞዴልን ({0} MB) ከhuggingface.co/{1} ወደ QGIS መገለጫዎ ይውረድ?
 
 እያንዳንዱ ፋይል በSHA-256 ይረጋገጣል። ሞዴሉ ከዚያ በኋላ በአካባቢው በCPU ላይ ይሠራል፤ ምንም ነገር ኮምፒውተርዎን አይለቅም።</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2740"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2892"/>
         <source>Clear ({0})</source>
         <translation>አጽዳ ({0})</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2780"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2932"/>
         <source>Derived value: {0}</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2652"/>
         <source>The segmentation needs onnxruntime (about {0} MB), which is not installed yet.</source>
-        <translation>ክፍፍሉ onnxruntime ያስፈልገዋል (ወደ {0} ሜባ)፣ እሱም ገና አልተጫነም።</translation>
+        <translation type="obsolete">ክፍፍሉ onnxruntime ያስፈልገዋል (ወደ {0} ሜባ)፣ እሱም ገና አልተጫነም።</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2656"/>
         <source>Install onnxruntime…</source>
-        <translation>onnxruntime ጫን…</translation>
+        <translation type="obsolete">onnxruntime ጫን…</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2675"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2779"/>
         <source>Segmentation</source>
         <translation>ክፍፍል</translation>
     </message>
@@ -6753,9 +7456,68 @@ Every file is checked against its SHA-256. The model then runs locally, on the C
         <source>The segmentation needs onnxruntime (about {0} MB), which this QGIS does not have.
 
 Install it now from PyPI with pip, into your QGIS profile? The Python of QGIS is not modified.</source>
-        <translation>ክፍፍሉ onnxruntime ያስፈልገዋል (ወደ {0} ሜባ)፣ ይህ QGIS ግን የለውም።
+        <translation type="obsolete">ክፍፍሉ onnxruntime ያስፈልገዋል (ወደ {0} ሜባ)፣ ይህ QGIS ግን የለውም።
 
 አሁን ከ PyPI በ pip ወደ QGIS ፕሮፋይልዎ ይጫን? የ QGIS Python አይቀየርም።</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1156"/>
+        <source>The object under the click: a roof, a pool, a field (the object detector of the rail). With SAM: a click adds an object, Shift+click extends the last one, a right click trims it, a box frames one, Escape removes it. With the colour engine: the patch of such pixels, Ctrl+click adds another one</source>
+        <translation>ከጠቅታው በታች ያለው ነገር፦ ጣራ፣ የመዋኛ ገንዳ፣ እርሻ (የመሣሪያ አሞሌው የነገር መፈለጊያ)። በSAM፦ ጠቅታ ነገር ይጨምራል፣ Shift+ጠቅታ የመጨረሻውን ያሰፋል፣ የቀኝ ጠቅታ ያጠባል፣ ሳጥን አንዱን ይከብባል፣ Esc ያስወግደዋል። በቀለም ሞተር፦ ተመሳሳይ ፒክሰሎች ያሉት ቦታ፣ Ctrl+ጠቅታ ሌላ ይጨምራል</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1156"/>
+        <source>Every object like the clicked one, whose area is within the ratios below (the similar objects tool of the rail). With SAM: the patches of a similar colour in the visible area are redrawn by the model, then compared with the clicked object. With the colour engine: the patches of such pixels</source>
+        <translation>ጠቅ ከተደረገበት ነገር ጋር የሚመሳሰል እያንዳንዱ ነገር፣ ስፋቱ ከታች ባሉት ሬሾዎች ውስጥ የሚሆን (የመሣሪያ አሞሌው ተመሳሳይ ነገሮች መሣሪያ)። በSAM፦ በሚታየው ቦታ ውስጥ ተመሳሳይ ቀለም ያላቸው ቦታዎች በሞዴሉ እንደገና ይሳላሉ፣ ከዚያም ጠቅ ከተደረገበት ነገር ጋር ይነጻጸራሉ። በቀለም ሞተር፦ ተመሳሳይ ፒክሰሎች ያሉባቸው ቦታዎች</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1185"/>
+        <source>Engine</source>
+        <translation>ሞተር</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1189"/>
+        <source>Colour</source>
+        <translation>ቀለም</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1190"/>
+        <source>SAM draws the object from the image, locally on the CPU; the colour engine grows the patch of pixels of the clicked colour</source>
+        <translation>SAM ነገሩን ከምስሉ ይስላል፣ በCPU ላይ በአካባቢ፤ የቀለም ሞተር ጠቅ የተደረገበትን ቀለም ፒክሰሎች ቦታ ያሰፋል</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1207"/>
+        <source>Install SAM 2.1 tiny once, into your QGIS profile; it then runs locally, on the CPU</source>
+        <translation>SAM 2.1 tiny በQGIS መገለጫዎ ውስጥ አንድ ጊዜ ይጫኑ፤ ከዚያ በኋላ በCPU ላይ በአካባቢ ይሰራል</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1218"/>
+        <source>Forget the objects drawn by SAM</source>
+        <translation>በSAM የተሳሉትን ነገሮች እርሳ</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2741"/>
+        <source>Downloading the SAM model in the background…</source>
+        <translation>የSAM ሞዴል በዳራ እየወረደ ነው…</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2747"/>
+        <source>Objects are found by their colour. SAM draws them from the image, far better on buildings (about {0} MB to install).</source>
+        <translation>ነገሮች በቀለማቸው ይገኛሉ። SAM ከምስሉ ይስላቸዋል፣ በሕንፃዎች ላይ እጅግ የተሻለ ነው (ለመጫን ወደ {0} ሜባ)።</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2751"/>
+        <source>Install SAM ({0} MB)…</source>
+        <translation>SAM ጫን ({0} ሜባ)…</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2779"/>
+        <source>Clicked and similar objects can be drawn by the SAM 2.1 segmentation model, locally on the CPU. Install it now (about {0} MB)?
+
+onnxruntime comes from PyPI with pip, the model from huggingface.co/{1}, each file checked against its SHA-256. Both go to your QGIS profile; the Python of QGIS is not modified and nothing leaves your computer. Without SAM, objects are found by their colour.</source>
+        <translation>ጠቅ የተደረገባቸው እና ተመሳሳይ ነገሮች በSAM 2.1 የክፍፍል ሞዴል በCPU ላይ በአካባቢ ሊሳሉ ይችላሉ። አሁን ይጫን (ወደ {0} ሜባ)?
+
+onnxruntime ከPyPI በpip ይመጣል፣ ሞዴሉ ከhuggingface.co/{1}፣ እያንዳንዱ ፋይል በSHA-256 ይረጋገጣል። ሁለቱም ወደ QGIS መገለጫዎ ይሄዳሉ፤ የQGIS Python አይቀየርም እና ምንም ነገር ከኮምፒውተርዎ አይወጣም። SAM ከሌለ ነገሮች በቀለማቸው ይገኛሉ።</translation>
     </message>
 </context>
 <context>
@@ -7027,125 +7789,200 @@ Install it now from PyPI with pip, into your QGIS profile? The Python of QGIS is
 <context>
     <name>SegmentationController</name>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="106"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="147"/>
         <source>This point cannot be used on this layer</source>
         <translation>ይህ ነጥብ በዚህ ንብርብር ላይ ሊያገለግል አይችልም</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="134"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="199"/>
         <source>Click inside the raster</source>
         <translation>በራስተሩ ውስጥ ጠቅ ያድርጉ</translation>
     </message>
     <message>
         <location filename="../ui/controllers/segmentation_controller.py" line="141"/>
         <source>This point is outside the window being segmented: validate or clear the object first</source>
-        <translation>ይህ ነጥብ እየተከፋፈለ ካለው መስኮት ውጭ ነው፦ መጀመሪያ ነገሩን ያረጋግጡ ወይም ያጽዱ</translation>
+        <translation type="obsolete">ይህ ነጥብ እየተከፋፈለ ካለው መስኮት ውጭ ነው፦ መጀመሪያ ነገሩን ያረጋግጡ ወይም ያጽዱ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="164"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="231"/>
         <source>This box is too small</source>
         <translation>ይህ ሳጥን በጣም ትንሽ ነው</translation>
     </message>
     <message>
         <location filename="../ui/controllers/segmentation_controller.py" line="149"/>
         <source>Start with a left click on the object, or draw a box</source>
-        <translation>በነገሩ ላይ በግራ ጠቅ በማድረግ ይጀምሩ ወይም ሳጥን ይሳሉ</translation>
+        <translation type="obsolete">በነገሩ ላይ በግራ ጠቅ በማድረግ ይጀምሩ ወይም ሳጥን ይሳሉ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="160"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="224"/>
         <source>This raster cannot be segmented</source>
         <translation>ይህ ራስተር ሊከፈል አይችልም</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="211"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="317"/>
         <source>Preparing the segmentation of this area…</source>
         <translation>የዚህን አካባቢ ክፍልፋይ በማዘጋጀት ላይ…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="370"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="430"/>
         <source>The segmentation of this area failed: {0}</source>
         <translation>የዚህ አካባቢ ክፍልፋይ አልተሳካም፦ {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="222"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="328"/>
         <source>canceled</source>
         <translation>ተሰርዟል</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="247"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="363"/>
         <source>onnxruntime is being installed, click again in a moment</source>
         <translation>onnxruntime እየተጫነ ነው፣ ከጥቂት ጊዜ በኋላ እንደገና ጠቅ ያድርጉ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="249"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="365"/>
         <source>onnxruntime is missing: run {0}, then restart QGIS</source>
         <translation>onnxruntime የለም፦ {0}ን ያስኪዱ ከዚያም QGISን እንደገና ያስጀምሩ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="253"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="369"/>
         <source>The segmentation model is being downloaded, click again once it is installed</source>
         <translation>የክፍልፋይ ሞዴሉ እየወረደ ነው፣ ከተጫነ በኋላ እንደገና ጠቅ ያድርጉ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="255"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="371"/>
         <source>Install the segmentation model first (button below)</source>
         <translation>መጀመሪያ የክፍልፋይ ሞዴሉን ይጫኑ (ከታች ያለው አዝራር)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="256"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="372"/>
         <source>The segmentation model could not be loaded (see the FilterMate log)</source>
         <translation>የክፍልፋይ ሞዴሉ መጫን አልተቻለም (የFilterMate ምዝግብ ማስታወሻን ይመልከቱ)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="276"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="393"/>
         <source>Downloading the segmentation model… {0} %</source>
         <translation>የክፍልፋይ ሞዴሉን በማውረድ ላይ… {0} %</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="285"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="402"/>
         <source>Model installed: left click on an object, or draw a box</source>
         <translation>ሞዴሉ ተጭኗል፦ በነገር ላይ በግራ ጠቅ ያድርጉ ወይም ሳጥን ይሳሉ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="287"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="404"/>
         <source>The model could not be downloaded: {0}</source>
         <translation>ሞዴሉ ማውረድ አልተቻለም፦ {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="289"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="406"/>
         <source>Download canceled</source>
         <translation>ማውረዱ ተሰርዟል</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="307"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="422"/>
         <source>Click on an object in the area prepared</source>
         <translation>በተዘጋጀው አካባቢ ውስጥ ባለ ነገር ላይ ጠቅ ያድርጉ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="373"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="439"/>
         <source>No object found: add a point or draw a box</source>
         <translation>ምንም ነገር አልተገኘም፦ ነጥብ ይጨምሩ ወይም ሳጥን ይሳሉ</translation>
     </message>
     <message>
         <location filename="../ui/controllers/segmentation_controller.py" line="324"/>
         <source>Left click adds to the object, right click removes, Enter validates</source>
-        <translation>የግራ ጠቅ ወደ ነገሩ ይጨምራል፣ የቀኝ ጠቅ ያስወግዳል፣ Enter ያረጋግጣል</translation>
+        <translation type="obsolete">የግራ ጠቅ ወደ ነገሩ ይጨምራል፣ የቀኝ ጠቅ ያስወግዳል፣ Enter ያረጋግጣል</translation>
     </message>
     <message>
         <location filename="../ui/controllers/segmentation_controller.py" line="364"/>
         <source>Click an object first</source>
-        <translation>መጀመሪያ በነገር ላይ ጠቅ ያድርጉ</translation>
+        <translation type="obsolete">መጀመሪያ በነገር ላይ ጠቅ ያድርጉ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="251"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="367"/>
         <source>Install onnxruntime first, with the button below</source>
         <translation>መጀመሪያ onnxruntime ን ከታች ባለው አዝራር ይጫኑ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="91"/>
+        <source>Click an object, or draw a box around it</source>
+        <translation>ነገር ላይ ጠቅ ያድርጉ፣ ወይም በዙሪያው ሳጥን ይሳሉ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="166"/>
+        <source>A right click trims the last object: click an object first</source>
+        <translation>የቀኝ ጠቅታ የመጨረሻውን ነገር ያጠባል፦ መጀመሪያ ነገር ላይ ጠቅ ያድርጉ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="206"/>
+        <source>This point is outside the area of the last object: click it as a new object</source>
+        <translation>ይህ ነጥብ ከመጨረሻው ነገር አካባቢ ውጪ ነው፦ እንደ አዲስ ነገር ጠቅ ያድርጉት</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="349"/>
+        <source>{0} click(s) fell outside the area prepared: click them again</source>
+        <translation>{0} ጠቅታዎች ከተዘጋጀው አካባቢ ውጪ ወደቁ፦ እንደገና ጠቅ ያድርጓቸው</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="466"/>
+        <source>Shift+click extends the object, right click trims it, Escape removes it</source>
+        <translation>Shift+ጠቅታ ነገሩን ያሰፋል፣ የቀኝ ጠቅታ ያጠባል፣ Esc ያስወግዳል</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="502"/>
+        <source>Similar objects need the values of the raster: this layer is only drawn</source>
+        <translation>ተመሳሳይ ነገሮች የራስተሩን እሴቶች ይፈልጋሉ፦ ይህ ንብርብር የተሳለ ብቻ ነው</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="510"/>
+        <source>No patch of this colour nearby to compare with the object</source>
+        <translation>ከነገሩ ጋር ለማወዳደር በአቅራቢያ የዚህ ቀለም ቦታ የለም</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="524"/>
+        <source>Drawing the similar objects: {0} candidates…</source>
+        <translation>ተመሳሳይ ነገሮች እየተሳሉ ነው፦ {0} እጩዎች…</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="535"/>
+        <source>Drawing the similar objects… {0} %</source>
+        <translation>ተመሳሳይ ነገሮች እየተሳሉ ነው… {0} %</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="549"/>
+        <source>The similar objects could not be drawn: {0}</source>
+        <translation>ተመሳሳይ ነገሮችን መሳል አልተቻለም፦ {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="559"/>
+        <source>{0} similar objects found among {1} candidates; Escape removes them</source>
+        <translation>ከ{1} እጩዎች መካከል {0} ተመሳሳይ ነገሮች ተገኙ፤ Esc ያስወግዳቸዋል</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="596"/>
+        <source>Click the next object</source>
+        <translation>ቀጣዩን ነገር ጠቅ ያድርጉ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="603"/>
+        <source>Search stopped</source>
+        <translation>ፍለጋ ቆሟል</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="603"/>
+        <source>Click canceled</source>
+        <translation>ጠቅታው ተሰርዟል</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="611"/>
+        <source>Last object removed</source>
+        <translation>የመጨረሻው ነገር ተወግዷል</translation>
     </message>
 </context>
 <context>
     <name>SegmentationEmbedTask</name>
     <message>
-        <location filename="../adapters/qgis/coverage_layers/segmentation.py" line="238"/>
+        <location filename="../adapters/qgis/coverage_layers/segmentation.py" line="400"/>
         <source>FilterMate: preparing the segmentation</source>
         <translation>FilterMate፦ ክፍልፋዩን በማዘጋጀት ላይ</translation>
     </message>
@@ -7441,6 +8278,14 @@ Install it now from PyPI with pip, into your QGIS profile? The Python of QGIS is
     </message>
 </context>
 <context>
+    <name>SimilarObjectsTask</name>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/segmentation.py" line="469"/>
+        <source>FilterMate: drawing the similar objects</source>
+        <translation>FilterMate፦ ተመሳሳይ ነገሮች እየተሳሉ ነው</translation>
+    </message>
+</context>
+<context>
     <name>SimpleConfigDialog</name>
     <message>
         <location filename="../ui/dialogs/config_editor_widget.py" line="470"/>
@@ -7475,12 +8320,12 @@ Install it now from PyPI with pip, into your QGIS profile? The Python of QGIS is
 <context>
     <name>SqlUtils</name>
     <message>
-        <location filename="../infrastructure/database/sql_utils.py" line="273"/>
+        <location filename="../infrastructure/database/sql_utils.py" line="243"/>
         <source>FilterMate - PostgreSQL Type Warning</source>
         <translation>FilterMate - PostgreSQL ዓይነት ማስጠንቀቂያ</translation>
     </message>
     <message>
-        <location filename="../infrastructure/database/sql_utils.py" line="277"/>
+        <location filename="../infrastructure/database/sql_utils.py" line="247"/>
         <source>Type mismatch in filter: {warning_detail}...</source>
         <translation>በማጣሪያ ውስጥ ዓይነት አለመዛመድ: {warning_detail}...</translation>
     </message>
@@ -7756,576 +8601,6 @@ Install it now from PyPI with pip, into your QGIS profile? The Python of QGIS is
         <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
         <source>Kept points</source>
         <translation type="obsolete">የተያዙ ነጥቦች</translation>
-    </message>
-</context>
-<context>
-    <name>AgentPanel</name>
-    <message>
-        <source>(no request)</source>
-        <translation>(ጥያቄ የለም)</translation>
-    </message>
-    <message>
-        <source>A few free requests a month, through the relay of FilterMate to Claude (Anthropic), under the terms of Anthropic. The relay counts what is spent and keeps no conversation. When it is used up, choose a provider and enter your own API key.</source>
-        <translation>በወር ጥቂት ነፃ ጥያቄዎች፣ በFilterMate ወደ Claude (Anthropic) በሚያደርሰው ማስተላለፊያ በኩል፣ በAnthropic ውሎች መሠረት። ማስተላለፊያው የሚወጣውን ይቆጥራል እንጂ ምንም ውይይት አያስቀምጥም። ሲያልቅ አቅራቢ ይምረጡ እና የራስዎን API ቁልፍ ያስገቡ።</translation>
-    </message>
-    <message>
-        <source>API key</source>
-        <translation>API ቁልፍ</translation>
-    </message>
-    <message>
-        <source>Add</source>
-        <translation>አክል</translation>
-    </message>
-    <message>
-        <source>Address</source>
-        <translation>አድራሻ</translation>
-    </message>
-    <message>
-        <source>Agent settings</source>
-        <translation>የወኪል ቅንብሮች</translation>
-    </message>
-    <message>
-        <source>Allow attribute values to be sent</source>
-        <translation>የባህሪ እሴቶች እንዲላኩ ፍቀድ</translation>
-    </message>
-    <message>
-        <source>Applications already set up will have to be set up again.</source>
-        <translation>አስቀድሞ የተዋቀሩ መተግበሪያዎች እንደገና መዋቀር አለባቸው።</translation>
-    </message>
-    <message>
-        <source>Ask the agent to filter your layers</source>
-        <translation>ንብርብሮችዎን እንዲያጣራ ወኪሉን ይጠይቁ</translation>
-    </message>
-    <message>
-        <source>Back to the conversation</source>
-        <translation>ወደ ውይይቱ ተመለስ</translation>
-    </message>
-    <message>
-        <source>Claude Code or another MCP client on this computer can then filter your layers, once FilterMate has been opened, under the rules of this panel: the same sources, the same confirmations, and filters can be undone here. That application sends what it reads to its own AI provider.</source>
-        <translation>FilterMate ከተከፈተ በኋላ፣ በዚህ ኮምፒውተር ላይ ያለ Claude Code ወይም ሌላ MCP ደንበኛ በዚህ ፓነል ደንቦች መሠረት ንብርብሮችዎን ማጣራት ይችላል: ተመሳሳይ ምንጮች፣ ተመሳሳይ ማረጋገጫዎች፣ እና ማጣሪያዎች እዚህ ሊቀለበሱ ይችላሉ። ያ መተግበሪያ የሚያነበውን ለራሱ AI አቅራቢ ይልካል።</translation>
-    </message>
-    <message>
-        <source>Connect an AI provider to start. Nothing is sent before you agree.</source>
-        <translation>ለመጀመር AI አቅራቢ ያገናኙ። ከእርስዎ ፈቃድ በፊት ምንም አይላክም።</translation>
-    </message>
-    <message>
-        <source>Copied, with the access token: keep it to yourself. Save these settings for it to apply.</source>
-        <translation>ከመዳረሻ ቶከን ጋር ተቀድቷል: ለራስዎ ያቆዩት። ተግባራዊ እንዲሆን እነዚህን ቅንብሮች ያስቀምጡ።</translation>
-    </message>
-    <message>
-        <source>Copy for Claude Desktop</source>
-        <translation>ለClaude Desktop ቅዳ</translation>
-    </message>
-    <message>
-        <source>Copy the Claude Code command</source>
-        <translation>የClaude Code ትዕዛዝ ቅዳ</translation>
-    </message>
-    <message>
-        <source>Copy the configuration</source>
-        <translation>ውቅሩን ቅዳ</translation>
-    </message>
-    <message>
-        <source>Describe it in your own words. Each filter can be undone.</source>
-        <translation>በራስዎ ቃላት ይግለጹት። እያንዳንዱ ማጣሪያ ሊቀለበስ ይችላል።</translation>
-    </message>
-    <message>
-        <source>Filter your layers from a sentence</source>
-        <translation>ንብርብሮችዎን በአንድ አረፍተ ነገር ያጣሩ</translation>
-    </message>
-    <message>
-        <source>FilterMate agent</source>
-        <translation>የFilterMate ወኪል</translation>
-    </message>
-    <message>
-        <source>History</source>
-        <translation>ታሪክ</translation>
-    </message>
-    <message>
-        <source>History…</source>
-        <translation>ታሪክ…</translation>
-    </message>
-    <message>
-        <source>I agree to send this data to this provider</source>
-        <translation>ይህን ውሂብ ለዚህ አቅራቢ ለመላክ እስማማለሁ</translation>
-    </message>
-    <message>
-        <source>Let other applications on this computer drive FilterMate (MCP server)</source>
-        <translation>በዚህ ኮምፒውተር ላይ ያሉ ሌሎች መተግበሪያዎች FilterMateን እንዲቆጣጠሩ ፍቀድ (MCP አገልጋይ)</translation>
-    </message>
-    <message>
-        <source>MCP connector</source>
-        <translation>MCP አገናኝ</translation>
-    </message>
-    <message>
-        <source>MCP connectors</source>
-        <translation>MCP አገናኞች</translation>
-    </message>
-    <message>
-        <source>Model</source>
-        <translation>ሞዴል</translation>
-    </message>
-    <message>
-        <source>More</source>
-        <translation>ተጨማሪ</translation>
-    </message>
-    <message>
-        <source>New access token</source>
-        <translation>አዲስ የመዳረሻ ቶከን</translation>
-    </message>
-    <message>
-        <source>New conversation</source>
-        <translation>አዲስ ውይይት</translation>
-    </message>
-    <message>
-        <source>New token: it applies once these settings are saved.</source>
-        <translation>አዲስ ቶከን: እነዚህ ቅንብሮች ከተቀመጡ በኋላ ይተገበራል።</translation>
-    </message>
-    <message>
-        <source>Open data platforms</source>
-        <translation>ክፍት የውሂብ መድረኮች</translation>
-    </message>
-    <message>
-        <source>Open the settings</source>
-        <translation>ቅንብሮችን ክፈት</translation>
-    </message>
-    <message>
-        <source>Other applications</source>
-        <translation>ሌሎች መተግበሪያዎች</translation>
-    </message>
-    <message>
-        <source>Port</source>
-        <translation>ወደብ</translation>
-    </message>
-    <message>
-        <source>Provider</source>
-        <translation>አቅራቢ</translation>
-    </message>
-    <message>
-        <source>Redo</source>
-        <translation>እንደገና አድርግ</translation>
-    </message>
-    <message>
-        <source>Remove</source>
-        <translation>አስወግድ</translation>
-    </message>
-    <message>
-        <source>Remove the stored key</source>
-        <translation>የተከማቸውን ቁልፍ አስወግድ</translation>
-    </message>
-    <message>
-        <source>Satellite imagery</source>
-        <translation>የሳተላይት ምስሎች</translation>
-    </message>
-    <message>
-        <source>Send (Enter)</source>
-        <translation>ላክ (Enter)</translation>
-    </message>
-    <message>
-        <source>Send again</source>
-        <translation>እንደገና ላክ</translation>
-    </message>
-    <message>
-        <source>Sent to: {}</source>
-        <translation>የተላከው ወደ: {}</translation>
-    </message>
-    <message>
-        <source>Set up the agent</source>
-        <translation>ወኪሉን አዋቅር</translation>
-    </message>
-    <message>
-        <source>Sources</source>
-        <translation>ምንጮች</translation>
-    </message>
-    <message>
-        <source>Stop (Esc)</source>
-        <translation>አቁም (Esc)</translation>
-    </message>
-    <message>
-        <source>Stored: leave empty to keep it</source>
-        <translation>የተከማቸ: ለማቆየት ባዶ ይተዉት</translation>
-    </message>
-    <message>
-        <source>Test</source>
-        <translation>ሞክር</translation>
-    </message>
-    <message>
-        <source>Testing…</source>
-        <translation>በመሞከር ላይ…</translation>
-    </message>
-    <message>
-        <source>The MCP server could not start: {}</source>
-        <translation>የMCP አገልጋይ መጀመር አልቻለም: {}</translation>
-    </message>
-    <message>
-        <source>The agent can search the sources ticked here. Your searches, and what the agent passes to a connector, are sent to them; a layer added from them is read from their servers.</source>
-        <translation>ወኪሉ እዚህ ምልክት የተደረገባቸውን ምንጮች መፈለግ ይችላል። ፍለጋዎችዎ እና ወኪሉ ለአገናኝ የሚያስተላልፈው ወደ እነሱ ይላካሉ፤ ከእነሱ የተጨመረ ንብርብር ከአገልጋዮቻቸው ይነበባል።</translation>
-    </message>
-    <message>
-        <source>The agent sends your request, the names of your layers and fields, your filter expressions and the results of its tools to the provider chosen here, under that provider's terms. Without the option below, the agent does not read the values of your fields; values already written in your filters and favorites are still sent. The conversation is kept on this computer for each project, until you start a new one.</source>
-        <translation>ወኪሉ ጥያቄዎን፣ የንብርብሮችዎን እና የመስኮችዎን ስሞች፣ የማጣሪያ አገላለጾችዎን እና የመሣሪያዎቹን ውጤቶች እዚህ ለተመረጠው አቅራቢ በዚያ አቅራቢ ውሎች መሠረት ይልካል። ከታች ያለው አማራጭ ከሌለ ወኪሉ የመስኮችዎን እሴቶች አያነብም፤ በማጣሪያዎችዎ እና በተወዳጆችዎ ውስጥ አስቀድመው የተጻፉ እሴቶች አሁንም ይላካሉ። ውይይቱ አዲስ እስኪጀምሩ ድረስ ለእያንዳንዱ ፕሮጀክት በዚህ ኮምፒውተር ላይ ይቀመጣል።</translation>
-    </message>
-    <message>
-        <source>Through mcp-remote, which needs Node.js: Claude Desktop starts local servers as programs.</source>
-        <translation>በNode.js በሚያስፈልገው mcp-remote በኩል: Claude Desktop የአካባቢ አገልጋዮችን እንደ ፕሮግራሞች ያስነሳል።</translation>
-    </message>
-    <message>
-        <source>Too many sources added: remove one first.</source>
-        <translation>በጣም ብዙ ምንጮች ተጨምረዋል: መጀመሪያ አንዱን ያስወግዱ።</translation>
-    </message>
-    <message>
-        <source>Undo the last</source>
-        <translation>የመጨረሻውን ቀልብስ</translation>
-    </message>
-    <message>
-        <source>Undo this turn</source>
-        <translation>ይህን ዙር ቀልብስ</translation>
-    </message>
-    <message>
-        <source>What do you want to filter?</source>
-        <translation>ምን ማጣራት ይፈልጋሉ?</translation>
-    </message>
-    <message>
-        <source>added by you</source>
-        <translation>በእርስዎ የተጨመረ</translation>
-    </message>
-    <message>
-        <source>applied</source>
-        <translation>ተተግብሯል</translation>
-    </message>
-    <message>
-        <source>community</source>
-        <translation>የማህበረሰብ</translation>
-    </message>
-    <message>
-        <source>https://... or a portal address</source>
-        <translation>https://... ወይም የፖርታል አድራሻ</translation>
-    </message>
-    <message>
-        <source>no change</source>
-        <translation>ለውጥ የለም</translation>
-    </message>
-    <message>
-        <source>official</source>
-        <translation>ይፋዊ</translation>
-    </message>
-    <message>
-        <source>this computer</source>
-        <translation>ይህ ኮምፒውተር</translation>
-    </message>
-    <message>
-        <source>undone</source>
-        <translation>ተቀልብሷል</translation>
-    </message>
-    <message>
-        <source>{} turn(s)</source>
-        <translation>{} ዙር(ዎች)</translation>
-    </message>
-    <message>
-        <source>Which layers are in this project?</source>
-        <translation>በዚህ ፕሮጀክት ውስጥ ያሉት የትኞቹ ንብርብሮች ናቸው?</translation>
-    </message>
-    <message>
-        <source>Keep the buildings taller than 15 m</source>
-        <translation>ከ15 ሜ የሚረዝሙ ሕንፃዎችን አቆይ</translation>
-    </message>
-    <message>
-        <source>Filter the roads inside the selected feature</source>
-        <translation>በተመረጠው ባህሪ ውስጥ ያሉትን መንገዶች አጣራ</translation>
-    </message>
-</context>
-<context>
-    <name>AgentChat</name>
-    <message>
-        <source>Access to the free quota was renewed: send your request again.</source>
-        <translation>የነፃ ኮታ መዳረሻ ታድሷል: ጥያቄዎን እንደገና ይላኩ።</translation>
-    </message>
-    <message>
-        <source>Another application is changing the project: try again in a moment.</source>
-        <translation>ሌላ መተግበሪያ ፕሮጀክቱን እየቀየረ ነው: ከጥቂት ቆይታ በኋላ እንደገና ይሞክሩ።</translation>
-    </message>
-    <message>
-        <source>Another application: {}</source>
-        <translation>ሌላ መተግበሪያ: {}</translation>
-    </message>
-    <message>
-        <source>Applied again: {}.</source>
-        <translation>እንደገና ተተግብሯል: {}።</translation>
-    </message>
-    <message>
-        <source>Changed since, left as is: {}.</source>
-        <translation>ከዚያ በኋላ ተቀይሯል፣ እንዳለ ተተወ: {}።</translation>
-    </message>
-    <message>
-        <source>Changed: {}.</source>
-        <translation>ተቀይሯል: {}።</translation>
-    </message>
-    <message>
-        <source>Choose a model and agree to send your data to use the agent.</source>
-        <translation>ወኪሉን ለመጠቀም ሞዴል ይምረጡ እና ውሂብዎን ለመላክ ይስማሙ።</translation>
-    </message>
-    <message>
-        <source>Connecting to {}…</source>
-        <translation>ከ{} ጋር በመገናኘት ላይ…</translation>
-    </message>
-    <message>
-        <source>Earlier conversation: the agent starts afresh from here.</source>
-        <translation>ቀዳሚ ውይይት: ወኪሉ ከዚህ ጀምሮ እንደገና ይጀምራል።</translation>
-    </message>
-    <message>
-        <source>Enter your API key in the agent settings.</source>
-        <translation>API ቁልፍዎን በወኪል ቅንብሮች ውስጥ ያስገቡ።</translation>
-    </message>
-    <message>
-        <source>Export of {}</source>
-        <translation>{} መላክ</translation>
-    </message>
-    <message>
-        <source>Favorite applied</source>
-        <translation>ተወዳጅ ተተግብሯል</translation>
-    </message>
-    <message>
-        <source>Filter on the points of {}</source>
-        <translation>በ{} ነጥቦች ላይ ማጣሪያ</translation>
-    </message>
-    <message>
-        <source>Filter on {}</source>
-        <translation>በ{} ላይ ማጣሪያ</translation>
-    </message>
-    <message>
-        <source>Filter on {} by an area</source>
-        <translation>በ{} ላይ በአካባቢ ማጣሪያ</translation>
-    </message>
-    <message>
-        <source>Filter on {} by {}</source>
-        <translation>በ{} ላይ በ{} ማጣሪያ</translation>
-    </message>
-    <message>
-        <source>FilterMate agent</source>
-        <translation>የFilterMate ወኪል</translation>
-    </message>
-    <message>
-        <source>Filters removed from {}</source>
-        <translation>ማጣሪያዎች ከ{} ተወግደዋል</translation>
-    </message>
-    <message>
-        <source>Hidden: {}</source>
-        <translation>ተደብቋል: {}</translation>
-    </message>
-    <message>
-        <source>It answers.</source>
-        <translation>ምላሽ ይሰጣል።</translation>
-    </message>
-    <message>
-        <source>Layer added: {}</source>
-        <translation>ንብርብር ተጨምሯል: {}</translation>
-    </message>
-    <message>
-        <source>Layers removed: {}</source>
-        <translation>ንብርብሮች ተወግደዋል: {}</translation>
-    </message>
-    <message>
-        <source>Not reachable for this conversation: {}</source>
-        <translation>ለዚህ ውይይት ሊደረስበት አይችልም: {}</translation>
-    </message>
-    <message>
-        <source>Nothing to redo.</source>
-        <translation>እንደገና የሚደረግ ምንም የለም።</translation>
-    </message>
-    <message>
-        <source>Nothing to restore.</source>
-        <translation>የሚመለስ ምንም የለም።</translation>
-    </message>
-    <message>
-        <source>Reading the active filters</source>
-        <translation>ንቁ ማጣሪያዎችን በማንበብ ላይ</translation>
-    </message>
-    <message>
-        <source>Reading the favorites</source>
-        <translation>ተወዳጆችን በማንበብ ላይ</translation>
-    </message>
-    <message>
-        <source>Reading the fields of {}</source>
-        <translation>የ{} መስኮችን በማንበብ ላይ</translation>
-    </message>
-    <message>
-        <source>Reading the layers</source>
-        <translation>ንብርብሮችን በማንበብ ላይ</translation>
-    </message>
-    <message>
-        <source>Reading the map</source>
-        <translation>ካርታውን በማንበብ ላይ</translation>
-    </message>
-    <message>
-        <source>Reading the values of {}</source>
-        <translation>የ{} እሴቶችን በማንበብ ላይ</translation>
-    </message>
-    <message>
-        <source>Restored: {}.</source>
-        <translation>ተመልሷል: {}።</translation>
-    </message>
-    <message>
-        <source>Searching satellite imagery on {}</source>
-        <translation>በ{} ላይ የሳተላይት ምስሎችን በመፈለግ ላይ</translation>
-    </message>
-    <message>
-        <source>Searching {} for {}</source>
-        <translation>በ{} ላይ {} በመፈለግ ላይ</translation>
-    </message>
-    <message>
-        <source>Selection cleared on {}</source>
-        <translation>በ{} ላይ ምርጫ ተጠርጓል</translation>
-    </message>
-    <message>
-        <source>Selection on {}</source>
-        <translation>በ{} ላይ ምርጫ</translation>
-    </message>
-    <message>
-        <source>Shown: {}</source>
-        <translation>ታይቷል: {}</translation>
-    </message>
-    <message>
-        <source>Stopped.</source>
-        <translation>ቆሟል።</translation>
-    </message>
-    <message>
-        <source>The MCP server could not start: {}</source>
-        <translation>የMCP አገልጋይ መጀመር አልቻለም: {}</translation>
-    </message>
-    <message>
-        <source>The QGIS authentication database is not available.</source>
-        <translation>የQGIS የማረጋገጫ ዳታቤዝ አይገኝም።</translation>
-    </message>
-    <message>
-        <source>The QGIS master password is needed to use the stored key.</source>
-        <translation>የተከማቸውን ቁልፍ ለመጠቀም የQGIS ዋና የይለፍ ቃል ያስፈልጋል።</translation>
-    </message>
-    <message>
-        <source>The agent stopped before the end ({}).</source>
-        <translation>ወኪሉ ከመጨረሻው በፊት ቆሟል ({})።</translation>
-    </message>
-    <message>
-        <source>The agent wants to add this layer of a web service to the project:
-{} · {}
-
-Do you agree?</source>
-        <translation>ወኪሉ የዚህን የድር አገልግሎት ንብርብር ወደ ፕሮጀክቱ ማከል ይፈልጋል:
-{} · {}
-
-ይስማማሉ?</translation>
-    </message>
-    <message>
-        <source>The agent wants to add this layer to the project:
-{}
-
-A remote source is read from its server by QGIS, and what the layer holds can be sent to the provider of the agent. Do you agree?</source>
-        <translation>ወኪሉ ይህን ንብርብር ወደ ፕሮጀክቱ ማከል ይፈልጋል:
-{}
-
-የርቀት ምንጭ በQGIS ከአገልጋዩ ይነበባል፣ እና ንብርብሩ የያዘው ለወኪሉ አቅራቢ ሊላክ ይችላል። ይስማማሉ?</translation>
-    </message>
-    <message>
-        <source>The agent wants to export these layers to files:
-{}
-
-Do you agree?</source>
-        <translation>ወኪሉ እነዚህን ንብርብሮች ወደ ፋይሎች መላክ ይፈልጋል:
-{}
-
-ይስማማሉ?</translation>
-    </message>
-    <message>
-        <source>The agent wants to remove these layers from the project (their files stay, their styles and filters here are lost):
-{}
-
-Do you agree?</source>
-        <translation>ወኪሉ እነዚህን ንብርብሮች ከፕሮጀክቱ ማስወገድ ይፈልጋል (ፋይሎቻቸው ይቀራሉ፣ እዚህ ያሉ ቅጦቻቸው እና ማጣሪያዎቻቸው ይጠፋሉ):
-{}
-
-ይስማማሉ?</translation>
-    </message>
-    <message>
-        <source>The agent wants to run this action on an external connector:
-{}
-{}
-
-Do you agree?</source>
-        <translation>ወኪሉ ይህን ተግባር በውጫዊ አገናኝ ላይ ማስኬድ ይፈልጋል:
-{}
-{}
-
-ይስማማሉ?</translation>
-    </message>
-    <message>
-        <source>The credit or quota of this account is used up.</source>
-        <translation>የዚህ መለያ ክሬዲት ወይም ኮታ አልቋል።</translation>
-    </message>
-    <message>
-        <source>The free quota could not be reached: {}</source>
-        <translation>ነፃው ኮታ ሊደረስበት አልቻለም: {}</translation>
-    </message>
-    <message>
-        <source>The free quota is not available.</source>
-        <translation>ነፃው ኮታ አይገኝም።</translation>
-    </message>
-    <message>
-        <source>The free quota is unavailable for now.</source>
-        <translation>ነፃው ኮታ ለጊዜው አይገኝም።</translation>
-    </message>
-    <message>
-        <source>The free quota is used up for this month. Enter your own API key in the agent settings.</source>
-        <translation>የዚህ ወር ነፃ ኮታ አልቋል። የራስዎን API ቁልፍ በወኪል ቅንብሮች ውስጥ ያስገቡ።</translation>
-    </message>
-    <message>
-        <source>The key could not be stored.</source>
-        <translation>ቁልፉ ሊከማች አልቻለም።</translation>
-    </message>
-    <message>
-        <source>The provider could not be reached: {}</source>
-        <translation>አቅራቢው ሊደረስበት አልቻለም: {}</translation>
-    </message>
-    <message>
-        <source>The provider refused the API key: check it in the agent settings.</source>
-        <translation>አቅራቢው API ቁልፉን ውድቅ አደረገ: በወኪል ቅንብሮች ውስጥ ይፈትሹት።</translation>
-    </message>
-    <message>
-        <source>The provider reported a problem: {}</source>
-        <translation>አቅራቢው ችግር ሪፖርት አደረገ: {}</translation>
-    </message>
-    <message>
-        <source>The stored key could not be read.</source>
-        <translation>የተከማቸው ቁልፍ ሊነበብ አልቻለም።</translation>
-    </message>
-    <message>
-        <source>Thinking…</source>
-        <translation>በማሰብ ላይ…</translation>
-    </message>
-    <message>
-        <source>Too many new accounts from this address today: try again tomorrow, or enter your own API key.</source>
-        <translation>ዛሬ ከዚህ አድራሻ ብዙ አዳዲስ መለያዎች ተፈጥረዋል: ነገ እንደገና ይሞክሩ፣ ወይም የራስዎን API ቁልፍ ያስገቡ።</translation>
-    </message>
-    <message>
-        <source>Too many requests for now: try again in a moment.</source>
-        <translation>ለጊዜው ብዙ ጥያቄዎች: ከጥቂት ቆይታ በኋላ እንደገና ይሞክሩ።</translation>
-    </message>
-    <message>
-        <source>Trying a filter on {}</source>
-        <translation>በ{} ላይ ማጣሪያ በመሞከር ላይ</translation>
-    </message>
-    <message>
-        <source>Zoom on {}</source>
-        <translation>ወደ {} አጉላ</translation>
-    </message>
-    <message>
-        <source>an area</source>
-        <translation>አካባቢ</translation>
-    </message>
-    <message>
-        <source>everything</source>
-        <translation>ሁሉም ነገር</translation>
-    </message>
-    <message>
-        <source>{} tools available</source>
-        <translation>{} መሣሪያዎች ይገኛሉ</translation>
     </message>
 </context>
 </TS>

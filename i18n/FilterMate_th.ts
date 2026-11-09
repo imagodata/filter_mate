@@ -30,6 +30,709 @@
     </message>
 </context>
 <context>
+    <name>AgentChat</name>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Access to the free quota was renewed: send your request again.</source>
+        <translation type="obsolete">สิทธิ์เข้าถึงโควตาฟรีได้รับการต่ออายุแล้ว: โปรดส่งคำขอของคุณอีกครั้ง</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Another application is changing the project: try again in a moment.</source>
+        <translation type="obsolete">แอปพลิเคชันอื่นกำลังแก้ไขโปรเจกต์: โปรดลองใหม่อีกครั้งในอีกสักครู่</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Another application: {}</source>
+        <translation type="obsolete">แอปพลิเคชันอื่น: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Applied again: {}.</source>
+        <translation type="obsolete">ใช้อีกครั้งแล้ว: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Changed since, left as is: {}.</source>
+        <translation type="obsolete">มีการเปลี่ยนแปลงแล้ว คงไว้ตามเดิม: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Changed: {}.</source>
+        <translation type="obsolete">เปลี่ยนแปลงแล้ว: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Choose a model and agree to send your data to use the agent.</source>
+        <translation type="obsolete">เลือกโมเดลและยอมรับการส่งข้อมูลของคุณเพื่อใช้เอเจนต์</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Connecting to {}…</source>
+        <translation type="obsolete">กำลังเชื่อมต่อกับ {}…</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Earlier conversation: the agent starts afresh from here.</source>
+        <translation type="obsolete">บทสนทนาก่อนหน้า: เอเจนต์จะเริ่มใหม่ตั้งแต่จุดนี้</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Enter your API key in the agent settings.</source>
+        <translation type="obsolete">ป้อนคีย์ API ของคุณในการตั้งค่าเอเจนต์</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Export of {}</source>
+        <translation type="obsolete">การส่งออก {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Favorite applied</source>
+        <translation type="obsolete">ใช้รายการโปรดแล้ว</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Filter on the points of {}</source>
+        <translation type="obsolete">กรองตามจุดของ {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Filter on {}</source>
+        <translation type="obsolete">กรอง {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Filter on {} by an area</source>
+        <translation type="obsolete">กรอง {} ด้วยพื้นที่</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Filter on {} by {}</source>
+        <translation type="obsolete">กรอง {} ด้วย {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>FilterMate agent</source>
+        <translation type="obsolete">เอเจนต์ FilterMate</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Filters removed from {}</source>
+        <translation type="obsolete">ลบตัวกรองออกจาก {} แล้ว</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Hidden: {}</source>
+        <translation type="obsolete">ซ่อนแล้ว: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>It answers.</source>
+        <translation type="obsolete">มีการตอบกลับ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Layer added: {}</source>
+        <translation type="obsolete">เพิ่มเลเยอร์แล้ว: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Layers removed: {}</source>
+        <translation type="obsolete">ลบเลเยอร์แล้ว: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Not reachable for this conversation: {}</source>
+        <translation type="obsolete">ไม่สามารถเข้าถึงได้สำหรับบทสนทนานี้: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Nothing to redo.</source>
+        <translation type="obsolete">ไม่มีสิ่งที่ต้องทำซ้ำ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Nothing to restore.</source>
+        <translation type="obsolete">ไม่มีสิ่งที่ต้องกู้คืน</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Reading the active filters</source>
+        <translation type="obsolete">กำลังอ่านตัวกรองที่ใช้งานอยู่</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Reading the favorites</source>
+        <translation type="obsolete">กำลังอ่านรายการโปรด</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Reading the fields of {}</source>
+        <translation type="obsolete">กำลังอ่านฟิลด์ของ {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Reading the layers</source>
+        <translation type="obsolete">กำลังอ่านเลเยอร์</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Reading the map</source>
+        <translation type="obsolete">กำลังอ่านแผนที่</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Reading the values of {}</source>
+        <translation type="obsolete">กำลังอ่านค่าของ {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Restored: {}.</source>
+        <translation type="obsolete">กู้คืนแล้ว: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Searching satellite imagery on {}</source>
+        <translation type="obsolete">กำลังค้นหาภาพถ่ายดาวเทียมบน {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Searching {} for {}</source>
+        <translation type="obsolete">กำลังค้นหาบน {}: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Selection cleared on {}</source>
+        <translation type="obsolete">ล้างการเลือกบน {} แล้ว</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Selection on {}</source>
+        <translation type="obsolete">การเลือกบน {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Shown: {}</source>
+        <translation type="obsolete">แสดงแล้ว: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Stopped.</source>
+        <translation type="obsolete">หยุดแล้ว</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The MCP server could not start: {}</source>
+        <translation type="obsolete">ไม่สามารถเริ่มเซิร์ฟเวอร์ MCP ได้: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The QGIS authentication database is not available.</source>
+        <translation type="obsolete">ฐานข้อมูลการยืนยันตัวตนของ QGIS ไม่พร้อมใช้งาน</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The QGIS master password is needed to use the stored key.</source>
+        <translation type="obsolete">ต้องใช้รหัสผ่านหลักของ QGIS เพื่อใช้คีย์ที่จัดเก็บไว้</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The agent stopped before the end ({}).</source>
+        <translation type="obsolete">เอเจนต์หยุดก่อนเสร็จสิ้น ({})</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The agent wants to add this layer of a web service to the project:
+{} · {}
+
+Do you agree?</source>
+        <translation type="obsolete">เอเจนต์ต้องการเพิ่มเลเยอร์นี้ของเว็บเซอร์วิสลงในโปรเจกต์:
+{} · {}
+
+คุณยินยอมหรือไม่?</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The agent wants to add this layer to the project:
+{}
+
+A remote source is read from its server by QGIS, and what the layer holds can be sent to the provider of the agent. Do you agree?</source>
+        <translation type="obsolete">เอเจนต์ต้องการเพิ่มเลเยอร์นี้ลงในโปรเจกต์:
+{}
+
+QGIS จะอ่านแหล่งข้อมูลระยะไกลจากเซิร์ฟเวอร์ของแหล่งนั้น และเนื้อหาของเลเยอร์อาจถูกส่งไปยังผู้ให้บริการของเอเจนต์ คุณยินยอมหรือไม่?</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The agent wants to export these layers to files:
+{}
+
+Do you agree?</source>
+        <translation type="obsolete">เอเจนต์ต้องการส่งออกเลเยอร์เหล่านี้เป็นไฟล์:
+{}
+
+คุณยินยอมหรือไม่?</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The agent wants to remove these layers from the project (their files stay, their styles and filters here are lost):
+{}
+
+Do you agree?</source>
+        <translation type="obsolete">เอเจนต์ต้องการลบเลเยอร์เหล่านี้ออกจากโปรเจกต์ (ไฟล์ยังคงอยู่ แต่สไตล์และตัวกรองในที่นี้จะสูญหาย):
+{}
+
+คุณยินยอมหรือไม่?</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The agent wants to run this action on an external connector:
+{}
+{}
+
+Do you agree?</source>
+        <translation type="obsolete">เอเจนต์ต้องการเรียกใช้การดำเนินการนี้บนคอนเนคเตอร์ภายนอก:
+{}
+{}
+
+คุณยินยอมหรือไม่?</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The credit or quota of this account is used up.</source>
+        <translation type="obsolete">เครดิตหรือโควตาของบัญชีนี้ถูกใช้หมดแล้ว</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The free quota could not be reached: {}</source>
+        <translation type="obsolete">ไม่สามารถเข้าถึงโควตาฟรีได้: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The free quota is not available.</source>
+        <translation type="obsolete">โควตาฟรีไม่พร้อมใช้งาน</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The free quota is unavailable for now.</source>
+        <translation type="obsolete">โควตาฟรีไม่พร้อมใช้งานในขณะนี้</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The free quota is used up for this month. Enter your own API key in the agent settings.</source>
+        <translation type="obsolete">โควตาฟรีของเดือนนี้ถูกใช้หมดแล้ว ป้อนคีย์ API ของคุณเองในการตั้งค่าเอเจนต์</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The key could not be stored.</source>
+        <translation type="obsolete">ไม่สามารถจัดเก็บคีย์ได้</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The provider could not be reached: {}</source>
+        <translation type="obsolete">ไม่สามารถเชื่อมต่อกับผู้ให้บริการได้: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The provider refused the API key: check it in the agent settings.</source>
+        <translation type="obsolete">ผู้ให้บริการปฏิเสธคีย์ API: โปรดตรวจสอบในการตั้งค่าเอเจนต์</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The provider reported a problem: {}</source>
+        <translation type="obsolete">ผู้ให้บริการแจ้งว่ามีปัญหา: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The stored key could not be read.</source>
+        <translation type="obsolete">ไม่สามารถอ่านคีย์ที่จัดเก็บไว้ได้</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Thinking…</source>
+        <translation type="obsolete">กำลังคิด…</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Too many new accounts from this address today: try again tomorrow, or enter your own API key.</source>
+        <translation type="obsolete">วันนี้มีบัญชีใหม่จากที่อยู่นี้มากเกินไป: โปรดลองใหม่พรุ่งนี้ หรือป้อนคีย์ API ของคุณเอง</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Too many requests for now: try again in a moment.</source>
+        <translation type="obsolete">มีคำขอมากเกินไปในขณะนี้: โปรดลองใหม่ในอีกสักครู่</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Trying a filter on {}</source>
+        <translation type="obsolete">กำลังทดลองตัวกรองบน {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Zoom on {}</source>
+        <translation type="obsolete">ซูมไปที่ {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>an area</source>
+        <translation type="obsolete">พื้นที่</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>everything</source>
+        <translation type="obsolete">ทั้งหมด</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>{} tools available</source>
+        <translation type="obsolete">เครื่องมือที่ใช้ได้ {} รายการ</translation>
+    </message>
+</context>
+<context>
+    <name>AgentPanel</name>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>(no request)</source>
+        <translation type="obsolete">(ไม่มีคำขอ)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>A few free requests a month, through the relay of FilterMate to Claude (Anthropic), under the terms of Anthropic. The relay counts what is spent and keeps no conversation. When it is used up, choose a provider and enter your own API key.</source>
+        <translation type="obsolete">คำขอฟรีจำนวนหนึ่งต่อเดือน ผ่านรีเลย์ของ FilterMate ไปยัง Claude (Anthropic) ภายใต้เงื่อนไขของ Anthropic รีเลย์จะนับเฉพาะปริมาณที่ใช้และไม่เก็บบทสนทนาใดไว้ เมื่อโควตาหมด ให้เลือกผู้ให้บริการและป้อนคีย์ API ของคุณเอง</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>API key</source>
+        <translation type="obsolete">คีย์ API</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Add</source>
+        <translation type="obsolete">เพิ่ม</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Address</source>
+        <translation type="obsolete">ที่อยู่</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Agent settings</source>
+        <translation type="obsolete">การตั้งค่าเอเจนต์</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Allow attribute values to be sent</source>
+        <translation type="obsolete">อนุญาตให้ส่งค่าแอตทริบิวต์</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Applications already set up will have to be set up again.</source>
+        <translation type="obsolete">แอปพลิเคชันที่ตั้งค่าไว้แล้วจะต้องตั้งค่าใหม่</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Ask the agent to filter your layers</source>
+        <translation type="obsolete">ให้เอเจนต์กรองเลเยอร์ของคุณ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Back to the conversation</source>
+        <translation type="obsolete">กลับไปที่บทสนทนา</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Claude Code or another MCP client on this computer can then filter your layers, once FilterMate has been opened, under the rules of this panel: the same sources, the same confirmations, and filters can be undone here. That application sends what it reads to its own AI provider.</source>
+        <translation type="obsolete">Claude Code หรือไคลเอนต์ MCP อื่นบนคอมพิวเตอร์เครื่องนี้จะสามารถกรองเลเยอร์ของคุณได้ หลังจากเปิด FilterMate แล้ว ตามกฎของแผงนี้: แหล่งข้อมูลเดียวกัน การยืนยันเดียวกัน และเลิกทำตัวกรองได้ที่นี่ แอปพลิเคชันนั้นจะส่งสิ่งที่อ่านไปยังผู้ให้บริการ AI ของตัวเอง</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Connect an AI provider to start. Nothing is sent before you agree.</source>
+        <translation type="obsolete">เชื่อมต่อผู้ให้บริการ AI เพื่อเริ่มต้น จะไม่มีการส่งสิ่งใดก่อนที่คุณจะยินยอม</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Copied, with the access token: keep it to yourself. Save these settings for it to apply.</source>
+        <translation type="obsolete">คัดลอกพร้อมโทเค็นการเข้าถึงแล้ว: โปรดเก็บเป็นความลับ บันทึกการตั้งค่านี้เพื่อให้มีผล</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Copy for Claude Desktop</source>
+        <translation type="obsolete">คัดลอกสำหรับ Claude Desktop</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Copy the Claude Code command</source>
+        <translation type="obsolete">คัดลอกคำสั่ง Claude Code</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Copy the configuration</source>
+        <translation type="obsolete">คัดลอกการกำหนดค่า</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Describe it in your own words. Each filter can be undone.</source>
+        <translation type="obsolete">อธิบายด้วยคำพูดของคุณเอง ตัวกรองแต่ละรายการเลิกทำได้</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Filter your layers from a sentence</source>
+        <translation type="obsolete">กรองเลเยอร์ของคุณด้วยประโยคเดียว</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>FilterMate agent</source>
+        <translation type="obsolete">เอเจนต์ FilterMate</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>History</source>
+        <translation type="obsolete">ประวัติ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>History…</source>
+        <translation type="obsolete">ประวัติ…</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>I agree to send this data to this provider</source>
+        <translation type="obsolete">ฉันยินยอมให้ส่งข้อมูลนี้ไปยังผู้ให้บริการรายนี้</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Let other applications on this computer drive FilterMate (MCP server)</source>
+        <translation type="obsolete">อนุญาตให้แอปพลิเคชันอื่นบนคอมพิวเตอร์เครื่องนี้ควบคุม FilterMate (เซิร์ฟเวอร์ MCP)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>MCP connector</source>
+        <translation type="obsolete">คอนเนคเตอร์ MCP</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>MCP connectors</source>
+        <translation type="obsolete">คอนเนคเตอร์ MCP</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Model</source>
+        <translation type="obsolete">โมเดล</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>More</source>
+        <translation type="obsolete">เพิ่มเติม</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>New access token</source>
+        <translation type="obsolete">โทเค็นการเข้าถึงใหม่</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>New conversation</source>
+        <translation type="obsolete">บทสนทนาใหม่</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>New token: it applies once these settings are saved.</source>
+        <translation type="obsolete">โทเค็นใหม่: จะมีผลเมื่อบันทึกการตั้งค่านี้</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Open data platforms</source>
+        <translation type="obsolete">แพลตฟอร์มข้อมูลเปิด</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Open the settings</source>
+        <translation type="obsolete">เปิดการตั้งค่า</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Other applications</source>
+        <translation type="obsolete">แอปพลิเคชันอื่น</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Port</source>
+        <translation type="obsolete">พอร์ต</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Provider</source>
+        <translation type="obsolete">ผู้ให้บริการ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Redo</source>
+        <translation type="obsolete">ทำซ้ำ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Remove</source>
+        <translation type="obsolete">ลบออก</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Remove the stored key</source>
+        <translation type="obsolete">ลบคีย์ที่จัดเก็บไว้</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Satellite imagery</source>
+        <translation type="obsolete">ภาพถ่ายดาวเทียม</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Send (Enter)</source>
+        <translation type="obsolete">ส่ง (Enter)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Send again</source>
+        <translation type="obsolete">ส่งอีกครั้ง</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Sent to: {}</source>
+        <translation type="obsolete">ส่งไปยัง: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Set up the agent</source>
+        <translation type="obsolete">ตั้งค่าเอเจนต์</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Sources</source>
+        <translation type="obsolete">แหล่งข้อมูล</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Stop (Esc)</source>
+        <translation type="obsolete">หยุด (Esc)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Stored: leave empty to keep it</source>
+        <translation type="obsolete">จัดเก็บแล้ว: เว้นว่างไว้เพื่อคงไว้</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Test</source>
+        <translation type="obsolete">ทดสอบ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Testing…</source>
+        <translation type="obsolete">กำลังทดสอบ…</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The MCP server could not start: {}</source>
+        <translation type="obsolete">ไม่สามารถเริ่มเซิร์ฟเวอร์ MCP ได้: {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The agent can search the sources ticked here. Your searches, and what the agent passes to a connector, are sent to them; a layer added from them is read from their servers.</source>
+        <translation type="obsolete">เอเจนต์สามารถค้นหาแหล่งข้อมูลที่ทำเครื่องหมายไว้ที่นี่ได้ คำค้นหาของคุณ และสิ่งที่เอเจนต์ส่งให้คอนเนคเตอร์ จะถูกส่งไปยังแหล่งเหล่านั้น เลเยอร์ที่เพิ่มจากแหล่งเหล่านั้นจะถูกอ่านจากเซิร์ฟเวอร์ของแหล่งนั้น</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>The agent sends your request, the names of your layers and fields, your filter expressions and the results of its tools to the provider chosen here, under that provider&apos;s terms. Without the option below, the agent does not read the values of your fields; values already written in your filters and favorites are still sent. The conversation is kept on this computer for each project, until you start a new one.</source>
+        <translation type="obsolete">เอเจนต์ส่งคำขอของคุณ ชื่อเลเยอร์และฟิลด์ นิพจน์ตัวกรอง และผลลัพธ์จากเครื่องมือของเอเจนต์ ไปยังผู้ให้บริการที่เลือกไว้ที่นี่ ภายใต้เงื่อนไขของผู้ให้บริการนั้น หากไม่เปิดตัวเลือกด้านล่าง เอเจนต์จะไม่อ่านค่าของฟิลด์ แต่ค่าที่เขียนอยู่ในตัวกรองและรายการโปรดของคุณแล้วจะยังคงถูกส่ง บทสนทนาจะถูกเก็บไว้บนคอมพิวเตอร์เครื่องนี้ แยกตามโปรเจกต์ จนกว่าคุณจะเริ่มบทสนทนาใหม่</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Through mcp-remote, which needs Node.js: Claude Desktop starts local servers as programs.</source>
+        <translation type="obsolete">ผ่าน mcp-remote ซึ่งต้องใช้ Node.js: Claude Desktop เรียกใช้เซิร์ฟเวอร์ภายในเครื่องเป็นโปรแกรม</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Too many sources added: remove one first.</source>
+        <translation type="obsolete">เพิ่มแหล่งข้อมูลมากเกินไป: โปรดลบออกหนึ่งรายการก่อน</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Undo the last</source>
+        <translation type="obsolete">เลิกทำรายการล่าสุด</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Undo this turn</source>
+        <translation type="obsolete">เลิกทำรอบนี้</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>What do you want to filter?</source>
+        <translation type="obsolete">คุณต้องการกรองอะไร</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>added by you</source>
+        <translation type="obsolete">เพิ่มโดยคุณ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>applied</source>
+        <translation type="obsolete">ใช้แล้ว</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>community</source>
+        <translation type="obsolete">ชุมชน</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>https://... or a portal address</source>
+        <translation type="obsolete">https://... หรือที่อยู่ของพอร์ทัล</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>no change</source>
+        <translation type="obsolete">ไม่มีการเปลี่ยนแปลง</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>official</source>
+        <translation type="obsolete">ทางการ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>this computer</source>
+        <translation type="obsolete">คอมพิวเตอร์เครื่องนี้</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>undone</source>
+        <translation type="obsolete">เลิกทำแล้ว</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>{} turn(s)</source>
+        <translation type="obsolete">{} รอบ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Which layers are in this project?</source>
+        <translation type="obsolete">โปรเจกต์นี้มีเลเยอร์อะไรบ้าง</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Keep the buildings taller than 15 m</source>
+        <translation type="obsolete">เก็บเฉพาะอาคารที่สูงกว่า 15 ม.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
+        <source>Filter the roads inside the selected feature</source>
+        <translation type="obsolete">กรองถนนที่อยู่ภายในฟีเจอร์ที่เลือก</translation>
+    </message>
+</context>
+<context>
     <name>AppInitializer</name>
     <message>
         <location filename="../core/services/app_initializer.py" line="174"/>
@@ -616,137 +1319,137 @@
         <translation>รีเซ็ตเกณฑ์พอยต์คลาวด์</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1597"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1605"/>
         <source>Invalid raster calculator expression</source>
         <translation>นิพจน์ตัวคำนวณราสเตอร์ไม่ถูกต้อง</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1912"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1920"/>
         <source>PDAL was not found: the height above a DTM needs the pdal executable</source>
         <translation>ไม่พบ PDAL: การคำนวณความสูงเหนือ DTM ต้องใช้ไฟล์ปฏิบัติการ pdal</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3432"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3475"/>
         <source>A FilterMate task is still running: wait for it to finish</source>
         <translation>งาน FilterMate ยังทำงานอยู่: โปรดรอให้เสร็จสิ้น</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2905"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2948"/>
         <source>FilterMate task failed: {0}</source>
         <translation>งาน FilterMate ล้มเหลว: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2942"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2985"/>
         <source>Select pixels first: a value range, classes or a raster expression</source>
         <translation>เลือกพิกเซลก่อน: ช่วงค่า คลาส หรือนิพจน์ราสเตอร์</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2957"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3000"/>
         <source>Raster filtered: {0}</source>
         <translation>กรองราสเตอร์แล้ว: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2991"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3034"/>
         <source>The point cloud expression was rejected: {0}</source>
         <translation>นิพจน์พอยต์คลาวด์ถูกปฏิเสธ: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2994"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3037"/>
         <source>Select points first: classes, attribute ranges or an expression</source>
         <translation>เลือกจุดก่อน: คลาส ช่วงแอตทริบิวต์ หรือนิพจน์</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3008"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3051"/>
         <source>Point cloud filtered: {0}</source>
         <translation>กรองพอยต์คลาวด์แล้ว: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3542"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3585"/>
         <source>Filter not applied: {0}</source>
         <translation>ไม่ได้ใช้ตัวกรอง: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3394"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3437"/>
         <source>canceled</source>
         <translation>ยกเลิกแล้ว</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3091"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3134"/>
         <source>{0} target(s) filtered</source>
         <translation>กรองเลเยอร์เป้าหมายแล้ว {0} เลเยอร์</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3102"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3145"/>
         <source>{0} failed: {1}</source>
         <translation>{0} ล้มเหลว: {1}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3115"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3158"/>
         <source>FilterMate: filtering from '{0}'…</source>
         <translation>FilterMate: กำลังกรองจาก '{0}'…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3214"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3257"/>
         <source>Changed since, left as is: {0}</source>
         <translation>มีการเปลี่ยนแปลงภายหลัง คงไว้ตามเดิม: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3220"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3263"/>
         <source>{0} layer(s) restored</source>
         <translation>คืนค่าแล้ว {0} เลเยอร์</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3254"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3297"/>
         <source>&apos;{0}&apos; not exported: {1}</source>
         <translation>ไม่ได้ส่งออก '{0}': {1}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3268"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3311"/>
         <source>Exported: {0}</source>
         <translation>ส่งออกแล้ว: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3270"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3313"/>
         <source>Export failed: {0}</source>
         <translation>ส่งออกล้มเหลว: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3277"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3320"/>
         <source>Exporting {0} layer(s)…</source>
         <translation>กำลังส่งออก {0} เลเยอร์…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3283"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3326"/>
         <source>Export folder</source>
         <translation>โฟลเดอร์ส่งออก</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3365"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3408"/>
         <source>Raster / point cloud targets skipped: no source feature selected in EXPLORING</source>
         <translation>ข้ามเลเยอร์เป้าหมายราสเตอร์ / พอยต์คลาวด์: ไม่ได้เลือกฟีเจอร์ต้นทางใน EXPLORING</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3394"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3437"/>
         <source>Raster / point cloud targets not filtered: {0}</source>
         <translation>ไม่ได้กรองเลเยอร์เป้าหมายราสเตอร์ / พอยต์คลาวด์: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3396"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3439"/>
         <source>{0} raster / point cloud target(s) filtered</source>
         <translation>กรองเลเยอร์เป้าหมายราสเตอร์ / พอยต์คลาวด์แล้ว {0} เลเยอร์</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3519"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3562"/>
         <source>Choose the DTM raster used for the height above ground</source>
         <translation>เลือกราสเตอร์ DTM ที่ใช้คำนวณความสูงเหนือพื้นดิน</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3530"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3573"/>
         <source>Height above ground not computed: {0}</source>
         <translation>ไม่ได้คำนวณความสูงเหนือพื้นดิน: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3551"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3594"/>
         <source>Computing the height above '{0}' with PDAL…</source>
         <translation>กำลังคำนวณความสูงเหนือ '{0}' ด้วย PDAL…</translation>
     </message>
@@ -756,12 +1459,12 @@
         <translation>แคชของ FilterMate ใช้พื้นที่ {0} GB เกินขีดจำกัด {1} GB: โปรดยกเลิกตัวกรองของชั้นข้อมูลแรสเตอร์ / พอยต์คลาวด์ที่คุณไม่ต้องการแล้ว</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1914"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1922"/>
         <source>PDAL {0} is too old: the height above a DTM needs PDAL 2.4 or later</source>
         <translation>PDAL {0} เก่าเกินไป: การคำนวณความสูงเหนือ DTM ต้องใช้ PDAL 2.4 ขึ้นไป</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1917"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1925"/>
         <source>PDAL could not be run, the height above a DTM is unavailable: {0}</source>
         <translation>ไม่สามารถเรียกใช้ PDAL ได้ ความสูงเหนือ DTM ใช้งานไม่ได้: {0}</translation>
     </message>
@@ -781,27 +1484,27 @@
         <translation>ดูตัวอย่าง: ซ่อนพิกเซลนอกการเลือก (ม่านสีขาวสำหรับความลาดชัน ทิศด้านลาด ฯลฯ)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1792"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1800"/>
         <source>The preview of a slope or aspect needs the map in the CRS of the raster ({0})</source>
         <translation>การดูตัวอย่างความลาดชันหรือทิศด้านลาดต้องใช้แผนที่ใน CRS ของราสเตอร์ ({0})</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2434"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2477"/>
         <source>only the points drawn on the map can be picked: turn the preview off to pick a class it hides</source>
         <translation>เลือกได้เฉพาะจุดที่วาดอยู่บนแผนที่: ปิดการดูตัวอย่างเพื่อเลือกคลาสที่ถูกซ่อนไว้</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2505"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2548"/>
         <source>No classified point under the click</source>
         <translation>ไม่มีจุดที่จำแนกประเภทแล้วใต้ตำแหน่งที่คลิก</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2440"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2483"/>
         <source>Class {0} is already checked</source>
         <translation>คลาส {0} ถูกเลือกไว้แล้ว</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2529"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2572"/>
         <source>Class {0} is not in the class list of the layer</source>
         <translation>คลาส {0} ไม่อยู่ในรายการคลาสของเลเยอร์</translation>
     </message>
@@ -816,157 +1519,157 @@
         <translation>ตัวเลือกคลาส: คลิกบนแผนที่ แล้วคลาสของจุดที่วาดอยู่ตรงนั้นจะถูกเลือก Ctrl+คลิก เพื่อเพิ่มอีกคลาส</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1116"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1118"/>
         <source>Preview and statistics use a bounded local sample of the visible extent; filtering reads the source.</source>
         <translation>การดูตัวอย่างและสถิติใช้ตัวอย่างในเครื่องแบบจำกัดของขอบเขตที่มองเห็น ส่วนการกรองจะอ่านจากต้นทาง</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1314"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1322"/>
         <source>Preparing a bounded color snapshot of the visible extent…</source>
         <translation>กำลังเตรียมสแนปช็อตสีแบบจำกัดของขอบเขตที่มองเห็น…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1326"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1334"/>
         <source>The color snapshot could not be prepared. Try a smaller visible extent.</source>
         <translation>ไม่สามารถเตรียมสแนปช็อตสีได้ ลองใช้ขอบเขตที่มองเห็นที่เล็กลง</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1330"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1338"/>
         <source>Color selection applies to the captured visible extent.</source>
         <translation>การเลือกตามสีใช้กับขอบเขตที่มองเห็นซึ่งบันทึกไว้</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1394"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1402"/>
         <source>Raster sampling failed. Try a smaller visible extent.</source>
         <translation>การสุ่มตัวอย่างราสเตอร์ล้มเหลว ลองใช้ขอบเขตที่มองเห็นที่เล็กลง</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1515"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1523"/>
         <source>No valid pixels to display in the selected bands.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1792"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1800"/>
         <source>The preview of a color or an expression needs the map in the CRS of the raster ({0})</source>
         <translation>การดูตัวอย่างสีหรือนิพจน์ต้องใช้แผนที่ใน CRS ของราสเตอร์ ({0})</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2458"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2501"/>
         <source>No point drawn under the click</source>
         <translation>ไม่มีจุดที่วาดอยู่ใต้ตำแหน่งที่คลิก</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2460"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2503"/>
         <source>This point has no {0}</source>
         <translation>จุดนี้ไม่มี {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2462"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2505"/>
         <source>{0} cannot be used in a condition</source>
         <translation>ไม่สามารถใช้ {0} ในเงื่อนไขได้</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2519"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2562"/>
         <source>Object not read: {0}</source>
         <translation>ไม่ได้อ่านวัตถุ: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2521"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2564"/>
         <source>Too many points around the click: the object could not be read</source>
         <translation>มีจุดรอบตำแหน่งที่คลิกมากเกินไป: ไม่สามารถอ่านวัตถุได้</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2523"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2566"/>
         <source>No point of class {0} under the click: click on the object itself</source>
         <translation>ไม่มีจุดของคลาส {0} ใต้ตำแหน่งที่คลิก: คลิกที่วัตถุโดยตรง</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2660"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2703"/>
         <source>Similar objects not read: {0}</source>
         <translation>ไม่ได้อ่านวัตถุที่คล้ายกัน: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2663"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2706"/>
         <source>No similar object within the area ratios: widen them</source>
         <translation>ไม่มีวัตถุที่คล้ายกันภายในอัตราส่วนพื้นที่: ขยายอัตราส่วน</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2732"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2775"/>
         <source>Preparing a sample for the new visible extent. Click again when it is ready.</source>
         <translation>กำลังเตรียมตัวอย่างสำหรับขอบเขตที่มองเห็นใหม่ คลิกอีกครั้งเมื่อพร้อม</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2743"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2786"/>
         <source>The local raster sample is still being prepared. Retry when it is ready.</source>
         <translation>ตัวอย่างราสเตอร์ในเครื่องยังเตรียมไม่เสร็จ ลองอีกครั้งเมื่อพร้อม</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="2949"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="2992"/>
         <source>Prepare a color snapshot before filtering this rendered layer.</source>
         <translation>เตรียมสแนปช็อตสีก่อนกรองเลเยอร์ที่แสดงผลนี้</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3094"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3137"/>
         <source>{0} raster target(s) resampled to the configured pixel limit</source>
         <translation>เลเยอร์เป้าหมายราสเตอร์ {0} เลเยอร์ถูกสุ่มใหม่ตามขีดจำกัดพิกเซลที่กำหนด</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3126"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3169"/>
         <source>color selection limited to the captured extent; colors depend on style and scale</source>
         <translation>การเลือกตามสีจำกัดอยู่ที่ขอบเขตที่บันทึกไว้ สีขึ้นอยู่กับสไตล์และมาตราส่วน</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3128"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3171"/>
         <source>raster source resampled to {0} cells within the pixel limit</source>
         <translation>ราสเตอร์ต้นทางถูกสุ่มใหม่เป็น {0} เซลล์ภายในขีดจำกัดพิกเซล</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3130"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3173"/>
         <source>raster selection read every {0} pixels: over the pixel limit of the settings</source>
         <translation>การเลือกราสเตอร์อ่านทุก {0} พิกเซล: เกินขีดจำกัดพิกเซลในการตั้งค่า</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3133"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3176"/>
         <source>dense raster selection smoothed to keep its outline light</source>
         <translation>การเลือกราสเตอร์ที่หนาแน่นถูกทำให้เรียบเพื่อให้เส้นขอบเบา</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3180"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3223"/>
         <source>{0} left empty, nothing matches the selection: {1}</source>
         <translation>{0} ถูกทำให้ว่าง ไม่มีสิ่งใดตรงกับการเลือก: {1}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="3164"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="3207"/>
         <source>failed</source>
         <translation>ล้มเหลว</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1509"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1517"/>
         <source>Preparing band display…</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1525"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1533"/>
         <source>The selected bands could not be displayed.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1597"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1605"/>
         <source>Unknown raster layer or band in expression</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1389"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1397"/>
         <source>The raster histogram could not be calculated.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1738"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1746"/>
         <source>The raster preview could not be calculated.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/coverage_mode_controller.py" line="1148"/>
+        <location filename="../ui/controllers/coverage_mode_controller.py" line="1150"/>
         <source>onnxruntime installed</source>
         <translation>ติดตั้ง onnxruntime แล้ว</translation>
     </message>
@@ -1959,27 +2662,27 @@ Click the ★ indicator and select 'Add current filter to favorites' to save you
         <translation>รีเซ็ตการกำหนดค่าเริ่มต้นและลบฐานข้อมูล SQLite</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1572"/>
+        <location filename="../filter_mate.py" line="1573"/>
         <source>Reset Configuration</source>
         <translation>รีเซ็ตการกำหนดค่า</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1598"/>
+        <location filename="../filter_mate.py" line="1599"/>
         <source>Configuration reset successfully.</source>
         <translation>รีเซ็ตการกำหนดค่าสำเร็จแล้ว</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1603"/>
+        <location filename="../filter_mate.py" line="1604"/>
         <source>Default configuration file not found.</source>
         <translation>ไม่พบไฟล์การกำหนดค่าเริ่มต้น</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1626"/>
+        <location filename="../filter_mate.py" line="1627"/>
         <source>Database deleted: {filename}</source>
         <translation>ลบฐานข้อมูลแล้ว: {filename}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1650"/>
+        <location filename="../filter_mate.py" line="1651"/>
         <source>Restart required</source>
         <translation>ต้องรีสตาร์ท</translation>
     </message>
@@ -2130,7 +2833,7 @@ FilterMate แนะนำให้ปิดการตั้งค่านี
         <translation>ไม่ได้แก้ไขการกรองเรขาคณิตที่ไม่ถูกต้อง ฟีเจอร์บางอย่างอาจถูกยกเว้นจากการส่งออก</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1572"/>
+        <location filename="../filter_mate.py" line="1573"/>
         <source>Are you sure you want to reset to the default configuration?
 
 This will:
@@ -2147,7 +2850,7 @@ QGIS must be restarted to apply the changes.</source>
 ต้องรีสตาร์ท QGIS เพื่อใช้การเปลี่ยนแปลง</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1650"/>
+        <location filename="../filter_mate.py" line="1651"/>
         <source>The configuration has been reset.
 
 Please restart QGIS to apply the changes.</source>
@@ -2166,7 +2869,7 @@ Please restart QGIS to apply the changes.</source>
         <translation>{count} เลเยอร์อ้างอิงไม่ได้โหลด ({layers_list}) ใช้การแสดงผลสำรอง</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1641"/>
+        <location filename="../filter_mate.py" line="1642"/>
         <source>Unable to delete {filename}: {e}</source>
         <translation>ไม่สามารถลบ {filename}: {e}</translation>
     </message>
@@ -2176,86 +2879,86 @@ Please restart QGIS to apply the changes.</source>
         <translation type="obsolete">ข้อผิดพลาดระหว่างการรีเซ็ต: {str(e)}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1693"/>
+        <location filename="../filter_mate.py" line="1694"/>
         <source>&lt;p style=&apos;font-size:13px;&apos;&gt;Thank you for using &lt;b&gt;FilterMate&lt;/b&gt;!&lt;br&gt;Join our Discord community to:&lt;/p&gt;&lt;ul style=&apos;margin-left:10px; font-size:12px;&apos;&gt;&lt;li&gt;Get help and support&lt;/li&gt;&lt;li&gt;Report bugs and issues&lt;/li&gt;&lt;li&gt;Suggest new features&lt;/li&gt;&lt;li&gt;Share tips with other users&lt;/li&gt;&lt;/ul&gt;</source>
         <translation>&lt;p style='font-size:13px;'&gt;ขอบคุณที่ใช้ &lt;b&gt;FilterMate&lt;/b&gt;!&lt;br&gt;เข้าร่วมชุมชน Discord ของเราเพื่อ:&lt;/p&gt;&lt;ul style='margin-left:10px; font-size:12px;'&gt;&lt;li&gt;รับความช่วยเหลือและการสนับสนุน&lt;/li&gt;&lt;li&gt;รายงานข้อผิดพลาดและปัญหา&lt;/li&gt;&lt;li&gt;แนะนำฟีเจอร์ใหม่&lt;/li&gt;&lt;li&gt;แบ่งปันเคล็ดลับกับผู้ใช้อื่น&lt;/li&gt;&lt;/ul&gt;</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1709"/>
+        <location filename="../filter_mate.py" line="1710"/>
         <source>  Join us on Discord</source>
         <translation>  เข้าร่วมกับเราบน Discord</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1729"/>
+        <location filename="../filter_mate.py" line="1730"/>
         <source>Don&apos;t show this again</source>
         <translation>ไม่ต้องแสดงอีก</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1785"/>
+        <location filename="../filter_mate.py" line="1786"/>
         <source>Close</source>
         <translation>ปิด</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1852"/>
+        <location filename="../filter_mate.py" line="1855"/>
         <source>Error loading plugin: {0}. Check QGIS Python console for details.</source>
         <translation>ข้อผิดพลาดในการโหลดปลั๊กอิน: {0} ตรวจสอบคอนโซล QGIS Python สำหรับรายละเอียด</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7560"/>
+        <location filename="../filter_mate_dockwidget.py" line="7586"/>
         <source>Current layer: {0}</source>
         <translation>เลเยอร์ปัจจุบัน: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7562"/>
+        <location filename="../filter_mate_dockwidget.py" line="7588"/>
         <source>No layer selected</source>
         <translation>ไม่ได้เลือกเลเยอร์</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7572"/>
+        <location filename="../filter_mate_dockwidget.py" line="7598"/>
         <source>Selected layers:
 {0}</source>
         <translation>เลเยอร์ที่เลือก:
 {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7572"/>
+        <location filename="../filter_mate_dockwidget.py" line="7598"/>
         <source>No layers selected</source>
         <translation>ไม่ได้เลือกเลเยอร์</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7592"/>
+        <location filename="../filter_mate_dockwidget.py" line="7618"/>
         <source>No expression defined</source>
         <translation>ไม่มีนิพจน์ที่กำหนด</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7604"/>
+        <location filename="../filter_mate_dockwidget.py" line="7630"/>
         <source>Display expression: {0}</source>
         <translation>นิพจน์การแสดงผล: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7621"/>
+        <location filename="../filter_mate_dockwidget.py" line="7647"/>
         <source>Feature ID: {0}
 First attribute: {1}</source>
         <translation>รหัสฟีเจอร์: {0}
 แอตทริบิวต์แรก: {1}</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1659"/>
+        <location filename="../filter_mate.py" line="1660"/>
         <source>The configuration could not be reset. Check that the plugin folder is writable, then try again. Details in filtermate.log.</source>
         <translation>ไม่สามารถรีเซ็ตการกำหนดค่าได้ ตรวจสอบว่าโฟลเดอร์ปลั๊กอินเขียนได้ แล้วลองอีกครั้ง ดูรายละเอียดใน filtermate.log</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1759"/>
+        <location filename="../filter_mate.py" line="1760"/>
         <source>What&apos;s new in FilterMate 5</source>
         <translation>มีอะไรใหม่ใน FilterMate 5</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1765"/>
+        <location filename="../filter_mate.py" line="1766"/>
         <source>&lt;p style=&apos;font-size:13px;&apos;&gt;&lt;b&gt;FilterMate now works with raster and point cloud layers.&lt;/b&gt;&lt;/p&gt;&lt;ul style=&apos;margin-left:10px; font-size:12px;&apos;&gt;&lt;li&gt;&lt;b&gt;EXPLORING&lt;/b&gt; adapts to the current layer: value range and classes of a raster, classes, elevation and attributes of a LiDAR point cloud.&lt;/li&gt;&lt;li&gt;&lt;b&gt;FILTERING&lt;/b&gt; relates that selection to layers of any kind, with the usual predicates and buffer: parcels within an elevation range, LiDAR points under buildings, a DTM clipped to a municipality.&lt;/li&gt;&lt;li&gt;&lt;b&gt;EXPORTING&lt;/b&gt; writes filtered rasters (GeoTIFF, COG) and point clouds (LAZ, COPC).&lt;/li&gt;&lt;li&gt;Processing algorithms and models, qgis_process, Python and REST APIs.&lt;/li&gt;&lt;/ul&gt;</source>
         <translation>&lt;p style='font-size:13px;'&gt;&lt;b&gt;ตอนนี้ FilterMate ทำงานกับชั้นข้อมูลแรสเตอร์และพอยต์คลาวด์ได้แล้ว&lt;/b&gt;&lt;/p&gt;&lt;ul style='margin-left:10px; font-size:12px;'&gt;&lt;li&gt;&lt;b&gt;EXPLORING&lt;/b&gt; ปรับตามชั้นข้อมูลปัจจุบัน: ช่วงค่าและคลาสของแรสเตอร์ คลาส ความสูง และแอตทริบิวต์ของพอยต์คลาวด์ LiDAR&lt;/li&gt;&lt;li&gt;&lt;b&gt;FILTERING&lt;/b&gt; เชื่อมโยงการเลือกนั้นกับชั้นข้อมูลทุกประเภท ด้วยเพรดิเคตและบัฟเฟอร์ตามปกติ: แปลงที่ดินในช่วงความสูง จุด LiDAR ใต้อาคาร DTM ที่ตัดตามขอบเขตเทศบาล&lt;/li&gt;&lt;li&gt;&lt;b&gt;EXPORTING&lt;/b&gt; บันทึกแรสเตอร์ (GeoTIFF, COG) และพอยต์คลาวด์ (LAZ, COPC) ที่กรองแล้ว&lt;/li&gt;&lt;li&gt;อัลกอริทึมและโมเดลของ Processing, qgis_process, API ของ Python และ REST&lt;/li&gt;&lt;/ul&gt;</translation>
     </message>
     <message>
-        <location filename="../filter_mate.py" line="1781"/>
+        <location filename="../filter_mate.py" line="1782"/>
         <source>Open the user guide</source>
         <translation>เปิดคู่มือผู้ใช้</translation>
     </message>
@@ -2628,59 +3331,59 @@ Drop anyway?</source>
         <translation>โหมดสว่าง</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="4151"/>
+        <location filename="../filter_mate_dockwidget.py" line="4155"/>
         <location filename="../ui/controllers/exploring_controller.py" line="884"/>
         <source>Selected features have no geometry.</source>
         <translation>ฟีเจอร์ที่เลือกไม่มีเรขาคณิต</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="4170"/>
+        <location filename="../filter_mate_dockwidget.py" line="4174"/>
         <location filename="../ui/controllers/exploring_controller.py" line="885"/>
         <source>No feature selected. Select a feature from the dropdown list.</source>
         <translation>ไม่ได้เลือกฟีเจอร์ เลือกฟีเจอร์จากรายการแบบเลื่อนลง</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="5345"/>
+        <location filename="../filter_mate_dockwidget.py" line="5349"/>
         <source>The selected layer is invalid or its source cannot be found.</source>
         <translation>เลเยอร์ที่เลือกไม่ถูกต้องหรือไม่พบแหล่งข้อมูล</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6238"/>
+        <location filename="../filter_mate_dockwidget.py" line="6242"/>
         <source>Negative buffer (erosion): shrinks polygons inward</source>
         <translation>บัฟเฟอร์ลบ (การกัดเซาะ): หดรูปหลายเหลี่ยมเข้าด้านใน</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6241"/>
+        <location filename="../filter_mate_dockwidget.py" line="6245"/>
         <source>Buffer value in meters (positive=expand, negative=shrink polygons)</source>
         <translation>ค่าบัฟเฟอร์เป็นเมตร (บวก=ขยาย, ลบ=หดรูปหลายเหลี่ยม)</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6743"/>
+        <location filename="../filter_mate_dockwidget.py" line="6747"/>
         <source>Plugin activated with {0} vector layer(s)</source>
         <translation>เปิดใช้งานปลั๊กอินด้วย {0} เลเยอร์เวกเตอร์</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6862"/>
+        <location filename="../filter_mate_dockwidget.py" line="6866"/>
         <source>Could not reload plugin automatically.</source>
         <translation>ไม่สามารถโหลดปลั๊กอินใหม่โดยอัตโนมัติ</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6867"/>
+        <location filename="../filter_mate_dockwidget.py" line="6871"/>
         <source>Error reloading plugin: {0}</source>
         <translation>ข้อผิดพลาดในการโหลดปลั๊กอินใหม่: {0}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6942"/>
+        <location filename="../filter_mate_dockwidget.py" line="6946"/>
         <source>Layer properties reset to defaults</source>
         <translation>รีเซ็ตคุณสมบัติเลเยอร์เป็นค่าเริ่มต้นแล้ว</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="6943"/>
+        <location filename="../filter_mate_dockwidget.py" line="6947"/>
         <source>Error resetting layer properties: {}</source>
         <translation>ข้อผิดพลาดในการรีเซ็ตคุณสมบัติเลเยอร์: {}</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7206"/>
+        <location filename="../filter_mate_dockwidget.py" line="7232"/>
         <source>Filter</source>
         <translation>กรอง</translation>
     </message>
@@ -2810,7 +3513,7 @@ Drop anyway?</source>
         <translation>ไม่สามารถใช้เลย์เอาต์ของแผงได้ จึงใช้ขนาดเริ่มต้น ดูรายละเอียดใน filtermate.log</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7034"/>
+        <location filename="../filter_mate_dockwidget.py" line="7038"/>
         <location filename="../ui/controllers/backend_controller.py" line="682"/>
         <source>Vector</source>
         <translation>เวกเตอร์</translation>
@@ -2841,22 +3544,22 @@ Drop anyway?</source>
         <translation>ลบสคีมา FilterMate</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="4282"/>
+        <location filename="../filter_mate_dockwidget.py" line="4286"/>
         <source>Read failed</source>
         <translation>อ่านล้มเหลว</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="4282"/>
+        <location filename="../filter_mate_dockwidget.py" line="4286"/>
         <source>The service could not be read. Please retry.</source>
         <translation>ไม่สามารถอ่านบริการได้ โปรดลองอีกครั้ง</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="4624"/>
+        <location filename="../filter_mate_dockwidget.py" line="4628"/>
         <source>Loading filtered extent…</source>
         <translation>กำลังโหลดขอบเขตที่กรอง…</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="5210"/>
+        <location filename="../filter_mate_dockwidget.py" line="5214"/>
         <location filename="../ui/controllers/exploring_controller.py" line="742"/>
         <location filename="../ui/controllers/exploring_controller.py" line="3662"/>
         <source>Loading selected values…</source>
@@ -2898,7 +3601,7 @@ Drop anyway?</source>
         <translation>แสดงค่าเพียงบางส่วนเท่านั้น โปรดปรับการค้นหาให้เจาะจงขึ้นเพื่อหาค่าอื่น</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="5145"/>
+        <location filename="../filter_mate_dockwidget.py" line="5149"/>
         <location filename="../ui/controllers/exploring_controller.py" line="551"/>
         <location filename="../ui/controllers/exploring_controller.py" line="568"/>
         <location filename="../ui/controllers/exploring_controller.py" line="636"/>
@@ -3057,7 +3760,7 @@ Drop anyway?</source>
         <translation>📁 โปรเจกต์ปัจจุบัน</translation>
     </message>
     <message>
-        <location filename="../filter_mate_dockwidget.py" line="7206"/>
+        <location filename="../filter_mate_dockwidget.py" line="7232"/>
         <source>The filter was not launched: its selection changed or could not be read. Click Filter again.</source>
         <translation>ตัวกรองไม่ได้เริ่มทำงาน: การเลือกเปลี่ยนไปหรืออ่านไม่ได้ คลิก กรอง อีกครั้ง</translation>
     </message>
@@ -3437,7 +4140,7 @@ Make sure the PostgreSQL table has a PRIMARY KEY defined.</source>
 <context>
     <name>ModelDownloadTask</name>
     <message>
-        <location filename="../adapters/qgis/coverage_layers/segmentation.py" line="316"/>
+        <location filename="../adapters/qgis/coverage_layers/segmentation.py" line="558"/>
         <source>FilterMate: downloading the segmentation model</source>
         <translation>FilterMate: กำลังดาวน์โหลดโมเดลการแบ่งส่วน</translation>
     </message>
@@ -5830,27 +6533,27 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">คลิกบนแผนที่ด้วยตัวเลือกพิกเซล Ctrl+คลิก เพื่อขยายช่วงไปถึงค่านั้น</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2138"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2160"/>
         <source>VALUE RANGE</source>
         <translation>ช่วงค่า</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1444"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1461"/>
         <source>Min</source>
         <translation>ต่ำสุด</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1444"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1461"/>
         <source>Lowest value kept</source>
         <translation>ค่าต่ำสุดที่เก็บไว้</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1444"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1461"/>
         <source>Max</source>
         <translation>สูงสุด</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1444"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1461"/>
         <source>Highest value kept</source>
         <translation>ค่าสูงสุดที่เก็บไว้</translation>
     </message>
@@ -5880,17 +6583,17 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">ไม่มี</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1464"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1481"/>
         <source>RASTER EXPRESSION</source>
         <translation>นิพจน์ราสเตอร์</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1468"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1485"/>
         <source>Raster calculator expression; a pixel is kept where it is not 0</source>
         <translation>นิพจน์ตัวคำนวณราสเตอร์ พิกเซลจะถูกเก็บไว้ที่ที่ค่าไม่เท่ากับ 0</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1469"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1486"/>
         <source>Raster expression</source>
         <translation>นิพจน์ราสเตอร์</translation>
     </message>
@@ -5910,12 +6613,12 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">พิกเซลที่เลือก: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1550"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1567"/>
         <source>Set a value range first</source>
         <translation>กำหนดช่วงค่าก่อน</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2758"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2910"/>
         <source>NoData</source>
         <translation>NoData</translation>
     </message>
@@ -5935,22 +6638,22 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">สถิติของแบนด์ปัจจุบันในสี่เหลี่ยมล่าสุดที่วาดบนแผนที่</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1844"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1861"/>
         <source>Under the cursor: {0}  (X {1:.{3}f}  Y {2:.{3}f})</source>
         <translation>ใต้เคอร์เซอร์: {0}  (X {1:.{3}f}  Y {2:.{3}f})</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1854"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1871"/>
         <source>Zone: {0}</source>
         <translation>โซน: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1854"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1871"/>
         <source>no pixel</source>
         <translation>ไม่มีพิกเซล</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2776"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2928"/>
         <source>LAST PICKS</source>
         <translation>การอ่านล่าสุด</translation>
     </message>
@@ -5965,37 +6668,37 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">ปริมาณที่ช่วงนำไปใช้ ความลาดชัน ทิศด้านลาด ร่มเงาภูมิประเทศ และความขรุขระจะอ่านแบนด์เป็น DTM</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1401"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1418"/>
         <source>Pixel value</source>
         <translation>ค่าพิกเซล</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1401"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1418"/>
         <source>Slope (degrees)</source>
         <translation>ความลาดชัน (องศา)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1401"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1418"/>
         <source>Slope (%)</source>
         <translation>ความลาดชัน (%)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1401"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1418"/>
         <source>Aspect (degrees)</source>
         <translation>ทิศด้านลาด (องศา)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1401"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1418"/>
         <source>Hillshade (0-255)</source>
         <translation>ร่มเงาภูมิประเทศ (0-255)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1401"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1418"/>
         <source>Roughness (TRI, mean difference)</source>
         <translation>ความขรุขระ (TRI, ผลต่างเฉลี่ย)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1411"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1428"/>
         <source>Usual thresholds of the quantity</source>
         <translation>ค่าเกณฑ์ที่ใช้บ่อยของปริมาณนี้</translation>
     </message>
@@ -6005,47 +6708,47 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">ค่าเกณฑ์ที่ใช้บ่อย</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2275"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2297"/>
         <source>Flat</source>
         <translation>ราบ</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2275"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2297"/>
         <source>Gentle</source>
         <translation>ลาดเล็กน้อย</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2275"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2297"/>
         <source>Moderate</source>
         <translation>ปานกลาง</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2276"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2298"/>
         <source>Steep</source>
         <translation>ชัน</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2276"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2298"/>
         <source>East</source>
         <translation>ตะวันออก</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2276"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2298"/>
         <source>South</source>
         <translation>ใต้</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2277"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2299"/>
         <source>West</source>
         <translation>ตะวันตก</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2277"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2299"/>
         <source>Shadow</source>
         <translation>เงา</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2277"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2299"/>
         <source>Lit</source>
         <translation>สว่าง</translation>
     </message>
@@ -6055,27 +6758,27 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">ค่าเกณฑ์ที่ใช้บ่อย…</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1137"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1146"/>
         <source>PIPETTE</source>
         <translation>ตัวเลือก</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1273"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1290"/>
         <source>Tolerance ±</source>
         <translation>ค่าเผื่อ ±</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1280"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1297"/>
         <source>Tolerance around the picked color or value, in % of the value range</source>
         <translation>ค่าเผื่อรอบสีหรือค่าที่เลือก เป็น % ของช่วงค่า</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1281"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1298"/>
         <source>Pipette tolerance</source>
         <translation>ค่าเผื่อของตัวเลือก</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1504"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1521"/>
         <source>Bands</source>
         <translation>แบนด์</translation>
     </message>
@@ -6120,22 +6823,22 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">ต้องใช้ภาพที่มีสามแบนด์ขึ้นไป (แดง เขียว น้ำเงิน...)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1523"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1540"/>
         <source>Vegetation (NDVI &gt; 0.3)</source>
         <translation>พืชพรรณ (NDVI &gt; 0.3)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1523"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1540"/>
         <source>No vegetation (NDVI &lt; 0.1)</source>
         <translation>ไม่มีพืชพรรณ (NDVI &lt; 0.1)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1524"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1541"/>
         <source>Water (NDWI &gt; 0.1)</source>
         <translation>น้ำ (NDWI &gt; 0.1)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1524"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1541"/>
         <source>Vegetation (excess green)</source>
         <translation>พืชพรรณ (สีเขียวส่วนเกิน)</translation>
     </message>
@@ -6145,12 +6848,12 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">พรีเซ็ตสเปกตรัม…</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2431"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2470"/>
         <source>This pixel has no value (NoData): pick another one</source>
         <translation>พิกเซลนี้ไม่มีค่า (NoData): เลือกพิกเซลอื่น</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2541"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2578"/>
         <source>The tolerance covers every value: lower it</source>
         <translation>ค่าเผื่อครอบคลุมทุกค่า: ลดลง</translation>
     </message>
@@ -6175,12 +6878,12 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">นิพจน์</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="857"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="866"/>
         <source>BANDS</source>
         <translation>BANDS</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="900"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="909"/>
         <source>Value of the active band under the cursor</source>
         <translation>ค่าของแบนด์ที่ใช้งานใต้เคอร์เซอร์</translation>
     </message>
@@ -6190,7 +6893,7 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">สถิติของแบนด์ที่ใช้งานในสี่เหลี่ยมสุดท้ายที่วาดบนแผนที่</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="941"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="950"/>
         <source>Every band</source>
         <translation>ทุกแบนด์</translation>
     </message>
@@ -6200,7 +6903,7 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">ช่วงค่านำไปใช้กับทุกแบนด์สีพร้อมกัน (พิกเซลจะถูกเก็บไว้เมื่อทุกแบนด์อยู่ในช่วง) ฮิสโตแกรมแสดงแบนด์แรก</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="875"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="884"/>
         <source>Display the first checked band in grey or the checked bands as a colour composite</source>
         <translation type="unfinished"></translation>
     </message>
@@ -6210,142 +6913,142 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">ตัวเลือกเปรียบเทียบแบนด์นี้</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1052"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1061"/>
         <source>Colour the band holds: the spectral indexes and the chips use it. Click to change it</source>
         <translation>สีที่แบนด์ถืออยู่: ดัชนีสเปกตรัมและชิปใช้สีนี้ คลิกเพื่อเปลี่ยน</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1062"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1071"/>
         <source>Value at the last click of the pipette</source>
         <translation>ค่าที่การคลิกครั้งสุดท้ายของตัวเลือก</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="994"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1003"/>
         <source>No colour</source>
         <translation>ไม่มีสี</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1002"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1011"/>
         <source>RGB</source>
         <translation>RGB</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1002"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1011"/>
         <source>Bands 1, 2, 3 are red, green, blue</source>
         <translation>แบนด์ 1, 2, 3 คือแดง เขียว น้ำเงิน</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1002"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1011"/>
         <source>IRC</source>
         <translation>IRC</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1002"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1011"/>
         <source>Bands 1, 2, 3 are infrared, red, green (IGN infrared colour orthophoto)</source>
         <translation>แบนด์ 1, 2, 3 คืออินฟราเรด แดง เขียว (ออร์โทโฟโตอินฟราเรดสี IGN)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1002"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1011"/>
         <source>RGB + NIR</source>
         <translation>RGB + NIR</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1002"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1011"/>
         <source>Bands 1, 2, 3, 4 are red, green, blue, near infrared</source>
         <translation>แบนด์ 1, 2, 3, 4 คือแดง เขียว น้ำเงิน อินฟราเรดใกล้</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1005"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1014"/>
         <source>Every band: {0}</source>
         <translation>ทุกแบนด์: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1051"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1060"/>
         <source> Roles guessed, to confirm.</source>
         <translation> คาดเดาบทบาทไว้ โปรดยืนยัน</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1115"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1124"/>
         <source>R</source>
         <translation>R</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1115"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1124"/>
         <source>G</source>
         <translation>G</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1115"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1124"/>
         <source>B</source>
         <translation>B</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1116"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1125"/>
         <source>NIR</source>
         <translation>NIR</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1119"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1128"/>
         <source>Red</source>
         <translation>แดง</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1119"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1128"/>
         <source>Green</source>
         <translation>เขียว</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1119"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1128"/>
         <source>Blue</source>
         <translation>น้ำเงิน</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1120"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1129"/>
         <source>Near infrared</source>
         <translation>อินฟราเรดใกล้</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1126"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1135"/>
         <source>roles guessed, to confirm</source>
         <translation>คาดเดาบทบาทไว้ โปรดยืนยัน</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1141"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1152"/>
         <source>Select</source>
         <translation>เลือก</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1145"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1156"/>
         <source>Similar pixels</source>
         <translation>พิกเซลที่คล้ายกัน</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1145"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1156"/>
         <source>Every pixel of the raster close to the picked colour or value (the pipette of the rail)</source>
         <translation>ทุกพิกเซลของราสเตอร์ที่ใกล้เคียงสีหรือค่าที่เลือก (ตัวเลือกของแถบด้านข้าง)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1145"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1156"/>
         <source>Clicked object</source>
         <translation>วัตถุที่คลิก</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1145"/>
         <source>Only the patch of such pixels the click falls in: a pool, a roof, a field (the object detector of the rail); Ctrl+click adds another object</source>
-        <translation>เฉพาะกลุ่มพิกเซลดังกล่าวที่ตำแหน่งคลิกตกอยู่: สระน้ำ หลังคา ทุ่งนา (ตัวตรวจจับวัตถุของแถบด้านข้าง) Ctrl+คลิก เพื่อเพิ่มอีกวัตถุ</translation>
+        <translation type="obsolete">เฉพาะกลุ่มพิกเซลดังกล่าวที่ตำแหน่งคลิกตกอยู่: สระน้ำ หลังคา ทุ่งนา (ตัวตรวจจับวัตถุของแถบด้านข้าง) Ctrl+คลิก เพื่อเพิ่มอีกวัตถุ</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1145"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1156"/>
         <source>Similar objects</source>
         <translation>วัตถุที่คล้ายกัน</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1145"/>
         <source>Every object of the raster like the clicked one: the patches of such pixels whose area is within the ratios below (the similar objects tool of the rail); Ctrl+click adds another reference object</source>
-        <translation>ทุกวัตถุของราสเตอร์ที่คล้ายวัตถุที่คลิก: กลุ่มพิกเซลดังกล่าวที่มีพื้นที่อยู่ในอัตราส่วนด้านล่าง (เครื่องมือวัตถุที่คล้ายกันของแถบด้านข้าง) Ctrl+คลิก เพื่อเพิ่มวัตถุอ้างอิงอีกชิ้น</translation>
+        <translation type="obsolete">ทุกวัตถุของราสเตอร์ที่คล้ายวัตถุที่คลิก: กลุ่มพิกเซลดังกล่าวที่มีพื้นที่อยู่ในอัตราส่วนด้านล่าง (เครื่องมือวัตถุที่คล้ายกันของแถบด้านข้าง) Ctrl+คลิก เพื่อเพิ่มวัตถุอ้างอิงอีกชิ้น</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1218"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1235"/>
         <source>Area ×</source>
         <translation>พื้นที่ ×</translation>
     </message>
@@ -6360,72 +7063,72 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">วัตถุที่คล้ายกันที่ใหญ่ที่สุด เป็นกี่เท่าของวัตถุที่คลิกที่ใหญ่ที่สุด</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1234"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1251"/>
         <source>to ×</source>
         <translation>ถึง ×</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1237"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1254"/>
         <source>same shape</source>
         <translation>รูปร่างเดียวกัน</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1240"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1257"/>
         <source>Keep only the objects shaped like the clicked ones: their compactness (4π × area / perimeter², 1 for a disc) within the same ratios; off, a road of the area of a pool is a pool</source>
         <translation>เก็บเฉพาะวัตถุที่มีรูปร่างเหมือนวัตถุที่คลิก: ความกะทัดรัด (4π × พื้นที่ / เส้นรอบรูป², เท่ากับ 1 สำหรับวงกลม) ภายในอัตราส่วนเดียวกัน เมื่อปิด ถนนที่มีพื้นที่เท่าสระน้ำจะถูกนับเป็นสระน้ำ</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1314"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1331"/>
         <source>Remove this pick</source>
         <translation>เอาการเลือกนี้ออก</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1393"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1410"/>
         <source>Quantity</source>
         <translation>ปริมาณ</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2334"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2356"/>
         <source>Quantity the range applies to. Slope, aspect, hillshade and roughness read the active band as a DTM.</source>
         <translation>ปริมาณที่ช่วงค่านำไปใช้ ความลาดชัน ทิศด้านลาด เงาเขา และความขรุขระอ่านแบนด์ที่ใช้งานเป็น DTM</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1411"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1428"/>
         <source>Thresholds ▾</source>
         <translation>เกณฑ์ ▾</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1483"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1500"/>
         <source>Insert ▾</source>
         <translation>แทรก ▾</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1483"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1500"/>
         <source>Insert a band reference, a usual spectral index or the current range</source>
         <translation>แทรกการอ้างอิงแบนด์ ดัชนีสเปกตรัมที่ใช้บ่อย หรือช่วงปัจจุบัน</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1512"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1529"/>
         <source>Spectral indexes</source>
         <translation>ดัชนีสเปกตรัม</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1517"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1534"/>
         <source>Range</source>
         <translation>ช่วง</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1518"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1535"/>
         <source>The current value range</source>
         <translation>ช่วงค่าปัจจุบัน</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1629"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1646"/>
         <source>Rendered colors depend on style and scale.</source>
         <translation>สีที่แสดงผลขึ้นอยู่กับสไตล์และมาตราส่วน</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1629"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1646"/>
         <source>Only color selection is available: numeric bands, indices, ranges, classes and derivatives are unavailable.</source>
         <translation>ใช้ได้เฉพาะการเลือกตามสี: แบนด์ตัวเลข ดัชนี ช่วง คลาส และข้อมูลอนุพันธ์ใช้ไม่ได้</translation>
     </message>
@@ -6435,316 +7138,316 @@ Only project layers are filtered. The filter can be undone from FilterMate and t
         <translation type="obsolete">ช่วงค่า — ทุกแบนด์</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2136"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2158"/>
         <source>VALUE RANGE — band {0}</source>
         <translation>ช่วงค่า — แบนด์ {0}</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2330"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2352"/>
         <source>picks on: {0}</source>
         <translation>เลือกจาก: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2334"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2356"/>
         <source>A slope, aspect... reads one band as a DTM: choose a band in BANDS first</source>
         <translation>ความลาดชัน ทิศด้านลาด ฯลฯ อ่านหนึ่งแบนด์เป็น DTM: เลือกแบนด์ใน BANDS ก่อน</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2576"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2613"/>
         <source>The object could not be read</source>
         <translation>ไม่สามารถอ่านวัตถุได้</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2578"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2615"/>
         <source>No object under the click: raise the tolerance or click another pixel</source>
         <translation>ไม่มีวัตถุใต้ตำแหน่งที่คลิก: เพิ่มค่าความคลาดเคลื่อนหรือคลิกพิกเซลอื่น</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2580"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2617"/>
         <source>An object is larger than the window read and was cut: lower the tolerance</source>
         <translation>มีวัตถุใหญ่กว่าหน้าต่างที่อ่านและถูกตัด: ลดค่าความคลาดเคลื่อน</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1080"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1089"/>
         <source>Choose 1 to 3 bands for display.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1082"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1091"/>
         <source>Grey: band {0}</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="872"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="881"/>
         <source>Layer style</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="868"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="877"/>
         <source>Map display</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1084"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1093"/>
         <source>R: {0} · G: {1} · B: {2}</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="955"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="964"/>
         <source>Select band {0}</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="874"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="883"/>
         <source>Selected bands</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2412"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2452"/>
         <source>Choose at least one band in BANDS before using the pipette.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="873"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="882"/>
         <source>First checked band</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="944"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="953"/>
         <source>Select or clear every band. The histogram shows the first checked band.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="954"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="963"/>
         <source>Use this band for the pipette, value range and selected bands display</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2134"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2156"/>
         <source>VALUE RANGE — selected bands</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="907"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="916"/>
         <source>Statistics of the active band in the box of the last zone drawn on the map; only the pixels inside the zone are selected</source>
         <translation>สถิติของแบนด์ที่ใช้งานอยู่ในขอบเขตของโซนล่าสุดที่วาดบนแผนที่ ระบบจะเลือกเฉพาะพิกเซลที่อยู่ภายในโซน</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1145"/>
         <source>Segment</source>
-        <translation>แบ่งส่วน</translation>
+        <translation type="obsolete">แบ่งส่วน</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1145"/>
         <source>Draw an object with the segmentation model: left click on it, right click off it, or drag a box; Enter validates. Best on buildings and other well delimited objects</source>
-        <translation>วาดวัตถุด้วยโมเดลการแบ่งส่วน: คลิกซ้ายบนวัตถุ คลิกขวานอกวัตถุ หรือลากกรอบ กด Enter เพื่อยืนยัน เหมาะที่สุดกับอาคารและวัตถุอื่นที่มีขอบเขตชัดเจน</translation>
+        <translation type="obsolete">วาดวัตถุด้วยโมเดลการแบ่งส่วน: คลิกซ้ายบนวัตถุ คลิกขวานอกวัตถุ หรือลากกรอบ กด Enter เพื่อยืนยัน เหมาะที่สุดกับอาคารและวัตถุอื่นที่มีขอบเขตชัดเจน</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1185"/>
         <source>Download the SAM 2.1 tiny model once, into your QGIS profile; the segmentation then runs locally, on the CPU</source>
-        <translation>ดาวน์โหลดโมเดล SAM 2.1 tiny เพียงครั้งเดียวลงในโปรไฟล์ QGIS ของคุณ จากนั้นการแบ่งส่วนจะทำงานในเครื่อง บน CPU</translation>
+        <translation type="obsolete">ดาวน์โหลดโมเดล SAM 2.1 tiny เพียงครั้งเดียวลงในโปรไฟล์ QGIS ของคุณ จากนั้นการแบ่งส่วนจะทำงานในเครื่อง บน CPU</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1194"/>
         <source>Validate object</source>
-        <translation>ยืนยันวัตถุ</translation>
+        <translation type="obsolete">ยืนยันวัตถุ</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1196"/>
         <source>Add the object drawn to the selection (Enter on the map)</source>
-        <translation>เพิ่มวัตถุที่วาดลงในรายการที่เลือก (Enter บนแผนที่)</translation>
+        <translation type="obsolete">เพิ่มวัตถุที่วาดลงในรายการที่เลือก (Enter บนแผนที่)</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2740"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2892"/>
         <source>Clear</source>
         <translation>ล้าง</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1201"/>
         <source>Forget the validated objects</source>
-        <translation>ลืมวัตถุที่ยืนยันแล้ว</translation>
+        <translation type="obsolete">ลืมวัตถุที่ยืนยันแล้ว</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1221"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1238"/>
         <source>Smallest similar object, as a share of each clicked reference</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1221"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1238"/>
         <source>Largest similar object, as a multiple of each clicked reference</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1253"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1270"/>
         <source>Separation</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1256"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1273"/>
         <source>Connected pixels</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1258"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1275"/>
         <source>Bridge removal: {0} px</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1260"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1277"/>
         <source>Separate objects joined by narrow bridges; higher values cut wider bridges</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1263"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1280"/>
         <source>Fill holes</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1266"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1283"/>
         <source>Fill enclosed gaps in the clicked object; clear to preserve courtyards and inner rings</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1408"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1425"/>
         <source>Custom expression</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1418"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1435"/>
         <source>Numeric raster formula, e.g. (&quot;raster@4&quot; - &quot;raster@1&quot;) / (&quot;raster@4&quot; + &quot;raster@1&quot;)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1419"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1436"/>
         <source>Custom derived value expression</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1420"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1437"/>
         <source>A numeric raster calculator expression. The histogram and thresholds use its computed values.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1478"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1495"/>
         <source>Computed expression values. Drag the handles to use this expression as a derived value with thresholds.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1487"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1504"/>
         <source>Use as derived value</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1696"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1713"/>
         <source>Computing histogram…</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2153"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2175"/>
         <source>No histogram available</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2153"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2175"/>
         <source>Constant value: {0}</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2153"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2175"/>
         <source>{0} sampled pixels · {1} to {2}</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2287"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2309"/>
         <source>Distribution (approximate)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2289"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2311"/>
         <source>Central 98% (P1–P99)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2289"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2311"/>
         <source>Central 90% (P5–P95)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2289"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2311"/>
         <source>Interquartile range (P25–P75)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2289"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2311"/>
         <source>Upper quartile (≥ P75)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2296"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2318"/>
         <source>All values</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2300"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2322"/>
         <source>Derived spectral values</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2646"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2739"/>
         <source>Installing onnxruntime in the background…</source>
         <translation>กำลังติดตั้ง onnxruntime ในเบื้องหลัง…</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2648"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2743"/>
         <source>onnxruntime could not be installed automatically (see the FilterMate log). In a terminal (the OSGeo4W Shell on Windows), run {0} then restart QGIS.</source>
         <translation>ไม่สามารถติดตั้ง onnxruntime โดยอัตโนมัติได้ (ดูบันทึกของ FilterMate) ในเทอร์มินัล (OSGeo4W Shell บน Windows) ให้รัน {0} แล้วรีสตาร์ท QGIS</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2660"/>
         <source>Install the model ({0} MB)…</source>
-        <translation>ติดตั้งโมเดล ({0} MB)…</translation>
+        <translation type="obsolete">ติดตั้งโมเดล ({0} MB)…</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2666"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2769"/>
         <source>Repair the model…</source>
         <translation>ซ่อมแซมโมเดล…</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2691"/>
         <source>Segmentation model</source>
-        <translation>โมเดลการแบ่งส่วน</translation>
+        <translation type="obsolete">โมเดลการแบ่งส่วน</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2691"/>
         <source>Download the SAM 2.1 tiny model ({0} MB) from huggingface.co/{1} into your QGIS profile?
 
 Every file is checked against its SHA-256. The model then runs locally, on the CPU; nothing leaves your computer.</source>
-        <translation>ดาวน์โหลดโมเดล SAM 2.1 tiny ({0} MB) จาก huggingface.co/{1} ลงในโปรไฟล์ QGIS ของคุณหรือไม่
+        <translation type="obsolete">ดาวน์โหลดโมเดล SAM 2.1 tiny ({0} MB) จาก huggingface.co/{1} ลงในโปรไฟล์ QGIS ของคุณหรือไม่
 
 ทุกไฟล์จะถูกตรวจสอบกับ SHA-256 ของไฟล์นั้น จากนั้นโมเดลจะทำงานในเครื่อง บน CPU ไม่มีข้อมูลใดออกจากคอมพิวเตอร์ของคุณ</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2740"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2892"/>
         <source>Clear ({0})</source>
         <translation>ล้าง ({0})</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2780"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2932"/>
         <source>Derived value: {0}</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2652"/>
         <source>The segmentation needs onnxruntime (about {0} MB), which is not installed yet.</source>
-        <translation>การแบ่งส่วนภาพต้องใช้ onnxruntime (ประมาณ {0} MB) ซึ่งยังไม่ได้ติดตั้ง</translation>
+        <translation type="obsolete">การแบ่งส่วนภาพต้องใช้ onnxruntime (ประมาณ {0} MB) ซึ่งยังไม่ได้ติดตั้ง</translation>
     </message>
     <message>
         <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2656"/>
         <source>Install onnxruntime…</source>
-        <translation>ติดตั้ง onnxruntime…</translation>
+        <translation type="obsolete">ติดตั้ง onnxruntime…</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2675"/>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2779"/>
         <source>Segmentation</source>
         <translation>การแบ่งส่วนภาพ</translation>
     </message>
@@ -6753,9 +7456,68 @@ Every file is checked against its SHA-256. The model then runs locally, on the C
         <source>The segmentation needs onnxruntime (about {0} MB), which this QGIS does not have.
 
 Install it now from PyPI with pip, into your QGIS profile? The Python of QGIS is not modified.</source>
-        <translation>การแบ่งส่วนภาพต้องใช้ onnxruntime (ประมาณ {0} MB) ซึ่ง QGIS นี้ไม่มี
+        <translation type="obsolete">การแบ่งส่วนภาพต้องใช้ onnxruntime (ประมาณ {0} MB) ซึ่ง QGIS นี้ไม่มี
 
 ติดตั้งตอนนี้จาก PyPI ด้วย pip ลงในโปรไฟล์ QGIS ของคุณหรือไม่ Python ของ QGIS จะไม่ถูกแก้ไข</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1156"/>
+        <source>The object under the click: a roof, a pool, a field (the object detector of the rail). With SAM: a click adds an object, Shift+click extends the last one, a right click trims it, a box frames one, Escape removes it. With the colour engine: the patch of such pixels, Ctrl+click adds another one</source>
+        <translation>วัตถุใต้ตำแหน่งที่คลิก: หลังคา สระว่ายน้ำ หรือทุ่งนา (ตัวตรวจจับวัตถุของแถบเครื่องมือ) เมื่อใช้ SAM: คลิกเพื่อเพิ่มวัตถุ Shift+คลิกเพื่อขยายวัตถุสุดท้าย คลิกขวาเพื่อตัดให้เล็กลง กรอบใช้ล้อมวัตถุหนึ่งชิ้น และ Esc เพื่อลบออก เมื่อใช้เอนจินสี: กลุ่มพิกเซลที่คล้ายกัน Ctrl+คลิกเพื่อเพิ่มอีกกลุ่ม</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1156"/>
+        <source>Every object like the clicked one, whose area is within the ratios below (the similar objects tool of the rail). With SAM: the patches of a similar colour in the visible area are redrawn by the model, then compared with the clicked object. With the colour engine: the patches of such pixels</source>
+        <translation>ทุกวัตถุที่คล้ายกับวัตถุที่คลิก และมีพื้นที่อยู่ในสัดส่วนด้านล่าง (เครื่องมือวัตถุที่คล้ายกันของแถบเครื่องมือ) เมื่อใช้ SAM: กลุ่มสีใกล้เคียงในพื้นที่ที่มองเห็นจะถูกโมเดลวาดใหม่ แล้วนำไปเทียบกับวัตถุที่คลิก เมื่อใช้เอนจินสี: กลุ่มพิกเซลที่คล้ายกัน</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1185"/>
+        <source>Engine</source>
+        <translation>เอนจิน</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1189"/>
+        <source>Colour</source>
+        <translation>สี</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1190"/>
+        <source>SAM draws the object from the image, locally on the CPU; the colour engine grows the patch of pixels of the clicked colour</source>
+        <translation>SAM วาดวัตถุจากภาพ ภายในเครื่องบน CPU ส่วนเอนจินสีจะขยายกลุ่มพิกเซลที่มีสีที่คลิก</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1207"/>
+        <source>Install SAM 2.1 tiny once, into your QGIS profile; it then runs locally, on the CPU</source>
+        <translation>ติดตั้ง SAM 2.1 tiny เพียงครั้งเดียวในโปรไฟล์ QGIS ของคุณ จากนั้นจะทำงานภายในเครื่องบน CPU</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="1218"/>
+        <source>Forget the objects drawn by SAM</source>
+        <translation>ล้างวัตถุที่ SAM วาด</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2741"/>
+        <source>Downloading the SAM model in the background…</source>
+        <translation>กำลังดาวน์โหลดโมเดล SAM ในเบื้องหลัง…</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2747"/>
+        <source>Objects are found by their colour. SAM draws them from the image, far better on buildings (about {0} MB to install).</source>
+        <translation>วัตถุจะถูกค้นหาจากสี SAM วาดวัตถุจากภาพ ให้ผลดีกว่ามากกับอาคาร (ต้องติดตั้งประมาณ {0} MB)</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2751"/>
+        <source>Install SAM ({0} MB)…</source>
+        <translation>ติดตั้ง SAM ({0} MB)…</translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/coverage_panels/raster_exploring_panel.py" line="2779"/>
+        <source>Clicked and similar objects can be drawn by the SAM 2.1 segmentation model, locally on the CPU. Install it now (about {0} MB)?
+
+onnxruntime comes from PyPI with pip, the model from huggingface.co/{1}, each file checked against its SHA-256. Both go to your QGIS profile; the Python of QGIS is not modified and nothing leaves your computer. Without SAM, objects are found by their colour.</source>
+        <translation>วัตถุที่คลิกและวัตถุที่คล้ายกันสามารถวาดได้ด้วยโมเดลการแบ่งส่วน SAM 2.1 ภายในเครื่องบน CPU ติดตั้งตอนนี้หรือไม่ (ประมาณ {0} MB)
+
+onnxruntime มาจาก PyPI ด้วย pip ส่วนโมเดลมาจาก huggingface.co/{1} โดยแต่ละไฟล์ตรวจสอบด้วย SHA-256 ทั้งสองจะอยู่ในโปรไฟล์ QGIS ของคุณ Python ของ QGIS จะไม่ถูกแก้ไข และไม่มีสิ่งใดออกจากคอมพิวเตอร์ของคุณ หากไม่มี SAM วัตถุจะถูกค้นหาจากสี</translation>
     </message>
 </context>
 <context>
@@ -7027,125 +7789,200 @@ Install it now from PyPI with pip, into your QGIS profile? The Python of QGIS is
 <context>
     <name>SegmentationController</name>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="106"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="147"/>
         <source>This point cannot be used on this layer</source>
         <translation>ไม่สามารถใช้จุดนี้กับเลเยอร์นี้ได้</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="134"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="199"/>
         <source>Click inside the raster</source>
         <translation>คลิกภายในเรสเตอร์</translation>
     </message>
     <message>
         <location filename="../ui/controllers/segmentation_controller.py" line="141"/>
         <source>This point is outside the window being segmented: validate or clear the object first</source>
-        <translation>จุดนี้อยู่นอกหน้าต่างที่กำลังแบ่งส่วน: ให้ยืนยันหรือล้างวัตถุก่อน</translation>
+        <translation type="obsolete">จุดนี้อยู่นอกหน้าต่างที่กำลังแบ่งส่วน: ให้ยืนยันหรือล้างวัตถุก่อน</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="164"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="231"/>
         <source>This box is too small</source>
         <translation>กรอบนี้เล็กเกินไป</translation>
     </message>
     <message>
         <location filename="../ui/controllers/segmentation_controller.py" line="149"/>
         <source>Start with a left click on the object, or draw a box</source>
-        <translation>เริ่มด้วยการคลิกซ้ายบนวัตถุ หรือลากกรอบ</translation>
+        <translation type="obsolete">เริ่มด้วยการคลิกซ้ายบนวัตถุ หรือลากกรอบ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="160"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="224"/>
         <source>This raster cannot be segmented</source>
         <translation>ไม่สามารถแบ่งส่วนเรสเตอร์นี้ได้</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="211"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="317"/>
         <source>Preparing the segmentation of this area…</source>
         <translation>กำลังเตรียมการแบ่งส่วนพื้นที่นี้…</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="370"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="430"/>
         <source>The segmentation of this area failed: {0}</source>
         <translation>การแบ่งส่วนพื้นที่นี้ล้มเหลว: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="222"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="328"/>
         <source>canceled</source>
         <translation>ถูกยกเลิก</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="247"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="363"/>
         <source>onnxruntime is being installed, click again in a moment</source>
         <translation>กำลังติดตั้ง onnxruntime โปรดคลิกอีกครั้งในอีกสักครู่</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="249"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="365"/>
         <source>onnxruntime is missing: run {0}, then restart QGIS</source>
         <translation>ไม่พบ onnxruntime: รัน {0} แล้วรีสตาร์ท QGIS</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="253"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="369"/>
         <source>The segmentation model is being downloaded, click again once it is installed</source>
         <translation>กำลังดาวน์โหลดโมเดลการแบ่งส่วน โปรดคลิกอีกครั้งเมื่อติดตั้งเสร็จ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="255"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="371"/>
         <source>Install the segmentation model first (button below)</source>
         <translation>ติดตั้งโมเดลการแบ่งส่วนก่อน (ปุ่มด้านล่าง)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="256"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="372"/>
         <source>The segmentation model could not be loaded (see the FilterMate log)</source>
         <translation>ไม่สามารถโหลดโมเดลการแบ่งส่วนได้ (ดูบันทึกของ FilterMate)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="276"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="393"/>
         <source>Downloading the segmentation model… {0} %</source>
         <translation>กำลังดาวน์โหลดโมเดลการแบ่งส่วน… {0} %</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="285"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="402"/>
         <source>Model installed: left click on an object, or draw a box</source>
         <translation>ติดตั้งโมเดลแล้ว: คลิกซ้ายบนวัตถุ หรือลากกรอบ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="287"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="404"/>
         <source>The model could not be downloaded: {0}</source>
         <translation>ไม่สามารถดาวน์โหลดโมเดลได้: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="289"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="406"/>
         <source>Download canceled</source>
         <translation>ยกเลิกการดาวน์โหลดแล้ว</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="307"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="422"/>
         <source>Click on an object in the area prepared</source>
         <translation>คลิกที่วัตถุในพื้นที่ที่เตรียมไว้</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="373"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="439"/>
         <source>No object found: add a point or draw a box</source>
         <translation>ไม่พบวัตถุ: เพิ่มจุดหรือลากกรอบ</translation>
     </message>
     <message>
         <location filename="../ui/controllers/segmentation_controller.py" line="324"/>
         <source>Left click adds to the object, right click removes, Enter validates</source>
-        <translation>คลิกซ้ายเพื่อเพิ่มเข้าวัตถุ คลิกขวาเพื่อลบออก Enter เพื่อยืนยัน</translation>
+        <translation type="obsolete">คลิกซ้ายเพื่อเพิ่มเข้าวัตถุ คลิกขวาเพื่อลบออก Enter เพื่อยืนยัน</translation>
     </message>
     <message>
         <location filename="../ui/controllers/segmentation_controller.py" line="364"/>
         <source>Click an object first</source>
-        <translation>คลิกที่วัตถุก่อน</translation>
+        <translation type="obsolete">คลิกที่วัตถุก่อน</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/segmentation_controller.py" line="251"/>
+        <location filename="../ui/controllers/segmentation_controller.py" line="367"/>
         <source>Install onnxruntime first, with the button below</source>
         <translation>โปรดติดตั้ง onnxruntime ก่อนด้วยปุ่มด้านล่าง</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="91"/>
+        <source>Click an object, or draw a box around it</source>
+        <translation>คลิกที่วัตถุ หรือวาดกรอบล้อมรอบวัตถุ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="166"/>
+        <source>A right click trims the last object: click an object first</source>
+        <translation>คลิกขวาจะตัดวัตถุสุดท้ายให้เล็กลง: ให้คลิกที่วัตถุก่อน</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="206"/>
+        <source>This point is outside the area of the last object: click it as a new object</source>
+        <translation>จุดนี้อยู่นอกพื้นที่ของวัตถุสุดท้าย: คลิกเป็นวัตถุใหม่</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="349"/>
+        <source>{0} click(s) fell outside the area prepared: click them again</source>
+        <translation>การคลิก {0} ครั้งอยู่นอกพื้นที่ที่เตรียมไว้: คลิกอีกครั้ง</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="466"/>
+        <source>Shift+click extends the object, right click trims it, Escape removes it</source>
+        <translation>Shift+คลิกขยายวัตถุ คลิกขวาตัดให้เล็กลง Esc ลบออก</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="502"/>
+        <source>Similar objects need the values of the raster: this layer is only drawn</source>
+        <translation>วัตถุที่คล้ายกันต้องใช้ค่าของราสเตอร์: เลเยอร์นี้เป็นเพียงภาพที่วาด</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="510"/>
+        <source>No patch of this colour nearby to compare with the object</source>
+        <translation>ไม่มีกลุ่มสีนี้ใกล้เคียงให้เทียบกับวัตถุ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="524"/>
+        <source>Drawing the similar objects: {0} candidates…</source>
+        <translation>กำลังวาดวัตถุที่คล้ายกัน: {0} รายการที่เป็นไปได้…</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="535"/>
+        <source>Drawing the similar objects… {0} %</source>
+        <translation>กำลังวาดวัตถุที่คล้ายกัน… {0} %</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="549"/>
+        <source>The similar objects could not be drawn: {0}</source>
+        <translation>ไม่สามารถวาดวัตถุที่คล้ายกันได้: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="559"/>
+        <source>{0} similar objects found among {1} candidates; Escape removes them</source>
+        <translation>พบวัตถุที่คล้ายกัน {0} ชิ้นจาก {1} รายการที่เป็นไปได้ กด Esc เพื่อลบออก</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="596"/>
+        <source>Click the next object</source>
+        <translation>คลิกที่วัตถุถัดไป</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="603"/>
+        <source>Search stopped</source>
+        <translation>หยุดการค้นหาแล้ว</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="603"/>
+        <source>Click canceled</source>
+        <translation>ยกเลิกการคลิกแล้ว</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="611"/>
+        <source>Last object removed</source>
+        <translation>ลบวัตถุสุดท้ายแล้ว</translation>
     </message>
 </context>
 <context>
     <name>SegmentationEmbedTask</name>
     <message>
-        <location filename="../adapters/qgis/coverage_layers/segmentation.py" line="238"/>
+        <location filename="../adapters/qgis/coverage_layers/segmentation.py" line="400"/>
         <source>FilterMate: preparing the segmentation</source>
         <translation>FilterMate: กำลังเตรียมการแบ่งส่วน</translation>
     </message>
@@ -7441,6 +8278,14 @@ Install it now from PyPI with pip, into your QGIS profile? The Python of QGIS is
     </message>
 </context>
 <context>
+    <name>SimilarObjectsTask</name>
+    <message>
+        <location filename="../adapters/qgis/coverage_layers/segmentation.py" line="469"/>
+        <source>FilterMate: drawing the similar objects</source>
+        <translation>FilterMate: กำลังวาดวัตถุที่คล้ายกัน</translation>
+    </message>
+</context>
+<context>
     <name>SimpleConfigDialog</name>
     <message>
         <location filename="../ui/dialogs/config_editor_widget.py" line="470"/>
@@ -7475,12 +8320,12 @@ Install it now from PyPI with pip, into your QGIS profile? The Python of QGIS is
 <context>
     <name>SqlUtils</name>
     <message>
-        <location filename="../infrastructure/database/sql_utils.py" line="273"/>
+        <location filename="../infrastructure/database/sql_utils.py" line="243"/>
         <source>FilterMate - PostgreSQL Type Warning</source>
         <translation>FilterMate - คำเตือนประเภท PostgreSQL</translation>
     </message>
     <message>
-        <location filename="../infrastructure/database/sql_utils.py" line="277"/>
+        <location filename="../infrastructure/database/sql_utils.py" line="247"/>
         <source>Type mismatch in filter: {warning_detail}...</source>
         <translation>ประเภทไม่ตรงกันในตัวกรอง: {warning_detail}...</translation>
     </message>
@@ -7756,576 +8601,6 @@ Install it now from PyPI with pip, into your QGIS profile? The Python of QGIS is
         <location filename="../ui/controllers/coverage_dock_extras.py" line="638"/>
         <source>Kept points</source>
         <translation type="obsolete">จุดที่เก็บไว้</translation>
-    </message>
-</context>
-<context>
-    <name>AgentPanel</name>
-    <message>
-        <source>(no request)</source>
-        <translation>(ไม่มีคำขอ)</translation>
-    </message>
-    <message>
-        <source>A few free requests a month, through the relay of FilterMate to Claude (Anthropic), under the terms of Anthropic. The relay counts what is spent and keeps no conversation. When it is used up, choose a provider and enter your own API key.</source>
-        <translation>คำขอฟรีจำนวนหนึ่งต่อเดือน ผ่านรีเลย์ของ FilterMate ไปยัง Claude (Anthropic) ภายใต้เงื่อนไขของ Anthropic รีเลย์จะนับเฉพาะปริมาณที่ใช้และไม่เก็บบทสนทนาใดไว้ เมื่อโควตาหมด ให้เลือกผู้ให้บริการและป้อนคีย์ API ของคุณเอง</translation>
-    </message>
-    <message>
-        <source>API key</source>
-        <translation>คีย์ API</translation>
-    </message>
-    <message>
-        <source>Add</source>
-        <translation>เพิ่ม</translation>
-    </message>
-    <message>
-        <source>Address</source>
-        <translation>ที่อยู่</translation>
-    </message>
-    <message>
-        <source>Agent settings</source>
-        <translation>การตั้งค่าเอเจนต์</translation>
-    </message>
-    <message>
-        <source>Allow attribute values to be sent</source>
-        <translation>อนุญาตให้ส่งค่าแอตทริบิวต์</translation>
-    </message>
-    <message>
-        <source>Applications already set up will have to be set up again.</source>
-        <translation>แอปพลิเคชันที่ตั้งค่าไว้แล้วจะต้องตั้งค่าใหม่</translation>
-    </message>
-    <message>
-        <source>Ask the agent to filter your layers</source>
-        <translation>ให้เอเจนต์กรองเลเยอร์ของคุณ</translation>
-    </message>
-    <message>
-        <source>Back to the conversation</source>
-        <translation>กลับไปที่บทสนทนา</translation>
-    </message>
-    <message>
-        <source>Claude Code or another MCP client on this computer can then filter your layers, once FilterMate has been opened, under the rules of this panel: the same sources, the same confirmations, and filters can be undone here. That application sends what it reads to its own AI provider.</source>
-        <translation>Claude Code หรือไคลเอนต์ MCP อื่นบนคอมพิวเตอร์เครื่องนี้จะสามารถกรองเลเยอร์ของคุณได้ หลังจากเปิด FilterMate แล้ว ตามกฎของแผงนี้: แหล่งข้อมูลเดียวกัน การยืนยันเดียวกัน และเลิกทำตัวกรองได้ที่นี่ แอปพลิเคชันนั้นจะส่งสิ่งที่อ่านไปยังผู้ให้บริการ AI ของตัวเอง</translation>
-    </message>
-    <message>
-        <source>Connect an AI provider to start. Nothing is sent before you agree.</source>
-        <translation>เชื่อมต่อผู้ให้บริการ AI เพื่อเริ่มต้น จะไม่มีการส่งสิ่งใดก่อนที่คุณจะยินยอม</translation>
-    </message>
-    <message>
-        <source>Copied, with the access token: keep it to yourself. Save these settings for it to apply.</source>
-        <translation>คัดลอกพร้อมโทเค็นการเข้าถึงแล้ว: โปรดเก็บเป็นความลับ บันทึกการตั้งค่านี้เพื่อให้มีผล</translation>
-    </message>
-    <message>
-        <source>Copy for Claude Desktop</source>
-        <translation>คัดลอกสำหรับ Claude Desktop</translation>
-    </message>
-    <message>
-        <source>Copy the Claude Code command</source>
-        <translation>คัดลอกคำสั่ง Claude Code</translation>
-    </message>
-    <message>
-        <source>Copy the configuration</source>
-        <translation>คัดลอกการกำหนดค่า</translation>
-    </message>
-    <message>
-        <source>Describe it in your own words. Each filter can be undone.</source>
-        <translation>อธิบายด้วยคำพูดของคุณเอง ตัวกรองแต่ละรายการเลิกทำได้</translation>
-    </message>
-    <message>
-        <source>Filter your layers from a sentence</source>
-        <translation>กรองเลเยอร์ของคุณด้วยประโยคเดียว</translation>
-    </message>
-    <message>
-        <source>FilterMate agent</source>
-        <translation>เอเจนต์ FilterMate</translation>
-    </message>
-    <message>
-        <source>History</source>
-        <translation>ประวัติ</translation>
-    </message>
-    <message>
-        <source>History…</source>
-        <translation>ประวัติ…</translation>
-    </message>
-    <message>
-        <source>I agree to send this data to this provider</source>
-        <translation>ฉันยินยอมให้ส่งข้อมูลนี้ไปยังผู้ให้บริการรายนี้</translation>
-    </message>
-    <message>
-        <source>Let other applications on this computer drive FilterMate (MCP server)</source>
-        <translation>อนุญาตให้แอปพลิเคชันอื่นบนคอมพิวเตอร์เครื่องนี้ควบคุม FilterMate (เซิร์ฟเวอร์ MCP)</translation>
-    </message>
-    <message>
-        <source>MCP connector</source>
-        <translation>คอนเนคเตอร์ MCP</translation>
-    </message>
-    <message>
-        <source>MCP connectors</source>
-        <translation>คอนเนคเตอร์ MCP</translation>
-    </message>
-    <message>
-        <source>Model</source>
-        <translation>โมเดล</translation>
-    </message>
-    <message>
-        <source>More</source>
-        <translation>เพิ่มเติม</translation>
-    </message>
-    <message>
-        <source>New access token</source>
-        <translation>โทเค็นการเข้าถึงใหม่</translation>
-    </message>
-    <message>
-        <source>New conversation</source>
-        <translation>บทสนทนาใหม่</translation>
-    </message>
-    <message>
-        <source>New token: it applies once these settings are saved.</source>
-        <translation>โทเค็นใหม่: จะมีผลเมื่อบันทึกการตั้งค่านี้</translation>
-    </message>
-    <message>
-        <source>Open data platforms</source>
-        <translation>แพลตฟอร์มข้อมูลเปิด</translation>
-    </message>
-    <message>
-        <source>Open the settings</source>
-        <translation>เปิดการตั้งค่า</translation>
-    </message>
-    <message>
-        <source>Other applications</source>
-        <translation>แอปพลิเคชันอื่น</translation>
-    </message>
-    <message>
-        <source>Port</source>
-        <translation>พอร์ต</translation>
-    </message>
-    <message>
-        <source>Provider</source>
-        <translation>ผู้ให้บริการ</translation>
-    </message>
-    <message>
-        <source>Redo</source>
-        <translation>ทำซ้ำ</translation>
-    </message>
-    <message>
-        <source>Remove</source>
-        <translation>ลบออก</translation>
-    </message>
-    <message>
-        <source>Remove the stored key</source>
-        <translation>ลบคีย์ที่จัดเก็บไว้</translation>
-    </message>
-    <message>
-        <source>Satellite imagery</source>
-        <translation>ภาพถ่ายดาวเทียม</translation>
-    </message>
-    <message>
-        <source>Send (Enter)</source>
-        <translation>ส่ง (Enter)</translation>
-    </message>
-    <message>
-        <source>Send again</source>
-        <translation>ส่งอีกครั้ง</translation>
-    </message>
-    <message>
-        <source>Sent to: {}</source>
-        <translation>ส่งไปยัง: {}</translation>
-    </message>
-    <message>
-        <source>Set up the agent</source>
-        <translation>ตั้งค่าเอเจนต์</translation>
-    </message>
-    <message>
-        <source>Sources</source>
-        <translation>แหล่งข้อมูล</translation>
-    </message>
-    <message>
-        <source>Stop (Esc)</source>
-        <translation>หยุด (Esc)</translation>
-    </message>
-    <message>
-        <source>Stored: leave empty to keep it</source>
-        <translation>จัดเก็บแล้ว: เว้นว่างไว้เพื่อคงไว้</translation>
-    </message>
-    <message>
-        <source>Test</source>
-        <translation>ทดสอบ</translation>
-    </message>
-    <message>
-        <source>Testing…</source>
-        <translation>กำลังทดสอบ…</translation>
-    </message>
-    <message>
-        <source>The MCP server could not start: {}</source>
-        <translation>ไม่สามารถเริ่มเซิร์ฟเวอร์ MCP ได้: {}</translation>
-    </message>
-    <message>
-        <source>The agent can search the sources ticked here. Your searches, and what the agent passes to a connector, are sent to them; a layer added from them is read from their servers.</source>
-        <translation>เอเจนต์สามารถค้นหาแหล่งข้อมูลที่ทำเครื่องหมายไว้ที่นี่ได้ คำค้นหาของคุณ และสิ่งที่เอเจนต์ส่งให้คอนเนคเตอร์ จะถูกส่งไปยังแหล่งเหล่านั้น เลเยอร์ที่เพิ่มจากแหล่งเหล่านั้นจะถูกอ่านจากเซิร์ฟเวอร์ของแหล่งนั้น</translation>
-    </message>
-    <message>
-        <source>The agent sends your request, the names of your layers and fields, your filter expressions and the results of its tools to the provider chosen here, under that provider's terms. Without the option below, the agent does not read the values of your fields; values already written in your filters and favorites are still sent. The conversation is kept on this computer for each project, until you start a new one.</source>
-        <translation>เอเจนต์ส่งคำขอของคุณ ชื่อเลเยอร์และฟิลด์ นิพจน์ตัวกรอง และผลลัพธ์จากเครื่องมือของเอเจนต์ ไปยังผู้ให้บริการที่เลือกไว้ที่นี่ ภายใต้เงื่อนไขของผู้ให้บริการนั้น หากไม่เปิดตัวเลือกด้านล่าง เอเจนต์จะไม่อ่านค่าของฟิลด์ แต่ค่าที่เขียนอยู่ในตัวกรองและรายการโปรดของคุณแล้วจะยังคงถูกส่ง บทสนทนาจะถูกเก็บไว้บนคอมพิวเตอร์เครื่องนี้ แยกตามโปรเจกต์ จนกว่าคุณจะเริ่มบทสนทนาใหม่</translation>
-    </message>
-    <message>
-        <source>Through mcp-remote, which needs Node.js: Claude Desktop starts local servers as programs.</source>
-        <translation>ผ่าน mcp-remote ซึ่งต้องใช้ Node.js: Claude Desktop เรียกใช้เซิร์ฟเวอร์ภายในเครื่องเป็นโปรแกรม</translation>
-    </message>
-    <message>
-        <source>Too many sources added: remove one first.</source>
-        <translation>เพิ่มแหล่งข้อมูลมากเกินไป: โปรดลบออกหนึ่งรายการก่อน</translation>
-    </message>
-    <message>
-        <source>Undo the last</source>
-        <translation>เลิกทำรายการล่าสุด</translation>
-    </message>
-    <message>
-        <source>Undo this turn</source>
-        <translation>เลิกทำรอบนี้</translation>
-    </message>
-    <message>
-        <source>What do you want to filter?</source>
-        <translation>คุณต้องการกรองอะไร</translation>
-    </message>
-    <message>
-        <source>added by you</source>
-        <translation>เพิ่มโดยคุณ</translation>
-    </message>
-    <message>
-        <source>applied</source>
-        <translation>ใช้แล้ว</translation>
-    </message>
-    <message>
-        <source>community</source>
-        <translation>ชุมชน</translation>
-    </message>
-    <message>
-        <source>https://... or a portal address</source>
-        <translation>https://... หรือที่อยู่ของพอร์ทัล</translation>
-    </message>
-    <message>
-        <source>no change</source>
-        <translation>ไม่มีการเปลี่ยนแปลง</translation>
-    </message>
-    <message>
-        <source>official</source>
-        <translation>ทางการ</translation>
-    </message>
-    <message>
-        <source>this computer</source>
-        <translation>คอมพิวเตอร์เครื่องนี้</translation>
-    </message>
-    <message>
-        <source>undone</source>
-        <translation>เลิกทำแล้ว</translation>
-    </message>
-    <message>
-        <source>{} turn(s)</source>
-        <translation>{} รอบ</translation>
-    </message>
-    <message>
-        <source>Which layers are in this project?</source>
-        <translation>โปรเจกต์นี้มีเลเยอร์อะไรบ้าง</translation>
-    </message>
-    <message>
-        <source>Keep the buildings taller than 15 m</source>
-        <translation>เก็บเฉพาะอาคารที่สูงกว่า 15 ม.</translation>
-    </message>
-    <message>
-        <source>Filter the roads inside the selected feature</source>
-        <translation>กรองถนนที่อยู่ภายในฟีเจอร์ที่เลือก</translation>
-    </message>
-</context>
-<context>
-    <name>AgentChat</name>
-    <message>
-        <source>Access to the free quota was renewed: send your request again.</source>
-        <translation>สิทธิ์เข้าถึงโควตาฟรีได้รับการต่ออายุแล้ว: โปรดส่งคำขอของคุณอีกครั้ง</translation>
-    </message>
-    <message>
-        <source>Another application is changing the project: try again in a moment.</source>
-        <translation>แอปพลิเคชันอื่นกำลังแก้ไขโปรเจกต์: โปรดลองใหม่อีกครั้งในอีกสักครู่</translation>
-    </message>
-    <message>
-        <source>Another application: {}</source>
-        <translation>แอปพลิเคชันอื่น: {}</translation>
-    </message>
-    <message>
-        <source>Applied again: {}.</source>
-        <translation>ใช้อีกครั้งแล้ว: {}</translation>
-    </message>
-    <message>
-        <source>Changed since, left as is: {}.</source>
-        <translation>มีการเปลี่ยนแปลงแล้ว คงไว้ตามเดิม: {}</translation>
-    </message>
-    <message>
-        <source>Changed: {}.</source>
-        <translation>เปลี่ยนแปลงแล้ว: {}</translation>
-    </message>
-    <message>
-        <source>Choose a model and agree to send your data to use the agent.</source>
-        <translation>เลือกโมเดลและยอมรับการส่งข้อมูลของคุณเพื่อใช้เอเจนต์</translation>
-    </message>
-    <message>
-        <source>Connecting to {}…</source>
-        <translation>กำลังเชื่อมต่อกับ {}…</translation>
-    </message>
-    <message>
-        <source>Earlier conversation: the agent starts afresh from here.</source>
-        <translation>บทสนทนาก่อนหน้า: เอเจนต์จะเริ่มใหม่ตั้งแต่จุดนี้</translation>
-    </message>
-    <message>
-        <source>Enter your API key in the agent settings.</source>
-        <translation>ป้อนคีย์ API ของคุณในการตั้งค่าเอเจนต์</translation>
-    </message>
-    <message>
-        <source>Export of {}</source>
-        <translation>การส่งออก {}</translation>
-    </message>
-    <message>
-        <source>Favorite applied</source>
-        <translation>ใช้รายการโปรดแล้ว</translation>
-    </message>
-    <message>
-        <source>Filter on the points of {}</source>
-        <translation>กรองตามจุดของ {}</translation>
-    </message>
-    <message>
-        <source>Filter on {}</source>
-        <translation>กรอง {}</translation>
-    </message>
-    <message>
-        <source>Filter on {} by an area</source>
-        <translation>กรอง {} ด้วยพื้นที่</translation>
-    </message>
-    <message>
-        <source>Filter on {} by {}</source>
-        <translation>กรอง {} ด้วย {}</translation>
-    </message>
-    <message>
-        <source>FilterMate agent</source>
-        <translation>เอเจนต์ FilterMate</translation>
-    </message>
-    <message>
-        <source>Filters removed from {}</source>
-        <translation>ลบตัวกรองออกจาก {} แล้ว</translation>
-    </message>
-    <message>
-        <source>Hidden: {}</source>
-        <translation>ซ่อนแล้ว: {}</translation>
-    </message>
-    <message>
-        <source>It answers.</source>
-        <translation>มีการตอบกลับ</translation>
-    </message>
-    <message>
-        <source>Layer added: {}</source>
-        <translation>เพิ่มเลเยอร์แล้ว: {}</translation>
-    </message>
-    <message>
-        <source>Layers removed: {}</source>
-        <translation>ลบเลเยอร์แล้ว: {}</translation>
-    </message>
-    <message>
-        <source>Not reachable for this conversation: {}</source>
-        <translation>ไม่สามารถเข้าถึงได้สำหรับบทสนทนานี้: {}</translation>
-    </message>
-    <message>
-        <source>Nothing to redo.</source>
-        <translation>ไม่มีสิ่งที่ต้องทำซ้ำ</translation>
-    </message>
-    <message>
-        <source>Nothing to restore.</source>
-        <translation>ไม่มีสิ่งที่ต้องกู้คืน</translation>
-    </message>
-    <message>
-        <source>Reading the active filters</source>
-        <translation>กำลังอ่านตัวกรองที่ใช้งานอยู่</translation>
-    </message>
-    <message>
-        <source>Reading the favorites</source>
-        <translation>กำลังอ่านรายการโปรด</translation>
-    </message>
-    <message>
-        <source>Reading the fields of {}</source>
-        <translation>กำลังอ่านฟิลด์ของ {}</translation>
-    </message>
-    <message>
-        <source>Reading the layers</source>
-        <translation>กำลังอ่านเลเยอร์</translation>
-    </message>
-    <message>
-        <source>Reading the map</source>
-        <translation>กำลังอ่านแผนที่</translation>
-    </message>
-    <message>
-        <source>Reading the values of {}</source>
-        <translation>กำลังอ่านค่าของ {}</translation>
-    </message>
-    <message>
-        <source>Restored: {}.</source>
-        <translation>กู้คืนแล้ว: {}</translation>
-    </message>
-    <message>
-        <source>Searching satellite imagery on {}</source>
-        <translation>กำลังค้นหาภาพถ่ายดาวเทียมบน {}</translation>
-    </message>
-    <message>
-        <source>Searching {} for {}</source>
-        <translation>กำลังค้นหาบน {}: {}</translation>
-    </message>
-    <message>
-        <source>Selection cleared on {}</source>
-        <translation>ล้างการเลือกบน {} แล้ว</translation>
-    </message>
-    <message>
-        <source>Selection on {}</source>
-        <translation>การเลือกบน {}</translation>
-    </message>
-    <message>
-        <source>Shown: {}</source>
-        <translation>แสดงแล้ว: {}</translation>
-    </message>
-    <message>
-        <source>Stopped.</source>
-        <translation>หยุดแล้ว</translation>
-    </message>
-    <message>
-        <source>The MCP server could not start: {}</source>
-        <translation>ไม่สามารถเริ่มเซิร์ฟเวอร์ MCP ได้: {}</translation>
-    </message>
-    <message>
-        <source>The QGIS authentication database is not available.</source>
-        <translation>ฐานข้อมูลการยืนยันตัวตนของ QGIS ไม่พร้อมใช้งาน</translation>
-    </message>
-    <message>
-        <source>The QGIS master password is needed to use the stored key.</source>
-        <translation>ต้องใช้รหัสผ่านหลักของ QGIS เพื่อใช้คีย์ที่จัดเก็บไว้</translation>
-    </message>
-    <message>
-        <source>The agent stopped before the end ({}).</source>
-        <translation>เอเจนต์หยุดก่อนเสร็จสิ้น ({})</translation>
-    </message>
-    <message>
-        <source>The agent wants to add this layer of a web service to the project:
-{} · {}
-
-Do you agree?</source>
-        <translation>เอเจนต์ต้องการเพิ่มเลเยอร์นี้ของเว็บเซอร์วิสลงในโปรเจกต์:
-{} · {}
-
-คุณยินยอมหรือไม่?</translation>
-    </message>
-    <message>
-        <source>The agent wants to add this layer to the project:
-{}
-
-A remote source is read from its server by QGIS, and what the layer holds can be sent to the provider of the agent. Do you agree?</source>
-        <translation>เอเจนต์ต้องการเพิ่มเลเยอร์นี้ลงในโปรเจกต์:
-{}
-
-QGIS จะอ่านแหล่งข้อมูลระยะไกลจากเซิร์ฟเวอร์ของแหล่งนั้น และเนื้อหาของเลเยอร์อาจถูกส่งไปยังผู้ให้บริการของเอเจนต์ คุณยินยอมหรือไม่?</translation>
-    </message>
-    <message>
-        <source>The agent wants to export these layers to files:
-{}
-
-Do you agree?</source>
-        <translation>เอเจนต์ต้องการส่งออกเลเยอร์เหล่านี้เป็นไฟล์:
-{}
-
-คุณยินยอมหรือไม่?</translation>
-    </message>
-    <message>
-        <source>The agent wants to remove these layers from the project (their files stay, their styles and filters here are lost):
-{}
-
-Do you agree?</source>
-        <translation>เอเจนต์ต้องการลบเลเยอร์เหล่านี้ออกจากโปรเจกต์ (ไฟล์ยังคงอยู่ แต่สไตล์และตัวกรองในที่นี้จะสูญหาย):
-{}
-
-คุณยินยอมหรือไม่?</translation>
-    </message>
-    <message>
-        <source>The agent wants to run this action on an external connector:
-{}
-{}
-
-Do you agree?</source>
-        <translation>เอเจนต์ต้องการเรียกใช้การดำเนินการนี้บนคอนเนคเตอร์ภายนอก:
-{}
-{}
-
-คุณยินยอมหรือไม่?</translation>
-    </message>
-    <message>
-        <source>The credit or quota of this account is used up.</source>
-        <translation>เครดิตหรือโควตาของบัญชีนี้ถูกใช้หมดแล้ว</translation>
-    </message>
-    <message>
-        <source>The free quota could not be reached: {}</source>
-        <translation>ไม่สามารถเข้าถึงโควตาฟรีได้: {}</translation>
-    </message>
-    <message>
-        <source>The free quota is not available.</source>
-        <translation>โควตาฟรีไม่พร้อมใช้งาน</translation>
-    </message>
-    <message>
-        <source>The free quota is unavailable for now.</source>
-        <translation>โควตาฟรีไม่พร้อมใช้งานในขณะนี้</translation>
-    </message>
-    <message>
-        <source>The free quota is used up for this month. Enter your own API key in the agent settings.</source>
-        <translation>โควตาฟรีของเดือนนี้ถูกใช้หมดแล้ว ป้อนคีย์ API ของคุณเองในการตั้งค่าเอเจนต์</translation>
-    </message>
-    <message>
-        <source>The key could not be stored.</source>
-        <translation>ไม่สามารถจัดเก็บคีย์ได้</translation>
-    </message>
-    <message>
-        <source>The provider could not be reached: {}</source>
-        <translation>ไม่สามารถเชื่อมต่อกับผู้ให้บริการได้: {}</translation>
-    </message>
-    <message>
-        <source>The provider refused the API key: check it in the agent settings.</source>
-        <translation>ผู้ให้บริการปฏิเสธคีย์ API: โปรดตรวจสอบในการตั้งค่าเอเจนต์</translation>
-    </message>
-    <message>
-        <source>The provider reported a problem: {}</source>
-        <translation>ผู้ให้บริการแจ้งว่ามีปัญหา: {}</translation>
-    </message>
-    <message>
-        <source>The stored key could not be read.</source>
-        <translation>ไม่สามารถอ่านคีย์ที่จัดเก็บไว้ได้</translation>
-    </message>
-    <message>
-        <source>Thinking…</source>
-        <translation>กำลังคิด…</translation>
-    </message>
-    <message>
-        <source>Too many new accounts from this address today: try again tomorrow, or enter your own API key.</source>
-        <translation>วันนี้มีบัญชีใหม่จากที่อยู่นี้มากเกินไป: โปรดลองใหม่พรุ่งนี้ หรือป้อนคีย์ API ของคุณเอง</translation>
-    </message>
-    <message>
-        <source>Too many requests for now: try again in a moment.</source>
-        <translation>มีคำขอมากเกินไปในขณะนี้: โปรดลองใหม่ในอีกสักครู่</translation>
-    </message>
-    <message>
-        <source>Trying a filter on {}</source>
-        <translation>กำลังทดลองตัวกรองบน {}</translation>
-    </message>
-    <message>
-        <source>Zoom on {}</source>
-        <translation>ซูมไปที่ {}</translation>
-    </message>
-    <message>
-        <source>an area</source>
-        <translation>พื้นที่</translation>
-    </message>
-    <message>
-        <source>everything</source>
-        <translation>ทั้งหมด</translation>
-    </message>
-    <message>
-        <source>{} tools available</source>
-        <translation>เครื่องมือที่ใช้ได้ {} รายการ</translation>
     </message>
 </context>
 </TS>
