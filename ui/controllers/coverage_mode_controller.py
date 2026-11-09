@@ -414,6 +414,8 @@ class CoverageModeController(BaseController):
                     task.cancel()  # its callback returns early once torn down
                 except RuntimeError:
                     pass
+        if self._segmentation is not None:
+            self._segmentation.cancel_download()  # a reloaded plugin must not find it still writing the model
         for widget_name in ('_host', '_coverage_spin'):
             widget = getattr(self, widget_name)
             setattr(self, widget_name, None)
@@ -1090,6 +1092,7 @@ class CoverageModeController(BaseController):
             raster.segmentValidateRequested.connect(lambda: self._segmentation_controller().validate())
             raster.targetChanged.connect(self._on_raster_target_changed)
             raster.segmentToolRequested.connect(self._on_segment_tool_requested)
+            raster.segmentModelInstallRequested.connect(lambda: self._segmentation_controller().install_model())
         if hasattr(pc, 'groupChosen'):
             pc.groupChosen.connect(self._on_point_cloud_group_chosen)
         if hasattr(pc, 'objectsChanged'):
@@ -1097,14 +1100,13 @@ class CoverageModeController(BaseController):
 
     def _populate_raster(self, layer: Any) -> None:
         try:
+            self._refresh_segmentation_readiness()  # first: a raster that cannot be read must not leave the state of the previous one
             from ...adapters.qgis.coverage_layers.raster_adapter import raster_reference, read_raster_summary
             summary = read_raster_summary(layer)
             self._raster_panel.set_summary(summary)
             self._raster_panel.set_reference(raster_reference(layer))
             capability = self._raster_capability(layer)
             self._raster_panel.set_rendered_only(not capability.has_raw_values)
-            from ...adapters.qgis.coverage_layers.segmentation import find_provider
-            self._call(self._raster_panel, 'set_segmentation_available', find_provider() is not None)
             if not capability.has_raw_values:
                 self._request_rendered_capture(layer)
                 return
@@ -1118,6 +1120,13 @@ class CoverageModeController(BaseController):
             self._refresh_histogram(layer, self._raster_panel.current_band())
         except Exception as exc:
             logger.warning(f"[FM5] raster panel not populated: {exc}", exc_info=True)
+
+    def _refresh_segmentation_readiness(self) -> None:
+        """Tell the panel what the Segment target lacks (nothing is made for it before the target is used)."""
+        from ...adapters.qgis.coverage_layers.segmentation import model_state
+        state = model_state()
+        downloading = self._segmentation is not None and bool(self._segmentation.downloading())
+        self._call(self._raster_panel, 'set_segmentation_readiness', state.runtime, state.installed, downloading)
 
     def _band_spans(self, layer: Any, band_count: int) -> Dict[int, float]:
         """Observed value range of the first four bands (the colour of an image), for the pipette tolerance."""
@@ -2154,8 +2163,6 @@ class CoverageModeController(BaseController):
             target = 'similar'
         if target is not None and panel is not None and hasattr(panel, 'set_pick_target'):
             panel.set_pick_target(target)
-            if target == 'segment' and hasattr(panel, 'pick_target'):
-                target = panel.pick_target()  # 'similar' when no model is available any more
         if target is None and panel is not None and hasattr(panel, 'pick_target'):
             target = panel.pick_target()
         self._color_pick = bool(enabled)

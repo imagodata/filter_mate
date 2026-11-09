@@ -205,8 +205,9 @@ def test_tool_flow(layer):
     check("drop releases the map at once", canvas.mapTool() is other, canvas.mapTool())
 
     # Panel: the target, the validated objects, the state.
-    panel.set_segmentation_available(True)
-    check("the target shows with a model", not panel._target_buttons[panels.PICK_SEGMENT].isHidden())
+    panel.set_segmentation_readiness(True, True)
+    check("the target shows", not panel._target_buttons[panels.PICK_SEGMENT].isHidden())
+    check("ready: nothing to install", panel._segment_install_label.isHidden() and panel._segment_install_button.isHidden())
     panel._target_buttons[panels.PICK_SEGMENT].setChecked(True)
     check("the segment widget shows", not panel._segment_widget.isHidden() and panel.pick_target() == panels.PICK_SEGMENT)
     check("the objects are selected", panel.selection() is not None and len(panel.selection().segments) == 1)
@@ -225,12 +226,20 @@ def test_tool_flow(layer):
     panel.restore_state(state)
     check("the state brings the objects and the target back",
           panel.selection() is not None and panel.pick_target() == panels.PICK_SEGMENT and len(panel._segments) == 1)
-    panel.set_segmentation_available(False)
-    check("without a model the target hides", panel._target_buttons[panels.PICK_SEGMENT].isHidden())
-    check("and is left", panel.pick_target() == panels.PICK_SIMILAR)
-    panel.restore_state(state)
-    check("a saved target cannot come back without a model", panel.pick_target() == panels.PICK_SIMILAR)
-    panel.set_segmentation_available(True)
+    panel.set_segmentation_readiness(False, False)
+    check("without the runtime and the model the target stays", not panel._target_buttons[panels.PICK_SEGMENT].isHidden()
+          and panel.pick_target() == panels.PICK_SEGMENT)
+    check("and says what to install", not panel._segment_install_label.isHidden() and not panel._segment_install_button.isHidden()
+          and "onnxruntime" in panel._segment_install_label.text() and "62" in panel._segment_install_button.text())
+    panel.set_segmentation_readiness(True, False)
+    check("with the runtime only the download is offered", panel._segment_install_label.isHidden() and not panel._segment_install_button.isHidden())
+    panel.set_segmentation_readiness(True, False, True)
+    check("during a download the button waits", not panel._segment_install_button.isEnabled())
+    panel.set_segmentation_readiness(True, True)
+    check("installed: no button", panel._segment_install_button.isHidden())
+    panel.offer_model_repair()
+    check("damaged files can be repaired", not panel._segment_install_button.isHidden() and panel._segment_install_button.isEnabled())
+    panel.set_segmentation_readiness(True, True)
     panel.restore_state(state)
     panel.clear_segments()
     check("clear forgets the objects", panel.selection() is None and panel._segments == [])
@@ -308,8 +317,7 @@ def test_real_model():
     if not (models and ortho and buildings):
         print("skip real model (FM_SAM_MODELS, FM_SAM_ORTHO, FM_SAM_BUILDINGS)", flush=True)
         return
-    sys.path.insert(0, str(ROOT / "companion"))
-    from filter_mate_segmentation.sam_provider import SamOnnxProvider
+    SamOnnxProvider = importlib.import_module(PACKAGE + ".adapters.qgis.coverage_layers.sam_model").SamOnnxProvider
     provider = SamOnnxProvider(models)
     layer = QgsRasterLayer(ortho, "Ortho", "gdal")
     extent = layer.extent()

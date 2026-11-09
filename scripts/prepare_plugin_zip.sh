@@ -84,8 +84,6 @@ rsync -a --quiet \
     --exclude='dist/**' \
     --exclude='build' \
     --exclude='build/**' \
-    --exclude='companion' \
-    --exclude='companion/**' \
     --exclude='scripts' \
     --exclude='scripts/**' \
     --exclude='knowledge' \
