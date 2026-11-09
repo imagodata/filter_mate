@@ -1,45 +1,61 @@
 # -*- coding: utf-8 -*-
 """
-Spatialite Expression Builder.
+Spatialite Expression Builder: the QGIS side of the SpatiaLite / GeoPackage spatial filters.
 
-v4.1.0: Migrated from before_migration/modules/backends/spatialite_backend.py
+2026-10-28 (S0 step 4): the SQL generation and the GeoPackage R-tree lookups
+moved to ``filtermate_core.sql.spatialite.expression_builder.SpatialiteSqlBuilder``;
+its constants and helpers are re-exported here for the plugin.
+``SpatialiteExpressionBuilder`` keeps its name and its callers (factory,
+LegacyAdapter) and adds what needs QGIS:
 
-This module contains the SQL expression building logic for Spatialite spatial filters.
-It implements the GeometricFilterPort interface for Spatialite backends.
-
-Features:
-- GeoPackage support with GeomFromGPB conversion
-- R-tree spatial index optimization
-- WKT simplification for large geometries
-- Centroid optimization
-- CRS transformation handling
-
-Author: FilterMate Team
-Date: January 2026
+- ``supports_layer`` / ``apply_filter``: the subset string on a QgsVectorLayer;
+- the host hooks of the core builder: the source bounding box with
+  QgsGeometry and QgsCoordinateTransform, and the JSON1 probe of GDAL's SQLite.
 """
 
-import logging
-import math
-import os
-import re
-import sqlite3
-import threading
-import time
-from typing import Dict, Optional, Any, Tuple
-from urllib.request import pathname2url
+from typing import TYPE_CHECKING, Optional, Tuple
 
-try:
+if TYPE_CHECKING:
     from qgis.core import QgsVectorLayer
-except ImportError:
-    QgsVectorLayer = None
 
-logger = logging.getLogger('FilterMate.Backend.Spatialite.ExpressionBuilder')
-
-# Import the port interface
 try:
-    from ....core.ports.geometric_filter_port import GeometricFilterPort
-except ImportError:
-    from core.ports.geometric_filter_port import GeometricFilterPort
+    from ....filtermate_core.sql.spatialite.expression_builder import (  # noqa: F401
+        RTREE_CHECK_TTL_SECONDS,
+        RTREE_COUNT_CACHE_MAX,
+        RTREE_PREFILTER_PREDICATES,
+        SPATIALITE_INLINE_BUDGET_SECONDS,
+        SPATIALITE_INLINE_COST_US_PER_ROW_KB,
+        SPATIALITE_INLINE_SQL_BUFFER_FACTOR,
+        SPATIALITE_WKT_INLINE_MAX_LENGTH,
+        SPATIALITE_WKT_STATIC_INLINE_LIMIT,
+        SpatialiteSqlBuilder,
+        USE_OGR_FALLBACK,
+        clear_rtree_cache,
+        gpkg_has_rtree,
+        gpkg_layer_location,
+        gpkg_rtree_count,
+        logger,
+        task_scoped_cache,
+    )
+except ImportError:  # imported from the repository root (tests)
+    from filtermate_core.sql.spatialite.expression_builder import (  # noqa: F401
+        RTREE_CHECK_TTL_SECONDS,
+        RTREE_COUNT_CACHE_MAX,
+        RTREE_PREFILTER_PREDICATES,
+        SPATIALITE_INLINE_BUDGET_SECONDS,
+        SPATIALITE_INLINE_COST_US_PER_ROW_KB,
+        SPATIALITE_INLINE_SQL_BUFFER_FACTOR,
+        SPATIALITE_WKT_INLINE_MAX_LENGTH,
+        SPATIALITE_WKT_STATIC_INLINE_LIMIT,
+        SpatialiteSqlBuilder,
+        USE_OGR_FALLBACK,
+        clear_rtree_cache,
+        gpkg_has_rtree,
+        gpkg_layer_location,
+        gpkg_rtree_count,
+        logger,
+        task_scoped_cache,
+    )
 
 # Import safe_set_subset_string from infrastructure
 try:
@@ -54,71 +70,6 @@ except ImportError:
         except Exception:
             return False
 
-# Sentinel value for OGR fallback
-USE_OGR_FALLBACK = "__USE_OGR_FALLBACK__"
-
-# Thresholds
-# 2026-10-17: inline the source WKT only when the subset string stays cheap.
-# It is evaluated again by every statement QGIS runs on the target (count,
-# extent, each full-extent render), and the predicate is not prepared:
-# measured through GDAL's GeoPackage driver with SpatiaLite 5.1 (QGIS 4.2.3),
-# about 1.1-1.4 µs per candidate row and per KB of WKT (Crosses, 100,000
-# candidates: 3.4 KB 0.3 s, 13 KB 1.5 s, 106 KB 12.4 s, 262 KB 37 s). On the
-# real BD TOPO 31 roads, the 87 KB Toulouse Metropole polygon (Intersects,
-# 136,565 R-tree candidates) cost 14.5 s per count, 22 s per extent and 18 s
-# per full read - for every statement. The alternative, the OGR backend,
-# selects once (exact, union of the source) and writes a key list that QGIS
-# applies in 0.3 s, counts in 0.1-0.3 s and reads in 0.7 s (98,687 keys out
-# of 1.15 million rows, see ogr/expression_builder.KEY_LIST_JSON_THRESHOLD).
-# Hence a budget of about 1 s per statement: candidates (target R-tree in the
-# source bounding box) x KB x SPATIALITE_INLINE_COST_US_PER_ROW_KB, up to
-# SPATIALITE_WKT_INLINE_MAX_LENGTH; without a candidate count, up to
-# SPATIALITE_WKT_STATIC_INLINE_LIMIT. The source is never simplified: a 1 m
-# simplification of that polygon (87 KB → 53 KB) still cost 6 s per count and
-# changed 84 of the 98,687 roads.
-SPATIALITE_INLINE_COST_US_PER_ROW_KB = 1.4
-SPATIALITE_INLINE_BUDGET_SECONDS = 1.0
-SPATIALITE_WKT_INLINE_MAX_LENGTH = 1_000_000
-# Same value as PostgreSQLExpressionBuilder.MAX_WKT_LENGTH.
-SPATIALITE_WKT_STATIC_INLINE_LIMIT = 100_000
-# 2026-10-17: a buffer applied in SQL (ST_Buffer in the subset, when it could
-# not be applied to the WKT) roughly doubles the vertices the predicate walks
-# (the arcs of the joins and caps). An estimate, not a measurement.
-SPATIALITE_INLINE_SQL_BUFFER_FACTOR = 2.0
-# Disjoint: no R-tree window (every row is tested), so its estimate counts the
-# whole table. Measured on the BD TOPO 31 roads (383,112 rows, 87 KB
-# Toulouse Metropole polygon): NOT (R-tree window AND ST_Intersects) cost
-# 57 s per count and 47 s per full read, the OGR backend's
-# NOT ("fid" IN (json_each(<98,687 intersecting keys>))) 0.48 s and 2.3 s.
-
-# PERF 2026-09-12: GeoPackage R-tree prefilter. SQLite evaluates the spatial
-# predicate row by row over the whole table: with a 2,000-vertex source polygon
-# (Toulouse, 43 KB of WKT) a 1.2 M-row layer took 164 s. Restricting the rows
-# to the R-tree candidates of the source bounding box first (the clause GDAL
-# itself emits for its spatial filter) leaves the exact predicate a few
-# thousand rows. The R-tree table is looked up once per file/table/column and
-# remembered for RTREE_CHECK_TTL_SECONDS.
-RTREE_CHECK_TTL_SECONDS = 120
-# Predicates for which "the target's bounding box overlaps the source's" is a
-# necessary condition (a shared point exists). Anything else - Disjoint, a
-# future distance predicate - gets no prefilter.
-RTREE_PREFILTER_PREDICATES = frozenset((
-    'intersects', 'contains', 'within', 'touches', 'overlaps', 'crosses', 'equals', 'covers', 'coveredby',
-))
-_RTREE_CACHE: Dict[tuple, tuple] = {}
-_RTREE_CACHE_LOCK = threading.Lock()
-_RTREE_COUNT_CACHE: Dict[tuple, tuple] = {}
-# 2026-10-17: the count cache is keyed by bounding box too; bounded.
-RTREE_COUNT_CACHE_MAX = 256
-
-# 2026-10-17: a spatial function CALL (name followed by "("), not a substring.
-# Same pattern as ogr/expression_builder._GEOMETRIC_FILTER_RE.
-_GEOMETRIC_FILTER_RE = re.compile(
-    r"\b(?:ST_\w+|Intersects|Contains|Within|Touches|Overlaps|Crosses|Disjoint|Equals|Covers|CoveredBy"
-    r"|MbrIntersects|GeomFromText|GeomFromGPB|Buffer)\s*\(",
-    re.IGNORECASE,
-)
-
 
 def json1_available() -> bool:
     """Whether GDAL's SQLite has ``json_each`` (see infrastructure.database.sqlite_capabilities)."""
@@ -132,190 +83,8 @@ def json1_available() -> bool:
     return gdal_sqlite_json1_available()
 
 
-def task_scoped_cache(task, name: str, owner) -> dict:
-    """Cache ``name`` held by the filter task, or by ``owner`` without a task (2026-10-17)."""
-    store = getattr(task, '__dict__', None) if task is not None else None
-    if store is None:
-        store = owner.__dict__
-    return store.setdefault('_filtermate_task_caches', {}).setdefault(name, {})
-
-
-def gpkg_layer_location(layer) -> Tuple[Optional[str], Optional[str]]:
-    """(file path, table name) of an OGR GeoPackage layer, from its source URI."""
-    try:
-        source = layer.source() or ''
-    except Exception:
-        return None, None
-    path, _, options = source.partition('|')
-    table = None
-    for part in options.split('|'):
-        key, separator, value = part.partition('=')
-        if separator and key.strip().lower() == 'layername':
-            table = value.strip()
-    return (path.strip() or None), (table or None)
-
-
-def gpkg_has_rtree(path: Optional[str], table: Optional[str], geom_column: Optional[str]) -> bool:
-    """True when the GeoPackage holds a registered R-tree for the column.
-
-    Same test as GDAL's ``HasSpatialIndex``: the ``gpkg_rtree_index`` extension
-    is registered for (table, column) in ``gpkg_extensions`` and the
-    ``rtree_<table>_<column>`` table exists. Read-only lookup through a
-    separate connection; a definite answer is cached per file/table/column
-    for RTREE_CHECK_TTL_SECONDS, a failed lookup (locked file...) is not.
-    """
-    if not (path and table and geom_column):
-        return False
-    path = os.path.abspath(path)
-    key = (path, table, geom_column)
-    now = time.monotonic()
-    with _RTREE_CACHE_LOCK:
-        cached = _RTREE_CACHE.get(key)
-        if cached is not None and now - cached[1] < RTREE_CHECK_TTL_SECONDS:
-            return cached[0]
-    if not os.path.isfile(path):
-        return False
-    try:
-        connection = sqlite3.connect(f"file:{pathname2url(path)}?mode=ro", uri=True, timeout=1.0)
-        try:
-            registered = connection.execute(
-                "SELECT 1 FROM gpkg_extensions WHERE table_name = ? AND column_name = ? "
-                "AND extension_name = 'gpkg_rtree_index'",
-                (table, geom_column),
-            ).fetchone()
-            table_row = connection.execute(
-                "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = ?",
-                (f"rtree_{table}_{geom_column}",),
-            ).fetchone()
-        finally:
-            connection.close()
-    except sqlite3.OperationalError as exc:
-        # "no such table: gpkg_extensions" is a definite no; a lock or an I/O
-        # error is transient and must not disable the prefilter for 2 minutes.
-        if 'no such table' in str(exc).lower():
-            with _RTREE_CACHE_LOCK:
-                _RTREE_CACHE[key] = (False, now)
-        else:
-            logger.info(f"R-tree lookup skipped for {os.path.basename(path)} ({table}): {exc}")
-        return False
-    except (sqlite3.Error, OSError, ValueError) as exc:
-        logger.info(f"R-tree lookup skipped for {os.path.basename(path)} ({table}): {exc}")
-        return False
-    found = registered is not None and table_row is not None
-    with _RTREE_CACHE_LOCK:
-        _RTREE_CACHE[key] = (found, now)
-    return found
-
-
-def gpkg_rtree_count(
-    path: Optional[str], table: Optional[str], geom_column: Optional[str],
-    bbox: Optional[Tuple[float, float, float, float]] = None,
-) -> Optional[int]:
-    """Entries of the GeoPackage R-tree of (table, column), within ``bbox`` when given.
-
-    2026-10-17: the number of candidate rows a subset string will test.
-    Read-only lookup through a separate connection, cached like
-    gpkg_has_rtree() for RTREE_CHECK_TTL_SECONDS (it only steers the
-    inline / OGR choice); None when unknown.
-    """
-    if not gpkg_has_rtree(path, table, geom_column):
-        return None
-    key = (os.path.abspath(path), table, geom_column, bbox)
-    now = time.monotonic()
-    with _RTREE_CACHE_LOCK:
-        cached = _RTREE_COUNT_CACHE.get(key)
-        if cached is not None and now - cached[1] < RTREE_CHECK_TTL_SECONDS:
-            return cached[0]
-    rtree_table = f"rtree_{table}_{geom_column}".replace('"', '""')
-    sql = f'SELECT count(*) FROM "{rtree_table}"'  # nosec B608 - name from the layer URI, quotes doubled
-    params: tuple = ()
-    if bbox is not None:
-        xmin, ymin, xmax, ymax = bbox
-        sql += " WHERE minx <= ? AND maxx >= ? AND miny <= ? AND maxy >= ?"
-        params = (xmax, xmin, ymax, ymin)
-    try:
-        connection = sqlite3.connect(f"file:{pathname2url(os.path.abspath(path))}?mode=ro", uri=True, timeout=1.0)
-        try:
-            count = int(connection.execute(sql, params).fetchone()[0])
-        finally:
-            connection.close()
-    except (sqlite3.Error, OSError, ValueError, TypeError) as exc:
-        logger.info(f"R-tree count skipped for {os.path.basename(str(path))} ({table}): {exc}")
-        return None
-    with _RTREE_CACHE_LOCK:
-        if len(_RTREE_COUNT_CACHE) >= RTREE_COUNT_CACHE_MAX:
-            _RTREE_COUNT_CACHE.clear()
-        _RTREE_COUNT_CACHE[key] = (count, now)
-    return count
-
-
-def clear_rtree_cache() -> None:
-    """Forget the R-tree lookups (tests, or after a file is rebuilt)."""
-    with _RTREE_CACHE_LOCK:
-        _RTREE_CACHE.clear()
-        _RTREE_COUNT_CACHE.clear()
-
-
-class SpatialiteExpressionBuilder(GeometricFilterPort):
-    """
-    Spatialite expression builder.
-
-    Generates Spatialite SQL expressions for spatial filtering.
-    Implements the legacy GeometricFilterPort interface for backward compatibility.
-
-    Features:
-    - GeoPackage binary geometry support
-    - WKT simplification for large geometries
-    - R-tree index optimization via temp tables
-    - Centroid optimization
-    - CRS transformation
-
-    Example:
-        builder = SpatialiteExpressionBuilder(task_params)
-        expr = builder.build_expression(
-            layer_props={'layer_table_name': 'buildings'},
-            predicates={'intersects': True},
-            source_geom='POLYGON((0 0, 1 0, 1 1, 0 1, 0 0))'
-        )
-    """
-
-    # Spatial predicate mapping. ``ST_*``-prefixed names work uniformly:
-    # - SpatiaLite (>= 4.0, OGC alias): ST_Intersects(...) is equivalent to Intersects(...)
-    # - GeoPackage native SQL: ST_Intersects is the standard OGC name
-    # - QGIS OGR provider on .gpkg: GDAL passes the WHERE through to SQLite,
-    #   which understands both the bare and ST_-prefixed forms when SpatiaLite
-    #   is loaded but ONLY ST_-prefixed when it isn't.
-    # 2026-04-29 fix: switched from bare names to ST_-prefixed because the
-    # cascade silently no-oped on GPKG-via-OGR — the bare ``Intersects(...)``
-    # was either rejected or silently dropped depending on whether SpatiaLite
-    # was loaded in the GDAL stack.
-    PREDICATE_FUNCTIONS = {
-        'intersects': 'ST_Intersects',
-        'contains': 'ST_Contains',
-        'within': 'ST_Within',
-        'touches': 'ST_Touches',
-        'overlaps': 'ST_Overlaps',
-        'crosses': 'ST_Crosses',
-        'disjoint': 'ST_Disjoint',
-        'equals': 'ST_Equals',
-        'covers': 'ST_Covers',
-        'coveredby': 'ST_CoveredBy',
-    }
-
-    def __init__(self, task_params: Dict[str, Any]):
-        """
-        Initialize Spatialite expression builder.
-
-        Args:
-            task_params: Task configuration parameters
-        """
-        super().__init__(task_params)
-        self._logger = logger
-        self.last_error = None
-
-    def get_backend_name(self) -> str:
-        """Get backend name."""
-        return "Spatialite"
+class SpatialiteExpressionBuilder(SpatialiteSqlBuilder):
+    """SpatiaLite / GeoPackage spatial filters on QGIS layers (see the module docstring)."""
 
     def supports_layer(self, layer: 'QgsVectorLayer') -> bool:
         """
@@ -341,201 +110,6 @@ class SpatialiteExpressionBuilder(GeometricFilterPort):
                 return True
 
         return False
-
-    def build_expression(
-        self,
-        layer_props: Dict[str, Any],
-        predicates: Dict[str, bool],
-        source_geom: Optional[str] = None,
-        buffer_value: Optional[float] = None,
-        buffer_expression: Optional[str] = None,
-        source_filter: Optional[str] = None,
-        use_centroids: bool = False,
-        **kwargs
-    ) -> str:
-        """
-        Build Spatialite filter expression.
-
-        Args:
-            layer_props: Layer properties
-            predicates: Spatial predicates to apply
-            source_geom: Source geometry WKT
-            buffer_value: Buffer distance
-            buffer_expression: Dynamic buffer expression
-            source_filter: Source filter (not used)
-            use_centroids: Use centroid optimization
-            **kwargs: Additional parameters
-
-        Returns:
-            Spatialite SQL expression or USE_OGR_FALLBACK sentinel
-        """
-        self.log_debug(f"Building Spatialite expression for {layer_props.get('layer_name', 'unknown')}")
-
-        # FIX v4.2.13: Spatialite cannot evaluate dynamic buffer expressions with field references
-        # Unlike PostgreSQL which can create temp tables with pre-calculated buffers,
-        # Spatialite's Buffer(GeomFromText(wkt), "field_name" * 2) fails because
-        # the field reference is not valid in the context of a WKT literal.
-        # Solution: Fall back to OGR backend which uses QGIS native expression evaluation.
-        if buffer_expression and buffer_expression.strip():
-            self.log_warning(f"🔄 Dynamic buffer expression detected: {buffer_expression}")
-            self.log_warning("   Spatialite cannot evaluate field references in Buffer()")
-            self.log_warning("   → Falling back to OGR backend for native QGIS expression evaluation")
-            return USE_OGR_FALLBACK
-
-        # Extract layer properties
-        geom_field = self._detect_geometry_column(layer_props)
-        layer = layer_props.get("layer")
-
-        # Validate source geometry
-        if not source_geom:
-            self.log_error("No source geometry provided")
-            return "1 = 0"
-
-        if not isinstance(source_geom, str):
-            self.log_error(f"Invalid source geometry type: {type(source_geom)}")
-            return "1 = 0"
-
-        wkt_length = len(source_geom)
-        self.log_debug(f"Source WKT length: {wkt_length} chars")
-
-        # Handle GeometryCollection (causes RTTOPO errors)
-        is_geometry_collection = source_geom.strip().upper().startswith('GEOMETRYCOLLECTION')
-        if is_geometry_collection:
-            self.log_warning("GeometryCollection detected - returning OGR fallback")
-            return USE_OGR_FALLBACK
-
-        # 2026-09-13: the executor may have applied the static buffer to the
-        # WKT itself (see filter_executor._apply_static_buffer); the SQL must
-        # then not buffer again, and the R-tree bbox needs no extra margin.
-        buffer_state = ((self.task_params or {}).get('infos') or {}).get('buffer_state') or {}
-        if buffer_value and buffer_state.get('applied_in_wkt'):
-            self.log_info(f"Buffer of {buffer_value} already applied to the source WKT - no ST_Buffer() in SQL")
-            buffer_value = None
-
-        # 2026-10-16: never generalize the source (results must stay exact);
-        # a source too large or too costly to inline goes to the OGR backend.
-        if wkt_length > SPATIALITE_WKT_INLINE_MAX_LENGTH:
-            self.log_warning(
-                f"Source WKT too large to inline ({wkt_length:,} > {SPATIALITE_WKT_INLINE_MAX_LENGTH:,} chars)"
-                " - returning OGR fallback (exact, QGIS processing)"
-            )
-            return USE_OGR_FALLBACK
-
-        # Build geometry expression
-        geom_expr = f'"{geom_field}"'
-
-        # 2026-04-29 fix: previously wrapped ``GeomFromGPB("geom")`` for
-        # GeoPackage layers, but QGIS's OGR provider already passes the
-        # column through GDAL which auto-decodes the GPB blob to a real
-        # geometry by the time SQLite sees the WHERE clause. Re-decoding
-        # an already-decoded geometry made the cascade silently no-op
-        # (``GeomFromGPB`` returned NULL → ``ST_Intersects(NULL, ...)`` →
-        # rejected/ignored, layer left unfiltered). The bare column
-        # reference is the correct shape for both pure SpatiaLite and
-        # GPKG-via-OGR. Centroid optimization is still applied below.
-
-        # Apply centroid optimization
-        if use_centroids:
-            geom_expr = self._apply_centroid_transform(geom_expr, layer_props)
-
-        # Get SRIDs
-        target_srid = self._get_layer_srid(layer)
-
-        # 2026-07-29 fix: prefer the caller-supplied ``source_srid`` kwarg.
-        # ExpressionBuilder._get_expression_builder() computes it from
-        # ``self.source_layer_crs_authid``, which reflects the CRS the WKT
-        # was ACTUALLY generated in — including the metric reprojection
-        # applied by ``configure_metric_crs()`` for buffer calculations
-        # (triggered for any geographic/non-metric source CRS, unconditionally,
-        # not just when a buffer is requested). ``self._get_source_srid()``
-        # instead reads ``task_params['infos']['layer_crs_authid']``, which
-        # ``initialization_handler.py`` auto-fills ONCE from the layer's
-        # *original* CRS and never updates after reprojection. When source
-        # and target share that original CRS, ``source_srid == target_srid``
-        # skips ``ST_Transform`` entirely, so the (metric) WKT coordinates get
-        # tagged with the (geographic) original SRID and compared as-is —
-        # ``ST_Intersects`` never matches, ``setSubsetString`` succeeds, and
-        # the layer silently renders zero features. This mirrors the fix
-        # already applied to PostgreSQLExpressionBuilder.build_expression()
-        # (which reads ``kwargs.get('source_srid')``) — Spatialite's builder
-        # was never updated to match.
-        source_srid = kwargs.get('source_srid')
-        if source_srid is None:
-            source_srid = self._get_source_srid()
-
-        self.log_debug(f"SRIDs: source={source_srid}, target={target_srid}")
-
-        # 2026-10-17: inline only when one statement stays cheap (see
-        # SPATIALITE_INLINE_BUDGET_SECONDS); else the OGR backend selects once.
-        inline_cost = self._inline_cost_seconds(
-            layer, geom_field, source_geom, source_srid, target_srid, buffer_value, predicates
-        )
-        too_costly = (
-            (inline_cost is None and wkt_length > SPATIALITE_WKT_STATIC_INLINE_LIMIT)
-            or (inline_cost is not None and inline_cost > SPATIALITE_INLINE_BUDGET_SECONDS)
-        )
-        if too_costly and not json1_available():
-            # 2026-10-17: the OGR backend writes long key lists with json_each;
-            # without JSON1 it would have to refuse them (a plain list that
-            # long freezes QGIS). The inline subset is slow but exact.
-            self.log_warning(
-                f"Source WKT kept inline although costly ({wkt_length:,} chars"
-                + (f", about {inline_cost:.1f} s per statement" if inline_cost is not None else "")
-                + "): GDAL's SQLite has no JSON1 for the OGR backend's key lists"
-            )
-        elif too_costly and inline_cost is None:
-            self.log_info(
-                f"Source WKT too large to inline without a candidate count ({wkt_length:,} > "
-                f"{SPATIALITE_WKT_STATIC_INLINE_LIMIT:,} chars) - handing the layer to the OGR backend (exact)"
-            )
-            return USE_OGR_FALLBACK
-        elif too_costly:
-            self.log_info(
-                f"Source WKT too costly to inline for this layer ({wkt_length:,} chars, about {inline_cost:.1f} s "
-                f"per statement > {SPATIALITE_INLINE_BUDGET_SECONDS:g} s) - handing the layer to the OGR backend (exact)"
-            )
-            return USE_OGR_FALLBACK
-
-        # Build source geometry SQL
-        # FIX v4.2.11: Pass buffer_expression for dynamic buffer support
-        source_geom_sql = self._build_source_geometry_sql(
-            source_geom, source_srid, target_srid, buffer_value, buffer_expression
-        )
-
-        # Build predicate expressions
-        predicate_expressions = []
-
-        for predicate_name, predicate_value in predicates.items():
-            if not predicate_value:
-                continue
-
-            # Get Spatialite function name
-            predicate_func = self.PREDICATE_FUNCTIONS.get(
-                predicate_name.lower().replace('st_', ''),
-                'Intersects'
-            )
-
-            # Build expression
-            expr = f"{predicate_func}({geom_expr}, {source_geom_sql})"
-            predicate_expressions.append(expr)
-
-        # Combine predicates
-        if not predicate_expressions:
-            self.log_warning("No predicates specified")
-            return "1 = 0"
-
-        if len(predicate_expressions) == 1:
-            expression = predicate_expressions[0]
-        else:
-            expression = f"({' OR '.join(predicate_expressions)})"
-
-        prefilter = self._rtree_prefilter(
-            layer, geom_field, source_geom, source_srid, target_srid, buffer_value, predicates
-        )
-        if prefilter:
-            self.log_info(f"✓ GeoPackage R-tree prefilter added for {layer_props.get('layer_name', 'layer')}")
-            return f"{prefilter} AND {expression}"
-        return expression
 
     def apply_filter(
         self,
@@ -611,240 +185,33 @@ class SpatialiteExpressionBuilder(GeometricFilterPort):
             return False
 
     # =========================================================================
-    # Private Helper Methods
+    # Host hooks of SpatialiteSqlBuilder
     # =========================================================================
 
-    # NOTE v4.0.1: _detect_geometry_column, _apply_centroid_transform,
-    # _get_layer_srid, _get_source_srid are inherited from GeometricFilterPort
-
-    def _rtree_prefilter(
-        self,
-        layer,
-        geom_field: str,
-        source_wkt: str,
-        source_srid: int,
-        target_srid: int,
-        buffer_value: Optional[float],
-        predicates: Dict[str, bool]
-    ) -> Optional[str]:
-        """R-tree candidate clause for a GeoPackage target, or None.
-
-        Valid for every predicate except Disjoint: a feature that intersects,
-        contains, touches... the source (or whose point-on-surface does) has a
-        bounding box that overlaps the source bounding box, grown by the
-        buffer. Returns None whenever anything needed is missing, so the plain
-        predicate keeps working as before.
-        """
-        if not layer or not self._is_geopackage(layer):
-            return None
-        try:
-            if layer.providerType() != 'ogr':
-                return None
-            layer_name = layer.name()
-        except Exception:
-            return None
-        active = [str(name).lower().replace('st_', '') for name, enabled in predicates.items() if enabled]
-        unsupported = [name for name in active if name not in RTREE_PREFILTER_PREDICATES]
-        if unsupported:
-            self.log_info(f"R-tree prefilter not applied for {layer_name}: predicate {unsupported[0]}")
-            return None
-        path, table = gpkg_layer_location(layer)
-        if not path or not table:
-            self.log_info(f"R-tree prefilter not applied for {layer_name}: no file path or layername in the source URI")
-            return None
-        if not gpkg_has_rtree(path, table, geom_field):
-            self.log_info(f"R-tree prefilter not applied for {layer_name}: no registered R-tree on {table}.{geom_field}")
-            return None
-        bbox = self._source_bbox(source_wkt, source_srid, target_srid, buffer_value)
-        if bbox is None:
-            self.log_info(f"R-tree prefilter not applied for {layer_name}: source bounding box unavailable")
-            return None
-        xmin, ymin, xmax, ymax = bbox
-        rtree_table = f"rtree_{table}_{geom_field}".replace('"', '""')
-        return (
-            f'ROWID IN (SELECT id FROM "{rtree_table}" '  # nosec B608 - finite floats, table name from the layer URI with quotes doubled, OGR subset string not a cursor
-            f'WHERE minx <= {xmax!r} AND maxx >= {xmin!r} AND miny <= {ymax!r} AND maxy >= {ymin!r})'
-        )
-
-    def _inline_cost_seconds(
-        self,
-        layer,
-        geom_field: str,
-        source_wkt: str,
-        source_srid: int,
-        target_srid: int,
-        buffer_value: Optional[float],
-        predicates: Dict[str, bool]
-    ) -> Optional[float]:
-        """Estimated time of one statement on ``layer`` with the source inlined, or None if unknown.
-
-        2026-10-17: candidates (target R-tree entries in the source bounding
-        box, or the whole R-tree for Disjoint) x KB of WKT x
-        SPATIALITE_INLINE_COST_US_PER_ROW_KB. Only GeoPackage targets with an
-        R-tree have a count.
-        """
-        if not layer or not self._is_geopackage(layer):
-            return None
-        try:
-            if layer.providerType() != 'ogr':
-                return None
-        except Exception:
-            return None
-        path, table = gpkg_layer_location(layer)
-        active = [str(name).lower().replace('st_', '') for name, enabled in predicates.items() if enabled]
-        bbox = None
-        if active and all(name in RTREE_PREFILTER_PREDICATES for name in active):
-            bbox = self._source_bbox(source_wkt, source_srid, target_srid, buffer_value)
-            if bbox is None:
-                return None
-        candidates = gpkg_rtree_count(path, table, geom_field, bbox)
-        if candidates is None:
-            return None
-        size_kb = len(source_wkt) / 1000.0
-        if buffer_value:
-            size_kb *= SPATIALITE_INLINE_SQL_BUFFER_FACTOR
-        cost = candidates * size_kb * SPATIALITE_INLINE_COST_US_PER_ROW_KB / 1e6
-        self.log_info(
-            f"Inline estimate for {table}: {candidates:,} candidates x {len(source_wkt) / 1000.0:.0f} KB "
-            f"≈ {cost:.1f} s per statement"
-        )
-        return cost
-
-    def _source_bbox(
-        self,
-        source_wkt: str,
-        source_srid: int,
-        target_srid: int,
-        buffer_value: Optional[float]
+    def _wkt_bounds_in_target_crs(
+        self, source_wkt: str, source_srid: int, target_srid: int
     ) -> Optional[Tuple[float, float, float, float]]:
-        """Bounding box of the source WKT in the target CRS, grown by the buffer.
-
-        2026-10-16: computed once per task and source (the WKT used to be
-        parsed again for every target layer); the memo lives in the task
-        parameters shared by the builders of one task, like the OGR backend's
-        buffered-source cache.
-        """
-        # 2026-10-17: held by the task, not by task_params (= PROJECT_LAYERS:
-        # a WKT of up to 1 MB outlived the task there).
-        params = self.task_params if isinstance(self.task_params, dict) else {}
-        params.pop('_spatialite_source_bbox_cache', None)
-        memo = task_scoped_cache(params.get('_parent_task'), 'spatialite_source_bbox', self)
-        key = (source_wkt, source_srid, target_srid, buffer_value)
-        if key not in memo:
-            memo.clear()  # one source per task: keep a single WKT alive
-            memo[key] = self._compute_source_bbox(source_wkt, source_srid, target_srid, buffer_value)
-        return memo[key]
-
-    def _compute_source_bbox(
-        self,
-        source_wkt: str,
-        source_srid: int,
-        target_srid: int,
-        buffer_value: Optional[float]
-    ) -> Optional[Tuple[float, float, float, float]]:
-        """See _source_bbox."""
-        try:
-            from qgis.core import (
-                QgsGeometry, QgsCoordinateReferenceSystem, QgsCoordinateTransform, QgsProject
-            )
-            geometry = QgsGeometry.fromWkt(source_wkt)
-            if geometry is None or geometry.isEmpty():
-                return None
-            bbox = geometry.boundingBox()
-            if source_srid != target_srid:
-                source_crs = QgsCoordinateReferenceSystem(f"EPSG:{source_srid}")
-                target_crs = QgsCoordinateReferenceSystem(f"EPSG:{target_srid}")
-                if not source_crs.isValid() or not target_crs.isValid():
-                    return None
-                bbox = QgsCoordinateTransform(source_crs, target_crs, QgsProject.instance()).transformBoundingBox(bbox)
-            if bbox.isNull():
-                return None
-            margin = max(float(buffer_value or 0.0), 0.0)
-            bounds = (
-                float(bbox.xMinimum()) - margin, float(bbox.yMinimum()) - margin,
-                float(bbox.xMaximum()) + margin, float(bbox.yMaximum()) + margin,
-            )
-            # A transform out of the target CRS domain yields inf/nan, which
-            # SQLite would read as column names: no prefilter in that case.
-            if not all(math.isfinite(value) for value in bounds):
-                return None
-            return bounds
-        except Exception as exc:
-            self.log_debug(f"R-tree prefilter skipped (source bbox unavailable): {exc}")
+        """QgsGeometry's bounding box, reprojected with QgsCoordinateTransform when the SRIDs differ."""
+        from qgis.core import (
+            QgsGeometry, QgsCoordinateReferenceSystem, QgsCoordinateTransform, QgsProject
+        )
+        geometry = QgsGeometry.fromWkt(source_wkt)
+        if geometry is None or geometry.isEmpty():
             return None
-
-    def _is_geopackage(self, layer) -> bool:
-        """Check if layer is from a GeoPackage."""
-        if not layer:
-            return False
-        source = layer.source().lower()
-        return '.gpkg' in source or 'gpkg|' in source
-
-    def _build_source_geometry_sql(
-        self,
-        source_wkt: str,
-        source_srid: int,
-        target_srid: int,
-        buffer_value: Optional[float],
-        buffer_expression: Optional[str] = None
-    ) -> str:
-        """
-        Build SQL for source geometry.
-
-        FIX v4.2.11: Added buffer_expression support for dynamic buffer.
-
-        Args:
-            source_wkt: WKT string of source geometry
-            source_srid: Source SRID
-            target_srid: Target SRID for transformation
-            buffer_value: Static buffer value
-            buffer_expression: Dynamic buffer expression (QGIS syntax)
-        """
-        # Escape single quotes in WKT
-        escaped_wkt = source_wkt.replace("'", "''")
-
-        # 2026-04-29 fix: ST_-prefixed function names everywhere — see comment
-        # on PREDICATE_FUNCTIONS for the rationale (works on SpatiaLite and
-        # GPKG-via-OGR, bare names worked only when SpatiaLite extension was
-        # explicitly loaded in the GDAL stack).
-        source_geom_sql = f"ST_GeomFromText('{escaped_wkt}', {source_srid})"
-
-        # Apply MakeValid
-        source_geom_sql = f"ST_MakeValid({source_geom_sql})"
-
-        # Apply CRS transformation if needed
+        bbox = geometry.boundingBox()
         if source_srid != target_srid:
-            source_geom_sql = f"ST_Transform({source_geom_sql}, {target_srid})"
-            self.log_info(f"Applying CRS transform: {source_srid} → {target_srid}")
+            source_crs = QgsCoordinateReferenceSystem(f"EPSG:{source_srid}")
+            target_crs = QgsCoordinateReferenceSystem(f"EPSG:{target_srid}")
+            if not source_crs.isValid() or not target_crs.isValid():
+                return None
+            bbox = QgsCoordinateTransform(source_crs, target_crs, QgsProject.instance()).transformBoundingBox(bbox)
+        if bbox.isNull():
+            return None
+        return (bbox.xMinimum(), bbox.yMinimum(), bbox.xMaximum(), bbox.yMaximum())
 
-        # FIX v4.2.11: Support dynamic buffer expressions
-        # Priority: buffer_expression (dynamic) > buffer_value (static)
-        if buffer_expression and buffer_expression.strip():
-            # Convert QGIS expression to Spatialite SQL
-            from .filter_executor import qgis_expression_to_spatialite
-            buffer_expr_sql = qgis_expression_to_spatialite(buffer_expression)
-
-            self.log_info(f"🔧 Applying dynamic buffer expression: {buffer_expr_sql[:100]}...")
-            source_geom_sql = f"ST_Buffer({source_geom_sql}, {buffer_expr_sql})"
-
-        # Apply static buffer
-        elif buffer_value is not None and buffer_value != 0:
-            source_geom_sql = f"ST_Buffer({source_geom_sql}, {buffer_value})"
-            self.log_info(f"Applying buffer: {buffer_value}")
-
-            # Wrap negative buffers in MakeValid
-            if buffer_value < 0:
-                source_geom_sql = f"ST_MakeValid({source_geom_sql})"
-
-        return source_geom_sql
-
-    def _is_geometric_filter(self, subset: str) -> bool:
-        """Whether ``subset`` holds a spatial predicate (2026-10-17: function calls, not substrings).
-
-        ``"name" LIKE '%BUFFER%'`` or a column ``"contains_x"`` used to count
-        as geometric and were replaced instead of combined.
-        """
-        return bool(_GEOMETRIC_FILTER_RE.search(subset or ''))
+    def _json1_available(self) -> bool:
+        """The JSON1 probe of GDAL's SQLite (the OGR backend's key lists)."""
+        return json1_available()
 
 
 # =============================================================================

@@ -7,7 +7,7 @@ It is the part of the plugin another GIS (or a plain Python program) can embed.
 
 | Package | Contents |
 |---|---|
-| `domain/` | value objects and criteria: filter expressions and results, layer descriptions, raster and point-cloud criteria, centroid targets; `datasource_uri` reads the geometry column of a QGIS URI as `QgsDataSourceUri` does |
+| `domain/` | value objects and criteria: filter expressions and results, layer descriptions, raster and point-cloud criteria, centroid targets; `datasource_uri` reads the table and geometry column of a QGIS URI as `QgsDataSourceUri` does; `wkt_bounds` boxes a linear WKT as `QgsGeometry.boundingBox()` does (or answers None) |
 | `filter/` | expression combination (`expression_combiner`), sanitisation, SQL quoting, server dialects, transfer policy |
 | `optimization/` | query analysis, combined-query optimiser, performance advisor, backend selection |
 | `services/` | host-free application services: filter, expression, buffer, source-subset buffer, point cloud |
@@ -16,7 +16,7 @@ It is the part of the plugin another GIS (or a plain Python program) can embed.
 | `geometry/` | `IGeometry` on shapely (`ShapelyGeometry`, reprojection with pyproj) and the spatial filter's semantics: `source_union` + `matches` (see below) |
 | `sql/postgresql/` | **the PostGIS SQL of the spatial filters** (`PostgreSQLSqlBuilder`, see below), the filter-chain optimiser, QGIS expression → PostGIS (`qgis_expression`), object names (`naming`), SQL safety checks, optimiser, materialized-view reference tracking, driver availability |
 | `sql/identifiers.py` | `sanitize_sql_identifier` |
-| `sql/spatialite/` | index and temp-table managers, cache, Spatialite connection |
+| `sql/spatialite/` | **the SpatiaLite / GeoPackage SQL of the spatial filters** (`SpatialiteSqlBuilder`, GeoPackage R-tree prefilter read with `sqlite3`), QGIS expression → SpatiaLite (`qgis_expression`), index and temp-table managers, cache, Spatialite connection |
 | `tasks/builders/` | subset-string builder shared with the host's task layer |
 | `log.py`, `constants.py` | logger access and the constants the SQL generation needs |
 
@@ -71,6 +71,21 @@ subclasses it and provides:
 Layers are duck-typed: `dataProvider().dataSourceUri()`, `crs().postgisSrid()`,
 `fields()`. `tests/unit/core/sql/test_postgresql_sql_builder.py` checks that the
 core alone writes the SQL the plugin writes in QGIS.
+
+## SpatiaLite / GeoPackage SQL for any host
+
+`sql.spatialite.expression_builder.SpatialiteSqlBuilder` writes the SpatiaLite
+expression (inlined source WKT, GeoPackage R-tree prefilter, inline cost
+budget, OGR fallback sentinel). A host subclasses it:
+
+| Method | Abstract / default | QGIS (`adapters.backends.spatialite.expression_builder`) |
+|---|---|---|
+| `supports_layer`, `apply_filter` | abstract | provider check, subset string on the layer |
+| `_wkt_bounds_in_target_crs(wkt, source_srid, target_srid)` | `domain.wkt_bounds` in the source CRS, None when the SRIDs differ (no prefilter) | `QgsGeometry` + `QgsCoordinateTransform` |
+| `_json1_available()` | False: a costly source stays inline | GDAL's SQLite JSON1 probe |
+
+`tests/unit/core/sql/test_spatialite_sql_builder.py` checks that the core
+alone writes the plugin's SQL, R-tree prefilter included.
 
 ## The spatial filter without a database
 

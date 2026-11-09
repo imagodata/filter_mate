@@ -39,9 +39,18 @@ ports, SQL PG / Spatialite, `subset_string_builder`) avec un shim d'alias à cha
   (118 cas) sert de fixture au test « le cœur seul sans QGIS écrit le SQL de QGIS ». Piège : ne pas trier les clés
   JSON des prédicats (deux prédicats de même rang gardent l'ordre du dict). OGR reste un adaptateur (c'est de
   l'exécution QGIS : processing, moteurs GEOS, QgsSpatialIndex) ; pour un autre hôte c'est `geometry.matches`.
-- **Reste pour S0** : builder Spatialite (une méthode reprojette une emprise avec QgsGeometry), le reste de
-  `core/geometry` (QgsGeometry partout), `core/filter/expression_builder` (orchestration + QgsFeatureRequest),
-  favoris (`config.config`), puis réécriture des sites d'import et suppression des shims. Brainstorm complet en mémoire utilisateur
+- **Étape 4 (PR empilée sur l'étape 3)** : builder Spatialite → `SpatialiteSqlBuilder` (cœur, R-tree GeoPackage en
+  `sqlite3`) + adaptateur `SpatialiteExpressionBuilder` (crochets `_wkt_bounds_in_target_crs` QgsGeometry /
+  QgsCoordinateTransform, `_json1_available` sonde GDAL). Défaut du cœur pour l'emprise : `domain/wkt_bounds`
+  (lecteur conservateur : linéaires seulement, None sinon), même SRID seulement. Différentiel QGIS 3.44 + 4.3 avec
+  de vrais GeoPackage GDAL (R-tree) : 12 990 entrées, identique octet pour octet, 2 112 SQL avec préfiltre.
+  **Bug latent trouvé (non corrigé, comportement inchangé)** : QGIS calcule l'emprise d'un polygone sur l'anneau
+  extérieur seul ; une source invalide dont un trou sort de la coque devient, après `ST_MakeValid`, un polygone de
+  plus hors de cette emprise → le préfiltre R-tree perd les entités qui ne touchent que ce morceau. Correctif
+  proposé : emprise de `geometry.makeValid()` dans `_wkt_bounds_in_target_crs` de l'adaptateur.
+- **Reste pour S0** : le reste de `core/geometry` (QgsGeometry partout), `core/filter/expression_builder`
+  (orchestration + QgsFeatureRequest), favoris (`config.config`), puis réécriture des sites d'import et suppression
+  des shims. Brainstorm complet en mémoire utilisateur
   (`port-rustgis-geolibre-brainstorm-2026-10-27`).
 
 ## [2026-10-20] Sources en flux (5.1) : lots A à F → PR #190 – #208, plan `docs/internal/plans/V5_STREAMING/`

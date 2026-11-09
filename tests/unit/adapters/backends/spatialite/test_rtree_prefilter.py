@@ -64,6 +64,12 @@ def _load():
                       f"{_PKG}.adapters.backends.spatialite")
 
 
+def _core_module():
+    """The core module the loaded builder reads its R-trees with (2026-10-28)."""
+    _load()
+    return sys.modules[f"{_PKG}.filtermate_core.sql.spatialite.expression_builder"]
+
+
 def _sanitizer():
     name = f"{_PKG}.core.filter.expression_sanitizer"
     if name in sys.modules:
@@ -232,7 +238,7 @@ class TestRtreePrefilter:
         mod = _load()
         _install_fake_geometry(monkeypatch)
         _build(mod, _layer(gpkg))
-        monkeypatch.setattr(mod, "sqlite3", SimpleNamespace(
+        monkeypatch.setattr(_core_module(), "sqlite3", SimpleNamespace(
             connect=MagicMock(side_effect=AssertionError("second lookup")),
             OperationalError=sqlite3.OperationalError, Error=sqlite3.Error))
 
@@ -253,7 +259,7 @@ class TestRtreePrefilter:
     def test_transient_lookup_failure_is_not_cached(self, gpkg, monkeypatch):
         mod = _load()
         _install_fake_geometry(monkeypatch)
-        monkeypatch.setattr(mod, "sqlite3", SimpleNamespace(
+        monkeypatch.setattr(_core_module(), "sqlite3", SimpleNamespace(
             connect=MagicMock(side_effect=sqlite3.OperationalError("database is locked")),
             OperationalError=sqlite3.OperationalError, Error=sqlite3.Error))
         assert _build(mod, _layer(gpkg)).startswith("ST_Intersects(")

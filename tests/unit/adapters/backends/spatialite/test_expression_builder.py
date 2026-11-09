@@ -13,6 +13,14 @@ Tests the SpatialiteExpressionBuilder class for:
 - Empty/invalid inputs handling
 
 All QGIS dependencies are mocked.
+
+2026-10-28: the SQL generation lives in
+filtermate_core.sql.spatialite.expression_builder (SpatialiteSqlBuilder, with
+the real GeometricFilterPort); the module loaded here is the QGIS subclass.
+Loaded under a stub ``filter_mate`` package, its core import falls back to the
+top-level ``filtermate_core``: patches of the R-tree helpers target ``_core``.
+The layer fixtures answer what a QGIS layer answers (provider geometry
+column, URI, CRS authid).
 """
 import sys
 import types
@@ -33,55 +41,9 @@ def _ensure_spatialite_mocks():
         fm.__package__ = ROOT
         sys.modules[ROOT] = fm
 
-    from abc import ABC
-
-    class _FakeGeometricFilterPort(ABC):
-        def __init__(self, task_params):
-            self.task_params = task_params
-            self._warnings = []
-            self._logger = MagicMock()
-
-        def log_debug(self, msg): pass
-        def log_info(self, msg): pass
-        def log_warning(self, msg): self._warnings.append(msg)
-        def log_error(self, msg): pass
-
-        def _get_buffer_endcap_style(self):
-            return self.task_params.get("buffer_endcap_style", "round")
-
-        def _apply_centroid_transform(self, geom_expr, layer_props):
-            return f"ST_PointOnSurface({geom_expr})"
-
-        def _detect_geometry_column(self, layer_props):
-            return layer_props.get("layer_geometry_field", "geom")
-
-        def _get_layer_srid(self, layer):
-            if not layer:
-                return 4326
-            try:
-                crs = layer.crs()
-                if crs and crs.isValid():
-                    authid = crs.authid()
-                    if ':' in authid:
-                        return int(authid.split(':')[1])
-            except Exception:
-                pass
-            return 2154
-
-        def _get_source_srid(self):
-            if self.task_params:
-                source_crs = self.task_params.get('infos', {}).get('layer_crs_authid', '')
-                if ':' in str(source_crs):
-                    try:
-                        return int(str(source_crs).split(':')[1])
-                    except (ValueError, IndexError):
-                        pass
-            return self.task_params.get("source_srid", 4326)
-
     mocks = {
         f"{ROOT}.core": MagicMock(),
         f"{ROOT}.core.ports": MagicMock(),
-        f"{ROOT}.core.ports.geometric_filter_port": MagicMock(),
         f"{ROOT}.infrastructure": MagicMock(),
         f"{ROOT}.infrastructure.database": MagicMock(),
         f"{ROOT}.infrastructure.database.sql_utils": MagicMock(),
@@ -91,11 +53,9 @@ def _ensure_spatialite_mocks():
         f"{ROOT}.adapters.backends.spatialite.filter_executor": MagicMock(),
     }
     mocks[f"{ROOT}.infrastructure.database.sql_utils"].safe_set_subset_string = MagicMock(return_value=True)
-    mocks[f"{ROOT}.core.ports.geometric_filter_port"].GeometricFilterPort = _FakeGeometricFilterPort
 
-    # Always overwrite -- other test files may have already registered plain
-    # MagicMock() objects for these module paths, which would lack the real
-    # _FakeGeometricFilterPort class required by SpatialiteExpressionBuilder.
+    # Always overwrite -- other test files may have already registered other
+    # objects for these module paths.
     for name, mock_obj in mocks.items():
         sys.modules[name] = mock_obj
 
@@ -111,7 +71,7 @@ _builder_path = os.path.normpath(os.path.join(
     "adapters", "backends", "spatialite", "expression_builder.py"
 ))
 
-# Force-reload to pick up the freshly installed fake GeometricFilterPort.
+# Force-reload to pick up the freshly installed module stubs.
 _mod_name = "filter_mate.adapters.backends.spatialite.expression_builder"
 if _mod_name in sys.modules:
     del sys.modules[_mod_name]
@@ -124,6 +84,7 @@ _spec.loader.exec_module(_mod)
 
 SpatialiteExpressionBuilder = _mod.SpatialiteExpressionBuilder
 USE_OGR_FALLBACK = _mod.USE_OGR_FALLBACK
+_core = importlib.import_module("filtermate_core.sql.spatialite.expression_builder")
 
 
 # ===========================================================================
@@ -134,8 +95,18 @@ USE_OGR_FALLBACK = _mod.USE_OGR_FALLBACK
 def builder():
     return SpatialiteExpressionBuilder(task_params={
         "buffer_endcap_style": "round",
-        "source_srid": 2154,
+        # the source layer's CRS, as initialization_handler fills it
+        "infos": {"layer_crs_authid": "EPSG:2154"},
     })
+
+
+def _qgis_like(layer, source, authid="EPSG:2154"):
+    """What a QGIS layer answers to the builder: provider column, URI, CRS."""
+    layer.dataProvider.return_value.geometryColumn.return_value = ""
+    layer.dataProvider.return_value.dataSourceUri.return_value = source
+    layer.crs.return_value.isValid.return_value = True
+    layer.crs.return_value.authid.return_value = authid
+    return layer
 
 
 @pytest.fixture
@@ -144,7 +115,7 @@ def mock_spatialite_layer():
     layer.providerType.return_value = "spatialite"
     layer.source.return_value = "/tmp/test.sqlite"
     layer.isValid.return_value = True
-    return layer
+    return _qgis_like(layer, "dbname='/tmp/test.sqlite' table=\"buildings\" (geom)")
 
 
 @pytest.fixture
@@ -153,7 +124,7 @@ def mock_gpkg_layer():
     layer.providerType.return_value = "ogr"
     layer.source.return_value = "/tmp/data.gpkg|layername=buildings"
     layer.isValid.return_value = True
-    return layer
+    return _qgis_like(layer, "/tmp/data.gpkg|layername=buildings")
 
 
 # ===========================================================================
@@ -379,7 +350,7 @@ class TestLargeSourceWkt:
             seen.append((path, table, geom_column, bbox))
             return 100_000
 
-        monkeypatch.setattr(_mod, "gpkg_rtree_count", _count)
+        monkeypatch.setattr(_core, "gpkg_rtree_count", _count)
         monkeypatch.setattr(builder, "_source_bbox", lambda *args: (0.0, 0.0, 1.0, 1.0))
         wkt = _long_linestring(236_398)
         cost = builder._inline_cost_seconds(mock_gpkg_layer, "geom", wkt, 2154, 2154, None, predicates)
@@ -413,6 +384,8 @@ class TestLargeSourceWkt:
         # list that long freezes QGIS): slow but exact inline subset.
         monkeypatch.setattr(_mod, "json1_available", lambda: False)
         monkeypatch.setattr(builder, "_inline_cost_seconds", lambda *args: cost)
+        warnings = []
+        monkeypatch.setattr(builder, "log_warning", warnings.append)
         wkt = _long_linestring(236_398)
         expr = builder.build_expression(
             layer_props={"layer_name": "test", "layer_geometry_field": "geom"},
@@ -420,10 +393,10 @@ class TestLargeSourceWkt:
             source_geom=wkt,
         )
         assert expr != USE_OGR_FALLBACK
-        assert any("no JSON1" in w for w in builder._warnings)
+        assert any("no JSON1" in w for w in warnings)
 
     def test_sql_buffer_doubles_the_estimate(self, builder, mock_gpkg_layer, monkeypatch):
-        monkeypatch.setattr(_mod, "gpkg_rtree_count", lambda *args: 100_000)
+        monkeypatch.setattr(_core, "gpkg_rtree_count", lambda *args: 100_000)
         monkeypatch.setattr(builder, "_source_bbox", lambda *args: (0.0, 0.0, 1.0, 1.0))
         wkt = _long_linestring(10_000)
         plain = builder._inline_cost_seconds(mock_gpkg_layer, "geom", wkt, 2154, 2154, None, {"intersects": True})
@@ -442,7 +415,7 @@ class TestLargeSourceWkt:
         _mod.clear_rtree_cache()
         for index in range(_mod.RTREE_COUNT_CACHE_MAX + 10):
             _mod.gpkg_rtree_count(str(path), "roads", "geom", (index, 0.0, index + 1.0, 1.0))
-        assert len(_mod._RTREE_COUNT_CACHE) <= _mod.RTREE_COUNT_CACHE_MAX
+        assert len(_core._RTREE_COUNT_CACHE) <= _mod.RTREE_COUNT_CACHE_MAX
 
     def test_source_bbox_parsed_once_per_task(self, monkeypatch):
         # Builders are created per target layer but share the task (2026-10-17:

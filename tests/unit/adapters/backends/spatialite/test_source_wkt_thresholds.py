@@ -19,6 +19,8 @@ pytestmark = pytest.mark.unit
 
 PLUGIN_ROOT = Path(__file__).resolve().parents[5]
 SPATIALITE_DIR = PLUGIN_ROOT / "adapters" / "backends" / "spatialite"
+# 2026-10-28: the Spatialite SQL generation lives in the host-free core
+SPATIALITE_CORE_DIR = PLUGIN_ROOT / "filtermate_core" / "sql" / "spatialite"
 EXCLUDED_DIRS = {
     "tests", ".git", "__pycache__", ".claude",
     "_bmad", "_bmad-output", "website", "docs", "knowledge", "dist", "build", "scripts",
@@ -53,7 +55,7 @@ def test_inline_limits_defined_once():
             for path in _plugin_python_files()
             if name in _assigned_names(_tree(path))
         ]
-        assert owners == [str(Path("adapters/backends/spatialite/expression_builder.py"))], name
+        assert owners == [str(Path("filtermate_core/sql/spatialite/expression_builder.py"))], name
     assert not any(
         "SPATIALITE_WKT_SIMPLIFY_THRESHOLD" in _assigned_names(_tree(path)) for path in _plugin_python_files()
     )
@@ -71,8 +73,9 @@ def test_executor_never_simplifies_the_source():
     assert "exists_subquery_threshold" not in source
 
 
-def test_builder_never_simplifies_nor_envelopes():
-    tree = _tree(SPATIALITE_DIR / "expression_builder.py")
+@pytest.mark.parametrize("builder_dir", [SPATIALITE_DIR, SPATIALITE_CORE_DIR], ids=["qgis", "core"])
+def test_builder_never_simplifies_nor_envelopes(builder_dir):
+    tree = _tree(builder_dir / "expression_builder.py")
     calls = {
         node.func.attr
         for node in ast.walk(tree)
@@ -106,7 +109,7 @@ def test_inline_limit_matches_postgresql():
     2026-10-17: SpatiaLite may inline more (up to 1 MB) on a GeoPackage
     target whose R-tree count keeps one statement under its time budget.
     """
-    spatialite = _constants(_tree(SPATIALITE_DIR / "expression_builder.py"))
+    spatialite = _constants(_tree(SPATIALITE_CORE_DIR / "expression_builder.py"))
     # 2026-10-27: the PostgreSQL SQL generation lives in the host-free core
     pg_tree = _tree(PLUGIN_ROOT / "filtermate_core" / "sql" / "postgresql" / "expression_builder.py")
     pg_class = next(
@@ -152,6 +155,6 @@ def _regex_source(path):
 
 def test_both_paths_detect_spatial_filters_alike():
     """2026-10-17: the SQL and the OGR path decide 'replace or combine' with the same pattern."""
-    assert _regex_source(SPATIALITE_DIR / "expression_builder.py") == _regex_source(
+    assert _regex_source(SPATIALITE_CORE_DIR / "expression_builder.py") == _regex_source(
         PLUGIN_ROOT / "adapters" / "backends" / "ogr" / "expression_builder.py"
     )

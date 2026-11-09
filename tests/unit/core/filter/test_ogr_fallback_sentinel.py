@@ -85,7 +85,7 @@ legacy_module = _load(
 def test_orchestrator_sentinel_matches_the_spatialite_builder():
     assert orchestrator_module.OGR_FALLBACK_SENTINEL == SENTINEL
     assert legacy_module._OGR_FALLBACK_SENTINEL == SENTINEL
-    source = (PLUGIN_ROOT / "adapters" / "backends" / "spatialite" / "expression_builder.py").read_text(encoding="utf-8")
+    source = (PLUGIN_ROOT / "filtermate_core" / "sql" / "spatialite" / "expression_builder.py").read_text(encoding="utf-8")  # 2026-10-28: the host-free core
     assert f'USE_OGR_FALLBACK = "{SENTINEL}"' in source
 
 
