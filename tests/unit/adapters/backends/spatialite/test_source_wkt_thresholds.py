@@ -107,10 +107,11 @@ def test_inline_limit_matches_postgresql():
     target whose R-tree count keeps one statement under its time budget.
     """
     spatialite = _constants(_tree(SPATIALITE_DIR / "expression_builder.py"))
-    pg_tree = _tree(PLUGIN_ROOT / "adapters" / "backends" / "postgresql" / "expression_builder.py")
+    # 2026-10-27: the PostgreSQL SQL generation lives in the host-free core
+    pg_tree = _tree(PLUGIN_ROOT / "filtermate_core" / "sql" / "postgresql" / "expression_builder.py")
     pg_class = next(
         node for node in pg_tree.body
-        if isinstance(node, ast.ClassDef) and node.name == "PostgreSQLExpressionBuilder"
+        if isinstance(node, ast.ClassDef) and node.name == "PostgreSQLSqlBuilder"
     )
     assert spatialite["SPATIALITE_WKT_STATIC_INLINE_LIMIT"] == _constants(pg_class)["MAX_WKT_LENGTH"] == 100_000
 

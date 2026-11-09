@@ -14,7 +14,8 @@ It is the part of the plugin another GIS (or a plain Python program) can embed.
 | `strategies/` | progressive and multi-step filtering |
 | `ports/` | the interfaces a host implements for the core: backend, filter executor, repository, cache, materialized views, point clouds, geometric filter backends, host layer and geometry (`qgis_port`, kept under its historical name) |
 | `geometry/` | `IGeometry` on shapely (`ShapelyGeometry`, reprojection with pyproj) and the spatial filter's semantics: `source_union` + `matches` (see below) |
-| `sql/postgresql/` | SQL safety checks, optimiser, materialized-view reference tracking, driver availability |
+| `sql/postgresql/` | **the PostGIS SQL of the spatial filters** (`PostgreSQLSqlBuilder`, see below), the filter-chain optimiser, QGIS expression → PostGIS (`qgis_expression`), object names (`naming`), SQL safety checks, optimiser, materialized-view reference tracking, driver availability |
+| `sql/identifiers.py` | `sanitize_sql_identifier` |
 | `sql/spatialite/` | index and temp-table managers, cache, Spatialite connection |
 | `tasks/builders/` | subset-string builder shared with the host's task layer |
 | `log.py`, `constants.py` | logger access and the constants the SQL generation needs |
@@ -52,6 +53,24 @@ from filtermate_core.filter.expression_combiner import combine_expressions
 ```
 
 Everything a host must provide is declared in `ports/`.
+
+## PostGIS SQL for any host
+
+`sql.postgresql.expression_builder.PostgreSQLSqlBuilder` writes the PostGIS
+expression of a spatial filter (simple WKT, `EXISTS` against the source
+table, filter chaining, union semantics, buffers, reprojection). A host
+subclasses it and provides:
+
+| Method | Abstract / default | QGIS (`adapters.backends.postgresql.expression_builder`) |
+|---|---|---|
+| `supports_layer`, `apply_filter` | abstract | provider check, subset string on the layer |
+| `_connection_for_layer(layer)` | `None`: no statement timeout, no pre-computed buffer table (a dynamic buffer is inlined, or `None` is returned in filter chaining, where only the table works) | the layer's psycopg2 connection |
+| `_notify_user_warning(message)` | the log | the QGIS message log |
+| `_authid_to_srid`, `_srid_is_geographic` | `EPSG:<n>` and known lon/lat SRIDs | the QGIS CRS database, then the defaults |
+
+Layers are duck-typed: `dataProvider().dataSourceUri()`, `crs().postgisSrid()`,
+`fields()`. `tests/unit/core/sql/test_postgresql_sql_builder.py` checks that the
+core alone writes the SQL the plugin writes in QGIS.
 
 ## The spatial filter without a database
 

@@ -27,9 +27,21 @@ ports, SQL PG / Spatialite, `subset_string_builder`) avec un shim d'alias à cha
   des sources, buffer sur l'union, cible sans géométrie jamais gardée). shapely / pyproj optionnels (import gardé),
   ajoutés à `requirements-test.txt`. Vérifier les shims en vrai QGIS : script Docker qui importe `filter_mate.<ancien>`
   et compare à `filter_mate.filtermate_core.<nouveau>` (55/55 en 3.44 et 4.3, pas de `filtermate_core` en double).
-- **Reste pour S0** : séparation des 4 `expression_builder` (≈6 k lignes) entre « quel SQL » et « lecture de la
-  couche », le reste de `core/geometry` (QgsGeometry partout), favoris (`config.config`), puis réécriture des sites
-  d'import et suppression des shims. Brainstorm complet en mémoire utilisateur
+- **Étape 3 (PR empilée sur l'étape 2)** : builder PostgreSQL → `filtermate_core/sql/postgresql/expression_builder.py`
+  (`PostgreSQLSqlBuilder`, abstrait) + adaptateur QGIS `PostgreSQLExpressionBuilder` (même nom pour les appelants :
+  `supports_layer`, `apply_filter`, 4 crochets `_connection_for_layer` / `_notify_user_warning` / `_authid_to_srid` /
+  `_srid_is_geographic`). Le couplage QGIS réel était mince (QgsDataSourceUri ×3, QgsMessageLog, 2 appels CRS qui
+  avaient déjà un repli pur) ; `filter_chain_optimizer`, `qgis_expression_to_postgis`, `session_token`,
+  `sanitize_sql_identifier` suivent (une définition, anciens modules réexportent). Idiome d'import cœur depuis le
+  plugin : `try: from ....filtermate_core.x import y / except ImportError: from filtermate_core.x import y` (l'import
+  relatif seul casse les tests qui chargent `adapters.*` en premier niveau). **Méthode de preuve** : différentiel en
+  vrai QGIS (Docker 3.44 + 4.3) avant/après sur 19 440 entrées, sorties identiques octet pour octet ; un échantillon
+  (118 cas) sert de fixture au test « le cœur seul sans QGIS écrit le SQL de QGIS ». Piège : ne pas trier les clés
+  JSON des prédicats (deux prédicats de même rang gardent l'ordre du dict). OGR reste un adaptateur (c'est de
+  l'exécution QGIS : processing, moteurs GEOS, QgsSpatialIndex) ; pour un autre hôte c'est `geometry.matches`.
+- **Reste pour S0** : builder Spatialite (une méthode reprojette une emprise avec QgsGeometry), le reste de
+  `core/geometry` (QgsGeometry partout), `core/filter/expression_builder` (orchestration + QgsFeatureRequest),
+  favoris (`config.config`), puis réécriture des sites d'import et suppression des shims. Brainstorm complet en mémoire utilisateur
   (`port-rustgis-geolibre-brainstorm-2026-10-27`).
 
 ## [2026-10-20] Sources en flux (5.1) : lots A à F → PR #190 – #208, plan `docs/internal/plans/V5_STREAMING/`

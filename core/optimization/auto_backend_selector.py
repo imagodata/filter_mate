@@ -7,7 +7,8 @@ checks and ``mock.patch`` targets keep working; new code imports
 module's own package prefix (``filter_mate.`` in QGIS, nothing when the
 sub-packages are imported from the repository root) and, failing that, as the
 top-level ``filtermate_core`` next to this file, so loaders that register the
-file under another name (tests) get the same objects.
+file under another name (tests) get the same objects. Under a package that
+holds ``filtermate_core`` (QGIS) an import error of the core surfaces as is.
 """
 import importlib as _importlib
 import os as _os
@@ -20,10 +21,14 @@ _ROOT = _os.path.abspath(_os.path.join(_os.path.dirname(__file__), '..', '..'))
 
 def _load():
     if __name__ == _OLD or __name__.endswith('.' + _OLD):
+        prefix = __name__[:-len(_OLD)]
         try:
-            return _importlib.import_module(__name__[:-len(_OLD)] + _NEW)
+            return _importlib.import_module(prefix + _NEW)
         except ImportError:
-            pass  # not reachable under this prefix: use the top-level spelling
+            parent = _sys.modules.get(prefix[:-1]) if prefix else None
+            if any(_os.path.isdir(_os.path.join(p, 'filtermate_core')) for p in getattr(parent, '__path__', ())):
+                raise  # the core is there and failed: never load a second copy of it
+            # not reachable under this prefix (a stub package): use the top-level spelling
     if _ROOT not in _sys.path:
         _sys.path.append(_ROOT)
     return _importlib.import_module(_NEW)
