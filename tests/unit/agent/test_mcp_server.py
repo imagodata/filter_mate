@@ -6,6 +6,7 @@ import pytest
 
 from core.agent.mcp_server import (
     DEFAULT_PORT, MAX_BODY, MAX_HEAD, HttpReject, HttpResponse, McpProtocol, RequestHead, check_access, claude_code_command,
+    claude_desktop_config,
     client_config, client_name, new_token, read_head, render,
 )
 from core.agent.messages import ToolResultPart
@@ -108,6 +109,12 @@ class TestAccess:
     def test_a_form_cannot_post(self):
         assert self.status(head(content_type="text/plain")) == 415
         assert self.status(head(content_type=None)) == 415
+
+    def test_claude_desktop_goes_through_mcp_remote(self):
+        server = json.loads(claude_desktop_config(1234, "t"))["mcpServers"]["filtermate"]
+        assert server["command"] == "npx" and server["args"][:2] == ["mcp-remote", "http://127.0.0.1:1234/mcp"]
+        assert not any(" " in arg for arg in server["args"])  # Windows does not quote them
+        assert server["env"] == {"AUTH_HEADER": "Bearer t"} and "Authorization:${AUTH_HEADER}" in server["args"]
 
     def test_a_token_is_long_and_never_the_same(self):
         assert len(new_token()) >= 40 and new_token() != new_token()

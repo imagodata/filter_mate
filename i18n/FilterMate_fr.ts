@@ -7900,6 +7900,14 @@ L'installer maintenant depuis PyPI avec pip, dans votre profil QGIS ? Le Python 
 <context>
     <name>AgentPanel</name>
     <message>
+        <source>Copy for Claude Desktop</source>
+        <translation>Copier pour Claude Desktop</translation>
+    </message>
+    <message>
+        <source>Through mcp-remote, which needs Node.js: Claude Desktop starts local servers as programs.</source>
+        <translation>Par mcp-remote, qui demande Node.js : Claude Desktop lance les serveurs locaux comme des programmes.</translation>
+    </message>
+    <message>
         <source>Other applications</source>
         <translation>Autres applications</translation>
     </message>

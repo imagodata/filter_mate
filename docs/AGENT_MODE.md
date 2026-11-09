@@ -179,8 +179,13 @@ what decides the model of the free quota, and whether a local model is good enou
 Agent settings, tab **Other applications**. Off by default. Once on, FilterMate listens on `http://127.0.0.1:17823/mcp`
 (port configurable) and needs no Python package, unlike the stdio server of `filtermate_api/mcp`, which stays.
 
-Buttons copy the JSON most clients read, or the `claude mcp add` command. Both contain the access token. A client that only
-speaks stdio needs a bridge to Streamable HTTP. The server starts when FilterMate is opened and keeps running while its panel is
+Buttons copy the JSON most clients read, the entry for `claude_desktop_config.json`, or the `claude mcp add` command. All
+contain the access token. Claude Desktop starts local servers as programs, so its entry goes through `mcp-remote` (Node.js),
+with the header written without a space, as Claude Desktop on Windows does not quote arguments. That entry has not been tried
+with Claude Desktop itself.
+
+`tests/mcp_client_check.py` drives the server with the official MCP Python SDK, against a QGIS started by
+`tests/qgis_headless/serve_agent_mcp.py` (`docker run --network host`). The server starts when FilterMate is opened and keeps running while its panel is
 closed, until QGIS closes or the plugin unloads.
 
 It listens on `127.0.0.1` of the machine running QGIS. With QGIS on Windows and the client in WSL 2, that address is not the same
