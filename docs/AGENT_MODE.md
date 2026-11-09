@@ -1,17 +1,17 @@
 # Agent mode: foundations
 
-Status: step 1 of 4 is in the code. The chat panel does not exist yet and nothing here is loaded by the plugin at start.
-For developers of FilterMate.
+Status: steps 1 and 2 of 4 are in the code. The chat is off by default (`APP.OPTIONS.AGENT.enabled`, read when the panel
+opens) and works with the user's own key. For developers of FilterMate.
 
 ## Goal
 
-A chat band above FILTERING: the user writes "buildings above 1200 m in the selected commune" and the agent filters.
+An AGENT section, first in the accordion before FILTERING: the user writes "buildings above 1200 m in the selected commune" and the agent filters.
 Any provider, a few free requests through a relay, then the user's own key, and external MCP clients on the same tools.
 
 | Step | Content | State |
 |---|---|---|
 | 1. Foundations | Neutral conversation, provider adapters, tool catalog, read tools, evaluation bench | done |
-| 2. Chat | Panel, Qt transport, key in `QgsAuthManager`, undo of a whole turn | to do |
+| 2. Chat | Panel, Qt transport, key in `QgsAuthManager`, undo of a whole turn | done |
 | 3. Free quota | Relay holding the key, per-install and global limits | to do |
 | 4. Native MCP | Local MCP server without dependencies, shared activity log | to do |
 
@@ -30,6 +30,10 @@ core/agent/                 no QGIS, no Qt, no network (load it alone outside QG
   json_schema.py            the JSON Schema subset the catalog uses
   sql_guard.py              checks on filters written by a model
   system_prompt.py          constant, it opens the cached prefix
+  chat_engine.py            one request at a time, event-driven, cancellable
+adapters/agent/             Qt network transport, key and settings, undo of a turn
+ui/widgets/agent_panel.py   the section and its settings dialog (plain text only)
+ui/controllers/agent_chat_controller.py   connects the section to the conversation
 adapters/public_api/introspection.py   fields, values, trial run, map state, on real layers
 filtermate_api/agent_tools.py          the chat tools, on the accessor used by the REST routes
 scripts/export_agent_tools.py          regenerates the catalog
@@ -54,6 +58,55 @@ Rules worth keeping:
 - Tools and system prompt are constant and serialized in a fixed order: a prompt cache needs identical bytes.
 - `max_tokens` is only sent to Claude, where it is required; OpenAI-compatible servers disagree on its name.
 - An API key is sent over https, or to this machine. It never appears in a `repr`.
+
+## The chat
+
+- **Consent** is for one server: nothing leaves before the user has chosen a model and agreed, and changing the provider
+  or its address asks again. Without attribute values, `field_values` is not offered; values already written in filters
+  and favorites are still sent, and the dialog says so.
+- **The key** lives in the QGIS authentication database, which asks for the master password, never in a settings file.
+  It is only sent to the server it was typed for, and can be removed from the settings. It shows in the network log of
+  QGIS if the user turns that log on.
+- **Timeouts.** The network timeout of QGIS applies (60 s by default) and cannot be set per request: a local model slow
+  to start may need more, and the message says so.
+- **Redirections are not followed**, since the key is in the headers.
+- **Undo this turn** captures every layer before the first change of a request and pushes one `CrossOperation` in the
+  automation history: rasters and point clouds get their source back, a layer changed since is left alone, and the
+  derived files of the turn stay alive. Stopping a request keeps what was done and it can still be undone.
+- **What a model writes is shown as plain text** (`QPlainTextEdit`): rich text would load its images and links.
+- A conversation does not survive a change of project or of provider.
+- **The accordion.** `tabTools_current_index` stays 0 / 1 / 2 for FILTERING / EXPORTING / CONFIGURATION with the section in
+  front of them, and is -1 on AGENT: the action bar and the undo buttons read that number.
+
+## History
+
+- Every turn that changed a layer is one `CrossOperation` under the key `filtermate_agent_turn` of the automation
+  history, described by the request. The History page lists them (applied or undone), undoes and redoes them in
+  order, and sends a request again. A layer that refuses a restore (being edited) keeps the turn undoable.
+- The transcript (requests, actions, answers) is kept per project in the QGIS settings, keyed by the project path, and
+  shown again when the project opens. The model does not get it back: a conversation starts afresh.
+- Zooms, selections, layers added or removed are not undone by a turn and a turn made only of those is not listed; the
+  last two are confirmed first. A filter set on a layer added in the same turn is undone with the turn.
+- New conversation forgets what was kept for the project; only the 20 latest projects are kept.
+
+## Driving QGIS and open data
+
+`zoom_to`, `select_features` (QGIS expression, parsed by `QgsExpression`, never SQL), `set_layers_visibility`,
+`add_layer`, `remove_layers`, `search_open_data`, in `adapters/public_api/project_control.py`, with the REST routes of
+`routers/project.py`. Open data (`core/agent/open_data.py`, pure): data.gouv.fr and the Opendatasoft hub are built in,
+other portals come from `APP.OPTIONS.AGENT.open_data_domains`; a platform not in the list is refused. In the chat the
+whole thing is behind the "open data" setting: without it `search_open_data` is not offered and `add_layer` takes local
+files only. `add_layer` and `remove_layers` ask the user; a search stays in the thread.
+
+Two allowlists hold, on every path (chat, REST, MCP), because QGIS and GDAL interpret these strings:
+
+- `add_layer` (`open_data.source_problem`): a plain local data file, or a public https URL of one. No provider URI, no
+  `PG:`, `/vsi...`, UNC path, inline XML or `|subset=`. A service (WFS, WMS) cannot be added by a model.
+- `select_features` (`sql_guard.expression_problem`): plain conditions and a short list of functions. QGIS expressions
+  can read the environment and the disk (`env`, `file_exists`, `aggregate`) and write to SQLite
+  (`sqlite_fetch_and_increment`).
+
+`search_open_data` blocks the interface until the platform answers or the network timeout of QGIS runs out.
 
 ## Tools
 

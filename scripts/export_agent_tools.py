@@ -54,6 +54,8 @@ def catalog_entries():
                        else annotations.destructiveHint)
         idempotent = (annotations.idempotent_hint if hasattr(annotations, "idempotent_hint")
                       else annotations.idempotentHint)
+        open_world = (annotations.open_world_hint if hasattr(annotations, "open_world_hint")
+                      else annotations.openWorldHint)
         entries.append({
             "name": tool.name,
             "title": annotations.title or "",
@@ -61,6 +63,7 @@ def catalog_entries():
             "read_only": bool(read_only),
             "destructive": bool(destructive),
             "idempotent": bool(idempotent),
+            "open_world": open_world is not False,  # MCP: an absent hint means open
             "input_schema": clean_schema(schema, schema.get("$defs", {})),
         })
     return entries

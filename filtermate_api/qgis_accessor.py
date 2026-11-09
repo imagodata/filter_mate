@@ -41,7 +41,10 @@ from .accessor import (
     LayerDetails,
     LayerSummary,
     MapContext,
+    OpenDataResult,
     OperationResult,
+    SelectionResult,
+    ViewState,
 )
 from .main_thread import QGISBusy, run_on_main_thread
 
@@ -285,6 +288,48 @@ class QGISFilterMateAccessor:
 
     def map_context(self) -> MapContext:
         return MapContext(**self._introspect("map_context"))
+
+    # ------------------------------------------------------------------
+    # Driving QGIS (agent mode)
+    # ------------------------------------------------------------------
+
+    def _control(self, name: str, *args, **kwargs):
+        """Call ``adapters.public_api.project_control.<name>`` on the main thread, refused while FilterMate is busy."""
+        def call():
+            function = getattr(_plugin_module("adapters.public_api.project_control"), name)
+            try:
+                return _unless_busy(function, *args, **kwargs)
+            except ValueError as exc:
+                raise FilterRejected(str(exc)) from None
+        return run_on_main_thread(call)
+
+    def zoom_to(self, layer=None, extent_wkt=None, crs=None, selected_only: bool = False) -> ViewState:
+        return ViewState(**self._control("zoom_to", layer=layer, extent_wkt=extent_wkt, crs=crs, selected_only=selected_only))
+
+    def select_features(self, layer: str, expression: str = "", clear: bool = False, add: bool = False) -> SelectionResult:
+        return SelectionResult(**self._control("select_features", layer, expression=expression, clear=clear, add=add))
+
+    def set_layers_visibility(self, layers: List[str], visible: bool) -> OperationResult:
+        result = self._control("set_layers_visibility", layers, visible)
+        return OperationResult(done=result["done"], failed=result["failed"])
+
+    def add_layer(self, source: str, name: str = "", kind: str = "vector") -> LayerSummary:
+        return LayerSummary(**self._control("add_layer", source, name=name, kind=kind))
+
+    def remove_layers(self, layers: List[str]) -> OperationResult:
+        result = self._control("remove_layers", layers)
+        return OperationResult(done=result["done"], failed=result["failed"])
+
+    def search_open_data(self, query: str, platform: str = "datagouv", limit: int = 10) -> OpenDataResult:
+        extra = ""
+        try:
+            config = _plugin_module("config.config")
+            section = config.ENV_VARS.get("CONFIG_DATA", {}).get("APP", {}).get("OPTIONS", {}).get("AGENT", {})
+            extra = str(config._get_option_value(section.get("open_data_domains"), "") or "")
+        except Exception:  # the list of platforms is a convenience, not a dependency
+            logger.debug("open_data_domains unreadable", exc_info=True)
+        return OpenDataResult(**self._control("search_open_data", query, platform=platform, limit=limit,
+                                              extra_domains=extra))
 
     def cross_filter(self, source_layer: str, target_layers: List[str], predicates: List[str],
                      buffer: float = 0.0, coverage_min: float = 0.0, operator: Optional[str] = None,

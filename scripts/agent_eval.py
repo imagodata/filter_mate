@@ -142,6 +142,34 @@ class SimulatedProject:
             done = self._targets(args["layers"])
             return {"done": done, "outputs": {name: f"/exports/{name}.gpkg" for name in done}}
 
+        def zoom_to(args):
+            if args.get("layer"):
+                self._layer(args["layer"])
+            return {"extent_wkt": EXTENT_WKT, "scale": 10000.0}
+
+        def select_features(args):
+            name, layer = self._layer(args["layer"])
+            if layer["kind"] != "vector":
+                raise ToolFailure(f"'{name}' is not a vector layer")
+            return {"layer_id": layer["id"], "layer_name": name, "selected_count": 0 if args.get("clear") else 1}
+
+        def add_layer(args):
+            if "http://" in args["source"]:
+                raise ToolFailure("only https sources are read over the network")
+            name = args.get("name") or args["source"].rsplit("/", 1)[-1]
+            return {"layer_id": f"added_{len(self.by_ref)}", "name": name, "layer_kind": args["kind"],
+                    "provider_type": args.get("provider") or "ogr", "crs_authid": "EPSG:4326", "feature_count": 34970}
+
+        def search_open_data(args):
+            if "commune" not in args["query"].lower():
+                return {"platform": args["platform"], "query": args["query"], "datasets": [], "count": 0}
+            return {"platform": args["platform"], "query": args["query"], "count": 1, "datasets": [{
+                "id": "admin-express", "title": "Limites administratives des communes", "publisher": "IGN",
+                "description": "Contours des communes de France", "page": "https://www.data.gouv.fr/datasets/admin-express",
+                "resources": [{"title": "Communes (GeoJSON)", "format": "geojson",
+                               "url": "https://static.data.gouv.fr/admin-express/communes.geojson"},
+                              {"title": "Notice", "format": "pdf", "url": "https://static.data.gouv.fr/notice.pdf"}]}]}
+
         def map_context(_):
             return {"available": True, "project_crs": "EPSG:2154", "canvas_crs": "EPSG:2154", "extent_wkt": EXTENT_WKT,
                     "scale": 25000.0, "active_layer_id": "communes_a1", "active_layer_name": "communes",
@@ -151,7 +179,9 @@ class SimulatedProject:
             "list_layers": list_layers, "describe_layer": describe_layer, "field_values": field_values,
             "preview_filter": preview_filter, "apply_filter": apply_filter, "cross_filter": relation,
             "geometry_filter": relation, "point_cloud_filter": operation, "clear_filters": operation,
-            "export_layers": export_layers, "map_context": map_context,
+            "export_layers": export_layers, "map_context": map_context, "zoom_to": zoom_to,
+            "select_features": select_features, "set_layers_visibility": operation, "add_layer": add_layer,
+            "remove_layers": operation, "search_open_data": search_open_data,
             "filter_state": lambda _: {"layers": []}, "list_favorites": lambda _: {"favorites": FAVORITES},
             "apply_favorite": lambda args: {"step": {"layer_name": "communes"}, "active_filters": {}},
         }
@@ -187,7 +217,7 @@ def matches(expected: Any, actual: Any, by_ref: Dict[str, str]) -> bool:
 
 def _touched(arguments: Dict[str, Any], by_ref: Dict[str, str]) -> List[str]:
     """Layers a write changes."""
-    names: List[Any] = [arguments.get("layer_name"), *(arguments.get("target_layers") or ()),
+    names: List[Any] = [arguments.get("layer_name"), arguments.get("layer"), *(arguments.get("target_layers") or ()),
                         *(arguments.get("layers") or ())]
     return [_normalize(name, by_ref) for name in names if isinstance(name, str)]
 

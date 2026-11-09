@@ -16,6 +16,12 @@ FUNCTIONS = frozenset({
     "lower", "ltrim", "mod", "nullif", "replace", "right", "round", "rtrim", "strftime", "substr", "substring", "trim",
     "unaccent", "upper",
 })
+# QGIS expressions can read the environment and the disk, and write to SQLite (env, file_exists, aggregate,
+# sqlite_fetch_and_increment...): the same rule, a list of what a selection needs.
+EXPRESSION_FUNCTIONS = FUNCTIONS | frozenset({
+    "area", "day", "month", "perimeter", "to_date", "to_int", "to_real", "to_string", "x", "y", "year",
+})
+EXPRESSION_VARIABLES = frozenset({"$area", "$geometry", "$id", "$length", "$perimeter", "$x", "$y"})
 CAST_TYPES = frozenset({
     "bigint", "boolean", "char", "date", "double", "float", "int", "int4", "int8", "integer", "numeric", "precision",
     "real", "smallint", "text", "time", "timestamp", "timestamptz", "varchar",
@@ -70,6 +76,15 @@ def _number_end(expression: str, start: int) -> int:
 
 def filter_problem(expression: str) -> str:
     """Why ``expression`` cannot be accepted as a filter written by a model; "" when it can."""
+    return _problem(expression, FUNCTIONS, frozenset())
+
+
+def expression_problem(expression: str) -> str:
+    """Why ``expression`` cannot be accepted as a QGIS expression written by a model; "" when it can."""
+    return _problem(expression, EXPRESSION_FUNCTIONS, EXPRESSION_VARIABLES)
+
+
+def _problem(expression: str, functions: frozenset, variables: frozenset) -> str:
     if not expression.strip():
         return "the expression is empty"
     index, depth, previous = 0, 0, ""
@@ -88,6 +103,11 @@ def filter_problem(expression: str) -> str:
             index, previous = end, "value"
         elif char.isdigit():
             index, previous = _number_end(expression, index), "value"
+        elif char == "$" and variables:
+            end = _word_end(expression, index + 1)
+            if expression[index:end].lower() not in variables:
+                return f"the variable {expression[index:end]} is not accepted"
+            index, previous = end, "value"
         elif char.isalpha() or char == "_":
             end = _word_end(expression, index)
             word = expression[index:end].lower()
@@ -98,7 +118,7 @@ def filter_problem(expression: str) -> str:
             if previous == "::" and word not in CAST_TYPES:
                 return f"casting to {word} is not accepted"
             if _next_char(expression, end) == "(" and word not in _BEFORE_PARENTHESIS:
-                if word not in FUNCTIONS or previous == ".":
+                if word not in functions or previous == ".":
                     return f"the function {word} is not accepted in a filter"
             index, previous = end, "word"
         else:

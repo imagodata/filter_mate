@@ -35,6 +35,7 @@ from .routers import favorites as favorites_router
 from .routers import filters as filters_router
 from .routers import layers as layers_router
 from .routers import map_context as map_context_router
+from .routers import project as project_router
 
 logger = logging.getLogger("filtermate_api")
 
@@ -419,6 +420,7 @@ def create_app(
     app.include_router(favorites_router.router)  # GET /favorites, POST /favorites/{id}/apply — #32
     app.include_router(export_router.router)     # POST /export — FilterMate 5
     app.include_router(map_context_router.router)  # GET /map/context — agent mode
+    app.include_router(project_router.router)    # /map/zoom, /layers/select|visibility|add|remove, /open-data/search
 
     return app
 

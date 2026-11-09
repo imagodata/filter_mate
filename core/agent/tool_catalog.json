@@ -8,6 +8,7 @@
    "read_only": true,
    "destructive": false,
    "idempotent": false,
+   "open_world": false,
    "input_schema": {
     "properties": {},
     "type": "object"
@@ -20,6 +21,7 @@
    "read_only": true,
    "destructive": false,
    "idempotent": false,
+   "open_world": false,
    "input_schema": {
     "properties": {},
     "type": "object"
@@ -32,6 +34,7 @@
    "read_only": true,
    "destructive": false,
    "idempotent": false,
+   "open_world": false,
    "input_schema": {
     "properties": {},
     "type": "object"
@@ -44,6 +47,7 @@
    "read_only": true,
    "destructive": false,
    "idempotent": false,
+   "open_world": false,
    "input_schema": {
     "properties": {},
     "type": "object"
@@ -56,6 +60,7 @@
    "read_only": true,
    "destructive": false,
    "idempotent": false,
+   "open_world": false,
    "input_schema": {
     "properties": {
      "layer": {
@@ -78,6 +83,7 @@
    "read_only": true,
    "destructive": false,
    "idempotent": false,
+   "open_world": false,
    "input_schema": {
     "properties": {
      "layer": {
@@ -120,6 +126,7 @@
    "read_only": true,
    "destructive": false,
    "idempotent": false,
+   "open_world": false,
    "input_schema": {
     "properties": {
      "layer_name": {
@@ -149,6 +156,7 @@
    "read_only": true,
    "destructive": false,
    "idempotent": false,
+   "open_world": false,
    "input_schema": {
     "properties": {},
     "type": "object"
@@ -161,6 +169,7 @@
    "read_only": false,
    "destructive": false,
    "idempotent": true,
+   "open_world": false,
    "input_schema": {
     "properties": {
      "layer_name": {
@@ -196,6 +205,7 @@
    "read_only": false,
    "destructive": false,
    "idempotent": false,
+   "open_world": false,
    "input_schema": {
     "properties": {},
     "type": "object"
@@ -208,6 +218,7 @@
    "read_only": false,
    "destructive": false,
    "idempotent": false,
+   "open_world": false,
    "input_schema": {
     "properties": {},
     "type": "object"
@@ -220,6 +231,7 @@
    "read_only": false,
    "destructive": false,
    "idempotent": true,
+   "open_world": false,
    "input_schema": {
     "properties": {
      "source_layer": {
@@ -487,6 +499,7 @@
    "read_only": false,
    "destructive": false,
    "idempotent": true,
+   "open_world": false,
    "input_schema": {
     "properties": {
      "wkt": {
@@ -578,6 +591,7 @@
    "read_only": false,
    "destructive": false,
    "idempotent": true,
+   "open_world": false,
    "input_schema": {
     "properties": {
      "layers": {
@@ -703,6 +717,7 @@
    "read_only": false,
    "destructive": false,
    "idempotent": true,
+   "open_world": false,
    "input_schema": {
     "properties": {
      "layers": {
@@ -728,6 +743,7 @@
    "read_only": false,
    "destructive": false,
    "idempotent": true,
+   "open_world": false,
    "input_schema": {
     "properties": {
      "favorite_id": {
@@ -744,12 +760,241 @@
    }
   },
   {
+   "name": "zoom_to",
+   "title": "Zoom the map",
+   "description": "Zoom the QGIS map to a layer, to its selected features, to a WKT extent, or to everything (no argument). Changes only the view, never the data or the filters. Returns extent_wkt and scale after the zoom. Fails without a map window (headless QGIS).",
+   "read_only": false,
+   "destructive": false,
+   "idempotent": true,
+   "open_world": false,
+   "input_schema": {
+    "properties": {
+     "layer": {
+      "anyOf": [
+       {
+        "maxLength": 1000,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "description": "Layer id or name to zoom to (its whole extent, or its selection with selected_only)"
+     },
+     "extent_wkt": {
+      "anyOf": [
+       {
+        "maxLength": 100000,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "description": "Instead of a layer: an extent or geometry as WKT"
+     },
+     "crs": {
+      "anyOf": [
+       {
+        "maxLength": 64,
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "description": "CRS of the WKT, e.g. EPSG:2154"
+     },
+     "selected_only": {
+      "default": false,
+      "description": "With layer: zoom to its selected features",
+      "type": "boolean"
+     }
+    },
+    "type": "object"
+   }
+  },
+  {
+   "name": "select_features",
+   "title": "Select features",
+   "description": "Select the features of a vector layer matching a QGIS expression, as the user would in QGIS. A selection is not a filter: the features stay visible, they are highlighted. Use it to make the source of cross_filter (which uses the selected features), or when the user asks to select. Returns layer_name and selected_count. Comparisons, IN, LIKE and simple text, number, date and geometry functions are accepted; other functions are refused.",
+   "read_only": false,
+   "destructive": false,
+   "idempotent": true,
+   "open_world": false,
+   "input_schema": {
+    "properties": {
+     "layer": {
+      "description": "Vector layer id or name",
+      "maxLength": 1000,
+      "minLength": 1,
+      "type": "string"
+     },
+     "expression": {
+      "default": "",
+      "description": "QGIS expression (NOT SQL), plain conditions only: \"population\" > 10000, \"nom\" ILIKE 'saint%', area($geometry) > 1000. Field names in double quotes, text in single quotes.",
+      "maxLength": 100000,
+      "type": "string"
+     },
+     "clear": {
+      "default": false,
+      "description": "Empty the selection instead of selecting",
+      "type": "boolean"
+     },
+     "add": {
+      "default": false,
+      "description": "Add to the current selection instead of replacing it",
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "layer"
+    ],
+    "type": "object"
+   }
+  },
+  {
+   "name": "set_layers_visibility",
+   "title": "Show or hide layers",
+   "description": "Check or uncheck layers in the layer tree (shown or hidden on the map). Returns done and failed.",
+   "read_only": false,
+   "destructive": false,
+   "idempotent": true,
+   "open_world": false,
+   "input_schema": {
+    "properties": {
+     "layers": {
+      "description": "Layer ids or names",
+      "items": {
+       "type": "string"
+      },
+      "maxItems": 1000,
+      "minItems": 1,
+      "type": "array"
+     },
+     "visible": {
+      "description": "true shows the layers, false hides them",
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "layers",
+     "visible"
+    ],
+    "type": "object"
+   }
+  },
+  {
+   "name": "add_layer",
+   "title": "Add a layer",
+   "description": "Add a layer to the open project from a local file or a public https URL. Typical use after search_open_data: pick a geojson or gpkg resource url and add it, then filter it like any other layer. A remote layer is read from its server by QGIS. Returns the layer summary (layer_id, name, layer_kind, provider_type, crs_authid, feature_count). The chat of FilterMate asks the user first.",
+   "read_only": false,
+   "destructive": false,
+   "idempotent": false,
+   "open_world": true,
+   "input_schema": {
+    "properties": {
+     "source": {
+      "description": "A local data file on the QGIS machine (gpkg, shp, geojson, json, kml, gml, fgb, csv, tif; a GeoPackage table with |layername=name), or a public https URL of such a file (a resource url from search_open_data). Nothing else: no http, no provider URI, no database connection.",
+      "maxLength": 2000,
+      "minLength": 1,
+      "type": "string"
+     },
+     "name": {
+      "default": "",
+      "description": "Name of the layer in the project (default: the file name)",
+      "maxLength": 200,
+      "type": "string"
+     },
+     "kind": {
+      "default": "vector",
+      "description": "vector (default) or raster",
+      "enum": [
+       "vector",
+       "raster"
+      ],
+      "type": "string"
+     }
+    },
+    "required": [
+     "source"
+    ],
+    "type": "object"
+   }
+  },
+  {
+   "name": "remove_layers",
+   "title": "Remove layers",
+   "description": "Remove layers from the project. Their files are not deleted, but their styles and filters in this project are lost and this cannot be undone. The chat of FilterMate asks the user first. Returns done and failed.",
+   "read_only": false,
+   "destructive": true,
+   "idempotent": true,
+   "open_world": false,
+   "input_schema": {
+    "properties": {
+     "layers": {
+      "description": "Layer ids or names to remove from the project",
+      "items": {
+       "type": "string"
+      },
+      "maxItems": 1000,
+      "minItems": 1,
+      "type": "array"
+     }
+    },
+    "required": [
+     "layers"
+    ],
+    "type": "object"
+   }
+  },
+  {
+   "name": "search_open_data",
+   "title": "Search open data",
+   "description": "Search datasets on an open data platform the user allowed, and get the URLs a layer can be made of. Returns datasets [{id, title, publisher, description, page, resources: [{title, format, url}]}], the resources kept to files add_layer can open (geojson, gpkg, zip, csv, tif...). Then add_layer with a resource url (geojson or gpkg first). The query is sent to the platform.",
+   "read_only": true,
+   "destructive": false,
+   "idempotent": false,
+   "open_world": true,
+   "input_schema": {
+    "properties": {
+     "query": {
+      "description": "Words to search, in the language of the platform",
+      "maxLength": 200,
+      "minLength": 1,
+      "type": "string"
+     },
+     "platform": {
+      "default": "datagouv",
+      "description": "datagouv (data.gouv.fr, France), opendatasoft (the public Opendatasoft hub), or a host the user allowed in the FilterMate configuration",
+      "maxLength": 200,
+      "type": "string"
+     },
+     "limit": {
+      "default": 10,
+      "description": "Maximum number of datasets",
+      "maximum": 20,
+      "minimum": 1,
+      "type": "integer"
+     }
+    },
+    "required": [
+     "query"
+    ],
+    "type": "object"
+   }
+  },
+  {
    "name": "export_layers",
    "title": "Export filtered layers",
    "description": "Write layers, as filtered now, to files on the QGIS machine, below the server's export root. Writes files: a file with the same name already in the sub-folder is overwritten. The files stay on the machine running QGIS; the answer gives their paths there. Returns done (layers written), outputs ({layer name: file path}), failed and skipped.",
    "read_only": false,
    "destructive": true,
    "idempotent": true,
+   "open_world": false,
    "input_schema": {
     "properties": {
      "layers": {
