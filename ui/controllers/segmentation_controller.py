@@ -243,6 +243,8 @@ class SegmentationController:
     def _missing_model_text(self) -> str:
         from ...adapters.qgis.coverage_layers.sam_model import install_command
         state = self.model_state()
+        if state.installing_runtime:
+            return self.tr("onnxruntime is being installed, click again in a moment")
         if not state.runtime:
             return self.tr("onnxruntime is missing: run {0}, then restart QGIS").format(install_command())
         if self.downloading():
@@ -253,7 +255,7 @@ class SegmentationController:
 
     def _refresh_readiness(self) -> None:
         state = self.model_state()
-        self._host._call(self._host._raster_panel, 'set_segmentation_readiness', state.runtime, state.installed, self.downloading())
+        self._host._call(self._host._raster_panel, 'set_segmentation_readiness', state.runtime, state.installed, self.downloading(), state.installing_runtime)
 
     def install_model(self) -> None:
         """Download the model files (the panel asked the user first); one download at a time."""

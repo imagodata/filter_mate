@@ -19,8 +19,8 @@ _PKG = "fm_seg_ctrl_test"
 
 
 class ModelState:
-    def __init__(self, runtime, installed):
-        self.runtime, self.installed = runtime, installed
+    def __init__(self, runtime, installed, installing_runtime=False):
+        self.runtime, self.installed, self.installing_runtime = runtime, installed, installing_runtime
 
     @property
     def ready(self):
@@ -97,6 +97,10 @@ class TestMissingModel:
         ctrl_module._segmentation_stub.state = ModelState(False, False)
         assert "pip install onnxruntime" in controller._missing_model_text()
 
+    def test_while_pip_runs_no_command_is_told(self, ctrl_module, controller):
+        ctrl_module._segmentation_stub.state = ModelState(False, False, True)
+        assert "being installed" in controller._missing_model_text()
+
     def test_without_the_files_the_download_is_told(self, ctrl_module, controller):
         ctrl_module._segmentation_stub.state = ModelState(True, False)
         assert "Install the segmentation model first" in controller._missing_model_text()
@@ -133,14 +137,14 @@ class TestInstallModel:
         ctrl_module._segmentation_stub.state = ModelState(True, True)
         FakeDownloadTask.made[0].finish(True)
         assert not controller.downloading()
-        assert ("set_segmentation_readiness", True, True, False) in controller._host.calls
+        assert ("set_segmentation_readiness", True, True, False, False) in controller._host.calls
         assert controller._host.calls[-1] == ("set_segmentation_status", "Model installed: left click on an object, or draw a box")
 
     def test_a_failure_is_told_and_the_button_comes_back(self, ctrl_module, controller):
         controller.install_model()
         ctrl_module._segmentation_stub.state = ModelState(True, False)
         FakeDownloadTask.made[0].finish(False, "disk full")
-        assert ("set_segmentation_readiness", True, False, False) in controller._host.calls
+        assert ("set_segmentation_readiness", True, False, False, False) in controller._host.calls
         assert controller._host.calls[-1] == ("set_segmentation_status", "The model could not be downloaded: disk full")
         controller.install_model()
         assert len(ctrl_module._added_tasks) == 2
