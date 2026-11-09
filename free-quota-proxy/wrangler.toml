@@ -1,0 +1,24 @@
+name = "filtermate-free-quota"
+main = "src/index.js"
+compatibility_date = "2026-09-01"
+
+[vars]
+UPSTREAM = "https://api.anthropic.com"
+MODEL = "claude-haiku-5-5"
+MONTHLY_BUDGET_USD = "200"
+USER_MONTHLY_USD = "0.50"
+IP_MONTHLY_USD = "2"
+
+# A cheap brake per address before the ledger.
+[[ratelimits]]
+name = "LIMITER"
+namespace_id = "1001"
+simple = { limit = 60, period = 60 }
+
+[[durable_objects.bindings]]
+name = "LEDGER"
+class_name = "QuotaLedger"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["QuotaLedger"]

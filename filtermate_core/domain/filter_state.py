@@ -178,6 +178,14 @@ class CrossOperationHistory:
         self._undo.setdefault(source_layer_id, []).append(operation)
         return operation
 
+    def undo_stack(self, source_layer_id: str) -> Tuple[CrossOperation, ...]:
+        """Operations of the source still applied, oldest first."""
+        return tuple(self._undo.get(source_layer_id) or ())
+
+    def redo_stack(self, source_layer_id: str) -> Tuple[CrossOperation, ...]:
+        """Operations of the source undone, the one to redo first last."""
+        return tuple(self._redo.get(source_layer_id) or ())
+
     def clear_source(self, source_layer_id: str) -> None:
         """Drop the history of one source (vector Reset clears its own history too)."""
         self._undo.pop(source_layer_id, None)

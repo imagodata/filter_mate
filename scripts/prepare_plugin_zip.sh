@@ -88,6 +88,8 @@ rsync -a --quiet \
     --exclude='scripts/**' \
     --exclude='knowledge' \
     --exclude='knowledge/**' \
+    --exclude='/free-quota-proxy' \
+    --exclude='/free-quota-proxy/**' \
     --exclude='website' \
     --exclude='website/**' \
     --exclude='tests' \

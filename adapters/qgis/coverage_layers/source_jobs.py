@@ -327,9 +327,18 @@ class RasterSourceJob(SourceJob):
         return base if base.isValid() else layer
 
     def _raw_geometry(self, is_canceled) -> QgsGeometry:
-        from .raster_adapter import _decimation, gdal_cell_reader, selection_geometry
-        if getattr(self, '_deferred_provider', False):
+        from .raster_adapter import _decimation, gdal_cell_reader, segments_geometry, selection_geometry
+        if self.selection.segments and (getattr(self, '_rendered', False) or not self.clips_source):
+            pass  # validated polygons: nothing is read from the raster unless it is masked by them
+        elif getattr(self, '_deferred_provider', False):
             self._prepare_remote(is_canceled)
+        if self.selection.segments:
+            result = segments_geometry(self.selection, self._extent, self._width, self._height)
+            self.details.update(kept_pixels=result.kept_pixels, total_pixels=result.total_pixels, cell_size=result.cell_size)
+            if self._zone is not None and not result.geometry.isEmpty():
+                self.details['zone'] = True
+                return result.geometry.intersection(self._zone)
+            return result.geometry
         if self._provider is None:
             self.message = 'raster provider unavailable'
             return QgsGeometry()
@@ -412,7 +421,7 @@ class RasterSourceJob(SourceJob):
         return bool(self._filter_source and not getattr(self, '_rendered', False)
                     and (getattr(self, '_remote', False) or self._band_count > 1
                          or self.selection.mode is RasterSelectionMode.EXPRESSION
-                         or self.selection.derivative.is_terrain or self.selection.seeds))
+                         or self.selection.derivative.is_terrain or self.selection.seeds or self.selection.segments))
 
     def apply(self, layer) -> Optional[LayerSnapshot]:
         if getattr(self, '_rendered', False):
@@ -610,7 +619,7 @@ def apply_stored_selection(layer, snapshot: LayerSnapshot) -> Optional[LayerSnap
         selection = RasterSelection.from_dict(json.loads(snapshot.selection))
     except (TypeError, ValueError, KeyError):
         return None
-    if selection.seeds:
+    if selection.seeds or selection.segments:
         return None  # a detected object is a clip of the source, not a formula (never stored as one)
     uri, _ = selection_virtual_uri(snapshot.base_source, snapshot.base_provider, layer, selection)
     if not swap_source(layer, uri, 'virtualraster'):

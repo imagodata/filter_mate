@@ -72,6 +72,26 @@ def test_rail_order_keeps_an_unlisted_button_before_the_menus():
                              'pushButton_exploring_reset_layer_properties']
 
 
+class _Rail:
+    def __init__(self, minimum, hint):
+        self._minimum, self._hint = minimum, hint
+
+    def minimumWidth(self):
+        return self._minimum
+
+    def minimumSizeHint(self):
+        return types.SimpleNamespace(width=lambda: self._hint)
+
+
+def test_rail_width_keeps_the_minimum_of_the_display_profile():
+    """36 px buttons in a 56 px rail: a 36 px scroll area cut the rail and its centred icons."""
+    assert layout.rail_width(_Rail(56, 36)) == 56
+
+
+def test_rail_width_keeps_the_buttons_of_a_narrower_profile():
+    assert layout.rail_width(_Rail(32, 36)) == 36
+
+
 def test_rail_floor_is_the_buttons_plus_one_gap_around_each():
     # Eight 36 px tools (vector rail, 2026-10-18): 288 + 9 gaps of 6 = 342, the height under which they overlap.
     assert layout.rail_floor([36] * 8, 6) == 342

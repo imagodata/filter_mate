@@ -314,7 +314,11 @@ One tool per REST endpoint. Layers are designated by id or name (list them with 
 | `list_layers` | `GET /layers` | layers with id, name, kind (vector / raster / point cloud), CRS, active filter |
 | `filter_status` | `GET /filters/status` | vector filters active, last change, last error |
 | `filter_state` | `GET /filters/state` | every layer filtered now, of any kind (subset, clipped source) |
-| `apply_filter` | `POST /filters/apply` | sets the subset string (provider SQL `WHERE` clause) of one vector layer |
+| `apply_filter` | `POST /filters/apply` | sets the subset string (provider SQL `WHERE` clause) of one vector layer: plain conditions only, a subquery or a function outside the list answers 400 |
+| `describe_layer` | `GET /layers/details` | fields, bands (with the classes of a paletted band) or point attributes of a layer |
+| `field_values` | `GET /layers/field-values` | distinct values of a vector field, minimum and maximum; refused on web services |
+| `preview_filter` | `POST /filters/preview` | tries an expression on a private copy of the layer and counts what it keeps |
+| `map_context` | `GET /map/context` | CRS, visible extent as WKT, scale, active layer, layers with a selection |
 | `undo_filter`, `redo_filter` | `POST /filters/undo`, `/redo` | the dock's vector history (not what the other tools record, see above) |
 | `cross_filter` | `POST /filters/cross` | filters layers of any kind by the selection of a source layer of any kind (selected features, raster pixels, point cloud points) with spatial predicates, buffer, minimum coverage, combine operator |
 | `geometry_filter` | `POST /filters/geometry` | same, by a WKT geometry in a given CRS |
@@ -322,6 +326,12 @@ One tool per REST endpoint. Layers are designated by id or name (list them with 
 | `clear_filters` | `POST /filters/clear` | back to the original source, no filter (reverts all of the above except undo / redo) |
 | `list_favorites`, `apply_favorite` | `GET /favorites`, `POST /favorites/{id}/apply` | saved filters |
 | `export_layers` | `POST /export` | writes the layers as filtered now below the export root of the QGIS machine |
+| `zoom_to` | `POST /map/zoom` | zooms the map to a layer, its selection, a WKT extent or everything |
+| `select_features` | `POST /layers/select` | selects by QGIS expression (not SQL), or clears the selection |
+| `set_layers_visibility` | `POST /layers/visibility` | checks or unchecks layers in the layer tree |
+| `add_layer` | `POST /layers/add` | adds a layer from a path, an https URL or a provider URI (http refused) |
+| `remove_layers` | `POST /layers/remove` | removes layers from the project (files kept) |
+| `search_open_data` | `GET /open-data/search` | datasets of an allowed open data platform, with their geo resources |
 
 The tools carry MCP annotations: the four readers are `readOnlyHint`; no filter tool is destructive (a filter changes
 what a layer shows, never its data, and `clear_filters` reverts it); `export_layers` is the only one flagged

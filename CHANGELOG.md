@@ -2,6 +2,32 @@
 
 All notable changes to FilterMate will be documented in this file.
 
+## [5.0.3] - 2026-11-09
+
+- **Interactive segmentation of a raster (experimental).** A **Segment** target in the PIPETTE group: click on an object or drag a box, and a SAM 2.1 model draws it locally, on the CPU; Enter validates. Validated objects are plain polygons (`RasterSelection.segments`), so the filter applied to the other layers needs no model; Processing and the REST API do not accept them yet. Best on buildings and well delimited objects (median IoU 0.82 with a box against 0.52 for the object detector with 3 clicks); parcels and trees are not validated. FilterMate ships neither the model nor its runtime: `onnxruntime`, declared by the `python_dependencies` key of `metadata.txt`, is installed into your QGIS profile once you confirm, at the first click on Segment, and the panel offers to download the model (62 MB, pinned revision, every file checked against its SHA-256) into your QGIS profile. See `docs/SEGMENTATION.md`. The object detector stays as it was.
+
+## [5.0.2] - 2026-11-06
+
+Patch release on 5.0.1: changing between vector layers no longer empties the single selection or selects a feature nobody picked, the dock stays usable on small scaled screens, several features that failed only in QGIS work, and the Configuration tab gets a search bar.
+
+- **One order for the EXPLORING tools.** The rail shows its buttons in the same order on vector, raster and point cloud layers.
+- **Histogram range stays blue when QGIS is not the active window.** It followed the inactive palette and turned grey on Windows.
+- **Single selection empty after a layer change.** The link filter of the previous layer (built from its multiple selection) stayed on the single-selection feature picker: it is a property of the widget and `setLayer()` does not clear it, so the new layer was fetched through the old layer's filter and showed no feature. The reload of the exploring widgets now clears it (the link logic re-applies one for the new layer when relevant).
+- **A feature the user never picked was selected after a layer change.** The picker keeps its feature id across `setLayer()`: fid 3 picked on one layer showed the unrelated fid 3 of the next layer as selected, and a filter started from it. The picker now shows no feature on the new layer, and still keeps its feature on a reload of the same layer.
+- **The display field chosen for a layer was lost at each layer change.** The `fieldChanged("")` echo of the widget clear emptied the stored expression of the layer being switched to, and a debounced replay wrote it back. Neither happens during a layer change any more, and a field change still pending when the layer changes no longer lands on the new layer. The buffer validation that this replay ran as a side effect (no negative buffer on points and lines) now runs explicitly.
+- **A vector layer picked before its registration is shown once registered**, as rasters and point clouds already were; the pick was lost and the previous layer came back.
+- **Two smaller layer-change defects.** The feature picker detach/reattach around subset changes no longer puts the picker back on the previous layer when a layer change took it meanwhile, and the truncation tooltips of the expression widgets no longer stop updating after the first layer change.
+- **The dock could stop reacting after a layer was removed.** The results of a short removal task could land while its start handler cleared the widgets, and the handler then disconnected the dock's signals with nothing left to reconnect them: the current-layer list no longer answered until the next layer task. The handler now disconnects first.
+- **The UI profile setting works.** Changing `UI_PROFILE` in the Configuration tab did nothing (an import failing in QGIS, and a method that did not exist), and the stored value was ignored at startup. `auto`, `compact`, `normal` and `hidpi` now apply at once and at startup, and detection reads the screen of the QGIS window instead of the primary screen.
+- **Features that failed in QGIS only.** Several imports worked in the tests but not in QGIS. A custom expression passed to the exploring features raised an error, a layer saved without its linking option raised one too, choosing where to save a single exported layer with a format failed, and the expression debounce setting was ignored.
+- **A custom expression matching nothing no longer empties the single selection list.** With linking on, the single list stayed empty even after leaving the custom selection group. The filter now applies only while that group is in use.
+- **EXPLORING tools cut on the right.** From 1920 x 1080 up, the rail's scroll area took the width of the buttons rather than the rail's own, so the icons were cut and off centre. This came with the scrolling rail below.
+- **Dock opened on a raster or web layer.** With such an active layer in QGIS the current-layer combo box showed a layer the panel had not applied: no layer card, and no Zone or "more" button on the rail until another layer was picked. The layer shown by the combo box is now applied.
+- **Overlapping EXPLORING tools on short docks.** When the band was shorter than the tools at their smallest size (a 720 px screen), they overlapped. The tools now scroll with the mouse wheel in that case.
+- **Search bar in the Configuration tab.** It was written long ago but never appeared in QGIS. It finds a setting by name, opens its branch and selects it (Ctrl+F while in the tab, Escape to clear).
+- **Scrolling the dock no longer changes a value by accident.** A wheel turned while a list or a number passed under the pointer changed it without a click, including the feature used as the source of the next filter. Lists and numbers now answer the wheel only once clicked; otherwise the panel scrolls.
+- **Dock too tall on small scaled screens.** A small screen with display scaling (a 1080p laptop at 150 %: 1280x720 logical px) matched the HIDPI profile before the resolution check and got its 600 px dock minimum height, taller than its dock area. A usable logical height under 800 px now selects the COMPACT profile whatever the scaling, read from the screen's available geometry (taskbar excluded).
+
 ## [5.0.1] - 2026-10-22
 
 Patch release on 5.0.0: the Zone on the vector and raster rails, checkbox band selection and band display, centroid controls for every source kind, and two dock fixes.

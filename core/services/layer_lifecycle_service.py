@@ -707,6 +707,9 @@ class LayerLifecycleService:
             dockwidget._plugin_busy = False
             dockwidget._updating_layers = False
             dockwidget.PROJECT_LAYERS.clear()
+            # A layer picked before its registration, in the outgoing project: reopening that project
+            # (same layer ids) would jump to it.
+            dockwidget._awaited_vector_pick = None
             picker = getattr(dockwidget, 'checkableComboBoxFeaturesListPickerWidget_exploring_multiple_selection', None)
             if picker is not None:
                 try:

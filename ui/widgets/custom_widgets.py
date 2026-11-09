@@ -119,6 +119,22 @@ def apply_feature_picker_fetch_limit(picker) -> None:
         logger.debug(f"apply_feature_picker_fetch_limit: skipped ({exc})")
 
 
+# FID_NULL of the QGIS API (the lowest qint64), not exposed to Python. -1 would add a "(-1)" row.
+_FID_NULL = -(2 ** 63)
+
+
+def clear_feature_picker_feature(picker) -> None:
+    """Select no feature on a QgsFeaturePickerWidget (it needs ``setAllowNull(True)``).
+
+    The picker keeps its feature id across ``setLayer()``: without this, the feature
+    with the same id on the next layer shows up as selected, and is filtered on.
+    """
+    try:
+        picker.setFeature(_FID_NULL)
+    except (RuntimeError, TypeError, AttributeError, OverflowError) as exc:
+        logger.debug(f"clear_feature_picker_feature: skipped ({exc})")
+
+
 logger = logging.getLogger('FilterMate.UI.Widgets.CustomWidgets')
 
 
