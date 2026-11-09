@@ -6,14 +6,18 @@ The key is never written in a settings or configuration file.
 from __future__ import annotations
 
 import json
-from dataclasses import dataclass
+import logging
+from dataclasses import dataclass, field
 from typing import Optional, Tuple
 
 from qgis.core import QgsApplication, QgsAuthMethodConfig, QgsSettings
 from qgis.PyQt.QtCore import QCoreApplication
 
-from ...core.agent.providers import PRESETS
+from ...core.agent.mcp_server import DEFAULT_PORT
+from ...core.agent.providers import FREE_PRESET, FREE_QUOTA_URL, PRESETS
 from ...core.agent.providers.base import ProviderConfig
+
+logger = logging.getLogger("FilterMate.agent")
 
 _PREFIX = "filter_mate/agent/"
 _METHOD = "Basic"
@@ -31,8 +35,22 @@ class KeyStoreError(RuntimeError):
     """The key could not be stored or read; the message is for the user."""
 
 
+def free_quota_url() -> str:
+    """Where the free quota is, "" when none is offered. ``APP.OPTIONS.AGENT.free_quota_url`` overrides the release."""
+    override = ""
+    try:
+        from ...config import config
+        section = config.ENV_VARS.get("CONFIG_DATA", {}).get("APP", {}).get("OPTIONS", {}).get("AGENT", {})
+        override = str(config._get_option_value(section.get("free_quota_url"), "") or "").strip()
+    except Exception:  # the free quota is an offer, not a dependency
+        logger.debug("free_quota_url unreadable", exc_info=True)
+    return (override or FREE_QUOTA_URL).rstrip("/")
+
+
 def target_of(preset: str, base_url: str) -> str:
     """The server a key and a consent are for."""
+    if preset == FREE_PRESET:
+        return free_quota_url()
     return base_url.strip().rstrip("/") or PRESETS[preset][1]
 
 
@@ -52,10 +70,15 @@ class AgentSettings:
     # Where the consent was given and the key was typed for: neither follows a change of provider.
     consent_target: str = ""
     key_target: str = ""
+    # The MCP server of the plugin: off until the user turns it on. The token is not the paid key of a provider: it is
+    # copied in the configuration of the client anyway, and reading it must not ask for the master password at startup.
+    mcp_enabled: bool = False
+    mcp_port: int = DEFAULT_PORT
+    mcp_token: str = field(default="", repr=False)
 
     @property
     def needs_key(self) -> bool:
-        return self.preset != "ollama"
+        return self.preset not in ("ollama", FREE_PRESET)
 
     @property
     def target(self) -> str:
@@ -63,7 +86,7 @@ class AgentSettings:
 
     @property
     def has_consent(self) -> bool:
-        return self.consent and self.consent_target == self.target
+        return self.consent and bool(self.target) and self.consent_target == self.target
 
     @property
     def has_key(self) -> bool:
@@ -86,6 +109,14 @@ def _enabled_sources(settings) -> Tuple[str, ...]:
     return tuple(str(item) for item in value) if isinstance(value, list) else ()
 
 
+def _port(value) -> int:
+    try:
+        port = int(value)
+    except (TypeError, ValueError):
+        return DEFAULT_PORT
+    return port if 1024 <= port <= 65535 else DEFAULT_PORT
+
+
 def load_settings() -> AgentSettings:
     settings = QgsSettings()
     preset = str(settings.value(_PREFIX + "preset", DEFAULT_PRESET) or DEFAULT_PRESET)
@@ -99,7 +130,10 @@ def load_settings() -> AgentSettings:
         custom_sources=str(settings.value(_PREFIX + "custom_sources", "[]") or "[]"),
         authcfg=str(settings.value(_PREFIX + "authcfg", "") or ""),
         consent_target=str(settings.value(_PREFIX + "consent_target", "") or ""),
-        key_target=str(settings.value(_PREFIX + "key_target", "") or ""))
+        key_target=str(settings.value(_PREFIX + "key_target", "") or ""),
+        mcp_enabled=settings.value(_PREFIX + "mcp_enabled", False, type=bool),
+        mcp_port=_port(settings.value(_PREFIX + "mcp_port", DEFAULT_PORT)),
+        mcp_token=str(settings.value(_PREFIX + "mcp_token", "") or ""))
 
 
 def save_settings(values: AgentSettings) -> None:
@@ -114,6 +148,9 @@ def save_settings(values: AgentSettings) -> None:
     settings.setValue(_PREFIX + "authcfg", values.authcfg)
     settings.setValue(_PREFIX + "consent_target", values.consent_target)
     settings.setValue(_PREFIX + "key_target", values.key_target)
+    settings.setValue(_PREFIX + "mcp_enabled", values.mcp_enabled)
+    settings.setValue(_PREFIX + "mcp_port", values.mcp_port)
+    settings.setValue(_PREFIX + "mcp_token", values.mcp_token)
 
 
 def _auth_manager():
@@ -181,5 +218,10 @@ def delete_key(authcfg: str) -> None:
 
 def provider_config(values: AgentSettings, key: Optional[str]) -> ProviderConfig:
     kind, base_url = PRESETS[values.preset]
+    if values.preset == FREE_PRESET:
+        url = free_quota_url()
+        if not url:  # an empty address means the official API to a provider, which must never see this token
+            raise ValueError(_tr("The free quota is not available."))
+        return ProviderConfig(kind=kind, model=values.model, base_url=url, api_key=key or "", max_tokens=MAX_TOKENS)
     return ProviderConfig(kind=kind, model=values.model, base_url=values.base_url or base_url, api_key=key or "",
                           max_tokens=MAX_TOKENS)

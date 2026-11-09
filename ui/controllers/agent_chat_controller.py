@@ -13,14 +13,15 @@ from qgis.PyQt.QtWidgets import QDialog
 from ...adapters.agent.qt_transport import QtTransport
 from ...adapters.agent.settings import (
     AgentSettings, KeyStoreError, delete_key, load_settings, provider_config, read_key, save_settings, store_key,
-    target_of,
+    free_quota_url, target_of,
 )
-from ...adapters.agent import transcript_store
+from ...adapters.agent import free_quota, transcript_store
 from ...adapters.agent.bounded_http import abort_active
 from ...adapters.agent.mcp_connection import McpConnection
 from ...adapters.agent.turn_checkpoint import TurnCheckpoint
 from ...core.agent.chat_engine import OUTCOME_CANCELLED, OUTCOME_FAILED, OUTCOME_STOPPED, ChatEngine, ChatOutcome
 from ...core.agent.mcp_client import McpError
+from ...core.agent.mcp_server import EXTERNAL_MARK, one_line
 from ...core.agent.open_data import KIND_STAC, KIND_WFS, display_source, parse_extra_domains
 from ...core.agent.sources import (
     KIND_MCP, all_sources, custom_from_json, describe_enabled, enabled, platform_domains, platform_name,
@@ -28,7 +29,7 @@ from ...core.agent.sources import (
 from ...core.agent.messages import (
     ERROR_AUTH, ERROR_NETWORK, ERROR_QUOTA, ERROR_RATE_LIMIT, ToolCallPart, ToolResultPart,
 )
-from ...core.agent.providers import create_provider
+from ...core.agent.providers import FREE_PRESET, create_provider
 from ...core.agent.session import AgentSession
 from ...core.agent.system_prompt import SYSTEM_PROMPT
 from ...core.agent.tool_catalog import chat_tools
@@ -39,6 +40,7 @@ from ...filtermate_api.accessor import FilterRejected
 from ...filtermate_api.config import _default_export_root
 from ...filtermate_api.main_thread import QGISBusy
 from ...filtermate_api.qgis_accessor import QGISFilterMateAccessor
+from .agent_mcp_bridge import AgentMcpBridge
 from ..widgets.agent_panel import PRESET_LABELS, AgentPanel, AgentSettingsDialog, ask_plain
 
 logger = logging.getLogger("FilterMate.agent")
@@ -104,20 +106,28 @@ class AgentChatController(QObject):
         QgsProject.instance().cleared.connect(self._on_project_cleared)
         QgsProject.instance().readProject.connect(self._on_project_read)
         QgsProject.instance().fileNameChanged.connect(self._on_file_name_changed)
+        self._mcp = AgentMcpBridge(self, self)
+        self._journal_later = []
         trailer = add_page(self.panel)  # last: a failure before leaves the accordion untouched
         self._header_label = trailer if hasattr(trailer, "setText") else None
+        try:
+            self._sync_mcp()
+        except Exception:  # the chat does not depend on it
+            logger.exception("MCP server could not be set up")
         self._refresh_ready()
 
     def _refresh_ready(self) -> None:
         """Whether the agent can answer, without opening the key store (it may ask for the master password)."""
         values = load_settings()
         destination = f"{PRESET_LABELS.get(values.preset, values.preset)} · {values.model}"
+        if self._mcp.listening:
+            destination += " · MCP"
         if self._header_label is not None:
             try:
                 from ..styles.mockup_design import tokens
                 muted = tokens(bool(getattr(getattr(self._parent_widget, "_icon_manager", None), "is_dark_mode", False)))
                 self._header_label.setStyleSheet(f"color: {muted['fm_text_muted']}; font-weight: normal; font-size: 11px;")
-                self._header_label.setText(destination if values.ready else "")
+                self._header_label.setText(destination if values.ready else ("MCP" if self._mcp.listening else ""))
             except RuntimeError:  # the header is gone with its dock
                 self._header_label = None
         self.panel.set_ready(values.ready, "" if self._header_label is not None else destination)
@@ -131,6 +141,7 @@ class AgentChatController(QObject):
     def shutdown(self) -> None:
         """The plugin unloads: nothing may arrive afterwards."""
         self.stop()
+        self._mcp.close()
         for signal, handler in ((QgsProject.instance().cleared, self._on_project_cleared),
                                 (QgsProject.instance().readProject, self._on_project_read),
                                 (QgsProject.instance().fileNameChanged, self._on_file_name_changed)):
@@ -191,8 +202,11 @@ class AgentChatController(QObject):
         self._refresh_history()
         self.panel.show_history()
 
+    def chat_busy(self) -> bool:
+        return self._building or (self._engine is not None and self._engine.busy)
+
     def _on_redo(self) -> None:
-        if self._engine is not None and self._engine.busy:
+        if self.chat_busy() or self._mcp.busy:
             return
         busy = self._checkpoint.busy()
         if busy:
@@ -206,7 +220,7 @@ class AgentChatController(QObject):
         self._refresh_history()
 
     def _on_resend(self, text: str) -> None:
-        if text and not (self._engine is not None and self._engine.busy):
+        if text and not self.chat_busy() and not text.startswith(EXTERNAL_MARK):
             self.panel.show_thread()
             self._on_send(text)
 
@@ -225,13 +239,15 @@ class AgentChatController(QObject):
     def open_settings(self) -> bool:
         """Ask for the settings; True when saved."""
         values = load_settings()
-        dialog = AgentSettingsDialog(values, target_of, self._parent_widget, tester=self._test_source)
+        dialog = AgentSettingsDialog(values, target_of, self._parent_widget, tester=self._test_source,
+                                     free_available=bool(free_quota_url()), mcp_error=self._mcp.error)
         try:
             if dialog.exec() != QDialog.DialogCode.Accepted:
                 return False
             authcfg = values.authcfg
             key_target = values.key_target
-            key = dialog.key.text().strip()
+            # A key left in a field the chosen provider hides must not replace the stored one.
+            key = dialog.key.text().strip() if dialog.chosen_preset() not in (FREE_PRESET, "ollama") else ""
             target = dialog.chosen_target()
             try:
                 if key:
@@ -242,39 +258,36 @@ class AgentChatController(QObject):
             except KeyStoreError as exc:
                 self._say(str(exc), error=True)
                 return False
+            chosen = (dialog.chosen_preset(), dialog.chosen_model(), dialog.base_url.text().strip(), dialog.consent.isChecked(),
+                      dialog.send_values.isChecked(), dialog.chosen_sources(), dialog.chosen_custom_sources(), authcfg, target,
+                      key_target)
+            same_chat = chosen == (values.preset, values.model, values.base_url, values.consent, values.send_values,
+                                   values.enabled_sources, values.custom_sources, values.authcfg, values.consent_target,
+                                   values.key_target) and not key
             save_settings(AgentSettings(preset=dialog.chosen_preset(), model=dialog.chosen_model(),
                                         base_url=dialog.base_url.text().strip(), consent=dialog.consent.isChecked(),
                                         send_values=dialog.send_values.isChecked(), enabled_sources=dialog.chosen_sources(),
                                         custom_sources=dialog.chosen_custom_sources(),
                                         authcfg=authcfg,
-                                        consent_target=target, key_target=key_target))
+                                        consent_target=target, key_target=key_target,
+                                        mcp_enabled=dialog.mcp_enabled.isChecked(), mcp_port=dialog.mcp_port.value(),
+                                        mcp_token=dialog.chosen_mcp_token()))
         finally:
             dialog.key.clear()
             dialog.deleteLater()
-        self._reset_view()  # another provider cannot continue this conversation
+        if not same_chat:
+            self._reset_view()  # another provider cannot continue this conversation
+        self._sync_mcp()
         self._refresh_ready()
         return True
 
-    def _build_engine(self) -> Optional[ChatEngine]:
-        """A conversation from the settings; None, after saying why, when they are not complete."""
-        values = load_settings()
-        if not values.has_consent or not values.model:
-            if not self.open_settings():
-                return None
-            values = load_settings()
-            if not values.has_consent or not values.model:
-                self._say(_tr("Choose a model and agree to send your data to use the agent."), offer_settings=True)
-                return None
-        try:
-            # Only the key typed for this server, and none for a local one.
-            key = read_key(values.authcfg) if values.needs_key and values.has_key else ""
-            if values.needs_key and not key:
-                self._say(_tr("Enter your API key in the agent settings."), offer_settings=True)
-                return None
-            provider = create_provider(provider_config(values, key))
-        except (KeyStoreError, ValueError) as exc:
-            self._say(str(exc), error=True, offer_settings=True)
-            return None
+    def _sync_mcp(self) -> None:
+        self._mcp.sync()
+        if self._mcp.error:
+            self._say(_tr("The MCP server could not start: {}").format(self._mcp.error), error=True, offer_settings=True)
+
+    def tools_and_handlers(self, values: AgentSettings):
+        """The tools of the plugin under the ticks of the settings, without the external connectors."""
         active = enabled(all_sources(custom_from_json(values.custom_sources)), values.enabled_sources)
         kinds = {source.kind for source in active}
         accessor = self._accessor()
@@ -295,6 +308,31 @@ class AgentChatController(QObject):
         handlers = build_handlers(accessor, _default_export_root(), allow_remote_sources=bool(data_sources or configured_names),
                                   platforms=[platform_name(source) for source in data_sources] + configured_names,
                                   extra_domains=",".join(item for item in (platform_domains(active), configured) if item))
+        return tools, handlers, active
+
+    def _build_engine(self) -> Optional[ChatEngine]:
+        """A conversation from the settings; None, after saying why, when they are not complete."""
+        values = load_settings()
+        if not values.has_consent or not values.model:
+            if not self.open_settings():
+                return None
+            values = load_settings()
+            if not values.has_consent or not values.model:
+                self._say(_tr("Choose a model and agree to send your data to use the agent."), offer_settings=True)
+                return None
+        try:
+            # Only the key typed for this server, and none for a local one.
+            key = read_key(values.authcfg) if values.needs_key and values.has_key else ""
+            if values.preset == FREE_PRESET and free_quota_url():
+                key = free_quota.token_for(free_quota_url())
+            if values.needs_key and not key:
+                self._say(_tr("Enter your API key in the agent settings."), offer_settings=True)
+                return None
+            provider = create_provider(provider_config(values, key))
+        except (KeyStoreError, free_quota.FreeQuotaError, ValueError) as exc:
+            self._say(str(exc), error=True, offer_settings=True)
+            return None
+        tools, handlers, active = self.tools_and_handlers(values)
         self.panel.set_working(True)
         try:
             unreachable = self._add_connectors(active, tools, handlers)
@@ -389,8 +427,11 @@ class AgentChatController(QObject):
     # --- what the user does -----------------------------------------------------
 
     def _on_send(self, text: str) -> None:
-        if self._building or (self._engine is not None and self._engine.busy):
+        if self.chat_busy():
             return  # connecting to a connector lets the event loop run
+        if self._mcp.busy:
+            self._say(_tr("Another application is changing the project: try again in a moment."))
+            return
         if self._engine is None:
             self._building = True
             try:
@@ -416,7 +457,7 @@ class AgentChatController(QObject):
             self._engine.cancel()
 
     def _on_undo(self) -> None:
-        if self._engine is not None and self._engine.busy:
+        if self.chat_busy() or self._mcp.busy:
             return
         busy = self._checkpoint.busy()
         if busy:
@@ -487,16 +528,48 @@ class AgentChatController(QObject):
     def on_tool_end(self, call: ToolCallPart, result: ToolResultPart) -> None:
         if result.is_error:
             logger.info("Agent tool %s refused: %s", call.name, result.content[:300])
+        self._log_action(call, result, self._describe(call))
+        self.panel.set_status(_tr("Thinking…"))
+
+    def _log_action(self, call: ToolCallPart, result: ToolResultPart, label: str, keep: bool = True) -> None:
+        """What changes something, or leaves the machine, stays in the thread."""
         spec = self._tools.get(call.name)
-        if spec is not None and (not spec.read_only or spec.open_world):  # what leaves the machine stays in the thread
+        if spec is not None and (not spec.read_only or spec.open_world):
             self._flush_answer()
-            detail = str(call.arguments.get("expression") or "")[:MAX_DETAIL_CHARS]
+            detail = one_line(call.arguments.get("expression") or "", MAX_DETAIL_CHARS)
             if call.name in self._connector_labels:
                 detail = json.dumps(call.arguments, ensure_ascii=False, default=str)[:MAX_DETAIL_CHARS]
             count = self._kept_count(result)
-            self.panel.add_action(self._describe(call), not result.is_error, detail, count)
-            self._record("action", self._describe(call), ok=not result.is_error, detail=detail, count=count)
-        self.panel.set_status(_tr("Thinking…"))
+            self.panel.add_action(label, not result.is_error, detail, count)
+            if keep:
+                self._record("action", label, ok=not result.is_error, detail=detail, count=count)
+
+    # --- what another application does (AgentMcpBridge) --------------------------
+
+    def label_of(self, call: ToolCallPart, client: str) -> str:
+        return one_line(f"{client}: {self._describe(call)}")
+
+    def journal(self, call: ToolCallPart, result: ToolResultPart, client: str) -> None:
+        """A line in the thread, without cutting an answer being written."""
+        if self.chat_busy():
+            self._journal_later.append((call, result, client))
+            return
+        # No project key: one is closing or opening, and a line kept now would replace what is stored for it.
+        self._log_action(call, result, self.label_of(call, client), keep=bool(self._transcript_key))
+        self._save_transcript()
+
+    def _flush_journal(self) -> None:
+        waiting, self._journal_later = self._journal_later, []
+        for item in waiting:
+            self.journal(*item)
+
+    def history_changed(self) -> None:
+        if not self.chat_busy():
+            self._refresh_history()
+
+    def confirm_external(self, call: ToolCallPart, client: str) -> bool:
+        """The usual question, under the name of the application that asks."""
+        return self._confirm(call, _tr("Another application: {}").format(client))
 
     @staticmethod
     def _kept_count(result: ToolResultPart) -> str:
@@ -513,7 +586,10 @@ class AgentChatController(QObject):
         return f"{data['feature_count']:,} / {total:,}" if isinstance(total, int) and total >= 0 else f"{data['feature_count']:,}"
 
     def confirm(self, call: ToolCallPart) -> bool:
-        names = [str(layer)[:100] for layer in (call.arguments.get("layers") or [])]
+        return self._confirm(call, _tr("FilterMate agent"))
+
+    def _confirm(self, call: ToolCallPart, title: str) -> bool:
+        names = [one_line(layer, 100) for layer in (call.arguments.get("layers") or [])]
         layers = "\n".join(names[:MAX_LISTED]) + (f"\n(+{len(names) - MAX_LISTED})" if len(names) > MAX_LISTED else "")
         if call.name in self._connector_labels:
             text = _tr("The agent wants to run this action on an external connector:\n{}\n{}\n\nDo you agree?").format(
@@ -521,7 +597,7 @@ class AgentChatController(QObject):
                 json.dumps(call.arguments, ensure_ascii=False, default=str)[:500])
         elif call.name == "add_service_layer":
             text = _tr("The agent wants to add this layer of a web service to the project:\n{} · {}\n\nDo you agree?").format(
-                str(call.arguments.get("platform", ""))[:100], str(call.arguments.get("typename", ""))[:200])
+                one_line(call.arguments.get("platform", ""), 100), one_line(call.arguments.get("typename", ""), 200))
         elif call.name == "add_layer":
             text = _tr("The agent wants to add this layer to the project:\n{}\n\nA remote source is read from its "
                        "server by QGIS, and what the layer holds can be sent to the provider of the agent. "
@@ -531,17 +607,26 @@ class AgentChatController(QObject):
                        "filters here are lost):\n{}\n\nDo you agree?").format(layers)
         else:
             text = _tr("The agent wants to export these layers to files:\n{}\n\nDo you agree?").format(layers)
-        return self._ask_user(_tr("FilterMate agent"), text)
+        return self._ask_user(title, text)
 
     def on_finished(self, outcome: ChatOutcome) -> None:
         self.panel.set_working(False)
         self._flush_answer()
         self.panel.end_answer()
+        self._flush_journal()
         self._save_transcript()
         self._refresh_history()
         if outcome.status == OUTCOME_FAILED and outcome.error is not None:
             self._give_back_request()
-            self._say(self._error_message(outcome.error), error=True, offer_settings=outcome.error.kind in FIXED_IN_SETTINGS)
+            free = load_settings().preset == FREE_PRESET
+            if free and outcome.error.status == 401:  # the relay no longer knows this token: ask for another
+                free_quota.forget_token()
+                self._engine = None
+                self._say(_tr("Access to the free quota was renewed: send your request again."))
+                return
+            message = (_tr("The free quota is used up for this month. Enter your own API key in the agent settings.")
+                       if free and outcome.error.kind == ERROR_QUOTA else self._error_message(outcome.error))
+            self._say(message, error=True, offer_settings=outcome.error.kind in FIXED_IN_SETTINGS)
             return
         if outcome.status == OUTCOME_CANCELLED:
             self._give_back_request()

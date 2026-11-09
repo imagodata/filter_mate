@@ -13,13 +13,14 @@ from typing import Tuple
 from qgis.PyQt.QtCore import QCoreApplication, QEvent, QSize, Qt, pyqtSignal
 from qgis.PyQt.QtGui import QColor, QFont, QTextBlockFormat, QTextCharFormat, QTextCursor
 from qgis.PyQt.QtWidgets import (
-    QCheckBox, QComboBox, QDialog, QDialogButtonBox, QFormLayout, QFrame, QHBoxLayout, QLabel, QLineEdit, QMenu,
-    QListWidget, QListWidgetItem, QMessageBox, QProgressBar, QPushButton, QScrollArea, QSizePolicy, QStackedWidget,
+    QApplication, QCheckBox, QComboBox, QDialog, QDialogButtonBox, QFormLayout, QFrame, QHBoxLayout, QLabel, QLineEdit, QMenu,
+    QListWidget, QListWidgetItem, QMessageBox, QProgressBar, QPushButton, QScrollArea, QSizePolicy, QSpinBox, QStackedWidget,
     QTabWidget, QTextEdit, QToolButton, QTreeWidget, QTreeWidgetItem, QVBoxLayout, QWidget,
 )
 
+from ...core.agent.mcp_server import EXTERNAL_MARK, claude_code_command, client_config, new_token, server_url
 from ...core.agent.open_data import KIND_CKAN, KIND_OPENDATASOFT, KIND_WFS
-from ...core.agent.providers import PRESETS
+from ...core.agent.providers import FREE_MODEL, FREE_PRESET, PRESETS
 from ...core.agent.sources import (
     KIND_MCP, KIND_STAC, MAX_CUSTOM, ORIGIN_COMMUNITY, ORIGIN_LOCAL, ORIGIN_OFFICIAL, ORIGIN_USER, all_sources, custom_from_json,
     custom_to_json, make_source,
@@ -35,7 +36,7 @@ STATUS_MAX_HEIGHT = 48
 _WELCOME_PAGE, _THREAD_PAGE, _HISTORY_PAGE = 0, 1, 2
 _TURN_ROLE = Qt.ItemDataRole.UserRole
 
-PRESET_LABELS = {"anthropic": "Claude (Anthropic)", "mistral": "Mistral", "openai": "OpenAI", "ollama": "Ollama (local)"}
+PRESET_LABELS = {FREE_PRESET: "FilterMate (free quota)", "anthropic": "Claude (Anthropic)", "mistral": "Mistral", "openai": "OpenAI", "ollama": "Ollama (local)"}
 # Only what can be named without going stale: the user can type any model.
 MODEL_SUGGESTIONS = {"anthropic": ("claude-haiku-5-5", "claude-sonnet-5-5", "claude-opus-5-5")}
 EXAMPLES = (
@@ -92,6 +93,9 @@ def ask_plain(parent, title: str, text: str) -> bool:
     box.setText(text)
     box.setStandardButtons(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
     box.setDefaultButton(QMessageBox.StandardButton.No)
+    box.show()
+    box.raise_()  # the question can come from another application, the one in front
+    box.activateWindow()
     answer = box.exec()
     box.deleteLater()
     return answer == QMessageBox.StandardButton.Yes
@@ -308,7 +312,9 @@ class AgentPanel(QFrame):
         self._on_turn_selected()
 
     def _on_turn_selected(self) -> None:
-        self.resend_button.setEnabled(bool(self.history_list.selectedItems()) and not self._working)
+        items = self.history_list.selectedItems()
+        typed_here = bool(items) and not str(items[0].data(_TURN_ROLE) or "").startswith(EXTERNAL_MARK)
+        self.resend_button.setEnabled(typed_here and not self._working)
 
     def _resend_selected(self) -> None:
         items = self.history_list.selectedItems()
@@ -513,7 +519,7 @@ class AgentPanel(QFrame):
 class AgentSettingsDialog(QDialog):
     """Provider, model, key and what may leave this machine."""
 
-    def __init__(self, values, target_of, parent=None, tester=None) -> None:
+    def __init__(self, values, target_of, parent=None, tester=None, free_available=False, mcp_error="") -> None:
         super().__init__(parent)
         self.setWindowTitle(_tr("FilterMate agent"))
         self._tester = tester
@@ -521,12 +527,22 @@ class AgentSettingsDialog(QDialog):
         self._target_of = target_of
         self.forget_key = False
         self.preset = QComboBox(self)
-        for name in PRESETS:
-            self.preset.addItem(PRESET_LABELS.get(name, name), name)
-        self.preset.setCurrentIndex(max(self.preset.findData(values.preset), 0))
+        for name in sorted(PRESETS, key=lambda item: item != FREE_PRESET):  # the free quota first, when there is one
+            if name != FREE_PRESET or free_available:
+                self.preset.addItem(PRESET_LABELS.get(name, name), name)
+        # A first use starts on what needs no key; a free quota that went away falls back on the first provider.
+        first_use = free_available and not values.model
+        self.preset.setCurrentIndex(max(self.preset.findData(FREE_PRESET if first_use else values.preset), 0))
+        self.model_label = QLabel(_tr("Model"), self)
         self.model = QComboBox(self)
         self.model.setEditable(True)
         self.base_url = QLineEdit(values.base_url, self)
+        self.address_label = QLabel(_tr("Address"), self)
+        self.free_notice = QLabel(_tr(
+            "A few free requests a month, through the relay of FilterMate to Claude (Anthropic), under the terms of "
+            "Anthropic. The relay counts what is spent and keeps no conversation. When it is used up, choose a provider "
+            "and enter your own API key."), self)
+        self.free_notice.setWordWrap(True)
         self.key_label = QLabel(_tr("API key"), self)
         self.key = QLineEdit(self)
         self.key.setEchoMode(QLineEdit.EchoMode.Password)
@@ -550,16 +566,17 @@ class AgentSettingsDialog(QDialog):
 
         form = QFormLayout()
         form.addRow(_tr("Provider"), self.preset)
-        form.addRow(_tr("Model"), self.model)
+        form.addRow(self.model_label, self.model)
         form.addRow(self.key_label, self.key)
         form.addRow("", self.forget_button)
-        form.addRow(_tr("Address"), self.base_url)
+        form.addRow(self.address_label, self.base_url)
         buttons = QDialogButtonBox(QDialogButtonBox.StandardButton.Save | QDialogButtonBox.StandardButton.Cancel, self)
         buttons.accepted.connect(self.accept)
         buttons.rejected.connect(self.reject)
         general = QWidget(self)
         general_layout = QVBoxLayout(general)
         general_layout.addLayout(form)
+        general_layout.addWidget(self.free_notice)
         general_layout.addWidget(notice)
         general_layout.addWidget(self.send_values)
         general_layout.addWidget(self.consent)
@@ -567,9 +584,82 @@ class AgentSettingsDialog(QDialog):
         self.tabs = QTabWidget(self)
         self.tabs.addTab(general, _tr("Provider"))
         self.tabs.addTab(self._build_sources(values), _tr("Sources"))
+        self.tabs.addTab(self._build_applications(values), _tr("Other applications"))
+        if mcp_error:
+            self.mcp_result.setText(_tr("The MCP server could not start: {}").format(mcp_error))
         layout = QVBoxLayout(self)
         layout.addWidget(self.tabs)
         layout.addWidget(buttons)
+
+    def _build_applications(self, values) -> QWidget:
+        """The MCP server of the plugin: off by default, and only ever reachable from this computer."""
+        self._mcp_token = values.mcp_token
+        page = QWidget(self)
+        hint = QLabel(_tr("Claude Code or another MCP client on this computer can then filter your layers, once FilterMate "
+                          "has been opened, under the rules of this panel: the same sources, the same confirmations, and "
+                          "filters can be undone here. That application sends what it reads to its own AI provider."), page)
+        hint.setWordWrap(True)
+        self.mcp_enabled = QCheckBox(_tr("Let other applications on this computer drive FilterMate (MCP server)"), page)
+        self.mcp_enabled.setChecked(values.mcp_enabled)
+        self.mcp_enabled.toggled.connect(self._on_mcp_toggled)
+        self.mcp_port = QSpinBox(page)
+        self.mcp_port.setRange(1024, 65535)
+        self.mcp_port.setValue(values.mcp_port)
+        self.mcp_address = QLabel(page)
+        self.mcp_address.setTextFormat(Qt.TextFormat.PlainText)
+        self.mcp_address.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
+        self.mcp_port.valueChanged.connect(self._refresh_mcp_address)
+        self.copy_config_button = QPushButton(_tr("Copy the configuration"), page)
+        self.copy_config_button.setObjectName("pushButton_agent_mcp_copy_config")
+        self.copy_config_button.clicked.connect(lambda: self._copy_mcp(client_config))
+        self.copy_command_button = QPushButton(_tr("Copy the Claude Code command"), page)
+        self.copy_command_button.setObjectName("pushButton_agent_mcp_copy_command")
+        self.copy_command_button.clicked.connect(lambda: self._copy_mcp(claude_code_command))
+        self.new_token_button = QPushButton(_tr("New access token"), page)
+        self.new_token_button.setObjectName("pushButton_agent_mcp_new_token")
+        self.new_token_button.setToolTip(_tr("Applications already set up will have to be set up again."))
+        self.new_token_button.clicked.connect(self._on_new_mcp_token)
+        self.mcp_result = QLabel(page)
+        self.mcp_result.setTextFormat(Qt.TextFormat.PlainText)
+        self.mcp_result.setWordWrap(True)
+        form = QFormLayout()
+        form.addRow(_tr("Port"), self.mcp_port)
+        form.addRow(_tr("Address"), self.mcp_address)
+        row = QHBoxLayout()
+        row.addWidget(self.copy_config_button)
+        row.addWidget(self.copy_command_button)
+        row.addWidget(self.new_token_button)
+        row.addStretch(1)
+        layout = QVBoxLayout(page)
+        layout.addWidget(hint)
+        layout.addWidget(self.mcp_enabled)
+        layout.addLayout(form)
+        layout.addLayout(row)
+        layout.addWidget(self.mcp_result)
+        layout.addStretch(1)
+        self._refresh_mcp_address()
+        self._on_mcp_toggled(values.mcp_enabled)
+        return page
+
+    def _refresh_mcp_address(self, _value: int = 0) -> None:
+        self.mcp_address.setText(server_url(self.mcp_port.value()))
+
+    def _on_mcp_toggled(self, on: bool) -> None:
+        if on and not self._mcp_token:
+            self._mcp_token = new_token()
+        for widget in (self.mcp_port, self.copy_config_button, self.copy_command_button, self.new_token_button):
+            widget.setEnabled(on)
+
+    def _on_new_mcp_token(self) -> None:
+        self._mcp_token = new_token()
+        self.mcp_result.setText(_tr("New token: it applies once these settings are saved."))
+
+    def _copy_mcp(self, text_for) -> None:
+        QApplication.clipboard().setText(text_for(self.mcp_port.value(), self._mcp_token))
+        self.mcp_result.setText(_tr("Copied, with the access token: keep it to yourself. Save these settings for it to apply."))
+
+    def chosen_mcp_token(self) -> str:
+        return self._mcp_token
 
     def _build_sources(self, values) -> QWidget:
         """Platforms and connectors, each one the user's choice: nothing is on by default."""
@@ -703,9 +793,13 @@ class AgentSettingsDialog(QDialog):
         self.model.addItems(MODEL_SUGGESTIONS.get(name, ()))
         self.model.setEditText(typed if name not in MODEL_SUGGESTIONS or typed else "")
         self.base_url.setPlaceholderText(PRESETS[name][1])
-        local = name == "ollama"
-        self.key_label.setVisible(not local)
-        self.key.setVisible(not local)
+        free = name == FREE_PRESET
+        no_key = free or name == "ollama"
+        self.key_label.setVisible(not no_key)
+        self.key.setVisible(not no_key)
+        for widget in (self.model_label, self.model, self.address_label, self.base_url):
+            widget.setVisible(not free)
+        self.free_notice.setVisible(free)
         self._on_destination()
 
     def _on_destination(self, _text: str = "") -> None:
@@ -727,4 +821,4 @@ class AgentSettingsDialog(QDialog):
         return self.preset.currentData()
 
     def chosen_model(self) -> str:
-        return self.model.currentText().strip()
+        return FREE_MODEL if self.preset.currentData() == FREE_PRESET else self.model.currentText().strip()
