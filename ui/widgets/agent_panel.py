@@ -18,7 +18,7 @@ from qgis.PyQt.QtWidgets import (
     QTabWidget, QTextEdit, QToolButton, QTreeWidget, QTreeWidgetItem, QVBoxLayout, QWidget,
 )
 
-from ...core.agent.mcp_server import EXTERNAL_MARK, claude_code_command, client_config, new_token, server_url
+from ...core.agent.mcp_server import EXTERNAL_MARK, claude_code_command, claude_desktop_config, client_config, new_token, server_url
 from ...core.agent.open_data import KIND_CKAN, KIND_OPENDATASOFT, KIND_WFS
 from ...core.agent.providers import FREE_MODEL, FREE_PRESET, PRESETS
 from ...core.agent.sources import (
@@ -612,6 +612,11 @@ class AgentSettingsDialog(QDialog):
         self.copy_config_button = QPushButton(_tr("Copy the configuration"), page)
         self.copy_config_button.setObjectName("pushButton_agent_mcp_copy_config")
         self.copy_config_button.clicked.connect(lambda: self._copy_mcp(client_config))
+        self.copy_desktop_button = QPushButton(_tr("Copy for Claude Desktop"), page)
+        self.copy_desktop_button.setObjectName("pushButton_agent_mcp_copy_desktop")
+        self.copy_desktop_button.setToolTip(_tr("Through mcp-remote, which needs Node.js: Claude Desktop starts local servers "
+                                                "as programs."))
+        self.copy_desktop_button.clicked.connect(lambda: self._copy_mcp(claude_desktop_config))
         self.copy_command_button = QPushButton(_tr("Copy the Claude Code command"), page)
         self.copy_command_button.setObjectName("pushButton_agent_mcp_copy_command")
         self.copy_command_button.clicked.connect(lambda: self._copy_mcp(claude_code_command))
@@ -627,6 +632,7 @@ class AgentSettingsDialog(QDialog):
         form.addRow(_tr("Address"), self.mcp_address)
         row = QHBoxLayout()
         row.addWidget(self.copy_config_button)
+        row.addWidget(self.copy_desktop_button)
         row.addWidget(self.copy_command_button)
         row.addWidget(self.new_token_button)
         row.addStretch(1)
@@ -647,7 +653,8 @@ class AgentSettingsDialog(QDialog):
     def _on_mcp_toggled(self, on: bool) -> None:
         if on and not self._mcp_token:
             self._mcp_token = new_token()
-        for widget in (self.mcp_port, self.copy_config_button, self.copy_command_button, self.new_token_button):
+        for widget in (self.mcp_port, self.copy_config_button, self.copy_desktop_button, self.copy_command_button,
+                       self.new_token_button):
             widget.setEnabled(on)
 
     def _on_new_mcp_token(self) -> None:

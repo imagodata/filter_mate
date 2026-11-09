@@ -1128,6 +1128,8 @@ def check_native_mcp(chat, settings, answers, layer):
     dialog.copy_config_button.click()
     from qgis.PyQt.QtWidgets import QApplication
     check("mcp: the configuration is copied", TOKEN in QApplication.clipboard().text() and str(taken) in QApplication.clipboard().text())
+    dialog.copy_desktop_button.click()
+    check("mcp: the Claude Desktop entry is copied", '"mcp-remote"' in QApplication.clipboard().text() and TOKEN in QApplication.clipboard().text())
     dialog.copy_command_button.click()
     check("mcp: the command is copied", QApplication.clipboard().text().startswith("claude mcp add --transport http"))
     dialog.new_token_button.click()

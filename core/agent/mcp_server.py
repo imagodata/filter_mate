@@ -150,6 +150,18 @@ def client_config(port: int, token: str) -> str:
                                                      "headers": {"Authorization": "Bearer " + token}}}}, indent=2)
 
 
+def claude_desktop_config(port: int, token: str) -> str:
+    """Claude Desktop starts local servers as programs: ``mcp-remote`` turns this one into such a program.
+
+    The header has no space in ``args``: Claude Desktop on Windows does not quote them when it calls npx.
+    """
+    return json.dumps({"mcpServers": {"filtermate": {
+        "command": "npx",
+        "args": ["mcp-remote", server_url(port), "--transport", "http-only", "--allow-http",
+                 "--header", "Authorization:${AUTH_HEADER}"],
+        "env": {"AUTH_HEADER": "Bearer " + token}}}}, indent=2)
+
+
 def claude_code_command(port: int, token: str) -> str:
     return f'claude mcp add --transport http filtermate {server_url(port)} --header "Authorization: Bearer {token}"'
 
