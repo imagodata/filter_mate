@@ -400,6 +400,9 @@ class FilterMate:
             self._stale_cache_timer.timeout.connect(self._cleanup_stale_cache)
             self._stale_cache_timer.start(30000)
 
+            from .adapters.qgis import python_dependencies
+            python_dependencies.activate_installed()
+
             logger.debug("FilterMate.initGui: Completed successfully")
 
         except Exception as e:
@@ -1378,6 +1381,12 @@ class FilterMate:
         """Removes the plugin menu item and icon from QGIS GUI."""
 
         # print "** UNLOAD FilterMate"
+
+        try:
+            from .adapters.qgis import python_dependencies
+            python_dependencies.cancel()
+        except Exception as exc:  # nothing may stop the unload
+            logger.debug(f"Python dependencies install not canceled: {exc}")
 
         # v4.7.0: Emit about_to_unload signal for inter-plugin communication
         if hasattr(self, '_public_api') and self._public_api is not None:
