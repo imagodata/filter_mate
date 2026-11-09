@@ -33,10 +33,14 @@ from .accessor import (
     Favorite,
     FavoritesUnavailable,
     FilterRejected,
+    FieldValues,
     FilteredLayer,
+    FilterPreview,
     FilterStatus,
     HistoryStep,
+    LayerDetails,
     LayerSummary,
+    MapContext,
     OperationResult,
 )
 from .main_thread import QGISBusy, run_on_main_thread
@@ -251,6 +255,36 @@ class QGISFilterMateAccessor:
     # ------------------------------------------------------------------
     # FilterMate 5 operations — adapters.public_api.operations
     # ------------------------------------------------------------------
+
+    # ------------------------------------------------------------------
+    # What a filter can be built from (agent mode)
+    # ------------------------------------------------------------------
+
+    @staticmethod
+    def _introspect(name: str, *args, **kwargs):
+        """Call ``adapters.public_api.introspection.<name>`` on the main thread."""
+        def call():
+            function = getattr(_plugin_module("adapters.public_api.introspection"), name)
+            try:
+                return function(*args, **kwargs)
+            except ValueError as exc:
+                raise FilterRejected(str(exc)) from None
+        return run_on_main_thread(call)
+
+    def describe_layer(self, layer: str) -> Optional[LayerDetails]:
+        details = self._introspect("describe_layer", layer)
+        return None if details is None else LayerDetails(**details)
+
+    def field_values(self, layer: str, field_name: str, search: str = "", limit: int = 50) -> Optional[FieldValues]:
+        values = self._introspect("field_values", layer, field_name, search=search, limit=limit)
+        return None if values is None else FieldValues(**values)
+
+    def preview_filter(self, layer_name: str, expression: str) -> Optional[FilterPreview]:
+        preview = self._introspect("preview_filter", layer_name, expression)
+        return None if preview is None else FilterPreview(**preview)
+
+    def map_context(self) -> MapContext:
+        return MapContext(**self._introspect("map_context"))
 
     def cross_filter(self, source_layer: str, target_layers: List[str], predicates: List[str],
                      buffer: float = 0.0, coverage_min: float = 0.0, operator: Optional[str] = None,

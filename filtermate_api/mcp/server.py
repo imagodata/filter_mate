@@ -14,6 +14,7 @@ import json
 import os
 import sys
 from typing import Annotated, Any, Dict, List, Literal, Optional, Sequence
+from urllib.parse import urlencode
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -33,7 +34,8 @@ SERVER_NAME = "filtermate"
 INSTRUCTIONS = """\
 Drives FilterMate, the QGIS filtering plugin, through its local REST API. QGIS must be running with the API started.
 
-Typical workflow: list_layers (names, ids, kinds), then cross_filter / geometry_filter / point_cloud_filter / \
+Typical workflow: list_layers (names, ids, kinds), describe_layer and field_values (what a filter can test), \
+preview_filter (try an expression), then cross_filter / geometry_filter / point_cloud_filter / \
 apply_filter to filter, filter_state to see what is filtered now, export_layers to write the filtered layers, \
 clear_filters to put layers back on their original source.
 undo_filter / redo_filter are not idempotent: after one (also after an error or a timeout), read filter_state \
@@ -165,6 +167,62 @@ def build_server(client: FilterMateClient) -> Any:
         Each has favorite_id (what apply_favorite takes), name, description, layer_name and expression.
         """
         return {"favorites": await call("GET", "/favorites")}
+
+    @mcp.tool(annotations=ToolAnnotations(title="Describe a layer", readOnlyHint=True, openWorldHint=False))
+    async def describe_layer(
+        layer: Annotated[str, Field(min_length=1, max_length=1000, description="Layer id or name, of any kind")],
+    ) -> Dict[str, Any]:
+        """What a filter can test on a layer: its fields, bands or point attributes.
+
+        Returns layer_id, name, layer_kind, provider_type, crs_authid, geometry_type, feature_count, subset (its
+        current filter), and by kind: fields [{name, type, alias, filterable}] for a vector layer (filterable is
+        false for virtual and joined fields, which a filter expression cannot test); bands [{band, name, classes}]
+        and pixel_size for a raster, classes [{value, label}] only on a paletted band; attributes [name] for a point
+        cloud.
+        """
+        return await call("GET", "/layers/details?" + urlencode({"layer": layer}))
+
+    @mcp.tool(annotations=ToolAnnotations(title="Values of a field", readOnlyHint=True, openWorldHint=False))
+    async def field_values(
+        layer: Annotated[str, Field(min_length=1, max_length=1000, description="Vector layer id or name")],
+        field: Annotated[str, Field(min_length=1, max_length=1000, description="Field name, from describe_layer")],
+        search: Annotated[str, Field(max_length=200, description=(
+            "Text fields: only values containing this text, ignoring case"))] = "",
+        limit: Annotated[int, Field(ge=1, le=200, description="Maximum number of values returned")] = 50,
+    ) -> Dict[str, Any]:
+        """Distinct values a field really takes, among the features the layer shows now (its filter applies).
+
+        Use it to write a filter with the exact spelling of a value. Returns values, truncated (more values exist),
+        and minimum and maximum for a numeric or date field. NULL is left out. Refused on web services (WFS...),
+        which would have to be read whole.
+        """
+        return await call("GET", "/layers/field-values?" + urlencode(
+            {"layer": layer, "field": field, "search": search, "limit": limit}))
+
+    @mcp.tool(annotations=ToolAnnotations(title="Try a filter", readOnlyHint=True, openWorldHint=False))
+    async def preview_filter(
+        layer_name: Annotated[str, Field(min_length=1, max_length=1000, description="Vector layer id or name")],
+        expression: Annotated[str, Field(min_length=1, max_length=500_000, description=(
+            "Subset string, as for apply_filter"))],
+    ) -> Dict[str, Any]:
+        """Try a filter expression on a private copy of the layer: nothing changes in the project.
+
+        It is what apply_filter would do, and it replaces the layer's current filter in the same way. Returns valid,
+        feature_count (features kept, -1 when unknown) and error (the reason when valid is false). Refused on web
+        services and memory layers, and for anything but a plain condition (subqueries, most functions).
+        """
+        return await call("POST", "/filters/preview", _body(layer_name=layer_name, expression=expression))
+
+    @mcp.tool(annotations=ToolAnnotations(title="Map context", readOnlyHint=True, openWorldHint=False))
+    async def map_context() -> Dict[str, Any]:
+        """What the user is looking at in QGIS.
+
+        Returns project_crs, canvas_crs, extent_wkt (the visible extent, usable as is with geometry_filter and
+        canvas_crs), scale, active_layer_id, active_layer_name and selections [{layer_id, name, selected_count}]
+        (the layers with selected features, which cross_filter uses as its source). available is false when QGIS
+        has no map canvas.
+        """
+        return await call("GET", "/map/context")
 
     # -- filters ---------------------------------------------------------------
 

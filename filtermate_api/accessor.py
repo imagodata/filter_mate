@@ -21,7 +21,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
-from typing import Dict, List, Optional, Protocol, runtime_checkable
+from typing import Any, Dict, List, Optional, Protocol, runtime_checkable
 
 
 class FavoritesUnavailable(RuntimeError):
@@ -136,12 +136,91 @@ class FilterStatus:
     last_error: Optional[str] = None
 
 
+@dataclass(frozen=True)
+class LayerDetails:
+    """What it takes to write a filter on a layer: its fields, bands or point attributes."""
+    layer_id: str
+    name: str
+    layer_kind: str
+    provider_type: str = ""
+    crs_authid: str = ""
+    geometry_type: str = ""
+    feature_count: int = -1
+    subset: str = ""
+    # Vector: {"name", "type", "alias", "filterable"}; virtual and joined fields are not filterable.
+    fields: List[Dict[str, Any]] = field(default_factory=list)
+    # Raster: {"band", "name", "classes": [{"value", "label"}]}, classes only on a paletted band.
+    bands: List[Dict[str, Any]] = field(default_factory=list)
+    # Raster: size of a pixel, in the units of the layer CRS.
+    pixel_size: Optional[float] = None
+    # Point cloud: attribute names (Z, Classification, Intensity...).
+    attributes: List[str] = field(default_factory=list)
+
+
+@dataclass(frozen=True)
+class FieldValues:
+    """Distinct values of a field, among the features the layer shows now."""
+    layer_name: str
+    field: str
+    values: List[Any] = field(default_factory=list)
+    # More values exist than ``values`` holds.
+    truncated: bool = False
+    minimum: Any = None
+    maximum: Any = None
+
+
+@dataclass(frozen=True)
+class FilterPreview:
+    """What a filter expression would keep, tried on a private copy of the layer."""
+    layer_name: str
+    expression: str
+    valid: bool
+    feature_count: int = -1
+    error: str = ""
+
+
+@dataclass(frozen=True)
+class MapContext:
+    """What the user is looking at. ``available`` is False without a map canvas (headless QGIS)."""
+    available: bool = False
+    project_crs: str = ""
+    canvas_crs: str = ""
+    extent_wkt: str = ""
+    scale: Optional[float] = None
+    active_layer_id: str = ""
+    active_layer_name: str = ""
+    # {"layer_id", "name", "selected_count"} of the vector layers with a selection.
+    selections: List[Dict[str, Any]] = field(default_factory=list)
+
+
 @runtime_checkable
 class FilterMateAccessor(Protocol):
     """The contract REST routes use to talk to the running FilterMate plugin."""
 
     def list_layers(self) -> List[LayerSummary]:
         """Return all vector layers visible to the current FilterMate session."""
+        ...
+
+    def describe_layer(self, layer: str) -> Optional[LayerDetails]:
+        """Fields, bands or attributes of a layer (id or name), ``None`` when it does not resolve."""
+        ...
+
+    def field_values(self, layer: str, field_name: str, search: str = "", limit: int = 50) -> Optional[FieldValues]:
+        """Distinct values of a vector field, ``None`` when the layer or the field does not resolve.
+
+        Raises FilterRejected on a layer that cannot answer (not vector, web service).
+        """
+        ...
+
+    def preview_filter(self, layer_name: str, expression: str) -> Optional[FilterPreview]:
+        """Try ``expression`` without touching the layer, ``None`` when the layer does not resolve.
+
+        Raises FilterRejected on a layer that cannot be tried (not vector, web service).
+        """
+        ...
+
+    def map_context(self) -> MapContext:
+        """CRS, extent, active layer and selections of the QGIS window."""
         ...
 
     def apply_filter(self, layer_name: str, expression: str, source: str) -> bool:
@@ -236,6 +315,32 @@ class InMemoryAccessor:
 
     def list_layers(self) -> List[LayerSummary]:
         return [self._with_active(layer) for layer in self.layers]
+
+    def _find(self, reference: str) -> Optional[LayerSummary]:
+        return next((layer for layer in self.layers if reference in (layer.layer_id, layer.name)), None)
+
+    def describe_layer(self, layer: str) -> Optional[LayerDetails]:
+        found = self._find(layer)
+        if found is None:
+            return None
+        return LayerDetails(layer_id=found.layer_id, name=found.name, layer_kind=found.layer_kind,
+                            provider_type=found.provider_type, crs_authid=found.crs_authid,
+                            geometry_type=found.geometry_type, feature_count=found.feature_count,
+                            subset=self._active.get(found.name, ""))
+
+    def field_values(self, layer: str, field_name: str, search: str = "", limit: int = 50) -> Optional[FieldValues]:
+        found = self._find(layer)
+        return None if found is None else FieldValues(layer_name=found.name, field=field_name)
+
+    def preview_filter(self, layer_name: str, expression: str) -> Optional[FilterPreview]:
+        found = self._find(layer_name)
+        if found is None:
+            return None
+        return FilterPreview(layer_name=found.name, expression=expression, valid=True,
+                             feature_count=found.feature_count)
+
+    def map_context(self) -> MapContext:
+        return MapContext()
 
     def apply_filter(self, layer_name: str, expression: str, source: str) -> bool:
         if not any(layer.name == layer_name for layer in self.layers):

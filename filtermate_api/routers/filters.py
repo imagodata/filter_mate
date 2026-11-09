@@ -23,6 +23,7 @@ from ..accessor import (
     CrossFilterResult,
     FilteredLayer,
     FilterMateAccessor,
+    FilterPreview,
     FilterRejected,
     FilterStatus,
     HistoryStep,
@@ -125,6 +126,20 @@ def apply_filter(
         source=payload.source,
         active_filters=active_filters_after_change(accessor),
     )
+
+
+class PreviewFilterRequest(BaseModel):
+    layer_name: str = Field(..., min_length=1, max_length=_MAX_NAME, description="Vector layer: name or id")
+    expression: str = Field(..., min_length=1, max_length=_MAX_EXPRESSION, description="Subset string to try")
+
+
+@router.post("/preview", response_model=FilterPreview)
+def preview_filter(payload: PreviewFilterRequest, request: Request) -> FilterPreview:
+    """Try an expression on a private copy of the layer: nothing changes in the project."""
+    preview = _accessor(request).preview_filter(payload.layer_name, payload.expression)
+    if preview is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Layer not found")
+    return preview
 
 
 @router.get("/status", response_model=FilterStatus)
