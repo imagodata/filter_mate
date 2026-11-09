@@ -7758,4 +7758,574 @@ Install it now from PyPI with pip, into your QGIS profile? The Python of QGIS is
         <translation type="obsolete">النقاط المحتفظ بها</translation>
     </message>
 </context>
+<context>
+    <name>AgentPanel</name>
+    <message>
+        <source>(no request)</source>
+        <translation>(بلا طلب)</translation>
+    </message>
+    <message>
+        <source>A few free requests a month, through the relay of FilterMate to Claude (Anthropic), under the terms of Anthropic. The relay counts what is spent and keeps no conversation. When it is used up, choose a provider and enter your own API key.</source>
+        <translation>بضعة طلبات مجانية شهرياً، عبر وسيط FilterMate إلى Claude (Anthropic)، وفق شروط Anthropic. يحتسب الوسيط ما يُستهلك ولا يحتفظ بأي محادثة. عند نفاد الحصة، اختر مزوّداً وأدخل مفتاح API الخاص بك.</translation>
+    </message>
+    <message>
+        <source>API key</source>
+        <translation>مفتاح API</translation>
+    </message>
+    <message>
+        <source>Add</source>
+        <translation>إضافة</translation>
+    </message>
+    <message>
+        <source>Address</source>
+        <translation>العنوان</translation>
+    </message>
+    <message>
+        <source>Agent settings</source>
+        <translation>إعدادات الوكيل</translation>
+    </message>
+    <message>
+        <source>Allow attribute values to be sent</source>
+        <translation>السماح بإرسال قيم السمات</translation>
+    </message>
+    <message>
+        <source>Applications already set up will have to be set up again.</source>
+        <translation>ستحتاج التطبيقات التي سبق إعدادها إلى إعدادها من جديد.</translation>
+    </message>
+    <message>
+        <source>Ask the agent to filter your layers</source>
+        <translation>اطلب من الوكيل تصفية طبقاتك</translation>
+    </message>
+    <message>
+        <source>Back to the conversation</source>
+        <translation>العودة إلى المحادثة</translation>
+    </message>
+    <message>
+        <source>Claude Code or another MCP client on this computer can then filter your layers, once FilterMate has been opened, under the rules of this panel: the same sources, the same confirmations, and filters can be undone here. That application sends what it reads to its own AI provider.</source>
+        <translation>يمكن حينئذٍ لـ Claude Code أو لأي عميل MCP آخر على هذا الكمبيوتر تصفية طبقاتك، بعد فتح FilterMate، وفق قواعد هذه اللوحة: المصادر نفسها، والتأكيدات نفسها، ويمكن التراجع عن التصفيات هنا. يرسل هذا التطبيق ما يقرؤه إلى مزوّد الذكاء الاصطناعي الخاص به.</translation>
+    </message>
+    <message>
+        <source>Connect an AI provider to start. Nothing is sent before you agree.</source>
+        <translation>اربط مزوّد ذكاء اصطناعي للبدء. لا يُرسَل شيء قبل موافقتك.</translation>
+    </message>
+    <message>
+        <source>Copied, with the access token: keep it to yourself. Save these settings for it to apply.</source>
+        <translation>تم النسخ مع رمز الوصول: احتفظ به لنفسك. احفظ هذه الإعدادات لكي يُطبَّق.</translation>
+    </message>
+    <message>
+        <source>Copy for Claude Desktop</source>
+        <translation>نسخ لـ Claude Desktop</translation>
+    </message>
+    <message>
+        <source>Copy the Claude Code command</source>
+        <translation>نسخ أمر Claude Code</translation>
+    </message>
+    <message>
+        <source>Copy the configuration</source>
+        <translation>نسخ التكوين</translation>
+    </message>
+    <message>
+        <source>Describe it in your own words. Each filter can be undone.</source>
+        <translation>صِفه بكلماتك. يمكن التراجع عن كل تصفية.</translation>
+    </message>
+    <message>
+        <source>Filter your layers from a sentence</source>
+        <translation>صفِّ طبقاتك بجملة واحدة</translation>
+    </message>
+    <message>
+        <source>FilterMate agent</source>
+        <translation>وكيل FilterMate</translation>
+    </message>
+    <message>
+        <source>History</source>
+        <translation>السجل</translation>
+    </message>
+    <message>
+        <source>History…</source>
+        <translation>السجل…</translation>
+    </message>
+    <message>
+        <source>I agree to send this data to this provider</source>
+        <translation>أوافق على إرسال هذه البيانات إلى هذا المزوّد</translation>
+    </message>
+    <message>
+        <source>Let other applications on this computer drive FilterMate (MCP server)</source>
+        <translation>السماح للتطبيقات الأخرى على هذا الكمبيوتر بتشغيل FilterMate (خادم MCP)</translation>
+    </message>
+    <message>
+        <source>MCP connector</source>
+        <translation>موصّل MCP</translation>
+    </message>
+    <message>
+        <source>MCP connectors</source>
+        <translation>موصّلات MCP</translation>
+    </message>
+    <message>
+        <source>Model</source>
+        <translation>النموذج</translation>
+    </message>
+    <message>
+        <source>More</source>
+        <translation>المزيد</translation>
+    </message>
+    <message>
+        <source>New access token</source>
+        <translation>رمز وصول جديد</translation>
+    </message>
+    <message>
+        <source>New conversation</source>
+        <translation>محادثة جديدة</translation>
+    </message>
+    <message>
+        <source>New token: it applies once these settings are saved.</source>
+        <translation>رمز جديد: يُطبَّق بعد حفظ هذه الإعدادات.</translation>
+    </message>
+    <message>
+        <source>Open data platforms</source>
+        <translation>منصات البيانات المفتوحة</translation>
+    </message>
+    <message>
+        <source>Open the settings</source>
+        <translation>فتح الإعدادات</translation>
+    </message>
+    <message>
+        <source>Other applications</source>
+        <translation>تطبيقات أخرى</translation>
+    </message>
+    <message>
+        <source>Port</source>
+        <translation>المنفذ</translation>
+    </message>
+    <message>
+        <source>Provider</source>
+        <translation>المزوّد</translation>
+    </message>
+    <message>
+        <source>Redo</source>
+        <translation>إعادة</translation>
+    </message>
+    <message>
+        <source>Remove</source>
+        <translation>إزالة</translation>
+    </message>
+    <message>
+        <source>Remove the stored key</source>
+        <translation>حذف المفتاح المخزَّن</translation>
+    </message>
+    <message>
+        <source>Satellite imagery</source>
+        <translation>صور الأقمار الصناعية</translation>
+    </message>
+    <message>
+        <source>Send (Enter)</source>
+        <translation>إرسال (Enter)</translation>
+    </message>
+    <message>
+        <source>Send again</source>
+        <translation>إعادة الإرسال</translation>
+    </message>
+    <message>
+        <source>Sent to: {}</source>
+        <translation>أُرسل إلى: {}</translation>
+    </message>
+    <message>
+        <source>Set up the agent</source>
+        <translation>إعداد الوكيل</translation>
+    </message>
+    <message>
+        <source>Sources</source>
+        <translation>المصادر</translation>
+    </message>
+    <message>
+        <source>Stop (Esc)</source>
+        <translation>إيقاف (Esc)</translation>
+    </message>
+    <message>
+        <source>Stored: leave empty to keep it</source>
+        <translation>مخزَّن: اتركه فارغاً للإبقاء عليه</translation>
+    </message>
+    <message>
+        <source>Test</source>
+        <translation>اختبار</translation>
+    </message>
+    <message>
+        <source>Testing…</source>
+        <translation>جارٍ الاختبار…</translation>
+    </message>
+    <message>
+        <source>The MCP server could not start: {}</source>
+        <translation>تعذر تشغيل خادم MCP: {}</translation>
+    </message>
+    <message>
+        <source>The agent can search the sources ticked here. Your searches, and what the agent passes to a connector, are sent to them; a layer added from them is read from their servers.</source>
+        <translation>يمكن للوكيل البحث في المصادر المحددة هنا. تُرسَل إليها عمليات بحثك وما يمرّره الوكيل إلى موصّل؛ وتُقرأ الطبقة المضافة منها من خوادمها.</translation>
+    </message>
+    <message>
+        <source>The agent sends your request, the names of your layers and fields, your filter expressions and the results of its tools to the provider chosen here, under that provider's terms. Without the option below, the agent does not read the values of your fields; values already written in your filters and favorites are still sent. The conversation is kept on this computer for each project, until you start a new one.</source>
+        <translation>يرسل الوكيل طلبك وأسماء طبقاتك وحقولك وتعابير التصفية ونتائج أدواته إلى المزوّد المختار هنا، وفق شروط هذا المزوّد. من دون الخيار أدناه، لا يقرأ الوكيل قيم حقولك؛ أما القيم المكتوبة أصلاً في تصفياتك ومفضلاتك فتبقى مُرسَلة. تُحفظ المحادثة على هذا الكمبيوتر لكل مشروع، حتى تبدأ محادثة جديدة.</translation>
+    </message>
+    <message>
+        <source>Through mcp-remote, which needs Node.js: Claude Desktop starts local servers as programs.</source>
+        <translation>عبر mcp-remote الذي يتطلب Node.js: يشغّل Claude Desktop الخوادم المحلية كبرامج.</translation>
+    </message>
+    <message>
+        <source>Too many sources added: remove one first.</source>
+        <translation>عدد المصادر المضافة كبير جداً: أزل أحدها أولاً.</translation>
+    </message>
+    <message>
+        <source>Undo the last</source>
+        <translation>التراجع عن الأخير</translation>
+    </message>
+    <message>
+        <source>Undo this turn</source>
+        <translation>التراجع عن هذه الدورة</translation>
+    </message>
+    <message>
+        <source>What do you want to filter?</source>
+        <translation>ماذا تريد أن تصفّي؟</translation>
+    </message>
+    <message>
+        <source>added by you</source>
+        <translation>أضفتَه أنت</translation>
+    </message>
+    <message>
+        <source>applied</source>
+        <translation>مطبَّق</translation>
+    </message>
+    <message>
+        <source>community</source>
+        <translation>مجتمعي</translation>
+    </message>
+    <message>
+        <source>https://... or a portal address</source>
+        <translation>https://... أو عنوان بوابة</translation>
+    </message>
+    <message>
+        <source>no change</source>
+        <translation>بلا تغيير</translation>
+    </message>
+    <message>
+        <source>official</source>
+        <translation>رسمي</translation>
+    </message>
+    <message>
+        <source>this computer</source>
+        <translation>هذا الكمبيوتر</translation>
+    </message>
+    <message>
+        <source>undone</source>
+        <translation>تم التراجع</translation>
+    </message>
+    <message>
+        <source>{} turn(s)</source>
+        <translation>{} دورة (دورات)</translation>
+    </message>
+    <message>
+        <source>Which layers are in this project?</source>
+        <translation>ما الطبقات الموجودة في هذا المشروع؟</translation>
+    </message>
+    <message>
+        <source>Keep the buildings taller than 15 m</source>
+        <translation>احتفظ بالمباني الأعلى من 15 م</translation>
+    </message>
+    <message>
+        <source>Filter the roads inside the selected feature</source>
+        <translation>صفِّ الطرق داخل المعلم المحدد</translation>
+    </message>
+</context>
+<context>
+    <name>AgentChat</name>
+    <message>
+        <source>Access to the free quota was renewed: send your request again.</source>
+        <translation>تم تجديد الوصول إلى الحصة المجانية: أعد إرسال طلبك.</translation>
+    </message>
+    <message>
+        <source>Another application is changing the project: try again in a moment.</source>
+        <translation>يقوم تطبيق آخر بتعديل المشروع: حاول مجدداً بعد قليل.</translation>
+    </message>
+    <message>
+        <source>Another application: {}</source>
+        <translation>تطبيق آخر: {}</translation>
+    </message>
+    <message>
+        <source>Applied again: {}.</source>
+        <translation>تم التطبيق مجدداً: {}.</translation>
+    </message>
+    <message>
+        <source>Changed since, left as is: {}.</source>
+        <translation>تم التعديل لاحقاً، وتُرك كما هو: {}.</translation>
+    </message>
+    <message>
+        <source>Changed: {}.</source>
+        <translation>تم التعديل: {}.</translation>
+    </message>
+    <message>
+        <source>Choose a model and agree to send your data to use the agent.</source>
+        <translation>اختر نموذجاً ووافق على إرسال بياناتك لاستخدام الوكيل.</translation>
+    </message>
+    <message>
+        <source>Connecting to {}…</source>
+        <translation>جارٍ الاتصال بـ {}…</translation>
+    </message>
+    <message>
+        <source>Earlier conversation: the agent starts afresh from here.</source>
+        <translation>محادثة سابقة: يبدأ الوكيل من جديد من هنا.</translation>
+    </message>
+    <message>
+        <source>Enter your API key in the agent settings.</source>
+        <translation>أدخل مفتاح API في إعدادات الوكيل.</translation>
+    </message>
+    <message>
+        <source>Export of {}</source>
+        <translation>تصدير {}</translation>
+    </message>
+    <message>
+        <source>Favorite applied</source>
+        <translation>تم تطبيق المفضلة</translation>
+    </message>
+    <message>
+        <source>Filter on the points of {}</source>
+        <translation>تصفية على نقاط {}</translation>
+    </message>
+    <message>
+        <source>Filter on {}</source>
+        <translation>تصفية على {}</translation>
+    </message>
+    <message>
+        <source>Filter on {} by an area</source>
+        <translation>تصفية على {} حسب منطقة</translation>
+    </message>
+    <message>
+        <source>Filter on {} by {}</source>
+        <translation>تصفية على {} حسب {}</translation>
+    </message>
+    <message>
+        <source>FilterMate agent</source>
+        <translation>وكيل FilterMate</translation>
+    </message>
+    <message>
+        <source>Filters removed from {}</source>
+        <translation>تمت إزالة التصفيات من {}</translation>
+    </message>
+    <message>
+        <source>Hidden: {}</source>
+        <translation>مخفي: {}</translation>
+    </message>
+    <message>
+        <source>It answers.</source>
+        <translation>يستجيب.</translation>
+    </message>
+    <message>
+        <source>Layer added: {}</source>
+        <translation>تمت إضافة الطبقة: {}</translation>
+    </message>
+    <message>
+        <source>Layers removed: {}</source>
+        <translation>تمت إزالة الطبقات: {}</translation>
+    </message>
+    <message>
+        <source>Not reachable for this conversation: {}</source>
+        <translation>يتعذر الوصول إليه في هذه المحادثة: {}</translation>
+    </message>
+    <message>
+        <source>Nothing to redo.</source>
+        <translation>لا شيء لإعادة تطبيقه.</translation>
+    </message>
+    <message>
+        <source>Nothing to restore.</source>
+        <translation>لا شيء لاستعادته.</translation>
+    </message>
+    <message>
+        <source>Reading the active filters</source>
+        <translation>قراءة التصفيات النشطة</translation>
+    </message>
+    <message>
+        <source>Reading the favorites</source>
+        <translation>قراءة المفضلات</translation>
+    </message>
+    <message>
+        <source>Reading the fields of {}</source>
+        <translation>قراءة حقول {}</translation>
+    </message>
+    <message>
+        <source>Reading the layers</source>
+        <translation>قراءة الطبقات</translation>
+    </message>
+    <message>
+        <source>Reading the map</source>
+        <translation>قراءة الخريطة</translation>
+    </message>
+    <message>
+        <source>Reading the values of {}</source>
+        <translation>قراءة قيم {}</translation>
+    </message>
+    <message>
+        <source>Restored: {}.</source>
+        <translation>تمت الاستعادة: {}.</translation>
+    </message>
+    <message>
+        <source>Searching satellite imagery on {}</source>
+        <translation>البحث عن صور الأقمار الصناعية في {}</translation>
+    </message>
+    <message>
+        <source>Searching {} for {}</source>
+        <translation>البحث في {} عن {}</translation>
+    </message>
+    <message>
+        <source>Selection cleared on {}</source>
+        <translation>تم مسح التحديد في {}</translation>
+    </message>
+    <message>
+        <source>Selection on {}</source>
+        <translation>تحديد في {}</translation>
+    </message>
+    <message>
+        <source>Shown: {}</source>
+        <translation>ظاهر: {}</translation>
+    </message>
+    <message>
+        <source>Stopped.</source>
+        <translation>تم الإيقاف.</translation>
+    </message>
+    <message>
+        <source>The MCP server could not start: {}</source>
+        <translation>تعذر تشغيل خادم MCP: {}</translation>
+    </message>
+    <message>
+        <source>The QGIS authentication database is not available.</source>
+        <translation>قاعدة بيانات المصادقة في QGIS غير متاحة.</translation>
+    </message>
+    <message>
+        <source>The QGIS master password is needed to use the stored key.</source>
+        <translation>كلمة المرور الرئيسية لـ QGIS مطلوبة لاستخدام المفتاح المخزَّن.</translation>
+    </message>
+    <message>
+        <source>The agent stopped before the end ({}).</source>
+        <translation>توقف الوكيل قبل النهاية ({}).</translation>
+    </message>
+    <message>
+        <source>The agent wants to add this layer of a web service to the project:
+{} · {}
+
+Do you agree?</source>
+        <translation>يريد الوكيل إضافة طبقة من خدمة ويب إلى المشروع:
+{} · {}
+
+هل توافق؟</translation>
+    </message>
+    <message>
+        <source>The agent wants to add this layer to the project:
+{}
+
+A remote source is read from its server by QGIS, and what the layer holds can be sent to the provider of the agent. Do you agree?</source>
+        <translation>يريد الوكيل إضافة هذه الطبقة إلى المشروع:
+{}
+
+يقرأ QGIS المصدر البعيد من خادمه، وقد يُرسَل محتوى الطبقة إلى مزوّد الوكيل. هل توافق؟</translation>
+    </message>
+    <message>
+        <source>The agent wants to export these layers to files:
+{}
+
+Do you agree?</source>
+        <translation>يريد الوكيل تصدير هذه الطبقات إلى ملفات:
+{}
+
+هل توافق؟</translation>
+    </message>
+    <message>
+        <source>The agent wants to remove these layers from the project (their files stay, their styles and filters here are lost):
+{}
+
+Do you agree?</source>
+        <translation>يريد الوكيل إزالة هذه الطبقات من المشروع (تبقى ملفاتها، وتُفقد أنماطها وتصفياتها هنا):
+{}
+
+هل توافق؟</translation>
+    </message>
+    <message>
+        <source>The agent wants to run this action on an external connector:
+{}
+{}
+
+Do you agree?</source>
+        <translation>يريد الوكيل تشغيل هذا الإجراء على موصّل خارجي:
+{}
+{}
+
+هل توافق؟</translation>
+    </message>
+    <message>
+        <source>The credit or quota of this account is used up.</source>
+        <translation>نفد رصيد هذا الحساب أو حصته.</translation>
+    </message>
+    <message>
+        <source>The free quota could not be reached: {}</source>
+        <translation>تعذر الوصول إلى الحصة المجانية: {}</translation>
+    </message>
+    <message>
+        <source>The free quota is not available.</source>
+        <translation>الحصة المجانية غير متاحة.</translation>
+    </message>
+    <message>
+        <source>The free quota is unavailable for now.</source>
+        <translation>الحصة المجانية غير متاحة حالياً.</translation>
+    </message>
+    <message>
+        <source>The free quota is used up for this month. Enter your own API key in the agent settings.</source>
+        <translation>نفدت الحصة المجانية لهذا الشهر. أدخل مفتاح API الخاص بك في إعدادات الوكيل.</translation>
+    </message>
+    <message>
+        <source>The key could not be stored.</source>
+        <translation>تعذر تخزين المفتاح.</translation>
+    </message>
+    <message>
+        <source>The provider could not be reached: {}</source>
+        <translation>تعذر الوصول إلى المزوّد: {}</translation>
+    </message>
+    <message>
+        <source>The provider refused the API key: check it in the agent settings.</source>
+        <translation>رفض المزوّد مفتاح API: تحقق منه في إعدادات الوكيل.</translation>
+    </message>
+    <message>
+        <source>The provider reported a problem: {}</source>
+        <translation>أبلغ المزوّد عن مشكلة: {}</translation>
+    </message>
+    <message>
+        <source>The stored key could not be read.</source>
+        <translation>تعذرت قراءة المفتاح المخزَّن.</translation>
+    </message>
+    <message>
+        <source>Thinking…</source>
+        <translation>جارٍ التفكير…</translation>
+    </message>
+    <message>
+        <source>Too many new accounts from this address today: try again tomorrow, or enter your own API key.</source>
+        <translation>عدد كبير جداً من الحسابات الجديدة من هذا العنوان اليوم: حاول غداً، أو أدخل مفتاح API الخاص بك.</translation>
+    </message>
+    <message>
+        <source>Too many requests for now: try again in a moment.</source>
+        <translation>طلبات كثيرة جداً حالياً: حاول مجدداً بعد قليل.</translation>
+    </message>
+    <message>
+        <source>Trying a filter on {}</source>
+        <translation>تجربة تصفية على {}</translation>
+    </message>
+    <message>
+        <source>Zoom on {}</source>
+        <translation>تكبير إلى {}</translation>
+    </message>
+    <message>
+        <source>an area</source>
+        <translation>منطقة</translation>
+    </message>
+    <message>
+        <source>everything</source>
+        <translation>كل شيء</translation>
+    </message>
+    <message>
+        <source>{} tools available</source>
+        <translation>{} أداة متاحة</translation>
+    </message>
+</context>
 </TS>

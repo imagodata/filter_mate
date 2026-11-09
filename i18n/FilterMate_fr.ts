@@ -7900,6 +7900,10 @@ L'installer maintenant depuis PyPI avec pip, dans votre profil QGIS ? Le Python 
 <context>
     <name>AgentPanel</name>
     <message>
+        <source>The MCP server could not start: {}</source>
+        <translation>Le serveur MCP n'a pas pu démarrer : {}</translation>
+    </message>
+    <message>
         <source>Copy for Claude Desktop</source>
         <translation>Copier pour Claude Desktop</translation>
     </message>

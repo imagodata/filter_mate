@@ -7758,4 +7758,574 @@ Het nu installeren vanaf PyPI met pip, in uw QGIS-profiel? De Python van QGIS wo
         <translation type="obsolete">Behouden punten</translation>
     </message>
 </context>
+<context>
+    <name>AgentPanel</name>
+    <message>
+        <source>(no request)</source>
+        <translation>(geen verzoek)</translation>
+    </message>
+    <message>
+        <source>A few free requests a month, through the relay of FilterMate to Claude (Anthropic), under the terms of Anthropic. The relay counts what is spent and keeps no conversation. When it is used up, choose a provider and enter your own API key.</source>
+        <translation>Enkele gratis verzoeken per maand, via de relay van FilterMate naar Claude (Anthropic), onder de voorwaarden van Anthropic. De relay telt wat is verbruikt en bewaart geen gesprek. Als het quotum op is, kiest u een provider en voert u uw eigen API-sleutel in.</translation>
+    </message>
+    <message>
+        <source>API key</source>
+        <translation>API-sleutel</translation>
+    </message>
+    <message>
+        <source>Add</source>
+        <translation>Toevoegen</translation>
+    </message>
+    <message>
+        <source>Address</source>
+        <translation>Adres</translation>
+    </message>
+    <message>
+        <source>Agent settings</source>
+        <translation>Agentinstellingen</translation>
+    </message>
+    <message>
+        <source>Allow attribute values to be sent</source>
+        <translation>Verzenden van attribuutwaarden toestaan</translation>
+    </message>
+    <message>
+        <source>Applications already set up will have to be set up again.</source>
+        <translation>Toepassingen die al zijn ingesteld, moeten opnieuw worden ingesteld.</translation>
+    </message>
+    <message>
+        <source>Ask the agent to filter your layers</source>
+        <translation>Vraag de agent uw lagen te filteren</translation>
+    </message>
+    <message>
+        <source>Back to the conversation</source>
+        <translation>Terug naar het gesprek</translation>
+    </message>
+    <message>
+        <source>Claude Code or another MCP client on this computer can then filter your layers, once FilterMate has been opened, under the rules of this panel: the same sources, the same confirmations, and filters can be undone here. That application sends what it reads to its own AI provider.</source>
+        <translation>Claude Code of een andere MCP-client op deze computer kan dan uw lagen filteren, zodra FilterMate is geopend, volgens de regels van dit paneel: dezelfde bronnen, dezelfde bevestigingen, en filters zijn hier ongedaan te maken. Die toepassing stuurt wat ze leest naar haar eigen AI-provider.</translation>
+    </message>
+    <message>
+        <source>Connect an AI provider to start. Nothing is sent before you agree.</source>
+        <translation>Verbind een AI-provider om te beginnen. Er wordt niets verstuurd zonder uw akkoord.</translation>
+    </message>
+    <message>
+        <source>Copied, with the access token: keep it to yourself. Save these settings for it to apply.</source>
+        <translation>Gekopieerd, met het toegangstoken: houd het voor uzelf. Sla deze instellingen op om het toe te passen.</translation>
+    </message>
+    <message>
+        <source>Copy for Claude Desktop</source>
+        <translation>Kopiëren voor Claude Desktop</translation>
+    </message>
+    <message>
+        <source>Copy the Claude Code command</source>
+        <translation>Het Claude Code-commando kopiëren</translation>
+    </message>
+    <message>
+        <source>Copy the configuration</source>
+        <translation>De configuratie kopiëren</translation>
+    </message>
+    <message>
+        <source>Describe it in your own words. Each filter can be undone.</source>
+        <translation>Beschrijf het in uw eigen woorden. Elk filter kan ongedaan worden gemaakt.</translation>
+    </message>
+    <message>
+        <source>Filter your layers from a sentence</source>
+        <translation>Filter uw lagen met één zin</translation>
+    </message>
+    <message>
+        <source>FilterMate agent</source>
+        <translation>FilterMate-agent</translation>
+    </message>
+    <message>
+        <source>History</source>
+        <translation>Geschiedenis</translation>
+    </message>
+    <message>
+        <source>History…</source>
+        <translation>Geschiedenis…</translation>
+    </message>
+    <message>
+        <source>I agree to send this data to this provider</source>
+        <translation>Ik ga akkoord met het verzenden van deze gegevens naar deze provider</translation>
+    </message>
+    <message>
+        <source>Let other applications on this computer drive FilterMate (MCP server)</source>
+        <translation>Andere toepassingen op deze computer FilterMate laten bedienen (MCP-server)</translation>
+    </message>
+    <message>
+        <source>MCP connector</source>
+        <translation>MCP-connector</translation>
+    </message>
+    <message>
+        <source>MCP connectors</source>
+        <translation>MCP-connectors</translation>
+    </message>
+    <message>
+        <source>Model</source>
+        <translation>Model</translation>
+    </message>
+    <message>
+        <source>More</source>
+        <translation>Meer</translation>
+    </message>
+    <message>
+        <source>New access token</source>
+        <translation>Nieuw toegangstoken</translation>
+    </message>
+    <message>
+        <source>New conversation</source>
+        <translation>Nieuw gesprek</translation>
+    </message>
+    <message>
+        <source>New token: it applies once these settings are saved.</source>
+        <translation>Nieuw token: het wordt toegepast zodra deze instellingen zijn opgeslagen.</translation>
+    </message>
+    <message>
+        <source>Open data platforms</source>
+        <translation>Open-dataplatforms</translation>
+    </message>
+    <message>
+        <source>Open the settings</source>
+        <translation>Instellingen openen</translation>
+    </message>
+    <message>
+        <source>Other applications</source>
+        <translation>Andere toepassingen</translation>
+    </message>
+    <message>
+        <source>Port</source>
+        <translation>Poort</translation>
+    </message>
+    <message>
+        <source>Provider</source>
+        <translation>Provider</translation>
+    </message>
+    <message>
+        <source>Redo</source>
+        <translation>Opnieuw</translation>
+    </message>
+    <message>
+        <source>Remove</source>
+        <translation>Verwijderen</translation>
+    </message>
+    <message>
+        <source>Remove the stored key</source>
+        <translation>De opgeslagen sleutel verwijderen</translation>
+    </message>
+    <message>
+        <source>Satellite imagery</source>
+        <translation>Satellietbeelden</translation>
+    </message>
+    <message>
+        <source>Send (Enter)</source>
+        <translation>Verzenden (Enter)</translation>
+    </message>
+    <message>
+        <source>Send again</source>
+        <translation>Opnieuw verzenden</translation>
+    </message>
+    <message>
+        <source>Sent to: {}</source>
+        <translation>Verzonden naar: {}</translation>
+    </message>
+    <message>
+        <source>Set up the agent</source>
+        <translation>De agent instellen</translation>
+    </message>
+    <message>
+        <source>Sources</source>
+        <translation>Bronnen</translation>
+    </message>
+    <message>
+        <source>Stop (Esc)</source>
+        <translation>Stoppen (Esc)</translation>
+    </message>
+    <message>
+        <source>Stored: leave empty to keep it</source>
+        <translation>Opgeslagen: leeg laten om te behouden</translation>
+    </message>
+    <message>
+        <source>Test</source>
+        <translation>Testen</translation>
+    </message>
+    <message>
+        <source>Testing…</source>
+        <translation>Bezig met testen…</translation>
+    </message>
+    <message>
+        <source>The MCP server could not start: {}</source>
+        <translation>De MCP-server kon niet worden gestart: {}</translation>
+    </message>
+    <message>
+        <source>The agent can search the sources ticked here. Your searches, and what the agent passes to a connector, are sent to them; a layer added from them is read from their servers.</source>
+        <translation>De agent kan de hier aangevinkte bronnen doorzoeken. Uw zoekopdrachten, en wat de agent aan een connector doorgeeft, worden naar hen verzonden; een laag die daaruit wordt toegevoegd, wordt van hun servers gelezen.</translation>
+    </message>
+    <message>
+        <source>The agent sends your request, the names of your layers and fields, your filter expressions and the results of its tools to the provider chosen here, under that provider's terms. Without the option below, the agent does not read the values of your fields; values already written in your filters and favorites are still sent. The conversation is kept on this computer for each project, until you start a new one.</source>
+        <translation>De agent stuurt uw verzoek, de namen van uw lagen en velden, uw filterexpressies en de resultaten van zijn hulpmiddelen naar de hier gekozen provider, onder de voorwaarden van die provider. Zonder de optie hieronder leest de agent de waarden van uw velden niet; waarden die al in uw filters en favorieten staan, worden nog steeds verzonden. Het gesprek wordt per project op deze computer bewaard, tot u een nieuw gesprek begint.</translation>
+    </message>
+    <message>
+        <source>Through mcp-remote, which needs Node.js: Claude Desktop starts local servers as programs.</source>
+        <translation>Via mcp-remote, dat Node.js vereist: Claude Desktop start lokale servers als programma's.</translation>
+    </message>
+    <message>
+        <source>Too many sources added: remove one first.</source>
+        <translation>Te veel bronnen toegevoegd: verwijder er eerst een.</translation>
+    </message>
+    <message>
+        <source>Undo the last</source>
+        <translation>De laatste ongedaan maken</translation>
+    </message>
+    <message>
+        <source>Undo this turn</source>
+        <translation>Deze beurt ongedaan maken</translation>
+    </message>
+    <message>
+        <source>What do you want to filter?</source>
+        <translation>Wat wilt u filteren?</translation>
+    </message>
+    <message>
+        <source>added by you</source>
+        <translation>door u toegevoegd</translation>
+    </message>
+    <message>
+        <source>applied</source>
+        <translation>toegepast</translation>
+    </message>
+    <message>
+        <source>community</source>
+        <translation>community</translation>
+    </message>
+    <message>
+        <source>https://... or a portal address</source>
+        <translation>https://... of adres van een portaal</translation>
+    </message>
+    <message>
+        <source>no change</source>
+        <translation>geen wijziging</translation>
+    </message>
+    <message>
+        <source>official</source>
+        <translation>officieel</translation>
+    </message>
+    <message>
+        <source>this computer</source>
+        <translation>deze computer</translation>
+    </message>
+    <message>
+        <source>undone</source>
+        <translation>ongedaan gemaakt</translation>
+    </message>
+    <message>
+        <source>{} turn(s)</source>
+        <translation>{} beurt(en)</translation>
+    </message>
+    <message>
+        <source>Which layers are in this project?</source>
+        <translation>Welke lagen bevat dit project?</translation>
+    </message>
+    <message>
+        <source>Keep the buildings taller than 15 m</source>
+        <translation>De gebouwen hoger dan 15 m behouden</translation>
+    </message>
+    <message>
+        <source>Filter the roads inside the selected feature</source>
+        <translation>De wegen binnen het geselecteerde object filteren</translation>
+    </message>
+</context>
+<context>
+    <name>AgentChat</name>
+    <message>
+        <source>Access to the free quota was renewed: send your request again.</source>
+        <translation>De toegang tot het gratis tegoed is vernieuwd: verstuur uw verzoek opnieuw.</translation>
+    </message>
+    <message>
+        <source>Another application is changing the project: try again in a moment.</source>
+        <translation>Een andere toepassing wijzigt het project: probeer het zo meteen opnieuw.</translation>
+    </message>
+    <message>
+        <source>Another application: {}</source>
+        <translation>Andere toepassing: {}</translation>
+    </message>
+    <message>
+        <source>Applied again: {}.</source>
+        <translation>Opnieuw toegepast: {}.</translation>
+    </message>
+    <message>
+        <source>Changed since, left as is: {}.</source>
+        <translation>Sindsdien gewijzigd, ongemoeid gelaten: {}.</translation>
+    </message>
+    <message>
+        <source>Changed: {}.</source>
+        <translation>Gewijzigd: {}.</translation>
+    </message>
+    <message>
+        <source>Choose a model and agree to send your data to use the agent.</source>
+        <translation>Kies een model en ga akkoord met het verzenden van uw gegevens om de agent te gebruiken.</translation>
+    </message>
+    <message>
+        <source>Connecting to {}…</source>
+        <translation>Verbinden met {}…</translation>
+    </message>
+    <message>
+        <source>Earlier conversation: the agent starts afresh from here.</source>
+        <translation>Eerder gesprek: de agent begint vanaf hier opnieuw.</translation>
+    </message>
+    <message>
+        <source>Enter your API key in the agent settings.</source>
+        <translation>Voer uw API-sleutel in bij de agentinstellingen.</translation>
+    </message>
+    <message>
+        <source>Export of {}</source>
+        <translation>Export van {}</translation>
+    </message>
+    <message>
+        <source>Favorite applied</source>
+        <translation>Favoriet toegepast</translation>
+    </message>
+    <message>
+        <source>Filter on the points of {}</source>
+        <translation>Filter op de punten van {}</translation>
+    </message>
+    <message>
+        <source>Filter on {}</source>
+        <translation>Filter op {}</translation>
+    </message>
+    <message>
+        <source>Filter on {} by an area</source>
+        <translation>Filter op {} met een gebied</translation>
+    </message>
+    <message>
+        <source>Filter on {} by {}</source>
+        <translation>Filter op {} met {}</translation>
+    </message>
+    <message>
+        <source>FilterMate agent</source>
+        <translation>FilterMate-agent</translation>
+    </message>
+    <message>
+        <source>Filters removed from {}</source>
+        <translation>Filters verwijderd van {}</translation>
+    </message>
+    <message>
+        <source>Hidden: {}</source>
+        <translation>Verborgen: {}</translation>
+    </message>
+    <message>
+        <source>It answers.</source>
+        <translation>De bron antwoordt.</translation>
+    </message>
+    <message>
+        <source>Layer added: {}</source>
+        <translation>Laag toegevoegd: {}</translation>
+    </message>
+    <message>
+        <source>Layers removed: {}</source>
+        <translation>Lagen verwijderd: {}</translation>
+    </message>
+    <message>
+        <source>Not reachable for this conversation: {}</source>
+        <translation>Niet bereikbaar voor dit gesprek: {}</translation>
+    </message>
+    <message>
+        <source>Nothing to redo.</source>
+        <translation>Niets om opnieuw uit te voeren.</translation>
+    </message>
+    <message>
+        <source>Nothing to restore.</source>
+        <translation>Niets om te herstellen.</translation>
+    </message>
+    <message>
+        <source>Reading the active filters</source>
+        <translation>Actieve filters worden gelezen</translation>
+    </message>
+    <message>
+        <source>Reading the favorites</source>
+        <translation>Favorieten worden gelezen</translation>
+    </message>
+    <message>
+        <source>Reading the fields of {}</source>
+        <translation>Velden van {} worden gelezen</translation>
+    </message>
+    <message>
+        <source>Reading the layers</source>
+        <translation>Lagen worden gelezen</translation>
+    </message>
+    <message>
+        <source>Reading the map</source>
+        <translation>Kaart wordt gelezen</translation>
+    </message>
+    <message>
+        <source>Reading the values of {}</source>
+        <translation>Waarden van {} worden gelezen</translation>
+    </message>
+    <message>
+        <source>Restored: {}.</source>
+        <translation>Hersteld: {}.</translation>
+    </message>
+    <message>
+        <source>Searching satellite imagery on {}</source>
+        <translation>Satellietbeelden zoeken op {}</translation>
+    </message>
+    <message>
+        <source>Searching {} for {}</source>
+        <translation>Zoeken op {} naar {}</translation>
+    </message>
+    <message>
+        <source>Selection cleared on {}</source>
+        <translation>Selectie gewist op {}</translation>
+    </message>
+    <message>
+        <source>Selection on {}</source>
+        <translation>Selectie op {}</translation>
+    </message>
+    <message>
+        <source>Shown: {}</source>
+        <translation>Getoond: {}</translation>
+    </message>
+    <message>
+        <source>Stopped.</source>
+        <translation>Gestopt.</translation>
+    </message>
+    <message>
+        <source>The MCP server could not start: {}</source>
+        <translation>De MCP-server kon niet worden gestart: {}</translation>
+    </message>
+    <message>
+        <source>The QGIS authentication database is not available.</source>
+        <translation>De QGIS-authenticatiedatabase is niet beschikbaar.</translation>
+    </message>
+    <message>
+        <source>The QGIS master password is needed to use the stored key.</source>
+        <translation>Het hoofdwachtwoord van QGIS is nodig om de opgeslagen sleutel te gebruiken.</translation>
+    </message>
+    <message>
+        <source>The agent stopped before the end ({}).</source>
+        <translation>De agent is gestopt vóór het einde ({}).</translation>
+    </message>
+    <message>
+        <source>The agent wants to add this layer of a web service to the project:
+{} · {}
+
+Do you agree?</source>
+        <translation>De agent wil deze laag van een webdienst aan het project toevoegen:
+{} · {}
+
+Gaat u akkoord?</translation>
+    </message>
+    <message>
+        <source>The agent wants to add this layer to the project:
+{}
+
+A remote source is read from its server by QGIS, and what the layer holds can be sent to the provider of the agent. Do you agree?</source>
+        <translation>De agent wil deze laag aan het project toevoegen:
+{}
+
+Een externe bron wordt door QGIS van haar server gelezen en de inhoud van de laag kan naar de provider van de agent worden verstuurd. Gaat u akkoord?</translation>
+    </message>
+    <message>
+        <source>The agent wants to export these layers to files:
+{}
+
+Do you agree?</source>
+        <translation>De agent wil deze lagen naar bestanden exporteren:
+{}
+
+Gaat u akkoord?</translation>
+    </message>
+    <message>
+        <source>The agent wants to remove these layers from the project (their files stay, their styles and filters here are lost):
+{}
+
+Do you agree?</source>
+        <translation>De agent wil deze lagen uit het project verwijderen (hun bestanden blijven, hun stijlen en filters hier gaan verloren):
+{}
+
+Gaat u akkoord?</translation>
+    </message>
+    <message>
+        <source>The agent wants to run this action on an external connector:
+{}
+{}
+
+Do you agree?</source>
+        <translation>De agent wil deze actie uitvoeren op een externe connector:
+{}
+{}
+
+Gaat u akkoord?</translation>
+    </message>
+    <message>
+        <source>The credit or quota of this account is used up.</source>
+        <translation>Het tegoed of het quotum van dit account is op.</translation>
+    </message>
+    <message>
+        <source>The free quota could not be reached: {}</source>
+        <translation>Het gratis quotum was niet bereikbaar: {}</translation>
+    </message>
+    <message>
+        <source>The free quota is not available.</source>
+        <translation>Het gratis quotum is niet beschikbaar.</translation>
+    </message>
+    <message>
+        <source>The free quota is unavailable for now.</source>
+        <translation>Het gratis quotum is momenteel niet beschikbaar.</translation>
+    </message>
+    <message>
+        <source>The free quota is used up for this month. Enter your own API key in the agent settings.</source>
+        <translation>Het gratis quotum is deze maand op. Voer uw eigen API-sleutel in bij de agentinstellingen.</translation>
+    </message>
+    <message>
+        <source>The key could not be stored.</source>
+        <translation>De sleutel kon niet worden opgeslagen.</translation>
+    </message>
+    <message>
+        <source>The provider could not be reached: {}</source>
+        <translation>De provider was niet bereikbaar: {}</translation>
+    </message>
+    <message>
+        <source>The provider refused the API key: check it in the agent settings.</source>
+        <translation>De provider heeft de API-sleutel geweigerd: controleer hem bij de agentinstellingen.</translation>
+    </message>
+    <message>
+        <source>The provider reported a problem: {}</source>
+        <translation>De provider meldde een probleem: {}</translation>
+    </message>
+    <message>
+        <source>The stored key could not be read.</source>
+        <translation>De opgeslagen sleutel kon niet worden gelezen.</translation>
+    </message>
+    <message>
+        <source>Thinking…</source>
+        <translation>Aan het nadenken…</translation>
+    </message>
+    <message>
+        <source>Too many new accounts from this address today: try again tomorrow, or enter your own API key.</source>
+        <translation>Te veel nieuwe accounts vanaf dit adres vandaag: probeer het morgen opnieuw of voer uw eigen API-sleutel in.</translation>
+    </message>
+    <message>
+        <source>Too many requests for now: try again in a moment.</source>
+        <translation>Momenteel te veel verzoeken: probeer het zo meteen opnieuw.</translation>
+    </message>
+    <message>
+        <source>Trying a filter on {}</source>
+        <translation>Een filter op {} uitproberen</translation>
+    </message>
+    <message>
+        <source>Zoom on {}</source>
+        <translation>Zoomen naar {}</translation>
+    </message>
+    <message>
+        <source>an area</source>
+        <translation>een gebied</translation>
+    </message>
+    <message>
+        <source>everything</source>
+        <translation>alles</translation>
+    </message>
+    <message>
+        <source>{} tools available</source>
+        <translation>{} hulpmiddelen beschikbaar</translation>
+    </message>
+</context>
 </TS>

@@ -7758,4 +7758,574 @@ Installere det nå fra PyPI med pip i QGIS-profilen din? QGIS' Python endres ikk
         <translation type="obsolete">Beholdte punkter</translation>
     </message>
 </context>
+<context>
+    <name>AgentPanel</name>
+    <message>
+        <source>(no request)</source>
+        <translation>(ingen forespørsel)</translation>
+    </message>
+    <message>
+        <source>A few free requests a month, through the relay of FilterMate to Claude (Anthropic), under the terms of Anthropic. The relay counts what is spent and keeps no conversation. When it is used up, choose a provider and enter your own API key.</source>
+        <translation>Noen få gratis forespørsler i måneden, via FilterMates relé til Claude (Anthropic), etter Anthropics vilkår. Releet teller hva som brukes og lagrer ingen samtale. Når kvoten er brukt opp, velg en leverandør og skriv inn din egen API-nøkkel.</translation>
+    </message>
+    <message>
+        <source>API key</source>
+        <translation>API-nøkkel</translation>
+    </message>
+    <message>
+        <source>Add</source>
+        <translation>Legg til</translation>
+    </message>
+    <message>
+        <source>Address</source>
+        <translation>Adresse</translation>
+    </message>
+    <message>
+        <source>Agent settings</source>
+        <translation>Agentinnstillinger</translation>
+    </message>
+    <message>
+        <source>Allow attribute values to be sent</source>
+        <translation>Tillat at attributtverdier sendes</translation>
+    </message>
+    <message>
+        <source>Applications already set up will have to be set up again.</source>
+        <translation>Programmer som allerede er satt opp, må settes opp på nytt.</translation>
+    </message>
+    <message>
+        <source>Ask the agent to filter your layers</source>
+        <translation>Be agenten filtrere lagene dine</translation>
+    </message>
+    <message>
+        <source>Back to the conversation</source>
+        <translation>Tilbake til samtalen</translation>
+    </message>
+    <message>
+        <source>Claude Code or another MCP client on this computer can then filter your layers, once FilterMate has been opened, under the rules of this panel: the same sources, the same confirmations, and filters can be undone here. That application sends what it reads to its own AI provider.</source>
+        <translation>Claude Code eller en annen MCP-klient på denne datamaskinen kan da filtrere lagene dine, når FilterMate er åpnet, etter reglene i dette panelet: de samme kildene, de samme bekreftelsene, og filtre kan angres her. Programmet sender det det leser til sin egen KI-leverandør.</translation>
+    </message>
+    <message>
+        <source>Connect an AI provider to start. Nothing is sent before you agree.</source>
+        <translation>Koble til en KI-leverandør for å starte. Ingenting sendes før du godtar.</translation>
+    </message>
+    <message>
+        <source>Copied, with the access token: keep it to yourself. Save these settings for it to apply.</source>
+        <translation>Kopiert, med tilgangstokenet: hold det for deg selv. Lagre disse innstillingene for at det skal gjelde.</translation>
+    </message>
+    <message>
+        <source>Copy for Claude Desktop</source>
+        <translation>Kopier for Claude Desktop</translation>
+    </message>
+    <message>
+        <source>Copy the Claude Code command</source>
+        <translation>Kopier Claude Code-kommandoen</translation>
+    </message>
+    <message>
+        <source>Copy the configuration</source>
+        <translation>Kopier konfigurasjonen</translation>
+    </message>
+    <message>
+        <source>Describe it in your own words. Each filter can be undone.</source>
+        <translation>Beskriv det med dine egne ord. Hvert filter kan angres.</translation>
+    </message>
+    <message>
+        <source>Filter your layers from a sentence</source>
+        <translation>Filtrer lagene dine med én setning</translation>
+    </message>
+    <message>
+        <source>FilterMate agent</source>
+        <translation>FilterMate-agent</translation>
+    </message>
+    <message>
+        <source>History</source>
+        <translation>Historikk</translation>
+    </message>
+    <message>
+        <source>History…</source>
+        <translation>Historikk…</translation>
+    </message>
+    <message>
+        <source>I agree to send this data to this provider</source>
+        <translation>Jeg godtar at disse dataene sendes til denne leverandøren</translation>
+    </message>
+    <message>
+        <source>Let other applications on this computer drive FilterMate (MCP server)</source>
+        <translation>La andre programmer på denne datamaskinen styre FilterMate (MCP-server)</translation>
+    </message>
+    <message>
+        <source>MCP connector</source>
+        <translation>MCP-kobling</translation>
+    </message>
+    <message>
+        <source>MCP connectors</source>
+        <translation>MCP-koblinger</translation>
+    </message>
+    <message>
+        <source>Model</source>
+        <translation>Modell</translation>
+    </message>
+    <message>
+        <source>More</source>
+        <translation>Mer</translation>
+    </message>
+    <message>
+        <source>New access token</source>
+        <translation>Nytt tilgangstoken</translation>
+    </message>
+    <message>
+        <source>New conversation</source>
+        <translation>Ny samtale</translation>
+    </message>
+    <message>
+        <source>New token: it applies once these settings are saved.</source>
+        <translation>Nytt token: det gjelder når disse innstillingene er lagret.</translation>
+    </message>
+    <message>
+        <source>Open data platforms</source>
+        <translation>Plattformer for åpne data</translation>
+    </message>
+    <message>
+        <source>Open the settings</source>
+        <translation>Åpne innstillingene</translation>
+    </message>
+    <message>
+        <source>Other applications</source>
+        <translation>Andre programmer</translation>
+    </message>
+    <message>
+        <source>Port</source>
+        <translation>Port</translation>
+    </message>
+    <message>
+        <source>Provider</source>
+        <translation>Leverandør</translation>
+    </message>
+    <message>
+        <source>Redo</source>
+        <translation>Gjør om</translation>
+    </message>
+    <message>
+        <source>Remove</source>
+        <translation>Fjern</translation>
+    </message>
+    <message>
+        <source>Remove the stored key</source>
+        <translation>Fjern den lagrede nøkkelen</translation>
+    </message>
+    <message>
+        <source>Satellite imagery</source>
+        <translation>Satellittbilder</translation>
+    </message>
+    <message>
+        <source>Send (Enter)</source>
+        <translation>Send (Enter)</translation>
+    </message>
+    <message>
+        <source>Send again</source>
+        <translation>Send på nytt</translation>
+    </message>
+    <message>
+        <source>Sent to: {}</source>
+        <translation>Sendt til: {}</translation>
+    </message>
+    <message>
+        <source>Set up the agent</source>
+        <translation>Sett opp agenten</translation>
+    </message>
+    <message>
+        <source>Sources</source>
+        <translation>Kilder</translation>
+    </message>
+    <message>
+        <source>Stop (Esc)</source>
+        <translation>Stopp (Esc)</translation>
+    </message>
+    <message>
+        <source>Stored: leave empty to keep it</source>
+        <translation>Lagret: la stå tomt for å beholde den</translation>
+    </message>
+    <message>
+        <source>Test</source>
+        <translation>Test</translation>
+    </message>
+    <message>
+        <source>Testing…</source>
+        <translation>Tester…</translation>
+    </message>
+    <message>
+        <source>The MCP server could not start: {}</source>
+        <translation>MCP-serveren kunne ikke starte: {}</translation>
+    </message>
+    <message>
+        <source>The agent can search the sources ticked here. Your searches, and what the agent passes to a connector, are sent to them; a layer added from them is read from their servers.</source>
+        <translation>Agenten kan søke i kildene som er avmerket her. Søkene dine, og det agenten sender til en kobling, sendes til dem; et lag som legges til fra dem, leses fra serverne deres.</translation>
+    </message>
+    <message>
+        <source>The agent sends your request, the names of your layers and fields, your filter expressions and the results of its tools to the provider chosen here, under that provider's terms. Without the option below, the agent does not read the values of your fields; values already written in your filters and favorites are still sent. The conversation is kept on this computer for each project, until you start a new one.</source>
+        <translation>Agenten sender forespørselen din, navnene på lagene og feltene dine, filteruttrykkene dine og resultatene av verktøyene sine til leverandøren som er valgt her, etter leverandørens vilkår. Uten alternativet nedenfor leser ikke agenten verdiene i feltene dine; verdier som allerede står i filtrene og favorittene dine, sendes likevel. Samtalen lagres på denne datamaskinen for hvert prosjekt, til du starter en ny.</translation>
+    </message>
+    <message>
+        <source>Through mcp-remote, which needs Node.js: Claude Desktop starts local servers as programs.</source>
+        <translation>Via mcp-remote, som krever Node.js: Claude Desktop starter lokale servere som programmer.</translation>
+    </message>
+    <message>
+        <source>Too many sources added: remove one first.</source>
+        <translation>For mange kilder lagt til: fjern én først.</translation>
+    </message>
+    <message>
+        <source>Undo the last</source>
+        <translation>Angre den siste</translation>
+    </message>
+    <message>
+        <source>Undo this turn</source>
+        <translation>Angre denne runden</translation>
+    </message>
+    <message>
+        <source>What do you want to filter?</source>
+        <translation>Hva vil du filtrere?</translation>
+    </message>
+    <message>
+        <source>added by you</source>
+        <translation>lagt til av deg</translation>
+    </message>
+    <message>
+        <source>applied</source>
+        <translation>brukt</translation>
+    </message>
+    <message>
+        <source>community</source>
+        <translation>fellesskap</translation>
+    </message>
+    <message>
+        <source>https://... or a portal address</source>
+        <translation>https://... eller en portaladresse</translation>
+    </message>
+    <message>
+        <source>no change</source>
+        <translation>ingen endring</translation>
+    </message>
+    <message>
+        <source>official</source>
+        <translation>offisiell</translation>
+    </message>
+    <message>
+        <source>this computer</source>
+        <translation>denne datamaskinen</translation>
+    </message>
+    <message>
+        <source>undone</source>
+        <translation>angret</translation>
+    </message>
+    <message>
+        <source>{} turn(s)</source>
+        <translation>{} runde(r)</translation>
+    </message>
+    <message>
+        <source>Which layers are in this project?</source>
+        <translation>Hvilke lag inneholder dette prosjektet?</translation>
+    </message>
+    <message>
+        <source>Keep the buildings taller than 15 m</source>
+        <translation>Behold bygningene som er høyere enn 15 m</translation>
+    </message>
+    <message>
+        <source>Filter the roads inside the selected feature</source>
+        <translation>Filtrer veiene innenfor det valgte objektet</translation>
+    </message>
+</context>
+<context>
+    <name>AgentChat</name>
+    <message>
+        <source>Access to the free quota was renewed: send your request again.</source>
+        <translation>Tilgangen til gratiskvoten er fornyet: send forespørselen din på nytt.</translation>
+    </message>
+    <message>
+        <source>Another application is changing the project: try again in a moment.</source>
+        <translation>Et annet program endrer prosjektet: prøv igjen om et øyeblikk.</translation>
+    </message>
+    <message>
+        <source>Another application: {}</source>
+        <translation>Annet program: {}</translation>
+    </message>
+    <message>
+        <source>Applied again: {}.</source>
+        <translation>Brukt på nytt: {}.</translation>
+    </message>
+    <message>
+        <source>Changed since, left as is: {}.</source>
+        <translation>Endret siden, latt stå som det er: {}.</translation>
+    </message>
+    <message>
+        <source>Changed: {}.</source>
+        <translation>Endret: {}.</translation>
+    </message>
+    <message>
+        <source>Choose a model and agree to send your data to use the agent.</source>
+        <translation>Velg en modell og godta at dataene dine sendes for å bruke agenten.</translation>
+    </message>
+    <message>
+        <source>Connecting to {}…</source>
+        <translation>Kobler til {}…</translation>
+    </message>
+    <message>
+        <source>Earlier conversation: the agent starts afresh from here.</source>
+        <translation>Tidligere samtale: agenten starter på nytt herfra.</translation>
+    </message>
+    <message>
+        <source>Enter your API key in the agent settings.</source>
+        <translation>Skriv inn API-nøkkelen din i agentinnstillingene.</translation>
+    </message>
+    <message>
+        <source>Export of {}</source>
+        <translation>Eksport av {}</translation>
+    </message>
+    <message>
+        <source>Favorite applied</source>
+        <translation>Favoritt brukt</translation>
+    </message>
+    <message>
+        <source>Filter on the points of {}</source>
+        <translation>Filter på punktene i {}</translation>
+    </message>
+    <message>
+        <source>Filter on {}</source>
+        <translation>Filter på {}</translation>
+    </message>
+    <message>
+        <source>Filter on {} by an area</source>
+        <translation>Filter på {} etter et område</translation>
+    </message>
+    <message>
+        <source>Filter on {} by {}</source>
+        <translation>Filter på {} etter {}</translation>
+    </message>
+    <message>
+        <source>FilterMate agent</source>
+        <translation>FilterMate-agent</translation>
+    </message>
+    <message>
+        <source>Filters removed from {}</source>
+        <translation>Filtre fjernet fra {}</translation>
+    </message>
+    <message>
+        <source>Hidden: {}</source>
+        <translation>Skjult: {}</translation>
+    </message>
+    <message>
+        <source>It answers.</source>
+        <translation>Kilden svarer.</translation>
+    </message>
+    <message>
+        <source>Layer added: {}</source>
+        <translation>Lag lagt til: {}</translation>
+    </message>
+    <message>
+        <source>Layers removed: {}</source>
+        <translation>Lag fjernet: {}</translation>
+    </message>
+    <message>
+        <source>Not reachable for this conversation: {}</source>
+        <translation>Kan ikke nås for denne samtalen: {}</translation>
+    </message>
+    <message>
+        <source>Nothing to redo.</source>
+        <translation>Ingenting å gjøre om.</translation>
+    </message>
+    <message>
+        <source>Nothing to restore.</source>
+        <translation>Ingenting å gjenopprette.</translation>
+    </message>
+    <message>
+        <source>Reading the active filters</source>
+        <translation>Leser de aktive filtrene</translation>
+    </message>
+    <message>
+        <source>Reading the favorites</source>
+        <translation>Leser favorittene</translation>
+    </message>
+    <message>
+        <source>Reading the fields of {}</source>
+        <translation>Leser feltene i {}</translation>
+    </message>
+    <message>
+        <source>Reading the layers</source>
+        <translation>Leser lagene</translation>
+    </message>
+    <message>
+        <source>Reading the map</source>
+        <translation>Leser kartet</translation>
+    </message>
+    <message>
+        <source>Reading the values of {}</source>
+        <translation>Leser verdiene i {}</translation>
+    </message>
+    <message>
+        <source>Restored: {}.</source>
+        <translation>Gjenopprettet: {}.</translation>
+    </message>
+    <message>
+        <source>Searching satellite imagery on {}</source>
+        <translation>Søker etter satellittbilder på {}</translation>
+    </message>
+    <message>
+        <source>Searching {} for {}</source>
+        <translation>Søker i {} etter {}</translation>
+    </message>
+    <message>
+        <source>Selection cleared on {}</source>
+        <translation>Utvalg tømt på {}</translation>
+    </message>
+    <message>
+        <source>Selection on {}</source>
+        <translation>Utvalg på {}</translation>
+    </message>
+    <message>
+        <source>Shown: {}</source>
+        <translation>Vist: {}</translation>
+    </message>
+    <message>
+        <source>Stopped.</source>
+        <translation>Stoppet.</translation>
+    </message>
+    <message>
+        <source>The MCP server could not start: {}</source>
+        <translation>MCP-serveren kunne ikke starte: {}</translation>
+    </message>
+    <message>
+        <source>The QGIS authentication database is not available.</source>
+        <translation>QGIS-autentiseringsdatabasen er ikke tilgjengelig.</translation>
+    </message>
+    <message>
+        <source>The QGIS master password is needed to use the stored key.</source>
+        <translation>QGIS-hovedpassordet trengs for å bruke den lagrede nøkkelen.</translation>
+    </message>
+    <message>
+        <source>The agent stopped before the end ({}).</source>
+        <translation>Agenten stoppet før slutten ({}).</translation>
+    </message>
+    <message>
+        <source>The agent wants to add this layer of a web service to the project:
+{} · {}
+
+Do you agree?</source>
+        <translation>Agenten vil legge til dette laget fra en nettjeneste i prosjektet:
+{} · {}
+
+Godtar du?</translation>
+    </message>
+    <message>
+        <source>The agent wants to add this layer to the project:
+{}
+
+A remote source is read from its server by QGIS, and what the layer holds can be sent to the provider of the agent. Do you agree?</source>
+        <translation>Agenten vil legge til dette laget i prosjektet:
+{}
+
+En ekstern kilde leses av QGIS fra serveren sin, og innholdet i laget kan sendes til agentens leverandør. Godtar du?</translation>
+    </message>
+    <message>
+        <source>The agent wants to export these layers to files:
+{}
+
+Do you agree?</source>
+        <translation>Agenten vil eksportere disse lagene til filer:
+{}
+
+Godtar du?</translation>
+    </message>
+    <message>
+        <source>The agent wants to remove these layers from the project (their files stay, their styles and filters here are lost):
+{}
+
+Do you agree?</source>
+        <translation>Agenten vil fjerne disse lagene fra prosjektet (filene deres beholdes, men stilene og filtrene deres her går tapt):
+{}
+
+Godtar du?</translation>
+    </message>
+    <message>
+        <source>The agent wants to run this action on an external connector:
+{}
+{}
+
+Do you agree?</source>
+        <translation>Agenten vil kjøre denne handlingen på en ekstern kobling:
+{}
+{}
+
+Godtar du?</translation>
+    </message>
+    <message>
+        <source>The credit or quota of this account is used up.</source>
+        <translation>Kreditten eller kvoten på denne kontoen er brukt opp.</translation>
+    </message>
+    <message>
+        <source>The free quota could not be reached: {}</source>
+        <translation>Gratiskvoten kunne ikke nås: {}</translation>
+    </message>
+    <message>
+        <source>The free quota is not available.</source>
+        <translation>Gratiskvoten er ikke tilgjengelig.</translation>
+    </message>
+    <message>
+        <source>The free quota is unavailable for now.</source>
+        <translation>Gratiskvoten er utilgjengelig for øyeblikket.</translation>
+    </message>
+    <message>
+        <source>The free quota is used up for this month. Enter your own API key in the agent settings.</source>
+        <translation>Gratiskvoten er brukt opp for denne måneden. Skriv inn din egen API-nøkkel i agentinnstillingene.</translation>
+    </message>
+    <message>
+        <source>The key could not be stored.</source>
+        <translation>Nøkkelen kunne ikke lagres.</translation>
+    </message>
+    <message>
+        <source>The provider could not be reached: {}</source>
+        <translation>Leverandøren kunne ikke nås: {}</translation>
+    </message>
+    <message>
+        <source>The provider refused the API key: check it in the agent settings.</source>
+        <translation>Leverandøren avviste API-nøkkelen: kontroller den i agentinnstillingene.</translation>
+    </message>
+    <message>
+        <source>The provider reported a problem: {}</source>
+        <translation>Leverandøren rapporterte et problem: {}</translation>
+    </message>
+    <message>
+        <source>The stored key could not be read.</source>
+        <translation>Den lagrede nøkkelen kunne ikke leses.</translation>
+    </message>
+    <message>
+        <source>Thinking…</source>
+        <translation>Tenker…</translation>
+    </message>
+    <message>
+        <source>Too many new accounts from this address today: try again tomorrow, or enter your own API key.</source>
+        <translation>For mange nye kontoer fra denne adressen i dag: prøv igjen i morgen, eller skriv inn din egen API-nøkkel.</translation>
+    </message>
+    <message>
+        <source>Too many requests for now: try again in a moment.</source>
+        <translation>For mange forespørsler for øyeblikket: prøv igjen om et øyeblikk.</translation>
+    </message>
+    <message>
+        <source>Trying a filter on {}</source>
+        <translation>Prøver et filter på {}</translation>
+    </message>
+    <message>
+        <source>Zoom on {}</source>
+        <translation>Zoom til {}</translation>
+    </message>
+    <message>
+        <source>an area</source>
+        <translation>et område</translation>
+    </message>
+    <message>
+        <source>everything</source>
+        <translation>alt</translation>
+    </message>
+    <message>
+        <source>{} tools available</source>
+        <translation>{} verktøy tilgjengelige</translation>
+    </message>
+</context>
 </TS>

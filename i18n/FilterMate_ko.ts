@@ -7758,4 +7758,574 @@ Install it now from PyPI with pip, into your QGIS profile? The Python of QGIS is
         <translation type="obsolete">유지된 포인트</translation>
     </message>
 </context>
+<context>
+    <name>AgentPanel</name>
+    <message>
+        <source>(no request)</source>
+        <translation>(요청 없음)</translation>
+    </message>
+    <message>
+        <source>A few free requests a month, through the relay of FilterMate to Claude (Anthropic), under the terms of Anthropic. The relay counts what is spent and keeps no conversation. When it is used up, choose a provider and enter your own API key.</source>
+        <translation>매달 소량의 무료 요청을 FilterMate의 Claude(Anthropic) 중계를 통해 Anthropic의 약관에 따라 제공합니다. 중계는 사용량만 집계하며 대화를 보관하지 않습니다. 소진되면 제공자를 선택하고 본인의 API 키를 입력하세요.</translation>
+    </message>
+    <message>
+        <source>API key</source>
+        <translation>API 키</translation>
+    </message>
+    <message>
+        <source>Add</source>
+        <translation>추가</translation>
+    </message>
+    <message>
+        <source>Address</source>
+        <translation>주소</translation>
+    </message>
+    <message>
+        <source>Agent settings</source>
+        <translation>에이전트 설정</translation>
+    </message>
+    <message>
+        <source>Allow attribute values to be sent</source>
+        <translation>속성 값 전송 허용</translation>
+    </message>
+    <message>
+        <source>Applications already set up will have to be set up again.</source>
+        <translation>이미 설정된 애플리케이션은 다시 설정해야 합니다.</translation>
+    </message>
+    <message>
+        <source>Ask the agent to filter your layers</source>
+        <translation>에이전트에게 레이어 필터링을 요청하세요</translation>
+    </message>
+    <message>
+        <source>Back to the conversation</source>
+        <translation>대화로 돌아가기</translation>
+    </message>
+    <message>
+        <source>Claude Code or another MCP client on this computer can then filter your layers, once FilterMate has been opened, under the rules of this panel: the same sources, the same confirmations, and filters can be undone here. That application sends what it reads to its own AI provider.</source>
+        <translation>이 컴퓨터의 Claude Code 또는 다른 MCP 클라이언트가 FilterMate를 연 뒤 이 패널의 규칙(동일한 소스, 동일한 확인 절차, 필터는 여기서 실행 취소 가능)에 따라 레이어를 필터링할 수 있습니다. 해당 애플리케이션은 읽은 내용을 자체 AI 제공자에게 전송합니다.</translation>
+    </message>
+    <message>
+        <source>Connect an AI provider to start. Nothing is sent before you agree.</source>
+        <translation>시작하려면 AI 제공자를 연결하세요. 동의하기 전에는 아무것도 전송되지 않습니다.</translation>
+    </message>
+    <message>
+        <source>Copied, with the access token: keep it to yourself. Save these settings for it to apply.</source>
+        <translation>액세스 토큰과 함께 복사됨: 다른 사람에게 공개하지 마세요. 적용하려면 이 설정을 저장하세요.</translation>
+    </message>
+    <message>
+        <source>Copy for Claude Desktop</source>
+        <translation>Claude Desktop용으로 복사</translation>
+    </message>
+    <message>
+        <source>Copy the Claude Code command</source>
+        <translation>Claude Code 명령 복사</translation>
+    </message>
+    <message>
+        <source>Copy the configuration</source>
+        <translation>구성 복사</translation>
+    </message>
+    <message>
+        <source>Describe it in your own words. Each filter can be undone.</source>
+        <translation>원하는 대로 설명하세요. 각 필터는 실행 취소할 수 있습니다.</translation>
+    </message>
+    <message>
+        <source>Filter your layers from a sentence</source>
+        <translation>문장 하나로 레이어를 필터링하세요</translation>
+    </message>
+    <message>
+        <source>FilterMate agent</source>
+        <translation>FilterMate 에이전트</translation>
+    </message>
+    <message>
+        <source>History</source>
+        <translation>기록</translation>
+    </message>
+    <message>
+        <source>History…</source>
+        <translation>기록…</translation>
+    </message>
+    <message>
+        <source>I agree to send this data to this provider</source>
+        <translation>이 제공자에게 이 데이터를 전송하는 데 동의합니다</translation>
+    </message>
+    <message>
+        <source>Let other applications on this computer drive FilterMate (MCP server)</source>
+        <translation>이 컴퓨터의 다른 애플리케이션이 FilterMate를 제어하도록 허용(MCP 서버)</translation>
+    </message>
+    <message>
+        <source>MCP connector</source>
+        <translation>MCP 커넥터</translation>
+    </message>
+    <message>
+        <source>MCP connectors</source>
+        <translation>MCP 커넥터</translation>
+    </message>
+    <message>
+        <source>Model</source>
+        <translation>모델</translation>
+    </message>
+    <message>
+        <source>More</source>
+        <translation>더 보기</translation>
+    </message>
+    <message>
+        <source>New access token</source>
+        <translation>새 액세스 토큰</translation>
+    </message>
+    <message>
+        <source>New conversation</source>
+        <translation>새 대화</translation>
+    </message>
+    <message>
+        <source>New token: it applies once these settings are saved.</source>
+        <translation>새 토큰: 이 설정을 저장하면 적용됩니다.</translation>
+    </message>
+    <message>
+        <source>Open data platforms</source>
+        <translation>오픈 데이터 플랫폼</translation>
+    </message>
+    <message>
+        <source>Open the settings</source>
+        <translation>설정 열기</translation>
+    </message>
+    <message>
+        <source>Other applications</source>
+        <translation>다른 애플리케이션</translation>
+    </message>
+    <message>
+        <source>Port</source>
+        <translation>포트</translation>
+    </message>
+    <message>
+        <source>Provider</source>
+        <translation>제공자</translation>
+    </message>
+    <message>
+        <source>Redo</source>
+        <translation>다시 실행</translation>
+    </message>
+    <message>
+        <source>Remove</source>
+        <translation>제거</translation>
+    </message>
+    <message>
+        <source>Remove the stored key</source>
+        <translation>저장된 키 삭제</translation>
+    </message>
+    <message>
+        <source>Satellite imagery</source>
+        <translation>위성 영상</translation>
+    </message>
+    <message>
+        <source>Send (Enter)</source>
+        <translation>보내기 (Enter)</translation>
+    </message>
+    <message>
+        <source>Send again</source>
+        <translation>다시 보내기</translation>
+    </message>
+    <message>
+        <source>Sent to: {}</source>
+        <translation>전송 대상: {}</translation>
+    </message>
+    <message>
+        <source>Set up the agent</source>
+        <translation>에이전트 설정하기</translation>
+    </message>
+    <message>
+        <source>Sources</source>
+        <translation>소스</translation>
+    </message>
+    <message>
+        <source>Stop (Esc)</source>
+        <translation>중지 (Esc)</translation>
+    </message>
+    <message>
+        <source>Stored: leave empty to keep it</source>
+        <translation>저장됨: 비워 두면 유지</translation>
+    </message>
+    <message>
+        <source>Test</source>
+        <translation>테스트</translation>
+    </message>
+    <message>
+        <source>Testing…</source>
+        <translation>테스트 중…</translation>
+    </message>
+    <message>
+        <source>The MCP server could not start: {}</source>
+        <translation>MCP 서버를 시작할 수 없습니다: {}</translation>
+    </message>
+    <message>
+        <source>The agent can search the sources ticked here. Your searches, and what the agent passes to a connector, are sent to them; a layer added from them is read from their servers.</source>
+        <translation>에이전트는 여기서 선택한 소스를 검색할 수 있습니다. 사용자의 검색어와 에이전트가 커넥터에 전달하는 내용이 해당 소스로 전송되며, 소스에서 추가한 레이어는 해당 서버에서 읽습니다.</translation>
+    </message>
+    <message>
+        <source>The agent sends your request, the names of your layers and fields, your filter expressions and the results of its tools to the provider chosen here, under that provider's terms. Without the option below, the agent does not read the values of your fields; values already written in your filters and favorites are still sent. The conversation is kept on this computer for each project, until you start a new one.</source>
+        <translation>에이전트는 사용자의 요청, 레이어와 필드의 이름, 필터 표현식, 도구 실행 결과를 여기서 선택한 제공자에게 해당 제공자의 약관에 따라 전송합니다. 아래 옵션을 켜지 않으면 에이전트는 필드의 값을 읽지 않지만, 이미 필터와 즐겨찾기에 적혀 있는 값은 계속 전송됩니다. 대화는 새 대화를 시작할 때까지 프로젝트별로 이 컴퓨터에 보관됩니다.</translation>
+    </message>
+    <message>
+        <source>Through mcp-remote, which needs Node.js: Claude Desktop starts local servers as programs.</source>
+        <translation>Node.js가 필요한 mcp-remote를 통해: Claude Desktop은 로컬 서버를 프로그램으로 실행합니다.</translation>
+    </message>
+    <message>
+        <source>Too many sources added: remove one first.</source>
+        <translation>추가된 소스가 너무 많습니다. 먼저 하나를 제거하세요.</translation>
+    </message>
+    <message>
+        <source>Undo the last</source>
+        <translation>마지막 항목 실행 취소</translation>
+    </message>
+    <message>
+        <source>Undo this turn</source>
+        <translation>이번 턴 실행 취소</translation>
+    </message>
+    <message>
+        <source>What do you want to filter?</source>
+        <translation>무엇을 필터링하시겠습니까?</translation>
+    </message>
+    <message>
+        <source>added by you</source>
+        <translation>직접 추가함</translation>
+    </message>
+    <message>
+        <source>applied</source>
+        <translation>적용됨</translation>
+    </message>
+    <message>
+        <source>community</source>
+        <translation>커뮤니티</translation>
+    </message>
+    <message>
+        <source>https://... or a portal address</source>
+        <translation>https://... 또는 포털 주소</translation>
+    </message>
+    <message>
+        <source>no change</source>
+        <translation>변경 없음</translation>
+    </message>
+    <message>
+        <source>official</source>
+        <translation>공식</translation>
+    </message>
+    <message>
+        <source>this computer</source>
+        <translation>이 컴퓨터</translation>
+    </message>
+    <message>
+        <source>undone</source>
+        <translation>실행 취소됨</translation>
+    </message>
+    <message>
+        <source>{} turn(s)</source>
+        <translation>{}턴</translation>
+    </message>
+    <message>
+        <source>Which layers are in this project?</source>
+        <translation>이 프로젝트에는 어떤 레이어가 있나요?</translation>
+    </message>
+    <message>
+        <source>Keep the buildings taller than 15 m</source>
+        <translation>15m보다 높은 건물만 남기기</translation>
+    </message>
+    <message>
+        <source>Filter the roads inside the selected feature</source>
+        <translation>선택한 피처 안의 도로 필터링</translation>
+    </message>
+</context>
+<context>
+    <name>AgentChat</name>
+    <message>
+        <source>Access to the free quota was renewed: send your request again.</source>
+        <translation>무료 사용량 접근이 갱신되었습니다. 요청을 다시 보내세요.</translation>
+    </message>
+    <message>
+        <source>Another application is changing the project: try again in a moment.</source>
+        <translation>다른 애플리케이션이 프로젝트를 변경하고 있습니다. 잠시 후 다시 시도하세요.</translation>
+    </message>
+    <message>
+        <source>Another application: {}</source>
+        <translation>다른 애플리케이션: {}</translation>
+    </message>
+    <message>
+        <source>Applied again: {}.</source>
+        <translation>다시 적용됨: {}.</translation>
+    </message>
+    <message>
+        <source>Changed since, left as is: {}.</source>
+        <translation>이후 변경되어 그대로 둠: {}.</translation>
+    </message>
+    <message>
+        <source>Changed: {}.</source>
+        <translation>변경됨: {}.</translation>
+    </message>
+    <message>
+        <source>Choose a model and agree to send your data to use the agent.</source>
+        <translation>에이전트를 사용하려면 모델을 선택하고 데이터 전송에 동의하세요.</translation>
+    </message>
+    <message>
+        <source>Connecting to {}…</source>
+        <translation>{}에 연결 중…</translation>
+    </message>
+    <message>
+        <source>Earlier conversation: the agent starts afresh from here.</source>
+        <translation>이전 대화: 에이전트는 여기서부터 새로 시작합니다.</translation>
+    </message>
+    <message>
+        <source>Enter your API key in the agent settings.</source>
+        <translation>에이전트 설정에서 API 키를 입력하세요.</translation>
+    </message>
+    <message>
+        <source>Export of {}</source>
+        <translation>{} 내보내기</translation>
+    </message>
+    <message>
+        <source>Favorite applied</source>
+        <translation>즐겨찾기 적용됨</translation>
+    </message>
+    <message>
+        <source>Filter on the points of {}</source>
+        <translation>{}의 포인트 필터</translation>
+    </message>
+    <message>
+        <source>Filter on {}</source>
+        <translation>{} 필터</translation>
+    </message>
+    <message>
+        <source>Filter on {} by an area</source>
+        <translation>{} 필터 (영역 기준)</translation>
+    </message>
+    <message>
+        <source>Filter on {} by {}</source>
+        <translation>{} 필터 ({} 기준)</translation>
+    </message>
+    <message>
+        <source>FilterMate agent</source>
+        <translation>FilterMate 에이전트</translation>
+    </message>
+    <message>
+        <source>Filters removed from {}</source>
+        <translation>{}의 필터 제거됨</translation>
+    </message>
+    <message>
+        <source>Hidden: {}</source>
+        <translation>숨김: {}</translation>
+    </message>
+    <message>
+        <source>It answers.</source>
+        <translation>응답합니다.</translation>
+    </message>
+    <message>
+        <source>Layer added: {}</source>
+        <translation>레이어 추가됨: {}</translation>
+    </message>
+    <message>
+        <source>Layers removed: {}</source>
+        <translation>레이어 제거됨: {}</translation>
+    </message>
+    <message>
+        <source>Not reachable for this conversation: {}</source>
+        <translation>이 대화에서 접근할 수 없음: {}</translation>
+    </message>
+    <message>
+        <source>Nothing to redo.</source>
+        <translation>다시 실행할 항목이 없습니다.</translation>
+    </message>
+    <message>
+        <source>Nothing to restore.</source>
+        <translation>복원할 항목이 없습니다.</translation>
+    </message>
+    <message>
+        <source>Reading the active filters</source>
+        <translation>활성 필터 읽는 중</translation>
+    </message>
+    <message>
+        <source>Reading the favorites</source>
+        <translation>즐겨찾기 읽는 중</translation>
+    </message>
+    <message>
+        <source>Reading the fields of {}</source>
+        <translation>{}의 필드 읽는 중</translation>
+    </message>
+    <message>
+        <source>Reading the layers</source>
+        <translation>레이어 읽는 중</translation>
+    </message>
+    <message>
+        <source>Reading the map</source>
+        <translation>지도 읽는 중</translation>
+    </message>
+    <message>
+        <source>Reading the values of {}</source>
+        <translation>{}의 값 읽는 중</translation>
+    </message>
+    <message>
+        <source>Restored: {}.</source>
+        <translation>복원됨: {}.</translation>
+    </message>
+    <message>
+        <source>Searching satellite imagery on {}</source>
+        <translation>{}에서 위성 영상 검색 중</translation>
+    </message>
+    <message>
+        <source>Searching {} for {}</source>
+        <translation>{}에서 검색 중: {}</translation>
+    </message>
+    <message>
+        <source>Selection cleared on {}</source>
+        <translation>{}의 선택 해제됨</translation>
+    </message>
+    <message>
+        <source>Selection on {}</source>
+        <translation>{}의 선택</translation>
+    </message>
+    <message>
+        <source>Shown: {}</source>
+        <translation>표시됨: {}</translation>
+    </message>
+    <message>
+        <source>Stopped.</source>
+        <translation>중지되었습니다.</translation>
+    </message>
+    <message>
+        <source>The MCP server could not start: {}</source>
+        <translation>MCP 서버를 시작할 수 없습니다: {}</translation>
+    </message>
+    <message>
+        <source>The QGIS authentication database is not available.</source>
+        <translation>QGIS 인증 데이터베이스를 사용할 수 없습니다.</translation>
+    </message>
+    <message>
+        <source>The QGIS master password is needed to use the stored key.</source>
+        <translation>저장된 키를 사용하려면 QGIS 마스터 비밀번호가 필요합니다.</translation>
+    </message>
+    <message>
+        <source>The agent stopped before the end ({}).</source>
+        <translation>에이전트가 끝나기 전에 중지되었습니다({}).</translation>
+    </message>
+    <message>
+        <source>The agent wants to add this layer of a web service to the project:
+{} · {}
+
+Do you agree?</source>
+        <translation>에이전트가 웹 서비스의 이 레이어를 프로젝트에 추가하려고 합니다:
+{} · {}
+
+허용하시겠습니까?</translation>
+    </message>
+    <message>
+        <source>The agent wants to add this layer to the project:
+{}
+
+A remote source is read from its server by QGIS, and what the layer holds can be sent to the provider of the agent. Do you agree?</source>
+        <translation>에이전트가 이 레이어를 프로젝트에 추가하려고 합니다:
+{}
+
+원격 소스는 QGIS가 해당 서버에서 읽으며, 레이어에 담긴 내용이 에이전트의 제공자에게 전송될 수 있습니다. 허용하시겠습니까?</translation>
+    </message>
+    <message>
+        <source>The agent wants to export these layers to files:
+{}
+
+Do you agree?</source>
+        <translation>에이전트가 이 레이어들을 파일로 내보내려고 합니다:
+{}
+
+허용하시겠습니까?</translation>
+    </message>
+    <message>
+        <source>The agent wants to remove these layers from the project (their files stay, their styles and filters here are lost):
+{}
+
+Do you agree?</source>
+        <translation>에이전트가 이 레이어들을 프로젝트에서 제거하려고 합니다(파일은 유지되지만 여기서의 스타일과 필터는 사라집니다):
+{}
+
+허용하시겠습니까?</translation>
+    </message>
+    <message>
+        <source>The agent wants to run this action on an external connector:
+{}
+{}
+
+Do you agree?</source>
+        <translation>에이전트가 외부 커넥터에서 이 작업을 실행하려고 합니다:
+{}
+{}
+
+허용하시겠습니까?</translation>
+    </message>
+    <message>
+        <source>The credit or quota of this account is used up.</source>
+        <translation>이 계정의 크레딧 또는 할당량을 모두 사용했습니다.</translation>
+    </message>
+    <message>
+        <source>The free quota could not be reached: {}</source>
+        <translation>무료 할당량에 연결할 수 없습니다: {}</translation>
+    </message>
+    <message>
+        <source>The free quota is not available.</source>
+        <translation>무료 할당량을 사용할 수 없습니다.</translation>
+    </message>
+    <message>
+        <source>The free quota is unavailable for now.</source>
+        <translation>무료 할당량을 당분간 사용할 수 없습니다.</translation>
+    </message>
+    <message>
+        <source>The free quota is used up for this month. Enter your own API key in the agent settings.</source>
+        <translation>이번 달 무료 할당량을 모두 사용했습니다. 에이전트 설정에서 본인의 API 키를 입력하세요.</translation>
+    </message>
+    <message>
+        <source>The key could not be stored.</source>
+        <translation>키를 저장할 수 없습니다.</translation>
+    </message>
+    <message>
+        <source>The provider could not be reached: {}</source>
+        <translation>제공자에 연결할 수 없습니다: {}</translation>
+    </message>
+    <message>
+        <source>The provider refused the API key: check it in the agent settings.</source>
+        <translation>제공자가 API 키를 거부했습니다. 에이전트 설정에서 확인하세요.</translation>
+    </message>
+    <message>
+        <source>The provider reported a problem: {}</source>
+        <translation>제공자가 문제를 보고했습니다: {}</translation>
+    </message>
+    <message>
+        <source>The stored key could not be read.</source>
+        <translation>저장된 키를 읽을 수 없습니다.</translation>
+    </message>
+    <message>
+        <source>Thinking…</source>
+        <translation>생각 중…</translation>
+    </message>
+    <message>
+        <source>Too many new accounts from this address today: try again tomorrow, or enter your own API key.</source>
+        <translation>오늘 이 주소에서 만든 새 계정이 너무 많습니다. 내일 다시 시도하거나 본인의 API 키를 입력하세요.</translation>
+    </message>
+    <message>
+        <source>Too many requests for now: try again in a moment.</source>
+        <translation>요청이 너무 많습니다. 잠시 후 다시 시도하세요.</translation>
+    </message>
+    <message>
+        <source>Trying a filter on {}</source>
+        <translation>{}에 필터 시험 중</translation>
+    </message>
+    <message>
+        <source>Zoom on {}</source>
+        <translation>{}(으)로 확대</translation>
+    </message>
+    <message>
+        <source>an area</source>
+        <translation>영역</translation>
+    </message>
+    <message>
+        <source>everything</source>
+        <translation>전체</translation>
+    </message>
+    <message>
+        <source>{} tools available</source>
+        <translation>사용 가능한 도구 {}개</translation>
+    </message>
+</context>
 </TS>

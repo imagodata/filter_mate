@@ -7758,4 +7758,574 @@ Install it now from PyPI with pip, into your QGIS profile? The Python of QGIS is
         <translation type="obsolete">Збережені точки</translation>
     </message>
 </context>
+<context>
+    <name>AgentPanel</name>
+    <message>
+        <source>(no request)</source>
+        <translation>(немає запиту)</translation>
+    </message>
+    <message>
+        <source>A few free requests a month, through the relay of FilterMate to Claude (Anthropic), under the terms of Anthropic. The relay counts what is spent and keeps no conversation. When it is used up, choose a provider and enter your own API key.</source>
+        <translation>Кілька безкоштовних запитів на місяць через ретранслятор FilterMate до Claude (Anthropic) на умовах Anthropic. Ретранслятор рахує витрати й не зберігає розмов. Коли квоту вичерпано, виберіть провайдера та введіть власний ключ API.</translation>
+    </message>
+    <message>
+        <source>API key</source>
+        <translation>Ключ API</translation>
+    </message>
+    <message>
+        <source>Add</source>
+        <translation>Додати</translation>
+    </message>
+    <message>
+        <source>Address</source>
+        <translation>Адреса</translation>
+    </message>
+    <message>
+        <source>Agent settings</source>
+        <translation>Налаштування агента</translation>
+    </message>
+    <message>
+        <source>Allow attribute values to be sent</source>
+        <translation>Дозволити надсилання значень атрибутів</translation>
+    </message>
+    <message>
+        <source>Applications already set up will have to be set up again.</source>
+        <translation>Уже налаштовані програми доведеться налаштувати знову.</translation>
+    </message>
+    <message>
+        <source>Ask the agent to filter your layers</source>
+        <translation>Попросіть агента відфільтрувати ваші шари</translation>
+    </message>
+    <message>
+        <source>Back to the conversation</source>
+        <translation>Назад до розмови</translation>
+    </message>
+    <message>
+        <source>Claude Code or another MCP client on this computer can then filter your layers, once FilterMate has been opened, under the rules of this panel: the same sources, the same confirmations, and filters can be undone here. That application sends what it reads to its own AI provider.</source>
+        <translation>Claude Code або інший клієнт MCP на цьому комп'ютері зможе тоді фільтрувати ваші шари після відкриття FilterMate за правилами цієї панелі: ті самі джерела, ті самі підтвердження, а фільтри можна скасувати тут. Ця програма надсилає прочитане своєму власному провайдеру ШІ.</translation>
+    </message>
+    <message>
+        <source>Connect an AI provider to start. Nothing is sent before you agree.</source>
+        <translation>Підключіть провайдера ШІ, щоб почати. Нічого не надсилається без вашої згоди.</translation>
+    </message>
+    <message>
+        <source>Copied, with the access token: keep it to yourself. Save these settings for it to apply.</source>
+        <translation>Скопійовано разом із токеном доступу: не показуйте його нікому. Збережіть ці налаштування, щоб вони набули чинності.</translation>
+    </message>
+    <message>
+        <source>Copy for Claude Desktop</source>
+        <translation>Копіювати для Claude Desktop</translation>
+    </message>
+    <message>
+        <source>Copy the Claude Code command</source>
+        <translation>Копіювати команду Claude Code</translation>
+    </message>
+    <message>
+        <source>Copy the configuration</source>
+        <translation>Копіювати конфігурацію</translation>
+    </message>
+    <message>
+        <source>Describe it in your own words. Each filter can be undone.</source>
+        <translation>Опишіть це своїми словами. Кожен фільтр можна скасувати.</translation>
+    </message>
+    <message>
+        <source>Filter your layers from a sentence</source>
+        <translation>Фільтруйте шари одним реченням</translation>
+    </message>
+    <message>
+        <source>FilterMate agent</source>
+        <translation>Агент FilterMate</translation>
+    </message>
+    <message>
+        <source>History</source>
+        <translation>Історія</translation>
+    </message>
+    <message>
+        <source>History…</source>
+        <translation>Історія…</translation>
+    </message>
+    <message>
+        <source>I agree to send this data to this provider</source>
+        <translation>Я погоджуюся надсилати ці дані цьому провайдеру</translation>
+    </message>
+    <message>
+        <source>Let other applications on this computer drive FilterMate (MCP server)</source>
+        <translation>Дозволити іншим програмам на цьому комп'ютері керувати FilterMate (сервер MCP)</translation>
+    </message>
+    <message>
+        <source>MCP connector</source>
+        <translation>Конектор MCP</translation>
+    </message>
+    <message>
+        <source>MCP connectors</source>
+        <translation>Конектори MCP</translation>
+    </message>
+    <message>
+        <source>Model</source>
+        <translation>Модель</translation>
+    </message>
+    <message>
+        <source>More</source>
+        <translation>Більше</translation>
+    </message>
+    <message>
+        <source>New access token</source>
+        <translation>Новий токен доступу</translation>
+    </message>
+    <message>
+        <source>New conversation</source>
+        <translation>Нова розмова</translation>
+    </message>
+    <message>
+        <source>New token: it applies once these settings are saved.</source>
+        <translation>Новий токен: він набуде чинності після збереження цих налаштувань.</translation>
+    </message>
+    <message>
+        <source>Open data platforms</source>
+        <translation>Платформи відкритих даних</translation>
+    </message>
+    <message>
+        <source>Open the settings</source>
+        <translation>Відкрити налаштування</translation>
+    </message>
+    <message>
+        <source>Other applications</source>
+        <translation>Інші програми</translation>
+    </message>
+    <message>
+        <source>Port</source>
+        <translation>Порт</translation>
+    </message>
+    <message>
+        <source>Provider</source>
+        <translation>Провайдер</translation>
+    </message>
+    <message>
+        <source>Redo</source>
+        <translation>Повторити</translation>
+    </message>
+    <message>
+        <source>Remove</source>
+        <translation>Вилучити</translation>
+    </message>
+    <message>
+        <source>Remove the stored key</source>
+        <translation>Видалити збережений ключ</translation>
+    </message>
+    <message>
+        <source>Satellite imagery</source>
+        <translation>Супутникові знімки</translation>
+    </message>
+    <message>
+        <source>Send (Enter)</source>
+        <translation>Надіслати (Enter)</translation>
+    </message>
+    <message>
+        <source>Send again</source>
+        <translation>Надіслати знову</translation>
+    </message>
+    <message>
+        <source>Sent to: {}</source>
+        <translation>Надіслано до: {}</translation>
+    </message>
+    <message>
+        <source>Set up the agent</source>
+        <translation>Налаштувати агента</translation>
+    </message>
+    <message>
+        <source>Sources</source>
+        <translation>Джерела</translation>
+    </message>
+    <message>
+        <source>Stop (Esc)</source>
+        <translation>Зупинити (Esc)</translation>
+    </message>
+    <message>
+        <source>Stored: leave empty to keep it</source>
+        <translation>Збережено: залиште порожнім, щоб зберегти</translation>
+    </message>
+    <message>
+        <source>Test</source>
+        <translation>Перевірити</translation>
+    </message>
+    <message>
+        <source>Testing…</source>
+        <translation>Перевірка…</translation>
+    </message>
+    <message>
+        <source>The MCP server could not start: {}</source>
+        <translation>Не вдалося запустити сервер MCP: {}</translation>
+    </message>
+    <message>
+        <source>The agent can search the sources ticked here. Your searches, and what the agent passes to a connector, are sent to them; a layer added from them is read from their servers.</source>
+        <translation>Агент може шукати в джерелах, позначених тут. Їм надсилаються ваші пошуки та те, що агент передає конектору; шар, доданий із них, читається з їхніх серверів.</translation>
+    </message>
+    <message>
+        <source>The agent sends your request, the names of your layers and fields, your filter expressions and the results of its tools to the provider chosen here, under that provider's terms. Without the option below, the agent does not read the values of your fields; values already written in your filters and favorites are still sent. The conversation is kept on this computer for each project, until you start a new one.</source>
+        <translation>Агент надсилає ваш запит, назви ваших шарів і полів, ваші вирази фільтрів і результати своїх інструментів обраному тут провайдеру на умовах цього провайдера. Без опції нижче агент не читає значень ваших полів; значення, уже записані у ваших фільтрах та обраному, усе одно надсилаються. Розмова зберігається на цьому комп'ютері для кожного проєкту, доки ви не почнете нову.</translation>
+    </message>
+    <message>
+        <source>Through mcp-remote, which needs Node.js: Claude Desktop starts local servers as programs.</source>
+        <translation>Через mcp-remote, якому потрібен Node.js: Claude Desktop запускає локальні сервери як програми.</translation>
+    </message>
+    <message>
+        <source>Too many sources added: remove one first.</source>
+        <translation>Додано забагато джерел: спершу вилучіть одне.</translation>
+    </message>
+    <message>
+        <source>Undo the last</source>
+        <translation>Скасувати останній</translation>
+    </message>
+    <message>
+        <source>Undo this turn</source>
+        <translation>Скасувати цей хід</translation>
+    </message>
+    <message>
+        <source>What do you want to filter?</source>
+        <translation>Що ви хочете відфільтрувати?</translation>
+    </message>
+    <message>
+        <source>added by you</source>
+        <translation>додано вами</translation>
+    </message>
+    <message>
+        <source>applied</source>
+        <translation>застосовано</translation>
+    </message>
+    <message>
+        <source>community</source>
+        <translation>спільнота</translation>
+    </message>
+    <message>
+        <source>https://... or a portal address</source>
+        <translation>https://... або адреса порталу</translation>
+    </message>
+    <message>
+        <source>no change</source>
+        <translation>без змін</translation>
+    </message>
+    <message>
+        <source>official</source>
+        <translation>офіційний</translation>
+    </message>
+    <message>
+        <source>this computer</source>
+        <translation>цей комп'ютер</translation>
+    </message>
+    <message>
+        <source>undone</source>
+        <translation>скасовано</translation>
+    </message>
+    <message>
+        <source>{} turn(s)</source>
+        <translation>Ходів: {}</translation>
+    </message>
+    <message>
+        <source>Which layers are in this project?</source>
+        <translation>Які шари містить цей проєкт?</translation>
+    </message>
+    <message>
+        <source>Keep the buildings taller than 15 m</source>
+        <translation>Залишити будівлі вищі за 15 м</translation>
+    </message>
+    <message>
+        <source>Filter the roads inside the selected feature</source>
+        <translation>Відфільтрувати дороги всередині вибраного об'єкта</translation>
+    </message>
+</context>
+<context>
+    <name>AgentChat</name>
+    <message>
+        <source>Access to the free quota was renewed: send your request again.</source>
+        <translation>Доступ до безкоштовної квоти оновлено: надішліть запит ще раз.</translation>
+    </message>
+    <message>
+        <source>Another application is changing the project: try again in a moment.</source>
+        <translation>Інша програма змінює проєкт: повторіть спробу за мить.</translation>
+    </message>
+    <message>
+        <source>Another application: {}</source>
+        <translation>Інша програма: {}</translation>
+    </message>
+    <message>
+        <source>Applied again: {}.</source>
+        <translation>Застосовано повторно: {}.</translation>
+    </message>
+    <message>
+        <source>Changed since, left as is: {}.</source>
+        <translation>Змінено відтоді, залишено як є: {}.</translation>
+    </message>
+    <message>
+        <source>Changed: {}.</source>
+        <translation>Змінено: {}.</translation>
+    </message>
+    <message>
+        <source>Choose a model and agree to send your data to use the agent.</source>
+        <translation>Виберіть модель і погодьтеся на надсилання ваших даних, щоб користуватися агентом.</translation>
+    </message>
+    <message>
+        <source>Connecting to {}…</source>
+        <translation>Підключення до {}…</translation>
+    </message>
+    <message>
+        <source>Earlier conversation: the agent starts afresh from here.</source>
+        <translation>Попередня розмова: звідси агент починає з чистого аркуша.</translation>
+    </message>
+    <message>
+        <source>Enter your API key in the agent settings.</source>
+        <translation>Введіть ваш ключ API в налаштуваннях агента.</translation>
+    </message>
+    <message>
+        <source>Export of {}</source>
+        <translation>Експорт {}</translation>
+    </message>
+    <message>
+        <source>Favorite applied</source>
+        <translation>Обране застосовано</translation>
+    </message>
+    <message>
+        <source>Filter on the points of {}</source>
+        <translation>Фільтр для точок шару {}</translation>
+    </message>
+    <message>
+        <source>Filter on {}</source>
+        <translation>Фільтр для {}</translation>
+    </message>
+    <message>
+        <source>Filter on {} by an area</source>
+        <translation>Фільтр для {} за зоною</translation>
+    </message>
+    <message>
+        <source>Filter on {} by {}</source>
+        <translation>Фільтр для {} за: {}</translation>
+    </message>
+    <message>
+        <source>FilterMate agent</source>
+        <translation>Агент FilterMate</translation>
+    </message>
+    <message>
+        <source>Filters removed from {}</source>
+        <translation>Фільтри прибрано з {}</translation>
+    </message>
+    <message>
+        <source>Hidden: {}</source>
+        <translation>Приховано: {}</translation>
+    </message>
+    <message>
+        <source>It answers.</source>
+        <translation>Джерело відповідає.</translation>
+    </message>
+    <message>
+        <source>Layer added: {}</source>
+        <translation>Шар додано: {}</translation>
+    </message>
+    <message>
+        <source>Layers removed: {}</source>
+        <translation>Шари вилучено: {}</translation>
+    </message>
+    <message>
+        <source>Not reachable for this conversation: {}</source>
+        <translation>Недоступно для цієї розмови: {}</translation>
+    </message>
+    <message>
+        <source>Nothing to redo.</source>
+        <translation>Нічого повторювати.</translation>
+    </message>
+    <message>
+        <source>Nothing to restore.</source>
+        <translation>Нічого відновлювати.</translation>
+    </message>
+    <message>
+        <source>Reading the active filters</source>
+        <translation>Читання активних фільтрів</translation>
+    </message>
+    <message>
+        <source>Reading the favorites</source>
+        <translation>Читання обраного</translation>
+    </message>
+    <message>
+        <source>Reading the fields of {}</source>
+        <translation>Читання полів шару {}</translation>
+    </message>
+    <message>
+        <source>Reading the layers</source>
+        <translation>Читання шарів</translation>
+    </message>
+    <message>
+        <source>Reading the map</source>
+        <translation>Читання карти</translation>
+    </message>
+    <message>
+        <source>Reading the values of {}</source>
+        <translation>Читання значень {}</translation>
+    </message>
+    <message>
+        <source>Restored: {}.</source>
+        <translation>Відновлено: {}.</translation>
+    </message>
+    <message>
+        <source>Searching satellite imagery on {}</source>
+        <translation>Пошук супутникових знімків у {}</translation>
+    </message>
+    <message>
+        <source>Searching {} for {}</source>
+        <translation>Пошук у {}: {}</translation>
+    </message>
+    <message>
+        <source>Selection cleared on {}</source>
+        <translation>Вибір очищено на {}</translation>
+    </message>
+    <message>
+        <source>Selection on {}</source>
+        <translation>Вибір на {}</translation>
+    </message>
+    <message>
+        <source>Shown: {}</source>
+        <translation>Показано: {}</translation>
+    </message>
+    <message>
+        <source>Stopped.</source>
+        <translation>Зупинено.</translation>
+    </message>
+    <message>
+        <source>The MCP server could not start: {}</source>
+        <translation>Не вдалося запустити сервер MCP: {}</translation>
+    </message>
+    <message>
+        <source>The QGIS authentication database is not available.</source>
+        <translation>База даних автентифікації QGIS недоступна.</translation>
+    </message>
+    <message>
+        <source>The QGIS master password is needed to use the stored key.</source>
+        <translation>Для використання збереженого ключа потрібен головний пароль QGIS.</translation>
+    </message>
+    <message>
+        <source>The agent stopped before the end ({}).</source>
+        <translation>Агент зупинився до завершення ({}).</translation>
+    </message>
+    <message>
+        <source>The agent wants to add this layer of a web service to the project:
+{} · {}
+
+Do you agree?</source>
+        <translation>Агент хоче додати до проєкту цей шар вебсервісу:
+{} · {}
+
+Ви погоджуєтеся?</translation>
+    </message>
+    <message>
+        <source>The agent wants to add this layer to the project:
+{}
+
+A remote source is read from its server by QGIS, and what the layer holds can be sent to the provider of the agent. Do you agree?</source>
+        <translation>Агент хоче додати до проєкту цей шар:
+{}
+
+Віддалене джерело QGIS читає з його сервера, а вміст шару може бути надіслано провайдеру агента. Ви погоджуєтеся?</translation>
+    </message>
+    <message>
+        <source>The agent wants to export these layers to files:
+{}
+
+Do you agree?</source>
+        <translation>Агент хоче експортувати ці шари у файли:
+{}
+
+Ви погоджуєтеся?</translation>
+    </message>
+    <message>
+        <source>The agent wants to remove these layers from the project (their files stay, their styles and filters here are lost):
+{}
+
+Do you agree?</source>
+        <translation>Агент хоче вилучити ці шари з проєкту (їхні файли залишаються, їхні стилі та фільтри тут буде втрачено):
+{}
+
+Ви погоджуєтеся?</translation>
+    </message>
+    <message>
+        <source>The agent wants to run this action on an external connector:
+{}
+{}
+
+Do you agree?</source>
+        <translation>Агент хоче виконати цю дію на зовнішньому конекторі:
+{}
+{}
+
+Ви погоджуєтеся?</translation>
+    </message>
+    <message>
+        <source>The credit or quota of this account is used up.</source>
+        <translation>Кредит або квоту цього облікового запису вичерпано.</translation>
+    </message>
+    <message>
+        <source>The free quota could not be reached: {}</source>
+        <translation>Не вдалося зв'язатися з безкоштовною квотою: {}</translation>
+    </message>
+    <message>
+        <source>The free quota is not available.</source>
+        <translation>Безкоштовна квота недоступна.</translation>
+    </message>
+    <message>
+        <source>The free quota is unavailable for now.</source>
+        <translation>Безкоштовна квота наразі недоступна.</translation>
+    </message>
+    <message>
+        <source>The free quota is used up for this month. Enter your own API key in the agent settings.</source>
+        <translation>Безкоштовну квоту на цей місяць вичерпано. Введіть власний ключ API в налаштуваннях агента.</translation>
+    </message>
+    <message>
+        <source>The key could not be stored.</source>
+        <translation>Не вдалося зберегти ключ.</translation>
+    </message>
+    <message>
+        <source>The provider could not be reached: {}</source>
+        <translation>Не вдалося зв'язатися з провайдером: {}</translation>
+    </message>
+    <message>
+        <source>The provider refused the API key: check it in the agent settings.</source>
+        <translation>Провайдер відхилив ключ API: перевірте його в налаштуваннях агента.</translation>
+    </message>
+    <message>
+        <source>The provider reported a problem: {}</source>
+        <translation>Провайдер повідомив про проблему: {}</translation>
+    </message>
+    <message>
+        <source>The stored key could not be read.</source>
+        <translation>Не вдалося прочитати збережений ключ.</translation>
+    </message>
+    <message>
+        <source>Thinking…</source>
+        <translation>Роздуми…</translation>
+    </message>
+    <message>
+        <source>Too many new accounts from this address today: try again tomorrow, or enter your own API key.</source>
+        <translation>Сьогодні з цієї адреси створено забагато нових облікових записів: спробуйте завтра або введіть власний ключ API.</translation>
+    </message>
+    <message>
+        <source>Too many requests for now: try again in a moment.</source>
+        <translation>Забагато запитів: повторіть спробу за мить.</translation>
+    </message>
+    <message>
+        <source>Trying a filter on {}</source>
+        <translation>Пробний фільтр на {}</translation>
+    </message>
+    <message>
+        <source>Zoom on {}</source>
+        <translation>Наближення до {}</translation>
+    </message>
+    <message>
+        <source>an area</source>
+        <translation>зона</translation>
+    </message>
+    <message>
+        <source>everything</source>
+        <translation>усе</translation>
+    </message>
+    <message>
+        <source>{} tools available</source>
+        <translation>Доступно інструментів: {}</translation>
+    </message>
+</context>
 </TS>

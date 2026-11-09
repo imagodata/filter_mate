@@ -7758,4 +7758,574 @@ Jetzt von PyPI mit pip in Ihr QGIS-Profil installieren? Das Python von QGIS wird
         <translation type="obsolete">Behaltene Punkte</translation>
     </message>
 </context>
+<context>
+    <name>AgentPanel</name>
+    <message>
+        <source>(no request)</source>
+        <translation>(keine Anfrage)</translation>
+    </message>
+    <message>
+        <source>A few free requests a month, through the relay of FilterMate to Claude (Anthropic), under the terms of Anthropic. The relay counts what is spent and keeps no conversation. When it is used up, choose a provider and enter your own API key.</source>
+        <translation>Einige kostenlose Anfragen pro Monat über das Relay von FilterMate zu Claude (Anthropic), gemäß den Bedingungen von Anthropic. Das Relay zählt den Verbrauch und speichert keine Unterhaltung. Ist das Kontingent aufgebraucht, wählen Sie einen Anbieter und geben Sie Ihren eigenen API-Schlüssel ein.</translation>
+    </message>
+    <message>
+        <source>API key</source>
+        <translation>API-Schlüssel</translation>
+    </message>
+    <message>
+        <source>Add</source>
+        <translation>Hinzufügen</translation>
+    </message>
+    <message>
+        <source>Address</source>
+        <translation>Adresse</translation>
+    </message>
+    <message>
+        <source>Agent settings</source>
+        <translation>Agent-Einstellungen</translation>
+    </message>
+    <message>
+        <source>Allow attribute values to be sent</source>
+        <translation>Senden von Attributwerten erlauben</translation>
+    </message>
+    <message>
+        <source>Applications already set up will have to be set up again.</source>
+        <translation>Bereits eingerichtete Anwendungen müssen erneut eingerichtet werden.</translation>
+    </message>
+    <message>
+        <source>Ask the agent to filter your layers</source>
+        <translation>Bitten Sie den Agenten, Ihre Layer zu filtern</translation>
+    </message>
+    <message>
+        <source>Back to the conversation</source>
+        <translation>Zurück zur Unterhaltung</translation>
+    </message>
+    <message>
+        <source>Claude Code or another MCP client on this computer can then filter your layers, once FilterMate has been opened, under the rules of this panel: the same sources, the same confirmations, and filters can be undone here. That application sends what it reads to its own AI provider.</source>
+        <translation>Claude Code oder ein anderer MCP-Client auf diesem Computer kann dann Ihre Layer filtern, sobald FilterMate geöffnet ist, nach den Regeln dieses Panels: dieselben Quellen, dieselben Bestätigungen, und Filter lassen sich hier rückgängig machen. Diese Anwendung sendet, was sie liest, an ihren eigenen KI-Anbieter.</translation>
+    </message>
+    <message>
+        <source>Connect an AI provider to start. Nothing is sent before you agree.</source>
+        <translation>Verbinden Sie einen KI-Anbieter, um zu beginnen. Ohne Ihre Zustimmung wird nichts gesendet.</translation>
+    </message>
+    <message>
+        <source>Copied, with the access token: keep it to yourself. Save these settings for it to apply.</source>
+        <translation>Kopiert, mit dem Zugriffstoken: Behalten Sie es für sich. Speichern Sie diese Einstellungen, damit es wirksam wird.</translation>
+    </message>
+    <message>
+        <source>Copy for Claude Desktop</source>
+        <translation>Für Claude Desktop kopieren</translation>
+    </message>
+    <message>
+        <source>Copy the Claude Code command</source>
+        <translation>Claude-Code-Befehl kopieren</translation>
+    </message>
+    <message>
+        <source>Copy the configuration</source>
+        <translation>Konfiguration kopieren</translation>
+    </message>
+    <message>
+        <source>Describe it in your own words. Each filter can be undone.</source>
+        <translation>Beschreiben Sie es mit Ihren eigenen Worten. Jeder Filter lässt sich rückgängig machen.</translation>
+    </message>
+    <message>
+        <source>Filter your layers from a sentence</source>
+        <translation>Filtern Sie Ihre Layer mit einem Satz</translation>
+    </message>
+    <message>
+        <source>FilterMate agent</source>
+        <translation>FilterMate-Agent</translation>
+    </message>
+    <message>
+        <source>History</source>
+        <translation>Verlauf</translation>
+    </message>
+    <message>
+        <source>History…</source>
+        <translation>Verlauf…</translation>
+    </message>
+    <message>
+        <source>I agree to send this data to this provider</source>
+        <translation>Ich stimme zu, diese Daten an diesen Anbieter zu senden</translation>
+    </message>
+    <message>
+        <source>Let other applications on this computer drive FilterMate (MCP server)</source>
+        <translation>Anderen Anwendungen auf diesem Computer die Steuerung von FilterMate erlauben (MCP-Server)</translation>
+    </message>
+    <message>
+        <source>MCP connector</source>
+        <translation>MCP-Konnektor</translation>
+    </message>
+    <message>
+        <source>MCP connectors</source>
+        <translation>MCP-Konnektoren</translation>
+    </message>
+    <message>
+        <source>Model</source>
+        <translation>Modell</translation>
+    </message>
+    <message>
+        <source>More</source>
+        <translation>Mehr</translation>
+    </message>
+    <message>
+        <source>New access token</source>
+        <translation>Neues Zugriffstoken</translation>
+    </message>
+    <message>
+        <source>New conversation</source>
+        <translation>Neue Unterhaltung</translation>
+    </message>
+    <message>
+        <source>New token: it applies once these settings are saved.</source>
+        <translation>Neues Token: Es wird wirksam, sobald diese Einstellungen gespeichert sind.</translation>
+    </message>
+    <message>
+        <source>Open data platforms</source>
+        <translation>Open-Data-Plattformen</translation>
+    </message>
+    <message>
+        <source>Open the settings</source>
+        <translation>Einstellungen öffnen</translation>
+    </message>
+    <message>
+        <source>Other applications</source>
+        <translation>Andere Anwendungen</translation>
+    </message>
+    <message>
+        <source>Port</source>
+        <translation>Port</translation>
+    </message>
+    <message>
+        <source>Provider</source>
+        <translation>Anbieter</translation>
+    </message>
+    <message>
+        <source>Redo</source>
+        <translation>Wiederholen</translation>
+    </message>
+    <message>
+        <source>Remove</source>
+        <translation>Entfernen</translation>
+    </message>
+    <message>
+        <source>Remove the stored key</source>
+        <translation>Gespeicherten Schlüssel löschen</translation>
+    </message>
+    <message>
+        <source>Satellite imagery</source>
+        <translation>Satellitenbilder</translation>
+    </message>
+    <message>
+        <source>Send (Enter)</source>
+        <translation>Senden (Eingabe)</translation>
+    </message>
+    <message>
+        <source>Send again</source>
+        <translation>Erneut senden</translation>
+    </message>
+    <message>
+        <source>Sent to: {}</source>
+        <translation>Gesendet an: {}</translation>
+    </message>
+    <message>
+        <source>Set up the agent</source>
+        <translation>Agent einrichten</translation>
+    </message>
+    <message>
+        <source>Sources</source>
+        <translation>Quellen</translation>
+    </message>
+    <message>
+        <source>Stop (Esc)</source>
+        <translation>Anhalten (Esc)</translation>
+    </message>
+    <message>
+        <source>Stored: leave empty to keep it</source>
+        <translation>Gespeichert: leer lassen, um ihn beizubehalten</translation>
+    </message>
+    <message>
+        <source>Test</source>
+        <translation>Testen</translation>
+    </message>
+    <message>
+        <source>Testing…</source>
+        <translation>Test läuft…</translation>
+    </message>
+    <message>
+        <source>The MCP server could not start: {}</source>
+        <translation>Der MCP-Server konnte nicht gestartet werden: {}</translation>
+    </message>
+    <message>
+        <source>The agent can search the sources ticked here. Your searches, and what the agent passes to a connector, are sent to them; a layer added from them is read from their servers.</source>
+        <translation>Der Agent kann die hier angehakten Quellen abfragen. Ihre Suchanfragen und das, was der Agent an einen Konnektor übergibt, werden an diese gesendet; ein daraus hinzugefügter Layer wird von deren Servern gelesen.</translation>
+    </message>
+    <message>
+        <source>The agent sends your request, the names of your layers and fields, your filter expressions and the results of its tools to the provider chosen here, under that provider's terms. Without the option below, the agent does not read the values of your fields; values already written in your filters and favorites are still sent. The conversation is kept on this computer for each project, until you start a new one.</source>
+        <translation>Der Agent sendet Ihre Anfrage, die Namen Ihrer Layer und Felder, Ihre Filterausdrücke und die Ergebnisse seiner Werkzeuge an den hier gewählten Anbieter, gemäß dessen Bedingungen. Ohne die Option unten liest der Agent die Werte Ihrer Felder nicht; Werte, die bereits in Ihren Filtern und Favoriten stehen, werden weiterhin gesendet. Die Unterhaltung wird für jedes Projekt auf diesem Computer gespeichert, bis Sie eine neue beginnen.</translation>
+    </message>
+    <message>
+        <source>Through mcp-remote, which needs Node.js: Claude Desktop starts local servers as programs.</source>
+        <translation>Über mcp-remote, das Node.js benötigt: Claude Desktop startet lokale Server als Programme.</translation>
+    </message>
+    <message>
+        <source>Too many sources added: remove one first.</source>
+        <translation>Zu viele Quellen hinzugefügt: Entfernen Sie zuerst eine.</translation>
+    </message>
+    <message>
+        <source>Undo the last</source>
+        <translation>Letzten rückgängig machen</translation>
+    </message>
+    <message>
+        <source>Undo this turn</source>
+        <translation>Diese Runde rückgängig machen</translation>
+    </message>
+    <message>
+        <source>What do you want to filter?</source>
+        <translation>Was möchten Sie filtern?</translation>
+    </message>
+    <message>
+        <source>added by you</source>
+        <translation>von Ihnen hinzugefügt</translation>
+    </message>
+    <message>
+        <source>applied</source>
+        <translation>angewendet</translation>
+    </message>
+    <message>
+        <source>community</source>
+        <translation>Community</translation>
+    </message>
+    <message>
+        <source>https://... or a portal address</source>
+        <translation>https://... oder Adresse eines Portals</translation>
+    </message>
+    <message>
+        <source>no change</source>
+        <translation>keine Änderung</translation>
+    </message>
+    <message>
+        <source>official</source>
+        <translation>offiziell</translation>
+    </message>
+    <message>
+        <source>this computer</source>
+        <translation>dieser Computer</translation>
+    </message>
+    <message>
+        <source>undone</source>
+        <translation>rückgängig gemacht</translation>
+    </message>
+    <message>
+        <source>{} turn(s)</source>
+        <translation>{} Runde(n)</translation>
+    </message>
+    <message>
+        <source>Which layers are in this project?</source>
+        <translation>Welche Layer enthält dieses Projekt?</translation>
+    </message>
+    <message>
+        <source>Keep the buildings taller than 15 m</source>
+        <translation>Gebäude über 15 m Höhe behalten</translation>
+    </message>
+    <message>
+        <source>Filter the roads inside the selected feature</source>
+        <translation>Die Straßen innerhalb des ausgewählten Objekts filtern</translation>
+    </message>
+</context>
+<context>
+    <name>AgentChat</name>
+    <message>
+        <source>Access to the free quota was renewed: send your request again.</source>
+        <translation>Der Zugang zum kostenlosen Kontingent wurde erneuert: Senden Sie Ihre Anfrage erneut.</translation>
+    </message>
+    <message>
+        <source>Another application is changing the project: try again in a moment.</source>
+        <translation>Eine andere Anwendung ändert das Projekt: Versuchen Sie es gleich noch einmal.</translation>
+    </message>
+    <message>
+        <source>Another application: {}</source>
+        <translation>Andere Anwendung: {}</translation>
+    </message>
+    <message>
+        <source>Applied again: {}.</source>
+        <translation>Erneut angewendet: {}.</translation>
+    </message>
+    <message>
+        <source>Changed since, left as is: {}.</source>
+        <translation>Seitdem geändert, unverändert belassen: {}.</translation>
+    </message>
+    <message>
+        <source>Changed: {}.</source>
+        <translation>Geändert: {}.</translation>
+    </message>
+    <message>
+        <source>Choose a model and agree to send your data to use the agent.</source>
+        <translation>Wählen Sie ein Modell und stimmen Sie dem Senden Ihrer Daten zu, um den Agenten zu verwenden.</translation>
+    </message>
+    <message>
+        <source>Connecting to {}…</source>
+        <translation>Verbindung zu {}…</translation>
+    </message>
+    <message>
+        <source>Earlier conversation: the agent starts afresh from here.</source>
+        <translation>Frühere Unterhaltung: Der Agent beginnt ab hier von vorn.</translation>
+    </message>
+    <message>
+        <source>Enter your API key in the agent settings.</source>
+        <translation>Geben Sie Ihren API-Schlüssel in den Agent-Einstellungen ein.</translation>
+    </message>
+    <message>
+        <source>Export of {}</source>
+        <translation>Export von {}</translation>
+    </message>
+    <message>
+        <source>Favorite applied</source>
+        <translation>Favorit angewendet</translation>
+    </message>
+    <message>
+        <source>Filter on the points of {}</source>
+        <translation>Filter auf die Punkte von {}</translation>
+    </message>
+    <message>
+        <source>Filter on {}</source>
+        <translation>Filter auf {}</translation>
+    </message>
+    <message>
+        <source>Filter on {} by an area</source>
+        <translation>Filter auf {} nach einem Gebiet</translation>
+    </message>
+    <message>
+        <source>Filter on {} by {}</source>
+        <translation>Filter auf {} nach {}</translation>
+    </message>
+    <message>
+        <source>FilterMate agent</source>
+        <translation>FilterMate-Agent</translation>
+    </message>
+    <message>
+        <source>Filters removed from {}</source>
+        <translation>Filter von {} entfernt</translation>
+    </message>
+    <message>
+        <source>Hidden: {}</source>
+        <translation>Ausgeblendet: {}</translation>
+    </message>
+    <message>
+        <source>It answers.</source>
+        <translation>Die Quelle antwortet.</translation>
+    </message>
+    <message>
+        <source>Layer added: {}</source>
+        <translation>Layer hinzugefügt: {}</translation>
+    </message>
+    <message>
+        <source>Layers removed: {}</source>
+        <translation>Layer entfernt: {}</translation>
+    </message>
+    <message>
+        <source>Not reachable for this conversation: {}</source>
+        <translation>Für diese Unterhaltung nicht erreichbar: {}</translation>
+    </message>
+    <message>
+        <source>Nothing to redo.</source>
+        <translation>Nichts zu wiederholen.</translation>
+    </message>
+    <message>
+        <source>Nothing to restore.</source>
+        <translation>Nichts wiederherzustellen.</translation>
+    </message>
+    <message>
+        <source>Reading the active filters</source>
+        <translation>Aktive Filter werden gelesen</translation>
+    </message>
+    <message>
+        <source>Reading the favorites</source>
+        <translation>Favoriten werden gelesen</translation>
+    </message>
+    <message>
+        <source>Reading the fields of {}</source>
+        <translation>Felder von {} werden gelesen</translation>
+    </message>
+    <message>
+        <source>Reading the layers</source>
+        <translation>Layer werden gelesen</translation>
+    </message>
+    <message>
+        <source>Reading the map</source>
+        <translation>Karte wird gelesen</translation>
+    </message>
+    <message>
+        <source>Reading the values of {}</source>
+        <translation>Werte von {} werden gelesen</translation>
+    </message>
+    <message>
+        <source>Restored: {}.</source>
+        <translation>Wiederhergestellt: {}.</translation>
+    </message>
+    <message>
+        <source>Searching satellite imagery on {}</source>
+        <translation>Satellitenbilder auf {} werden gesucht</translation>
+    </message>
+    <message>
+        <source>Searching {} for {}</source>
+        <translation>Suche auf {} nach {}</translation>
+    </message>
+    <message>
+        <source>Selection cleared on {}</source>
+        <translation>Auswahl aufgehoben auf {}</translation>
+    </message>
+    <message>
+        <source>Selection on {}</source>
+        <translation>Auswahl auf {}</translation>
+    </message>
+    <message>
+        <source>Shown: {}</source>
+        <translation>Eingeblendet: {}</translation>
+    </message>
+    <message>
+        <source>Stopped.</source>
+        <translation>Angehalten.</translation>
+    </message>
+    <message>
+        <source>The MCP server could not start: {}</source>
+        <translation>Der MCP-Server konnte nicht gestartet werden: {}</translation>
+    </message>
+    <message>
+        <source>The QGIS authentication database is not available.</source>
+        <translation>Die QGIS-Authentifizierungsdatenbank ist nicht verfügbar.</translation>
+    </message>
+    <message>
+        <source>The QGIS master password is needed to use the stored key.</source>
+        <translation>Das QGIS-Master-Passwort wird benötigt, um den gespeicherten Schlüssel zu verwenden.</translation>
+    </message>
+    <message>
+        <source>The agent stopped before the end ({}).</source>
+        <translation>Der Agent wurde vor dem Ende angehalten ({}).</translation>
+    </message>
+    <message>
+        <source>The agent wants to add this layer of a web service to the project:
+{} · {}
+
+Do you agree?</source>
+        <translation>Der Agent möchte diesen Layer eines Webdienstes zum Projekt hinzufügen:
+{} · {}
+
+Sind Sie einverstanden?</translation>
+    </message>
+    <message>
+        <source>The agent wants to add this layer to the project:
+{}
+
+A remote source is read from its server by QGIS, and what the layer holds can be sent to the provider of the agent. Do you agree?</source>
+        <translation>Der Agent möchte diesen Layer zum Projekt hinzufügen:
+{}
+
+Eine Remote-Quelle wird von QGIS auf ihrem Server gelesen, und der Inhalt des Layers kann an den Anbieter des Agenten gesendet werden. Sind Sie einverstanden?</translation>
+    </message>
+    <message>
+        <source>The agent wants to export these layers to files:
+{}
+
+Do you agree?</source>
+        <translation>Der Agent möchte diese Layer in Dateien exportieren:
+{}
+
+Sind Sie einverstanden?</translation>
+    </message>
+    <message>
+        <source>The agent wants to remove these layers from the project (their files stay, their styles and filters here are lost):
+{}
+
+Do you agree?</source>
+        <translation>Der Agent möchte diese Layer aus dem Projekt entfernen (ihre Dateien bleiben erhalten, ihre Stile und Filter hier gehen verloren):
+{}
+
+Sind Sie einverstanden?</translation>
+    </message>
+    <message>
+        <source>The agent wants to run this action on an external connector:
+{}
+{}
+
+Do you agree?</source>
+        <translation>Der Agent möchte diese Aktion auf einem externen Konnektor ausführen:
+{}
+{}
+
+Sind Sie einverstanden?</translation>
+    </message>
+    <message>
+        <source>The credit or quota of this account is used up.</source>
+        <translation>Das Guthaben oder Kontingent dieses Kontos ist aufgebraucht.</translation>
+    </message>
+    <message>
+        <source>The free quota could not be reached: {}</source>
+        <translation>Das kostenlose Kontingent ist nicht erreichbar: {}</translation>
+    </message>
+    <message>
+        <source>The free quota is not available.</source>
+        <translation>Das kostenlose Kontingent ist nicht verfügbar.</translation>
+    </message>
+    <message>
+        <source>The free quota is unavailable for now.</source>
+        <translation>Das kostenlose Kontingent ist derzeit nicht verfügbar.</translation>
+    </message>
+    <message>
+        <source>The free quota is used up for this month. Enter your own API key in the agent settings.</source>
+        <translation>Das kostenlose Kontingent ist für diesen Monat aufgebraucht. Geben Sie Ihren eigenen API-Schlüssel in den Agent-Einstellungen ein.</translation>
+    </message>
+    <message>
+        <source>The key could not be stored.</source>
+        <translation>Der Schlüssel konnte nicht gespeichert werden.</translation>
+    </message>
+    <message>
+        <source>The provider could not be reached: {}</source>
+        <translation>Der Anbieter ist nicht erreichbar: {}</translation>
+    </message>
+    <message>
+        <source>The provider refused the API key: check it in the agent settings.</source>
+        <translation>Der Anbieter hat den API-Schlüssel abgelehnt: Prüfen Sie ihn in den Agent-Einstellungen.</translation>
+    </message>
+    <message>
+        <source>The provider reported a problem: {}</source>
+        <translation>Der Anbieter hat ein Problem gemeldet: {}</translation>
+    </message>
+    <message>
+        <source>The stored key could not be read.</source>
+        <translation>Der gespeicherte Schlüssel konnte nicht gelesen werden.</translation>
+    </message>
+    <message>
+        <source>Thinking…</source>
+        <translation>Denke nach…</translation>
+    </message>
+    <message>
+        <source>Too many new accounts from this address today: try again tomorrow, or enter your own API key.</source>
+        <translation>Heute zu viele neue Konten von dieser Adresse: Versuchen Sie es morgen erneut oder geben Sie Ihren eigenen API-Schlüssel ein.</translation>
+    </message>
+    <message>
+        <source>Too many requests for now: try again in a moment.</source>
+        <translation>Derzeit zu viele Anfragen: Versuchen Sie es gleich noch einmal.</translation>
+    </message>
+    <message>
+        <source>Trying a filter on {}</source>
+        <translation>Filter auf {} wird getestet</translation>
+    </message>
+    <message>
+        <source>Zoom on {}</source>
+        <translation>Zoom auf {}</translation>
+    </message>
+    <message>
+        <source>an area</source>
+        <translation>ein Gebiet</translation>
+    </message>
+    <message>
+        <source>everything</source>
+        <translation>alles</translation>
+    </message>
+    <message>
+        <source>{} tools available</source>
+        <translation>{} Werkzeuge verfügbar</translation>
+    </message>
+</context>
 </TS>

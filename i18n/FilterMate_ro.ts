@@ -7758,4 +7758,574 @@ Install it now from PyPI with pip, into your QGIS profile? The Python of QGIS is
         <translation type="obsolete">Puncte păstrate</translation>
     </message>
 </context>
+<context>
+    <name>AgentPanel</name>
+    <message>
+        <source>(no request)</source>
+        <translation>(fără cerere)</translation>
+    </message>
+    <message>
+        <source>A few free requests a month, through the relay of FilterMate to Claude (Anthropic), under the terms of Anthropic. The relay counts what is spent and keeps no conversation. When it is used up, choose a provider and enter your own API key.</source>
+        <translation>Câteva cereri gratuite pe lună, prin releul FilterMate către Claude (Anthropic), conform condițiilor Anthropic. Releul numără consumul și nu păstrează nicio conversație. Când cota se epuizează, alegeți un furnizor și introduceți propria cheie API.</translation>
+    </message>
+    <message>
+        <source>API key</source>
+        <translation>Cheie API</translation>
+    </message>
+    <message>
+        <source>Add</source>
+        <translation>Adaugă</translation>
+    </message>
+    <message>
+        <source>Address</source>
+        <translation>Adresă</translation>
+    </message>
+    <message>
+        <source>Agent settings</source>
+        <translation>Setările agentului</translation>
+    </message>
+    <message>
+        <source>Allow attribute values to be sent</source>
+        <translation>Permite trimiterea valorilor atributelor</translation>
+    </message>
+    <message>
+        <source>Applications already set up will have to be set up again.</source>
+        <translation>Aplicațiile deja configurate vor trebui configurate din nou.</translation>
+    </message>
+    <message>
+        <source>Ask the agent to filter your layers</source>
+        <translation>Cereți agentului să vă filtreze straturile</translation>
+    </message>
+    <message>
+        <source>Back to the conversation</source>
+        <translation>Înapoi la conversație</translation>
+    </message>
+    <message>
+        <source>Claude Code or another MCP client on this computer can then filter your layers, once FilterMate has been opened, under the rules of this panel: the same sources, the same confirmations, and filters can be undone here. That application sends what it reads to its own AI provider.</source>
+        <translation>Claude Code sau un alt client MCP de pe acest calculator poate apoi să vă filtreze straturile, după deschiderea FilterMate, conform regulilor acestui panou: aceleași surse, aceleași confirmări, iar filtrele pot fi anulate aici. Acea aplicație trimite ce citește propriului furnizor de IA.</translation>
+    </message>
+    <message>
+        <source>Connect an AI provider to start. Nothing is sent before you agree.</source>
+        <translation>Conectați un furnizor de IA pentru a începe. Nimic nu este trimis fără acordul dvs.</translation>
+    </message>
+    <message>
+        <source>Copied, with the access token: keep it to yourself. Save these settings for it to apply.</source>
+        <translation>Copiat, cu tokenul de acces: păstrați-l pentru dvs. Salvați aceste setări pentru ca tokenul să se aplice.</translation>
+    </message>
+    <message>
+        <source>Copy for Claude Desktop</source>
+        <translation>Copiază pentru Claude Desktop</translation>
+    </message>
+    <message>
+        <source>Copy the Claude Code command</source>
+        <translation>Copiază comanda Claude Code</translation>
+    </message>
+    <message>
+        <source>Copy the configuration</source>
+        <translation>Copiază configurația</translation>
+    </message>
+    <message>
+        <source>Describe it in your own words. Each filter can be undone.</source>
+        <translation>Descrieți în cuvintele dvs. Fiecare filtru poate fi anulat.</translation>
+    </message>
+    <message>
+        <source>Filter your layers from a sentence</source>
+        <translation>Filtrați-vă straturile dintr-o frază</translation>
+    </message>
+    <message>
+        <source>FilterMate agent</source>
+        <translation>Agent FilterMate</translation>
+    </message>
+    <message>
+        <source>History</source>
+        <translation>Istoric</translation>
+    </message>
+    <message>
+        <source>History…</source>
+        <translation>Istoric…</translation>
+    </message>
+    <message>
+        <source>I agree to send this data to this provider</source>
+        <translation>Sunt de acord să trimit aceste date acestui furnizor</translation>
+    </message>
+    <message>
+        <source>Let other applications on this computer drive FilterMate (MCP server)</source>
+        <translation>Permite altor aplicații de pe acest calculator să controleze FilterMate (server MCP)</translation>
+    </message>
+    <message>
+        <source>MCP connector</source>
+        <translation>Conector MCP</translation>
+    </message>
+    <message>
+        <source>MCP connectors</source>
+        <translation>Conectori MCP</translation>
+    </message>
+    <message>
+        <source>Model</source>
+        <translation>Model</translation>
+    </message>
+    <message>
+        <source>More</source>
+        <translation>Mai mult</translation>
+    </message>
+    <message>
+        <source>New access token</source>
+        <translation>Token de acces nou</translation>
+    </message>
+    <message>
+        <source>New conversation</source>
+        <translation>Conversație nouă</translation>
+    </message>
+    <message>
+        <source>New token: it applies once these settings are saved.</source>
+        <translation>Token nou: se aplică după salvarea acestor setări.</translation>
+    </message>
+    <message>
+        <source>Open data platforms</source>
+        <translation>Platforme de date deschise</translation>
+    </message>
+    <message>
+        <source>Open the settings</source>
+        <translation>Deschide setările</translation>
+    </message>
+    <message>
+        <source>Other applications</source>
+        <translation>Alte aplicații</translation>
+    </message>
+    <message>
+        <source>Port</source>
+        <translation>Port</translation>
+    </message>
+    <message>
+        <source>Provider</source>
+        <translation>Furnizor</translation>
+    </message>
+    <message>
+        <source>Redo</source>
+        <translation>Refă</translation>
+    </message>
+    <message>
+        <source>Remove</source>
+        <translation>Elimină</translation>
+    </message>
+    <message>
+        <source>Remove the stored key</source>
+        <translation>Șterge cheia stocată</translation>
+    </message>
+    <message>
+        <source>Satellite imagery</source>
+        <translation>Imagini satelitare</translation>
+    </message>
+    <message>
+        <source>Send (Enter)</source>
+        <translation>Trimite (Enter)</translation>
+    </message>
+    <message>
+        <source>Send again</source>
+        <translation>Trimite din nou</translation>
+    </message>
+    <message>
+        <source>Sent to: {}</source>
+        <translation>Trimis către: {}</translation>
+    </message>
+    <message>
+        <source>Set up the agent</source>
+        <translation>Configurează agentul</translation>
+    </message>
+    <message>
+        <source>Sources</source>
+        <translation>Surse</translation>
+    </message>
+    <message>
+        <source>Stop (Esc)</source>
+        <translation>Oprește (Esc)</translation>
+    </message>
+    <message>
+        <source>Stored: leave empty to keep it</source>
+        <translation>Stocată: lăsați gol pentru a o păstra</translation>
+    </message>
+    <message>
+        <source>Test</source>
+        <translation>Testează</translation>
+    </message>
+    <message>
+        <source>Testing…</source>
+        <translation>Se testează…</translation>
+    </message>
+    <message>
+        <source>The MCP server could not start: {}</source>
+        <translation>Serverul MCP nu a putut porni: {}</translation>
+    </message>
+    <message>
+        <source>The agent can search the sources ticked here. Your searches, and what the agent passes to a connector, are sent to them; a layer added from them is read from their servers.</source>
+        <translation>Agentul poate căuta în sursele bifate aici. Căutările dvs. și ceea ce agentul transmite unui conector le sunt trimise; un strat adăugat din ele este citit de pe serverele lor.</translation>
+    </message>
+    <message>
+        <source>The agent sends your request, the names of your layers and fields, your filter expressions and the results of its tools to the provider chosen here, under that provider's terms. Without the option below, the agent does not read the values of your fields; values already written in your filters and favorites are still sent. The conversation is kept on this computer for each project, until you start a new one.</source>
+        <translation>Agentul trimite cererea dvs., numele straturilor și câmpurilor, expresiile de filtru și rezultatele instrumentelor sale furnizorului ales aici, conform condițiilor acelui furnizor. Fără opțiunea de mai jos, agentul nu citește valorile câmpurilor dvs.; valorile deja scrise în filtre și favorite sunt totuși trimise. Conversația este păstrată pe acest calculator pentru fiecare proiect, până începeți una nouă.</translation>
+    </message>
+    <message>
+        <source>Through mcp-remote, which needs Node.js: Claude Desktop starts local servers as programs.</source>
+        <translation>Prin mcp-remote, care necesită Node.js: Claude Desktop pornește serverele locale ca programe.</translation>
+    </message>
+    <message>
+        <source>Too many sources added: remove one first.</source>
+        <translation>Prea multe surse adăugate: eliminați mai întâi una.</translation>
+    </message>
+    <message>
+        <source>Undo the last</source>
+        <translation>Anulează ultimul</translation>
+    </message>
+    <message>
+        <source>Undo this turn</source>
+        <translation>Anulează acest tur</translation>
+    </message>
+    <message>
+        <source>What do you want to filter?</source>
+        <translation>Ce doriți să filtrați?</translation>
+    </message>
+    <message>
+        <source>added by you</source>
+        <translation>adăugat de dvs.</translation>
+    </message>
+    <message>
+        <source>applied</source>
+        <translation>aplicat</translation>
+    </message>
+    <message>
+        <source>community</source>
+        <translation>comunitar</translation>
+    </message>
+    <message>
+        <source>https://... or a portal address</source>
+        <translation>https://... sau adresa unui portal</translation>
+    </message>
+    <message>
+        <source>no change</source>
+        <translation>nicio modificare</translation>
+    </message>
+    <message>
+        <source>official</source>
+        <translation>oficial</translation>
+    </message>
+    <message>
+        <source>this computer</source>
+        <translation>acest calculator</translation>
+    </message>
+    <message>
+        <source>undone</source>
+        <translation>anulat</translation>
+    </message>
+    <message>
+        <source>{} turn(s)</source>
+        <translation>{} tur(uri)</translation>
+    </message>
+    <message>
+        <source>Which layers are in this project?</source>
+        <translation>Ce straturi conține acest proiect?</translation>
+    </message>
+    <message>
+        <source>Keep the buildings taller than 15 m</source>
+        <translation>Păstrează clădirile mai înalte de 15 m</translation>
+    </message>
+    <message>
+        <source>Filter the roads inside the selected feature</source>
+        <translation>Filtrează drumurile din interiorul entității selectate</translation>
+    </message>
+</context>
+<context>
+    <name>AgentChat</name>
+    <message>
+        <source>Access to the free quota was renewed: send your request again.</source>
+        <translation>Accesul la cota gratuită a fost reînnoit: trimiteți din nou cererea.</translation>
+    </message>
+    <message>
+        <source>Another application is changing the project: try again in a moment.</source>
+        <translation>O altă aplicație modifică proiectul: încercați din nou peste un moment.</translation>
+    </message>
+    <message>
+        <source>Another application: {}</source>
+        <translation>Altă aplicație: {}</translation>
+    </message>
+    <message>
+        <source>Applied again: {}.</source>
+        <translation>Aplicat din nou: {}.</translation>
+    </message>
+    <message>
+        <source>Changed since, left as is: {}.</source>
+        <translation>Modificat între timp, lăsat ca atare: {}.</translation>
+    </message>
+    <message>
+        <source>Changed: {}.</source>
+        <translation>Modificat: {}.</translation>
+    </message>
+    <message>
+        <source>Choose a model and agree to send your data to use the agent.</source>
+        <translation>Alegeți un model și acceptați trimiterea datelor pentru a folosi agentul.</translation>
+    </message>
+    <message>
+        <source>Connecting to {}…</source>
+        <translation>Se conectează la {}…</translation>
+    </message>
+    <message>
+        <source>Earlier conversation: the agent starts afresh from here.</source>
+        <translation>Conversație anterioară: agentul reia de la zero de aici.</translation>
+    </message>
+    <message>
+        <source>Enter your API key in the agent settings.</source>
+        <translation>Introduceți cheia API în setările agentului.</translation>
+    </message>
+    <message>
+        <source>Export of {}</source>
+        <translation>Export din {}</translation>
+    </message>
+    <message>
+        <source>Favorite applied</source>
+        <translation>Favorit aplicat</translation>
+    </message>
+    <message>
+        <source>Filter on the points of {}</source>
+        <translation>Filtru pe punctele din {}</translation>
+    </message>
+    <message>
+        <source>Filter on {}</source>
+        <translation>Filtru pe {}</translation>
+    </message>
+    <message>
+        <source>Filter on {} by an area</source>
+        <translation>Filtru pe {} după o zonă</translation>
+    </message>
+    <message>
+        <source>Filter on {} by {}</source>
+        <translation>Filtru pe {} după {}</translation>
+    </message>
+    <message>
+        <source>FilterMate agent</source>
+        <translation>Agent FilterMate</translation>
+    </message>
+    <message>
+        <source>Filters removed from {}</source>
+        <translation>Filtre eliminate din {}</translation>
+    </message>
+    <message>
+        <source>Hidden: {}</source>
+        <translation>Ascuns: {}</translation>
+    </message>
+    <message>
+        <source>It answers.</source>
+        <translation>Sursa răspunde.</translation>
+    </message>
+    <message>
+        <source>Layer added: {}</source>
+        <translation>Strat adăugat: {}</translation>
+    </message>
+    <message>
+        <source>Layers removed: {}</source>
+        <translation>Straturi eliminate: {}</translation>
+    </message>
+    <message>
+        <source>Not reachable for this conversation: {}</source>
+        <translation>Inaccesibil pentru această conversație: {}</translation>
+    </message>
+    <message>
+        <source>Nothing to redo.</source>
+        <translation>Nimic de refăcut.</translation>
+    </message>
+    <message>
+        <source>Nothing to restore.</source>
+        <translation>Nimic de restaurat.</translation>
+    </message>
+    <message>
+        <source>Reading the active filters</source>
+        <translation>Citirea filtrelor active</translation>
+    </message>
+    <message>
+        <source>Reading the favorites</source>
+        <translation>Citirea favoritelor</translation>
+    </message>
+    <message>
+        <source>Reading the fields of {}</source>
+        <translation>Citirea câmpurilor din {}</translation>
+    </message>
+    <message>
+        <source>Reading the layers</source>
+        <translation>Citirea straturilor</translation>
+    </message>
+    <message>
+        <source>Reading the map</source>
+        <translation>Citirea hărții</translation>
+    </message>
+    <message>
+        <source>Reading the values of {}</source>
+        <translation>Citirea valorilor din {}</translation>
+    </message>
+    <message>
+        <source>Restored: {}.</source>
+        <translation>Restaurat: {}.</translation>
+    </message>
+    <message>
+        <source>Searching satellite imagery on {}</source>
+        <translation>Căutare de imagini satelitare pe {}</translation>
+    </message>
+    <message>
+        <source>Searching {} for {}</source>
+        <translation>Căutare pe {} după {}</translation>
+    </message>
+    <message>
+        <source>Selection cleared on {}</source>
+        <translation>Selecție golită pe {}</translation>
+    </message>
+    <message>
+        <source>Selection on {}</source>
+        <translation>Selecție pe {}</translation>
+    </message>
+    <message>
+        <source>Shown: {}</source>
+        <translation>Afișat: {}</translation>
+    </message>
+    <message>
+        <source>Stopped.</source>
+        <translation>Oprit.</translation>
+    </message>
+    <message>
+        <source>The MCP server could not start: {}</source>
+        <translation>Serverul MCP nu a putut porni: {}</translation>
+    </message>
+    <message>
+        <source>The QGIS authentication database is not available.</source>
+        <translation>Baza de date de autentificare QGIS nu este disponibilă.</translation>
+    </message>
+    <message>
+        <source>The QGIS master password is needed to use the stored key.</source>
+        <translation>Parola principală QGIS este necesară pentru a folosi cheia stocată.</translation>
+    </message>
+    <message>
+        <source>The agent stopped before the end ({}).</source>
+        <translation>Agentul s-a oprit înainte de final ({}).</translation>
+    </message>
+    <message>
+        <source>The agent wants to add this layer of a web service to the project:
+{} · {}
+
+Do you agree?</source>
+        <translation>Agentul dorește să adauge la proiect acest strat al unui serviciu web:
+{} · {}
+
+Sunteți de acord?</translation>
+    </message>
+    <message>
+        <source>The agent wants to add this layer to the project:
+{}
+
+A remote source is read from its server by QGIS, and what the layer holds can be sent to the provider of the agent. Do you agree?</source>
+        <translation>Agentul dorește să adauge la proiect acest strat:
+{}
+
+O sursă la distanță este citită de QGIS de pe serverul ei, iar conținutul stratului poate fi trimis furnizorului agentului. Sunteți de acord?</translation>
+    </message>
+    <message>
+        <source>The agent wants to export these layers to files:
+{}
+
+Do you agree?</source>
+        <translation>Agentul dorește să exporte aceste straturi în fișiere:
+{}
+
+Sunteți de acord?</translation>
+    </message>
+    <message>
+        <source>The agent wants to remove these layers from the project (their files stay, their styles and filters here are lost):
+{}
+
+Do you agree?</source>
+        <translation>Agentul dorește să elimine aceste straturi din proiect (fișierele lor rămân, stilurile și filtrele lor de aici se pierd):
+{}
+
+Sunteți de acord?</translation>
+    </message>
+    <message>
+        <source>The agent wants to run this action on an external connector:
+{}
+{}
+
+Do you agree?</source>
+        <translation>Agentul dorește să execute această acțiune pe un conector extern:
+{}
+{}
+
+Sunteți de acord?</translation>
+    </message>
+    <message>
+        <source>The credit or quota of this account is used up.</source>
+        <translation>Creditul sau cota acestui cont este epuizată.</translation>
+    </message>
+    <message>
+        <source>The free quota could not be reached: {}</source>
+        <translation>Cota gratuită nu a putut fi contactată: {}</translation>
+    </message>
+    <message>
+        <source>The free quota is not available.</source>
+        <translation>Cota gratuită nu este disponibilă.</translation>
+    </message>
+    <message>
+        <source>The free quota is unavailable for now.</source>
+        <translation>Cota gratuită este momentan indisponibilă.</translation>
+    </message>
+    <message>
+        <source>The free quota is used up for this month. Enter your own API key in the agent settings.</source>
+        <translation>Cota gratuită este epuizată pentru această lună. Introduceți propria cheie API în setările agentului.</translation>
+    </message>
+    <message>
+        <source>The key could not be stored.</source>
+        <translation>Cheia nu a putut fi stocată.</translation>
+    </message>
+    <message>
+        <source>The provider could not be reached: {}</source>
+        <translation>Furnizorul nu a putut fi contactat: {}</translation>
+    </message>
+    <message>
+        <source>The provider refused the API key: check it in the agent settings.</source>
+        <translation>Furnizorul a refuzat cheia API: verificați-o în setările agentului.</translation>
+    </message>
+    <message>
+        <source>The provider reported a problem: {}</source>
+        <translation>Furnizorul a raportat o problemă: {}</translation>
+    </message>
+    <message>
+        <source>The stored key could not be read.</source>
+        <translation>Cheia stocată nu a putut fi citită.</translation>
+    </message>
+    <message>
+        <source>Thinking…</source>
+        <translation>Se gândește…</translation>
+    </message>
+    <message>
+        <source>Too many new accounts from this address today: try again tomorrow, or enter your own API key.</source>
+        <translation>Prea multe conturi noi de la această adresă astăzi: încercați mâine sau introduceți propria cheie API.</translation>
+    </message>
+    <message>
+        <source>Too many requests for now: try again in a moment.</source>
+        <translation>Prea multe cereri momentan: încercați din nou peste un moment.</translation>
+    </message>
+    <message>
+        <source>Trying a filter on {}</source>
+        <translation>Încercarea unui filtru pe {}</translation>
+    </message>
+    <message>
+        <source>Zoom on {}</source>
+        <translation>Zoom pe {}</translation>
+    </message>
+    <message>
+        <source>an area</source>
+        <translation>o zonă</translation>
+    </message>
+    <message>
+        <source>everything</source>
+        <translation>tot</translation>
+    </message>
+    <message>
+        <source>{} tools available</source>
+        <translation>{} instrumente disponibile</translation>
+    </message>
+</context>
 </TS>

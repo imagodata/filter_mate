@@ -7758,4 +7758,574 @@ Install it now from PyPI with pip, into your QGIS profile? The Python of QGIS is
         <translation type="obsolete">保留的点</translation>
     </message>
 </context>
+<context>
+    <name>AgentPanel</name>
+    <message>
+        <source>(no request)</source>
+        <translation>（无请求）</translation>
+    </message>
+    <message>
+        <source>A few free requests a month, through the relay of FilterMate to Claude (Anthropic), under the terms of Anthropic. The relay counts what is spent and keeps no conversation. When it is used up, choose a provider and enter your own API key.</source>
+        <translation>每月提供少量免费请求，经由 FilterMate 到 Claude（Anthropic）的中继，适用 Anthropic 的条款。中继只统计消耗量，不保留任何对话。用完后，请选择提供者并输入您自己的 API 密钥。</translation>
+    </message>
+    <message>
+        <source>API key</source>
+        <translation>API 密钥</translation>
+    </message>
+    <message>
+        <source>Add</source>
+        <translation>添加</translation>
+    </message>
+    <message>
+        <source>Address</source>
+        <translation>地址</translation>
+    </message>
+    <message>
+        <source>Agent settings</source>
+        <translation>智能体设置</translation>
+    </message>
+    <message>
+        <source>Allow attribute values to be sent</source>
+        <translation>允许发送属性值</translation>
+    </message>
+    <message>
+        <source>Applications already set up will have to be set up again.</source>
+        <translation>已设置的应用程序需要重新设置。</translation>
+    </message>
+    <message>
+        <source>Ask the agent to filter your layers</source>
+        <translation>让智能体来过滤您的图层</translation>
+    </message>
+    <message>
+        <source>Back to the conversation</source>
+        <translation>返回对话</translation>
+    </message>
+    <message>
+        <source>Claude Code or another MCP client on this computer can then filter your layers, once FilterMate has been opened, under the rules of this panel: the same sources, the same confirmations, and filters can be undone here. That application sends what it reads to its own AI provider.</source>
+        <translation>此计算机上的 Claude Code 或其他 MCP 客户端随后可在 FilterMate 打开后过滤您的图层，遵循本面板的规则：相同的来源、相同的确认，过滤可在此撤销。该应用程序会将其读取的内容发送给其自己的 AI 提供者。</translation>
+    </message>
+    <message>
+        <source>Connect an AI provider to start. Nothing is sent before you agree.</source>
+        <translation>连接 AI 提供者即可开始。未经您同意，不会发送任何内容。</translation>
+    </message>
+    <message>
+        <source>Copied, with the access token: keep it to yourself. Save these settings for it to apply.</source>
+        <translation>已复制（含访问令牌）：请妥善保管。保存这些设置后才会生效。</translation>
+    </message>
+    <message>
+        <source>Copy for Claude Desktop</source>
+        <translation>复制给 Claude Desktop</translation>
+    </message>
+    <message>
+        <source>Copy the Claude Code command</source>
+        <translation>复制 Claude Code 命令</translation>
+    </message>
+    <message>
+        <source>Copy the configuration</source>
+        <translation>复制配置</translation>
+    </message>
+    <message>
+        <source>Describe it in your own words. Each filter can be undone.</source>
+        <translation>用您自己的话描述。每个过滤都可以撤销。</translation>
+    </message>
+    <message>
+        <source>Filter your layers from a sentence</source>
+        <translation>一句话过滤您的图层</translation>
+    </message>
+    <message>
+        <source>FilterMate agent</source>
+        <translation>FilterMate 智能体</translation>
+    </message>
+    <message>
+        <source>History</source>
+        <translation>历史记录</translation>
+    </message>
+    <message>
+        <source>History…</source>
+        <translation>历史记录…</translation>
+    </message>
+    <message>
+        <source>I agree to send this data to this provider</source>
+        <translation>我同意将这些数据发送给此提供者</translation>
+    </message>
+    <message>
+        <source>Let other applications on this computer drive FilterMate (MCP server)</source>
+        <translation>允许此计算机上的其他应用程序控制 FilterMate（MCP 服务器）</translation>
+    </message>
+    <message>
+        <source>MCP connector</source>
+        <translation>MCP 连接器</translation>
+    </message>
+    <message>
+        <source>MCP connectors</source>
+        <translation>MCP 连接器</translation>
+    </message>
+    <message>
+        <source>Model</source>
+        <translation>模型</translation>
+    </message>
+    <message>
+        <source>More</source>
+        <translation>更多</translation>
+    </message>
+    <message>
+        <source>New access token</source>
+        <translation>新的访问令牌</translation>
+    </message>
+    <message>
+        <source>New conversation</source>
+        <translation>新对话</translation>
+    </message>
+    <message>
+        <source>New token: it applies once these settings are saved.</source>
+        <translation>新令牌：保存这些设置后生效。</translation>
+    </message>
+    <message>
+        <source>Open data platforms</source>
+        <translation>开放数据平台</translation>
+    </message>
+    <message>
+        <source>Open the settings</source>
+        <translation>打开设置</translation>
+    </message>
+    <message>
+        <source>Other applications</source>
+        <translation>其他应用程序</translation>
+    </message>
+    <message>
+        <source>Port</source>
+        <translation>端口</translation>
+    </message>
+    <message>
+        <source>Provider</source>
+        <translation>提供者</translation>
+    </message>
+    <message>
+        <source>Redo</source>
+        <translation>重做</translation>
+    </message>
+    <message>
+        <source>Remove</source>
+        <translation>移除</translation>
+    </message>
+    <message>
+        <source>Remove the stored key</source>
+        <translation>删除已保存的密钥</translation>
+    </message>
+    <message>
+        <source>Satellite imagery</source>
+        <translation>卫星影像</translation>
+    </message>
+    <message>
+        <source>Send (Enter)</source>
+        <translation>发送（Enter）</translation>
+    </message>
+    <message>
+        <source>Send again</source>
+        <translation>重新发送</translation>
+    </message>
+    <message>
+        <source>Sent to: {}</source>
+        <translation>发送至：{}</translation>
+    </message>
+    <message>
+        <source>Set up the agent</source>
+        <translation>设置智能体</translation>
+    </message>
+    <message>
+        <source>Sources</source>
+        <translation>来源</translation>
+    </message>
+    <message>
+        <source>Stop (Esc)</source>
+        <translation>停止（Esc）</translation>
+    </message>
+    <message>
+        <source>Stored: leave empty to keep it</source>
+        <translation>已保存：留空则保留</translation>
+    </message>
+    <message>
+        <source>Test</source>
+        <translation>测试</translation>
+    </message>
+    <message>
+        <source>Testing…</source>
+        <translation>测试中…</translation>
+    </message>
+    <message>
+        <source>The MCP server could not start: {}</source>
+        <translation>MCP 服务器无法启动：{}</translation>
+    </message>
+    <message>
+        <source>The agent can search the sources ticked here. Your searches, and what the agent passes to a connector, are sent to them; a layer added from them is read from their servers.</source>
+        <translation>智能体可以搜索此处勾选的来源。您的搜索内容以及智能体传给连接器的内容会发送给这些来源；从中添加的图层将从其服务器读取。</translation>
+    </message>
+    <message>
+        <source>The agent sends your request, the names of your layers and fields, your filter expressions and the results of its tools to the provider chosen here, under that provider's terms. Without the option below, the agent does not read the values of your fields; values already written in your filters and favorites are still sent. The conversation is kept on this computer for each project, until you start a new one.</source>
+        <translation>智能体会将您的请求、图层和字段的名称、过滤表达式以及其工具的结果发送给此处选择的提供者，适用该提供者的条款。未启用下方选项时，智能体不会读取字段的值；但已写入您的过滤器和收藏中的值仍会被发送。对话按项目保存在此计算机上，直到您开始新的对话。</translation>
+    </message>
+    <message>
+        <source>Through mcp-remote, which needs Node.js: Claude Desktop starts local servers as programs.</source>
+        <translation>通过 mcp-remote（需要 Node.js）：Claude Desktop 会将本地服务器作为程序启动。</translation>
+    </message>
+    <message>
+        <source>Too many sources added: remove one first.</source>
+        <translation>添加的来源过多：请先移除一个。</translation>
+    </message>
+    <message>
+        <source>Undo the last</source>
+        <translation>撤销最近的</translation>
+    </message>
+    <message>
+        <source>Undo this turn</source>
+        <translation>撤销本轮</translation>
+    </message>
+    <message>
+        <source>What do you want to filter?</source>
+        <translation>您想过滤什么？</translation>
+    </message>
+    <message>
+        <source>added by you</source>
+        <translation>由您添加</translation>
+    </message>
+    <message>
+        <source>applied</source>
+        <translation>已应用</translation>
+    </message>
+    <message>
+        <source>community</source>
+        <translation>社区</translation>
+    </message>
+    <message>
+        <source>https://... or a portal address</source>
+        <translation>https://... 或门户网站地址</translation>
+    </message>
+    <message>
+        <source>no change</source>
+        <translation>无更改</translation>
+    </message>
+    <message>
+        <source>official</source>
+        <translation>官方</translation>
+    </message>
+    <message>
+        <source>this computer</source>
+        <translation>此计算机</translation>
+    </message>
+    <message>
+        <source>undone</source>
+        <translation>已撤销</translation>
+    </message>
+    <message>
+        <source>{} turn(s)</source>
+        <translation>{} 轮</translation>
+    </message>
+    <message>
+        <source>Which layers are in this project?</source>
+        <translation>此项目包含哪些图层？</translation>
+    </message>
+    <message>
+        <source>Keep the buildings taller than 15 m</source>
+        <translation>保留高于 15 米的建筑物</translation>
+    </message>
+    <message>
+        <source>Filter the roads inside the selected feature</source>
+        <translation>过滤所选要素内的道路</translation>
+    </message>
+</context>
+<context>
+    <name>AgentChat</name>
+    <message>
+        <source>Access to the free quota was renewed: send your request again.</source>
+        <translation>免费额度的访问权限已续期：请重新发送您的请求。</translation>
+    </message>
+    <message>
+        <source>Another application is changing the project: try again in a moment.</source>
+        <translation>另一个应用程序正在修改项目：请稍后再试。</translation>
+    </message>
+    <message>
+        <source>Another application: {}</source>
+        <translation>其他应用程序：{}</translation>
+    </message>
+    <message>
+        <source>Applied again: {}.</source>
+        <translation>已重新应用：{}。</translation>
+    </message>
+    <message>
+        <source>Changed since, left as is: {}.</source>
+        <translation>此后已被更改，保持原样：{}。</translation>
+    </message>
+    <message>
+        <source>Changed: {}.</source>
+        <translation>已更改：{}。</translation>
+    </message>
+    <message>
+        <source>Choose a model and agree to send your data to use the agent.</source>
+        <translation>请选择模型并同意发送数据，以使用智能体。</translation>
+    </message>
+    <message>
+        <source>Connecting to {}…</source>
+        <translation>正在连接 {}…</translation>
+    </message>
+    <message>
+        <source>Earlier conversation: the agent starts afresh from here.</source>
+        <translation>之前的对话：智能体将从此处重新开始。</translation>
+    </message>
+    <message>
+        <source>Enter your API key in the agent settings.</source>
+        <translation>请在智能体设置中输入您的 API 密钥。</translation>
+    </message>
+    <message>
+        <source>Export of {}</source>
+        <translation>{} 的导出</translation>
+    </message>
+    <message>
+        <source>Favorite applied</source>
+        <translation>已应用收藏</translation>
+    </message>
+    <message>
+        <source>Filter on the points of {}</source>
+        <translation>对 {} 的点过滤</translation>
+    </message>
+    <message>
+        <source>Filter on {}</source>
+        <translation>对 {} 过滤</translation>
+    </message>
+    <message>
+        <source>Filter on {} by an area</source>
+        <translation>对 {} 按区域过滤</translation>
+    </message>
+    <message>
+        <source>Filter on {} by {}</source>
+        <translation>对 {} 按 {} 过滤</translation>
+    </message>
+    <message>
+        <source>FilterMate agent</source>
+        <translation>FilterMate 智能体</translation>
+    </message>
+    <message>
+        <source>Filters removed from {}</source>
+        <translation>已移除 {} 的过滤器</translation>
+    </message>
+    <message>
+        <source>Hidden: {}</source>
+        <translation>已隐藏：{}</translation>
+    </message>
+    <message>
+        <source>It answers.</source>
+        <translation>来源有响应。</translation>
+    </message>
+    <message>
+        <source>Layer added: {}</source>
+        <translation>已添加图层：{}</translation>
+    </message>
+    <message>
+        <source>Layers removed: {}</source>
+        <translation>已移除图层：{}</translation>
+    </message>
+    <message>
+        <source>Not reachable for this conversation: {}</source>
+        <translation>此对话无法访问：{}</translation>
+    </message>
+    <message>
+        <source>Nothing to redo.</source>
+        <translation>没有可重做的操作。</translation>
+    </message>
+    <message>
+        <source>Nothing to restore.</source>
+        <translation>没有可恢复的内容。</translation>
+    </message>
+    <message>
+        <source>Reading the active filters</source>
+        <translation>正在读取当前过滤器</translation>
+    </message>
+    <message>
+        <source>Reading the favorites</source>
+        <translation>正在读取收藏</translation>
+    </message>
+    <message>
+        <source>Reading the fields of {}</source>
+        <translation>正在读取 {} 的字段</translation>
+    </message>
+    <message>
+        <source>Reading the layers</source>
+        <translation>正在读取图层</translation>
+    </message>
+    <message>
+        <source>Reading the map</source>
+        <translation>正在读取地图</translation>
+    </message>
+    <message>
+        <source>Reading the values of {}</source>
+        <translation>正在读取 {} 的值</translation>
+    </message>
+    <message>
+        <source>Restored: {}.</source>
+        <translation>已恢复：{}。</translation>
+    </message>
+    <message>
+        <source>Searching satellite imagery on {}</source>
+        <translation>正在 {} 上搜索卫星影像</translation>
+    </message>
+    <message>
+        <source>Searching {} for {}</source>
+        <translation>正在 {} 上搜索：{}</translation>
+    </message>
+    <message>
+        <source>Selection cleared on {}</source>
+        <translation>已清除 {} 上的选择</translation>
+    </message>
+    <message>
+        <source>Selection on {}</source>
+        <translation>{} 上的选择</translation>
+    </message>
+    <message>
+        <source>Shown: {}</source>
+        <translation>已显示：{}</translation>
+    </message>
+    <message>
+        <source>Stopped.</source>
+        <translation>已停止。</translation>
+    </message>
+    <message>
+        <source>The MCP server could not start: {}</source>
+        <translation>MCP 服务器无法启动：{}</translation>
+    </message>
+    <message>
+        <source>The QGIS authentication database is not available.</source>
+        <translation>QGIS 认证数据库不可用。</translation>
+    </message>
+    <message>
+        <source>The QGIS master password is needed to use the stored key.</source>
+        <translation>使用已保存的密钥需要 QGIS 主密码。</translation>
+    </message>
+    <message>
+        <source>The agent stopped before the end ({}).</source>
+        <translation>智能体在结束前已停止（{}）。</translation>
+    </message>
+    <message>
+        <source>The agent wants to add this layer of a web service to the project:
+{} · {}
+
+Do you agree?</source>
+        <translation>智能体想将此网络服务的图层添加到项目：
+{} · {}
+
+是否同意？</translation>
+    </message>
+    <message>
+        <source>The agent wants to add this layer to the project:
+{}
+
+A remote source is read from its server by QGIS, and what the layer holds can be sent to the provider of the agent. Do you agree?</source>
+        <translation>智能体想将此图层添加到项目：
+{}
+
+远程来源由 QGIS 从其服务器读取，图层所含内容可能会发送给智能体的提供者。是否同意？</translation>
+    </message>
+    <message>
+        <source>The agent wants to export these layers to files:
+{}
+
+Do you agree?</source>
+        <translation>智能体想将这些图层导出为文件：
+{}
+
+是否同意？</translation>
+    </message>
+    <message>
+        <source>The agent wants to remove these layers from the project (their files stay, their styles and filters here are lost):
+{}
+
+Do you agree?</source>
+        <translation>智能体想从项目中移除这些图层（其文件会保留，但此处的样式和过滤器将丢失）：
+{}
+
+是否同意？</translation>
+    </message>
+    <message>
+        <source>The agent wants to run this action on an external connector:
+{}
+{}
+
+Do you agree?</source>
+        <translation>智能体想在外部连接器上运行此操作：
+{}
+{}
+
+是否同意？</translation>
+    </message>
+    <message>
+        <source>The credit or quota of this account is used up.</source>
+        <translation>此账户的额度或配额已用完。</translation>
+    </message>
+    <message>
+        <source>The free quota could not be reached: {}</source>
+        <translation>无法连接免费额度：{}</translation>
+    </message>
+    <message>
+        <source>The free quota is not available.</source>
+        <translation>免费额度不可用。</translation>
+    </message>
+    <message>
+        <source>The free quota is unavailable for now.</source>
+        <translation>免费额度暂时不可用。</translation>
+    </message>
+    <message>
+        <source>The free quota is used up for this month. Enter your own API key in the agent settings.</source>
+        <translation>本月免费额度已用完。请在智能体设置中输入您自己的 API 密钥。</translation>
+    </message>
+    <message>
+        <source>The key could not be stored.</source>
+        <translation>无法保存密钥。</translation>
+    </message>
+    <message>
+        <source>The provider could not be reached: {}</source>
+        <translation>无法连接提供者：{}</translation>
+    </message>
+    <message>
+        <source>The provider refused the API key: check it in the agent settings.</source>
+        <translation>提供者拒绝了 API 密钥：请在智能体设置中检查。</translation>
+    </message>
+    <message>
+        <source>The provider reported a problem: {}</source>
+        <translation>提供者报告了问题：{}</translation>
+    </message>
+    <message>
+        <source>The stored key could not be read.</source>
+        <translation>无法读取已保存的密钥。</translation>
+    </message>
+    <message>
+        <source>Thinking…</source>
+        <translation>思考中…</translation>
+    </message>
+    <message>
+        <source>Too many new accounts from this address today: try again tomorrow, or enter your own API key.</source>
+        <translation>今天此地址创建的新账户过多：请明天再试，或输入您自己的 API 密钥。</translation>
+    </message>
+    <message>
+        <source>Too many requests for now: try again in a moment.</source>
+        <translation>请求过多：请稍后再试。</translation>
+    </message>
+    <message>
+        <source>Trying a filter on {}</source>
+        <translation>正在尝试对 {} 的过滤</translation>
+    </message>
+    <message>
+        <source>Zoom on {}</source>
+        <translation>缩放到 {}</translation>
+    </message>
+    <message>
+        <source>an area</source>
+        <translation>一个区域</translation>
+    </message>
+    <message>
+        <source>everything</source>
+        <translation>全部</translation>
+    </message>
+    <message>
+        <source>{} tools available</source>
+        <translation>{} 个可用工具</translation>
+    </message>
+</context>
 </TS>

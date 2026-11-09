@@ -7758,4 +7758,574 @@ Pasang sekarang dari PyPI dengan pip ke profil QGIS Anda? Python milik QGIS tida
         <translation type="obsolete">Titik yang dipertahankan</translation>
     </message>
 </context>
+<context>
+    <name>AgentPanel</name>
+    <message>
+        <source>(no request)</source>
+        <translation>(tanpa permintaan)</translation>
+    </message>
+    <message>
+        <source>A few free requests a month, through the relay of FilterMate to Claude (Anthropic), under the terms of Anthropic. The relay counts what is spent and keeps no conversation. When it is used up, choose a provider and enter your own API key.</source>
+        <translation>Beberapa permintaan gratis per bulan, melalui relai FilterMate ke Claude (Anthropic), sesuai ketentuan Anthropic. Relai menghitung yang terpakai dan tidak menyimpan percakapan. Setelah kuota habis, pilih penyedia dan masukkan kunci API Anda sendiri.</translation>
+    </message>
+    <message>
+        <source>API key</source>
+        <translation>Kunci API</translation>
+    </message>
+    <message>
+        <source>Add</source>
+        <translation>Tambah</translation>
+    </message>
+    <message>
+        <source>Address</source>
+        <translation>Alamat</translation>
+    </message>
+    <message>
+        <source>Agent settings</source>
+        <translation>Pengaturan agen</translation>
+    </message>
+    <message>
+        <source>Allow attribute values to be sent</source>
+        <translation>Izinkan pengiriman nilai atribut</translation>
+    </message>
+    <message>
+        <source>Applications already set up will have to be set up again.</source>
+        <translation>Aplikasi yang sudah diatur harus diatur ulang.</translation>
+    </message>
+    <message>
+        <source>Ask the agent to filter your layers</source>
+        <translation>Minta agen memfilter lapisan Anda</translation>
+    </message>
+    <message>
+        <source>Back to the conversation</source>
+        <translation>Kembali ke percakapan</translation>
+    </message>
+    <message>
+        <source>Claude Code or another MCP client on this computer can then filter your layers, once FilterMate has been opened, under the rules of this panel: the same sources, the same confirmations, and filters can be undone here. That application sends what it reads to its own AI provider.</source>
+        <translation>Claude Code atau klien MCP lain di komputer ini kemudian dapat memfilter lapisan Anda, setelah FilterMate dibuka, sesuai aturan panel ini: sumber yang sama, konfirmasi yang sama, dan filter dapat diurungkan di sini. Aplikasi tersebut mengirim apa yang dibacanya ke penyedia AI-nya sendiri.</translation>
+    </message>
+    <message>
+        <source>Connect an AI provider to start. Nothing is sent before you agree.</source>
+        <translation>Hubungkan penyedia AI untuk memulai. Tidak ada yang dikirim sebelum Anda setuju.</translation>
+    </message>
+    <message>
+        <source>Copied, with the access token: keep it to yourself. Save these settings for it to apply.</source>
+        <translation>Disalin, beserta token akses: simpan untuk Anda sendiri. Simpan pengaturan ini agar berlaku.</translation>
+    </message>
+    <message>
+        <source>Copy for Claude Desktop</source>
+        <translation>Salin untuk Claude Desktop</translation>
+    </message>
+    <message>
+        <source>Copy the Claude Code command</source>
+        <translation>Salin perintah Claude Code</translation>
+    </message>
+    <message>
+        <source>Copy the configuration</source>
+        <translation>Salin konfigurasi</translation>
+    </message>
+    <message>
+        <source>Describe it in your own words. Each filter can be undone.</source>
+        <translation>Jelaskan dengan kata-kata Anda sendiri. Setiap filter dapat diurungkan.</translation>
+    </message>
+    <message>
+        <source>Filter your layers from a sentence</source>
+        <translation>Filter lapisan Anda dengan satu kalimat</translation>
+    </message>
+    <message>
+        <source>FilterMate agent</source>
+        <translation>Agen FilterMate</translation>
+    </message>
+    <message>
+        <source>History</source>
+        <translation>Riwayat</translation>
+    </message>
+    <message>
+        <source>History…</source>
+        <translation>Riwayat…</translation>
+    </message>
+    <message>
+        <source>I agree to send this data to this provider</source>
+        <translation>Saya setuju mengirim data ini ke penyedia ini</translation>
+    </message>
+    <message>
+        <source>Let other applications on this computer drive FilterMate (MCP server)</source>
+        <translation>Izinkan aplikasi lain di komputer ini mengendalikan FilterMate (server MCP)</translation>
+    </message>
+    <message>
+        <source>MCP connector</source>
+        <translation>Konektor MCP</translation>
+    </message>
+    <message>
+        <source>MCP connectors</source>
+        <translation>Konektor MCP</translation>
+    </message>
+    <message>
+        <source>Model</source>
+        <translation>Model</translation>
+    </message>
+    <message>
+        <source>More</source>
+        <translation>Lainnya</translation>
+    </message>
+    <message>
+        <source>New access token</source>
+        <translation>Token akses baru</translation>
+    </message>
+    <message>
+        <source>New conversation</source>
+        <translation>Percakapan baru</translation>
+    </message>
+    <message>
+        <source>New token: it applies once these settings are saved.</source>
+        <translation>Token baru: berlaku setelah pengaturan ini disimpan.</translation>
+    </message>
+    <message>
+        <source>Open data platforms</source>
+        <translation>Platform data terbuka</translation>
+    </message>
+    <message>
+        <source>Open the settings</source>
+        <translation>Buka pengaturan</translation>
+    </message>
+    <message>
+        <source>Other applications</source>
+        <translation>Aplikasi lain</translation>
+    </message>
+    <message>
+        <source>Port</source>
+        <translation>Port</translation>
+    </message>
+    <message>
+        <source>Provider</source>
+        <translation>Penyedia</translation>
+    </message>
+    <message>
+        <source>Redo</source>
+        <translation>Ulangi</translation>
+    </message>
+    <message>
+        <source>Remove</source>
+        <translation>Hapus</translation>
+    </message>
+    <message>
+        <source>Remove the stored key</source>
+        <translation>Hapus kunci yang tersimpan</translation>
+    </message>
+    <message>
+        <source>Satellite imagery</source>
+        <translation>Citra satelit</translation>
+    </message>
+    <message>
+        <source>Send (Enter)</source>
+        <translation>Kirim (Enter)</translation>
+    </message>
+    <message>
+        <source>Send again</source>
+        <translation>Kirim ulang</translation>
+    </message>
+    <message>
+        <source>Sent to: {}</source>
+        <translation>Dikirim ke: {}</translation>
+    </message>
+    <message>
+        <source>Set up the agent</source>
+        <translation>Atur agen</translation>
+    </message>
+    <message>
+        <source>Sources</source>
+        <translation>Sumber</translation>
+    </message>
+    <message>
+        <source>Stop (Esc)</source>
+        <translation>Hentikan (Esc)</translation>
+    </message>
+    <message>
+        <source>Stored: leave empty to keep it</source>
+        <translation>Tersimpan: biarkan kosong untuk mempertahankannya</translation>
+    </message>
+    <message>
+        <source>Test</source>
+        <translation>Uji</translation>
+    </message>
+    <message>
+        <source>Testing…</source>
+        <translation>Menguji…</translation>
+    </message>
+    <message>
+        <source>The MCP server could not start: {}</source>
+        <translation>Server MCP tidak dapat dimulai: {}</translation>
+    </message>
+    <message>
+        <source>The agent can search the sources ticked here. Your searches, and what the agent passes to a connector, are sent to them; a layer added from them is read from their servers.</source>
+        <translation>Agen dapat mencari di sumber yang dicentang di sini. Pencarian Anda, dan apa yang diteruskan agen ke konektor, dikirim ke sumber tersebut; lapisan yang ditambahkan dari sumber itu dibaca dari server mereka.</translation>
+    </message>
+    <message>
+        <source>The agent sends your request, the names of your layers and fields, your filter expressions and the results of its tools to the provider chosen here, under that provider's terms. Without the option below, the agent does not read the values of your fields; values already written in your filters and favorites are still sent. The conversation is kept on this computer for each project, until you start a new one.</source>
+        <translation>Agen mengirim permintaan Anda, nama lapisan dan bidang Anda, ekspresi filter Anda, dan hasil alatnya ke penyedia yang dipilih di sini, sesuai ketentuan penyedia tersebut. Tanpa opsi di bawah, agen tidak membaca nilai bidang Anda; nilai yang sudah tertulis di filter dan favorit Anda tetap dikirim. Percakapan disimpan di komputer ini untuk setiap proyek, hingga Anda memulai yang baru.</translation>
+    </message>
+    <message>
+        <source>Through mcp-remote, which needs Node.js: Claude Desktop starts local servers as programs.</source>
+        <translation>Melalui mcp-remote, yang memerlukan Node.js: Claude Desktop menjalankan server lokal sebagai program.</translation>
+    </message>
+    <message>
+        <source>Too many sources added: remove one first.</source>
+        <translation>Terlalu banyak sumber ditambahkan: hapus satu terlebih dahulu.</translation>
+    </message>
+    <message>
+        <source>Undo the last</source>
+        <translation>Urungkan yang terakhir</translation>
+    </message>
+    <message>
+        <source>Undo this turn</source>
+        <translation>Urungkan giliran ini</translation>
+    </message>
+    <message>
+        <source>What do you want to filter?</source>
+        <translation>Apa yang ingin Anda filter?</translation>
+    </message>
+    <message>
+        <source>added by you</source>
+        <translation>ditambahkan oleh Anda</translation>
+    </message>
+    <message>
+        <source>applied</source>
+        <translation>diterapkan</translation>
+    </message>
+    <message>
+        <source>community</source>
+        <translation>komunitas</translation>
+    </message>
+    <message>
+        <source>https://... or a portal address</source>
+        <translation>https://... atau alamat portal</translation>
+    </message>
+    <message>
+        <source>no change</source>
+        <translation>tidak ada perubahan</translation>
+    </message>
+    <message>
+        <source>official</source>
+        <translation>resmi</translation>
+    </message>
+    <message>
+        <source>this computer</source>
+        <translation>komputer ini</translation>
+    </message>
+    <message>
+        <source>undone</source>
+        <translation>diurungkan</translation>
+    </message>
+    <message>
+        <source>{} turn(s)</source>
+        <translation>{} giliran</translation>
+    </message>
+    <message>
+        <source>Which layers are in this project?</source>
+        <translation>Lapisan apa saja yang ada di proyek ini?</translation>
+    </message>
+    <message>
+        <source>Keep the buildings taller than 15 m</source>
+        <translation>Pertahankan bangunan yang lebih tinggi dari 15 m</translation>
+    </message>
+    <message>
+        <source>Filter the roads inside the selected feature</source>
+        <translation>Filter jalan di dalam fitur yang dipilih</translation>
+    </message>
+</context>
+<context>
+    <name>AgentChat</name>
+    <message>
+        <source>Access to the free quota was renewed: send your request again.</source>
+        <translation>Akses ke kuota gratis telah diperbarui: kirim ulang permintaan Anda.</translation>
+    </message>
+    <message>
+        <source>Another application is changing the project: try again in a moment.</source>
+        <translation>Aplikasi lain sedang mengubah proyek: coba lagi sebentar lagi.</translation>
+    </message>
+    <message>
+        <source>Another application: {}</source>
+        <translation>Aplikasi lain: {}</translation>
+    </message>
+    <message>
+        <source>Applied again: {}.</source>
+        <translation>Diterapkan lagi: {}.</translation>
+    </message>
+    <message>
+        <source>Changed since, left as is: {}.</source>
+        <translation>Telah berubah sejak itu, dibiarkan apa adanya: {}.</translation>
+    </message>
+    <message>
+        <source>Changed: {}.</source>
+        <translation>Diubah: {}.</translation>
+    </message>
+    <message>
+        <source>Choose a model and agree to send your data to use the agent.</source>
+        <translation>Pilih model dan setujui pengiriman data Anda untuk menggunakan agen.</translation>
+    </message>
+    <message>
+        <source>Connecting to {}…</source>
+        <translation>Menghubungkan ke {}…</translation>
+    </message>
+    <message>
+        <source>Earlier conversation: the agent starts afresh from here.</source>
+        <translation>Percakapan sebelumnya: agen memulai dari awal mulai dari sini.</translation>
+    </message>
+    <message>
+        <source>Enter your API key in the agent settings.</source>
+        <translation>Masukkan kunci API Anda di pengaturan agen.</translation>
+    </message>
+    <message>
+        <source>Export of {}</source>
+        <translation>Ekspor {}</translation>
+    </message>
+    <message>
+        <source>Favorite applied</source>
+        <translation>Favorit diterapkan</translation>
+    </message>
+    <message>
+        <source>Filter on the points of {}</source>
+        <translation>Filter pada titik-titik {}</translation>
+    </message>
+    <message>
+        <source>Filter on {}</source>
+        <translation>Filter pada {}</translation>
+    </message>
+    <message>
+        <source>Filter on {} by an area</source>
+        <translation>Filter pada {} berdasarkan suatu area</translation>
+    </message>
+    <message>
+        <source>Filter on {} by {}</source>
+        <translation>Filter pada {} berdasarkan {}</translation>
+    </message>
+    <message>
+        <source>FilterMate agent</source>
+        <translation>Agen FilterMate</translation>
+    </message>
+    <message>
+        <source>Filters removed from {}</source>
+        <translation>Filter dihapus dari {}</translation>
+    </message>
+    <message>
+        <source>Hidden: {}</source>
+        <translation>Disembunyikan: {}</translation>
+    </message>
+    <message>
+        <source>It answers.</source>
+        <translation>Sumber menjawab.</translation>
+    </message>
+    <message>
+        <source>Layer added: {}</source>
+        <translation>Lapisan ditambahkan: {}</translation>
+    </message>
+    <message>
+        <source>Layers removed: {}</source>
+        <translation>Lapisan dihapus: {}</translation>
+    </message>
+    <message>
+        <source>Not reachable for this conversation: {}</source>
+        <translation>Tidak dapat dijangkau untuk percakapan ini: {}</translation>
+    </message>
+    <message>
+        <source>Nothing to redo.</source>
+        <translation>Tidak ada yang bisa diulang.</translation>
+    </message>
+    <message>
+        <source>Nothing to restore.</source>
+        <translation>Tidak ada yang bisa dipulihkan.</translation>
+    </message>
+    <message>
+        <source>Reading the active filters</source>
+        <translation>Membaca filter yang aktif</translation>
+    </message>
+    <message>
+        <source>Reading the favorites</source>
+        <translation>Membaca favorit</translation>
+    </message>
+    <message>
+        <source>Reading the fields of {}</source>
+        <translation>Membaca bidang {}</translation>
+    </message>
+    <message>
+        <source>Reading the layers</source>
+        <translation>Membaca lapisan</translation>
+    </message>
+    <message>
+        <source>Reading the map</source>
+        <translation>Membaca peta</translation>
+    </message>
+    <message>
+        <source>Reading the values of {}</source>
+        <translation>Membaca nilai {}</translation>
+    </message>
+    <message>
+        <source>Restored: {}.</source>
+        <translation>Dipulihkan: {}.</translation>
+    </message>
+    <message>
+        <source>Searching satellite imagery on {}</source>
+        <translation>Mencari citra satelit di {}</translation>
+    </message>
+    <message>
+        <source>Searching {} for {}</source>
+        <translation>Mencari di {} untuk {}</translation>
+    </message>
+    <message>
+        <source>Selection cleared on {}</source>
+        <translation>Seleksi dihapus pada {}</translation>
+    </message>
+    <message>
+        <source>Selection on {}</source>
+        <translation>Seleksi pada {}</translation>
+    </message>
+    <message>
+        <source>Shown: {}</source>
+        <translation>Ditampilkan: {}</translation>
+    </message>
+    <message>
+        <source>Stopped.</source>
+        <translation>Dihentikan.</translation>
+    </message>
+    <message>
+        <source>The MCP server could not start: {}</source>
+        <translation>Server MCP tidak dapat dimulai: {}</translation>
+    </message>
+    <message>
+        <source>The QGIS authentication database is not available.</source>
+        <translation>Basis data autentikasi QGIS tidak tersedia.</translation>
+    </message>
+    <message>
+        <source>The QGIS master password is needed to use the stored key.</source>
+        <translation>Kata sandi utama QGIS diperlukan untuk menggunakan kunci yang tersimpan.</translation>
+    </message>
+    <message>
+        <source>The agent stopped before the end ({}).</source>
+        <translation>Agen berhenti sebelum selesai ({}).</translation>
+    </message>
+    <message>
+        <source>The agent wants to add this layer of a web service to the project:
+{} · {}
+
+Do you agree?</source>
+        <translation>Agen ingin menambahkan lapisan layanan web ini ke proyek:
+{} · {}
+
+Apakah Anda setuju?</translation>
+    </message>
+    <message>
+        <source>The agent wants to add this layer to the project:
+{}
+
+A remote source is read from its server by QGIS, and what the layer holds can be sent to the provider of the agent. Do you agree?</source>
+        <translation>Agen ingin menambahkan lapisan ini ke proyek:
+{}
+
+Sumber jarak jauh dibaca dari servernya oleh QGIS, dan isi lapisan dapat dikirim ke penyedia agen. Apakah Anda setuju?</translation>
+    </message>
+    <message>
+        <source>The agent wants to export these layers to files:
+{}
+
+Do you agree?</source>
+        <translation>Agen ingin mengekspor lapisan-lapisan ini ke file:
+{}
+
+Apakah Anda setuju?</translation>
+    </message>
+    <message>
+        <source>The agent wants to remove these layers from the project (their files stay, their styles and filters here are lost):
+{}
+
+Do you agree?</source>
+        <translation>Agen ingin menghapus lapisan-lapisan ini dari proyek (file-nya tetap ada, tetapi gaya dan filter di sini hilang):
+{}
+
+Apakah Anda setuju?</translation>
+    </message>
+    <message>
+        <source>The agent wants to run this action on an external connector:
+{}
+{}
+
+Do you agree?</source>
+        <translation>Agen ingin menjalankan tindakan ini pada konektor eksternal:
+{}
+{}
+
+Apakah Anda setuju?</translation>
+    </message>
+    <message>
+        <source>The credit or quota of this account is used up.</source>
+        <translation>Kredit atau kuota akun ini telah habis.</translation>
+    </message>
+    <message>
+        <source>The free quota could not be reached: {}</source>
+        <translation>Kuota gratis tidak dapat dijangkau: {}</translation>
+    </message>
+    <message>
+        <source>The free quota is not available.</source>
+        <translation>Kuota gratis tidak tersedia.</translation>
+    </message>
+    <message>
+        <source>The free quota is unavailable for now.</source>
+        <translation>Kuota gratis tidak tersedia untuk saat ini.</translation>
+    </message>
+    <message>
+        <source>The free quota is used up for this month. Enter your own API key in the agent settings.</source>
+        <translation>Kuota gratis bulan ini telah habis. Masukkan kunci API Anda sendiri di pengaturan agen.</translation>
+    </message>
+    <message>
+        <source>The key could not be stored.</source>
+        <translation>Kunci tidak dapat disimpan.</translation>
+    </message>
+    <message>
+        <source>The provider could not be reached: {}</source>
+        <translation>Penyedia tidak dapat dijangkau: {}</translation>
+    </message>
+    <message>
+        <source>The provider refused the API key: check it in the agent settings.</source>
+        <translation>Penyedia menolak kunci API: periksa di pengaturan agen.</translation>
+    </message>
+    <message>
+        <source>The provider reported a problem: {}</source>
+        <translation>Penyedia melaporkan masalah: {}</translation>
+    </message>
+    <message>
+        <source>The stored key could not be read.</source>
+        <translation>Kunci yang tersimpan tidak dapat dibaca.</translation>
+    </message>
+    <message>
+        <source>Thinking…</source>
+        <translation>Berpikir…</translation>
+    </message>
+    <message>
+        <source>Too many new accounts from this address today: try again tomorrow, or enter your own API key.</source>
+        <translation>Terlalu banyak akun baru dari alamat ini hari ini: coba lagi besok, atau masukkan kunci API Anda sendiri.</translation>
+    </message>
+    <message>
+        <source>Too many requests for now: try again in a moment.</source>
+        <translation>Terlalu banyak permintaan saat ini: coba lagi sebentar lagi.</translation>
+    </message>
+    <message>
+        <source>Trying a filter on {}</source>
+        <translation>Mencoba filter pada {}</translation>
+    </message>
+    <message>
+        <source>Zoom on {}</source>
+        <translation>Zoom ke {}</translation>
+    </message>
+    <message>
+        <source>an area</source>
+        <translation>suatu area</translation>
+    </message>
+    <message>
+        <source>everything</source>
+        <translation>semuanya</translation>
+    </message>
+    <message>
+        <source>{} tools available</source>
+        <translation>{} alat tersedia</translation>
+    </message>
+</context>
 </TS>

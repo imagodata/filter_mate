@@ -7758,4 +7758,574 @@ Install it now from PyPI with pip, into your QGIS profile? The Python of QGIS is
         <translation type="obsolete">Σημεία που διατηρούνται</translation>
     </message>
 </context>
+<context>
+    <name>AgentPanel</name>
+    <message>
+        <source>(no request)</source>
+        <translation>(χωρίς αίτημα)</translation>
+    </message>
+    <message>
+        <source>A few free requests a month, through the relay of FilterMate to Claude (Anthropic), under the terms of Anthropic. The relay counts what is spent and keeps no conversation. When it is used up, choose a provider and enter your own API key.</source>
+        <translation>Μερικά δωρεάν αιτήματα τον μήνα, μέσω του ενδιάμεσου κόμβου του FilterMate προς το Claude (Anthropic), σύμφωνα με τους όρους της Anthropic. Ο κόμβος μετρά τα έξοδα και δεν κρατά καμία συνομιλία. Όταν εξαντληθεί η ποσόστωση, επιλέξτε πάροχο και εισαγάγετε το δικό σας κλειδί API.</translation>
+    </message>
+    <message>
+        <source>API key</source>
+        <translation>Κλειδί API</translation>
+    </message>
+    <message>
+        <source>Add</source>
+        <translation>Προσθήκη</translation>
+    </message>
+    <message>
+        <source>Address</source>
+        <translation>Διεύθυνση</translation>
+    </message>
+    <message>
+        <source>Agent settings</source>
+        <translation>Ρυθμίσεις πράκτορα</translation>
+    </message>
+    <message>
+        <source>Allow attribute values to be sent</source>
+        <translation>Να επιτρέπεται η αποστολή τιμών χαρακτηριστικών</translation>
+    </message>
+    <message>
+        <source>Applications already set up will have to be set up again.</source>
+        <translation>Οι εφαρμογές που έχουν ήδη ρυθμιστεί θα πρέπει να ρυθμιστούν ξανά.</translation>
+    </message>
+    <message>
+        <source>Ask the agent to filter your layers</source>
+        <translation>Ζητήστε από τον πράκτορα να φιλτράρει τα επίπεδά σας</translation>
+    </message>
+    <message>
+        <source>Back to the conversation</source>
+        <translation>Επιστροφή στη συνομιλία</translation>
+    </message>
+    <message>
+        <source>Claude Code or another MCP client on this computer can then filter your layers, once FilterMate has been opened, under the rules of this panel: the same sources, the same confirmations, and filters can be undone here. That application sends what it reads to its own AI provider.</source>
+        <translation>Το Claude Code ή άλλος πελάτης MCP σε αυτόν τον υπολογιστή μπορεί τότε να φιλτράρει τα επίπεδά σας, μόλις ανοίξει το FilterMate, με τους κανόνες αυτού του πίνακα: ίδιες πηγές, ίδιες επιβεβαιώσεις, και τα φίλτρα αναιρούνται εδώ. Αυτή η εφαρμογή στέλνει ό,τι διαβάζει στον δικό της πάροχο AI.</translation>
+    </message>
+    <message>
+        <source>Connect an AI provider to start. Nothing is sent before you agree.</source>
+        <translation>Συνδέστε έναν πάροχο AI για να ξεκινήσετε. Τίποτα δεν στέλνεται χωρίς τη συμφωνία σας.</translation>
+    </message>
+    <message>
+        <source>Copied, with the access token: keep it to yourself. Save these settings for it to apply.</source>
+        <translation>Αντιγράφηκε, μαζί με το διακριτικό πρόσβασης: κρατήστε το για εσάς. Αποθηκεύστε αυτές τις ρυθμίσεις για να εφαρμοστεί.</translation>
+    </message>
+    <message>
+        <source>Copy for Claude Desktop</source>
+        <translation>Αντιγραφή για το Claude Desktop</translation>
+    </message>
+    <message>
+        <source>Copy the Claude Code command</source>
+        <translation>Αντιγραφή της εντολής Claude Code</translation>
+    </message>
+    <message>
+        <source>Copy the configuration</source>
+        <translation>Αντιγραφή της διαμόρφωσης</translation>
+    </message>
+    <message>
+        <source>Describe it in your own words. Each filter can be undone.</source>
+        <translation>Περιγράψτε το με δικά σας λόγια. Κάθε φίλτρο μπορεί να αναιρεθεί.</translation>
+    </message>
+    <message>
+        <source>Filter your layers from a sentence</source>
+        <translation>Φιλτράρετε τα επίπεδά σας με μια πρόταση</translation>
+    </message>
+    <message>
+        <source>FilterMate agent</source>
+        <translation>Πράκτορας FilterMate</translation>
+    </message>
+    <message>
+        <source>History</source>
+        <translation>Ιστορικό</translation>
+    </message>
+    <message>
+        <source>History…</source>
+        <translation>Ιστορικό…</translation>
+    </message>
+    <message>
+        <source>I agree to send this data to this provider</source>
+        <translation>Συμφωνώ να σταλούν αυτά τα δεδομένα σε αυτόν τον πάροχο</translation>
+    </message>
+    <message>
+        <source>Let other applications on this computer drive FilterMate (MCP server)</source>
+        <translation>Να επιτρέπεται σε άλλες εφαρμογές αυτού του υπολογιστή να ελέγχουν το FilterMate (διακομιστής MCP)</translation>
+    </message>
+    <message>
+        <source>MCP connector</source>
+        <translation>Συνδέτης MCP</translation>
+    </message>
+    <message>
+        <source>MCP connectors</source>
+        <translation>Συνδέτες MCP</translation>
+    </message>
+    <message>
+        <source>Model</source>
+        <translation>Μοντέλο</translation>
+    </message>
+    <message>
+        <source>More</source>
+        <translation>Περισσότερα</translation>
+    </message>
+    <message>
+        <source>New access token</source>
+        <translation>Νέο διακριτικό πρόσβασης</translation>
+    </message>
+    <message>
+        <source>New conversation</source>
+        <translation>Νέα συνομιλία</translation>
+    </message>
+    <message>
+        <source>New token: it applies once these settings are saved.</source>
+        <translation>Νέο διακριτικό: εφαρμόζεται μόλις αποθηκευτούν αυτές οι ρυθμίσεις.</translation>
+    </message>
+    <message>
+        <source>Open data platforms</source>
+        <translation>Πλατφόρμες ανοικτών δεδομένων</translation>
+    </message>
+    <message>
+        <source>Open the settings</source>
+        <translation>Άνοιγμα των ρυθμίσεων</translation>
+    </message>
+    <message>
+        <source>Other applications</source>
+        <translation>Άλλες εφαρμογές</translation>
+    </message>
+    <message>
+        <source>Port</source>
+        <translation>Θύρα</translation>
+    </message>
+    <message>
+        <source>Provider</source>
+        <translation>Πάροχος</translation>
+    </message>
+    <message>
+        <source>Redo</source>
+        <translation>Επανάληψη</translation>
+    </message>
+    <message>
+        <source>Remove</source>
+        <translation>Αφαίρεση</translation>
+    </message>
+    <message>
+        <source>Remove the stored key</source>
+        <translation>Διαγραφή του αποθηκευμένου κλειδιού</translation>
+    </message>
+    <message>
+        <source>Satellite imagery</source>
+        <translation>Δορυφορικές εικόνες</translation>
+    </message>
+    <message>
+        <source>Send (Enter)</source>
+        <translation>Αποστολή (Enter)</translation>
+    </message>
+    <message>
+        <source>Send again</source>
+        <translation>Αποστολή ξανά</translation>
+    </message>
+    <message>
+        <source>Sent to: {}</source>
+        <translation>Στάλθηκε σε: {}</translation>
+    </message>
+    <message>
+        <source>Set up the agent</source>
+        <translation>Ρύθμιση του πράκτορα</translation>
+    </message>
+    <message>
+        <source>Sources</source>
+        <translation>Πηγές</translation>
+    </message>
+    <message>
+        <source>Stop (Esc)</source>
+        <translation>Διακοπή (Esc)</translation>
+    </message>
+    <message>
+        <source>Stored: leave empty to keep it</source>
+        <translation>Αποθηκευμένο: αφήστε κενό για να διατηρηθεί</translation>
+    </message>
+    <message>
+        <source>Test</source>
+        <translation>Δοκιμή</translation>
+    </message>
+    <message>
+        <source>Testing…</source>
+        <translation>Δοκιμή σε εξέλιξη…</translation>
+    </message>
+    <message>
+        <source>The MCP server could not start: {}</source>
+        <translation>Δεν ήταν δυνατή η εκκίνηση του διακομιστή MCP: {}</translation>
+    </message>
+    <message>
+        <source>The agent can search the sources ticked here. Your searches, and what the agent passes to a connector, are sent to them; a layer added from them is read from their servers.</source>
+        <translation>Ο πράκτορας μπορεί να αναζητήσει στις πηγές που είναι επιλεγμένες εδώ. Οι αναζητήσεις σας και ό,τι περνά ο πράκτορας σε έναν συνδέτη στέλνονται σε αυτές· ένα επίπεδο που προστίθεται από αυτές διαβάζεται από τους διακομιστές τους.</translation>
+    </message>
+    <message>
+        <source>The agent sends your request, the names of your layers and fields, your filter expressions and the results of its tools to the provider chosen here, under that provider's terms. Without the option below, the agent does not read the values of your fields; values already written in your filters and favorites are still sent. The conversation is kept on this computer for each project, until you start a new one.</source>
+        <translation>Ο πράκτορας στέλνει το αίτημά σας, τα ονόματα των επιπέδων και των πεδίων σας, τις εκφράσεις φίλτρων σας και τα αποτελέσματα των εργαλείων του στον πάροχο που επιλέχθηκε εδώ, σύμφωνα με τους όρους αυτού του παρόχου. Χωρίς την παρακάτω επιλογή, ο πράκτορας δεν διαβάζει τις τιμές των πεδίων σας· οι τιμές που είναι ήδη γραμμένες στα φίλτρα και στα αγαπημένα σας στέλνονται παρ' όλα αυτά. Η συνομιλία διατηρείται σε αυτόν τον υπολογιστή για κάθε έργο, μέχρι να ξεκινήσετε νέα.</translation>
+    </message>
+    <message>
+        <source>Through mcp-remote, which needs Node.js: Claude Desktop starts local servers as programs.</source>
+        <translation>Μέσω του mcp-remote, που απαιτεί Node.js: το Claude Desktop εκκινεί τους τοπικούς διακομιστές ως προγράμματα.</translation>
+    </message>
+    <message>
+        <source>Too many sources added: remove one first.</source>
+        <translation>Έχουν προστεθεί πάρα πολλές πηγές: αφαιρέστε πρώτα μία.</translation>
+    </message>
+    <message>
+        <source>Undo the last</source>
+        <translation>Αναίρεση του τελευταίου</translation>
+    </message>
+    <message>
+        <source>Undo this turn</source>
+        <translation>Αναίρεση αυτού του γύρου</translation>
+    </message>
+    <message>
+        <source>What do you want to filter?</source>
+        <translation>Τι θέλετε να φιλτράρετε;</translation>
+    </message>
+    <message>
+        <source>added by you</source>
+        <translation>προστέθηκε από εσάς</translation>
+    </message>
+    <message>
+        <source>applied</source>
+        <translation>εφαρμόστηκε</translation>
+    </message>
+    <message>
+        <source>community</source>
+        <translation>κοινοτικό</translation>
+    </message>
+    <message>
+        <source>https://... or a portal address</source>
+        <translation>https://... ή διεύθυνση πύλης</translation>
+    </message>
+    <message>
+        <source>no change</source>
+        <translation>καμία αλλαγή</translation>
+    </message>
+    <message>
+        <source>official</source>
+        <translation>επίσημο</translation>
+    </message>
+    <message>
+        <source>this computer</source>
+        <translation>αυτός ο υπολογιστής</translation>
+    </message>
+    <message>
+        <source>undone</source>
+        <translation>αναιρέθηκε</translation>
+    </message>
+    <message>
+        <source>{} turn(s)</source>
+        <translation>Γύροι: {}</translation>
+    </message>
+    <message>
+        <source>Which layers are in this project?</source>
+        <translation>Ποια επίπεδα περιέχει αυτό το έργο;</translation>
+    </message>
+    <message>
+        <source>Keep the buildings taller than 15 m</source>
+        <translation>Διατήρηση των κτιρίων με ύψος άνω των 15 m</translation>
+    </message>
+    <message>
+        <source>Filter the roads inside the selected feature</source>
+        <translation>Φιλτράρισμα των δρόμων μέσα στην επιλεγμένη οντότητα</translation>
+    </message>
+</context>
+<context>
+    <name>AgentChat</name>
+    <message>
+        <source>Access to the free quota was renewed: send your request again.</source>
+        <translation>Η πρόσβαση στη δωρεάν ποσόστωση ανανεώθηκε: στείλτε ξανά το αίτημά σας.</translation>
+    </message>
+    <message>
+        <source>Another application is changing the project: try again in a moment.</source>
+        <translation>Άλλη εφαρμογή τροποποιεί το έργο: δοκιμάστε ξανά σε λίγο.</translation>
+    </message>
+    <message>
+        <source>Another application: {}</source>
+        <translation>Άλλη εφαρμογή: {}</translation>
+    </message>
+    <message>
+        <source>Applied again: {}.</source>
+        <translation>Εφαρμόστηκε ξανά: {}.</translation>
+    </message>
+    <message>
+        <source>Changed since, left as is: {}.</source>
+        <translation>Τροποποιήθηκε από τότε, αφέθηκε ως έχει: {}.</translation>
+    </message>
+    <message>
+        <source>Changed: {}.</source>
+        <translation>Τροποποιήθηκε: {}.</translation>
+    </message>
+    <message>
+        <source>Choose a model and agree to send your data to use the agent.</source>
+        <translation>Επιλέξτε ένα μοντέλο και αποδεχτείτε την αποστολή των δεδομένων σας για να χρησιμοποιήσετε τον πράκτορα.</translation>
+    </message>
+    <message>
+        <source>Connecting to {}…</source>
+        <translation>Σύνδεση με {}…</translation>
+    </message>
+    <message>
+        <source>Earlier conversation: the agent starts afresh from here.</source>
+        <translation>Προηγούμενη συνομιλία: ο πράκτορας ξεκινά από την αρχή από εδώ.</translation>
+    </message>
+    <message>
+        <source>Enter your API key in the agent settings.</source>
+        <translation>Εισαγάγετε το κλειδί API σας στις ρυθμίσεις του πράκτορα.</translation>
+    </message>
+    <message>
+        <source>Export of {}</source>
+        <translation>Εξαγωγή του {}</translation>
+    </message>
+    <message>
+        <source>Favorite applied</source>
+        <translation>Το αγαπημένο εφαρμόστηκε</translation>
+    </message>
+    <message>
+        <source>Filter on the points of {}</source>
+        <translation>Φίλτρο στα σημεία του {}</translation>
+    </message>
+    <message>
+        <source>Filter on {}</source>
+        <translation>Φίλτρο στο {}</translation>
+    </message>
+    <message>
+        <source>Filter on {} by an area</source>
+        <translation>Φίλτρο στο {} με βάση μια ζώνη</translation>
+    </message>
+    <message>
+        <source>Filter on {} by {}</source>
+        <translation>Φίλτρο στο {} με βάση: {}</translation>
+    </message>
+    <message>
+        <source>FilterMate agent</source>
+        <translation>Πράκτορας FilterMate</translation>
+    </message>
+    <message>
+        <source>Filters removed from {}</source>
+        <translation>Τα φίλτρα αφαιρέθηκαν από το {}</translation>
+    </message>
+    <message>
+        <source>Hidden: {}</source>
+        <translation>Κρυμμένο: {}</translation>
+    </message>
+    <message>
+        <source>It answers.</source>
+        <translation>Η πηγή απαντά.</translation>
+    </message>
+    <message>
+        <source>Layer added: {}</source>
+        <translation>Προστέθηκε επίπεδο: {}</translation>
+    </message>
+    <message>
+        <source>Layers removed: {}</source>
+        <translation>Αφαιρέθηκαν επίπεδα: {}</translation>
+    </message>
+    <message>
+        <source>Not reachable for this conversation: {}</source>
+        <translation>Μη προσβάσιμο για αυτή τη συνομιλία: {}</translation>
+    </message>
+    <message>
+        <source>Nothing to redo.</source>
+        <translation>Τίποτα για επανάληψη.</translation>
+    </message>
+    <message>
+        <source>Nothing to restore.</source>
+        <translation>Τίποτα για επαναφορά.</translation>
+    </message>
+    <message>
+        <source>Reading the active filters</source>
+        <translation>Ανάγνωση των ενεργών φίλτρων</translation>
+    </message>
+    <message>
+        <source>Reading the favorites</source>
+        <translation>Ανάγνωση των αγαπημένων</translation>
+    </message>
+    <message>
+        <source>Reading the fields of {}</source>
+        <translation>Ανάγνωση των πεδίων του {}</translation>
+    </message>
+    <message>
+        <source>Reading the layers</source>
+        <translation>Ανάγνωση των επιπέδων</translation>
+    </message>
+    <message>
+        <source>Reading the map</source>
+        <translation>Ανάγνωση του χάρτη</translation>
+    </message>
+    <message>
+        <source>Reading the values of {}</source>
+        <translation>Ανάγνωση των τιμών του {}</translation>
+    </message>
+    <message>
+        <source>Restored: {}.</source>
+        <translation>Επαναφέρθηκε: {}.</translation>
+    </message>
+    <message>
+        <source>Searching satellite imagery on {}</source>
+        <translation>Αναζήτηση δορυφορικών εικόνων στο {}</translation>
+    </message>
+    <message>
+        <source>Searching {} for {}</source>
+        <translation>Αναζήτηση στο {}: {}</translation>
+    </message>
+    <message>
+        <source>Selection cleared on {}</source>
+        <translation>Η επιλογή καθαρίστηκε στο {}</translation>
+    </message>
+    <message>
+        <source>Selection on {}</source>
+        <translation>Επιλογή στο {}</translation>
+    </message>
+    <message>
+        <source>Shown: {}</source>
+        <translation>Εμφανίζεται: {}</translation>
+    </message>
+    <message>
+        <source>Stopped.</source>
+        <translation>Διακόπηκε.</translation>
+    </message>
+    <message>
+        <source>The MCP server could not start: {}</source>
+        <translation>Δεν ήταν δυνατή η εκκίνηση του διακομιστή MCP: {}</translation>
+    </message>
+    <message>
+        <source>The QGIS authentication database is not available.</source>
+        <translation>Η βάση δεδομένων ταυτοποίησης του QGIS δεν είναι διαθέσιμη.</translation>
+    </message>
+    <message>
+        <source>The QGIS master password is needed to use the stored key.</source>
+        <translation>Ο κύριος κωδικός πρόσβασης του QGIS απαιτείται για τη χρήση του αποθηκευμένου κλειδιού.</translation>
+    </message>
+    <message>
+        <source>The agent stopped before the end ({}).</source>
+        <translation>Ο πράκτορας σταμάτησε πριν από το τέλος ({}).</translation>
+    </message>
+    <message>
+        <source>The agent wants to add this layer of a web service to the project:
+{} · {}
+
+Do you agree?</source>
+        <translation>Ο πράκτορας θέλει να προσθέσει στο έργο αυτό το επίπεδο μιας υπηρεσίας ιστού:
+{} · {}
+
+Συμφωνείτε;</translation>
+    </message>
+    <message>
+        <source>The agent wants to add this layer to the project:
+{}
+
+A remote source is read from its server by QGIS, and what the layer holds can be sent to the provider of the agent. Do you agree?</source>
+        <translation>Ο πράκτορας θέλει να προσθέσει στο έργο αυτό το επίπεδο:
+{}
+
+Μια απομακρυσμένη πηγή διαβάζεται από το QGIS στον διακομιστή της και το περιεχόμενο του επιπέδου μπορεί να σταλεί στον πάροχο του πράκτορα. Συμφωνείτε;</translation>
+    </message>
+    <message>
+        <source>The agent wants to export these layers to files:
+{}
+
+Do you agree?</source>
+        <translation>Ο πράκτορας θέλει να εξαγάγει αυτά τα επίπεδα σε αρχεία:
+{}
+
+Συμφωνείτε;</translation>
+    </message>
+    <message>
+        <source>The agent wants to remove these layers from the project (their files stay, their styles and filters here are lost):
+{}
+
+Do you agree?</source>
+        <translation>Ο πράκτορας θέλει να αφαιρέσει αυτά τα επίπεδα από το έργο (τα αρχεία τους παραμένουν, τα στυλ και τα φίλτρα τους εδώ χάνονται):
+{}
+
+Συμφωνείτε;</translation>
+    </message>
+    <message>
+        <source>The agent wants to run this action on an external connector:
+{}
+{}
+
+Do you agree?</source>
+        <translation>Ο πράκτορας θέλει να εκτελέσει αυτή την ενέργεια σε έναν εξωτερικό συνδέτη:
+{}
+{}
+
+Συμφωνείτε;</translation>
+    </message>
+    <message>
+        <source>The credit or quota of this account is used up.</source>
+        <translation>Η πίστωση ή η ποσόστωση αυτού του λογαριασμού έχει εξαντληθεί.</translation>
+    </message>
+    <message>
+        <source>The free quota could not be reached: {}</source>
+        <translation>Η δωρεάν ποσόστωση δεν ήταν προσβάσιμη: {}</translation>
+    </message>
+    <message>
+        <source>The free quota is not available.</source>
+        <translation>Η δωρεάν ποσόστωση δεν είναι διαθέσιμη.</translation>
+    </message>
+    <message>
+        <source>The free quota is unavailable for now.</source>
+        <translation>Η δωρεάν ποσόστωση δεν είναι διαθέσιμη προς το παρόν.</translation>
+    </message>
+    <message>
+        <source>The free quota is used up for this month. Enter your own API key in the agent settings.</source>
+        <translation>Η δωρεάν ποσόστωση εξαντλήθηκε για αυτόν τον μήνα. Εισαγάγετε το δικό σας κλειδί API στις ρυθμίσεις του πράκτορα.</translation>
+    </message>
+    <message>
+        <source>The key could not be stored.</source>
+        <translation>Δεν ήταν δυνατή η αποθήκευση του κλειδιού.</translation>
+    </message>
+    <message>
+        <source>The provider could not be reached: {}</source>
+        <translation>Ο πάροχος δεν ήταν προσβάσιμος: {}</translation>
+    </message>
+    <message>
+        <source>The provider refused the API key: check it in the agent settings.</source>
+        <translation>Ο πάροχος απέρριψε το κλειδί API: ελέγξτε το στις ρυθμίσεις του πράκτορα.</translation>
+    </message>
+    <message>
+        <source>The provider reported a problem: {}</source>
+        <translation>Ο πάροχος ανέφερε πρόβλημα: {}</translation>
+    </message>
+    <message>
+        <source>The stored key could not be read.</source>
+        <translation>Δεν ήταν δυνατή η ανάγνωση του αποθηκευμένου κλειδιού.</translation>
+    </message>
+    <message>
+        <source>Thinking…</source>
+        <translation>Σκέψη…</translation>
+    </message>
+    <message>
+        <source>Too many new accounts from this address today: try again tomorrow, or enter your own API key.</source>
+        <translation>Πάρα πολλοί νέοι λογαριασμοί από αυτή τη διεύθυνση σήμερα: δοκιμάστε ξανά αύριο ή εισαγάγετε το δικό σας κλειδί API.</translation>
+    </message>
+    <message>
+        <source>Too many requests for now: try again in a moment.</source>
+        <translation>Πάρα πολλά αιτήματα προς το παρόν: δοκιμάστε ξανά σε λίγο.</translation>
+    </message>
+    <message>
+        <source>Trying a filter on {}</source>
+        <translation>Δοκιμή φίλτρου στο {}</translation>
+    </message>
+    <message>
+        <source>Zoom on {}</source>
+        <translation>Εστίαση στο {}</translation>
+    </message>
+    <message>
+        <source>an area</source>
+        <translation>μια ζώνη</translation>
+    </message>
+    <message>
+        <source>everything</source>
+        <translation>όλα</translation>
+    </message>
+    <message>
+        <source>{} tools available</source>
+        <translation>{} διαθέσιμα εργαλεία</translation>
+    </message>
+</context>
 </TS>

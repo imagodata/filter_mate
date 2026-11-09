@@ -7758,4 +7758,574 @@ Ga želite zdaj namestiti iz PyPI s pip v svoj profil QGIS? Python programa QGIS
         <translation type="obsolete">Ohranjene točke</translation>
     </message>
 </context>
+<context>
+    <name>AgentPanel</name>
+    <message>
+        <source>(no request)</source>
+        <translation>(brez zahteve)</translation>
+    </message>
+    <message>
+        <source>A few free requests a month, through the relay of FilterMate to Claude (Anthropic), under the terms of Anthropic. The relay counts what is spent and keeps no conversation. When it is used up, choose a provider and enter your own API key.</source>
+        <translation>Nekaj brezplačnih zahtev na mesec prek releja FilterMate do Claude (Anthropic), pod pogoji družbe Anthropic. Rele šteje porabo in ne hrani nobenega pogovora. Ko je kvota porabljena, izberite ponudnika in vnesite svoj ključ API.</translation>
+    </message>
+    <message>
+        <source>API key</source>
+        <translation>Ključ API</translation>
+    </message>
+    <message>
+        <source>Add</source>
+        <translation>Dodaj</translation>
+    </message>
+    <message>
+        <source>Address</source>
+        <translation>Naslov</translation>
+    </message>
+    <message>
+        <source>Agent settings</source>
+        <translation>Nastavitve agenta</translation>
+    </message>
+    <message>
+        <source>Allow attribute values to be sent</source>
+        <translation>Dovoli pošiljanje vrednosti atributov</translation>
+    </message>
+    <message>
+        <source>Applications already set up will have to be set up again.</source>
+        <translation>Že nastavljene aplikacije bo treba nastaviti znova.</translation>
+    </message>
+    <message>
+        <source>Ask the agent to filter your layers</source>
+        <translation>Prosite agenta, naj filtrira vaše plasti</translation>
+    </message>
+    <message>
+        <source>Back to the conversation</source>
+        <translation>Nazaj na pogovor</translation>
+    </message>
+    <message>
+        <source>Claude Code or another MCP client on this computer can then filter your layers, once FilterMate has been opened, under the rules of this panel: the same sources, the same confirmations, and filters can be undone here. That application sends what it reads to its own AI provider.</source>
+        <translation>Claude Code ali drug odjemalec MCP na tem računalniku lahko nato filtrira vaše plasti, ko je FilterMate odprt, po pravilih te plošče: isti viri, ista potrditev, filtre pa je tu mogoče razveljaviti. Ta aplikacija prebrano pošilja svojemu ponudniku UI.</translation>
+    </message>
+    <message>
+        <source>Connect an AI provider to start. Nothing is sent before you agree.</source>
+        <translation>Za začetek povežite ponudnika UI. Brez vašega soglasja se ne pošlje nič.</translation>
+    </message>
+    <message>
+        <source>Copied, with the access token: keep it to yourself. Save these settings for it to apply.</source>
+        <translation>Kopirano z dostopnim žetonom: obdržite ga zase. Shranite te nastavitve, da se uveljavijo.</translation>
+    </message>
+    <message>
+        <source>Copy for Claude Desktop</source>
+        <translation>Kopiraj za Claude Desktop</translation>
+    </message>
+    <message>
+        <source>Copy the Claude Code command</source>
+        <translation>Kopiraj ukaz Claude Code</translation>
+    </message>
+    <message>
+        <source>Copy the configuration</source>
+        <translation>Kopiraj konfiguracijo</translation>
+    </message>
+    <message>
+        <source>Describe it in your own words. Each filter can be undone.</source>
+        <translation>Opišite to s svojimi besedami. Vsak filter je mogoče razveljaviti.</translation>
+    </message>
+    <message>
+        <source>Filter your layers from a sentence</source>
+        <translation>Filtrirajte plasti z enim stavkom</translation>
+    </message>
+    <message>
+        <source>FilterMate agent</source>
+        <translation>Agent FilterMate</translation>
+    </message>
+    <message>
+        <source>History</source>
+        <translation>Zgodovina</translation>
+    </message>
+    <message>
+        <source>History…</source>
+        <translation>Zgodovina…</translation>
+    </message>
+    <message>
+        <source>I agree to send this data to this provider</source>
+        <translation>Strinjam se s pošiljanjem teh podatkov temu ponudniku</translation>
+    </message>
+    <message>
+        <source>Let other applications on this computer drive FilterMate (MCP server)</source>
+        <translation>Dovoli drugim aplikacijam na tem računalniku upravljanje FilterMate (strežnik MCP)</translation>
+    </message>
+    <message>
+        <source>MCP connector</source>
+        <translation>Povezovalnik MCP</translation>
+    </message>
+    <message>
+        <source>MCP connectors</source>
+        <translation>Povezovalniki MCP</translation>
+    </message>
+    <message>
+        <source>Model</source>
+        <translation>Model</translation>
+    </message>
+    <message>
+        <source>More</source>
+        <translation>Več</translation>
+    </message>
+    <message>
+        <source>New access token</source>
+        <translation>Nov dostopni žeton</translation>
+    </message>
+    <message>
+        <source>New conversation</source>
+        <translation>Nov pogovor</translation>
+    </message>
+    <message>
+        <source>New token: it applies once these settings are saved.</source>
+        <translation>Nov žeton: uveljavi se, ko so te nastavitve shranjene.</translation>
+    </message>
+    <message>
+        <source>Open data platforms</source>
+        <translation>Platforme odprtih podatkov</translation>
+    </message>
+    <message>
+        <source>Open the settings</source>
+        <translation>Odpri nastavitve</translation>
+    </message>
+    <message>
+        <source>Other applications</source>
+        <translation>Druge aplikacije</translation>
+    </message>
+    <message>
+        <source>Port</source>
+        <translation>Vrata</translation>
+    </message>
+    <message>
+        <source>Provider</source>
+        <translation>Ponudnik</translation>
+    </message>
+    <message>
+        <source>Redo</source>
+        <translation>Ponovi</translation>
+    </message>
+    <message>
+        <source>Remove</source>
+        <translation>Odstrani</translation>
+    </message>
+    <message>
+        <source>Remove the stored key</source>
+        <translation>Odstrani shranjeni ključ</translation>
+    </message>
+    <message>
+        <source>Satellite imagery</source>
+        <translation>Satelitski posnetki</translation>
+    </message>
+    <message>
+        <source>Send (Enter)</source>
+        <translation>Pošlji (Enter)</translation>
+    </message>
+    <message>
+        <source>Send again</source>
+        <translation>Pošlji znova</translation>
+    </message>
+    <message>
+        <source>Sent to: {}</source>
+        <translation>Poslano na: {}</translation>
+    </message>
+    <message>
+        <source>Set up the agent</source>
+        <translation>Nastavi agenta</translation>
+    </message>
+    <message>
+        <source>Sources</source>
+        <translation>Viri</translation>
+    </message>
+    <message>
+        <source>Stop (Esc)</source>
+        <translation>Ustavi (Esc)</translation>
+    </message>
+    <message>
+        <source>Stored: leave empty to keep it</source>
+        <translation>Shranjen: pustite prazno, če ga želite obdržati</translation>
+    </message>
+    <message>
+        <source>Test</source>
+        <translation>Preizkusi</translation>
+    </message>
+    <message>
+        <source>Testing…</source>
+        <translation>Preizkušanje…</translation>
+    </message>
+    <message>
+        <source>The MCP server could not start: {}</source>
+        <translation>Strežnika MCP ni bilo mogoče zagnati: {}</translation>
+    </message>
+    <message>
+        <source>The agent can search the sources ticked here. Your searches, and what the agent passes to a connector, are sent to them; a layer added from them is read from their servers.</source>
+        <translation>Agent lahko išče po tu označenih virih. Vaša iskanja in to, kar agent posreduje povezovalniku, se jim pošljejo; plast, dodana iz njih, se bere z njihovih strežnikov.</translation>
+    </message>
+    <message>
+        <source>The agent sends your request, the names of your layers and fields, your filter expressions and the results of its tools to the provider chosen here, under that provider's terms. Without the option below, the agent does not read the values of your fields; values already written in your filters and favorites are still sent. The conversation is kept on this computer for each project, until you start a new one.</source>
+        <translation>Agent pošilja vašo zahtevo, imena vaših plasti in polj, vaše filtrirne izraze in rezultate svojih orodij ponudniku, izbranemu tu, pod pogoji tega ponudnika. Brez spodnje možnosti agent ne bere vrednosti vaših polj; vrednosti, ki so že zapisane v vaših filtrih in priljubljenih, se še vedno pošljejo. Pogovor se hrani na tem računalniku za vsak projekt, dokler ne začnete novega.</translation>
+    </message>
+    <message>
+        <source>Through mcp-remote, which needs Node.js: Claude Desktop starts local servers as programs.</source>
+        <translation>Prek mcp-remote, ki zahteva Node.js: Claude Desktop lokalne strežnike zažene kot programe.</translation>
+    </message>
+    <message>
+        <source>Too many sources added: remove one first.</source>
+        <translation>Dodanih je preveč virov: najprej enega odstranite.</translation>
+    </message>
+    <message>
+        <source>Undo the last</source>
+        <translation>Razveljavi zadnjega</translation>
+    </message>
+    <message>
+        <source>Undo this turn</source>
+        <translation>Razveljavi ta krog</translation>
+    </message>
+    <message>
+        <source>What do you want to filter?</source>
+        <translation>Kaj želite filtrirati?</translation>
+    </message>
+    <message>
+        <source>added by you</source>
+        <translation>dodali ste</translation>
+    </message>
+    <message>
+        <source>applied</source>
+        <translation>uporabljeno</translation>
+    </message>
+    <message>
+        <source>community</source>
+        <translation>skupnostni</translation>
+    </message>
+    <message>
+        <source>https://... or a portal address</source>
+        <translation>https://... ali naslov portala</translation>
+    </message>
+    <message>
+        <source>no change</source>
+        <translation>brez sprememb</translation>
+    </message>
+    <message>
+        <source>official</source>
+        <translation>uradni</translation>
+    </message>
+    <message>
+        <source>this computer</source>
+        <translation>ta računalnik</translation>
+    </message>
+    <message>
+        <source>undone</source>
+        <translation>razveljavljeno</translation>
+    </message>
+    <message>
+        <source>{} turn(s)</source>
+        <translation>Krogi: {}</translation>
+    </message>
+    <message>
+        <source>Which layers are in this project?</source>
+        <translation>Katere plasti vsebuje ta projekt?</translation>
+    </message>
+    <message>
+        <source>Keep the buildings taller than 15 m</source>
+        <translation>Obdrži stavbe, višje od 15 m</translation>
+    </message>
+    <message>
+        <source>Filter the roads inside the selected feature</source>
+        <translation>Filtriraj ceste znotraj izbranega objekta</translation>
+    </message>
+</context>
+<context>
+    <name>AgentChat</name>
+    <message>
+        <source>Access to the free quota was renewed: send your request again.</source>
+        <translation>Dostop do brezplačne kvote je bil obnovljen: ponovno pošljite zahtevo.</translation>
+    </message>
+    <message>
+        <source>Another application is changing the project: try again in a moment.</source>
+        <translation>Druga aplikacija spreminja projekt: poskusite znova čez trenutek.</translation>
+    </message>
+    <message>
+        <source>Another application: {}</source>
+        <translation>Druga aplikacija: {}</translation>
+    </message>
+    <message>
+        <source>Applied again: {}.</source>
+        <translation>Ponovno uporabljeno: {}.</translation>
+    </message>
+    <message>
+        <source>Changed since, left as is: {}.</source>
+        <translation>Vmes spremenjeno, pustjeno kot je: {}.</translation>
+    </message>
+    <message>
+        <source>Changed: {}.</source>
+        <translation>Spremenjeno: {}.</translation>
+    </message>
+    <message>
+        <source>Choose a model and agree to send your data to use the agent.</source>
+        <translation>Za uporabo agenta izberite model in privolite v pošiljanje svojih podatkov.</translation>
+    </message>
+    <message>
+        <source>Connecting to {}…</source>
+        <translation>Povezovanje z {}…</translation>
+    </message>
+    <message>
+        <source>Earlier conversation: the agent starts afresh from here.</source>
+        <translation>Prejšnji pogovor: agent tu začne znova.</translation>
+    </message>
+    <message>
+        <source>Enter your API key in the agent settings.</source>
+        <translation>Vnesite svoj ključ API v nastavitvah agenta.</translation>
+    </message>
+    <message>
+        <source>Export of {}</source>
+        <translation>Izvoz {}</translation>
+    </message>
+    <message>
+        <source>Favorite applied</source>
+        <translation>Priljubljeni uporabljen</translation>
+    </message>
+    <message>
+        <source>Filter on the points of {}</source>
+        <translation>Filter na točkah {}</translation>
+    </message>
+    <message>
+        <source>Filter on {}</source>
+        <translation>Filter na {}</translation>
+    </message>
+    <message>
+        <source>Filter on {} by an area</source>
+        <translation>Filter na {} po območju</translation>
+    </message>
+    <message>
+        <source>Filter on {} by {}</source>
+        <translation>Filter na {} po {}</translation>
+    </message>
+    <message>
+        <source>FilterMate agent</source>
+        <translation>Agent FilterMate</translation>
+    </message>
+    <message>
+        <source>Filters removed from {}</source>
+        <translation>Filtri odstranjeni iz {}</translation>
+    </message>
+    <message>
+        <source>Hidden: {}</source>
+        <translation>Skrito: {}</translation>
+    </message>
+    <message>
+        <source>It answers.</source>
+        <translation>Vir odgovarja.</translation>
+    </message>
+    <message>
+        <source>Layer added: {}</source>
+        <translation>Plast dodana: {}</translation>
+    </message>
+    <message>
+        <source>Layers removed: {}</source>
+        <translation>Plasti odstranjene: {}</translation>
+    </message>
+    <message>
+        <source>Not reachable for this conversation: {}</source>
+        <translation>Za ta pogovor nedosegljivo: {}</translation>
+    </message>
+    <message>
+        <source>Nothing to redo.</source>
+        <translation>Ni česa ponoviti.</translation>
+    </message>
+    <message>
+        <source>Nothing to restore.</source>
+        <translation>Ni česa obnoviti.</translation>
+    </message>
+    <message>
+        <source>Reading the active filters</source>
+        <translation>Branje aktivnih filtrov</translation>
+    </message>
+    <message>
+        <source>Reading the favorites</source>
+        <translation>Branje priljubljenih</translation>
+    </message>
+    <message>
+        <source>Reading the fields of {}</source>
+        <translation>Branje polj plasti {}</translation>
+    </message>
+    <message>
+        <source>Reading the layers</source>
+        <translation>Branje plasti</translation>
+    </message>
+    <message>
+        <source>Reading the map</source>
+        <translation>Branje zemljevida</translation>
+    </message>
+    <message>
+        <source>Reading the values of {}</source>
+        <translation>Branje vrednosti {}</translation>
+    </message>
+    <message>
+        <source>Restored: {}.</source>
+        <translation>Obnovljeno: {}.</translation>
+    </message>
+    <message>
+        <source>Searching satellite imagery on {}</source>
+        <translation>Iskanje satelitskih posnetkov v {}</translation>
+    </message>
+    <message>
+        <source>Searching {} for {}</source>
+        <translation>Iskanje v {}: {}</translation>
+    </message>
+    <message>
+        <source>Selection cleared on {}</source>
+        <translation>Izbor počiščen na {}</translation>
+    </message>
+    <message>
+        <source>Selection on {}</source>
+        <translation>Izbor na {}</translation>
+    </message>
+    <message>
+        <source>Shown: {}</source>
+        <translation>Prikazano: {}</translation>
+    </message>
+    <message>
+        <source>Stopped.</source>
+        <translation>Ustavljeno.</translation>
+    </message>
+    <message>
+        <source>The MCP server could not start: {}</source>
+        <translation>Strežnika MCP ni bilo mogoče zagnati: {}</translation>
+    </message>
+    <message>
+        <source>The QGIS authentication database is not available.</source>
+        <translation>Overitvena zbirka podatkov QGIS ni na voljo.</translation>
+    </message>
+    <message>
+        <source>The QGIS master password is needed to use the stored key.</source>
+        <translation>Za uporabo shranjenega ključa je potrebno glavno geslo QGIS.</translation>
+    </message>
+    <message>
+        <source>The agent stopped before the end ({}).</source>
+        <translation>Agent se je ustavil pred koncem ({}).</translation>
+    </message>
+    <message>
+        <source>The agent wants to add this layer of a web service to the project:
+{} · {}
+
+Do you agree?</source>
+        <translation>Agent želi projektu dodati to plast spletne storitve:
+{} · {}
+
+Se strinjate?</translation>
+    </message>
+    <message>
+        <source>The agent wants to add this layer to the project:
+{}
+
+A remote source is read from its server by QGIS, and what the layer holds can be sent to the provider of the agent. Do you agree?</source>
+        <translation>Agent želi projektu dodati to plast:
+{}
+
+QGIS oddaljen vir bere z njegovega strežnika, vsebina plasti pa se lahko pošlje ponudniku agenta. Se strinjate?</translation>
+    </message>
+    <message>
+        <source>The agent wants to export these layers to files:
+{}
+
+Do you agree?</source>
+        <translation>Agent želi te plasti izvoziti v datoteke:
+{}
+
+Se strinjate?</translation>
+    </message>
+    <message>
+        <source>The agent wants to remove these layers from the project (their files stay, their styles and filters here are lost):
+{}
+
+Do you agree?</source>
+        <translation>Agent želi te plasti odstraniti iz projekta (njihove datoteke ostanejo, njihovi slogi in filtri tu pa se izgubijo):
+{}
+
+Se strinjate?</translation>
+    </message>
+    <message>
+        <source>The agent wants to run this action on an external connector:
+{}
+{}
+
+Do you agree?</source>
+        <translation>Agent želi izvesti to dejanje na zunanjem povezovalniku:
+{}
+{}
+
+Se strinjate?</translation>
+    </message>
+    <message>
+        <source>The credit or quota of this account is used up.</source>
+        <translation>Kredit ali kvota tega računa je porabljena.</translation>
+    </message>
+    <message>
+        <source>The free quota could not be reached: {}</source>
+        <translation>Brezplačne kvote ni bilo mogoče doseči: {}</translation>
+    </message>
+    <message>
+        <source>The free quota is not available.</source>
+        <translation>Brezplačna kvota ni na voljo.</translation>
+    </message>
+    <message>
+        <source>The free quota is unavailable for now.</source>
+        <translation>Brezplačna kvota trenutno ni na voljo.</translation>
+    </message>
+    <message>
+        <source>The free quota is used up for this month. Enter your own API key in the agent settings.</source>
+        <translation>Brezplačna kvota je za ta mesec porabljena. Vnesite svoj ključ API v nastavitvah agenta.</translation>
+    </message>
+    <message>
+        <source>The key could not be stored.</source>
+        <translation>Ključa ni bilo mogoče shraniti.</translation>
+    </message>
+    <message>
+        <source>The provider could not be reached: {}</source>
+        <translation>Ponudnika ni bilo mogoče doseči: {}</translation>
+    </message>
+    <message>
+        <source>The provider refused the API key: check it in the agent settings.</source>
+        <translation>Ponudnik je zavrnil ključ API: preverite ga v nastavitvah agenta.</translation>
+    </message>
+    <message>
+        <source>The provider reported a problem: {}</source>
+        <translation>Ponudnik je sporočil težavo: {}</translation>
+    </message>
+    <message>
+        <source>The stored key could not be read.</source>
+        <translation>Shranjenega ključa ni bilo mogoče prebrati.</translation>
+    </message>
+    <message>
+        <source>Thinking…</source>
+        <translation>Razmišljanje…</translation>
+    </message>
+    <message>
+        <source>Too many new accounts from this address today: try again tomorrow, or enter your own API key.</source>
+        <translation>Danes je bilo s tega naslova ustvarjenih preveč novih računov: poskusite jutri ali vnesite svoj ključ API.</translation>
+    </message>
+    <message>
+        <source>Too many requests for now: try again in a moment.</source>
+        <translation>Trenutno je preveč zahtev: poskusite znova čez trenutek.</translation>
+    </message>
+    <message>
+        <source>Trying a filter on {}</source>
+        <translation>Preizkušanje filtra na {}</translation>
+    </message>
+    <message>
+        <source>Zoom on {}</source>
+        <translation>Povečaj na {}</translation>
+    </message>
+    <message>
+        <source>an area</source>
+        <translation>območje</translation>
+    </message>
+    <message>
+        <source>everything</source>
+        <translation>vse</translation>
+    </message>
+    <message>
+        <source>{} tools available</source>
+        <translation>Razpoložljiva orodja: {}</translation>
+    </message>
+</context>
 </TS>

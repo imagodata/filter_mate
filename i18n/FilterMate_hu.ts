@@ -7758,4 +7758,574 @@ Telepíti most a PyPI-ról pip segítségével a QGIS-profiljába? A QGIS Python
         <translation type="obsolete">Megtartott pontok</translation>
     </message>
 </context>
+<context>
+    <name>AgentPanel</name>
+    <message>
+        <source>(no request)</source>
+        <translation>(nincs kérés)</translation>
+    </message>
+    <message>
+        <source>A few free requests a month, through the relay of FilterMate to Claude (Anthropic), under the terms of Anthropic. The relay counts what is spent and keeps no conversation. When it is used up, choose a provider and enter your own API key.</source>
+        <translation>Havonta néhány ingyenes kérés a FilterMate Claude (Anthropic) felé irányuló átjátszóján keresztül, az Anthropic feltételei szerint. Az átjátszó számolja a felhasznált mennyiséget, és nem őriz meg beszélgetést. A keret elfogyása után válasszon szolgáltatót, és adja meg saját API-kulcsát.</translation>
+    </message>
+    <message>
+        <source>API key</source>
+        <translation>API-kulcs</translation>
+    </message>
+    <message>
+        <source>Add</source>
+        <translation>Hozzáadás</translation>
+    </message>
+    <message>
+        <source>Address</source>
+        <translation>Cím</translation>
+    </message>
+    <message>
+        <source>Agent settings</source>
+        <translation>Az ügynök beállításai</translation>
+    </message>
+    <message>
+        <source>Allow attribute values to be sent</source>
+        <translation>Attribútumértékek küldésének engedélyezése</translation>
+    </message>
+    <message>
+        <source>Applications already set up will have to be set up again.</source>
+        <translation>A már beállított alkalmazásokat újra be kell állítani.</translation>
+    </message>
+    <message>
+        <source>Ask the agent to filter your layers</source>
+        <translation>Kérje meg az ügynököt a rétegei szűrésére</translation>
+    </message>
+    <message>
+        <source>Back to the conversation</source>
+        <translation>Vissza a beszélgetéshez</translation>
+    </message>
+    <message>
+        <source>Claude Code or another MCP client on this computer can then filter your layers, once FilterMate has been opened, under the rules of this panel: the same sources, the same confirmations, and filters can be undone here. That application sends what it reads to its own AI provider.</source>
+        <translation>A Claude Code vagy egy másik MCP-kliens ezen a számítógépen ekkor szűrheti a rétegeit, a FilterMate megnyitása után, a panel szabályai szerint: ugyanazok a források, ugyanazok a megerősítések, és a szűrők itt visszavonhatók. Ez az alkalmazás a beolvasottakat a saját MI-szolgáltatójának küldi.</translation>
+    </message>
+    <message>
+        <source>Connect an AI provider to start. Nothing is sent before you agree.</source>
+        <translation>A kezdéshez csatlakoztasson egy MI-szolgáltatót. Az Ön jóváhagyása nélkül semmi nem kerül elküldésre.</translation>
+    </message>
+    <message>
+        <source>Copied, with the access token: keep it to yourself. Save these settings for it to apply.</source>
+        <translation>Másolva a hozzáférési tokennel: tartsa titokban. Mentse el ezeket a beállításokat, hogy érvénybe lépjenek.</translation>
+    </message>
+    <message>
+        <source>Copy for Claude Desktop</source>
+        <translation>Másolás Claude Desktophoz</translation>
+    </message>
+    <message>
+        <source>Copy the Claude Code command</source>
+        <translation>A Claude Code parancs másolása</translation>
+    </message>
+    <message>
+        <source>Copy the configuration</source>
+        <translation>A konfiguráció másolása</translation>
+    </message>
+    <message>
+        <source>Describe it in your own words. Each filter can be undone.</source>
+        <translation>Írja le a saját szavaival. Minden szűrő visszavonható.</translation>
+    </message>
+    <message>
+        <source>Filter your layers from a sentence</source>
+        <translation>Szűrje a rétegeit egyetlen mondattal</translation>
+    </message>
+    <message>
+        <source>FilterMate agent</source>
+        <translation>FilterMate ügynök</translation>
+    </message>
+    <message>
+        <source>History</source>
+        <translation>Előzmények</translation>
+    </message>
+    <message>
+        <source>History…</source>
+        <translation>Előzmények…</translation>
+    </message>
+    <message>
+        <source>I agree to send this data to this provider</source>
+        <translation>Elfogadom, hogy ezeket az adatokat elküldik ennek a szolgáltatónak</translation>
+    </message>
+    <message>
+        <source>Let other applications on this computer drive FilterMate (MCP server)</source>
+        <translation>Engedélyezés, hogy a számítógép más alkalmazásai vezéreljék a FilterMate-et (MCP-kiszolgáló)</translation>
+    </message>
+    <message>
+        <source>MCP connector</source>
+        <translation>MCP-összekötő</translation>
+    </message>
+    <message>
+        <source>MCP connectors</source>
+        <translation>MCP-összekötők</translation>
+    </message>
+    <message>
+        <source>Model</source>
+        <translation>Modell</translation>
+    </message>
+    <message>
+        <source>More</source>
+        <translation>Több</translation>
+    </message>
+    <message>
+        <source>New access token</source>
+        <translation>Új hozzáférési token</translation>
+    </message>
+    <message>
+        <source>New conversation</source>
+        <translation>Új beszélgetés</translation>
+    </message>
+    <message>
+        <source>New token: it applies once these settings are saved.</source>
+        <translation>Új token: a beállítások mentése után lép érvénybe.</translation>
+    </message>
+    <message>
+        <source>Open data platforms</source>
+        <translation>Nyílt adatplatformok</translation>
+    </message>
+    <message>
+        <source>Open the settings</source>
+        <translation>Beállítások megnyitása</translation>
+    </message>
+    <message>
+        <source>Other applications</source>
+        <translation>Más alkalmazások</translation>
+    </message>
+    <message>
+        <source>Port</source>
+        <translation>Port</translation>
+    </message>
+    <message>
+        <source>Provider</source>
+        <translation>Szolgáltató</translation>
+    </message>
+    <message>
+        <source>Redo</source>
+        <translation>Újra</translation>
+    </message>
+    <message>
+        <source>Remove</source>
+        <translation>Eltávolítás</translation>
+    </message>
+    <message>
+        <source>Remove the stored key</source>
+        <translation>A tárolt kulcs törlése</translation>
+    </message>
+    <message>
+        <source>Satellite imagery</source>
+        <translation>Műholdfelvételek</translation>
+    </message>
+    <message>
+        <source>Send (Enter)</source>
+        <translation>Küldés (Enter)</translation>
+    </message>
+    <message>
+        <source>Send again</source>
+        <translation>Újraküldés</translation>
+    </message>
+    <message>
+        <source>Sent to: {}</source>
+        <translation>Elküldve ide: {}</translation>
+    </message>
+    <message>
+        <source>Set up the agent</source>
+        <translation>Az ügynök beállítása</translation>
+    </message>
+    <message>
+        <source>Sources</source>
+        <translation>Források</translation>
+    </message>
+    <message>
+        <source>Stop (Esc)</source>
+        <translation>Leállítás (Esc)</translation>
+    </message>
+    <message>
+        <source>Stored: leave empty to keep it</source>
+        <translation>Tárolva: hagyja üresen a megtartáshoz</translation>
+    </message>
+    <message>
+        <source>Test</source>
+        <translation>Teszt</translation>
+    </message>
+    <message>
+        <source>Testing…</source>
+        <translation>Tesztelés…</translation>
+    </message>
+    <message>
+        <source>The MCP server could not start: {}</source>
+        <translation>Az MCP-kiszolgálót nem sikerült elindítani: {}</translation>
+    </message>
+    <message>
+        <source>The agent can search the sources ticked here. Your searches, and what the agent passes to a connector, are sent to them; a layer added from them is read from their servers.</source>
+        <translation>Az ügynök az itt bejelölt forrásokban kereshet. A keresései, és amit az ügynök egy összekötőnek átad, elküldésre kerülnek nekik; a belőlük hozzáadott réteg a kiszolgálóikról kerül beolvasásra.</translation>
+    </message>
+    <message>
+        <source>The agent sends your request, the names of your layers and fields, your filter expressions and the results of its tools to the provider chosen here, under that provider's terms. Without the option below, the agent does not read the values of your fields; values already written in your filters and favorites are still sent. The conversation is kept on this computer for each project, until you start a new one.</source>
+        <translation>Az ügynök a kérését, a rétegei és mezői nevét, a szűrőkifejezéseit és az eszközei eredményeit elküldi az itt kiválasztott szolgáltatónak, annak feltételei szerint. Az alábbi beállítás nélkül az ügynök nem olvassa a mezői értékeit; a szűrőiben és kedvenceiben már szereplő értékek továbbra is elküldésre kerülnek. A beszélgetést ezen a számítógépen őrizzük projektenként, amíg újat nem kezd.</translation>
+    </message>
+    <message>
+        <source>Through mcp-remote, which needs Node.js: Claude Desktop starts local servers as programs.</source>
+        <translation>Az mcp-remote-on keresztül, amelyhez Node.js szükséges: a Claude Desktop a helyi kiszolgálókat programként indítja el.</translation>
+    </message>
+    <message>
+        <source>Too many sources added: remove one first.</source>
+        <translation>Túl sok forrás lett hozzáadva: először távolítson el egyet.</translation>
+    </message>
+    <message>
+        <source>Undo the last</source>
+        <translation>Az utolsó visszavonása</translation>
+    </message>
+    <message>
+        <source>Undo this turn</source>
+        <translation>Kör visszavonása</translation>
+    </message>
+    <message>
+        <source>What do you want to filter?</source>
+        <translation>Mit szeretne szűrni?</translation>
+    </message>
+    <message>
+        <source>added by you</source>
+        <translation>Ön által hozzáadva</translation>
+    </message>
+    <message>
+        <source>applied</source>
+        <translation>alkalmazva</translation>
+    </message>
+    <message>
+        <source>community</source>
+        <translation>közösségi</translation>
+    </message>
+    <message>
+        <source>https://... or a portal address</source>
+        <translation>https://... vagy egy portál címe</translation>
+    </message>
+    <message>
+        <source>no change</source>
+        <translation>nincs változás</translation>
+    </message>
+    <message>
+        <source>official</source>
+        <translation>hivatalos</translation>
+    </message>
+    <message>
+        <source>this computer</source>
+        <translation>ez a számítógép</translation>
+    </message>
+    <message>
+        <source>undone</source>
+        <translation>visszavonva</translation>
+    </message>
+    <message>
+        <source>{} turn(s)</source>
+        <translation>{} kör</translation>
+    </message>
+    <message>
+        <source>Which layers are in this project?</source>
+        <translation>Milyen rétegeket tartalmaz ez a projekt?</translation>
+    </message>
+    <message>
+        <source>Keep the buildings taller than 15 m</source>
+        <translation>A 15 m-nél magasabb épületek megtartása</translation>
+    </message>
+    <message>
+        <source>Filter the roads inside the selected feature</source>
+        <translation>A kijelölt elemen belüli utak szűrése</translation>
+    </message>
+</context>
+<context>
+    <name>AgentChat</name>
+    <message>
+        <source>Access to the free quota was renewed: send your request again.</source>
+        <translation>Az ingyenes keret elérése megújult: küldje el újra a kérését.</translation>
+    </message>
+    <message>
+        <source>Another application is changing the project: try again in a moment.</source>
+        <translation>Egy másik alkalmazás módosítja a projektet: próbálja újra egy pillanat múlva.</translation>
+    </message>
+    <message>
+        <source>Another application: {}</source>
+        <translation>Másik alkalmazás: {}</translation>
+    </message>
+    <message>
+        <source>Applied again: {}.</source>
+        <translation>Újra alkalmazva: {}.</translation>
+    </message>
+    <message>
+        <source>Changed since, left as is: {}.</source>
+        <translation>Azóta módosítva, változatlanul hagyva: {}.</translation>
+    </message>
+    <message>
+        <source>Changed: {}.</source>
+        <translation>Módosítva: {}.</translation>
+    </message>
+    <message>
+        <source>Choose a model and agree to send your data to use the agent.</source>
+        <translation>Válasszon modellt, és fogadja el az adatai küldését az ügynök használatához.</translation>
+    </message>
+    <message>
+        <source>Connecting to {}…</source>
+        <translation>Csatlakozás: {}…</translation>
+    </message>
+    <message>
+        <source>Earlier conversation: the agent starts afresh from here.</source>
+        <translation>Korábbi beszélgetés: az ügynök innen újrakezdi.</translation>
+    </message>
+    <message>
+        <source>Enter your API key in the agent settings.</source>
+        <translation>Adja meg az API-kulcsát az ügynök beállításaiban.</translation>
+    </message>
+    <message>
+        <source>Export of {}</source>
+        <translation>{} exportja</translation>
+    </message>
+    <message>
+        <source>Favorite applied</source>
+        <translation>Kedvenc alkalmazva</translation>
+    </message>
+    <message>
+        <source>Filter on the points of {}</source>
+        <translation>Szűrő a(z) {} pontjaira</translation>
+    </message>
+    <message>
+        <source>Filter on {}</source>
+        <translation>Szűrő: {}</translation>
+    </message>
+    <message>
+        <source>Filter on {} by an area</source>
+        <translation>Szűrő: {} terület szerint</translation>
+    </message>
+    <message>
+        <source>Filter on {} by {}</source>
+        <translation>Szűrő: {}, {} szerint</translation>
+    </message>
+    <message>
+        <source>FilterMate agent</source>
+        <translation>FilterMate ügynök</translation>
+    </message>
+    <message>
+        <source>Filters removed from {}</source>
+        <translation>Szűrők eltávolítva innen: {}</translation>
+    </message>
+    <message>
+        <source>Hidden: {}</source>
+        <translation>Elrejtve: {}</translation>
+    </message>
+    <message>
+        <source>It answers.</source>
+        <translation>A forrás válaszol.</translation>
+    </message>
+    <message>
+        <source>Layer added: {}</source>
+        <translation>Réteg hozzáadva: {}</translation>
+    </message>
+    <message>
+        <source>Layers removed: {}</source>
+        <translation>Rétegek eltávolítva: {}</translation>
+    </message>
+    <message>
+        <source>Not reachable for this conversation: {}</source>
+        <translation>Ebben a beszélgetésben nem érhető el: {}</translation>
+    </message>
+    <message>
+        <source>Nothing to redo.</source>
+        <translation>Nincs mit újra végrehajtani.</translation>
+    </message>
+    <message>
+        <source>Nothing to restore.</source>
+        <translation>Nincs mit visszaállítani.</translation>
+    </message>
+    <message>
+        <source>Reading the active filters</source>
+        <translation>Az aktív szűrők beolvasása</translation>
+    </message>
+    <message>
+        <source>Reading the favorites</source>
+        <translation>A kedvencek beolvasása</translation>
+    </message>
+    <message>
+        <source>Reading the fields of {}</source>
+        <translation>{} mezőinek beolvasása</translation>
+    </message>
+    <message>
+        <source>Reading the layers</source>
+        <translation>A rétegek beolvasása</translation>
+    </message>
+    <message>
+        <source>Reading the map</source>
+        <translation>A térkép beolvasása</translation>
+    </message>
+    <message>
+        <source>Reading the values of {}</source>
+        <translation>{} értékeinek beolvasása</translation>
+    </message>
+    <message>
+        <source>Restored: {}.</source>
+        <translation>Visszaállítva: {}.</translation>
+    </message>
+    <message>
+        <source>Searching satellite imagery on {}</source>
+        <translation>Műholdfelvételek keresése itt: {}</translation>
+    </message>
+    <message>
+        <source>Searching {} for {}</source>
+        <translation>Keresés itt: {}, erre: {}</translation>
+    </message>
+    <message>
+        <source>Selection cleared on {}</source>
+        <translation>Kijelölés törölve itt: {}</translation>
+    </message>
+    <message>
+        <source>Selection on {}</source>
+        <translation>Kijelölés itt: {}</translation>
+    </message>
+    <message>
+        <source>Shown: {}</source>
+        <translation>Megjelenítve: {}</translation>
+    </message>
+    <message>
+        <source>Stopped.</source>
+        <translation>Leállítva.</translation>
+    </message>
+    <message>
+        <source>The MCP server could not start: {}</source>
+        <translation>Az MCP-kiszolgálót nem sikerült elindítani: {}</translation>
+    </message>
+    <message>
+        <source>The QGIS authentication database is not available.</source>
+        <translation>A QGIS hitelesítési adatbázisa nem érhető el.</translation>
+    </message>
+    <message>
+        <source>The QGIS master password is needed to use the stored key.</source>
+        <translation>A tárolt kulcs használatához a QGIS főjelszava szükséges.</translation>
+    </message>
+    <message>
+        <source>The agent stopped before the end ({}).</source>
+        <translation>Az ügynök a vége előtt leállt ({}).</translation>
+    </message>
+    <message>
+        <source>The agent wants to add this layer of a web service to the project:
+{} · {}
+
+Do you agree?</source>
+        <translation>Az ügynök hozzá szeretné adni a projekthez egy webszolgáltatás ezen rétegét:
+{} · {}
+
+Elfogadja?</translation>
+    </message>
+    <message>
+        <source>The agent wants to add this layer to the project:
+{}
+
+A remote source is read from its server by QGIS, and what the layer holds can be sent to the provider of the agent. Do you agree?</source>
+        <translation>Az ügynök hozzá szeretné adni a projekthez ezt a réteget:
+{}
+
+A távoli forrást a QGIS a kiszolgálójáról olvassa, és a réteg tartalma elküldhető az ügynök szolgáltatójának. Elfogadja?</translation>
+    </message>
+    <message>
+        <source>The agent wants to export these layers to files:
+{}
+
+Do you agree?</source>
+        <translation>Az ügynök exportálni szeretné ezeket a rétegeket fájlokba:
+{}
+
+Elfogadja?</translation>
+    </message>
+    <message>
+        <source>The agent wants to remove these layers from the project (their files stay, their styles and filters here are lost):
+{}
+
+Do you agree?</source>
+        <translation>Az ügynök el szeretné távolítani ezeket a rétegeket a projektből (a fájljaik megmaradnak, a stílusaik és szűrőik itt elvesznek):
+{}
+
+Elfogadja?</translation>
+    </message>
+    <message>
+        <source>The agent wants to run this action on an external connector:
+{}
+{}
+
+Do you agree?</source>
+        <translation>Az ügynök ezt a műveletet szeretné futtatni egy külső összekötőn:
+{}
+{}
+
+Elfogadja?</translation>
+    </message>
+    <message>
+        <source>The credit or quota of this account is used up.</source>
+        <translation>A fiók kreditje vagy kerete elfogyott.</translation>
+    </message>
+    <message>
+        <source>The free quota could not be reached: {}</source>
+        <translation>Az ingyenes keretet nem sikerült elérni: {}</translation>
+    </message>
+    <message>
+        <source>The free quota is not available.</source>
+        <translation>Az ingyenes keret nem áll rendelkezésre.</translation>
+    </message>
+    <message>
+        <source>The free quota is unavailable for now.</source>
+        <translation>Az ingyenes keret egyelőre nem elérhető.</translation>
+    </message>
+    <message>
+        <source>The free quota is used up for this month. Enter your own API key in the agent settings.</source>
+        <translation>Az ingyenes keret erre a hónapra elfogyott. Adja meg saját API-kulcsát az ügynök beállításaiban.</translation>
+    </message>
+    <message>
+        <source>The key could not be stored.</source>
+        <translation>A kulcsot nem sikerült eltárolni.</translation>
+    </message>
+    <message>
+        <source>The provider could not be reached: {}</source>
+        <translation>A szolgáltatót nem sikerült elérni: {}</translation>
+    </message>
+    <message>
+        <source>The provider refused the API key: check it in the agent settings.</source>
+        <translation>A szolgáltató elutasította az API-kulcsot: ellenőrizze az ügynök beállításaiban.</translation>
+    </message>
+    <message>
+        <source>The provider reported a problem: {}</source>
+        <translation>A szolgáltató problémát jelzett: {}</translation>
+    </message>
+    <message>
+        <source>The stored key could not be read.</source>
+        <translation>A tárolt kulcsot nem sikerült beolvasni.</translation>
+    </message>
+    <message>
+        <source>Thinking…</source>
+        <translation>Gondolkodás…</translation>
+    </message>
+    <message>
+        <source>Too many new accounts from this address today: try again tomorrow, or enter your own API key.</source>
+        <translation>Ma túl sok új fiók jött létre erről a címről: próbálja újra holnap, vagy adja meg saját API-kulcsát.</translation>
+    </message>
+    <message>
+        <source>Too many requests for now: try again in a moment.</source>
+        <translation>Egyelőre túl sok kérés: próbálja újra egy pillanat múlva.</translation>
+    </message>
+    <message>
+        <source>Trying a filter on {}</source>
+        <translation>Szűrő kipróbálása: {}</translation>
+    </message>
+    <message>
+        <source>Zoom on {}</source>
+        <translation>Nagyítás: {}</translation>
+    </message>
+    <message>
+        <source>an area</source>
+        <translation>egy terület</translation>
+    </message>
+    <message>
+        <source>everything</source>
+        <translation>minden</translation>
+    </message>
+    <message>
+        <source>{} tools available</source>
+        <translation>{} eszköz érhető el</translation>
+    </message>
+</context>
 </TS>
