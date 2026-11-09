@@ -263,7 +263,8 @@ DEFAULT_COLOR_TOLERANCE = 12.0  # percent of the value range, per band
 PICK_SIMILAR = "similar"
 PICK_OBJECT = "object"
 PICK_SIMILAR_OBJECTS = "similar_objects"  # every object of the raster like the clicked one (colour and size)
-PICK_TARGETS = (PICK_SIMILAR, PICK_OBJECT, PICK_SIMILAR_OBJECTS)
+PICK_SEGMENT = "segment"  # prompts to a segmentation model (only with the optional plugin that provides one)
+PICK_TARGETS = (PICK_SIMILAR, PICK_OBJECT, PICK_SIMILAR_OBJECTS, PICK_SEGMENT)
 DEFAULT_SIMILAR_RATIO = (0.5, 2.0)  # area of a similar object: half to twice the clicked one
 CUSTOM_QUANTITY = "custom_expression"
 # Words of a band name that say it is the near infrared one.
@@ -650,7 +651,8 @@ def build_raster_selection(state: Any) -> Optional[RasterSelection]:
     """
     parsed = parse_raster_state(state)
     mode = parsed["mode"]
-    if mode in (PIPETTE, RasterSelectionMode.RANGE) and isinstance(state, dict) and "pipette_bands" in state and not parsed["pipette_bands"]:
+    segmented = mode is PIPETTE and bool((parsed["pipette_selection"] or {}).get("segments"))  # polygons need no band
+    if not segmented and mode in (PIPETTE, RasterSelectionMode.RANGE) and isinstance(state, dict) and "pipette_bands" in state and not parsed["pipette_bands"]:
         return None
     if mode is PIPETTE:
         try:
@@ -730,6 +732,8 @@ class RasterExploringPanel(QWidget):
     summaryChanged = pyqtSignal()
     modeChosen = pyqtSignal(str)
     targetChanged = pyqtSignal(str)
+    segmentValidateRequested = pyqtSignal()
+    segmentToolRequested = pyqtSignal()
     displayChanged = pyqtSignal()
 
     def __init__(self, parent=None):
@@ -758,6 +762,9 @@ class RasterExploringPanel(QWidget):
         # (x, y, pick): where each pick was read (layer CRS) and what, the objects to detect
         self._seeds: List[Tuple[float, float, Any]] = []
         self._pick_target = PICK_SIMILAR  # PICK_OBJECT: a click selects the object under it only
+        self._segments: List[str] = []  # WKT of the objects validated with the segmentation tool (layer CRS)
+        self._segmentation_available = False  # a plugin provides a model: the Segment target can be chosen
+        self._stashed_preset: Optional[RasterSelection] = None  # the spectral preset the Segment target set aside
         self._band_spans: Dict[int, float] = {}  # observed value range of each band (statistics of the layer)
         self._pipette_on = False  # the pipette tool is on the map
         self._detected: Optional[Tuple[Optional[int], Optional[float], bool]] = None  # last object detection
@@ -1138,7 +1145,11 @@ class RasterExploringPanel(QWidget):
                                 (PICK_SIMILAR_OBJECTS, self.tr("Similar objects"),
                                  self.tr("Every object of the raster like the clicked one: the patches of such pixels "
                                          "whose area is within the ratios below (the similar objects tool of the rail); "
-                                         "Ctrl+click adds another reference object"))):
+                                         "Ctrl+click adds another reference object")),
+                                (PICK_SEGMENT, self.tr("Segment"),
+                                 self.tr("Draw an object with the segmentation model: left click on it, right click "
+                                         "off it, or drag a box; Enter validates. Best on buildings and "
+                                         "other well delimited objects"))):
             button = QRadioButton(label, self._pipette_group)
             button.setObjectName(f"radioButton_raster_pipette_{key}")
             button.setToolTip(tip)
@@ -1148,6 +1159,34 @@ class RasterExploringPanel(QWidget):
             target_row.addWidget(button)
         target_row.addStretch(1)
         group_layout.addLayout(target_row)
+        self._target_buttons[PICK_SEGMENT].setVisible(False)  # until the plugin providing a model is found
+        # Clicked though already checked, it brings the tool back once another QGIS tool took the map.
+        self._target_buttons[PICK_SEGMENT].clicked.connect(lambda _checked=False: self.segmentToolRequested.emit())
+        self._segment_widget = QWidget(self._pipette_group)
+        self._segment_widget.setObjectName("widget_raster_segmentation")
+        segment_layout = QVBoxLayout(self._segment_widget)
+        segment_layout.setContentsMargins(0, 0, 0, 0)
+        segment_layout.setSpacing(GAP)
+        segment_row = QHBoxLayout()
+        segment_row.setSpacing(GAP)
+        self._segment_validate_button = QPushButton(self.tr("Validate object"), self._segment_widget)
+        self._segment_validate_button.setObjectName("pushButton_raster_segment_validate")
+        self._segment_validate_button.setToolTip(self.tr("Add the object drawn to the selection (Enter on the map)"))
+        self._segment_validate_button.clicked.connect(self.segmentValidateRequested.emit)
+        segment_row.addWidget(self._segment_validate_button)
+        self._segment_clear_button = QPushButton(self.tr("Clear"), self._segment_widget)
+        self._segment_clear_button.setObjectName("pushButton_raster_segment_clear")
+        self._segment_clear_button.setToolTip(self.tr("Forget the validated objects"))
+        self._segment_clear_button.clicked.connect(self.clear_segments)
+        segment_row.addWidget(self._segment_clear_button)
+        segment_row.addStretch(1)
+        segment_layout.addLayout(segment_row)
+        self._segment_status = QLabel("", self._segment_widget)
+        self._segment_status.setObjectName("label_raster_segment_status")
+        self._segment_status.setWordWrap(True)
+        segment_layout.addWidget(self._segment_status)
+        self._segment_widget.setVisible(False)
+        group_layout.addWidget(self._segment_widget)
         # Similar objects: how far from the clicked object's area a patch may be (shown in that target only).
         self._similar_widget = QWidget(self._pipette_group)
         self._similar_widget.setObjectName("widget_raster_similar_ratio")
@@ -1545,6 +1584,7 @@ class RasterExploringPanel(QWidget):
             self._histograms.clear()
             self._reference = sanitize_reference(summary.layer_name)
             self._pipette_selection, self._picks, self._pick_kind, self._seeds = None, [], "", []
+            self._forget_segments()
             self._band_spans = {}
             self._detected = None
             self._last_pixel = None
@@ -1585,6 +1625,7 @@ class RasterExploringPanel(QWidget):
             widget.setEnabled(not enabled)
         if changed:
             self._pipette_selection, self._picks, self._pick_kind, self._seeds = None, [], "", []
+            self._forget_segments()
             self._rebuild_chips()
         if enabled:
             self._quantity_debounce.stop()
@@ -1826,6 +1867,7 @@ class RasterExploringPanel(QWidget):
         self.set_hover_value(None, None)
         self.clear_zone()
         self._pipette_selection, self._picks, self._pick_kind, self._seeds = None, [], "", []
+        self._forget_segments()
         self._detected = None
         self._sample_label.setText("")
         self._all_bands = False
@@ -1872,6 +1914,7 @@ class RasterExploringPanel(QWidget):
             "pipette_kind": self._pick_kind,
             "pipette_seeds": [[x, y, list(pick) if isinstance(pick, tuple) else pick] for x, y, pick in self._seeds],
             "pipette_target": self._pick_target,
+            "pipette_segments": list(self._segments),
             "pipette_similar": list(self.similar_ratio()),
             "pipette_shape": self.similar_shape(),
             "pipette_tolerance": self._tolerance_spin.value(),
@@ -1924,9 +1967,12 @@ class RasterExploringPanel(QWidget):
         except (ValueError, TypeError):
             self._pipette_selection = None
         selection = self._pipette_selection
-        if not self._pipette_bands:
+        if not self._pipette_bands and not (selection is not None and selection.segments):
             self._pipette_selection, self._picks, self._pick_kind, self._seeds = None, [], "", []
             selection = None
+        # Kept while another target is active: they come back with the Segment target.
+        self._segments = [wkt for wkt in (state.get("pipette_segments") or (selection.segments if selection is not None else ()))]
+        self._refresh_segment_buttons()
         if selection is not None:
             # A state saved before the shape: the selection follows the box (checked by default).
             from dataclasses import replace
@@ -2105,6 +2151,8 @@ class RasterExploringPanel(QWidget):
 
     def _forget_picks(self, kinds: Sequence[str] = ("color", "value", "classes", "preset")) -> None:
         """Picks of ``kinds`` were read on another band, bands or quantity: they and their selection no longer apply."""
+        if self._pick_target == PICK_SEGMENT and self._segments:
+            return  # polygons do not depend on the band read
         if self._pick_kind and self._pick_kind not in kinds:
             return
         self._picks, self._pick_kind, self._pipette_selection, self._seeds = [], "", None, []
@@ -2380,6 +2428,9 @@ class RasterExploringPanel(QWidget):
         Args:
             debounced: Signal the change after the input settles (the tolerance spin box), not at once.
         """
+        if self._pick_target == PICK_SEGMENT:
+            self._apply_segments(debounced)
+            return
         if self._pick_kind == "preset":  # a spectral index: no pick to read again
             self._set_pipette_selection(self._pipette_selection, debounced)
             return
@@ -2457,11 +2508,13 @@ class RasterExploringPanel(QWidget):
             self._apply_picks(debounced=True)
 
     def _set_pipette_selection(self, selection: Optional[RasterSelection], debounced: bool = False) -> None:
+        if selection is None and self._pick_target == PICK_SEGMENT and self._segments:
+            selection = RasterSelection(band=self.current_band(), segments=tuple(self._segments))  # a chip was removed
         self._pipette_selection = None if selection is None or selection.is_empty else selection
         self._detected = None
         self._rebuild_chips()
         self._show_pipette_result()
-        if self._pipette_selection is None and self._picks:
+        if self._pipette_selection is None and self._picks and self._pick_target != PICK_SEGMENT:
             # A range over every value is no constraint (A7): say why nothing is selected.
             self._sample_label.setText(self.tr("The tolerance covers every value: lower it"))
         self._activate_mode(PIPETTE, emit=False)
@@ -2492,7 +2545,7 @@ class RasterExploringPanel(QWidget):
             truncated: An object went on past the largest window read and was cut.
         """
         selection = self._pipette_selection
-        if selection is None or not selection.seeds:
+        if selection is None or not (selection.seeds or selection.segments):
             self._detected = None
             self.summaryChanged.emit()
             return
@@ -2518,12 +2571,17 @@ class RasterExploringPanel(QWidget):
 
     def set_pick_target(self, target: str) -> None:
         """Adopt the target of the rail tool that went on the map (the detector or the pipette). Does not emit ``targetChanged``."""
+        left_segments = self._pick_target == PICK_SEGMENT
         changed = self._set_pick_target(target)
-        if changed and self._picks and self._pick_kind in ("color", "value", "classes"):
+        if changed and left_segments:
+            self._leave_segments()
+        elif changed and self._picks and self._pick_kind in ("color", "value", "classes"):
             self._apply_picks()  # the same picks, on the whole raster or as objects
 
     def _set_pick_target(self, target: str) -> bool:
         target = target if target in PICK_TARGETS else PICK_SIMILAR
+        if target == PICK_SEGMENT and not self._segmentation_available:
+            target = PICK_SIMILAR  # a state saved while a model was there
         changed = target != self._pick_target
         self._pick_target = target
         button = self._target_buttons.get(target)
@@ -2535,15 +2593,75 @@ class RasterExploringPanel(QWidget):
         if hasattr(self, "_object_settings"):
             self._object_settings.setVisible(target in (PICK_OBJECT, PICK_SIMILAR_OBJECTS))
             self._fill_holes_check.setVisible(target == PICK_OBJECT)
+        if hasattr(self, "_segment_widget"):
+            self._segment_widget.setVisible(target == PICK_SEGMENT)
         return changed
 
     def _on_target_button(self, target: str, checked: bool) -> None:
         if not checked or target == self._pick_target:
             return
+        left_segments = self._pick_target == PICK_SEGMENT
+        if target == PICK_SEGMENT and self._pick_kind == "preset":
+            self._stashed_preset = self._pipette_selection
         self._set_pick_target(target)
         self.targetChanged.emit(self._pick_target)
-        if self._picks and self._pick_kind in ("color", "value", "classes"):
+        if target == PICK_SEGMENT:
+            self._apply_segments()
+        elif left_segments:
+            self._leave_segments()
+        elif self._picks and self._pick_kind in ("color", "value", "classes"):
             self._apply_picks()
+
+    # === Segmentation (the model is provided by an optional plugin) ===
+
+    def set_segmentation_available(self, available: bool) -> None:
+        """Show the Segment target when a model is available; validated objects keep filtering without one."""
+        self._segmentation_available = bool(available)
+        self._target_buttons[PICK_SEGMENT].setVisible(self._segmentation_available)
+        if not available and self._pick_target == PICK_SEGMENT:
+            self._set_pick_target(PICK_SIMILAR)
+
+    def _leave_segments(self) -> None:
+        """Another target was chosen: its picks select again; the validated objects wait for the Segment target."""
+        self._segment_status.setText("")
+        if self._pick_kind == "preset":
+            preset, self._stashed_preset = self._stashed_preset, None
+            self._set_pipette_selection(preset)
+        elif self._picks and self._pick_kind in ("color", "value", "classes"):
+            self._apply_picks()
+        else:
+            self._set_pipette_selection(None)
+
+    def _forget_segments(self) -> None:
+        """Drop the objects without signalling (a reset, another layer)."""
+        self._segments = []
+        self._stashed_preset = None
+        self._segment_status.setText("")
+        self._refresh_segment_buttons()
+
+    def set_segmentation_status(self, text: str) -> None:
+        self._segment_status.setText(text)
+
+    def add_segment(self, wkt: str) -> None:
+        """Add a validated object (WKT, layer CRS) to the selection and signal it."""
+        if wkt and wkt not in self._segments:
+            self._segments.append(wkt)
+        self._apply_segments()
+
+    def clear_segments(self) -> None:
+        """Forget the validated objects and signal it."""
+        self._segments = []
+        self._apply_segments()
+
+    def _apply_segments(self, debounced: bool = False) -> None:
+        self._refresh_segment_buttons()
+        selection = RasterSelection(band=self.current_band(), segments=tuple(self._segments)) if self._segments else None
+        self._set_pipette_selection(selection, debounced)
+
+    def _refresh_segment_buttons(self) -> None:
+        count = len(self._segments)
+        self._segment_clear_button.setEnabled(count > 0)
+        self._segment_clear_button.setText(self.tr("Clear ({0})").format(count) if count else self.tr("Clear"))
 
     def _on_tolerance_changed(self, _value: float) -> None:
         # The selection follows at once, its signal once the wheel stops: each one may read the raster.
