@@ -5,8 +5,9 @@ The key is never written in a settings or configuration file.
 """
 from __future__ import annotations
 
+import json
 from dataclasses import dataclass
-from typing import Optional
+from typing import Optional, Tuple
 
 from qgis.core import QgsApplication, QgsAuthMethodConfig, QgsSettings
 from qgis.PyQt.QtCore import QCoreApplication
@@ -44,8 +45,9 @@ class AgentSettings:
     base_url: str = ""
     consent: bool = False
     send_values: bool = True
-    # Open data platforms may be searched, and layers read from their servers.
-    open_data: bool = False
+    # Sources the agent may use (core.agent.sources) and the ones the user added, as JSON. None enabled by default.
+    enabled_sources: Tuple[str, ...] = ()
+    custom_sources: str = "[]"
     authcfg: str = ""
     # Where the consent was given and the key was typed for: neither follows a change of provider.
     consent_target: str = ""
@@ -73,6 +75,17 @@ class AgentSettings:
         return self.has_consent and bool(self.model) and (self.has_key or not self.needs_key)
 
 
+def _enabled_sources(settings) -> Tuple[str, ...]:
+    raw = settings.value(_PREFIX + "enabled_sources", "")
+    if not raw:  # the single switch of the first version
+        return ("datagouv", "opendatasoft") if settings.value(_PREFIX + "open_data", False, type=bool) else ()
+    try:
+        value = json.loads(str(raw))
+    except (ValueError, RecursionError):
+        return ()
+    return tuple(str(item) for item in value) if isinstance(value, list) else ()
+
+
 def load_settings() -> AgentSettings:
     settings = QgsSettings()
     preset = str(settings.value(_PREFIX + "preset", DEFAULT_PRESET) or DEFAULT_PRESET)
@@ -82,7 +95,8 @@ def load_settings() -> AgentSettings:
         base_url=str(settings.value(_PREFIX + "base_url", "") or ""),
         consent=settings.value(_PREFIX + "consent", False, type=bool),
         send_values=settings.value(_PREFIX + "send_values", True, type=bool),
-        open_data=settings.value(_PREFIX + "open_data", False, type=bool),
+        enabled_sources=_enabled_sources(settings),
+        custom_sources=str(settings.value(_PREFIX + "custom_sources", "[]") or "[]"),
         authcfg=str(settings.value(_PREFIX + "authcfg", "") or ""),
         consent_target=str(settings.value(_PREFIX + "consent_target", "") or ""),
         key_target=str(settings.value(_PREFIX + "key_target", "") or ""))
@@ -95,7 +109,8 @@ def save_settings(values: AgentSettings) -> None:
     settings.setValue(_PREFIX + "base_url", values.base_url)
     settings.setValue(_PREFIX + "consent", values.consent)
     settings.setValue(_PREFIX + "send_values", values.send_values)
-    settings.setValue(_PREFIX + "open_data", values.open_data)
+    settings.setValue(_PREFIX + "enabled_sources", json.dumps(list(values.enabled_sources)))
+    settings.setValue(_PREFIX + "custom_sources", values.custom_sources)
     settings.setValue(_PREFIX + "authcfg", values.authcfg)
     settings.setValue(_PREFIX + "consent_target", values.consent_target)
     settings.setValue(_PREFIX + "key_target", values.key_target)

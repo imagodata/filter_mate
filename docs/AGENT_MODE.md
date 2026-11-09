@@ -108,6 +108,35 @@ Two allowlists hold, on every path (chat, REST, MCP), because QGIS and GDAL inte
 
 `search_open_data` blocks the interface until the platform answers or the network timeout of QGIS runs out.
 
+## Sources
+
+`core/agent/sources.py` is one list, in the Sources tab of the settings, nothing ticked by default:
+
+- **Open data platforms**: data.gouv.fr, Opendatasoft, national CKAN portals, WFS services (IGN Géoplateforme, IBGE, PRG).
+- **Satellite imagery**: STAC catalogs with public GeoTIFFs (Earth Search). `search_imagery` finds scenes, `add_layer`
+  opens one through `/vsicurl/` without downloading it. Planetary Computer and Copernicus need signed or authenticated
+  asset links, so they are left out for now.
+- **MCP connectors** (`core/agent/mcp_client.py`, `adapters/agent/mcp_connection.py`): any Streamable HTTP server, public
+  https or on this machine. Their tools join the conversation as `mcp_<server>__<tool>`, bounded in number and size.
+  A plugin starts no process: a stdio-only server has to be run in HTTP mode by the user, as IGN's geocontext can be.
+
+Rules: in the chat, only what is ticked can be used (REST and MCP callers hold the API key and are not limited by the
+ticks); a connector alone does not let `add_layer` read the web; a WFS layer must be listed by the service, which must keep
+its operations on its own host, and its URI is built by the plugin; every connector call stays in the thread; a connector
+tool not declared read-only asks the user first; a call is sent once, again only when the server lost the session; a server
+that does not answer is left out of the conversation and said so.
+
+Anything fetched from these servers goes through `adapters/agent/bounded_http.py`: redirects are not followed, total time and
+size are capped, Stop works, and a 401 or a TLS error is a failure rather than a QGIS dialog worded by the server. Layers
+opened by GDAL have their redirects checked first and its own HTTP time limits. Connector descriptions and schemas are
+reduced to well-formed, bounded JSON. `readOnlyHint` is what a server declares about itself: the thread shows these calls
+after the fact, with their arguments.
+
+The built-in list favours the countries where QGIS plugins are downloaded most (public dashboard
+plugins-analytics.qgis.org, 30 days to 2026-11-09: United States 26 %, Brazil 11 %, France 10 %, then Singapore, Germany,
+Hong Kong, Poland, United Kingdom, Netherlands, Spain, Italy, Japan). The dashboard has no figure for one given plugin.
+Each entry was checked to answer without an account; `tests/qgis_headless/check_agent_sources_live.py` checks them again.
+
 ## Tools
 
 `filtermate_api/mcp/server.py` is the one place where a tool is described. After changing one:

@@ -10,7 +10,7 @@ import logging
 import os
 from dataclasses import asdict
 from pathlib import Path
-from typing import Any, Callable, Dict, Optional
+from typing import Any, Callable, Dict, Optional, Sequence
 
 from .accessor import FavoritesUnavailable, FilterMateAccessor, FilterRejected
 from .export_root import ExportRootError, prepare_export_root, resolve_export_folder
@@ -74,11 +74,20 @@ def _guarded(handler: Handler) -> Handler:
     return run
 
 
-def build_handlers(accessor: FilterMateAccessor, export_root: Path, allow_remote_sources: bool = False) -> Dict[str, Handler]:
+def build_handlers(accessor: FilterMateAccessor, export_root: Path, allow_remote_sources: bool = False,
+                   platforms: Sequence[str] = (), extra_domains: str = "") -> Dict[str, Handler]:
     """One handler per tool of the chat (see ``core.agent.tool_catalog.chat_tools``).
 
-    ``allow_remote_sources`` False: no layer is read over the network (the user kept open data off).
+    ``allow_remote_sources`` False: no layer is read over the network. ``platforms``: the only ones that can be
+    searched, each as the user enabled it; ``extra_domains`` says where the user's own portals are.
     """
+    enabled_platforms = {name.lower() for name in platforms}
+
+    def _allowed_platform(name: str) -> str:
+        if name.lower() not in enabled_platforms:
+            raise ToolFailure(f"{name!r} is not enabled in the agent sources. Enabled: "
+                              f"{', '.join(sorted(enabled_platforms)) or 'none'}.")
+        return name
 
     def list_layers(_: Dict[str, Any]) -> Dict[str, Any]:
         return {"layers": [asdict(layer) for layer in accessor.list_layers()]}
@@ -187,7 +196,18 @@ def build_handlers(accessor: FilterMateAccessor, export_root: Path, allow_remote
         return _report("Remove", accessor.remove_layers(args["layers"]))
 
     def search_open_data(args: Dict[str, Any]) -> Dict[str, Any]:
-        return asdict(accessor.search_open_data(args["query"], platform=args["platform"], limit=args["limit"]))
+        return asdict(accessor.search_open_data(args["query"], platform=_allowed_platform(args["platform"]),
+                                                limit=args["limit"], extra_domains=extra_domains))
+
+    def search_imagery(args: Dict[str, Any]) -> Dict[str, Any]:
+        return asdict(accessor.search_imagery(
+            bbox=args.get("bbox"), start=args["start"], end=args["end"], max_cloud=args["max_cloud"],
+            collections=args.get("collections"), limit=args["limit"], platform=_allowed_platform(args["platform"]),
+            extra_domains=extra_domains))
+
+    def add_service_layer(args: Dict[str, Any]) -> Dict[str, Any]:
+        return asdict(accessor.add_service_layer(_allowed_platform(args["platform"]), args["typename"],
+                                                 name=args["name"], extra_domains=extra_domains))
 
     def export_layers(args: Dict[str, Any]) -> Dict[str, Any]:
         try:
@@ -213,5 +233,6 @@ def build_handlers(accessor: FilterMateAccessor, export_root: Path, allow_remote
         "clear_filters": clear_filters, "apply_favorite": apply_favorite, "export_layers": export_layers,
         "zoom_to": zoom_to, "select_features": select_features, "set_layers_visibility": set_layers_visibility,
         "add_layer": add_layer, "remove_layers": remove_layers, "search_open_data": search_open_data,
+        "add_service_layer": add_service_layer, "search_imagery": search_imagery,
     }
     return {name: _guarded(handler) for name, handler in handlers.items()}

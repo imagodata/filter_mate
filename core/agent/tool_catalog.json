@@ -926,6 +926,121 @@
    }
   },
   {
+   "name": "add_service_layer",
+   "title": "Add a layer of a WFS service",
+   "description": "Add a layer of a WFS service, read from the service as the map moves and filtered on the server. Only a layer the service lists can be added. Returns the layer summary. The chat of FilterMate asks the user first.",
+   "read_only": false,
+   "destructive": false,
+   "idempotent": false,
+   "open_world": true,
+   "input_schema": {
+    "properties": {
+     "platform": {
+      "description": "A WFS platform the user allowed, e.g. ign_wfs (IGN Géoplateforme)",
+      "maxLength": 200,
+      "minLength": 1,
+      "type": "string"
+     },
+     "typename": {
+      "description": "Layer id given by search_open_data on that platform, e.g. ADMINEXPRESS-COG-CARTO.LATEST:commune",
+      "maxLength": 300,
+      "minLength": 1,
+      "type": "string"
+     },
+     "name": {
+      "default": "",
+      "description": "Name of the layer in the project (default: its title)",
+      "maxLength": 200,
+      "type": "string"
+     }
+    },
+    "required": [
+     "platform",
+     "typename"
+    ],
+    "type": "object"
+   }
+  },
+  {
+   "name": "search_imagery",
+   "title": "Search satellite imagery",
+   "description": "Find satellite scenes over an area, newest first, with the GeoTIFF of each one. Returns datasets [{id, publisher (collection), description (date and cloud cover), resources: [{format, url}]}]; format visual is the natural colour image. Then add_layer with its url and kind raster.",
+   "read_only": true,
+   "destructive": false,
+   "idempotent": false,
+   "open_world": true,
+   "input_schema": {
+    "properties": {
+     "bbox": {
+      "anyOf": [
+       {
+        "items": {
+         "type": "number"
+        },
+        "maxItems": 4,
+        "minItems": 4,
+        "type": "array"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "description": "[west, south, east, north] in degrees; omit for the current map extent"
+     },
+     "start": {
+      "default": "",
+      "description": "First day, YYYY-MM-DD",
+      "maxLength": 10,
+      "type": "string"
+     },
+     "end": {
+      "default": "",
+      "description": "Last day, YYYY-MM-DD",
+      "maxLength": 10,
+      "type": "string"
+     },
+     "max_cloud": {
+      "default": 20.0,
+      "description": "Maximum cloud cover, %",
+      "maximum": 100,
+      "minimum": 0,
+      "type": "number"
+     },
+     "collections": {
+      "anyOf": [
+       {
+        "items": {
+         "type": "string"
+        },
+        "maxItems": 5,
+        "type": "array"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "description": "STAC collections (default sentinel-2-l2a)"
+     },
+     "limit": {
+      "default": 5,
+      "description": "Maximum number of scenes",
+      "maximum": 20,
+      "minimum": 1,
+      "type": "integer"
+     },
+     "platform": {
+      "default": "earth_search",
+      "description": "STAC catalog the user allowed, e.g. earth_search",
+      "maxLength": 200,
+      "type": "string"
+     }
+    },
+    "type": "object"
+   }
+  },
+  {
    "name": "remove_layers",
    "title": "Remove layers",
    "description": "Remove layers from the project. Their files are not deleted, but their styles and filters in this project are lost and this cannot be undone. The chat of FilterMate asks the user first. Returns done and failed.",
@@ -954,7 +1069,7 @@
   {
    "name": "search_open_data",
    "title": "Search open data",
-   "description": "Search datasets on an open data platform the user allowed, and get the URLs a layer can be made of. Returns datasets [{id, title, publisher, description, page, resources: [{title, format, url}]}], the resources kept to files add_layer can open (geojson, gpkg, zip, csv, tif...). Then add_layer with a resource url (geojson or gpkg first). The query is sent to the platform.",
+   "description": "Search datasets on an open data platform the user allowed, and get the URLs a layer can be made of. Returns datasets [{id, title, publisher, description, page, resources: [{title, format, url}]}], the resources kept to files add_layer can open (geojson, gpkg, zip, csv, tif...). Then add_layer with a resource url (geojson or gpkg first), or add_service_layer with the id on a WFS platform. The query is sent to the platform.",
    "read_only": true,
    "destructive": false,
    "idempotent": false,
@@ -969,7 +1084,7 @@
      },
      "platform": {
       "default": "datagouv",
-      "description": "datagouv (data.gouv.fr, France), opendatasoft (the public Opendatasoft hub), or a host the user allowed in the FilterMate configuration",
+      "description": "datagouv (data.gouv.fr, France), opendatasoft (the public Opendatasoft hub), ign_wfs (IGN Géoplateforme layers), or a portal the user allowed",
       "maxLength": 200,
       "type": "string"
      },

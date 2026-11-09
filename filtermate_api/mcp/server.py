@@ -446,6 +446,42 @@ def build_server(client: FilterMateClient) -> Any:
         """
         return await call("POST", "/layers/add", _body(source=source, name=name, kind=kind))
 
+    @mcp.tool(annotations=ToolAnnotations(title="Add a layer of a WFS service", readOnlyHint=False, destructiveHint=False,
+                                          idempotentHint=False, openWorldHint=True))
+    async def add_service_layer(
+        platform: Annotated[str, Field(min_length=1, max_length=200, description=(
+            "A WFS platform the user allowed, e.g. ign_wfs (IGN Géoplateforme)"))],
+        typename: Annotated[str, Field(min_length=1, max_length=300, description=(
+            "Layer id given by search_open_data on that platform, e.g. ADMINEXPRESS-COG-CARTO.LATEST:commune"))],
+        name: Annotated[str, Field(max_length=200, description="Name of the layer in the project (default: its title)")] = "",
+    ) -> Dict[str, Any]:
+        """Add a layer of a WFS service, read from the service as the map moves and filtered on the server.
+
+        Only a layer the service lists can be added. Returns the layer summary. The chat of FilterMate asks the
+        user first.
+        """
+        return await call("POST", "/layers/add-service", _body(platform=platform, typename=typename, name=name))
+
+    @mcp.tool(annotations=ToolAnnotations(title="Search satellite imagery", readOnlyHint=True, openWorldHint=True))
+    async def search_imagery(
+        bbox: Annotated[Optional[List[float]], Field(min_length=4, max_length=4, description=(
+            "[west, south, east, north] in degrees; omit for the current map extent"))] = None,
+        start: Annotated[str, Field(max_length=10, description="First day, YYYY-MM-DD")] = "",
+        end: Annotated[str, Field(max_length=10, description="Last day, YYYY-MM-DD")] = "",
+        max_cloud: Annotated[float, Field(ge=0, le=100, description="Maximum cloud cover, %")] = 20.0,
+        collections: Annotated[Optional[List[str]], Field(max_length=5, description=(
+            "STAC collections (default sentinel-2-l2a)"))] = None,
+        limit: Annotated[int, Field(ge=1, le=20, description="Maximum number of scenes")] = 5,
+        platform: Annotated[str, Field(max_length=200, description="STAC catalog the user allowed, e.g. earth_search")] = "earth_search",
+    ) -> Dict[str, Any]:
+        """Find satellite scenes over an area, newest first, with the GeoTIFF of each one.
+
+        Returns datasets [{id, publisher (collection), description (date and cloud cover), resources: [{format, url}]}];
+        format visual is the natural colour image. Then add_layer with its url and kind raster.
+        """
+        return await call("POST", "/open-data/imagery", _body(
+            bbox=bbox, start=start, end=end, max_cloud=max_cloud, collections=collections, limit=limit, platform=platform))
+
     @mcp.tool(annotations=_write("Remove layers", idempotent=True, destructive=True))
     async def remove_layers(
         layers: Annotated[LayerList, Field(description="Layer ids or names to remove from the project")],
@@ -458,15 +494,16 @@ def build_server(client: FilterMateClient) -> Any:
     async def search_open_data(
         query: Annotated[str, Field(min_length=1, max_length=200, description="Words to search, in the language of the platform")],
         platform: Annotated[str, Field(max_length=200, description=(
-            "datagouv (data.gouv.fr, France), opendatasoft (the public Opendatasoft hub), or a host the user "
-            "allowed in the FilterMate configuration"))] = "datagouv",
+            "datagouv (data.gouv.fr, France), opendatasoft (the public Opendatasoft hub), ign_wfs (IGN Géoplateforme "
+            "layers), or a portal the user allowed"))] = "datagouv",
         limit: Annotated[int, Field(ge=1, le=20, description="Maximum number of datasets")] = 10,
     ) -> Dict[str, Any]:
         """Search datasets on an open data platform the user allowed, and get the URLs a layer can be made of.
 
         Returns datasets [{id, title, publisher, description, page, resources: [{title, format, url}]}], the
         resources kept to files add_layer can open (geojson, gpkg, zip, csv, tif...). Then add_layer with a
-        resource url (geojson or gpkg first). The query is sent to the platform.
+        resource url (geojson or gpkg first), or add_service_layer with the id on a WFS platform. The query is sent to
+        the platform.
         """
         return await call("POST", "/open-data/search", _body(query=query, platform=platform, limit=limit))
 

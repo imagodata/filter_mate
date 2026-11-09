@@ -8,16 +8,22 @@ follow the links it holds. Nothing here ever parses HTML.
 from __future__ import annotations
 
 import time
+from typing import Tuple
 
 from qgis.PyQt.QtCore import QCoreApplication, QEvent, QSize, Qt, pyqtSignal
 from qgis.PyQt.QtGui import QColor, QFont, QTextBlockFormat, QTextCharFormat, QTextCursor
 from qgis.PyQt.QtWidgets import (
     QCheckBox, QComboBox, QDialog, QDialogButtonBox, QFormLayout, QFrame, QHBoxLayout, QLabel, QLineEdit, QMenu,
     QListWidget, QListWidgetItem, QMessageBox, QProgressBar, QPushButton, QScrollArea, QSizePolicy, QStackedWidget,
-    QTextEdit, QToolButton, QVBoxLayout, QWidget,
+    QTabWidget, QTextEdit, QToolButton, QTreeWidget, QTreeWidgetItem, QVBoxLayout, QWidget,
 )
 
+from ...core.agent.open_data import KIND_CKAN, KIND_OPENDATASOFT, KIND_WFS
 from ...core.agent.providers import PRESETS
+from ...core.agent.sources import (
+    KIND_MCP, KIND_STAC, MAX_CUSTOM, ORIGIN_COMMUNITY, ORIGIN_LOCAL, ORIGIN_OFFICIAL, ORIGIN_USER, all_sources, custom_from_json,
+    custom_to_json, make_source,
+)
 from ..styles.mockup_design import FONT_FAMILY, render_icon, stylesheet_is_dark, tokens
 
 PANEL_NAME = "AGENT"
@@ -507,9 +513,10 @@ class AgentPanel(QFrame):
 class AgentSettingsDialog(QDialog):
     """Provider, model, key and what may leave this machine."""
 
-    def __init__(self, values, target_of, parent=None) -> None:
+    def __init__(self, values, target_of, parent=None, tester=None) -> None:
         super().__init__(parent)
         self.setWindowTitle(_tr("FilterMate agent"))
+        self._tester = tester
         self._values = values
         self._target_of = target_of
         self.forget_key = False
@@ -528,10 +535,6 @@ class AgentSettingsDialog(QDialog):
         self.forget_button.clicked.connect(self._on_forget)
         self.send_values = QCheckBox(_tr("Allow attribute values to be sent"), self)
         self.send_values.setChecked(values.send_values)
-        self.open_data = QCheckBox(_tr("Allow open data platforms (data.gouv.fr, Opendatasoft...)"), self)
-        self.open_data.setToolTip(_tr("Your searches are sent to them, and a layer added from them is read from their "
-                                      "servers. Other platforms can be allowed in the FilterMate configuration."))
-        self.open_data.setChecked(values.open_data)
         notice = QLabel(_tr(
             "The agent sends your request, the names of your layers and fields, your filter expressions and the "
             "results of its tools to the provider chosen here, under that provider's terms. Without the option "
@@ -554,13 +557,143 @@ class AgentSettingsDialog(QDialog):
         buttons = QDialogButtonBox(QDialogButtonBox.StandardButton.Save | QDialogButtonBox.StandardButton.Cancel, self)
         buttons.accepted.connect(self.accept)
         buttons.rejected.connect(self.reject)
+        general = QWidget(self)
+        general_layout = QVBoxLayout(general)
+        general_layout.addLayout(form)
+        general_layout.addWidget(notice)
+        general_layout.addWidget(self.send_values)
+        general_layout.addWidget(self.consent)
+        general_layout.addStretch(1)
+        self.tabs = QTabWidget(self)
+        self.tabs.addTab(general, _tr("Provider"))
+        self.tabs.addTab(self._build_sources(values), _tr("Sources"))
         layout = QVBoxLayout(self)
-        layout.addLayout(form)
-        layout.addWidget(notice)
-        layout.addWidget(self.send_values)
-        layout.addWidget(self.open_data)
-        layout.addWidget(self.consent)
+        layout.addWidget(self.tabs)
         layout.addWidget(buttons)
+
+    def _build_sources(self, values) -> QWidget:
+        """Platforms and connectors, each one the user's choice: nothing is on by default."""
+        self._custom = custom_from_json(values.custom_sources)
+        page = QWidget(self)
+        hint = QLabel(_tr("The agent can search the sources ticked here. Your searches, and what the agent passes to a "
+                          "connector, are sent to them; a layer added from them is read from their servers."), page)
+        hint.setWordWrap(True)
+        self.sources_tree = QTreeWidget(page)
+        self.sources_tree.setObjectName("treeWidget_agent_sources")
+        self.sources_tree.setHeaderHidden(True)
+        self.sources_tree.setRootIsDecorated(False)
+        self.sources_tree.currentItemChanged.connect(lambda *_: self._on_source_selected())
+        self.test_button = QPushButton(_tr("Test"), page)
+        self.test_button.clicked.connect(self._on_test_source)
+        self.remove_button = QPushButton(_tr("Remove"), page)
+        self.remove_button.clicked.connect(self._on_remove_source)
+        self.source_result = QLabel(page)
+        self.source_result.setTextFormat(Qt.TextFormat.PlainText)
+        self.source_result.setWordWrap(True)
+        row = QHBoxLayout()
+        row.addWidget(self.source_result, 1)
+        row.addWidget(self.test_button)
+        row.addWidget(self.remove_button)
+        self.new_address = QLineEdit(page)
+        self.new_address.setPlaceholderText(_tr("https://... or a portal address"))
+        self.new_kind = QComboBox(page)
+        for kind, label in ((KIND_MCP, _tr("MCP connector")), (KIND_OPENDATASOFT, "Opendatasoft"), (KIND_CKAN, "CKAN"),
+                            (KIND_WFS, "WFS"), (KIND_STAC, "STAC")):
+            self.new_kind.addItem(label, kind)
+        self.add_button = QPushButton(_tr("Add"), page)
+        self.add_button.clicked.connect(self._on_add_source)
+        add_row = QHBoxLayout()
+        add_row.addWidget(self.new_address, 1)
+        add_row.addWidget(self.new_kind)
+        add_row.addWidget(self.add_button)
+        layout = QVBoxLayout(page)
+        layout.addWidget(hint)
+        layout.addWidget(self.sources_tree, 1)
+        layout.addLayout(row)
+        layout.addLayout(add_row)
+        self._fill_sources(set(values.enabled_sources))
+        return page
+
+    def _source_item(self, parent, source, checked: bool) -> None:
+        origin = {ORIGIN_OFFICIAL: _tr("official"), ORIGIN_COMMUNITY: _tr("community"), ORIGIN_LOCAL: _tr("this computer"),
+                  ORIGIN_USER: _tr("added by you")}.get(source.origin, "")
+        item = QTreeWidgetItem(parent, [f"{source.title}  ·  {origin}"])
+        item.setFlags(item.flags() | Qt.ItemFlag.ItemIsUserCheckable)
+        item.setCheckState(0, Qt.CheckState.Checked if checked else Qt.CheckState.Unchecked)
+        item.setData(0, _TURN_ROLE, source.id)
+        item.setToolTip(0, f"{source.note}\n{source.address}".strip())
+
+    def _fill_sources(self, enabled_ids) -> None:
+        self.sources_tree.clear()
+        groups = ((_tr("Open data platforms"), lambda source: source.kind not in (KIND_MCP, KIND_STAC)),
+                  (_tr("Satellite imagery"), lambda source: source.kind == KIND_STAC),
+                  (_tr("MCP connectors"), lambda source: source.kind == KIND_MCP))
+        for title, belongs in groups:
+            group = QTreeWidgetItem(self.sources_tree, [title])
+            group.setFlags(Qt.ItemFlag.ItemIsEnabled)
+            font = group.font(0)
+            font.setBold(True)
+            group.setFont(0, font)
+            for source in all_sources(self._custom):
+                if belongs(source):
+                    self._source_item(group, source, source.id in enabled_ids)
+        self.sources_tree.expandAll()
+        self._on_source_selected()
+
+    def _checked_ids(self) -> Tuple[str, ...]:
+        ids = []
+        root = self.sources_tree.invisibleRootItem()
+        for row in range(root.childCount()):
+            group = root.child(row)
+            for index in range(group.childCount()):
+                if group.child(index).checkState(0) == Qt.CheckState.Checked:
+                    ids.append(str(group.child(index).data(0, _TURN_ROLE)))
+        return tuple(ids)
+
+    def _selected_source(self):
+        item = self.sources_tree.currentItem()
+        identifier = item.data(0, _TURN_ROLE) if item is not None else None
+        return next((source for source in all_sources(self._custom) if source.id == identifier), None)
+
+    def _on_source_selected(self) -> None:
+        source = self._selected_source()
+        self.test_button.setEnabled(source is not None and self._tester is not None)
+        self.remove_button.setEnabled(source is not None and source in self._custom)
+        self.source_result.setText(source.note if source is not None else "")
+
+    def _on_test_source(self) -> None:
+        source = self._selected_source()
+        if source is not None and self._tester is not None:
+            self.source_result.setText(_tr("Testing…"))
+            QCoreApplication.processEvents()
+            self.source_result.setText(self._tester(source))
+
+    def _on_add_source(self) -> None:
+        try:
+            source = make_source(self.new_address.text(), self.new_kind.currentData())
+        except ValueError as exc:
+            self.source_result.setText(str(exc))
+            return
+        if source.id not in [other.id for other in all_sources(self._custom)]:
+            if len(self._custom) >= MAX_CUSTOM:
+                self.source_result.setText(_tr("Too many sources added: remove one first."))
+                return
+            self._custom.append(source)
+        checked = set(self._checked_ids()) | {source.id}
+        self.new_address.clear()
+        self._fill_sources(checked)
+
+    def _on_remove_source(self) -> None:
+        source = self._selected_source()
+        if source is not None and source in self._custom:
+            self._custom.remove(source)
+            self._fill_sources(set(self._checked_ids()) - {source.id})
+
+    def chosen_sources(self) -> Tuple[str, ...]:
+        return self._checked_ids()
+
+    def chosen_custom_sources(self) -> str:
+        return custom_to_json(self._custom)
 
     def _on_preset(self, _index: int = 0) -> None:
         """What depends on the provider: its models, its address, whether it needs a key."""

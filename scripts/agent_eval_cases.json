@@ -104,5 +104,11 @@
   "expect": [[{"tool": "remove_layers", "args": {"layers": ["cours_eau"]}, "call_args": {"layers": ["cours_eau"]}}]]},
  {"id": "no_remove_unasked", "prompt": "Filtre les cours d'eau permanents.",
   "expect": [[{"tool": "apply_filter", "args": {"layer_name": "cours_eau", "expression": {"contains": ["regime", "Permanent"]}},
-    "call_args": {"layer_name": "cours_eau", "expression": "\"regime\" = 'Permanent'"}}]], "forbid": ["remove_layers", "clear_filters"]}
+    "call_args": {"layer_name": "cours_eau", "expression": "\"regime\" = 'Permanent'"}}]], "forbid": ["remove_layers", "clear_filters"]},
+ {"id": "imagery_add", "prompt": "Affiche la dernière image Sentinel-2 peu nuageuse sur la zone de la carte.",
+  "expect": [[{"tool": "add_layer", "args": {"source": {"contains": ["https://", ".tif"]}, "kind": "raster"},
+    "call_args": {"source": "https://sentinel-cogs.s3.us-west-2.amazonaws.com/TCI.tif", "kind": "raster", "name": "Sentinel-2"}}]]},
+ {"id": "wfs_layer", "prompt": "Ajoute les communes de la Géoplateforme IGN.",
+  "expect": [[{"tool": "add_service_layer", "args": {"platform": "ign_wfs", "typename": {"contains": ["commune"]}},
+    "call_args": {"platform": "ign_wfs", "typename": "ADMINEXPRESS-COG-CARTO.LATEST:commune"}}]]}
 ]}

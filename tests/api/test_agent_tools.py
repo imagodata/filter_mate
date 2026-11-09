@@ -74,7 +74,8 @@ def api(tmp_path):
 
 def run(accessor, root, name, **arguments):
     tools = chat_tools()
-    result = ToolExecutor(tools, build_handlers(accessor, root)).execute(ToolCallPart("c", name, arguments))
+    result = ToolExecutor(tools, build_handlers(accessor, root, platforms=("datagouv", "ign_wfs", "earth_search"))).execute(
+        ToolCallPart("c", name, arguments))
     return result.is_error, (result.content if result.is_error else json.loads(result.content))
 
 
@@ -206,6 +207,14 @@ class TestHandlers:
         assert run(accessor, root, "remove_layers", layers=["communes"])[1]["done"] == ["communes"]
         assert accessor.layers == []
 
+    def test_only_enabled_platforms_can_be_searched(self, api):
+        accessor, root = api
+        failed, message = run(accessor, root, "search_open_data", query="x", platform="opendatasoft")
+        assert failed and "not enabled" in message
+        assert run(accessor, root, "search_imagery")[1]["platform"] == "earth_search"
+        assert run(accessor, root, "add_service_layer", platform="ign_wfs", typename="A:b")[1]["name"] == "A:b"
+        assert run(accessor, root, "add_service_layer", platform="prg_pl", typename="A:b")[0] is True
+
     def test_export_stays_below_the_root(self, api):
         accessor, root = api
         assert run(accessor, root, "export_layers", layers=["a"], subfolder="ok/sub")[0] is False
@@ -274,6 +283,9 @@ class TestRoutes:
         assert client.post("/open-data/search", json={"query": ""}).status_code == 422
         assert client.get("/open-data/search", params={"query": "x"}).status_code == 405  # a page cannot trigger it
         assert client.post("/layers/remove", json={"layers": ["a"]}).json()["done"] == ["a"]
+        assert client.post("/layers/add-service", json={"platform": "ign_wfs", "typename": "A:b"}).json()["provider_type"] == "WFS"
+        assert client.post("/open-data/imagery", json={"bbox": [1, 2, 3, 4]}).status_code == 200
+        assert client.post("/open-data/imagery", json={"bbox": [1, 2]}).status_code == 422
 
     def test_map_context(self, client):
         response = client.get("/map/context")

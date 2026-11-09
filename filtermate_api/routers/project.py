@@ -78,6 +78,21 @@ def add_layer(payload: AddLayerBody, request: Request) -> LayerSummary:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from None
 
 
+class AddServiceLayerBody(BaseModel):
+    platform: str = Field(..., min_length=1, max_length=200, description="WFS platform, e.g. ign_wfs")
+    typename: str = Field(..., min_length=1, max_length=300, description="Layer id given by the search")
+    name: str = Field(default="", max_length=200)
+
+
+@router.post("/layers/add-service", response_model=LayerSummary)
+def add_service_layer(payload: AddServiceLayerBody, request: Request) -> LayerSummary:
+    """Add a layer of a WFS platform the user allowed."""
+    try:
+        return _accessor(request).add_service_layer(payload.platform, payload.typename, name=payload.name)
+    except FilterRejected as exc:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from None
+
+
 class RemoveBody(BaseModel):
     layers: List[LayerName] = Field(..., min_length=1, max_length=1000)
 
@@ -99,5 +114,26 @@ def search_open_data(payload: OpenDataBody, request: Request) -> OpenDataResult:
     """Datasets of an allowed open data platform. A POST: a web page must not be able to trigger it."""
     try:
         return _accessor(request).search_open_data(payload.query, platform=payload.platform, limit=payload.limit)
+    except FilterRejected as exc:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from None
+
+
+class ImageryBody(BaseModel):
+    bbox: Optional[List[float]] = Field(default=None, min_length=4, max_length=4, description="[west, south, east, north] in degrees")
+    start: str = Field(default="", max_length=10, description="First day, YYYY-MM-DD")
+    end: str = Field(default="", max_length=10, description="Last day, YYYY-MM-DD")
+    max_cloud: float = Field(default=20.0, ge=0, le=100)
+    collections: Optional[List[str]] = Field(default=None, max_length=5)
+    limit: int = Field(default=5, ge=1, le=20)
+    platform: str = Field(default="earth_search", max_length=200)
+
+
+@router.post("/open-data/imagery", response_model=OpenDataResult)
+def search_imagery(payload: ImageryBody, request: Request) -> OpenDataResult:
+    """Satellite scenes of an allowed STAC catalog."""
+    try:
+        return _accessor(request).search_imagery(bbox=payload.bbox, start=payload.start, end=payload.end,
+                                                 max_cloud=payload.max_cloud, collections=payload.collections,
+                                                 limit=payload.limit, platform=payload.platform)
     except FilterRejected as exc:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from None
