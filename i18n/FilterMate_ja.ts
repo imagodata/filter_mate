@@ -7758,4 +7758,574 @@ PyPI から pip で、QGIS のプロファイルに今すぐインストール�
         <translation type="obsolete">保持したポイント</translation>
     </message>
 </context>
+<context>
+    <name>AgentPanel</name>
+    <message>
+        <source>(no request)</source>
+        <translation>(リクエストなし)</translation>
+    </message>
+    <message>
+        <source>A few free requests a month, through the relay of FilterMate to Claude (Anthropic), under the terms of Anthropic. The relay counts what is spent and keeps no conversation. When it is used up, choose a provider and enter your own API key.</source>
+        <translation>FilterMate から Claude (Anthropic) への中継を通じて、毎月少数の無料リクエストを利用できます（Anthropic の利用規約が適用されます）。中継は使用量のみを集計し、会話は保存しません。使い切った場合は、プロバイダーを選択して独自の API キーを入力してください。</translation>
+    </message>
+    <message>
+        <source>API key</source>
+        <translation>API キー</translation>
+    </message>
+    <message>
+        <source>Add</source>
+        <translation>追加</translation>
+    </message>
+    <message>
+        <source>Address</source>
+        <translation>アドレス</translation>
+    </message>
+    <message>
+        <source>Agent settings</source>
+        <translation>エージェントの設定</translation>
+    </message>
+    <message>
+        <source>Allow attribute values to be sent</source>
+        <translation>属性値の送信を許可する</translation>
+    </message>
+    <message>
+        <source>Applications already set up will have to be set up again.</source>
+        <translation>設定済みのアプリケーションは、再設定が必要です。</translation>
+    </message>
+    <message>
+        <source>Ask the agent to filter your layers</source>
+        <translation>エージェントにレイヤーのフィルタを依頼</translation>
+    </message>
+    <message>
+        <source>Back to the conversation</source>
+        <translation>会話に戻る</translation>
+    </message>
+    <message>
+        <source>Claude Code or another MCP client on this computer can then filter your layers, once FilterMate has been opened, under the rules of this panel: the same sources, the same confirmations, and filters can be undone here. That application sends what it reads to its own AI provider.</source>
+        <translation>このコンピューター上の Claude Code などの MCP クライアントは、FilterMate を開いた後、このパネルのルール（同じソース、同じ確認、フィルタはここで元に戻せます）に従ってレイヤーをフィルタできるようになります。そのアプリケーションは、読み取った内容を独自の AI プロバイダーに送信します。</translation>
+    </message>
+    <message>
+        <source>Connect an AI provider to start. Nothing is sent before you agree.</source>
+        <translation>開始するには AI プロバイダーを接続してください。同意するまで何も送信されません。</translation>
+    </message>
+    <message>
+        <source>Copied, with the access token: keep it to yourself. Save these settings for it to apply.</source>
+        <translation>アクセストークンとともにコピーしました。他人に見せないでください。適用するには、この設定を保存してください。</translation>
+    </message>
+    <message>
+        <source>Copy for Claude Desktop</source>
+        <translation>Claude Desktop 用にコピー</translation>
+    </message>
+    <message>
+        <source>Copy the Claude Code command</source>
+        <translation>Claude Code のコマンドをコピー</translation>
+    </message>
+    <message>
+        <source>Copy the configuration</source>
+        <translation>設定をコピー</translation>
+    </message>
+    <message>
+        <source>Describe it in your own words. Each filter can be undone.</source>
+        <translation>自分の言葉で説明してください。各フィルタは元に戻せます。</translation>
+    </message>
+    <message>
+        <source>Filter your layers from a sentence</source>
+        <translation>一文でレイヤーをフィルタ</translation>
+    </message>
+    <message>
+        <source>FilterMate agent</source>
+        <translation>FilterMate エージェント</translation>
+    </message>
+    <message>
+        <source>History</source>
+        <translation>履歴</translation>
+    </message>
+    <message>
+        <source>History…</source>
+        <translation>履歴…</translation>
+    </message>
+    <message>
+        <source>I agree to send this data to this provider</source>
+        <translation>このプロバイダーへのデータ送信に同意します</translation>
+    </message>
+    <message>
+        <source>Let other applications on this computer drive FilterMate (MCP server)</source>
+        <translation>このコンピューター上の他のアプリケーションによる FilterMate の操作を許可する (MCP サーバー)</translation>
+    </message>
+    <message>
+        <source>MCP connector</source>
+        <translation>MCP コネクター</translation>
+    </message>
+    <message>
+        <source>MCP connectors</source>
+        <translation>MCP コネクター</translation>
+    </message>
+    <message>
+        <source>Model</source>
+        <translation>モデル</translation>
+    </message>
+    <message>
+        <source>More</source>
+        <translation>その他</translation>
+    </message>
+    <message>
+        <source>New access token</source>
+        <translation>新しいアクセストークン</translation>
+    </message>
+    <message>
+        <source>New conversation</source>
+        <translation>新しい会話</translation>
+    </message>
+    <message>
+        <source>New token: it applies once these settings are saved.</source>
+        <translation>新しいトークン: この設定を保存すると適用されます。</translation>
+    </message>
+    <message>
+        <source>Open data platforms</source>
+        <translation>オープンデータプラットフォーム</translation>
+    </message>
+    <message>
+        <source>Open the settings</source>
+        <translation>設定を開く</translation>
+    </message>
+    <message>
+        <source>Other applications</source>
+        <translation>他のアプリケーション</translation>
+    </message>
+    <message>
+        <source>Port</source>
+        <translation>ポート</translation>
+    </message>
+    <message>
+        <source>Provider</source>
+        <translation>プロバイダー</translation>
+    </message>
+    <message>
+        <source>Redo</source>
+        <translation>やり直す</translation>
+    </message>
+    <message>
+        <source>Remove</source>
+        <translation>削除</translation>
+    </message>
+    <message>
+        <source>Remove the stored key</source>
+        <translation>保存したキーを削除</translation>
+    </message>
+    <message>
+        <source>Satellite imagery</source>
+        <translation>衛星画像</translation>
+    </message>
+    <message>
+        <source>Send (Enter)</source>
+        <translation>送信 (Enter)</translation>
+    </message>
+    <message>
+        <source>Send again</source>
+        <translation>再送信</translation>
+    </message>
+    <message>
+        <source>Sent to: {}</source>
+        <translation>送信先: {}</translation>
+    </message>
+    <message>
+        <source>Set up the agent</source>
+        <translation>エージェントを設定</translation>
+    </message>
+    <message>
+        <source>Sources</source>
+        <translation>ソース</translation>
+    </message>
+    <message>
+        <source>Stop (Esc)</source>
+        <translation>停止 (Esc)</translation>
+    </message>
+    <message>
+        <source>Stored: leave empty to keep it</source>
+        <translation>保存済み: 空欄のままにすると維持されます</translation>
+    </message>
+    <message>
+        <source>Test</source>
+        <translation>テスト</translation>
+    </message>
+    <message>
+        <source>Testing…</source>
+        <translation>テスト中…</translation>
+    </message>
+    <message>
+        <source>The MCP server could not start: {}</source>
+        <translation>MCP サーバーを起動できませんでした: {}</translation>
+    </message>
+    <message>
+        <source>The agent can search the sources ticked here. Your searches, and what the agent passes to a connector, are sent to them; a layer added from them is read from their servers.</source>
+        <translation>エージェントは、ここでチェックしたソースを検索できます。検索内容やエージェントがコネクターに渡す内容はそれらのソースに送信され、そこから追加したレイヤーはそのサーバーから読み込まれます。</translation>
+    </message>
+    <message>
+        <source>The agent sends your request, the names of your layers and fields, your filter expressions and the results of its tools to the provider chosen here, under that provider's terms. Without the option below, the agent does not read the values of your fields; values already written in your filters and favorites are still sent. The conversation is kept on this computer for each project, until you start a new one.</source>
+        <translation>エージェントは、ユーザーのリクエスト、レイヤーとフィールドの名前、フィルタ式、およびツールの結果を、ここで選択したプロバイダーに、そのプロバイダーの規約に従って送信します。下のオプションがオフの場合、エージェントはフィールドの値を読み取りませんが、フィルタやお気に入りにすでに書かれている値は引き続き送信されます。会話は、新しく開始するまでプロジェクトごとにこのコンピューターに保存されます。</translation>
+    </message>
+    <message>
+        <source>Through mcp-remote, which needs Node.js: Claude Desktop starts local servers as programs.</source>
+        <translation>Node.js が必要な mcp-remote を使用: Claude Desktop はローカルサーバーをプログラムとして起動します。</translation>
+    </message>
+    <message>
+        <source>Too many sources added: remove one first.</source>
+        <translation>ソースが多すぎます。先に 1 つ削除してください。</translation>
+    </message>
+    <message>
+        <source>Undo the last</source>
+        <translation>直前を元に戻す</translation>
+    </message>
+    <message>
+        <source>Undo this turn</source>
+        <translation>このターンを元に戻す</translation>
+    </message>
+    <message>
+        <source>What do you want to filter?</source>
+        <translation>何をフィルタしますか？</translation>
+    </message>
+    <message>
+        <source>added by you</source>
+        <translation>ユーザー追加</translation>
+    </message>
+    <message>
+        <source>applied</source>
+        <translation>適用済み</translation>
+    </message>
+    <message>
+        <source>community</source>
+        <translation>コミュニティ</translation>
+    </message>
+    <message>
+        <source>https://... or a portal address</source>
+        <translation>https://... またはポータルのアドレス</translation>
+    </message>
+    <message>
+        <source>no change</source>
+        <translation>変更なし</translation>
+    </message>
+    <message>
+        <source>official</source>
+        <translation>公式</translation>
+    </message>
+    <message>
+        <source>this computer</source>
+        <translation>このコンピューター</translation>
+    </message>
+    <message>
+        <source>undone</source>
+        <translation>元に戻しました</translation>
+    </message>
+    <message>
+        <source>{} turn(s)</source>
+        <translation>{} ターン</translation>
+    </message>
+    <message>
+        <source>Which layers are in this project?</source>
+        <translation>このプロジェクトにはどのレイヤーがありますか？</translation>
+    </message>
+    <message>
+        <source>Keep the buildings taller than 15 m</source>
+        <translation>高さ 15 m を超える建物だけを残す</translation>
+    </message>
+    <message>
+        <source>Filter the roads inside the selected feature</source>
+        <translation>選択した地物内の道路をフィルタ</translation>
+    </message>
+</context>
+<context>
+    <name>AgentChat</name>
+    <message>
+        <source>Access to the free quota was renewed: send your request again.</source>
+        <translation>無料枠へのアクセスが更新されました。リクエストをもう一度送信してください。</translation>
+    </message>
+    <message>
+        <source>Another application is changing the project: try again in a moment.</source>
+        <translation>別のアプリケーションがプロジェクトを変更しています。しばらくしてからもう一度お試しください。</translation>
+    </message>
+    <message>
+        <source>Another application: {}</source>
+        <translation>他のアプリケーション: {}</translation>
+    </message>
+    <message>
+        <source>Applied again: {}.</source>
+        <translation>再適用しました: {}。</translation>
+    </message>
+    <message>
+        <source>Changed since, left as is: {}.</source>
+        <translation>その後に変更されたため、そのままにしました: {}。</translation>
+    </message>
+    <message>
+        <source>Changed: {}.</source>
+        <translation>変更しました: {}。</translation>
+    </message>
+    <message>
+        <source>Choose a model and agree to send your data to use the agent.</source>
+        <translation>エージェントを使用するには、モデルを選択し、データの送信に同意してください。</translation>
+    </message>
+    <message>
+        <source>Connecting to {}…</source>
+        <translation>{} に接続中…</translation>
+    </message>
+    <message>
+        <source>Earlier conversation: the agent starts afresh from here.</source>
+        <translation>以前の会話です。エージェントはここから新たに開始します。</translation>
+    </message>
+    <message>
+        <source>Enter your API key in the agent settings.</source>
+        <translation>エージェントの設定で API キーを入力してください。</translation>
+    </message>
+    <message>
+        <source>Export of {}</source>
+        <translation>{} のエクスポート</translation>
+    </message>
+    <message>
+        <source>Favorite applied</source>
+        <translation>お気に入りを適用しました</translation>
+    </message>
+    <message>
+        <source>Filter on the points of {}</source>
+        <translation>{} のポイントでフィルタ</translation>
+    </message>
+    <message>
+        <source>Filter on {}</source>
+        <translation>{} をフィルタ</translation>
+    </message>
+    <message>
+        <source>Filter on {} by an area</source>
+        <translation>{} をエリアでフィルタ</translation>
+    </message>
+    <message>
+        <source>Filter on {} by {}</source>
+        <translation>{} を {} でフィルタ</translation>
+    </message>
+    <message>
+        <source>FilterMate agent</source>
+        <translation>FilterMate エージェント</translation>
+    </message>
+    <message>
+        <source>Filters removed from {}</source>
+        <translation>{} のフィルタを解除しました</translation>
+    </message>
+    <message>
+        <source>Hidden: {}</source>
+        <translation>非表示にしました: {}</translation>
+    </message>
+    <message>
+        <source>It answers.</source>
+        <translation>応答があります。</translation>
+    </message>
+    <message>
+        <source>Layer added: {}</source>
+        <translation>レイヤーを追加しました: {}</translation>
+    </message>
+    <message>
+        <source>Layers removed: {}</source>
+        <translation>レイヤーを削除しました: {}</translation>
+    </message>
+    <message>
+        <source>Not reachable for this conversation: {}</source>
+        <translation>この会話からはアクセスできません: {}</translation>
+    </message>
+    <message>
+        <source>Nothing to redo.</source>
+        <translation>やり直す操作はありません。</translation>
+    </message>
+    <message>
+        <source>Nothing to restore.</source>
+        <translation>復元するものはありません。</translation>
+    </message>
+    <message>
+        <source>Reading the active filters</source>
+        <translation>有効なフィルタを読み取り中</translation>
+    </message>
+    <message>
+        <source>Reading the favorites</source>
+        <translation>お気に入りを読み取り中</translation>
+    </message>
+    <message>
+        <source>Reading the fields of {}</source>
+        <translation>{} のフィールドを読み取り中</translation>
+    </message>
+    <message>
+        <source>Reading the layers</source>
+        <translation>レイヤーを読み取り中</translation>
+    </message>
+    <message>
+        <source>Reading the map</source>
+        <translation>地図を読み取り中</translation>
+    </message>
+    <message>
+        <source>Reading the values of {}</source>
+        <translation>{} の値を読み取り中</translation>
+    </message>
+    <message>
+        <source>Restored: {}.</source>
+        <translation>復元しました: {}。</translation>
+    </message>
+    <message>
+        <source>Searching satellite imagery on {}</source>
+        <translation>{} で衛星画像を検索中</translation>
+    </message>
+    <message>
+        <source>Searching {} for {}</source>
+        <translation>{} で {} を検索中</translation>
+    </message>
+    <message>
+        <source>Selection cleared on {}</source>
+        <translation>{} の選択を解除しました</translation>
+    </message>
+    <message>
+        <source>Selection on {}</source>
+        <translation>{} の選択</translation>
+    </message>
+    <message>
+        <source>Shown: {}</source>
+        <translation>表示しました: {}</translation>
+    </message>
+    <message>
+        <source>Stopped.</source>
+        <translation>停止しました。</translation>
+    </message>
+    <message>
+        <source>The MCP server could not start: {}</source>
+        <translation>MCP サーバーを起動できませんでした: {}</translation>
+    </message>
+    <message>
+        <source>The QGIS authentication database is not available.</source>
+        <translation>QGIS の認証データベースを利用できません。</translation>
+    </message>
+    <message>
+        <source>The QGIS master password is needed to use the stored key.</source>
+        <translation>保存されたキーを使用するには QGIS のマスターパスワードが必要です。</translation>
+    </message>
+    <message>
+        <source>The agent stopped before the end ({}).</source>
+        <translation>エージェントが完了前に停止しました ({})。</translation>
+    </message>
+    <message>
+        <source>The agent wants to add this layer of a web service to the project:
+{} · {}
+
+Do you agree?</source>
+        <translation>エージェントがウェブサービスの次のレイヤーをプロジェクトに追加しようとしています:
+{} · {}
+
+許可しますか？</translation>
+    </message>
+    <message>
+        <source>The agent wants to add this layer to the project:
+{}
+
+A remote source is read from its server by QGIS, and what the layer holds can be sent to the provider of the agent. Do you agree?</source>
+        <translation>エージェントがこのレイヤーをプロジェクトに追加しようとしています:
+{}
+
+リモートソースは QGIS がそのサーバーから読み込み、レイヤーの内容がエージェントのプロバイダーに送信される場合があります。許可しますか？</translation>
+    </message>
+    <message>
+        <source>The agent wants to export these layers to files:
+{}
+
+Do you agree?</source>
+        <translation>エージェントが次のレイヤーをファイルにエクスポートしようとしています:
+{}
+
+許可しますか？</translation>
+    </message>
+    <message>
+        <source>The agent wants to remove these layers from the project (their files stay, their styles and filters here are lost):
+{}
+
+Do you agree?</source>
+        <translation>エージェントが次のレイヤーをプロジェクトから削除しようとしています（ファイルは残りますが、ここでのスタイルとフィルタは失われます）:
+{}
+
+許可しますか？</translation>
+    </message>
+    <message>
+        <source>The agent wants to run this action on an external connector:
+{}
+{}
+
+Do you agree?</source>
+        <translation>エージェントが外部コネクターで次の操作を実行しようとしています:
+{}
+{}
+
+許可しますか？</translation>
+    </message>
+    <message>
+        <source>The credit or quota of this account is used up.</source>
+        <translation>このアカウントのクレジットまたは上限を使い切りました。</translation>
+    </message>
+    <message>
+        <source>The free quota could not be reached: {}</source>
+        <translation>無料枠に接続できませんでした: {}</translation>
+    </message>
+    <message>
+        <source>The free quota is not available.</source>
+        <translation>無料枠は利用できません。</translation>
+    </message>
+    <message>
+        <source>The free quota is unavailable for now.</source>
+        <translation>無料枠は現在利用できません。</translation>
+    </message>
+    <message>
+        <source>The free quota is used up for this month. Enter your own API key in the agent settings.</source>
+        <translation>今月の無料枠を使い切りました。エージェントの設定で独自の API キーを入力してください。</translation>
+    </message>
+    <message>
+        <source>The key could not be stored.</source>
+        <translation>キーを保存できませんでした。</translation>
+    </message>
+    <message>
+        <source>The provider could not be reached: {}</source>
+        <translation>プロバイダーに接続できませんでした: {}</translation>
+    </message>
+    <message>
+        <source>The provider refused the API key: check it in the agent settings.</source>
+        <translation>プロバイダーが API キーを拒否しました。エージェントの設定で確認してください。</translation>
+    </message>
+    <message>
+        <source>The provider reported a problem: {}</source>
+        <translation>プロバイダーが問題を報告しました: {}</translation>
+    </message>
+    <message>
+        <source>The stored key could not be read.</source>
+        <translation>保存されたキーを読み取れませんでした。</translation>
+    </message>
+    <message>
+        <source>Thinking…</source>
+        <translation>考え中…</translation>
+    </message>
+    <message>
+        <source>Too many new accounts from this address today: try again tomorrow, or enter your own API key.</source>
+        <translation>本日、このアドレスからの新規アカウントが多すぎます。明日もう一度お試しいただくか、独自の API キーを入力してください。</translation>
+    </message>
+    <message>
+        <source>Too many requests for now: try again in a moment.</source>
+        <translation>リクエストが多すぎます。しばらくしてからもう一度お試しください。</translation>
+    </message>
+    <message>
+        <source>Trying a filter on {}</source>
+        <translation>{} でフィルタを試行中</translation>
+    </message>
+    <message>
+        <source>Zoom on {}</source>
+        <translation>{} にズーム</translation>
+    </message>
+    <message>
+        <source>an area</source>
+        <translation>エリア</translation>
+    </message>
+    <message>
+        <source>everything</source>
+        <translation>すべて</translation>
+    </message>
+    <message>
+        <source>{} tools available</source>
+        <translation>利用可能なツール: {} 個</translation>
+    </message>
+</context>
 </TS>

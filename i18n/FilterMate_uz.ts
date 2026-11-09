@@ -7758,4 +7758,574 @@ Uni hozir PyPI’dan pip yordamida QGIS profilingizga o‘rnatamizmi? QGIS’nin
         <translation type="obsolete">Saqlangan nuqtalar</translation>
     </message>
 </context>
+<context>
+    <name>AgentPanel</name>
+    <message>
+        <source>(no request)</source>
+        <translation>(so'rov yo'q)</translation>
+    </message>
+    <message>
+        <source>A few free requests a month, through the relay of FilterMate to Claude (Anthropic), under the terms of Anthropic. The relay counts what is spent and keeps no conversation. When it is used up, choose a provider and enter your own API key.</source>
+        <translation>Oyiga bir nechta bepul so'rov, FilterMate'ning Claude (Anthropic) ga ulovchi relesi orqali, Anthropic shartlariga muvofiq. Rele sarflanganini hisoblaydi va hech qanday suhbatni saqlamaydi. Kvota tugagach, ta'minotchini tanlang va o'z API kalitingizni kiriting.</translation>
+    </message>
+    <message>
+        <source>API key</source>
+        <translation>API kaliti</translation>
+    </message>
+    <message>
+        <source>Add</source>
+        <translation>Qo'shish</translation>
+    </message>
+    <message>
+        <source>Address</source>
+        <translation>Manzil</translation>
+    </message>
+    <message>
+        <source>Agent settings</source>
+        <translation>Agent sozlamalari</translation>
+    </message>
+    <message>
+        <source>Allow attribute values to be sent</source>
+        <translation>Atribut qiymatlarini yuborishga ruxsat berish</translation>
+    </message>
+    <message>
+        <source>Applications already set up will have to be set up again.</source>
+        <translation>Allaqachon sozlangan ilovalarni qayta sozlash kerak bo'ladi.</translation>
+    </message>
+    <message>
+        <source>Ask the agent to filter your layers</source>
+        <translation>Agentdan qatlamlaringizni filtrlashni so'rang</translation>
+    </message>
+    <message>
+        <source>Back to the conversation</source>
+        <translation>Suhbatga qaytish</translation>
+    </message>
+    <message>
+        <source>Claude Code or another MCP client on this computer can then filter your layers, once FilterMate has been opened, under the rules of this panel: the same sources, the same confirmations, and filters can be undone here. That application sends what it reads to its own AI provider.</source>
+        <translation>FilterMate ochilgandan so'ng, bu kompyuterdagi Claude Code yoki boshqa MCP mijozi ushbu panel qoidalariga muvofiq qatlamlaringizni filtrlay oladi: bir xil manbalar, bir xil tasdiqlashlar, filtrlarni shu yerda bekor qilish mumkin. Bu ilova o'qiganini o'zining sun'iy intellekt ta'minotchisiga yuboradi.</translation>
+    </message>
+    <message>
+        <source>Connect an AI provider to start. Nothing is sent before you agree.</source>
+        <translation>Boshlash uchun sun'iy intellekt ta'minotchisini ulang. Roziligingizsiz hech narsa yuborilmaydi.</translation>
+    </message>
+    <message>
+        <source>Copied, with the access token: keep it to yourself. Save these settings for it to apply.</source>
+        <translation>Kirish tokeni bilan nusxalandi: uni o'zingizda saqlang. Qo'llanishi uchun ushbu sozlamalarni saqlang.</translation>
+    </message>
+    <message>
+        <source>Copy for Claude Desktop</source>
+        <translation>Claude Desktop uchun nusxalash</translation>
+    </message>
+    <message>
+        <source>Copy the Claude Code command</source>
+        <translation>Claude Code buyrug'ini nusxalash</translation>
+    </message>
+    <message>
+        <source>Copy the configuration</source>
+        <translation>Konfiguratsiyani nusxalash</translation>
+    </message>
+    <message>
+        <source>Describe it in your own words. Each filter can be undone.</source>
+        <translation>Buni o'z so'zlaringiz bilan tasvirlang. Har bir filtrni bekor qilish mumkin.</translation>
+    </message>
+    <message>
+        <source>Filter your layers from a sentence</source>
+        <translation>Qatlamlaringizni bitta gap bilan filtrlang</translation>
+    </message>
+    <message>
+        <source>FilterMate agent</source>
+        <translation>FilterMate agenti</translation>
+    </message>
+    <message>
+        <source>History</source>
+        <translation>Tarix</translation>
+    </message>
+    <message>
+        <source>History…</source>
+        <translation>Tarix…</translation>
+    </message>
+    <message>
+        <source>I agree to send this data to this provider</source>
+        <translation>Bu ma'lumotlarni ushbu ta'minotchiga yuborishga roziman</translation>
+    </message>
+    <message>
+        <source>Let other applications on this computer drive FilterMate (MCP server)</source>
+        <translation>Bu kompyuterdagi boshqa ilovalarga FilterMate'ni boshqarishga ruxsat berish (MCP serveri)</translation>
+    </message>
+    <message>
+        <source>MCP connector</source>
+        <translation>MCP konnektori</translation>
+    </message>
+    <message>
+        <source>MCP connectors</source>
+        <translation>MCP konnektorlari</translation>
+    </message>
+    <message>
+        <source>Model</source>
+        <translation>Model</translation>
+    </message>
+    <message>
+        <source>More</source>
+        <translation>Yana</translation>
+    </message>
+    <message>
+        <source>New access token</source>
+        <translation>Yangi kirish tokeni</translation>
+    </message>
+    <message>
+        <source>New conversation</source>
+        <translation>Yangi suhbat</translation>
+    </message>
+    <message>
+        <source>New token: it applies once these settings are saved.</source>
+        <translation>Yangi token: ushbu sozlamalar saqlangach qo'llanadi.</translation>
+    </message>
+    <message>
+        <source>Open data platforms</source>
+        <translation>Ochiq ma'lumotlar platformalari</translation>
+    </message>
+    <message>
+        <source>Open the settings</source>
+        <translation>Sozlamalarni ochish</translation>
+    </message>
+    <message>
+        <source>Other applications</source>
+        <translation>Boshqa ilovalar</translation>
+    </message>
+    <message>
+        <source>Port</source>
+        <translation>Port</translation>
+    </message>
+    <message>
+        <source>Provider</source>
+        <translation>Ta'minotchi</translation>
+    </message>
+    <message>
+        <source>Redo</source>
+        <translation>Qayta bajarish</translation>
+    </message>
+    <message>
+        <source>Remove</source>
+        <translation>Olib tashlash</translation>
+    </message>
+    <message>
+        <source>Remove the stored key</source>
+        <translation>Saqlangan kalitni o'chirish</translation>
+    </message>
+    <message>
+        <source>Satellite imagery</source>
+        <translation>Sun'iy yo'ldosh tasvirlari</translation>
+    </message>
+    <message>
+        <source>Send (Enter)</source>
+        <translation>Yuborish (Enter)</translation>
+    </message>
+    <message>
+        <source>Send again</source>
+        <translation>Qayta yuborish</translation>
+    </message>
+    <message>
+        <source>Sent to: {}</source>
+        <translation>Yuborildi: {}</translation>
+    </message>
+    <message>
+        <source>Set up the agent</source>
+        <translation>Agentni sozlash</translation>
+    </message>
+    <message>
+        <source>Sources</source>
+        <translation>Manbalar</translation>
+    </message>
+    <message>
+        <source>Stop (Esc)</source>
+        <translation>To'xtatish (Esc)</translation>
+    </message>
+    <message>
+        <source>Stored: leave empty to keep it</source>
+        <translation>Saqlangan: saqlab qolish uchun bo'sh qoldiring</translation>
+    </message>
+    <message>
+        <source>Test</source>
+        <translation>Sinash</translation>
+    </message>
+    <message>
+        <source>Testing…</source>
+        <translation>Sinalmoqda…</translation>
+    </message>
+    <message>
+        <source>The MCP server could not start: {}</source>
+        <translation>MCP serverini ishga tushirib bo'lmadi: {}</translation>
+    </message>
+    <message>
+        <source>The agent can search the sources ticked here. Your searches, and what the agent passes to a connector, are sent to them; a layer added from them is read from their servers.</source>
+        <translation>Agent shu yerda belgilangan manbalarda qidira oladi. Qidiruvlaringiz va agent konnektorga uzatgani ularga yuboriladi; ulardan qo'shilgan qatlam ularning serverlaridan o'qiladi.</translation>
+    </message>
+    <message>
+        <source>The agent sends your request, the names of your layers and fields, your filter expressions and the results of its tools to the provider chosen here, under that provider's terms. Without the option below, the agent does not read the values of your fields; values already written in your filters and favorites are still sent. The conversation is kept on this computer for each project, until you start a new one.</source>
+        <translation>Agent so'rovingizni, qatlam va maydonlaringiz nomlarini, filtr ifodalaringizni va vositalari natijalarini shu yerda tanlangan ta'minotchiga, uning shartlariga muvofiq yuboradi. Quyidagi variantsiz agent maydonlaringiz qiymatlarini o'qimaydi; filtr va sevimlilaringizda allaqachon yozilgan qiymatlar baribir yuboriladi. Suhbat yangisini boshlamaguningizcha har bir loyiha uchun shu kompyuterda saqlanadi.</translation>
+    </message>
+    <message>
+        <source>Through mcp-remote, which needs Node.js: Claude Desktop starts local servers as programs.</source>
+        <translation>Node.js talab qiladigan mcp-remote orqali: Claude Desktop lokal serverlarni dastur sifatida ishga tushiradi.</translation>
+    </message>
+    <message>
+        <source>Too many sources added: remove one first.</source>
+        <translation>Juda ko'p manba qo'shildi: avval bittasini olib tashlang.</translation>
+    </message>
+    <message>
+        <source>Undo the last</source>
+        <translation>Oxirgisini bekor qilish</translation>
+    </message>
+    <message>
+        <source>Undo this turn</source>
+        <translation>Bu navbatni bekor qilish</translation>
+    </message>
+    <message>
+        <source>What do you want to filter?</source>
+        <translation>Nimani filtrlamoqchisiz?</translation>
+    </message>
+    <message>
+        <source>added by you</source>
+        <translation>siz qo'shgansiz</translation>
+    </message>
+    <message>
+        <source>applied</source>
+        <translation>qo'llandi</translation>
+    </message>
+    <message>
+        <source>community</source>
+        <translation>hamjamiyat</translation>
+    </message>
+    <message>
+        <source>https://... or a portal address</source>
+        <translation>https://... yoki portal manzili</translation>
+    </message>
+    <message>
+        <source>no change</source>
+        <translation>o'zgarish yo'q</translation>
+    </message>
+    <message>
+        <source>official</source>
+        <translation>rasmiy</translation>
+    </message>
+    <message>
+        <source>this computer</source>
+        <translation>bu kompyuter</translation>
+    </message>
+    <message>
+        <source>undone</source>
+        <translation>bekor qilindi</translation>
+    </message>
+    <message>
+        <source>{} turn(s)</source>
+        <translation>{} navbat</translation>
+    </message>
+    <message>
+        <source>Which layers are in this project?</source>
+        <translation>Bu loyihada qaysi qatlamlar bor?</translation>
+    </message>
+    <message>
+        <source>Keep the buildings taller than 15 m</source>
+        <translation>15 m dan baland binolarni qoldirish</translation>
+    </message>
+    <message>
+        <source>Filter the roads inside the selected feature</source>
+        <translation>Tanlangan xususiyat ichidagi yo'llarni filtrlash</translation>
+    </message>
+</context>
+<context>
+    <name>AgentChat</name>
+    <message>
+        <source>Access to the free quota was renewed: send your request again.</source>
+        <translation>Bepul kvotaga kirish yangilandi: so'rovingizni qayta yuboring.</translation>
+    </message>
+    <message>
+        <source>Another application is changing the project: try again in a moment.</source>
+        <translation>Boshqa ilova loyihani o'zgartirmoqda: birozdan so'ng qayta urinib ko'ring.</translation>
+    </message>
+    <message>
+        <source>Another application: {}</source>
+        <translation>Boshqa ilova: {}</translation>
+    </message>
+    <message>
+        <source>Applied again: {}.</source>
+        <translation>Qayta qo'llandi: {}.</translation>
+    </message>
+    <message>
+        <source>Changed since, left as is: {}.</source>
+        <translation>Keyin o'zgartirilgan, o'z holicha qoldirildi: {}.</translation>
+    </message>
+    <message>
+        <source>Changed: {}.</source>
+        <translation>O'zgartirildi: {}.</translation>
+    </message>
+    <message>
+        <source>Choose a model and agree to send your data to use the agent.</source>
+        <translation>Agentdan foydalanish uchun modelni tanlang va ma'lumotlaringiz yuborilishiga rozilik bering.</translation>
+    </message>
+    <message>
+        <source>Connecting to {}…</source>
+        <translation>{} ga ulanmoqda…</translation>
+    </message>
+    <message>
+        <source>Earlier conversation: the agent starts afresh from here.</source>
+        <translation>Oldingi suhbat: agent bu yerdan boshlab yangidan boshlaydi.</translation>
+    </message>
+    <message>
+        <source>Enter your API key in the agent settings.</source>
+        <translation>Agent sozlamalarida API kalitingizni kiriting.</translation>
+    </message>
+    <message>
+        <source>Export of {}</source>
+        <translation>{} eksporti</translation>
+    </message>
+    <message>
+        <source>Favorite applied</source>
+        <translation>Sevimli qo'llandi</translation>
+    </message>
+    <message>
+        <source>Filter on the points of {}</source>
+        <translation>{} nuqtalari bo'yicha filtr</translation>
+    </message>
+    <message>
+        <source>Filter on {}</source>
+        <translation>{} bo'yicha filtr</translation>
+    </message>
+    <message>
+        <source>Filter on {} by an area</source>
+        <translation>{} bo'yicha hudud orqali filtr</translation>
+    </message>
+    <message>
+        <source>Filter on {} by {}</source>
+        <translation>{} bo'yicha {} orqali filtr</translation>
+    </message>
+    <message>
+        <source>FilterMate agent</source>
+        <translation>FilterMate agenti</translation>
+    </message>
+    <message>
+        <source>Filters removed from {}</source>
+        <translation>{} dan filtrlar olib tashlandi</translation>
+    </message>
+    <message>
+        <source>Hidden: {}</source>
+        <translation>Yashirildi: {}</translation>
+    </message>
+    <message>
+        <source>It answers.</source>
+        <translation>U javob beradi.</translation>
+    </message>
+    <message>
+        <source>Layer added: {}</source>
+        <translation>Qatlam qo'shildi: {}</translation>
+    </message>
+    <message>
+        <source>Layers removed: {}</source>
+        <translation>Qatlamlar olib tashlandi: {}</translation>
+    </message>
+    <message>
+        <source>Not reachable for this conversation: {}</source>
+        <translation>Bu suhbat uchun erishib bo'lmaydi: {}</translation>
+    </message>
+    <message>
+        <source>Nothing to redo.</source>
+        <translation>Qayta bajariladigan narsa yo'q.</translation>
+    </message>
+    <message>
+        <source>Nothing to restore.</source>
+        <translation>Tiklanadigan narsa yo'q.</translation>
+    </message>
+    <message>
+        <source>Reading the active filters</source>
+        <translation>Faol filtrlar o'qilmoqda</translation>
+    </message>
+    <message>
+        <source>Reading the favorites</source>
+        <translation>Sevimlilar o'qilmoqda</translation>
+    </message>
+    <message>
+        <source>Reading the fields of {}</source>
+        <translation>{} maydonlari o'qilmoqda</translation>
+    </message>
+    <message>
+        <source>Reading the layers</source>
+        <translation>Qatlamlar o'qilmoqda</translation>
+    </message>
+    <message>
+        <source>Reading the map</source>
+        <translation>Xarita o'qilmoqda</translation>
+    </message>
+    <message>
+        <source>Reading the values of {}</source>
+        <translation>{} qiymatlari o'qilmoqda</translation>
+    </message>
+    <message>
+        <source>Restored: {}.</source>
+        <translation>Tiklandi: {}.</translation>
+    </message>
+    <message>
+        <source>Searching satellite imagery on {}</source>
+        <translation>{} da sun'iy yo'ldosh tasvirlari qidirilmoqda</translation>
+    </message>
+    <message>
+        <source>Searching {} for {}</source>
+        <translation>{} da {} qidirilmoqda</translation>
+    </message>
+    <message>
+        <source>Selection cleared on {}</source>
+        <translation>{} da tanlov tozalandi</translation>
+    </message>
+    <message>
+        <source>Selection on {}</source>
+        <translation>{} da tanlov</translation>
+    </message>
+    <message>
+        <source>Shown: {}</source>
+        <translation>Ko'rsatildi: {}</translation>
+    </message>
+    <message>
+        <source>Stopped.</source>
+        <translation>To'xtatildi.</translation>
+    </message>
+    <message>
+        <source>The MCP server could not start: {}</source>
+        <translation>MCP serverini ishga tushirib bo'lmadi: {}</translation>
+    </message>
+    <message>
+        <source>The QGIS authentication database is not available.</source>
+        <translation>QGIS autentifikatsiya ma'lumotlar bazasi mavjud emas.</translation>
+    </message>
+    <message>
+        <source>The QGIS master password is needed to use the stored key.</source>
+        <translation>Saqlangan kalitdan foydalanish uchun QGIS asosiy paroli kerak.</translation>
+    </message>
+    <message>
+        <source>The agent stopped before the end ({}).</source>
+        <translation>Agent oxirigacha yetmay to'xtadi ({}).</translation>
+    </message>
+    <message>
+        <source>The agent wants to add this layer of a web service to the project:
+{} · {}
+
+Do you agree?</source>
+        <translation>Agent veb-xizmatning ushbu qatlamini loyihaga qo'shmoqchi:
+{} · {}
+
+Rozimisiz?</translation>
+    </message>
+    <message>
+        <source>The agent wants to add this layer to the project:
+{}
+
+A remote source is read from its server by QGIS, and what the layer holds can be sent to the provider of the agent. Do you agree?</source>
+        <translation>Agent ushbu qatlamni loyihaga qo'shmoqchi:
+{}
+
+Masofaviy manbani QGIS uning serveridan o'qiydi, qatlam tarkibi esa agent ta'minotchisiga yuborilishi mumkin. Rozimisiz?</translation>
+    </message>
+    <message>
+        <source>The agent wants to export these layers to files:
+{}
+
+Do you agree?</source>
+        <translation>Agent ushbu qatlamlarni fayllarga eksport qilmoqchi:
+{}
+
+Rozimisiz?</translation>
+    </message>
+    <message>
+        <source>The agent wants to remove these layers from the project (their files stay, their styles and filters here are lost):
+{}
+
+Do you agree?</source>
+        <translation>Agent ushbu qatlamlarni loyihadan olib tashlamoqchi (fayllari qoladi, bu yerdagi uslublari va filtrlari yo'qoladi):
+{}
+
+Rozimisiz?</translation>
+    </message>
+    <message>
+        <source>The agent wants to run this action on an external connector:
+{}
+{}
+
+Do you agree?</source>
+        <translation>Agent ushbu amalni tashqi konnektorda bajarmoqchi:
+{}
+{}
+
+Rozimisiz?</translation>
+    </message>
+    <message>
+        <source>The credit or quota of this account is used up.</source>
+        <translation>Bu hisobning krediti yoki kvotasi tugagan.</translation>
+    </message>
+    <message>
+        <source>The free quota could not be reached: {}</source>
+        <translation>Bepul kvotaga ulanib bo'lmadi: {}</translation>
+    </message>
+    <message>
+        <source>The free quota is not available.</source>
+        <translation>Bepul kvota mavjud emas.</translation>
+    </message>
+    <message>
+        <source>The free quota is unavailable for now.</source>
+        <translation>Bepul kvota hozircha mavjud emas.</translation>
+    </message>
+    <message>
+        <source>The free quota is used up for this month. Enter your own API key in the agent settings.</source>
+        <translation>Bu oy uchun bepul kvota tugadi. Agent sozlamalarida o'z API kalitingizni kiriting.</translation>
+    </message>
+    <message>
+        <source>The key could not be stored.</source>
+        <translation>Kalitni saqlab bo'lmadi.</translation>
+    </message>
+    <message>
+        <source>The provider could not be reached: {}</source>
+        <translation>Ta'minotchiga ulanib bo'lmadi: {}</translation>
+    </message>
+    <message>
+        <source>The provider refused the API key: check it in the agent settings.</source>
+        <translation>Ta'minotchi API kalitini rad etdi: uni agent sozlamalarida tekshiring.</translation>
+    </message>
+    <message>
+        <source>The provider reported a problem: {}</source>
+        <translation>Ta'minotchi muammo haqida xabar berdi: {}</translation>
+    </message>
+    <message>
+        <source>The stored key could not be read.</source>
+        <translation>Saqlangan kalitni o'qib bo'lmadi.</translation>
+    </message>
+    <message>
+        <source>Thinking…</source>
+        <translation>O'ylanmoqda…</translation>
+    </message>
+    <message>
+        <source>Too many new accounts from this address today: try again tomorrow, or enter your own API key.</source>
+        <translation>Bugun bu manzildan juda ko'p yangi hisoblar ochildi: ertaga qayta urinib ko'ring yoki o'z API kalitingizni kiriting.</translation>
+    </message>
+    <message>
+        <source>Too many requests for now: try again in a moment.</source>
+        <translation>Hozircha juda ko'p so'rovlar: birozdan so'ng qayta urinib ko'ring.</translation>
+    </message>
+    <message>
+        <source>Trying a filter on {}</source>
+        <translation>{} da filtr sinab ko'rilmoqda</translation>
+    </message>
+    <message>
+        <source>Zoom on {}</source>
+        <translation>{} ga masshtablash</translation>
+    </message>
+    <message>
+        <source>an area</source>
+        <translation>hudud</translation>
+    </message>
+    <message>
+        <source>everything</source>
+        <translation>hammasi</translation>
+    </message>
+    <message>
+        <source>{} tools available</source>
+        <translation>{} ta vosita mavjud</translation>
+    </message>
+</context>
 </TS>

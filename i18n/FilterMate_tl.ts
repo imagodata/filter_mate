@@ -7758,4 +7758,574 @@ I-install ito ngayon mula sa PyPI gamit ang pip, sa iyong QGIS profile? Hindi bi
         <translation type="obsolete">Mga pinanatiling punto</translation>
     </message>
 </context>
+<context>
+    <name>AgentPanel</name>
+    <message>
+        <source>(no request)</source>
+        <translation>(walang kahilingan)</translation>
+    </message>
+    <message>
+        <source>A few free requests a month, through the relay of FilterMate to Claude (Anthropic), under the terms of Anthropic. The relay counts what is spent and keeps no conversation. When it is used up, choose a provider and enter your own API key.</source>
+        <translation>Ilang libreng kahilingan bawat buwan, sa pamamagitan ng relay ng FilterMate papunta sa Claude (Anthropic), ayon sa mga tuntunin ng Anthropic. Binibilang ng relay ang nagagastos at hindi nag-iimbak ng anumang usapan. Kapag naubos na, pumili ng provider at ilagay ang sarili mong API key.</translation>
+    </message>
+    <message>
+        <source>API key</source>
+        <translation>API key</translation>
+    </message>
+    <message>
+        <source>Add</source>
+        <translation>Idagdag</translation>
+    </message>
+    <message>
+        <source>Address</source>
+        <translation>Address</translation>
+    </message>
+    <message>
+        <source>Agent settings</source>
+        <translation>Mga setting ng agent</translation>
+    </message>
+    <message>
+        <source>Allow attribute values to be sent</source>
+        <translation>Payagang maipadala ang mga halaga ng attribute</translation>
+    </message>
+    <message>
+        <source>Applications already set up will have to be set up again.</source>
+        <translation>Kailangang i-set up muli ang mga application na na-set up na.</translation>
+    </message>
+    <message>
+        <source>Ask the agent to filter your layers</source>
+        <translation>Hilingin sa agent na i-filter ang iyong mga layer</translation>
+    </message>
+    <message>
+        <source>Back to the conversation</source>
+        <translation>Bumalik sa usapan</translation>
+    </message>
+    <message>
+        <source>Claude Code or another MCP client on this computer can then filter your layers, once FilterMate has been opened, under the rules of this panel: the same sources, the same confirmations, and filters can be undone here. That application sends what it reads to its own AI provider.</source>
+        <translation>Pagkabukas ng FilterMate, maaaring i-filter ng Claude Code o ibang MCP client sa computer na ito ang iyong mga layer, ayon sa mga patakaran ng panel na ito: parehong mga source, parehong kumpirmasyon, at maaaring i-undo rito ang mga filter. Ipinapadala ng application na iyon ang binabasa nito sa sarili nitong AI provider.</translation>
+    </message>
+    <message>
+        <source>Connect an AI provider to start. Nothing is sent before you agree.</source>
+        <translation>Magkonekta ng AI provider para magsimula. Walang ipapadala bago ka pumayag.</translation>
+    </message>
+    <message>
+        <source>Copied, with the access token: keep it to yourself. Save these settings for it to apply.</source>
+        <translation>Nakopya, kasama ang access token: ingatan ito. I-save ang mga setting na ito para mailapat.</translation>
+    </message>
+    <message>
+        <source>Copy for Claude Desktop</source>
+        <translation>Kopyahin para sa Claude Desktop</translation>
+    </message>
+    <message>
+        <source>Copy the Claude Code command</source>
+        <translation>Kopyahin ang command ng Claude Code</translation>
+    </message>
+    <message>
+        <source>Copy the configuration</source>
+        <translation>Kopyahin ang configuration</translation>
+    </message>
+    <message>
+        <source>Describe it in your own words. Each filter can be undone.</source>
+        <translation>Ilarawan ito sa sarili mong salita. Maaaring i-undo ang bawat filter.</translation>
+    </message>
+    <message>
+        <source>Filter your layers from a sentence</source>
+        <translation>I-filter ang iyong mga layer sa isang pangungusap</translation>
+    </message>
+    <message>
+        <source>FilterMate agent</source>
+        <translation>FilterMate agent</translation>
+    </message>
+    <message>
+        <source>History</source>
+        <translation>History</translation>
+    </message>
+    <message>
+        <source>History…</source>
+        <translation>History…</translation>
+    </message>
+    <message>
+        <source>I agree to send this data to this provider</source>
+        <translation>Pumapayag akong ipadala ang data na ito sa provider na ito</translation>
+    </message>
+    <message>
+        <source>Let other applications on this computer drive FilterMate (MCP server)</source>
+        <translation>Hayaang kontrolin ng ibang application sa computer na ito ang FilterMate (MCP server)</translation>
+    </message>
+    <message>
+        <source>MCP connector</source>
+        <translation>MCP connector</translation>
+    </message>
+    <message>
+        <source>MCP connectors</source>
+        <translation>Mga MCP connector</translation>
+    </message>
+    <message>
+        <source>Model</source>
+        <translation>Model</translation>
+    </message>
+    <message>
+        <source>More</source>
+        <translation>Higit pa</translation>
+    </message>
+    <message>
+        <source>New access token</source>
+        <translation>Bagong access token</translation>
+    </message>
+    <message>
+        <source>New conversation</source>
+        <translation>Bagong usapan</translation>
+    </message>
+    <message>
+        <source>New token: it applies once these settings are saved.</source>
+        <translation>Bagong token: mailalapat ito kapag na-save na ang mga setting na ito.</translation>
+    </message>
+    <message>
+        <source>Open data platforms</source>
+        <translation>Mga open data platform</translation>
+    </message>
+    <message>
+        <source>Open the settings</source>
+        <translation>Buksan ang mga setting</translation>
+    </message>
+    <message>
+        <source>Other applications</source>
+        <translation>Ibang mga application</translation>
+    </message>
+    <message>
+        <source>Port</source>
+        <translation>Port</translation>
+    </message>
+    <message>
+        <source>Provider</source>
+        <translation>Provider</translation>
+    </message>
+    <message>
+        <source>Redo</source>
+        <translation>I-redo</translation>
+    </message>
+    <message>
+        <source>Remove</source>
+        <translation>Alisin</translation>
+    </message>
+    <message>
+        <source>Remove the stored key</source>
+        <translation>Alisin ang naka-store na key</translation>
+    </message>
+    <message>
+        <source>Satellite imagery</source>
+        <translation>Satellite imagery</translation>
+    </message>
+    <message>
+        <source>Send (Enter)</source>
+        <translation>Ipadala (Enter)</translation>
+    </message>
+    <message>
+        <source>Send again</source>
+        <translation>Ipadala ulit</translation>
+    </message>
+    <message>
+        <source>Sent to: {}</source>
+        <translation>Ipinadala sa: {}</translation>
+    </message>
+    <message>
+        <source>Set up the agent</source>
+        <translation>I-set up ang agent</translation>
+    </message>
+    <message>
+        <source>Sources</source>
+        <translation>Mga source</translation>
+    </message>
+    <message>
+        <source>Stop (Esc)</source>
+        <translation>Ihinto (Esc)</translation>
+    </message>
+    <message>
+        <source>Stored: leave empty to keep it</source>
+        <translation>Naka-store: iwanang walang laman para panatilihin</translation>
+    </message>
+    <message>
+        <source>Test</source>
+        <translation>Subukan</translation>
+    </message>
+    <message>
+        <source>Testing…</source>
+        <translation>Sinusubukan…</translation>
+    </message>
+    <message>
+        <source>The MCP server could not start: {}</source>
+        <translation>Hindi masimulan ang MCP server: {}</translation>
+    </message>
+    <message>
+        <source>The agent can search the sources ticked here. Your searches, and what the agent passes to a connector, are sent to them; a layer added from them is read from their servers.</source>
+        <translation>Maaaring maghanap ang agent sa mga source na may tsek dito. Ipinapadala sa kanila ang iyong mga paghahanap at ang ipinapasa ng agent sa isang connector; ang layer na idinagdag mula sa kanila ay binabasa mula sa kanilang mga server.</translation>
+    </message>
+    <message>
+        <source>The agent sends your request, the names of your layers and fields, your filter expressions and the results of its tools to the provider chosen here, under that provider's terms. Without the option below, the agent does not read the values of your fields; values already written in your filters and favorites are still sent. The conversation is kept on this computer for each project, until you start a new one.</source>
+        <translation>Ipinapadala ng agent ang iyong kahilingan, ang mga pangalan ng iyong mga layer at field, ang iyong mga filter expression at ang mga resulta ng mga tool nito sa provider na pinili rito, ayon sa mga tuntunin ng provider na iyon. Kung walang opsyon sa ibaba, hindi binabasa ng agent ang mga halaga ng iyong mga field; ang mga halagang nakasulat na sa iyong mga filter at paborito ay ipinapadala pa rin. Itinatago ang usapan sa computer na ito para sa bawat project, hanggang magsimula ka ng bago.</translation>
+    </message>
+    <message>
+        <source>Through mcp-remote, which needs Node.js: Claude Desktop starts local servers as programs.</source>
+        <translation>Sa pamamagitan ng mcp-remote, na nangangailangan ng Node.js: sinisimulan ng Claude Desktop ang mga lokal na server bilang mga program.</translation>
+    </message>
+    <message>
+        <source>Too many sources added: remove one first.</source>
+        <translation>Masyadong maraming source ang naidagdag: mag-alis muna ng isa.</translation>
+    </message>
+    <message>
+        <source>Undo the last</source>
+        <translation>I-undo ang huli</translation>
+    </message>
+    <message>
+        <source>Undo this turn</source>
+        <translation>I-undo ang turn na ito</translation>
+    </message>
+    <message>
+        <source>What do you want to filter?</source>
+        <translation>Ano ang gusto mong i-filter?</translation>
+    </message>
+    <message>
+        <source>added by you</source>
+        <translation>idinagdag mo</translation>
+    </message>
+    <message>
+        <source>applied</source>
+        <translation>nailapat</translation>
+    </message>
+    <message>
+        <source>community</source>
+        <translation>komunidad</translation>
+    </message>
+    <message>
+        <source>https://... or a portal address</source>
+        <translation>https://... o address ng portal</translation>
+    </message>
+    <message>
+        <source>no change</source>
+        <translation>walang pagbabago</translation>
+    </message>
+    <message>
+        <source>official</source>
+        <translation>opisyal</translation>
+    </message>
+    <message>
+        <source>this computer</source>
+        <translation>computer na ito</translation>
+    </message>
+    <message>
+        <source>undone</source>
+        <translation>na-undo</translation>
+    </message>
+    <message>
+        <source>{} turn(s)</source>
+        <translation>{} turn</translation>
+    </message>
+    <message>
+        <source>Which layers are in this project?</source>
+        <translation>Anong mga layer ang nasa project na ito?</translation>
+    </message>
+    <message>
+        <source>Keep the buildings taller than 15 m</source>
+        <translation>Panatilihin ang mga gusaling mas mataas sa 15 m</translation>
+    </message>
+    <message>
+        <source>Filter the roads inside the selected feature</source>
+        <translation>I-filter ang mga kalsada sa loob ng napiling feature</translation>
+    </message>
+</context>
+<context>
+    <name>AgentChat</name>
+    <message>
+        <source>Access to the free quota was renewed: send your request again.</source>
+        <translation>Na-renew ang access sa libreng quota: ipadala ulit ang iyong kahilingan.</translation>
+    </message>
+    <message>
+        <source>Another application is changing the project: try again in a moment.</source>
+        <translation>May ibang application na nagbabago sa project: subukan ulit sa ilang sandali.</translation>
+    </message>
+    <message>
+        <source>Another application: {}</source>
+        <translation>Ibang application: {}</translation>
+    </message>
+    <message>
+        <source>Applied again: {}.</source>
+        <translation>Inilapat muli: {}.</translation>
+    </message>
+    <message>
+        <source>Changed since, left as is: {}.</source>
+        <translation>Nabago na mula noon, iniwan kung ano ito: {}.</translation>
+    </message>
+    <message>
+        <source>Changed: {}.</source>
+        <translation>Binago: {}.</translation>
+    </message>
+    <message>
+        <source>Choose a model and agree to send your data to use the agent.</source>
+        <translation>Pumili ng model at pumayag na ipadala ang iyong data para magamit ang agent.</translation>
+    </message>
+    <message>
+        <source>Connecting to {}…</source>
+        <translation>Kumokonekta sa {}…</translation>
+    </message>
+    <message>
+        <source>Earlier conversation: the agent starts afresh from here.</source>
+        <translation>Naunang usapan: nagsisimula ulit ang agent mula rito.</translation>
+    </message>
+    <message>
+        <source>Enter your API key in the agent settings.</source>
+        <translation>Ilagay ang iyong API key sa mga setting ng agent.</translation>
+    </message>
+    <message>
+        <source>Export of {}</source>
+        <translation>Export ng {}</translation>
+    </message>
+    <message>
+        <source>Favorite applied</source>
+        <translation>Nailapat ang paborito</translation>
+    </message>
+    <message>
+        <source>Filter on the points of {}</source>
+        <translation>Filter sa mga punto ng {}</translation>
+    </message>
+    <message>
+        <source>Filter on {}</source>
+        <translation>Filter sa {}</translation>
+    </message>
+    <message>
+        <source>Filter on {} by an area</source>
+        <translation>Filter sa {} ayon sa isang lugar</translation>
+    </message>
+    <message>
+        <source>Filter on {} by {}</source>
+        <translation>Filter sa {} ayon sa {}</translation>
+    </message>
+    <message>
+        <source>FilterMate agent</source>
+        <translation>FilterMate agent</translation>
+    </message>
+    <message>
+        <source>Filters removed from {}</source>
+        <translation>Inalis ang mga filter sa {}</translation>
+    </message>
+    <message>
+        <source>Hidden: {}</source>
+        <translation>Nakatago: {}</translation>
+    </message>
+    <message>
+        <source>It answers.</source>
+        <translation>Sumasagot ito.</translation>
+    </message>
+    <message>
+        <source>Layer added: {}</source>
+        <translation>Naidagdag ang layer: {}</translation>
+    </message>
+    <message>
+        <source>Layers removed: {}</source>
+        <translation>Inalis ang mga layer: {}</translation>
+    </message>
+    <message>
+        <source>Not reachable for this conversation: {}</source>
+        <translation>Hindi maabot para sa usapang ito: {}</translation>
+    </message>
+    <message>
+        <source>Nothing to redo.</source>
+        <translation>Walang ire-redo.</translation>
+    </message>
+    <message>
+        <source>Nothing to restore.</source>
+        <translation>Walang ibabalik.</translation>
+    </message>
+    <message>
+        <source>Reading the active filters</source>
+        <translation>Binabasa ang mga aktibong filter</translation>
+    </message>
+    <message>
+        <source>Reading the favorites</source>
+        <translation>Binabasa ang mga paborito</translation>
+    </message>
+    <message>
+        <source>Reading the fields of {}</source>
+        <translation>Binabasa ang mga field ng {}</translation>
+    </message>
+    <message>
+        <source>Reading the layers</source>
+        <translation>Binabasa ang mga layer</translation>
+    </message>
+    <message>
+        <source>Reading the map</source>
+        <translation>Binabasa ang mapa</translation>
+    </message>
+    <message>
+        <source>Reading the values of {}</source>
+        <translation>Binabasa ang mga halaga ng {}</translation>
+    </message>
+    <message>
+        <source>Restored: {}.</source>
+        <translation>Naibalik: {}.</translation>
+    </message>
+    <message>
+        <source>Searching satellite imagery on {}</source>
+        <translation>Naghahanap ng satellite imagery sa {}</translation>
+    </message>
+    <message>
+        <source>Searching {} for {}</source>
+        <translation>Hinahanap sa {} ang {}</translation>
+    </message>
+    <message>
+        <source>Selection cleared on {}</source>
+        <translation>Na-clear ang pinili sa {}</translation>
+    </message>
+    <message>
+        <source>Selection on {}</source>
+        <translation>Pinili sa {}</translation>
+    </message>
+    <message>
+        <source>Shown: {}</source>
+        <translation>Ipinakita: {}</translation>
+    </message>
+    <message>
+        <source>Stopped.</source>
+        <translation>Itinigil.</translation>
+    </message>
+    <message>
+        <source>The MCP server could not start: {}</source>
+        <translation>Hindi masimulan ang MCP server: {}</translation>
+    </message>
+    <message>
+        <source>The QGIS authentication database is not available.</source>
+        <translation>Hindi available ang authentication database ng QGIS.</translation>
+    </message>
+    <message>
+        <source>The QGIS master password is needed to use the stored key.</source>
+        <translation>Kailangan ang master password ng QGIS para magamit ang naka-store na key.</translation>
+    </message>
+    <message>
+        <source>The agent stopped before the end ({}).</source>
+        <translation>Huminto ang agent bago matapos ({}).</translation>
+    </message>
+    <message>
+        <source>The agent wants to add this layer of a web service to the project:
+{} · {}
+
+Do you agree?</source>
+        <translation>Gustong idagdag ng agent ang layer na ito ng isang web service sa project:
+{} · {}
+
+Sumasang-ayon ka ba?</translation>
+    </message>
+    <message>
+        <source>The agent wants to add this layer to the project:
+{}
+
+A remote source is read from its server by QGIS, and what the layer holds can be sent to the provider of the agent. Do you agree?</source>
+        <translation>Gustong idagdag ng agent ang layer na ito sa project:
+{}
+
+Ang remote na source ay binabasa ng QGIS mula sa server nito, at ang laman ng layer ay maaaring ipadala sa provider ng agent. Sumasang-ayon ka ba?</translation>
+    </message>
+    <message>
+        <source>The agent wants to export these layers to files:
+{}
+
+Do you agree?</source>
+        <translation>Gustong i-export ng agent ang mga layer na ito sa mga file:
+{}
+
+Sumasang-ayon ka ba?</translation>
+    </message>
+    <message>
+        <source>The agent wants to remove these layers from the project (their files stay, their styles and filters here are lost):
+{}
+
+Do you agree?</source>
+        <translation>Gustong alisin ng agent ang mga layer na ito sa project (nananatili ang kanilang mga file, nawawala rito ang kanilang mga style at filter):
+{}
+
+Sumasang-ayon ka ba?</translation>
+    </message>
+    <message>
+        <source>The agent wants to run this action on an external connector:
+{}
+{}
+
+Do you agree?</source>
+        <translation>Gustong patakbuhin ng agent ang aksyong ito sa isang external na connector:
+{}
+{}
+
+Sumasang-ayon ka ba?</translation>
+    </message>
+    <message>
+        <source>The credit or quota of this account is used up.</source>
+        <translation>Naubos na ang credit o quota ng account na ito.</translation>
+    </message>
+    <message>
+        <source>The free quota could not be reached: {}</source>
+        <translation>Hindi maabot ang libreng quota: {}</translation>
+    </message>
+    <message>
+        <source>The free quota is not available.</source>
+        <translation>Hindi available ang libreng quota.</translation>
+    </message>
+    <message>
+        <source>The free quota is unavailable for now.</source>
+        <translation>Hindi muna available ang libreng quota.</translation>
+    </message>
+    <message>
+        <source>The free quota is used up for this month. Enter your own API key in the agent settings.</source>
+        <translation>Naubos na ang libreng quota ngayong buwan. Ilagay ang sarili mong API key sa mga setting ng agent.</translation>
+    </message>
+    <message>
+        <source>The key could not be stored.</source>
+        <translation>Hindi ma-store ang key.</translation>
+    </message>
+    <message>
+        <source>The provider could not be reached: {}</source>
+        <translation>Hindi maabot ang provider: {}</translation>
+    </message>
+    <message>
+        <source>The provider refused the API key: check it in the agent settings.</source>
+        <translation>Tinanggihan ng provider ang API key: tingnan ito sa mga setting ng agent.</translation>
+    </message>
+    <message>
+        <source>The provider reported a problem: {}</source>
+        <translation>May iniulat na problema ang provider: {}</translation>
+    </message>
+    <message>
+        <source>The stored key could not be read.</source>
+        <translation>Hindi mabasa ang naka-store na key.</translation>
+    </message>
+    <message>
+        <source>Thinking…</source>
+        <translation>Nag-iisip…</translation>
+    </message>
+    <message>
+        <source>Too many new accounts from this address today: try again tomorrow, or enter your own API key.</source>
+        <translation>Napakaraming bagong account mula sa address na ito ngayon: subukan ulit bukas, o ilagay ang sarili mong API key.</translation>
+    </message>
+    <message>
+        <source>Too many requests for now: try again in a moment.</source>
+        <translation>Masyadong maraming request sa ngayon: subukan ulit sa ilang sandali.</translation>
+    </message>
+    <message>
+        <source>Trying a filter on {}</source>
+        <translation>Sinusubukan ang isang filter sa {}</translation>
+    </message>
+    <message>
+        <source>Zoom on {}</source>
+        <translation>Mag-zoom sa {}</translation>
+    </message>
+    <message>
+        <source>an area</source>
+        <translation>isang lugar</translation>
+    </message>
+    <message>
+        <source>everything</source>
+        <translation>lahat</translation>
+    </message>
+    <message>
+        <source>{} tools available</source>
+        <translation>{} tool ang available</translation>
+    </message>
+</context>
 </TS>

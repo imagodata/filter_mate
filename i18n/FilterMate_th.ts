@@ -7758,4 +7758,574 @@ Install it now from PyPI with pip, into your QGIS profile? The Python of QGIS is
         <translation type="obsolete">จุดที่เก็บไว้</translation>
     </message>
 </context>
+<context>
+    <name>AgentPanel</name>
+    <message>
+        <source>(no request)</source>
+        <translation>(ไม่มีคำขอ)</translation>
+    </message>
+    <message>
+        <source>A few free requests a month, through the relay of FilterMate to Claude (Anthropic), under the terms of Anthropic. The relay counts what is spent and keeps no conversation. When it is used up, choose a provider and enter your own API key.</source>
+        <translation>คำขอฟรีจำนวนหนึ่งต่อเดือน ผ่านรีเลย์ของ FilterMate ไปยัง Claude (Anthropic) ภายใต้เงื่อนไขของ Anthropic รีเลย์จะนับเฉพาะปริมาณที่ใช้และไม่เก็บบทสนทนาใดไว้ เมื่อโควตาหมด ให้เลือกผู้ให้บริการและป้อนคีย์ API ของคุณเอง</translation>
+    </message>
+    <message>
+        <source>API key</source>
+        <translation>คีย์ API</translation>
+    </message>
+    <message>
+        <source>Add</source>
+        <translation>เพิ่ม</translation>
+    </message>
+    <message>
+        <source>Address</source>
+        <translation>ที่อยู่</translation>
+    </message>
+    <message>
+        <source>Agent settings</source>
+        <translation>การตั้งค่าเอเจนต์</translation>
+    </message>
+    <message>
+        <source>Allow attribute values to be sent</source>
+        <translation>อนุญาตให้ส่งค่าแอตทริบิวต์</translation>
+    </message>
+    <message>
+        <source>Applications already set up will have to be set up again.</source>
+        <translation>แอปพลิเคชันที่ตั้งค่าไว้แล้วจะต้องตั้งค่าใหม่</translation>
+    </message>
+    <message>
+        <source>Ask the agent to filter your layers</source>
+        <translation>ให้เอเจนต์กรองเลเยอร์ของคุณ</translation>
+    </message>
+    <message>
+        <source>Back to the conversation</source>
+        <translation>กลับไปที่บทสนทนา</translation>
+    </message>
+    <message>
+        <source>Claude Code or another MCP client on this computer can then filter your layers, once FilterMate has been opened, under the rules of this panel: the same sources, the same confirmations, and filters can be undone here. That application sends what it reads to its own AI provider.</source>
+        <translation>Claude Code หรือไคลเอนต์ MCP อื่นบนคอมพิวเตอร์เครื่องนี้จะสามารถกรองเลเยอร์ของคุณได้ หลังจากเปิด FilterMate แล้ว ตามกฎของแผงนี้: แหล่งข้อมูลเดียวกัน การยืนยันเดียวกัน และเลิกทำตัวกรองได้ที่นี่ แอปพลิเคชันนั้นจะส่งสิ่งที่อ่านไปยังผู้ให้บริการ AI ของตัวเอง</translation>
+    </message>
+    <message>
+        <source>Connect an AI provider to start. Nothing is sent before you agree.</source>
+        <translation>เชื่อมต่อผู้ให้บริการ AI เพื่อเริ่มต้น จะไม่มีการส่งสิ่งใดก่อนที่คุณจะยินยอม</translation>
+    </message>
+    <message>
+        <source>Copied, with the access token: keep it to yourself. Save these settings for it to apply.</source>
+        <translation>คัดลอกพร้อมโทเค็นการเข้าถึงแล้ว: โปรดเก็บเป็นความลับ บันทึกการตั้งค่านี้เพื่อให้มีผล</translation>
+    </message>
+    <message>
+        <source>Copy for Claude Desktop</source>
+        <translation>คัดลอกสำหรับ Claude Desktop</translation>
+    </message>
+    <message>
+        <source>Copy the Claude Code command</source>
+        <translation>คัดลอกคำสั่ง Claude Code</translation>
+    </message>
+    <message>
+        <source>Copy the configuration</source>
+        <translation>คัดลอกการกำหนดค่า</translation>
+    </message>
+    <message>
+        <source>Describe it in your own words. Each filter can be undone.</source>
+        <translation>อธิบายด้วยคำพูดของคุณเอง ตัวกรองแต่ละรายการเลิกทำได้</translation>
+    </message>
+    <message>
+        <source>Filter your layers from a sentence</source>
+        <translation>กรองเลเยอร์ของคุณด้วยประโยคเดียว</translation>
+    </message>
+    <message>
+        <source>FilterMate agent</source>
+        <translation>เอเจนต์ FilterMate</translation>
+    </message>
+    <message>
+        <source>History</source>
+        <translation>ประวัติ</translation>
+    </message>
+    <message>
+        <source>History…</source>
+        <translation>ประวัติ…</translation>
+    </message>
+    <message>
+        <source>I agree to send this data to this provider</source>
+        <translation>ฉันยินยอมให้ส่งข้อมูลนี้ไปยังผู้ให้บริการรายนี้</translation>
+    </message>
+    <message>
+        <source>Let other applications on this computer drive FilterMate (MCP server)</source>
+        <translation>อนุญาตให้แอปพลิเคชันอื่นบนคอมพิวเตอร์เครื่องนี้ควบคุม FilterMate (เซิร์ฟเวอร์ MCP)</translation>
+    </message>
+    <message>
+        <source>MCP connector</source>
+        <translation>คอนเนคเตอร์ MCP</translation>
+    </message>
+    <message>
+        <source>MCP connectors</source>
+        <translation>คอนเนคเตอร์ MCP</translation>
+    </message>
+    <message>
+        <source>Model</source>
+        <translation>โมเดล</translation>
+    </message>
+    <message>
+        <source>More</source>
+        <translation>เพิ่มเติม</translation>
+    </message>
+    <message>
+        <source>New access token</source>
+        <translation>โทเค็นการเข้าถึงใหม่</translation>
+    </message>
+    <message>
+        <source>New conversation</source>
+        <translation>บทสนทนาใหม่</translation>
+    </message>
+    <message>
+        <source>New token: it applies once these settings are saved.</source>
+        <translation>โทเค็นใหม่: จะมีผลเมื่อบันทึกการตั้งค่านี้</translation>
+    </message>
+    <message>
+        <source>Open data platforms</source>
+        <translation>แพลตฟอร์มข้อมูลเปิด</translation>
+    </message>
+    <message>
+        <source>Open the settings</source>
+        <translation>เปิดการตั้งค่า</translation>
+    </message>
+    <message>
+        <source>Other applications</source>
+        <translation>แอปพลิเคชันอื่น</translation>
+    </message>
+    <message>
+        <source>Port</source>
+        <translation>พอร์ต</translation>
+    </message>
+    <message>
+        <source>Provider</source>
+        <translation>ผู้ให้บริการ</translation>
+    </message>
+    <message>
+        <source>Redo</source>
+        <translation>ทำซ้ำ</translation>
+    </message>
+    <message>
+        <source>Remove</source>
+        <translation>ลบออก</translation>
+    </message>
+    <message>
+        <source>Remove the stored key</source>
+        <translation>ลบคีย์ที่จัดเก็บไว้</translation>
+    </message>
+    <message>
+        <source>Satellite imagery</source>
+        <translation>ภาพถ่ายดาวเทียม</translation>
+    </message>
+    <message>
+        <source>Send (Enter)</source>
+        <translation>ส่ง (Enter)</translation>
+    </message>
+    <message>
+        <source>Send again</source>
+        <translation>ส่งอีกครั้ง</translation>
+    </message>
+    <message>
+        <source>Sent to: {}</source>
+        <translation>ส่งไปยัง: {}</translation>
+    </message>
+    <message>
+        <source>Set up the agent</source>
+        <translation>ตั้งค่าเอเจนต์</translation>
+    </message>
+    <message>
+        <source>Sources</source>
+        <translation>แหล่งข้อมูล</translation>
+    </message>
+    <message>
+        <source>Stop (Esc)</source>
+        <translation>หยุด (Esc)</translation>
+    </message>
+    <message>
+        <source>Stored: leave empty to keep it</source>
+        <translation>จัดเก็บแล้ว: เว้นว่างไว้เพื่อคงไว้</translation>
+    </message>
+    <message>
+        <source>Test</source>
+        <translation>ทดสอบ</translation>
+    </message>
+    <message>
+        <source>Testing…</source>
+        <translation>กำลังทดสอบ…</translation>
+    </message>
+    <message>
+        <source>The MCP server could not start: {}</source>
+        <translation>ไม่สามารถเริ่มเซิร์ฟเวอร์ MCP ได้: {}</translation>
+    </message>
+    <message>
+        <source>The agent can search the sources ticked here. Your searches, and what the agent passes to a connector, are sent to them; a layer added from them is read from their servers.</source>
+        <translation>เอเจนต์สามารถค้นหาแหล่งข้อมูลที่ทำเครื่องหมายไว้ที่นี่ได้ คำค้นหาของคุณ และสิ่งที่เอเจนต์ส่งให้คอนเนคเตอร์ จะถูกส่งไปยังแหล่งเหล่านั้น เลเยอร์ที่เพิ่มจากแหล่งเหล่านั้นจะถูกอ่านจากเซิร์ฟเวอร์ของแหล่งนั้น</translation>
+    </message>
+    <message>
+        <source>The agent sends your request, the names of your layers and fields, your filter expressions and the results of its tools to the provider chosen here, under that provider's terms. Without the option below, the agent does not read the values of your fields; values already written in your filters and favorites are still sent. The conversation is kept on this computer for each project, until you start a new one.</source>
+        <translation>เอเจนต์ส่งคำขอของคุณ ชื่อเลเยอร์และฟิลด์ นิพจน์ตัวกรอง และผลลัพธ์จากเครื่องมือของเอเจนต์ ไปยังผู้ให้บริการที่เลือกไว้ที่นี่ ภายใต้เงื่อนไขของผู้ให้บริการนั้น หากไม่เปิดตัวเลือกด้านล่าง เอเจนต์จะไม่อ่านค่าของฟิลด์ แต่ค่าที่เขียนอยู่ในตัวกรองและรายการโปรดของคุณแล้วจะยังคงถูกส่ง บทสนทนาจะถูกเก็บไว้บนคอมพิวเตอร์เครื่องนี้ แยกตามโปรเจกต์ จนกว่าคุณจะเริ่มบทสนทนาใหม่</translation>
+    </message>
+    <message>
+        <source>Through mcp-remote, which needs Node.js: Claude Desktop starts local servers as programs.</source>
+        <translation>ผ่าน mcp-remote ซึ่งต้องใช้ Node.js: Claude Desktop เรียกใช้เซิร์ฟเวอร์ภายในเครื่องเป็นโปรแกรม</translation>
+    </message>
+    <message>
+        <source>Too many sources added: remove one first.</source>
+        <translation>เพิ่มแหล่งข้อมูลมากเกินไป: โปรดลบออกหนึ่งรายการก่อน</translation>
+    </message>
+    <message>
+        <source>Undo the last</source>
+        <translation>เลิกทำรายการล่าสุด</translation>
+    </message>
+    <message>
+        <source>Undo this turn</source>
+        <translation>เลิกทำรอบนี้</translation>
+    </message>
+    <message>
+        <source>What do you want to filter?</source>
+        <translation>คุณต้องการกรองอะไร</translation>
+    </message>
+    <message>
+        <source>added by you</source>
+        <translation>เพิ่มโดยคุณ</translation>
+    </message>
+    <message>
+        <source>applied</source>
+        <translation>ใช้แล้ว</translation>
+    </message>
+    <message>
+        <source>community</source>
+        <translation>ชุมชน</translation>
+    </message>
+    <message>
+        <source>https://... or a portal address</source>
+        <translation>https://... หรือที่อยู่ของพอร์ทัล</translation>
+    </message>
+    <message>
+        <source>no change</source>
+        <translation>ไม่มีการเปลี่ยนแปลง</translation>
+    </message>
+    <message>
+        <source>official</source>
+        <translation>ทางการ</translation>
+    </message>
+    <message>
+        <source>this computer</source>
+        <translation>คอมพิวเตอร์เครื่องนี้</translation>
+    </message>
+    <message>
+        <source>undone</source>
+        <translation>เลิกทำแล้ว</translation>
+    </message>
+    <message>
+        <source>{} turn(s)</source>
+        <translation>{} รอบ</translation>
+    </message>
+    <message>
+        <source>Which layers are in this project?</source>
+        <translation>โปรเจกต์นี้มีเลเยอร์อะไรบ้าง</translation>
+    </message>
+    <message>
+        <source>Keep the buildings taller than 15 m</source>
+        <translation>เก็บเฉพาะอาคารที่สูงกว่า 15 ม.</translation>
+    </message>
+    <message>
+        <source>Filter the roads inside the selected feature</source>
+        <translation>กรองถนนที่อยู่ภายในฟีเจอร์ที่เลือก</translation>
+    </message>
+</context>
+<context>
+    <name>AgentChat</name>
+    <message>
+        <source>Access to the free quota was renewed: send your request again.</source>
+        <translation>สิทธิ์เข้าถึงโควตาฟรีได้รับการต่ออายุแล้ว: โปรดส่งคำขอของคุณอีกครั้ง</translation>
+    </message>
+    <message>
+        <source>Another application is changing the project: try again in a moment.</source>
+        <translation>แอปพลิเคชันอื่นกำลังแก้ไขโปรเจกต์: โปรดลองใหม่อีกครั้งในอีกสักครู่</translation>
+    </message>
+    <message>
+        <source>Another application: {}</source>
+        <translation>แอปพลิเคชันอื่น: {}</translation>
+    </message>
+    <message>
+        <source>Applied again: {}.</source>
+        <translation>ใช้อีกครั้งแล้ว: {}</translation>
+    </message>
+    <message>
+        <source>Changed since, left as is: {}.</source>
+        <translation>มีการเปลี่ยนแปลงแล้ว คงไว้ตามเดิม: {}</translation>
+    </message>
+    <message>
+        <source>Changed: {}.</source>
+        <translation>เปลี่ยนแปลงแล้ว: {}</translation>
+    </message>
+    <message>
+        <source>Choose a model and agree to send your data to use the agent.</source>
+        <translation>เลือกโมเดลและยอมรับการส่งข้อมูลของคุณเพื่อใช้เอเจนต์</translation>
+    </message>
+    <message>
+        <source>Connecting to {}…</source>
+        <translation>กำลังเชื่อมต่อกับ {}…</translation>
+    </message>
+    <message>
+        <source>Earlier conversation: the agent starts afresh from here.</source>
+        <translation>บทสนทนาก่อนหน้า: เอเจนต์จะเริ่มใหม่ตั้งแต่จุดนี้</translation>
+    </message>
+    <message>
+        <source>Enter your API key in the agent settings.</source>
+        <translation>ป้อนคีย์ API ของคุณในการตั้งค่าเอเจนต์</translation>
+    </message>
+    <message>
+        <source>Export of {}</source>
+        <translation>การส่งออก {}</translation>
+    </message>
+    <message>
+        <source>Favorite applied</source>
+        <translation>ใช้รายการโปรดแล้ว</translation>
+    </message>
+    <message>
+        <source>Filter on the points of {}</source>
+        <translation>กรองตามจุดของ {}</translation>
+    </message>
+    <message>
+        <source>Filter on {}</source>
+        <translation>กรอง {}</translation>
+    </message>
+    <message>
+        <source>Filter on {} by an area</source>
+        <translation>กรอง {} ด้วยพื้นที่</translation>
+    </message>
+    <message>
+        <source>Filter on {} by {}</source>
+        <translation>กรอง {} ด้วย {}</translation>
+    </message>
+    <message>
+        <source>FilterMate agent</source>
+        <translation>เอเจนต์ FilterMate</translation>
+    </message>
+    <message>
+        <source>Filters removed from {}</source>
+        <translation>ลบตัวกรองออกจาก {} แล้ว</translation>
+    </message>
+    <message>
+        <source>Hidden: {}</source>
+        <translation>ซ่อนแล้ว: {}</translation>
+    </message>
+    <message>
+        <source>It answers.</source>
+        <translation>มีการตอบกลับ</translation>
+    </message>
+    <message>
+        <source>Layer added: {}</source>
+        <translation>เพิ่มเลเยอร์แล้ว: {}</translation>
+    </message>
+    <message>
+        <source>Layers removed: {}</source>
+        <translation>ลบเลเยอร์แล้ว: {}</translation>
+    </message>
+    <message>
+        <source>Not reachable for this conversation: {}</source>
+        <translation>ไม่สามารถเข้าถึงได้สำหรับบทสนทนานี้: {}</translation>
+    </message>
+    <message>
+        <source>Nothing to redo.</source>
+        <translation>ไม่มีสิ่งที่ต้องทำซ้ำ</translation>
+    </message>
+    <message>
+        <source>Nothing to restore.</source>
+        <translation>ไม่มีสิ่งที่ต้องกู้คืน</translation>
+    </message>
+    <message>
+        <source>Reading the active filters</source>
+        <translation>กำลังอ่านตัวกรองที่ใช้งานอยู่</translation>
+    </message>
+    <message>
+        <source>Reading the favorites</source>
+        <translation>กำลังอ่านรายการโปรด</translation>
+    </message>
+    <message>
+        <source>Reading the fields of {}</source>
+        <translation>กำลังอ่านฟิลด์ของ {}</translation>
+    </message>
+    <message>
+        <source>Reading the layers</source>
+        <translation>กำลังอ่านเลเยอร์</translation>
+    </message>
+    <message>
+        <source>Reading the map</source>
+        <translation>กำลังอ่านแผนที่</translation>
+    </message>
+    <message>
+        <source>Reading the values of {}</source>
+        <translation>กำลังอ่านค่าของ {}</translation>
+    </message>
+    <message>
+        <source>Restored: {}.</source>
+        <translation>กู้คืนแล้ว: {}</translation>
+    </message>
+    <message>
+        <source>Searching satellite imagery on {}</source>
+        <translation>กำลังค้นหาภาพถ่ายดาวเทียมบน {}</translation>
+    </message>
+    <message>
+        <source>Searching {} for {}</source>
+        <translation>กำลังค้นหาบน {}: {}</translation>
+    </message>
+    <message>
+        <source>Selection cleared on {}</source>
+        <translation>ล้างการเลือกบน {} แล้ว</translation>
+    </message>
+    <message>
+        <source>Selection on {}</source>
+        <translation>การเลือกบน {}</translation>
+    </message>
+    <message>
+        <source>Shown: {}</source>
+        <translation>แสดงแล้ว: {}</translation>
+    </message>
+    <message>
+        <source>Stopped.</source>
+        <translation>หยุดแล้ว</translation>
+    </message>
+    <message>
+        <source>The MCP server could not start: {}</source>
+        <translation>ไม่สามารถเริ่มเซิร์ฟเวอร์ MCP ได้: {}</translation>
+    </message>
+    <message>
+        <source>The QGIS authentication database is not available.</source>
+        <translation>ฐานข้อมูลการยืนยันตัวตนของ QGIS ไม่พร้อมใช้งาน</translation>
+    </message>
+    <message>
+        <source>The QGIS master password is needed to use the stored key.</source>
+        <translation>ต้องใช้รหัสผ่านหลักของ QGIS เพื่อใช้คีย์ที่จัดเก็บไว้</translation>
+    </message>
+    <message>
+        <source>The agent stopped before the end ({}).</source>
+        <translation>เอเจนต์หยุดก่อนเสร็จสิ้น ({})</translation>
+    </message>
+    <message>
+        <source>The agent wants to add this layer of a web service to the project:
+{} · {}
+
+Do you agree?</source>
+        <translation>เอเจนต์ต้องการเพิ่มเลเยอร์นี้ของเว็บเซอร์วิสลงในโปรเจกต์:
+{} · {}
+
+คุณยินยอมหรือไม่?</translation>
+    </message>
+    <message>
+        <source>The agent wants to add this layer to the project:
+{}
+
+A remote source is read from its server by QGIS, and what the layer holds can be sent to the provider of the agent. Do you agree?</source>
+        <translation>เอเจนต์ต้องการเพิ่มเลเยอร์นี้ลงในโปรเจกต์:
+{}
+
+QGIS จะอ่านแหล่งข้อมูลระยะไกลจากเซิร์ฟเวอร์ของแหล่งนั้น และเนื้อหาของเลเยอร์อาจถูกส่งไปยังผู้ให้บริการของเอเจนต์ คุณยินยอมหรือไม่?</translation>
+    </message>
+    <message>
+        <source>The agent wants to export these layers to files:
+{}
+
+Do you agree?</source>
+        <translation>เอเจนต์ต้องการส่งออกเลเยอร์เหล่านี้เป็นไฟล์:
+{}
+
+คุณยินยอมหรือไม่?</translation>
+    </message>
+    <message>
+        <source>The agent wants to remove these layers from the project (their files stay, their styles and filters here are lost):
+{}
+
+Do you agree?</source>
+        <translation>เอเจนต์ต้องการลบเลเยอร์เหล่านี้ออกจากโปรเจกต์ (ไฟล์ยังคงอยู่ แต่สไตล์และตัวกรองในที่นี้จะสูญหาย):
+{}
+
+คุณยินยอมหรือไม่?</translation>
+    </message>
+    <message>
+        <source>The agent wants to run this action on an external connector:
+{}
+{}
+
+Do you agree?</source>
+        <translation>เอเจนต์ต้องการเรียกใช้การดำเนินการนี้บนคอนเนคเตอร์ภายนอก:
+{}
+{}
+
+คุณยินยอมหรือไม่?</translation>
+    </message>
+    <message>
+        <source>The credit or quota of this account is used up.</source>
+        <translation>เครดิตหรือโควตาของบัญชีนี้ถูกใช้หมดแล้ว</translation>
+    </message>
+    <message>
+        <source>The free quota could not be reached: {}</source>
+        <translation>ไม่สามารถเข้าถึงโควตาฟรีได้: {}</translation>
+    </message>
+    <message>
+        <source>The free quota is not available.</source>
+        <translation>โควตาฟรีไม่พร้อมใช้งาน</translation>
+    </message>
+    <message>
+        <source>The free quota is unavailable for now.</source>
+        <translation>โควตาฟรีไม่พร้อมใช้งานในขณะนี้</translation>
+    </message>
+    <message>
+        <source>The free quota is used up for this month. Enter your own API key in the agent settings.</source>
+        <translation>โควตาฟรีของเดือนนี้ถูกใช้หมดแล้ว ป้อนคีย์ API ของคุณเองในการตั้งค่าเอเจนต์</translation>
+    </message>
+    <message>
+        <source>The key could not be stored.</source>
+        <translation>ไม่สามารถจัดเก็บคีย์ได้</translation>
+    </message>
+    <message>
+        <source>The provider could not be reached: {}</source>
+        <translation>ไม่สามารถเชื่อมต่อกับผู้ให้บริการได้: {}</translation>
+    </message>
+    <message>
+        <source>The provider refused the API key: check it in the agent settings.</source>
+        <translation>ผู้ให้บริการปฏิเสธคีย์ API: โปรดตรวจสอบในการตั้งค่าเอเจนต์</translation>
+    </message>
+    <message>
+        <source>The provider reported a problem: {}</source>
+        <translation>ผู้ให้บริการแจ้งว่ามีปัญหา: {}</translation>
+    </message>
+    <message>
+        <source>The stored key could not be read.</source>
+        <translation>ไม่สามารถอ่านคีย์ที่จัดเก็บไว้ได้</translation>
+    </message>
+    <message>
+        <source>Thinking…</source>
+        <translation>กำลังคิด…</translation>
+    </message>
+    <message>
+        <source>Too many new accounts from this address today: try again tomorrow, or enter your own API key.</source>
+        <translation>วันนี้มีบัญชีใหม่จากที่อยู่นี้มากเกินไป: โปรดลองใหม่พรุ่งนี้ หรือป้อนคีย์ API ของคุณเอง</translation>
+    </message>
+    <message>
+        <source>Too many requests for now: try again in a moment.</source>
+        <translation>มีคำขอมากเกินไปในขณะนี้: โปรดลองใหม่ในอีกสักครู่</translation>
+    </message>
+    <message>
+        <source>Trying a filter on {}</source>
+        <translation>กำลังทดลองตัวกรองบน {}</translation>
+    </message>
+    <message>
+        <source>Zoom on {}</source>
+        <translation>ซูมไปที่ {}</translation>
+    </message>
+    <message>
+        <source>an area</source>
+        <translation>พื้นที่</translation>
+    </message>
+    <message>
+        <source>everything</source>
+        <translation>ทั้งหมด</translation>
+    </message>
+    <message>
+        <source>{} tools available</source>
+        <translation>เครื่องมือที่ใช้ได้ {} รายการ</translation>
+    </message>
+</context>
 </TS>

@@ -7740,4 +7740,574 @@ Nainstalovat jej nyní z PyPI pomocí pip do vašeho profilu QGIS? Python progra
         <translation type="obsolete">Ponechané body</translation>
     </message>
 </context>
+<context>
+    <name>AgentPanel</name>
+    <message>
+        <source>(no request)</source>
+        <translation>(bez požadavku)</translation>
+    </message>
+    <message>
+        <source>A few free requests a month, through the relay of FilterMate to Claude (Anthropic), under the terms of Anthropic. The relay counts what is spent and keeps no conversation. When it is used up, choose a provider and enter your own API key.</source>
+        <translation>Několik bezplatných požadavků měsíčně prostřednictvím relé FilterMate k Claude (Anthropic) za podmínek společnosti Anthropic. Relé počítá, kolik se spotřebuje, a neuchovává žádnou konverzaci. Po vyčerpání limitu vyberte poskytovatele a zadejte vlastní klíč API.</translation>
+    </message>
+    <message>
+        <source>API key</source>
+        <translation>Klíč API</translation>
+    </message>
+    <message>
+        <source>Add</source>
+        <translation>Přidat</translation>
+    </message>
+    <message>
+        <source>Address</source>
+        <translation>Adresa</translation>
+    </message>
+    <message>
+        <source>Agent settings</source>
+        <translation>Nastavení agenta</translation>
+    </message>
+    <message>
+        <source>Allow attribute values to be sent</source>
+        <translation>Povolit odesílání hodnot atributů</translation>
+    </message>
+    <message>
+        <source>Applications already set up will have to be set up again.</source>
+        <translation>Již nastavené aplikace bude nutné nastavit znovu.</translation>
+    </message>
+    <message>
+        <source>Ask the agent to filter your layers</source>
+        <translation>Požádejte agenta o filtrování vrstev</translation>
+    </message>
+    <message>
+        <source>Back to the conversation</source>
+        <translation>Zpět do konverzace</translation>
+    </message>
+    <message>
+        <source>Claude Code or another MCP client on this computer can then filter your layers, once FilterMate has been opened, under the rules of this panel: the same sources, the same confirmations, and filters can be undone here. That application sends what it reads to its own AI provider.</source>
+        <translation>Claude Code nebo jiný klient MCP v tomto počítači pak může filtrovat vaše vrstvy, jakmile je FilterMate otevřen, podle pravidel tohoto panelu: stejné zdroje, stejná potvrzení a filtry lze zde vrátit zpět. Tato aplikace odesílá to, co přečte, svému vlastnímu poskytovateli AI.</translation>
+    </message>
+    <message>
+        <source>Connect an AI provider to start. Nothing is sent before you agree.</source>
+        <translation>Pro zahájení připojte poskytovatele AI. Bez vašeho souhlasu se nic neodesílá.</translation>
+    </message>
+    <message>
+        <source>Copied, with the access token: keep it to yourself. Save these settings for it to apply.</source>
+        <translation>Zkopírováno včetně přístupového tokenu: nikomu ho neukazujte. Uložte toto nastavení, aby se použilo.</translation>
+    </message>
+    <message>
+        <source>Copy for Claude Desktop</source>
+        <translation>Kopírovat pro Claude Desktop</translation>
+    </message>
+    <message>
+        <source>Copy the Claude Code command</source>
+        <translation>Kopírovat příkaz Claude Code</translation>
+    </message>
+    <message>
+        <source>Copy the configuration</source>
+        <translation>Kopírovat konfiguraci</translation>
+    </message>
+    <message>
+        <source>Describe it in your own words. Each filter can be undone.</source>
+        <translation>Popište to vlastními slovy. Každý filtr lze vrátit zpět.</translation>
+    </message>
+    <message>
+        <source>Filter your layers from a sentence</source>
+        <translation>Filtrujte vrstvy jednou větou</translation>
+    </message>
+    <message>
+        <source>FilterMate agent</source>
+        <translation>Agent FilterMate</translation>
+    </message>
+    <message>
+        <source>History</source>
+        <translation>Historie</translation>
+    </message>
+    <message>
+        <source>History…</source>
+        <translation>Historie…</translation>
+    </message>
+    <message>
+        <source>I agree to send this data to this provider</source>
+        <translation>Souhlasím s odesláním těchto dat tomuto poskytovateli</translation>
+    </message>
+    <message>
+        <source>Let other applications on this computer drive FilterMate (MCP server)</source>
+        <translation>Povolit ostatním aplikacím v tomto počítači ovládat FilterMate (server MCP)</translation>
+    </message>
+    <message>
+        <source>MCP connector</source>
+        <translation>Konektor MCP</translation>
+    </message>
+    <message>
+        <source>MCP connectors</source>
+        <translation>Konektory MCP</translation>
+    </message>
+    <message>
+        <source>Model</source>
+        <translation>Model</translation>
+    </message>
+    <message>
+        <source>More</source>
+        <translation>Více</translation>
+    </message>
+    <message>
+        <source>New access token</source>
+        <translation>Nový přístupový token</translation>
+    </message>
+    <message>
+        <source>New conversation</source>
+        <translation>Nová konverzace</translation>
+    </message>
+    <message>
+        <source>New token: it applies once these settings are saved.</source>
+        <translation>Nový token: použije se po uložení tohoto nastavení.</translation>
+    </message>
+    <message>
+        <source>Open data platforms</source>
+        <translation>Platformy otevřených dat</translation>
+    </message>
+    <message>
+        <source>Open the settings</source>
+        <translation>Otevřít nastavení</translation>
+    </message>
+    <message>
+        <source>Other applications</source>
+        <translation>Další aplikace</translation>
+    </message>
+    <message>
+        <source>Port</source>
+        <translation>Port</translation>
+    </message>
+    <message>
+        <source>Provider</source>
+        <translation>Poskytovatel</translation>
+    </message>
+    <message>
+        <source>Redo</source>
+        <translation>Znovu</translation>
+    </message>
+    <message>
+        <source>Remove</source>
+        <translation>Odebrat</translation>
+    </message>
+    <message>
+        <source>Remove the stored key</source>
+        <translation>Odstranit uložený klíč</translation>
+    </message>
+    <message>
+        <source>Satellite imagery</source>
+        <translation>Satelitní snímky</translation>
+    </message>
+    <message>
+        <source>Send (Enter)</source>
+        <translation>Odeslat (Enter)</translation>
+    </message>
+    <message>
+        <source>Send again</source>
+        <translation>Odeslat znovu</translation>
+    </message>
+    <message>
+        <source>Sent to: {}</source>
+        <translation>Odesláno: {}</translation>
+    </message>
+    <message>
+        <source>Set up the agent</source>
+        <translation>Nastavit agenta</translation>
+    </message>
+    <message>
+        <source>Sources</source>
+        <translation>Zdroje</translation>
+    </message>
+    <message>
+        <source>Stop (Esc)</source>
+        <translation>Zastavit (Esc)</translation>
+    </message>
+    <message>
+        <source>Stored: leave empty to keep it</source>
+        <translation>Uloženo: ponechte prázdné pro zachování</translation>
+    </message>
+    <message>
+        <source>Test</source>
+        <translation>Testovat</translation>
+    </message>
+    <message>
+        <source>Testing…</source>
+        <translation>Testování…</translation>
+    </message>
+    <message>
+        <source>The MCP server could not start: {}</source>
+        <translation>Server MCP se nepodařilo spustit: {}</translation>
+    </message>
+    <message>
+        <source>The agent can search the sources ticked here. Your searches, and what the agent passes to a connector, are sent to them; a layer added from them is read from their servers.</source>
+        <translation>Agent může prohledávat zdroje zaškrtnuté zde. Vaše hledání a to, co agent předá konektoru, se jim odesílá; vrstva z nich přidaná se čte z jejich serverů.</translation>
+    </message>
+    <message>
+        <source>The agent sends your request, the names of your layers and fields, your filter expressions and the results of its tools to the provider chosen here, under that provider's terms. Without the option below, the agent does not read the values of your fields; values already written in your filters and favorites are still sent. The conversation is kept on this computer for each project, until you start a new one.</source>
+        <translation>Agent odesílá váš požadavek, názvy vašich vrstev a polí, vaše filtrační výrazy a výsledky svých nástrojů poskytovateli zvolenému zde, za podmínek tohoto poskytovatele. Bez níže uvedené volby agent hodnoty vašich polí nečte; hodnoty již zapsané ve vašich filtrech a oblíbených se však odesílají. Konverzace se pro každý projekt uchovává v tomto počítači, dokud nezačnete novou.</translation>
+    </message>
+    <message>
+        <source>Through mcp-remote, which needs Node.js: Claude Desktop starts local servers as programs.</source>
+        <translation>Přes mcp-remote, které vyžaduje Node.js: Claude Desktop spouští místní servery jako programy.</translation>
+    </message>
+    <message>
+        <source>Too many sources added: remove one first.</source>
+        <translation>Přidáno příliš mnoho zdrojů: nejprve jeden odeberte.</translation>
+    </message>
+    <message>
+        <source>Undo the last</source>
+        <translation>Vrátit poslední</translation>
+    </message>
+    <message>
+        <source>Undo this turn</source>
+        <translation>Vrátit toto kolo</translation>
+    </message>
+    <message>
+        <source>What do you want to filter?</source>
+        <translation>Co chcete filtrovat?</translation>
+    </message>
+    <message>
+        <source>added by you</source>
+        <translation>přidáno vámi</translation>
+    </message>
+    <message>
+        <source>applied</source>
+        <translation>použito</translation>
+    </message>
+    <message>
+        <source>community</source>
+        <translation>komunitní</translation>
+    </message>
+    <message>
+        <source>https://... or a portal address</source>
+        <translation>https://... nebo adresa portálu</translation>
+    </message>
+    <message>
+        <source>no change</source>
+        <translation>bez změny</translation>
+    </message>
+    <message>
+        <source>official</source>
+        <translation>oficiální</translation>
+    </message>
+    <message>
+        <source>this computer</source>
+        <translation>tento počítač</translation>
+    </message>
+    <message>
+        <source>undone</source>
+        <translation>vráceno zpět</translation>
+    </message>
+    <message>
+        <source>{} turn(s)</source>
+        <translation>Kola: {}</translation>
+    </message>
+    <message>
+        <source>Which layers are in this project?</source>
+        <translation>Jaké vrstvy tento projekt obsahuje?</translation>
+    </message>
+    <message>
+        <source>Keep the buildings taller than 15 m</source>
+        <translation>Ponechat budovy vyšší než 15 m</translation>
+    </message>
+    <message>
+        <source>Filter the roads inside the selected feature</source>
+        <translation>Vyfiltrovat silnice uvnitř vybraného prvku</translation>
+    </message>
+</context>
+<context>
+    <name>AgentChat</name>
+    <message>
+        <source>Access to the free quota was renewed: send your request again.</source>
+        <translation>Přístup k bezplatnému limitu byl obnoven: odešlete svůj požadavek znovu.</translation>
+    </message>
+    <message>
+        <source>Another application is changing the project: try again in a moment.</source>
+        <translation>Jiná aplikace mění projekt: zkuste to znovu za chvíli.</translation>
+    </message>
+    <message>
+        <source>Another application: {}</source>
+        <translation>Jiná aplikace: {}</translation>
+    </message>
+    <message>
+        <source>Applied again: {}.</source>
+        <translation>Použito znovu: {}.</translation>
+    </message>
+    <message>
+        <source>Changed since, left as is: {}.</source>
+        <translation>Mezitím změněno, ponecháno beze změny: {}.</translation>
+    </message>
+    <message>
+        <source>Changed: {}.</source>
+        <translation>Změněno: {}.</translation>
+    </message>
+    <message>
+        <source>Choose a model and agree to send your data to use the agent.</source>
+        <translation>Pro použití agenta vyberte model a souhlaste s odesláním svých dat.</translation>
+    </message>
+    <message>
+        <source>Connecting to {}…</source>
+        <translation>Připojování k {}…</translation>
+    </message>
+    <message>
+        <source>Earlier conversation: the agent starts afresh from here.</source>
+        <translation>Dřívější konverzace: agent zde začíná od začátku.</translation>
+    </message>
+    <message>
+        <source>Enter your API key in the agent settings.</source>
+        <translation>Zadejte svůj klíč API v nastavení agenta.</translation>
+    </message>
+    <message>
+        <source>Export of {}</source>
+        <translation>Export {}</translation>
+    </message>
+    <message>
+        <source>Favorite applied</source>
+        <translation>Oblíbená použita</translation>
+    </message>
+    <message>
+        <source>Filter on the points of {}</source>
+        <translation>Filtr na bodech {}</translation>
+    </message>
+    <message>
+        <source>Filter on {}</source>
+        <translation>Filtr na {}</translation>
+    </message>
+    <message>
+        <source>Filter on {} by an area</source>
+        <translation>Filtr na {} podle oblasti</translation>
+    </message>
+    <message>
+        <source>Filter on {} by {}</source>
+        <translation>Filtr na {} podle {}</translation>
+    </message>
+    <message>
+        <source>FilterMate agent</source>
+        <translation>Agent FilterMate</translation>
+    </message>
+    <message>
+        <source>Filters removed from {}</source>
+        <translation>Filtry odebrány z {}</translation>
+    </message>
+    <message>
+        <source>Hidden: {}</source>
+        <translation>Skryto: {}</translation>
+    </message>
+    <message>
+        <source>It answers.</source>
+        <translation>Zdroj odpovídá.</translation>
+    </message>
+    <message>
+        <source>Layer added: {}</source>
+        <translation>Vrstva přidána: {}</translation>
+    </message>
+    <message>
+        <source>Layers removed: {}</source>
+        <translation>Vrstvy odebrány: {}</translation>
+    </message>
+    <message>
+        <source>Not reachable for this conversation: {}</source>
+        <translation>Pro tuto konverzaci nedostupné: {}</translation>
+    </message>
+    <message>
+        <source>Nothing to redo.</source>
+        <translation>Není co znovu provést.</translation>
+    </message>
+    <message>
+        <source>Nothing to restore.</source>
+        <translation>Není co obnovit.</translation>
+    </message>
+    <message>
+        <source>Reading the active filters</source>
+        <translation>Čtení aktivních filtrů</translation>
+    </message>
+    <message>
+        <source>Reading the favorites</source>
+        <translation>Čtení oblíbených</translation>
+    </message>
+    <message>
+        <source>Reading the fields of {}</source>
+        <translation>Čtení polí vrstvy {}</translation>
+    </message>
+    <message>
+        <source>Reading the layers</source>
+        <translation>Čtení vrstev</translation>
+    </message>
+    <message>
+        <source>Reading the map</source>
+        <translation>Čtení mapy</translation>
+    </message>
+    <message>
+        <source>Reading the values of {}</source>
+        <translation>Čtení hodnot {}</translation>
+    </message>
+    <message>
+        <source>Restored: {}.</source>
+        <translation>Obnoveno: {}.</translation>
+    </message>
+    <message>
+        <source>Searching satellite imagery on {}</source>
+        <translation>Vyhledávání satelitních snímků v {}</translation>
+    </message>
+    <message>
+        <source>Searching {} for {}</source>
+        <translation>Hledání v {}: {}</translation>
+    </message>
+    <message>
+        <source>Selection cleared on {}</source>
+        <translation>Výběr zrušen na {}</translation>
+    </message>
+    <message>
+        <source>Selection on {}</source>
+        <translation>Výběr na {}</translation>
+    </message>
+    <message>
+        <source>Shown: {}</source>
+        <translation>Zobrazeno: {}</translation>
+    </message>
+    <message>
+        <source>Stopped.</source>
+        <translation>Zastaveno.</translation>
+    </message>
+    <message>
+        <source>The MCP server could not start: {}</source>
+        <translation>Server MCP se nepodařilo spustit: {}</translation>
+    </message>
+    <message>
+        <source>The QGIS authentication database is not available.</source>
+        <translation>Databáze ověřování QGIS není dostupná.</translation>
+    </message>
+    <message>
+        <source>The QGIS master password is needed to use the stored key.</source>
+        <translation>K použití uloženého klíče je potřeba hlavní heslo QGIS.</translation>
+    </message>
+    <message>
+        <source>The agent stopped before the end ({}).</source>
+        <translation>Agent se zastavil před dokončením ({}).</translation>
+    </message>
+    <message>
+        <source>The agent wants to add this layer of a web service to the project:
+{} · {}
+
+Do you agree?</source>
+        <translation>Agent chce do projektu přidat tuto vrstvu webové služby:
+{} · {}
+
+Souhlasíte?</translation>
+    </message>
+    <message>
+        <source>The agent wants to add this layer to the project:
+{}
+
+A remote source is read from its server by QGIS, and what the layer holds can be sent to the provider of the agent. Do you agree?</source>
+        <translation>Agent chce do projektu přidat tuto vrstvu:
+{}
+
+QGIS čte vzdálený zdroj z jeho serveru a obsah vrstvy může být odeslán poskytovateli agenta. Souhlasíte?</translation>
+    </message>
+    <message>
+        <source>The agent wants to export these layers to files:
+{}
+
+Do you agree?</source>
+        <translation>Agent chce exportovat tyto vrstvy do souborů:
+{}
+
+Souhlasíte?</translation>
+    </message>
+    <message>
+        <source>The agent wants to remove these layers from the project (their files stay, their styles and filters here are lost):
+{}
+
+Do you agree?</source>
+        <translation>Agent chce odebrat tyto vrstvy z projektu (jejich soubory zůstanou, ale jejich styly a filtry zde budou ztraceny):
+{}
+
+Souhlasíte?</translation>
+    </message>
+    <message>
+        <source>The agent wants to run this action on an external connector:
+{}
+{}
+
+Do you agree?</source>
+        <translation>Agent chce spustit tuto akci na externím konektoru:
+{}
+{}
+
+Souhlasíte?</translation>
+    </message>
+    <message>
+        <source>The credit or quota of this account is used up.</source>
+        <translation>Kredit nebo limit tohoto účtu je vyčerpán.</translation>
+    </message>
+    <message>
+        <source>The free quota could not be reached: {}</source>
+        <translation>Bezplatný limit se nepodařilo kontaktovat: {}</translation>
+    </message>
+    <message>
+        <source>The free quota is not available.</source>
+        <translation>Bezplatný limit není dostupný.</translation>
+    </message>
+    <message>
+        <source>The free quota is unavailable for now.</source>
+        <translation>Bezplatný limit je momentálně nedostupný.</translation>
+    </message>
+    <message>
+        <source>The free quota is used up for this month. Enter your own API key in the agent settings.</source>
+        <translation>Bezplatný limit je pro tento měsíc vyčerpán. Zadejte vlastní klíč API v nastavení agenta.</translation>
+    </message>
+    <message>
+        <source>The key could not be stored.</source>
+        <translation>Klíč se nepodařilo uložit.</translation>
+    </message>
+    <message>
+        <source>The provider could not be reached: {}</source>
+        <translation>Poskytovatele se nepodařilo kontaktovat: {}</translation>
+    </message>
+    <message>
+        <source>The provider refused the API key: check it in the agent settings.</source>
+        <translation>Poskytovatel odmítl klíč API: zkontrolujte ho v nastavení agenta.</translation>
+    </message>
+    <message>
+        <source>The provider reported a problem: {}</source>
+        <translation>Poskytovatel nahlásil problém: {}</translation>
+    </message>
+    <message>
+        <source>The stored key could not be read.</source>
+        <translation>Uložený klíč se nepodařilo přečíst.</translation>
+    </message>
+    <message>
+        <source>Thinking…</source>
+        <translation>Přemýšlení…</translation>
+    </message>
+    <message>
+        <source>Too many new accounts from this address today: try again tomorrow, or enter your own API key.</source>
+        <translation>Z této adresy dnes vzniklo příliš mnoho nových účtů: zkuste to zítra nebo zadejte vlastní klíč API.</translation>
+    </message>
+    <message>
+        <source>Too many requests for now: try again in a moment.</source>
+        <translation>Příliš mnoho požadavků: zkuste to znovu za chvíli.</translation>
+    </message>
+    <message>
+        <source>Trying a filter on {}</source>
+        <translation>Zkoušení filtru na {}</translation>
+    </message>
+    <message>
+        <source>Zoom on {}</source>
+        <translation>Přiblížit na {}</translation>
+    </message>
+    <message>
+        <source>an area</source>
+        <translation>oblast</translation>
+    </message>
+    <message>
+        <source>everything</source>
+        <translation>vše</translation>
+    </message>
+    <message>
+        <source>{} tools available</source>
+        <translation>Dostupné nástroje: {}</translation>
+    </message>
+</context>
 </TS>

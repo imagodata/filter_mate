@@ -7758,4 +7758,574 @@ Install it now from PyPI with pip, into your QGIS profile? The Python of QGIS is
         <translation type="obsolete">የተያዙ ነጥቦች</translation>
     </message>
 </context>
+<context>
+    <name>AgentPanel</name>
+    <message>
+        <source>(no request)</source>
+        <translation>(ጥያቄ የለም)</translation>
+    </message>
+    <message>
+        <source>A few free requests a month, through the relay of FilterMate to Claude (Anthropic), under the terms of Anthropic. The relay counts what is spent and keeps no conversation. When it is used up, choose a provider and enter your own API key.</source>
+        <translation>በወር ጥቂት ነፃ ጥያቄዎች፣ በFilterMate ወደ Claude (Anthropic) በሚያደርሰው ማስተላለፊያ በኩል፣ በAnthropic ውሎች መሠረት። ማስተላለፊያው የሚወጣውን ይቆጥራል እንጂ ምንም ውይይት አያስቀምጥም። ሲያልቅ አቅራቢ ይምረጡ እና የራስዎን API ቁልፍ ያስገቡ።</translation>
+    </message>
+    <message>
+        <source>API key</source>
+        <translation>API ቁልፍ</translation>
+    </message>
+    <message>
+        <source>Add</source>
+        <translation>አክል</translation>
+    </message>
+    <message>
+        <source>Address</source>
+        <translation>አድራሻ</translation>
+    </message>
+    <message>
+        <source>Agent settings</source>
+        <translation>የወኪል ቅንብሮች</translation>
+    </message>
+    <message>
+        <source>Allow attribute values to be sent</source>
+        <translation>የባህሪ እሴቶች እንዲላኩ ፍቀድ</translation>
+    </message>
+    <message>
+        <source>Applications already set up will have to be set up again.</source>
+        <translation>አስቀድሞ የተዋቀሩ መተግበሪያዎች እንደገና መዋቀር አለባቸው።</translation>
+    </message>
+    <message>
+        <source>Ask the agent to filter your layers</source>
+        <translation>ንብርብሮችዎን እንዲያጣራ ወኪሉን ይጠይቁ</translation>
+    </message>
+    <message>
+        <source>Back to the conversation</source>
+        <translation>ወደ ውይይቱ ተመለስ</translation>
+    </message>
+    <message>
+        <source>Claude Code or another MCP client on this computer can then filter your layers, once FilterMate has been opened, under the rules of this panel: the same sources, the same confirmations, and filters can be undone here. That application sends what it reads to its own AI provider.</source>
+        <translation>FilterMate ከተከፈተ በኋላ፣ በዚህ ኮምፒውተር ላይ ያለ Claude Code ወይም ሌላ MCP ደንበኛ በዚህ ፓነል ደንቦች መሠረት ንብርብሮችዎን ማጣራት ይችላል: ተመሳሳይ ምንጮች፣ ተመሳሳይ ማረጋገጫዎች፣ እና ማጣሪያዎች እዚህ ሊቀለበሱ ይችላሉ። ያ መተግበሪያ የሚያነበውን ለራሱ AI አቅራቢ ይልካል።</translation>
+    </message>
+    <message>
+        <source>Connect an AI provider to start. Nothing is sent before you agree.</source>
+        <translation>ለመጀመር AI አቅራቢ ያገናኙ። ከእርስዎ ፈቃድ በፊት ምንም አይላክም።</translation>
+    </message>
+    <message>
+        <source>Copied, with the access token: keep it to yourself. Save these settings for it to apply.</source>
+        <translation>ከመዳረሻ ቶከን ጋር ተቀድቷል: ለራስዎ ያቆዩት። ተግባራዊ እንዲሆን እነዚህን ቅንብሮች ያስቀምጡ።</translation>
+    </message>
+    <message>
+        <source>Copy for Claude Desktop</source>
+        <translation>ለClaude Desktop ቅዳ</translation>
+    </message>
+    <message>
+        <source>Copy the Claude Code command</source>
+        <translation>የClaude Code ትዕዛዝ ቅዳ</translation>
+    </message>
+    <message>
+        <source>Copy the configuration</source>
+        <translation>ውቅሩን ቅዳ</translation>
+    </message>
+    <message>
+        <source>Describe it in your own words. Each filter can be undone.</source>
+        <translation>በራስዎ ቃላት ይግለጹት። እያንዳንዱ ማጣሪያ ሊቀለበስ ይችላል።</translation>
+    </message>
+    <message>
+        <source>Filter your layers from a sentence</source>
+        <translation>ንብርብሮችዎን በአንድ አረፍተ ነገር ያጣሩ</translation>
+    </message>
+    <message>
+        <source>FilterMate agent</source>
+        <translation>የFilterMate ወኪል</translation>
+    </message>
+    <message>
+        <source>History</source>
+        <translation>ታሪክ</translation>
+    </message>
+    <message>
+        <source>History…</source>
+        <translation>ታሪክ…</translation>
+    </message>
+    <message>
+        <source>I agree to send this data to this provider</source>
+        <translation>ይህን ውሂብ ለዚህ አቅራቢ ለመላክ እስማማለሁ</translation>
+    </message>
+    <message>
+        <source>Let other applications on this computer drive FilterMate (MCP server)</source>
+        <translation>በዚህ ኮምፒውተር ላይ ያሉ ሌሎች መተግበሪያዎች FilterMateን እንዲቆጣጠሩ ፍቀድ (MCP አገልጋይ)</translation>
+    </message>
+    <message>
+        <source>MCP connector</source>
+        <translation>MCP አገናኝ</translation>
+    </message>
+    <message>
+        <source>MCP connectors</source>
+        <translation>MCP አገናኞች</translation>
+    </message>
+    <message>
+        <source>Model</source>
+        <translation>ሞዴል</translation>
+    </message>
+    <message>
+        <source>More</source>
+        <translation>ተጨማሪ</translation>
+    </message>
+    <message>
+        <source>New access token</source>
+        <translation>አዲስ የመዳረሻ ቶከን</translation>
+    </message>
+    <message>
+        <source>New conversation</source>
+        <translation>አዲስ ውይይት</translation>
+    </message>
+    <message>
+        <source>New token: it applies once these settings are saved.</source>
+        <translation>አዲስ ቶከን: እነዚህ ቅንብሮች ከተቀመጡ በኋላ ይተገበራል።</translation>
+    </message>
+    <message>
+        <source>Open data platforms</source>
+        <translation>ክፍት የውሂብ መድረኮች</translation>
+    </message>
+    <message>
+        <source>Open the settings</source>
+        <translation>ቅንብሮችን ክፈት</translation>
+    </message>
+    <message>
+        <source>Other applications</source>
+        <translation>ሌሎች መተግበሪያዎች</translation>
+    </message>
+    <message>
+        <source>Port</source>
+        <translation>ወደብ</translation>
+    </message>
+    <message>
+        <source>Provider</source>
+        <translation>አቅራቢ</translation>
+    </message>
+    <message>
+        <source>Redo</source>
+        <translation>እንደገና አድርግ</translation>
+    </message>
+    <message>
+        <source>Remove</source>
+        <translation>አስወግድ</translation>
+    </message>
+    <message>
+        <source>Remove the stored key</source>
+        <translation>የተከማቸውን ቁልፍ አስወግድ</translation>
+    </message>
+    <message>
+        <source>Satellite imagery</source>
+        <translation>የሳተላይት ምስሎች</translation>
+    </message>
+    <message>
+        <source>Send (Enter)</source>
+        <translation>ላክ (Enter)</translation>
+    </message>
+    <message>
+        <source>Send again</source>
+        <translation>እንደገና ላክ</translation>
+    </message>
+    <message>
+        <source>Sent to: {}</source>
+        <translation>የተላከው ወደ: {}</translation>
+    </message>
+    <message>
+        <source>Set up the agent</source>
+        <translation>ወኪሉን አዋቅር</translation>
+    </message>
+    <message>
+        <source>Sources</source>
+        <translation>ምንጮች</translation>
+    </message>
+    <message>
+        <source>Stop (Esc)</source>
+        <translation>አቁም (Esc)</translation>
+    </message>
+    <message>
+        <source>Stored: leave empty to keep it</source>
+        <translation>የተከማቸ: ለማቆየት ባዶ ይተዉት</translation>
+    </message>
+    <message>
+        <source>Test</source>
+        <translation>ሞክር</translation>
+    </message>
+    <message>
+        <source>Testing…</source>
+        <translation>በመሞከር ላይ…</translation>
+    </message>
+    <message>
+        <source>The MCP server could not start: {}</source>
+        <translation>የMCP አገልጋይ መጀመር አልቻለም: {}</translation>
+    </message>
+    <message>
+        <source>The agent can search the sources ticked here. Your searches, and what the agent passes to a connector, are sent to them; a layer added from them is read from their servers.</source>
+        <translation>ወኪሉ እዚህ ምልክት የተደረገባቸውን ምንጮች መፈለግ ይችላል። ፍለጋዎችዎ እና ወኪሉ ለአገናኝ የሚያስተላልፈው ወደ እነሱ ይላካሉ፤ ከእነሱ የተጨመረ ንብርብር ከአገልጋዮቻቸው ይነበባል።</translation>
+    </message>
+    <message>
+        <source>The agent sends your request, the names of your layers and fields, your filter expressions and the results of its tools to the provider chosen here, under that provider's terms. Without the option below, the agent does not read the values of your fields; values already written in your filters and favorites are still sent. The conversation is kept on this computer for each project, until you start a new one.</source>
+        <translation>ወኪሉ ጥያቄዎን፣ የንብርብሮችዎን እና የመስኮችዎን ስሞች፣ የማጣሪያ አገላለጾችዎን እና የመሣሪያዎቹን ውጤቶች እዚህ ለተመረጠው አቅራቢ በዚያ አቅራቢ ውሎች መሠረት ይልካል። ከታች ያለው አማራጭ ከሌለ ወኪሉ የመስኮችዎን እሴቶች አያነብም፤ በማጣሪያዎችዎ እና በተወዳጆችዎ ውስጥ አስቀድመው የተጻፉ እሴቶች አሁንም ይላካሉ። ውይይቱ አዲስ እስኪጀምሩ ድረስ ለእያንዳንዱ ፕሮጀክት በዚህ ኮምፒውተር ላይ ይቀመጣል።</translation>
+    </message>
+    <message>
+        <source>Through mcp-remote, which needs Node.js: Claude Desktop starts local servers as programs.</source>
+        <translation>በNode.js በሚያስፈልገው mcp-remote በኩል: Claude Desktop የአካባቢ አገልጋዮችን እንደ ፕሮግራሞች ያስነሳል።</translation>
+    </message>
+    <message>
+        <source>Too many sources added: remove one first.</source>
+        <translation>በጣም ብዙ ምንጮች ተጨምረዋል: መጀመሪያ አንዱን ያስወግዱ።</translation>
+    </message>
+    <message>
+        <source>Undo the last</source>
+        <translation>የመጨረሻውን ቀልብስ</translation>
+    </message>
+    <message>
+        <source>Undo this turn</source>
+        <translation>ይህን ዙር ቀልብስ</translation>
+    </message>
+    <message>
+        <source>What do you want to filter?</source>
+        <translation>ምን ማጣራት ይፈልጋሉ?</translation>
+    </message>
+    <message>
+        <source>added by you</source>
+        <translation>በእርስዎ የተጨመረ</translation>
+    </message>
+    <message>
+        <source>applied</source>
+        <translation>ተተግብሯል</translation>
+    </message>
+    <message>
+        <source>community</source>
+        <translation>የማህበረሰብ</translation>
+    </message>
+    <message>
+        <source>https://... or a portal address</source>
+        <translation>https://... ወይም የፖርታል አድራሻ</translation>
+    </message>
+    <message>
+        <source>no change</source>
+        <translation>ለውጥ የለም</translation>
+    </message>
+    <message>
+        <source>official</source>
+        <translation>ይፋዊ</translation>
+    </message>
+    <message>
+        <source>this computer</source>
+        <translation>ይህ ኮምፒውተር</translation>
+    </message>
+    <message>
+        <source>undone</source>
+        <translation>ተቀልብሷል</translation>
+    </message>
+    <message>
+        <source>{} turn(s)</source>
+        <translation>{} ዙር(ዎች)</translation>
+    </message>
+    <message>
+        <source>Which layers are in this project?</source>
+        <translation>በዚህ ፕሮጀክት ውስጥ ያሉት የትኞቹ ንብርብሮች ናቸው?</translation>
+    </message>
+    <message>
+        <source>Keep the buildings taller than 15 m</source>
+        <translation>ከ15 ሜ የሚረዝሙ ሕንፃዎችን አቆይ</translation>
+    </message>
+    <message>
+        <source>Filter the roads inside the selected feature</source>
+        <translation>በተመረጠው ባህሪ ውስጥ ያሉትን መንገዶች አጣራ</translation>
+    </message>
+</context>
+<context>
+    <name>AgentChat</name>
+    <message>
+        <source>Access to the free quota was renewed: send your request again.</source>
+        <translation>የነፃ ኮታ መዳረሻ ታድሷል: ጥያቄዎን እንደገና ይላኩ።</translation>
+    </message>
+    <message>
+        <source>Another application is changing the project: try again in a moment.</source>
+        <translation>ሌላ መተግበሪያ ፕሮጀክቱን እየቀየረ ነው: ከጥቂት ቆይታ በኋላ እንደገና ይሞክሩ።</translation>
+    </message>
+    <message>
+        <source>Another application: {}</source>
+        <translation>ሌላ መተግበሪያ: {}</translation>
+    </message>
+    <message>
+        <source>Applied again: {}.</source>
+        <translation>እንደገና ተተግብሯል: {}።</translation>
+    </message>
+    <message>
+        <source>Changed since, left as is: {}.</source>
+        <translation>ከዚያ በኋላ ተቀይሯል፣ እንዳለ ተተወ: {}።</translation>
+    </message>
+    <message>
+        <source>Changed: {}.</source>
+        <translation>ተቀይሯል: {}።</translation>
+    </message>
+    <message>
+        <source>Choose a model and agree to send your data to use the agent.</source>
+        <translation>ወኪሉን ለመጠቀም ሞዴል ይምረጡ እና ውሂብዎን ለመላክ ይስማሙ።</translation>
+    </message>
+    <message>
+        <source>Connecting to {}…</source>
+        <translation>ከ{} ጋር በመገናኘት ላይ…</translation>
+    </message>
+    <message>
+        <source>Earlier conversation: the agent starts afresh from here.</source>
+        <translation>ቀዳሚ ውይይት: ወኪሉ ከዚህ ጀምሮ እንደገና ይጀምራል።</translation>
+    </message>
+    <message>
+        <source>Enter your API key in the agent settings.</source>
+        <translation>API ቁልፍዎን በወኪል ቅንብሮች ውስጥ ያስገቡ።</translation>
+    </message>
+    <message>
+        <source>Export of {}</source>
+        <translation>{} መላክ</translation>
+    </message>
+    <message>
+        <source>Favorite applied</source>
+        <translation>ተወዳጅ ተተግብሯል</translation>
+    </message>
+    <message>
+        <source>Filter on the points of {}</source>
+        <translation>በ{} ነጥቦች ላይ ማጣሪያ</translation>
+    </message>
+    <message>
+        <source>Filter on {}</source>
+        <translation>በ{} ላይ ማጣሪያ</translation>
+    </message>
+    <message>
+        <source>Filter on {} by an area</source>
+        <translation>በ{} ላይ በአካባቢ ማጣሪያ</translation>
+    </message>
+    <message>
+        <source>Filter on {} by {}</source>
+        <translation>በ{} ላይ በ{} ማጣሪያ</translation>
+    </message>
+    <message>
+        <source>FilterMate agent</source>
+        <translation>የFilterMate ወኪል</translation>
+    </message>
+    <message>
+        <source>Filters removed from {}</source>
+        <translation>ማጣሪያዎች ከ{} ተወግደዋል</translation>
+    </message>
+    <message>
+        <source>Hidden: {}</source>
+        <translation>ተደብቋል: {}</translation>
+    </message>
+    <message>
+        <source>It answers.</source>
+        <translation>ምላሽ ይሰጣል።</translation>
+    </message>
+    <message>
+        <source>Layer added: {}</source>
+        <translation>ንብርብር ተጨምሯል: {}</translation>
+    </message>
+    <message>
+        <source>Layers removed: {}</source>
+        <translation>ንብርብሮች ተወግደዋል: {}</translation>
+    </message>
+    <message>
+        <source>Not reachable for this conversation: {}</source>
+        <translation>ለዚህ ውይይት ሊደረስበት አይችልም: {}</translation>
+    </message>
+    <message>
+        <source>Nothing to redo.</source>
+        <translation>እንደገና የሚደረግ ምንም የለም።</translation>
+    </message>
+    <message>
+        <source>Nothing to restore.</source>
+        <translation>የሚመለስ ምንም የለም።</translation>
+    </message>
+    <message>
+        <source>Reading the active filters</source>
+        <translation>ንቁ ማጣሪያዎችን በማንበብ ላይ</translation>
+    </message>
+    <message>
+        <source>Reading the favorites</source>
+        <translation>ተወዳጆችን በማንበብ ላይ</translation>
+    </message>
+    <message>
+        <source>Reading the fields of {}</source>
+        <translation>የ{} መስኮችን በማንበብ ላይ</translation>
+    </message>
+    <message>
+        <source>Reading the layers</source>
+        <translation>ንብርብሮችን በማንበብ ላይ</translation>
+    </message>
+    <message>
+        <source>Reading the map</source>
+        <translation>ካርታውን በማንበብ ላይ</translation>
+    </message>
+    <message>
+        <source>Reading the values of {}</source>
+        <translation>የ{} እሴቶችን በማንበብ ላይ</translation>
+    </message>
+    <message>
+        <source>Restored: {}.</source>
+        <translation>ተመልሷል: {}።</translation>
+    </message>
+    <message>
+        <source>Searching satellite imagery on {}</source>
+        <translation>በ{} ላይ የሳተላይት ምስሎችን በመፈለግ ላይ</translation>
+    </message>
+    <message>
+        <source>Searching {} for {}</source>
+        <translation>በ{} ላይ {} በመፈለግ ላይ</translation>
+    </message>
+    <message>
+        <source>Selection cleared on {}</source>
+        <translation>በ{} ላይ ምርጫ ተጠርጓል</translation>
+    </message>
+    <message>
+        <source>Selection on {}</source>
+        <translation>በ{} ላይ ምርጫ</translation>
+    </message>
+    <message>
+        <source>Shown: {}</source>
+        <translation>ታይቷል: {}</translation>
+    </message>
+    <message>
+        <source>Stopped.</source>
+        <translation>ቆሟል።</translation>
+    </message>
+    <message>
+        <source>The MCP server could not start: {}</source>
+        <translation>የMCP አገልጋይ መጀመር አልቻለም: {}</translation>
+    </message>
+    <message>
+        <source>The QGIS authentication database is not available.</source>
+        <translation>የQGIS የማረጋገጫ ዳታቤዝ አይገኝም።</translation>
+    </message>
+    <message>
+        <source>The QGIS master password is needed to use the stored key.</source>
+        <translation>የተከማቸውን ቁልፍ ለመጠቀም የQGIS ዋና የይለፍ ቃል ያስፈልጋል።</translation>
+    </message>
+    <message>
+        <source>The agent stopped before the end ({}).</source>
+        <translation>ወኪሉ ከመጨረሻው በፊት ቆሟል ({})።</translation>
+    </message>
+    <message>
+        <source>The agent wants to add this layer of a web service to the project:
+{} · {}
+
+Do you agree?</source>
+        <translation>ወኪሉ የዚህን የድር አገልግሎት ንብርብር ወደ ፕሮጀክቱ ማከል ይፈልጋል:
+{} · {}
+
+ይስማማሉ?</translation>
+    </message>
+    <message>
+        <source>The agent wants to add this layer to the project:
+{}
+
+A remote source is read from its server by QGIS, and what the layer holds can be sent to the provider of the agent. Do you agree?</source>
+        <translation>ወኪሉ ይህን ንብርብር ወደ ፕሮጀክቱ ማከል ይፈልጋል:
+{}
+
+የርቀት ምንጭ በQGIS ከአገልጋዩ ይነበባል፣ እና ንብርብሩ የያዘው ለወኪሉ አቅራቢ ሊላክ ይችላል። ይስማማሉ?</translation>
+    </message>
+    <message>
+        <source>The agent wants to export these layers to files:
+{}
+
+Do you agree?</source>
+        <translation>ወኪሉ እነዚህን ንብርብሮች ወደ ፋይሎች መላክ ይፈልጋል:
+{}
+
+ይስማማሉ?</translation>
+    </message>
+    <message>
+        <source>The agent wants to remove these layers from the project (their files stay, their styles and filters here are lost):
+{}
+
+Do you agree?</source>
+        <translation>ወኪሉ እነዚህን ንብርብሮች ከፕሮጀክቱ ማስወገድ ይፈልጋል (ፋይሎቻቸው ይቀራሉ፣ እዚህ ያሉ ቅጦቻቸው እና ማጣሪያዎቻቸው ይጠፋሉ):
+{}
+
+ይስማማሉ?</translation>
+    </message>
+    <message>
+        <source>The agent wants to run this action on an external connector:
+{}
+{}
+
+Do you agree?</source>
+        <translation>ወኪሉ ይህን ተግባር በውጫዊ አገናኝ ላይ ማስኬድ ይፈልጋል:
+{}
+{}
+
+ይስማማሉ?</translation>
+    </message>
+    <message>
+        <source>The credit or quota of this account is used up.</source>
+        <translation>የዚህ መለያ ክሬዲት ወይም ኮታ አልቋል።</translation>
+    </message>
+    <message>
+        <source>The free quota could not be reached: {}</source>
+        <translation>ነፃው ኮታ ሊደረስበት አልቻለም: {}</translation>
+    </message>
+    <message>
+        <source>The free quota is not available.</source>
+        <translation>ነፃው ኮታ አይገኝም።</translation>
+    </message>
+    <message>
+        <source>The free quota is unavailable for now.</source>
+        <translation>ነፃው ኮታ ለጊዜው አይገኝም።</translation>
+    </message>
+    <message>
+        <source>The free quota is used up for this month. Enter your own API key in the agent settings.</source>
+        <translation>የዚህ ወር ነፃ ኮታ አልቋል። የራስዎን API ቁልፍ በወኪል ቅንብሮች ውስጥ ያስገቡ።</translation>
+    </message>
+    <message>
+        <source>The key could not be stored.</source>
+        <translation>ቁልፉ ሊከማች አልቻለም።</translation>
+    </message>
+    <message>
+        <source>The provider could not be reached: {}</source>
+        <translation>አቅራቢው ሊደረስበት አልቻለም: {}</translation>
+    </message>
+    <message>
+        <source>The provider refused the API key: check it in the agent settings.</source>
+        <translation>አቅራቢው API ቁልፉን ውድቅ አደረገ: በወኪል ቅንብሮች ውስጥ ይፈትሹት።</translation>
+    </message>
+    <message>
+        <source>The provider reported a problem: {}</source>
+        <translation>አቅራቢው ችግር ሪፖርት አደረገ: {}</translation>
+    </message>
+    <message>
+        <source>The stored key could not be read.</source>
+        <translation>የተከማቸው ቁልፍ ሊነበብ አልቻለም።</translation>
+    </message>
+    <message>
+        <source>Thinking…</source>
+        <translation>በማሰብ ላይ…</translation>
+    </message>
+    <message>
+        <source>Too many new accounts from this address today: try again tomorrow, or enter your own API key.</source>
+        <translation>ዛሬ ከዚህ አድራሻ ብዙ አዳዲስ መለያዎች ተፈጥረዋል: ነገ እንደገና ይሞክሩ፣ ወይም የራስዎን API ቁልፍ ያስገቡ።</translation>
+    </message>
+    <message>
+        <source>Too many requests for now: try again in a moment.</source>
+        <translation>ለጊዜው ብዙ ጥያቄዎች: ከጥቂት ቆይታ በኋላ እንደገና ይሞክሩ።</translation>
+    </message>
+    <message>
+        <source>Trying a filter on {}</source>
+        <translation>በ{} ላይ ማጣሪያ በመሞከር ላይ</translation>
+    </message>
+    <message>
+        <source>Zoom on {}</source>
+        <translation>ወደ {} አጉላ</translation>
+    </message>
+    <message>
+        <source>an area</source>
+        <translation>አካባቢ</translation>
+    </message>
+    <message>
+        <source>everything</source>
+        <translation>ሁሉም ነገር</translation>
+    </message>
+    <message>
+        <source>{} tools available</source>
+        <translation>{} መሣሪያዎች ይገኛሉ</translation>
+    </message>
+</context>
 </TS>

@@ -7758,4 +7758,574 @@ Install it now from PyPI with pip, into your QGIS profile? The Python of QGIS is
         <translation type="obsolete">Tutulan noktalar</translation>
     </message>
 </context>
+<context>
+    <name>AgentPanel</name>
+    <message>
+        <source>(no request)</source>
+        <translation>(istek yok)</translation>
+    </message>
+    <message>
+        <source>A few free requests a month, through the relay of FilterMate to Claude (Anthropic), under the terms of Anthropic. The relay counts what is spent and keeps no conversation. When it is used up, choose a provider and enter your own API key.</source>
+        <translation>Ayda birkaç ücretsiz istek, FilterMate'in Claude'a (Anthropic) aktarıcısı üzerinden, Anthropic koşullarına göre. Aktarıcı harcananı sayar ve hiçbir konuşmayı saklamaz. Kota tükendiğinde bir sağlayıcı seçin ve kendi API anahtarınızı girin.</translation>
+    </message>
+    <message>
+        <source>API key</source>
+        <translation>API anahtarı</translation>
+    </message>
+    <message>
+        <source>Add</source>
+        <translation>Ekle</translation>
+    </message>
+    <message>
+        <source>Address</source>
+        <translation>Adres</translation>
+    </message>
+    <message>
+        <source>Agent settings</source>
+        <translation>Aracı ayarları</translation>
+    </message>
+    <message>
+        <source>Allow attribute values to be sent</source>
+        <translation>Öznitelik değerlerinin gönderilmesine izin ver</translation>
+    </message>
+    <message>
+        <source>Applications already set up will have to be set up again.</source>
+        <translation>Önceden yapılandırılmış uygulamaların yeniden yapılandırılması gerekecek.</translation>
+    </message>
+    <message>
+        <source>Ask the agent to filter your layers</source>
+        <translation>Aracıdan katmanlarınızı filtrelemesini isteyin</translation>
+    </message>
+    <message>
+        <source>Back to the conversation</source>
+        <translation>Konuşmaya dön</translation>
+    </message>
+    <message>
+        <source>Claude Code or another MCP client on this computer can then filter your layers, once FilterMate has been opened, under the rules of this panel: the same sources, the same confirmations, and filters can be undone here. That application sends what it reads to its own AI provider.</source>
+        <translation>Bu bilgisayardaki Claude Code veya başka bir MCP istemcisi, FilterMate açıldıktan sonra, bu panelin kurallarına göre katmanlarınızı filtreleyebilir: aynı kaynaklar, aynı onaylar ve filtreler burada geri alınabilir. Bu uygulama okuduklarını kendi yapay zekâ sağlayıcısına gönderir.</translation>
+    </message>
+    <message>
+        <source>Connect an AI provider to start. Nothing is sent before you agree.</source>
+        <translation>Başlamak için bir yapay zekâ sağlayıcısı bağlayın. Siz onaylamadan hiçbir şey gönderilmez.</translation>
+    </message>
+    <message>
+        <source>Copied, with the access token: keep it to yourself. Save these settings for it to apply.</source>
+        <translation>Erişim belirteci ile birlikte kopyalandı: kendinize saklayın. Uygulanması için bu ayarları kaydedin.</translation>
+    </message>
+    <message>
+        <source>Copy for Claude Desktop</source>
+        <translation>Claude Desktop için kopyala</translation>
+    </message>
+    <message>
+        <source>Copy the Claude Code command</source>
+        <translation>Claude Code komutunu kopyala</translation>
+    </message>
+    <message>
+        <source>Copy the configuration</source>
+        <translation>Yapılandırmayı kopyala</translation>
+    </message>
+    <message>
+        <source>Describe it in your own words. Each filter can be undone.</source>
+        <translation>Kendi sözcüklerinizle anlatın. Her filtre geri alınabilir.</translation>
+    </message>
+    <message>
+        <source>Filter your layers from a sentence</source>
+        <translation>Katmanlarınızı tek cümleyle filtreleyin</translation>
+    </message>
+    <message>
+        <source>FilterMate agent</source>
+        <translation>FilterMate aracısı</translation>
+    </message>
+    <message>
+        <source>History</source>
+        <translation>Geçmiş</translation>
+    </message>
+    <message>
+        <source>History…</source>
+        <translation>Geçmiş…</translation>
+    </message>
+    <message>
+        <source>I agree to send this data to this provider</source>
+        <translation>Bu verilerin bu sağlayıcıya gönderilmesini kabul ediyorum</translation>
+    </message>
+    <message>
+        <source>Let other applications on this computer drive FilterMate (MCP server)</source>
+        <translation>Bu bilgisayardaki diğer uygulamaların FilterMate'i yönetmesine izin ver (MCP sunucusu)</translation>
+    </message>
+    <message>
+        <source>MCP connector</source>
+        <translation>MCP bağlayıcısı</translation>
+    </message>
+    <message>
+        <source>MCP connectors</source>
+        <translation>MCP bağlayıcıları</translation>
+    </message>
+    <message>
+        <source>Model</source>
+        <translation>Model</translation>
+    </message>
+    <message>
+        <source>More</source>
+        <translation>Daha fazla</translation>
+    </message>
+    <message>
+        <source>New access token</source>
+        <translation>Yeni erişim belirteci</translation>
+    </message>
+    <message>
+        <source>New conversation</source>
+        <translation>Yeni konuşma</translation>
+    </message>
+    <message>
+        <source>New token: it applies once these settings are saved.</source>
+        <translation>Yeni belirteç: bu ayarlar kaydedildiğinde uygulanır.</translation>
+    </message>
+    <message>
+        <source>Open data platforms</source>
+        <translation>Açık veri platformları</translation>
+    </message>
+    <message>
+        <source>Open the settings</source>
+        <translation>Ayarları aç</translation>
+    </message>
+    <message>
+        <source>Other applications</source>
+        <translation>Diğer uygulamalar</translation>
+    </message>
+    <message>
+        <source>Port</source>
+        <translation>Port</translation>
+    </message>
+    <message>
+        <source>Provider</source>
+        <translation>Sağlayıcı</translation>
+    </message>
+    <message>
+        <source>Redo</source>
+        <translation>Yinele</translation>
+    </message>
+    <message>
+        <source>Remove</source>
+        <translation>Kaldır</translation>
+    </message>
+    <message>
+        <source>Remove the stored key</source>
+        <translation>Kayıtlı anahtarı sil</translation>
+    </message>
+    <message>
+        <source>Satellite imagery</source>
+        <translation>Uydu görüntüleri</translation>
+    </message>
+    <message>
+        <source>Send (Enter)</source>
+        <translation>Gönder (Enter)</translation>
+    </message>
+    <message>
+        <source>Send again</source>
+        <translation>Yeniden gönder</translation>
+    </message>
+    <message>
+        <source>Sent to: {}</source>
+        <translation>Gönderilen yer: {}</translation>
+    </message>
+    <message>
+        <source>Set up the agent</source>
+        <translation>Aracıyı yapılandır</translation>
+    </message>
+    <message>
+        <source>Sources</source>
+        <translation>Kaynaklar</translation>
+    </message>
+    <message>
+        <source>Stop (Esc)</source>
+        <translation>Durdur (Esc)</translation>
+    </message>
+    <message>
+        <source>Stored: leave empty to keep it</source>
+        <translation>Kayıtlı: korumak için boş bırakın</translation>
+    </message>
+    <message>
+        <source>Test</source>
+        <translation>Test et</translation>
+    </message>
+    <message>
+        <source>Testing…</source>
+        <translation>Test ediliyor…</translation>
+    </message>
+    <message>
+        <source>The MCP server could not start: {}</source>
+        <translation>MCP sunucusu başlatılamadı: {}</translation>
+    </message>
+    <message>
+        <source>The agent can search the sources ticked here. Your searches, and what the agent passes to a connector, are sent to them; a layer added from them is read from their servers.</source>
+        <translation>Aracı, burada işaretlenen kaynaklarda arama yapabilir. Aramalarınız ve aracının bir bağlayıcıya ilettiği her şey bunlara gönderilir; bunlardan eklenen bir katman sunucularından okunur.</translation>
+    </message>
+    <message>
+        <source>The agent sends your request, the names of your layers and fields, your filter expressions and the results of its tools to the provider chosen here, under that provider's terms. Without the option below, the agent does not read the values of your fields; values already written in your filters and favorites are still sent. The conversation is kept on this computer for each project, until you start a new one.</source>
+        <translation>Aracı; isteğinizi, katmanlarınızın ve alanlarınızın adlarını, filtre ifadelerinizi ve araçlarının sonuçlarını burada seçilen sağlayıcıya, o sağlayıcının koşullarına göre gönderir. Aşağıdaki seçenek olmadan aracı alanlarınızın değerlerini okumaz; filtrelerinize ve favorilerinize zaten yazılmış değerler yine de gönderilir. Konuşma, yenisini başlatana kadar her proje için bu bilgisayarda saklanır.</translation>
+    </message>
+    <message>
+        <source>Through mcp-remote, which needs Node.js: Claude Desktop starts local servers as programs.</source>
+        <translation>Node.js gerektiren mcp-remote üzerinden: Claude Desktop yerel sunucuları program olarak başlatır.</translation>
+    </message>
+    <message>
+        <source>Too many sources added: remove one first.</source>
+        <translation>Çok fazla kaynak eklendi: önce birini kaldırın.</translation>
+    </message>
+    <message>
+        <source>Undo the last</source>
+        <translation>Sonuncuyu geri al</translation>
+    </message>
+    <message>
+        <source>Undo this turn</source>
+        <translation>Bu turu geri al</translation>
+    </message>
+    <message>
+        <source>What do you want to filter?</source>
+        <translation>Neyi filtrelemek istiyorsunuz?</translation>
+    </message>
+    <message>
+        <source>added by you</source>
+        <translation>sizin tarafınızdan eklendi</translation>
+    </message>
+    <message>
+        <source>applied</source>
+        <translation>uygulandı</translation>
+    </message>
+    <message>
+        <source>community</source>
+        <translation>topluluk</translation>
+    </message>
+    <message>
+        <source>https://... or a portal address</source>
+        <translation>https://... veya bir portal adresi</translation>
+    </message>
+    <message>
+        <source>no change</source>
+        <translation>değişiklik yok</translation>
+    </message>
+    <message>
+        <source>official</source>
+        <translation>resmî</translation>
+    </message>
+    <message>
+        <source>this computer</source>
+        <translation>bu bilgisayar</translation>
+    </message>
+    <message>
+        <source>undone</source>
+        <translation>geri alındı</translation>
+    </message>
+    <message>
+        <source>{} turn(s)</source>
+        <translation>Tur sayısı: {}</translation>
+    </message>
+    <message>
+        <source>Which layers are in this project?</source>
+        <translation>Bu projede hangi katmanlar var?</translation>
+    </message>
+    <message>
+        <source>Keep the buildings taller than 15 m</source>
+        <translation>15 m'den yüksek binaları tut</translation>
+    </message>
+    <message>
+        <source>Filter the roads inside the selected feature</source>
+        <translation>Seçili özelliğin içindeki yolları filtrele</translation>
+    </message>
+</context>
+<context>
+    <name>AgentChat</name>
+    <message>
+        <source>Access to the free quota was renewed: send your request again.</source>
+        <translation>Ücretsiz kotaya erişim yenilendi: isteğinizi yeniden gönderin.</translation>
+    </message>
+    <message>
+        <source>Another application is changing the project: try again in a moment.</source>
+        <translation>Başka bir uygulama projeyi değiştiriyor: birazdan yeniden deneyin.</translation>
+    </message>
+    <message>
+        <source>Another application: {}</source>
+        <translation>Başka uygulama: {}</translation>
+    </message>
+    <message>
+        <source>Applied again: {}.</source>
+        <translation>Yeniden uygulandı: {}.</translation>
+    </message>
+    <message>
+        <source>Changed since, left as is: {}.</source>
+        <translation>Sonradan değiştirildi, olduğu gibi bırakıldı: {}.</translation>
+    </message>
+    <message>
+        <source>Changed: {}.</source>
+        <translation>Değiştirildi: {}.</translation>
+    </message>
+    <message>
+        <source>Choose a model and agree to send your data to use the agent.</source>
+        <translation>Aracıyı kullanmak için bir model seçin ve verilerinizin gönderilmesini kabul edin.</translation>
+    </message>
+    <message>
+        <source>Connecting to {}…</source>
+        <translation>{} bağlantısı kuruluyor…</translation>
+    </message>
+    <message>
+        <source>Earlier conversation: the agent starts afresh from here.</source>
+        <translation>Önceki konuşma: aracı buradan itibaren sıfırdan başlar.</translation>
+    </message>
+    <message>
+        <source>Enter your API key in the agent settings.</source>
+        <translation>API anahtarınızı aracı ayarlarına girin.</translation>
+    </message>
+    <message>
+        <source>Export of {}</source>
+        <translation>{} dışa aktarımı</translation>
+    </message>
+    <message>
+        <source>Favorite applied</source>
+        <translation>Favori uygulandı</translation>
+    </message>
+    <message>
+        <source>Filter on the points of {}</source>
+        <translation>{} noktalarında filtre</translation>
+    </message>
+    <message>
+        <source>Filter on {}</source>
+        <translation>{} üzerinde filtre</translation>
+    </message>
+    <message>
+        <source>Filter on {} by an area</source>
+        <translation>{} üzerinde bölgeye göre filtre</translation>
+    </message>
+    <message>
+        <source>Filter on {} by {}</source>
+        <translation>{} üzerinde filtre, ölçüt: {}</translation>
+    </message>
+    <message>
+        <source>FilterMate agent</source>
+        <translation>FilterMate aracısı</translation>
+    </message>
+    <message>
+        <source>Filters removed from {}</source>
+        <translation>{} üzerindeki filtreler kaldırıldı</translation>
+    </message>
+    <message>
+        <source>Hidden: {}</source>
+        <translation>Gizlendi: {}</translation>
+    </message>
+    <message>
+        <source>It answers.</source>
+        <translation>Kaynak yanıt veriyor.</translation>
+    </message>
+    <message>
+        <source>Layer added: {}</source>
+        <translation>Katman eklendi: {}</translation>
+    </message>
+    <message>
+        <source>Layers removed: {}</source>
+        <translation>Katmanlar kaldırıldı: {}</translation>
+    </message>
+    <message>
+        <source>Not reachable for this conversation: {}</source>
+        <translation>Bu konuşma için erişilemez: {}</translation>
+    </message>
+    <message>
+        <source>Nothing to redo.</source>
+        <translation>Yinelenecek bir şey yok.</translation>
+    </message>
+    <message>
+        <source>Nothing to restore.</source>
+        <translation>Geri yüklenecek bir şey yok.</translation>
+    </message>
+    <message>
+        <source>Reading the active filters</source>
+        <translation>Etkin filtreler okunuyor</translation>
+    </message>
+    <message>
+        <source>Reading the favorites</source>
+        <translation>Favoriler okunuyor</translation>
+    </message>
+    <message>
+        <source>Reading the fields of {}</source>
+        <translation>{} alanları okunuyor</translation>
+    </message>
+    <message>
+        <source>Reading the layers</source>
+        <translation>Katmanlar okunuyor</translation>
+    </message>
+    <message>
+        <source>Reading the map</source>
+        <translation>Harita okunuyor</translation>
+    </message>
+    <message>
+        <source>Reading the values of {}</source>
+        <translation>{} değerleri okunuyor</translation>
+    </message>
+    <message>
+        <source>Restored: {}.</source>
+        <translation>Geri yüklendi: {}.</translation>
+    </message>
+    <message>
+        <source>Searching satellite imagery on {}</source>
+        <translation>{} üzerinde uydu görüntüsü aranıyor</translation>
+    </message>
+    <message>
+        <source>Searching {} for {}</source>
+        <translation>{} üzerinde aranıyor: {}</translation>
+    </message>
+    <message>
+        <source>Selection cleared on {}</source>
+        <translation>{} üzerinde seçim temizlendi</translation>
+    </message>
+    <message>
+        <source>Selection on {}</source>
+        <translation>{} üzerinde seçim</translation>
+    </message>
+    <message>
+        <source>Shown: {}</source>
+        <translation>Gösterildi: {}</translation>
+    </message>
+    <message>
+        <source>Stopped.</source>
+        <translation>Durduruldu.</translation>
+    </message>
+    <message>
+        <source>The MCP server could not start: {}</source>
+        <translation>MCP sunucusu başlatılamadı: {}</translation>
+    </message>
+    <message>
+        <source>The QGIS authentication database is not available.</source>
+        <translation>QGIS kimlik doğrulama veritabanı kullanılamıyor.</translation>
+    </message>
+    <message>
+        <source>The QGIS master password is needed to use the stored key.</source>
+        <translation>Kayıtlı anahtarı kullanmak için QGIS ana parolası gerekli.</translation>
+    </message>
+    <message>
+        <source>The agent stopped before the end ({}).</source>
+        <translation>Aracı sona ermeden durdu ({}).</translation>
+    </message>
+    <message>
+        <source>The agent wants to add this layer of a web service to the project:
+{} · {}
+
+Do you agree?</source>
+        <translation>Aracı, bir web hizmetinin şu katmanını projeye eklemek istiyor:
+{} · {}
+
+Onaylıyor musunuz?</translation>
+    </message>
+    <message>
+        <source>The agent wants to add this layer to the project:
+{}
+
+A remote source is read from its server by QGIS, and what the layer holds can be sent to the provider of the agent. Do you agree?</source>
+        <translation>Aracı şu katmanı projeye eklemek istiyor:
+{}
+
+Uzak bir kaynak QGIS tarafından sunucusundan okunur ve katmanın içeriği aracının sağlayıcısına gönderilebilir. Onaylıyor musunuz?</translation>
+    </message>
+    <message>
+        <source>The agent wants to export these layers to files:
+{}
+
+Do you agree?</source>
+        <translation>Aracı şu katmanları dosyalara dışa aktarmak istiyor:
+{}
+
+Onaylıyor musunuz?</translation>
+    </message>
+    <message>
+        <source>The agent wants to remove these layers from the project (their files stay, their styles and filters here are lost):
+{}
+
+Do you agree?</source>
+        <translation>Aracı şu katmanları projeden kaldırmak istiyor (dosyaları kalır, buradaki stilleri ve filtreleri kaybolur):
+{}
+
+Onaylıyor musunuz?</translation>
+    </message>
+    <message>
+        <source>The agent wants to run this action on an external connector:
+{}
+{}
+
+Do you agree?</source>
+        <translation>Aracı, harici bir bağlayıcıda şu eylemi çalıştırmak istiyor:
+{}
+{}
+
+Onaylıyor musunuz?</translation>
+    </message>
+    <message>
+        <source>The credit or quota of this account is used up.</source>
+        <translation>Bu hesabın kredisi veya kotası tükendi.</translation>
+    </message>
+    <message>
+        <source>The free quota could not be reached: {}</source>
+        <translation>Ücretsiz kotaya ulaşılamadı: {}</translation>
+    </message>
+    <message>
+        <source>The free quota is not available.</source>
+        <translation>Ücretsiz kota kullanılamıyor.</translation>
+    </message>
+    <message>
+        <source>The free quota is unavailable for now.</source>
+        <translation>Ücretsiz kota şu anda kullanılamıyor.</translation>
+    </message>
+    <message>
+        <source>The free quota is used up for this month. Enter your own API key in the agent settings.</source>
+        <translation>Ücretsiz kota bu ay için tükendi. Aracı ayarlarına kendi API anahtarınızı girin.</translation>
+    </message>
+    <message>
+        <source>The key could not be stored.</source>
+        <translation>Anahtar kaydedilemedi.</translation>
+    </message>
+    <message>
+        <source>The provider could not be reached: {}</source>
+        <translation>Sağlayıcıya ulaşılamadı: {}</translation>
+    </message>
+    <message>
+        <source>The provider refused the API key: check it in the agent settings.</source>
+        <translation>Sağlayıcı API anahtarını reddetti: aracı ayarlarında kontrol edin.</translation>
+    </message>
+    <message>
+        <source>The provider reported a problem: {}</source>
+        <translation>Sağlayıcı bir sorun bildirdi: {}</translation>
+    </message>
+    <message>
+        <source>The stored key could not be read.</source>
+        <translation>Kayıtlı anahtar okunamadı.</translation>
+    </message>
+    <message>
+        <source>Thinking…</source>
+        <translation>Düşünüyor…</translation>
+    </message>
+    <message>
+        <source>Too many new accounts from this address today: try again tomorrow, or enter your own API key.</source>
+        <translation>Bugün bu adresten çok fazla yeni hesap açıldı: yarın yeniden deneyin veya kendi API anahtarınızı girin.</translation>
+    </message>
+    <message>
+        <source>Too many requests for now: try again in a moment.</source>
+        <translation>Şu anda çok fazla istek var: birazdan yeniden deneyin.</translation>
+    </message>
+    <message>
+        <source>Trying a filter on {}</source>
+        <translation>{} üzerinde filtre deneniyor</translation>
+    </message>
+    <message>
+        <source>Zoom on {}</source>
+        <translation>{} üzerine yakınlaştırma</translation>
+    </message>
+    <message>
+        <source>an area</source>
+        <translation>bir bölge</translation>
+    </message>
+    <message>
+        <source>everything</source>
+        <translation>her şey</translation>
+    </message>
+    <message>
+        <source>{} tools available</source>
+        <translation>{} araç kullanılabilir</translation>
+    </message>
+</context>
 </TS>

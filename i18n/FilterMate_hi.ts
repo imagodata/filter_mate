@@ -7758,4 +7758,574 @@ Install it now from PyPI with pip, into your QGIS profile? The Python of QGIS is
         <translation type="obsolete">रखे गए बिंदु</translation>
     </message>
 </context>
+<context>
+    <name>AgentPanel</name>
+    <message>
+        <source>(no request)</source>
+        <translation>(कोई अनुरोध नहीं)</translation>
+    </message>
+    <message>
+        <source>A few free requests a month, through the relay of FilterMate to Claude (Anthropic), under the terms of Anthropic. The relay counts what is spent and keeps no conversation. When it is used up, choose a provider and enter your own API key.</source>
+        <translation>हर महीने कुछ निःशुल्क अनुरोध, FilterMate के Claude (Anthropic) तक रिले के माध्यम से, Anthropic की शर्तों के अंतर्गत। रिले केवल खर्च का हिसाब रखता है और कोई बातचीत नहीं रखता। कोटा समाप्त होने पर कोई प्रदाता चुनें और अपनी API कुंजी दर्ज करें।</translation>
+    </message>
+    <message>
+        <source>API key</source>
+        <translation>API कुंजी</translation>
+    </message>
+    <message>
+        <source>Add</source>
+        <translation>जोड़ें</translation>
+    </message>
+    <message>
+        <source>Address</source>
+        <translation>पता</translation>
+    </message>
+    <message>
+        <source>Agent settings</source>
+        <translation>एजेंट सेटिंग्स</translation>
+    </message>
+    <message>
+        <source>Allow attribute values to be sent</source>
+        <translation>विशेषता मान भेजने की अनुमति दें</translation>
+    </message>
+    <message>
+        <source>Applications already set up will have to be set up again.</source>
+        <translation>पहले से कॉन्फ़िगर किए गए एप्लिकेशन को दोबारा कॉन्फ़िगर करना होगा।</translation>
+    </message>
+    <message>
+        <source>Ask the agent to filter your layers</source>
+        <translation>एजेंट से अपनी परतें फ़िल्टर करने को कहें</translation>
+    </message>
+    <message>
+        <source>Back to the conversation</source>
+        <translation>बातचीत पर वापस जाएँ</translation>
+    </message>
+    <message>
+        <source>Claude Code or another MCP client on this computer can then filter your layers, once FilterMate has been opened, under the rules of this panel: the same sources, the same confirmations, and filters can be undone here. That application sends what it reads to its own AI provider.</source>
+        <translation>FilterMate खुलने के बाद, इस कंप्यूटर पर Claude Code या कोई अन्य MCP क्लाइंट इस पैनल के नियमों के अनुसार आपकी परतें फ़िल्टर कर सकता है: वही स्रोत, वही पुष्टियाँ, और फ़िल्टर यहीं पूर्ववत किए जा सकते हैं। वह एप्लिकेशन जो पढ़ता है उसे अपने AI प्रदाता को भेजता है।</translation>
+    </message>
+    <message>
+        <source>Connect an AI provider to start. Nothing is sent before you agree.</source>
+        <translation>शुरू करने के लिए कोई AI प्रदाता जोड़ें। आपकी सहमति से पहले कुछ नहीं भेजा जाता।</translation>
+    </message>
+    <message>
+        <source>Copied, with the access token: keep it to yourself. Save these settings for it to apply.</source>
+        <translation>एक्सेस टोकन के साथ कॉपी किया गया: इसे अपने तक रखें। लागू होने के लिए ये सेटिंग्स सहेजें।</translation>
+    </message>
+    <message>
+        <source>Copy for Claude Desktop</source>
+        <translation>Claude Desktop के लिए कॉपी करें</translation>
+    </message>
+    <message>
+        <source>Copy the Claude Code command</source>
+        <translation>Claude Code कमांड कॉपी करें</translation>
+    </message>
+    <message>
+        <source>Copy the configuration</source>
+        <translation>कॉन्फ़िगरेशन कॉपी करें</translation>
+    </message>
+    <message>
+        <source>Describe it in your own words. Each filter can be undone.</source>
+        <translation>इसे अपने शब्दों में बताएँ। हर फ़िल्टर पूर्ववत किया जा सकता है।</translation>
+    </message>
+    <message>
+        <source>Filter your layers from a sentence</source>
+        <translation>एक वाक्य से अपनी परतें फ़िल्टर करें</translation>
+    </message>
+    <message>
+        <source>FilterMate agent</source>
+        <translation>FilterMate एजेंट</translation>
+    </message>
+    <message>
+        <source>History</source>
+        <translation>इतिहास</translation>
+    </message>
+    <message>
+        <source>History…</source>
+        <translation>इतिहास…</translation>
+    </message>
+    <message>
+        <source>I agree to send this data to this provider</source>
+        <translation>मैं यह डेटा इस प्रदाता को भेजने के लिए सहमत हूँ</translation>
+    </message>
+    <message>
+        <source>Let other applications on this computer drive FilterMate (MCP server)</source>
+        <translation>इस कंप्यूटर के अन्य एप्लिकेशन को FilterMate चलाने दें (MCP सर्वर)</translation>
+    </message>
+    <message>
+        <source>MCP connector</source>
+        <translation>MCP कनेक्टर</translation>
+    </message>
+    <message>
+        <source>MCP connectors</source>
+        <translation>MCP कनेक्टर</translation>
+    </message>
+    <message>
+        <source>Model</source>
+        <translation>मॉडल</translation>
+    </message>
+    <message>
+        <source>More</source>
+        <translation>और</translation>
+    </message>
+    <message>
+        <source>New access token</source>
+        <translation>नया एक्सेस टोकन</translation>
+    </message>
+    <message>
+        <source>New conversation</source>
+        <translation>नई बातचीत</translation>
+    </message>
+    <message>
+        <source>New token: it applies once these settings are saved.</source>
+        <translation>नया टोकन: ये सेटिंग्स सहेजने के बाद लागू होगा।</translation>
+    </message>
+    <message>
+        <source>Open data platforms</source>
+        <translation>ओपन डेटा प्लेटफ़ॉर्म</translation>
+    </message>
+    <message>
+        <source>Open the settings</source>
+        <translation>सेटिंग्स खोलें</translation>
+    </message>
+    <message>
+        <source>Other applications</source>
+        <translation>अन्य एप्लिकेशन</translation>
+    </message>
+    <message>
+        <source>Port</source>
+        <translation>पोर्ट</translation>
+    </message>
+    <message>
+        <source>Provider</source>
+        <translation>प्रदाता</translation>
+    </message>
+    <message>
+        <source>Redo</source>
+        <translation>फिर से करें</translation>
+    </message>
+    <message>
+        <source>Remove</source>
+        <translation>हटाएँ</translation>
+    </message>
+    <message>
+        <source>Remove the stored key</source>
+        <translation>संग्रहीत कुंजी हटाएँ</translation>
+    </message>
+    <message>
+        <source>Satellite imagery</source>
+        <translation>उपग्रह इमेजरी</translation>
+    </message>
+    <message>
+        <source>Send (Enter)</source>
+        <translation>भेजें (Enter)</translation>
+    </message>
+    <message>
+        <source>Send again</source>
+        <translation>फिर से भेजें</translation>
+    </message>
+    <message>
+        <source>Sent to: {}</source>
+        <translation>इन्हें भेजा गया: {}</translation>
+    </message>
+    <message>
+        <source>Set up the agent</source>
+        <translation>एजेंट सेट करें</translation>
+    </message>
+    <message>
+        <source>Sources</source>
+        <translation>स्रोत</translation>
+    </message>
+    <message>
+        <source>Stop (Esc)</source>
+        <translation>रोकें (Esc)</translation>
+    </message>
+    <message>
+        <source>Stored: leave empty to keep it</source>
+        <translation>संग्रहीत: रखने के लिए खाली छोड़ें</translation>
+    </message>
+    <message>
+        <source>Test</source>
+        <translation>जाँचें</translation>
+    </message>
+    <message>
+        <source>Testing…</source>
+        <translation>जाँच हो रही है…</translation>
+    </message>
+    <message>
+        <source>The MCP server could not start: {}</source>
+        <translation>MCP सर्वर शुरू नहीं हो सका: {}</translation>
+    </message>
+    <message>
+        <source>The agent can search the sources ticked here. Your searches, and what the agent passes to a connector, are sent to them; a layer added from them is read from their servers.</source>
+        <translation>एजेंट यहाँ चुने गए स्रोतों में खोज सकता है। आपकी खोजें, और एजेंट जो कनेक्टर को देता है, उन्हें भेजे जाते हैं; उनसे जोड़ी गई परत उनके सर्वर से पढ़ी जाती है।</translation>
+    </message>
+    <message>
+        <source>The agent sends your request, the names of your layers and fields, your filter expressions and the results of its tools to the provider chosen here, under that provider's terms. Without the option below, the agent does not read the values of your fields; values already written in your filters and favorites are still sent. The conversation is kept on this computer for each project, until you start a new one.</source>
+        <translation>एजेंट आपका अनुरोध, आपकी परतों और फ़ील्ड के नाम, आपके फ़िल्टर व्यंजक और अपने टूल के परिणाम यहाँ चुने गए प्रदाता को उसकी शर्तों के अंतर्गत भेजता है। नीचे दिए विकल्प के बिना एजेंट आपके फ़ील्ड के मान नहीं पढ़ता; आपके फ़िल्टर और पसंदीदा में पहले से लिखे मान फिर भी भेजे जाते हैं। बातचीत इस कंप्यूटर पर हर प्रोजेक्ट के लिए तब तक रखी जाती है जब तक आप नई शुरू न करें।</translation>
+    </message>
+    <message>
+        <source>Through mcp-remote, which needs Node.js: Claude Desktop starts local servers as programs.</source>
+        <translation>mcp-remote के माध्यम से, जिसे Node.js चाहिए: Claude Desktop स्थानीय सर्वर को प्रोग्राम के रूप में चलाता है।</translation>
+    </message>
+    <message>
+        <source>Too many sources added: remove one first.</source>
+        <translation>बहुत अधिक स्रोत जोड़े गए: पहले एक हटाएँ।</translation>
+    </message>
+    <message>
+        <source>Undo the last</source>
+        <translation>पिछला पूर्ववत करें</translation>
+    </message>
+    <message>
+        <source>Undo this turn</source>
+        <translation>यह टर्न पूर्ववत करें</translation>
+    </message>
+    <message>
+        <source>What do you want to filter?</source>
+        <translation>आप क्या फ़िल्टर करना चाहते हैं?</translation>
+    </message>
+    <message>
+        <source>added by you</source>
+        <translation>आपके द्वारा जोड़ा गया</translation>
+    </message>
+    <message>
+        <source>applied</source>
+        <translation>लागू किया गया</translation>
+    </message>
+    <message>
+        <source>community</source>
+        <translation>सामुदायिक</translation>
+    </message>
+    <message>
+        <source>https://... or a portal address</source>
+        <translation>https://... या पोर्टल का पता</translation>
+    </message>
+    <message>
+        <source>no change</source>
+        <translation>कोई बदलाव नहीं</translation>
+    </message>
+    <message>
+        <source>official</source>
+        <translation>आधिकारिक</translation>
+    </message>
+    <message>
+        <source>this computer</source>
+        <translation>यह कंप्यूटर</translation>
+    </message>
+    <message>
+        <source>undone</source>
+        <translation>पूर्ववत किया गया</translation>
+    </message>
+    <message>
+        <source>{} turn(s)</source>
+        <translation>{} टर्न</translation>
+    </message>
+    <message>
+        <source>Which layers are in this project?</source>
+        <translation>इस प्रोजेक्ट में कौन-सी परतें हैं?</translation>
+    </message>
+    <message>
+        <source>Keep the buildings taller than 15 m</source>
+        <translation>15 मी से ऊँची इमारतें रखें</translation>
+    </message>
+    <message>
+        <source>Filter the roads inside the selected feature</source>
+        <translation>चयनित फ़ीचर के भीतर की सड़कें फ़िल्टर करें</translation>
+    </message>
+</context>
+<context>
+    <name>AgentChat</name>
+    <message>
+        <source>Access to the free quota was renewed: send your request again.</source>
+        <translation>निःशुल्क कोटे तक पहुँच नवीनीकृत हो गई: अपना अनुरोध फिर से भेजें।</translation>
+    </message>
+    <message>
+        <source>Another application is changing the project: try again in a moment.</source>
+        <translation>कोई अन्य एप्लिकेशन प्रोजेक्ट बदल रहा है: थोड़ी देर बाद पुनः प्रयास करें।</translation>
+    </message>
+    <message>
+        <source>Another application: {}</source>
+        <translation>अन्य एप्लिकेशन: {}</translation>
+    </message>
+    <message>
+        <source>Applied again: {}.</source>
+        <translation>फिर से लागू किया गया: {}.</translation>
+    </message>
+    <message>
+        <source>Changed since, left as is: {}.</source>
+        <translation>बाद में बदल गया, जस का तस छोड़ा गया: {}.</translation>
+    </message>
+    <message>
+        <source>Changed: {}.</source>
+        <translation>बदला गया: {}.</translation>
+    </message>
+    <message>
+        <source>Choose a model and agree to send your data to use the agent.</source>
+        <translation>एजेंट का उपयोग करने के लिए कोई मॉडल चुनें और अपना डेटा भेजने की सहमति दें।</translation>
+    </message>
+    <message>
+        <source>Connecting to {}…</source>
+        <translation>{} से कनेक्ट हो रहा है…</translation>
+    </message>
+    <message>
+        <source>Earlier conversation: the agent starts afresh from here.</source>
+        <translation>पिछली बातचीत: एजेंट यहाँ से नए सिरे से शुरू करता है।</translation>
+    </message>
+    <message>
+        <source>Enter your API key in the agent settings.</source>
+        <translation>एजेंट सेटिंग्स में अपनी API कुंजी दर्ज करें।</translation>
+    </message>
+    <message>
+        <source>Export of {}</source>
+        <translation>{} का निर्यात</translation>
+    </message>
+    <message>
+        <source>Favorite applied</source>
+        <translation>पसंदीदा लागू किया गया</translation>
+    </message>
+    <message>
+        <source>Filter on the points of {}</source>
+        <translation>{} के बिंदुओं पर फ़िल्टर</translation>
+    </message>
+    <message>
+        <source>Filter on {}</source>
+        <translation>{} पर फ़िल्टर</translation>
+    </message>
+    <message>
+        <source>Filter on {} by an area</source>
+        <translation>{} पर क्षेत्र द्वारा फ़िल्टर</translation>
+    </message>
+    <message>
+        <source>Filter on {} by {}</source>
+        <translation>{} पर {} द्वारा फ़िल्टर</translation>
+    </message>
+    <message>
+        <source>FilterMate agent</source>
+        <translation>FilterMate एजेंट</translation>
+    </message>
+    <message>
+        <source>Filters removed from {}</source>
+        <translation>{} से फ़िल्टर हटाए गए</translation>
+    </message>
+    <message>
+        <source>Hidden: {}</source>
+        <translation>छिपाया गया: {}</translation>
+    </message>
+    <message>
+        <source>It answers.</source>
+        <translation>वह उत्तर देता है।</translation>
+    </message>
+    <message>
+        <source>Layer added: {}</source>
+        <translation>परत जोड़ी गई: {}</translation>
+    </message>
+    <message>
+        <source>Layers removed: {}</source>
+        <translation>परतें हटाई गईं: {}</translation>
+    </message>
+    <message>
+        <source>Not reachable for this conversation: {}</source>
+        <translation>इस बातचीत के लिए पहुँच से बाहर: {}</translation>
+    </message>
+    <message>
+        <source>Nothing to redo.</source>
+        <translation>फिर से करने के लिए कुछ नहीं।</translation>
+    </message>
+    <message>
+        <source>Nothing to restore.</source>
+        <translation>पुनर्स्थापित करने के लिए कुछ नहीं।</translation>
+    </message>
+    <message>
+        <source>Reading the active filters</source>
+        <translation>सक्रिय फ़िल्टर पढ़ना</translation>
+    </message>
+    <message>
+        <source>Reading the favorites</source>
+        <translation>पसंदीदा पढ़ना</translation>
+    </message>
+    <message>
+        <source>Reading the fields of {}</source>
+        <translation>{} के फ़ील्ड पढ़ना</translation>
+    </message>
+    <message>
+        <source>Reading the layers</source>
+        <translation>परतें पढ़ना</translation>
+    </message>
+    <message>
+        <source>Reading the map</source>
+        <translation>मानचित्र पढ़ना</translation>
+    </message>
+    <message>
+        <source>Reading the values of {}</source>
+        <translation>{} के मान पढ़ना</translation>
+    </message>
+    <message>
+        <source>Restored: {}.</source>
+        <translation>पुनर्स्थापित किया गया: {}.</translation>
+    </message>
+    <message>
+        <source>Searching satellite imagery on {}</source>
+        <translation>{} पर उपग्रह इमेजरी खोजना</translation>
+    </message>
+    <message>
+        <source>Searching {} for {}</source>
+        <translation>{} पर {} खोजना</translation>
+    </message>
+    <message>
+        <source>Selection cleared on {}</source>
+        <translation>{} पर चयन साफ़ किया गया</translation>
+    </message>
+    <message>
+        <source>Selection on {}</source>
+        <translation>{} पर चयन</translation>
+    </message>
+    <message>
+        <source>Shown: {}</source>
+        <translation>दिखाया गया: {}</translation>
+    </message>
+    <message>
+        <source>Stopped.</source>
+        <translation>रोक दिया गया।</translation>
+    </message>
+    <message>
+        <source>The MCP server could not start: {}</source>
+        <translation>MCP सर्वर शुरू नहीं हो सका: {}</translation>
+    </message>
+    <message>
+        <source>The QGIS authentication database is not available.</source>
+        <translation>QGIS का प्रमाणीकरण डेटाबेस उपलब्ध नहीं है।</translation>
+    </message>
+    <message>
+        <source>The QGIS master password is needed to use the stored key.</source>
+        <translation>संग्रहीत कुंजी का उपयोग करने के लिए QGIS का मास्टर पासवर्ड चाहिए।</translation>
+    </message>
+    <message>
+        <source>The agent stopped before the end ({}).</source>
+        <translation>एजेंट अंत से पहले रुक गया ({})।</translation>
+    </message>
+    <message>
+        <source>The agent wants to add this layer of a web service to the project:
+{} · {}
+
+Do you agree?</source>
+        <translation>एजेंट इस वेब सेवा की परत को प्रोजेक्ट में जोड़ना चाहता है:
+{} · {}
+
+क्या आप सहमत हैं?</translation>
+    </message>
+    <message>
+        <source>The agent wants to add this layer to the project:
+{}
+
+A remote source is read from its server by QGIS, and what the layer holds can be sent to the provider of the agent. Do you agree?</source>
+        <translation>एजेंट इस परत को प्रोजेक्ट में जोड़ना चाहता है:
+{}
+
+दूरस्थ स्रोत को QGIS उसके सर्वर से पढ़ता है, और परत की सामग्री एजेंट के प्रदाता को भेजी जा सकती है। क्या आप सहमत हैं?</translation>
+    </message>
+    <message>
+        <source>The agent wants to export these layers to files:
+{}
+
+Do you agree?</source>
+        <translation>एजेंट इन परतों को फ़ाइलों में निर्यात करना चाहता है:
+{}
+
+क्या आप सहमत हैं?</translation>
+    </message>
+    <message>
+        <source>The agent wants to remove these layers from the project (their files stay, their styles and filters here are lost):
+{}
+
+Do you agree?</source>
+        <translation>एजेंट इन परतों को प्रोजेक्ट से हटाना चाहता है (उनकी फ़ाइलें बनी रहती हैं, यहाँ उनकी शैलियाँ और फ़िल्टर खो जाते हैं):
+{}
+
+क्या आप सहमत हैं?</translation>
+    </message>
+    <message>
+        <source>The agent wants to run this action on an external connector:
+{}
+{}
+
+Do you agree?</source>
+        <translation>एजेंट इस कार्रवाई को किसी बाहरी कनेक्टर पर चलाना चाहता है:
+{}
+{}
+
+क्या आप सहमत हैं?</translation>
+    </message>
+    <message>
+        <source>The credit or quota of this account is used up.</source>
+        <translation>इस खाते का क्रेडिट या कोटा समाप्त हो गया है।</translation>
+    </message>
+    <message>
+        <source>The free quota could not be reached: {}</source>
+        <translation>निःशुल्क कोटे तक नहीं पहुँचा जा सका: {}</translation>
+    </message>
+    <message>
+        <source>The free quota is not available.</source>
+        <translation>निःशुल्क कोटा उपलब्ध नहीं है।</translation>
+    </message>
+    <message>
+        <source>The free quota is unavailable for now.</source>
+        <translation>निःशुल्क कोटा फ़िलहाल अनुपलब्ध है।</translation>
+    </message>
+    <message>
+        <source>The free quota is used up for this month. Enter your own API key in the agent settings.</source>
+        <translation>इस महीने का निःशुल्क कोटा समाप्त हो गया है। एजेंट सेटिंग्स में अपनी API कुंजी दर्ज करें।</translation>
+    </message>
+    <message>
+        <source>The key could not be stored.</source>
+        <translation>कुंजी संग्रहीत नहीं की जा सकी।</translation>
+    </message>
+    <message>
+        <source>The provider could not be reached: {}</source>
+        <translation>प्रदाता तक नहीं पहुँचा जा सका: {}</translation>
+    </message>
+    <message>
+        <source>The provider refused the API key: check it in the agent settings.</source>
+        <translation>प्रदाता ने API कुंजी अस्वीकार कर दी: एजेंट सेटिंग्स में उसे जाँचें।</translation>
+    </message>
+    <message>
+        <source>The provider reported a problem: {}</source>
+        <translation>प्रदाता ने समस्या बताई: {}</translation>
+    </message>
+    <message>
+        <source>The stored key could not be read.</source>
+        <translation>संग्रहीत कुंजी पढ़ी नहीं जा सकी।</translation>
+    </message>
+    <message>
+        <source>Thinking…</source>
+        <translation>सोच रहा है…</translation>
+    </message>
+    <message>
+        <source>Too many new accounts from this address today: try again tomorrow, or enter your own API key.</source>
+        <translation>आज इस पते से बहुत अधिक नए खाते बने: कल पुनः प्रयास करें, या अपनी API कुंजी दर्ज करें।</translation>
+    </message>
+    <message>
+        <source>Too many requests for now: try again in a moment.</source>
+        <translation>फ़िलहाल बहुत अधिक अनुरोध: थोड़ी देर बाद पुनः प्रयास करें।</translation>
+    </message>
+    <message>
+        <source>Trying a filter on {}</source>
+        <translation>{} पर फ़िल्टर आज़माना</translation>
+    </message>
+    <message>
+        <source>Zoom on {}</source>
+        <translation>{} पर ज़ूम</translation>
+    </message>
+    <message>
+        <source>an area</source>
+        <translation>एक क्षेत्र</translation>
+    </message>
+    <message>
+        <source>everything</source>
+        <translation>सब कुछ</translation>
+    </message>
+    <message>
+        <source>{} tools available</source>
+        <translation>{} टूल उपलब्ध</translation>
+    </message>
+</context>
 </TS>

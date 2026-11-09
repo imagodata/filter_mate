@@ -7758,4 +7758,574 @@ Cài đặt ngay từ PyPI bằng pip vào hồ sơ QGIS của bạn? Python c�
         <translation type="obsolete">Điểm được giữ lại</translation>
     </message>
 </context>
+<context>
+    <name>AgentPanel</name>
+    <message>
+        <source>(no request)</source>
+        <translation>(không có yêu cầu)</translation>
+    </message>
+    <message>
+        <source>A few free requests a month, through the relay of FilterMate to Claude (Anthropic), under the terms of Anthropic. The relay counts what is spent and keeps no conversation. When it is used up, choose a provider and enter your own API key.</source>
+        <translation>Một vài yêu cầu miễn phí mỗi tháng, qua máy chuyển tiếp của FilterMate đến Claude (Anthropic), theo điều khoản của Anthropic. Máy chuyển tiếp chỉ đếm mức đã dùng và không lưu cuộc trò chuyện nào. Khi hết hạn mức, hãy chọn nhà cung cấp và nhập khóa API riêng của bạn.</translation>
+    </message>
+    <message>
+        <source>API key</source>
+        <translation>Khóa API</translation>
+    </message>
+    <message>
+        <source>Add</source>
+        <translation>Thêm</translation>
+    </message>
+    <message>
+        <source>Address</source>
+        <translation>Địa chỉ</translation>
+    </message>
+    <message>
+        <source>Agent settings</source>
+        <translation>Cài đặt tác tử</translation>
+    </message>
+    <message>
+        <source>Allow attribute values to be sent</source>
+        <translation>Cho phép gửi giá trị thuộc tính</translation>
+    </message>
+    <message>
+        <source>Applications already set up will have to be set up again.</source>
+        <translation>Các ứng dụng đã thiết lập sẽ phải thiết lập lại.</translation>
+    </message>
+    <message>
+        <source>Ask the agent to filter your layers</source>
+        <translation>Nhờ tác tử lọc các lớp của bạn</translation>
+    </message>
+    <message>
+        <source>Back to the conversation</source>
+        <translation>Quay lại cuộc trò chuyện</translation>
+    </message>
+    <message>
+        <source>Claude Code or another MCP client on this computer can then filter your layers, once FilterMate has been opened, under the rules of this panel: the same sources, the same confirmations, and filters can be undone here. That application sends what it reads to its own AI provider.</source>
+        <translation>Claude Code hoặc một ứng dụng khách MCP khác trên máy tính này khi đó có thể lọc các lớp của bạn, sau khi FilterMate đã mở, theo quy tắc của bảng này: cùng nguồn, cùng xác nhận, và bộ lọc có thể được hoàn tác tại đây. Ứng dụng đó gửi những gì nó đọc được đến nhà cung cấp AI của riêng nó.</translation>
+    </message>
+    <message>
+        <source>Connect an AI provider to start. Nothing is sent before you agree.</source>
+        <translation>Hãy kết nối một nhà cung cấp AI để bắt đầu. Không có gì được gửi đi khi bạn chưa đồng ý.</translation>
+    </message>
+    <message>
+        <source>Copied, with the access token: keep it to yourself. Save these settings for it to apply.</source>
+        <translation>Đã sao chép, kèm mã thông báo truy cập: hãy giữ kín. Hãy lưu các cài đặt này để áp dụng.</translation>
+    </message>
+    <message>
+        <source>Copy for Claude Desktop</source>
+        <translation>Sao chép cho Claude Desktop</translation>
+    </message>
+    <message>
+        <source>Copy the Claude Code command</source>
+        <translation>Sao chép lệnh Claude Code</translation>
+    </message>
+    <message>
+        <source>Copy the configuration</source>
+        <translation>Sao chép cấu hình</translation>
+    </message>
+    <message>
+        <source>Describe it in your own words. Each filter can be undone.</source>
+        <translation>Hãy mô tả bằng lời của bạn. Mỗi bộ lọc đều có thể hoàn tác.</translation>
+    </message>
+    <message>
+        <source>Filter your layers from a sentence</source>
+        <translation>Lọc các lớp của bạn chỉ bằng một câu</translation>
+    </message>
+    <message>
+        <source>FilterMate agent</source>
+        <translation>Tác tử FilterMate</translation>
+    </message>
+    <message>
+        <source>History</source>
+        <translation>Lịch sử</translation>
+    </message>
+    <message>
+        <source>History…</source>
+        <translation>Lịch sử…</translation>
+    </message>
+    <message>
+        <source>I agree to send this data to this provider</source>
+        <translation>Tôi đồng ý gửi dữ liệu này đến nhà cung cấp này</translation>
+    </message>
+    <message>
+        <source>Let other applications on this computer drive FilterMate (MCP server)</source>
+        <translation>Cho phép các ứng dụng khác trên máy tính này điều khiển FilterMate (máy chủ MCP)</translation>
+    </message>
+    <message>
+        <source>MCP connector</source>
+        <translation>Trình kết nối MCP</translation>
+    </message>
+    <message>
+        <source>MCP connectors</source>
+        <translation>Các trình kết nối MCP</translation>
+    </message>
+    <message>
+        <source>Model</source>
+        <translation>Mô hình</translation>
+    </message>
+    <message>
+        <source>More</source>
+        <translation>Xem thêm</translation>
+    </message>
+    <message>
+        <source>New access token</source>
+        <translation>Mã thông báo truy cập mới</translation>
+    </message>
+    <message>
+        <source>New conversation</source>
+        <translation>Cuộc trò chuyện mới</translation>
+    </message>
+    <message>
+        <source>New token: it applies once these settings are saved.</source>
+        <translation>Mã thông báo mới: có hiệu lực sau khi lưu các cài đặt này.</translation>
+    </message>
+    <message>
+        <source>Open data platforms</source>
+        <translation>Nền tảng dữ liệu mở</translation>
+    </message>
+    <message>
+        <source>Open the settings</source>
+        <translation>Mở cài đặt</translation>
+    </message>
+    <message>
+        <source>Other applications</source>
+        <translation>Ứng dụng khác</translation>
+    </message>
+    <message>
+        <source>Port</source>
+        <translation>Cổng</translation>
+    </message>
+    <message>
+        <source>Provider</source>
+        <translation>Nhà cung cấp</translation>
+    </message>
+    <message>
+        <source>Redo</source>
+        <translation>Làm lại</translation>
+    </message>
+    <message>
+        <source>Remove</source>
+        <translation>Gỡ bỏ</translation>
+    </message>
+    <message>
+        <source>Remove the stored key</source>
+        <translation>Xóa khóa đã lưu</translation>
+    </message>
+    <message>
+        <source>Satellite imagery</source>
+        <translation>Ảnh vệ tinh</translation>
+    </message>
+    <message>
+        <source>Send (Enter)</source>
+        <translation>Gửi (Enter)</translation>
+    </message>
+    <message>
+        <source>Send again</source>
+        <translation>Gửi lại</translation>
+    </message>
+    <message>
+        <source>Sent to: {}</source>
+        <translation>Đã gửi đến: {}</translation>
+    </message>
+    <message>
+        <source>Set up the agent</source>
+        <translation>Thiết lập tác tử</translation>
+    </message>
+    <message>
+        <source>Sources</source>
+        <translation>Nguồn</translation>
+    </message>
+    <message>
+        <source>Stop (Esc)</source>
+        <translation>Dừng (Esc)</translation>
+    </message>
+    <message>
+        <source>Stored: leave empty to keep it</source>
+        <translation>Đã lưu: để trống để giữ nguyên</translation>
+    </message>
+    <message>
+        <source>Test</source>
+        <translation>Kiểm tra</translation>
+    </message>
+    <message>
+        <source>Testing…</source>
+        <translation>Đang kiểm tra…</translation>
+    </message>
+    <message>
+        <source>The MCP server could not start: {}</source>
+        <translation>Không thể khởi động máy chủ MCP: {}</translation>
+    </message>
+    <message>
+        <source>The agent can search the sources ticked here. Your searches, and what the agent passes to a connector, are sent to them; a layer added from them is read from their servers.</source>
+        <translation>Tác tử có thể tìm kiếm trong các nguồn được đánh dấu ở đây. Các tìm kiếm của bạn, và những gì tác tử chuyển cho một trình kết nối, sẽ được gửi đến các nguồn đó; lớp được thêm từ chúng được đọc từ máy chủ của chúng.</translation>
+    </message>
+    <message>
+        <source>The agent sends your request, the names of your layers and fields, your filter expressions and the results of its tools to the provider chosen here, under that provider's terms. Without the option below, the agent does not read the values of your fields; values already written in your filters and favorites are still sent. The conversation is kept on this computer for each project, until you start a new one.</source>
+        <translation>Tác tử gửi yêu cầu của bạn, tên các lớp và trường, biểu thức bộ lọc cùng kết quả của các công cụ đến nhà cung cấp được chọn ở đây, theo điều khoản của nhà cung cấp đó. Nếu không bật tùy chọn bên dưới, tác tử không đọc giá trị của các trường; những giá trị đã có trong bộ lọc và mục yêu thích của bạn vẫn được gửi. Cuộc trò chuyện được lưu trên máy tính này theo từng dự án, cho đến khi bạn bắt đầu cuộc mới.</translation>
+    </message>
+    <message>
+        <source>Through mcp-remote, which needs Node.js: Claude Desktop starts local servers as programs.</source>
+        <translation>Qua mcp-remote, cần Node.js: Claude Desktop khởi chạy các máy chủ cục bộ như chương trình.</translation>
+    </message>
+    <message>
+        <source>Too many sources added: remove one first.</source>
+        <translation>Đã thêm quá nhiều nguồn: hãy gỡ bớt một nguồn trước.</translation>
+    </message>
+    <message>
+        <source>Undo the last</source>
+        <translation>Hoàn tác mục gần nhất</translation>
+    </message>
+    <message>
+        <source>Undo this turn</source>
+        <translation>Hoàn tác lượt này</translation>
+    </message>
+    <message>
+        <source>What do you want to filter?</source>
+        <translation>Bạn muốn lọc gì?</translation>
+    </message>
+    <message>
+        <source>added by you</source>
+        <translation>do bạn thêm</translation>
+    </message>
+    <message>
+        <source>applied</source>
+        <translation>đã áp dụng</translation>
+    </message>
+    <message>
+        <source>community</source>
+        <translation>cộng đồng</translation>
+    </message>
+    <message>
+        <source>https://... or a portal address</source>
+        <translation>https://... hoặc địa chỉ cổng thông tin</translation>
+    </message>
+    <message>
+        <source>no change</source>
+        <translation>không thay đổi</translation>
+    </message>
+    <message>
+        <source>official</source>
+        <translation>chính thức</translation>
+    </message>
+    <message>
+        <source>this computer</source>
+        <translation>máy tính này</translation>
+    </message>
+    <message>
+        <source>undone</source>
+        <translation>đã hoàn tác</translation>
+    </message>
+    <message>
+        <source>{} turn(s)</source>
+        <translation>{} lượt</translation>
+    </message>
+    <message>
+        <source>Which layers are in this project?</source>
+        <translation>Dự án này có những lớp nào?</translation>
+    </message>
+    <message>
+        <source>Keep the buildings taller than 15 m</source>
+        <translation>Giữ lại các tòa nhà cao hơn 15 m</translation>
+    </message>
+    <message>
+        <source>Filter the roads inside the selected feature</source>
+        <translation>Lọc các con đường nằm trong đối tượng đã chọn</translation>
+    </message>
+</context>
+<context>
+    <name>AgentChat</name>
+    <message>
+        <source>Access to the free quota was renewed: send your request again.</source>
+        <translation>Quyền truy cập hạn mức miễn phí đã được gia hạn: hãy gửi lại yêu cầu của bạn.</translation>
+    </message>
+    <message>
+        <source>Another application is changing the project: try again in a moment.</source>
+        <translation>Một ứng dụng khác đang thay đổi dự án: hãy thử lại sau giây lát.</translation>
+    </message>
+    <message>
+        <source>Another application: {}</source>
+        <translation>Ứng dụng khác: {}</translation>
+    </message>
+    <message>
+        <source>Applied again: {}.</source>
+        <translation>Đã áp dụng lại: {}.</translation>
+    </message>
+    <message>
+        <source>Changed since, left as is: {}.</source>
+        <translation>Đã thay đổi từ đó, giữ nguyên: {}.</translation>
+    </message>
+    <message>
+        <source>Changed: {}.</source>
+        <translation>Đã thay đổi: {}.</translation>
+    </message>
+    <message>
+        <source>Choose a model and agree to send your data to use the agent.</source>
+        <translation>Hãy chọn một mô hình và đồng ý gửi dữ liệu của bạn để dùng tác tử.</translation>
+    </message>
+    <message>
+        <source>Connecting to {}…</source>
+        <translation>Đang kết nối với {}…</translation>
+    </message>
+    <message>
+        <source>Earlier conversation: the agent starts afresh from here.</source>
+        <translation>Cuộc trò chuyện trước: tác tử bắt đầu lại từ đây.</translation>
+    </message>
+    <message>
+        <source>Enter your API key in the agent settings.</source>
+        <translation>Hãy nhập khóa API của bạn trong cài đặt tác tử.</translation>
+    </message>
+    <message>
+        <source>Export of {}</source>
+        <translation>Xuất {}</translation>
+    </message>
+    <message>
+        <source>Favorite applied</source>
+        <translation>Đã áp dụng mục yêu thích</translation>
+    </message>
+    <message>
+        <source>Filter on the points of {}</source>
+        <translation>Lọc theo các điểm của {}</translation>
+    </message>
+    <message>
+        <source>Filter on {}</source>
+        <translation>Lọc {}</translation>
+    </message>
+    <message>
+        <source>Filter on {} by an area</source>
+        <translation>Lọc {} theo một vùng</translation>
+    </message>
+    <message>
+        <source>Filter on {} by {}</source>
+        <translation>Lọc {} theo {}</translation>
+    </message>
+    <message>
+        <source>FilterMate agent</source>
+        <translation>Tác tử FilterMate</translation>
+    </message>
+    <message>
+        <source>Filters removed from {}</source>
+        <translation>Đã gỡ bộ lọc khỏi {}</translation>
+    </message>
+    <message>
+        <source>Hidden: {}</source>
+        <translation>Đã ẩn: {}</translation>
+    </message>
+    <message>
+        <source>It answers.</source>
+        <translation>Nguồn có phản hồi.</translation>
+    </message>
+    <message>
+        <source>Layer added: {}</source>
+        <translation>Đã thêm lớp: {}</translation>
+    </message>
+    <message>
+        <source>Layers removed: {}</source>
+        <translation>Đã gỡ các lớp: {}</translation>
+    </message>
+    <message>
+        <source>Not reachable for this conversation: {}</source>
+        <translation>Không truy cập được trong cuộc trò chuyện này: {}</translation>
+    </message>
+    <message>
+        <source>Nothing to redo.</source>
+        <translation>Không có gì để làm lại.</translation>
+    </message>
+    <message>
+        <source>Nothing to restore.</source>
+        <translation>Không có gì để khôi phục.</translation>
+    </message>
+    <message>
+        <source>Reading the active filters</source>
+        <translation>Đang đọc các bộ lọc đang hoạt động</translation>
+    </message>
+    <message>
+        <source>Reading the favorites</source>
+        <translation>Đang đọc các mục yêu thích</translation>
+    </message>
+    <message>
+        <source>Reading the fields of {}</source>
+        <translation>Đang đọc các trường của {}</translation>
+    </message>
+    <message>
+        <source>Reading the layers</source>
+        <translation>Đang đọc các lớp</translation>
+    </message>
+    <message>
+        <source>Reading the map</source>
+        <translation>Đang đọc bản đồ</translation>
+    </message>
+    <message>
+        <source>Reading the values of {}</source>
+        <translation>Đang đọc các giá trị của {}</translation>
+    </message>
+    <message>
+        <source>Restored: {}.</source>
+        <translation>Đã khôi phục: {}.</translation>
+    </message>
+    <message>
+        <source>Searching satellite imagery on {}</source>
+        <translation>Đang tìm ảnh vệ tinh trên {}</translation>
+    </message>
+    <message>
+        <source>Searching {} for {}</source>
+        <translation>Đang tìm kiếm trên {}: {}</translation>
+    </message>
+    <message>
+        <source>Selection cleared on {}</source>
+        <translation>Đã bỏ chọn trên {}</translation>
+    </message>
+    <message>
+        <source>Selection on {}</source>
+        <translation>Vùng chọn trên {}</translation>
+    </message>
+    <message>
+        <source>Shown: {}</source>
+        <translation>Đã hiển thị: {}</translation>
+    </message>
+    <message>
+        <source>Stopped.</source>
+        <translation>Đã dừng.</translation>
+    </message>
+    <message>
+        <source>The MCP server could not start: {}</source>
+        <translation>Không thể khởi động máy chủ MCP: {}</translation>
+    </message>
+    <message>
+        <source>The QGIS authentication database is not available.</source>
+        <translation>Cơ sở dữ liệu xác thực của QGIS không khả dụng.</translation>
+    </message>
+    <message>
+        <source>The QGIS master password is needed to use the stored key.</source>
+        <translation>Cần mật khẩu chính của QGIS để dùng khóa đã lưu.</translation>
+    </message>
+    <message>
+        <source>The agent stopped before the end ({}).</source>
+        <translation>Tác tử đã dừng trước khi kết thúc ({}).</translation>
+    </message>
+    <message>
+        <source>The agent wants to add this layer of a web service to the project:
+{} · {}
+
+Do you agree?</source>
+        <translation>Tác tử muốn thêm lớp này của một dịch vụ web vào dự án:
+{} · {}
+
+Bạn có đồng ý không?</translation>
+    </message>
+    <message>
+        <source>The agent wants to add this layer to the project:
+{}
+
+A remote source is read from its server by QGIS, and what the layer holds can be sent to the provider of the agent. Do you agree?</source>
+        <translation>Tác tử muốn thêm lớp này vào dự án:
+{}
+
+QGIS đọc nguồn từ xa từ máy chủ của nó, và nội dung của lớp có thể được gửi đến nhà cung cấp của tác tử. Bạn có đồng ý không?</translation>
+    </message>
+    <message>
+        <source>The agent wants to export these layers to files:
+{}
+
+Do you agree?</source>
+        <translation>Tác tử muốn xuất các lớp này ra tệp:
+{}
+
+Bạn có đồng ý không?</translation>
+    </message>
+    <message>
+        <source>The agent wants to remove these layers from the project (their files stay, their styles and filters here are lost):
+{}
+
+Do you agree?</source>
+        <translation>Tác tử muốn gỡ các lớp này khỏi dự án (tệp của chúng được giữ lại, kiểu và bộ lọc ở đây sẽ mất):
+{}
+
+Bạn có đồng ý không?</translation>
+    </message>
+    <message>
+        <source>The agent wants to run this action on an external connector:
+{}
+{}
+
+Do you agree?</source>
+        <translation>Tác tử muốn chạy thao tác này trên một trình kết nối bên ngoài:
+{}
+{}
+
+Bạn có đồng ý không?</translation>
+    </message>
+    <message>
+        <source>The credit or quota of this account is used up.</source>
+        <translation>Tín dụng hoặc hạn mức của tài khoản này đã hết.</translation>
+    </message>
+    <message>
+        <source>The free quota could not be reached: {}</source>
+        <translation>Không truy cập được hạn mức miễn phí: {}</translation>
+    </message>
+    <message>
+        <source>The free quota is not available.</source>
+        <translation>Hạn mức miễn phí không khả dụng.</translation>
+    </message>
+    <message>
+        <source>The free quota is unavailable for now.</source>
+        <translation>Hạn mức miễn phí tạm thời không khả dụng.</translation>
+    </message>
+    <message>
+        <source>The free quota is used up for this month. Enter your own API key in the agent settings.</source>
+        <translation>Hạn mức miễn phí tháng này đã hết. Hãy nhập khóa API riêng của bạn trong cài đặt tác tử.</translation>
+    </message>
+    <message>
+        <source>The key could not be stored.</source>
+        <translation>Không thể lưu khóa.</translation>
+    </message>
+    <message>
+        <source>The provider could not be reached: {}</source>
+        <translation>Không thể kết nối với nhà cung cấp: {}</translation>
+    </message>
+    <message>
+        <source>The provider refused the API key: check it in the agent settings.</source>
+        <translation>Nhà cung cấp đã từ chối khóa API: hãy kiểm tra trong cài đặt tác tử.</translation>
+    </message>
+    <message>
+        <source>The provider reported a problem: {}</source>
+        <translation>Nhà cung cấp báo có sự cố: {}</translation>
+    </message>
+    <message>
+        <source>The stored key could not be read.</source>
+        <translation>Không thể đọc khóa đã lưu.</translation>
+    </message>
+    <message>
+        <source>Thinking…</source>
+        <translation>Đang suy nghĩ…</translation>
+    </message>
+    <message>
+        <source>Too many new accounts from this address today: try again tomorrow, or enter your own API key.</source>
+        <translation>Hôm nay có quá nhiều tài khoản mới từ địa chỉ này: hãy thử lại vào ngày mai, hoặc nhập khóa API riêng của bạn.</translation>
+    </message>
+    <message>
+        <source>Too many requests for now: try again in a moment.</source>
+        <translation>Quá nhiều yêu cầu lúc này: hãy thử lại sau giây lát.</translation>
+    </message>
+    <message>
+        <source>Trying a filter on {}</source>
+        <translation>Đang thử một bộ lọc trên {}</translation>
+    </message>
+    <message>
+        <source>Zoom on {}</source>
+        <translation>Thu phóng đến {}</translation>
+    </message>
+    <message>
+        <source>an area</source>
+        <translation>một vùng</translation>
+    </message>
+    <message>
+        <source>everything</source>
+        <translation>tất cả</translation>
+    </message>
+    <message>
+        <source>{} tools available</source>
+        <translation>{} công cụ khả dụng</translation>
+    </message>
+</context>
 </TS>
