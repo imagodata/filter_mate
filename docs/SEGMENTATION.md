@@ -69,6 +69,22 @@ median overlap with the reference outlines (IoU, 1 is a perfect match):
 Parcels did not reach the improvement we required: a cadastral limit is often invisible on the image.
 Trees were not validated either: hedges tend to merge. Use the colour engine or a vector layer for them.
 
+**Similar objects: a start, not a finished tool.** Measured on the 25 cm orthophoto of the test project
+(Cerdagne), 2026-11-10, with `scripts/sam_similar_bench.py` under QGIS 4.2.3 for Windows. Ten reference
+buildings of 80 to 400 m² were each clicked in a 150 m view, with the default ratios (0.5 to 2, same shape).
+A found object counts when it overlaps a BD TOPO building with an IoU of at least 0.5. Medians:
+
+| | SAM | Colour engine |
+|---|---|---|
+| Precision (found objects that are buildings) | 0.36 | 0.00 |
+| Recall (buildings of the same size found) | 0.46 | 0.00 |
+| Time per search | 5.2 s | 2.4 s, 24 s on two views |
+| Overlap of the clicked object | 0.78 | |
+
+SAM finds roughly half of the buildings of the same size in the view, where the colour engine finds almost
+none. About two found objects out of three are not buildings, though: check the result before filtering
+with it, and remove the wrong ones with Escape or *Clear*.
+
 ## Model
 
 SAM 2.1 hiera tiny (Meta, Apache 2.0), quantized ONNX export of
