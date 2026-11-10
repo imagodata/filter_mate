@@ -2,7 +2,8 @@
 """Map tool of SAM for the object targets of the raster pipette.
 
 Left click: a new object. Shift+left click: extend the last object. Right click:
-trim it. Left drag: a box around a new object. Escape: remove the last object.
+trim it. Left drag: a box around a new object. Escape: remove the last object. G (or Tab when
+QGIS lets it through): the next granularity of the last object, a part, the object, a group.
 Moving the mouse without a button asks for a preview of the object under it.
 """
 from qgis.core import QgsPointXY, QgsRectangle
@@ -41,6 +42,7 @@ class SegmentationTool(QgsMapTool):
     hovered = pyqtSignal(object)  # QgsPointXY under the mouse, no button pressed
     validateRequested = pyqtSignal()
     clearRequested = pyqtSignal()
+    cycleRequested = pyqtSignal()  # G or Tab: the next granularity of the last object
 
     def __init__(self, canvas) -> None:
         super().__init__(canvas)
@@ -86,6 +88,8 @@ class SegmentationTool(QgsMapTool):
             self.validateRequested.emit()
         elif event.key() == Qt.Key.Key_Escape:
             self.clearRequested.emit()
+        elif event.key() in (Qt.Key.Key_G, Qt.Key.Key_Tab):
+            self.cycleRequested.emit()
 
     def deactivate(self) -> None:
         self._press = None

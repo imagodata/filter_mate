@@ -366,3 +366,46 @@ class TestWindowsAtTheEdge:
     def test_a_raster_smaller_than_the_window_needs_one(self):
         windows = segmentation.assign_windows([(5.0 + i, 5.0) for i in range(10)], (0.0, 0.0, 900.0, 900.0), 1.0, 1024)
         assert len(windows) == 1
+
+
+class TestAppearance:
+    """2026-11-10: the encoder features of SAM under an object, compared with the clicked one's (cosine)."""
+
+    @staticmethod
+    def embedding(fine=None, coarse=None):
+        coarse = np.zeros((1, 4, 2, 2), dtype=np.float32) if coarse is None else coarse
+        fine = np.zeros((1, 2, 4, 4), dtype=np.float32) if fine is None else fine
+        return {'image_embeddings.0': fine, 'image_embeddings.1': coarse}
+
+    def test_the_coarsest_map_under_the_mask(self):
+        coarse = np.zeros((1, 4, 2, 2), dtype=np.float32)
+        coarse[0, 0, 0, 0] = 3.0  # top left cell points along channel 0
+        coarse[0, 1, 1, 1] = 5.0  # bottom right cell along channel 1
+        mask = np.zeros((8, 8), dtype=bool)
+        mask[:4, :4] = True
+        vector = segmentation.pooled_features(self.embedding(coarse=coarse), mask)
+        assert vector == pytest.approx([1.0, 0.0, 0.0, 0.0])
+
+    def test_nothing_for_a_stub_or_an_empty_mask(self):
+        assert segmentation.pooled_features(np.zeros((8, 8, 3)), np.ones((8, 8), dtype=bool)) is None
+        assert segmentation.pooled_features(self.embedding(), np.zeros((8, 8), dtype=bool)) is None
+        assert segmentation.pooled_features(self.embedding(), None) is None
+
+    def test_a_mask_that_does_not_tile_the_map_is_none(self):
+        assert segmentation.pooled_features(self.embedding(), np.ones((7, 7), dtype=bool)) is None
+
+    def test_the_threshold_is_the_measured_one(self):
+        assert segmentation.SIMILAR_APPEARANCE_MIN == 0.68
+
+    def test_looks_alike(self):
+        task = object.__new__(segmentation.SimilarObjectsTask)
+        coarse = np.zeros((1, 4, 2, 2), dtype=np.float32)
+        coarse[0, 0] = 1.0
+        mask = np.ones((8, 8), dtype=bool)
+        task.reference_features = None
+        assert task._looks_alike(self.embedding(coarse=coarse), mask)
+        task.reference_features = np.array([1.0, 0.0, 0.0, 0.0])
+        assert task._looks_alike(self.embedding(coarse=coarse), mask)
+        task.reference_features = np.array([0.0, 1.0, 0.0, 0.0])
+        assert not task._looks_alike(self.embedding(coarse=coarse), mask)
+        assert task._looks_alike(np.zeros((8, 8, 3)), mask)  # unknown features: kept

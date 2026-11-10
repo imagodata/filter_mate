@@ -388,27 +388,68 @@ def test_similar_flow(folder):
     check("Shift+click after Clear redraws the new object", names() == ["clicked"], names())
     panel.clear_segments()
 
+    # G: the next of the three masks SAM proposes (a stub: a quarter, the object, the whole window).
+    class ThreeMasks(BrightModel):
+        def predict_masks(self, embedding, points, labels, box):
+            bright = embedding[:, :, 0] > 128
+            column, row = (int(value) for value in points[0])
+            part = np.zeros_like(bright)
+            part[row - 10:row + 10, column - 10:column + 10] = True  # a part of the clicked object, around the click
+            return [part & bright, bright, np.ones_like(bright)], [0.5, 0.9, 0.4]
+
+    three = ThreeMasks()
+    install_model(three)
+    controller._session = None
+    panel.set_pick_target(panels.PICK_OBJECT)
+    controller._on_point(reference.centroid().asPoint(), True)
+    spin(lambda: controller._task is None and len(panel._segments) == 1, 30000)
+    first = QgsGeometry.fromWkt(panel._segments[0]).area()
+    controller.cycle()
+    second = QgsGeometry.fromWkt(panel._segments[0]).area() if panel._segments else 0
+    controller.cycle()
+    third = QgsGeometry.fromWkt(panel._segments[0]).area() if panel._segments else 0
+    check("G redraws the last object at the next granularity, then wraps to the smallest",
+          len(panel._segments) == 1 and second > first and 0 < third < first, (first, second, third))
+    check("and says which one", "1" in panel._segment_status.text() and "3" in panel._segment_status.text(), panel._segment_status.text())
+    panel.clear_segments()
+    install_model(model)
+    controller._session = None
+
+    def names_of(wkts):
+        return sorted(max(SHAPES, key=lambda name: segmentation.overlap(QgsGeometry.fromWkt(wkt), shape_geometry(layer, name)))
+                      for wkt in wkts)
+
+    def search():
+        controller._on_point(reference.centroid().asPoint(), True)
+        return spin(lambda: controller._task is None and controller._search is None and len(panel._segments) >= 1, 60000)
+
+    alike = shape_geometry(layer, "alike").centroid().asPoint()
     panel.set_pick_target(panels.PICK_SIMILAR_OBJECTS)
-    controller._on_point(reference.centroid().asPoint(), True)
-    check("the clicked object is drawn and the search runs",
-          spin(lambda: controller._task is None and controller._search is None and len(panel._segments) >= 1, 60000),
-          panel._segment_status.text())
-    found = [QgsGeometry.fromWkt(wkt) for wkt in panel._segments]
-    kinds = []
-    for geometry in found:
-        best = max(SHAPES, key=lambda name: segmentation.overlap(geometry, shape_geometry(layer, name)))
-        kinds.append(best)
-    check("the alike square is found", "alike" in kinds, kinds)
-    check("the large square and the strip are not", "large" not in kinds and "strip" not in kinds, kinds)
+    check("the clicked object is drawn and the search runs", search(), panel._segment_status.text())
+    proposed = names_of([wkt for wkt, _reference in controller._proposals])
+    check("the alike square is proposed", "alike" in proposed, proposed)
+    check("the large square and the strip are not", "large" not in proposed and "strip" not in proposed, proposed)
+    check("proposals stay out of the selection until kept", names() == ["clicked"] and not panel._proposal_widget.isHidden())
     check("the status counts them", "1 " in panel._segment_status.text(), panel._segment_status.text())
+    controller._on_point(alike, False)
+    check("a right click on a proposal rejects it", controller.proposal_count() == 0 and names() == ["clicked"]
+          and panel._proposal_widget.isHidden())
     controller.clear()
-    check("Escape removes the clicked object with its similar ones", panel._segments == [], len(panel._segments))
+    check("Escape removes the clicked object", panel._segments == [])
+    search()
+    controller._on_point(alike, True)
+    check("a click on a proposal keeps it", names() == ["alike", "clicked"] and controller.proposal_count() == 0, names())
+    controller.clear()
+    check("Escape removes the clicked object with the objects kept from its search", panel._segments == [], names())
     panel._similar_shape_check.setChecked(False)
-    controller._on_point(reference.centroid().asPoint(), True)
-    spin(lambda: controller._search is None and len(panel._segments) >= 1, 60000)
-    kinds = [max(SHAPES, key=lambda name: segmentation.overlap(QgsGeometry.fromWkt(wkt), shape_geometry(layer, name)))
-             for wkt in panel._segments]
-    check("without the shape, the strip of the same area joins", "strip" in kinds and "large" not in kinds, kinds)
+    search()
+    controller.validate()
+    check("Enter keeps every proposal; without the shape the strip joins", "strip" in names() and "large" not in names(), names())
+    controller.clear()
+    search()
+    controller.clear()
+    check("Escape rejects every proposal", controller.proposal_count() == 0 and names() == ["clicked"], names())
+    panel.clear_segments()
     controller.drop()
     QgsProject.instance().removeMapLayer(layer.id())
 

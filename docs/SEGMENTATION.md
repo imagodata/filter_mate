@@ -43,14 +43,24 @@ group. The **Engine** list of the group switches between SAM and the colour engi
 | Shift+click | The last object, extended |
 | Right click | The last object, trimmed |
 | Drag a box | A new object inside the box |
-| Escape | Removes the last object, or the last search with its clicked object |
+| G (or Tab when QGIS lets it through) | The last object at the next granularity: a part, the object, a group |
+| Escape | Rejects the proposals; otherwise removes the last object, or the last search with its clicked object |
 | *Clear* | Forgets every object drawn by SAM |
 
 The first click of an area prepares it: about 3 s under QGIS for Windows, then about 0.1 s per gesture.
 
+SAM proposes three outlines for each click and FilterMate keeps the one it rates best. On 20 buildings that was
+the best of the three 11 times: G shows the others (median overlap 0.71 with the chosen one, 0.76 with the best
+of the three).
+
 **Similar objects** first draws the clicked object. The patches of a similar colour in the visible map, at
 most 120 of them, are then proposed to SAM, which redraws each one in the background. An object is kept when
-its area, and its shape with *same shape*, are within the ratios of the group compared with the clicked one.
+its area, and its shape with *same shape*, are within the ratios of the group compared with the clicked one,
+and when it looks like it: the encoder features of SAM under the two objects must point the same way (cosine
+at least 0.68).
+
+The objects found are **proposals**, outlined in dashes, outside the selection: click one to keep it, right
+click to reject it, Enter (or *Keep*) keeps them all, Escape (or *Reject*) rejects them all.
 
 The objects are polygons in the CRS of the raster, stored with the filter like any other raster selection.
 Processing and the REST API do not accept them yet.
@@ -81,17 +91,29 @@ A found object counts when it overlaps a BD TOPO building with an IoU of at leas
 | Time per search | 5.2 s | 2.4 s, 24 s on two views |
 | Overlap of the clicked object | 0.78 | |
 
-SAM finds roughly half of the buildings of the same size in the view, where the colour engine finds almost
-none. About two found objects out of three are not buildings, though: check the result before filtering
-with it, and remove the wrong ones with Escape or *Clear*. On ten other buildings of the same orthophoto
+These were the numbers before the appearance filter. On ten other buildings of the same orthophoto
 (`scripts/sam_similar_features.py`), SAM did less well: median precision 0.24, recall 0.31.
 
-**A filter tried and not adopted** (2026-11-10, rule set before the run). The objects that are not buildings
-have a lower SAM score (median 0.75 against 0.88) and a colour further from the clicked object (largest
-difference of the mean R, G, B: 25.6 against 11.4). Thresholds chosen on the first ten buildings (score at
-least 0.42, colour distance at most 30) raised the median precision on the ten others from 0.24 to 0.31 for a
-recall from 0.31 to 0.29 (`scripts/sam_similar_analysis.py`). The gain required was 0.10: the search is
-unchanged.
+**Appearance filter, adopted** (2026-11-10, rule set before the run: a threshold chosen on the first ten
+buildings, judged on the ten others, adopted if the median precision gains at least 0.10 for a recall loss of
+at most 0.05). The cosine of the encoder features of SAM separates the classes (median 0.80 for the buildings
+found, 0.69 for the rest). With the threshold of 0.68 chosen on the first ten (`scripts/sam_similar_appearance.py`):
+
+| Median | First ten, before | First ten, after | Ten others, before | Ten others, after |
+|---|---|---|---|---|
+| Precision | 0.36 | 0.49 | 0.24 | 0.35 |
+| Recall | 0.46 | 0.43 | 0.31 | 0.26 |
+
+About half of the objects proposed are buildings: keep or reject them before filtering with them.
+
+**Tried and not adopted.** A score and colour filter (precision 0.24 to 0.31 on the ten others, short of the
+0.10 required, `scripts/sam_similar_analysis.py`), and a second, framed pass of SAM after the click (median
+overlap 0.711 to 0.713 on 20 buildings, short of the 0.02 required).
+
+**Colour engine.** Its similar objects took up to 34 s on this orthophoto: the patches of the whole raster
+were simplified to a vertex budget they did not need. They are now only measured, and the budget applies to
+the objects kept: 5.5 s at most, median precision 0.06 and recall 0.11 instead of 0 and 0, as the patches and
+the clicked object are now measured alike.
 
 ## Model
 

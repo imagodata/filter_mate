@@ -38,3 +38,6 @@ class SegmentationProvider(Protocol):
             ``(mask, score)``: an ``input_size`` x ``input_size`` boolean numpy
             array and the confidence the model gives it.
         """
+
+    # Optional: ``predict_masks(embedding, points, labels, box) -> (masks, scores)``, every mask the model
+    # proposes (SAM: three granularities); the panel then lets the user cycle them.

@@ -1096,6 +1096,9 @@ class CoverageModeController(BaseController):
             if hasattr(raster, 'engineChanged'):
                 raster.engineChanged.connect(self._on_raster_engine_changed)
             raster.segmentModelInstallRequested.connect(lambda: self._segmentation_controller().install_model())
+            if hasattr(raster, 'proposalsAcceptRequested'):
+                raster.proposalsAcceptRequested.connect(lambda: self._segmentation_controller().accept_proposals())
+                raster.proposalsRejectRequested.connect(lambda: self._segmentation_controller().reject_proposals())
             raster.segmentRuntimeInstallRequested.connect(self._on_segment_runtime_install_requested)
         if hasattr(pc, 'groupChosen'):
             pc.groupChosen.connect(self._on_point_cloud_group_chosen)

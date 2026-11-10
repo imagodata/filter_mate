@@ -1370,8 +1370,12 @@ def similar_objects_geometry(provider: QgsRasterDataProvider, selection: RasterS
                    similar_shape_bounds([compactness(part)], selection.similar) if selection.shape else None)
                   for part in clicked]
     plain = replace(selection, seeds=(), objects=(), similar=(), shape=False)
+    # The patches are only measured: simplifying them all to the vertex budget took 20 of 24 s on a 25 cm
+    # orthophoto (2026-11-10) and changed their compactness. The budget applies to the objects kept.
+    budget = selection_kwargs.pop('max_vertices', SOURCE_MAX_VERTICES)
     patches = selection_geometry(patch_provider or provider, plain, extent, native_width, native_height, crs_wkt,
-                                 max_pixels=max_pixels, opening=selection.object_opening, **selection_kwargs)
+                                 max_pixels=max_pixels, opening=selection.object_opening, max_vertices=sys.maxsize,
+                                 **selection_kwargs)
     if patches.canceled:
         return patches
     parts = geometry_parts(patches.geometry)
@@ -1380,6 +1384,8 @@ def similar_objects_geometry(provider: QgsRasterDataProvider, selection: RasterS
                   for (low, high), shape in references)]
     geometry = union_geometries(kept_parts) if kept_parts else QgsGeometry()
     cell = float(patches.cell_size) if patches.cell_size else 0.0
+    if not geometry.isEmpty():
+        geometry = _within_budget(geometry, budget, cell or 1.0)
     pixel_area = (extent.width() / max(1, native_width) * extent.height() / max(1, native_height)
                   * patches.decimation ** 2)
     kept = int(round(sum(part.area() for part in kept_parts) / pixel_area)) if cell > 0 and pixel_area > 0 else 0

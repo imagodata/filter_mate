@@ -15,6 +15,7 @@ to a task; the prompts that follow reuse it on the main thread (tens of ms).
 import logging
 import math
 import os
+import sys
 from dataclasses import dataclass, field
 from typing import Any, List, Optional, Tuple
 
@@ -30,6 +31,10 @@ SIEVE_PIXELS = 16
 SIMILAR_CANDIDATES = 120
 # A candidate whose object overlaps one already kept (or the clicked one) by this much is the same object.
 SAME_OBJECT_IOU = 0.5
+# Least cosine between the encoder features of SAM under an object and under the clicked one. Chosen on 10 buildings
+# of the 25 cm Cerdagne orthophoto, judged on 10 others by a rule set before the run (2026-11-10): median precision
+# 0.24 -> 0.35, recall 0.31 -> 0.26 (scripts/sam_similar_appearance.py).
+SIMILAR_APPEARANCE_MIN = 0.68
 # Area ratios of the colour patches proposed to SAM, wide: the model redraws them, the panel's ratios judge them.
 CANDIDATE_RATIO = (0.05, 20.0)
 # A patch smaller than this share of the object drawn by SAM is a speck of the image, not a candidate:
@@ -186,6 +191,9 @@ class SegmentationSession:
     labels: List[int] = field(default_factory=list)
     box: Optional[Tuple[float, float, float, float]] = None
     mask: Any = None
+    masks: List[Any] = field(default_factory=list)  # every mask of the last prediction (SAM: three granularities)
+    scores: List[float] = field(default_factory=list)
+    choice: int = 0  # the mask in use among ``masks``
 
     @property
     def has_prompts(self) -> bool:
@@ -216,11 +224,35 @@ class SegmentationSession:
     def clear(self) -> None:
         """Forget the prompts, keep the encoded window."""
         self.points, self.labels, self.box, self.mask = [], [], None, None
+        self.masks, self.scores, self.choice = [], [], 0
 
     def predict(self) -> Any:
-        """Ask the model for the mask of the current prompts."""
-        self.mask, _score = self.provider.predict(self.embedding, self.points, self.labels, self.box)
+        """Ask the model for the mask of the current prompts: its best one; the others wait for :meth:`cycle`."""
+        several = getattr(self.provider, 'predict_masks', None)
+        if several is None:
+            self.mask, _score = self.provider.predict(self.embedding, self.points, self.labels, self.box)
+            self.masks, self.scores, self.choice = [self.mask], [_score], 0
+            return self.mask
+        self.masks, self.scores = several(self.embedding, self.points, self.labels, self.box)
+        self.choice = max(range(len(self.scores)), key=lambda index: self.scores[index])
+        self.mask = self.masks[self.choice]
         return self.mask
+
+    def cycle(self) -> bool:
+        """Use the next mask of the last prediction, by growing area (a part, the object, a group); False without another."""
+        if len(self.masks) < 2:
+            return False
+        order = sorted(range(len(self.masks)), key=lambda index: int(self.masks[index].sum()))
+        self.choice = order[(order.index(self.choice) + 1) % len(order)]
+        self.mask = self.masks[self.choice]
+        return True
+
+    def granularity(self) -> Tuple[int, int]:
+        """``(rank, count)`` of the mask in use, ranked by area from 1 (the smallest)."""
+        if not self.masks:
+            return 0, 0
+        order = sorted(range(len(self.masks)), key=lambda index: int(self.masks[index].sum()))
+        return order.index(self.choice) + 1, len(order)
 
     def geometry(self, crs_wkt: str = '') -> Any:
         """Polygons of the current mask, simplified by half a pixel; None without a mask."""
@@ -262,21 +294,52 @@ def assign_windows(points: List[Tuple[float, float]], raster: Tuple[float, float
 
 
 def point_geometry(provider: Any, embedding: Any, window: SegmentationWindow, x: float, y: float, crs_wkt: str = '') -> Any:
-    """The object SAM sees under one point of the map, its part holding the point (or its largest); None without one."""
+    """The object SAM sees under one point of the map, its part nearest the point; None without one."""
+    return point_object(provider, embedding, window, x, y, crs_wkt)[0]
+
+
+def point_object(provider: Any, embedding: Any, window: SegmentationWindow, x: float, y: float,
+                 crs_wkt: str = '') -> Tuple[Any, Any]:
+    """``(geometry, mask)`` of the object SAM sees under one point: its part nearest the point, and the whole mask."""
     from qgis.core import QgsGeometry, QgsPointXY
     from .geometry_tools import mask_to_geometry
     from .raster_adapter import geometry_parts
     if not window.contains(x, y):
-        return None
+        return None, None
     mask, _score = provider.predict(embedding, [window.to_pixel(x, y)], [1], None)
     geometry = mask_to_geometry(mask, window.geotransform(), crs_wkt, sieve_pixels=SIEVE_PIXELS,
                                 simplify_tolerance=window.cell * 0.5)
     parts = geometry_parts(geometry)
     if not parts:
-        return None
+        return None, mask
     where = QgsGeometry.fromPointXY(QgsPointXY(x, y))
     near = [part for part in parts if part.distance(where) <= window.cell * 2.0]  # a simplified edge may pass by the point
-    return min(near, key=lambda part: part.distance(where)) if near else None
+    return (min(near, key=lambda part: part.distance(where)) if near else None), mask
+
+
+def pooled_features(embedding: Any, mask: Any) -> Any:
+    """Encoder features of SAM averaged under a mask, on the coarsest feature map, unit length; None without them.
+
+    The appearance of an object for the similar objects: two roofs of one kind point the same way,
+    a road or a lawn of the same colour less so. None for an embedding that is not SAM's (a stub).
+    """
+    import numpy as np
+    if not isinstance(embedding, dict) or mask is None:
+        return None
+    maps = [np.asarray(value) for value in embedding.values() if np.ndim(value) == 4]
+    if not maps:
+        return None
+    coarse = min(maps, key=lambda value: value.shape[-1] * value.shape[-2])[0]
+    _channels, height, width = coarse.shape
+    size = np.asarray(mask).shape[0]
+    if size % height or size % width:
+        return None
+    cells = np.asarray(mask).reshape(height, size // height, width, size // width).mean(axis=(1, 3)) >= 0.5
+    if not cells.any():
+        return None
+    vector = coarse[:, cells].mean(axis=1)
+    norm = float(np.linalg.norm(vector))
+    return vector / norm if norm else None
 
 
 def similar_candidate_points(layer: Any, criterion: Any, reference: Any, visible: Any,
@@ -317,7 +380,8 @@ def similar_candidate_points(layer: Any, criterion: Any, reference: Any, visible
         return []
     provider = virtual.dataProvider() if virtual is not None else layer.dataProvider()
     patches = selection_geometry(provider, plain, window, columns[1] - columns[0], rows[1] - rows[0], layer.crs().toWkt(),
-                                 max_pixels=SIMILAR_LIVE_MAX_PIXELS, opening=criterion.object_opening).geometry
+                                 max_pixels=SIMILAR_LIVE_MAX_PIXELS, opening=criterion.object_opening,
+                                 max_vertices=sys.maxsize).geometry  # only measured: no simplification
     inside = reference.pointOnSurface().asPoint()
     points = []
     low, high = reference.area() * max(CANDIDATE_RATIO[0], CANDIDATE_MIN_SHARE), reference.area() * CANDIDATE_RATIO[1]
@@ -465,13 +529,14 @@ class SimilarObjectsTask(QgsTask):
     def __init__(self, source: str, provider_key: str, renderer: Any, crs: Any, model: Any,
                  raster: Tuple[float, float, float, float], cell: float, points: List[Tuple[float, float]],
                  reference_wkt: str, ratio: Tuple[float, float], shape: bool, callback: Any, context: Any = None,
-                 existing: Optional[List[str]] = None) -> None:
+                 existing: Optional[List[str]] = None, reference_features: Any = None) -> None:
         super().__init__(QCoreApplication.translate('SimilarObjectsTask', 'FilterMate: drawing the similar objects'),
                          QgsTask.Flag.CanCancel)
         self.source, self.provider_key, self.renderer = source, provider_key, renderer
         self.model, self.raster, self.cell, self.points = model, raster, cell, list(points)
         self.reference_wkt, self.ratio, self.shape = reference_wkt, tuple(ratio), bool(shape)
         self.existing = list(existing or ())  # objects already in the panel: not drawn twice
+        self.reference_features = reference_features  # the appearance of the clicked object; None: not compared
         self.callback = callback
         self.crs_wkt = crs.toWkt()
         self.wkts: List[str] = []
@@ -521,14 +586,15 @@ class SimilarObjectsTask(QgsTask):
                     if any(found.contains(where) for found in kept):
                         continue  # a patch of an object already drawn
                     self.examined += 1
-                    found = point_geometry(self.model, embedding, window, x, y, self.crs_wkt)
+                    found, mask = point_object(self.model, embedding, window, x, y, self.crs_wkt)
                     if found is not None and not found.isEmpty():
                         found = found.intersection(bounds)  # past the raster the window is black: nothing was drawn
                     if found is None or found.isEmpty() or any(overlap(found, other) >= SAME_OBJECT_IOU for other in kept):
                         continue
                     if is_similar(found, reference_area, reference_shape, self.ratio, self.shape):
-                        kept.append(found)
-                        self.wkts.append(found.asWkt())
+                        kept.append(found)  # drawn: its patches are not prompted again, whatever its appearance
+                        if self._looks_alike(embedding, mask):
+                            self.wkts.append(found.asWkt())
             return not self.isCanceled()
         except Exception as exc:  # the model is third party code: its failure is told, not raised in a task
             from . import sam_model
@@ -539,6 +605,14 @@ class SimilarObjectsTask(QgsTask):
         finally:
             self.settings.setLayers([])
             layer = None
+
+    def _looks_alike(self, embedding: Any, mask: Any) -> bool:
+        """Its SAM features point like the clicked object's (``SIMILAR_APPEARANCE_MIN``); True when either is unknown."""
+        import numpy as np
+        if self.reference_features is None:
+            return True
+        features = pooled_features(embedding, mask)
+        return features is None or float(np.dot(features, self.reference_features)) >= SIMILAR_APPEARANCE_MIN
 
     def finished(self, result: bool) -> None:
         callback, self.callback = self.callback, None

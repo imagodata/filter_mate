@@ -38,12 +38,18 @@ class SegmentationController:
         self._previous_tool: Any = None
         # Prompts waiting for the window being encoded: (kind, value, positive, extend).
         self._pending: List[Tuple[str, Any, bool, bool]] = []
+        # Every task started, until its callback: forgetting one dropped the last Python reference, and QGIS 3.22,
+        # which leaves it to Python, deleted it while it ran (2026-11-10, the Escape of a click being prepared).
+        self._running: List[Any] = []
         # The objects are followed by their polygon (WKT), not their index: the panel may clear or reset them.
         self._current: Optional[str] = None  # the object the prompts of the session draw
         self._groups: List[List[str]] = []  # the objects of each gesture (a click, a search), for Escape
         self._extending = False  # the prompts of the session redraw the current object
         self._hover_timer: Any = None
         self._hover_point: Any = None
+        # Similar objects found, not yet in the selection: (WKT, reference WKT); kept or rejected by the user.
+        self._proposals: List[Tuple[str, str]] = []
+        self._proposal_outline: Any = None
 
     @staticmethod
     def tr(text: str) -> str:
@@ -51,18 +57,23 @@ class SegmentationController:
 
     @staticmethod
     def _stop(task: Any) -> None:
-        """Cancel a running task; a queued one is left to finish, its callback ignored (the generation moved on).
+        """Cancel a task QGIS says runs; any other is left to finish, its callback ignored (the generation moved on).
 
         QGIS 3.22 deletes a queued task canceled while the thread pool already holds its runnable:
         the run that follows reads a deleted object and QGIS crashes (2026-11-10, the Escape of a click
-        whose area was not prepared yet).
+        whose area was not prepared yet). A status that cannot be read counts as not running.
         """
         try:
+            if not hasattr(task, 'status'):
+                task.cancel()  # not a QgsTask (a stand-in): nothing queued to protect
+                return
             from qgis.core import QgsTask
             statuses = getattr(QgsTask, 'TaskStatus', None)
-            queued = getattr(statuses, 'Queued', None) if statuses is not None else getattr(QgsTask, 'Queued', None)
-            status = task.status() if hasattr(task, 'status') else None
-            if queued is not None and status is not None and status == queued:
+            running = getattr(statuses, 'Running', None) if statuses is not None else None
+            if running is None:
+                running = getattr(QgsTask, 'Running', None)
+            status = task.status() if hasattr(task, 'status') else running
+            if running is None or status != running:
                 return
             task.cancel()
         except RuntimeError:
@@ -83,6 +94,7 @@ class SegmentationController:
             self.tool.hovered.connect(self._on_hover)
             self.tool.validateRequested.connect(self.validate)
             self.tool.clearRequested.connect(self.clear)
+            self.tool.cycleRequested.connect(self.cycle)
             self.tool.activated.connect(lambda: self._host._show_picker_state(True))
             self.tool.deactivated.connect(self._on_tool_left)
         if canvas.mapTool() is not self.tool:
@@ -96,8 +108,9 @@ class SegmentationController:
         self._host._show_picker_state(False)
 
     def deactivate(self) -> None:
-        """Give the map back to the tool this one replaced and forget the prompts; the objects stay."""
+        """Give the map back to the tool this one replaced and forget the prompts and proposals; the objects stay."""
         self.cancel()
+        self._set_proposals([])
         if self.tool is not None:
             previous, self._previous_tool = self._previous_tool, None
             self._host._release_map_tool(self.tool, previous)
@@ -110,6 +123,7 @@ class SegmentationController:
         self.deactivate()
         self._session, self._session_layer = None, ''
         self._groups, self._current = [], None
+        self._set_proposals([])
         tool, self.tool = self.tool, None
         if tool is not None:
             try:
@@ -121,11 +135,10 @@ class SegmentationController:
         """Forget the prompts, the window being encoded and the search running; the objects stay."""
         self._generation += 1
         self._pending = []
-        for name in ('_task', '_search'):
-            task = getattr(self, name)
-            setattr(self, name, None)
-            if task is not None:
-                self._stop(task)
+        self._task = None  # the encoding is short: left to finish, its result ignored (never canceled, see _stop)
+        search, self._search = self._search, None
+        if search is not None:
+            self._stop(search)
         if self._hover_timer is not None:
             self._hover_timer.stop()
         if self._session is not None:
@@ -159,6 +172,8 @@ class SegmentationController:
     def _on_point(self, point: Any, positive: bool, extend: bool = False) -> None:
         """A click: a new object; Shift+click (``extend``) or a right click (not ``positive``) redraw the last one."""
         if self._host._active_layer is None:
+            return
+        if self._proposals and not extend and self._decide_proposal(point, positive):
             return
         refine = extend or not positive
         if refine and not self._has_current():
@@ -314,11 +329,13 @@ class SegmentationController:
                                      self._embedded(self._generation, layer.id(), window, model),
                                      QgsProject.instance().transformContext())
         self._task = task
+        self._running.append(task)
         self._status(self.tr("Preparing the segmentation of this area…"))
         QgsApplication.taskManager().addTask(task)
 
     def _embedded(self, generation: int, layer_id: str, window: Any, model: Any) -> Any:
         def finish(task: Any, success: bool) -> None:
+            self._release(task)
             if generation != self._generation or getattr(self._host, '_torn_down', False):
                 return  # the layer or the object changed while the window was encoded
             self._task = None
@@ -452,7 +469,7 @@ class SegmentationController:
             for group in self._groups:
                 group[:] = [wkt if member == self._current else member for member in group]
             self._current = wkt
-            self._status(self.tr("Shift+click extends the object, right click trims it, Escape removes it"))
+            self._status(self.tr("Shift+click extends the object, right click trims it, G changes its granularity"))
             return
         if self._index(wkt) >= 0:
             self._current = wkt  # the very same polygon was already there: it is the one refined next
@@ -463,7 +480,7 @@ class SegmentationController:
         if hasattr(panel, 'pick_target') and panel.pick_target() == 'similar_objects':
             self._search_similar(geometry)
         else:
-            self._status(self.tr("Shift+click extends the object, right click trims it, Escape removes it"))
+            self._status(self.tr("Shift+click extends the object, right click trims it, G changes its granularity"))
 
     def _geometry(self, session: Any) -> Any:
         """The object of the session inside the raster: a window can run past its edge, where nothing was drawn.
@@ -488,12 +505,16 @@ class SegmentationController:
             geometry = QgsGeometry.unaryUnion(held)
         return geometry.intersection(QgsGeometry.fromRect(self._host._active_layer.extent()))
 
+    def _release(self, task: Any) -> None:
+        """The task ended (its callback runs): it may go."""
+        self._running = [other for other in self._running if other is not task]
+
     # === Similar objects ===
 
     def _search_similar(self, reference: Any) -> None:
         """Propose the colour patches near the clicked object to SAM, then keep the objects like it (a task)."""
         from qgis.core import QgsApplication, QgsProject
-        from ...adapters.qgis.coverage_layers.segmentation import SimilarObjectsTask, find_provider
+        from ...adapters.qgis.coverage_layers.segmentation import SimilarObjectsTask, find_provider, pooled_features
         layer, session, panel = self._host._active_layer, self._session, self._host._raster_panel
         model = find_provider()
         if layer is None or session is None or model is None or panel is None:
@@ -518,8 +539,10 @@ class SegmentationController:
                                   (extent.xMinimum(), extent.yMinimum(), extent.xMaximum(), extent.yMaximum()),
                                   session.window.cell, points, reference.asWkt(), panel.similar_ratio(),
                                   panel.similar_shape(), self._searched(self._generation, layer.id(), reference.asWkt()),
-                                  QgsProject.instance().transformContext(), existing=list(panel._segments))
+                                  QgsProject.instance().transformContext(), existing=list(panel._segments),
+                                  reference_features=pooled_features(session.embedding, session.mask))
         self._search = task
+        self._running.append(task)
         task.progressChanged.connect(lambda progress: self._on_search_progress(task, progress))
         self._status(self.tr("Drawing the similar objects: {0} candidates…").format(len(points)))
         QgsApplication.taskManager().addTask(task)
@@ -536,6 +559,7 @@ class SegmentationController:
 
     def _searched(self, generation: int, layer_id: str, reference_wkt: str) -> Any:
         def finish(task: Any, success: bool) -> None:
+            self._release(task)
             if generation != self._generation or getattr(self._host, '_torn_down', False):
                 return
             self._search = None
@@ -551,13 +575,84 @@ class SegmentationController:
                         self._host._call(panel, 'offer_model_repair')
                 return
             new = [wkt for wkt in task.wkts if self._index(wkt) < 0]
-            added = panel.add_segments(new) if new else 0
-            for group in reversed(self._groups):
-                if reference_wkt in group:
-                    group.extend(new)  # Escape removes the clicked object with its similar ones
-                    break
-            self._status(self.tr("{0} similar objects found among {1} candidates; Escape removes them").format(added, task.examined))
+            self._set_proposals([(wkt, reference_wkt) for wkt in new])
+            if new:
+                self._status(self.tr("{0} similar objects proposed among {1} candidates: click one to keep it, right click "
+                                     "to reject it, Enter keeps them all, Escape rejects them all").format(len(new), task.examined))
+            else:
+                self._status(self.tr("No similar object found among {0} candidates").format(task.examined))
         return finish
+
+    # === Proposals ===
+
+    def proposal_count(self) -> int:
+        return len(self._proposals)
+
+    def _set_proposals(self, proposals: List[Tuple[str, str]]) -> None:
+        """Show the proposals (dashed), or hide them; the panel shows how many there are."""
+        from qgis.core import QgsGeometry
+        self._proposals = list(proposals)
+        self._host._call(self._host._raster_panel, 'set_proposal_count', len(self._proposals))
+        if not self._proposals:
+            if self._proposal_outline is not None:
+                self._proposal_outline.hide()
+            return
+        iface = self._host._iface()
+        canvas = iface.mapCanvas() if iface is not None else None
+        layer = self._host._active_layer
+        if canvas is None or layer is None:
+            return
+        if self._proposal_outline is None:
+            from ...adapters.qgis.coverage_layers.preview_overlay import ObjectOutline
+            self._proposal_outline = ObjectOutline(canvas, hover=True)
+        geometries = [QgsGeometry.fromWkt(wkt) for wkt, _reference in self._proposals]
+        self._proposal_outline.show(QgsGeometry.unaryUnion(geometries), layer)
+
+    def _decide_proposal(self, point: Any, keep: bool) -> bool:
+        """A click on a proposal keeps it, a right click rejects it; False when the click is on none."""
+        from qgis.core import QgsGeometry, QgsPointXY
+        try:
+            where = QgsGeometry.fromPointXY(QgsPointXY(self._transform().transform(point)))
+        except Exception:  # off the domain of the CRS: not on a proposal
+            return False
+        for index, (wkt, reference) in enumerate(self._proposals):
+            if QgsGeometry.fromWkt(wkt).contains(where):
+                rest = self._proposals[:index] + self._proposals[index + 1:]
+                if keep:
+                    self._accept([(wkt, reference)])
+                self._set_proposals(rest)
+                self._status((self.tr("Object kept") if keep else self.tr("Proposal rejected"))
+                             + (self.tr(": {0} proposals left").format(len(rest)) if rest else ""))
+                return True
+        return False
+
+    def _accept(self, proposals: List[Tuple[str, str]]) -> int:
+        panel = self._host._raster_panel
+        if panel is None or not proposals:
+            return 0
+        wkts = [wkt for wkt, _reference in proposals if self._index(wkt) < 0]
+        added = panel.add_segments(wkts) if wkts else 0
+        for wkt, reference in proposals:
+            for group in reversed(self._groups):
+                if reference in group:
+                    group.append(wkt)  # Escape removes the clicked object with the objects kept from its search
+                    break
+        return added
+
+    def accept_proposals(self) -> None:
+        """Enter or the panel: every proposal joins the selection."""
+        if not self._proposals:
+            return
+        added = self._accept(self._proposals)
+        self._set_proposals([])
+        self._status(self.tr("{0} similar objects kept").format(added))
+
+    def reject_proposals(self) -> None:
+        """Escape or the panel: the proposals go, the selection is unchanged."""
+        if not self._proposals:
+            return
+        self._set_proposals([])
+        self._status(self.tr("Proposals rejected"))
 
     # === Outline and status ===
 
@@ -587,7 +682,10 @@ class SegmentationController:
         self._host._call(self._host._raster_panel, 'set_segmentation_status', text)
 
     def validate(self) -> None:
-        """Enter: nothing left to validate, a click already added the object."""
+        """Enter: keep the proposals; otherwise nothing to validate, a click already added the object."""
+        if self._proposals:
+            self.accept_proposals()
+            return
         self._current, self._extending = None, False
         if self._session is not None:
             self._session.clear()
@@ -602,6 +700,9 @@ class SegmentationController:
             self.cancel()
             self._status(self.tr("Search stopped") if searching else self.tr("Click canceled"))
             return
+        if self._proposals:
+            self.reject_proposals()
+            return
         self.cancel()
         panel = self._host._raster_panel
         if panel is None or not hasattr(panel, 'remove_segment_wkts'):
@@ -611,6 +712,29 @@ class SegmentationController:
                 self._status(self.tr("Last object removed"))
                 return
         self._status('')
+
+    def cycle(self) -> None:
+        """G: the last object takes the next mask SAM proposed for it (a part, the object, a group)."""
+        session = self._session
+        if session is None or not session.has_prompts or self._task is not None or not self._has_current():
+            self._status(self.tr("Click an object first"))
+            return
+        if not session.cycle():
+            self._status(self.tr("SAM proposed a single outline for this object"))
+            return
+        try:
+            geometry = self._geometry(session)
+        except Exception as exc:  # a mask GEOS cannot polygonize
+            logger.warning(f"[FM5] granularity not drawn: {exc}", exc_info=True)
+            return
+        if geometry is None or geometry.isEmpty():
+            self._status(self.tr("No object at this granularity: press G again"))
+            return
+        self._stop_search()  # it compared with the former outline
+        self._extending = True
+        self._commit(geometry)
+        rank, count = session.granularity()
+        self._status(self.tr("Granularity {0} of {1}: G for the next one").format(rank, count))
 
     def session_info(self) -> Optional[Any]:
         """The encoded window, for the tests."""

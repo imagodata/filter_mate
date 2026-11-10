@@ -14,7 +14,7 @@ import sys
 import tempfile
 import threading
 import urllib.request
-from typing import Any, Callable, Dict, Optional, Sequence, Tuple
+from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple
 
 import numpy as np
 
@@ -249,6 +249,19 @@ class SamOnnxProvider:
 
     def predict(self, embedding: Any, points: Sequence[Tuple[float, float]], labels: Sequence[int],
                 box: Optional[Tuple[float, float, float, float]]) -> Tuple[Any, float]:
+        logits, scores = self._decode(embedding, points, labels, box)
+        best = int(np.argmax(scores))
+        return upsample(logits[best], self.input_size) > 0, scores[best]  # one enlargement: 3.5 s of 15 on a search
+
+    def predict_masks(self, embedding: Any, points: Sequence[Tuple[float, float]], labels: Sequence[int],
+                      box: Optional[Tuple[float, float, float, float]]) -> Tuple[List[Any], List[float]]:
+        """The three masks SAM proposes for the prompts (a part, the object, a group, roughly) and their scores."""
+        logits, scores = self._decode(embedding, points, labels, box)
+        return [upsample(mask, self.input_size) > 0 for mask in logits], scores
+
+    def _decode(self, embedding: Any, points: Sequence[Tuple[float, float]], labels: Sequence[int],
+                box: Optional[Tuple[float, float, float, float]]) -> Tuple[Any, List[float]]:
+        """The low resolution logits of the masks and their scores."""
         coordinates = [[float(x), float(y)] for x, y in points]
         kinds = [int(label) for label in labels]
         feeds = dict(embedding)
@@ -259,5 +272,4 @@ class SamOnnxProvider:
         feeds['input_boxes'] = (np.array([[box]], dtype=np.float32) if box is not None
                                 else np.zeros((1, 0, 4), dtype=np.float32))
         scores, masks = self._decoder.run(['iou_scores', 'pred_masks'], feeds)
-        best = int(np.argmax(scores[0, 0]))
-        return upsample(masks[0, 0, best], self.input_size) > 0, float(scores[0, 0, best])
+        return masks[0, 0], [float(score) for score in scores[0, 0]]
