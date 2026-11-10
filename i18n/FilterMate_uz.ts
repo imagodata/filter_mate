@@ -28,6 +28,21 @@
         <source>Manage Resource Sharing repos...</source>
         <translation>Resource Sharing omborlarini boshqarish...</translation>
     </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="173"/>
+        <source>OptimizationManager</source>
+        <translation>OptimizationManager</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="175"/>
+        <source>OptimizationManager</source>
+        <translation>OptimizationManager</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="177"/>
+        <source>OptimizationManager</source>
+        <translation>OptimizationManager</translation>
+    </message>
 </context>
 <context>
     <name>AgentChat</name>
@@ -1929,22 +1944,22 @@ Rozimisiz?</translation>
 <context>
     <name>DockChrome</name>
     <message>
-        <location filename="../ui/layout/dock_chrome.py" line="232"/>
+        <location filename="../ui/layout/dock_chrome.py" line="288"/>
         <source>Hide EXPLORING to give room to the sections</source>
         <translation>Bo'limlarga joy ochish uchun EXPLORING ni yashirish</translation>
     </message>
     <message>
-        <location filename="../ui/layout/dock_chrome.py" line="233"/>
+        <location filename="../ui/layout/dock_chrome.py" line="289"/>
         <source>Show EXPLORING</source>
         <translation>EXPLORING ni ko'rsatish</translation>
     </message>
     <message>
-        <location filename="../ui/layout/dock_chrome.py" line="51"/>
+        <location filename="../ui/layout/dock_chrome.py" line="117"/>
         <source>Close</source>
         <translation>Yopish</translation>
     </message>
     <message>
-        <location filename="../ui/layout/dock_chrome.py" line="48"/>
+        <location filename="../ui/layout/dock_chrome.py" line="115"/>
         <source>Detach or dock the panel</source>
         <translation>Panelni ajratish yoki biriktirish</translation>
     </message>
@@ -2115,79 +2130,79 @@ Yo'q = Barcha mavjudlarni almashtirish</translation>
         <translation>Xatolik: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="775"/>
+        <location filename="../ui/controllers/favorites_menu_builder.py" line="203"/>
         <source>Used {0} times</source>
-        <translation type="obsolete">{0} marta ishlatilgan</translation>
+        <translation>{0} marta ishlatilgan</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="786"/>
+        <location filename="../ui/controllers/favorites_menu_builder.py" line="217"/>
         <source>Add current filter to favorites</source>
-        <translation type="obsolete">Joriy filtrni sevimlilarga qo'shish</translation>
+        <translation>Joriy filtrni sevimlilarga qo'shish</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="790"/>
+        <location filename="../ui/controllers/favorites_menu_builder.py" line="221"/>
         <source>Add filter (no active filter)</source>
-        <translation type="obsolete">Filtr qo'shish (faol filtr yo'q)</translation>
+        <translation>Filtr qo'shish (faol filtr yo'q)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="795"/>
+        <location filename="../ui/controllers/favorites_menu_builder.py" line="227"/>
         <source>Manage favorites...</source>
-        <translation type="obsolete">Sevimlilarni boshqarish...</translation>
+        <translation>Sevimlilarni boshqarish...</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="798"/>
+        <location filename="../ui/controllers/favorites_menu_builder.py" line="230"/>
         <source>Export...</source>
-        <translation type="obsolete">Eksport...</translation>
+        <translation>Eksport...</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="801"/>
+        <location filename="../ui/controllers/favorites_menu_builder.py" line="233"/>
         <source>Import...</source>
-        <translation type="obsolete">Import...</translation>
+        <translation>Import...</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="822"/>
+        <location filename="../ui/controllers/favorites_menu_builder.py" line="259"/>
         <source>Global favorites</source>
-        <translation type="obsolete">Global sevimlilar</translation>
+        <translation>Global sevimlilar</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="826"/>
+        <location filename="../ui/controllers/favorites_menu_builder.py" line="262"/>
         <source>Copy to global...</source>
-        <translation type="obsolete">Globalga nusxalash...</translation>
+        <translation>Globalga nusxalash...</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="837"/>
+        <location filename="../ui/controllers/favorites_menu_builder.py" line="272"/>
         <source>── Available global favorites ──</source>
-        <translation type="obsolete">── Mavjud global sevimlilar ──</translation>
+        <translation>── Mavjud global sevimlilar ──</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="845"/>
+        <location filename="../ui/controllers/favorites_menu_builder.py" line="282"/>
         <source>(No global favorites)</source>
-        <translation type="obsolete">(Global sevimlilar yo'q)</translation>
+        <translation>(Global sevimlilar yo'q)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="849"/>
+        <location filename="../ui/controllers/favorites_menu_builder.py" line="288"/>
         <source>Maintenance</source>
-        <translation type="obsolete">Texnik xizmat</translation>
+        <translation>Texnik xizmat</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="851"/>
+        <location filename="../ui/controllers/favorites_menu_builder.py" line="290"/>
         <source>Save to project (.qgz)</source>
-        <translation type="obsolete">Loyihaga saqlash (.qgz)</translation>
+        <translation>Loyihaga saqlash (.qgz)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="854"/>
+        <location filename="../ui/controllers/favorites_menu_builder.py" line="293"/>
         <source>Restore from project</source>
-        <translation type="obsolete">Loyihadan tiklash</translation>
+        <translation>Loyihadan tiklash</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="859"/>
+        <location filename="../ui/controllers/favorites_menu_builder.py" line="298"/>
         <source>Clean up orphan projects</source>
-        <translation type="obsolete">Yetim loyihalarni tozalash</translation>
+        <translation>Yetim loyihalarni tozalash</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="862"/>
+        <location filename="../ui/controllers/favorites_menu_builder.py" line="301"/>
         <source>Database statistics</source>
-        <translation type="obsolete">Ma'lumotlar bazasi statistikasi</translation>
+        <translation>Ma'lumotlar bazasi statistikasi</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="909"/>
@@ -2327,29 +2342,32 @@ Qatlamga filtr qoʻllang, soʻng ★ koʻrsatkichini bosing va birinchi sevimlin
         <translation>FilterMate konfiguratsiya katalogi hali boshlanmagan — avval FilterMate bilan QGIS loyihasini oching.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1714"/>
+        <location filename="../ui/controllers/favorites_extension_bridge.py" line="138"/>
+        <location filename="../ui/controllers/favorites_extension_bridge.py" line="179"/>
+        <location filename="../ui/controllers/favorites_extension_bridge.py" line="219"/>
         <source>Resource Sharing extension is not active. Enable &apos;favorites_sharing&apos; in FilterMate settings.</source>
-        <translation type="obsolete">Resource Sharing kengaytmasi faol emas. FilterMate sozlamalarida 'favorites_sharing' ni yoqing.</translation>
+        <translation>Resource Sharing kengaytmasi faol emas. FilterMate sozlamalarida 'favorites_sharing' ni yoqing.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1722"/>
+        <location filename="../ui/controllers/favorites_extension_bridge.py" line="146"/>
+        <location filename="../ui/controllers/favorites_extension_bridge.py" line="187"/>
         <source>Shared favorites service is not available.</source>
-        <translation type="obsolete">Umumiy sevimlilar xizmati mavjud emas.</translation>
+        <translation>Umumiy sevimlilar xizmati mavjud emas.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1708"/>
+        <location filename="../ui/controllers/favorites_extension_bridge.py" line="161"/>
         <source>Shared picker failed: {0}</source>
-        <translation type="obsolete">Umumiy sevimlilar tanlagichi muvaffaqiyatsiz: {0}</translation>
+        <translation>Umumiy sevimlilar tanlagichi muvaffaqiyatsiz: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1726"/>
+        <location filename="../ui/controllers/favorites_extension_bridge.py" line="191"/>
         <source>You have no favorites to publish yet. Save a filter via the ★ menu first.</source>
-        <translation type="obsolete">Sizda hali nashr qilish uchun sevimlilar yoʻq. Avval ★ menyusi orqali filtrni saqlang.</translation>
+        <translation>Sizda hali nashr qilish uchun sevimlilar yoʻq. Avval ★ menyusi orqali filtrni saqlang.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1742"/>
+        <location filename="../ui/controllers/favorites_extension_bridge.py" line="212"/>
         <source>Publish dialog failed: {0}</source>
-        <translation type="obsolete">Nashr oynasini ochish muvaffaqiyatsiz: {0}</translation>
+        <translation>Nashr oynasini ochish muvaffaqiyatsiz: {0}</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="388"/>
@@ -2405,6 +2423,76 @@ Qatlamga filtr qoʻllang, soʻng ★ koʻrsatkichini bosing va birinchi sevimlin
         <location filename="../ui/controllers/favorites_controller.py" line="1205"/>
         <source>Database statistics are unavailable. Details in filtermate.log.</source>
         <translation>Ma’lumotlar bazasi statistikasi mavjud emas. Tafsilotlar filtermate.log faylida.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_extension_bridge.py" line="347"/>
+        <source>Bundle unchanged — nothing to commit.</source>
+        <translation>To‘plam o‘zgarmagan — commit qilinadigan narsa yo‘q.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_spatial_handler.py" line="866"/>
+        <source>Favorite &apos;{0}&apos; could not be applied: no layer matched the saved source / targets.</source>
+        <translation>'{0}' sevimlisini qo‘llab bo‘lmadi: saqlangan manba / nishonlarga mos qatlam topilmadi.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_spatial_handler.py" line="133"/>
+        <source>Favorite '{0}' was missing predicate info — defaulting to 'Intersect'. Re-save it after adjusting if you need a different predicate.</source>
+        <translation>'{0}' sevimlisida predikat ma’lumoti yo‘q edi — 'Intersect' ishlatilmoqda. Boshqa predikat kerak bo‘lsa, sozlagandan so‘ng uni qayta saqlang.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_extension_bridge.py" line="259"/>
+        <source>No default repo is configured. Open 'Manage Resource Sharing repos…' to add one and mark it as default.</source>
+        <translation>Standart ombor sozlanmagan. Qo‘shish va standart deb belgilash uchun 'Resource Sharing omborlarini boshqarish…' bo‘limini oching.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_extension_bridge.py" line="265"/>
+        <source>No favorites to publish.</source>
+        <translation>Nashr etish uchun sevimlilar yo‘q.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_extension_bridge.py" line="286"/>
+        <source>Publish {0} favorite(s) to &lt;b&gt;{1}&lt;/b&gt;?&lt;br&gt;&lt;br&gt;&lt;small&gt;Target: &lt;code&gt;{2}&lt;/code&gt;&lt;/small&gt;</source>
+        <translation>{0} ta sevimli &lt;b&gt;{1}&lt;/b&gt; omborida nashr etilsinmi?&lt;br&gt;&lt;br&gt;&lt;small&gt;Nishon: &lt;code&gt;{2}&lt;/code&gt;&lt;/small&gt;</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_extension_bridge.py" line="343"/>
+        <source>Published {0} favorite(s) to {1} (commit {2}).</source>
+        <translation>{0} ta sevimli {1} omborida nashr etildi (commit {2}).</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_extension_bridge.py" line="285"/>
+        <source>Quick publish</source>
+        <translation>Tezkor nashr</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_extension_bridge.py" line="337"/>
+        <source>Quick publish to {0} failed: {1}</source>
+        <translation>{0} omborida tezkor nashr etish bajarilmadi: {1}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_extension_bridge.py" line="226"/>
+        <source>Remote repo manager is not available.</source>
+        <translation>Masofaviy omborlar menejeri mavjud emas.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_extension_bridge.py" line="234"/>
+        <source>Repo manager failed: {0}</source>
+        <translation>Omborlar menejeri xatosi: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_extension_bridge.py" line="246"/>
+        <source>Resource Sharing extension is not active.</source>
+        <translation>Resource Sharing kengaytmasi faol emas.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_extension_bridge.py" line="253"/>
+        <source>Resource Sharing services are not available.</source>
+        <translation>Resource Sharing xizmatlari mavjud emas.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_extension_bridge.py" line="351"/>
+        <source>Wrote bundle locally — push manually.</source>
+        <translation>To‘plam mahalliy yozildi — push’ni qo‘lda bajaring.</translation>
     </message>
 </context>
 <context>
@@ -3970,6 +4058,167 @@ Baribir o'chirilsinmi?</translation>
         <source>The filter was not launched: its selection changed or could not be read. Click Filter again.</source>
         <translation>Filtr ishga tushirilmadi: uning tanlovi o'zgardi yoki o'qib bo'lmadi. Filtr tugmasini yana bosing.</translation>
     </message>
+    <message>
+        <location filename="../ui/managers/configuration_manager.py" line="870"/>
+        <source>Type to find a layer</source>
+        <translation>Qatlam topish uchun yozing</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="420"/>
+        <source>All layers using auto-selection</source>
+        <translation>Avtomatik tanlovdan foydalanuvchi barcha qatlamlar</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="191"/>
+        <source>Applied to &apos;{0}&apos;:
+{1}</source>
+        <translation>'{0}' ga qo‘llandi:
+{1}</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="71"/>
+        <source>Auto-centroid {0}</source>
+        <translation>Avto-markaziy nuqta {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="58"/>
+        <source>Auto-optimization {0}</source>
+        <translation>Avto-optimallashtirish {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="104"/>
+        <source>Auto-optimizer module not available</source>
+        <translation>Avto-optimallashtiruvchi moduli mavjud emas</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="158"/>
+        <source>Auto-optimizer not available: {0}</source>
+        <translation>Avto-optimallashtiruvchi mavjud emas: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/configuration_manager.py" line="697"/>
+        <source>Auto-zoom when feature changes</source>
+        <translation>Obyekt o‘zgarganda avtomatik masshtablash</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="258"/>
+        <source>Backend optimization settings saved</source>
+        <translation>Backend optimallashtirish sozlamalari saqlandi</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="429"/>
+        <source>Backend optimization unavailable</source>
+        <translation>Backend optimallashtirish mavjud emas</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="287"/>
+        <source>Backend optimizations configured</source>
+        <translation>Backend optimallashtirishlar sozlandi</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="83"/>
+        <source>Confirmation {0}</source>
+        <translation>Tasdiqlash {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="110"/>
+        <source>Could not analyze layer &apos;{0}&apos;</source>
+        <translation>'{0}' qatlamini tahlil qilib bo‘lmadi</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="235"/>
+        <location filename="../ui/managers/optimization_manager.py" line="291"/>
+        <source>Dialog not available: {0}</source>
+        <translation>Dialog mavjud emas: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="163"/>
+        <source>Error analyzing layer: {0}</source>
+        <translation>Qatlamni tahlil qilishda xato: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/configuration_manager.py" line="694"/>
+        <source>Identify selected feature</source>
+        <translation>Tanlangan obyektni aniqlash</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/configuration_manager.py" line="696"/>
+        <source>Keep the map selection and the widgets in sync</source>
+        <translation>Xarita tanlovi va vidjetlarni sinxron saqlash</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="131"/>
+        <source>Layer &apos;{0}&apos; is already optimally configured.
+Type: {1}
+Features: {2:,}</source>
+        <translation>'{0}' qatlami allaqachon optimal sozlangan.
+Turi: {1}
+Obyektlar: {2:,}</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/configuration_manager.py" line="698"/>
+        <source>Link exploring widgets together</source>
+        <translation>Tadqiq vidjetlarini bir-biriga bog‘lash</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="97"/>
+        <source>No layer selected. Please select a layer first.</source>
+        <translation>Qatlam tanlanmagan. Avval qatlamni tanlang.</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="196"/>
+        <source>No optimizations selected to apply.</source>
+        <translation>Qo‘llash uchun optimallashtirish tanlanmagan.</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="231"/>
+        <source>Optimization settings saved</source>
+        <translation>Optimallashtirish sozlamalari saqlandi</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="415"/>
+        <source>Optimized {0} layer(s)</source>
+        <translation>{0} ta qatlam optimallashtirildi</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/configuration_manager.py" line="699"/>
+        <source>Reset all layer exploring properties</source>
+        <translation>Barcha qatlam tadqiq xususiyatlarini tiklash</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="297"/>
+        <source>The backend optimizations could not be configured. Details in filtermate.log.</source>
+        <translation>Backend optimallashtirishlarini sozlab bo‘lmadi. Tafsilotlar filtermate.log faylida.</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="241"/>
+        <source>The optimization settings could not be saved. Details in filtermate.log.</source>
+        <translation>Optimallashtirish sozlamalarini saqlab bo‘lmadi. Tafsilotlar filtermate.log faylida.</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/configuration_manager.py" line="927"/>
+        <source>Use centroids instead of full geometries for distant layers</source>
+        <translation>Uzoq qatlamlar uchun to‘liq geometriya o‘rniga markaziy nuqtalardan foydalanish</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/configuration_manager.py" line="695"/>
+        <source>Zoom to selected feature</source>
+        <translation>Tanlangan obyektga masshtablash</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="59"/>
+        <location filename="../ui/managers/optimization_manager.py" line="72"/>
+        <location filename="../ui/managers/optimization_manager.py" line="84"/>
+        <source>disabled</source>
+        <translation>o‘chirilgan</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="59"/>
+        <location filename="../ui/managers/optimization_manager.py" line="72"/>
+        <location filename="../ui/managers/optimization_manager.py" line="84"/>
+        <source>enabled</source>
+        <translation>yoqilgan</translation>
+    </message>
 </context>
 <context>
     <name>FilterMateDockWidgetBase</name>
@@ -4145,6 +4394,283 @@ Baribir o'chirilsinmi?</translation>
     </message>
 </context>
 <context>
+    <name>FilterMateGitBinary</name>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="309"/>
+        <source>All files (*)</source>
+        <translation>Barcha fayllar (*)</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="191"/>
+        <source>Apply path</source>
+        <translation>Yo‘lni qo‘llash</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="180"/>
+        <source>Browse for git executable</source>
+        <translation>git bajariladigan faylini ko‘rish</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="340"/>
+        <source>Cannot find a git binary. Configure a path or download Portable Git.</source>
+        <translation>git bajariladigan fayli topilmadi. Yo‘lni sozlang yoki Portable Git’ni yuklab oling.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="392"/>
+        <source>Cannot resolve QGIS profile dir — try restarting QGIS.</source>
+        <translation>QGIS profil jildini aniqlab bo‘lmadi — QGIS’ni qayta ishga tushirib ko‘ring.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="184"/>
+        <source>Clear</source>
+        <translation>Tozalash</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="263"/>
+        <source>Configured path</source>
+        <translation>Sozlangan yo‘l</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="468"/>
+        <source>Could not delete the Portable Git directory. Check that no QGIS process is using it and retry.</source>
+        <translation>Portable Git jildini o‘chirib bo‘lmadi. Hech bir QGIS jarayoni undan foydalanmayotganini tekshirib, qayta urinib ko‘ring.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="353"/>
+        <source>Could not execute {0}:
+{1}</source>
+        <translation>{0} ni bajarib bo‘lmadi:
+{1}</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="328"/>
+        <source>Could not persist git_binary_path to the extension config.</source>
+        <translation>git_binary_path ni kengaytma sozlamalariga saqlab bo‘lmadi.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="459"/>
+        <source>Delete the bundled Portable Git directory?</source>
+        <translation>O‘rnatilgan Portable Git jildi o‘chirilsinmi?</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="227"/>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="398"/>
+        <source>Download Portable Git</source>
+        <translation>Portable Git’ni yuklab olish</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="451"/>
+        <source>Download failed</source>
+        <translation>Yuklab olish bajarilmadi</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="399"/>
+        <source>Download {0} (~50 MB) into:
+{1}
+
+Continue?</source>
+        <translation>{0} (~50 MB) quyidagi joyga yuklab olinadi:
+{1}
+
+Davom etilsinmi?</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="410"/>
+        <source>Downloading…</source>
+        <translation>Yuklab olinmoqda…</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="430"/>
+        <source>Downloading… {0:.1f} / {1:.1f} MB</source>
+        <translation>Yuklab olinmoqda… {0:.1f} / {1:.1f} MB</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="435"/>
+        <source>Downloading… {0:.1f} MB</source>
+        <translation>Yuklab olinmoqda… {0:.1f} MB</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="172"/>
+        <source>Empty = auto-detect (portable → system PATH)</source>
+        <translation>Bo‘sh = avtomatik aniqlash (ko‘chma → tizim PATH)</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="373"/>
+        <source>Exit {0}: {1}</source>
+        <translation>Chiqish {0}: {1}</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="321"/>
+        <source>File does not exist:
+{0}</source>
+        <translation>Fayl mavjud emas:
+{0}</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="155"/>
+        <source>FilterMate uses &lt;b&gt;git&lt;/b&gt; to publish favorites to a remote repository. If git is not on your system PATH, configure an explicit path below or download a portable copy.</source>
+        <translation>FilterMate sevimlilarni masofaviy omborda nashr etish uchun &lt;b&gt;git&lt;/b&gt; dan foydalanadi. Agar git tizim PATH’ida bo‘lmasa, quyida aniq yo‘lni sozlang yoki ko‘chma nusxani yuklab oling.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="147"/>
+        <source>FilterMate — Git Binary</source>
+        <translation>FilterMate — Git bajariladigan fayli</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="307"/>
+        <source>Git executable (git.exe);;All files (*.*)</source>
+        <translation>Git bajariladigan fayli (git.exe);;Barcha fayllar (*.*)</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="443"/>
+        <source>Installation complete:
+{0}</source>
+        <translation>O‘rnatish yakunlandi:
+{0}</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="320"/>
+        <source>Invalid path</source>
+        <translation>Yaroqsiz yo‘l</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="311"/>
+        <source>Locate git executable</source>
+        <translation>git bajariladigan faylini topish</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="264"/>
+        <source>Portable (downloaded)</source>
+        <translation>Ko‘chma (yuklab olingan)</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="211"/>
+        <source>Portable Git</source>
+        <translation>Portable Git</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="452"/>
+        <source>Portable Git could not be installed:
+
+{0}</source>
+        <translation>Portable Git o‘rnatib bo‘lmadi:
+
+{0}</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="442"/>
+        <source>Portable Git installed</source>
+        <translation>Portable Git o‘rnatildi</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="384"/>
+        <source>Portable Git is Windows-only. Install git via your package manager.</source>
+        <translation>Portable Git faqat Windows uchun. git’ni paket menejeringiz orqali o‘rnating.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="391"/>
+        <source>Profile not initialized</source>
+        <translation>Profil ishga tushirilmagan</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="231"/>
+        <source>Reinstall</source>
+        <translation>Qayta o‘rnatish</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="467"/>
+        <source>Removal failed</source>
+        <translation>O‘chirish bajarilmadi</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="235"/>
+        <source>Remove</source>
+        <translation>Olib tashlash</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="458"/>
+        <source>Remove Portable Git</source>
+        <translation>Portable Git’ni olib tashlash</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="196"/>
+        <source>Run &apos;git --version&apos; against the resolved binary</source>
+        <translation>Topilgan faylda 'git --version' ni ishga tushirish</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="327"/>
+        <source>Save failed</source>
+        <translation>Saqlash bajarilmadi</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="265"/>
+        <source>System PATH</source>
+        <translation>Tizim PATH</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="195"/>
+        <source>Test</source>
+        <translation>Sinash</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="365"/>
+        <source>Test OK</source>
+        <translation>Sinov muvaffaqiyatli</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="352"/>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="358"/>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="372"/>
+        <source>Test failed</source>
+        <translation>Sinov muvaffaqiyatsiz</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="383"/>
+        <source>Unsupported platform</source>
+        <translation>Qo‘llab-quvvatlanmaydigan platforma</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="212"/>
+        <source>download a self-contained git ({0}, no admin rights needed) into the QGIS profile.</source>
+        <translation>QGIS profiliga mustaqil git ({0}, administrator huquqlari kerak emas) yuklab oling.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="359"/>
+        <source>git --version timed out after 10 s.</source>
+        <translation>git --version 10 soniyadan so‘ng kutish vaqti tugadi.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="274"/>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="339"/>
+        <source>git not found</source>
+        <translation>git topilmadi</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="286"/>
+        <source>installed</source>
+        <translation>o‘rnatilgan</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="294"/>
+        <source>not installed</source>
+        <translation>o‘rnatilmagan</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="276"/>
+        <source>set a path below or download Portable Git.</source>
+        <translation>quyida yo‘l belgilang yoki Portable Git’ni yuklab oling.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="366"/>
+        <source>{0}
+
+Resolved from: {1}</source>
+        <translation>{0}
+
+Aniqlangan joy: {1}</translation>
+    </message>
+</context>
+<context>
     <name>FilterMateOperations</name>
     <message>
         <location filename="../adapters/public_api/operations.py" line="639"/>
@@ -4170,6 +4696,269 @@ Baribir o'chirilsinmi?</translation>
         <location filename="../adapters/public_api/operations.py" line="643"/>
         <source>source changed while the filter was running: nothing was applied</source>
         <translation>filtrlash vaqtida manba o'zgardi: hech narsa qo'llanmadi</translation>
+    </message>
+</context>
+<context>
+    <name>FilterMateRepoManager</name>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="561"/>
+        <source> — Test connection and Publish will fail until this is configured.</source>
+        <translation> — Bu sozlanmaguncha, ulanishni sinash va nashr etish bajarilmaydi.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="355"/>
+        <source>&lt;b&gt;Remote Repos&lt;/b&gt; — git-backed publish targets for favorite collections. Anonymous read access is supported; only publishers need credentials.</source>
+        <translation>&lt;b&gt;Masofaviy omborlar&lt;/b&gt; — sevimlilar to‘plamlari uchun git asosidagi nashr nishonlari. Anonim o‘qish qo‘llab-quvvatlanadi; faqat nashr etuvchilarga hisob ma’lumotlari kerak.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="296"/>
+        <source>A repo name is required.</source>
+        <translation>Ombor nomi talab qilinadi.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="303"/>
+        <source>A repo named &apos;{0}&apos; already exists.</source>
+        <translation>'{0}' nomli ombor allaqachon mavjud.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="400"/>
+        <source>Add</source>
+        <translation>Qo‘shish</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="90"/>
+        <source>Add Remote Repo</source>
+        <translation>Masofaviy ombor qo‘shish</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="381"/>
+        <source>Auth</source>
+        <translation>Autent.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="152"/>
+        <source>Auth config id:</source>
+        <translation>Autentifikatsiya sozlamasi ID:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="144"/>
+        <source>Authentication:</source>
+        <translation>Autentifikatsiya:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="380"/>
+        <source>Branch</source>
+        <translation>Shox</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="119"/>
+        <source>Branch:</source>
+        <translation>Shox:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="233"/>
+        <source>Choose local clone directory</source>
+        <translation>Mahalliy klon jildini tanlang</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="381"/>
+        <source>Collection</source>
+        <translation>To‘plam</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="137"/>
+        <source>Collection:</source>
+        <translation>To‘plam:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="98"/>
+        <source>Configure a git-backed publish target. Anonymous repos can leave Authentication empty — only publishers need credentials.</source>
+        <translation>git asosidagi nashr nishonini sozlang. Anonim omborlar uchun Autentifikatsiyani bo‘sh qoldirish mumkin — faqat nashr etuvchilarga hisob ma’lumotlari kerak.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="369"/>
+        <source>Configure git…</source>
+        <translation>git ni sozlash…</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="526"/>
+        <source>Could not persist repos to FilterMate config. Check the QGIS log for details.</source>
+        <translation>Omborlarni FilterMate sozlamalariga saqlab bo‘lmadi. Tafsilotlar uchun QGIS jurnaliga qarang.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="381"/>
+        <source>Default</source>
+        <translation>Standart</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="408"/>
+        <source>Delete</source>
+        <translation>O‘chirish</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="499"/>
+        <source>Delete repo</source>
+        <translation>Omborni o‘chirish</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="110"/>
+        <source>Display name (e.g. Acme team)</source>
+        <translation>Ko‘rsatiladigan nom (masalan, Acme jamoasi)</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="302"/>
+        <source>Duplicate name</source>
+        <translation>Takroriy nom</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="89"/>
+        <source>Edit Remote Repo</source>
+        <translation>Masofaviy omborni tahrirlash</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="404"/>
+        <source>Edit…</source>
+        <translation>Tahrirlash…</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="123"/>
+        <source>Empty = [profile]/FilterMate/repos/&lt;slug&gt;</source>
+        <translation>Bo‘sh = [profil]/FilterMate/repos/&lt;slug&gt;</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="347"/>
+        <source>FilterMate — Manage Remote Repos</source>
+        <translation>FilterMate — Masofaviy omborlarni boshqarish</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="115"/>
+        <source>Git URL:</source>
+        <translation>Git URL:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="131"/>
+        <source>Local clone:</source>
+        <translation>Mahalliy klon:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="295"/>
+        <source>Missing name</source>
+        <translation>Nom yo‘q</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="380"/>
+        <source>Name</source>
+        <translation>Nom</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="111"/>
+        <source>Name *:</source>
+        <translation>Nom *:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="242"/>
+        <source>No manager wired — cannot test.</source>
+        <translation>Menejer ulanmagan — sinab bo‘lmaydi.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="271"/>
+        <source>OK — local-only target (path is writable).</source>
+        <translation>OK — faqat mahalliy nishon (yo‘lga yozish mumkin).</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="273"/>
+        <source>OK — remote reachable.</source>
+        <translation>OK — masofaviy omborga ulanish mumkin.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="149"/>
+        <source>QGIS authcfg_id (Settings → Options → Authentication)</source>
+        <translation>QGIS authcfg_id (Sozlamalar → Parametrlar → Autentifikatsiya)</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="500"/>
+        <source>Remove &apos;{0}&apos; from the configured repos?</source>
+        <translation>'{0}' sozlangan omborlardan olib tashlansinmi?</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="525"/>
+        <source>Save failed</source>
+        <translation>Saqlash bajarilmadi</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="250"/>
+        <source>Set a name first.</source>
+        <translation>Avval nom belgilang.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="370"/>
+        <source>Set an explicit git binary path or download Portable Git.</source>
+        <translation>git bajariladigan fayliga aniq yo‘l belgilang yoki Portable Git’ni yuklab oling.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="412"/>
+        <source>Set as default</source>
+        <translation>Standart qilish</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="381"/>
+        <source>Status</source>
+        <translation>Holat</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="134"/>
+        <source>Sub-directory under collections/ (empty = repo root)</source>
+        <translation>collections/ ostidagi pastki jild (bo‘sh = ombor ildizi)</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="163"/>
+        <source>Test connection</source>
+        <translation>Ulanishni sinash</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="261"/>
+        <source>Testing…</source>
+        <translation>Sinalmoqda…</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="380"/>
+        <source>URL</source>
+        <translation>URL</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="154"/>
+        <source>Use as default publish target</source>
+        <translation>Standart nashr nishoni sifatida ishlatish</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="548"/>
+        <source>configured path</source>
+        <translation>sozlangan yo‘l</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="559"/>
+        <source>git not found</source>
+        <translation>git topilmadi</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="114"/>
+        <source>https://github.com/org/repo.git</source>
+        <translation>https://github.com/org/repo.git</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="118"/>
+        <source>main / master / … (empty = default)</source>
+        <translation>main / master / … (bo‘sh = standart)</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="549"/>
+        <source>portable</source>
+        <translation>ko‘chma</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="550"/>
+        <source>system PATH</source>
+        <translation>tizim PATH</translation>
     </message>
 </context>
 <context>
@@ -4295,6 +5084,14 @@ Baribir o'chirilsinmi?</translation>
         <location filename="../ui/widgets/json_view/model.py" line="54"/>
         <source>Value</source>
         <translation>Qiymat</translation>
+    </message>
+</context>
+<context>
+    <name>LayerExporter</name>
+    <message>
+        <location filename="../core/export/layer_exporter.py" line="525"/>
+        <source>Cannot export to &apos;{path}&apos;: this file is the data source of the layer &apos;{layer}&apos; of the project and would be overwritten. Choose another file.</source>
+        <translation>'{path}' ga eksport qilib bo‘lmaydi: bu fayl loyihadagi '{layer}' qatlamining ma’lumot manbai va ustidan yoziladi. Boshqa faylni tanlang.</translation>
     </message>
 </context>
 <context>
@@ -4520,6 +5317,24 @@ PostgreSQL jadvalida PRIMARY KEY belgilanganligiga ishonch hosil qiling.</transl
         <location filename="../ui/dialogs/optimization_dialog.py" line="344"/>
         <source>OGR (Shapefiles, GeoPackage)</source>
         <translation>OGR (Shapefiles, GeoPackage)</translation>
+    </message>
+</context>
+<context>
+    <name>OptimizationManager</name>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="178"/>
+        <source>Reduce buffer segments (3)</source>
+        <translation>Bufer segmentlarini kamaytirish (3)</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="176"/>
+        <source>Simplify before buffer</source>
+        <translation>Buferdan oldin soddalashtirish</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="174"/>
+        <source>Use Centroids</source>
+        <translation>Markaziy nuqtalardan foydalanish</translation>
     </message>
 </context>
 <context>

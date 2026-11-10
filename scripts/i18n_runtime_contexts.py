@@ -10,7 +10,9 @@ the plugin escape it:
 - a method ``def _tr(self, text): return self.dockwidget.tr(text)`` called as ``self._tr("...")``;
 - an alias ``_tr = QCoreApplication.translate`` called as ``_tr("Context", "...")``;
 - ``dw.tr("...")`` / ``self._dockwidget.tr("...")``: the string is filed under the receiver's text
-  (``dw``), while PyQt looks it up under the class of the dock, ``FilterMateDockWidget``.
+  (``dw``), while PyQt looks it up under the class of the dock, ``FilterMateDockWidget``;
+- ``ctrl.tr("...")`` / ``controller.tr("...")`` in the helpers of the favorites menu: filed under the
+  variable, looked up under ``FavoritesController`` (``FILE_RECEIVERS``).
 
 A name the calling function rebinds (``tr = context.tr``, a parameter) is not taken for the helper.
 The FILTERING predicate labels stay out (see ``EXCLUDED_CONTEXTS``).
@@ -36,8 +38,17 @@ from i18n_processing_context import _context, write_ts  # noqa: E402
 DOCK_CONTEXT = 'FilterMateDockWidget'
 # Receivers of ``.tr()`` that are the dock widget: pylupdate5 names the context after the receiver text.
 RECEIVERS = {'dw': DOCK_CONTEXT, 'self._dockwidget': DOCK_CONTEXT, 'self.dockwidget': DOCK_CONTEXT}
+# Receivers of ``.tr()`` named after a local variable, per file: the FavoritesController the helpers of the
+# favorites menu are handed (``controller.tr`` / ``ctrl.tr``), looked up by PyQt under its class name.
+FAVORITES_CONTEXT = 'FavoritesController'
+FILE_RECEIVERS = {
+    '../ui/controllers/favorites_menu_builder.py': {'controller': FAVORITES_CONTEXT},
+    '../ui/controllers/favorites_extension_bridge.py': {'ctrl': FAVORITES_CONTEXT, 'self._controller': FAVORITES_CONTEXT},
+    '../ui/controllers/favorites_spatial_handler.py': {'ctrl': FAVORITES_CONTEXT, 'self._controller': FAVORITES_CONTEXT},
+    '../ui/managers/configuration_manager.py': {'d': DOCK_CONTEXT},  # d = the dock widget
+}
 # Contexts pylupdate5 makes up for these calls: their copies of a collected string are removed.
-MISFILED = {'@default'} | set(RECEIVERS)
+MISFILED = {'@default'} | set(RECEIVERS) | {name for receivers in FILE_RECEIVERS.values() for name in receivers}
 OBSOLETE = ('obsolete', 'vanished')
 TWO_ARGS = object()
 # Contexts left untranslated on purpose: the FILTERING predicate labels ("Intersect", "Are within"...)
@@ -196,7 +207,8 @@ def collect(pro_path):
             if isinstance(call.func, ast.Name):
                 kind = None if call.func.id in shadowed else names.get(call.func.id)
             elif isinstance(call.func, ast.Attribute) and call.func.attr == 'tr':
-                kind = RECEIVERS.get(ast.unparse(call.func.value))
+                receiver = ast.unparse(call.func.value)
+                kind = RECEIVERS.get(receiver) or FILE_RECEIVERS.get(relative, {}).get(receiver)
             elif isinstance(call.func, ast.Attribute) and _is_name(call.func.value, 'self'):
                 kind = names.get(call.func.attr)  # a translating method: self._tr('...')
             if kind is TWO_ARGS:

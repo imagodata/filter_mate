@@ -28,6 +28,21 @@
         <source>Manage Resource Sharing repos...</source>
         <translation>Pamahalaan ang mga repo ng Resource Sharing...</translation>
     </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="173"/>
+        <source>OptimizationManager</source>
+        <translation>OptimizationManager</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="175"/>
+        <source>OptimizationManager</source>
+        <translation>OptimizationManager</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="177"/>
+        <source>OptimizationManager</source>
+        <translation>OptimizationManager</translation>
+    </message>
 </context>
 <context>
     <name>AgentChat</name>
@@ -1929,22 +1944,22 @@ Sumasang-ayon ka ba?</translation>
 <context>
     <name>DockChrome</name>
     <message>
-        <location filename="../ui/layout/dock_chrome.py" line="232"/>
+        <location filename="../ui/layout/dock_chrome.py" line="288"/>
         <source>Hide EXPLORING to give room to the sections</source>
         <translation>Itago ang EXPLORING para magkaroon ng espasyo ang mga seksyon</translation>
     </message>
     <message>
-        <location filename="../ui/layout/dock_chrome.py" line="233"/>
+        <location filename="../ui/layout/dock_chrome.py" line="289"/>
         <source>Show EXPLORING</source>
         <translation>Ipakita ang EXPLORING</translation>
     </message>
     <message>
-        <location filename="../ui/layout/dock_chrome.py" line="51"/>
+        <location filename="../ui/layout/dock_chrome.py" line="117"/>
         <source>Close</source>
         <translation>Isara</translation>
     </message>
     <message>
-        <location filename="../ui/layout/dock_chrome.py" line="48"/>
+        <location filename="../ui/layout/dock_chrome.py" line="115"/>
         <source>Detach or dock the panel</source>
         <translation>I-detach o i-dock ang panel</translation>
     </message>
@@ -2115,79 +2130,79 @@ Hindi = Palitan lahat ng kasalukuyan</translation>
         <translation>Error: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="775"/>
+        <location filename="../ui/controllers/favorites_menu_builder.py" line="203"/>
         <source>Used {0} times</source>
-        <translation type="obsolete">Ginamit ng {0} beses</translation>
+        <translation>Ginamit ng {0} beses</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="786"/>
+        <location filename="../ui/controllers/favorites_menu_builder.py" line="217"/>
         <source>Add current filter to favorites</source>
-        <translation type="obsolete">Idagdag ang kasalukuyang filter sa mga paborito</translation>
+        <translation>Idagdag ang kasalukuyang filter sa mga paborito</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="790"/>
+        <location filename="../ui/controllers/favorites_menu_builder.py" line="221"/>
         <source>Add filter (no active filter)</source>
-        <translation type="obsolete">Magdagdag ng filter (walang aktibong filter)</translation>
+        <translation>Magdagdag ng filter (walang aktibong filter)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="795"/>
+        <location filename="../ui/controllers/favorites_menu_builder.py" line="227"/>
         <source>Manage favorites...</source>
-        <translation type="obsolete">Pamahalaan ang mga paborito...</translation>
+        <translation>Pamahalaan ang mga paborito...</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="798"/>
+        <location filename="../ui/controllers/favorites_menu_builder.py" line="230"/>
         <source>Export...</source>
-        <translation type="obsolete">I-export...</translation>
+        <translation>I-export...</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="801"/>
+        <location filename="../ui/controllers/favorites_menu_builder.py" line="233"/>
         <source>Import...</source>
-        <translation type="obsolete">Mag-import...</translation>
+        <translation>Mag-import...</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="822"/>
+        <location filename="../ui/controllers/favorites_menu_builder.py" line="259"/>
         <source>Global favorites</source>
-        <translation type="obsolete">Mga global na paborito</translation>
+        <translation>Mga global na paborito</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="826"/>
+        <location filename="../ui/controllers/favorites_menu_builder.py" line="262"/>
         <source>Copy to global...</source>
-        <translation type="obsolete">Kopyahin sa global...</translation>
+        <translation>Kopyahin sa global...</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="837"/>
+        <location filename="../ui/controllers/favorites_menu_builder.py" line="272"/>
         <source>── Available global favorites ──</source>
-        <translation type="obsolete">── Mga available na global na paborito ──</translation>
+        <translation>── Mga available na global na paborito ──</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="845"/>
+        <location filename="../ui/controllers/favorites_menu_builder.py" line="282"/>
         <source>(No global favorites)</source>
-        <translation type="obsolete">(Walang global na paborito)</translation>
+        <translation>(Walang global na paborito)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="849"/>
+        <location filename="../ui/controllers/favorites_menu_builder.py" line="288"/>
         <source>Maintenance</source>
-        <translation type="obsolete">Maintenance</translation>
+        <translation>Maintenance</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="851"/>
+        <location filename="../ui/controllers/favorites_menu_builder.py" line="290"/>
         <source>Save to project (.qgz)</source>
-        <translation type="obsolete">I-save sa project (.qgz)</translation>
+        <translation>I-save sa project (.qgz)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="854"/>
+        <location filename="../ui/controllers/favorites_menu_builder.py" line="293"/>
         <source>Restore from project</source>
-        <translation type="obsolete">I-restore mula sa project</translation>
+        <translation>I-restore mula sa project</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="859"/>
+        <location filename="../ui/controllers/favorites_menu_builder.py" line="298"/>
         <source>Clean up orphan projects</source>
-        <translation type="obsolete">Linisin ang mga orphan na project</translation>
+        <translation>Linisin ang mga orphan na project</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="862"/>
+        <location filename="../ui/controllers/favorites_menu_builder.py" line="301"/>
         <source>Database statistics</source>
-        <translation type="obsolete">Mga istatistika ng database</translation>
+        <translation>Mga istatistika ng database</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="909"/>
@@ -2327,29 +2342,32 @@ Mag-apply ng filter sa isang layer, pagkatapos ay i-click ang indicator na ★ a
         <translation>Hindi pa naka-initialize ang config directory ng FilterMate — buksan muna ang isang QGIS project na may FilterMate.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1714"/>
+        <location filename="../ui/controllers/favorites_extension_bridge.py" line="138"/>
+        <location filename="../ui/controllers/favorites_extension_bridge.py" line="179"/>
+        <location filename="../ui/controllers/favorites_extension_bridge.py" line="219"/>
         <source>Resource Sharing extension is not active. Enable &apos;favorites_sharing&apos; in FilterMate settings.</source>
-        <translation type="obsolete">Hindi aktibo ang Resource Sharing extension. I-enable ang 'favorites_sharing' sa FilterMate settings.</translation>
+        <translation>Hindi aktibo ang Resource Sharing extension. I-enable ang 'favorites_sharing' sa FilterMate settings.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1722"/>
+        <location filename="../ui/controllers/favorites_extension_bridge.py" line="146"/>
+        <location filename="../ui/controllers/favorites_extension_bridge.py" line="187"/>
         <source>Shared favorites service is not available.</source>
-        <translation type="obsolete">Hindi available ang serbisyo ng shared favorites.</translation>
+        <translation>Hindi available ang serbisyo ng shared favorites.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1708"/>
+        <location filename="../ui/controllers/favorites_extension_bridge.py" line="161"/>
         <source>Shared picker failed: {0}</source>
-        <translation type="obsolete">Nabigo ang shared picker: {0}</translation>
+        <translation>Nabigo ang shared picker: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1726"/>
+        <location filename="../ui/controllers/favorites_extension_bridge.py" line="191"/>
         <source>You have no favorites to publish yet. Save a filter via the ★ menu first.</source>
-        <translation type="obsolete">Wala ka pang favorites na mai-publish. I-save muna ang isang filter sa pamamagitan ng menu na ★.</translation>
+        <translation>Wala ka pang favorites na mai-publish. I-save muna ang isang filter sa pamamagitan ng menu na ★.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1742"/>
+        <location filename="../ui/controllers/favorites_extension_bridge.py" line="212"/>
         <source>Publish dialog failed: {0}</source>
-        <translation type="obsolete">Nabigo ang publish dialog: {0}</translation>
+        <translation>Nabigo ang publish dialog: {0}</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="388"/>
@@ -2405,6 +2423,76 @@ Mag-apply ng filter sa isang layer, pagkatapos ay i-click ang indicator na ★ a
         <location filename="../ui/controllers/favorites_controller.py" line="1205"/>
         <source>Database statistics are unavailable. Details in filtermate.log.</source>
         <translation>Hindi available ang mga estadistika ng database. Mga detalye sa filtermate.log.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_extension_bridge.py" line="347"/>
+        <source>Bundle unchanged — nothing to commit.</source>
+        <translation>Walang pagbabago sa bundle — walang ika-commit.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_spatial_handler.py" line="866"/>
+        <source>Favorite &apos;{0}&apos; could not be applied: no layer matched the saved source / targets.</source>
+        <translation>Hindi mailapat ang paborito na '{0}': walang layer na tumugma sa na-save na source / target.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_spatial_handler.py" line="133"/>
+        <source>Favorite '{0}' was missing predicate info — defaulting to 'Intersect'. Re-save it after adjusting if you need a different predicate.</source>
+        <translation>Walang impormasyon ng predicate ang paborito na '{0}' — 'Intersect' ang default. I-save muli pagkatapos ayusin kung kailangan mo ng ibang predicate.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_extension_bridge.py" line="259"/>
+        <source>No default repo is configured. Open 'Manage Resource Sharing repos…' to add one and mark it as default.</source>
+        <translation>Walang naka-configure na default na repo. Buksan ang 'Pamahalaan ang mga repo ng Resource Sharing…' para magdagdag ng isa at markahan ito bilang default.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_extension_bridge.py" line="265"/>
+        <source>No favorites to publish.</source>
+        <translation>Walang mga paborito na ipa-publish.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_extension_bridge.py" line="286"/>
+        <source>Publish {0} favorite(s) to &lt;b&gt;{1}&lt;/b&gt;?&lt;br&gt;&lt;br&gt;&lt;small&gt;Target: &lt;code&gt;{2}&lt;/code&gt;&lt;/small&gt;</source>
+        <translation>I-publish ang {0} paborito sa &lt;b&gt;{1}&lt;/b&gt;?&lt;br&gt;&lt;br&gt;&lt;small&gt;Target: &lt;code&gt;{2}&lt;/code&gt;&lt;/small&gt;</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_extension_bridge.py" line="343"/>
+        <source>Published {0} favorite(s) to {1} (commit {2}).</source>
+        <translation>Na-publish ang {0} paborito sa {1} (commit {2}).</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_extension_bridge.py" line="285"/>
+        <source>Quick publish</source>
+        <translation>Mabilis na pag-publish</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_extension_bridge.py" line="337"/>
+        <source>Quick publish to {0} failed: {1}</source>
+        <translation>Nabigo ang mabilis na pag-publish sa {0}: {1}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_extension_bridge.py" line="226"/>
+        <source>Remote repo manager is not available.</source>
+        <translation>Hindi available ang remote repo manager.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_extension_bridge.py" line="234"/>
+        <source>Repo manager failed: {0}</source>
+        <translation>Nabigo ang repo manager: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_extension_bridge.py" line="246"/>
+        <source>Resource Sharing extension is not active.</source>
+        <translation>Hindi aktibo ang extension ng Resource Sharing.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_extension_bridge.py" line="253"/>
+        <source>Resource Sharing services are not available.</source>
+        <translation>Hindi available ang mga serbisyo ng Resource Sharing.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_extension_bridge.py" line="351"/>
+        <source>Wrote bundle locally — push manually.</source>
+        <translation>Isinulat nang lokal ang bundle — i-push nang mano-mano.</translation>
     </message>
 </context>
 <context>
@@ -3970,6 +4058,167 @@ I-drop pa rin?</translation>
         <source>The filter was not launched: its selection changed or could not be read. Click Filter again.</source>
         <translation>Hindi inilunsad ang filter: nagbago ang pinili nito o hindi nabasa. I-click muli ang I-filter.</translation>
     </message>
+    <message>
+        <location filename="../ui/managers/configuration_manager.py" line="870"/>
+        <source>Type to find a layer</source>
+        <translation>Mag-type para maghanap ng layer</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="420"/>
+        <source>All layers using auto-selection</source>
+        <translation>Lahat ng layer na gumagamit ng auto-selection</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="191"/>
+        <source>Applied to &apos;{0}&apos;:
+{1}</source>
+        <translation>Inilapat sa '{0}':
+{1}</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="71"/>
+        <source>Auto-centroid {0}</source>
+        <translation>Auto-centroid {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="58"/>
+        <source>Auto-optimization {0}</source>
+        <translation>Auto-optimization {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="104"/>
+        <source>Auto-optimizer module not available</source>
+        <translation>Hindi available ang module ng auto-optimizer</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="158"/>
+        <source>Auto-optimizer not available: {0}</source>
+        <translation>Hindi available ang auto-optimizer: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/configuration_manager.py" line="697"/>
+        <source>Auto-zoom when feature changes</source>
+        <translation>Auto-zoom kapag nagbago ang feature</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="258"/>
+        <source>Backend optimization settings saved</source>
+        <translation>Na-save ang mga setting ng backend optimization</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="429"/>
+        <source>Backend optimization unavailable</source>
+        <translation>Hindi available ang backend optimization</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="287"/>
+        <source>Backend optimizations configured</source>
+        <translation>Na-configure ang mga backend optimization</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="83"/>
+        <source>Confirmation {0}</source>
+        <translation>Kumpirmasyon {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="110"/>
+        <source>Could not analyze layer &apos;{0}&apos;</source>
+        <translation>Hindi masuri ang layer na '{0}'</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="235"/>
+        <location filename="../ui/managers/optimization_manager.py" line="291"/>
+        <source>Dialog not available: {0}</source>
+        <translation>Hindi available ang dialog: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="163"/>
+        <source>Error analyzing layer: {0}</source>
+        <translation>Error sa pagsusuri ng layer: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/configuration_manager.py" line="694"/>
+        <source>Identify selected feature</source>
+        <translation>I-identify ang napiling feature</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/configuration_manager.py" line="696"/>
+        <source>Keep the map selection and the widgets in sync</source>
+        <translation>Panatilihing naka-sync ang pagpili sa mapa at ang mga widget</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="131"/>
+        <source>Layer &apos;{0}&apos; is already optimally configured.
+Type: {1}
+Features: {2:,}</source>
+        <translation>Optimal na ang configuration ng layer na '{0}'.
+Uri: {1}
+Mga feature: {2:,}</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/configuration_manager.py" line="698"/>
+        <source>Link exploring widgets together</source>
+        <translation>I-link ang mga exploring widget</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="97"/>
+        <source>No layer selected. Please select a layer first.</source>
+        <translation>Walang napiling layer. Pumili muna ng layer.</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="196"/>
+        <source>No optimizations selected to apply.</source>
+        <translation>Walang napiling optimization na ilalapat.</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="231"/>
+        <source>Optimization settings saved</source>
+        <translation>Na-save ang mga setting ng optimization</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="415"/>
+        <source>Optimized {0} layer(s)</source>
+        <translation>Na-optimize ang {0} layer</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/configuration_manager.py" line="699"/>
+        <source>Reset all layer exploring properties</source>
+        <translation>I-reset ang lahat ng exploring property ng layer</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="297"/>
+        <source>The backend optimizations could not be configured. Details in filtermate.log.</source>
+        <translation>Hindi ma-configure ang mga backend optimization. Mga detalye sa filtermate.log.</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="241"/>
+        <source>The optimization settings could not be saved. Details in filtermate.log.</source>
+        <translation>Hindi ma-save ang mga setting ng optimization. Mga detalye sa filtermate.log.</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/configuration_manager.py" line="927"/>
+        <source>Use centroids instead of full geometries for distant layers</source>
+        <translation>Gumamit ng mga centroid sa halip na buong geometry para sa mga malayong layer</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/configuration_manager.py" line="695"/>
+        <source>Zoom to selected feature</source>
+        <translation>I-zoom sa napiling feature</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="59"/>
+        <location filename="../ui/managers/optimization_manager.py" line="72"/>
+        <location filename="../ui/managers/optimization_manager.py" line="84"/>
+        <source>disabled</source>
+        <translation>naka-disable</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="59"/>
+        <location filename="../ui/managers/optimization_manager.py" line="72"/>
+        <location filename="../ui/managers/optimization_manager.py" line="84"/>
+        <source>enabled</source>
+        <translation>naka-enable</translation>
+    </message>
 </context>
 <context>
     <name>FilterMateDockWidgetBase</name>
@@ -4145,6 +4394,283 @@ I-drop pa rin?</translation>
     </message>
 </context>
 <context>
+    <name>FilterMateGitBinary</name>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="309"/>
+        <source>All files (*)</source>
+        <translation>Lahat ng file (*)</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="191"/>
+        <source>Apply path</source>
+        <translation>Ilapat ang path</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="180"/>
+        <source>Browse for git executable</source>
+        <translation>Hanapin ang git executable</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="340"/>
+        <source>Cannot find a git binary. Configure a path or download Portable Git.</source>
+        <translation>Walang makitang git binary. Mag-configure ng path o i-download ang Portable Git.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="392"/>
+        <source>Cannot resolve QGIS profile dir — try restarting QGIS.</source>
+        <translation>Hindi matukoy ang QGIS profile dir — subukang i-restart ang QGIS.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="184"/>
+        <source>Clear</source>
+        <translation>I-clear</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="263"/>
+        <source>Configured path</source>
+        <translation>Naka-configure na path</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="468"/>
+        <source>Could not delete the Portable Git directory. Check that no QGIS process is using it and retry.</source>
+        <translation>Hindi matanggal ang direktoryo ng Portable Git. Tiyaking walang QGIS process na gumagamit nito at subukan muli.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="353"/>
+        <source>Could not execute {0}:
+{1}</source>
+        <translation>Hindi maisagawa ang {0}:
+{1}</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="328"/>
+        <source>Could not persist git_binary_path to the extension config.</source>
+        <translation>Hindi ma-persist ang git_binary_path sa extension config.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="459"/>
+        <source>Delete the bundled Portable Git directory?</source>
+        <translation>Tanggalin ang kasamang direktoryo ng Portable Git?</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="227"/>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="398"/>
+        <source>Download Portable Git</source>
+        <translation>I-download ang Portable Git</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="451"/>
+        <source>Download failed</source>
+        <translation>Nabigo ang pag-download</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="399"/>
+        <source>Download {0} (~50 MB) into:
+{1}
+
+Continue?</source>
+        <translation>I-download ang {0} (~50 MB) sa:
+{1}
+
+Magpatuloy?</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="410"/>
+        <source>Downloading…</source>
+        <translation>Nagda-download…</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="430"/>
+        <source>Downloading… {0:.1f} / {1:.1f} MB</source>
+        <translation>Nagda-download… {0:.1f} / {1:.1f} MB</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="435"/>
+        <source>Downloading… {0:.1f} MB</source>
+        <translation>Nagda-download… {0:.1f} MB</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="172"/>
+        <source>Empty = auto-detect (portable → system PATH)</source>
+        <translation>Walang laman = auto-detect (portable → system PATH)</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="373"/>
+        <source>Exit {0}: {1}</source>
+        <translation>Exit {0}: {1}</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="321"/>
+        <source>File does not exist:
+{0}</source>
+        <translation>Hindi umiiral ang file:
+{0}</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="155"/>
+        <source>FilterMate uses &lt;b&gt;git&lt;/b&gt; to publish favorites to a remote repository. If git is not on your system PATH, configure an explicit path below or download a portable copy.</source>
+        <translation>Gumagamit ang FilterMate ng &lt;b&gt;git&lt;/b&gt; para i-publish ang mga paborito sa isang remote na repository. Kung wala ang git sa system PATH mo, mag-configure ng tahasang path sa ibaba o mag-download ng portable na kopya.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="147"/>
+        <source>FilterMate — Git Binary</source>
+        <translation>FilterMate — Git Binary</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="307"/>
+        <source>Git executable (git.exe);;All files (*.*)</source>
+        <translation>Git executable (git.exe);;Lahat ng file (*.*)</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="443"/>
+        <source>Installation complete:
+{0}</source>
+        <translation>Tapos na ang pag-install:
+{0}</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="320"/>
+        <source>Invalid path</source>
+        <translation>Di-wastong path</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="311"/>
+        <source>Locate git executable</source>
+        <translation>Hanapin ang git executable</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="264"/>
+        <source>Portable (downloaded)</source>
+        <translation>Portable (na-download)</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="211"/>
+        <source>Portable Git</source>
+        <translation>Portable Git</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="452"/>
+        <source>Portable Git could not be installed:
+
+{0}</source>
+        <translation>Hindi ma-install ang Portable Git:
+
+{0}</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="442"/>
+        <source>Portable Git installed</source>
+        <translation>Na-install ang Portable Git</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="384"/>
+        <source>Portable Git is Windows-only. Install git via your package manager.</source>
+        <translation>Windows lang ang Portable Git. Mag-install ng git gamit ang package manager mo.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="391"/>
+        <source>Profile not initialized</source>
+        <translation>Hindi pa na-initialize ang profile</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="231"/>
+        <source>Reinstall</source>
+        <translation>I-reinstall</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="467"/>
+        <source>Removal failed</source>
+        <translation>Nabigo ang pagtanggal</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="235"/>
+        <source>Remove</source>
+        <translation>Alisin</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="458"/>
+        <source>Remove Portable Git</source>
+        <translation>Alisin ang Portable Git</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="196"/>
+        <source>Run &apos;git --version&apos; against the resolved binary</source>
+        <translation>Patakbuhin ang 'git --version' sa na-resolve na binary</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="327"/>
+        <source>Save failed</source>
+        <translation>Nabigo ang pag-save</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="265"/>
+        <source>System PATH</source>
+        <translation>System PATH</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="195"/>
+        <source>Test</source>
+        <translation>Subukan</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="365"/>
+        <source>Test OK</source>
+        <translation>Pumasa ang test</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="352"/>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="358"/>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="372"/>
+        <source>Test failed</source>
+        <translation>Nabigo ang test</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="383"/>
+        <source>Unsupported platform</source>
+        <translation>Hindi suportadong platform</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="212"/>
+        <source>download a self-contained git ({0}, no admin rights needed) into the QGIS profile.</source>
+        <translation>mag-download ng self-contained na git ({0}, hindi kailangan ng admin rights) sa QGIS profile.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="359"/>
+        <source>git --version timed out after 10 s.</source>
+        <translation>Nag-time out ang git --version pagkatapos ng 10 s.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="274"/>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="339"/>
+        <source>git not found</source>
+        <translation>Hindi mahanap ang git</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="286"/>
+        <source>installed</source>
+        <translation>naka-install</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="294"/>
+        <source>not installed</source>
+        <translation>hindi naka-install</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="276"/>
+        <source>set a path below or download Portable Git.</source>
+        <translation>mag-set ng path sa ibaba o i-download ang Portable Git.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="366"/>
+        <source>{0}
+
+Resolved from: {1}</source>
+        <translation>{0}
+
+Na-resolve mula sa: {1}</translation>
+    </message>
+</context>
+<context>
     <name>FilterMateOperations</name>
     <message>
         <location filename="../adapters/public_api/operations.py" line="639"/>
@@ -4170,6 +4696,269 @@ I-drop pa rin?</translation>
         <location filename="../adapters/public_api/operations.py" line="643"/>
         <source>source changed while the filter was running: nothing was applied</source>
         <translation>nagbago ang source habang tumatakbo ang filter: walang inilapat</translation>
+    </message>
+</context>
+<context>
+    <name>FilterMateRepoManager</name>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="561"/>
+        <source> — Test connection and Publish will fail until this is configured.</source>
+        <translation> — Mabibigo ang Test connection at Publish hangga't hindi ito na-configure.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="355"/>
+        <source>&lt;b&gt;Remote Repos&lt;/b&gt; — git-backed publish targets for favorite collections. Anonymous read access is supported; only publishers need credentials.</source>
+        <translation>&lt;b&gt;Mga Remote Repo&lt;/b&gt; — mga git-backed na publish target para sa mga koleksyon ng paborito. Sinusuportahan ang anonymous na read access; mga nagpa-publish lang ang nangangailangan ng credentials.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="296"/>
+        <source>A repo name is required.</source>
+        <translation>Kailangan ang pangalan ng repo.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="303"/>
+        <source>A repo named &apos;{0}&apos; already exists.</source>
+        <translation>May umiiral nang repo na may pangalang '{0}'.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="400"/>
+        <source>Add</source>
+        <translation>Idagdag</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="90"/>
+        <source>Add Remote Repo</source>
+        <translation>Magdagdag ng Remote Repo</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="381"/>
+        <source>Auth</source>
+        <translation>Auth</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="152"/>
+        <source>Auth config id:</source>
+        <translation>Auth config id:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="144"/>
+        <source>Authentication:</source>
+        <translation>Authentication:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="380"/>
+        <source>Branch</source>
+        <translation>Branch</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="119"/>
+        <source>Branch:</source>
+        <translation>Branch:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="233"/>
+        <source>Choose local clone directory</source>
+        <translation>Pumili ng lokal na clone directory</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="381"/>
+        <source>Collection</source>
+        <translation>Collection</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="137"/>
+        <source>Collection:</source>
+        <translation>Collection:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="98"/>
+        <source>Configure a git-backed publish target. Anonymous repos can leave Authentication empty — only publishers need credentials.</source>
+        <translation>Mag-configure ng git-backed na publish target. Maaaring iwanang walang laman ang Authentication ng mga anonymous na repo — mga nagpa-publish lang ang nangangailangan ng credentials.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="369"/>
+        <source>Configure git…</source>
+        <translation>I-configure ang git…</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="526"/>
+        <source>Could not persist repos to FilterMate config. Check the QGIS log for details.</source>
+        <translation>Hindi ma-persist ang mga repo sa config ng FilterMate. Tingnan ang QGIS log para sa mga detalye.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="381"/>
+        <source>Default</source>
+        <translation>Default</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="408"/>
+        <source>Delete</source>
+        <translation>Tanggalin</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="499"/>
+        <source>Delete repo</source>
+        <translation>Tanggalin ang repo</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="110"/>
+        <source>Display name (e.g. Acme team)</source>
+        <translation>Display name (hal. Acme team)</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="302"/>
+        <source>Duplicate name</source>
+        <translation>Duplicate na pangalan</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="89"/>
+        <source>Edit Remote Repo</source>
+        <translation>I-edit ang Remote Repo</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="404"/>
+        <source>Edit…</source>
+        <translation>I-edit…</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="123"/>
+        <source>Empty = [profile]/FilterMate/repos/&lt;slug&gt;</source>
+        <translation>Walang laman = [profile]/FilterMate/repos/&lt;slug&gt;</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="347"/>
+        <source>FilterMate — Manage Remote Repos</source>
+        <translation>FilterMate — Pamahalaan ang mga Remote Repo</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="115"/>
+        <source>Git URL:</source>
+        <translation>Git URL:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="131"/>
+        <source>Local clone:</source>
+        <translation>Lokal na clone:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="295"/>
+        <source>Missing name</source>
+        <translation>Walang pangalan</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="380"/>
+        <source>Name</source>
+        <translation>Pangalan</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="111"/>
+        <source>Name *:</source>
+        <translation>Pangalan *:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="242"/>
+        <source>No manager wired — cannot test.</source>
+        <translation>Walang nakakabit na manager — hindi makapag-test.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="271"/>
+        <source>OK — local-only target (path is writable).</source>
+        <translation>OK — local-only na target (maaaring sulatan ang path).</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="273"/>
+        <source>OK — remote reachable.</source>
+        <translation>OK — maaabot ang remote.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="149"/>
+        <source>QGIS authcfg_id (Settings → Options → Authentication)</source>
+        <translation>authcfg_id ng QGIS (Mga Setting → Mga Opsyon → Authentication)</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="500"/>
+        <source>Remove &apos;{0}&apos; from the configured repos?</source>
+        <translation>Alisin ang '{0}' sa mga naka-configure na repo?</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="525"/>
+        <source>Save failed</source>
+        <translation>Nabigo ang pag-save</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="250"/>
+        <source>Set a name first.</source>
+        <translation>Mag-set muna ng pangalan.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="370"/>
+        <source>Set an explicit git binary path or download Portable Git.</source>
+        <translation>Mag-set ng tahasang path ng git binary o i-download ang Portable Git.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="412"/>
+        <source>Set as default</source>
+        <translation>Itakda bilang default</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="381"/>
+        <source>Status</source>
+        <translation>Status</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="134"/>
+        <source>Sub-directory under collections/ (empty = repo root)</source>
+        <translation>Sub-directory sa ilalim ng collections/ (walang laman = root ng repo)</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="163"/>
+        <source>Test connection</source>
+        <translation>Test connection</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="261"/>
+        <source>Testing…</source>
+        <translation>Sinusubukan…</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="380"/>
+        <source>URL</source>
+        <translation>URL</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="154"/>
+        <source>Use as default publish target</source>
+        <translation>Gamitin bilang default na publish target</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="548"/>
+        <source>configured path</source>
+        <translation>naka-configure na path</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="559"/>
+        <source>git not found</source>
+        <translation>hindi mahanap ang git</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="114"/>
+        <source>https://github.com/org/repo.git</source>
+        <translation>https://github.com/org/repo.git</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="118"/>
+        <source>main / master / … (empty = default)</source>
+        <translation>main / master / … (walang laman = default)</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="549"/>
+        <source>portable</source>
+        <translation>portable</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="550"/>
+        <source>system PATH</source>
+        <translation>system PATH</translation>
     </message>
 </context>
 <context>
@@ -4295,6 +5084,14 @@ I-drop pa rin?</translation>
         <location filename="../ui/widgets/json_view/model.py" line="54"/>
         <source>Value</source>
         <translation>Halaga</translation>
+    </message>
+</context>
+<context>
+    <name>LayerExporter</name>
+    <message>
+        <location filename="../core/export/layer_exporter.py" line="525"/>
+        <source>Cannot export to &apos;{path}&apos;: this file is the data source of the layer &apos;{layer}&apos; of the project and would be overwritten. Choose another file.</source>
+        <translation>Hindi ma-export sa '{path}': ang file na ito ang data source ng layer na '{layer}' ng proyekto at mapapalitan. Pumili ng ibang file.</translation>
     </message>
 </context>
 <context>
@@ -4520,6 +5317,24 @@ Siguraduhin na ang PostgreSQL table ay may nakatakdang PRIMARY KEY.</translation
         <location filename="../ui/dialogs/optimization_dialog.py" line="344"/>
         <source>OGR (Shapefiles, GeoPackage)</source>
         <translation>OGR (Shapefiles, GeoPackage)</translation>
+    </message>
+</context>
+<context>
+    <name>OptimizationManager</name>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="178"/>
+        <source>Reduce buffer segments (3)</source>
+        <translation>Bawasan ang mga buffer segment (3)</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="176"/>
+        <source>Simplify before buffer</source>
+        <translation>Pasimplehin bago ang buffer</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="174"/>
+        <source>Use Centroids</source>
+        <translation>Gamitin ang mga Centroid</translation>
     </message>
 </context>
 <context>

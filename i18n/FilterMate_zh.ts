@@ -28,6 +28,21 @@
         <source>Manage Resource Sharing repos...</source>
         <translation>管理 Resource Sharing 仓库...</translation>
     </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="173"/>
+        <source>OptimizationManager</source>
+        <translation>OptimizationManager</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="175"/>
+        <source>OptimizationManager</source>
+        <translation>OptimizationManager</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="177"/>
+        <source>OptimizationManager</source>
+        <translation>OptimizationManager</translation>
+    </message>
 </context>
 <context>
     <name>AgentChat</name>
@@ -1929,22 +1944,22 @@ Do you agree?</source>
 <context>
     <name>DockChrome</name>
     <message>
-        <location filename="../ui/layout/dock_chrome.py" line="232"/>
+        <location filename="../ui/layout/dock_chrome.py" line="288"/>
         <source>Hide EXPLORING to give room to the sections</source>
         <translation>隐藏 EXPLORING 以给各部分腾出空间</translation>
     </message>
     <message>
-        <location filename="../ui/layout/dock_chrome.py" line="233"/>
+        <location filename="../ui/layout/dock_chrome.py" line="289"/>
         <source>Show EXPLORING</source>
         <translation>显示 EXPLORING</translation>
     </message>
     <message>
-        <location filename="../ui/layout/dock_chrome.py" line="51"/>
+        <location filename="../ui/layout/dock_chrome.py" line="117"/>
         <source>Close</source>
         <translation>关闭</translation>
     </message>
     <message>
-        <location filename="../ui/layout/dock_chrome.py" line="48"/>
+        <location filename="../ui/layout/dock_chrome.py" line="115"/>
         <source>Detach or dock the panel</source>
         <translation>分离或停靠面板</translation>
     </message>
@@ -2115,79 +2130,79 @@ No = Replace all existing</source>
         <translation>错误：{0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="775"/>
+        <location filename="../ui/controllers/favorites_menu_builder.py" line="203"/>
         <source>Used {0} times</source>
-        <translation type="obsolete">已使用 {0} 次</translation>
+        <translation>已使用 {0} 次</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="786"/>
+        <location filename="../ui/controllers/favorites_menu_builder.py" line="217"/>
         <source>Add current filter to favorites</source>
-        <translation type="obsolete">将当前过滤器添加到收藏</translation>
+        <translation>将当前过滤器添加到收藏</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="790"/>
+        <location filename="../ui/controllers/favorites_menu_builder.py" line="221"/>
         <source>Add filter (no active filter)</source>
-        <translation type="obsolete">添加过滤器（无活动过滤器）</translation>
+        <translation>添加过滤器（无活动过滤器）</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="795"/>
+        <location filename="../ui/controllers/favorites_menu_builder.py" line="227"/>
         <source>Manage favorites...</source>
-        <translation type="obsolete">管理收藏...</translation>
+        <translation>管理收藏...</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="798"/>
+        <location filename="../ui/controllers/favorites_menu_builder.py" line="230"/>
         <source>Export...</source>
-        <translation type="obsolete">导出...</translation>
+        <translation>导出...</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="801"/>
+        <location filename="../ui/controllers/favorites_menu_builder.py" line="233"/>
         <source>Import...</source>
-        <translation type="obsolete">导入...</translation>
+        <translation>导入...</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="822"/>
+        <location filename="../ui/controllers/favorites_menu_builder.py" line="259"/>
         <source>Global favorites</source>
-        <translation type="obsolete">全局收藏</translation>
+        <translation>全局收藏</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="826"/>
+        <location filename="../ui/controllers/favorites_menu_builder.py" line="262"/>
         <source>Copy to global...</source>
-        <translation type="obsolete">复制到全局...</translation>
+        <translation>复制到全局...</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="837"/>
+        <location filename="../ui/controllers/favorites_menu_builder.py" line="272"/>
         <source>── Available global favorites ──</source>
-        <translation type="obsolete">── 可用的全局收藏 ──</translation>
+        <translation>── 可用的全局收藏 ──</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="845"/>
+        <location filename="../ui/controllers/favorites_menu_builder.py" line="282"/>
         <source>(No global favorites)</source>
-        <translation type="obsolete">（无全局收藏）</translation>
+        <translation>（无全局收藏）</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="849"/>
+        <location filename="../ui/controllers/favorites_menu_builder.py" line="288"/>
         <source>Maintenance</source>
-        <translation type="obsolete">维护</translation>
+        <translation>维护</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="851"/>
+        <location filename="../ui/controllers/favorites_menu_builder.py" line="290"/>
         <source>Save to project (.qgz)</source>
-        <translation type="obsolete">保存到项目 (.qgz)</translation>
+        <translation>保存到项目 (.qgz)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="854"/>
+        <location filename="../ui/controllers/favorites_menu_builder.py" line="293"/>
         <source>Restore from project</source>
-        <translation type="obsolete">从项目恢复</translation>
+        <translation>从项目恢复</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="859"/>
+        <location filename="../ui/controllers/favorites_menu_builder.py" line="298"/>
         <source>Clean up orphan projects</source>
-        <translation type="obsolete">清理孤立项目</translation>
+        <translation>清理孤立项目</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="862"/>
+        <location filename="../ui/controllers/favorites_menu_builder.py" line="301"/>
         <source>Database statistics</source>
-        <translation type="obsolete">数据库统计</translation>
+        <translation>数据库统计</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="909"/>
@@ -2327,29 +2342,32 @@ Apply a filter to a layer, then click the ★ indicator and choose 'Add current 
         <translation>FilterMate 配置目录尚未初始化 — 请先打开启用 FilterMate 的 QGIS 项目。</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1714"/>
+        <location filename="../ui/controllers/favorites_extension_bridge.py" line="138"/>
+        <location filename="../ui/controllers/favorites_extension_bridge.py" line="179"/>
+        <location filename="../ui/controllers/favorites_extension_bridge.py" line="219"/>
         <source>Resource Sharing extension is not active. Enable &apos;favorites_sharing&apos; in FilterMate settings.</source>
-        <translation type="obsolete">Resource Sharing 扩展未启用。请在 FilterMate 设置中启用 'favorites_sharing'。</translation>
+        <translation>Resource Sharing 扩展未启用。请在 FilterMate 设置中启用 'favorites_sharing'。</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1722"/>
+        <location filename="../ui/controllers/favorites_extension_bridge.py" line="146"/>
+        <location filename="../ui/controllers/favorites_extension_bridge.py" line="187"/>
         <source>Shared favorites service is not available.</source>
-        <translation type="obsolete">共享收藏服务不可用。</translation>
+        <translation>共享收藏服务不可用。</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1708"/>
+        <location filename="../ui/controllers/favorites_extension_bridge.py" line="161"/>
         <source>Shared picker failed: {0}</source>
-        <translation type="obsolete">共享收藏选择器失败：{0}</translation>
+        <translation>共享收藏选择器失败：{0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1726"/>
+        <location filename="../ui/controllers/favorites_extension_bridge.py" line="191"/>
         <source>You have no favorites to publish yet. Save a filter via the ★ menu first.</source>
-        <translation type="obsolete">您还没有可发布的收藏。请先通过 ★ 菜单保存一个筛选器。</translation>
+        <translation>您还没有可发布的收藏。请先通过 ★ 菜单保存一个筛选器。</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1742"/>
+        <location filename="../ui/controllers/favorites_extension_bridge.py" line="212"/>
         <source>Publish dialog failed: {0}</source>
-        <translation type="obsolete">打开发布对话框失败：{0}</translation>
+        <translation>打开发布对话框失败：{0}</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="388"/>
@@ -2405,6 +2423,76 @@ Apply a filter to a layer, then click the ★ indicator and choose 'Add current 
         <location filename="../ui/controllers/favorites_controller.py" line="1205"/>
         <source>Database statistics are unavailable. Details in filtermate.log.</source>
         <translation>数据库统计信息不可用。详情见 filtermate.log。</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_extension_bridge.py" line="347"/>
+        <source>Bundle unchanged — nothing to commit.</source>
+        <translation>数据包未更改 — 没有需要提交的内容。</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_spatial_handler.py" line="866"/>
+        <source>Favorite &apos;{0}&apos; could not be applied: no layer matched the saved source / targets.</source>
+        <translation>无法应用收藏“{0}”：没有图层与保存的来源 / 目标匹配。</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_spatial_handler.py" line="133"/>
+        <source>Favorite '{0}' was missing predicate info — defaulting to 'Intersect'. Re-save it after adjusting if you need a different predicate.</source>
+        <translation>收藏“{0}”缺少谓词信息 — 默认使用“Intersect”。如需其他谓词，请调整后重新保存。</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_extension_bridge.py" line="259"/>
+        <source>No default repo is configured. Open 'Manage Resource Sharing repos…' to add one and mark it as default.</source>
+        <translation>未配置默认仓库。请打开“管理 Resource Sharing 仓库…”添加一个并设为默认。</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_extension_bridge.py" line="265"/>
+        <source>No favorites to publish.</source>
+        <translation>没有可发布的收藏。</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_extension_bridge.py" line="286"/>
+        <source>Publish {0} favorite(s) to &lt;b&gt;{1}&lt;/b&gt;?&lt;br&gt;&lt;br&gt;&lt;small&gt;Target: &lt;code&gt;{2}&lt;/code&gt;&lt;/small&gt;</source>
+        <translation>将 {0} 个收藏发布到 &lt;b&gt;{1}&lt;/b&gt;？&lt;br&gt;&lt;br&gt;&lt;small&gt;目标：&lt;code&gt;{2}&lt;/code&gt;&lt;/small&gt;</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_extension_bridge.py" line="343"/>
+        <source>Published {0} favorite(s) to {1} (commit {2}).</source>
+        <translation>已将 {0} 个收藏发布到 {1}（提交 {2}）。</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_extension_bridge.py" line="285"/>
+        <source>Quick publish</source>
+        <translation>快速发布</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_extension_bridge.py" line="337"/>
+        <source>Quick publish to {0} failed: {1}</source>
+        <translation>快速发布到 {0} 失败：{1}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_extension_bridge.py" line="226"/>
+        <source>Remote repo manager is not available.</source>
+        <translation>远程仓库管理器不可用。</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_extension_bridge.py" line="234"/>
+        <source>Repo manager failed: {0}</source>
+        <translation>仓库管理器失败：{0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_extension_bridge.py" line="246"/>
+        <source>Resource Sharing extension is not active.</source>
+        <translation>Resource Sharing 扩展未启用。</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_extension_bridge.py" line="253"/>
+        <source>Resource Sharing services are not available.</source>
+        <translation>Resource Sharing 服务不可用。</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_extension_bridge.py" line="351"/>
+        <source>Wrote bundle locally — push manually.</source>
+        <translation>已在本地写入数据包 — 请手动推送。</translation>
     </message>
 </context>
 <context>
@@ -3970,6 +4058,167 @@ Drop anyway?</source>
         <source>The filter was not launched: its selection changed or could not be read. Click Filter again.</source>
         <translation>过滤未启动：其选择已更改或无法读取。请再次点击“过滤”。</translation>
     </message>
+    <message>
+        <location filename="../ui/managers/configuration_manager.py" line="870"/>
+        <source>Type to find a layer</source>
+        <translation>输入以查找图层</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="420"/>
+        <source>All layers using auto-selection</source>
+        <translation>所有使用自动选择的图层</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="191"/>
+        <source>Applied to &apos;{0}&apos;:
+{1}</source>
+        <translation>已应用到“{0}”：
+{1}</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="71"/>
+        <source>Auto-centroid {0}</source>
+        <translation>自动质心 {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="58"/>
+        <source>Auto-optimization {0}</source>
+        <translation>自动优化 {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="104"/>
+        <source>Auto-optimizer module not available</source>
+        <translation>自动优化器模块不可用</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="158"/>
+        <source>Auto-optimizer not available: {0}</source>
+        <translation>自动优化器不可用：{0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/configuration_manager.py" line="697"/>
+        <source>Auto-zoom when feature changes</source>
+        <translation>要素变化时自动缩放</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="258"/>
+        <source>Backend optimization settings saved</source>
+        <translation>已保存后端优化设置</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="429"/>
+        <source>Backend optimization unavailable</source>
+        <translation>后端优化不可用</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="287"/>
+        <source>Backend optimizations configured</source>
+        <translation>已配置后端优化</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="83"/>
+        <source>Confirmation {0}</source>
+        <translation>确认 {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="110"/>
+        <source>Could not analyze layer &apos;{0}&apos;</source>
+        <translation>无法分析图层“{0}”</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="235"/>
+        <location filename="../ui/managers/optimization_manager.py" line="291"/>
+        <source>Dialog not available: {0}</source>
+        <translation>对话框不可用：{0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="163"/>
+        <source>Error analyzing layer: {0}</source>
+        <translation>分析图层时出错：{0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/configuration_manager.py" line="694"/>
+        <source>Identify selected feature</source>
+        <translation>识别所选要素</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/configuration_manager.py" line="696"/>
+        <source>Keep the map selection and the widgets in sync</source>
+        <translation>保持地图选择与控件同步</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="131"/>
+        <source>Layer &apos;{0}&apos; is already optimally configured.
+Type: {1}
+Features: {2:,}</source>
+        <translation>图层“{0}”已是最佳配置。
+类型：{1}
+要素：{2:,}</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/configuration_manager.py" line="698"/>
+        <source>Link exploring widgets together</source>
+        <translation>联动探索控件</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="97"/>
+        <source>No layer selected. Please select a layer first.</source>
+        <translation>未选择图层。请先选择一个图层。</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="196"/>
+        <source>No optimizations selected to apply.</source>
+        <translation>未选择要应用的优化。</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="231"/>
+        <source>Optimization settings saved</source>
+        <translation>已保存优化设置</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="415"/>
+        <source>Optimized {0} layer(s)</source>
+        <translation>已优化 {0} 个图层</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/configuration_manager.py" line="699"/>
+        <source>Reset all layer exploring properties</source>
+        <translation>重置所有图层的探索属性</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="297"/>
+        <source>The backend optimizations could not be configured. Details in filtermate.log.</source>
+        <translation>无法配置后端优化。详情见 filtermate.log。</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="241"/>
+        <source>The optimization settings could not be saved. Details in filtermate.log.</source>
+        <translation>无法保存优化设置。详情见 filtermate.log。</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/configuration_manager.py" line="927"/>
+        <source>Use centroids instead of full geometries for distant layers</source>
+        <translation>对较远的图层使用质心代替完整几何</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/configuration_manager.py" line="695"/>
+        <source>Zoom to selected feature</source>
+        <translation>缩放到所选要素</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="59"/>
+        <location filename="../ui/managers/optimization_manager.py" line="72"/>
+        <location filename="../ui/managers/optimization_manager.py" line="84"/>
+        <source>disabled</source>
+        <translation>已禁用</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="59"/>
+        <location filename="../ui/managers/optimization_manager.py" line="72"/>
+        <location filename="../ui/managers/optimization_manager.py" line="84"/>
+        <source>enabled</source>
+        <translation>已启用</translation>
+    </message>
 </context>
 <context>
     <name>FilterMateDockWidgetBase</name>
@@ -4145,6 +4394,283 @@ Drop anyway?</source>
     </message>
 </context>
 <context>
+    <name>FilterMateGitBinary</name>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="309"/>
+        <source>All files (*)</source>
+        <translation>所有文件 (*)</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="191"/>
+        <source>Apply path</source>
+        <translation>应用路径</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="180"/>
+        <source>Browse for git executable</source>
+        <translation>浏览 git 可执行文件</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="340"/>
+        <source>Cannot find a git binary. Configure a path or download Portable Git.</source>
+        <translation>找不到 git 二进制文件。请配置路径或下载 Portable Git。</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="392"/>
+        <source>Cannot resolve QGIS profile dir — try restarting QGIS.</source>
+        <translation>无法确定 QGIS 配置文件目录 — 请尝试重启 QGIS。</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="184"/>
+        <source>Clear</source>
+        <translation>清除</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="263"/>
+        <source>Configured path</source>
+        <translation>已配置路径</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="468"/>
+        <source>Could not delete the Portable Git directory. Check that no QGIS process is using it and retry.</source>
+        <translation>无法删除 Portable Git 目录。请确认没有 QGIS 进程在使用它，然后重试。</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="353"/>
+        <source>Could not execute {0}:
+{1}</source>
+        <translation>无法执行 {0}：
+{1}</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="328"/>
+        <source>Could not persist git_binary_path to the extension config.</source>
+        <translation>无法将 git_binary_path 保存到扩展配置。</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="459"/>
+        <source>Delete the bundled Portable Git directory?</source>
+        <translation>删除内置的 Portable Git 目录？</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="227"/>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="398"/>
+        <source>Download Portable Git</source>
+        <translation>下载 Portable Git</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="451"/>
+        <source>Download failed</source>
+        <translation>下载失败</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="399"/>
+        <source>Download {0} (~50 MB) into:
+{1}
+
+Continue?</source>
+        <translation>将 {0}（约 50 MB）下载到：
+{1}
+
+是否继续？</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="410"/>
+        <source>Downloading…</source>
+        <translation>正在下载…</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="430"/>
+        <source>Downloading… {0:.1f} / {1:.1f} MB</source>
+        <translation>正在下载… {0:.1f} / {1:.1f} MB</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="435"/>
+        <source>Downloading… {0:.1f} MB</source>
+        <translation>正在下载… {0:.1f} MB</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="172"/>
+        <source>Empty = auto-detect (portable → system PATH)</source>
+        <translation>留空 = 自动检测（便携版 → 系统 PATH）</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="373"/>
+        <source>Exit {0}: {1}</source>
+        <translation>退出码 {0}：{1}</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="321"/>
+        <source>File does not exist:
+{0}</source>
+        <translation>文件不存在：
+{0}</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="155"/>
+        <source>FilterMate uses &lt;b&gt;git&lt;/b&gt; to publish favorites to a remote repository. If git is not on your system PATH, configure an explicit path below or download a portable copy.</source>
+        <translation>FilterMate 使用 &lt;b&gt;git&lt;/b&gt; 将收藏发布到远程仓库。如果 git 不在系统 PATH 中，请在下方配置明确路径，或下载便携版。</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="147"/>
+        <source>FilterMate — Git Binary</source>
+        <translation>FilterMate — Git 二进制文件</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="307"/>
+        <source>Git executable (git.exe);;All files (*.*)</source>
+        <translation>Git 可执行文件 (git.exe);;所有文件 (*.*)</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="443"/>
+        <source>Installation complete:
+{0}</source>
+        <translation>安装完成：
+{0}</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="320"/>
+        <source>Invalid path</source>
+        <translation>路径无效</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="311"/>
+        <source>Locate git executable</source>
+        <translation>定位 git 可执行文件</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="264"/>
+        <source>Portable (downloaded)</source>
+        <translation>便携版（已下载）</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="211"/>
+        <source>Portable Git</source>
+        <translation>Portable Git</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="452"/>
+        <source>Portable Git could not be installed:
+
+{0}</source>
+        <translation>无法安装 Portable Git：
+
+{0}</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="442"/>
+        <source>Portable Git installed</source>
+        <translation>已安装 Portable Git</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="384"/>
+        <source>Portable Git is Windows-only. Install git via your package manager.</source>
+        <translation>Portable Git 仅适用于 Windows。请通过包管理器安装 git。</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="391"/>
+        <source>Profile not initialized</source>
+        <translation>配置文件未初始化</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="231"/>
+        <source>Reinstall</source>
+        <translation>重新安装</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="467"/>
+        <source>Removal failed</source>
+        <translation>移除失败</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="235"/>
+        <source>Remove</source>
+        <translation>移除</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="458"/>
+        <source>Remove Portable Git</source>
+        <translation>移除 Portable Git</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="196"/>
+        <source>Run &apos;git --version&apos; against the resolved binary</source>
+        <translation>对已解析的二进制文件运行“git --version”</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="327"/>
+        <source>Save failed</source>
+        <translation>保存失败</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="265"/>
+        <source>System PATH</source>
+        <translation>系统 PATH</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="195"/>
+        <source>Test</source>
+        <translation>测试</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="365"/>
+        <source>Test OK</source>
+        <translation>测试通过</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="352"/>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="358"/>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="372"/>
+        <source>Test failed</source>
+        <translation>测试失败</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="383"/>
+        <source>Unsupported platform</source>
+        <translation>不支持的平台</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="212"/>
+        <source>download a self-contained git ({0}, no admin rights needed) into the QGIS profile.</source>
+        <translation>将独立的 git（{0}，无需管理员权限）下载到 QGIS 配置文件中。</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="359"/>
+        <source>git --version timed out after 10 s.</source>
+        <translation>git --version 在 10 秒后超时。</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="274"/>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="339"/>
+        <source>git not found</source>
+        <translation>找不到 git</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="286"/>
+        <source>installed</source>
+        <translation>已安装</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="294"/>
+        <source>not installed</source>
+        <translation>未安装</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="276"/>
+        <source>set a path below or download Portable Git.</source>
+        <translation>请在下方设置路径或下载 Portable Git。</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="366"/>
+        <source>{0}
+
+Resolved from: {1}</source>
+        <translation>{0}
+
+解析自：{1}</translation>
+    </message>
+</context>
+<context>
     <name>FilterMateOperations</name>
     <message>
         <location filename="../adapters/public_api/operations.py" line="639"/>
@@ -4170,6 +4696,269 @@ Drop anyway?</source>
         <location filename="../adapters/public_api/operations.py" line="643"/>
         <source>source changed while the filter was running: nothing was applied</source>
         <translation>过滤运行期间源已更改：未应用任何内容</translation>
+    </message>
+</context>
+<context>
+    <name>FilterMateRepoManager</name>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="561"/>
+        <source> — Test connection and Publish will fail until this is configured.</source>
+        <translation> — 在配置之前，测试连接和发布都会失败。</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="355"/>
+        <source>&lt;b&gt;Remote Repos&lt;/b&gt; — git-backed publish targets for favorite collections. Anonymous read access is supported; only publishers need credentials.</source>
+        <translation>&lt;b&gt;远程仓库&lt;/b&gt; — 收藏集合基于 git 的发布目标。支持匿名读取；只有发布者需要凭据。</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="296"/>
+        <source>A repo name is required.</source>
+        <translation>需要仓库名称。</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="303"/>
+        <source>A repo named &apos;{0}&apos; already exists.</source>
+        <translation>名为“{0}”的仓库已存在。</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="400"/>
+        <source>Add</source>
+        <translation>添加</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="90"/>
+        <source>Add Remote Repo</source>
+        <translation>添加远程仓库</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="381"/>
+        <source>Auth</source>
+        <translation>认证</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="152"/>
+        <source>Auth config id:</source>
+        <translation>认证配置 ID：</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="144"/>
+        <source>Authentication:</source>
+        <translation>认证：</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="380"/>
+        <source>Branch</source>
+        <translation>分支</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="119"/>
+        <source>Branch:</source>
+        <translation>分支：</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="233"/>
+        <source>Choose local clone directory</source>
+        <translation>选择本地克隆目录</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="381"/>
+        <source>Collection</source>
+        <translation>集合</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="137"/>
+        <source>Collection:</source>
+        <translation>集合：</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="98"/>
+        <source>Configure a git-backed publish target. Anonymous repos can leave Authentication empty — only publishers need credentials.</source>
+        <translation>配置基于 git 的发布目标。匿名仓库可将认证留空 — 只有发布者需要凭据。</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="369"/>
+        <source>Configure git…</source>
+        <translation>配置 git…</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="526"/>
+        <source>Could not persist repos to FilterMate config. Check the QGIS log for details.</source>
+        <translation>无法将仓库保存到 FilterMate 配置。详情请查看 QGIS 日志。</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="381"/>
+        <source>Default</source>
+        <translation>默认</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="408"/>
+        <source>Delete</source>
+        <translation>删除</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="499"/>
+        <source>Delete repo</source>
+        <translation>删除仓库</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="110"/>
+        <source>Display name (e.g. Acme team)</source>
+        <translation>显示名称（例如 Acme 团队）</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="302"/>
+        <source>Duplicate name</source>
+        <translation>名称重复</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="89"/>
+        <source>Edit Remote Repo</source>
+        <translation>编辑远程仓库</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="404"/>
+        <source>Edit…</source>
+        <translation>编辑…</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="123"/>
+        <source>Empty = [profile]/FilterMate/repos/&lt;slug&gt;</source>
+        <translation>留空 = [配置文件]/FilterMate/repos/&lt;slug&gt;</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="347"/>
+        <source>FilterMate — Manage Remote Repos</source>
+        <translation>FilterMate — 管理远程仓库</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="115"/>
+        <source>Git URL:</source>
+        <translation>Git URL：</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="131"/>
+        <source>Local clone:</source>
+        <translation>本地克隆：</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="295"/>
+        <source>Missing name</source>
+        <translation>缺少名称</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="380"/>
+        <source>Name</source>
+        <translation>名称</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="111"/>
+        <source>Name *:</source>
+        <translation>名称 *：</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="242"/>
+        <source>No manager wired — cannot test.</source>
+        <translation>未连接管理器 — 无法测试。</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="271"/>
+        <source>OK — local-only target (path is writable).</source>
+        <translation>OK — 仅本地目标（路径可写）。</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="273"/>
+        <source>OK — remote reachable.</source>
+        <translation>OK — 远程可访问。</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="149"/>
+        <source>QGIS authcfg_id (Settings → Options → Authentication)</source>
+        <translation>QGIS authcfg_id（设置 → 选项 → 认证）</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="500"/>
+        <source>Remove &apos;{0}&apos; from the configured repos?</source>
+        <translation>从已配置的仓库中移除“{0}”？</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="525"/>
+        <source>Save failed</source>
+        <translation>保存失败</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="250"/>
+        <source>Set a name first.</source>
+        <translation>请先设置名称。</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="370"/>
+        <source>Set an explicit git binary path or download Portable Git.</source>
+        <translation>请设置明确的 git 二进制文件路径，或下载 Portable Git。</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="412"/>
+        <source>Set as default</source>
+        <translation>设为默认</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="381"/>
+        <source>Status</source>
+        <translation>状态</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="134"/>
+        <source>Sub-directory under collections/ (empty = repo root)</source>
+        <translation>collections/ 下的子目录（留空 = 仓库根目录）</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="163"/>
+        <source>Test connection</source>
+        <translation>测试连接</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="261"/>
+        <source>Testing…</source>
+        <translation>正在测试…</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="380"/>
+        <source>URL</source>
+        <translation>URL</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="154"/>
+        <source>Use as default publish target</source>
+        <translation>用作默认发布目标</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="548"/>
+        <source>configured path</source>
+        <translation>已配置路径</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="559"/>
+        <source>git not found</source>
+        <translation>找不到 git</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="114"/>
+        <source>https://github.com/org/repo.git</source>
+        <translation>https://github.com/org/repo.git</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="118"/>
+        <source>main / master / … (empty = default)</source>
+        <translation>main / master / …（留空 = 默认）</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="549"/>
+        <source>portable</source>
+        <translation>便携版</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="550"/>
+        <source>system PATH</source>
+        <translation>系统 PATH</translation>
     </message>
 </context>
 <context>
@@ -4295,6 +5084,14 @@ Drop anyway?</source>
         <location filename="../ui/widgets/json_view/model.py" line="54"/>
         <source>Value</source>
         <translation>值</translation>
+    </message>
+</context>
+<context>
+    <name>LayerExporter</name>
+    <message>
+        <location filename="../core/export/layer_exporter.py" line="525"/>
+        <source>Cannot export to &apos;{path}&apos;: this file is the data source of the layer &apos;{layer}&apos; of the project and would be overwritten. Choose another file.</source>
+        <translation>无法导出到“{path}”：此文件是项目中图层“{layer}”的数据源，将被覆盖。请选择其他文件。</translation>
     </message>
 </context>
 <context>
@@ -4520,6 +5317,24 @@ Make sure the PostgreSQL table has a PRIMARY KEY defined.</source>
         <location filename="../ui/dialogs/optimization_dialog.py" line="344"/>
         <source>OGR (Shapefiles, GeoPackage)</source>
         <translation>OGR (Shapefiles, GeoPackage)</translation>
+    </message>
+</context>
+<context>
+    <name>OptimizationManager</name>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="178"/>
+        <source>Reduce buffer segments (3)</source>
+        <translation>减少缓冲区分段数 (3)</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="176"/>
+        <source>Simplify before buffer</source>
+        <translation>缓冲前先简化</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="174"/>
+        <source>Use Centroids</source>
+        <translation>使用质心</translation>
     </message>
 </context>
 <context>

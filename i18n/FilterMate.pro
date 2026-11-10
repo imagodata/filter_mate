@@ -52,6 +52,14 @@ SOURCES = \
     ../processing/algorithms/cross_filter_algorithm.py \
     ../processing/algorithms/layer_operations_algorithms.py \
     ../processing/algorithms/segmentation_algorithm.py \
+    ../ui/controllers/favorites_extension_bridge.py \
+    ../ui/controllers/favorites_menu_builder.py \
+    ../ui/controllers/favorites_spatial_handler.py \
+    ../extensions/favorites_sharing/ui/git_binary_dialog.py \
+    ../extensions/favorites_sharing/ui/repo_manager_dialog.py \
+    ../ui/managers/optimization_manager.py \
+    ../ui/managers/configuration_manager.py \
+    ../core/export/layer_exporter.py \
     ../adapters/agent/free_quota.py \
     ../adapters/agent/settings.py \
     ../adapters/qgis/coverage_layers/point_cloud_footprint.py \
@@ -86,13 +94,7 @@ SOURCES = \
     ../ui/widgets/coverage_panels/histogram_widget.py \
     ../ui/widgets/coverage_panels/raster_exploring_panel.py \
     ../ui/widgets/coverage_panels/point_cloud_exploring_panel.py \
-    ../ui/controllers/exploring_controller.py \
-    ../adapters/agent/free_quota.py \
-    ../adapters/agent/settings.py \
-    ../ui/controllers/agent_chat_controller.py \
-    ../ui/layout/dock_chrome.py \
-    ../ui/widgets/agent_panel.py \
-    ../ui/widgets/agent_thread.py
+    ../ui/controllers/exploring_controller.py
 
 TRANSLATIONS = \
     FilterMate_am.ts \

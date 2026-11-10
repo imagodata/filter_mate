@@ -28,6 +28,21 @@
         <source>Manage Resource Sharing repos...</source>
         <translation>Resource Sharing リポジトリを管理...</translation>
     </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="173"/>
+        <source>OptimizationManager</source>
+        <translation>OptimizationManager</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="175"/>
+        <source>OptimizationManager</source>
+        <translation>OptimizationManager</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="177"/>
+        <source>OptimizationManager</source>
+        <translation>OptimizationManager</translation>
+    </message>
 </context>
 <context>
     <name>AgentChat</name>
@@ -1929,22 +1944,22 @@ Do you agree?</source>
 <context>
     <name>DockChrome</name>
     <message>
-        <location filename="../ui/layout/dock_chrome.py" line="232"/>
+        <location filename="../ui/layout/dock_chrome.py" line="288"/>
         <source>Hide EXPLORING to give room to the sections</source>
         <translation>EXPLORING を非表示にしてセクションの領域を広げる</translation>
     </message>
     <message>
-        <location filename="../ui/layout/dock_chrome.py" line="233"/>
+        <location filename="../ui/layout/dock_chrome.py" line="289"/>
         <source>Show EXPLORING</source>
         <translation>EXPLORING を表示</translation>
     </message>
     <message>
-        <location filename="../ui/layout/dock_chrome.py" line="51"/>
+        <location filename="../ui/layout/dock_chrome.py" line="117"/>
         <source>Close</source>
         <translation>閉じる</translation>
     </message>
     <message>
-        <location filename="../ui/layout/dock_chrome.py" line="48"/>
+        <location filename="../ui/layout/dock_chrome.py" line="115"/>
         <source>Detach or dock the panel</source>
         <translation>パネルを分離またはドッキング</translation>
     </message>
@@ -2115,79 +2130,79 @@ No = Replace all existing</source>
         <translation>エラー: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="775"/>
+        <location filename="../ui/controllers/favorites_menu_builder.py" line="203"/>
         <source>Used {0} times</source>
-        <translation type="obsolete">{0}回使用</translation>
+        <translation>{0}回使用</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="786"/>
+        <location filename="../ui/controllers/favorites_menu_builder.py" line="217"/>
         <source>Add current filter to favorites</source>
-        <translation type="obsolete">現在のフィルターをお気に入りに追加</translation>
+        <translation>現在のフィルターをお気に入りに追加</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="790"/>
+        <location filename="../ui/controllers/favorites_menu_builder.py" line="221"/>
         <source>Add filter (no active filter)</source>
-        <translation type="obsolete">フィルターを追加 (アクティブなフィルターなし)</translation>
+        <translation>フィルターを追加 (アクティブなフィルターなし)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="795"/>
+        <location filename="../ui/controllers/favorites_menu_builder.py" line="227"/>
         <source>Manage favorites...</source>
-        <translation type="obsolete">お気に入りを管理...</translation>
+        <translation>お気に入りを管理...</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="798"/>
+        <location filename="../ui/controllers/favorites_menu_builder.py" line="230"/>
         <source>Export...</source>
-        <translation type="obsolete">エクスポート...</translation>
+        <translation>エクスポート...</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="801"/>
+        <location filename="../ui/controllers/favorites_menu_builder.py" line="233"/>
         <source>Import...</source>
-        <translation type="obsolete">インポート...</translation>
+        <translation>インポート...</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="822"/>
+        <location filename="../ui/controllers/favorites_menu_builder.py" line="259"/>
         <source>Global favorites</source>
-        <translation type="obsolete">グローバルお気に入り</translation>
+        <translation>グローバルお気に入り</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="826"/>
+        <location filename="../ui/controllers/favorites_menu_builder.py" line="262"/>
         <source>Copy to global...</source>
-        <translation type="obsolete">グローバルにコピー...</translation>
+        <translation>グローバルにコピー...</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="837"/>
+        <location filename="../ui/controllers/favorites_menu_builder.py" line="272"/>
         <source>── Available global favorites ──</source>
-        <translation type="obsolete">── 利用可能なグローバルお気に入り ──</translation>
+        <translation>── 利用可能なグローバルお気に入り ──</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="845"/>
+        <location filename="../ui/controllers/favorites_menu_builder.py" line="282"/>
         <source>(No global favorites)</source>
-        <translation type="obsolete">(グローバルお気に入りなし)</translation>
+        <translation>(グローバルお気に入りなし)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="849"/>
+        <location filename="../ui/controllers/favorites_menu_builder.py" line="288"/>
         <source>Maintenance</source>
-        <translation type="obsolete">メンテナンス</translation>
+        <translation>メンテナンス</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="851"/>
+        <location filename="../ui/controllers/favorites_menu_builder.py" line="290"/>
         <source>Save to project (.qgz)</source>
-        <translation type="obsolete">プロジェクトに保存 (.qgz)</translation>
+        <translation>プロジェクトに保存 (.qgz)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="854"/>
+        <location filename="../ui/controllers/favorites_menu_builder.py" line="293"/>
         <source>Restore from project</source>
-        <translation type="obsolete">プロジェクトから復元</translation>
+        <translation>プロジェクトから復元</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="859"/>
+        <location filename="../ui/controllers/favorites_menu_builder.py" line="298"/>
         <source>Clean up orphan projects</source>
-        <translation type="obsolete">孤立プロジェクトのクリーンアップ</translation>
+        <translation>孤立プロジェクトのクリーンアップ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="862"/>
+        <location filename="../ui/controllers/favorites_menu_builder.py" line="301"/>
         <source>Database statistics</source>
-        <translation type="obsolete">データベース統計</translation>
+        <translation>データベース統計</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="909"/>
@@ -2327,29 +2342,32 @@ Apply a filter to a layer, then click the ★ indicator and choose 'Add current 
         <translation>FilterMate 設定ディレクトリはまだ初期化されていません — 最初に FilterMate を有効にした QGIS プロジェクトを開いてください。</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1714"/>
+        <location filename="../ui/controllers/favorites_extension_bridge.py" line="138"/>
+        <location filename="../ui/controllers/favorites_extension_bridge.py" line="179"/>
+        <location filename="../ui/controllers/favorites_extension_bridge.py" line="219"/>
         <source>Resource Sharing extension is not active. Enable &apos;favorites_sharing&apos; in FilterMate settings.</source>
-        <translation type="obsolete">Resource Sharing 拡張機能が有効になっていません。FilterMate 設定で 'favorites_sharing' を有効にしてください。</translation>
+        <translation>Resource Sharing 拡張機能が有効になっていません。FilterMate 設定で 'favorites_sharing' を有効にしてください。</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1722"/>
+        <location filename="../ui/controllers/favorites_extension_bridge.py" line="146"/>
+        <location filename="../ui/controllers/favorites_extension_bridge.py" line="187"/>
         <source>Shared favorites service is not available.</source>
-        <translation type="obsolete">共有お気に入りサービスが利用できません。</translation>
+        <translation>共有お気に入りサービスが利用できません。</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1708"/>
+        <location filename="../ui/controllers/favorites_extension_bridge.py" line="161"/>
         <source>Shared picker failed: {0}</source>
-        <translation type="obsolete">共有お気に入り選択に失敗しました: {0}</translation>
+        <translation>共有お気に入り選択に失敗しました: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1726"/>
+        <location filename="../ui/controllers/favorites_extension_bridge.py" line="191"/>
         <source>You have no favorites to publish yet. Save a filter via the ★ menu first.</source>
-        <translation type="obsolete">公開できるお気に入りがまだありません。先に ★ メニューからフィルタを保存してください。</translation>
+        <translation>公開できるお気に入りがまだありません。先に ★ メニューからフィルタを保存してください。</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1742"/>
+        <location filename="../ui/controllers/favorites_extension_bridge.py" line="212"/>
         <source>Publish dialog failed: {0}</source>
-        <translation type="obsolete">公開ダイアログの起動に失敗しました: {0}</translation>
+        <translation>公開ダイアログの起動に失敗しました: {0}</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="388"/>
@@ -2405,6 +2423,76 @@ Apply a filter to a layer, then click the ★ indicator and choose 'Add current 
         <location filename="../ui/controllers/favorites_controller.py" line="1205"/>
         <source>Database statistics are unavailable. Details in filtermate.log.</source>
         <translation>データベースの統計情報を利用できません。詳細は filtermate.log を参照してください。</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_extension_bridge.py" line="347"/>
+        <source>Bundle unchanged — nothing to commit.</source>
+        <translation>バンドルに変更はありません — コミットするものがありません。</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_spatial_handler.py" line="866"/>
+        <source>Favorite &apos;{0}&apos; could not be applied: no layer matched the saved source / targets.</source>
+        <translation>お気に入り '{0}' を適用できませんでした: 保存されたソース / ターゲットに一致するレイヤーがありません。</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_spatial_handler.py" line="133"/>
+        <source>Favorite '{0}' was missing predicate info — defaulting to 'Intersect'. Re-save it after adjusting if you need a different predicate.</source>
+        <translation>お気に入り '{0}' に述語情報がありません — 既定で 'Intersect' を使用します。別の述語が必要な場合は、調整後に再保存してください。</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_extension_bridge.py" line="259"/>
+        <source>No default repo is configured. Open 'Manage Resource Sharing repos…' to add one and mark it as default.</source>
+        <translation>既定のリポジトリが設定されていません。'Resource Sharing リポジトリを管理…' を開いて追加し、既定に設定してください。</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_extension_bridge.py" line="265"/>
+        <source>No favorites to publish.</source>
+        <translation>公開するお気に入りがありません。</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_extension_bridge.py" line="286"/>
+        <source>Publish {0} favorite(s) to &lt;b&gt;{1}&lt;/b&gt;?&lt;br&gt;&lt;br&gt;&lt;small&gt;Target: &lt;code&gt;{2}&lt;/code&gt;&lt;/small&gt;</source>
+        <translation>{0} 個のお気に入りを &lt;b&gt;{1}&lt;/b&gt; に公開しますか?&lt;br&gt;&lt;br&gt;&lt;small&gt;ターゲット: &lt;code&gt;{2}&lt;/code&gt;&lt;/small&gt;</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_extension_bridge.py" line="343"/>
+        <source>Published {0} favorite(s) to {1} (commit {2}).</source>
+        <translation>{0} 個のお気に入りを {1} に公開しました (コミット {2})。</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_extension_bridge.py" line="285"/>
+        <source>Quick publish</source>
+        <translation>クイック公開</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_extension_bridge.py" line="337"/>
+        <source>Quick publish to {0} failed: {1}</source>
+        <translation>{0} へのクイック公開に失敗しました: {1}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_extension_bridge.py" line="226"/>
+        <source>Remote repo manager is not available.</source>
+        <translation>リモートリポジトリマネージャーを利用できません。</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_extension_bridge.py" line="234"/>
+        <source>Repo manager failed: {0}</source>
+        <translation>リポジトリマネージャーが失敗しました: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_extension_bridge.py" line="246"/>
+        <source>Resource Sharing extension is not active.</source>
+        <translation>Resource Sharing 拡張機能が有効ではありません。</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_extension_bridge.py" line="253"/>
+        <source>Resource Sharing services are not available.</source>
+        <translation>Resource Sharing サービスを利用できません。</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_extension_bridge.py" line="351"/>
+        <source>Wrote bundle locally — push manually.</source>
+        <translation>バンドルをローカルに書き込みました — 手動でプッシュしてください。</translation>
     </message>
 </context>
 <context>
@@ -3970,6 +4058,167 @@ Drop anyway?</source>
         <source>The filter was not launched: its selection changed or could not be read. Click Filter again.</source>
         <translation>フィルタは開始されませんでした: 選択が変更されたか、読み取れませんでした。もう一度「フィルタ」をクリックしてください。</translation>
     </message>
+    <message>
+        <location filename="../ui/managers/configuration_manager.py" line="870"/>
+        <source>Type to find a layer</source>
+        <translation>入力してレイヤーを検索</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="420"/>
+        <source>All layers using auto-selection</source>
+        <translation>自動選択を使用しているすべてのレイヤー</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="191"/>
+        <source>Applied to &apos;{0}&apos;:
+{1}</source>
+        <translation>'{0}' に適用しました:
+{1}</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="71"/>
+        <source>Auto-centroid {0}</source>
+        <translation>自動重心 {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="58"/>
+        <source>Auto-optimization {0}</source>
+        <translation>自動最適化 {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="104"/>
+        <source>Auto-optimizer module not available</source>
+        <translation>自動最適化モジュールを利用できません</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="158"/>
+        <source>Auto-optimizer not available: {0}</source>
+        <translation>自動最適化を利用できません: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/configuration_manager.py" line="697"/>
+        <source>Auto-zoom when feature changes</source>
+        <translation>地物が変わったら自動ズーム</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="258"/>
+        <source>Backend optimization settings saved</source>
+        <translation>バックエンド最適化の設定を保存しました</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="429"/>
+        <source>Backend optimization unavailable</source>
+        <translation>バックエンド最適化を利用できません</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="287"/>
+        <source>Backend optimizations configured</source>
+        <translation>バックエンド最適化を設定しました</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="83"/>
+        <source>Confirmation {0}</source>
+        <translation>確認 {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="110"/>
+        <source>Could not analyze layer &apos;{0}&apos;</source>
+        <translation>レイヤー '{0}' を分析できませんでした</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="235"/>
+        <location filename="../ui/managers/optimization_manager.py" line="291"/>
+        <source>Dialog not available: {0}</source>
+        <translation>ダイアログを利用できません: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="163"/>
+        <source>Error analyzing layer: {0}</source>
+        <translation>レイヤーの分析中にエラーが発生しました: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/configuration_manager.py" line="694"/>
+        <source>Identify selected feature</source>
+        <translation>選択した地物を識別</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/configuration_manager.py" line="696"/>
+        <source>Keep the map selection and the widgets in sync</source>
+        <translation>マップの選択とウィジェットを同期させる</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="131"/>
+        <source>Layer &apos;{0}&apos; is already optimally configured.
+Type: {1}
+Features: {2:,}</source>
+        <translation>レイヤー '{0}' はすでに最適に設定されています。
+タイプ: {1}
+地物: {2:,}</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/configuration_manager.py" line="698"/>
+        <source>Link exploring widgets together</source>
+        <translation>探索ウィジェットを連動させる</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="97"/>
+        <source>No layer selected. Please select a layer first.</source>
+        <translation>レイヤーが選択されていません。先にレイヤーを選択してください。</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="196"/>
+        <source>No optimizations selected to apply.</source>
+        <translation>適用する最適化が選択されていません。</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="231"/>
+        <source>Optimization settings saved</source>
+        <translation>最適化設定を保存しました</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="415"/>
+        <source>Optimized {0} layer(s)</source>
+        <translation>{0} 個のレイヤーを最適化しました</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/configuration_manager.py" line="699"/>
+        <source>Reset all layer exploring properties</source>
+        <translation>すべてのレイヤーの探索プロパティをリセット</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="297"/>
+        <source>The backend optimizations could not be configured. Details in filtermate.log.</source>
+        <translation>バックエンド最適化を設定できませんでした。詳細は filtermate.log を参照してください。</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="241"/>
+        <source>The optimization settings could not be saved. Details in filtermate.log.</source>
+        <translation>最適化設定を保存できませんでした。詳細は filtermate.log を参照してください。</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/configuration_manager.py" line="927"/>
+        <source>Use centroids instead of full geometries for distant layers</source>
+        <translation>遠くのレイヤーには完全なジオメトリの代わりに重心を使用</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/configuration_manager.py" line="695"/>
+        <source>Zoom to selected feature</source>
+        <translation>選択した地物にズーム</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="59"/>
+        <location filename="../ui/managers/optimization_manager.py" line="72"/>
+        <location filename="../ui/managers/optimization_manager.py" line="84"/>
+        <source>disabled</source>
+        <translation>無効</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="59"/>
+        <location filename="../ui/managers/optimization_manager.py" line="72"/>
+        <location filename="../ui/managers/optimization_manager.py" line="84"/>
+        <source>enabled</source>
+        <translation>有効</translation>
+    </message>
 </context>
 <context>
     <name>FilterMateDockWidgetBase</name>
@@ -4145,6 +4394,283 @@ Drop anyway?</source>
     </message>
 </context>
 <context>
+    <name>FilterMateGitBinary</name>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="309"/>
+        <source>All files (*)</source>
+        <translation>すべてのファイル (*)</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="191"/>
+        <source>Apply path</source>
+        <translation>パスを適用</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="180"/>
+        <source>Browse for git executable</source>
+        <translation>git 実行ファイルを参照</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="340"/>
+        <source>Cannot find a git binary. Configure a path or download Portable Git.</source>
+        <translation>git バイナリが見つかりません。パスを設定するか、Portable Git をダウンロードしてください。</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="392"/>
+        <source>Cannot resolve QGIS profile dir — try restarting QGIS.</source>
+        <translation>QGIS プロファイルのディレクトリを解決できません — QGIS を再起動してみてください。</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="184"/>
+        <source>Clear</source>
+        <translation>クリア</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="263"/>
+        <source>Configured path</source>
+        <translation>設定済みのパス</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="468"/>
+        <source>Could not delete the Portable Git directory. Check that no QGIS process is using it and retry.</source>
+        <translation>Portable Git のディレクトリを削除できませんでした。QGIS のプロセスが使用していないか確認して、再試行してください。</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="353"/>
+        <source>Could not execute {0}:
+{1}</source>
+        <translation>{0} を実行できませんでした:
+{1}</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="328"/>
+        <source>Could not persist git_binary_path to the extension config.</source>
+        <translation>git_binary_path を拡張機能の設定に保存できませんでした。</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="459"/>
+        <source>Delete the bundled Portable Git directory?</source>
+        <translation>同梱の Portable Git ディレクトリを削除しますか?</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="227"/>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="398"/>
+        <source>Download Portable Git</source>
+        <translation>Portable Git をダウンロード</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="451"/>
+        <source>Download failed</source>
+        <translation>ダウンロードに失敗しました</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="399"/>
+        <source>Download {0} (~50 MB) into:
+{1}
+
+Continue?</source>
+        <translation>{0} (約 50 MB) を次の場所にダウンロードします:
+{1}
+
+続行しますか?</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="410"/>
+        <source>Downloading…</source>
+        <translation>ダウンロード中…</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="430"/>
+        <source>Downloading… {0:.1f} / {1:.1f} MB</source>
+        <translation>ダウンロード中… {0:.1f} / {1:.1f} MB</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="435"/>
+        <source>Downloading… {0:.1f} MB</source>
+        <translation>ダウンロード中… {0:.1f} MB</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="172"/>
+        <source>Empty = auto-detect (portable → system PATH)</source>
+        <translation>空 = 自動検出 (ポータブル → システム PATH)</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="373"/>
+        <source>Exit {0}: {1}</source>
+        <translation>終了 {0}: {1}</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="321"/>
+        <source>File does not exist:
+{0}</source>
+        <translation>ファイルが存在しません:
+{0}</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="155"/>
+        <source>FilterMate uses &lt;b&gt;git&lt;/b&gt; to publish favorites to a remote repository. If git is not on your system PATH, configure an explicit path below or download a portable copy.</source>
+        <translation>FilterMate は &lt;b&gt;git&lt;/b&gt; を使ってお気に入りをリモートリポジトリに公開します。git がシステム PATH にない場合は、下で明示的にパスを設定するか、ポータブル版をダウンロードしてください。</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="147"/>
+        <source>FilterMate — Git Binary</source>
+        <translation>FilterMate — Git バイナリ</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="307"/>
+        <source>Git executable (git.exe);;All files (*.*)</source>
+        <translation>Git 実行ファイル (git.exe);;すべてのファイル (*.*)</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="443"/>
+        <source>Installation complete:
+{0}</source>
+        <translation>インストールが完了しました:
+{0}</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="320"/>
+        <source>Invalid path</source>
+        <translation>無効なパス</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="311"/>
+        <source>Locate git executable</source>
+        <translation>git 実行ファイルを指定</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="264"/>
+        <source>Portable (downloaded)</source>
+        <translation>ポータブル (ダウンロード済み)</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="211"/>
+        <source>Portable Git</source>
+        <translation>Portable Git</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="452"/>
+        <source>Portable Git could not be installed:
+
+{0}</source>
+        <translation>Portable Git をインストールできませんでした:
+
+{0}</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="442"/>
+        <source>Portable Git installed</source>
+        <translation>Portable Git をインストールしました</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="384"/>
+        <source>Portable Git is Windows-only. Install git via your package manager.</source>
+        <translation>Portable Git は Windows 専用です。パッケージマネージャーで git をインストールしてください。</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="391"/>
+        <source>Profile not initialized</source>
+        <translation>プロファイルが初期化されていません</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="231"/>
+        <source>Reinstall</source>
+        <translation>再インストール</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="467"/>
+        <source>Removal failed</source>
+        <translation>削除に失敗しました</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="235"/>
+        <source>Remove</source>
+        <translation>削除</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="458"/>
+        <source>Remove Portable Git</source>
+        <translation>Portable Git を削除</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="196"/>
+        <source>Run &apos;git --version&apos; against the resolved binary</source>
+        <translation>解決されたバイナリに対して 'git --version' を実行</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="327"/>
+        <source>Save failed</source>
+        <translation>保存に失敗</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="265"/>
+        <source>System PATH</source>
+        <translation>システム PATH</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="195"/>
+        <source>Test</source>
+        <translation>テスト</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="365"/>
+        <source>Test OK</source>
+        <translation>テスト OK</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="352"/>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="358"/>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="372"/>
+        <source>Test failed</source>
+        <translation>テスト失敗</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="383"/>
+        <source>Unsupported platform</source>
+        <translation>サポートされていないプラットフォーム</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="212"/>
+        <source>download a self-contained git ({0}, no admin rights needed) into the QGIS profile.</source>
+        <translation>自己完結型の git ({0}、管理者権限は不要) を QGIS プロファイルにダウンロードします。</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="359"/>
+        <source>git --version timed out after 10 s.</source>
+        <translation>git --version が 10 秒後にタイムアウトしました。</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="274"/>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="339"/>
+        <source>git not found</source>
+        <translation>git が見つかりません</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="286"/>
+        <source>installed</source>
+        <translation>インストール済み</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="294"/>
+        <source>not installed</source>
+        <translation>未インストール</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="276"/>
+        <source>set a path below or download Portable Git.</source>
+        <translation>下でパスを設定するか、Portable Git をダウンロードしてください。</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="366"/>
+        <source>{0}
+
+Resolved from: {1}</source>
+        <translation>{0}
+
+解決元: {1}</translation>
+    </message>
+</context>
+<context>
     <name>FilterMateOperations</name>
     <message>
         <location filename="../adapters/public_api/operations.py" line="639"/>
@@ -4170,6 +4696,269 @@ Drop anyway?</source>
         <location filename="../adapters/public_api/operations.py" line="643"/>
         <source>source changed while the filter was running: nothing was applied</source>
         <translation>フィルタの実行中にソースが変更されました: 何も適用されていません</translation>
+    </message>
+</context>
+<context>
+    <name>FilterMateRepoManager</name>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="561"/>
+        <source> — Test connection and Publish will fail until this is configured.</source>
+        <translation> — これを設定するまで、接続テストと公開は失敗します。</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="355"/>
+        <source>&lt;b&gt;Remote Repos&lt;/b&gt; — git-backed publish targets for favorite collections. Anonymous read access is supported; only publishers need credentials.</source>
+        <translation>&lt;b&gt;リモートリポジトリ&lt;/b&gt; — お気に入りコレクションの git ベースの公開先です。匿名での読み取りに対応しており、認証情報が必要なのは公開する人だけです。</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="296"/>
+        <source>A repo name is required.</source>
+        <translation>リポジトリ名は必須です。</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="303"/>
+        <source>A repo named &apos;{0}&apos; already exists.</source>
+        <translation>'{0}' という名前のリポジトリはすでに存在します。</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="400"/>
+        <source>Add</source>
+        <translation>追加</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="90"/>
+        <source>Add Remote Repo</source>
+        <translation>リモートリポジトリを追加</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="381"/>
+        <source>Auth</source>
+        <translation>認証</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="152"/>
+        <source>Auth config id:</source>
+        <translation>認証設定 ID:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="144"/>
+        <source>Authentication:</source>
+        <translation>認証:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="380"/>
+        <source>Branch</source>
+        <translation>ブランチ</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="119"/>
+        <source>Branch:</source>
+        <translation>ブランチ:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="233"/>
+        <source>Choose local clone directory</source>
+        <translation>ローカルクローンのディレクトリを選択</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="381"/>
+        <source>Collection</source>
+        <translation>コレクション</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="137"/>
+        <source>Collection:</source>
+        <translation>コレクション:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="98"/>
+        <source>Configure a git-backed publish target. Anonymous repos can leave Authentication empty — only publishers need credentials.</source>
+        <translation>git ベースの公開先を設定します。匿名リポジトリでは認証を空のままにできます — 認証情報が必要なのは公開する人だけです。</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="369"/>
+        <source>Configure git…</source>
+        <translation>git を設定…</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="526"/>
+        <source>Could not persist repos to FilterMate config. Check the QGIS log for details.</source>
+        <translation>リポジトリを FilterMate の設定に保存できませんでした。詳細は QGIS のログを確認してください。</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="381"/>
+        <source>Default</source>
+        <translation>既定</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="408"/>
+        <source>Delete</source>
+        <translation>削除</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="499"/>
+        <source>Delete repo</source>
+        <translation>リポジトリを削除</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="110"/>
+        <source>Display name (e.g. Acme team)</source>
+        <translation>表示名 (例: Acme チーム)</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="302"/>
+        <source>Duplicate name</source>
+        <translation>名前が重複しています</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="89"/>
+        <source>Edit Remote Repo</source>
+        <translation>リモートリポジトリを編集</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="404"/>
+        <source>Edit…</source>
+        <translation>編集…</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="123"/>
+        <source>Empty = [profile]/FilterMate/repos/&lt;slug&gt;</source>
+        <translation>空 = [プロファイル]/FilterMate/repos/&lt;slug&gt;</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="347"/>
+        <source>FilterMate — Manage Remote Repos</source>
+        <translation>FilterMate — リモートリポジトリの管理</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="115"/>
+        <source>Git URL:</source>
+        <translation>Git URL:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="131"/>
+        <source>Local clone:</source>
+        <translation>ローカルクローン:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="295"/>
+        <source>Missing name</source>
+        <translation>名前がありません</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="380"/>
+        <source>Name</source>
+        <translation>名前</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="111"/>
+        <source>Name *:</source>
+        <translation>名前 *:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="242"/>
+        <source>No manager wired — cannot test.</source>
+        <translation>マネージャーが接続されていません — テストできません。</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="271"/>
+        <source>OK — local-only target (path is writable).</source>
+        <translation>OK — ローカル専用の公開先です (パスは書き込み可能)。</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="273"/>
+        <source>OK — remote reachable.</source>
+        <translation>OK — リモートに到達できます。</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="149"/>
+        <source>QGIS authcfg_id (Settings → Options → Authentication)</source>
+        <translation>QGIS の authcfg_id (設定 → オプション → 認証)</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="500"/>
+        <source>Remove &apos;{0}&apos; from the configured repos?</source>
+        <translation>設定済みのリポジトリから '{0}' を削除しますか?</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="525"/>
+        <source>Save failed</source>
+        <translation>保存に失敗</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="250"/>
+        <source>Set a name first.</source>
+        <translation>先に名前を設定してください。</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="370"/>
+        <source>Set an explicit git binary path or download Portable Git.</source>
+        <translation>git バイナリのパスを明示的に設定するか、Portable Git をダウンロードしてください。</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="412"/>
+        <source>Set as default</source>
+        <translation>既定にする</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="381"/>
+        <source>Status</source>
+        <translation>状態</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="134"/>
+        <source>Sub-directory under collections/ (empty = repo root)</source>
+        <translation>collections/ 以下のサブディレクトリ (空 = リポジトリのルート)</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="163"/>
+        <source>Test connection</source>
+        <translation>接続テスト</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="261"/>
+        <source>Testing…</source>
+        <translation>テスト中…</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="380"/>
+        <source>URL</source>
+        <translation>URL</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="154"/>
+        <source>Use as default publish target</source>
+        <translation>既定の公開先として使用</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="548"/>
+        <source>configured path</source>
+        <translation>設定済みのパス</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="559"/>
+        <source>git not found</source>
+        <translation>git が見つかりません</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="114"/>
+        <source>https://github.com/org/repo.git</source>
+        <translation>https://github.com/org/repo.git</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="118"/>
+        <source>main / master / … (empty = default)</source>
+        <translation>main / master / … (空 = 既定)</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="549"/>
+        <source>portable</source>
+        <translation>ポータブル</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="550"/>
+        <source>system PATH</source>
+        <translation>システム PATH</translation>
     </message>
 </context>
 <context>
@@ -4295,6 +5084,14 @@ Drop anyway?</source>
         <location filename="../ui/widgets/json_view/model.py" line="54"/>
         <source>Value</source>
         <translation>値</translation>
+    </message>
+</context>
+<context>
+    <name>LayerExporter</name>
+    <message>
+        <location filename="../core/export/layer_exporter.py" line="525"/>
+        <source>Cannot export to &apos;{path}&apos;: this file is the data source of the layer &apos;{layer}&apos; of the project and would be overwritten. Choose another file.</source>
+        <translation>'{path}' にエクスポートできません: このファイルはプロジェクトのレイヤー '{layer}' のデータソースであり、上書きされてしまいます。別のファイルを選択してください。</translation>
     </message>
 </context>
 <context>
@@ -4520,6 +5317,24 @@ PostgreSQLテーブルにPRIMARY KEYが定義されていることを確認し�
         <location filename="../ui/dialogs/optimization_dialog.py" line="344"/>
         <source>OGR (Shapefiles, GeoPackage)</source>
         <translation>OGR (Shapefiles, GeoPackage)</translation>
+    </message>
+</context>
+<context>
+    <name>OptimizationManager</name>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="178"/>
+        <source>Reduce buffer segments (3)</source>
+        <translation>バッファのセグメントを減らす (3)</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="176"/>
+        <source>Simplify before buffer</source>
+        <translation>バッファの前に簡略化</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="174"/>
+        <source>Use Centroids</source>
+        <translation>重心を使用</translation>
     </message>
 </context>
 <context>

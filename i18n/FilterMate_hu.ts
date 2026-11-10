@@ -28,6 +28,21 @@
         <source>Manage Resource Sharing repos...</source>
         <translation>Resource Sharing tárolók kezelése...</translation>
     </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="173"/>
+        <source>OptimizationManager</source>
+        <translation>OptimizationManager</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="175"/>
+        <source>OptimizationManager</source>
+        <translation>OptimizationManager</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="177"/>
+        <source>OptimizationManager</source>
+        <translation>OptimizationManager</translation>
+    </message>
 </context>
 <context>
     <name>AgentChat</name>
@@ -1929,22 +1944,22 @@ Elfogadja?</translation>
 <context>
     <name>DockChrome</name>
     <message>
-        <location filename="../ui/layout/dock_chrome.py" line="232"/>
+        <location filename="../ui/layout/dock_chrome.py" line="288"/>
         <source>Hide EXPLORING to give room to the sections</source>
         <translation>EXPLORING elrejtése, hogy több hely jusson a szakaszoknak</translation>
     </message>
     <message>
-        <location filename="../ui/layout/dock_chrome.py" line="233"/>
+        <location filename="../ui/layout/dock_chrome.py" line="289"/>
         <source>Show EXPLORING</source>
         <translation>EXPLORING megjelenítése</translation>
     </message>
     <message>
-        <location filename="../ui/layout/dock_chrome.py" line="51"/>
+        <location filename="../ui/layout/dock_chrome.py" line="117"/>
         <source>Close</source>
         <translation>Bezárás</translation>
     </message>
     <message>
-        <location filename="../ui/layout/dock_chrome.py" line="48"/>
+        <location filename="../ui/layout/dock_chrome.py" line="115"/>
         <source>Detach or dock the panel</source>
         <translation>Panel leválasztása vagy rögzítése</translation>
     </message>
@@ -2115,79 +2130,79 @@ Nem = Összes meglévő cseréje</translation>
         <translation>Hiba: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="775"/>
+        <location filename="../ui/controllers/favorites_menu_builder.py" line="203"/>
         <source>Used {0} times</source>
-        <translation type="obsolete">{0} alkalommal használva</translation>
+        <translation>{0} alkalommal használva</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="786"/>
+        <location filename="../ui/controllers/favorites_menu_builder.py" line="217"/>
         <source>Add current filter to favorites</source>
-        <translation type="obsolete">Jelenlegi szűrő hozzáadása a kedvencekhez</translation>
+        <translation>Jelenlegi szűrő hozzáadása a kedvencekhez</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="790"/>
+        <location filename="../ui/controllers/favorites_menu_builder.py" line="221"/>
         <source>Add filter (no active filter)</source>
-        <translation type="obsolete">Szűrő hozzáadása (nincs aktív szűrő)</translation>
+        <translation>Szűrő hozzáadása (nincs aktív szűrő)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="795"/>
+        <location filename="../ui/controllers/favorites_menu_builder.py" line="227"/>
         <source>Manage favorites...</source>
-        <translation type="obsolete">Kedvencek kezelése...</translation>
+        <translation>Kedvencek kezelése...</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="798"/>
+        <location filename="../ui/controllers/favorites_menu_builder.py" line="230"/>
         <source>Export...</source>
-        <translation type="obsolete">Exportálás...</translation>
+        <translation>Exportálás...</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="801"/>
+        <location filename="../ui/controllers/favorites_menu_builder.py" line="233"/>
         <source>Import...</source>
-        <translation type="obsolete">Importálás...</translation>
+        <translation>Importálás...</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="822"/>
+        <location filename="../ui/controllers/favorites_menu_builder.py" line="259"/>
         <source>Global favorites</source>
-        <translation type="obsolete">Globális kedvencek</translation>
+        <translation>Globális kedvencek</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="826"/>
+        <location filename="../ui/controllers/favorites_menu_builder.py" line="262"/>
         <source>Copy to global...</source>
-        <translation type="obsolete">Másolás globálisba...</translation>
+        <translation>Másolás globálisba...</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="837"/>
+        <location filename="../ui/controllers/favorites_menu_builder.py" line="272"/>
         <source>── Available global favorites ──</source>
-        <translation type="obsolete">── Elérhető globális kedvencek ──</translation>
+        <translation>── Elérhető globális kedvencek ──</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="845"/>
+        <location filename="../ui/controllers/favorites_menu_builder.py" line="282"/>
         <source>(No global favorites)</source>
-        <translation type="obsolete">(Nincsenek globális kedvencek)</translation>
+        <translation>(Nincsenek globális kedvencek)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="849"/>
+        <location filename="../ui/controllers/favorites_menu_builder.py" line="288"/>
         <source>Maintenance</source>
-        <translation type="obsolete">Karbantartás</translation>
+        <translation>Karbantartás</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="851"/>
+        <location filename="../ui/controllers/favorites_menu_builder.py" line="290"/>
         <source>Save to project (.qgz)</source>
-        <translation type="obsolete">Mentés projektbe (.qgz)</translation>
+        <translation>Mentés projektbe (.qgz)</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="854"/>
+        <location filename="../ui/controllers/favorites_menu_builder.py" line="293"/>
         <source>Restore from project</source>
-        <translation type="obsolete">Visszaállítás projektből</translation>
+        <translation>Visszaállítás projektből</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="859"/>
+        <location filename="../ui/controllers/favorites_menu_builder.py" line="298"/>
         <source>Clean up orphan projects</source>
-        <translation type="obsolete">Árva projektek eltávolítása</translation>
+        <translation>Árva projektek eltávolítása</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="862"/>
+        <location filename="../ui/controllers/favorites_menu_builder.py" line="301"/>
         <source>Database statistics</source>
-        <translation type="obsolete">Adatbázis statisztikák</translation>
+        <translation>Adatbázis statisztikák</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="909"/>
@@ -2327,29 +2342,32 @@ Alkalmazzon egy szűrőt egy rétegre, majd kattintson a ★ jelzőre, és vála
         <translation>A FilterMate konfigurációs mappa még nincs inicializálva — először nyisson meg egy QGIS projektet a FilterMate-tel.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1714"/>
+        <location filename="../ui/controllers/favorites_extension_bridge.py" line="138"/>
+        <location filename="../ui/controllers/favorites_extension_bridge.py" line="179"/>
+        <location filename="../ui/controllers/favorites_extension_bridge.py" line="219"/>
         <source>Resource Sharing extension is not active. Enable &apos;favorites_sharing&apos; in FilterMate settings.</source>
-        <translation type="obsolete">A Resource Sharing bővítmény nincs aktiválva. Kapcsolja be a 'favorites_sharing' opciót a FilterMate beállításaiban.</translation>
+        <translation>A Resource Sharing bővítmény nincs aktiválva. Kapcsolja be a 'favorites_sharing' opciót a FilterMate beállításaiban.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1722"/>
+        <location filename="../ui/controllers/favorites_extension_bridge.py" line="146"/>
+        <location filename="../ui/controllers/favorites_extension_bridge.py" line="187"/>
         <source>Shared favorites service is not available.</source>
-        <translation type="obsolete">A megosztott kedvencek szolgáltatás nem érhető el.</translation>
+        <translation>A megosztott kedvencek szolgáltatás nem érhető el.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1708"/>
+        <location filename="../ui/controllers/favorites_extension_bridge.py" line="161"/>
         <source>Shared picker failed: {0}</source>
-        <translation type="obsolete">A megosztott kedvencek választója nem sikerült: {0}</translation>
+        <translation>A megosztott kedvencek választója nem sikerült: {0}</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1726"/>
+        <location filename="../ui/controllers/favorites_extension_bridge.py" line="191"/>
         <source>You have no favorites to publish yet. Save a filter via the ★ menu first.</source>
-        <translation type="obsolete">Még nincsenek közzétehető kedvencei. Először mentsen el egy szűrőt a ★ menüből.</translation>
+        <translation>Még nincsenek közzétehető kedvencei. Először mentsen el egy szűrőt a ★ menüből.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/favorites_controller.py" line="1742"/>
+        <location filename="../ui/controllers/favorites_extension_bridge.py" line="212"/>
         <source>Publish dialog failed: {0}</source>
-        <translation type="obsolete">A közzétételi ablak megnyitása nem sikerült: {0}</translation>
+        <translation>A közzétételi ablak megnyitása nem sikerült: {0}</translation>
     </message>
     <message>
         <location filename="../ui/controllers/favorites_controller.py" line="388"/>
@@ -2405,6 +2423,76 @@ Alkalmazzon egy szűrőt egy rétegre, majd kattintson a ★ jelzőre, és vála
         <location filename="../ui/controllers/favorites_controller.py" line="1205"/>
         <source>Database statistics are unavailable. Details in filtermate.log.</source>
         <translation>Az adatbázis-statisztikák nem érhetők el. Részletek a filtermate.log fájlban.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_extension_bridge.py" line="347"/>
+        <source>Bundle unchanged — nothing to commit.</source>
+        <translation>A csomag változatlan — nincs mit commitolni.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_spatial_handler.py" line="866"/>
+        <source>Favorite &apos;{0}&apos; could not be applied: no layer matched the saved source / targets.</source>
+        <translation>A(z) „{0}” kedvenc nem alkalmazható: egyetlen réteg sem felelt meg a mentett forrásnak / céloknak.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_spatial_handler.py" line="133"/>
+        <source>Favorite '{0}' was missing predicate info — defaulting to 'Intersect'. Re-save it after adjusting if you need a different predicate.</source>
+        <translation>A(z) „{0}” kedvenc predikátuminformációja hiányzott — alapértelmezetten „Intersect” lesz. Ha másik predikátum kell, a módosítás után mentse újra.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_extension_bridge.py" line="259"/>
+        <source>No default repo is configured. Open 'Manage Resource Sharing repos…' to add one and mark it as default.</source>
+        <translation>Nincs alapértelmezett tárhely beállítva. Nyissa meg a „Resource Sharing tárhelyek kezelése…” menüpontot, adjon hozzá egyet, és jelölje meg alapértelmezettként.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_extension_bridge.py" line="265"/>
+        <source>No favorites to publish.</source>
+        <translation>Nincs közzétehető kedvenc.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_extension_bridge.py" line="286"/>
+        <source>Publish {0} favorite(s) to &lt;b&gt;{1}&lt;/b&gt;?&lt;br&gt;&lt;br&gt;&lt;small&gt;Target: &lt;code&gt;{2}&lt;/code&gt;&lt;/small&gt;</source>
+        <translation>Közzétesz {0} kedvencet ide: &lt;b&gt;{1}&lt;/b&gt;?&lt;br&gt;&lt;br&gt;&lt;small&gt;Cél: &lt;code&gt;{2}&lt;/code&gt;&lt;/small&gt;</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_extension_bridge.py" line="343"/>
+        <source>Published {0} favorite(s) to {1} (commit {2}).</source>
+        <translation>{0} kedvenc közzétéve ide: {1} (commit {2}).</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_extension_bridge.py" line="285"/>
+        <source>Quick publish</source>
+        <translation>Gyors közzététel</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_extension_bridge.py" line="337"/>
+        <source>Quick publish to {0} failed: {1}</source>
+        <translation>A gyors közzététel ide: {0} sikertelen: {1}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_extension_bridge.py" line="226"/>
+        <source>Remote repo manager is not available.</source>
+        <translation>A távoli tárhelykezelő nem érhető el.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_extension_bridge.py" line="234"/>
+        <source>Repo manager failed: {0}</source>
+        <translation>A tárhelykezelő hibája: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_extension_bridge.py" line="246"/>
+        <source>Resource Sharing extension is not active.</source>
+        <translation>A Resource Sharing bővítmény nincs aktiválva.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_extension_bridge.py" line="253"/>
+        <source>Resource Sharing services are not available.</source>
+        <translation>A Resource Sharing szolgáltatások nem érhetők el.</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/favorites_extension_bridge.py" line="351"/>
+        <source>Wrote bundle locally — push manually.</source>
+        <translation>A csomag helyben megírva — a push-t végezze el kézzel.</translation>
     </message>
 </context>
 <context>
@@ -3970,6 +4058,167 @@ Mégis törli?</translation>
         <source>The filter was not launched: its selection changed or could not be read. Click Filter again.</source>
         <translation>A szűrés nem indult el: a kijelölése megváltozott, vagy nem volt olvasható. Kattintson újra a Szűrés gombra.</translation>
     </message>
+    <message>
+        <location filename="../ui/managers/configuration_manager.py" line="870"/>
+        <source>Type to find a layer</source>
+        <translation>Írjon a réteg kereséséhez</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="420"/>
+        <source>All layers using auto-selection</source>
+        <translation>Az összes automatikus kijelölést használó réteg</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="191"/>
+        <source>Applied to &apos;{0}&apos;:
+{1}</source>
+        <translation>Alkalmazva ide: „{0}”:
+{1}</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="71"/>
+        <source>Auto-centroid {0}</source>
+        <translation>Auto-centroid {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="58"/>
+        <source>Auto-optimization {0}</source>
+        <translation>Automatikus optimalizálás {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="104"/>
+        <source>Auto-optimizer module not available</source>
+        <translation>Az automatikus optimalizáló modul nem érhető el</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="158"/>
+        <source>Auto-optimizer not available: {0}</source>
+        <translation>Az automatikus optimalizáló nem érhető el: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/configuration_manager.py" line="697"/>
+        <source>Auto-zoom when feature changes</source>
+        <translation>Automatikus nagyítás elemváltáskor</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="258"/>
+        <source>Backend optimization settings saved</source>
+        <translation>A háttérrendszer-optimalizálás beállításai mentve</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="429"/>
+        <source>Backend optimization unavailable</source>
+        <translation>A háttérrendszer-optimalizálás nem érhető el</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="287"/>
+        <source>Backend optimizations configured</source>
+        <translation>A háttérrendszer-optimalizálások beállítva</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="83"/>
+        <source>Confirmation {0}</source>
+        <translation>Megerősítés {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="110"/>
+        <source>Could not analyze layer &apos;{0}&apos;</source>
+        <translation>A(z) „{0}” réteg nem elemezhető</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="235"/>
+        <location filename="../ui/managers/optimization_manager.py" line="291"/>
+        <source>Dialog not available: {0}</source>
+        <translation>A párbeszédablak nem érhető el: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="163"/>
+        <source>Error analyzing layer: {0}</source>
+        <translation>Hiba a réteg elemzésekor: {0}</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/configuration_manager.py" line="694"/>
+        <source>Identify selected feature</source>
+        <translation>Kijelölt elem azonosítása</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/configuration_manager.py" line="696"/>
+        <source>Keep the map selection and the widgets in sync</source>
+        <translation>A térképkijelölés és a vezérlők szinkronban tartása</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="131"/>
+        <source>Layer &apos;{0}&apos; is already optimally configured.
+Type: {1}
+Features: {2:,}</source>
+        <translation>A(z) „{0}” réteg már optimálisan van beállítva.
+Típus: {1}
+Elemek: {2:,}</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/configuration_manager.py" line="698"/>
+        <source>Link exploring widgets together</source>
+        <translation>A felfedező vezérlők összekapcsolása</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="97"/>
+        <source>No layer selected. Please select a layer first.</source>
+        <translation>Nincs réteg kiválasztva. Először válasszon egy réteget.</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="196"/>
+        <source>No optimizations selected to apply.</source>
+        <translation>Nincs alkalmazandó optimalizálás kiválasztva.</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="231"/>
+        <source>Optimization settings saved</source>
+        <translation>Az optimalizálási beállítások mentve</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="415"/>
+        <source>Optimized {0} layer(s)</source>
+        <translation>{0} réteg optimalizálva</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/configuration_manager.py" line="699"/>
+        <source>Reset all layer exploring properties</source>
+        <translation>Az összes réteg felfedezési tulajdonságának visszaállítása</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="297"/>
+        <source>The backend optimizations could not be configured. Details in filtermate.log.</source>
+        <translation>A háttérrendszer-optimalizálások nem állíthatók be. Részletek a filtermate.log fájlban.</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="241"/>
+        <source>The optimization settings could not be saved. Details in filtermate.log.</source>
+        <translation>Az optimalizálási beállítások nem menthetők. Részletek a filtermate.log fájlban.</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/configuration_manager.py" line="927"/>
+        <source>Use centroids instead of full geometries for distant layers</source>
+        <translation>Centroidok használata a teljes geometriák helyett a távoli rétegeknél</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/configuration_manager.py" line="695"/>
+        <source>Zoom to selected feature</source>
+        <translation>Nagyítás a kijelölt elemre</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="59"/>
+        <location filename="../ui/managers/optimization_manager.py" line="72"/>
+        <location filename="../ui/managers/optimization_manager.py" line="84"/>
+        <source>disabled</source>
+        <translation>letiltva</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="59"/>
+        <location filename="../ui/managers/optimization_manager.py" line="72"/>
+        <location filename="../ui/managers/optimization_manager.py" line="84"/>
+        <source>enabled</source>
+        <translation>engedélyezve</translation>
+    </message>
 </context>
 <context>
     <name>FilterMateDockWidgetBase</name>
@@ -4145,6 +4394,283 @@ Mégis törli?</translation>
     </message>
 </context>
 <context>
+    <name>FilterMateGitBinary</name>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="309"/>
+        <source>All files (*)</source>
+        <translation>Minden fájl (*)</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="191"/>
+        <source>Apply path</source>
+        <translation>Útvonal alkalmazása</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="180"/>
+        <source>Browse for git executable</source>
+        <translation>A git végrehajtható fájl tallózása</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="340"/>
+        <source>Cannot find a git binary. Configure a path or download Portable Git.</source>
+        <translation>A git bináris nem található. Adjon meg útvonalat, vagy töltse le a Portable Git-et.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="392"/>
+        <source>Cannot resolve QGIS profile dir — try restarting QGIS.</source>
+        <translation>A QGIS profilkönyvtára nem állapítható meg — próbálja újraindítani a QGIS-t.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="184"/>
+        <source>Clear</source>
+        <translation>Kiürítés</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="263"/>
+        <source>Configured path</source>
+        <translation>Beállított útvonal</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="468"/>
+        <source>Could not delete the Portable Git directory. Check that no QGIS process is using it and retry.</source>
+        <translation>A Portable Git könyvtár nem törölhető. Ellenőrizze, hogy egyetlen QGIS-folyamat sem használja, majd próbálja újra.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="353"/>
+        <source>Could not execute {0}:
+{1}</source>
+        <translation>A(z) {0} nem hajtható végre:
+{1}</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="328"/>
+        <source>Could not persist git_binary_path to the extension config.</source>
+        <translation>A git_binary_path nem menthető a bővítmény konfigurációjába.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="459"/>
+        <source>Delete the bundled Portable Git directory?</source>
+        <translation>Törli a csomagolt Portable Git könyvtárat?</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="227"/>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="398"/>
+        <source>Download Portable Git</source>
+        <translation>Portable Git letöltése</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="451"/>
+        <source>Download failed</source>
+        <translation>A letöltés sikertelen</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="399"/>
+        <source>Download {0} (~50 MB) into:
+{1}
+
+Continue?</source>
+        <translation>Letölti a(z) {0} (~50 MB) ide:
+{1}
+
+Folytatja?</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="410"/>
+        <source>Downloading…</source>
+        <translation>Letöltés…</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="430"/>
+        <source>Downloading… {0:.1f} / {1:.1f} MB</source>
+        <translation>Letöltés… {0:.1f} / {1:.1f} MB</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="435"/>
+        <source>Downloading… {0:.1f} MB</source>
+        <translation>Letöltés… {0:.1f} MB</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="172"/>
+        <source>Empty = auto-detect (portable → system PATH)</source>
+        <translation>Üres = automatikus észlelés (hordozható → rendszer PATH)</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="373"/>
+        <source>Exit {0}: {1}</source>
+        <translation>Kilépés {0}: {1}</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="321"/>
+        <source>File does not exist:
+{0}</source>
+        <translation>A fájl nem létezik:
+{0}</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="155"/>
+        <source>FilterMate uses &lt;b&gt;git&lt;/b&gt; to publish favorites to a remote repository. If git is not on your system PATH, configure an explicit path below or download a portable copy.</source>
+        <translation>A FilterMate a &lt;b&gt;git&lt;/b&gt;-et használja a kedvencek távoli tárhelyre közzétételéhez. Ha a git nincs a rendszer PATH-ában, adjon meg alább egy explicit útvonalat, vagy töltsön le egy hordozható másolatot.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="147"/>
+        <source>FilterMate — Git Binary</source>
+        <translation>FilterMate — Git bináris</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="307"/>
+        <source>Git executable (git.exe);;All files (*.*)</source>
+        <translation>Git végrehajtható fájl (git.exe);;Minden fájl (*.*)</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="443"/>
+        <source>Installation complete:
+{0}</source>
+        <translation>A telepítés kész:
+{0}</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="320"/>
+        <source>Invalid path</source>
+        <translation>Érvénytelen útvonal</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="311"/>
+        <source>Locate git executable</source>
+        <translation>A git végrehajtható fájl megkeresése</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="264"/>
+        <source>Portable (downloaded)</source>
+        <translation>Hordozható (letöltött)</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="211"/>
+        <source>Portable Git</source>
+        <translation>Portable Git</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="452"/>
+        <source>Portable Git could not be installed:
+
+{0}</source>
+        <translation>A Portable Git nem telepíthető:
+
+{0}</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="442"/>
+        <source>Portable Git installed</source>
+        <translation>A Portable Git telepítve</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="384"/>
+        <source>Portable Git is Windows-only. Install git via your package manager.</source>
+        <translation>A Portable Git csak Windowson érhető el. Telepítse a git-et a csomagkezelővel.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="391"/>
+        <source>Profile not initialized</source>
+        <translation>A profil nincs inicializálva</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="231"/>
+        <source>Reinstall</source>
+        <translation>Újratelepítés</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="467"/>
+        <source>Removal failed</source>
+        <translation>Az eltávolítás sikertelen</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="235"/>
+        <source>Remove</source>
+        <translation>Eltávolítás</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="458"/>
+        <source>Remove Portable Git</source>
+        <translation>Portable Git eltávolítása</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="196"/>
+        <source>Run &apos;git --version&apos; against the resolved binary</source>
+        <translation>A „git --version” futtatása a feloldott binárison</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="327"/>
+        <source>Save failed</source>
+        <translation>A mentés sikertelen</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="265"/>
+        <source>System PATH</source>
+        <translation>Rendszer PATH</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="195"/>
+        <source>Test</source>
+        <translation>Teszt</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="365"/>
+        <source>Test OK</source>
+        <translation>Teszt rendben</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="352"/>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="358"/>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="372"/>
+        <source>Test failed</source>
+        <translation>A teszt sikertelen</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="383"/>
+        <source>Unsupported platform</source>
+        <translation>Nem támogatott platform</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="212"/>
+        <source>download a self-contained git ({0}, no admin rights needed) into the QGIS profile.</source>
+        <translation>önálló git letöltése ({0}, nem kell rendszergazdai jog) a QGIS-profilba.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="359"/>
+        <source>git --version timed out after 10 s.</source>
+        <translation>A git --version 10 s után időtúllépést szenvedett.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="274"/>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="339"/>
+        <source>git not found</source>
+        <translation>a git nem található</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="286"/>
+        <source>installed</source>
+        <translation>telepítve</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="294"/>
+        <source>not installed</source>
+        <translation>nincs telepítve</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="276"/>
+        <source>set a path below or download Portable Git.</source>
+        <translation>adjon meg alább egy útvonalat, vagy töltse le a Portable Git-et.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/git_binary_dialog.py" line="366"/>
+        <source>{0}
+
+Resolved from: {1}</source>
+        <translation>{0}
+
+Feloldva innen: {1}</translation>
+    </message>
+</context>
+<context>
     <name>FilterMateOperations</name>
     <message>
         <location filename="../adapters/public_api/operations.py" line="639"/>
@@ -4170,6 +4696,269 @@ Mégis törli?</translation>
         <location filename="../adapters/public_api/operations.py" line="643"/>
         <source>source changed while the filter was running: nothing was applied</source>
         <translation>a forrás megváltozott a szűrés közben: semmi sem lett alkalmazva</translation>
+    </message>
+</context>
+<context>
+    <name>FilterMateRepoManager</name>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="561"/>
+        <source> — Test connection and Publish will fail until this is configured.</source>
+        <translation> — A kapcsolat tesztelése és a közzététel sikertelen lesz, amíg ez nincs beállítva.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="355"/>
+        <source>&lt;b&gt;Remote Repos&lt;/b&gt; — git-backed publish targets for favorite collections. Anonymous read access is supported; only publishers need credentials.</source>
+        <translation>&lt;b&gt;Távoli tárhelyek&lt;/b&gt; — git-alapú közzétételi célok a kedvenc-gyűjteményekhez. A névtelen olvasás támogatott; hitelesítő adatok csak a közzétevőknek kellenek.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="296"/>
+        <source>A repo name is required.</source>
+        <translation>A tárhely neve kötelező.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="303"/>
+        <source>A repo named &apos;{0}&apos; already exists.</source>
+        <translation>Már létezik „{0}” nevű tárhely.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="400"/>
+        <source>Add</source>
+        <translation>Hozzáadás</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="90"/>
+        <source>Add Remote Repo</source>
+        <translation>Távoli tárhely hozzáadása</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="381"/>
+        <source>Auth</source>
+        <translation>Hitelesítés</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="152"/>
+        <source>Auth config id:</source>
+        <translation>Hitelesítési konfiguráció azonosítója:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="144"/>
+        <source>Authentication:</source>
+        <translation>Hitelesítés:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="380"/>
+        <source>Branch</source>
+        <translation>Ág</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="119"/>
+        <source>Branch:</source>
+        <translation>Ág:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="233"/>
+        <source>Choose local clone directory</source>
+        <translation>Helyi klón könyvtárának kiválasztása</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="381"/>
+        <source>Collection</source>
+        <translation>Gyűjtemény</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="137"/>
+        <source>Collection:</source>
+        <translation>Gyűjtemény:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="98"/>
+        <source>Configure a git-backed publish target. Anonymous repos can leave Authentication empty — only publishers need credentials.</source>
+        <translation>Git-alapú közzétételi cél beállítása. Névtelen tárhelyeknél a Hitelesítés üresen hagyható — hitelesítő adatok csak a közzétevőknek kellenek.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="369"/>
+        <source>Configure git…</source>
+        <translation>Git beállítása…</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="526"/>
+        <source>Could not persist repos to FilterMate config. Check the QGIS log for details.</source>
+        <translation>A tárhelyek nem menthetők a FilterMate konfigurációjába. Részletek a QGIS naplóban.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="381"/>
+        <source>Default</source>
+        <translation>Alapértelmezett</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="408"/>
+        <source>Delete</source>
+        <translation>Törlés</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="499"/>
+        <source>Delete repo</source>
+        <translation>Tárhely törlése</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="110"/>
+        <source>Display name (e.g. Acme team)</source>
+        <translation>Megjelenített név (pl. Acme csapat)</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="302"/>
+        <source>Duplicate name</source>
+        <translation>Ismétlődő név</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="89"/>
+        <source>Edit Remote Repo</source>
+        <translation>Távoli tárhely szerkesztése</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="404"/>
+        <source>Edit…</source>
+        <translation>Szerkesztés…</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="123"/>
+        <source>Empty = [profile]/FilterMate/repos/&lt;slug&gt;</source>
+        <translation>Üres = [profil]/FilterMate/repos/&lt;slug&gt;</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="347"/>
+        <source>FilterMate — Manage Remote Repos</source>
+        <translation>FilterMate — Távoli tárhelyek kezelése</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="115"/>
+        <source>Git URL:</source>
+        <translation>Git URL:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="131"/>
+        <source>Local clone:</source>
+        <translation>Helyi klón:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="295"/>
+        <source>Missing name</source>
+        <translation>Hiányzó név</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="380"/>
+        <source>Name</source>
+        <translation>Név</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="111"/>
+        <source>Name *:</source>
+        <translation>Név *:</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="242"/>
+        <source>No manager wired — cannot test.</source>
+        <translation>Nincs kezelő csatlakoztatva — nem tesztelhető.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="271"/>
+        <source>OK — local-only target (path is writable).</source>
+        <translation>OK — csak helyi cél (az útvonal írható).</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="273"/>
+        <source>OK — remote reachable.</source>
+        <translation>OK — a távoli tárhely elérhető.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="149"/>
+        <source>QGIS authcfg_id (Settings → Options → Authentication)</source>
+        <translation>QGIS authcfg_id (Beállítások → Opciók → Hitelesítés)</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="500"/>
+        <source>Remove &apos;{0}&apos; from the configured repos?</source>
+        <translation>Eltávolítja a(z) „{0}” elemet a beállított tárhelyek közül?</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="525"/>
+        <source>Save failed</source>
+        <translation>A mentés sikertelen</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="250"/>
+        <source>Set a name first.</source>
+        <translation>Először adjon meg egy nevet.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="370"/>
+        <source>Set an explicit git binary path or download Portable Git.</source>
+        <translation>Adjon meg explicit útvonalat a git binárishoz, vagy töltse le a Portable Git-et.</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="412"/>
+        <source>Set as default</source>
+        <translation>Beállítás alapértelmezettként</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="381"/>
+        <source>Status</source>
+        <translation>Állapot</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="134"/>
+        <source>Sub-directory under collections/ (empty = repo root)</source>
+        <translation>Alkönyvtár a collections/ alatt (üres = a tárhely gyökere)</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="163"/>
+        <source>Test connection</source>
+        <translation>Kapcsolat tesztelése</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="261"/>
+        <source>Testing…</source>
+        <translation>Tesztelés…</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="380"/>
+        <source>URL</source>
+        <translation>URL</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="154"/>
+        <source>Use as default publish target</source>
+        <translation>Használat alapértelmezett közzétételi célként</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="548"/>
+        <source>configured path</source>
+        <translation>beállított útvonal</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="559"/>
+        <source>git not found</source>
+        <translation>a git nem található</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="114"/>
+        <source>https://github.com/org/repo.git</source>
+        <translation>https://github.com/org/repo.git</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="118"/>
+        <source>main / master / … (empty = default)</source>
+        <translation>main / master / … (üres = alapértelmezett)</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="549"/>
+        <source>portable</source>
+        <translation>hordozható</translation>
+    </message>
+    <message>
+        <location filename="../extensions/favorites_sharing/ui/repo_manager_dialog.py" line="550"/>
+        <source>system PATH</source>
+        <translation>rendszer PATH</translation>
     </message>
 </context>
 <context>
@@ -4295,6 +5084,14 @@ Mégis törli?</translation>
         <location filename="../ui/widgets/json_view/model.py" line="54"/>
         <source>Value</source>
         <translation>Érték</translation>
+    </message>
+</context>
+<context>
+    <name>LayerExporter</name>
+    <message>
+        <location filename="../core/export/layer_exporter.py" line="525"/>
+        <source>Cannot export to &apos;{path}&apos;: this file is the data source of the layer &apos;{layer}&apos; of the project and would be overwritten. Choose another file.</source>
+        <translation>Nem exportálható ide: „{path}”: ez a fájl a projekt „{layer}” rétegének adatforrása, és felülíródna. Válasszon másik fájlt.</translation>
     </message>
 </context>
 <context>
@@ -4520,6 +5317,24 @@ Győződjön meg róla, hogy a PostgreSQL tábla rendelkezik definiált PRIMARY 
         <location filename="../ui/dialogs/optimization_dialog.py" line="344"/>
         <source>OGR (Shapefiles, GeoPackage)</source>
         <translation>OGR (Shapefiles, GeoPackage)</translation>
+    </message>
+</context>
+<context>
+    <name>OptimizationManager</name>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="178"/>
+        <source>Reduce buffer segments (3)</source>
+        <translation>Pufferszegmensek csökkentése (3)</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="176"/>
+        <source>Simplify before buffer</source>
+        <translation>Egyszerűsítés a puffer előtt</translation>
+    </message>
+    <message>
+        <location filename="../ui/managers/optimization_manager.py" line="174"/>
+        <source>Use Centroids</source>
+        <translation>Centroidok használata</translation>
     </message>
 </context>
 <context>

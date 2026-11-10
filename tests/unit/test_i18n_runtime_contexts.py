@@ -173,6 +173,28 @@ def test_helper_strings_reach_their_runtime_context(tree):
     assert not any(context in ("dw", "self._dockwidget") for context, _ in messages)
 
 
+def test_favorites_receivers_are_the_favorites_controller(tmp_path):
+    """``ctrl.tr`` / ``controller.tr`` in the favorites helpers: PyQt looks them up under FavoritesController."""
+    module = _script()
+    controllers = tmp_path / "ui" / "controllers"
+    controllers.mkdir(parents=True)
+    (controllers / "favorites_menu_builder.py").write_text("def build(controller):\n    controller.tr('Export...')\n",
+                                                           encoding="utf-8")
+    (controllers / "favorites_spatial_handler.py").write_text(
+        "def apply(self):\n    ctrl = self._controller\n    ctrl.tr('Applied')\n", encoding="utf-8")
+    (controllers / "other.py").write_text("def build(ctrl):\n    ctrl.tr('Elsewhere')\n", encoding="utf-8")
+    i18n = tmp_path / "i18n"
+    i18n.mkdir()
+    (i18n / "FilterMate.pro").write_text(
+        "SOURCES = \\\n    ../ui/controllers/favorites_menu_builder.py \\\n    ../ui/controllers/favorites_spatial_handler.py \\\n"
+        "    ../ui/controllers/other.py\n\nTRANSLATIONS = \\\n    FilterMate_fr.ts\n", encoding="utf-8")
+    strings = {(context, text) for context, text, _, _ in module.collect(str(i18n / "FilterMate.pro"))}
+    assert ("FavoritesController", "Export...") in strings
+    assert ("FavoritesController", "Applied") in strings
+    assert not any(text == "Elsewhere" for _, text in strings)  # a ctrl of another file is not taken for it
+    assert {"ctrl", "controller"} <= module.MISFILED
+
+
 def test_nested_method_and_two_argument_helpers(tree):
     """filter_mate_app task descriptions, backend_controller._tr, the feedback module's two-argument alias."""
     strings = {(context, text) for context, text, _, _ in _script().collect(str(tree / "i18n" / "FilterMate.pro"))}
