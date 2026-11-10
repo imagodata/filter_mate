@@ -416,6 +416,38 @@ def is_similar(geometry: Any, reference_area: float, reference_compactness: floa
     return shapes is None or shapes[0] <= compactness(geometry) <= shapes[1]
 
 
+def objects_layer(wkts: List[str], crs: Any, name: str, area: Optional[Any] = None) -> Tuple[Any, int]:
+    """A memory layer of the objects (WKT, ``crs``): one multipolygon each, numbered from 1, with its area.
+
+    ``area`` gives the area of a geometry in square metres (None when unknown); without it the
+    column stays empty. Returns the layer and the number of objects that could not be read.
+    """
+    from qgis.core import QgsFeature, QgsGeometry, QgsVectorLayer
+    authid = crs.authid() if crs is not None else ''
+    uri = 'MultiPolygon?field=object:integer&field=area_m2:double(20,2)'
+    if authid:
+        uri += f'&crs={authid}'
+    layer = QgsVectorLayer(uri, name, 'memory')
+    if crs is not None and crs.isValid():
+        layer.setCrs(crs)  # a CRS without authid (a custom one) too
+    features, skipped = [], 0
+    for wkt in wkts:
+        geometry = QgsGeometry.fromWkt(wkt)
+        if geometry is None or geometry.isNull() or geometry.isEmpty():
+            skipped += 1
+            continue
+        geometry.convertToMultiType()
+        feature = QgsFeature(layer.fields())
+        measured = area(geometry) if area is not None else None
+        feature.setAttributes([len(features) + 1, round(measured, 2) if measured is not None else None])
+        feature.setGeometry(geometry)
+        features.append(feature)
+    if features:
+        layer.dataProvider().addFeatures(features)
+        layer.updateExtents()
+    return layer, skipped
+
+
 def render_window(settings: Any, layer: Any, window: SegmentationWindow, is_canceled: Any) -> QImage:
     """``layer`` alone, drawn in ``window``. Worker thread only (it waits for the job)."""
     settings.setOutputSize(QSize(window.size, window.size))
