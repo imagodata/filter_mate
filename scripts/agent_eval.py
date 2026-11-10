@@ -173,6 +173,19 @@ class SimulatedProject:
                         {"layer_name": "mnt", "layer_kind": "raster", "values": [{"band": 1, "value": 187.4}]}],
                     "skipped": []}
 
+        def set_layer_style(args):
+            name, layer = self._layer(args["layer"])
+            if args.get("field") and args["field"] not in layer.get("fields", {}):
+                raise ToolFailure(f"'{name}' has no field {args['field']!r} (describe_layer lists them)")
+            return {"layer_name": name, "mode": args["mode"], "field": args.get("field", ""),
+                    "classes": args.get("classes", 5) if args["mode"] == "graduated" else 3}
+
+        def set_labels(args):
+            name, layer = self._layer(args["layer"])
+            if args.get("enabled", True) and args.get("field") not in layer.get("fields", {}):
+                raise ToolFailure(f"'{name}' has no field {args.get('field')!r} (describe_layer lists them)")
+            return {"layer_name": name, "labels": args.get("enabled", True), "field": args.get("field", "")}
+
         algorithms = {
             "native:buffer": ("Buffer", "Vector geometry", [
                 {"name": "INPUT", "type": "source", "description": "Input layer", "optional": False},
@@ -327,6 +340,7 @@ class SimulatedProject:
             "list_layers": list_layers, "describe_layer": describe_layer, "field_values": field_values,
             "layer_statistics": layer_statistics, "sample_features": sample_features, "identify_at": identify_at,
             "find_algorithms": find_algorithms, "describe_algorithm": describe_algorithm, "run_algorithm": run_algorithm,
+            "set_layer_style": set_layer_style, "set_labels": set_labels,
             "preview_filter": preview_filter, "apply_filter": apply_filter, "cross_filter": relation,
             "geometry_filter": relation, "point_cloud_filter": point_cloud_filter, "clear_filters": clear_filters,
             "export_layers": export_layers, "map_context": map_context, "zoom_to": zoom_to,

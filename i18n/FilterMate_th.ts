@@ -269,6 +269,16 @@
         <translation>การประมวลผล: {}</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="615"/>
+        <source>Style of {}</source>
+        <translation>สไตล์ของ {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="616"/>
+        <source>Labels of {}</source>
+        <translation>ป้ายกำกับของ {}</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="590"/>
         <source>Reading the values of {}</source>
         <translation>กำลังอ่านค่าของ {}</translation>

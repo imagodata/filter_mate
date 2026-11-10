@@ -568,6 +568,20 @@ def check_chat(provider, layer, authcfg, work):
     check("undoing the turn removes its layer", not set(QgsProject.instance().mapLayers()) - layers_before,
           set(QgsProject.instance().mapLayers()) - layers_before)
 
+    renderer_before = layer.renderer().type()
+    provider.reset((200, {}, tool_turn("set_layer_style", {"layer": "communes", "mode": "graduated", "field": "pop",
+                                                           "classes": 3})),
+                   (200, {}, tool_turn("set_labels", {"layer": "communes", "field": "pop"}, "toolu_2")),
+                   (200, {}, text_turn("C'est fait.")))
+    check("a style through the chat", ask("colore les communes par population et affiche leur nom"))
+    check("the style and the labels are set", layer.renderer().type() == "graduatedSymbol" and layer.labelsEnabled(),
+          (layer.renderer().type(), layer.labelsEnabled()))
+    check("their cards say what changed", "graduated · pop" in panel.thread.toPlainText()
+          and "Labels of communes" in panel.thread.toPlainText(), panel.thread.toPlainText()[-300:])
+    chat._on_undo()
+    check("undoing the turn brings the style back", layer.renderer().type() == renderer_before
+          and not layer.labelsEnabled(), (layer.renderer().type(), layer.labelsEnabled()))
+
     provider.reset((200, {}, text_turn("**Vecteur (2)**\n- routes : 131 lignes\n## Titre")))
     ask("liste")
     shown = [label.text() for label in panel.thread.findChildren(QLabel) if "routes" in label.text()]

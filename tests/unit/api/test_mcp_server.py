@@ -25,6 +25,7 @@ EXPECTED_TOOLS = {
     "point_cloud_filter", "clear_filters", "filter_state", "list_favorites", "apply_favorite", "export_layers",
     "describe_layer", "field_values", "preview_filter", "map_context",
     "layer_statistics", "sample_features", "identify_at", "find_algorithms", "describe_algorithm", "run_algorithm",
+    "set_layer_style", "set_labels",
     "zoom_to", "select_features", "set_layers_visibility", "add_layer", "remove_layers", "search_open_data",
     "add_service_layer", "search_imagery",
 }
@@ -68,6 +69,8 @@ def test_one_tool_per_endpoint_with_annotations(mcp):
     assert tools["undo_filter"]["annotations"]["idempotentHint"] is False
     assert tools["redo_filter"]["annotations"]["idempotentHint"] is False
     assert tools["clear_filters"]["annotations"]["idempotentHint"] is True
+    assert tools["set_layer_style"]["annotations"]["idempotentHint"] is True
+    assert tools["run_algorithm"]["annotations"]["idempotentHint"] is False
     assert "overwritten" in tools["export_layers"]["description"]
 
 

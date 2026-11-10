@@ -269,6 +269,16 @@
         <translation>プロセシング: {}</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="615"/>
+        <source>Style of {}</source>
+        <translation>{} のスタイル</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="616"/>
+        <source>Labels of {}</source>
+        <translation>{} のラベル</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="590"/>
         <source>Reading the values of {}</source>
         <translation>{} の値を読み取り中</translation>

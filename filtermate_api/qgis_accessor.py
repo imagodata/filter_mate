@@ -33,6 +33,8 @@ from .accessor import (
     Favorite,
     FavoritesUnavailable,
     AlgorithmDescription,
+    LabelsResult,
+    StyleResult,
     AlgorithmList,
     AlgorithmRun,
     FilterRejected,
@@ -354,6 +356,25 @@ class QGISFilterMateAccessor:
             except ValueError as exc:
                 raise FilterRejected(str(exc)) from None
         return run_on_main_thread(call)
+
+    @staticmethod
+    def _style(name: str, *args, **kwargs):
+        """Call ``adapters.public_api.layer_style.<name>`` on the main thread."""
+        def call():
+            function = getattr(_plugin_module("adapters.public_api.layer_style"), name)
+            try:
+                return function(*args, **kwargs)
+            except ValueError as exc:
+                raise FilterRejected(str(exc)) from None
+        return run_on_main_thread(call)
+
+    def set_layer_style(self, layer: str, mode: str, **options: Any) -> StyleResult:
+        return StyleResult(**self._style("set_layer_style", layer, mode, **options))
+
+    def set_labels(self, layer: str, field: str = "", enabled: bool = True, size: Optional[float] = None,
+                   color: str = "", buffer: bool = True) -> LabelsResult:
+        return LabelsResult(**self._style("set_labels", layer, field=field, enabled=enabled, size=size, color=color,
+                                          buffer=buffer))
 
     def zoom_to(self, layer=None, extent_wkt=None, crs=None, selected_only: bool = False) -> ViewState:
         return ViewState(**self._control("zoom_to", layer=layer, extent_wkt=extent_wkt, crs=crs, selected_only=selected_only))

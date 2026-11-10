@@ -269,6 +269,15 @@ def build_handlers(accessor: FilterMateAccessor, export_root: Path, allow_remote
         return asdict(accessor.select_features(args["layer"], expression=args["expression"], clear=args["clear"],
                                                add=args["add"]))
 
+    def set_layer_style(args: Dict[str, Any]) -> Dict[str, Any]:
+        options = {key: args[key] for key in ("field", "color", "ramp", "classes", "method", "invert", "band")}
+        options.update({key: args.get(key) for key in ("opacity", "minimum", "maximum")})
+        return asdict(accessor.set_layer_style(args["layer"], args["mode"], **options))
+
+    def set_labels(args: Dict[str, Any]) -> Dict[str, Any]:
+        return asdict(accessor.set_labels(args["layer"], field=args["field"], enabled=args["enabled"],
+                                          size=args.get("size"), color=args["color"], buffer=args["buffer"]))
+
     def set_layers_visibility(args: Dict[str, Any]) -> Dict[str, Any]:
         return _report("Visibility", accessor.set_layers_visibility(args["layers"], args["visible"]))
 
@@ -316,6 +325,7 @@ def build_handlers(accessor: FilterMateAccessor, export_root: Path, allow_remote
         "describe_layer": describe_layer, "field_values": field_values, "preview_filter": preview_filter,
         "layer_statistics": layer_statistics, "sample_features": sample_features, "identify_at": identify_at,
         "find_algorithms": find_algorithms, "describe_algorithm": describe_algorithm, "run_algorithm": run_algorithm,
+        "set_layer_style": set_layer_style, "set_labels": set_labels,
         "map_context": map_context, "apply_filter": apply_filter, "cross_filter": cross_filter,
         "geometry_filter": geometry_filter, "point_cloud_filter": point_cloud_filter,
         "clear_filters": clear_filters, "apply_favorite": apply_favorite, "export_layers": export_layers,

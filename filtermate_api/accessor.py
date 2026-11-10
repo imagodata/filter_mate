@@ -282,6 +282,30 @@ class AlgorithmRun:
 
 
 @dataclass(frozen=True)
+class StyleResult:
+    """How a layer is drawn after a change: never the values of its classes."""
+    layer_name: str
+    mode: str = ""
+    field: str = ""
+    classes: int = 0
+    ramp: str = ""
+    method: str = ""
+    # Raster: the band and the range of values stretched over the ramp.
+    band: Optional[int] = None
+    minimum: Optional[float] = None
+    maximum: Optional[float] = None
+    opacity: Optional[float] = None
+
+
+@dataclass(frozen=True)
+class LabelsResult:
+    """The labels of a vector layer after a change."""
+    layer_name: str
+    labels: bool = False
+    field: str = ""
+
+
+@dataclass(frozen=True)
 class FilterPreview:
     """What a filter expression would keep, tried on a private copy of the layer."""
     layer_name: str
@@ -382,6 +406,15 @@ class FilterMateAccessor(Protocol):
     def run_algorithm(self, algorithm_id: str, parameters: Optional[Dict[str, Any]] = None,
                       names: Optional[Dict[str, str]] = None, share_values: bool = True) -> AlgorithmRun:
         """Run an algorithm on project layers, its layers added to the project; raises FilterRejected when refused."""
+        ...
+
+    def set_layer_style(self, layer: str, mode: str, **options: Any) -> StyleResult:
+        """Draw a layer anew (single, categorized, graduated, pseudocolor, gray); raises FilterRejected when refused."""
+        ...
+
+    def set_labels(self, layer: str, field: str = "", enabled: bool = True, size: Optional[float] = None,
+                   color: str = "", buffer: bool = True) -> LabelsResult:
+        """Label a vector layer with a field, or turn its labels off; raises FilterRejected when refused."""
         ...
 
     def preview_filter(self, layer_name: str, expression: str) -> Optional[FilterPreview]:
@@ -583,6 +616,20 @@ class InMemoryAccessor:
         return AlgorithmRun(algorithm=algorithm_id, name="Buffer", layers=[
             {"output": "OUTPUT", "layer_id": "buffer_1", "name": name, "layer_kind": "vector",
              "feature_count": max(source.feature_count, 0)}])
+
+    def set_layer_style(self, layer: str, mode: str, **options: Any) -> StyleResult:
+        found = self._find(layer)
+        if found is None:
+            raise FilterRejected(f"layer {layer!r} not found")
+        return StyleResult(layer_name=found.name, mode=mode, field=options.get("field") or "",
+                           classes=options.get("classes", 5) if mode in ("categorized", "graduated") else 0)
+
+    def set_labels(self, layer: str, field: str = "", enabled: bool = True, size: Optional[float] = None,
+                   color: str = "", buffer: bool = True) -> LabelsResult:
+        found = self._find(layer)
+        if found is None:
+            raise FilterRejected(f"layer {layer!r} not found")
+        return LabelsResult(layer_name=found.name, labels=enabled, field=field if enabled else "")
 
     def preview_filter(self, layer_name: str, expression: str) -> Optional[FilterPreview]:
         found = self._find(layer_name)

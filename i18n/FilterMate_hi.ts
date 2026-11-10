@@ -269,6 +269,16 @@
         <translation>प्रोसेसिंग: {}</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="615"/>
+        <source>Style of {}</source>
+        <translation>{} की शैली</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="616"/>
+        <source>Labels of {}</source>
+        <translation>{} के लेबल</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="590"/>
         <source>Reading the values of {}</source>
         <translation>{} के मान पढ़ना</translation>

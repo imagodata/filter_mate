@@ -329,6 +329,16 @@ Acceptez-vous ?</translation>
         <translation>Traitement : {}</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="615"/>
+        <source>Style of {}</source>
+        <translation>Style de {}</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="616"/>
+        <source>Labels of {}</source>
+        <translation>Étiquettes de {}</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="593"/>
         <source>Reading the active filters</source>
         <translation>Lecture des filtres actifs</translation>

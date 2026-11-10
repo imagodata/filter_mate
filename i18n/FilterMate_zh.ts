@@ -269,6 +269,16 @@
         <translation>处理：{}</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="615"/>
+        <source>Style of {}</source>
+        <translation>{} 的样式</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="616"/>
+        <source>Labels of {}</source>
+        <translation>{} 的标注</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="590"/>
         <source>Reading the values of {}</source>
         <translation>正在读取 {} 的值</translation>
