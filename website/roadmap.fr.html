@@ -50,7 +50,7 @@
         </div>
         <h1 class="fade-in fade-in-delay-1">Au-delà du vecteur :<br><span class="gradient">filtrer rasters et LiDAR</span></h1>
         <p class="fade-in fade-in-delay-2">EXPLORING sélectionne sur la couche courante, quel que soit son type. FILTERING relie cette sélection aux couches vecteur, raster et nuage de points avec ses prédicats et son tampon habituels.</p>
-        <p class="roadmap-note fade-in fade-in-delay-2"><strong>Sortie le 15 octobre 2026.</strong> FilterMate 5.0 filtre les couches vecteur, raster et nuage de points. La prise en charge des rasters et des nuages de points est active par défaut et se désactive dans l’onglet Configuration. Chaque version est testée en CI sur QGIS 3.22, 3.28, 3.34, 3.44 et 4.2, via Processing et via le panneau lui-même.</p>
+        <p class="roadmap-note fade-in fade-in-delay-2"><strong>Sortie le 15 octobre 2026.</strong> FilterMate 5.0 filtre les couches vecteur, raster et nuage de points. La prise en charge des rasters et des nuages de points est active par défaut et se désactive dans l’onglet Configuration. Chaque version est vérifiée dans QGIS 3.22 à 4.x avant sa publication, via Processing et via le panneau lui-même.</p>
         <div class="hero-stats fade-in fade-in-delay-3">
             <div class="hero-stat">
                 <div class="num">3</div>
@@ -219,7 +219,7 @@
                 <div class="timeline-dot s2">3</div>
                 <div class="timeline-sprint">Testé</div>
                 <div class="timeline-title">QGIS 3.22 à 4.2</div>
-                <div class="timeline-desc">Un job de CI charge FilterMate dans les images Docker officielles de QGIS (3.22, 3.28, 3.34, 3.44, 4.2) et pilote le panneau sous Xvfb. Les nuages de points demandent QGIS 3.26 ou plus récent ; PDAL 2.4 ou plus récent est facultatif (hauteur au-dessus d’un MNT, écriture COPC directe).</div>
+                <div class="timeline-desc">Avant chaque version, FilterMate est chargé dans les images Docker officielles de QGIS, de la 3.22 à la 4.2, et le panneau est piloté sous Xvfb. Les nuages de points demandent QGIS 3.26 ou plus récent ; PDAL 2.4 ou plus récent est facultatif (hauteur au-dessus d’un MNT, écriture COPC directe).</div>
                 <div class="timeline-milestone">FilterMate 5.0</div>
             </div>
         </div>
@@ -236,9 +236,60 @@
                 Nouveautés
             </div>
             <h2 class="section-title">Depuis la sortie de la 5.0.0</h2>
-            <p class="section-subtitle">Fusionné sur la branche principale entre le 16 et le 18 octobre 2026, en route vers la prochaine version sur plugins.qgis.org. Détails dans le <a href="https://github.com/imagodata/filter_mate/blob/main/CHANGELOG.md" hreflang="en">changelog</a> (en anglais).</p>
+            <p class="section-subtitle">Fusionné sur la branche principale entre le 16 octobre et le 10 novembre 2026, et publié dans FilterMate 5.1.0, qui reprend aussi les 5.0.3 à 5.0.5 jamais publiées. Détails dans le <a href="https://github.com/imagodata/filter_mate/blob/main/CHANGELOG.md" hreflang="en">changelog</a> (en anglais).</p>
         </div>
         <div class="features-grid">
+            <div class="feature-card highlight-purple fade-in">
+                <span class="star-label">Nouveau · expérimental</span>
+                <div class="feature-title">AGENT : un tchat qui filtre à partir d’une phrase</div>
+                <div class="feature-desc">Une section en haut du panneau : écrivez une phrase et l’agent filtre, sélectionne, zoome, affiche ou masque des couches et exporte. Il fonctionne avec Claude, Mistral, OpenAI et des serveurs compatibles, ou un modèle Ollama local. Les filtres s’appliquent aussitôt ; les exports et les couches ajoutées ou retirées demandent d’abord. Un filtre est une simple clause WHERE, vérifiée avant de s’exécuter.</div>
+                <div class="feature-tags"><span class="tag must">AGENT</span><span class="tag sprint">Expérimental</span></div>
+            </div>
+            <div class="feature-card fade-in">
+                <div class="feature-title">Annuler par étape, et ce que dit l’agent</div>
+                <div class="feature-desc">Chaque filtre dit combien d’entités il a gardées et avertit s’il n’en a gardé aucune. Tant qu’AGENT est ouvert, Undo et Redo de la barre d’actions parcourent les demandes de l’agent, et l’historique liste les étapes de la dernière avec <em>Undo back to here</em>. Undo atteint aussi les couches ajoutées ou retirées, les sélections et la visibilité.</div>
+                <div class="feature-tags"><span class="tag must">AGENT</span><span class="tag sprint">Undo</span></div>
+            </div>
+            <div class="feature-card fade-in">
+                <div class="feature-title">Les sources de l’agent</div>
+                <div class="feature-desc">Portails de données ouvertes (data.gouv.fr, Opendatasoft, portails CKAN), services WFS, scènes Sentinel-2 ouvertes sans les télécharger et connecteurs MCP distants, tous désactivés tant qu’on ne les coche pas. Les téléchargements s’arrêtent à 512 Mo et 3 minutes, Stop les interrompt, et chaque échec dit sa cause.</div>
+                <div class="feature-tags"><span class="tag should">AGENT</span><span class="tag sprint">Données ouvertes</span></div>
+            </div>
+            <div class="feature-card fade-in">
+                <div class="feature-title">Un quota gratuit pour essayer</div>
+                <div class="feature-desc">Quelques requêtes gratuites par mois, par un relais de FilterMate vers Claude Haiku 5.5, sans clé à saisir. Le relais compte ce qu’il dépense et ne garde aucune conversation. Une fois le quota épuisé, le panneau demande votre propre clé d’API, conservée dans la base d’authentification de QGIS.</div>
+                <div class="feature-tags"><span class="tag should">AGENT</span></div>
+            </div>
+            <div class="feature-card fade-in">
+                <div class="feature-title">Serveur MCP intégré au plugin</div>
+                <div class="feature-desc">Désactivé par défaut. Claude Code ou un autre client MCP du même ordinateur pilote FilterMate sur <code>http://127.0.0.1:17823/mcp</code> avec un jeton d’accès, selon les règles du tchat : mêmes outils et mêmes sources, mêmes confirmations, chaque changement étant une étape de l’historique. Le serveur stdio reste.</div>
+                <div class="feature-tags"><span class="tag should">Automatisation</span><span class="tag sprint">MCP</span></div>
+            </div>
+            <div class="feature-card fade-in">
+                <div class="feature-title">SAM dans la pipette raster</div>
+                <div class="feature-desc"><em>Objet cliqué</em> et <em>Objets similaires</em> dessinent avec SAM 2.1 tiny, un modèle qui tourne sur le processeur et s’installe une fois, après une confirmation (onnxruntime et un modèle de 62 Mo). Un clic ajoute un objet, Maj+clic l’étend, un clic droit le rogne, un rectangle en cadre un nouveau, et G donne le contour suivant. Les objets similaires arrivent comme des propositions à garder ou à rejeter. Recouvrement médian de 0,82 avec 100 bâtiments depuis un rectangle ; les parcelles et les arbres ne sont pas validés. Sans SAM, le moteur couleur reste.</div>
+                <div class="feature-tags"><span class="tag must">EXPLORING</span><span class="tag sprint">Raster</span><span class="tag sprint">Expérimental</span></div>
+            </div>
+            <div class="feature-card fade-in">
+                <div class="feature-title">Des objets dans Processing, REST et MCP</div>
+                <div class="feature-desc"><code>segment_from_features</code> dessine un objet par point ou polygone d’une couche (recouvrement médian de 0,81 avec 40 emprises de la BD TOPO), ce qui fait dix algorithmes Processing. <em>To layer</em> ajoute les objets du panneau au projet comme une couche de polygones, et le paramètre <code>SEGMENTS</code>, ou <code>segments</code> dans <code>raster_selection</code>, filtre d’autres couches avec eux depuis des scripts, REST et MCP.</div>
+                <div class="feature-tags"><span class="tag should">Automatisation</span><span class="tag sprint">Processing</span></div>
+            </div>
+            <div class="feature-card fade-in">
+                <div class="feature-title">Deux piles de sections</div>
+                <div class="feature-desc">AGENT et EXPLORING au-dessus de la poignée du séparateur, FILTERING, EXPORTING et CONFIGURATION en dessous, une section ouverte au plus dans chaque pile. Ouvrir AGENT replie EXPLORING et FILTERING. Les favoris, le détachement et la fermeture sont des badges de la barre de titre.</div>
+                <div class="feature-tags"><span class="tag should">Panneau</span></div>
+            </div>
+            <div class="feature-card fade-in">
+                <div class="feature-title">Barre de recherche et contrôles plus sûrs</div>
+                <div class="feature-desc">L’onglet Configuration a une barre de recherche (Ctrl+F, Échap pour l’effacer). Les listes et les nombres ne répondent à la molette qu’après un clic : un défilement ne change plus une valeur. <code>UI_PROFILE</code> s’applique aussitôt, et un petit écran mis à l’échelle reçoit le profil compact.</div>
+                <div class="feature-tags"><span class="tag should">CONFIGURATION</span></div>
+            </div>
+            <div class="feature-card fade-in">
+                <div class="feature-title">Correctifs des 5.0.1 et 5.0.2</div>
+                <div class="feature-desc">Un outil Zone sur les rails vecteur et raster, la sélection des bandes par cases à cocher et leur affichage, les contrôles de centroïde pour tous les types de source. Passer d’une couche vecteur à une autre ne vide plus la sélection simple ni ne sélectionne une entité que personne n’a choisie, le panneau reste utilisable sur les petits écrans mis à l’échelle, et plusieurs fonctions qui ne marchaient que dans QGIS fonctionnent.</div>
+                <div class="feature-tags"><span class="tag sprint">Corrigé</span></div>
+            </div>
             <div class="feature-card highlight fade-in">
                 <span class="star-label">Pipette</span>
                 <div class="feature-title">Trois cibles pour la pipette raster</div>
@@ -272,7 +323,7 @@
             </div>
             <div class="feature-card fade-in">
                 <div class="feature-title">Serveur MCP pour les assistants IA</div>
-                <div class="feature-desc">Un serveur Model Context Protocol sur stdio, lancé hors de QGIS, avec un outil par point d’entrée REST : lister les couches, appliquer ou croiser un filtre, filtres par géométrie et par nuage de points, favoris, export. La clé d’API vient de l’environnement ; les URL distantes sont refusées sauf autorisation.</div>
+                <div class="feature-desc">Un serveur Model Context Protocol sur stdio, lancé hors de QGIS, avec un outil par point d’entrée REST : lister les couches, appliquer ou croiser un filtre, filtres par géométrie et par nuage de points, favoris, export. La clé d’API vient de l’environnement ; les URL distantes sont refusées sauf autorisation. Depuis la 5.0.4, le plugin a aussi son propre serveur (plus bas).</div>
                 <div class="feature-tags"><span class="tag should">Automatisation</span><span class="tag sprint">REST</span></div>
             </div>
             <div class="feature-card fade-in">
