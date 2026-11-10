@@ -30,7 +30,7 @@ from ...core.agent.messages import (
     ERROR_AUTH, ERROR_NETWORK, ERROR_QUOTA, ERROR_RATE_LIMIT, ToolCallPart, ToolResultPart,
 )
 from ...core.agent.providers import FREE_PRESET, create_provider
-from ...core.agent.session import AgentSession
+from ...core.agent.session import REASON_REFUSED, REASON_TRUNCATED, REASON_TURN_LIMIT, AgentSession
 from ...core.agent.system_prompt import SYSTEM_PROMPT
 from ...core.agent.tool_catalog import UNDO_AGENT_STEP, chat_tools
 from ...core.agent.tool_executor import ToolExecutor, ToolFailure
@@ -739,9 +739,22 @@ class AgentChatController(QObject):
             return
         if outcome.status == OUTCOME_STOPPED:
             self._say("")
-            self.panel.show_error(_tr("The agent stopped before the end ({}).").format(outcome.reason))
+            self.panel.show_error(*self._stop_words(outcome.reason))
             return
         self._say("")  # the cards of the turn say what changed (mockup)
+
+    @staticmethod
+    def _stop_words(reason: str) -> Tuple[str, str]:
+        """Why the agent stopped before its answer, and what the user can do, in plain words."""
+        if reason == REASON_TURN_LIMIT:
+            return (_tr("The request took too many steps: the agent stopped."),
+                    _tr("What it changed stays and can be undone. Ask for less at once, or say what is left."))
+        if reason == REASON_TRUNCATED:
+            return (_tr("The answer of the model was cut: it was too long."),
+                    _tr("What it changed stays and can be undone. Ask again, in smaller steps."))
+        if reason == REASON_REFUSED:
+            return _tr("The model declined this request."), _tr("Nothing more was done. Ask it differently.")
+        return _tr("The agent stopped before the end ({}).").format(reason), ""
 
     def _give_back_request(self) -> None:
         """A request that went nowhere can be sent again without retyping it."""

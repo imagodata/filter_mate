@@ -188,6 +188,19 @@ class TestSession:
         assert decision.status == "stopped" and decision.reason == "turn_limit"
         assert isinstance(chat.messages[-1].parts[0], ToolResultPart)
 
+    def test_the_model_is_told_before_the_limit(self):
+        chat = session(limit=4)
+        chat.add_user_text("hi")
+        notes = []
+        for number in range(3):
+            assert chat.accept_turn(turn(STOP_TOOL_USE, call(call_id=f"c{number}"))).status == "run_tools"
+            chat.add_tool_results([ToolResultPart(f"c{number}", "ok")])
+            notes.append([part.text for part in chat.messages[-1].parts if isinstance(part, TextPart)])
+        assert notes[0] == [] and "2 model turns left" in notes[1][0] and "1 model turns left" in notes[2][0]
+        assert isinstance(chat.messages[-1].parts[0], ToolResultPart)  # the results first, then the note
+        wire = json.loads(chat.next_request().body)["messages"][-1]["content"]
+        assert [block["type"] for block in wire] == ["tool_result", "text"]
+
     def test_a_new_request_resets_the_limit(self):
         chat = session(limit=1)
         chat.add_user_text("a")
