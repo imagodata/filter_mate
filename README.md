@@ -39,7 +39,7 @@ splitter handle, 🔍 FILTERING, 📦 EXPORTING and 🔧 CONFIGURATION below.
 
 | Section | What you do there |
 |---|---|
-| 🤖 **AGENT** (experimental) | Ask in a sentence: "buildings above 1200 m in the selected commune". The agent reads the project, filters, selects, zooms, styles and labels layers, adds open data, runs Processing algorithms of QGIS, draws objects with SAM and exports; each step can be undone. See [docs/AGENT_MODE.md](docs/AGENT_MODE.md). |
+| 🤖 **AGENT** (experimental) | Ask in a sentence: "buildings above 1200 m in the selected commune". The agent reads the project, filters, selects, zooms, styles and labels layers, edits features (in the edit buffer: you save them), adds open data, runs Processing algorithms of QGIS, draws objects with SAM and exports; each step can be undone. See [docs/AGENT_MODE.md](docs/AGENT_MODE.md). |
 | 🧭 **EXPLORING** | Select on the current layer. Vector: one feature, several, or an expression. Raster: a band, a pixel value (picked on the map), a value range on a live histogram, classes of a paletted raster, a raster calculator expression. Point cloud: ASPRS / LiDAR HD classes, Z, intensity and return ranges, chained attribute conditions, height above a DTM. |
 | 🔍 **FILTERING** | Choose the layers to filter and how they relate to the selection: geometric predicates (intersects, within, disjoint…), a buffer, AND / OR with existing filters, a minimum coverage for polygons. |
 | 📦 **EXPORTING** | Write the filtered layers as they are: vector formats, GeoTIFF / COG for rasters, LAZ / LAS / COPC / GPKG / CSV for point clouds, or a GeoPackage with an embedded QGIS project. |
