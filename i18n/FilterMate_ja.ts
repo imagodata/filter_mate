@@ -9258,6 +9258,11 @@ onnxruntime は pip で PyPI から、モデルは huggingface.co/{1} から取�
         <translation>：残り {0} 件の提案</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="677"/>
+        <source>({0} taken away: they look like the rejected ones)</source>
+        <translation>（{0} 件を除外しました：却下した提案に似ています）</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/segmentation_controller.py" line="648"/>
         <source>{0} similar objects kept</source>
         <translation>{0} 件の類似オブジェクトを保持しました</translation>

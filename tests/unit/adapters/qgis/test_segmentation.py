@@ -455,3 +455,57 @@ class TestAppearance:
         task.reference_features = np.array([0.0, 1.0, 0.0, 0.0])
         assert not task._looks_alike(self.embedding(coarse=coarse), mask)
         assert task._looks_alike(np.zeros((8, 8, 3)), mask)  # unknown features: kept
+        # features already pooled are used as given
+        assert task._looks_alike(None, None, np.array([0.0, 1.0, 0.0, 0.0]))
+
+    def test_the_coarsest_map(self):
+        coarse = np.ones((1, 4, 2, 2), dtype=np.float32)
+        assert segmentation.coarse_features(self.embedding(coarse=coarse)).shape == (4, 2, 2)
+        assert segmentation.coarse_features(np.zeros((8, 8, 3))) is None
+        assert segmentation.coarse_features({'scores': np.zeros(3)}) is None
+
+
+class TestFeatureCandidates:
+    """2026-11-11: the places whose features look like the clicked object's, and the proposals sorted by keep / reject."""
+
+    @staticmethod
+    def coarse(*cells):
+        """A 2 x 3 x 3 map: channel 0 at the given cells, channel 1 elsewhere."""
+        coarse = np.zeros((2, 3, 3), dtype=np.float32)
+        coarse[1] = 1.0
+        for row, column, value in cells:
+            coarse[:, row, column] = (value, 1.0 - value)
+        return coarse
+
+    def test_the_peaks_best_first(self):
+        peaks = segmentation.similarity_peaks(self.coarse((0, 0, 1.0), (2, 2, 0.8)), np.array([1.0, 0.0]), 0.3)
+        assert [(row, column) for _cosine, row, column in peaks] == [(0, 0), (2, 2)]
+        assert peaks[0][0] == pytest.approx(1.0) and peaks[1][0] == pytest.approx(0.8 / np.hypot(0.8, 0.2))
+
+    def test_a_cell_next_to_a_better_one_is_no_peak(self):
+        peaks = segmentation.similarity_peaks(self.coarse((0, 0, 1.0), (0, 1, 0.9)), np.array([1.0, 0.0]), 0.3)
+        assert [(row, column) for _cosine, row, column in peaks] == [(0, 0)]
+
+    def test_under_the_minimum_no_peak(self):
+        assert segmentation.similarity_peaks(self.coarse((1, 1, 0.2)), np.array([1.0, 0.0]), 0.3) == []
+
+    def test_an_empty_cell_does_not_divide_by_zero(self):
+        coarse = np.zeros((2, 2, 2), dtype=np.float32)
+        assert segmentation.similarity_peaks(coarse, np.array([1.0, 0.0]), 0.3) == []
+
+    def test_the_settings_are_the_measured_ones(self):
+        assert (segmentation.SIMILAR_FEATURE_CANDIDATES, segmentation.SIMILAR_FEATURE_MIN,
+                segmentation.SORT_AFTER_DECISIONS) == (10, 0.3, 3)
+
+    def test_closer_to_the_rejected_ones(self):
+        kept, rejected = [[1.0, 0.0]], [[0.0, 1.0], [0.1, 1.0]]
+        assert segmentation.closer_to_rejected([0.0, 1.0], kept, rejected)
+        assert not segmentation.closer_to_rejected([1.0, 0.1], kept, rejected)
+
+    def test_without_evidence_nothing_goes(self):
+        assert not segmentation.closer_to_rejected(None, [[1.0, 0.0]], [[0.0, 1.0]])
+        assert not segmentation.closer_to_rejected([0.0, 1.0], [[1.0, 0.0]], [])
+        assert not segmentation.closer_to_rejected([0.0, 1.0], [], [[0.0, 1.0]])
+
+    def test_a_tie_stays(self):
+        assert not segmentation.closer_to_rejected([1.0, 1.0], [[1.0, 0.0]], [[0.0, 1.0]])

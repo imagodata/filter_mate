@@ -9258,6 +9258,11 @@ onnxruntime ከPyPI በpip ይመጣል፣ ሞዴሉ ከhuggingface.co/{1}፣ �
         <translation>: {0} ሐሳቦች ቀርተዋል</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="677"/>
+        <source>({0} taken away: they look like the rejected ones)</source>
+        <translation>({0} ተወግደዋል፦ ውድቅ የተደረጉትን ሐሳቦች ይመስላሉ)</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/segmentation_controller.py" line="648"/>
         <source>{0} similar objects kept</source>
         <translation>{0} ተመሳሳይ ነገሮች ተቀምጠዋል</translation>

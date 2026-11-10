@@ -40,6 +40,16 @@ CANDIDATE_RATIO = (0.05, 20.0)
 # A patch smaller than this share of the object drawn by SAM is a speck of the image, not a candidate:
 # on a textured image they were most of the candidates (105 for 1 object, 20 s, 2026-11-10).
 CANDIDATE_MIN_SHARE = 0.05
+# After the colour patches, the places whose encoder features point most like the clicked object's: the best local
+# maxima of their cosine over the coarsest feature map of the clicked window. Chosen on 10 buildings of the 25 cm
+# Cerdagne orthophoto, judged on 10 others by a rule set before the run (2026-11-11,
+# scripts/sam_similar_candidates.py): median recall 0.20 -> 0.32 for a precision of 0.37 -> 0.36.
+SIMILAR_FEATURE_CANDIDATES = 10
+SIMILAR_FEATURE_MIN = 0.3
+# Once the user kept or rejected this many proposals of a search, those left whose features are closer to the rejected
+# ones than to the kept ones and the clicked object are taken away. Same bench and rule: median precision of the
+# proposals left 0.21 -> 0.33, none of the buildings they held lost.
+SORT_AFTER_DECISIONS = 3
 
 _provider: Any = None
 
@@ -471,6 +481,17 @@ def prompt_object(provider: Any, embedding: Any, window: SegmentationWindow, pro
     return (QgsGeometry.unaryUnion(held) if len(held) < len(parts) else geometry), score
 
 
+def coarse_features(embedding: Any) -> Any:
+    """The coarsest feature map of SAM's encoder, ``channels x height x width``; None for an embedding that is not SAM's."""
+    import numpy as np
+    if not isinstance(embedding, dict):
+        return None
+    maps = [np.asarray(value) for value in embedding.values() if np.ndim(value) == 4]
+    if not maps:
+        return None
+    return min(maps, key=lambda value: value.shape[-1] * value.shape[-2])[0]
+
+
 def pooled_features(embedding: Any, mask: Any) -> Any:
     """Encoder features of SAM averaged under a mask, on the coarsest feature map, unit length; None without them.
 
@@ -478,12 +499,9 @@ def pooled_features(embedding: Any, mask: Any) -> Any:
     a road or a lawn of the same colour less so. None for an embedding that is not SAM's (a stub).
     """
     import numpy as np
-    if not isinstance(embedding, dict) or mask is None:
+    coarse = coarse_features(embedding) if mask is not None else None
+    if coarse is None:
         return None
-    maps = [np.asarray(value) for value in embedding.values() if np.ndim(value) == 4]
-    if not maps:
-        return None
-    coarse = min(maps, key=lambda value: value.shape[-1] * value.shape[-2])[0]
     _channels, height, width = coarse.shape
     size = np.asarray(mask).shape[0]
     if size % height or size % width:
@@ -494,6 +512,70 @@ def pooled_features(embedding: Any, mask: Any) -> Any:
     vector = coarse[:, cells].mean(axis=1)
     norm = float(np.linalg.norm(vector))
     return vector / norm if norm else None
+
+
+def similarity_peaks(coarse: Any, reference_features: Any, minimum: float) -> List[Tuple[float, int, int]]:
+    """``(cosine, row, column)`` of the cells of ``coarse`` whose cosine with ``reference_features`` peaks, best first.
+
+    A peak is at least each of its 8 neighbours and at least ``minimum``. ``coarse`` is
+    ``channels x height x width`` (:func:`coarse_features`), ``reference_features`` a unit vector.
+    """
+    import numpy as np
+    channels, height, width = coarse.shape
+    cells = np.asarray(coarse, dtype=np.float64).reshape(channels, -1)
+    norms = np.linalg.norm(cells, axis=0)
+    norms[norms == 0] = 1.0
+    cosine = (np.asarray(reference_features, dtype=np.float64) @ (cells / norms)).reshape(height, width)
+    padded = np.pad(cosine, 1, constant_values=-np.inf)
+    neighbours = np.stack([padded[1 + dy:1 + dy + height, 1 + dx:1 + dx + width]
+                           for dy in (-1, 0, 1) for dx in (-1, 0, 1)])
+    peaks = (cosine >= neighbours.max(axis=0)) & (cosine >= minimum)
+    found = [(float(cosine[row, column]), int(row), int(column)) for row, column in zip(*np.nonzero(peaks))]
+    found.sort(key=lambda item: (-item[0], item[1], item[2]))
+    return found
+
+
+def feature_candidate_points(embedding: Any, window: SegmentationWindow, reference_features: Any, visible: Any,
+                             reference: Any, limit: int = SIMILAR_FEATURE_CANDIDATES,
+                             minimum: float = SIMILAR_FEATURE_MIN) -> List[Tuple[float, float]]:
+    """Points where the encoder features of the clicked window look most like the clicked object, best first.
+
+    The centres of the cells of :func:`similarity_peaks`, inside ``visible`` (layer CRS) and outside
+    the clicked object ``reference``, at most ``limit``. Nothing for an embedding that is not SAM's.
+    """
+    from qgis.core import QgsGeometry, QgsPointXY
+    coarse = coarse_features(embedding)
+    if coarse is None or reference_features is None or limit <= 0:
+        return []
+    step = window.size / coarse.shape[1]
+    points: List[Tuple[float, float]] = []
+    for _cosine, row, column in similarity_peaks(coarse, reference_features, minimum):
+        x, y = window.to_map((column + 0.5) * step, (row + 0.5) * step)
+        point = QgsPointXY(x, y)
+        if not visible.contains(point) or reference.contains(QgsGeometry.fromPointXY(point)):
+            continue
+        points.append((x, y))
+        if len(points) >= limit:
+            break
+    return points
+
+
+def closer_to_rejected(features: Any, kept: List[Any], rejected: List[Any]) -> bool:
+    """Whether ``features`` point more like the mean of the ``rejected`` ones than like the mean of the ``kept`` ones.
+
+    False without features, without anything rejected or without anything kept: a proposal is only
+    taken away on evidence.
+    """
+    import numpy as np
+    if features is None or not rejected or not kept:
+        return False
+
+    def unit_mean(vectors: List[Any]) -> Any:
+        mean = np.mean(np.asarray(vectors, dtype=np.float64), axis=0)
+        norm = float(np.linalg.norm(mean))
+        return mean / norm if norm else mean
+    vector = np.asarray(features, dtype=np.float64)
+    return float(vector @ unit_mean(rejected)) > float(vector @ unit_mean(kept))
 
 
 def similar_candidate_points(layer: Any, criterion: Any, reference: Any, visible: Any,
@@ -747,7 +829,8 @@ class SegmentationEmbedTask(QgsTask):
 class SimilarObjectsTask(QgsTask):
     """Redraw with SAM the candidates of a similar objects search and keep those like the clicked object. Worker thread.
 
-    The candidates are points inside colour patches near the click; each window holding some of
+    The candidates are points inside colour patches near the click, then the places whose features
+    look like the clicked object's (:func:`feature_candidate_points`); each window holding some of
     them is drawn and encoded once, then each point is one prompt.
 
     Args:
@@ -769,6 +852,7 @@ class SimilarObjectsTask(QgsTask):
         self.callback = callback
         self.crs_wkt = crs.toWkt()
         self.wkts: List[str] = []
+        self.features: dict = {}  # WKT of an object kept -> its encoder features (None when unknown): keep / reject sorts by them
         self.examined = 0
         self.error = ''
         self.model_damaged = False
@@ -822,8 +906,11 @@ class SimilarObjectsTask(QgsTask):
                         continue
                     if is_similar(found, reference_area, reference_shape, self.ratio, self.shape):
                         kept.append(found)  # drawn: its patches are not prompted again, whatever its appearance
-                        if self._looks_alike(embedding, mask):
-                            self.wkts.append(found.asWkt())
+                        features = pooled_features(embedding, mask)
+                        if self._looks_alike(embedding, mask, features):
+                            wkt = found.asWkt()
+                            self.wkts.append(wkt)
+                            self.features[wkt] = features
             return not self.isCanceled()
         except Exception as exc:  # the model is third party code: its failure is told, not raised in a task
             from . import sam_model
@@ -835,12 +922,16 @@ class SimilarObjectsTask(QgsTask):
             self.settings.setLayers([])
             layer = None
 
-    def _looks_alike(self, embedding: Any, mask: Any) -> bool:
-        """Its SAM features point like the clicked object's (``SIMILAR_APPEARANCE_MIN``); True when either is unknown."""
+    def _looks_alike(self, embedding: Any, mask: Any, features: Any = None) -> bool:
+        """Its SAM features point like the clicked object's (``SIMILAR_APPEARANCE_MIN``); True when either is unknown.
+
+        ``features``: those of the object when already pooled; read from ``embedding`` and ``mask`` otherwise.
+        """
         import numpy as np
         if self.reference_features is None:
             return True
-        features = pooled_features(embedding, mask)
+        if features is None:
+            features = pooled_features(embedding, mask)
         return features is None or float(np.dot(features, self.reference_features)) >= SIMILAR_APPEARANCE_MIN
 
     def finished(self, result: bool) -> None:

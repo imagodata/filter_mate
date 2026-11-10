@@ -50,6 +50,8 @@ class SegmentationController:
         # Similar objects found, not yet in the selection: (WKT, reference WKT); kept or rejected by the user.
         self._proposals: List[Tuple[str, str]] = []
         self._proposal_outline: Any = None
+        # The keep / reject decisions on the proposals of the last search, and the features they are sorted by.
+        self._sorting: Optional[dict] = None
 
     @staticmethod
     def tr(text: str) -> str:
@@ -512,9 +514,12 @@ class SegmentationController:
     # === Similar objects ===
 
     def _search_similar(self, reference: Any) -> None:
-        """Propose the colour patches near the clicked object to SAM, then keep the objects like it (a task)."""
+        """Propose to SAM the colour patches near the clicked object, then the places whose features look like it,
+        and keep the objects like it (a task)."""
         from qgis.core import QgsApplication, QgsProject
-        from ...adapters.qgis.coverage_layers.segmentation import SimilarObjectsTask, find_provider, pooled_features
+        from ...adapters.qgis.coverage_layers.segmentation import (
+            SimilarObjectsTask, feature_candidate_points, find_provider, pooled_features,
+        )
         layer, session, panel = self._host._active_layer, self._session, self._host._raster_panel
         model = find_provider()
         if layer is None or session is None or model is None or panel is None:
@@ -522,11 +527,18 @@ class SegmentationController:
         if not self._host._raster_capability(layer).has_raw_values:
             self._status(self.tr("Similar objects need the values of the raster: this layer is only drawn"))
             return
+        reference_features = pooled_features(session.embedding, session.mask)
+        visible = self._visible_extent()
         try:
-            points = self._host._similar_candidates(layer, reference, self._visible_extent())
+            points = self._host._similar_candidates(layer, reference, visible)
         except Exception as exc:  # a raster that cannot be read: the clicked object stays
             logger.warning(f"[FM5] similar objects not proposed: {exc}", exc_info=True)
             points = []
+        try:  # the colour patches first, as measured: their objects are drawn before the others
+            points = list(points) + feature_candidate_points(session.embedding, session.window, reference_features,
+                                                             visible, reference)
+        except Exception as exc:  # the colour candidates are enough to search
+            logger.warning(f"[FM5] candidates from the features not found: {exc}", exc_info=True)
         if not points:
             self._status(self.tr("No patch of this colour nearby to compare with the object"))
             return
@@ -540,7 +552,7 @@ class SegmentationController:
                                   session.window.cell, points, reference.asWkt(), panel.similar_ratio(),
                                   panel.similar_shape(), self._searched(self._generation, layer.id(), reference.asWkt()),
                                   QgsProject.instance().transformContext(), existing=list(panel._segments),
-                                  reference_features=pooled_features(session.embedding, session.mask))
+                                  reference_features=reference_features)
         self._search = task
         self._running.append(task)
         task.progressChanged.connect(lambda progress: self._on_search_progress(task, progress))
@@ -576,6 +588,7 @@ class SegmentationController:
                 return
             new = [wkt for wkt in task.wkts if self._index(wkt) < 0]
             self._set_proposals([(wkt, reference_wkt) for wkt in new])
+            self._start_sorting(task, new)
             if new:
                 self._status(self.tr("{0} similar objects proposed among {1} candidates: click one to keep it, right click "
                                      "to reject it, Enter keeps them all, Escape rejects them all").format(len(new), task.examined))
@@ -594,6 +607,7 @@ class SegmentationController:
         self._proposals = list(proposals)
         self._host._call(self._host._raster_panel, 'set_proposal_count', len(self._proposals))
         if not self._proposals:
+            self._sorting = None  # nothing left to sort: the next search starts afresh
             if self._proposal_outline is not None:
                 self._proposal_outline.hide()
             return
@@ -608,8 +622,38 @@ class SegmentationController:
         geometries = [QgsGeometry.fromWkt(wkt) for wkt, _reference in self._proposals]
         self._proposal_outline.show(QgsGeometry.unaryUnion(geometries), layer)
 
+    def _start_sorting(self, task: Any, wkts: List[str]) -> None:
+        """The proposals of a search, ready to be sorted by the decisions the user makes on them."""
+        features = getattr(task, 'features', None) or {}
+        reference = getattr(task, 'reference_features', None)
+        self._sorting = {'features': {wkt: features.get(wkt) for wkt in wkts}, 'decisions': 0,
+                         'kept': [reference] if reference is not None else [], 'rejected': []}
+
+    def _sorted_out(self, wkt: str, keep: bool, rest: List[Tuple[str, str]]) -> List[Tuple[str, str]]:
+        """Note the decision on ``wkt``; the proposals of ``rest`` that now look like the rejected ones (taken away).
+
+        From :data:`SORT_AFTER_DECISIONS` decisions on, a proposal closer, by its encoder features, to
+        the rejected ones than to the kept ones and the clicked object goes (measured on the 25 cm
+        Cerdagne orthophoto, 2026-11-11).
+        """
+        from ...adapters.qgis.coverage_layers.segmentation import SORT_AFTER_DECISIONS, closer_to_rejected
+        sorting = self._sorting
+        if sorting is None:
+            return []
+        sorting['decisions'] += 1
+        features = sorting['features'].get(wkt)
+        if features is not None:
+            sorting['kept' if keep else 'rejected'].append(features)
+        if sorting['decisions'] < SORT_AFTER_DECISIONS:
+            return []
+        return [item for item in rest
+                if closer_to_rejected(sorting['features'].get(item[0]), sorting['kept'], sorting['rejected'])]
+
     def _decide_proposal(self, point: Any, keep: bool) -> bool:
-        """A click on a proposal keeps it, a right click rejects it; False when the click is on none."""
+        """A click on a proposal keeps it, a right click rejects it; False when the click is on none.
+
+        Once enough proposals are decided, those that look like the rejected ones are taken away too.
+        """
         from qgis.core import QgsGeometry, QgsPointXY
         try:
             where = QgsGeometry.fromPointXY(QgsPointXY(self._transform().transform(point)))
@@ -620,9 +664,18 @@ class SegmentationController:
                 rest = self._proposals[:index] + self._proposals[index + 1:]
                 if keep:
                     self._accept([(wkt, reference)])
+                try:
+                    hidden = self._sorted_out(wkt, keep, rest)
+                except Exception as exc:  # sorting is a help: the decision itself is made
+                    logger.warning(f"[FM5] proposals not sorted: {exc}", exc_info=True)
+                    hidden = []
+                rest = [item for item in rest if item not in hidden]
                 self._set_proposals(rest)
-                self._status((self.tr("Object kept") if keep else self.tr("Proposal rejected"))
-                             + (self.tr(": {0} proposals left").format(len(rest)) if rest else ""))
+                message = ((self.tr("Object kept") if keep else self.tr("Proposal rejected"))
+                           + (self.tr(": {0} proposals left").format(len(rest)) if rest else ""))
+                if hidden:
+                    message += " " + self.tr("({0} taken away: they look like the rejected ones)").format(len(hidden))
+                self._status(message)
                 return True
         return False
 

@@ -9258,6 +9258,11 @@ onnxruntime comes from PyPI with pip, the model from huggingface.co/{1}, each fi
         <translation>: الاقتراحات المتبقية {0}</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="677"/>
+        <source>({0} taken away: they look like the rejected ones)</source>
+        <translation>(أُزيل {0}: تشبه الاقتراحات المرفوضة)</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/segmentation_controller.py" line="648"/>
         <source>{0} similar objects kept</source>
         <translation>تم الاحتفاظ بـ {0} كائنات مشابهة</translation>
