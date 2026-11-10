@@ -208,8 +208,12 @@ class AgentThread(QScrollArea):
         palette = self._palette_of()
         sheet = (
             f"QScrollArea#scrollArea_agent_thread {{ background: {palette['fm_list']}; border: 1px solid "
-            f"{palette['fm_group_border']}; border-radius: 6px; }} QWidget#widget_agent_thread {{ background: "
-            f"{palette['fm_list']}; }} QWidget#widget_agent_thread QLabel {{ padding: 0px; }}")
+            f"{palette['fm_group_border']}; border-radius: 6px; }}"
+            # The frame alone paints the background: a viewport or a content with one of its own is a square laid
+            # over the rounded corners.
+            " QScrollArea#scrollArea_agent_thread > QWidget#qt_scrollarea_viewport,"
+            " QWidget#widget_agent_thread { background: transparent; }"
+            " QWidget#widget_agent_thread QLabel { padding: 0px; }")
         _sheet(self, sheet)
         dark = self._is_dark()
         for item in self._items:
