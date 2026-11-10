@@ -9258,6 +9258,11 @@ onnxruntime은 pip으로 PyPI에서, 모델은 huggingface.co/{1}에서 받으�
         <translation>: 제안 {0}개 남음</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="677"/>
+        <source>({0} taken away: they look like the rejected ones)</source>
+        <translation>({0}개 제외됨: 거부한 제안과 비슷합니다)</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/segmentation_controller.py" line="648"/>
         <source>{0} similar objects kept</source>
         <translation>비슷한 객체 {0}개를 유지했습니다</translation>

@@ -9258,6 +9258,11 @@ onnxruntime มาจาก PyPI ด้วย pip ส่วนโมเดลม
         <translation>: เหลือข้อเสนอ {0} รายการ</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="677"/>
+        <source>({0} taken away: they look like the rejected ones)</source>
+        <translation>(นำออก {0} รายการ: คล้ายกับข้อเสนอที่ปฏิเสธไปแล้ว)</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/segmentation_controller.py" line="648"/>
         <source>{0} similar objects kept</source>
         <translation>เก็บวัตถุที่คล้ายกัน {0} รายการแล้ว</translation>

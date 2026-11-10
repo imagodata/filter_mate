@@ -9258,6 +9258,11 @@ onnxruntime datang dari PyPI dengan pip, model dari huggingface.co/{1}, dan seti
         <translation>: {0} cadangan tinggal</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="677"/>
+        <source>({0} taken away: they look like the rejected ones)</source>
+        <translation>({0} dibuang: ia menyerupai cadangan yang ditolak)</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/segmentation_controller.py" line="648"/>
         <source>{0} similar objects kept</source>
         <translation>{0} objek serupa disimpan</translation>

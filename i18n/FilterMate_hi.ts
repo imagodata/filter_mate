@@ -9258,6 +9258,11 @@ onnxruntime, pip के साथ PyPI से आता है, मॉडल hug
         <translation>: {0} सुझाव शेष</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="677"/>
+        <source>({0} taken away: they look like the rejected ones)</source>
+        <translation>({0} हटाए गए: ये अस्वीकृत सुझावों जैसे दिखते हैं)</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/segmentation_controller.py" line="648"/>
         <source>{0} similar objects kept</source>
         <translation>{0} समान ऑब्जेक्ट रखे गए</translation>

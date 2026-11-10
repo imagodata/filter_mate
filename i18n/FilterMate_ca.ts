@@ -9258,6 +9258,11 @@ onnxruntime ve de PyPI amb pip, el model de huggingface.co/{1}, cada fitxer veri
         <translation>: {0} propostes restants</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="677"/>
+        <source>({0} taken away: they look like the rejected ones)</source>
+        <translation>({0} retirades: s'assemblen a les propostes descartades)</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/segmentation_controller.py" line="648"/>
         <source>{0} similar objects kept</source>
         <translation>{0} objectes semblants conservats</translation>

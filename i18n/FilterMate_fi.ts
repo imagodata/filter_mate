@@ -9258,6 +9258,11 @@ onnxruntime tulee PyPI:stä pipillä, malli osoitteesta huggingface.co/{1}, ja j
         <translation>: {0} ehdotusta jäljellä</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="677"/>
+        <source>({0} taken away: they look like the rejected ones)</source>
+        <translation>({0} poistettu: ne muistuttavat hylättyjä ehdotuksia)</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/segmentation_controller.py" line="648"/>
         <source>{0} similar objects kept</source>
         <translation>{0} samankaltaista kohdetta säilytetty</translation>

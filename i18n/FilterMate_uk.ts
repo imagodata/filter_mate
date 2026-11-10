@@ -9258,6 +9258,11 @@ onnxruntime завантажується з PyPI за допомогою pip, м
         <translation>: залишилося пропозицій: {0}</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="677"/>
+        <source>({0} taken away: they look like the rejected ones)</source>
+        <translation>(прибрано пропозицій: {0}, вони схожі на відхилені)</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/segmentation_controller.py" line="648"/>
         <source>{0} similar objects kept</source>
         <translation>Залишено схожих об'єктів: {0}</translation>

@@ -9240,6 +9240,11 @@ onnxruntime pochází z PyPI přes pip, model z huggingface.co/{1}, každý soub
         <translation>: zbývá {0} návrhů</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="677"/>
+        <source>({0} taken away: they look like the rejected ones)</source>
+        <translation>(odebráno {0}: podobají se odmítnutým návrhům)</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/segmentation_controller.py" line="648"/>
         <source>{0} similar objects kept</source>
         <translation>Ponecháno {0} podobných objektů</translation>

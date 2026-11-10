@@ -9258,6 +9258,11 @@ onnxruntime đến từ PyPI qua pip, mô hình từ huggingface.co/{1}, mỗi t
         <translation>: còn lại {0} đề xuất</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="677"/>
+        <source>({0} taken away: they look like the rejected ones)</source>
+        <translation>(đã bỏ {0} đề xuất: giống các đề xuất đã loại bỏ)</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/segmentation_controller.py" line="648"/>
         <source>{0} similar objects kept</source>
         <translation>Đã giữ {0} đối tượng tương tự</translation>

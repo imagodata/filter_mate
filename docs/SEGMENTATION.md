@@ -55,13 +55,15 @@ the best of the three 11 times: G shows the others (median overlap 0.71 with the
 of the three).
 
 **Similar objects** first draws the clicked object. The patches of a similar colour in the visible map, at
-most 120 of them, are then proposed to SAM, which redraws each one in the background. An object is kept when
-its area, and its shape with *same shape*, are within the ratios of the group compared with the clicked one,
-and when it looks like it: the encoder features of SAM under the two objects must point the same way (cosine
-at least 0.68).
+most 120 of them, are then proposed to SAM, followed by the 10 places of the visible map whose encoder features
+look most like the clicked object's; SAM redraws each one in the background. An object is kept when its area,
+and its shape with *same shape*, are within the ratios of the group compared with the clicked one, and when it
+looks like it: the encoder features of SAM under the two objects must point the same way (cosine at least 0.68).
 
 The objects found are **proposals**, outlined in dashes, outside the selection: click one to keep it, right
-click to reject it, Enter (or *Keep*) keeps them all, Escape (or *Reject*) rejects them all.
+click to reject it, Enter (or *Keep*) keeps them all, Escape (or *Reject*) rejects them all. From the third
+proposal kept or rejected on, the proposals left that look more like the rejected ones than like the kept ones
+(and the clicked object) are taken away, and the status says how many.
 
 The objects are polygons in the CRS of the raster, stored with the filter like any other raster selection.
 Processing (the `SEGMENTS` parameter of *Filter layers of any type by the pixels of a raster*, a polygon layer),
@@ -165,6 +167,27 @@ found, 0.69 for the rest). With the threshold of 0.68 chosen on the first ten (`
 | Recall | 0.46 | 0.43 | 0.31 | 0.26 |
 
 About half of the objects proposed are buildings: keep or reject them before filtering with them.
+
+**Candidates from the features, and sorting by keep / reject, adopted** (2026-11-11,
+`scripts/sam_similar_candidates.py`, decided by `scripts/sam_similar_candidates_analysis.py` by rules written
+before the run). Same 20 buildings and sets; every candidate was drawn on the window of the click, the current
+search measured the same way. The colour patches gave about 40 candidates per search; the cosine between the
+features of the clicked object and each cell of the coarsest feature map peaks at about 90 places of a 150 m view.
+
+| Median, ten others | Precision | Recall | Prompts |
+|---|---|---|---|
+| Colour patches (as before) | 0.37 | 0.20 | 34 |
+| Colour patches, then the 10 best feature peaks (adopted) | 0.36 | 0.32 | 41 |
+| Feature peaks only (cosine at least 0.7, 40 at most, appearance at least 0.8) | 0.55 | 0.20 | 14 |
+
+The union was adopted: recall +0.12 for precision -0.01 (the rule asked +0.10 and at most -0.05). The feature
+peaks alone are more precise for a third of the prompts, but they did not raise the recall the rule asked for;
+they are a lead for a search that needs no colour, on a raster that is only drawn.
+
+Sorting, measured on the proposals of the current search: once the first three are kept or rejected (by whether
+they are a building), the proposals left closer to the rejected ones than to the kept ones and the clicked
+object are taken away. Median precision of the proposals left 0.21 to 0.33 on the ten others (0.43 to 0.63 on
+the first ten), none of the buildings they held lost.
 
 **Tried and not adopted.** A score and colour filter (precision 0.24 to 0.31 on the ten others, short of the
 0.10 required, `scripts/sam_similar_analysis.py`), and a second, framed pass of SAM after the click (median

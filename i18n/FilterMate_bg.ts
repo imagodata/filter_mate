@@ -9258,6 +9258,11 @@ onnxruntime идва от PyPI чрез pip, моделът от huggingface.co/
         <translation>: остават {0} предложения</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="677"/>
+        <source>({0} taken away: they look like the rejected ones)</source>
+        <translation>(премахнати {0}: приличат на отхвърлените предложения)</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/segmentation_controller.py" line="648"/>
         <source>{0} similar objects kept</source>
         <translation>Запазени са {0} сходни обекта</translation>

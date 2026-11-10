@@ -4,6 +4,8 @@ All notable changes to FilterMate will be documented in this file.
 
 ## [Unreleased]
 
+- **Similar objects with SAM find more, and keep / reject sorts the proposals.** After the colour patches, the 10 places of the visible map whose encoder features look most like the clicked object are proposed to SAM too: median recall 0.20 to 0.32 for a precision of 0.37 to 0.36 on ten buildings of the 25 cm Cerdagne orthophoto never used to choose the setting. From the third proposal kept or rejected, those left that look like the rejected ones are taken away: median precision of the proposals left 0.21 to 0.33, none of their buildings lost. Both decided by rules set before the run (`docs/SEGMENTATION.md`); the new message is translated in the 34 languages.
+
 ## [5.1.0] - 2026-11-10
 
 First version published since 5.0.2. The numbers 5.0.3, 5.0.4 and 5.0.5 were prepared but never published; what they held is gathered here. Two sections are new and experimental: AGENT, a chat that drives FilterMate and QGIS from a sentence, and the objects drawn by SAM on a raster.

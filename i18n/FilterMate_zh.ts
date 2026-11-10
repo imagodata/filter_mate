@@ -9258,6 +9258,11 @@ onnxruntime 通过 pip 从 PyPI 获取，模型来自 huggingface.co/{1}，每�
         <translation>：还剩 {0} 个建议</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="677"/>
+        <source>({0} taken away: they look like the rejected ones)</source>
+        <translation>（已移除 {0} 个：与已拒绝的建议相似）</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/segmentation_controller.py" line="648"/>
         <source>{0} similar objects kept</source>
         <translation>已保留 {0} 个相似对象</translation>

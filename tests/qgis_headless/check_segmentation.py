@@ -850,6 +850,98 @@ def test_similar_flow(folder):
     QgsProject.instance().removeMapLayer(layer.id())
 
 
+class FeatureModel(BrightModel):
+    """Bright pixels as objects, and encoder features that say how bright each 16 x 16 cell is."""
+
+    def embed(self, rgb):
+        super().embed(rgb)
+        share = (rgb[:, :, 0] > 128).astype(np.float32).reshape(64, 16, 64, 16).mean(axis=(1, 3))
+        return {'image': rgb, 'image_embed': np.stack([share, 1.0 - share])[None]}
+
+    def predict(self, embedding, points, labels, box):
+        return super().predict(embedding['image'], points, labels, box)
+
+
+def test_feature_candidates_and_sorting(folder):
+    """2026-11-11: candidates where the features look like the clicked object's, and proposals sorted by keep / reject."""
+    layer = make_shapes(folder)
+    QgsProject.instance().addMapLayer(layer)
+    canvas = QgsMapCanvas()
+    canvas.resize(QSize(600, 600))
+    canvas.setDestinationCrs(layer.crs())
+    canvas.setLayers([layer])
+    canvas.setExtent(layer.extent())
+    panel = ready_panel(layer)
+    model = FeatureModel()
+    install_model(model)
+    reference = shape_geometry(layer, "clicked")
+    extent = layer.extent()
+    window = segmentation.plan_window(reference.centroid().asPoint().x(), reference.centroid().asPoint().y(),
+                                      (extent.xMinimum(), extent.yMinimum(), extent.xMaximum(), extent.yMaximum()),
+                                      0.5, extent.width(), 1024)
+    from qgis.core import QgsMapSettings
+    settings = QgsMapSettings()
+    settings.setDestinationCrs(layer.crs())
+    embedding = model.embed(segmentation.image_to_rgb(segmentation.render_window(settings, layer, window, lambda: False)))
+    centre = reference.centroid().asPoint()
+    mask = model.predict(embedding, [window.to_pixel(centre.x(), centre.y())], [1], None)[0]
+    clicked_features = segmentation.pooled_features(embedding, mask)
+    points = segmentation.feature_candidate_points(embedding, window, clicked_features, extent, reference)
+
+    def shape_of(x, y):
+        where = QgsGeometry.fromPointXY(QgsPointXY(x, y))
+        return next((name for name in SHAPES
+                     if QgsGeometry.fromRect(shape_geometry(layer, name).boundingBox().buffered(1.0)).contains(where)), None)
+    found = [shape_of(px, py) for px, py in points]
+    check("the features point at the other bright shapes, the clicked one left out",
+          "alike" in found and "clicked" not in found and len(points) <= segmentation.SIMILAR_FEATURE_CANDIDATES, found)
+    check("outside the visible map, none",
+          segmentation.feature_candidate_points(embedding, window, clicked_features, shape_geometry(layer, "clicked").boundingBox(),
+                                                reference) == [])
+    check("a stub encoder has no features to read", segmentation.feature_candidate_points(
+        np.zeros((1024, 1024, 3), dtype=np.uint8), window, clicked_features, extent, reference) == [])
+
+    # The controller proposes them even when no colour patch does.
+    host = Host(layer, panel, canvas)
+    host._similar_candidates = lambda lay, ref, visible: []
+    controller = controllers.SegmentationController(host)
+    controller.activate()
+    panel.set_pick_target(panels.PICK_SIMILAR_OBJECTS)
+    controller._on_point(reference.centroid().asPoint(), True)
+    spin(lambda: controller._task is None and controller._search is None and len(panel._segments) >= 1, 60000)
+    inside = [QgsGeometry.fromWkt(wkt).pointOnSurface().asPoint() for wkt, _reference in controller._proposals]
+    proposed = [shape_of(point.x(), point.y()) for point in inside]
+    check("without colour candidates, the features still find the alike square", "alike" in proposed, proposed)
+    check("each proposal keeps its features for the sorting",
+          controller._sorting is not None and all(controller._sorting['features'].get(wkt) is not None
+                                                  for wkt, _reference in controller._proposals), controller._sorting)
+    controller.reject_proposals()
+
+    # Keep / reject: from the third decision, the proposals like the rejected ones go.
+    x, y = extent.xMinimum(), extent.yMinimum()
+    squares = [QgsGeometry.fromRect(QgsRectangle(x + 20 * i, y + 5, x + 20 * i + 10, y + 15)).asWkt() for i in range(6)]
+    vectors = [[0.0, 1.0], [1.0, 0.0], [0.1, 1.0], [0.0, 1.0], [1.0, 0.1], [0.05, 1.0]]
+    reference_wkt = reference.asWkt()
+    controller._set_proposals([(wkt, reference_wkt) for wkt in squares])
+    controller._sorting = {'features': dict(zip(squares, vectors)), 'decisions': 0, 'kept': [[1.0, 0.0]], 'rejected': []}
+
+    def decide(index, keep):
+        centre = QgsGeometry.fromWkt(squares[index]).centroid().asPoint()
+        return controller._decide_proposal(centre, keep)
+    decide(0, False)
+    decide(1, True)
+    check("before the third decision nothing else goes", controller.proposal_count() == 4)
+    decide(2, False)
+    left = [squares.index(wkt) for wkt, _reference in controller._proposals]
+    check("after it, the proposals closer to the rejected ones go, the others stay", left == [4], left)
+    check("and the status says why", "taken away" in panel._segment_status.text(), panel._segment_status.text())
+    decide(4, True)
+    check("the last one kept, the sorting is forgotten", controller.proposal_count() == 0 and controller._sorting is None)
+    panel.clear_segments()
+    controller.drop()
+    QgsProject.instance().removeMapLayer(layer.id())
+
+
 class _TileHandler(BaseHTTPRequestHandler):
     """A web map where every tile is bright."""
 
@@ -959,6 +1051,7 @@ with tempfile.TemporaryDirectory() as folder:
     test_features_algorithm(raster)
     test_agent_objects(raster)
     test_similar_flow(folder)
+    test_feature_candidates_and_sorting(folder)
     test_web_service()
     test_real_model()
     QgsProject.instance().removeAllMapLayers()

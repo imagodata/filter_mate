@@ -9258,6 +9258,11 @@ onnxruntime berasal dari PyPI dengan pip, model dari huggingface.co/{1}, dan set
         <translation>: tersisa {0} usulan</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/segmentation_controller.py" line="677"/>
+        <source>({0} taken away: they look like the rejected ones)</source>
+        <translation>({0} disingkirkan: mirip dengan usulan yang ditolak)</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/segmentation_controller.py" line="648"/>
         <source>{0} similar objects kept</source>
         <translation>{0} objek serupa disimpan</translation>
