@@ -299,6 +299,44 @@
         <translation>प्रोजेक्ट नोट</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="651"/>
+        <source>Edit of {} (not saved)</source>
+        <translation>{} का संपादन (सहेजा नहीं गया)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="652"/>
+        <source>Features deleted from {} (not saved)</source>
+        <translation>{} से हटाई गई विशेषताएँ (सहेजा नहीं गया)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="653"/>
+        <source>Features added to {} (not saved)</source>
+        <translation>{} में जोड़ी गई विशेषताएँ (सहेजा नहीं गया)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="758"/>
+        <source>selection</source>
+        <translation>चयन</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="812"/>
+        <source>(selected features)</source>
+        <translation>(चयनित विशेषताएँ)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="813"/>
+        <source>The agent wants to delete features of this layer:
+{}
+{}
+
+They stay in the edit buffer until you save the layer edits, and undoing the turn brings them back. Do you agree?</source>
+        <translation>एजेंट इस लेयर की विशेषताएँ हटाना चाहता है:
+{}
+{}
+
+जब तक आप लेयर के संपादन नहीं सहेजते, वे संपादन बफ़र में रहती हैं, और चरण को पूर्ववत करने से वे लौट आती हैं। क्या आप सहमत हैं?</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="590"/>
         <source>Reading the values of {}</source>
         <translation>{} के मान पढ़ना</translation>

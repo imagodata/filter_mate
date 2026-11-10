@@ -299,6 +299,44 @@
         <translation>projektjegyzetek</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="651"/>
+        <source>Edit of {} (not saved)</source>
+        <translation>{} szerkesztése (nincs mentve)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="652"/>
+        <source>Features deleted from {} (not saved)</source>
+        <translation>Elemek törölve innen: {} (nincs mentve)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="653"/>
+        <source>Features added to {} (not saved)</source>
+        <translation>Elemek hozzáadva ehhez: {} (nincs mentve)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="758"/>
+        <source>selection</source>
+        <translation>kijelölés</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="812"/>
+        <source>(selected features)</source>
+        <translation>(kijelölt elemek)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="813"/>
+        <source>The agent wants to delete features of this layer:
+{}
+{}
+
+They stay in the edit buffer until you save the layer edits, and undoing the turn brings them back. Do you agree?</source>
+        <translation>Az ügynök elemeket akar törölni ebből a rétegből:
+{}
+{}
+
+A szerkesztési pufferben maradnak, amíg nem menti a réteg szerkesztéseit, és a kör visszavonása visszahozza őket. Egyetért?</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="590"/>
         <source>Reading the values of {}</source>
         <translation>{} értékeinek beolvasása</translation>

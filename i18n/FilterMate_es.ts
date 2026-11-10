@@ -299,6 +299,44 @@
         <translation>notas del proyecto</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="651"/>
+        <source>Edit of {} (not saved)</source>
+        <translation>Edición de {} (sin guardar)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="652"/>
+        <source>Features deleted from {} (not saved)</source>
+        <translation>Entidades eliminadas de {} (sin guardar)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="653"/>
+        <source>Features added to {} (not saved)</source>
+        <translation>Entidades añadidas a {} (sin guardar)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="758"/>
+        <source>selection</source>
+        <translation>selección</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="812"/>
+        <source>(selected features)</source>
+        <translation>(entidades seleccionadas)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="813"/>
+        <source>The agent wants to delete features of this layer:
+{}
+{}
+
+They stay in the edit buffer until you save the layer edits, and undoing the turn brings them back. Do you agree?</source>
+        <translation>El agente quiere eliminar entidades de esta capa:
+{}
+{}
+
+Permanecen en el búfer de edición hasta que guarde las ediciones de la capa, y deshacer el turno las recupera. ¿Está de acuerdo?</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="590"/>
         <source>Reading the values of {}</source>
         <translation>Leyendo los valores de {}</translation>

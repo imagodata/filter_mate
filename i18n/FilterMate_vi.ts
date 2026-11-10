@@ -299,6 +299,44 @@
         <translation>ghi chú dự án</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="651"/>
+        <source>Edit of {} (not saved)</source>
+        <translation>Chỉnh sửa {} (chưa lưu)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="652"/>
+        <source>Features deleted from {} (not saved)</source>
+        <translation>Đã xóa đối tượng khỏi {} (chưa lưu)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="653"/>
+        <source>Features added to {} (not saved)</source>
+        <translation>Đã thêm đối tượng vào {} (chưa lưu)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="758"/>
+        <source>selection</source>
+        <translation>vùng chọn</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="812"/>
+        <source>(selected features)</source>
+        <translation>(các đối tượng đã chọn)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="813"/>
+        <source>The agent wants to delete features of this layer:
+{}
+{}
+
+They stay in the edit buffer until you save the layer edits, and undoing the turn brings them back. Do you agree?</source>
+        <translation>Tác tử muốn xóa các đối tượng của lớp này:
+{}
+{}
+
+Chúng vẫn ở trong bộ đệm chỉnh sửa cho đến khi bạn lưu các chỉnh sửa của lớp, và hoàn tác lượt này sẽ khôi phục chúng. Bạn có đồng ý không?</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="590"/>
         <source>Reading the values of {}</source>
         <translation>Đang đọc các giá trị của {}</translation>

@@ -299,6 +299,44 @@
         <translation>项目备注</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="651"/>
+        <source>Edit of {} (not saved)</source>
+        <translation>{} 的编辑（未保存）</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="652"/>
+        <source>Features deleted from {} (not saved)</source>
+        <translation>已从 {} 删除要素（未保存）</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="653"/>
+        <source>Features added to {} (not saved)</source>
+        <translation>已向 {} 添加要素（未保存）</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="758"/>
+        <source>selection</source>
+        <translation>选择集</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="812"/>
+        <source>(selected features)</source>
+        <translation>（所选要素）</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="813"/>
+        <source>The agent wants to delete features of this layer:
+{}
+{}
+
+They stay in the edit buffer until you save the layer edits, and undoing the turn brings them back. Do you agree?</source>
+        <translation>代理想要删除此图层的要素：
+{}
+{}
+
+在您保存图层编辑之前，它们会保留在编辑缓冲区中，撤销本轮操作即可恢复。您同意吗？</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="590"/>
         <source>Reading the values of {}</source>
         <translation>正在读取 {} 的值</translation>

@@ -359,6 +359,44 @@ Acceptez-vous ?</translation>
         <translation>notes du projet</translation>
     </message>
     <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="651"/>
+        <source>Edit of {} (not saved)</source>
+        <translation>Modification de {} (non enregistrée)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="652"/>
+        <source>Features deleted from {} (not saved)</source>
+        <translation>Entités supprimées de {} (non enregistré)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="653"/>
+        <source>Features added to {} (not saved)</source>
+        <translation>Entités ajoutées à {} (non enregistré)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="758"/>
+        <source>selection</source>
+        <translation>sélection</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="812"/>
+        <source>(selected features)</source>
+        <translation>(entités sélectionnées)</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/agent_chat_controller.py" line="813"/>
+        <source>The agent wants to delete features of this layer:
+{}
+{}
+
+They stay in the edit buffer until you save the layer edits, and undoing the turn brings them back. Do you agree?</source>
+        <translation>L'agent veut supprimer des entités de cette couche :
+{}
+{}
+
+Elles restent dans le tampon d'édition tant que vous n'enregistrez pas les modifications de la couche, et annuler le tour les rétablit. Acceptez-vous ?</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/agent_chat_controller.py" line="593"/>
         <source>Reading the active filters</source>
         <translation>Lecture des filtres actifs</translation>

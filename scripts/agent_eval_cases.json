@@ -171,5 +171,14 @@
     "call_args": {"text": "La couche des parcelles s'appelle parcelles, clé : champ section."}}]],
   "forbid": ["export_layers", "apply_filter"]},
  {"id": "note_not_kept_unasked", "prompt": "Quelles valeurs prend le champ nom des communes ?", "expect": [],
-  "forbid": ["add_project_note", "export_layers"]}
+  "forbid": ["add_project_note", "export_layers"]},
+ {"id": "edit_values", "prompt": "Dans la couche communes, mets le champ dept à 31 pour la commune de Muret.",
+  "expect": [[{"tool": "update_features", "args": {"layer": "communes", "values": {"dept": "31"},
+    "expression": {"contains": ["nom", "Muret"]}},
+    "call_args": {"layer": "communes", "values": {"dept": "31"}, "expression": "\"nom\" = 'Muret'"}}]],
+  "forbid": ["export_layers", "apply_filter", "delete_features"]},
+ {"id": "hide_is_no_delete", "prompt": "Cache les communes du département 32.",
+  "expect": [[{"tool": "apply_filter", "args": {"layer_name": "communes", "expression": {"contains": ["dept", "32"]}},
+    "call_args": {"layer_name": "communes", "expression": "\"dept\" <> '32'"}}]],
+  "forbid": ["delete_features", "update_features", "export_layers"]}
 ]}

@@ -103,6 +103,17 @@ class TestHandlers:
         error, answer = run(accessor, root, "identify_at", x=570000.5, y=6270000)
         assert not error and (answer["x"], answer["layers"], answer["skipped"]) == (570000.5, [], [])
 
+    def test_edit_tools(self, api):
+        accessor, root = api
+        error, answer = run(accessor, root, "update_features", layer="communes", values={"nom": "x"}, expression="true")
+        assert not error and answer["changed"] == 1 and answer["feature_count"] == 1 and answer["editing"] is True
+        error, answer = run(accessor, root, "delete_features", layer="communes", selected_only=True)
+        assert not error and answer["deleted"] == 1
+        error, answer = run(accessor, root, "add_features", layer="communes", features=[{"wkt": "POINT(1 2)"}])
+        assert not error and answer["added"] == 1
+        assert run(accessor, root, "update_features", layer="communes", expression="true")[0] is True
+        assert run(accessor, root, "add_features", layer="communes", features=[])[0] is True
+
     def test_style_tools(self, api):
         accessor, root = api
         error, answer = run(accessor, root, "set_layer_style", layer="communes", mode="graduated", field="pop")
@@ -379,6 +390,16 @@ class TestRoutes:
         response = client.get("/layers/field-values", params={"layer": "communes", "field": "nom"})
         assert response.status_code == 200 and response.json()["field"] == "nom"
         assert client.get("/layers/field-values", params={"layer": "x", "field": "y"}).status_code == 404
+
+    def test_edit_routes(self, client):
+        response = client.post("/layers/features/update", json={"layer": "communes", "values": {"a": 1}, "expression": "true"})
+        assert response.status_code == 200 and response.json()["changed"] == 1
+        assert client.post("/layers/features/update", json={"layer": "communes"}).status_code == 400
+        assert client.post("/layers/features/delete", json={"layer": "communes", "expression": "true"}).json()["deleted"] == 1
+        response = client.post("/layers/features/add", json={"layer": "communes", "features": [{"wkt": "POINT(1 2)"}]})
+        assert response.status_code == 200 and response.json()["added"] == 1
+        assert client.post("/layers/features/add", json={"layer": "communes", "features": []}).status_code == 422
+        assert client.post("/layers/features/add", json={"layer": "communes", "features": [{"x": 1}]}).status_code == 422
 
     def test_style_routes(self, client):
         response = client.post("/layers/style", json={"layer": "communes", "mode": "categorized", "field": "nom"})

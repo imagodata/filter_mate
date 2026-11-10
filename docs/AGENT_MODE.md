@@ -22,6 +22,7 @@ Any provider, a few free requests through a relay, then the user's own key, and 
 | 8. Style | One symbol, categories, graduated classes, raster ramps, labels, opacity, undone with the turn | done |
 | 9. Long conversations | The oldest requests summed up in a few lines past a budget | done |
 | 10. Project notes | Facts the user asks the agent to remember, saved in the project, sent with each request | done |
+| 11. Editing data | Change, delete (confirmed) and add features, in the edit buffer, never saved by the agent | done |
 
 Product decisions: filters apply at once with an "undo this turn"; exports are confirmed; the plugin stays free of
 Python dependencies and runs from QGIS 3.22.
@@ -95,6 +96,15 @@ Rules worth keeping:
   under a header saying they are data. A note comes back in every later conversation, so a text met in a tool
   result that asked to be kept would come back too: the prompt keeps notes to what the user asks, each note shows
   in the thread with its text, and undoing the turn takes it back (a `notes` effect of the turn).
+- **Editing data** (`adapters/public_api/feature_edits.py`): `update_features` (values, or formulas computed on
+  each feature), `delete_features` (the user confirms) and `add_features` (WKT, 100 at most) put the layer in
+  editing mode and add one named command to its undo stack: nothing is written to the data source, the user saves
+  the layer edits or discards them. Features are chosen by a QGIS expression and/or the selection (all of them
+  only with the expression `true`), 100 000 at most. A value is converted to the type of its field first (QGIS
+  would take "abc" in an integer field and fail at saving); keys, joined and virtual fields are not written.
+  The turn keeps the index of the undo stack before its first edit of a layer; undoing the turn steps back over its
+  commands, and is refused on a layer saved, discarded or edited by the user since. `describe_layer` says whether
+  a layer is being edited and holds unsaved changes.
 - **The map context** (`core/agent/project_summary.py`) goes with each request of the user, after it in the same
   message, so the cached prefix does not change. Three levels:
   - always: the project CRS, the scale, the visible extent, the active layer; up to 30 layers in the order of the layer

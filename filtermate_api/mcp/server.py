@@ -634,6 +634,55 @@ def build_server(client: FilterMateClient) -> Any:
         return await call("POST", "/layers/labels", _body(layer=layer, field=field, enabled=enabled, size=size,
                                                           color=color, buffer=buffer))
 
+    @mcp.tool(annotations=_write("Edit attributes of features", idempotent=True))
+    async def update_features(
+        layer: Annotated[str, Field(min_length=1, max_length=1000, description="Vector layer id or name")],
+        values: Annotated[Optional[Dict[str, Any]], Field(description=(
+            "Field: value, each converted to the type of its field (a number, a text, true or false, null)"))] = None,
+        formulas: Annotated[Optional[Dict[str, Annotated[str, Field(max_length=10_000)]]], Field(description=(
+            'Field: QGIS expression computed on each feature, such as "pop" * 2 or round($area / 10000, 2)'))] = None,
+        expression: Annotated[str, Field(max_length=100_000, description=(
+            'QGIS expression choosing the features ("nom" = \'Muret\'); the expression true for every feature'))] = "",
+        selected_only: Annotated[bool, Field(description="Only the selected features")] = False,
+    ) -> Dict[str, Any]:
+        """Change attribute values of features, in the edit buffer of the layer: nothing is saved.
+
+        The layer goes into editing mode; the user reviews the changes and saves them (Save Layer Edits) or discards
+        them. Choose the features with expression and/or selected_only. Keys, joined and virtual fields are not
+        changed; a value that does not fit its field is refused. Returns changed (features), editing and unsaved. In
+        the chat of FilterMate, undoing the turn takes the changes back while they are not saved.
+        """
+        return await call("POST", "/layers/features/update", _body(
+            layer=layer, values=values, formulas=formulas, expression=expression, selected_only=selected_only))
+
+    @mcp.tool(annotations=_write("Delete features", idempotent=True, destructive=True))
+    async def delete_features(
+        layer: Annotated[str, Field(min_length=1, max_length=1000, description="Vector layer id or name")],
+        expression: Annotated[str, Field(max_length=100_000, description="QGIS expression choosing the features")] = "",
+        selected_only: Annotated[bool, Field(description="Only the selected features")] = False,
+    ) -> Dict[str, Any]:
+        """Delete features of a vector layer, in its edit buffer: they are gone from the data once the user saves.
+
+        Only when the user asks to delete features; to hide them, filter the layer instead. The chat of FilterMate
+        asks the user first. Returns deleted, editing and unsaved.
+        """
+        return await call("POST", "/layers/features/delete", _body(
+            layer=layer, expression=expression, selected_only=selected_only))
+
+    @mcp.tool(annotations=_write("Add features", idempotent=False))
+    async def add_features(
+        layer: Annotated[str, Field(min_length=1, max_length=1000, description="Vector layer id or name")],
+        features: Annotated[List[Dict[str, Any]], Field(min_length=1, max_length=100, description=(
+            '[{"wkt": "POINT(1.44 43.6)", "attributes": {"nom": "Puits"}}]: geometries of the type of the layer'))],
+        crs: Annotated[str, Field(max_length=200, description="CRS of the WKT, such as EPSG:4326; the layer's by default")] = "",
+    ) -> Dict[str, Any]:
+        """Add features to a vector layer from WKT geometries and attributes, in its edit buffer: nothing is saved.
+
+        Returns added, editing and unsaved. In the chat of FilterMate, undoing the turn takes them back while they
+        are not saved.
+        """
+        return await call("POST", "/layers/features/add", _body(layer=layer, features=features, crs=crs))
+
     @mcp.tool(annotations=_write("Show or hide layers", idempotent=True))
     async def set_layers_visibility(
         layers: Annotated[LayerList, Field(description="Layer ids or names")],
