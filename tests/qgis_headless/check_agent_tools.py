@@ -616,6 +616,8 @@ def check_remote_files(project_control, project, work):
                 archive.write(os.path.join(work, "served." + extension), "export/communes." + extension)
     with zipfile.ZipFile(os.path.join(work, "notes.zip"), "w") as archive:
         archive.writestr("lisez-moi.txt", "rien")
+    with zipfile.ZipFile(os.path.join(work, "bomb.zip"), "w", zipfile.ZIP_DEFLATED) as archive:
+        archive.writestr("communes.geojson", b" " * (3 * 1024 * 1024))  # a few KB that unpack to 3 MB
 
     def served(name):
         with open(os.path.join(work, name), "rb") as handle:
@@ -679,6 +681,18 @@ def check_remote_files(project_control, project, work):
             elif route == "/slow.geojson":
                 self.start(200, {"Content-Type": "application/geo+json", "Transfer-Encoding": "chunked"})
                 self.stream(time.sleep(pause) or b"{" for pause in (0, 4))
+            elif route == "/cut-stream.geojson":  # an export cut while it is made, as a portal would
+                self.start(200, {"Content-Type": "application/geo+json", "Transfer-Encoding": "chunked"})
+                self.wfile.write(b"1000\r\n" + b"{" * 100)
+                self.close_connection = True
+            elif route == "/captcha.geojson":  # the first byte is a file, the file a web page
+                if self.headers.get("Range"):
+                    self.start(200, {"Content-Type": "application/geo+json", "Transfer-Encoding": "chunked"})
+                    self.stream([b"{"])
+                else:
+                    self.whole(b"<html>are you a robot?</html>", "text/html")
+            elif route == "/bomb.zip":
+                self.whole(served("bomb.zip"), "application/zip")
             elif route == "/cut.geojson":
                 self.start(200, {"Content-Type": "application/geo+json", "Content-Length": "5000"})
                 self.wfile.write(b"{" * 100)
@@ -735,10 +749,24 @@ def check_remote_files(project_control, project, work):
         check("remote: a redirect is followed to the file", added["feature_count"] == 60, added)
         added = project_control.add_layer(public + "/exports/geojson", name="again")
         check("remote: the same file again, while a layer reads the first copy", added["feature_count"] == 60, added)
-        check("remote: one copy per file, nothing half written",
-              kept() == ["communes-test.csv", "communes-test.geojson", "communes-test.zip"], kept())
+        check("remote: one copy per download, nothing half written", kept() == [
+            "communes-test.csv", "communes-test.geojson", "communes-test.geojson", "communes-test.geojson",
+            "communes-test.zip"], kept())
         check("remote: the first request asks for one byte, the copy for the file",
               asked.count("/exports/shp") == 2 and asked.count("/exports/csv") == 2, asked)
+        first = project.mapLayersByName("communes-test")
+        first = next(layer for layer in first if layer.source().startswith("/vsizip/"))
+        zipped = first.source()[len("/vsizip/"):].split(".zip/", 1)[0] + ".zip"
+        try:
+            project_control.add_layer(public + "/exports/shp", kind="raster")
+            check("remote: the same link as a raster is refused", False)
+        except ValueError as exc:
+            check("remote: the same link as a raster is refused", "holds no raster layer" in str(exc), exc)
+        first.setSubsetString('"pop" > 100')  # the provider opens the file again
+        check("remote: a failure never removes the copy another layer reads",
+              os.path.isfile(zipped) and first.isValid() and first.featureCount() == 59,
+              f"{zipped} {first.isValid()} {first.featureCount()}")
+        first.setSubsetString("")
 
         refused("an error of the server is said with its status", "/missing.geojson", "(404)")
         refused("a web page is not data", "/page.geojson", "web page")
@@ -754,6 +782,12 @@ def check_remote_files(project_control, project, work):
         QTimer.singleShot(1500, bounded_http.abort_active)
         refused("Stop ends a download", "/slow.geojson", "stopped")
         refused("a file cut before its end is not a shorter layer", "/cut.geojson", "lost before the end")
+        refused("an export cut while it is made is not a shorter layer", "/cut-stream.geojson", "lost before the end")
+        refused("a web page sent for the file is said so", "/captcha.geojson", "web page instead of the file")
+        unzipped = project_control.MAX_UNZIPPED
+        project_control.MAX_UNZIPPED = 1024 * 1024
+        refused("an archive that would unpack to too much is not read", "/bomb.zip", "would unpack to more than 1.0 MB")
+        project_control.MAX_UNZIPPED = unzipped
         refused("an empty file", "/empty.zip", "empty file")
         refused("a zip that is none", "/broken.zip", "not a zip archive")
         refused("an archive with no layer is said so and not kept", "/notes.zip", "holds no vector layer")

@@ -11,15 +11,16 @@ import hashlib
 import json
 import logging
 import os
-import time
+import shutil
+import tempfile
 import zipfile
 from contextlib import contextmanager
 from typing import Any, Dict, List, Optional, Tuple
 
 from ...core.agent.open_data import (
-    KIND_STAC, KIND_WFS, RemoteFile, archive_member, follow_redirects, gdal_source, megabytes, parse_results,
-    parse_stac_items, reads_in_place, remote_file, resolve_platform, search_url, source_problem, stac_search_body,
-    valid_day,
+    KIND_STAC, KIND_WFS, RemoteFile, archive_member, follow_redirects, gdal_source, is_web_page, megabytes,
+    parse_results, parse_stac_items, reads_in_place, remote_file, resolve_platform, search_url, source_problem,
+    stac_search_body, valid_day,
 )
 from ...core.agent.sql_guard import expression_problem, quoted_identifiers
 from ...core.domain.layer_kind import LayerKind
@@ -33,6 +34,7 @@ MAX_PAYLOAD = 5 * 1024 * 1024
 # A file its server only gives whole is copied to the QGIS profile first: what a layer may cost in disk and in time.
 MAX_DOWNLOAD = 512 * 1024 * 1024
 DOWNLOAD_TIMEOUT_MS = 180_000
+MAX_UNZIPPED = 4 * MAX_DOWNLOAD
 _SMALLER = "look for a smaller extract of it (a region, a department) or for the same data as a service layer"
 
 
@@ -171,18 +173,16 @@ def _probe(url: str) -> Tuple[str, RemoteFile]:
 
 
 def _discard(path: str) -> None:
-    """Remove a download that makes no layer, and its folder once empty."""
-    for remove, target in ((os.remove, path), (os.rmdir, os.path.dirname(path))):
-        try:
-            remove(target)
-        except OSError as exc:  # already gone, or a folder that holds another copy
-            logger.debug("Download not removed (%s): %s", target, exc)
+    """Remove a download that makes no layer, with its folder: each copy has one of its own."""
+    shutil.rmtree(os.path.dirname(path), ignore_errors=True)
 
 
 def _download(url: str, found: RemoteFile) -> str:
     """Copy a file its server only gives whole to the QGIS profile; returns the path of the copy.
 
-    Bounded in size and in time, stopped by Stop, and the interface stays alive meanwhile.
+    Bounded in size and in time, stopped by Stop, and the interface stays alive meanwhile. Each copy is written
+    in a new folder of its own, under its final name: no copy a layer reads is ever replaced or removed, two
+    downloads of one URL never share a file, and nothing is renamed (an antivirus holds a new file on Windows).
 
     Raises:
         ValueError: Too large, too slow, cut, stopped, or refused by the server or the disk; nothing is kept.
@@ -191,32 +191,29 @@ def _download(url: str, found: RemoteFile) -> str:
     if found.size > MAX_DOWNLOAD:
         raise ValueError(f"this file weighs {megabytes(found.size)}, more than the {megabytes(MAX_DOWNLOAD)} a layer "
                          f"can be made of: {_SMALLER}")
-    folder = os.path.join(QgsApplication.qgisSettingsDirPath(), 'filtermate', 'open_data',
-                          hashlib.sha256(url.encode('utf-8')).hexdigest()[:16])
-    part = os.path.join(folder, found.name + '.part')
+    root = os.path.join(QgsApplication.qgisSettingsDirPath(), 'filtermate', 'open_data')
     received = [0]
+    path, kept = '', False
 
     def keep(chunk: bytes) -> None:
         out.write(chunk)
         received[0] += len(chunk)
 
     try:
-        os.makedirs(folder, exist_ok=True)
-        with open(part, 'wb') as out:
-            reply = fetch(url, max_bytes=MAX_DOWNLOAD, timeout_ms=DOWNLOAD_TIMEOUT_MS, sink=keep)
+        os.makedirs(root, exist_ok=True)
+        path = os.path.join(tempfile.mkdtemp(prefix=hashlib.sha256(url.encode('utf-8')).hexdigest()[:12] + '-',
+                                             dir=root), found.name)
+        with open(path, 'wb') as out:
+            reply = fetch(url, max_bytes=MAX_DOWNLOAD, timeout_ms=DOWNLOAD_TIMEOUT_MS, sink=keep, decompress_freely=True)
         if reply.status != 200:
             raise ValueError(f"its server answered with an error ({reply.status})")
+        if is_web_page(reply.headers):  # a sign-in or a captcha page, served for the file this time
+            raise ValueError("its server sent a web page instead of the file")
         if not received[0]:
             raise ValueError("its server sent an empty file")
-        path = os.path.join(folder, found.name)
-        try:
-            os.replace(part, path)
-        except OSError:  # Windows: a layer of the project still reads the copy made before
-            path = os.path.join(folder, f"{int(time.time())}-{found.name}")
-            os.replace(part, path)
+        kept = True
         return path
     except HttpFailure as exc:
-        _discard(part)
         if str(exc) == TOO_LARGE:
             raise ValueError(f"this file weighs more than the {megabytes(MAX_DOWNLOAD)} a layer can be made of: "
                              f"{_SMALLER}") from None
@@ -225,24 +222,30 @@ def _download(url: str, found: RemoteFile) -> str:
                              f"finished, too slow to make a layer of it: {_SMALLER}") from None
         raise ValueError("the download was stopped" if str(exc) == STOPPED else f"the download failed: {exc}") from None
     except OSError:
-        _discard(part)
         raise ValueError("the file could not be written in the QGIS profile folder") from None
-    except ValueError:
-        _discard(part)
-        raise
+    finally:
+        if path and not kept:  # whatever ended it, Stop, QGIS closing or a full disk
+            _discard(path)
 
 
 def _local_source(path: str, kind: str) -> str:
-    """What QGIS opens of a downloaded file: the file, or the data file of a zip archive (read in it, not extracted)."""
+    """What QGIS opens of a downloaded file: the file, or the data file of a zip archive (read in it, not extracted).
+
+    Raises:
+        ValueError: Not a zip, or one that would unpack to more than GDAL is let read; the copy is removed.
+    """
     if not path.lower().endswith('.zip'):
         return path
     try:
         with zipfile.ZipFile(path) as archive:
-            names = archive.namelist()
-    except (zipfile.BadZipFile, OSError, ValueError, NotImplementedError):
+            entries = archive.infolist()
+    except (zipfile.BadZipFile, OSError, ValueError, NotImplementedError, UnicodeDecodeError):
         _discard(path)
         raise ValueError("its server sent something that is not a zip archive") from None
-    member = archive_member(names, kind)
+    if sum(entry.file_size for entry in entries) > MAX_UNZIPPED:  # read on the main thread: a zip bomb would freeze it
+        _discard(path)
+        raise ValueError(f"this archive would unpack to more than {megabytes(MAX_UNZIPPED)}: {_SMALLER}")
+    member = archive_member([entry.filename for entry in entries], kind)
     return '/vsizip/' + path.replace('\\', '/') + ('/' + member if member else '')
 
 
@@ -295,7 +298,8 @@ def add_layer(source: str, name: str = '', kind: str = 'vector') -> Dict[str, An
         else:
             copy = _download(url, found)
             opened = _local_source(copy, kind)
-        title = title or found.name.rsplit('.', 1)[0]
+        stem = found.name.rsplit('.', 1)[0]
+        title = title or (stem if stem != 'layer' else '')  # an export with no file name keeps the end of its link
     title = title or source.rsplit('/', 1)[-1].split('?', 1)[0][:80] or 'layer'
     with _gdal_time_limits(remote and not copy):
         layer = QgsVectorLayer(opened, title, 'ogr') if kind == 'vector' else QgsRasterLayer(opened, title, 'gdal')

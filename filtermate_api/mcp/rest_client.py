@@ -74,13 +74,15 @@ class FilterMateClient:
         """POST ``body`` as JSON to ``path`` and return the decoded JSON answer."""
         return self.request("POST", path, body if body is not None else {})
 
-    def request(self, method: str, path: str, body: Optional[Dict[str, Any]] = None) -> Any:
-        """Send one request.
+    def request(self, method: str, path: str, body: Optional[Dict[str, Any]] = None,
+                timeout: Optional[float] = None) -> Any:
+        """Send one request; ``timeout`` is a longer wait for a call known to take long (a download).
 
         Raises:
             FilterMateAPIError: unreachable API, timeout, or an HTTP error status.
         """
         url = self._base_url + path
+        wait = max(self._timeout, timeout or 0.0)
         if not url.lower().startswith(("http://", "https://")):  # urllib would also open ftp: and file: URLs
             raise FilterMateAPIError(f"Invalid FilterMate REST API URL {url!r}: only http and https are supported.")
         headers = {API_KEY_HEADER: self._api_key, "Accept": "application/json"}
@@ -96,7 +98,7 @@ class FilterMateClient:
             raise FilterMateAPIError(f"Invalid FilterMate REST API URL {url!r}: {exc}") from None
         try:
             try:
-                with self._opener.open(request, timeout=self._timeout) as response:
+                with self._opener.open(request, timeout=wait) as response:
                     raw = response.read(_MAX_RESPONSE_BYTES + 1)
             except urllib.error.HTTPError as exc:
                 try:
@@ -111,12 +113,12 @@ class FilterMateClient:
         except urllib.error.URLError as exc:
             reason = exc.reason
             if isinstance(reason, TimeoutError):
-                raise self._timeout_error(method, path) from None
+                raise self._timeout_error(method, path, wait) from None
             raise FilterMateAPIError(
                 f"Cannot reach the FilterMate REST API at {self._base_url} ({reason}). "
                 f"{_START_HINT}{self._maybe_applied(method, reason)}") from None
         except TimeoutError:
-            raise self._timeout_error(method, path) from None
+            raise self._timeout_error(method, path, wait) from None
         except (OSError, http.client.HTTPException) as exc:
             # Includes RemoteDisconnected, ConnectionReset, BadStatusLine, IncompleteRead, InvalidURL.
             raise FilterMateAPIError(
@@ -154,10 +156,10 @@ class FilterMateClient:
         return (" The operation may have been applied in QGIS: read filter_state before retrying, "
                 "so that the change is not applied twice.")
 
-    def _timeout_error(self, method: str, path: str) -> FilterMateAPIError:
+    def _timeout_error(self, method: str, path: str, wait: Optional[float] = None) -> FilterMateAPIError:
         writes = method != "GET"
         return FilterMateAPIError(
-            f"The FilterMate REST API did not answer {method} {path} within {self._timeout:.0f} s. "
+            f"The FilterMate REST API did not answer {method} {path} within {wait or self._timeout:.0f} s. "
             + ("QGIS may still be working on it: read filter_state before retrying, "
                "so that the change is not applied twice." if writes
                else "QGIS is probably busy on a long task; retry in a moment."))

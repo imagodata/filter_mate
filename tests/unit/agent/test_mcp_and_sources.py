@@ -38,7 +38,6 @@ class TestProtocol:
         with pytest.raises(McpError):
             parse_response(data, 1)
 
-
     def test_line_separators_inside_a_json_string(self):
         message = json.dumps({"id": 7, "result": {"text": "a\u2028b\u2029c\u0085d"}}, ensure_ascii=False)
         assert parse_response(f"data: {message}\n\n".encode("utf-8"), 7)["text"] == "a\u2028b\u2029c\u0085d"
@@ -269,7 +268,13 @@ class TestRemoteFile:
         ("https://d.org/r/1", {"content-disposition": 'attachment; filename="../../etc/cron.d/x.geojson"'}, "x.geojson"),
         ("https://d.org/r/1", {"content-disposition": 'attachment; filename="a|subset=1=1.gpkg"'}, "a_subset_1_1.gpkg"),
         ("https://d.org/r/1", {"content-disposition": 'attachment; filename="NUL.geojson"'}, "layer.geojson"),
-        ("https://d.org/r/1", {"content-disposition": 'attachment; filename=".geojson"'}, "layer"),
+        ("https://d.org/r/1", {"content-disposition": 'attachment; filename=".geojson"'}, "layer.geojson"),
+        # A name with no plain character keeps its format.
+        ("https://d.org/r/1", {"content-disposition": 'attachment; filename="市区町村.zip"'}, "layer.zip"),
+        ("https://d.org/dl/%E5%B8%82%E5%8C%BA.zip", {"content-type": "application/octet-stream"}, "layer.zip"),
+        ("https://d.org/r/1", {"content-disposition": "attachment; filename*=iso-8859-1'fr'%E9t%E9.zip"}, "t.zip"),
+        ("https://d.org/dl?FORMAT=shp", {}, "dl.zip"),
+        ("https://d.org/r/8f2c", {"content-type": "application/x-zip"}, "8f2c.zip"),
         ("https://d.org/" + "a" * 300 + ".kml", {}, "a" * 60 + ".kml"),
     ])
     def test_the_name_of_the_copy_says_the_format(self, url, headers, name):
@@ -298,6 +303,9 @@ class TestRemoteFile:
         with pytest.raises(ValueError, match="web page"):
             remote_file("https://d.org/a.geojson", 200, {"content-type": "text/html; charset=utf-8"})
 
+    def test_a_416_comes_with_the_error_page_of_its_server(self):
+        assert remote_file("https://d.org/a.geojson", 416, {"content-type": "text/html"}) == RemoteFile("a.geojson", False, -1)
+
     @pytest.mark.parametrize("url,kind,by_parts,expected", [
         ("https://d.org/a.gpkg", "vector", True, True),
         ("https://d.org/a.zip", "vector", True, True),
@@ -323,6 +331,11 @@ class TestArchiveMember:
 
     def test_in_a_folder_and_with_accents(self):
         assert archive_member(["__MACOSX/._zones.shp", "données 2026/zones (v2).shp"], "vector") == "données 2026/zones (v2).shp"
+
+    def test_metadata_comes_after_the_data(self):
+        assert archive_member(["datapackage.json", "limites.kml"], "vector") == "limites.kml"
+        assert archive_member(["notes.csv", "zones.gml"], "vector") == "zones.gml"
+        assert archive_member(["communes.json"], "vector") == "communes.json"
 
     def test_a_raster(self):
         assert archive_member(["a.shp", "dalle.TIF"], "raster") == "dalle.TIF"

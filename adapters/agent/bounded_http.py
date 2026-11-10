@@ -44,11 +44,13 @@ def abort_active() -> None:
 def fetch(url: str, body: Optional[bytes] = None, headers: Optional[Mapping[str, str]] = None,
           max_bytes: int = DEFAULT_MAX_BYTES, timeout_ms: int = DEFAULT_TIMEOUT_MS,
           done: Optional[Callable[[bytes], bool]] = None, headers_only: bool = False,
-          sink: Optional[Callable[[bytes], object]] = None) -> BoundedReply:
+          sink: Optional[Callable[[bytes], object]] = None, decompress_freely: bool = False) -> BoundedReply:
     """GET, or POST with ``body``. ``done`` ends the wait early, for a stream a server does not close.
 
     ``sink`` receives the answer piece by piece (a file being written) instead of the reply holding it: the
     content of the reply is then empty, and an answer cut before its end is a failure, never a shorter file.
+    ``decompress_freely`` lifts the ratio check of Qt 6 on a compressed answer (a repetitive CSV sent gzipped would
+    end as an error, read as a cut): ``max_bytes`` bounds what is decompressed anyway.
 
     Raises:
         HttpFailure: No answer, too long, too large, cut, or stopped.
@@ -61,6 +63,8 @@ def fetch(url: str, body: Optional[bytes] = None, headers: Optional[Mapping[str,
         request.setRawHeader(name.encode("ascii"), value.encode("utf-8"))
     request.setAttribute(QNetworkRequest.Attribute.RedirectPolicyAttribute,
                          QNetworkRequest.RedirectPolicy.ManualRedirectPolicy)
+    if decompress_freely and hasattr(request, "setDecompressedSafetyCheckThreshold"):  # Qt 6.2 and later
+        request.setDecompressedSafetyCheckThreshold(-1)
     reply = manager.post(request, QByteArray(body)) if body is not None else manager.get(request)
     buffer = bytearray()
     received = [0]

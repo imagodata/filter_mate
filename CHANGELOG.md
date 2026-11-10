@@ -4,6 +4,7 @@ All notable changes to FilterMate will be documented in this file.
 
 ## [Unreleased]
 
+- **Downloads of AGENT made safe.** A copy a layer reads is never replaced or removed by a second download of the same link or by a failure (each copy has a folder of its own); an archive that would unpack to more than 2 GB is refused; a name with no plain character keeps its format (`市区町村.zip`); a web page served for the file, an error page with a 416 and a gzipped export Qt 6 took for a cut are told apart; a `.json` or `.csv` of metadata in a zip comes after the data; the MCP server waits 330 s for `add_layer` instead of 45 s, so that a client does not retry a download QGIS is still making.
 - **AGENT adds the exports of open data portals, and says why when it cannot.** A dataset of data.gouv.fr often comes from an Opendatasoft portal it harvests: its files are made on request, with no size, and GDAL cannot read them where they are. Their shapefile and CSV never opened, the GeoJSON, the only one that did, was not listed, a national shapefile froze QGIS for two minutes, and the only error was "the source could not be opened". Such a file is now copied to the QGIS profile first (512 MB and 3 minutes at most, Stop ends it, the interface stays alive, a zip is read in its archive); a file on a server that gives parts of it (GeoPackage, GeoTIFF, zip) is still read where it is; and each failure says its cause: the status of the server, a web page, a file too large, too slow or cut, an archive with no layer.
 
 ## [5.0.5] - 2026-11-10
